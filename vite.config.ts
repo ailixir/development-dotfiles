@@ -8,6 +8,8 @@ export default defineConfig({
     port: 5173,
     host: true,
     open: true,
+    hmr: true,
+    force: true, // Force dependency re-bundling
   },
   resolve: {
     alias: {
