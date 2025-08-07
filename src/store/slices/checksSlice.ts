@@ -9,7 +9,7 @@ interface ChecksState extends AsyncState<CheckEntity[]> {
   totalCount: number;
   currentPage: number;
   executionResults: Record<string, ExecutionResult>;
-  executingChecks: Set<string>;
+  executingChecks: string[];
 }
 
 const initialState: ChecksState = {
@@ -28,7 +28,7 @@ const initialState: ChecksState = {
   totalCount: 0,
   currentPage: 1,
   executionResults: {},
-  executingChecks: new Set(),
+  executingChecks: [],
 };
 
 // Async thunks
@@ -160,11 +160,13 @@ const checksSlice = createSlice({
       // executeCheck
       .addCase(executeCheck.pending, (state, action) => {
         const checkId = action.meta.arg;
-        state.executingChecks.add(checkId);
+        if (!state.executingChecks.includes(checkId)) {
+          state.executingChecks.push(checkId);
+        }
       })
       .addCase(executeCheck.fulfilled, (state, action) => {
         const { checkId, result } = action.payload;
-        state.executingChecks.delete(checkId);
+        state.executingChecks = state.executingChecks.filter(id => id !== checkId);
         state.executionResults[checkId] = result;
         
         // Update check status based on execution result
@@ -177,7 +179,7 @@ const checksSlice = createSlice({
       })
       .addCase(executeCheck.rejected, (state, action) => {
         const checkId = action.meta.arg;
-        state.executingChecks.delete(checkId);
+        state.executingChecks = state.executingChecks.filter(id => id !== checkId);
         state.error = action.error.message || 'Failed to execute check';
       })
       
