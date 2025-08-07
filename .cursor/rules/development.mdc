@@ -1,0 +1,50 @@
+---
+description: General development workflow guidelines for code style, testing, and Git usage for the frontend application.
+globs: ["**/*.{ts,tsx,md}", "package.json"]
+alwaysApply: false
+---
+
+# **Frontend Development Workflow**
+
+This document defines the standard development processes for all contributors to the "Checks" frontend. Following these guidelines is essential for maintaining code quality, ensuring collaboration is smooth, and keeping the project on track.
+
+## **1. Code Style and Linting**
+
+- **Automatic Formatting:** All code will be automatically formatted on commit using pre-commit hooks. We use **Prettier** for code formatting and **ESLint** for static analysis.
+- **Action:** Before your first commit, ensure you have run `npm install` to set up these tools. Do not manually format code.
+
+## **2. Testing Requirements**
+
+Testing is a critical part of our development process.
+
+- **Unit Tests:** All new business logic (e.g., React utility functions, hooks) MUST be accompanied by unit tests using **Vitest** and **React Testing Library**.
+- **Integration Tests:** New components and pages should have integration tests to verify they work correctly with their children and contexts.
+- **End-to-End (E2E) Tests:** The "Checks Studio" UI testing feature is a high-priority area. E2E tests for critical user flows (creating and running a UI check, building a report) will be written using a framework like **Playwright** or **Cypress**.
+
+## **3. Git Workflow**
+
+We follow a standardized Git workflow to keep our repository history clean and understandable.
+
+- **Branching Strategy:**
+  - `main`: This branch represents the latest production-ready code. Direct pushes are forbidden.
+  - `develop`: This is the primary development branch. All feature branches are created from `develop`.
+  - **Feature Branches:** All new work must be done on a feature branch. Branch names should be descriptive and prefixed with `feat/`, `fix/`, or `chore/` and include the ticket number if applicable.
+    - **Good:** `feat/PROJ-123-add-check-studio`
+    - **Good:** `fix/remove-login-bug`
+    - **Bad:** `my_branch`, `dev_work`
+
+- **Commit Messages:**
+  - Follow the **Conventional Commits** specification. This helps in automating changelogs and understanding the history.
+  - **Format:** `<type>(<scope>): <subject>`
+    - **`<type>`:** `feat`, `fix`, `build`, `chore`, `ci`, `docs`, `perf`, `refactor`, `revert`, `style`, `test`.
+    - **`<scope>` (optional):** The part of the codebase affected (e.g., `components`, `hooks`, `auth`, `deps`).
+  - **Example:** `feat(auth): add hook for OIDC token refresh`
+  - **Example:** `fix(components): correct MUI button alignment on login form`
+
+## **4. Pull Request (PR) Process**
+
+1.  **Create a Draft PR Early:** Open a pull request as a "Draft" as soon as you start working. This signals your work to the team and allows for early feedback.
+2.  **PR Description:** The PR description must be filled out using the project's PR template. It should clearly explain the "what" and "why" of the change. Link to the relevant ticket.
+3.  **Code Review:** At least one other developer must review and approve the PR before it can be merged. Address all comments and feedback.
+4.  **Checks Must Pass:** All automated checks (linting, testing, builds) must pass before a PR can be merged into `develop`.
+5.  **Squash and Merge:** When merging, use the "Squash and Merge" option. This keeps the `develop` branch history clean, with one commit per feature or fix. The commit message should be the curated PR title and description.

@@ -1,0 +1,57 @@
+---
+description: Provides a high-level overview of Project "Checks", its purpose, architecture, and key documentation.
+globs: []
+alwaysApply: false
+---
+
+# **Project "Checks" Overview**
+
+This document provides essential context for any developer or contributor joining Project "Checks". Please review it before starting any work.
+
+## **1. Project Purpose & Description**
+
+**Project "Checks"** is a centralized orchestration and standardization layer for operational health monitoring at Citibank. It is designed to integrate with, not replace, existing monitoring tools like ITRS, Splunk, Grafana, and AppDynamics.
+
+- **Core Goal:** To provide a single source of truth for defining, executing, and viewing the status of health checks.
+- **Organizing Principle:** The **Citi System Inventory (CSI)** is the cornerstone of the system, used to associate and categorize all checks.
+- **Key Feature:** The "Checks Studio" empowers non-developers to create and run no-code UI tests with video playback for verification.
+
+## **2. Key Documentation**
+
+All developers must familiarize themselves with the primary project documents:
+
+- **[PRD.md](PRD.md):** The Product Requirements Document. This outlines the "what" and "why" of the project, including user personas, features, and success metrics.
+- **[ARCH.md](ARCH.md):** The Architecture Document. This describes the technical "how," including the system design, technology stack, and security considerations.
+- **[MFE_GUIDE.md](MFE_GUIDE.md):** The Implementation Guide. This contains practical setup instructions, an overview of the existing codebase, and development workflows.
+
+## **3. High-Level Architecture**
+
+This repository contains the **Frontend** for Project "Checks".
+
+The frontend is a **React 18 / TypeScript** single-page application (SPA) built with Vite and Material-UI. It is developed and tested independently from the backend by using **Mock Service Worker (MSW)** to simulate all API interactions. The backend is a separate FastAPI application developed in a different repository.
+
+## **4. Directory Structure**
+
+The project is organized as follows:
+
+```
+.
+├── .cursor/
+│   └── rules/         # Cursor IDE rules
+├── public/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── hooks/
+│   ├── mocks/         # MSW mock handlers
+│   ├── pages/
+│   ├── services/
+│   ├── types/
+│   └── main.tsx
+├── package.json
+└── tsconfig.json
+```
+
+## **5. Context Verification**
+
+To confirm you have understood this overview, please state the following when you begin a new task: **"I am familiar with the Checks PRD, architecture, and the mock-first development approach for the frontend."**

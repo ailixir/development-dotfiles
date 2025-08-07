@@ -1,0 +1,59 @@
+---
+description: Meta-rules for creating and maintaining high-quality Cursor rules for this project.
+globs: []
+alwaysApply: true
+---
+
+# **Cursor Rules Maintenance**
+
+This document outlines the best practices for writing, formatting, and maintaining Cursor rules within the "Checks" project. Adhering to these guidelines ensures our AI-driven development remains consistent, efficient, and aligned with project standards.
+
+## **1. Rule Structure and Syntax**
+
+Every rule file (`.mdc`) MUST begin with a YAML frontmatter block.
+
+- **`description`**: A concise, one-sentence explanation of the rule's purpose.
+- **`globs`**: An array of file path patterns (e.g., `["frontend/src/**/*.tsx"]`) to which the rule applies. Leave empty (`[]`) if `alwaysApply` is true.
+- **`alwaysApply`**: A boolean (`true` or `false`). Set to `true` for rules that should apply to every AI interaction, regardless of the active file.
+
+**Example:**
+```yaml
+---
+description: Enforces the use of Material-UI components for the React frontend.
+globs: ["frontend/src/**/*.{ts,tsx}"]
+alwaysApply: false
+---
+```
+
+## **2. Referencing Files and Code**
+
+When a rule needs to reference other files or show code examples, use the following formats for clarity and consistency.
+
+- **File References:** Always use Markdown links to refer to project files. This makes them easily clickable within the IDE.
+  - **Correct:** `Refer to the [ARCH.md](ARCH.md) for architectural details.`
+  - **Incorrect:** `Refer to the ARCH.md file.`
+
+- **Code Examples:** Use Markdown code blocks with the correct language identifier. Provide just enough context to make the example clear. For before/after examples, use comments to highlight the change.
+
+  **Example of a good code block:**
+  ```typescript
+  // Incorrect: Manual fetch implementation
+  fetch('/api/data')
+    .then(res => res.json());
+
+  // Correct: Use the centralized API client
+  import { apiClient } from '@/services/apiClient';
+  apiClient.get('/data');
+  ```
+
+## **3. Rule Maintenance Best Practices**
+
+- **Be Specific and Actionable:** Rules should be direct and provide clear instructions. Avoid vague statements.
+  - **Good:** "When creating a new React component, use a function declaration and export it directly. Use the `.tsx` extension."
+  - **Bad:** "Make components correctly."
+
+- **One Concern Per Rule File:** Each `.mdc` file should address a single, cohesive area of concern (e.g., `frontend-react.mdc`, `backend-python.mdc`, `git-workflow.mdc`). Do not mix frontend and backend rules in the same file.
+
+- **Review and Refine:** Rules are not static. As the project evolves, regularly review the rules in `.cursor/rules/` to ensure they are still relevant and effective. Use the `self_improve.mdc` guidelines for this process.
+
+- **Use `alwaysApply` Sparingly:** Only use `alwaysApply: true` for rules that are genuinely universal, such as meta-rules (`cursor_rules.mdc`) or evolution guidelines (`self_improve.mdc`). Most rules should be scoped with `globs`.

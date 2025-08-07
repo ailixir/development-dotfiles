@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkput_checks=self.webpackChunkput_checks||[]).push([[384],{9384:(e,t,s)=>{s.r(t),s.d(t,{default:()=>c});var n=s(4848),h=s(3451);const c=()=>(0,n.jsx)(h.Container,{maxWidth:"lg",sx:{py:4},children:(0,n.jsxs)(h.Box,{sx:{mb:4},children:[(0,n.jsx)(h.Typography,{variant:"h3",component:"h1",gutterBottom:!0,children:"Checks Studio"}),(0,n.jsx)(h.Typography,{variant:"subtitle1",color:"text.secondary",children:"UI Testing Studio with three-panel interface (Coming soon in Phase 3)"})]})})}}]);
+//# sourceMappingURL=384.298200b60818f845f472.chunk.js.map

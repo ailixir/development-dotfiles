@@ -1,0 +1,41 @@
+---
+description: Guidelines for how and when to evolve the Cursor rules to improve AI-assisted development.
+globs: []
+alwaysApply: true
+---
+
+# **Improving and Evolving Rules**
+
+This document provides a framework for maintaining and improving the project's Cursor rules over time. The goal is to create a self-improving system where the AI's behavior becomes more effective and aligned with our project's specific needs as development progresses.
+
+## **1. When to Add or Update a Rule**
+
+A new rule or an update to an existing one should be considered under the following circumstances:
+
+- **Repetitive Corrections:** If you find yourself giving the same corrective feedback to the AI repeatedly across different tasks (e.g., "you forgot to use the custom hook," "use `apiClient` instead of `fetch`"), it's a strong signal that a rule is needed.
+- **Architectural Decisions:** When a new architectural pattern is decided upon (e.g., adopting a new state management library, changing the error handling strategy), a rule should be created immediately to enforce it.
+- **New Dependencies:** When a new library or major dependency is added to the tech stack (e.g., a charting library, a new testing utility), add a rule explaining its purpose and basic usage patterns.
+- **Process Changes:** If there is a change in the development workflow (e.g., new git branch naming convention, updated PR template requirements), the `development.mdc` rule should be updated accordingly.
+
+## **2. Recognizing Patterns for New Rules**
+
+Be proactive in identifying patterns that could benefit from a new rule. Ask yourself:
+
+- "Is this a recurring pattern in our codebase?"
+- "Is there a 'right way' and a 'wrong way' to do this in our project?"
+- "Could an AI assistant enforce this standard automatically with the right instruction?"
+- "Does this piece of knowledge need to be shared with every developer working on this part of the codebase?"
+
+If the answer to these questions is "yes," it is likely a good candidate for a new rule.
+
+## **3. Rule Quality Checklist**
+
+Before committing a new or updated rule, ensure it meets the following quality standards:
+
+1.  **Is it clear and unambiguous?** The rule should be easy to understand and not open to interpretation.
+2.  **Is it actionable?** It should describe a clear action or standard to be followed.
+3.  **Does it provide context?** If necessary, it should explain *why* the rule exists (e.g., "We use `apiClient` because it automatically handles authentication tokens and error retries.").
+4.  **Is it correctly scoped?** Does the `globs` pattern target the right files? Is `alwaysApply` used appropriately?
+5.  **Does it follow the format?** Ensure it has the required YAML frontmatter and follows the formatting guidelines in `cursor_rules.mdc`.
+
+By following these principles, we can build a robust set of rules that significantly accelerate development and improve code quality across the project.

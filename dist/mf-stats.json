@@ -1,0 +1,203 @@
+{
+  "id": "checks",
+  "name": "checks",
+  "metaData": {
+    "name": "checks",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "1.0.0",
+      "buildName": "put-checks"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "@mf-types.zip",
+      "api": "@mf-types.d.ts"
+    },
+    "globalName": "checks",
+    "pluginVersion": "0.18.0",
+    "prefetchInterface": false,
+    "publicPath": "/checks/"
+  },
+  "shared": [
+    {
+      "singleton": true,
+      "requiredVersion": "^11.14.0",
+      "shareScope": "default",
+      "eager": true,
+      "name": "@emotion/react",
+      "version": "11.14.0",
+      "id": "checks:@emotion/react",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendors.5bad925467469a011ffd.js",
+            "remoteEntry.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": []
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^11.14.1",
+      "shareScope": "default",
+      "eager": true,
+      "name": "@emotion/styled",
+      "version": "11.14.1",
+      "id": "checks:@emotion/styled",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendors.5bad925467469a011ffd.js",
+            "remoteEntry.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": []
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^7.1.1",
+      "shareScope": "default",
+      "eager": true,
+      "name": "@mui/material",
+      "version": "false",
+      "id": "checks:@mui/material",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendors.5bad925467469a011ffd.js",
+            "remoteEntry.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": []
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^18.2.0",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react-dom",
+      "version": "18.3.1",
+      "id": "checks:react-dom",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendors.5bad925467469a011ffd.js",
+            "remoteEntry.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": []
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^7.0.1",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react-router-dom",
+      "version": "7.7.1",
+      "id": "checks:react-router-dom",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendors.5bad925467469a011ffd.js",
+            "remoteEntry.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": []
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^18.2.0",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react",
+      "version": "18.3.1",
+      "id": "checks:react",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendors.5bad925467469a011ffd.js",
+            "remoteEntry.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [
+        "./ChecksModule"
+      ]
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "path": "./ChecksModule",
+      "id": "checks:ChecksModule",
+      "name": "ChecksModule",
+      "requires": [
+        "react"
+      ],
+      "file": "src/bootstrap",
+      "assets": {
+        "js": {
+          "sync": [
+            "398.37ec8086b6491e906986.js",
+            "__federation_expose_ChecksModule.f077181bcad81eeab482.chunk.js"
+          ],
+          "async": [
+            "251.89db18e1e2cf828e391b.chunk.js",
+            "959.76cf16e44c6361e3d4ee.chunk.js",
+            "919.8b3c1523c5ab52dfbfc0.chunk.js",
+            "468.da2833865664400acbd2.chunk.js",
+            "384.298200b60818f845f472.chunk.js",
+            "878.3c3c02b1a7d4366a34d6.chunk.js",
+            "820.26ed22095b721f9ed4e7.chunk.js",
+            "216.5b55242730b0e321da22.chunk.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    }
+  ]
+}

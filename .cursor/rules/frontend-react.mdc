@@ -1,0 +1,51 @@
+---
+description: Enforces frontend development standards for the "Checks" React application.
+globs: ["frontend/src/**/*.{ts,tsx}", "frontend/package.json"]
+alwaysApply: false
+---
+
+# **Frontend Development Rules: React & TypeScript**
+
+This document outlines the specific rules, patterns, and best practices for developing the "Checks" frontend application.
+
+## **1. Technology Stack**
+
+The frontend is built on a modern, prescribed technology stack. Do not introduce new major dependencies without an architecture review.
+
+- **Framework:** **React 18** with **TypeScript**. All new code MUST be written in TypeScript.
+- **Build Tool:** **Vite**. Configuration is handled in `vite.config.ts`.
+- **UI Components:** **Material-UI (MUI) v7**. All UI components must be built using MUI or by styling standard HTML elements with **Emotion**. Do not use styled-components or other CSS-in-JS libraries.
+- **Routing:** **React Router v7**.
+- **Authentication:** Use the `oidc-react` library for OIDC flow management and `jwt-decode` for token inspection. All authentication logic should be encapsulated within the `AuthContext`.
+
+## **2. Mock-First Development with MSW**
+
+To ensure the frontend can be developed and tested independently, we use **Mock Service Worker (MSW)**.
+
+- **Mandatory First Step:** For any new feature that involves API interactions, the **first PR** must include the MSW handlers that mock the required API endpoints.
+- **Location:** Mock handlers should be located in `frontend/src/mocks/handlers.ts`.
+- **Benefit:** This allows for rapid UI development, comprehensive testing of all states (loading, error, success), and high-fidelity demos for stakeholders before the backend is complete. Refer to the **Phase 1** plan in the [ARCH.md](ARCH.md).
+
+## **3. Component Architecture**
+
+- **File Structure:** Create a new directory for each component. The directory should contain the component file (`.tsx`) and an `index.ts` for exports.
+  ```
+  - components/
+    - MyComponent/
+      - MyComponent.tsx
+      - index.ts
+  ```
+- **Styling:** Use the `sx` prop from MUI for component-specific styling. For reusable styles, define them in a separate `styles.ts` file.
+- **State Management:** For simple, local state, use `useState` and `useReducer`. For global or cross-component state (e.g., user authentication, navigation context), use React Context. Do not introduce Redux, Zustand, or other state management libraries without approval.
+
+## **4. API Interaction**
+
+- **Centralized API Client:** All HTTP requests to the backend MUST go through a centralized `apiClient`. This client, built on a library like Axios, will be configured to handle base URLs, authentication headers, and standardized error handling.
+- **No Direct `fetch`:** Do not use the native `fetch()` API directly in components.
+- **Data Fetching Hooks:** Create custom hooks (e.g., `useCheck`, `useCsrData`) to encapsulate data fetching logic, caching, and state management for specific API resources.
+
+## **5. Common Pitfalls to Avoid**
+
+- **Ignoring TypeScript:** Do not use `any` unless absolutely necessary. Take the time to define proper types and interfaces in the `frontend/src/types/` directory.
+- **Not Using MUI Components:** Do not build custom components for functionality that already exists in Material-UI (e.g., buttons, modals, pickers). Adhere to the Citi Design System via our MUI theme.
+- **Bypassing the Mock Service:** During initial development, ensure MSW is active. Disabling it prematurely will couple the frontend to a non-existent or incomplete backend, violating our phased development plan.

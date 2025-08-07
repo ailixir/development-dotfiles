@@ -1,0 +1,36 @@
+{
+  "name": "put-platform-shell-demo",
+  "version": "1.0.0",
+  "description": "Demo app shell for Production Unified Toolkit platform using core-components library",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "echo 'Building shell app...' && cp -r public dist/",
+    "serve": "npm run build && node server.js"
+  },
+  "dependencies": {
+    "@put/core-components": "file:../",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@mui/material": "^5.15.0",
+    "@mui/icons-material": "^5.15.0",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0"
+  },
+  "keywords": [
+    "put",
+    "platform",
+    "shell",
+    "demo",
+    "micro-frontend",
+    "citibank"
+  ],
+  "author": "PUT Platform Team",
+  "license": "MIT"
+}
