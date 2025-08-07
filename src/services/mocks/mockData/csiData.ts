@@ -1,0 +1,276 @@
+export interface MockCSI {
+  id: string;
+  name: string;
+  description: string;
+  owner: string;
+  environment: 'Production' | 'Staging' | 'Development' | 'UAT';
+  businessUnit: string;
+  status: 'Active' | 'Deprecated' | 'Development';
+  applications: MockApplication[];
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MockApplication {
+  id: string;
+  name: string;
+  type: 'REST API' | 'Microservice' | 'Database' | 'Web Application' | 'Batch Job' | 'Message Queue';
+  version: string;
+  status: 'Running' | 'Stopped' | 'Error' | 'Maintenance';
+  endpoints?: string[];
+}
+
+export const mockCSIs: MockCSI[] = [
+  {
+    id: 'CSI-12345',
+    name: 'Trade Processing System',
+    description: 'Core trading system for equity and fixed income transactions',
+    owner: 'Trading Technology Team',
+    environment: 'Production',
+    businessUnit: 'Markets & Securities Services',
+    status: 'Active',
+    applications: [
+      {
+        id: 'app-001',
+        name: 'Trade API Gateway',
+        type: 'REST API',
+        version: 'v2.1.4',
+        status: 'Running',
+        endpoints: [
+          'https://api.trade.internal/health',
+          'https://api.trade.internal/orders',
+          'https://api.trade.internal/settlements'
+        ]
+      },
+      {
+        id: 'app-002',
+        name: 'Trade Settlement Service',
+        type: 'Microservice',
+        version: 'v1.8.2',
+        status: 'Running'
+      },
+      {
+        id: 'app-003',
+        name: 'Trade Database',
+        type: 'Database',
+        version: 'PostgreSQL 14.9',
+        status: 'Running'
+      }
+    ],
+    tags: ['trading', 'critical', 'high-volume', 'real-time'],
+    createdAt: '2023-06-15T09:00:00Z',
+    updatedAt: '2024-01-10T14:30:00Z'
+  },
+  {
+    id: 'CSI-67890',
+    name: 'Market Data System',
+    description: 'Real-time market data processing and distribution platform',
+    owner: 'Market Data Engineering',
+    environment: 'Production',
+    businessUnit: 'Markets & Securities Services',
+    status: 'Active',
+    applications: [
+      {
+        id: 'app-004',
+        name: 'Market Data Processor',
+        type: 'Microservice',
+        version: 'v3.2.1',
+        status: 'Running'
+      },
+      {
+        id: 'app-005',
+        name: 'Price Feed API',
+        type: 'REST API',
+        version: 'v2.0.3',
+        status: 'Running',
+        endpoints: [
+          'https://api.marketdata.internal/prices',
+          'https://api.marketdata.internal/quotes'
+        ]
+      },
+      {
+        id: 'app-006',
+        name: 'Market Data Cache',
+        type: 'Database',
+        version: 'Redis 7.0.8',
+        status: 'Running'
+      }
+    ],
+    tags: ['market-data', 'real-time', 'high-throughput', 'low-latency'],
+    createdAt: '2023-05-20T10:00:00Z',
+    updatedAt: '2024-01-08T16:45:00Z'
+  },
+  {
+    id: 'CSI-11111',
+    name: 'Customer Portal',
+    description: 'Online banking portal for retail and corporate customers',
+    owner: 'Digital Banking Team',
+    environment: 'Production',
+    businessUnit: 'Global Consumer Banking',
+    status: 'Active',
+    applications: [
+      {
+        id: 'app-007',
+        name: 'Portal Web Application',
+        type: 'Web Application',
+        version: 'v5.1.2',
+        status: 'Running',
+        endpoints: [
+          'https://online.citi.com',
+          'https://online.citi.com/api/auth'
+        ]
+      },
+      {
+        id: 'app-008',
+        name: 'Customer API Service',
+        type: 'REST API',
+        version: 'v4.0.1',
+        status: 'Running'
+      },
+      {
+        id: 'app-009',
+        name: 'Session Management Service',
+        type: 'Microservice',
+        version: 'v2.3.5',
+        status: 'Running'
+      }
+    ],
+    tags: ['customer-facing', 'web', 'authentication', 'high-availability'],
+    createdAt: '2023-03-10T11:00:00Z',
+    updatedAt: '2024-01-12T09:15:00Z'
+  },
+  {
+    id: 'CSI-22222',
+    name: 'Risk Management Platform',
+    description: 'Enterprise risk assessment and monitoring platform',
+    owner: 'Risk Technology Team',
+    environment: 'Production',
+    businessUnit: 'Risk Management',
+    status: 'Active',
+    applications: [
+      {
+        id: 'app-010',
+        name: 'Risk Calculation Engine',
+        type: 'Batch Job',
+        version: 'v1.9.0',
+        status: 'Running'
+      },
+      {
+        id: 'app-011',
+        name: 'Risk API Gateway',
+        type: 'REST API',
+        version: 'v3.1.7',
+        status: 'Running'
+      },
+      {
+        id: 'app-012',
+        name: 'Risk Data Warehouse',
+        type: 'Database',
+        version: 'Oracle 19c',
+        status: 'Running'
+      }
+    ],
+    tags: ['risk', 'compliance', 'batch-processing', 'analytics'],
+    createdAt: '2023-08-01T08:00:00Z',
+    updatedAt: '2024-01-14T13:20:00Z'
+  },
+  {
+    id: 'CSI-33333',
+    name: 'Payment Processing Network',
+    description: 'Global payment processing and settlement network',
+    owner: 'Payments Engineering',
+    environment: 'Production',
+    businessUnit: 'Treasury & Trade Solutions',
+    status: 'Active',
+    applications: [
+      {
+        id: 'app-013',
+        name: 'Payment Gateway',
+        type: 'REST API',
+        version: 'v4.2.1',
+        status: 'Running'
+      },
+      {
+        id: 'app-014',
+        name: 'Settlement Engine',
+        type: 'Microservice',
+        version: 'v2.7.3',
+        status: 'Running'
+      },
+      {
+        id: 'app-015',
+        name: 'Payment Queue',
+        type: 'Message Queue',
+        version: 'Apache Kafka 3.4',
+        status: 'Running'
+      }
+    ],
+    tags: ['payments', 'settlement', 'messaging', 'global'],
+    createdAt: '2023-07-12T07:30:00Z',
+    updatedAt: '2024-01-11T15:45:00Z'
+  },
+  {
+    id: 'CSI-44444',
+    name: 'Credit Card Processing',
+    description: 'Credit card transaction processing and fraud detection system',
+    owner: 'Cards Technology Team',
+    environment: 'Production',
+    businessUnit: 'Global Consumer Banking',
+    status: 'Active',
+    applications: [
+      {
+        id: 'app-016',
+        name: 'Transaction Processor',
+        type: 'Microservice',
+        version: 'v6.1.0',
+        status: 'Running'
+      },
+      {
+        id: 'app-017',
+        name: 'Fraud Detection API',
+        type: 'REST API',
+        version: 'v3.4.2',
+        status: 'Running'
+      }
+    ],
+    tags: ['credit-cards', 'fraud-detection', 'real-time', 'high-volume'],
+    createdAt: '2023-04-05T12:00:00Z',
+    updatedAt: '2024-01-09T11:30:00Z'
+  }
+];
+
+export const mockUsers = [
+  {
+    id: 'user-001',
+    name: 'David Chen',
+    email: 'david.chen@citi.com',
+    role: 'SRE Engineer',
+    teams: ['Trading Technology Team'],
+    permissions: ['CSI-12345', 'CSI-67890']
+  },
+  {
+    id: 'user-002',
+    name: 'Priya Sharma',
+    email: 'priya.sharma@citi.com',
+    role: 'L2 Support Analyst',
+    teams: ['Trading Technology Team', 'Digital Banking Team'],
+    permissions: ['CSI-12345', 'CSI-11111']
+  },
+  {
+    id: 'user-003',
+    name: 'Maria Garcia',
+    email: 'maria.garcia@citi.com',
+    role: 'Operations Analyst',
+    teams: ['Market Data Engineering'],
+    permissions: ['CSI-67890']
+  },
+  {
+    id: 'user-004',
+    name: 'Robert Kim',
+    email: 'robert.kim@citi.com',
+    role: 'IT Director',
+    teams: ['Trading Technology Team', 'Risk Technology Team'],
+    permissions: ['CSI-12345', 'CSI-22222']
+  }
+];

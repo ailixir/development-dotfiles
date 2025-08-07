@@ -1,23 +1,11 @@
 import { setupWorker } from 'msw/browser';
-import { handlers } from './handlers/index';
+import { handlers } from './handlers';
 
-// Setup MSW worker with all handlers
 export const worker = setupWorker(...handlers);
 
-// Start worker and configure
-export const startMocking = async () => {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  await worker.start({
-    onUnhandledRequest: 'warn',
-    serviceWorker: {
-      url: '/mockServiceWorker.js',
-    },
+// Enhanced logging for development
+if (process.env.NODE_ENV === 'development') {
+  worker.events.on('request:start', ({ request }) => {
+    console.log('MSW intercepted:', request.method, request.url);
   });
-
-  console.log('🔶 MSW: Mock service worker started');
-};
-
-export default worker;
+}

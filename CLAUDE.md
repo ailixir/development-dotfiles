@@ -4,143 +4,163 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**PUT Checks Module** is a micro-frontend for centralized operational health monitoring at Citibank. It's designed as an orchestration layer that integrates with existing monitoring tools (ITRS, Splunk, Grafana, AppDynamics) rather than replacing them.
+**PUT Checks Module** is a React micro-frontend module for the Production Unified Toolkit (PUT) platform at Citibank. It serves as the centralized orchestration and standardization layer for operational health monitoring, integrating with existing tools like ITRS, Splunk, Grafana, and AppDynamics without replacing them.
 
-**Architecture**: React 18+ TypeScript SPA using Module Federation, with Citi System Inventory (CSI) as the organizing principle for all checks and data.
+**Key Organizing Principle:** All checks are associated with the Citi System Inventory (CSI) as the primary categorization system.
 
-## Development Commands
+## Architecture
 
-### Primary Development
+### Technology Stack
+- **Framework:** React 18 with TypeScript (strict mode)
+- **Build Tools:** 
+  - Vite for standalone development (`npm run dev`)
+  - Webpack with Module Federation for production (`npm run dev:fed`)
+- **UI Library:** Material-UI (MUI) v7 with Emotion styling
+- **Routing:** React Router v7
+- **State Management:** Redux Toolkit + React Context
+- **Authentication:** OIDC-React with JWT token handling
+- **Testing:** Vitest (unit tests) + Cypress (E2E tests)
+- **API Mocking:** Mock Service Worker (MSW) for development
+
+### Deployment Modes
+1. **Standalone Mode** (`npm run dev` - port 5173): Full development with welcome page and sidebar
+2. **Federated Mode** (`npm run dev:fed` - port 3002): Module Federation integration testing
+
+## Common Development Commands
+
+### Setup and Development
 ```bash
-# Standalone development (recommended for feature development)
-npm run dev          # Vite dev server on port 5173
+# Initial setup (recommended)
+./scripts/setup.sh
 
-# Federated module development (for integration testing)
-npm run dev:fed      # Webpack dev server on port 3002
+# Manual setup
+npm install
+npm run msw:init
 
-# Setup (run once)
-./scripts/setup.sh   # Recommended setup script
-npm run msw:init     # Initialize Mock Service Worker
+# Development servers
+npm run dev          # Standalone mode (port 5173)
+npm run dev:fed      # Federated mode (port 3002)
 ```
 
-### Build Commands
+### Code Quality and Testing
 ```bash
-npm run build                # Production build (Module Federation)
-npm run build:standalone     # Standalone build
-npm run build:dev           # Development build
+npm run type-check   # TypeScript validation
+npm run lint         # ESLint checking
+npm run lint:fix     # Auto-fix lint issues
+
+npm run test         # Unit tests with Vitest
+npm run test:ui      # Test UI
+npm run test:e2e     # Cypress E2E tests
 ```
 
-### Code Quality & Testing
-```bash
-npm run type-check          # TypeScript validation
-npm run lint               # ESLint checking
-npm run lint:fix           # Auto-fix lint issues
-npm run test              # Unit tests with Vitest
-npm run test:ui           # Test UI
-npm run test:coverage     # Test coverage
-npm run test:e2e          # Cypress E2E tests
-npm run test:e2e:open     # Open Cypress UI
+## Development Approach
+
+### Mock-First Development
+**CRITICAL:** All API interactions use Mock Service Worker (MSW) during development. This enables:
+- Independent frontend development without backend dependency
+- Full functionality testing with realistic data
+- Stakeholder demos before backend completion
+
+Mock handlers are located in `src/services/mocks/` and provide realistic API responses for all check types, CSI data, and execution results.
+
+### Module Federation Integration
+The module exposes `./ChecksModule` via Module Federation and integrates with the PUT Platform Shell using:
+- `PlatformSidebar` from `@put/core-components` for navigation
+- Adaptive layouts that detect standalone vs federated deployment
+- Event communication with host application
+
+## Key Features and Components
+
+### Core Check Types
+1. **Basic Checks:** HTTP/HTTPS endpoints, TCP port connectivity
+2. **Integration Checks:** Splunk queries, Grafana metrics, ITRS samplers, AppDynamics health rules
+3. **UI Test Checks:** No-code browser automation with "Checks Studio"
+
+### Checks Studio (UI Testing)
+**Philosophy:** "From Checklist to Reality" - users write plain English steps and watch video proof of execution.
+
+**Three-Panel Interface:**
+- Left: Test steps in numbered list format
+- Middle: Control panel with "Run Test" button and live logs
+- Right: Video playback synchronized with test steps
+
+### Navigation Structure
+```
+📁 Checks Module
+├── 🏠 Dashboard - Health overview
+├── 📋 All Checks - Check management  
+├── ➕ Create Check - New check builder
+├── 🎬 Checks Studio - UI testing
+└── 📊 Reports - Analytics & reporting
 ```
 
-## Architecture & Patterns
+## Code Organization
 
-### Dual-Mode Deployment
-The application supports two deployment modes via adaptive layouts:
-- **Standalone Mode** (port 5173): Full sidebar + welcome page
-- **Federated Mode** (port 3002): Integrates with Module Federation host
-
-### State Management
-- **Redux Toolkit**: Global state management with slices for checks, studio, reports
-- **React Query**: API caching and server state management
-- **Context API**: Layout and navigation state
-
-### API Strategy
-- **Mock-First Development**: All features start with MSW (Mock Service Worker) handlers
-- **Centralized API Client**: All HTTP requests go through a unified client
-- **TypeScript API Types**: Strict typing for all API interactions
-
-### Component Architecture
 ```
 src/
 ├── components/
-│   ├── layout/              # Adaptive layout system
-│   │   ├── LayoutProvider   # Auto-detects deployment context
-│   │   ├── ChecksLayout     # Module navigation sidebar
-│   │   └── StandaloneLayout # Simple layout
-│   └── common/              # Shared components
+│   ├── layout/              # Adaptive layouts (LayoutProvider, ChecksLayout)
+│   ├── common/              # Shared components
+│   └── [features]/          # Feature-specific components
 ├── pages/                   # Route components
-├── store/                   # Redux Toolkit slices
+├── store/                   # Redux Toolkit state management
 ├── services/
 │   └── mocks/              # MSW API mocking
 ├── types/                  # TypeScript definitions
-└── utils/                  # Configuration & utilities
+└── utils/                  # Utilities & configuration
 ```
 
-### Key Dependencies
-- **@put/core-components**: Platform navigation components (PlatformSidebar)
-- **@mui/material v7**: UI component library
-- **@reduxjs/toolkit**: State management
-- **@tanstack/react-query**: Server state management
-- **oidc-react**: Authentication
-- **msw**: API mocking
-- **framer-motion**: Animations
+### Environment Configuration
+- **Vite dev server** (port 5173) → Standalone mode with full navigation
+- **Webpack dev server** (port 3002) → Federated mode for platform integration
+- Environment variables in `.env.development` control MSW enablement and API URLs
 
-### Path Aliases (configured in tsconfig.json and vite.config.ts)
-```typescript
-@/* → ./src/*
-@/components/* → ./src/components/*
-@/services/* → ./src/services/*
-@/types/* → ./src/types/*
-@/utils/* → ./src/utils/*
-@/store/* → ./src/store/*
-```
+## Development Rules
 
-## Development Workflow
+### Code Quality
+- **TypeScript:** Strict mode enabled, no `any` types without justification
+- **Components:** Use MUI components and `sx` prop for styling
+- **API Calls:** All HTTP requests through centralized API client, no direct `fetch()`
+- **Testing:** Unit tests required for business logic, integration tests for components
 
-### Mock-First Approach
-1. **All new features must start with MSW handlers** in `src/services/mocks/handlers/`
-2. Create realistic API responses before building UI components
-3. MSW allows full frontend development without backend dependencies
+### Git Workflow
+- **Branching:** Feature branches from `develop` (format: `feat/PROJ-123-description`)
+- **Commits:** Follow Conventional Commits specification
+- **PRs:** Draft PRs early, squash and merge to maintain clean history
 
-### Module Federation Integration
-```javascript
-// webpack/webpack.common.js exposes:
-"./ChecksModule": "./src/bootstrap"
+### Authentication & Security
+- Enterprise SSO integration via OIDC
+- Role-based access control based on CSI ownership
+- Secrets vault integration for external system credentials
+- No hardcoded credentials or API keys
 
-// Shared dependencies include React, MUI, React Router
-```
+## Important Files and References
 
-### Navigation System
-Uses `PlatformSidebar` from `@put/core-components` for module-level navigation. The platform shell handles global navigation.
+### Primary Documentation
+- `PRD.md` - Product requirements and user stories
+- `ARCH.md` - Technical architecture and implementation plan
+- `MFE_GUIDE.md` - Platform shell implementation details  
 
-### Testing Strategy
-- **Unit Tests**: Vitest + React Testing Library
-- **E2E Tests**: Cypress
-- **Coverage**: Vitest coverage reports
-- **MSW**: Enables testing all API states (loading, error, success)
+### Cursor IDE Rules
+- `.cursor/rules/project-overview.mdc` - Project context and verification
+- `.cursor/rules/development.mdc` - Git workflow and testing requirements
+- `.cursor/rules/frontend-react.mdc` - React/TypeScript development standards
 
-## Important Notes
+## Performance and Integration
 
-### Security & Enterprise Standards
-- OIDC authentication with JWT tokens
-- Role-based access control (RBAC)
-- CSI-based data organization
-- Enterprise secrets management integration
+### Bundle Optimization
+- Module Federation with shared dependencies (React, MUI, etc.)
+- Code splitting and lazy loading
+- Target: < 500KB initial bundle, < 1.5s First Contentful Paint
 
-### Code Style Requirements
-- Strict TypeScript (no `any` types)
-- MUI components only (no custom styled components)
-- Centralized API client (no direct fetch calls)
-- React Query for server state
-- Redux Toolkit for client state
+### Platform Communication
+- Custom events for module change notifications
+- Host application integration via `window.dispatchEvent`
+- Responsive design with mobile-first approach
 
-### CSI Integration
-All checks, dashboards, and reports are organized by **Citi System Inventory (CSI)**. This is the primary organizing principle throughout the application.
+## Testing Philosophy
 
-### Performance Targets
-- < 500KB initial bundle size
-- < 1.5s First Contentful Paint
-- < 3s Time to Interactive
-- Optimized chunk splitting for vendor libraries
-
-When working on this codebase, always consider the dual-mode deployment, mock-first development approach, and CSI-centric organization. The application should work seamlessly in both standalone and federated contexts.
+- **Unit Tests:** Vitest + React Testing Library for components and hooks
+- **Integration Tests:** Full user flows with MSW API mocking
+- **E2E Tests:** Cypress for critical paths like check creation and execution
+- **Mock Data:** Comprehensive test scenarios including error states and edge cases

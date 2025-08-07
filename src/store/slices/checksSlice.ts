@@ -1,145 +1,215 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { Check, CheckFilters, CheckStatus } from '@/types/checks.types';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { CheckEntity, CreateCheckRequest, CheckFilters, ExecutionResult } from '../../types/checks/checkTypes';
+import { AsyncState } from '../../types/common/commonTypes';
+import { checksApi } from '@services/api/checksApi';
 
-interface ChecksState {
-  checks: Check[];
-  selectedCheck: Check | null;
+interface ChecksState extends AsyncState<CheckEntity[]> {
+  selectedCheck: CheckEntity | null;
   filters: CheckFilters;
-  loading: boolean;
-  error: string | null;
-  pagination: {
-    page: number;
-    pageSize: number;
-    total: number;
-    totalPages: number;
-  };
+  totalCount: number;
+  currentPage: number;
+  executionResults: Record<string, ExecutionResult>;
+  executingChecks: Set<string>;
 }
 
 const initialState: ChecksState = {
-  checks: [],
-  selectedCheck: null,
-  filters: {},
-  loading: false,
+  data: [],
+  loading: 'idle',
   error: null,
-  pagination: {
-    page: 1,
-    pageSize: 10,
-    total: 0,
-    totalPages: 0,
+  lastFetched: null,
+  selectedCheck: null,
+  filters: {
+    csiId: null,
+    status: null,
+    type: null,
+    searchQuery: '',
+    tags: [],
   },
+  totalCount: 0,
+  currentPage: 1,
+  executionResults: {},
+  executingChecks: new Set(),
 };
+
+// Async thunks
+export const fetchChecks = createAsyncThunk(
+  'checks/fetchChecks',
+  async (params: { page?: number; limit?: number; filters?: Partial<CheckFilters> }) => {
+    const response = await checksApi.getChecks(params);
+    return response;
+  }
+);
+
+export const fetchCheckById = createAsyncThunk(
+  'checks/fetchCheckById',
+  async (id: string) => {
+    const response = await checksApi.getCheckById(id);
+    return response;
+  }
+);
+
+export const createCheck = createAsyncThunk(
+  'checks/createCheck',
+  async (checkData: CreateCheckRequest) => {
+    const response = await checksApi.createCheck(checkData);
+    return response;
+  }
+);
+
+export const executeCheck = createAsyncThunk(
+  'checks/executeCheck',
+  async (id: string) => {
+    const response = await checksApi.executeCheck(id);
+    return { checkId: id, result: response };
+  }
+);
+
+export const deleteCheck = createAsyncThunk(
+  'checks/deleteCheck',
+  async (id: string) => {
+    await checksApi.deleteCheck(id);
+    return id;
+  }
+);
 
 const checksSlice = createSlice({
   name: 'checks',
   initialState,
   reducers: {
-    // Loading states
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
-      if (action.payload) {
-        state.error = null;
-      }
+    setSelectedCheck: (state, action: PayloadAction<CheckEntity | null>) => {
+      state.selectedCheck = action.payload;
     },
     
-    setError: (state, action: PayloadAction<string>) => {
-      state.error = action.payload;
-      state.loading = false;
+    updateFilters: (state, action: PayloadAction<Partial<CheckFilters>>) => {
+      state.filters = { ...state.filters, ...action.payload };
+      state.currentPage = 1; // Reset to first page when filters change
+    },
+    
+    clearFilters: (state) => {
+      state.filters = initialState.filters;
+      state.currentPage = 1;
     },
     
     clearError: (state) => {
       state.error = null;
     },
-
-    // Checks management
-    setChecks: (state, action: PayloadAction<Check[]>) => {
-      state.checks = action.payload;
-      state.loading = false;
-      state.error = null;
+    
+    setCurrentPage: (state, action: PayloadAction<number>) => {
+      state.currentPage = action.payload;
     },
     
-    addCheck: (state, action: PayloadAction<Check>) => {
-      state.checks.unshift(action.payload);
-      state.pagination.total += 1;
-    },
-    
-    updateCheck: (state, action: PayloadAction<Check>) => {
-      const index = state.checks.findIndex(check => check.id === action.payload.id);
-      if (index !== -1) {
-        state.checks[index] = action.payload;
-      }
-      if (state.selectedCheck?.id === action.payload.id) {
-        state.selectedCheck = action.payload;
-      }
-    },
-    
-    removeCheck: (state, action: PayloadAction<string>) => {
-      state.checks = state.checks.filter(check => check.id !== action.payload);
-      state.pagination.total -= 1;
-      if (state.selectedCheck?.id === action.payload) {
-        state.selectedCheck = null;
-      }
-    },
-    
-    updateCheckStatus: (state, action: PayloadAction<{ id: string; status: CheckStatus; lastExecuted?: string }>) => {
-      const { id, status, lastExecuted } = action.payload;
-      const check = state.checks.find(check => check.id === id);
+    updateCheckStatus: (state, action: PayloadAction<{ id: string; status: any }>) => {
+      const check = state.data.find(c => c.id === action.payload.id);
       if (check) {
-        check.lastStatus = status;
-        if (lastExecuted) {
-          check.lastExecuted = lastExecuted;
-        }
-      }
-      if (state.selectedCheck?.id === id) {
-        state.selectedCheck.lastStatus = status;
-        if (lastExecuted && state.selectedCheck) {
-          state.selectedCheck.lastExecuted = lastExecuted;
-        }
+        check.status = action.payload.status;
+        check.lastExecution = new Date().toISOString();
       }
     },
-
-    // Selection
-    setSelectedCheck: (state, action: PayloadAction<Check | null>) => {
-      state.selectedCheck = action.payload;
-    },
-
-    // Filters
-    setFilters: (state, action: PayloadAction<CheckFilters>) => {
-      state.filters = action.payload;
-    },
     
-    updateFilters: (state, action: PayloadAction<Partial<CheckFilters>>) => {
-      state.filters = { ...state.filters, ...action.payload };
+    clearExecutionResults: (state) => {
+      state.executionResults = {};
     },
-    
-    clearFilters: (state) => {
-      state.filters = {};
-    },
-
-    // Pagination
-    setPagination: (state, action: PayloadAction<Partial<ChecksState['pagination']>>) => {
-      state.pagination = { ...state.pagination, ...action.payload };
-    },
-
-    // Reset state
-    resetChecksState: () => initialState,
+  },
+  
+  extraReducers: (builder) => {
+    builder
+      // fetchChecks
+      .addCase(fetchChecks.pending, (state) => {
+        state.loading = 'loading';
+        state.error = null;
+      })
+      .addCase(fetchChecks.fulfilled, (state, action) => {
+        state.loading = 'succeeded';
+        state.data = action.payload.data;
+        state.totalCount = action.payload.total || 0;
+        state.lastFetched = new Date().toISOString();
+      })
+      .addCase(fetchChecks.rejected, (state, action) => {
+        state.loading = 'failed';
+        state.error = action.error.message || 'Failed to fetch checks';
+      })
+      
+      // fetchCheckById
+      .addCase(fetchCheckById.pending, (state) => {
+        state.loading = 'loading';
+      })
+      .addCase(fetchCheckById.fulfilled, (state, action) => {
+        state.loading = 'succeeded';
+        state.selectedCheck = action.payload;
+      })
+      .addCase(fetchCheckById.rejected, (state, action) => {
+        state.loading = 'failed';
+        state.error = action.error.message || 'Failed to fetch check';
+      })
+      
+      // createCheck
+      .addCase(createCheck.pending, (state) => {
+        state.loading = 'loading';
+        state.error = null;
+      })
+      .addCase(createCheck.fulfilled, (state, action) => {
+        state.loading = 'succeeded';
+        state.data.push(action.payload);
+        state.totalCount += 1;
+      })
+      .addCase(createCheck.rejected, (state, action) => {
+        state.loading = 'failed';
+        state.error = action.error.message || 'Failed to create check';
+      })
+      
+      // executeCheck
+      .addCase(executeCheck.pending, (state, action) => {
+        const checkId = action.meta.arg;
+        state.executingChecks.add(checkId);
+      })
+      .addCase(executeCheck.fulfilled, (state, action) => {
+        const { checkId, result } = action.payload;
+        state.executingChecks.delete(checkId);
+        state.executionResults[checkId] = result;
+        
+        // Update check status based on execution result
+        const check = state.data.find(c => c.id === checkId);
+        if (check) {
+          check.status = result.status === 'SUCCESS' ? 'PASSING' : 
+                        result.status === 'WARNING' ? 'WARNING' : 'FAILING';
+          check.lastExecution = result.endTime;
+        }
+      })
+      .addCase(executeCheck.rejected, (state, action) => {
+        const checkId = action.meta.arg;
+        state.executingChecks.delete(checkId);
+        state.error = action.error.message || 'Failed to execute check';
+      })
+      
+      // deleteCheck
+      .addCase(deleteCheck.pending, (state) => {
+        state.loading = 'loading';
+      })
+      .addCase(deleteCheck.fulfilled, (state, action) => {
+        state.loading = 'succeeded';
+        state.data = state.data.filter(check => check.id !== action.payload);
+        state.totalCount -= 1;
+        
+        // Clear selected check if it was deleted
+        if (state.selectedCheck?.id === action.payload) {
+          state.selectedCheck = null;
+        }
+      })
+      .addCase(deleteCheck.rejected, (state, action) => {
+        state.loading = 'failed';
+        state.error = action.error.message || 'Failed to delete check';
+      });
   },
 });
 
 export const {
-  setLoading,
-  setError,
-  clearError,
-  setChecks,
-  addCheck,
-  updateCheck,
-  removeCheck,
-  updateCheckStatus,
   setSelectedCheck,
-  setFilters,
   updateFilters,
   clearFilters,
-  setPagination,
-  resetChecksState,
+  clearError,
+  setCurrentPage,
+  updateCheckStatus,
+  clearExecutionResults,
 } = checksSlice.actions;
 
 export default checksSlice.reducer;
