@@ -7,8 +7,7 @@ import { CssBaseline } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { store } from '@store/index';
-import { createTheme } from '@mui/material/styles';
-// import { APP_CONFIG } from '@utils/constants/appConfig';
+import { theme } from './theme';
 
 // MSW initialization is handled in main.tsx for Vite mode
 // For Module Federation mode, the host should handle MSW initialization
@@ -23,35 +22,6 @@ const queryClient = new QueryClient({
     },
     mutations: {
       retry: 1,
-    },
-  },
-});
-
-// Create MUI theme
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#0056C7', // Citibank blue
-    },
-    secondary: {
-      main: '#F5F5F5',
-    },
-    background: {
-      default: '#FAFAFA',
-      paper: '#FFFFFF',
-    },
-  },
-  typography: {
-    fontFamily: 'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif',
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-        },
-      },
     },
   },
 });
