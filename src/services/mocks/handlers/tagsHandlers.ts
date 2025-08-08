@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { mockChecks } from '../mockData/checksData';
 import { mockCSIs } from '../../../data/mockCSIData';
+import { groupTagsByPrefix, TAG_CATEGORIES } from '../../../utils/tagUtils';
 
 export const tagsHandlers = [
   // Get all available tags
@@ -36,9 +37,12 @@ export const tagsHandlers = [
         }
 
         const sortedTags = Array.from(allTags).sort();
+        const groupedTags = groupTagsByPrefix(sortedTags);
 
         resolve(HttpResponse.json({
           data: sortedTags,
+          grouped: groupedTags,
+          categories: TAG_CATEGORIES,
           total: sortedTags.length,
           csiId,
           timestamp: new Date().toISOString()
