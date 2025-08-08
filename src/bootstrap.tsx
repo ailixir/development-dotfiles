@@ -1,5 +1,4 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material/styles';
@@ -75,15 +74,7 @@ if (typeof window !== 'undefined') {
   (window as any).ChecksModule = Bootstrap;
 }
 
-// For standalone mode
-if (process.env.NODE_ENV === 'development' && !(window as any).__POWERED_BY_MODULE_FEDERATION__) {
-  const container = document.getElementById('root');
-  if (container) {
-    // Clear the loading state and render the app
-    container.innerHTML = '';
-    const root = createRoot(container);
-    root.render(<Bootstrap />);
-  }
-}
+// Note: Standalone rendering is handled by main.tsx for Vite development
+// This bootstrap file focuses on providing the component for Module Federation
 
 export default Bootstrap;

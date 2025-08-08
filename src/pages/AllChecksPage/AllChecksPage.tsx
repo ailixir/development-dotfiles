@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -9,14 +9,12 @@ import {
   TextField,
   InputAdornment,
   Chip,
-  Avatar,
   Button,
   IconButton,
   Menu,
   MenuItem,
   Tooltip,
   Stack,
-  Divider,
   LinearProgress,
   Table,
   TableBody,
@@ -25,16 +23,17 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  Checkbox,
   FormControl,
   InputLabel,
   Select,
-  OutlinedInput,
   useTheme,
   alpha,
-  Switch,
-  FormControlLabel,
-  Badge,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
+  Snackbar,
 } from '@mui/material';
 import {
   Search,
@@ -50,369 +49,206 @@ import {
   Delete,
   Edit,
   Visibility,
-  GetApp,
-  Refresh,
-  TrendingUp,
-  Settings,
   Api,
   Storage,
   AutoGraph,
-  Speed,
   Security,
   BugReport,
-  Domain,
-  LocationOn,
-  AccessTime,
-  Person,
-  CalendarToday,
+  Science,
+  Refresh,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@store/index';
-import { fetchChecks } from '@store/slices/checksSlice';
-
-// Mock checks data with comprehensive details
-const mockChecks = [
-  {
-    id: '1',
-    name: 'Trading API Health Check',
-    type: 'HTTP',
-    status: 'passing',
-    csi: 'Trading Platform',
-    environment: 'Production',
-    url: 'https://api.trading.citi.com/health',
-    frequency: '5 minutes',
-    lastRun: '2025-01-07T10:30:00Z',
-    nextRun: '2025-01-07T10:35:00Z',
-    responseTime: 89,
-    uptime: 99.9,
-    owner: 'trading-team@citi.com',
-    created: '2024-12-01',
-    enabled: true,
-  },
-  {
-    id: '2',
-    name: 'Database Connection Monitor',
-    type: 'TCP',
-    status: 'warning',
-    csi: 'Banking Services',
-    environment: 'Production',
-    url: 'db.banking.citi.com:5432',
-    frequency: '2 minutes',
-    lastRun: '2025-01-07T10:32:00Z',
-    nextRun: '2025-01-07T10:34:00Z',
-    responseTime: 245,
-    uptime: 98.2,
-    owner: 'platform-team@citi.com',
-    created: '2024-11-15',
-    enabled: true,
-  },
-  {
-    id: '3',
-    name: 'Market Data Feed Monitor',
-    type: 'Splunk',
-    status: 'failing',
-    csi: 'Trading Platform',
-    environment: 'Production',
-    url: 'splunk://market-data-feed',
-    frequency: '1 minute',
-    lastRun: '2025-01-07T10:33:00Z',
-    nextRun: '2025-01-07T10:34:00Z',
-    responseTime: 0,
-    uptime: 87.3,
-    owner: 'market-data@citi.com',
-    created: '2024-10-20',
-    enabled: false,
-  },
-  {
-    id: '4',
-    name: 'Payment Gateway Status',
-    type: 'HTTP',
-    status: 'passing',
-    csi: 'Payment Systems',
-    environment: 'Production',
-    url: 'https://payments.citi.com/status',
-    frequency: '3 minutes',
-    lastRun: '2025-01-07T10:31:00Z',
-    nextRun: '2025-01-07T10:34:00Z',
-    responseTime: 156,
-    uptime: 99.95,
-    owner: 'payments@citi.com',
-    created: '2024-09-10',
-    enabled: true,
-  },
-];
+import { fetchChecks, executeCheck, deleteCheck } from '@store/slices/checksSlice';
+import { useNavigate } from 'react-router-dom';
+import { FilterBar } from '@components/common/FilterBar';
 
 const AllChecksPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
-  const { data: _checks, loading } = useAppSelector(state => state.checks);
+  const navigate = useNavigate();
   
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
-  const [selectedType, setSelectedType] = useState<string[]>([]);
-  const [selectedEnvironment, setSelectedEnvironment] = useState<string[]>([]);
+  const { data: checks, loading, error } = useAppSelector(state => state.checks);
+  const { selectedCSI, tags: { selected: selectedTags } } = useAppSelector(state => state.csi);
+  
+  // Local state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<string>('');
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedCheck, setSelectedCheck] = useState<string | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   useEffect(() => {
-    dispatch(fetchChecks({ page: 1, limit: 50 }));
+    dispatch(fetchChecks({ page: 1, limit: 100 }));
   }, [dispatch]);
+
+  // Filter and search logic
+  const filteredChecks = useMemo(() => {
+    let result = checks || [];
+    
+    // Apply CSI filter
+    if (selectedCSI) {
+      result = result.filter(check => check.csiId === selectedCSI);
+    }
+    
+    // Apply tag filter
+    if (selectedTags && selectedTags.length > 0) {
+      result = result.filter(check => 
+        selectedTags.every(tag => check.tags.includes(tag))
+      );
+    }
+    
+    // Apply search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(check => 
+        check.name.toLowerCase().includes(query) ||
+        check.description?.toLowerCase().includes(query) ||
+        check.csiName.toLowerCase().includes(query) ||
+        check.tags.some(tag => tag.toLowerCase().includes(query))
+      );
+    }
+    
+    // Apply status filter
+    if (statusFilter) {
+      result = result.filter(check => check.status === statusFilter);
+    }
+    
+    // Apply type filter
+    if (typeFilter) {
+      result = result.filter(check => check.type === typeFilter);
+    }
+    
+    return result;
+  }, [checks, selectedCSI, selectedTags, searchQuery, statusFilter, typeFilter]);
+
+  // Pagination
+  const paginatedChecks = useMemo(() => {
+    const startIndex = page * rowsPerPage;
+    return filteredChecks.slice(startIndex, startIndex + rowsPerPage);
+  }, [filteredChecks, page, rowsPerPage]);
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, checkId: string) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedCheck(checkId);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedCheck(null);
+  };
+
+  const handleExecuteCheck = async (checkId: string) => {
+    try {
+      await dispatch(executeCheck(checkId)).unwrap();
+      setSnackbar({ open: true, message: 'Check executed successfully', severity: 'success' });
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Failed to execute check', severity: 'error' });
+    }
+    handleMenuClose();
+  };
+
+  const handleDeleteCheck = async () => {
+    if (!selectedCheck) return;
+    
+    try {
+      await dispatch(deleteCheck(selectedCheck)).unwrap();
+      setSnackbar({ open: true, message: 'Check deleted successfully', severity: 'success' });
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Failed to delete check', severity: 'error' });
+    }
+    
+    setDeleteDialogOpen(false);
+    handleMenuClose();
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'passing': return <CheckCircle sx={{ color: 'success.main' }} />;
-      case 'failing': return <Error sx={{ color: 'error.main' }} />;
-      case 'warning': return <Warning sx={{ color: 'warning.main' }} />;
-      default: return <Schedule sx={{ color: 'text.secondary' }} />;
+      case 'PASSING': return <CheckCircle sx={{ color: theme.palette.success.main }} />;
+      case 'FAILING': return <Error sx={{ color: theme.palette.error.main }} />;
+      case 'WARNING': return <Warning sx={{ color: theme.palette.warning.main }} />;
+      case 'PENDING': return <Schedule sx={{ color: theme.palette.info.main }} />;
+      default: return <Schedule sx={{ color: theme.palette.grey[500] }} />;
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'HTTP': return <Api sx={{ color: '#3B82F6' }} />;
-      case 'TCP': return <Storage sx={{ color: '#10B981' }} />;
-      case 'Splunk': return <AutoGraph sx={{ color: '#F59E0B' }} />;
-      case 'Grafana': return <Speed sx={{ color: '#8B5CF6' }} />;
-      case 'ITRS': return <Security sx={{ color: '#EC4899' }} />;
-      case 'AppDynamics': return <BugReport sx={{ color: '#14B8A6' }} />;
-      default: return <Domain sx={{ color: 'text.secondary' }} />;
+      case 'HTTP': return <Api />;
+      case 'TCP': return <Storage />;
+      case 'SPLUNK': return <AutoGraph />;
+      case 'GRAFANA': return <AutoGraph />;
+      case 'ITRS': return <Security />;
+      case 'APPDYNAMICS': return <BugReport />;
+      case 'UI_TEST': return <Science />;
+      default: return <Api />;
     }
   };
 
-  const filteredChecks = mockChecks.filter(check => {
-    const matchesSearch = check.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         check.csi.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         check.url.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = selectedStatus.length === 0 || selectedStatus.includes(check.status);
-    const matchesType = selectedType.length === 0 || selectedType.includes(check.type);
-    const matchesEnvironment = selectedEnvironment.length === 0 || selectedEnvironment.includes(check.environment);
-    
-    return matchesSearch && matchesStatus && matchesType && matchesEnvironment;
-  });
-
-  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      const newSelected = filteredChecks.map(check => check.id);
-      setSelected(newSelected);
-      return;
-    }
-    setSelected([]);
+  const getStatusChip = (status: string) => {
+    const configs = {
+      PASSING: { color: 'success' as const, label: 'Passing' },
+      FAILING: { color: 'error' as const, label: 'Failing' },
+      WARNING: { color: 'warning' as const, label: 'Warning' },
+      PENDING: { color: 'info' as const, label: 'Pending' },
+      UNKNOWN: { color: 'default' as const, label: 'Unknown' },
+    };
+    const config = configs[status as keyof typeof configs] || configs.UNKNOWN;
+    return <Chip label={config.label} color={config.color} size="small" />;
   };
 
-  const handleCheckClick = (event: React.MouseEvent<unknown>, id: string) => {
-    const selectedIndex = selected.indexOf(id);
-    let newSelected: string[] = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      );
-    }
-    setSelected(newSelected);
-  };
-
-  const isSelected = (id: string) => selected.indexOf(id) !== -1;
-
-  const statusCounts = {
-    passing: mockChecks.filter(c => c.status === 'passing').length,
-    failing: mockChecks.filter(c => c.status === 'failing').length,
-    warning: mockChecks.filter(c => c.status === 'warning').length,
-    total: mockChecks.length,
-  };
+  if (error) {
+    return (
+      <Box>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          Error loading checks: {error}
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box>
-      {/* Enhanced Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-          <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-              <Avatar sx={{ bgcolor: 'info.main', width: 48, height: 48 }}>
-                <Domain sx={{ fontSize: 28 }} />
-              </Avatar>
-              <Box>
-                <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                  All Checks
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Manage and monitor all health checks across your systems
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-          <Stack direction="row" spacing={2}>
-            <Button
-              variant="outlined"
-              startIcon={<GetApp />}
-              size="small"
-            >
-              Export
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => {}}
-            >
-              Create Check
-            </Button>
-          </Stack>
+      {/* Header */}
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+        <Box>
+          <Typography variant="h4" fontWeight={600} gutterBottom>
+            All Checks
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            View and manage all health checks across your systems
+          </Typography>
         </Box>
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={() => navigate('/checks/create')}
+          size="large"
+        >
+          Create Check
+        </Button>
+      </Stack>
 
-        {/* Status Summary Cards */}
-        <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ 
-              background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.success.main, 0.05)} 100%)`,
-              borderTop: `3px solid ${theme.palette.success.main}`
-            }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    <Typography color="text.secondary" variant="overline" sx={{ fontWeight: 600 }}>
-                      Passing Checks
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'success.main' }}>
-                      {statusCounts.passing}
-                    </Typography>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={(statusCounts.passing / statusCounts.total) * 100}
-                      sx={{ 
-                        mt: 1,
-                        height: 4,
-                        borderRadius: 2,
-                        backgroundColor: alpha(theme.palette.success.main, 0.2),
-                        '& .MuiLinearProgress-bar': {
-                          backgroundColor: theme.palette.success.main,
-                        }
-                      }}
-                    />
-                  </Box>
-                  <CheckCircle sx={{ fontSize: 48, color: 'success.main', opacity: 0.7 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
+      {/* Filter Bar */}
+      <FilterBar />
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ 
-              background: `linear-gradient(135deg, ${alpha(theme.palette.error.main, 0.1)} 0%, ${alpha(theme.palette.error.main, 0.05)} 100%)`,
-              borderTop: `3px solid ${theme.palette.error.main}`
-            }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    <Typography color="text.secondary" variant="overline" sx={{ fontWeight: 600 }}>
-                      Failing Checks
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'error.main' }}>
-                      {statusCounts.failing}
-                    </Typography>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={(statusCounts.failing / statusCounts.total) * 100}
-                      sx={{ 
-                        mt: 1,
-                        height: 4,
-                        borderRadius: 2,
-                        backgroundColor: alpha(theme.palette.error.main, 0.2),
-                        '& .MuiLinearProgress-bar': {
-                          backgroundColor: theme.palette.error.main,
-                        }
-                      }}
-                    />
-                  </Box>
-                  <Error sx={{ fontSize: 48, color: 'error.main', opacity: 0.7 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ 
-              background: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.1)} 0%, ${alpha(theme.palette.warning.main, 0.05)} 100%)`,
-              borderTop: `3px solid ${theme.palette.warning.main}`
-            }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    <Typography color="text.secondary" variant="overline" sx={{ fontWeight: 600 }}>
-                      Warning Checks
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'warning.main' }}>
-                      {statusCounts.warning}
-                    </Typography>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={(statusCounts.warning / statusCounts.total) * 100}
-                      sx={{ 
-                        mt: 1,
-                        height: 4,
-                        borderRadius: 2,
-                        backgroundColor: alpha(theme.palette.warning.main, 0.2),
-                        '& .MuiLinearProgress-bar': {
-                          backgroundColor: theme.palette.warning.main,
-                        }
-                      }}
-                    />
-                  </Box>
-                  <Warning sx={{ fontSize: 48, color: 'warning.main', opacity: 0.7 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ 
-              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
-              borderTop: `3px solid ${theme.palette.primary.main}`
-            }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    <Typography color="text.secondary" variant="overline" sx={{ fontWeight: 600 }}>
-                      Total Checks
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                      {statusCounts.total}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                      <TrendingUp sx={{ fontSize: 16, color: 'success.main' }} />
-                      <Typography variant="caption" color="success.main">
-                        +12% this month
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Domain sx={{ fontSize: 48, color: 'primary.main', opacity: 0.7 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </Box>
-
-      {/* Main Content */}
-      <Paper sx={{ overflow: 'hidden' }}>
-        {/* Toolbar */}
-        <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Grid container spacing={2} alignItems="center">
+      {/* Search and Filters */}
+      <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, mb: 3 }}>
+        <CardContent>
+          <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                size="small"
                 placeholder="Search checks..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -422,324 +258,256 @@ const AllChecksPage: React.FC = () => {
                 }}
               />
             </Grid>
-            
-            <Grid item xs={12} md={8}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Button
-                    variant={showFilters ? "contained" : "outlined"}
-                    size="small"
-                    startIcon={<FilterList />}
-                    onClick={() => setShowFilters(!showFilters)}
-                  >
-                    Filters
-                  </Button>
-                  {selected.length > 0 && (
-                    <Chip 
-                      label={`${selected.length} selected`} 
-                      onDelete={() => setSelected([])}
-                      color="primary"
-                    />
-                  )}
-                </Stack>
-                
-                <Stack direction="row" spacing={1}>
-                  <Tooltip title="Refresh">
-                    <IconButton size="small">
-                      <Refresh />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Settings">
-                    <IconButton size="small">
-                      <Settings />
-                    </IconButton>
-                  </Tooltip>
-                </Stack>
-              </Box>
+            <Grid item xs={6} md={2}>
+              <FormControl fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  label="Status"
+                >
+                  <MenuItem value="">All Status</MenuItem>
+                  <MenuItem value="PASSING">Passing</MenuItem>
+                  <MenuItem value="FAILING">Failing</MenuItem>
+                  <MenuItem value="WARNING">Warning</MenuItem>
+                  <MenuItem value="PENDING">Pending</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={6} md={2}>
+              <FormControl fullWidth>
+                <InputLabel>Type</InputLabel>
+                <Select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  label="Type"
+                >
+                  <MenuItem value="">All Types</MenuItem>
+                  <MenuItem value="HTTP">HTTP</MenuItem>
+                  <MenuItem value="TCP">TCP</MenuItem>
+                  <MenuItem value="SPLUNK">Splunk</MenuItem>
+                  <MenuItem value="GRAFANA">Grafana</MenuItem>
+                  <MenuItem value="ITRS">ITRS</MenuItem>
+                  <MenuItem value="APPDYNAMICS">AppDynamics</MenuItem>
+                  <MenuItem value="UI_TEST">UI Test</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Stack direction="row" spacing={1} justifyContent="flex-end">
+                <Button
+                  variant="outlined"
+                  startIcon={<Refresh />}
+                  onClick={() => dispatch(fetchChecks({ page: 1, limit: 100 }))}
+                >
+                  Refresh
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<FilterList />}
+                  onClick={() => {
+                    setSearchQuery('');
+                    setStatusFilter('');
+                    setTypeFilter('');
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              </Stack>
             </Grid>
           </Grid>
+        </CardContent>
+      </Card>
 
-          {/* Filter Panel */}
-          {showFilters && (
-            <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={4}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      multiple
-                      value={selectedStatus}
-                      onChange={(e) => setSelectedStatus(e.target.value as string[])}
-                      input={<OutlinedInput label="Status" />}
-                      renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {(selected as string[]).map((value) => (
-                            <Chip key={value} label={value} size="small" />
-                          ))}
-                        </Box>
-                      )}
-                    >
-                      {['passing', 'failing', 'warning'].map((status) => (
-                        <MenuItem key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                
-                <Grid item xs={12} md={4}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Type</InputLabel>
-                    <Select
-                      multiple
-                      value={selectedType}
-                      onChange={(e) => setSelectedType(e.target.value as string[])}
-                      input={<OutlinedInput label="Type" />}
-                      renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {(selected as string[]).map((value) => (
-                            <Chip key={value} label={value} size="small" />
-                          ))}
-                        </Box>
-                      )}
-                    >
-                      {['HTTP', 'TCP', 'Splunk', 'Grafana', 'ITRS', 'AppDynamics'].map((type) => (
-                        <MenuItem key={type} value={type}>
-                          {type}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                
-                <Grid item xs={12} md={4}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Environment</InputLabel>
-                    <Select
-                      multiple
-                      value={selectedEnvironment}
-                      onChange={(e) => setSelectedEnvironment(e.target.value as string[])}
-                      input={<OutlinedInput label="Environment" />}
-                      renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {(selected as string[]).map((value) => (
-                            <Chip key={value} label={value} size="small" />
-                          ))}
-                        </Box>
-                      )}
-                    >
-                      {['Production', 'Staging', 'Development'].map((env) => (
-                        <MenuItem key={env} value={env}>
-                          {env}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-            </Box>
-          )}
-        </Box>
+      {/* Results Summary */}
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Showing {paginatedChecks.length} of {filteredChecks.length} checks
+        {selectedCSI && ' (filtered by CSI)'}
+        {selectedTags.length > 0 && ` (filtered by ${selectedTags.length} tags)`}
+      </Typography>
 
-        {/* Data Table */}
+      {/* Checks Table */}
+      <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}` }}>
+        {loading === 'loading' && <LinearProgress />}
+        
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    color="primary"
-                    indeterminate={selected.length > 0 && selected.length < filteredChecks.length}
-                    checked={filteredChecks.length > 0 && selected.length === filteredChecks.length}
-                    onChange={handleSelectAllClick}
-                  />
-                </TableCell>
                 <TableCell>Check Name</TableCell>
-                <TableCell>Status</TableCell>
                 <TableCell>Type</TableCell>
+                <TableCell>Status</TableCell>
                 <TableCell>CSI</TableCell>
-                <TableCell>Environment</TableCell>
-                <TableCell>Response Time</TableCell>
-                <TableCell>Uptime</TableCell>
-                <TableCell>Last Run</TableCell>
-                <TableCell>Owner</TableCell>
-                <TableCell align="center">Actions</TableCell>
+                <TableCell>Last Execution</TableCell>
+                <TableCell>Schedule</TableCell>
+                <TableCell>Tags</TableCell>
+                <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredChecks
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((check) => {
-                  const isItemSelected = isSelected(check.id);
-                  return (
-                    <TableRow
-                      hover
-                      key={check.id}
-                      selected={isItemSelected}
-                      sx={{ cursor: 'pointer' }}
-                    >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          color="primary"
-                          checked={isItemSelected}
-                          onChange={(event) => handleCheckClick(event, check.id)}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Box>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                              {check.name}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {check.url}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          icon={getStatusIcon(check.status)}
-                          label={check.status.toUpperCase()}
-                          size="small"
-                          color={
-                            check.status === 'passing' ? 'success' :
-                            check.status === 'failing' ? 'error' :
-                            'warning'
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {getTypeIcon(check.type)}
-                          <Typography variant="body2">{check.type}</Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">{check.csi}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={check.environment}
-                          size="small"
-                          variant="outlined"
-                          color={check.environment === 'Production' ? 'error' : 'default'}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <AccessTime sx={{ fontSize: 16, color: 'text.secondary' }} />
-                          <Typography variant="body2">
-                            {check.responseTime > 0 ? `${check.responseTime}ms` : '-'}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {check.uptime}%
-                          </Typography>
-                          <LinearProgress
-                            variant="determinate"
-                            value={check.uptime}
-                            size="small"
-                            sx={{
-                              height: 4,
-                              borderRadius: 2,
-                              backgroundColor: alpha(theme.palette.success.main, 0.2),
-                              '& .MuiLinearProgress-bar': {
-                                backgroundColor: check.uptime >= 99 ? theme.palette.success.main :
-                                              check.uptime >= 95 ? theme.palette.warning.main :
-                                              theme.palette.error.main,
-                              }
-                            }}
-                          />
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CalendarToday sx={{ fontSize: 16, color: 'text.secondary' }} />
-                          <Typography variant="body2">
-                            {new Date(check.lastRun).toLocaleString()}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Person sx={{ fontSize: 16, color: 'text.secondary' }} />
-                          <Typography variant="body2">{check.owner}</Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Stack direction="row" spacing={0.5}>
-                          <Tooltip title="View Details">
-                            <IconButton size="small">
-                              <Visibility />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Edit">
-                            <IconButton size="small">
-                              <Edit />
-                            </IconButton>
-                          </Tooltip>
-                          <IconButton
-                            size="small"
-                            onClick={(event) => {
-                              setAnchorEl(event.currentTarget);
-                              setSelectedCheck(check.id);
-                            }}
-                          >
-                            <MoreVert />
-                          </IconButton>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+              {paginatedChecks.map((check) => (
+                <TableRow key={check.id} hover>
+                  <TableCell>
+                    <Stack>
+                      <Typography variant="subtitle2" fontWeight={600}>
+                        {check.name}
+                      </Typography>
+                      {check.description && (
+                        <Typography variant="caption" color="text.secondary">
+                          {check.description}
+                        </Typography>
+                      )}
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      {getTypeIcon(check.type)}
+                      <Typography variant="body2">{check.type}</Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
+                    {getStatusChip(check.status)}
+                  </TableCell>
+                  <TableCell>
+                    <Stack>
+                      <Typography variant="body2" fontWeight={500}>
+                        {check.csiId}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {check.csiName}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">
+                      {check.lastExecution 
+                        ? new Date(check.lastExecution).toLocaleString()
+                        : 'Never'
+                      }
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={check.schedule.enabled ? check.schedule.frequency : 'Disabled'}
+                      size="small"
+                      variant={check.schedule.enabled ? 'filled' : 'outlined'}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                      {check.tags.slice(0, 3).map((tag) => (
+                        <Chip key={tag} label={tag} size="small" variant="outlined" />
+                      ))}
+                      {check.tags.length > 3 && (
+                        <Chip label={`+${check.tags.length - 3}`} size="small" variant="outlined" />
+                      )}
+                    </Stack>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Stack direction="row" spacing={1}>
+                      <IconButton
+                        size="small"
+                        onClick={() => navigate(`/checks/${check.id}`)}
+                        title="View Details"
+                      >
+                        <Visibility />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleExecuteCheck(check.id)}
+                        title="Execute Now"
+                      >
+                        <PlayArrow />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => handleMenuClick(e, check.id)}
+                      >
+                        <MoreVert />
+                      </IconButton>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
 
-        {/* Pagination */}
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50]}
           component="div"
           count={filteredChecks.length}
-          rowsPerPage={rowsPerPage}
           page={page}
-          onPageChange={(event, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(event) => {
-            setRowsPerPage(parseInt(event.target.value, 10));
+          onPageChange={(_, newPage) => setPage(newPage)}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
             setPage(0);
           }}
+          rowsPerPageOptions={[10, 25, 50, 100]}
         />
+      </Card>
 
-        {/* Context Menu */}
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={() => setAnchorEl(null)}
-        >
-          <MenuItem onClick={() => setAnchorEl(null)}>
-            <PlayArrow sx={{ mr: 1 }} />
-            Run Check
-          </MenuItem>
-          <MenuItem onClick={() => setAnchorEl(null)}>
-            <Pause sx={{ mr: 1 }} />
-            Pause Check
-          </MenuItem>
-          <MenuItem onClick={() => setAnchorEl(null)}>
-            <Edit sx={{ mr: 1 }} />
-            Edit Check
-          </MenuItem>
-          <Divider />
-          <MenuItem onClick={() => setAnchorEl(null)} sx={{ color: 'error.main' }}>
-            <Delete sx={{ mr: 1 }} />
-            Delete Check
-          </MenuItem>
-        </Menu>
-      </Paper>
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={() => {
+          if (selectedCheck) navigate(`/checks/${selectedCheck}`);
+          handleMenuClose();
+        }}>
+          <Visibility sx={{ mr: 1 }} />
+          View Details
+        </MenuItem>
+        <MenuItem onClick={() => {
+          if (selectedCheck) navigate(`/checks/edit/${selectedCheck}`);
+          handleMenuClose();
+        }}>
+          <Edit sx={{ mr: 1 }} />
+          Edit Check
+        </MenuItem>
+        <MenuItem onClick={() => {
+          if (selectedCheck) handleExecuteCheck(selectedCheck);
+        }}>
+          <PlayArrow sx={{ mr: 1 }} />
+          Execute Now
+        </MenuItem>
+        <MenuItem onClick={() => {
+          setDeleteDialogOpen(true);
+          handleMenuClose();
+        }}>
+          <Delete sx={{ mr: 1, color: 'error.main' }} />
+          Delete Check
+        </MenuItem>
+      </Menu>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>Delete Check</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete this check? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleDeleteCheck} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { 
   Box, 
   Grid, 
@@ -9,127 +9,31 @@ import {
   Chip,
   LinearProgress,
   Alert,
-  AlertTitle,
   IconButton,
-  Tooltip,
-  Avatar,
-  AvatarGroup,
-  Button,
-  Stack,
-  Divider,
   useTheme,
   alpha,
-  Skeleton,
-  Badge,
-  CardActions,
+  Stack,
 } from '@mui/material';
 import {
   CheckCircle,
   Error,
   Warning,
-  Schedule,
-  TrendingUp,
-  TrendingDown,
-  Dashboard as DashboardIcon,
   Refresh,
-  MoreVert,
-  ArrowUpward,
-  ArrowDownward,
-  AccessTime,
+  TrendingUp,
+  Schedule,
   Speed,
-  CloudDone,
-  CloudOff,
-  Notifications,
-  PlayArrow,
-  Settings,
-  Add,
+  Api,
+  Storage,
   AutoGraph,
   Security,
-  Storage,
-  Api,
   BugReport,
-  Code,
   Science,
+  ArrowForward,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@store/index';
 import { fetchChecks } from '@store/slices/checksSlice';
 import { useNavigate } from 'react-router-dom';
 import { FilterBar } from '@components/common/FilterBar';
-
-// Enhanced mock data with more realistic metrics
-const mockMetrics = {
-  totalChecks: 47,
-  passingChecks: 39,
-  failingChecks: 5,
-  warningChecks: 3,
-  scheduledChecks: 42,
-  lastUpdated: new Date(),
-  uptime: 99.2,
-  uptimeChange: 0.3,
-  responseTime: 145,
-  responseTimeChange: -12,
-  avgSuccessRate: 94.7,
-  totalExecutions: 1247,
-  activeIncidents: 2,
-  pendingMaintenance: 1,
-};
-
-// Check type distribution data
-const checkTypeData = [
-  { type: 'HTTP', count: 18, icon: <Api />, color: '#3B82F6' },
-  { type: 'TCP', count: 12, icon: <Storage />, color: '#10B981' },
-  { type: 'Splunk', count: 7, icon: <AutoGraph />, color: '#F59E0B' },
-  { type: 'Grafana', count: 4, icon: <Speed />, color: '#8B5CF6' },
-  { type: 'ITRS', count: 3, icon: <Security />, color: '#EC4899' },
-  { type: 'AppDynamics', count: 3, icon: <BugReport />, color: '#14B8A6' },
-];
-
-// Recent activity with more context
-const recentActivity = [
-  { 
-    type: 'success', 
-    message: 'Trading API health check passed',
-    details: 'Response time: 89ms',
-    time: '2 minutes ago',
-    csi: 'Trading Platform'
-  },
-  { 
-    type: 'warning', 
-    message: 'Database connection slow',
-    details: 'Latency increased by 40%',
-    time: '5 minutes ago',
-    csi: 'Banking Services'
-  },
-  { 
-    type: 'error', 
-    message: 'Market data feed failed',
-    details: 'Connection timeout after 30s',
-    time: '12 minutes ago',
-    csi: 'Trading Platform'
-  },
-  { 
-    type: 'success', 
-    message: 'Payment gateway restored',
-    details: 'All services operational',
-    time: '15 minutes ago',
-    csi: 'Payment Systems'
-  },
-  { 
-    type: 'info', 
-    message: 'Scheduled maintenance completed',
-    details: 'SSL certificates renewed',
-    time: '1 hour ago',
-    csi: 'Infrastructure'
-  },
-];
-
-// Critical systems status
-const criticalSystems = [
-  { name: 'Core Banking', status: 'operational', uptime: 99.99 },
-  { name: 'Trading Engine', status: 'degraded', uptime: 98.2 },
-  { name: 'Payment Gateway', status: 'operational', uptime: 99.95 },
-  { name: 'Risk Management', status: 'operational', uptime: 100 },
-];
 
 const DashboardPage: React.FC = () => {
   const theme = useTheme();
@@ -137,178 +41,123 @@ const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { data: checks, loading, error } = useAppSelector(state => state.checks);
   const { selectedCSI, tags: { selected: selectedTags } } = useAppSelector(state => state.csi);
-  const [refreshing, setRefreshing] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     dispatch(fetchChecks({ page: 1, limit: 20 }));
-    const interval = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000);
-    return () => clearInterval(interval);
   }, [dispatch]);
 
   // Filter checks based on selected CSI and tags
   const filteredChecks = useMemo(() => {
     let result = checks || [];
     
-    // Filter by CSI
     if (selectedCSI) {
       result = result.filter(check => check.csiId === selectedCSI);
     }
     
-    // Filter by tags
     if (selectedTags && selectedTags.length > 0) {
       result = result.filter(check => 
-        selectedTags.every(tag => check.tags.includes(tag)) // AND mode
+        selectedTags.every(tag => check.tags.includes(tag))
       );
     }
     
     return result;
   }, [checks, selectedCSI, selectedTags]);
 
-  // Calculate CSI-specific metrics
-  const csiMetrics = useMemo(() => {
-    const checksToAnalyze = filteredChecks || [];
-    const total = checksToAnalyze.length;
-    const passing = checksToAnalyze.filter(c => c.status === 'PASSING').length;
-    const failing = checksToAnalyze.filter(c => c.status === 'FAILING').length;
-    const warning = checksToAnalyze.filter(c => c.status === 'WARNING').length;
-    const scheduled = checksToAnalyze.filter(c => c.schedule.enabled).length;
+  // Calculate metrics
+  const metrics = useMemo(() => {
+    const total = filteredChecks?.length || 0;
+    const passing = filteredChecks?.filter(c => c.status === 'PASSING').length || 0;
+    const failing = filteredChecks?.filter(c => c.status === 'FAILING').length || 0;
+    const warning = filteredChecks?.filter(c => c.status === 'WARNING').length || 0;
+    const uptime = total > 0 ? ((passing / total) * 100) : 0;
     
-    return {
-      totalChecks: total,
-      passingChecks: passing,
-      failingChecks: failing,
-      warningChecks: warning,
-      scheduledChecks: scheduled,
-      uptime: total > 0 ? ((passing / total) * 100) : 0,
-      uptimeChange: 0.3,
-      responseTime: 145,
-      responseTimeChange: -12,
-      avgSuccessRate: total > 0 ? ((passing / total) * 100) : 0,
-      totalExecutions: total * 15, // Approximate
-      activeIncidents: failing,
-      pendingMaintenance: 1,
-    };
+    return { total, passing, failing, warning, uptime };
   }, [filteredChecks]);
 
-  // Calculate CSI-specific check type distribution
-  const csiCheckTypeData = useMemo(() => {
-    const checksToAnalyze = filteredChecks || [];
-    const typeGroups = checksToAnalyze.reduce((acc, check) => {
+  // Check type distribution
+  const checkTypes = useMemo(() => {
+    const typeCount = (filteredChecks || []).reduce((acc, check) => {
       acc[check.type] = (acc[check.type] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    const baseTypeData = [
-      { type: 'HTTP', icon: <Api />, color: '#3B82F6' },
-      { type: 'TCP', icon: <Storage />, color: '#10B981' },
-      { type: 'SPLUNK', icon: <AutoGraph />, color: '#F59E0B' },
-      { type: 'GRAFANA', icon: <Speed />, color: '#8B5CF6' },
-      { type: 'ITRS', icon: <Security />, color: '#EC4899' },
-      { type: 'APPDYNAMICS', icon: <BugReport />, color: '#14B8A6' },
-      { type: 'UI_TEST', icon: <Code />, color: '#F97316' },
-    ];
+    return [
+      { type: 'HTTP', count: typeCount.HTTP || 0, icon: Api, color: theme.palette.info.main },
+      { type: 'TCP', count: typeCount.TCP || 0, icon: Storage, color: theme.palette.success.main },
+      { type: 'SPLUNK', count: typeCount.SPLUNK || 0, icon: AutoGraph, color: theme.palette.warning.main },
+      { type: 'GRAFANA', count: typeCount.GRAFANA || 0, icon: Speed, color: theme.palette.secondary.main },
+      { type: 'ITRS', count: typeCount.ITRS || 0, icon: Security, color: theme.palette.error.main },
+      { type: 'APPDYNAMICS', count: typeCount.APPDYNAMICS || 0, icon: BugReport, color: theme.palette.primary.main },
+    ].filter(item => item.count > 0);
+  }, [filteredChecks, theme.palette]);
 
-    return baseTypeData
-      .map(item => ({ ...item, count: typeGroups[item.type] || 0 }))
-      .filter(item => item.count > 0);
-  }, [filteredChecks]);
+  // Recent activity
+  const recentActivity = useMemo(() => [
+    { type: 'success', message: 'API health check passed', time: '2m', system: 'Trading' },
+    { type: 'warning', message: 'Slow database response', time: '5m', system: 'Core Banking' },
+    { type: 'error', message: 'Feed connection failed', time: '12m', system: 'Market Data' },
+    { type: 'success', message: 'Gateway restored', time: '15m', system: 'Payments' },
+  ], []);
 
-  // Generate CSI-specific recent activity
-  const csiRecentActivity = useMemo(() => {
-    if (!selectedCSI || !filteredChecks?.length) return recentActivity;
-    
-    // Filter activities based on CSI or generate CSI-specific activities
-    const csiName = filteredChecks[0]?.csiName || 'Unknown CSI';
-    
-    return recentActivity.filter(activity => 
-      activity.csi === csiName || 
-      activity.csi.includes('Trading Platform') || 
-      activity.csi.includes('Infrastructure')
-    ).slice(0, 5);
-  }, [selectedCSI, filteredChecks]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await dispatch(fetchChecks({ page: 1, limit: 20 }));
-    setTimeout(() => setRefreshing(false), 1000);
+  const handleRefresh = () => {
+    dispatch(fetchChecks({ page: 1, limit: 20 }));
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'operational': return 'success';
-      case 'degraded': return 'warning';
-      case 'down': return 'error';
-      default: return 'default';
+  const getStatusIcon = (type: string, size = 20) => {
+    const iconProps = { sx: { fontSize: size } };
+    switch (type) {
+      case 'success': return <CheckCircle {...iconProps} sx={{ ...iconProps.sx, color: theme.palette.success.main }} />;
+      case 'warning': return <Warning {...iconProps} sx={{ ...iconProps.sx, color: theme.palette.warning.main }} />;
+      case 'error': return <Error {...iconProps} sx={{ ...iconProps.sx, color: theme.palette.error.main }} />;
+      default: return <Schedule {...iconProps} sx={{ ...iconProps.sx, color: theme.palette.info.main }} />;
     }
   };
 
-  const MetricCard = ({ title, value, total, icon, color, percentage, trend }: any) => (
+  const MetricCard: React.FC<{
+    title: string;
+    value: number | string;
+    total?: number;
+    color: string;
+    icon: React.ReactNode;
+    trend?: number;
+  }> = ({ title, value, total, color, icon, trend }) => (
     <Card 
+      elevation={0}
       sx={{ 
-        height: '100%',
-        background: `linear-gradient(135deg, ${alpha(color, 0.1)} 0%, ${alpha(color, 0.05)} 100%)`,
-        borderTop: `3px solid ${color}`,
-        transition: 'all 0.3s ease',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: theme.shadows[8],
+        border: `1px solid ${theme.palette.divider}`,
+        transition: 'all 0.2s ease',
+        '&:hover': { 
+          borderColor: color,
+          boxShadow: `0 0 0 1px ${alpha(color, 0.1)}`,
         }
       }}
     >
-      <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Box>
-            <Typography color="text.secondary" variant="overline" sx={{ fontWeight: 600 }}>
-              {title}
-            </Typography>
-            <Typography variant="h3" sx={{ fontWeight: 700, my: 1, color }}>
-              {value}
-              {total && (
-                <Typography component="span" variant="h5" sx={{ color: 'text.secondary', ml: 1 }}>
-                  / {total}
-                </Typography>
-              )}
-            </Typography>
-            {percentage !== undefined && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={percentage}
-                  sx={{ 
-                    flexGrow: 1,
-                    height: 6,
-                    borderRadius: 3,
-                    backgroundColor: alpha(color, 0.2),
-                    '& .MuiLinearProgress-bar': {
-                      backgroundColor: color,
-                      borderRadius: 3,
-                    }
-                  }}
-                />
-                <Typography variant="caption" sx={{ minWidth: 35, color: 'text.secondary' }}>
-                  {percentage.toFixed(0)}%
-                </Typography>
-              </Box>
-            )}
+      <CardContent sx={{ p: 3 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
+          <Typography variant="body2" color="text.secondary" fontWeight={500}>
+            {title}
+          </Typography>
+          <Box sx={{ color, opacity: 0.8 }}>
+            {icon}
           </Box>
-          <Avatar sx={{ bgcolor: alpha(color, 0.1), width: 56, height: 56 }}>
-            {React.cloneElement(icon, { sx: { fontSize: 32, color } })}
-          </Avatar>
-        </Box>
+        </Stack>
+        
+        <Typography variant="h4" fontWeight={600} sx={{ mb: 1 }}>
+          {value}
+          {total && (
+            <Typography component="span" variant="h6" color="text.secondary" fontWeight={400}>
+              /{total}
+            </Typography>
+          )}
+        </Typography>
+
         {trend !== undefined && (
-          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, gap: 0.5 }}>
-            {trend > 0 ? (
-              <ArrowUpward sx={{ fontSize: 16, color: 'success.main' }} />
-            ) : (
-              <ArrowDownward sx={{ fontSize: 16, color: 'error.main' }} />
-            )}
-            <Typography variant="body2" color={trend > 0 ? 'success.main' : 'error.main'}>
-              {Math.abs(trend)}% from last week
+          <Stack direction="row" alignItems="center" spacing={0.5}>
+            <TrendingUp sx={{ fontSize: 16, color: trend >= 0 ? 'success.main' : 'error.main' }} />
+            <Typography variant="caption" color={trend >= 0 ? 'success.main' : 'error.main'}>
+              {Math.abs(trend)}% vs last week
             </Typography>
-          </Box>
+          </Stack>
         )}
       </CardContent>
     </Card>
@@ -316,483 +165,247 @@ const DashboardPage: React.FC = () => {
 
   return (
     <Box>
-      {/* Enhanced Header */}
+      {/* Clean Header */}
       <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
           <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-              <Avatar sx={{ bgcolor: 'primary.main', width: 48, height: 48 }}>
-                <DashboardIcon sx={{ fontSize: 28 }} />
-              </Avatar>
-              <Box>
-                <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                  Dashboard
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {selectedCSI ? 'CSI-specific operational health monitoring' : 'Centralized operational health monitoring across all Citi systems'}
-                </Typography>
-              </Box>
-            </Box>
+            <Typography variant="h4" fontWeight={600} gutterBottom>
+              Dashboard
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {selectedCSI ? 'Filtered view for selected system' : 'System-wide health monitoring overview'}
+            </Typography>
           </Box>
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="Refresh Data">
-              <IconButton onClick={handleRefresh} disabled={refreshing}>
-                <Refresh className={refreshing ? 'spinning' : ''} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Notifications">
-              <IconButton>
-                <Badge badgeContent={3} color="error">
-                  <Notifications />
-                </Badge>
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Settings">
-              <IconButton>
-                <Settings />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        </Box>
-      </Box>
-
-      {/* Enhanced Filter Bar with CSI and Tag filtering */}
-      <FilterBar 
-        onFiltersChange={(filters) => {
-          // Filter changes are handled automatically by Redux state
-          // This callback can be used for additional side effects if needed
-          console.log('Filters changed:', filters);
-        }}
-      />
-
-      <Box sx={{ mb: 4 }}>
-        {/* Live Status Bar */}
-        <Paper 
-          sx={{ 
-            p: 2, 
-            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, transparent 100%)`,
-            borderLeft: `4px solid ${theme.palette.primary.main}`
-          }}
-        >
-          <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box 
-                  sx={{ 
-                    width: 12, 
-                    height: 12, 
-                    borderRadius: '50%', 
-                    bgcolor: 'success.main',
-                    animation: 'pulse 2s infinite'
-                  }} 
-                />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  System Status: Operational
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <AccessTime sx={{ fontSize: 18, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  Last updated: {currentTime.toLocaleTimeString()}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <CloudDone sx={{ fontSize: 18, color: 'success.main' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {csiMetrics.totalExecutions.toLocaleString()} executions today
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Speed sx={{ fontSize: 18, color: 'info.main' }} />
-                <Typography variant="body2" color="text.secondary">
-                  Avg response: {csiMetrics.responseTime}ms
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </Paper>
+          <IconButton onClick={handleRefresh} disabled={loading === 'loading'}>
+            <Refresh />
+          </IconButton>
+        </Stack>
+        
+        {/* Filter Bar */}
+        <FilterBar />
       </Box>
 
       {/* Error Alert */}
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => {}}>
-          <AlertTitle>Error Loading Dashboard Data</AlertTitle>
-          {error}
+        <Alert severity="error" sx={{ mb: 3 }}>
+          Error loading dashboard data: {error}
         </Alert>
       )}
 
+      {/* Main Content Grid */}
       <Grid container spacing={3}>
-        {/* Metric Cards */}
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="Passing Checks"
-            value={csiMetrics.passingChecks}
-            total={csiMetrics.totalChecks}
-            icon={<CheckCircle />}
-            color={theme.palette.success.main}
-            percentage={csiMetrics.totalChecks > 0 ? (csiMetrics.passingChecks / csiMetrics.totalChecks) * 100 : 0}
-            trend={2.5}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="Failing Checks"
-            value={csiMetrics.failingChecks}
-            total={csiMetrics.totalChecks}
-            icon={<Error />}
-            color={theme.palette.error.main}
-            percentage={csiMetrics.totalChecks > 0 ? (csiMetrics.failingChecks / csiMetrics.totalChecks) * 100 : 0}
-            trend={-1.2}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="Warning Checks"
-            value={csiMetrics.warningChecks}
-            total={csiMetrics.totalChecks}
-            icon={<Warning />}
-            color={theme.palette.warning.main}
-            percentage={csiMetrics.totalChecks > 0 ? (csiMetrics.warningChecks / csiMetrics.totalChecks) * 100 : 0}
-            trend={0.8}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="System Uptime"
-            value={`${csiMetrics.uptime.toFixed(1)}%`}
-            icon={<TrendingUp />}
-            color={theme.palette.info.main}
-            percentage={csiMetrics.uptime}
-            trend={csiMetrics.uptimeChange}
-          />
-        </Grid>
-
-        {/* Critical Systems Status */}
+        {/* Key Metrics */}
         <Grid item xs={12} lg={8}>
-          <Paper sx={{ p: 3, height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Security sx={{ color: 'primary.main' }} />
-                Critical Systems Status
-              </Typography>
-              <Button variant="text" size="small" endIcon={<ArrowUpward />}>
-                View All
-              </Button>
-            </Box>
-            
-            <Grid container spacing={2}>
-              {criticalSystems.map((system, index) => (
-                <Grid item xs={12} sm={6} key={index}>
-                  <Card 
-                    variant="outlined" 
-                    sx={{ 
-                      p: 2,
-                      borderLeft: `3px solid ${
-                        system.status === 'operational' ? theme.palette.success.main :
-                        system.status === 'degraded' ? theme.palette.warning.main :
-                        theme.palette.error.main
-                      }`
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                          {system.name}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                          <Chip 
-                            label={system.status.toUpperCase()} 
-                            size="small"
-                            color={getStatusColor(system.status) as any}
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            {system.uptime}% uptime
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <IconButton size="small">
-                        <MoreVert />
-                      </IconButton>
-                    </Box>
-                  </Card>
-                </Grid>
-              ))}
+          <Grid container spacing={3}>
+            <Grid item xs={6} md={3}>
+              <MetricCard
+                title="Passing"
+                value={metrics.passing}
+                total={metrics.total}
+                color={theme.palette.success.main}
+                icon={<CheckCircle />}
+                trend={2.1}
+              />
+            </Grid>
+            <Grid item xs={6} md={3}>
+              <MetricCard
+                title="Failing"
+                value={metrics.failing}
+                total={metrics.total}
+                color={theme.palette.error.main}
+                icon={<Error />}
+                trend={-1.5}
+              />
+            </Grid>
+            <Grid item xs={6} md={3}>
+              <MetricCard
+                title="Warning"
+                value={metrics.warning}
+                total={metrics.total}
+                color={theme.palette.warning.main}
+                icon={<Warning />}
+                trend={0.3}
+              />
+            </Grid>
+            <Grid item xs={6} md={3}>
+              <MetricCard
+                title="Uptime"
+                value={`${metrics.uptime.toFixed(1)}%`}
+                color={theme.palette.info.main}
+                icon={<TrendingUp />}
+                trend={0.2}
+              />
             </Grid>
 
-            {/* Check Type Distribution */}
-            <Box sx={{ mt: 4 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
-                {selectedCSI ? 'CSI Check Distribution by Type' : 'Check Distribution by Type'}
-              </Typography>
-              {csiCheckTypeData.length > 0 ? (
-                <Grid container spacing={2}>
-                  {csiCheckTypeData.map((item, index) => (
-                    <Grid item xs={6} sm={4} md={2} key={index}>
-                      <Box sx={{ textAlign: 'center' }}>
-                        <Avatar 
-                          sx={{ 
-                            bgcolor: alpha(item.color, 0.1),
-                            color: item.color,
-                            width: 48,
-                            height: 48,
-                            mx: 'auto',
-                            mb: 1
-                          }}
-                        >
-                          {item.icon}
-                        </Avatar>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                          {item.count}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {item.type}
-                        </Typography>
-                      </Box>
+            {/* System Overview */}
+            <Grid item xs={12}>
+              <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}` }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                    <Typography variant="h6" fontWeight={600}>
+                      System Overview
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {metrics.total} active checks
+                    </Typography>
+                  </Stack>
+
+                  {/* Health Status Bar */}
+                  <Box mb={3}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                      <Typography variant="body2" color="text.secondary">Overall Health</Typography>
+                      <Typography variant="body2" fontWeight={500}>{metrics.uptime.toFixed(1)}%</Typography>
+                    </Stack>
+                    <LinearProgress
+                      variant="determinate"
+                      value={metrics.uptime}
+                      sx={{
+                        height: 6,
+                        borderRadius: 3,
+                        backgroundColor: alpha(theme.palette.grey[400], 0.2),
+                        '& .MuiLinearProgress-bar': {
+                          borderRadius: 3,
+                          backgroundColor: metrics.uptime > 95 ? theme.palette.success.main : 
+                                         metrics.uptime > 85 ? theme.palette.warning.main : 
+                                         theme.palette.error.main,
+                        }
+                      }}
+                    />
+                  </Box>
+
+                  {/* Check Types Distribution */}
+                  {checkTypes.length > 0 && (
+                    <Grid container spacing={3}>
+                      {checkTypes.map((item, index) => (
+                        <Grid item xs={6} sm={4} md={2} key={index}>
+                          <Stack alignItems="center" spacing={1}>
+                            <Box
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 2,
+                                backgroundColor: alpha(item.color, 0.1),
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: item.color,
+                              }}
+                            >
+                              <item.icon sx={{ fontSize: 20 }} />
+                            </Box>
+                            <Typography variant="h6" fontWeight={600}>
+                              {item.count}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" textAlign="center">
+                              {item.type}
+                            </Typography>
+                          </Stack>
+                        </Grid>
+                      ))}
                     </Grid>
-                  ))}
-                </Grid>
-              ) : (
-                <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    {selectedCSI ? 'No checks found for selected CSI' : 'No check data available'}
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </Paper>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
         </Grid>
 
-        {/* Recent Activity Feed */}
+        {/* Quick Actions Sidebar */}
         <Grid item xs={12} lg={4}>
-          <Paper sx={{ p: 3, height: '100%', maxHeight: 520, overflow: 'auto' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Schedule sx={{ color: 'primary.main' }} />
-                Recent Activity
-              </Typography>
-              <Chip label="Live" size="small" color="error" sx={{ animation: 'pulse 2s infinite' }} />
-            </Box>
-            
-            <Stack spacing={2}>
-              {csiRecentActivity.map((activity, index) => (
-                <Card 
-                  key={index}
-                  variant="outlined"
-                  sx={{ 
-                    p: 2,
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      bgcolor: alpha(theme.palette.primary.main, 0.02),
-                      borderColor: theme.palette.primary.main,
-                    }
-                  }}
-                >
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <Avatar 
-                      sx={{ 
-                        bgcolor: alpha(
-                          activity.type === 'success' ? theme.palette.success.main :
-                          activity.type === 'warning' ? theme.palette.warning.main :
-                          activity.type === 'error' ? theme.palette.error.main :
-                          theme.palette.info.main, 
-                          0.1
-                        ),
-                        width: 36,
-                        height: 36
+          <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, height: 'fit-content' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="h6" fontWeight={600} mb={3}>Quick Actions</Typography>
+              
+              <Stack spacing={2}>
+                {[
+                  { label: 'Create Check', path: '/checks/create', icon: <CheckCircle /> },
+                  { label: 'Generate Report', path: '/checks/reports', icon: <AutoGraph /> },
+                ].map((action, index) => (
+                  <Paper
+                    key={index}
+                    sx={{
+                      p: 2,
+                      cursor: 'pointer',
+                      border: `1px solid ${theme.palette.divider}`,
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        borderColor: theme.palette.primary.main,
+                        backgroundColor: alpha(theme.palette.primary.main, 0.02),
+                      }
+                    }}
+                    onClick={() => navigate(action.path)}
+                  >
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Stack direction="row" alignItems="center" spacing={2}>
+                        <Box sx={{ color: theme.palette.primary.main, opacity: 0.8 }}>
+                          {action.icon}
+                        </Box>
+                        <Typography variant="body2" fontWeight={500}>
+                          {action.label}
+                        </Typography>
+                      </Stack>
+                      <ArrowForward sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    </Stack>
+                  </Paper>
+                ))}
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Recent Activity - Full Width */}
+        <Grid item xs={12}>
+          <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}` }}>
+            <CardContent sx={{ p: 3 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight={600}>Recent Activity</Typography>
+                <Chip label="Live" size="small" color="primary" variant="outlined" />
+              </Stack>
+              
+              <Grid container spacing={3}>
+                {recentActivity.map((activity, index) => (
+                  <Grid item xs={12} sm={6} md={3} key={index}>
+                    <Paper
+                      sx={{
+                        p: 2,
+                        border: `1px solid ${theme.palette.divider}`,
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          borderColor: alpha(theme.palette.primary.main, 0.5),
+                          backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                        }
                       }}
                     >
-                      {activity.type === 'success' ? <CheckCircle sx={{ fontSize: 20, color: 'success.main' }} /> :
-                       activity.type === 'warning' ? <Warning sx={{ fontSize: 20, color: 'warning.main' }} /> :
-                       activity.type === 'error' ? <Error sx={{ fontSize: 20, color: 'error.main' }} /> :
-                       <Schedule sx={{ fontSize: 20, color: 'info.main' }} />}
-                    </Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {activity.message}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {activity.details}
-                      </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                        <Chip label={activity.csi} size="small" variant="outlined" sx={{ height: 20 }} />
-                        <Typography variant="caption" color="text.secondary">
-                          • {activity.time}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                </Card>
-              ))}
-            </Stack>
-          </Paper>
-        </Grid>
-
-        {/* Quick Actions */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <PlayArrow sx={{ color: 'primary.main' }} />
-              Quick Actions
-            </Typography>
-            
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={3}>
-                <Card 
-                  sx={{ 
-                    p: 2,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s',
-                    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, transparent 100%)`,
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: theme.shadows[4],
-                    }
-                  }}
-                  onClick={() => navigate('/checks/create')}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: 'primary.main' }}>
-                      <Add />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        Create Check
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Set up new monitoring
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Card>
+                      <Stack spacing={2}>
+                        <Stack direction="row" alignItems="center" spacing={2}>
+                          <Box>
+                            {getStatusIcon(activity.type, 20)}
+                          </Box>
+                          <Typography variant="body2" fontWeight={500} sx={{ flex: 1 }}>
+                            {activity.message}
+                          </Typography>
+                        </Stack>
+                        
+                        <Stack direction="row" alignItems="center" justifyContent="space-between">
+                          <Chip 
+                            label={activity.system} 
+                            size="small" 
+                            variant="outlined"
+                            sx={{ fontSize: '0.7rem' }}
+                          />
+                          <Typography variant="caption" color="text.secondary">
+                            {activity.time} ago
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                    </Paper>
+                  </Grid>
+                ))}
               </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <Card 
-                  sx={{ 
-                    p: 2,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s',
-                    background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.05)} 0%, transparent 100%)`,
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: theme.shadows[4],
-                    }
-                  }}
-                  onClick={() => navigate('/checks/all')}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: 'info.main' }}>
-                      <DashboardIcon />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        View Checks
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Manage all checks
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Card>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <Card 
-                  sx={{ 
-                    p: 2,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s',
-                    background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)} 0%, transparent 100%)`,
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: theme.shadows[4],
-                    }
-                  }}
-                  onClick={() => navigate('/checks/studio')}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: 'success.main' }}>
-                      <Science />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        Checks Studio
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Test UI scenarios
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Card>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <Card 
-                  sx={{ 
-                    p: 2,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s',
-                    background: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.05)} 0%, transparent 100%)`,
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: theme.shadows[4],
-                    }
-                  }}
-                  onClick={() => navigate('/checks/reports')}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: 'warning.main' }}>
-                      <AutoGraph />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        Reports
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Generate insights
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Card>
-              </Grid>
-            </Grid>
-          </Paper>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
-
-      {/* CSS for animations */}
-      <style jsx global>{`
-        @keyframes pulse {
-          0% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-        
-        .spinning {
-          animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
     </Box>
   );
 };

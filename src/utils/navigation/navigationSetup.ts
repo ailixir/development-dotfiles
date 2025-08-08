@@ -16,18 +16,11 @@ export const registerChecksNavigation = () => {
         description: 'Overview & analytics'
       },
       {
-        id: 'all-checks',
-        label: 'All Checks',
+        id: 'checks',
+        label: 'Checks',
         path: '/checks/all',
         icon: 'monitor_heart',
-        description: 'View all health checks'
-      },
-      {
-        id: 'create-check',
-        label: 'Create Check',
-        path: '/checks/create',
-        icon: 'add_circle',
-        description: 'Create new health check'
+        description: 'View and manage checks'
       },
       {
         id: 'checks-studio',
@@ -50,8 +43,7 @@ export const registerChecksNavigation = () => {
 // Helper function to get current page ID from path
 export const getCurrentPageId = (pathname: string): string => {
   if (pathname === '/checks' || pathname === '/') return 'dashboard';
-  if (pathname.startsWith('/checks/all')) return 'all-checks';
-  if (pathname.startsWith('/checks/create')) return 'create-check';
+  if (pathname.startsWith('/checks/all') || pathname.startsWith('/checks/create')) return 'checks';
   if (pathname.startsWith('/checks/studio')) return 'checks-studio';
   if (pathname.startsWith('/checks/reports')) return 'reports';
   return 'dashboard';

@@ -8,7 +8,9 @@ import { ErrorBoundary } from '@components/shared/ErrorBoundary';
 // Lazy load pages for better performance and code splitting
 const DashboardPage = React.lazy(() => import('@pages/DashboardPage'));
 const AllChecksPage = React.lazy(() => import('@pages/AllChecksPage'));
-const CreateCheckPage = React.lazy(() => import('@pages/CreateCheckPage'));
+const CreateCheckPage = React.lazy(
+  () => import('./pages/CreateCheckPage/CreateCheckPage')
+);
 const CheckDetailsPage = React.lazy(() => import('@pages/CheckDetailsPage'));
 const ChecksStudioPage = React.lazy(() => import('@pages/ChecksStudioPage'));
 const ReportsPage = React.lazy(() => import('@pages/ReportsPage'));

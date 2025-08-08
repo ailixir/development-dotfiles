@@ -37,6 +37,7 @@ import {
   useTheme,
   alpha,
   CircularProgress,
+  GlobalStyles,
 } from '@mui/material';
 import {
   PlayArrow,
@@ -82,6 +83,8 @@ const mockTestScenarios = [
   {
     id: '1',
     name: 'Trading Platform Login Flow',
+    description: 'Validates complete user authentication flow and dashboard loading',
+    csiId: 'CSI-12345',
     steps: [
       'Navigate to https://trading.citi.com',
       'Click on Login button',
@@ -97,6 +100,8 @@ const mockTestScenarios = [
   {
     id: '2',
     name: 'Payment Gateway Test',
+    description: 'End-to-end payment processing validation',
+    csiId: 'CSI-67890',
     steps: [
       'Open payment form',
       'Fill payment details',
@@ -112,6 +117,8 @@ const mockTestScenarios = [
   {
     id: '3',
     name: 'Market Data Visualization',
+    description: 'Real-time market data display and interaction validation',
+    csiId: 'CSI-11111',
     steps: [
       'Load market dashboard',
       'Select equity symbols',
@@ -146,16 +153,35 @@ const ChecksStudioPage: React.FC = () => {
     { timestamp: '10:30:14', message: 'Navigating to target URL...', type: 'info' },
     { timestamp: '10:30:15', message: 'Page loaded in 1.2s', type: 'success' },
   ]);
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [videoCurrentTime, setVideoCurrentTime] = useState(0);
+  const [stepResults, setStepResults] = useState<{ [key: number]: 'passed' | 'failed' | 'pending' }>({});
+  const [newScenarioForm, setNewScenarioForm] = useState({
+    name: '',
+    environment: 'Development',
+    csiId: '',
+    description: ''
+  });
   
   const selectedScenarioData = mockTestScenarios.find(s => s.id === selectedScenario);
+  
+  // Calculate metrics
+  const totalScenarios = mockTestScenarios.length;
+  const passedScenarios = mockTestScenarios.filter(s => s.status === 'completed').length;
+  const failedScenarios = mockTestScenarios.filter(s => s.status === 'failed').length;
+  const successRate = Math.round((passedScenarios / totalScenarios) * 100);
 
   const handleRunTest = () => {
     setIsRunning(true);
     setCurrentStep(0);
+    setShowVideoPlayer(true);
+    setStepResults({});
     // Simulate test execution
     const interval = setInterval(() => {
       setCurrentStep(prev => {
         if (prev < testSteps.length - 1) {
+          // Mark current step as passed
+          setStepResults(results => ({ ...results, [prev]: 'passed' }));
           setExecutionLogs(logs => [...logs, {
             timestamp: new Date().toLocaleTimeString(),
             message: `Executing: ${testSteps[prev + 1]}`,
@@ -163,6 +189,8 @@ const ChecksStudioPage: React.FC = () => {
           }]);
           return prev + 1;
         } else {
+          // Mark final step as passed
+          setStepResults(results => ({ ...results, [prev]: 'passed' }));
           setIsRunning(false);
           setExecutionLogs(logs => [...logs, {
             timestamp: new Date().toLocaleTimeString(),
@@ -174,6 +202,50 @@ const ChecksStudioPage: React.FC = () => {
         }
       });
     }, 1500);
+  };
+
+  const handleScenarioSelect = (scenarioId: string) => {
+    setSelectedScenario(scenarioId);
+    const scenario = mockTestScenarios.find(s => s.id === scenarioId);
+    if (scenario) {
+      setTestSteps(scenario.steps);
+      setShowVideoPlayer(scenario.status === 'completed');
+      setCurrentStep(0);
+      setStepResults({});
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle sx={{ fontSize: 14 }} />;
+      case 'running':
+        return <CircularProgress size={14} />;
+      case 'failed':
+        return <Error sx={{ fontSize: 14 }} />;
+      default:
+        return <Schedule sx={{ fontSize: 14 }} />;
+    }
+  };
+
+  const handleStepClick = (stepIndex: number) => {
+    if (showVideoPlayer && !isRunning) {
+      // Simulate jumping to step timestamp in video
+      setVideoCurrentTime(stepIndex * 30); // 30 seconds per step simulation
+      setCurrentStep(stepIndex);
+    }
+  };
+
+  const handleCreateNewScenario = () => {
+    // In a real implementation, this would call an API
+    console.log('Creating new scenario:', newScenarioForm);
+    setShowNewScenarioDialog(false);
+    setNewScenarioForm({
+      name: '',
+      environment: 'Development',
+      csiId: '',
+      description: ''
+    });
   };
 
   const addTestStep = () => {
@@ -257,7 +329,7 @@ const ChecksStudioPage: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <BugReport sx={{ fontSize: 18, color: 'text.secondary' }} />
                 <Typography variant="body2" color="text.secondary">
-                  {mockTestScenarios.length} scenarios available
+                  {totalScenarios} scenarios • {passedScenarios} passed • {failedScenarios} failed
                 </Typography>
               </Box>
             </Grid>
@@ -273,7 +345,7 @@ const ChecksStudioPage: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CheckCircle sx={{ fontSize: 18, color: 'success.main' }} />
                 <Typography variant="body2" color="text.secondary">
-                  94% success rate
+                  {successRate}% success rate
                 </Typography>
               </Box>
             </Grid>
@@ -311,12 +383,10 @@ const ChecksStudioPage: React.FC = () => {
                         cursor: 'pointer',
                         border: selectedScenario === scenario.id ? 2 : 1,
                         borderColor: selectedScenario === scenario.id ? 'primary.main' : 'divider',
-                        '&:hover': { boxShadow: 2 }
+                        '&:hover': { boxShadow: 2 },
+                        bgcolor: selectedScenario === scenario.id ? alpha(theme.palette.primary.main, 0.02) : 'background.paper'
                       }}
-                      onClick={() => {
-                        setSelectedScenario(scenario.id);
-                        setTestSteps(scenario.steps);
-                      }}
+                      onClick={() => handleScenarioSelect(scenario.id)}
                     >
                       <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
@@ -327,11 +397,18 @@ const ChecksStudioPage: React.FC = () => {
                             label={scenario.status} 
                             size="small"
                             color={getStatusColor(scenario.status) as any}
-                            icon={scenario.status === 'running' ? <CircularProgress size={12} /> : undefined}
+                            icon={getStatusIcon(scenario.status)}
+                            sx={{ fontSize: 11 }}
                           />
                         </Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                          {scenario.description}
+                        </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {scenario.steps.length} steps • {scenario.environment}
+                          {scenario.steps.length} steps • {scenario.environment} • {scenario.csiId}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                          Last run: {new Date(scenario.lastRun).toLocaleString()}
                         </Typography>
                       </CardContent>
                     </Card>
@@ -351,46 +428,84 @@ const ChecksStudioPage: React.FC = () => {
                 </Box>
 
                 <List dense>
-                  {testSteps.map((step, index) => (
-                    <ListItem
-                      key={index}
-                      sx={{
-                        border: '1px solid',
-                        borderColor: index === currentStep && isRunning ? 'primary.main' : 'divider',
-                        borderRadius: 1,
-                        mb: 1,
-                        bgcolor: index === currentStep && isRunning ? alpha(theme.palette.primary.main, 0.05) : 'transparent',
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 1 }}>
-                        <Avatar sx={{ 
-                          width: 24, 
-                          height: 24, 
-                          fontSize: 12,
-                          bgcolor: index < currentStep && isRunning ? 'success.main' : 
-                                   index === currentStep && isRunning ? 'primary.main' : 'grey.300'
-                        }}>
-                          {index < currentStep && isRunning ? <CheckCircle sx={{ fontSize: 16 }} /> : index + 1}
-                        </Avatar>
-                      </Box>
-                      <ListItemText 
-                        primary={step}
-                        primaryTypographyProps={{
-                          variant: 'body2',
-                          sx: { 
-                            fontWeight: index === currentStep && isRunning ? 600 : 400,
-                            color: index < currentStep && isRunning ? 'success.main' : 'text.primary'
-                          }
+                  {testSteps.map((step, index) => {
+                    const stepResult = stepResults[index];
+                    const isCurrentStep = index === currentStep;
+                    const isPastStep = index < currentStep;
+                    const isClickable = showVideoPlayer && !isRunning;
+                    
+                    return (
+                      <ListItem
+                        key={index}
+                        sx={{
+                          border: '1px solid',
+                          borderColor: isCurrentStep && isRunning ? 'primary.main' : 
+                                       stepResult === 'passed' ? 'success.main' :
+                                       stepResult === 'failed' ? 'error.main' : 'divider',
+                          borderRadius: 1,
+                          mb: 1,
+                          bgcolor: isCurrentStep && isRunning ? alpha(theme.palette.primary.main, 0.08) : 
+                                   stepResult === 'passed' ? alpha(theme.palette.success.main, 0.05) :
+                                   stepResult === 'failed' ? alpha(theme.palette.error.main, 0.05) : 'transparent',
+                          transition: 'all 0.3s ease',
+                          cursor: isClickable ? 'pointer' : 'default',
+                          '&:hover': isClickable ? {
+                            bgcolor: alpha(theme.palette.primary.main, 0.05),
+                            boxShadow: 1
+                          } : {}
                         }}
-                      />
-                      <ListItemSecondaryAction>
-                        <IconButton size="small" onClick={() => removeTestStep(index)}>
-                          <Delete sx={{ fontSize: 16 }} />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  ))}
+                        onClick={() => isClickable && handleStepClick(index)}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 1 }}>
+                          <Avatar sx={{ 
+                            width: 28, 
+                            height: 28, 
+                            fontSize: 12,
+                            bgcolor: stepResult === 'passed' ? 'success.main' :
+                                     stepResult === 'failed' ? 'error.main' :
+                                     isCurrentStep && isRunning ? 'primary.main' : 'grey.300',
+                            color: 'white'
+                          }}>
+                            {stepResult === 'passed' ? <CheckCircle sx={{ fontSize: 16 }} /> : 
+                             stepResult === 'failed' ? <Error sx={{ fontSize: 16 }} /> :
+                             isCurrentStep && isRunning ? <CircularProgress size={16} sx={{ color: 'white' }} /> :
+                             index + 1}
+                          </Avatar>
+                        </Box>
+                        <ListItemText 
+                          primary={step}
+                          secondary={isClickable ? 'Click to jump to this step in video' : undefined}
+                          primaryTypographyProps={{
+                            variant: 'body2',
+                            sx: { 
+                              fontWeight: isCurrentStep && isRunning ? 600 : 400,
+                              color: stepResult === 'passed' ? 'success.main' :
+                                     stepResult === 'failed' ? 'error.main' :
+                                     isCurrentStep ? 'primary.main' : 'text.primary'
+                            }
+                          }}
+                          secondaryTypographyProps={{
+                            variant: 'caption',
+                            sx: { color: 'text.secondary' }
+                          }}
+                        />
+                        <ListItemSecondaryAction>
+                          <Tooltip title="Remove step">
+                            <IconButton 
+                              size="small" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeTestStep(index);
+                              }}
+                              disabled={isRunning}
+                            >
+                              <Delete sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          </Tooltip>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    );
+                  })}
                 </List>
 
                 {/* Add Step */}
@@ -578,7 +693,7 @@ const ChecksStudioPage: React.FC = () => {
               }
             />
             <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
-              {/* Video Player */}
+              {/* Video Player - Core PRD Feature */}
               <Paper 
                 variant="outlined"
                 sx={{ 
@@ -593,12 +708,17 @@ const ChecksStudioPage: React.FC = () => {
                   mb: 2
                 }}
               >
-                {isRunning ? (
-                  <Box sx={{ textAlign: 'center' }}>
-                    <CameraAlt sx={{ fontSize: 48, color: 'primary.light', mb: 1 }} />
-                    <Typography variant="body2">
-                      Recording in Progress...
+                {isRunning || isRecording ? (
+                  <Box sx={{ textAlign: 'center', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <CameraAlt sx={{ fontSize: 48, color: 'primary.light', mb: 2 }} />
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      Recording Test Execution
                     </Typography>
+                    <Typography variant="body2" color="grey.300">
+                      Step {currentStep + 1} of {testSteps.length}: {testSteps[currentStep]}
+                    </Typography>
+                    
+                    {/* Recording indicator */}
                     <Box sx={{ 
                       position: 'absolute',
                       top: 16,
@@ -606,17 +726,98 @@ const ChecksStudioPage: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       gap: 1,
-                      color: 'error.light'
+                      color: 'error.light',
+                      bgcolor: alpha('#000', 0.7),
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 2
                     }}>
-                      <FiberManualRecord sx={{ fontSize: 16, animation: 'pulse 2s infinite' }} />
-                      <Typography variant="caption">REC</Typography>
+                      <FiberManualRecord sx={{ fontSize: 12, animation: 'pulse 2s infinite' }} />
+                      <Typography variant="caption" sx={{ fontWeight: 'bold' }}>RECORDING</Typography>
+                    </Box>
+                    
+                    {/* Progress bar */}
+                    <Box sx={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={((currentStep + 1) / testSteps.length) * 100}
+                        sx={{ 
+                          height: 4,
+                          borderRadius: 2,
+                          bgcolor: alpha('#fff', 0.2),
+                          '& .MuiLinearProgress-bar': {
+                            bgcolor: 'primary.light'
+                          }
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                ) : showVideoPlayer ? (
+                  <Box sx={{ textAlign: 'center', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <Box sx={{ 
+                      width: '100%',
+                      height: '100%',
+                      background: `linear-gradient(45deg, 
+                        ${alpha(theme.palette.primary.main, 0.1)} 25%, 
+                        transparent 25%, 
+                        transparent 50%, 
+                        ${alpha(theme.palette.primary.main, 0.1)} 50%, 
+                        ${alpha(theme.palette.primary.main, 0.1)} 75%, 
+                        transparent 75%, 
+                        transparent)`,
+                      backgroundSize: '20px 20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexDirection: 'column'
+                    }}>
+                      <PlayArrow sx={{ fontSize: 64, color: 'primary.light', mb: 2 }} />
+                      <Typography variant="h6" sx={{ mb: 1 }}>
+                        Test Video Available
+                      </Typography>
+                      <Typography variant="body2" color="grey.300">
+                        {selectedScenarioData?.name} - {selectedScenarioData?.duration}
+                      </Typography>
+                      <Typography variant="caption" color="grey.400" sx={{ mt: 1 }}>
+                        Click on steps to jump to specific moments
+                      </Typography>
+                    </Box>
+                    
+                    {/* Video timeline indicator */}
+                    <Box sx={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="caption">
+                          {Math.floor(videoCurrentTime / 60)}:{(videoCurrentTime % 60).toFixed(0).padStart(2, '0')}
+                        </Typography>
+                        <Typography variant="caption">
+                          {selectedScenarioData?.duration || '0:00'}
+                        </Typography>
+                      </Box>
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={(videoCurrentTime / 180) * 100} // Assuming 3-minute max video
+                        sx={{ 
+                          height: 6,
+                          borderRadius: 3,
+                          bgcolor: alpha('#fff', 0.2),
+                          '& .MuiLinearProgress-bar': {
+                            bgcolor: 'info.light'
+                          }
+                        }}
+                      />
                     </Box>
                   </Box>
                 ) : (
                   <Box sx={{ textAlign: 'center' }}>
-                    <VideoLibrary sx={{ fontSize: 48, color: 'grey.600', mb: 1 }} />
-                    <Typography variant="body2" color="grey.400">
-                      Run a test to see video playback
+                    <VideoLibrary sx={{ fontSize: 48, color: 'grey.600', mb: 2 }} />
+                    <Typography variant="h6" sx={{ mb: 1, color: 'grey.400' }}>
+                      Visual Proof Arena
+                    </Typography>
+                    <Typography variant="body2" color="grey.500">
+                      Run a test to generate synchronized video proof of execution
+                    </Typography>
+                    <Typography variant="caption" color="grey.600" sx={{ mt: 2, display: 'block' }}>
+                      "From Checklist to Reality" - Watch your plain English commands come to life
                     </Typography>
                   </Box>
                 )}
@@ -697,47 +898,106 @@ const ChecksStudioPage: React.FC = () => {
         </Grid>
       </Grid>
 
-      {/* New Scenario Dialog */}
-      <Dialog open={showNewScenarioDialog} onClose={() => setShowNewScenarioDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Test Scenario</DialogTitle>
+      {/* Enhanced New Scenario Dialog */}
+      <Dialog open={showNewScenarioDialog} onClose={() => setShowNewScenarioDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Avatar sx={{ bgcolor: 'primary.main' }}>
+            <Science />
+          </Avatar>
+          <Box>
+            <Typography variant="h6">Create New UI Test Scenario</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Build no-code browser automation with plain English commands
+            </Typography>
+          </Box>
+        </DialogTitle>
         <DialogContent>
-          <Box sx={{ pt: 1 }}>
-            <TextField
-              fullWidth
-              label="Scenario Name"
-              placeholder="e.g., Login Flow Test"
-              sx={{ mb: 2 }}
-            />
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Environment</InputLabel>
-              <Select label="Environment" defaultValue="Development">
-                <MenuItem value="Development">Development</MenuItem>
-                <MenuItem value="Staging">Staging</MenuItem>
-                <MenuItem value="Production">Production</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              label="Description"
-              placeholder="Describe what this scenario tests..."
-            />
+          <Box sx={{ pt: 2 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Scenario Name"
+                  value={newScenarioForm.name}
+                  onChange={(e) => setNewScenarioForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Trading Platform Login Validation"
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Environment</InputLabel>
+                  <Select 
+                    value={newScenarioForm.environment}
+                    onChange={(e) => setNewScenarioForm(prev => ({ ...prev, environment: e.target.value }))}
+                    label="Environment"
+                  >
+                    <MenuItem value="Development">Development</MenuItem>
+                    <MenuItem value="Staging">Staging</MenuItem>
+                    <MenuItem value="UAT">UAT</MenuItem>
+                    <MenuItem value="Production">Production</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="CSI ID"
+                  value={newScenarioForm.csiId}
+                  onChange={(e) => setNewScenarioForm(prev => ({ ...prev, csiId: e.target.value }))}
+                  placeholder="CSI-12345"
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  label="Description"
+                  value={newScenarioForm.description}
+                  onChange={(e) => setNewScenarioForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe what this scenario validates and its business purpose"
+                />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <Alert severity="info">
+                  <AlertTitle>Next Steps</AlertTitle>
+                  After creating the scenario, you'll be able to add test steps using plain English commands like:
+                  <br />• "Go to https://example.com"
+                  <br />• "Click the Login button"
+                  <br />• "Wait for Welcome message to appear"
+                </Alert>
+              </Grid>
+            </Grid>
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowNewScenarioDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => setShowNewScenarioDialog(false)}>Create</Button>
+          <Button 
+            variant="contained" 
+            onClick={handleCreateNewScenario}
+            disabled={!newScenarioForm.name || !newScenarioForm.csiId}
+            startIcon={<Save />}
+          >
+            Create Scenario
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* CSS for animations */}
-      <style jsx global>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-      `}</style>
+      {/* Global CSS for animations - Using MUI's GlobalStyles */}
+      <GlobalStyles
+        styles={{
+          '@keyframes pulse': {
+            '0%, 100%': { opacity: 1 },
+            '50%': { opacity: 0.5 },
+          },
+        }}
+      />
     </Box>
   );
 };
