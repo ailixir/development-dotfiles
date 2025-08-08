@@ -34,6 +34,7 @@ import {
   DialogActions,
   Alert,
   Snackbar,
+  CircularProgress,
 } from '@mui/material';
 import {
   Search,
@@ -58,16 +59,17 @@ import {
   Refresh,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@store/index';
-import { fetchChecks, executeCheck, deleteCheck } from '@store/slices/checksSlice';
+import { fetchChecks, executeCheck, deleteCheck, pauseCheck, resumeCheck } from '@store/slices/checksSlice';
 import { useNavigate } from 'react-router-dom';
 import { FilterBar } from '@components/common/FilterBar';
+import ScheduleDialog from '@components/scheduling/ScheduleDialog';
 
 const AllChecksPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   
-  const { data: checks, loading, error } = useAppSelector(state => state.checks);
+  const { data: checks, loading, error, executingChecks, schedulingChecks } = useAppSelector(state => state.checks);
   const { selectedCSI, tags: { selected: selectedTags } } = useAppSelector(state => state.csi);
   
   // Local state
@@ -79,6 +81,7 @@ const AllChecksPage: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedCheck, setSelectedCheck] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -166,6 +169,26 @@ const AllChecksPage: React.FC = () => {
     }
     
     setDeleteDialogOpen(false);
+    handleMenuClose();
+  };
+
+  const handlePauseCheck = async (checkId: string) => {
+    try {
+      await dispatch(pauseCheck(checkId)).unwrap();
+      setSnackbar({ open: true, message: 'Check paused successfully', severity: 'success' });
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Failed to pause check', severity: 'error' });
+    }
+    handleMenuClose();
+  };
+
+  const handleResumeCheck = async (checkId: string) => {
+    try {
+      await dispatch(resumeCheck(checkId)).unwrap();
+      setSnackbar({ open: true, message: 'Check resumed successfully', severity: 'success' });
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Failed to resume check', severity: 'error' });
+    }
     handleMenuClose();
   };
 
@@ -416,8 +439,27 @@ const AllChecksPage: React.FC = () => {
                         size="small"
                         onClick={() => handleExecuteCheck(check.id)}
                         title="Execute Now"
+                        disabled={executingChecks.includes(check.id)}
                       >
-                        <PlayArrow />
+                        {executingChecks.includes(check.id) ? (
+                          <CircularProgress size={16} />
+                        ) : (
+                          <PlayArrow />
+                        )}
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => check.schedule.enabled ? handlePauseCheck(check.id) : handleResumeCheck(check.id)}
+                        title={check.schedule.enabled ? "Pause Check" : "Resume Check"}
+                        disabled={schedulingChecks.includes(check.id)}
+                      >
+                        {schedulingChecks.includes(check.id) ? (
+                          <CircularProgress size={16} />
+                        ) : check.schedule.enabled ? (
+                          <Pause />
+                        ) : (
+                          <PlayArrow />
+                        )}
                       </IconButton>
                       <IconButton
                         size="small"
@@ -473,6 +515,27 @@ const AllChecksPage: React.FC = () => {
           <PlayArrow sx={{ mr: 1 }} />
           Execute Now
         </MenuItem>
+        {selectedCheck && (() => {
+          const check = checks?.find(c => c.id === selectedCheck);
+          return check?.schedule.enabled ? (
+            <MenuItem onClick={() => handlePauseCheck(selectedCheck)}>
+              <Pause sx={{ mr: 1 }} />
+              Pause Schedule
+            </MenuItem>
+          ) : (
+            <MenuItem onClick={() => handleResumeCheck(selectedCheck)}>
+              <PlayArrow sx={{ mr: 1 }} />
+              Resume Schedule
+            </MenuItem>
+          );
+        })()}
+        <MenuItem onClick={() => {
+          setScheduleDialogOpen(true);
+          handleMenuClose();
+        }}>
+          <Schedule sx={{ mr: 1 }} />
+          Manage Schedule
+        </MenuItem>
         <MenuItem onClick={() => {
           setDeleteDialogOpen(true);
           handleMenuClose();
@@ -497,6 +560,16 @@ const AllChecksPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Schedule Dialog */}
+      <ScheduleDialog
+        open={scheduleDialogOpen}
+        onClose={() => {
+          setScheduleDialogOpen(false);
+          setSelectedCheck(null);
+        }}
+        check={selectedCheck ? checks?.find(c => c.id === selectedCheck) || null : null}
+      />
 
       {/* Snackbar for notifications */}
       <Snackbar

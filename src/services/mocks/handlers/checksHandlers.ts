@@ -249,6 +249,118 @@ export const checksHandlers = [
       total: 50, // Simulate total history
       hasMore: limit < 50
     });
+  }),
+
+  // Update check schedule
+  http.put('/api/checks/:id/schedule', async ({ params, request }) => {
+    await delay(500);
+    
+    const { id } = params;
+    const scheduleData = await request.json() as any;
+    
+    const checkIndex = mockChecks.findIndex(c => c.id === id);
+    if (checkIndex === -1) {
+      return new HttpResponse(null, {
+        status: 404,
+        statusText: 'Check not found'
+      });
+    }
+    
+    // Update the check's schedule
+    mockChecks[checkIndex] = {
+      ...mockChecks[checkIndex],
+      schedule: {
+        ...mockChecks[checkIndex].schedule,
+        ...scheduleData
+      },
+      updatedAt: new Date().toISOString(),
+      nextExecution: scheduleData.enabled 
+        ? new Date(Date.now() + 5 * 60 * 1000).toISOString()
+        : null
+    };
+    
+    return HttpResponse.json(mockChecks[checkIndex]);
+  }),
+
+  // Pause check
+  http.post('/api/checks/:id/pause', async ({ params }) => {
+    await delay(300);
+    
+    const { id } = params;
+    const checkIndex = mockChecks.findIndex(c => c.id === id);
+    
+    if (checkIndex === -1) {
+      return new HttpResponse(null, {
+        status: 404,
+        statusText: 'Check not found'
+      });
+    }
+    
+    mockChecks[checkIndex] = {
+      ...mockChecks[checkIndex],
+      schedule: {
+        ...mockChecks[checkIndex].schedule,
+        enabled: false
+      },
+      nextExecution: null,
+      updatedAt: new Date().toISOString()
+    };
+    
+    return HttpResponse.json(mockChecks[checkIndex]);
+  }),
+
+  // Resume check
+  http.post('/api/checks/:id/resume', async ({ params }) => {
+    await delay(300);
+    
+    const { id } = params;
+    const checkIndex = mockChecks.findIndex(c => c.id === id);
+    
+    if (checkIndex === -1) {
+      return new HttpResponse(null, {
+        status: 404,
+        statusText: 'Check not found'
+      });
+    }
+    
+    mockChecks[checkIndex] = {
+      ...mockChecks[checkIndex],
+      schedule: {
+        ...mockChecks[checkIndex].schedule,
+        enabled: true
+      },
+      nextExecution: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    return HttpResponse.json(mockChecks[checkIndex]);
+  }),
+
+  // Get upcoming executions
+  http.get('/api/checks/upcoming', async ({ request }) => {
+    await delay(400);
+    
+    const url = new URL(request.url);
+    const limit = parseInt(url.searchParams.get('limit') || '20');
+    
+    // Filter checks that are enabled and scheduled
+    const upcomingChecks = mockChecks
+      .filter(check => check.schedule.enabled && check.nextExecution)
+      .sort((a, b) => new Date(a.nextExecution!).getTime() - new Date(b.nextExecution!).getTime())
+      .slice(0, limit)
+      .map(check => ({
+        checkId: check.id,
+        checkName: check.name,
+        nextExecution: check.nextExecution!,
+        csiName: check.csiName,
+        frequency: check.schedule.frequency,
+        priority: check.tags.find(tag => tag.startsWith('priority:'))?.split(':')[1] || 'medium'
+      }));
+    
+    return HttpResponse.json({
+      data: upcomingChecks,
+      total: upcomingChecks.length
+    });
   })
 ];
 

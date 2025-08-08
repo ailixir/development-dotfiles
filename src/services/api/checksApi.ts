@@ -69,6 +69,28 @@ export const checksApi = {
     return apiClient.get(`${API_ENDPOINTS.CHECK_EXECUTIONS(id)}?${queryParams.toString()}`);
   },
 
+  // Schedule management
+  async updateCheckSchedule(id: string, schedule: { enabled: boolean; frequency?: string; cron?: string }): Promise<CheckEntity> {
+    return apiClient.put(`${API_ENDPOINTS.CHECK_BY_ID(id)}/schedule`, schedule);
+  },
+
+  async pauseCheck(id: string): Promise<CheckEntity> {
+    return apiClient.post(`${API_ENDPOINTS.CHECK_BY_ID(id)}/pause`);
+  },
+
+  async resumeCheck(id: string): Promise<CheckEntity> {
+    return apiClient.post(`${API_ENDPOINTS.CHECK_BY_ID(id)}/resume`);
+  },
+
+  // Get next scheduled executions
+  async getUpcomingExecutions(limit: number = 20): Promise<ApiResponse<Array<{ checkId: string; checkName: string; nextExecution: string; csiName: string }>>> {
+    const queryParams = new URLSearchParams({
+      limit: limit.toString(),
+    });
+
+    return apiClient.get(`${API_ENDPOINTS.CHECKS}/upcoming?${queryParams.toString()}`);
+  },
+
   // Bulk operations
   async executeMultipleChecks(checkIds: string[]): Promise<Record<string, ExecutionResult>> {
     const results: Record<string, ExecutionResult> = {};

@@ -10,6 +10,8 @@ interface ChecksState extends AsyncState<CheckEntity[]> {
   currentPage: number;
   executionResults: Record<string, ExecutionResult>;
   executingChecks: string[];
+  upcomingExecutions: Array<{ checkId: string; checkName: string; nextExecution: string; csiName: string }>;
+  schedulingChecks: string[];
 }
 
 const initialState: ChecksState = {
@@ -29,6 +31,8 @@ const initialState: ChecksState = {
   currentPage: 1,
   executionResults: {},
   executingChecks: [],
+  upcomingExecutions: [],
+  schedulingChecks: [],
 };
 
 // Async thunks
@@ -69,6 +73,38 @@ export const deleteCheck = createAsyncThunk(
   async (id: string) => {
     await checksApi.deleteCheck(id);
     return id;
+  }
+);
+
+export const updateCheckSchedule = createAsyncThunk(
+  'checks/updateCheckSchedule',
+  async ({ id, schedule }: { id: string; schedule: { enabled: boolean; frequency?: string; cron?: string } }) => {
+    const response = await checksApi.updateCheckSchedule(id, schedule);
+    return response;
+  }
+);
+
+export const pauseCheck = createAsyncThunk(
+  'checks/pauseCheck',
+  async (id: string) => {
+    const response = await checksApi.pauseCheck(id);
+    return response;
+  }
+);
+
+export const resumeCheck = createAsyncThunk(
+  'checks/resumeCheck',
+  async (id: string) => {
+    const response = await checksApi.resumeCheck(id);
+    return response;
+  }
+);
+
+export const fetchUpcomingExecutions = createAsyncThunk(
+  'checks/fetchUpcomingExecutions',
+  async (limit: number = 20) => {
+    const response = await checksApi.getUpcomingExecutions(limit);
+    return response;
   }
 );
 
@@ -200,6 +236,86 @@ const checksSlice = createSlice({
       .addCase(deleteCheck.rejected, (state, action) => {
         state.loading = 'failed';
         state.error = action.error.message || 'Failed to delete check';
+      })
+      
+      // updateCheckSchedule
+      .addCase(updateCheckSchedule.pending, (state, action) => {
+        const checkId = action.meta.arg.id;
+        if (!state.schedulingChecks.includes(checkId)) {
+          state.schedulingChecks.push(checkId);
+        }
+      })
+      .addCase(updateCheckSchedule.fulfilled, (state, action) => {
+        const updatedCheck = action.payload;
+        state.schedulingChecks = state.schedulingChecks.filter(id => id !== updatedCheck.id);
+        
+        // Update check in data array
+        const checkIndex = state.data.findIndex(c => c.id === updatedCheck.id);
+        if (checkIndex !== -1) {
+          state.data[checkIndex] = updatedCheck;
+        }
+        
+        // Update selected check if it's the same
+        if (state.selectedCheck?.id === updatedCheck.id) {
+          state.selectedCheck = updatedCheck;
+        }
+      })
+      .addCase(updateCheckSchedule.rejected, (state, action) => {
+        const checkId = action.meta.arg.id;
+        state.schedulingChecks = state.schedulingChecks.filter(id => id !== checkId);
+        state.error = action.error.message || 'Failed to update schedule';
+      })
+      
+      // pauseCheck
+      .addCase(pauseCheck.pending, (state, action) => {
+        const checkId = action.meta.arg;
+        if (!state.schedulingChecks.includes(checkId)) {
+          state.schedulingChecks.push(checkId);
+        }
+      })
+      .addCase(pauseCheck.fulfilled, (state, action) => {
+        const updatedCheck = action.payload;
+        state.schedulingChecks = state.schedulingChecks.filter(id => id !== updatedCheck.id);
+        
+        const checkIndex = state.data.findIndex(c => c.id === updatedCheck.id);
+        if (checkIndex !== -1) {
+          state.data[checkIndex] = updatedCheck;
+        }
+      })
+      .addCase(pauseCheck.rejected, (state, action) => {
+        const checkId = action.meta.arg;
+        state.schedulingChecks = state.schedulingChecks.filter(id => id !== checkId);
+        state.error = action.error.message || 'Failed to pause check';
+      })
+      
+      // resumeCheck
+      .addCase(resumeCheck.pending, (state, action) => {
+        const checkId = action.meta.arg;
+        if (!state.schedulingChecks.includes(checkId)) {
+          state.schedulingChecks.push(checkId);
+        }
+      })
+      .addCase(resumeCheck.fulfilled, (state, action) => {
+        const updatedCheck = action.payload;
+        state.schedulingChecks = state.schedulingChecks.filter(id => id !== updatedCheck.id);
+        
+        const checkIndex = state.data.findIndex(c => c.id === updatedCheck.id);
+        if (checkIndex !== -1) {
+          state.data[checkIndex] = updatedCheck;
+        }
+      })
+      .addCase(resumeCheck.rejected, (state, action) => {
+        const checkId = action.meta.arg;
+        state.schedulingChecks = state.schedulingChecks.filter(id => id !== checkId);
+        state.error = action.error.message || 'Failed to resume check';
+      })
+      
+      // fetchUpcomingExecutions
+      .addCase(fetchUpcomingExecutions.fulfilled, (state, action) => {
+        state.upcomingExecutions = action.payload.data;
+      })
+      .addCase(fetchUpcomingExecutions.rejected, (state, action) => {
+        state.error = action.error.message || 'Failed to fetch upcoming executions';
       });
   },
 });
