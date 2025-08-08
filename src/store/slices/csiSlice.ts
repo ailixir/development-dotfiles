@@ -1,15 +1,24 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { CSI, CSIMetrics, CSIHealthSummary, CSIFilters } from '@types/csi/csiTypes';
-import { AsyncState } from '@types/common/commonTypes';
+import { CSI, CSIMetrics, CSIHealthSummary, CSIFilters } from '../../types/csi/csiTypes';
+import { AsyncState } from '../../types/common/commonTypes';
 
 // Mock API calls - in real implementation these would call actual APIs
 import { mockCSIs, mockCSIMetrics, mockCSIHealthSummaries } from '../../data/mockCSIData';
+
+interface TagState {
+  selected: string[];
+  available: string[];
+  loading: boolean;
+  error: string | null;
+  filterMode: 'AND' | 'OR';
+}
 
 interface CSIState extends AsyncState<CSI[]> {
   selectedCSI: string | null; // CSI ID
   metrics: Record<string, CSIMetrics>;
   healthSummaries: CSIHealthSummary[];
   filters: CSIFilters;
+  tags: TagState;
   metricsLoading: boolean;
   metricsError: string | null;
   lastMetricsUpdate: string | null;
@@ -25,6 +34,13 @@ const initialState: CSIState = {
   healthSummaries: [],
   filters: {
     searchQuery: ''
+  },
+  tags: {
+    selected: [],
+    available: [],
+    loading: false,
+    error: null,
+    filterMode: 'AND'
   },
   metricsLoading: false,
   metricsError: null,
@@ -127,12 +143,63 @@ export const fetchCSIById = createAsyncThunk(
   }
 );
 
+// New async thunk for fetching tags
+export const fetchTags = createAsyncThunk(
+  'csi/fetchTags',
+  async (params?: { csiId?: string }) => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Import checks data to extract tags
+    const { mockChecks } = await import('../../services/mocks/mockData/checksData');
+    const { mockCSIs } = await import('../../data/mockCSIData');
+    
+    let allTags = new Set<string>();
+    
+    if (params?.csiId) {
+      // Get tags from checks associated with the selected CSI
+      const csiChecks = mockChecks.filter(check => check.csiId === params.csiId);
+      csiChecks.forEach(check => {
+        check.tags.forEach(tag => allTags.add(tag));
+      });
+      
+      // Also get tags from the CSI itself
+      const csi = mockCSIs.find(c => c.id === params.csiId);
+      if (csi) {
+        csi.tags.forEach(tag => allTags.add(tag));
+      }
+    } else {
+      // Get all available tags from all checks and CSIs
+      mockChecks.forEach(check => {
+        check.tags.forEach(tag => allTags.add(tag));
+      });
+      mockCSIs.forEach(csi => {
+        csi.tags.forEach(tag => allTags.add(tag));
+      });
+    }
+    
+    return Array.from(allTags).sort();
+  }
+);
+
 const csiSlice = createSlice({
   name: 'csi',
   initialState,
   reducers: {
     setSelectedCSI: (state, action: PayloadAction<string | null>) => {
       state.selectedCSI = action.payload;
+      // Clear selected tags when CSI changes
+      if (state.selectedCSI !== action.payload) {
+        state.tags.selected = [];
+      }
+    },
+    
+    setSelectedTags: (state, action: PayloadAction<string[]>) => {
+      state.tags.selected = action.payload;
+    },
+    
+    setTagFilterMode: (state, action: PayloadAction<'AND' | 'OR'>) => {
+      state.tags.filterMode = action.payload;
     },
     
     updateFilters: (state, action: PayloadAction<Partial<CSIFilters>>) => {
@@ -141,11 +208,18 @@ const csiSlice = createSlice({
     
     clearFilters: (state) => {
       state.filters = initialState.filters;
+      state.selectedCSI = null;
+      state.tags.selected = [];
+    },
+    
+    clearTagFilters: (state) => {
+      state.tags.selected = [];
     },
     
     clearError: (state) => {
       state.error = null;
       state.metricsError = null;
+      state.tags.error = null;
     },
     
     updateCSIMetrics: (state, action: PayloadAction<{ csiId: string; metrics: Partial<CSIMetrics> }>) => {
@@ -210,14 +284,31 @@ const csiSlice = createSlice({
         } else {
           state.data.push(action.payload);
         }
+      })
+      
+      // fetchTags
+      .addCase(fetchTags.pending, (state) => {
+        state.tags.loading = true;
+        state.tags.error = null;
+      })
+      .addCase(fetchTags.fulfilled, (state, action) => {
+        state.tags.loading = false;
+        state.tags.available = action.payload;
+      })
+      .addCase(fetchTags.rejected, (state, action) => {
+        state.tags.loading = false;
+        state.tags.error = action.error.message || 'Failed to fetch tags';
       });
   },
 });
 
 export const {
   setSelectedCSI,
+  setSelectedTags,
+  setTagFilterMode,
   updateFilters,
   clearFilters,
+  clearTagFilters,
   clearError,
   updateCSIMetrics,
   refreshMetrics

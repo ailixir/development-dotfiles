@@ -41,6 +41,8 @@ export interface CSIFilters {
   environment?: CSI['environment'];
   status?: CSI['status'];
   searchQuery?: string;
+  tags?: string[];
+  tagMode?: 'AND' | 'OR';
 }
 
 // API Response types

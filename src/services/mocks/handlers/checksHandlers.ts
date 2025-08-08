@@ -11,6 +11,8 @@ export const checksHandlers = [
     const status = url.searchParams.get('status');
     const type = url.searchParams.get('type');
     const searchQuery = url.searchParams.get('search');
+    const tags = url.searchParams.getAll('tags[]'); // Support multiple tags
+    const tagMode = url.searchParams.get('tagMode') || 'AND'; // AND or OR
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '20');
 
@@ -33,6 +35,19 @@ export const checksHandlers = [
         check.description?.toLowerCase().includes(query) ||
         check.tags.some(tag => tag.toLowerCase().includes(query))
       );
+    }
+    
+    // Apply tag filtering
+    if (tags && tags.length > 0) {
+      filteredChecks = filteredChecks.filter(check => {
+        if (tagMode === 'OR') {
+          // Check has at least one of the selected tags
+          return tags.some(tag => check.tags.includes(tag));
+        } else {
+          // Check has all selected tags (AND mode)
+          return tags.every(tag => check.tags.includes(tag));
+        }
+      });
     }
 
     // Apply pagination

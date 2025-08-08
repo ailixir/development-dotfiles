@@ -54,7 +54,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@store/index';
 import { fetchChecks } from '@store/slices/checksSlice';
 import { useNavigate } from 'react-router-dom';
-import CSIFilterBar from '@components/common/CSIFilterBar';
+import { FilterBar } from '@components/common/FilterBar';
 
 // Enhanced mock data with more realistic metrics
 const mockMetrics = {
@@ -136,7 +136,7 @@ const DashboardPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { data: checks, loading, error } = useAppSelector(state => state.checks);
-  const { selectedCSI } = useAppSelector(state => state.csi);
+  const { selectedCSI, tags: { selected: selectedTags } } = useAppSelector(state => state.csi);
   const [refreshing, setRefreshing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -148,11 +148,24 @@ const DashboardPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [dispatch]);
 
-  // Filter checks based on selected CSI
+  // Filter checks based on selected CSI and tags
   const filteredChecks = useMemo(() => {
-    if (!selectedCSI || !checks) return checks;
-    return checks.filter(check => check.csiId === selectedCSI);
-  }, [checks, selectedCSI]);
+    let result = checks || [];
+    
+    // Filter by CSI
+    if (selectedCSI) {
+      result = result.filter(check => check.csiId === selectedCSI);
+    }
+    
+    // Filter by tags
+    if (selectedTags && selectedTags.length > 0) {
+      result = result.filter(check => 
+        selectedTags.every(tag => check.tags.includes(tag)) // AND mode
+      );
+    }
+    
+    return result;
+  }, [checks, selectedCSI, selectedTags]);
 
   // Calculate CSI-specific metrics
   const csiMetrics = useMemo(() => {
@@ -313,7 +326,7 @@ const DashboardPage: React.FC = () => {
               </Avatar>
               <Box>
                 <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                  Health Monitoring Dashboard
+                  Dashboard
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {selectedCSI ? 'CSI-specific operational health monitoring' : 'Centralized operational health monitoring across all Citi systems'}
@@ -343,11 +356,12 @@ const DashboardPage: React.FC = () => {
         </Box>
       </Box>
 
-      {/* CSI Filter Bar */}
-      <CSIFilterBar 
-        onCSIChange={(csiId) => {
-          // CSI change is handled automatically by the Redux state
+      {/* Enhanced Filter Bar with CSI and Tag filtering */}
+      <FilterBar 
+        onFiltersChange={(filters) => {
+          // Filter changes are handled automatically by Redux state
           // This callback can be used for additional side effects if needed
+          console.log('Filters changed:', filters);
         }}
       />
 

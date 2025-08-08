@@ -41,7 +41,7 @@ export const CHECKS_NAVIGATION: NavigationItem[] = [
 // Navigation registration for @put/core-components
 export const CHECKS_MODULE_CONFIG = {
   moduleId: 'checks',
-  moduleLabel: 'Health Checks',
+  moduleLabel: 'Checks',
   version: '1.0.0',
   navigation: CHECKS_NAVIGATION,
 };

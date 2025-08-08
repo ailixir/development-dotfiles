@@ -4,7 +4,8 @@ import { navigationRegistry } from '@put/core-components';
 export const registerChecksNavigation = () => {
   navigationRegistry.register({
     moduleId: 'checks',
-    moduleLabel: 'Health Monitoring',
+    moduleLabel: 'Checks',
+    moduleIcon: 'health_and_safety',
     version: '1.0.0',
     navigation: [
       {
