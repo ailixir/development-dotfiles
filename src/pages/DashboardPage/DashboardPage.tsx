@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { 
   Box, 
   Grid, 
@@ -54,6 +54,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@store/index';
 import { fetchChecks } from '@store/slices/checksSlice';
 import { useNavigate } from 'react-router-dom';
+import CSIFilterBar from '@components/common/CSIFilterBar';
 
 // Enhanced mock data with more realistic metrics
 const mockMetrics = {
@@ -134,7 +135,8 @@ const DashboardPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { data: _checks, loading, error } = useAppSelector(state => state.checks);
+  const { data: checks, loading, error } = useAppSelector(state => state.checks);
+  const { selectedCSI } = useAppSelector(state => state.csi);
   const [refreshing, setRefreshing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -145,6 +147,75 @@ const DashboardPage: React.FC = () => {
     }, 60000);
     return () => clearInterval(interval);
   }, [dispatch]);
+
+  // Filter checks based on selected CSI
+  const filteredChecks = useMemo(() => {
+    if (!selectedCSI || !checks) return checks;
+    return checks.filter(check => check.csiId === selectedCSI);
+  }, [checks, selectedCSI]);
+
+  // Calculate CSI-specific metrics
+  const csiMetrics = useMemo(() => {
+    const checksToAnalyze = filteredChecks || [];
+    const total = checksToAnalyze.length;
+    const passing = checksToAnalyze.filter(c => c.status === 'PASSING').length;
+    const failing = checksToAnalyze.filter(c => c.status === 'FAILING').length;
+    const warning = checksToAnalyze.filter(c => c.status === 'WARNING').length;
+    const scheduled = checksToAnalyze.filter(c => c.schedule.enabled).length;
+    
+    return {
+      totalChecks: total,
+      passingChecks: passing,
+      failingChecks: failing,
+      warningChecks: warning,
+      scheduledChecks: scheduled,
+      uptime: total > 0 ? ((passing / total) * 100) : 0,
+      uptimeChange: 0.3,
+      responseTime: 145,
+      responseTimeChange: -12,
+      avgSuccessRate: total > 0 ? ((passing / total) * 100) : 0,
+      totalExecutions: total * 15, // Approximate
+      activeIncidents: failing,
+      pendingMaintenance: 1,
+    };
+  }, [filteredChecks]);
+
+  // Calculate CSI-specific check type distribution
+  const csiCheckTypeData = useMemo(() => {
+    const checksToAnalyze = filteredChecks || [];
+    const typeGroups = checksToAnalyze.reduce((acc, check) => {
+      acc[check.type] = (acc[check.type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const baseTypeData = [
+      { type: 'HTTP', icon: <Api />, color: '#3B82F6' },
+      { type: 'TCP', icon: <Storage />, color: '#10B981' },
+      { type: 'SPLUNK', icon: <AutoGraph />, color: '#F59E0B' },
+      { type: 'GRAFANA', icon: <Speed />, color: '#8B5CF6' },
+      { type: 'ITRS', icon: <Security />, color: '#EC4899' },
+      { type: 'APPDYNAMICS', icon: <BugReport />, color: '#14B8A6' },
+      { type: 'UI_TEST', icon: <Code />, color: '#F97316' },
+    ];
+
+    return baseTypeData
+      .map(item => ({ ...item, count: typeGroups[item.type] || 0 }))
+      .filter(item => item.count > 0);
+  }, [filteredChecks]);
+
+  // Generate CSI-specific recent activity
+  const csiRecentActivity = useMemo(() => {
+    if (!selectedCSI || !filteredChecks?.length) return recentActivity;
+    
+    // Filter activities based on CSI or generate CSI-specific activities
+    const csiName = filteredChecks[0]?.csiName || 'Unknown CSI';
+    
+    return recentActivity.filter(activity => 
+      activity.csi === csiName || 
+      activity.csi.includes('Trading Platform') || 
+      activity.csi.includes('Infrastructure')
+    ).slice(0, 5);
+  }, [selectedCSI, filteredChecks]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -245,7 +316,7 @@ const DashboardPage: React.FC = () => {
                   Health Monitoring Dashboard
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Centralized operational health monitoring across all Citi systems
+                  {selectedCSI ? 'CSI-specific operational health monitoring' : 'Centralized operational health monitoring across all Citi systems'}
                 </Typography>
               </Box>
             </Box>
@@ -270,7 +341,17 @@ const DashboardPage: React.FC = () => {
             </Tooltip>
           </Stack>
         </Box>
+      </Box>
 
+      {/* CSI Filter Bar */}
+      <CSIFilterBar 
+        onCSIChange={(csiId) => {
+          // CSI change is handled automatically by the Redux state
+          // This callback can be used for additional side effects if needed
+        }}
+      />
+
+      <Box sx={{ mb: 4 }}>
         {/* Live Status Bar */}
         <Paper 
           sx={{ 
@@ -308,7 +389,7 @@ const DashboardPage: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CloudDone sx={{ fontSize: 18, color: 'success.main' }} />
                 <Typography variant="body2" color="text.secondary">
-                  {mockMetrics.totalExecutions.toLocaleString()} executions today
+                  {csiMetrics.totalExecutions.toLocaleString()} executions today
                 </Typography>
               </Box>
             </Grid>
@@ -316,7 +397,7 @@ const DashboardPage: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Speed sx={{ fontSize: 18, color: 'info.main' }} />
                 <Typography variant="body2" color="text.secondary">
-                  Avg response: {mockMetrics.responseTime}ms
+                  Avg response: {csiMetrics.responseTime}ms
                 </Typography>
               </Box>
             </Grid>
@@ -337,44 +418,44 @@ const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <MetricCard
             title="Passing Checks"
-            value={mockMetrics.passingChecks}
-            total={mockMetrics.totalChecks}
+            value={csiMetrics.passingChecks}
+            total={csiMetrics.totalChecks}
             icon={<CheckCircle />}
             color={theme.palette.success.main}
-            percentage={(mockMetrics.passingChecks / mockMetrics.totalChecks) * 100}
+            percentage={csiMetrics.totalChecks > 0 ? (csiMetrics.passingChecks / csiMetrics.totalChecks) * 100 : 0}
             trend={2.5}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <MetricCard
             title="Failing Checks"
-            value={mockMetrics.failingChecks}
-            total={mockMetrics.totalChecks}
+            value={csiMetrics.failingChecks}
+            total={csiMetrics.totalChecks}
             icon={<Error />}
             color={theme.palette.error.main}
-            percentage={(mockMetrics.failingChecks / mockMetrics.totalChecks) * 100}
+            percentage={csiMetrics.totalChecks > 0 ? (csiMetrics.failingChecks / csiMetrics.totalChecks) * 100 : 0}
             trend={-1.2}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <MetricCard
             title="Warning Checks"
-            value={mockMetrics.warningChecks}
-            total={mockMetrics.totalChecks}
+            value={csiMetrics.warningChecks}
+            total={csiMetrics.totalChecks}
             icon={<Warning />}
             color={theme.palette.warning.main}
-            percentage={(mockMetrics.warningChecks / mockMetrics.totalChecks) * 100}
+            percentage={csiMetrics.totalChecks > 0 ? (csiMetrics.warningChecks / csiMetrics.totalChecks) * 100 : 0}
             trend={0.8}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <MetricCard
             title="System Uptime"
-            value={`${mockMetrics.uptime}%`}
+            value={`${csiMetrics.uptime.toFixed(1)}%`}
             icon={<TrendingUp />}
             color={theme.palette.info.main}
-            percentage={mockMetrics.uptime}
-            trend={mockMetrics.uptimeChange}
+            percentage={csiMetrics.uptime}
+            trend={csiMetrics.uptimeChange}
           />
         </Grid>
 
@@ -433,34 +514,42 @@ const DashboardPage: React.FC = () => {
             {/* Check Type Distribution */}
             <Box sx={{ mt: 4 }}>
               <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
-                Check Distribution by Type
+                {selectedCSI ? 'CSI Check Distribution by Type' : 'Check Distribution by Type'}
               </Typography>
-              <Grid container spacing={2}>
-                {checkTypeData.map((item, index) => (
-                  <Grid item xs={6} sm={4} md={2} key={index}>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Avatar 
-                        sx={{ 
-                          bgcolor: alpha(item.color, 0.1),
-                          color: item.color,
-                          width: 48,
-                          height: 48,
-                          mx: 'auto',
-                          mb: 1
-                        }}
-                      >
-                        {item.icon}
-                      </Avatar>
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        {item.count}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {item.type}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
+              {csiCheckTypeData.length > 0 ? (
+                <Grid container spacing={2}>
+                  {csiCheckTypeData.map((item, index) => (
+                    <Grid item xs={6} sm={4} md={2} key={index}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Avatar 
+                          sx={{ 
+                            bgcolor: alpha(item.color, 0.1),
+                            color: item.color,
+                            width: 48,
+                            height: 48,
+                            mx: 'auto',
+                            mb: 1
+                          }}
+                        >
+                          {item.icon}
+                        </Avatar>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                          {item.count}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {item.type}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {selectedCSI ? 'No checks found for selected CSI' : 'No check data available'}
+                  </Typography>
+                </Box>
+              )}
             </Box>
           </Paper>
         </Grid>
@@ -477,7 +566,7 @@ const DashboardPage: React.FC = () => {
             </Box>
             
             <Stack spacing={2}>
-              {recentActivity.map((activity, index) => (
+              {csiRecentActivity.map((activity, index) => (
                 <Card 
                   key={index}
                   variant="outlined"

@@ -25,8 +25,8 @@ export const mockChecks: MockCheck[] = [
     id: 'check-001',
     name: 'Trade API Health Check',
     type: 'HTTP',
-    csiId: 'CSI-12345',
-    csiName: 'Trade Processing System',
+    csiId: '174523',
+    csiName: 'Trading Platform Services',
     status: 'PASSING',
     lastExecution: '2024-01-15T10:30:00Z',
     nextExecution: '2024-01-15T10:35:00Z',
@@ -55,8 +55,8 @@ export const mockChecks: MockCheck[] = [
     id: 'check-002',
     name: 'Database Connection Pool',
     type: 'TCP',
-    csiId: 'CSI-12345',
-    csiName: 'Trade Processing System',
+    csiId: '174523',
+    csiName: 'Trading Platform Services',
     status: 'PASSING',
     lastExecution: '2024-01-15T10:29:00Z',
     nextExecution: '2024-01-15T10:34:00Z',
@@ -80,8 +80,8 @@ export const mockChecks: MockCheck[] = [
     id: 'check-003',
     name: 'Trade Settlement Log Analysis',
     type: 'SPLUNK',
-    csiId: 'CSI-12345',
-    csiName: 'Trade Processing System',
+    csiId: '174523',
+    csiName: 'Trading Platform Services',
     status: 'WARNING',
     lastExecution: '2024-01-15T10:25:00Z',
     nextExecution: '2024-01-15T10:40:00Z',
@@ -108,8 +108,8 @@ export const mockChecks: MockCheck[] = [
     id: 'check-004',
     name: 'CPU Usage Threshold',
     type: 'GRAFANA',
-    csiId: 'CSI-67890',
-    csiName: 'Market Data System',
+    csiId: '174523',
+    csiName: 'Trading Platform Services',
     status: 'FAILING',
     lastExecution: '2024-01-15T10:28:00Z',
     nextExecution: '2024-01-15T10:33:00Z',
@@ -137,8 +137,8 @@ export const mockChecks: MockCheck[] = [
     id: 'check-005',
     name: 'ITRS Gateway Status',
     type: 'ITRS',
-    csiId: 'CSI-67890',
-    csiName: 'Market Data System',
+    csiId: '174523',
+    csiName: 'Trading Platform Services',
     status: 'PASSING',
     lastExecution: '2024-01-15T10:27:00Z',
     nextExecution: '2024-01-15T10:37:00Z',
@@ -163,8 +163,8 @@ export const mockChecks: MockCheck[] = [
     id: 'check-006',
     name: 'Application Performance Health Rule',
     type: 'APPDYNAMICS',
-    csiId: 'CSI-11111',
-    csiName: 'Customer Portal',
+    csiId: '170456',
+    csiName: 'Customer Digital Platform',
     status: 'PASSING',
     lastExecution: '2024-01-15T10:26:00Z',
     nextExecution: '2024-01-15T10:41:00Z',
@@ -188,8 +188,8 @@ export const mockChecks: MockCheck[] = [
     id: 'check-007',
     name: 'Customer Login Flow Test',
     type: 'UI_TEST',
-    csiId: 'CSI-11111',
-    csiName: 'Customer Portal',
+    csiId: '170456',
+    csiName: 'Customer Digital Platform',
     status: 'PENDING',
     lastExecution: null,
     nextExecution: '2024-01-15T12:00:00Z',
@@ -216,6 +216,136 @@ export const mockChecks: MockCheck[] = [
     createdBy: 'priya.sharma@citi.com',
     tags: ['ui-test', 'customer-facing', 'login'],
     description: 'End-to-end test of customer login flow'
+  },
+  {
+    id: 'check-008',
+    name: 'Core Banking API Health',
+    type: 'HTTP',
+    csiId: '168942',
+    csiName: 'Core Banking Platform',
+    status: 'PASSING',
+    lastExecution: '2024-01-15T10:32:00Z',
+    nextExecution: '2024-01-15T10:37:00Z',
+    configuration: {
+      url: 'https://api.corebanking.internal/health',
+      method: 'GET',
+      expectedStatus: 200,
+      timeout: 3000
+    },
+    schedule: {
+      frequency: 'every_5_minutes',
+      timezone: 'EST',
+      enabled: true
+    },
+    createdAt: '2024-01-12T08:00:00Z',
+    updatedAt: '2024-01-15T10:32:00Z',
+    createdBy: 'banking.ops@citi.com',
+    tags: ['banking', 'api', 'critical'],
+    description: 'Monitors core banking API availability'
+  },
+  {
+    id: 'check-009',
+    name: 'Payment Gateway Health',
+    type: 'HTTP',
+    csiId: '169834',
+    csiName: 'Payment Gateway Infrastructure',
+    status: 'PASSING',
+    lastExecution: '2024-01-15T10:33:00Z',
+    nextExecution: '2024-01-15T10:36:00Z',
+    configuration: {
+      url: 'https://payments.gateway.internal/status',
+      method: 'GET',
+      expectedStatus: 200,
+      timeout: 5000
+    },
+    schedule: {
+      frequency: 'every_3_minutes',
+      timezone: 'EST',
+      enabled: true
+    },
+    createdAt: '2024-01-12T09:00:00Z',
+    updatedAt: '2024-01-15T10:33:00Z',
+    createdBy: 'payments.ops@citi.com',
+    tags: ['payments', 'gateway', 'critical'],
+    description: 'Monitors payment gateway infrastructure health'
+  },
+  {
+    id: 'check-010',
+    name: 'Risk Management System Health',
+    type: 'HTTP',
+    csiId: '171205',
+    csiName: 'Risk Management Systems',
+    status: 'WARNING',
+    lastExecution: '2024-01-15T10:31:00Z',
+    nextExecution: '2024-01-15T10:41:00Z',
+    configuration: {
+      url: 'https://risk.systems.internal/health',
+      method: 'GET',
+      expectedStatus: 200,
+      timeout: 8000
+    },
+    schedule: {
+      frequency: 'every_10_minutes',
+      timezone: 'EST',
+      enabled: true
+    },
+    createdAt: '2024-01-12T10:00:00Z',
+    updatedAt: '2024-01-15T10:31:00Z',
+    createdBy: 'risk.ops@citi.com',
+    tags: ['risk', 'compliance', 'monitoring'],
+    description: 'Monitors risk management system health'
+  },
+  {
+    id: 'check-011',
+    name: 'Security Operations Monitor',
+    type: 'HTTP',
+    csiId: '172954',
+    csiName: 'Security Operations Platform',
+    status: 'PASSING',
+    lastExecution: '2024-01-15T10:34:00Z',
+    nextExecution: '2024-01-15T10:39:00Z',
+    configuration: {
+      url: 'https://security.ops.internal/health',
+      method: 'GET',
+      expectedStatus: 200,
+      timeout: 3000
+    },
+    schedule: {
+      frequency: 'every_5_minutes',
+      timezone: 'EST',
+      enabled: true
+    },
+    createdAt: '2024-01-12T11:00:00Z',
+    updatedAt: '2024-01-15T10:34:00Z',
+    createdBy: 'security.ops@citi.com',
+    tags: ['security', 'monitoring', 'critical'],
+    description: 'Monitors security operations platform health'
+  },
+  {
+    id: 'check-012',
+    name: 'Automated Production Management',
+    type: 'HTTP',
+    csiId: '172087',
+    csiName: 'Automated Management of Production',
+    status: 'PASSING',
+    lastExecution: '2024-01-15T10:35:00Z',
+    nextExecution: '2024-01-15T10:40:00Z',
+    configuration: {
+      url: 'https://automation.prod.internal/health',
+      method: 'GET',
+      expectedStatus: 200,
+      timeout: 4000
+    },
+    schedule: {
+      frequency: 'every_5_minutes',
+      timezone: 'EST',
+      enabled: true
+    },
+    createdAt: '2024-01-12T12:00:00Z',
+    updatedAt: '2024-01-15T10:35:00Z',
+    createdBy: 'automation.ops@citi.com',
+    tags: ['automation', 'production', 'infrastructure'],
+    description: 'Monitors automated production management systems'
   }
 ];
 
