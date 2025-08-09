@@ -1,21 +1,80 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Paper,
-  Autocomplete,
-  TextField,
   Typography,
+  Paper,
+  Grid,
   Button,
-  Stack,
   IconButton,
-  Tooltip,
+  TextField,
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  Chip,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  Avatar,
+  Stack,
   LinearProgress,
   Alert,
+  AlertTitle,
+  Fab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Switch,
+  FormControlLabel,
+  Tooltip,
+  Badge,
   useTheme,
   alpha,
+  CircularProgress,
+  GlobalStyles,
 } from '@mui/material';
 import {
-  Domain,
+  PlayArrow,
+  Stop,
+  Pause,
+  Add,
+  Delete,
+  Edit,
+  Science,
+  VideoLibrary,
+  Code,
+  CheckCircle,
+  Error,
+  Warning,
+  Timer,
+  Visibility,
+  VisibilityOff,
+  Save,
+  Share,
+  Download,
+  Upload,
+  Settings,
+  BugReport,
+  Speed,
+  Memory,
+  WebAsset,
+  Mouse,
+  Keyboard,
+  TouchApp,
+  CameraAlt,
+  FiberManualRecord,
+  Schedule,
+  AutoMode,
+  ManualMode,
+  ListAlt,
+  PlaylistAdd,
+  Clear,
   Refresh,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@store/index';
@@ -23,7 +82,7 @@ import {
   fetchCSIs, 
   setSelectedCSI
 } from '@store/slices/csiSlice';
-import { CSI } from '@types/csi/csiTypes';
+import { CSI } from '@/types/csi/csiTypes';
 import { getCSIById } from '../../../data/mockCSIData';
 
 interface CSIFilterBarProps {
@@ -138,9 +197,11 @@ const CSIFilterBar: React.FC<CSIFilterBarProps> = ({
         </Box>
 
         <Tooltip title="Refresh Data">
-          <IconButton onClick={handleRefresh} disabled={loading === 'loading'}>
-            <Refresh />
-          </IconButton>
+          <span>
+            <IconButton onClick={handleRefresh} disabled={loading === 'loading'}>
+              <Refresh />
+            </IconButton>
+          </span>
         </Tooltip>
       </Stack>
     </Paper>

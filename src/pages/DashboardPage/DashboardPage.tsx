@@ -23,6 +23,7 @@ import {
   CircularProgress,
   Divider,
 } from '@mui/material';
+import { keyframes } from '@emotion/react';
 import {
   CheckCircle,
   Error,
@@ -70,6 +71,11 @@ const mockRealTimeData = {
   activeIncidents: 2,
   scheduledMaintenance: 1,
 };
+
+const pulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+`;
 
 const DashboardPage: React.FC = () => {
   const theme = useTheme();
@@ -141,7 +147,7 @@ const DashboardPage: React.FC = () => {
       'ITRS': { count: 0, icon: Security, color: 'success' },
       'AppDynamics': { count: 0, icon: BugReport, color: 'error' },
       'UI Tests': { count: 0, icon: Science, color: 'secondary' },
-    };
+    } as const;
 
     filteredChecks.forEach(check => {
       switch (check.type) {
@@ -172,7 +178,7 @@ const DashboardPage: React.FC = () => {
 
   // Get recent critical events
   const criticalEvents = useMemo(() => {
-    const events = [];
+    const events: Array<{ type: 'error' | 'warning'; title: string; description: string; csi: string; time: string; checkId: string }>= [];
     
     filteredChecks.filter(c => c.status === 'FAILING').slice(0, 3).forEach(check => {
       events.push({
@@ -256,7 +262,7 @@ const DashboardPage: React.FC = () => {
                     bgcolor: getHealthColor(metrics.uptime),
                     width: 48,
                     height: 48,
-                    animation: pulseAnimation ? 'pulse 2s infinite' : 'none'
+                    animation: pulseAnimation ? `${pulse} 2s infinite` : 'none'
                   }}
                 >
                   <HealthAndSafety />
@@ -293,7 +299,7 @@ const DashboardPage: React.FC = () => {
                 variant="dot"
                 sx={{
                   '& .MuiBadge-badge': {
-                    animation: 'pulse 2s infinite',
+                    animation: `${pulse} 2s infinite`,
                   }
                 }}
               >
@@ -304,16 +310,18 @@ const DashboardPage: React.FC = () => {
                 />
               </Badge>
               <Tooltip title="Refresh Dashboard">
-                <IconButton 
-                  onClick={handleRefresh} 
-                  disabled={loading === 'loading' || refreshing}
-                  sx={{
-                    bgcolor: 'background.paper',
-                    border: `1px solid ${theme.palette.divider}`,
-                  }}
-                >
-                  {refreshing ? <CircularProgress size={20} /> : <Refresh />}
-                </IconButton>
+                <span>
+                  <IconButton 
+                    onClick={handleRefresh} 
+                    disabled={loading === 'loading' || refreshing}
+                    sx={{
+                      bgcolor: 'background.paper',
+                      border: `1px solid ${theme.palette.divider}`,
+                    }}
+                  >
+                    {refreshing ? <CircularProgress size={20} /> : <Refresh />}
+                  </IconButton>
+                </span>
               </Tooltip>
             </Stack>
           </Stack>
@@ -829,14 +837,6 @@ const DashboardPage: React.FC = () => {
           </Grow>
         </Grid>
       </Grid>
-
-      {/* CSS for animations */}
-      <style jsx global>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.7; }
-        }
-      `}</style>
     </Box>
   );
 };

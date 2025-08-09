@@ -491,16 +491,18 @@ const ChecksStudioPage: React.FC = () => {
                         />
                         <ListItemSecondaryAction>
                           <Tooltip title="Remove step">
-                            <IconButton 
-                              size="small" 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeTestStep(index);
-                              }}
-                              disabled={isRunning}
-                            >
-                              <Delete sx={{ fontSize: 16 }} />
-                            </IconButton>
+                            <span>
+                              <IconButton 
+                                size="small" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeTestStep(index);
+                                }}
+                                disabled={isRunning}
+                              >
+                                <Delete sx={{ fontSize: 16 }} />
+                              </IconButton>
+                            </span>
                           </Tooltip>
                         </ListItemSecondaryAction>
                       </ListItem>

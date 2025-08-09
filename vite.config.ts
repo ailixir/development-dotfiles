@@ -9,7 +9,6 @@ export default defineConfig({
     host: true,
     open: true,
     hmr: true,
-    force: true, // Force dependency re-bundling
   },
   resolve: {
     alias: {
@@ -30,6 +29,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', '@mui/material', '@emotion/react', '@emotion/styled'],
+    force: true,
   },
   build: {
     rollupOptions: {

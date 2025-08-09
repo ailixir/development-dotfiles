@@ -42,6 +42,7 @@ const UpcomingExecutions: React.FC<UpcomingExecutionsProps> = ({
   const navigate = useNavigate();
   
   const { upcomingExecutions, loading } = useAppSelector(state => state.checks);
+  const executions = Array.isArray(upcomingExecutions) ? upcomingExecutions : [];
   
   useEffect(() => {
     dispatch(fetchUpcomingExecutions(maxItems));
@@ -128,7 +129,7 @@ const UpcomingExecutions: React.FC<UpcomingExecutionsProps> = ({
           )}
         </Stack>
 
-        {upcomingExecutions.length === 0 ? (
+        {executions.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Schedule sx={{ fontSize: 48, color: theme.palette.text.secondary, mb: 1 }} />
             <Typography variant="body2" color="text.secondary">
@@ -137,7 +138,7 @@ const UpcomingExecutions: React.FC<UpcomingExecutionsProps> = ({
           </Box>
         ) : (
           <List disablePadding>
-            {upcomingExecutions.slice(0, maxItems).map((execution, index) => {
+            {executions.slice(0, maxItems).map((execution, index) => {
               const timeInfo = getTimeUntilExecution(execution.nextExecution);
               // Find priority from check data (would need to be included in API response)
               const priority = 'medium'; // Default priority
@@ -203,7 +204,7 @@ const UpcomingExecutions: React.FC<UpcomingExecutionsProps> = ({
                       />
                     </Box>
                   </ListItem>
-                  {index < Math.min(upcomingExecutions.length, maxItems) - 1 && (
+                  {index < Math.min(executions.length, maxItems) - 1 && (
                     <Divider variant="inset" component="li" />
                   )}
                 </React.Fragment>
@@ -212,14 +213,14 @@ const UpcomingExecutions: React.FC<UpcomingExecutionsProps> = ({
           </List>
         )}
 
-        {upcomingExecutions.length > maxItems && showActions && (
+        {executions.length > maxItems && showActions && (
           <Box sx={{ textAlign: 'center', mt: 2, pt: 2, borderTop: `1px solid ${theme.palette.divider}` }}>
             <Button
               variant="outlined"
               size="small"
               onClick={() => navigate('/checks')}
             >
-              View All ({upcomingExecutions.length} total)
+              View All ({executions.length} total)
             </Button>
           </Box>
         )}

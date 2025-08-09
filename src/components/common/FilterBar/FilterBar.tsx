@@ -153,9 +153,11 @@ const FilterBar: React.FC<FilterBarProps> = ({
         )}
 
         <Tooltip title="Refresh Data">
-          <IconButton onClick={handleRefresh} disabled={isLoading}>
-            <Refresh />
-          </IconButton>
+          <span>
+            <IconButton onClick={handleRefresh} disabled={isLoading}>
+              <Refresh />
+            </IconButton>
+          </span>
         </Tooltip>
       </Stack>
     </Paper>
