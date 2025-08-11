@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   Chip,
-  LinearProgress,
   Alert,
   IconButton,
   useTheme,
@@ -17,7 +16,6 @@ import {
   Button,
   Tooltip,
   Badge,
-  useMediaQuery,
   Fade,
   Grow,
   CircularProgress,
@@ -34,7 +32,7 @@ import {
   Schedule,
   Speed,
   Api,
-  Storage,
+  // Storage,
   AutoGraph,
   Security,
   BugReport,
@@ -43,25 +41,26 @@ import {
   Business,
   Groups,
   Category,
-  Visibility,
+  // Visibility,
   PlayArrow,
   Timer,
-  CloudSync,
-  IntegrationInstructions,
+  // CloudSync,
+  // IntegrationInstructions,
   Hub,
   Insights,
-  AccountTree,
+  // AccountTree,
   HealthAndSafety,
   Assessment,
   NotificationsActive,
   Timeline,
-  DataUsage,
+  // DataUsage,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@store/index';
 import { fetchChecks } from '@store/slices/checksSlice';
 import { useNavigate } from 'react-router-dom';
-import { FilterBar } from '@components/common/FilterBar';
-import { parseTag, getTagColor, formatTagDisplay } from '@utils/tagUtils';
+// Page-level FilterBar removed per global Scope Bar adoption in layout
+import { parseTag } from '@utils/tagUtils';
+import type { CSI } from '@/types/csi/csiTypes';
 import UpcomingExecutions from '@components/scheduling/UpcomingExecutions';
 
 // Mock real-time data for demonstration
@@ -81,11 +80,9 @@ const DashboardPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   
   const { data: checks, loading, error } = useAppSelector(state => state.checks);
-  const { selectedCSI, tags: { selected: selectedTags }, entities: csiEntities } = useAppSelector(state => state.csi);
+  const { selectedCSI, tags: { selected: selectedTags }, data: csiData } = useAppSelector(state => state.csi);
   
   const [refreshing, setRefreshing] = useState(false);
   const [pulseAnimation, setPulseAnimation] = useState(true);
@@ -118,9 +115,9 @@ const DashboardPage: React.FC = () => {
 
   // Get selected CSI details
   const selectedCSIDetails = useMemo(() => {
-    if (!selectedCSI || !csiEntities) return null;
-    return csiEntities.find(csi => csi.id === selectedCSI);
-  }, [selectedCSI, csiEntities]);
+    if (!selectedCSI || !Array.isArray(csiData)) return null;
+    return (csiData as CSI[]).find((csi: CSI) => csi.id === selectedCSI) || null;
+  }, [selectedCSI, csiData]);
 
   // Calculate comprehensive metrics
   const metrics = useMemo(() => {
@@ -140,35 +137,36 @@ const DashboardPage: React.FC = () => {
 
   // Group checks by integration tool
   const integrationMetrics = useMemo(() => {
-    const tools = {
-      'HTTP/TCP': { count: 0, icon: Api, color: 'primary' },
-      'Splunk': { count: 0, icon: AutoGraph, color: 'warning' },
-      'Grafana': { count: 0, icon: Speed, color: 'info' },
-      'ITRS': { count: 0, icon: Security, color: 'success' },
-      'AppDynamics': { count: 0, icon: BugReport, color: 'error' },
-      'UI Tests': { count: 0, icon: Science, color: 'secondary' },
-    } as const;
+    const tools: Record<string, { count: number; icon: React.ElementType; color: 'primary' | 'warning' | 'info' | 'success' | 'error' | 'secondary' }>
+      = {
+        'HTTP/TCP': { count: 0, icon: Api, color: 'primary' },
+        'Splunk': { count: 0, icon: AutoGraph, color: 'warning' },
+        'Grafana': { count: 0, icon: Speed, color: 'info' },
+        'ITRS': { count: 0, icon: Security, color: 'success' },
+        'AppDynamics': { count: 0, icon: BugReport, color: 'error' },
+        'UI Tests': { count: 0, icon: Science, color: 'secondary' },
+      };
 
     filteredChecks.forEach(check => {
       switch (check.type) {
         case 'HTTP':
         case 'TCP':
-          tools['HTTP/TCP'].count++;
+          tools['HTTP/TCP'].count += 1;
           break;
         case 'SPLUNK':
-          tools['Splunk'].count++;
+          tools['Splunk'].count += 1;
           break;
         case 'GRAFANA':
-          tools['Grafana'].count++;
+          tools['Grafana'].count += 1;
           break;
         case 'ITRS':
-          tools['ITRS'].count++;
+          tools['ITRS'].count += 1;
           break;
         case 'APPDYNAMICS':
-          tools['AppDynamics'].count++;
+          tools['AppDynamics'].count += 1;
           break;
         case 'UI_TEST':
-          tools['UI Tests'].count++;
+          tools['UI Tests'].count += 1;
           break;
       }
     });
@@ -326,8 +324,7 @@ const DashboardPage: React.FC = () => {
             </Stack>
           </Stack>
           
-          {/* Enhanced Filter Bar */}
-          <FilterBar />
+          {/* Scope is handled globally via ScopeBar in layout */}
         </Box>
       </Fade>
 
@@ -699,7 +696,7 @@ const DashboardPage: React.FC = () => {
                                 ),
                               }
                             }}
-                            onClick={() => navigate(`/checks/${event.checkId}`)}
+                            onClick={() => navigate(`/checks/details/${event.checkId}`)}
                           >
                             <Stack spacing={1}>
                               <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
@@ -753,7 +750,7 @@ const DashboardPage: React.FC = () => {
                       fullWidth
                       variant="contained"
                       startIcon={<Science />}
-                      onClick={() => navigate('/checks-studio')}
+                    onClick={() => navigate('/checks/studio')}
                       sx={{
                         background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                         py: 1.5
@@ -775,7 +772,7 @@ const DashboardPage: React.FC = () => {
                       fullWidth
                       variant="outlined"
                       startIcon={<Assessment />}
-                      onClick={() => navigate('/reports')}
+                      onClick={() => navigate('/checks/reports')}
                     >
                       Generate Report
                     </Button>

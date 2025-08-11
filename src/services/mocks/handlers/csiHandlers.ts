@@ -1,5 +1,6 @@
 import { http, HttpResponse, delay } from 'msw';
 import { mockCSIs, mockUsers } from '../mockData/csiData';
+import { mockChecks } from '../mockData/checksData';
 
 export const csiHandlers = [
   // Get all CSIs with optional filtering
@@ -50,6 +51,43 @@ export const csiHandlers = [
       limit,
       totalPages: Math.ceil(filteredCSIs.length / limit)
     });
+  }),
+
+  // Search CSIs with autocomplete (place BEFORE /api/csi/:id to avoid route shadowing)
+  http.get('/api/csi/search', async ({ request }) => {
+    await delay(200);
+    
+    const url = new URL(request.url);
+    const query = url.searchParams.get('q');
+    const limit = parseInt(url.searchParams.get('limit') || '10');
+    
+    if (!query || query.length < 2) {
+      return HttpResponse.json([]);
+    }
+    
+    const searchTerm = query.toLowerCase();
+    // Build unique CSIs from checks dataset first (ensures selections map to checks results)
+    const uniqueFromChecks: Record<string, { id: string; name: string }> = {};
+    mockChecks.forEach((ch) => {
+      if (!uniqueFromChecks[ch.csiId]) {
+        uniqueFromChecks[ch.csiId] = { id: ch.csiId, name: ch.csiName };
+      }
+    });
+    const checksList = Object.values(uniqueFromChecks)
+      .filter((i) => i.name.toLowerCase().includes(searchTerm) || i.id.toLowerCase().includes(searchTerm));
+
+    // Fill with directory CSIs not already included
+    const seenNames = new Set(checksList.map((i) => i.name));
+    const directoryList = mockCSIs
+      .filter(
+        (csi) =>
+          (csi.name.toLowerCase().includes(searchTerm) || csi.id.toLowerCase().includes(searchTerm)) &&
+          !seenNames.has(csi.name)
+      )
+      .map((csi) => ({ id: csi.id, name: csi.name }));
+
+    const combined = [...checksList, ...directoryList].slice(0, limit);
+    return HttpResponse.json(combined);
   }),
 
   // Get single CSI by ID
@@ -109,35 +147,7 @@ export const csiHandlers = [
     });
   }),
 
-  // Search CSIs with autocomplete
-  http.get('/api/csi/search', async ({ request }) => {
-    await delay(200);
-    
-    const url = new URL(request.url);
-    const query = url.searchParams.get('q');
-    const limit = parseInt(url.searchParams.get('limit') || '10');
-    
-    if (!query || query.length < 2) {
-      return HttpResponse.json([]);
-    }
-    
-    const searchTerm = query.toLowerCase();
-    const matches = mockCSIs
-      .filter(csi => 
-        csi.name.toLowerCase().includes(searchTerm) ||
-        csi.id.toLowerCase().includes(searchTerm)
-      )
-      .slice(0, limit)
-      .map(csi => ({
-        id: csi.id,
-        name: csi.name,
-        description: csi.description,
-        businessUnit: csi.businessUnit,
-        environment: csi.environment
-      }));
-    
-    return HttpResponse.json(matches);
-  }),
+  
 
   // Get CSI health summary
   http.get('/api/csi/:id/health', async ({ params }) => {

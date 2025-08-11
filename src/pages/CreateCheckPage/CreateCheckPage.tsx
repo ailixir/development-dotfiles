@@ -140,7 +140,7 @@ const CreateCheckPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { entities: csiEntities, loading: csiLoading } = useAppSelector(state => state.csi);
+  const { data: csiEntities, loading: csiLoading } = useAppSelector(state => state.csi);
   
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
@@ -298,7 +298,7 @@ const CreateCheckPage: React.FC = () => {
         },
       };
 
-      await dispatch(createCheck(checkData)).unwrap();
+      await dispatch(createCheck(checkData as any)).unwrap();
       navigate('/checks');
     } catch (error) {
       console.error('Failed to create check:', error);
@@ -835,7 +835,7 @@ const CreateCheckPage: React.FC = () => {
                     label="Threshold Value"
                     value={formData.threshold}
                     onChange={handleInputChange('threshold')}
-                    step="0.1"
+                    inputProps={{ step: 0.1 }}
                   />
                 </Grid>
               </>

@@ -2,11 +2,11 @@ import { NavigationItem } from '../../types/common/commonTypes';
 
 export const CHECKS_NAVIGATION: NavigationItem[] = [
   {
-    id: 'dashboard',
-    label: 'Dashboard',
-    path: '/checks',
-    icon: 'dashboard',
-    description: 'Health overview and analytics',
+    id: 'home',
+    label: 'Home',
+    path: '/',
+    icon: 'home',
+    description: 'Attention, CSIs, and upcoming',
   },
   {
     id: 'all-checks',

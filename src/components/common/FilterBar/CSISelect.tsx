@@ -42,7 +42,7 @@ const CSISelect: React.FC<CSISelectProps> = ({
           {...params}
           label="Select CSI System"
           placeholder="Search by CSI ID or name..."
-          required
+          required={false}
           InputProps={{
             ...params.InputProps,
             startAdornment: (

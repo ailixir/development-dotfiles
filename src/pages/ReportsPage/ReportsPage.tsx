@@ -204,7 +204,7 @@ const ReportsPage: React.FC = () => {
                   Reports & Analytics
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Create, schedule, and analyze automated reports with live insights
+                  Scope-aware reporting. Selections reflect your current CSI/tag scope.
                 </Typography>
               </Box>
             </Box>

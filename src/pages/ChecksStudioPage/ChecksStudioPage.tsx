@@ -71,7 +71,6 @@ import {
   FiberManualRecord,
   Schedule,
   AutoMode,
-  ManualMode,
   ListAlt,
   PlaylistAdd,
   Clear,
@@ -283,7 +282,7 @@ const ChecksStudioPage: React.FC = () => {
                   Checks Studio
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  From Checklist to Reality - Create and run UI tests with plain English commands
+                  Scope-aware UI tests. Your current CSI/tag scope is applied across the module.
                 </Typography>
               </Box>
             </Box>

@@ -72,6 +72,7 @@ export interface CheckSchedule {
   enabled: boolean;
   daysOfWeek?: number[];
   time?: string;
+  cron?: string;
 }
 
 export interface CreateCheckRequest {

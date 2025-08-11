@@ -68,35 +68,88 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
+        
         /* Module Content Area */
         .module-content {
-            padding-top: 114px; /* Account for fixed header (50px + 48px top margin + 16px extra) */
-            margin-left: 200px; /* Account for sidebar when expanded (280px + 16px left margin + 48px spacing) */
-            padding: 114px 24px 24px 24px; /* Top, Right, Bottom, Left padding */
-            min-height: calc(100vh - 114px);
+            padding-top: 88px; /* Account for fixed header (64px + 24px top margin) */
+            margin-left: 316px; /* Account for sidebar when expanded (280px + 12px left margin + 24px padding) */
+            padding: 88px 24px 24px 24px; /* Top, Right, Bottom, Left padding */
+            min-height: calc(100vh - 88px);
             transition: margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1);
             background: #eff5f7;
+        }
+        
+        .module-content.sidebar-collapsed {
+            margin-left: 100px; /* Account for sidebar when collapsed (64px + 12px left margin + 24px padding) */
+        }
+        
+        /* Material Icons Support */
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: inherit;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Module Page Content Styling - Material-UI Style */
+        .module-page-header {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #E5E8EB;
+        }
+        
+        .module-page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1A2332;
+            margin: 0 0 8px 0;
+        }
+        
+        .module-page-subtitle {
+            font-size: 16px;
+            color: #4A5568;
+            margin: 0;
         }
         
         /* Responsive Design */
         @media (max-width: 1024px) {
             .module-content {
                 margin-left: 0;
-                padding: 114px 16px 24px 16px;
+                padding: 88px 16px 24px 16px;
             }
             
             .module-content.sidebar-collapsed {
                 margin-left: 0;
             }
+            
+            .module-content-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
         }
         
         @media (max-width: 768px) {
             .module-content {
-                padding: 114px 12px 24px 12px;
+                padding: 88px 12px 24px 12px;
+            }
+            
+            .module-page-title {
+                font-size: 24px;
+            }
+            
+            .module-content-card {
+                padding: 20px;
             }
         }
-        
     </style>
 </head>
 <body>
@@ -1125,23 +1178,9 @@
                 <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
                     {/* Page Header */}
                     <Box sx={{ mb: 4, pb: 3, borderBottom: '1px solid #E5E8EB' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                            <Box sx={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center',
-                                width: 48,
-                                height: 48,
-                                borderRadius: 2,
-                                backgroundColor: 'rgba(35, 89, 222, 0.08)',
-                                color: '#2359de'
-                            }}>
-                                {currentPageData.icon && React.createElement(currentPageData.icon)}
-                            </Box>
-                            <Typography variant="h4" sx={{ fontWeight: 700, color: '#1A2332' }}>
-                                {currentPageData.label}
-                            </Typography>
-                        </Box>
+                        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1A2332', mb: 1 }}>
+                            {currentPageData.label}
+                        </Typography>
                         <Typography variant="body1" color="text.secondary">
                             {module.label} › {currentPageData.label}
                         </Typography>

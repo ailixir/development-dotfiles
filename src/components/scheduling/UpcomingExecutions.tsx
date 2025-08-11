@@ -16,14 +16,7 @@ import {
   Divider,
   Skeleton,
 } from '@mui/material';
-import {
-  Schedule,
-  PlayArrow,
-  CheckCircle,
-  Warning,
-  Error,
-  Refresh,
-} from '@mui/icons-material';
+import { Schedule, Refresh } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@store/index';
 import { fetchUpcomingExecutions } from '@store/slices/checksSlice';
 import { useNavigate } from 'react-router-dom';

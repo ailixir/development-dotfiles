@@ -5,6 +5,7 @@ import csiSlice from './slices/csiSlice';
 import studioSlice from './slices/studioSlice';
 import reportsSlice from './slices/reportsSlice';
 import uiSlice from './slices/uiSlice';
+import dashboardSlice from './slices/dashboardSlice';
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ export const store = configureStore({
     studio: studioSlice,
     reports: reportsSlice,
     ui: uiSlice,
+    dashboard: dashboardSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

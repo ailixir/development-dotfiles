@@ -6,7 +6,7 @@ import { ChecksLayout } from '@components/layout/ChecksLayout';
 import { ErrorBoundary } from '@components/shared/ErrorBoundary';
 
 // Lazy load pages for better performance and code splitting
-const DashboardPage = React.lazy(() => import('@pages/DashboardPage'));
+const HomePage = React.lazy(() => import('@pages/HomePage'));
 const AllChecksPage = React.lazy(() => import('@pages/AllChecksPage'));
 const CreateCheckPage = React.lazy(
   () => import('./pages/CreateCheckPage/CreateCheckPage')
@@ -14,6 +14,13 @@ const CreateCheckPage = React.lazy(
 const CheckDetailsPage = React.lazy(() => import('@pages/CheckDetailsPage'));
 const ChecksStudioPage = React.lazy(() => import('@pages/ChecksStudioPage'));
 const ReportsPage = React.lazy(() => import('@pages/ReportsPage'));
+// CSIs directory and overview removed
+const ChecksTemplatesPage = React.lazy(() => import('@pages/ChecksTemplatesPage'));
+const StudioRunsPage = React.lazy(() => import('@pages/StudioRunsPage'));
+const ReportsScheduledPage = React.lazy(() => import('@pages/ReportsScheduledPage'));
+const ReportsAnalyticsPage = React.lazy(() => import('@pages/ReportsAnalyticsPage'));
+const ActivityPage = React.lazy(() => import('@pages/ActivityPage'));
+const SchedulesPage = React.lazy(() => import('@pages/SchedulesPage'));
 
 // Loading fallback component
 const PageLoadingFallback: React.FC = () => (
@@ -80,25 +87,37 @@ const App: React.FC = () => {
         <ChecksLayout>
           <Suspense fallback={<PageLoadingFallback />}>
             <Routes>
-              {/* Dashboard - Default route */}
-              <Route path="/checks" element={<DashboardPage />} />
-              <Route path="/" element={<Navigate to="/checks" replace />} />
+              {/* Home - Default route */}
+              <Route path="/checks" element={<Navigate to="/" replace />} />
+              <Route path="/" element={<HomePage />} />
               
               {/* Check Management */}
               <Route path="/checks/all" element={<AllChecksPage />} />
               <Route path="/checks/create" element={<CreateCheckPage />} />
               <Route path="/checks/details/:id" element={<CheckDetailsPage />} />
+              <Route path="/checks/templates" element={<ChecksTemplatesPage />} />
               
               {/* Checks Studio */}
               <Route path="/checks/studio" element={<ChecksStudioPage />} />
               <Route path="/checks/studio/:id" element={<ChecksStudioPage />} />
+              <Route path="/checks/studio/runs" element={<StudioRunsPage />} />
               
               {/* Reports */}
               <Route path="/checks/reports" element={<ReportsPage />} />
               <Route path="/checks/reports/:id" element={<ReportsPage />} />
+              <Route path="/checks/reports/scheduled" element={<ReportsScheduledPage />} />
+              <Route path="/checks/reports/analytics" element={<ReportsAnalyticsPage />} />
+
+              {/* CSIs */}
+              <Route path="/checks/csis" element={<Navigate to="/" replace />} />
+              <Route path="/checks/csis/:csiId" element={<Navigate to="/" replace />} />
+
+              {/* Activity & Schedules */}
+              <Route path="/checks/activity" element={<ActivityPage />} />
+              <Route path="/checks/schedules" element={<SchedulesPage />} />
               
-              {/* Catch all - redirect to dashboard */}
-              <Route path="*" element={<Navigate to="/checks" replace />} />
+              {/* Catch all - redirect to home */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
         </ChecksLayout>

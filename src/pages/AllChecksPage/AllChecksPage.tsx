@@ -61,7 +61,8 @@ import {
 import { useAppDispatch, useAppSelector } from '@store/index';
 import { fetchChecks, executeCheck, deleteCheck, pauseCheck, resumeCheck } from '@store/slices/checksSlice';
 import { useNavigate } from 'react-router-dom';
-import { FilterBar } from '@components/common/FilterBar';
+// Visual skeleton: scope is now shown globally in ScopeBar; this page gets a left FiltersRail
+import FiltersRail from './FiltersRail';
 import ScheduleDialog from '@components/scheduling/ScheduleDialog';
 
 const AllChecksPage: React.FC = () => {
@@ -259,10 +260,7 @@ const AllChecksPage: React.FC = () => {
         </Button>
       </Stack>
 
-      {/* Filter Bar */}
-      <FilterBar />
-
-      {/* Search and Filters */}
+      {/* Search and quick controls */}
       <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, mb: 3 }}>
         <CardContent>
           <Grid container spacing={3} alignItems="center">
@@ -342,15 +340,20 @@ const AllChecksPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Results Summary */}
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Showing {paginatedChecks.length} of {filteredChecks.length} checks
-        {selectedCSI && ' (filtered by CSI)'}
-        {selectedTags.length > 0 && ` (filtered by ${selectedTags.length} tags)`}
-      </Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={3} lg={3}>
+          <FiltersRail />
+        </Grid>
+        <Grid item xs={12} md={9} lg={9}>
+          {/* Results Summary */}
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Showing {paginatedChecks.length} of {filteredChecks.length} checks
+            {selectedCSI && ' (CSI scope active)'}
+            {selectedTags.length > 0 && ` (${selectedTags.length} tag filters)`}
+          </Typography>
 
-      {/* Checks Table */}
-      <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}` }}>
+          {/* Checks Table */}
+          <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}` }}>
         {loading === 'loading' && <LinearProgress />}
         
         <TableContainer>
@@ -430,7 +433,7 @@ const AllChecksPage: React.FC = () => {
                     <Stack direction="row" spacing={1}>
                       <IconButton
                         size="small"
-                        onClick={() => navigate(`/checks/${check.id}`)}
+                        onClick={() => navigate(`/checks/details/${check.id}`)}
                         title="View Details"
                       >
                         <Visibility />
@@ -475,19 +478,21 @@ const AllChecksPage: React.FC = () => {
           </Table>
         </TableContainer>
 
-        <TablePagination
-          component="div"
-          count={filteredChecks.length}
-          page={page}
-          onPageChange={(_, newPage) => setPage(newPage)}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
-          rowsPerPageOptions={[10, 25, 50, 100]}
-        />
-      </Card>
+            <TablePagination
+              component="div"
+              count={filteredChecks.length}
+              page={page}
+              onPageChange={(_, newPage) => setPage(newPage)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(e) => {
+                setRowsPerPage(parseInt(e.target.value, 10));
+                setPage(0);
+              }}
+              rowsPerPageOptions={[10, 25, 50, 100]}
+            />
+          </Card>
+        </Grid>
+      </Grid>
 
       {/* Action Menu */}
       <Menu
@@ -496,7 +501,7 @@ const AllChecksPage: React.FC = () => {
         onClose={handleMenuClose}
       >
         <MenuItem onClick={() => {
-          if (selectedCheck) navigate(`/checks/${selectedCheck}`);
+          if (selectedCheck) navigate(`/checks/details/${selectedCheck}`);
           handleMenuClose();
         }}>
           <Visibility sx={{ mr: 1 }} />

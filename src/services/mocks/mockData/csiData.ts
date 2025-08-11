@@ -23,7 +23,7 @@ export interface MockApplication {
 
 export const mockCSIs: MockCSI[] = [
   {
-    id: 'CSI-12345',
+    id: '174523',
     name: 'Trade Processing System',
     description: 'Core trading system for equity and fixed income transactions',
     owner: 'Trading Technology Team',
@@ -63,7 +63,7 @@ export const mockCSIs: MockCSI[] = [
     updatedAt: '2024-01-10T14:30:00Z'
   },
   {
-    id: 'CSI-67890',
+    id: '168942',
     name: 'Market Data System',
     description: 'Real-time market data processing and distribution platform',
     owner: 'Market Data Engineering',
@@ -102,7 +102,7 @@ export const mockCSIs: MockCSI[] = [
     updatedAt: '2024-01-08T16:45:00Z'
   },
   {
-    id: 'CSI-11111',
+    id: '170456',
     name: 'Customer Portal',
     description: 'Online banking portal for retail and corporate customers',
     owner: 'Digital Banking Team',
@@ -141,7 +141,7 @@ export const mockCSIs: MockCSI[] = [
     updatedAt: '2024-01-12T09:15:00Z'
   },
   {
-    id: 'CSI-22222',
+    id: '171205',
     name: 'Risk Management Platform',
     description: 'Enterprise risk assessment and monitoring platform',
     owner: 'Risk Technology Team',
@@ -176,7 +176,7 @@ export const mockCSIs: MockCSI[] = [
     updatedAt: '2024-01-14T13:20:00Z'
   },
   {
-    id: 'CSI-33333',
+    id: '169834',
     name: 'Payment Processing Network',
     description: 'Global payment processing and settlement network',
     owner: 'Payments Engineering',
@@ -211,7 +211,7 @@ export const mockCSIs: MockCSI[] = [
     updatedAt: '2024-01-11T15:45:00Z'
   },
   {
-    id: 'CSI-44444',
+    id: '172954',
     name: 'Credit Card Processing',
     description: 'Credit card transaction processing and fraud detection system',
     owner: 'Cards Technology Team',
@@ -247,7 +247,7 @@ export const mockUsers = [
     email: 'david.chen@citi.com',
     role: 'SRE Engineer',
     teams: ['Trading Technology Team'],
-    permissions: ['CSI-12345', 'CSI-67890']
+    permissions: ['174523', '168942']
   },
   {
     id: 'user-002',
@@ -255,7 +255,7 @@ export const mockUsers = [
     email: 'priya.sharma@citi.com',
     role: 'L2 Support Analyst',
     teams: ['Trading Technology Team', 'Digital Banking Team'],
-    permissions: ['CSI-12345', 'CSI-11111']
+    permissions: ['174523', '170456']
   },
   {
     id: 'user-003',
@@ -263,7 +263,7 @@ export const mockUsers = [
     email: 'maria.garcia@citi.com',
     role: 'Operations Analyst',
     teams: ['Market Data Engineering'],
-    permissions: ['CSI-67890']
+    permissions: ['168942']
   },
   {
     id: 'user-004',
@@ -271,6 +271,6 @@ export const mockUsers = [
     email: 'robert.kim@citi.com',
     role: 'IT Director',
     teams: ['Trading Technology Team', 'Risk Technology Team'],
-    permissions: ['CSI-12345', 'CSI-22222']
+    permissions: ['174523', '171205']
   }
 ];

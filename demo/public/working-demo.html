@@ -220,7 +220,17 @@
             ],
             health: [
                 { id: 'dashboard', label: 'Health Dashboard', icon: DashboardIcon, path: '/health' },
-                { id: 'monitors', label: 'Monitors', icon: MonitorIcon, path: '/health/monitors' },
+                { 
+                  id: 'monitors', 
+                  label: 'Monitors', 
+                  icon: MonitorIcon, 
+                  path: '/health/monitors',
+                  children: [
+                    { id: 'apm', label: 'APM', icon: TimelineIcon, path: '/health/monitors/apm' },
+                    { id: 'synthetics', label: 'Synthetics', icon: TimelineIcon, path: '/health/monitors/synthetics' },
+                    { id: 'rum', label: 'Real User Monitoring', icon: TimelineIcon, path: '/health/monitors/rum' }
+                  ]
+                },
                 { id: 'alerts', label: 'Alerts', icon: AlertsIcon, path: '/health/alerts' },
                 { id: 'reports', label: 'Reports', icon: ReportsIcon, path: '/health/reports' },
                 { id: 'settings', label: 'Settings', icon: SettingsIcon, path: '/health/settings' }
@@ -233,7 +243,17 @@
             dns: [
                 { id: 'dashboard', label: 'DNS Dashboard', icon: DashboardIcon, path: '/dns' },
                 { id: 'domains', label: 'Domains', icon: DomainsIcon, path: '/dns/domains' },
-                { id: 'records', label: 'DNS Records', icon: RecordsIcon, path: '/dns/records' },
+                { 
+                  id: 'records', 
+                  label: 'DNS Records', 
+                  icon: RecordsIcon, 
+                  path: '/dns/records',
+                  children: [
+                    { id: 'a-records', label: 'A Records', icon: RecordsIcon, path: '/dns/records/a' },
+                    { id: 'cname-records', label: 'CNAME Records', icon: RecordsIcon, path: '/dns/records/cname' },
+                    { id: 'txt-records', label: 'TXT Records', icon: RecordsIcon, path: '/dns/records/txt' }
+                  ]
+                },
                 { id: 'zones', label: 'Zone Management', icon: ConfigIcon, path: '/dns/zones' },
                 { id: 'logs', label: 'Query Logs', icon: LogsIcon, path: '/dns/logs' }
             ],
@@ -247,7 +267,16 @@
             incidents: [
                 { id: 'dashboard', label: 'Incident Center', icon: DashboardIcon, path: '/incidents' },
                 { id: 'active', label: 'Active Incidents', icon: IncidentsListIcon, path: '/incidents/active' },
-                { id: 'escalation', label: 'Escalation Rules', icon: EscalationIcon, path: '/incidents/escalation' },
+                { 
+                  id: 'escalation', 
+                  label: 'Escalation Rules', 
+                  icon: EscalationIcon, 
+                  path: '/incidents/escalation',
+                  children: [
+                    { id: 'policies', label: 'Policies', icon: SettingsIcon, path: '/incidents/escalation/policies' },
+                    { id: 'schedules', label: 'Schedules', icon: TimelineIcon, path: '/incidents/escalation/schedules' }
+                  ]
+                },
                 { id: 'playbooks', label: 'Playbooks', icon: PlaybooksIcon, path: '/incidents/playbooks' },
                 { id: 'team', label: 'Response Team', icon: TeamIcon, path: '/incidents/team' }
             ]
@@ -283,7 +312,18 @@
             return iconMap[IconComponent] || 'dashboard';
         };
         
-        // Register module navigation configurations
+        // Register module navigation configurations (supports nested children)
+        const transformNavItem = (item) => ({
+            id: item.id,
+            label: item.label,
+            path: item.path,
+            icon: getIconName(item.icon),
+            description: item.id === 'dashboard' ? 'Overview & analytics' : item.description,
+            ...(item.children && Array.isArray(item.children)
+              ? { children: item.children.map(transformNavItem) }
+              : {})
+        });
+
         Object.keys(MODULE_NAVIGATION).forEach(moduleId => {
             const moduleData = PUT_MODULES[moduleId.toUpperCase()];
             if (moduleData && MODULE_NAVIGATION[moduleId]) {
@@ -291,19 +331,7 @@
                     moduleId,
                     moduleLabel: moduleData.label,
                     version: '1.0.0',
-                    navigation: MODULE_NAVIGATION[moduleId].map(item => ({
-                        id: item.id,
-                        label: item.label,
-                        path: item.path,
-                        icon: getIconName(item.icon),
-                        description: item.id === 'dashboard' ? 'Overview & analytics' :
-                                   item.id === 'communications' ? 'Manage messages' :
-                                   item.id === 'templates' ? 'Message templates' :
-                                   item.id === 'alerts' ? 'Active notifications' :
-                                   item.id === 'monitors' ? 'System monitoring' :
-                                   item.id === 'reports' ? 'Analytics & reports' :
-                                   'Configuration'
-                    }))
+                    navigation: MODULE_NAVIGATION[moduleId].map(transformNavItem)
                 });
             }
         });
@@ -1104,7 +1132,17 @@
         const ModulePageContent = ({ moduleId, currentPage, isCollapsed }) => {
             const module = PUT_MODULES[moduleId.toUpperCase()];
             const navigation = MODULE_NAVIGATION[moduleId] || [];
-            const currentPageData = navigation.find(nav => nav.id === currentPage);
+            const findNav = (items, id) => {
+                for (const it of items) {
+                    if (it.id === id) return it;
+                    if (it.children) {
+                        const child = findNav(it.children, id);
+                        if (child) return child;
+                    }
+                }
+                return null;
+            };
+            const currentPageData = findNav(navigation, currentPage);
 
             if (!module || !currentPageData) {
                 return (
@@ -1200,22 +1238,25 @@
                                         Available Pages
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                        This module contains {navigation.length} pages:
+                                        This module contains the following pages:
                                     </Typography>
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                        {navigation.map((navItem) => (
-                                            <Chip
-                                                key={navItem.id}
-                                                label={navItem.label}
-                                                variant={currentPage === navItem.id ? "filled" : "outlined"}
-                                                color={currentPage === navItem.id ? "primary" : "default"}
-                                                size="small"
-                                                sx={{ 
-                                                    fontWeight: currentPage === navItem.id ? 600 : 400,
-                                                    fontSize: '13px'
-                                                }}
-                                            />
-                                        ))}
+                                        {(() => {
+                                            const flatten = (items) => items.flatMap(it => [it, ...(it.children ? flatten(it.children) : [])]);
+                                            return flatten(navigation).map((navItem) => (
+                                                <Chip
+                                                    key={navItem.id}
+                                                    label={navItem.label}
+                                                    variant={currentPage === navItem.id ? "filled" : "outlined"}
+                                                    color={currentPage === navItem.id ? "primary" : "default"}
+                                                    size="small"
+                                                    sx={{ 
+                                                        fontWeight: currentPage === navItem.id ? 600 : 400,
+                                                        fontSize: '13px'
+                                                    }}
+                                                />
+                                            ));
+                                        })()}
                                     </Box>
                                 </CardContent>
                             </Card>

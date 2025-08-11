@@ -18,6 +18,7 @@ export interface MockCheck {
   createdBy: string;
   tags: string[];
   description?: string;
+  environment?: string;
 }
 
 export const mockChecks: MockCheck[] = [
