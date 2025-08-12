@@ -13,12 +13,12 @@ import AttentionPanel from '@/components/home/AttentionPanel';
 import ActivityFeed from '@/components/home/ActivityFeed';
 import ReportsSnapshot from '@/components/home/ReportsSnapshot';
 import UpcomingSchedules from '@/components/home/UpcomingSchedules';
-import GlobalSearch from '@/components/home/GlobalSearch';
 import PinnedCSIs from '@/components/home/PinnedCSIs';
 
 const HomePage: React.FC = () => {
   const dispatch = useAppDispatch();
   const summary = useAppSelector((s) => s.dashboard.summary);
+  const searchContext = useAppSelector((s) => s.dashboard.searchContext);
 
   useEffect(() => {
     const load = () => {
@@ -38,6 +38,15 @@ const HomePage: React.FC = () => {
     return () => clearInterval(id);
   }, [dispatch]);
 
+  // Refetch scoped widgets when search context changes
+  useEffect(() => {
+    dispatch(fetchDashboardSummary());
+    dispatch(fetchAttention({ limit: 20 }));
+    dispatch(fetchActivity({ scope: 'ALL', hours: 24 }));
+    dispatch(fetchUpcomingSchedules({ limit: 10 }));
+    dispatch(fetchReportsSnapshot({ limit: 5 }));
+  }, [dispatch, searchContext.csiId, searchContext.environment, searchContext.tags, searchContext.tagMode]);
+
   return (
     <Box>
       <Stack spacing={2} mb={2}>
@@ -53,11 +62,11 @@ const HomePage: React.FC = () => {
 
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <KPIBar summary={summary.data} />
+          <PinnedCSIs />
         </Grid>
 
         <Grid item xs={12}>
-          <PinnedCSIs />
+          <KPIBar summary={summary.data} loading={summary.loading} error={summary.error} />
         </Grid>
 
         <Grid item xs={12} md={7}>

@@ -237,6 +237,103 @@ export const mockCSIs: MockCSI[] = [
     tags: ['credit-cards', 'fraud-detection', 'real-time', 'high-volume'],
     createdAt: '2023-04-05T12:00:00Z',
     updatedAt: '2024-01-09T11:30:00Z'
+  },
+  {
+    id: '173621',
+    name: 'Mobile Banking Platform',
+    description: 'Mobile banking APIs and services for iOS and Android clients',
+    owner: 'Mobile Banking Team',
+    environment: 'Production',
+    businessUnit: 'Digital Banking',
+    status: 'Active',
+    applications: [
+      {
+        id: 'app-018',
+        name: 'Mobile Banking API',
+        type: 'REST API',
+        version: 'v2.3.0',
+        status: 'Running',
+        endpoints: [
+          'https://api.mobile.citi.com/v2/health',
+          'https://api.mobile.citi.com/v2/auth'
+        ]
+      },
+      {
+        id: 'app-019',
+        name: 'Push Notification Service',
+        type: 'Microservice',
+        version: 'v1.5.2',
+        status: 'Running'
+      }
+    ],
+    tags: ['mobile-banking', 'digital-channels', 'customer-facing', 'high-availability'],
+    createdAt: '2023-09-01T10:00:00Z',
+    updatedAt: '2025-01-07T10:52:00Z'
+  }
+  ,
+  {
+    id: '176001',
+    name: 'Treasury Liquidity Platform',
+    description: 'Real-time liquidity monitoring and forecasting across accounts and currencies',
+    owner: 'Treasury Engineering',
+    environment: 'Production',
+    businessUnit: 'Treasury & Trade Solutions',
+    status: 'Active',
+    applications: [
+      {
+        id: 'app-020',
+        name: 'Liquidity API',
+        type: 'REST API',
+        version: 'v1.4.0',
+        status: 'Running',
+        endpoints: [
+          'https://liquidity.api.internal/health',
+          'https://liquidity.api.internal/positions'
+        ]
+      },
+      {
+        id: 'app-021',
+        name: 'Liquidity Metrics Processor',
+        type: 'Microservice',
+        version: 'v2.3.1',
+        status: 'Running'
+      }
+    ],
+    tags: ['treasury', 'liquidity', 'real-time', 'critical'],
+    createdAt: '2024-08-15T10:00:00Z',
+    updatedAt: '2025-01-07T10:55:00Z'
+  },
+  {
+    id: '176002',
+    name: 'Fraud Detection Platform',
+    description: 'Streaming fraud detection and scoring for card and account transactions',
+    owner: 'Fraud Analytics Team',
+    environment: 'Production',
+    businessUnit: 'Risk Management',
+    status: 'Active',
+    applications: [
+      {
+        id: 'app-022',
+        name: 'Fraud Scoring API',
+        type: 'REST API',
+        version: 'v3.0.2',
+        status: 'Running',
+        endpoints: [
+          'https://fraud.api.internal/health',
+          'https://fraud.api.internal/score'
+        ]
+      },
+      {
+        id: 'app-023',
+        name: 'Fraud Feature Pipeline',
+        type: 'Microservice',
+        version: 'v1.7.4',
+        status: 'Running'
+      }
+    ],
+    tags: ['fraud', 'streaming', 'analytics', 'critical'],
+    createdAt: '2024-09-10T09:00:00Z',
+    updatedAt: '2025-01-07T10:58:00Z'
   }
 ];
 

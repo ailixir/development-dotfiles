@@ -2,8 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { CSI, CSIMetrics, CSIHealthSummary, CSIFilters } from '../../types/csi/csiTypes';
 import { AsyncState } from '../../types/common/commonTypes';
 
-// Mock API calls - in real implementation these would call actual APIs
-import { mockCSIs, mockCSIMetrics, mockCSIHealthSummaries } from '../../data/mockCSIData';
+import { csiApi } from '@/services/api/csiApi';
 
 interface TagState {
   selected: string[];
@@ -51,95 +50,60 @@ const initialState: CSIState = {
 export const fetchCSIs = createAsyncThunk(
   'csi/fetchCSIs',
   async (filters?: CSIFilters) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    let filteredCSIs = [...mockCSIs];
-    
-    if (filters?.businessUnit) {
-      filteredCSIs = filteredCSIs.filter(csi => csi.businessUnit === filters.businessUnit);
-    }
-    
-    if (filters?.criticality) {
-      filteredCSIs = filteredCSIs.filter(csi => csi.criticality === filters.criticality);
-    }
-    
-    if (filters?.environment) {
-      filteredCSIs = filteredCSIs.filter(csi => csi.environment === filters.environment);
-    }
-    
-    if (filters?.status) {
-      filteredCSIs = filteredCSIs.filter(csi => csi.status === filters.status);
-    }
-    
-    if (filters?.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
-      filteredCSIs = filteredCSIs.filter(csi => 
-        csi.id.toLowerCase().includes(query) ||
-        csi.name.toLowerCase().includes(query) ||
-        csi.description.toLowerCase().includes(query) ||
-        csi.businessUnit.toLowerCase().includes(query)
-      );
-    }
-    
-    return {
-      data: filteredCSIs,
-      total: filteredCSIs.length
+    const params: any = {
+      search: filters?.searchQuery,
+      businessUnit: filters?.businessUnit,
+      environment: filters?.environment,
+      status: filters?.status,
     };
+    return await csiApi.listCsis(params);
   }
 );
 
 export const fetchCSIMetrics = createAsyncThunk(
   'csi/fetchCSIMetrics',
   async (csiIds?: string[]) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    if (csiIds && csiIds.length > 0) {
-      const filteredMetrics: Record<string, CSIMetrics> = {};
-      csiIds.forEach(id => {
-        if (mockCSIMetrics[id]) {
-          filteredMetrics[id] = mockCSIMetrics[id];
-        }
-      });
-      return {
-        data: filteredMetrics,
-        lastUpdated: new Date().toISOString()
-      };
-    }
-    
-    return {
-      data: mockCSIMetrics,
-      lastUpdated: new Date().toISOString()
-    };
+    // For prototype, re-use `/csi/:id/health` to compose metrics as needed.
+    // If ids provided, fetch each; else return empty (not essential for Home).
+    const ids = csiIds || [];
+    const results: Record<string, CSIMetrics> = {} as any;
+    await Promise.all(
+      ids.map(async (id) => {
+        try {
+          const health = await csiApi.getCsiHealth(id);
+          results[id] = {
+            csiId: id,
+            totalChecks: health.totalChecks,
+            passingChecks: health.passingChecks,
+            failingChecks: health.failingChecks,
+            warningChecks: health.warningChecks,
+            overallHealth: 0,
+            lastUpdated: new Date().toISOString(),
+            criticalAlertsCount: 0,
+            avgResponseTime: 0,
+            uptime: 0,
+            totalExecutions: 0,
+            successRate: 0,
+          };
+        } catch {}
+      })
+    );
+    return { data: results, lastUpdated: new Date().toISOString() };
   }
 );
 
 export const fetchCSIHealthSummaries = createAsyncThunk(
   'csi/fetchCSIHealthSummaries',
   async () => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 400));
-    
-    return {
-      data: mockCSIHealthSummaries,
-      timestamp: new Date().toISOString()
-    };
+    // Not essential for Home; keep stub empty
+    return { data: [], timestamp: new Date().toISOString() } as any;
   }
 );
 
 export const fetchCSIById = createAsyncThunk(
   'csi/fetchCSIById',
   async (csiId: string) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    const csi = mockCSIs.find(c => c.id === csiId);
-    if (!csi) {
-      throw new Error(`CSI with ID ${csiId} not found`);
-    }
-    
-    return csi;
+    return await csiApi.getCsiById(csiId);
   }
 );
 
@@ -147,38 +111,12 @@ export const fetchCSIById = createAsyncThunk(
 export const fetchTags = createAsyncThunk(
   'csi/fetchTags',
   async (params?: { csiId?: string }) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // Import checks data to extract tags
+    // Use checks MSW to derive tags in handlers in future. For now keep local derivation via checks dataset only.
     const { mockChecks } = await import('../../services/mocks/mockData/checksData');
-    const { mockCSIs } = await import('../../data/mockCSIData');
-    
-    let allTags = new Set<string>();
-    
-    if (params?.csiId) {
-      // Get tags from checks associated with the selected CSI
-      const csiChecks = mockChecks.filter(check => check.csiId === params.csiId);
-      csiChecks.forEach(check => {
-        check.tags.forEach(tag => allTags.add(tag));
-      });
-      
-      // Also get tags from the CSI itself
-      const csi = mockCSIs.find(c => c.id === params.csiId);
-      if (csi) {
-        csi.tags.forEach(tag => allTags.add(tag));
-      }
-    } else {
-      // Get all available tags from all checks and CSIs
-      mockChecks.forEach(check => {
-        check.tags.forEach(tag => allTags.add(tag));
-      });
-      mockCSIs.forEach(csi => {
-        csi.tags.forEach(tag => allTags.add(tag));
-      });
-    }
-    
-    return Array.from(allTags).sort();
+    const all = new Set<string>();
+    const src = params?.csiId ? mockChecks.filter((c) => c.csiId === params.csiId) : mockChecks;
+    src.forEach((c) => c.tags.forEach((t) => all.add(t)));
+    return Array.from(all).sort();
   }
 );
 

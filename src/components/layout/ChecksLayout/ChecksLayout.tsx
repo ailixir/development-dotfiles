@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Stack, TextField, useTheme, useMediaQuery } from '@mui/material';
 import CommandPalette from '@/components/home/CommandPalette';
+import HelpDialog from './HelpDialog';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PlatformSidebar } from '@put/core-components';
 import { useLayout } from '../LayoutProvider';
@@ -20,6 +21,7 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
   const [currentPage, setCurrentPage] = useState('home');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   
   const { deploymentMode } = useLayout();
 
@@ -52,6 +54,10 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
     if ((isMac ? e.metaKey : e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
       setPaletteOpen((v) => !v);
+    }
+    if (e.key === '?') {
+      e.preventDefault();
+      setHelpOpen(true);
     }
   }, []);
 
@@ -97,6 +103,7 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
           </Stack>
         {children}
           <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+          <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
       </Box>
     </Box>
   );

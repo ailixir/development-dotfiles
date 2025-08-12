@@ -1,14 +1,16 @@
 import React from 'react';
-import { Box, Chip, Grid, Stack, Typography, alpha, useTheme, Skeleton } from '@mui/material';
+import { Box, Chip, Grid, Stack, Typography, alpha, useTheme, Skeleton, Alert, Button } from '@mui/material';
 import type { DashboardSummary } from '../../types/dashboard/dashboardTypes';
 import { CheckCircle, Error, Warning, VolumeOff, HealthAndSafety } from '@mui/icons-material';
 import SectionBox from './SectionBox';
 
 interface KPIBarProps {
   summary: DashboardSummary | null | undefined;
+  loading?: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error?: string | null;
 }
 
-const KPIBar: React.FC<KPIBarProps> = ({ summary }) => {
+const KPIBar: React.FC<KPIBarProps> = ({ summary, loading, error }) => {
   const theme = useTheme();
   const statusColor =
     summary?.overallStatus === 'CRITICAL'
@@ -28,7 +30,11 @@ const KPIBar: React.FC<KPIBarProps> = ({ summary }) => {
       icon={<HealthAndSafety />}
       accentColor={statusColor}
     >
-      {!summary ? (
+      {loading === 'failed' ? (
+        <Alert role="alert" severity="error">
+          {error || 'Failed to load summary'}
+        </Alert>
+      ) : !summary ? (
         <Stack spacing={2}>
           <Skeleton variant="text" width={140} height={28} />
           <Skeleton variant="rounded" height={16} />

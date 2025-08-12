@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Chip, Divider, List, ListItemButton, ListItemText, Popper, Paper, TextField, InputAdornment, Stack, alpha, useTheme, Button, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete } from '@mui/material';
+import { Box, Chip, Divider, List, ListItemButton, ListItemText, Popper, Paper, TextField, InputAdornment, Stack, alpha, useTheme, Button, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete, Tooltip, Snackbar, Alert } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { clearSearchContext, searchAll, setSearchContext, setSearchFilters, clearSearchFilters } from '@/store/slices/dashboardSlice';
+import { clearSearchContext, searchAll, setSearchContext, setSearchFilters, clearSearchFilters, pinCsi } from '@/store/slices/dashboardSlice';
 import { Search } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { csiApi } from '@/services/api/csiApi';
@@ -12,6 +12,7 @@ const GlobalSearch: React.FC = () => {
   const navigate = useNavigate();
   const { data, loading } = useAppSelector((s) => s.dashboard.search);
   const context = useAppSelector((s) => s.dashboard.searchContext);
+  const pinned = useAppSelector((s) => s.dashboard.pinnedCsiIds);
   const results = Array.isArray(data) ? data : [];
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [query, setQuery] = useState('');
@@ -21,6 +22,7 @@ const GlobalSearch: React.FC = () => {
   const [draftEnv, setDraftEnv] = useState<string | null>(null);
   const [draftTags, setDraftTags] = useState<string[]>([]);
   const [draftMode, setDraftMode] = useState<'AND' | 'OR'>('AND');
+  const [pinToastOpen, setPinToastOpen] = useState(false);
 
   useEffect(() => {
     const id = setTimeout(async () => {
@@ -65,13 +67,31 @@ const GlobalSearch: React.FC = () => {
           ),
           endAdornment: context.csiId ? (
             <Stack direction="row" spacing={1} alignItems="center">
-              <Chip size="small" label={`CSI: ${context.csiId}`} onDelete={() => dispatch(clearSearchContext())} />
+              <Tooltip title="Current CSI context">
+                <Chip size="small" label={`CSI: ${context.csiId}`} onDelete={() => dispatch(clearSearchContext())} />
+              </Tooltip>
               {context.environment && (
-                <Chip size="small" label={`Env: ${context.environment}`} onDelete={() => dispatch(setSearchFilters({ environment: null }))} />
+                <Tooltip title="Environment filter">
+                  <Chip size="small" label={`Env: ${context.environment}`} onDelete={() => dispatch(setSearchFilters({ environment: null }))} />
+                </Tooltip>
               )}
               {context.tags && context.tags.length > 0 && (
-                <Chip size="small" label={`Tags: ${context.tags.length}`} onDelete={() => dispatch(setSearchFilters({ tags: [] }))} />
+                <Tooltip title={`Tags: ${context.tags.join(', ')}`}>
+                  <Chip size="small" label={`Tags: ${context.tags.length}`} onDelete={() => dispatch(setSearchFilters({ tags: [] }))} />
+                </Tooltip>
               )}
+              <Button
+                size="small"
+                disabled={pinned.includes(context.csiId)}
+                onMouseDown={() => {
+                  if (context.csiId) {
+                    dispatch(pinCsi(context.csiId));
+                    setPinToastOpen(true);
+                  }
+                }}
+              >
+                {pinned.includes(context.csiId) ? 'Pinned' : 'Pin'}
+              </Button>
               <Button size="small" onMouseDown={() => {
                 setDraftEnv(context.environment || null);
                 setDraftTags(context.tags || []);
@@ -165,6 +185,9 @@ const GlobalSearch: React.FC = () => {
           )}
         </Paper>
       </Popper>
+      <Snackbar open={pinToastOpen} autoHideDuration={2000} onClose={() => setPinToastOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity="success" onClose={() => setPinToastOpen(false)}>Pinned to My CSIs</Alert>
+      </Snackbar>
       <Dialog open={filtersOpen} onClose={() => setFiltersOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Filters</DialogTitle>
         <DialogContent>

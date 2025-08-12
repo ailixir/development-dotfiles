@@ -7,6 +7,10 @@ export const checksHandlers = [
     await delay(500); // Simulate network delay
     
     const url = new URL(request.url);
+    const slow = parseInt(url.searchParams.get('__slow') || '0');
+    if (slow > 0) await delay(slow);
+    const fail = url.searchParams.get('__fail');
+    if (fail) return new HttpResponse(null, { status: parseInt(fail) || 500 });
     const csiId = url.searchParams.get('csiId');
     const status = url.searchParams.get('status');
     const type = url.searchParams.get('type');
@@ -53,6 +57,9 @@ export const checksHandlers = [
     // Apply pagination
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
+    if (url.searchParams.get('__empty') === '1') {
+      filteredChecks = [];
+    }
     const paginatedChecks = filteredChecks.slice(startIndex, endIndex);
 
     return HttpResponse.json({
@@ -65,9 +72,14 @@ export const checksHandlers = [
   }),
 
   // Get single check by ID
-  http.get('/api/checks/:id', async ({ params }) => {
+  http.get('/api/checks/:id', async ({ params, request }) => {
     await delay(300);
     
+    const url = new URL(request.url);
+    const slow = parseInt(url.searchParams.get('__slow') || '0');
+    if (slow > 0) await delay(slow);
+    const fail = url.searchParams.get('__fail');
+    if (fail) return new HttpResponse(null, { status: parseInt(fail) || 500 });
     const { id } = params;
     const check = mockChecks.find(c => c.id === id);
     
@@ -164,9 +176,14 @@ export const checksHandlers = [
   }),
 
   // Execute check
-  http.post('/api/checks/:id/execute', async ({ params }) => {
+  http.post('/api/checks/:id/execute', async ({ params, request }) => {
     await delay(2000 + Math.random() * 3000); // 2-5 second execution time
     
+    const url = new URL(request.url);
+    const slow = parseInt(url.searchParams.get('__slow') || '0');
+    if (slow > 0) await delay(slow);
+    const fail = url.searchParams.get('__fail');
+    if (fail) return new HttpResponse(null, { status: parseInt(fail) || 500 });
     const { id } = params;
     const check = mockChecks.find(c => c.id === id);
     
@@ -227,6 +244,10 @@ export const checksHandlers = [
     
     const { id } = params;
     const url = new URL(request.url);
+    const slow = parseInt(url.searchParams.get('__slow') || '0');
+    if (slow > 0) await delay(slow);
+    const fail = url.searchParams.get('__fail');
+    if (fail) return new HttpResponse(null, { status: parseInt(fail) || 500 });
     const limit = parseInt(url.searchParams.get('limit') || '10');
     
     // Generate mock execution history
@@ -341,10 +362,14 @@ export const checksHandlers = [
     await delay(400);
     
     const url = new URL(request.url);
+    const slow = parseInt(url.searchParams.get('__slow') || '0');
+    if (slow > 0) await delay(slow);
+    const fail = url.searchParams.get('__fail');
+    if (fail) return new HttpResponse(null, { status: parseInt(fail) || 500 });
     const limit = parseInt(url.searchParams.get('limit') || '20');
     
     // Filter checks that are enabled and scheduled
-    const upcomingChecks = mockChecks
+    let upcomingChecks = mockChecks
       .filter(check => check.schedule.enabled && check.nextExecution)
       .sort((a, b) => new Date(a.nextExecution!).getTime() - new Date(b.nextExecution!).getTime())
       .slice(0, limit)
@@ -356,6 +381,7 @@ export const checksHandlers = [
         frequency: check.schedule.frequency,
         priority: check.tags.find(tag => tag.startsWith('priority:'))?.split(':')[1] || 'medium'
       }));
+    if (url.searchParams.get('__empty') === '1') upcomingChecks = [];
     
     return HttpResponse.json({
       data: upcomingChecks,

@@ -581,6 +581,52 @@ export const mockChecks: MockCheck[] = [
     description: 'Analyzes compliance audit logs for transaction monitoring and regulatory reporting',
     environment: 'Production'
   }
+  ,
+  {
+    id: 'check-021',
+    name: 'Liquidity API Health',
+    type: 'HTTP',
+    csiId: '176001',
+    csiName: 'Treasury Liquidity Platform',
+    status: 'PASSING',
+    lastExecution: '2024-01-15T10:36:00Z',
+    nextExecution: '2024-01-15T10:41:00Z',
+    configuration: {
+      url: 'https://liquidity.api.internal/health',
+      method: 'GET',
+      expectedStatus: 200,
+      timeout: 3000
+    },
+    schedule: { frequency: 'every_5_minutes', timezone: 'EST', enabled: true },
+    createdAt: '2024-01-14T10:00:00Z',
+    updatedAt: '2024-01-15T10:36:00Z',
+    createdBy: 'treasury.ops@citi.com',
+    tags: ['application:liquidity-api', 'team:treasury', 'lob:treasury', 'priority:critical'],
+    description: 'Checks Liquidity API health endpoint',
+    environment: 'Production'
+  },
+  {
+    id: 'check-022',
+    name: 'Fraud Scoring API Latency',
+    type: 'GRAFANA',
+    csiId: '176002',
+    csiName: 'Fraud Detection Platform',
+    status: 'WARNING',
+    lastExecution: '2024-01-15T10:35:00Z',
+    nextExecution: '2024-01-15T10:40:00Z',
+    configuration: {
+      datasource: 'prometheus',
+      query: 'avg(fraud_scoring_latency_ms)',
+      threshold: { operator: 'greater_than', value: 200, duration: '5m' }
+    },
+    schedule: { frequency: 'every_5_minutes', timezone: 'EST', enabled: true },
+    createdAt: '2024-01-14T11:30:00Z',
+    updatedAt: '2024-01-15T10:35:00Z',
+    createdBy: 'fraud.ops@citi.com',
+    tags: ['application:fraud-scoring', 'team:fraud-analytics', 'lob:risk-management', 'type:performance'],
+    description: 'Monitors latency of fraud scoring API',
+    environment: 'Production'
+  }
 ];
 
 export interface MockExecutionResult {

@@ -45,36 +45,46 @@ const initialState: DashboardState = {
 
 export const fetchDashboardSummary = createAsyncThunk(
   'dashboard/fetchSummary',
-  async () => {
-    return await dashboardApi.getDashboardSummary();
+  async (_, { getState }) => {
+    const state = getState() as any;
+    const csiId = state.dashboard.searchContext.csiId;
+    return await dashboardApi.getDashboardSummary({ csiId });
   }
 );
 
 export const fetchAttention = createAsyncThunk(
   'dashboard/fetchAttention',
-  async (params: { limit?: number } | undefined) => {
-    return await dashboardApi.getAttention(params);
+  async (params: { limit?: number; csiId?: string | null } | undefined, { getState }) => {
+    const state = getState() as any;
+    const csiId = params?.csiId ?? state.dashboard.searchContext.csiId;
+    return await dashboardApi.getAttention({ ...params, csiId });
   }
 );
 
 export const fetchActivity = createAsyncThunk(
   'dashboard/fetchActivity',
-  async (params: { scope?: 'ALL' | 'MINE'; hours?: number } | undefined) => {
-    return await dashboardApi.getActivity(params);
+  async (params: { scope?: 'ALL' | 'MINE'; hours?: number; csiId?: string | null } | undefined, { getState }) => {
+    const state = getState() as any;
+    const csiId = params?.csiId ?? state.dashboard.searchContext.csiId;
+    return await dashboardApi.getActivity({ ...params, csiId });
   }
 );
 
 export const fetchUpcomingSchedules = createAsyncThunk(
   'dashboard/fetchUpcomingSchedules',
-  async (params: { limit?: number } | undefined) => {
-    return await dashboardApi.getUpcomingSchedules(params);
+  async (params: { limit?: number; csiId?: string | null } | undefined, { getState }) => {
+    const state = getState() as any;
+    const csiId = params?.csiId ?? state.dashboard.searchContext.csiId;
+    return await dashboardApi.getUpcomingSchedules({ ...params, csiId });
   }
 );
 
 export const fetchReportsSnapshot = createAsyncThunk(
   'dashboard/fetchReportsSnapshot',
-  async (params: { limit?: number } | undefined) => {
-    return await dashboardApi.getReportsSnapshot(params);
+  async (params: { limit?: number; csiId?: string | null } | undefined, { getState }) => {
+    const state = getState() as any;
+    const csiId = params?.csiId ?? state.dashboard.searchContext.csiId;
+    return await dashboardApi.getReportsSnapshot({ ...params, csiId });
   }
 );
 
@@ -115,6 +125,15 @@ const dashboardSlice = createSlice({
     },
     unpinCsi: (state, action: PayloadAction<string>) => {
       state.pinnedCsiIds = state.pinnedCsiIds.filter((id) => id !== action.payload);
+    },
+    optimisticallyRemoveAttentionItem: (state, action: PayloadAction<string>) => {
+      state.attention.data = state.attention.data.filter((i) => i.id !== action.payload);
+    },
+    restoreAttentionItem: (state, action: PayloadAction<AttentionItem>) => {
+      const exists = state.attention.data.some((i) => i.id === action.payload.id);
+      if (!exists) {
+        state.attention.data.unshift(action.payload);
+      }
     },
     setSearchContext: (
       state,
@@ -247,6 +266,6 @@ const dashboardSlice = createSlice({
   },
 });
 
-export const { setPinnedCsiIds, pinCsi, unpinCsi, setSearchContext, clearSearchContext, setSearchFilters, clearSearchFilters } = dashboardSlice.actions;
+export const { setPinnedCsiIds, pinCsi, unpinCsi, optimisticallyRemoveAttentionItem, restoreAttentionItem, setSearchContext, clearSearchContext, setSearchFilters, clearSearchFilters } = dashboardSlice.actions;
 export default dashboardSlice.reducer;
 

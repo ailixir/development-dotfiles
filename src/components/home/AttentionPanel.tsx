@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Button, Chip, IconButton, List, ListItem, ListItemText, ListItemIcon, Skeleton, Stack, Typography, alpha, useTheme } from '@mui/material';
+import { Button, Chip, IconButton, List, ListItem, ListItemText, ListItemIcon, Skeleton, Stack, Typography, alpha, useTheme, Tooltip, Alert, Snackbar } from '@mui/material';
 import { Error, Warning, AssignmentInd, CheckCircle } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { acknowledgeCheck, assignCheck } from '@/store/slices/dashboardSlice';
+import { acknowledgeCheck, assignCheck, fetchAttention, optimisticallyRemoveAttentionItem, restoreAttentionItem } from '@/store/slices/dashboardSlice';
 import type { AttentionItem } from '@/types/dashboard/dashboardTypes';
 import { useNavigate } from 'react-router-dom';
 import TriageDrawer from './TriageDrawer';
@@ -41,12 +41,16 @@ const Row: React.FC<{ item: AttentionItem; onAck: () => void; onAssign: () => vo
         }
       />
       <Stack direction="row" spacing={1}>
-        <IconButton size="small" onClick={onAck} title="Acknowledge">
-          <CheckCircle />
-        </IconButton>
-        <IconButton size="small" onClick={onAssign} title="Assign">
-          <AssignmentInd />
-        </IconButton>
+        <Tooltip title="Acknowledge">
+          <IconButton size="small" onClick={onAck}>
+            <CheckCircle />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Assign">
+          <IconButton size="small" onClick={onAssign}>
+            <AssignmentInd />
+          </IconButton>
+        </Tooltip>
       </Stack>
     </ListItem>
   );
@@ -57,8 +61,9 @@ interface AttentionPanelProps { maxHeight?: number | string }
 const AttentionPanel: React.FC<AttentionPanelProps> = ({ maxHeight }) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { data, loading } = useAppSelector((s) => s.dashboard.attention);
+  const { data, loading, error } = useAppSelector((s) => s.dashboard.attention);
   const [triageId, setTriageId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>(() => ({ open: false, message: '', severity: 'success' }));
   const theme = useTheme();
 
   if (loading === 'loading') {
@@ -80,7 +85,9 @@ const AttentionPanel: React.FC<AttentionPanelProps> = ({ maxHeight }) => {
       action={<Button size="small" onClick={() => navigate('/checks/all')}>View all</Button>}
       maxHeight={maxHeight}
     >
-      {data.length === 0 ? (
+      {loading === 'failed' ? (
+        <Alert severity="error" role="alert" onClose={() => dispatch(fetchAttention({ limit: 20 }))}>{error || 'Failed to load attention items'}</Alert>
+      ) : data.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
           All clear. No failing or degrading checks.
         </Typography>
@@ -90,14 +97,37 @@ const AttentionPanel: React.FC<AttentionPanelProps> = ({ maxHeight }) => {
             <Row
               key={item.id}
               item={item}
-              onAck={() => dispatch(acknowledgeCheck(item.id))}
-              onAssign={() => dispatch(assignCheck({ id: item.id, userId: 'current.user@citi.com' }))}
+              onAck={async () => {
+                // Optimistic remove with simple rollback after 4s if needed
+                dispatch(optimisticallyRemoveAttentionItem(item.id));
+                setToast({ open: true, message: 'Acknowledged (Undo)', severity: 'success' });
+                const timer = setTimeout(() => {}, 4000);
+                try {
+                  await dispatch(acknowledgeCheck(item.id)).unwrap();
+                  clearTimeout(timer);
+                } catch {
+                  clearTimeout(timer);
+                  dispatch(restoreAttentionItem(item));
+                  setToast({ open: true, message: 'Failed to acknowledge', severity: 'error' });
+                }
+              }}
+              onAssign={async () => {
+                try {
+                  await dispatch(assignCheck({ id: item.id, userId: 'current.user@citi.com' })).unwrap();
+                  setToast({ open: true, message: 'Assigned', severity: 'success' });
+                } catch {
+                  setToast({ open: true, message: 'Failed to assign', severity: 'error' });
+                }
+              }}
               onOpen={() => setTriageId(item.id)}
             />
           ))}
         </List>
       )}
       <TriageDrawer open={!!triageId} checkId={triageId} onClose={() => setTriageId(null)} />
+      <Snackbar open={toast.open} autoHideDuration={2000} onClose={() => setToast((t) => ({ ...t, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity={toast.severity} onClose={() => setToast((t) => ({ ...t, open: false }))}>{toast.message}</Alert>
+      </Snackbar>
     </SectionBox>
   );
 };

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Card, CardActionArea, CardContent, Grid, Stack, Typography, alpha, useTheme } from '@mui/material';
-import { useAppSelector } from '@/store';
+import { Box, Card, CardActionArea, CardContent, Grid, Stack, Typography, alpha, useTheme, Skeleton, Button, Snackbar, Alert } from '@mui/material';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { unpinCsi, setSearchContext } from '@/store/slices/dashboardSlice';
 import apiClient from '@/services/api/apiClient';
+import SectionBox from './SectionBox';
 
 interface HealthSummary {
   csiId: string;
@@ -22,8 +24,10 @@ const StatusBadge: React.FC<{ status: HealthSummary['overallStatus'] }> = ({ sta
 
 const PinnedCSIs: React.FC = () => {
   const theme = useTheme();
+  const dispatch = useAppDispatch();
   const pinned = useAppSelector((s) => s.dashboard.pinnedCsiIds);
   const [health, setHealth] = useState<Record<string, HealthSummary>>({});
+  const [unpinToastOpen, setUnpinToastOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,35 +50,71 @@ const PinnedCSIs: React.FC = () => {
         setHealth(map);
       }
     }
-    if (pinned.length) load();
+    load();
+    const interval = setInterval(load, 60000);
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
   }, [pinned]);
 
-  if (pinned.length === 0) return null;
-
   return (
-    <Box sx={{ p: 2, border: `1px solid ${theme.palette.divider}`, borderRadius: 1 }}>
-      <Typography variant="h6" fontWeight={700} mb={1}>My CSIs</Typography>
+    <SectionBox title="My CSIs" accentColor={theme.palette.info.main}>
+      {pinned.length === 0 ? (
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Typography variant="body2" color="text.secondary">
+            You have no pinned CSIs. Select a CSI in search and click Pin to add it here.
+          </Typography>
+        </Stack>
+      ) : (
       <Grid container spacing={2}>
         {pinned.map((id) => {
           const hs = health[id];
+          const isLoading = !hs;
           return (
             <Grid item xs={12} sm={6} md={4} lg={3} key={id}>
-              <Card variant="outlined">
+              <Card variant="outlined" sx={{ transition: 'transform 150ms ease, box-shadow 200ms ease', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 20px rgba(0,0,0,0.08)' } }}>
                 <CardActionArea onClick={() => window.dispatchEvent(new Event('focus'))}>
                   <CardContent>
                     <Stack spacing={1}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography variant="subtitle2" fontWeight={700}>{id}</Typography>
-                        {hs && <StatusBadge status={hs.overallStatus} />}
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          {!isLoading && hs && <StatusBadge status={hs.overallStatus} />}
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            role="button"
+                            onClick={(e) => { e.stopPropagation(); dispatch(unpinCsi(id)); setUnpinToastOpen(true); }}
+                            sx={{ cursor: 'pointer', textDecoration: 'underline', '&:hover': { color: theme.palette.text.primary } }}
+                            aria-label={`Unpin ${id}`}
+                          >
+                            Unpin
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            role="button"
+                            onClick={(e) => { e.stopPropagation(); dispatch(setSearchContext({ csiId: id })); }}
+                            sx={{ cursor: 'pointer', textDecoration: 'underline', '&:hover': { color: theme.palette.text.primary } }}
+                            aria-label={`Set ${id} as context`}
+                          >
+                            Set context
+                          </Typography>
+                        </Stack>
                       </Stack>
-                      <Stack direction="row" spacing={2}>
-                        <Typography variant="caption" color="text.secondary">Passing: <Box component="span" sx={{ color: theme.palette.success.main, fontWeight: 700 }}>{hs?.passingChecks ?? '—'}</Box></Typography>
-                        <Typography variant="caption" color="text.secondary">Warn: <Box component="span" sx={{ color: theme.palette.warning.main, fontWeight: 700 }}>{hs?.warningChecks ?? '—'}</Box></Typography>
-                        <Typography variant="caption" color="text.secondary">Fail: <Box component="span" sx={{ color: theme.palette.error.main, fontWeight: 700 }}>{hs?.failingChecks ?? '—'}</Box></Typography>
-                      </Stack>
+                      {isLoading ? (
+                        <Stack spacing={0.75}>
+                          <Skeleton variant="text" width="60%" />
+                          <Skeleton variant="text" width="80%" />
+                        </Stack>
+                      ) : (
+                        <Stack direction="row" spacing={2}>
+                          <Typography variant="caption" color="text.secondary">Passing: <Box component="span" sx={{ color: theme.palette.success.main, fontWeight: 700 }}>{hs?.passingChecks ?? '—'}</Box></Typography>
+                          <Typography variant="caption" color="text.secondary">Warn: <Box component="span" sx={{ color: theme.palette.warning.main, fontWeight: 700 }}>{hs?.warningChecks ?? '—'}</Box></Typography>
+                          <Typography variant="caption" color="text.secondary">Fail: <Box component="span" sx={{ color: theme.palette.error.main, fontWeight: 700 }}>{hs?.failingChecks ?? '—'}</Box></Typography>
+                        </Stack>
+                      )}
                     </Stack>
                   </CardContent>
                 </CardActionArea>
@@ -83,7 +123,11 @@ const PinnedCSIs: React.FC = () => {
           );
         })}
       </Grid>
-    </Box>
+      )}
+      <Snackbar open={unpinToastOpen} autoHideDuration={2000} onClose={() => setUnpinToastOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity="info" onClose={() => setUnpinToastOpen(false)}>Removed from My CSIs</Alert>
+      </Snackbar>
+    </SectionBox>
   );
 };
 

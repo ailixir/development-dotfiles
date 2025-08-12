@@ -26,6 +26,33 @@ class ApiClient {
           config.headers.Authorization = `Bearer ${token}`;
         }
 
+        // Inject MSW debug params for development scenarios
+        try {
+          const isDev = typeof window !== 'undefined' && (import.meta as any).env?.DEV;
+          if (isDev) {
+            const slow = window.localStorage.getItem('__msw_debug_slow');
+            const fail = window.localStorage.getItem('__msw_debug_fail');
+            const empty = window.localStorage.getItem('__msw_debug_empty');
+            if (slow || fail || empty) {
+              // Normalize params to object
+              let paramsObj: Record<string, any> = {};
+              if (config.params instanceof URLSearchParams) {
+                config.params.forEach((value, key) => {
+                  paramsObj[key] = value;
+                });
+              } else if (typeof config.params === 'object' && config.params !== null) {
+                paramsObj = { ...config.params } as Record<string, any>;
+              }
+              if (slow && !Number.isNaN(Number(slow))) paramsObj.__slow = slow;
+              if (fail && !Number.isNaN(Number(fail))) paramsObj.__fail = fail;
+              if (empty === '1' || empty === 'true') paramsObj.__empty = '1';
+              config.params = paramsObj;
+            }
+          }
+        } catch {
+          // no-op if localStorage not available
+        }
+
         // Log requests in development
         if (APP_CONFIG.debugMode) {
           console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {

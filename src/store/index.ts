@@ -36,3 +36,67 @@ export type AppDispatch = typeof store.dispatch;
 // Typed hooks for use throughout the application
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+// Lightweight persistence for dashboard preferences (Phase 3 groundwork)
+const PERSIST_VERSION = 'v1';
+const PINNED_KEY = `checks.pinnedCsiIds.${PERSIST_VERSION}`;
+const SEARCH_CTX_KEY = `checks.searchContext.${PERSIST_VERSION}`;
+
+async function hydrateDashboardPreferences() {
+  try {
+    const pinnedRaw = window.localStorage.getItem(PINNED_KEY);
+    if (pinnedRaw) {
+      const pinned = JSON.parse(pinnedRaw);
+      if (Array.isArray(pinned)) {
+        store.dispatch({ type: 'dashboard/setPinnedCsiIds', payload: pinned });
+      }
+    } else {
+      // Seed smart defaults from mock users (Priya) when available
+      try {
+        const mod = await import('../services/mocks/mockData/csiData');
+        const priya = (mod as any).mockUsers?.find((u: any) => u.email === 'priya.sharma@citi.com');
+        if (priya?.permissions && Array.isArray(priya.permissions)) {
+          store.dispatch({ type: 'dashboard/setPinnedCsiIds', payload: priya.permissions.slice(0, 4) });
+        }
+      } catch {
+        // ignore if mock data not available in host mode
+      }
+    }
+
+    const ctxRaw = window.localStorage.getItem(SEARCH_CTX_KEY);
+    if (ctxRaw) {
+      const ctx = JSON.parse(ctxRaw);
+      if (ctx && typeof ctx === 'object' && ('csiId' in ctx)) {
+        store.dispatch({ type: 'dashboard/setSearchContext', payload: { csiId: ctx.csiId } });
+        // Set filters separately to respect reducer constraints
+        store.dispatch({ type: 'dashboard/setSearchFilters', payload: { environment: ctx.environment ?? null, tags: ctx.tags ?? [], tagMode: ctx.tagMode ?? 'AND' } });
+      }
+    }
+  } catch {
+    // no-op
+  }
+}
+
+function persistDashboardPreferences(state: RootState) {
+  try {
+    const pinned = state.dashboard.pinnedCsiIds;
+    window.localStorage.setItem(PINNED_KEY, JSON.stringify(pinned));
+    const ctx = state.dashboard.searchContext;
+    window.localStorage.setItem(SEARCH_CTX_KEY, JSON.stringify(ctx));
+  } catch {
+    // no-op
+  }
+}
+
+// Hydrate immediately in browser
+if (typeof window !== 'undefined') {
+  hydrateDashboardPreferences();
+  let last = store.getState().dashboard;
+  store.subscribe(() => {
+    const current = store.getState().dashboard;
+    if (current !== last) {
+      last = current;
+      persistDashboardPreferences(store.getState());
+    }
+  });
+}

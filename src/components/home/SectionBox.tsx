@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { Box, Paper, Stack, Typography, alpha, useTheme } from '@mui/material';
 
 interface SectionBoxProps {
@@ -13,6 +13,7 @@ interface SectionBoxProps {
 const SectionBox: React.FC<SectionBoxProps> = ({ title, icon, action, accentColor, maxHeight, children }) => {
   const theme = useTheme();
   const color = accentColor || theme.palette.primary.main;
+  const headerId = useId();
 
   return (
     <Paper
@@ -21,11 +22,16 @@ const SectionBox: React.FC<SectionBoxProps> = ({ title, icon, action, accentColo
         p: 0,
         borderRadius: 2,
         borderColor: alpha(color, 0.25),
-        background: `linear-gradient(135deg, ${alpha(color, 0.02)} 0%, ${alpha(color, 0.01)} 100%)`,
+        backgroundColor: theme.palette.background.paper,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         height: maxHeight ? maxHeight : 'auto',
+        transition: 'background-color 150ms ease, box-shadow 200ms ease, border-color 150ms ease',
+        '&:hover': {
+          borderColor: alpha(color, 0.35),
+          boxShadow: '0 6px 16px rgba(0,0,0,0.06)',
+        },
       }}
     >
       {/* Header */}
@@ -52,7 +58,7 @@ const SectionBox: React.FC<SectionBoxProps> = ({ title, icon, action, accentColo
         <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
           <Stack direction="row" spacing={1.25} alignItems="center">
             {icon && <Box sx={{ color }}>{icon}</Box>}
-            <Typography variant="h6" fontWeight={700}>
+            <Typography id={headerId} variant="h6" fontWeight={700}>
               {title}
             </Typography>
           </Stack>
@@ -71,6 +77,8 @@ const SectionBox: React.FC<SectionBoxProps> = ({ title, icon, action, accentColo
           '&::-webkit-scrollbar-thumb': { background: alpha(color, 0.4), borderRadius: 8 },
           '&::-webkit-scrollbar-thumb:hover': { background: alpha(color, 0.6) },
         }}
+        role="region"
+        aria-labelledby={headerId}
       >
         {children}
       </Box>

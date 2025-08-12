@@ -7,6 +7,10 @@ export const reportsHandlers = [
     await delay(300);
     
     const url = new URL(request.url);
+    const slow = parseInt(url.searchParams.get('__slow') || '0');
+    if (slow > 0) await delay(slow);
+    const fail = url.searchParams.get('__fail');
+    if (fail) return new HttpResponse(null, { status: parseInt(fail) || 500 });
     const status = url.searchParams.get('status');
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '10');
@@ -19,6 +23,9 @@ export const reportsHandlers = [
 
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
+    if (url.searchParams.get('__empty') === '1') {
+      filteredReports = [];
+    }
     const paginatedReports = filteredReports.slice(startIndex, endIndex);
 
     return HttpResponse.json({
@@ -72,8 +79,13 @@ export const reportsHandlers = [
   }),
 
   // Generate report preview
-  http.post('/api/reports/:id/preview', async ({ params }) => {
+  http.post('/api/reports/:id/preview', async ({ params, request }) => {
     await delay(1000);
+    const url = new URL(request.url);
+    const slow = parseInt(url.searchParams.get('__slow') || '0');
+    if (slow > 0) await delay(slow);
+    const fail = url.searchParams.get('__fail');
+    if (fail) return new HttpResponse(null, { status: parseInt(fail) || 500 });
     
     const { id } = params;
     const report = mockReports.find(r => r.id === id);
@@ -110,8 +122,13 @@ Generated with PUT Checks Platform
   }),
 
   // Get report execution history
-  http.get('/api/reports/:id/executions', async ({ params }) => {
+  http.get('/api/reports/:id/executions', async ({ params, request }) => {
     await delay(400);
+    const url = new URL(request.url);
+    const slow = parseInt(url.searchParams.get('__slow') || '0');
+    if (slow > 0) await delay(slow);
+    const fail = url.searchParams.get('__fail');
+    if (fail) return new HttpResponse(null, { status: parseInt(fail) || 500 });
     
     const executions = mockReportExecutions.filter(
       exec => exec.reportId === params.id

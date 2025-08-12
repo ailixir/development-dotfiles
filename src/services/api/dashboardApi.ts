@@ -8,23 +8,23 @@ import type {
 } from '@/types/dashboard/dashboardTypes';
 
 export const dashboardApi = {
-  async getDashboardSummary(): Promise<DashboardSummary> {
-    return await apiClient.get('/dashboard/summary');
+  async getDashboardSummary(params?: { csiId?: string | null }): Promise<DashboardSummary> {
+    return await apiClient.get('/dashboard/summary', { params });
   },
 
-  async getAttention(params?: { limit?: number }): Promise<{ data: AttentionItem[] }> {
+  async getAttention(params?: { limit?: number; csiId?: string | null }): Promise<{ data: AttentionItem[] }> {
     return await apiClient.get('/dashboard/attention', { params });
   },
 
-  async getActivity(params?: { scope?: 'ALL' | 'MINE'; hours?: number }): Promise<{ data: ActivityItem[] }> {
+  async getActivity(params?: { scope?: 'ALL' | 'MINE'; hours?: number; csiId?: string | null }): Promise<{ data: ActivityItem[] }> {
     return await apiClient.get('/dashboard/activity', { params });
   },
 
-  async getUpcomingSchedules(params?: { limit?: number }): Promise<{ data: any[] }> {
+  async getUpcomingSchedules(params?: { limit?: number; csiId?: string | null }): Promise<{ data: any[] }> {
     return await apiClient.get('/dashboard/upcoming', { params });
   },
 
-  async getReportsSnapshot(params?: { limit?: number }): Promise<{ data: ReportSnapshotItem[] }> {
+  async getReportsSnapshot(params?: { limit?: number; csiId?: string | null }): Promise<{ data: ReportSnapshotItem[] }> {
     return await apiClient.get('/dashboard/reports/snapshot', { params });
   },
 

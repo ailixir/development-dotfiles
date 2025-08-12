@@ -58,6 +58,10 @@ export const csiHandlers = [
     await delay(200);
     
     const url = new URL(request.url);
+    const slow = parseInt(url.searchParams.get('__slow') || '0');
+    if (slow > 0) await delay(slow);
+    const fail = url.searchParams.get('__fail');
+    if (fail) return new HttpResponse(null, { status: parseInt(fail) || 500 });
     const query = url.searchParams.get('q');
     const limit = parseInt(url.searchParams.get('limit') || '10');
     
@@ -149,42 +153,39 @@ export const csiHandlers = [
 
   
 
-  // Get CSI health summary
-  http.get('/api/csi/:id/health', async ({ params }) => {
+  // Get CSI health summary - derived from checks SSOT
+  http.get('/api/csi/:id/health', async ({ params, request }) => {
     await delay(500);
-    
+
+    const url = new URL(request.url);
+    const slow = parseInt(url.searchParams.get('__slow') || '0');
+    if (slow > 0) await delay(slow);
+    const fail = url.searchParams.get('__fail');
+    if (fail) return new HttpResponse(null, { status: parseInt(fail) || 500 });
+
     const { id } = params;
-    const csi = mockCSIs.find(c => c.id === id);
-    
+    const csi = mockCSIs.find((c) => c.id === id);
     if (!csi) {
-      return new HttpResponse(null, {
-        status: 404,
-        statusText: 'CSI not found'
-      });
+      return new HttpResponse(null, { status: 404, statusText: 'CSI not found' });
     }
-    
-    // Generate mock health data
-    const totalChecks = Math.floor(Math.random() * 20) + 5;
-    const passingChecks = Math.floor(totalChecks * (0.7 + Math.random() * 0.2));
-    const failingChecks = Math.floor((totalChecks - passingChecks) * 0.6);
-    const warningChecks = totalChecks - passingChecks - failingChecks;
-    
+
+    const checksForCsi = mockChecks.filter((chk) => chk.csiId === id);
+    const totalChecks = checksForCsi.length;
+    const passingChecks = checksForCsi.filter((chk) => chk.status === 'PASSING').length;
+    const failingChecks = checksForCsi.filter((chk) => chk.status === 'FAILING').length;
+    const warningChecks = checksForCsi.filter((chk) => chk.status === 'WARNING').length;
+    const overallStatus = failingChecks > 0 ? 'CRITICAL' : warningChecks > 0 ? 'WARNING' : 'HEALTHY';
+
     const healthSummary = {
       csiId: id,
       totalChecks,
       passingChecks,
       failingChecks,
       warningChecks,
-      overallStatus: failingChecks > 0 ? 'CRITICAL' : 
-                    warningChecks > 0 ? 'WARNING' : 'HEALTHY',
+      overallStatus,
       lastUpdated: new Date().toISOString(),
-      applications: csi.applications.map(app => ({
-        ...app,
-        checkCount: Math.floor(Math.random() * 5) + 1,
-        healthStatus: Math.random() > 0.8 ? 'WARNING' : 'HEALTHY'
-      }))
-    };
-    
+    } as any;
+
     return HttpResponse.json(healthSummary);
   })
 ];
