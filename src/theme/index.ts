@@ -84,12 +84,25 @@ export const theme = createTheme({
     borderRadius: 8,
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        '@media (prefers-reduced-motion: reduce)': {
+          '*': {
+            animation: 'none !important',
+            transition: 'none !important',
+            scrollBehavior: 'auto !important',
+          },
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {
           textTransform: 'none',
           fontWeight: 500,
           borderRadius: 8,
+          transition: 'transform 120ms ease',
+          '&:active': { transform: 'translateY(1px)' },
         },
       },
     },

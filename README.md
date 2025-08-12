@@ -115,6 +115,12 @@ The application uses MSW to provide a complete backend simulation:
 - **ESLint + Prettier**: Consistent code formatting
 - **Comprehensive Logging**: Debug mode with detailed API logs
 
+#### MSW Dev Toggles (via apiClient)
+- Set in `localStorage` to simulate scenarios at runtime:
+  - `__msw_debug_slow`: number (ms) to delay responses
+  - `__msw_debug_fail`: HTTP status to force failure (e.g., `500`)
+  - `__msw_debug_empty`: `1` to force empty responses
+
 ### Testing Ready
 - **Vitest**: Fast unit testing with React Testing Library
 - **MSW Integration**: Mock API responses in tests
@@ -129,12 +135,14 @@ The application uses MSW to provide a complete backend simulation:
 - [x] **Dashboard UI**: Functional health monitoring interface
 - [x] **Module Federation**: Ready for host application integration
 
-### 🔄 Next Steps (Phase 3+)
-- [ ] **Check Builder**: Multi-step wizard for creating checks
-- [ ] **Checks Studio**: Three-panel UI testing interface
-- [ ] **Report Builder**: Live preview email report creation
-- [ ] **Real-time Updates**: WebSocket integration for live data
-- [ ] **Advanced Features**: Bulk operations, filtering, search
+### 🔄 Recently Completed (Phase 3+)
+- [x] **Check Builder**: Multi-step wizard with validation, smart defaults, and autosave drafts
+- [x] **Checks Studio**: Three-panel UI with step validation, codegen, and run polling
+- [x] **Report Builder**: Live preview with subject/recipients, template-aware content, save & schedule
+- [x] **Advanced Features**: Bulk operations (execute/pause/resume/delete), persisted filters
+- [x] **Global Notifications**: Centralized toast queue in layout
+- [x] **A11y Improvements**: Skip link, ARIA for tabs/dialogs, reduced-motion support
+- [x] **UX States**: Standardized loading/empty/error components
 
 ## 📊 Performance Metrics
 

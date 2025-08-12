@@ -145,7 +145,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
         sx: { borderRadius: 2 }
       }}
     >
-      <DialogTitle>
+      <DialogTitle id="schedule-dialog-title">
         <Stack direction="row" alignItems="center" spacing={2}>
           <Schedule color="primary" />
           <Box>
@@ -159,7 +159,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
         </Stack>
       </DialogTitle>
       
-      <DialogContent>
+      <DialogContent aria-labelledby="schedule-dialog-title">
         <Stack spacing={3} sx={{ mt: 1 }}>
           {/* Enable/Disable Toggle */}
           <Box 
@@ -286,7 +286,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
       </DialogContent>
       
       <DialogActions sx={{ p: 3 }}>
-        <Button onClick={onClose} disabled={loading}>
+        <Button onClick={onClose} disabled={loading} autoFocus>
           Cancel
         </Button>
         <Button

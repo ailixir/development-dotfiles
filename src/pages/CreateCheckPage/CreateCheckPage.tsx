@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import {
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { 
   Box,
   Typography,
   Card,
@@ -37,11 +37,17 @@ import {
   ListItemIcon,
   IconButton,
   Tooltip,
+  Snackbar,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Save as SaveIcon,
-  Preview as PreviewIcon,
+  
   NavigateNext as NextIcon,
   NavigateBefore as BackIcon,
   Api,
@@ -56,11 +62,16 @@ import {
   CheckCircle,
   Warning,
   Info,
+  Edit,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@store/index';
 import { fetchCSIs } from '@store/slices/csiSlice';
 import { createCheck } from '@store/slices/checksSlice';
-import { useNavigate } from 'react-router-dom';
+import { addNotification } from '@/store/slices/uiSlice';
+import { useNavigate, useParams } from 'react-router-dom';
+import { fetchCheckById } from '@/store/slices/checksSlice';
+import { checksApi } from '@/services/api/checksApi';
+import SecretInput from '@/components/studio/SecretInput';
 
 const checkTypes = [
   { 
@@ -116,31 +127,33 @@ const checkTypes = [
 
 const environments = ['Development', 'Staging', 'Production', 'UAT'];
 const frequencies = [
-  { value: '1m', label: '1 minute' },
-  { value: '5m', label: '5 minutes' },
-  { value: '15m', label: '15 minutes' },
-  { value: '30m', label: '30 minutes' },
-  { value: '1h', label: '1 hour' },
-  { value: '6h', label: '6 hours' },
-  { value: '12h', label: '12 hours' },
-  { value: '24h', label: '24 hours' },
+  { value: '5m', label: 'Every 5 minutes' },
+  { value: '15m', label: 'Every 15 minutes' },
+  { value: '30m', label: 'Every 30 minutes' },
+  { value: '1h', label: 'Hourly' },
+  { value: '6h', label: 'Every 6 hours' },
+  { value: '12h', label: 'Every 12 hours' },
+  { value: '24h', label: 'Daily' },
+  { value: '1w', label: 'Weekly' },
+  { value: '1mo', label: 'Monthly' },
+  { value: 'custom', label: 'Custom (cron…)'},
 ];
 
 const notificationChannels = [
   { value: 'email', label: 'Email' },
-  { value: 'slack', label: 'Slack' },
   { value: 'teams', label: 'Microsoft Teams' },
-  { value: 'pagerduty', label: 'PagerDuty' },
   { value: 'webhook', label: 'Webhook' },
 ];
 
-const steps = ['Basic Information', 'Check Configuration', 'Scheduling & Alerts', 'Review & Create'];
+const steps = ['Basic Information', 'Check Configuration', 'Scheduling & Alerts', 'Review'];
 
 const CreateCheckPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { data: csiEntities, loading: csiLoading } = useAppSelector(state => state.csi);
+  const { data: checksData } = useAppSelector(state => state.checks);
+  const { id: editId } = useParams<{ id?: string }>();
   
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
@@ -205,10 +218,174 @@ const CreateCheckPage: React.FC = () => {
   const [newStepInput, setNewStepInput] = useState('');
   const [headerKey, setHeaderKey] = useState('');
   const [headerValue, setHeaderValue] = useState('');
+  const saveTimeoutRef = useRef<number | null>(null);
+  const [saveHint, setSaveHint] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [autosaveEnabled, setAutosaveEnabled] = useState<boolean>(true);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+  const [availableUITests, setAvailableUITests] = useState<Array<{ id: string; name: string }>>([]);
 
   useEffect(() => {
     dispatch(fetchCSIs());
   }, [dispatch]);
+
+  useEffect(() => {
+    // Load Studio tests for selection if UI_TEST selected
+    (async () => {
+      try {
+        if (formData.checkType === 'UI_TEST') {
+          const studio = (await import('@/services/api/studioApi')).default;
+          const res = (await studio.listTests({})) as any;
+          const data = res?.data || res || [];
+          setAvailableUITests(data.map((t: any) => ({ id: t.id, name: t.name })));
+        }
+      } catch {}
+    })();
+  }, [formData.checkType]);
+
+  // When a UI test is selected, seed required variables if metadata available
+  useEffect(() => {
+    (async () => {
+      try {
+        if (formData.checkType === 'UI_TEST' && (formData as any).uiTestId) {
+          const studio = (await import('@/services/api/studioApi')).default;
+          const test = await studio.getTest((formData as any).uiTestId);
+          const vars = (test as any).variables as Array<{ name: string; type: string; required?: boolean } | undefined>;
+          if (Array.isArray(vars) && vars.length > 0) {
+            setFormData((prev) => {
+              const existing = (prev as any).uiVariables || {};
+              const next = { ...existing } as Record<string, any>;
+              for (const v of vars) {
+                if (!v || !v.name) continue;
+                const key = v.name.toUpperCase();
+                if (next[key]) continue;
+                if (v.type === 'secret') next[key] = { kind: 'secret', secretId: '' };
+                else if (v.type === 'number') next[key] = { kind: 'number', value: '' };
+                else if (v.type === 'boolean') next[key] = { kind: 'boolean', value: false };
+                else next[key] = { kind: 'plain', value: '' };
+              }
+              return { ...prev, uiVariables: next } as any;
+            });
+          }
+        }
+      } catch {}
+    })();
+  }, [(formData as any).uiTestId, formData.checkType]);
+
+  // Smart defaults: prefill env/tag from typical usage
+  useEffect(() => {
+    if (!formData.environment) {
+      setFormData((p) => ({ ...p, environment: 'Production' }));
+    }
+  // one-time init
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Autosave draft to localStorage
+  useEffect(() => {
+    if (!autosaveEnabled) return;
+    if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current);
+    setSaveHint('saving');
+    saveTimeoutRef.current = window.setTimeout(() => {
+      try {
+        localStorage.setItem('checks:create:draft', JSON.stringify(formData));
+        setSaveHint('saved');
+        setTimeout(() => setSaveHint('idle'), 1200);
+      } catch {}
+    }, 400);
+    return () => {
+      if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current);
+    };
+  }, [formData, autosaveEnabled]);
+
+  // Hydrate from draft (first mount)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('checks:create:draft');
+      if (raw) {
+        const draft = JSON.parse(raw);
+        if (draft && typeof draft === 'object') {
+          setFormData((p) => ({ ...p, ...draft }));
+        }
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // If editing, hydrate from existing check
+  useEffect(() => {
+    (async () => {
+      if (!editId) return;
+      try {
+        const existing = checksData?.find((c) => c.id === editId);
+        const check = existing || await dispatch(fetchCheckById(editId)).unwrap();
+        if (!check) return;
+        setFormData((p) => ({
+          ...p,
+          name: check.name || '',
+          description: check.description || '',
+          checkType: check.type || '',
+          csiId: check.csiId || '',
+          environment: (check as any).environment || p.environment,
+          tags: check.tags || [],
+          ...(check.type === 'HTTP' ? {
+            endpoint: (check.configuration as any)?.url || (check.configuration as any)?.endpoint || '',
+            method: (check.configuration as any)?.method || 'GET',
+            expectedStatus: (check.configuration as any)?.expectedStatus || 200,
+            timeout: Math.round(((check.configuration as any)?.timeout || 30000) / 1000),
+            headers: (check.configuration as any)?.headers || {},
+          } : {}),
+          ...(check.type === 'TCP' ? {
+            host: (check.configuration as any)?.host || '',
+            port: (check.configuration as any)?.port || 80,
+          } : {}),
+          ...(check.type === 'SPLUNK' ? {
+            splunkQuery: (check.configuration as any)?.query || '',
+            timeRange: (check.configuration as any)?.timeRange || '15m',
+            expectedCount: (check.configuration as any)?.expectedCount || 0,
+            countOperator: (check.configuration as any)?.countOperator || '>',
+            splunkIndex: (check.configuration as any)?.index || '',
+          } : {}),
+          ...(check.type === 'GRAFANA' ? {
+            grafanaDashboard: (check.configuration as any)?.dashboard || (check.configuration as any)?.grafanaDashboard || '',
+            grafanaPanel: (check.configuration as any)?.panel || (check.configuration as any)?.grafanaPanel || '',
+            metric: (check.configuration as any)?.metric || '',
+            threshold: (check.configuration as any)?.threshold || 0,
+            thresholdOperator: (check.configuration as any)?.thresholdOperator || '>'
+          } : {}),
+          ...(check.type === 'ITRS' ? {
+            itrsSampler: (check.configuration as any)?.sampler || (check.configuration as any)?.gateway || '',
+            itrsExpectedStatus: (check.configuration as any)?.expectedStatus || 'OK',
+          } : {}),
+          ...(check.type === 'APPDYNAMICS' ? {
+            appDynamicsApp: (check.configuration as any)?.application || '',
+            healthRule: (check.configuration as any)?.healthRule || '',
+          } : {}),
+          ...(check.type === 'UI_TEST' ? {
+            uiTestId: (check.configuration as any)?.uiTest?.testId || '',
+            uiVariables: (check.configuration as any)?.uiTest?.variables || {},
+            timeout: Math.round((((check.configuration as any)?.uiTest?.overrides || {})?.timeout || 30000) / 1000),
+          } : {}),
+          enabled: check.schedule?.enabled ?? true,
+          frequency: (check.schedule as any)?.frequency || '5m',
+          ...(check.schedule && (check.schedule as any).cron ? { cron: (check.schedule as any).cron } : {}),
+        }));
+      } catch {}
+    })();
+  }, [editId, checksData, dispatch]);
+
+  // Notify if prefilled from template
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('checks:create:draft');
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      if (draft && draft.__fromTemplate && !snackbar.open) {
+        setSnackbar({ open: true, message: `Prefilled from template: ${draft.__fromTemplate}` as any, severity: 'success' });
+        delete draft.__fromTemplate;
+        localStorage.setItem('checks:create:draft', JSON.stringify(draft));
+      }
+    } catch {}
+  }, []);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -290,6 +467,9 @@ const CreateCheckPage: React.FC = () => {
         schedule: {
           enabled: formData.enabled,
           frequency: formData.frequency,
+          ...(formData.frequency === '1w' ? { dayOfWeek: (formData as any).dayOfWeek || 'mon' } : {}),
+          ...(formData.frequency === '1mo' ? { dayOfMonth: (formData as any).dayOfMonth ?? 1 } : {}),
+          ...(formData.frequency === 'custom' ? { cron: (formData as any).cron || '' } : {}),
         },
         alerting: {
           enabled: formData.alertOnFailure,
@@ -299,10 +479,12 @@ const CreateCheckPage: React.FC = () => {
       };
 
       await dispatch(createCheck(checkData as any)).unwrap();
-      navigate('/checks');
+      try { localStorage.removeItem('checks:create:draft'); } catch {}
+      dispatch(addNotification({ type: 'success', title: 'Create', message: 'Check created successfully' }));
+      navigate('/checks/all');
     } catch (error) {
       console.error('Failed to create check:', error);
-      // TODO: Add snackbar notification for error
+      setSnackbar({ open: true, message: 'Failed to create check', severity: 'error' });
     }
   };
 
@@ -353,9 +535,13 @@ const CreateCheckPage: React.FC = () => {
         };
       case 'UI_TEST':
         return {
-          steps: formData.testSteps,
-          browserType: formData.browserType,
-          screenSize: formData.screenSize,
+          uiTest: {
+            testId: (formData as any).uiTestId || '',
+            variables: (formData as any).uiVariables || {},
+            overrides: {
+              ...(formData.timeout ? { timeout: formData.timeout * 1000 } : {}),
+            },
+          },
         };
       default:
         return {};
@@ -364,62 +550,37 @@ const CreateCheckPage: React.FC = () => {
 
   const getSelectedCheckType = () => checkTypes.find(type => type.value === formData.checkType);
 
+  // Validation helpers
+  const step0Valid = useMemo(() => {
+    return Boolean(formData.checkType && formData.name.trim() && formData.csiId);
+  }, [formData.checkType, formData.name, formData.csiId]);
+
+  const step1Valid = useMemo(() => {
+    switch (formData.checkType) {
+      case 'HTTP':
+        return Boolean(formData.endpoint && /^https?:\/\//i.test(formData.endpoint));
+      case 'TCP':
+        return Boolean(formData.host && Number(formData.port) > 0);
+      case 'SPLUNK':
+        return Boolean(formData.splunkQuery && formData.timeRange);
+      case 'GRAFANA':
+        return Boolean(formData.grafanaDashboard && formData.grafanaPanel && formData.metric);
+      case 'ITRS':
+        return Boolean(formData.itrsSampler && formData.itrsExpectedStatus);
+      case 'APPDYNAMICS':
+        return Boolean(formData.appDynamicsApp && formData.healthRule);
+      case 'UI_TEST':
+        return Boolean((formData as any).uiTestId && typeof (formData as any).uiTestId === 'string');
+      default:
+        return false;
+    }
+  }, [formData]);
+
   const renderStepContent = (step: number) => {
     switch (step) {
       case 0:
         return (
           <Grid container spacing={3}>
-            {/* Header with check type selection */}
-            <Grid item xs={12}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                Choose Check Type
-              </Typography>
-              <Grid container spacing={2}>
-                {checkTypes.map((type) => {
-                  const IconComponent = type.icon;
-                  const isSelected = formData.checkType === type.value;
-                  return (
-                    <Grid item xs={12} sm={6} md={4} key={type.value}>
-                      <Card 
-                        variant={isSelected ? 'outlined' : 'elevation'}
-                        sx={{ 
-                          cursor: 'pointer',
-                          border: isSelected ? 2 : 1,
-                          borderColor: isSelected ? `${type.color}.main` : 'divider',
-                          '&:hover': { 
-                            boxShadow: 3,
-                            borderColor: `${type.color}.main`,
-                          },
-                          height: '100%'
-                        }}
-                        onClick={() => setFormData(prev => ({ ...prev, checkType: type.value }))}
-                      >
-                        <CardContent sx={{ textAlign: 'center', p: 3 }}>
-                          <Avatar 
-                            sx={{ 
-                              bgcolor: `${type.color}.main`, 
-                              width: 56, 
-                              height: 56, 
-                              mx: 'auto', 
-                              mb: 2 
-                            }}
-                          >
-                            <IconComponent sx={{ fontSize: 32 }} />
-                          </Avatar>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                            {type.label}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {type.description}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            </Grid>
-
             {formData.checkType && (
               <>
                 <Grid item xs={12}>
@@ -520,6 +681,58 @@ const CreateCheckPage: React.FC = () => {
                 </Grid>
               </>
             )}
+            {/* Header with check type selection */}
+            <Grid item xs={12}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                Choose Check Type
+              </Typography>
+              <Grid container spacing={2}>
+                {checkTypes.map((type) => {
+                  const IconComponent = type.icon;
+                  const isSelected = formData.checkType === type.value;
+                  return (
+                    <Grid item xs={12} sm={6} md={4} key={type.value}>
+                      <Card 
+                        variant={isSelected ? 'outlined' : 'elevation'}
+                        sx={{ 
+                          cursor: 'pointer',
+                          border: isSelected ? 2 : 1,
+                          borderColor: isSelected ? `${type.color}.main` : 'divider',
+                          '&:hover': { 
+                            boxShadow: 3,
+                            borderColor: `${type.color}.main`,
+                          },
+                          height: '100%'
+                        }}
+                        onClick={() => setFormData(prev => ({ ...prev, checkType: type.value }))}
+                      >
+                        <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                          <Avatar 
+                            sx={{ 
+                              bgcolor: `${type.color}.main`, 
+                              width: 56, 
+                              height: 56, 
+                              mx: 'auto', 
+                              mb: 2 
+                            }}
+                          >
+                            <IconComponent sx={{ fontSize: 32 }} />
+                          </Avatar>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                            {type.label}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {type.description}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Grid>
+
+            
           </Grid>
         );
 
@@ -527,12 +740,7 @@ const CreateCheckPage: React.FC = () => {
         const selectedType = getSelectedCheckType();
         return (
           <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Alert severity="info" sx={{ mb: 2 }}>
-                <AlertTitle>Check Type: {selectedType?.label}</AlertTitle>
-                {selectedType?.description}
-              </Alert>
-            </Grid>
+            {/* Check Type banner removed per request */}
 
             {/* HTTP Configuration */}
             {formData.checkType === 'HTTP' && (
@@ -902,109 +1110,112 @@ const CreateCheckPage: React.FC = () => {
             {/* UI Test Configuration */}
             {formData.checkType === 'UI_TEST' && (
               <>
-                <Grid item xs={12}>
-                  <Alert severity="success" sx={{ mb: 2 }}>
-                    <AlertTitle>Checks Studio - No Code UI Testing</AlertTitle>
-                    Write test steps in plain English. Each step should be clear and specific.
-                  </Alert>
-                </Grid>
+                {/* Banner removed per request */}
 
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Browser Type</InputLabel>
+                {/* Removed browser and screen size controls as they are not required here */}
+
+                <Grid item xs={12} md={8}>
+                  <FormControl fullWidth required>
+                    <InputLabel>Studio Test</InputLabel>
                     <Select
-                      value={formData.browserType}
-                      label="Browser Type"
-                      onChange={handleInputChange('browserType')}
+                      value={(formData as any).uiTestId || ''}
+                      label="Studio Test"
+                      onChange={(e) => setFormData((p) => ({ ...p, uiTestId: e.target.value }))}
                     >
-                      <MenuItem value="chrome">Chrome</MenuItem>
-                      <MenuItem value="firefox">Firefox</MenuItem>
-                      <MenuItem value="safari">Safari</MenuItem>
-                      <MenuItem value="edge">Edge</MenuItem>
+                      {availableUITests.map((t) => (
+                        <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Screen Size</InputLabel>
-                    <Select
-                      value={formData.screenSize}
-                      label="Screen Size"
-                      onChange={handleInputChange('screenSize')}
-                    >
-                      <MenuItem value="1920x1080">1920x1080 (Desktop)</MenuItem>
-                      <MenuItem value="1366x768">1366x768 (Laptop)</MenuItem>
-                      <MenuItem value="768x1024">768x1024 (Tablet)</MenuItem>
-                      <MenuItem value="375x667">375x667 (Mobile)</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+                {/* Optional overrides removed per request */}
 
                 <Grid item xs={12}>
-                  <Typography variant="subtitle2" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <PlaylistAdd />
-                    Test Steps ({formData.testSteps.length})
-                  </Typography>
-                  
-                  <TextField
-                    fullWidth
-                    label="Add Test Step"
-                    value={newStepInput}
-                    onChange={(e) => setNewStepInput(e.target.value)}
-                    placeholder='e.g., "Go to https://example.com", "Click the Login button", "Wait for text Welcome to appear"'
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddTestStep();
-                      }
-                    }}
-                    InputProps={{
-                      endAdornment: (
-                        <Button size="small" onClick={handleAddTestStep} disabled={!newStepInput.trim()}>
-                          Add Step
-                        </Button>
-                      ),
-                    }}
-                    sx={{ mb: 2 }}
-                  />
-                  
-                  {formData.testSteps.length > 0 && (
-                    <Paper variant="outlined" sx={{ p: 1 }}>
-                      <List dense>
-                        {formData.testSteps.map((step, index) => (
-                          <ListItem key={index}>
-                            <ListItemIcon>
-                              <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
-                                {index + 1}
-                              </Avatar>
-                            </ListItemIcon>
-                            <ListItemText primary={step} />
-                            <IconButton
-                              size="small"
-                              onClick={() => handleRemoveTestStep(index)}
-                              color="error"
-                            >
-                              <Delete fontSize="small" />
-                            </IconButton>
-                          </ListItem>
+                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Variables (Parameters)</Typography>
+                  <Paper variant="outlined" sx={{ p: 1 }}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell sx={{ width: 220 }}>Name</TableCell>
+                          <TableCell sx={{ width: 160 }}>Type</TableCell>
+                          <TableCell>Value / Secret</TableCell>
+                          <TableCell align="right" sx={{ width: 80 }}>Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {Object.entries(((formData as any).uiVariables || {}) as Record<string, any>).map(([name, v]: any) => (
+                          <TableRow key={name} hover>
+                            <TableCell>
+                              <TextField size="small" fullWidth label="Name" value={name} disabled />
+                            </TableCell>
+                            <TableCell>
+                              <FormControl size="small" fullWidth>
+                                <Select value={v?.kind || 'plain'} onChange={(e) => {
+                                  setFormData((p) => ({ ...p, uiVariables: { ...(p as any).uiVariables, [name]: { ...(v || {}), kind: e.target.value } } }));
+                                }}>
+                                  <MenuItem value="plain">Plain</MenuItem>
+                                  <MenuItem value="number">Number</MenuItem>
+                                  <MenuItem value="boolean">Boolean</MenuItem>
+                                  <MenuItem value="secret">Secret</MenuItem>
+                                </Select>
+                              </FormControl>
+                            </TableCell>
+                            <TableCell>
+                              {v?.kind === 'secret' ? (
+                                <SecretInput label="Select secret" value={v?.secretId ? { id: v.secretId } : null} onChange={(ref) => {
+                                  setFormData((p) => ({ ...p, uiVariables: { ...(p as any).uiVariables, [name]: { ...(v || {}), secretId: ref?.id } } }));
+                                }} />
+                              ) : (
+                                <TextField size="small" fullWidth label="Value" value={v?.value ?? ''} onChange={(e) => {
+                                  setFormData((p) => ({ ...p, uiVariables: { ...(p as any).uiVariables, [name]: { ...(v || {}), value: e.target.value } } }));
+                                }} />
+                              )}
+                            </TableCell>
+                            <TableCell align="right">
+                              <IconButton size="small" onClick={() => {
+                                const next = { ...(formData as any).uiVariables };
+                                delete (next as any)[name];
+                                setFormData((p) => ({ ...p, uiVariables: next }));
+                              }}>
+                                <Delete fontSize="small" />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                      </List>
-                    </Paper>
-                  )}
-
-                  {formData.testSteps.length === 0 && (
-                    <Alert severity="info">
-                      <Typography variant="body2">
-                        Example steps:
-                        <br />• "Go to https://www.citi.com"
-                        <br />• "Click on Sign On button"
-                        <br />• "Wait for User ID field to appear"
-                        <br />• "Type 'testuser' in User ID field"
-                        <br />• "Check that page title contains 'Login'"
-                      </Typography>
-                    </Alert>
-                  )}
+                        <TableRow>
+                          <TableCell colSpan={4}>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <TextField size="small" label="New variable name" value={headerKey} onChange={(e) => setHeaderKey(e.target.value)} sx={{ maxWidth: 240 }} />
+                              <Button size="small" disabled={!headerKey.trim()} onClick={() => {
+                                const name = headerKey.trim().toUpperCase();
+                                setHeaderKey('');
+                                setFormData((p) => ({ ...p, uiVariables: { ...(p as any).uiVariables, [name]: { kind: 'plain', value: '' } } }));
+                              }}>Add variable</Button>
+                              <Typography variant="caption" color="text.secondary">Use in Studio steps as &lt;var NAME&gt; or &lt;secret SECRET_ID&gt;</Typography>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12}>
+                  <Stack direction="row" spacing={1}>
+                    <Button size="small" variant="outlined" onClick={async () => {
+                      try {
+                        const studio = (await import('@/services/api/studioApi')).default;
+                        const testId = (formData as any).uiTestId;
+                        if (!testId) return;
+                        const vars = (formData as any).uiVariables || {};
+                        const res = await studio.validateVariables(testId, vars);
+                        const ok = (res as any).isValid !== false;
+                        setSnackbar({ open: true, message: ok ? 'Variables look good' : `Missing: ${(res as any).missing?.join(', ')}`, severity: ok ? 'success' : 'error' });
+                      } catch {
+                        setSnackbar({ open: true, message: 'Validation failed', severity: 'error' });
+                      }
+                    }}>Validate variables</Button>
+                  </Stack>
                 </Grid>
               </>
             )}
@@ -1044,6 +1255,61 @@ const CreateCheckPage: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
+
+            {formData.frequency === '1w' && (
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Day of Week</InputLabel>
+                  <Select
+                    value={(formData as any).dayOfWeek || 'mon'}
+                    label="Day of Week"
+                    onChange={(e) => setFormData((p) => ({ ...p, dayOfWeek: e.target.value }))}
+                  >
+                    {[['sun','Sunday'],['mon','Monday'],['tue','Tuesday'],['wed','Wednesday'],['thu','Thursday'],['fri','Friday'],['sat','Saturday']].map(([v, l]) => (
+                      <MenuItem key={v} value={v}>{l}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
+
+            {formData.frequency === '1mo' && (
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Day of Month"
+                  value={(formData as any).dayOfMonth ?? 1}
+                  onChange={(e) => setFormData((p) => ({ ...p, dayOfMonth: Math.max(1, Math.min(28, Number(e.target.value) || 1)) }))}
+                  helperText="Runs monthly on this day (1-28)"
+                  InputProps={{ inputProps: { min: 1, max: 28 } }}
+                />
+              </Grid>
+            )}
+
+            {formData.frequency === 'custom' && (
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Cron Expression"
+                  placeholder="e.g. 0 9 * * MON"
+                  value={(formData as any).cron || ''}
+                  onChange={(e) => setFormData((p) => ({ ...p, cron: e.target.value }))}
+                  helperText={(() => {
+                    const cron = (formData as any).cron || '';
+                    const isValid = /^\s*([^\s]+\s+){4}[^\s]+\s*$/.test(cron);
+                    return isValid ? 'Valid cron' : 'Supports standard 5-field cron (min hour day month dow)';
+                  })()}
+                />
+              </Grid>
+            )}
+            {formData.frequency === 'custom' && (
+              <Grid item xs={12}>
+                <Typography variant="caption" color="text.secondary">
+                  Examples: "0 */2 * * *" (every 2 hours), "30 9 * * 1" (Mondays 09:30), "0 0 1 * *" (first day monthly)
+                </Typography>
+              </Grid>
+            )}
 
             <Grid item xs={12} md={6}>
               <FormControlLabel
@@ -1128,9 +1394,9 @@ const CreateCheckPage: React.FC = () => {
               <Alert severity="info">
                 <AlertTitle>Scheduling Notes</AlertTitle>
                 <Typography variant="body2">
-                  • Checks will run according to the selected frequency after creation
-                  • You can pause/resume checks anytime from the Checks dashboard
-                  • Failed checks will retry automatically based on your configuration
+                  • Checks will run according to the selected frequency after creation<br />
+                  • You can pause/resume checks anytime from the Checks dashboard<br />
+                  • Failed checks will retry automatically based on your configuration<br />
                   • All execution history and logs are preserved for analysis
                 </Typography>
               </Alert>
@@ -1145,151 +1411,184 @@ const CreateCheckPage: React.FC = () => {
         return (
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <Alert severity="success" sx={{ mb: 3 }}>
-                <AlertTitle>Ready to Create Check</AlertTitle>
-                Review your configuration below. Once created, the check will be available in your dashboard.
+              <Alert severity="success" sx={{ mb: 2 }}>
+                <AlertTitle>{editId ? 'Review & Update' : 'Review & Create'}</AlertTitle>
+                Double-check details below. Use Edit actions to jump back to a section.
               </Alert>
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <Paper variant="outlined" sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Info color="primary" />
-                  Basic Information
-                </Typography>
-                <Stack spacing={1}>
-                  <Typography><strong>Name:</strong> {formData.name || 'Not specified'}</Typography>
-                  <Typography><strong>Type:</strong> {getSelectedCheckType()?.label}</Typography>
-                  <Typography><strong>CSI Entity:</strong> {selectedCsi ? `${selectedCsi.id} - ${selectedCsi.name}` : 'Not selected'}</Typography>
-                  <Typography><strong>Environment:</strong> {formData.environment || 'Not selected'}</Typography>
+            <Grid item xs={12} md={4}>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Basic Info</Typography>
+                  <Button size="small" startIcon={<Edit fontSize="small" />} onClick={() => setActiveStep(0)}>Edit</Button>
+                </Stack>
+                <List dense>
+                  <ListItem disableGutters>
+                    <ListItemText primary="Name" secondary={formData.name || 'Not specified'} />
+                  </ListItem>
+                  <ListItem disableGutters>
+                    <ListItemText primary="Type" secondary={getSelectedCheckType()?.label || '—'} />
+                  </ListItem>
+                  <ListItem disableGutters>
+                    <ListItemText primary="CSI" secondary={selectedCsi ? `${selectedCsi.id} - ${selectedCsi.name}` : 'Not selected'} />
+                  </ListItem>
+                  <ListItem disableGutters>
+                    <ListItemText primary="Environment" secondary={formData.environment || 'Not selected'} />
+                  </ListItem>
                   {formData.description && (
-                    <Typography><strong>Description:</strong> {formData.description}</Typography>
+                    <ListItem disableGutters>
+                      <ListItemText primary="Description" secondary={formData.description} />
+                    </ListItem>
                   )}
                   {formData.tags.length > 0 && (
-                    <Box sx={{ mt: 1 }}>
-                      <Typography component="span" sx={{ fontWeight: 'bold' }}>Tags:</Typography>
-                      <Box sx={{ mt: 0.5 }}>
-                        {formData.tags.map(tag => (
-                          <Chip key={tag} label={tag} size="small" sx={{ mr: 0.5, mb: 0.5 }} />
-                        ))}
-                      </Box>
-                    </Box>
+                    <ListItem disableGutters>
+                      <ListItemText primary="Tags" secondary={formData.tags.join(', ')} />
+                    </ListItem>
                   )}
-                </Stack>
+                </List>
               </Paper>
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <Paper variant="outlined" sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CheckCircle color="success" />
-                  Scheduling & Alerts
-                </Typography>
-                <Stack spacing={1}>
-                  <Typography><strong>Frequency:</strong> {frequencyLabel}</Typography>
-                  <Typography><strong>Status:</strong> {formData.enabled ? 'Will start immediately' : 'Will remain disabled'}</Typography>
-                  <Typography><strong>Alerts:</strong> {formData.alertOnFailure ? `After ${formData.alertThreshold} consecutive failures` : 'Disabled'}</Typography>
-                  {formData.notificationChannels.length > 0 && (
-                    <Typography><strong>Notification Channels:</strong> {formData.notificationChannels.map(ch => notificationChannels.find(c => c.value === ch)?.label).join(', ')}</Typography>
-                  )}
+            <Grid item xs={12} md={4}>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Configuration</Typography>
+                  <Button size="small" startIcon={<Edit fontSize="small" />} onClick={() => setActiveStep(1)}>Edit</Button>
                 </Stack>
-              </Paper>
-            </Grid>
 
-            {/* Configuration Details based on check type */}
-            <Grid item xs={12}>
-              <Paper variant="outlined" sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  {getSelectedCheckType()?.label} Configuration
-                </Typography>
-                
                 {formData.checkType === 'HTTP' && (
-                  <Stack spacing={1}>
-                    <Typography><strong>Endpoint:</strong> {formData.endpoint || 'Not specified'}</Typography>
-                    <Typography><strong>Method:</strong> {formData.method}</Typography>
-                    <Typography><strong>Expected Status:</strong> {formData.expectedStatus}</Typography>
-                    <Typography><strong>Timeout:</strong> {formData.timeout} seconds</Typography>
-                    <Typography><strong>Retries:</strong> {formData.retries}</Typography>
-                    <Typography><strong>SSL Validation:</strong> {formData.validateSSL ? 'Enabled' : 'Disabled'}</Typography>
-                    <Typography><strong>Follow Redirects:</strong> {formData.followRedirects ? 'Yes' : 'No'}</Typography>
-                    {Object.keys(formData.headers).length > 0 && (
-                      <Box>
-                        <Typography sx={{ fontWeight: 'bold' }}>Headers:</Typography>
-                        {Object.entries(formData.headers).map(([key, value]) => (
-                          <Typography key={key} variant="body2" sx={{ ml: 2 }}>• {key}: {value}</Typography>
-                        ))}
-                      </Box>
-                    )}
-                  </Stack>
+                  <List dense>
+                    <ListItem disableGutters><ListItemText primary="Endpoint" secondary={formData.endpoint || '—'} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Method" secondary={formData.method} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Expected Status" secondary={formData.expectedStatus} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Timeout" secondary={`${formData.timeout}s`} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Retries" secondary={formData.retries} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="SSL Validation" secondary={formData.validateSSL ? 'Enabled' : 'Disabled'} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Follow Redirects" secondary={formData.followRedirects ? 'Yes' : 'No'} /></ListItem>
+                  </List>
                 )}
 
                 {formData.checkType === 'TCP' && (
-                  <Stack spacing={1}>
-                    <Typography><strong>Host:</strong> {formData.host || 'Not specified'}</Typography>
-                    <Typography><strong>Port:</strong> {formData.port}</Typography>
-                    <Typography><strong>Timeout:</strong> {formData.timeout} seconds</Typography>
-                  </Stack>
+                  <List dense>
+                    <ListItem disableGutters><ListItemText primary="Host" secondary={formData.host || '—'} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Port" secondary={formData.port} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Timeout" secondary={`${formData.timeout}s`} /></ListItem>
+                  </List>
                 )}
 
                 {formData.checkType === 'SPLUNK' && (
-                  <Stack spacing={1}>
-                    <Typography><strong>Query:</strong></Typography>
-                    <Paper variant="outlined" sx={{ p: 1, bgcolor: 'grey.50' }}>
-                      <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                        {formData.splunkQuery || 'Not specified'}
-                      </Typography>
+                  <>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>Query</Typography>
+                    <Paper variant="outlined" sx={{ p: 1, bgcolor: 'grey.50', mb: 1 }}>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{formData.splunkQuery || '—'}</Typography>
                     </Paper>
-                    <Typography><strong>Index:</strong> {formData.splunkIndex || 'Default'}</Typography>
-                    <Typography><strong>Time Range:</strong> {formData.timeRange}</Typography>
-                    <Typography><strong>Expected Count:</strong> {formData.countOperator} {formData.expectedCount}</Typography>
-                  </Stack>
+                    <List dense>
+                      <ListItem disableGutters><ListItemText primary="Index" secondary={formData.splunkIndex || 'Default'} /></ListItem>
+                      <ListItem disableGutters><ListItemText primary="Time Range" secondary={formData.timeRange} /></ListItem>
+                      <ListItem disableGutters><ListItemText primary="Expected Count" secondary={`${formData.countOperator} ${formData.expectedCount}`} /></ListItem>
+                    </List>
+                  </>
                 )}
 
                 {formData.checkType === 'GRAFANA' && (
-                  <Stack spacing={1}>
-                    <Typography><strong>Dashboard:</strong> {formData.grafanaDashboard || 'Not specified'}</Typography>
-                    <Typography><strong>Panel:</strong> {formData.grafanaPanel || 'Not specified'}</Typography>
-                    <Typography><strong>Metric:</strong> {formData.metric || 'Not specified'}</Typography>
-                    <Typography><strong>Threshold:</strong> {formData.thresholdOperator} {formData.threshold}</Typography>
-                  </Stack>
+                  <List dense>
+                    <ListItem disableGutters><ListItemText primary="Dashboard" secondary={formData.grafanaDashboard || '—'} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Panel" secondary={formData.grafanaPanel || '—'} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Metric" secondary={formData.metric || '—'} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Threshold" secondary={`${formData.thresholdOperator} ${formData.threshold}`} /></ListItem>
+                  </List>
                 )}
 
                 {formData.checkType === 'ITRS' && (
-                  <Stack spacing={1}>
-                    <Typography><strong>Sampler Path:</strong> {formData.itrsSampler || 'Not specified'}</Typography>
-                    <Typography><strong>Expected Status:</strong> {formData.itrsExpectedStatus}</Typography>
-                  </Stack>
+                  <List dense>
+                    <ListItem disableGutters><ListItemText primary="Sampler Path" secondary={formData.itrsSampler || '—'} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Expected Status" secondary={formData.itrsExpectedStatus} /></ListItem>
+                  </List>
                 )}
 
                 {formData.checkType === 'APPDYNAMICS' && (
-                  <Stack spacing={1}>
-                    <Typography><strong>Application:</strong> {formData.appDynamicsApp || 'Not specified'}</Typography>
-                    <Typography><strong>Health Rule:</strong> {formData.healthRule || 'Not specified'}</Typography>
-                  </Stack>
+                  <List dense>
+                    <ListItem disableGutters><ListItemText primary="Application" secondary={formData.appDynamicsApp || '—'} /></ListItem>
+                    <ListItem disableGutters><ListItemText primary="Health Rule" secondary={formData.healthRule || '—'} /></ListItem>
+                  </List>
                 )}
 
                 {formData.checkType === 'UI_TEST' && (
-                  <Stack spacing={1}>
-                    <Typography><strong>Browser:</strong> {formData.browserType}</Typography>
-                    <Typography><strong>Screen Size:</strong> {formData.screenSize}</Typography>
-                    <Typography><strong>Test Steps:</strong> {formData.testSteps.length} steps defined</Typography>
-                    {formData.testSteps.length > 0 && (
-                      <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
-                        <Typography variant="subtitle2" sx={{ mb: 1 }}>Steps Preview:</Typography>
-                        {formData.testSteps.slice(0, 3).map((step, index) => (
-                          <Typography key={index} variant="body2">
-                            {index + 1}. {step}
-                          </Typography>
-                        ))}
-                        {formData.testSteps.length > 3 && (
-                          <Typography variant="body2" color="text.secondary">
-                            ... and {formData.testSteps.length - 3} more steps
-                          </Typography>
-                        )}
-                      </Paper>
+                  <>
+                    <List dense>
+                      <ListItem disableGutters><ListItemText primary="Studio Test" secondary={(() => {
+                        const t = availableUITests.find((t) => t.id === (formData as any).uiTestId);
+                        return t?.name || (formData as any).uiTestId || 'Not selected';
+                      })()} /></ListItem>
+                      {formData.timeout && (
+                        <ListItem disableGutters><ListItemText primary="Timeout override" secondary={`${formData.timeout}s`} /></ListItem>
+                      )}
+                    </List>
+                    {Object.keys(((formData as any).uiVariables || {})).length > 0 && (
+                      <>
+                        <Typography variant="body2" sx={{ fontWeight: 600, mt: 1 }}>Variables</Typography>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell sx={{ width: 220 }}>Name</TableCell>
+                              <TableCell sx={{ width: 140 }}>Type</TableCell>
+                              <TableCell>Value</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {Object.entries(((formData as any).uiVariables || {}) as Record<string, any>).map(([name, v]) => (
+                              <TableRow key={name}>
+                                <TableCell>{name}</TableCell>
+                                <TableCell>{v?.kind || 'plain'}</TableCell>
+                                <TableCell>{v?.kind === 'secret' ? (v?.secretId ? `••••${String(v.secretId).slice(-4)}` : '—') : (String(v?.value ?? ''))}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </>
                     )}
-                  </Stack>
+                  </>
                 )}
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Scheduling & Alerts</Typography>
+                  <Button size="small" startIcon={<Edit fontSize="small" />} onClick={() => setActiveStep(2)}>Edit</Button>
+                </Stack>
+                <List dense>
+                  <ListItem disableGutters>
+                    <ListItemText primary="Frequency" secondary={frequencyLabel} />
+                  </ListItem>
+                  {formData.frequency === '1w' && (
+                    <ListItem disableGutters>
+                      <ListItemText primary="Day of Week" secondary={(formData as any).dayOfWeek?.toUpperCase() || 'MON'} />
+                    </ListItem>
+                  )}
+                  {formData.frequency === '1mo' && (
+                    <ListItem disableGutters>
+                      <ListItemText primary="Day of Month" secondary={(formData as any).dayOfMonth ?? 1} />
+                    </ListItem>
+                  )}
+                  {formData.frequency === 'custom' && (
+                    <ListItem disableGutters>
+                      <ListItemText primary="Cron" secondary={(formData as any).cron || '—'} />
+                    </ListItem>
+                  )}
+                  <ListItem disableGutters>
+                    <ListItemText primary="Enabled" secondary={formData.enabled ? 'Yes' : 'No'} />
+                  </ListItem>
+                  <ListItem disableGutters>
+                    <ListItemText primary="Alerts" secondary={formData.alertOnFailure ? `After ${formData.alertThreshold} consecutive failures` : 'Disabled'} />
+                  </ListItem>
+                  {formData.notificationChannels.length > 0 && (
+                    <ListItem disableGutters>
+                      <ListItemText primary="Channels" secondary={formData.notificationChannels.map(ch => notificationChannels.find(c => c.value === ch)?.label).join(', ')} />
+                    </ListItem>
+                  )}
+                </List>
               </Paper>
             </Grid>
           </Grid>
@@ -1307,9 +1606,19 @@ const CreateCheckPage: React.FC = () => {
           <AddIcon sx={{ fontSize: 32, color: 'primary.main' }} />
           Create New Check
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Build comprehensive health checks for your applications and infrastructure using our multi-step wizard.
-        </Typography>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography variant="body1" color="text.secondary">
+            Build comprehensive health checks for your applications and infrastructure using our multi-step wizard.
+          </Typography>
+          <Typography variant="caption" color={saveHint === 'saving' ? 'text.secondary' : 'success.main'}>
+            {saveHint === 'saving' ? 'Saving draft…' : saveHint === 'saved' ? 'Draft saved' : ''}
+          </Typography>
+          <FormControlLabel
+            sx={{ ml: 2 }}
+            control={<Switch checked={autosaveEnabled} onChange={(e) => setAutosaveEnabled(e.target.checked)} />}
+            label="Autosave"
+          />
+        </Stack>
       </Box>
 
       <Card>
@@ -1324,10 +1633,17 @@ const CreateCheckPage: React.FC = () => {
 
           <Box sx={{ mb: 4 }}>
             {renderStepContent(activeStep)}
+            {/* Inline validation hints */}
+            {activeStep === 0 && !step0Valid && (
+              <Alert severity="warning" sx={{ mt: 2 }}>Name, Type, and CSI are required.</Alert>
+            )}
+            {activeStep === 1 && !step1Valid && (
+              <Alert severity="warning" sx={{ mt: 2 }}>Please complete the required configuration for the selected type.</Alert>
+            )}
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-            <Button
+              <Button
               color="inherit"
               disabled={activeStep === 0}
               onClick={handleBack}
@@ -1346,7 +1662,7 @@ const CreateCheckPage: React.FC = () => {
                                 variant="contained" 
                                 onClick={handleNext}
                                 endIcon={<NextIcon />}
-                                disabled={activeStep === 0 && !formData.checkType}
+                                disabled={(activeStep === 0 && !step0Valid) || (activeStep === 1 && !step1Valid)}
                               >
                                 Next
                               </Button>
@@ -1354,23 +1670,51 @@ const CreateCheckPage: React.FC = () => {
                           </Tooltip>
             ) : (
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button 
-                  variant="outlined" 
-                  startIcon={<PreviewIcon />}
-                  onClick={() => console.log('Preview:', formData)}
-                >
-                  Preview
-                </Button>
+                  {/* Preview button removed per request */}
                 <Tooltip title="Check Name, Type, and CSI Entity are required" arrow>
                   <span>
                     <Button 
                       variant="contained" 
                       color="success"
                       startIcon={<SaveIcon />}
-                      onClick={handleCreateCheck}
-                      disabled={!formData.name || !formData.checkType || !formData.csiId}
+                      onClick={async () => {
+                        if (!step0Valid || !step1Valid) return;
+                        try {
+                          if (editId) {
+                            const checkData: any = {
+                              name: formData.name,
+                              description: formData.description,
+                              type: formData.checkType,
+                              csiId: formData.csiId,
+                              environment: formData.environment,
+                              tags: formData.tags,
+                              configuration: getConfigurationForCheckType(),
+                              schedule: {
+                                enabled: formData.enabled,
+                                frequency: formData.frequency,
+                                ...(formData.frequency === '1w' ? { dayOfWeek: (formData as any).dayOfWeek || 'mon' } : {}),
+                                ...(formData.frequency === '1mo' ? { dayOfMonth: (formData as any).dayOfMonth ?? 1 } : {}),
+                                ...(formData.frequency === 'custom' ? { cron: (formData as any).cron || '' } : {}),
+                              },
+                              alerting: {
+                                enabled: formData.alertOnFailure,
+                                threshold: formData.alertThreshold,
+                                channels: formData.notificationChannels,
+                              },
+                            };
+                            await checksApi.updateCheck(editId, checkData);
+                            dispatch(addNotification({ type: 'success', title: 'Update', message: 'Check updated successfully' }));
+                            navigate(`/checks/details/${editId}`);
+                          } else {
+                            await handleCreateCheck();
+                          }
+                        } catch (e) {
+                          setSnackbar({ open: true, message: 'Failed to save check', severity: 'error' });
+                        }
+                      }}
+                      disabled={!step0Valid || !step1Valid}
                     >
-                      Create Check
+                      {editId ? 'Update Check' : 'Create Check'}
                     </Button>
                   </span>
                 </Tooltip>
@@ -1379,6 +1723,9 @@ const CreateCheckPage: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar((s) => ({ ...s, open: false }))}>
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar((s) => ({ ...s, open: false }))}>{snackbar.message}</Alert>
+      </Snackbar>
     </Box>
   );
 };

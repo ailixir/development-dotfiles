@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -35,6 +35,8 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
+  Checkbox,
+  Toolbar,
 } from '@mui/material';
 import {
   Search,
@@ -60,7 +62,12 @@ import {
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@store/index';
 import { fetchChecks, executeCheck, deleteCheck, pauseCheck, resumeCheck } from '@store/slices/checksSlice';
-import { useNavigate } from 'react-router-dom';
+import { addNotification } from '@/store/slices/uiSlice';
+import EmptyState from '@/components/shared/States/EmptyState';
+import ErrorState from '@/components/shared/States/ErrorState';
+import LoadingState from '@/components/shared/States/LoadingState';
+import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
+import { checksApi } from '@/services/api/checksApi';
 // Visual skeleton: scope is now shown globally in ScopeBar; this page gets a left FiltersRail
 import FiltersRail from './FiltersRail';
 import ScheduleDialog from '@components/scheduling/ScheduleDialog';
@@ -71,7 +78,8 @@ const AllChecksPage: React.FC = () => {
   const navigate = useNavigate();
   
   const { data: checks, loading, error, executingChecks, schedulingChecks } = useAppSelector(state => state.checks);
-  const { selectedCSI, tags: { selected: selectedTags } } = useAppSelector(state => state.csi);
+  const { selectedCSI, tags: { selected: selectedTags, filterMode } } = useAppSelector(state => state.csi);
+  const location = useLocation();
   
   // Local state
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,15 +91,52 @@ const AllChecksPage: React.FC = () => {
   const [selectedCheck, setSelectedCheck] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+  const lastFocusRef = useRef<HTMLElement | null>(null);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
     severity: 'success'
   });
+  const [persisted, setPersisted] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   useEffect(() => {
     dispatch(fetchChecks({ page: 1, limit: 100 }));
   }, [dispatch]);
+
+  // Return focus to trigger after closing schedule dialog
+  useEffect(() => {
+    if (!scheduleDialogOpen && lastFocusRef.current) {
+      lastFocusRef.current.focus();
+      lastFocusRef.current = null;
+    }
+  }, [scheduleDialogOpen]);
+
+  // Note: toast handled via notifications when creating a check
+
+  // Persist table preferences (e.g., rowsPerPage)
+  useEffect(() => {
+    if (!persisted) {
+      try {
+        const raw = localStorage.getItem('checks:catalog:prefs');
+        if (raw) {
+          const prefs = JSON.parse(raw);
+          if (prefs?.rowsPerPage) setRowsPerPage(prefs.rowsPerPage);
+          if (prefs?.searchQuery !== undefined) setSearchQuery(prefs.searchQuery);
+          if (prefs?.statusFilter !== undefined) setStatusFilter(prefs.statusFilter);
+          if (prefs?.typeFilter !== undefined) setTypeFilter(prefs.typeFilter);
+        }
+      } catch {}
+      setPersisted(true);
+    }
+  }, [persisted]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('checks:catalog:prefs', JSON.stringify({ rowsPerPage, searchQuery, statusFilter, typeFilter }));
+    } catch {}
+  }, [rowsPerPage, searchQuery, statusFilter, typeFilter]);
 
   // Filter and search logic
   const filteredChecks = useMemo(() => {
@@ -104,9 +149,10 @@ const AllChecksPage: React.FC = () => {
     
     // Apply tag filter
     if (selectedTags && selectedTags.length > 0) {
-      result = result.filter(check => 
-        selectedTags.every(tag => check.tags.includes(tag))
-      );
+      result = result.filter(check => {
+        const has = (t: string) => check.tags.includes(t);
+        return filterMode === 'AND' ? selectedTags.every(has) : selectedTags.some(has);
+      });
     }
     
     // Apply search query
@@ -139,6 +185,83 @@ const AllChecksPage: React.FC = () => {
     return filteredChecks.slice(startIndex, startIndex + rowsPerPage);
   }, [filteredChecks, page, rowsPerPage]);
 
+  const allVisibleSelected = paginatedChecks.length > 0 && paginatedChecks.every((c) => selectedIds.includes(c.id));
+  const someVisibleSelected = paginatedChecks.some((c) => selectedIds.includes(c.id));
+
+  const toggleSelectAllVisible = (checked: boolean) => {
+    if (checked) {
+      const ids = Array.from(new Set([...selectedIds, ...paginatedChecks.map((c) => c.id)]));
+      setSelectedIds(ids);
+    } else {
+      const visibleIds = new Set(paginatedChecks.map((c) => c.id));
+      setSelectedIds(selectedIds.filter((id) => !visibleIds.has(id)));
+    }
+  };
+
+  const toggleRow = (id: string) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const resetSelection = () => setSelectedIds([]);
+
+  const handleBulkExecute = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      setBulkBusy(true);
+      await checksApi.executeMultipleChecks(selectedIds);
+      setSnackbar({ open: true, message: `Executed ${selectedIds.length} checks`, severity: 'success' });
+      resetSelection();
+      dispatch(fetchChecks({ page: 1, limit: 100 }));
+    } catch {
+      setSnackbar({ open: true, message: 'Bulk execute failed', severity: 'error' });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      setBulkBusy(true);
+      const res = await checksApi.deleteMultipleChecks(selectedIds);
+      setSnackbar({ open: true, message: `Deleted ${res.succeeded.length} checks${res.failed.length ? `, failed ${res.failed.length}` : ''}` as any, severity: res.failed.length ? 'error' : 'success' });
+      resetSelection();
+      dispatch(fetchChecks({ page: 1, limit: 100 }));
+    } catch {
+      setSnackbar({ open: true, message: 'Bulk delete failed', severity: 'error' });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkPause = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      setBulkBusy(true);
+      await Promise.all(selectedIds.map((id) => dispatch(pauseCheck(id)).unwrap().catch(() => null)));
+      setSnackbar({ open: true, message: `Paused ${selectedIds.length} checks`, severity: 'success' });
+      resetSelection();
+    } catch {
+      setSnackbar({ open: true, message: 'Bulk pause encountered errors', severity: 'error' });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkResume = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      setBulkBusy(true);
+      await Promise.all(selectedIds.map((id) => dispatch(resumeCheck(id)).unwrap().catch(() => null)));
+      setSnackbar({ open: true, message: `Resumed ${selectedIds.length} checks`, severity: 'success' });
+      resetSelection();
+    } catch {
+      setSnackbar({ open: true, message: 'Bulk resume encountered errors', severity: 'error' });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>, checkId: string) => {
     setAnchorEl(event.currentTarget);
     setSelectedCheck(checkId);
@@ -152,9 +275,9 @@ const AllChecksPage: React.FC = () => {
   const handleExecuteCheck = async (checkId: string) => {
     try {
       await dispatch(executeCheck(checkId)).unwrap();
-      setSnackbar({ open: true, message: 'Check executed successfully', severity: 'success' });
+      dispatch(addNotification({ type: 'success', title: 'Execution', message: 'Check executed successfully' }));
     } catch (error) {
-      setSnackbar({ open: true, message: 'Failed to execute check', severity: 'error' });
+      dispatch(addNotification({ type: 'error', title: 'Execution', message: 'Failed to execute check' }));
     }
     handleMenuClose();
   };
@@ -164,9 +287,9 @@ const AllChecksPage: React.FC = () => {
     
     try {
       await dispatch(deleteCheck(selectedCheck)).unwrap();
-      setSnackbar({ open: true, message: 'Check deleted successfully', severity: 'success' });
+      dispatch(addNotification({ type: 'success', title: 'Delete', message: 'Check deleted successfully' }));
     } catch (error) {
-      setSnackbar({ open: true, message: 'Failed to delete check', severity: 'error' });
+      dispatch(addNotification({ type: 'error', title: 'Delete', message: 'Failed to delete check' }));
     }
     
     setDeleteDialogOpen(false);
@@ -176,9 +299,9 @@ const AllChecksPage: React.FC = () => {
   const handlePauseCheck = async (checkId: string) => {
     try {
       await dispatch(pauseCheck(checkId)).unwrap();
-      setSnackbar({ open: true, message: 'Check paused successfully', severity: 'success' });
+      dispatch(addNotification({ type: 'success', title: 'Schedule', message: 'Check paused successfully' }));
     } catch (error) {
-      setSnackbar({ open: true, message: 'Failed to pause check', severity: 'error' });
+      dispatch(addNotification({ type: 'error', title: 'Schedule', message: 'Failed to pause check' }));
     }
     handleMenuClose();
   };
@@ -186,9 +309,9 @@ const AllChecksPage: React.FC = () => {
   const handleResumeCheck = async (checkId: string) => {
     try {
       await dispatch(resumeCheck(checkId)).unwrap();
-      setSnackbar({ open: true, message: 'Check resumed successfully', severity: 'success' });
+      dispatch(addNotification({ type: 'success', title: 'Schedule', message: 'Check resumed successfully' }));
     } catch (error) {
-      setSnackbar({ open: true, message: 'Failed to resume check', severity: 'error' });
+      dispatch(addNotification({ type: 'error', title: 'Schedule', message: 'Failed to resume check' }));
     }
     handleMenuClose();
   };
@@ -230,11 +353,7 @@ const AllChecksPage: React.FC = () => {
 
   if (error) {
     return (
-      <Box>
-        <Alert severity="error" sx={{ mb: 3 }}>
-          Error loading checks: {error}
-        </Alert>
-      </Box>
+      <ErrorState message={`Error loading checks: ${error}`} onRetry={() => dispatch(fetchChecks({ page: 1, limit: 100 }))} />
     );
   }
 
@@ -250,14 +369,16 @@ const AllChecksPage: React.FC = () => {
             View and manage all health checks across your systems
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => navigate('/checks/create')}
-          size="large"
-        >
-          Create Check
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => navigate('/checks/create')}
+            size="large"
+          >
+            Create Check
+          </Button>
+        </Stack>
       </Stack>
 
       {/* Search and quick controls */}
@@ -340,6 +461,22 @@ const AllChecksPage: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Bulk actions toolbar */}
+      {selectedIds.length > 0 && (
+        <Paper elevation={0} sx={{ mb: 2, border: `1px solid ${theme.palette.divider}` }}>
+          <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography variant="subtitle2">{selectedIds.length} selected</Typography>
+            <Stack direction="row" spacing={1}>
+              <Button size="small" variant="outlined" onClick={handleBulkExecute} disabled={bulkBusy}>Execute</Button>
+              <Button size="small" variant="outlined" onClick={handleBulkPause} disabled={bulkBusy}>Pause</Button>
+              <Button size="small" variant="outlined" onClick={handleBulkResume} disabled={bulkBusy}>Resume</Button>
+              <Button size="small" color="error" variant="contained" onClick={handleBulkDelete} disabled={bulkBusy}>Delete</Button>
+              <Button size="small" onClick={resetSelection} disabled={bulkBusy}>Clear</Button>
+            </Stack>
+          </Toolbar>
+        </Paper>
+      )}
+
       <Grid container spacing={3}>
         <Grid item xs={12} md={3} lg={3}>
           <FiltersRail />
@@ -357,29 +494,54 @@ const AllChecksPage: React.FC = () => {
         {loading === 'loading' && <LinearProgress />}
         
         <TableContainer>
-          <Table>
+          <Table size="small">
             <TableHead>
-              <TableRow>
+                <TableRow>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      indeterminate={!allVisibleSelected && someVisibleSelected}
+                      checked={allVisibleSelected}
+                      onChange={(e) => toggleSelectAllVisible(e.target.checked)}
+                      inputProps={{ 'aria-label': 'select all visible checks' }}
+                    />
+                  </TableCell>
                 <TableCell>Check Name</TableCell>
                 <TableCell>Type</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>CSI</TableCell>
-                <TableCell>Last Execution</TableCell>
-                <TableCell>Schedule</TableCell>
-                <TableCell>Tags</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Last Execution</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
+              {loading === 'loading' ? null : paginatedChecks.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                    <EmptyState title="No checks match the current filters" description="Try clearing filters or create a new check." actionLabel="Create Check" onAction={() => navigate('/checks/create')} />
+                  </TableCell>
+                </TableRow>
+              )}
               {paginatedChecks.map((check) => (
                 <TableRow key={check.id} hover>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={selectedIds.includes(check.id)}
+                      onChange={() => toggleRow(check.id)}
+                      inputProps={{ 'aria-label': `select ${check.name}` }}
+                    />
+                  </TableCell>
                   <TableCell>
                     <Stack>
-                      <Typography variant="subtitle2" fontWeight={600}>
+                      <Typography
+                        component={RouterLink}
+                        to={`/checks/details/${check.id}`}
+                        variant="subtitle2"
+                        fontWeight={600}
+                        sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                      >
                         {check.name}
                       </Typography>
                       {check.description && (
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
                           {check.description}
                         </Typography>
                       )}
@@ -394,17 +556,7 @@ const AllChecksPage: React.FC = () => {
                   <TableCell>
                     {getStatusChip(check.status)}
                   </TableCell>
-                  <TableCell>
-                    <Stack>
-                      <Typography variant="body2" fontWeight={500}>
-                        {check.csiId}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {check.csiName}
-                      </Typography>
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                     <Typography variant="body2">
                       {check.lastExecution 
                         ? new Date(check.lastExecution).toLocaleString()
@@ -412,32 +564,8 @@ const AllChecksPage: React.FC = () => {
                       }
                     </Typography>
                   </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={check.schedule.enabled ? check.schedule.frequency : 'Disabled'}
-                      size="small"
-                      variant={check.schedule.enabled ? 'filled' : 'outlined'}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                      {check.tags.slice(0, 3).map((tag) => (
-                        <Chip key={tag} label={tag} size="small" variant="outlined" />
-                      ))}
-                      {check.tags.length > 3 && (
-                        <Chip label={`+${check.tags.length - 3}`} size="small" variant="outlined" />
-                      )}
-                    </Stack>
-                  </TableCell>
                   <TableCell align="right">
                     <Stack direction="row" spacing={1}>
-                      <IconButton
-                        size="small"
-                        onClick={() => navigate(`/checks/details/${check.id}`)}
-                        title="View Details"
-                      >
-                        <Visibility />
-                      </IconButton>
                       <IconButton
                         size="small"
                         onClick={() => handleExecuteCheck(check.id)}
@@ -450,20 +578,7 @@ const AllChecksPage: React.FC = () => {
                           <PlayArrow />
                         )}
                       </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => check.schedule.enabled ? handlePauseCheck(check.id) : handleResumeCheck(check.id)}
-                        title={check.schedule.enabled ? "Pause Check" : "Resume Check"}
-                        disabled={schedulingChecks.includes(check.id)}
-                      >
-                        {schedulingChecks.includes(check.id) ? (
-                          <CircularProgress size={16} />
-                        ) : check.schedule.enabled ? (
-                          <Pause />
-                        ) : (
-                          <PlayArrow />
-                        )}
-                      </IconButton>
+                      {/* Stop/Start schedule icon hidden per request */}
                       <IconButton
                         size="small"
                         onClick={(e) => handleMenuClick(e, check.id)}
@@ -501,42 +616,16 @@ const AllChecksPage: React.FC = () => {
         onClose={handleMenuClose}
       >
         <MenuItem onClick={() => {
-          if (selectedCheck) navigate(`/checks/details/${selectedCheck}`);
-          handleMenuClose();
-        }}>
-          <Visibility sx={{ mr: 1 }} />
-          View Details
-        </MenuItem>
-        <MenuItem onClick={() => {
           if (selectedCheck) navigate(`/checks/edit/${selectedCheck}`);
           handleMenuClose();
         }}>
           <Edit sx={{ mr: 1 }} />
           Edit Check
         </MenuItem>
-        <MenuItem onClick={() => {
-          if (selectedCheck) handleExecuteCheck(selectedCheck);
-        }}>
-          <PlayArrow sx={{ mr: 1 }} />
-          Execute Now
-        </MenuItem>
-        {selectedCheck && (() => {
-          const check = checks?.find(c => c.id === selectedCheck);
-          return check?.schedule.enabled ? (
-            <MenuItem onClick={() => handlePauseCheck(selectedCheck)}>
-              <Pause sx={{ mr: 1 }} />
-              Pause Schedule
-            </MenuItem>
-          ) : (
-            <MenuItem onClick={() => handleResumeCheck(selectedCheck)}>
-              <PlayArrow sx={{ mr: 1 }} />
-              Resume Schedule
-            </MenuItem>
-          );
-        })()}
-        <MenuItem onClick={() => {
+        <MenuItem onClick={(e) => {
+          lastFocusRef.current = (e.currentTarget as HTMLElement) || (document.activeElement as HTMLElement | null);
           setScheduleDialogOpen(true);
-          handleMenuClose();
+          setAnchorEl(null);
         }}>
           <Schedule sx={{ mr: 1 }} />
           Manage Schedule

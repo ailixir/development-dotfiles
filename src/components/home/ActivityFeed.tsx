@@ -27,7 +27,10 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ maxHeight }) => {
           {error || 'Failed to load activity'}
         </Alert>
       ) : data.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">No recent activity</Typography>
+        <Stack spacing={1}>
+          <Typography variant="body2" color="text.secondary">No recent activity</Typography>
+          <Button size="small" variant="outlined" onClick={() => dispatch(fetchActivity({ scope: 'ALL', hours: 24 }))}>Refresh Now</Button>
+        </Stack>
       ) : (
         <List dense disablePadding>
           {data.slice(0, 12).map((e) => (

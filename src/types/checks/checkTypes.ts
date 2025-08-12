@@ -54,10 +54,15 @@ export interface CheckConfiguration {
   tier?: string;
 
   // UI Test Configuration
-  steps?: string[];
-  browser?: 'chrome' | 'firefox' | 'safari' | 'edge';
-  viewport?: { width: number; height: number };
-  waitStrategy?: 'none' | 'networkidle' | 'domcontentloaded';
+  uiTest?: {
+    testId: string;
+    variables?: Record<string, { kind: 'plain' | 'secret' | 'number' | 'boolean'; value?: string | number; secretId?: string }>;
+    overrides?: {
+      browser?: 'chrome' | 'firefox' | 'safari' | 'edge';
+      viewport?: { width: number; height: number };
+      timeout?: number;
+    };
+  };
 }
 
 export interface ThresholdConfig {

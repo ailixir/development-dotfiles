@@ -6,8 +6,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { PlatformSidebar } from '@put/core-components';
 import { useLayout } from '../LayoutProvider';
 import { registerChecksNavigation, getCurrentPageId } from '../../../utils/navigation/navigationSetup';
-import ScopeBar from '@components/common/ScopeBar/ScopeBar';
 import GlobalSearch from '@/components/home/GlobalSearch';
+import SkipLink from './SkipLink';
+import Notifications from './Notifications';
 
 interface ChecksLayoutProps {
   children: React.ReactNode;
@@ -59,6 +60,17 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
       e.preventDefault();
       setHelpOpen(true);
     }
+    // Quick nav shortcuts
+    if ((isMac ? e.metaKey : e.ctrlKey) && e.key.toLowerCase() === 'n') {
+      e.preventDefault();
+      navigate('/checks/create');
+    }
+    if (e.key.toLowerCase() === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      // simple Go home
+      e.preventDefault();
+      navigate('/');
+    }
+    // Reduced motion preference: no-op shortcut but show how we'd adapt animations if needed
   }, []);
 
   useEffect(() => {
@@ -68,6 +80,7 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <SkipLink targetId="checks-main" />
       {shouldShowSidebar && (
         <PlatformSidebar
           key={`checks-sidebar-${currentPage}`}
@@ -98,12 +111,14 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
           },
         }}
       >
+          <Box component="div" id="checks-main" tabIndex={-1} sx={{ position: 'absolute', top: 0 }} />
           <Stack spacing={2} sx={{ mb: 2 }}>
             <GlobalSearch />
           </Stack>
         {children}
           <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
           <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
+          <Notifications />
       </Box>
     </Box>
   );

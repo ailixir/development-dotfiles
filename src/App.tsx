@@ -12,10 +12,13 @@ const CreateCheckPage = React.lazy(
   () => import('./pages/CreateCheckPage/CreateCheckPage')
 );
 const CheckDetailsPage = React.lazy(() => import('@pages/CheckDetailsPage'));
+const EditCheckPage = React.lazy(() => import('@pages/CreateCheckPage')); // reuse create page in edit mode
 const ChecksStudioPage = React.lazy(() => import('@pages/ChecksStudioPage'));
 const ReportsPage = React.lazy(() => import('@pages/ReportsPage'));
+const ReportsHome = React.lazy(() => import('./pages/Reports/ReportsHome'));
+const ReportBuilder = React.lazy(() => import('./pages/Reports/ReportBuilder'));
+const ReportDetailsPage = React.lazy(() => import('./pages/Reports/ReportDetailsPage'));
 // CSIs directory and overview removed
-const ChecksTemplatesPage = React.lazy(() => import('@pages/ChecksTemplatesPage'));
 const StudioRunsPage = React.lazy(() => import('@pages/StudioRunsPage'));
 const StudioTestsPage = React.lazy(() => import('@pages/StudioTestsPage'));
 const ReportsScheduledPage = React.lazy(() => import('@pages/ReportsScheduledPage'));
@@ -96,7 +99,8 @@ const App: React.FC = () => {
               <Route path="/checks/all" element={<AllChecksPage />} />
               <Route path="/checks/create" element={<CreateCheckPage />} />
               <Route path="/checks/details/:id" element={<CheckDetailsPage />} />
-              <Route path="/checks/templates" element={<ChecksTemplatesPage />} />
+              <Route path="/checks/edit/:id" element={<EditCheckPage />} />
+              {/* Templates route removed per product decision */}
               
               {/* Checks Studio */}
               <Route path="/checks/studio" element={<ChecksStudioPage />} />
@@ -105,8 +109,10 @@ const App: React.FC = () => {
               <Route path="/checks/studio/:id" element={<ChecksStudioPage />} />
               
               {/* Reports */}
-              <Route path="/checks/reports" element={<ReportsPage />} />
-              <Route path="/checks/reports/:id" element={<ReportsPage />} />
+              <Route path="/checks/reports" element={<ReportsHome />} />
+              <Route path="/checks/reports/new" element={<ReportBuilder />} />
+              <Route path="/checks/reports/:id" element={<ReportDetailsPage />} />
+              <Route path="/checks/reports/:id/edit" element={<ReportBuilder />} />
               <Route path="/checks/reports/scheduled" element={<ReportsScheduledPage />} />
               <Route path="/checks/reports/analytics" element={<ReportsAnalyticsPage />} />
 

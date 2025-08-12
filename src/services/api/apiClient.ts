@@ -82,7 +82,7 @@ class ApiClient {
 
         return response;
       },
-      (error) => {
+      async (error) => {
         // Log errors
         console.error('API Error:', {
           url: error.config?.url,
@@ -104,7 +104,27 @@ class ApiClient {
           console.error('Server error - check service status');
         }
 
-        return Promise.reject(error);
+        // Lightweight retry/backoff for idempotent GET requests
+        const originalConfig = error.config as (AxiosRequestConfig & { __retryCount?: number; __doNotRetry?: boolean });
+        const shouldRetry = !originalConfig?.__doNotRetry && (originalConfig?.method || 'get').toLowerCase() === 'get';
+        const retriableStatus = !error.response || (error.response.status >= 500 && error.response.status < 600);
+        if (shouldRetry && retriableStatus) {
+          originalConfig.__retryCount = (originalConfig.__retryCount || 0) + 1;
+          const maxRetries = 2;
+          if (originalConfig.__retryCount <= maxRetries) {
+            const delayMs = Math.min(1500, 200 * Math.pow(2, originalConfig.__retryCount - 1));
+            await new Promise((r) => setTimeout(r, delayMs));
+            return this.instance.request(originalConfig);
+          }
+        }
+
+        // Normalize error message shape
+        const normalized = new Error(
+          error.response?.data?.error || error.response?.data?.message || error.message || 'Request failed'
+        );
+        // Preserve response for callers who need it
+        (normalized as any).response = error.response;
+        return Promise.reject(normalized);
       }
     );
   }

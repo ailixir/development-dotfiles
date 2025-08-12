@@ -19,7 +19,6 @@ export const registerChecksNavigation = () => {
         children: [
           { id: 'checks-catalog', label: 'Catalog', path: '/checks/all', icon: 'view_list' },
           { id: 'checks-create', label: 'Create', path: '/checks/create', icon: 'add_circle' },
-          { id: 'checks-templates', label: 'Templates', path: '/checks/templates', icon: 'category' },
         ],
       },
       {
@@ -40,7 +39,8 @@ export const registerChecksNavigation = () => {
         icon: 'assessment',
         description: 'Reporting tools',
         children: [
-          { id: 'reports-builder', label: 'Builder', path: '/checks/reports', icon: 'build' },
+          { id: 'reports-home', label: 'All Reports', path: '/checks/reports', icon: 'list' },
+          { id: 'reports-builder', label: 'Create Report', path: '/checks/reports/new', icon: 'build' },
           { id: 'reports-scheduled', label: 'Scheduled', path: '/checks/reports/scheduled', icon: 'schedule' },
           { id: 'reports-analytics', label: 'Analytics', path: '/checks/reports/analytics', icon: 'analytics' },
         ],
@@ -58,7 +58,7 @@ export const getCurrentPageId = (pathname: string): string => {
   // Checks sub-nav
   if (pathname.startsWith('/checks/all')) return 'checks-catalog';
   if (pathname.startsWith('/checks/create')) return 'checks-create';
-  if (pathname.startsWith('/checks/templates')) return 'checks-templates';
+  // templates removed
   // Studio sub-nav
   if (pathname.startsWith('/checks/studio/runs')) return 'studio-runs';
   if (pathname.startsWith('/checks/studio/tests')) return 'studio-tests';
@@ -66,7 +66,9 @@ export const getCurrentPageId = (pathname: string): string => {
   // Reports sub-nav
   if (pathname.startsWith('/checks/reports/scheduled')) return 'reports-scheduled';
   if (pathname.startsWith('/checks/reports/analytics')) return 'reports-analytics';
-  if (pathname.startsWith('/checks/reports')) return 'reports-builder';
+  if (pathname.startsWith('/checks/reports/new')) return 'reports-builder';
+  if (pathname.startsWith('/checks/reports/') && pathname.endsWith('/edit')) return 'reports-builder';
+  if (pathname.startsWith('/checks/reports')) return 'reports-home';
   // Standalone
   if (pathname.startsWith('/checks/activity')) return 'activity';
   if (pathname.startsWith('/checks/schedules')) return 'schedules';

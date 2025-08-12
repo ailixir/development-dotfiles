@@ -9,6 +9,7 @@ export interface ValidateStepsResponse {
 export const studioApi = {
   listTests: async (params?: { csiId?: string }) => apiClient.get('/studio/tests', { params }),
   getTest: async (id: string) => apiClient.get(`/studio/tests/${id}`),
+  validateVariables: async (id: string, variables: Record<string, any>) => apiClient.post(`/studio/tests/${id}/validate-variables`, { variables }),
   createTest: async (payload: Partial<TestIR> & { name: string; csiId: string }) => apiClient.post('/studio/tests', payload),
   updateTest: async (id: string, payload: Partial<TestIR>) => apiClient.put(`/studio/tests/${id}`, payload),
   deleteTest: async (id: string) => apiClient.delete(`/studio/tests/${id}`),

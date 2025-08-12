@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -77,7 +77,15 @@ import {
   Refresh,
   Save,
   FileCopy,
+  Search,
 } from '@mui/icons-material';
+import { Alert, Snackbar } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
+import reportsApi from '@/services/api/reportsApi';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { fetchReports, createReport, generatePreview } from '@/store/slices/reportsSlice';
+import { checksApi } from '@/services/api/checksApi';
+import type { ReportEntity } from '@/types/reports/reportTypes';
 
 // Mock reports data
 const mockReports = [
@@ -119,8 +127,8 @@ const mockReports = [
   }
 ];
 
-// Mock analytics data
-const mockAnalytics = {
+// Placeholder analytics (static for prototype)
+const ANALYTICS = {
   totalReportsSent: 1247,
   avgOpenRate: 87.3,
   avgClickRate: 45.2,
@@ -132,7 +140,7 @@ const mockAnalytics = {
     { period: 'Last 30 days', reports: 186, opens: 162, clicks: 84 },
     { period: 'Last 90 days', reports: 548, opens: 478, clicks: 248 }
   ]
-};
+} as const;
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -161,20 +169,32 @@ function TabPanel(props: TabPanelProps) {
 
 const ReportsPage: React.FC = () => {
   const theme = useTheme();
+  const dispatch = useAppDispatch();
+  const params = useParams();
+  const navigate = useNavigate();
+  const { data: reports, loading: reportsLoading, previewContent, generatingPreview } = useAppSelector((s) => s.reports);
   const [selectedTab, setSelectedTab] = useState(0);
-  const [selectedReport, setSelectedReport] = useState<string | null>(mockReports[0]?.id || null);
+  const [selectedReport, setSelectedReport] = useState<string | null>(null);
   const [showNewReportDialog, setShowNewReportDialog] = useState(false);
   const [reportConfig, setReportConfig] = useState({
     name: '',
     description: '',
+    subject: '',
     frequency: 'daily',
     recipients: '',
     includeCharts: true,
     template: 'executive-summary',
     checks: [] as string[]
   });
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<Array<{ id: string; name: string; csiName: string }>>([]);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+  const [saving, setSaving] = useState(false);
 
-  const selectedReportData = mockReports.find(r => r.id === selectedReport);
+  const selectedReportData: ReportEntity | undefined = useMemo(() => reports.find(r => r.id === selectedReport), [reports, selectedReport]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -186,6 +206,147 @@ const ReportsPage: React.FC = () => {
       case 'paused': return 'warning';
       case 'failed': return 'error';
       default: return 'default';
+    }
+  };
+
+  useEffect(() => {
+    dispatch(fetchReports(undefined));
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (params.id) {
+      setSelectedReport(params.id);
+    }
+  }, [params.id]);
+
+  // Autosave builder draft to localStorage
+  useEffect(() => {
+    const key = 'reports.builderDraft.v1';
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          setReportConfig((rc) => ({ ...rc, ...parsed }));
+        }
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const key = 'reports.builderDraft.v1';
+    try {
+      window.localStorage.setItem(key, JSON.stringify({
+        name: reportConfig.name,
+        description: reportConfig.description,
+        subject: reportConfig.subject,
+        frequency: reportConfig.frequency,
+        recipients: reportConfig.recipients,
+        includeCharts: reportConfig.includeCharts,
+        template: reportConfig.template,
+        checks: reportConfig.checks,
+      }));
+    } catch {}
+  }, [reportConfig]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        void handleSaveReport();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        void handleGeneratePreview();
+      }
+      if (e.key === '/') {
+        if (searchInputRef.current) {
+          e.preventDefault();
+          searchInputRef.current.focus();
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [reportConfig, draftId]);
+
+  const handleSearch = async (q: string) => {
+    setSearchQuery(q);
+    if (!q.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    setSearchLoading(true);
+    try {
+      const res = await checksApi.getChecks({ page: 1, limit: 5, filters: { searchQuery: q } });
+      const items = (res.data || []).map((c: any) => ({ id: c.id, name: c.name, csiName: c.csiName }));
+      setSearchResults(items);
+    } catch (e) {
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleAddCheck = (id: string) => {
+    if (!reportConfig.checks.includes(id)) {
+      setReportConfig((rc) => ({ ...rc, checks: [...rc.checks, id] }));
+    }
+  };
+
+  const handleRemoveCheck = (id: string) => {
+    setReportConfig((rc) => ({ ...rc, checks: rc.checks.filter((x) => x !== id) }));
+  };
+
+  const handleSaveReport = async () => {
+    try {
+      setSaving(true);
+      const payload = {
+        name: reportConfig.name || 'Untitled Report',
+        description: reportConfig.description,
+        subject: reportConfig.subject || reportConfig.name || 'Checks Report',
+        frequency: reportConfig.frequency as any,
+        recipients: (reportConfig.recipients || '').split(',').map((s) => s.trim()).filter(Boolean),
+        includeCharts: reportConfig.includeCharts,
+        template: reportConfig.template,
+        checks: reportConfig.checks,
+      };
+      const created = await dispatch(createReport(payload as any)).unwrap();
+      setDraftId(created.id);
+      setSnack({ open: true, message: 'Report saved', severity: 'success' });
+      return created.id;
+    } catch (e: any) {
+      setSnack({ open: true, message: e?.message || 'Failed to save report', severity: 'error' });
+      return null;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleGeneratePreview = async () => {
+    let id = draftId;
+    if (!id) {
+      id = await handleSaveReport();
+      if (!id) return;
+    } else {
+      try {
+        await reportsApi.updateReport(id, {
+          name: reportConfig.name || 'Untitled Report',
+          description: reportConfig.description,
+          subject: reportConfig.subject || reportConfig.name || 'Checks Report',
+          frequency: reportConfig.frequency as any,
+          recipients: (reportConfig.recipients || '').split(',').map((s) => s.trim()).filter(Boolean),
+          includeCharts: reportConfig.includeCharts,
+          template: reportConfig.template,
+          checks: reportConfig.checks,
+        } as any);
+      } catch {}
+    }
+    try {
+      await dispatch(generatePreview(id)).unwrap();
+      setSnack({ open: true, message: 'Preview generated', severity: 'success' });
+    } catch (e: any) {
+      setSnack({ open: true, message: e?.message || 'Failed to generate preview', severity: 'error' });
     }
   };
 
@@ -241,7 +402,7 @@ const ReportsPage: React.FC = () => {
                       Reports Sent
                     </Typography>
                     <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                      {mockAnalytics.totalReportsSent.toLocaleString()}
+                      {ANALYTICS.totalReportsSent.toLocaleString()}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
                       <TrendingUp sx={{ fontSize: 16, color: 'success.main' }} />
@@ -266,11 +427,11 @@ const ReportsPage: React.FC = () => {
                       Open Rate
                     </Typography>
                     <Typography variant="h3" sx={{ fontWeight: 700, color: 'success.main' }}>
-                      {mockAnalytics.avgOpenRate}%
+                      {ANALYTICS.avgOpenRate}%
                     </Typography>
                     <LinearProgress 
                       variant="determinate" 
-                      value={mockAnalytics.avgOpenRate}
+                      value={ANALYTICS.avgOpenRate}
                       sx={{ 
                         mt: 1,
                         height: 4,
@@ -300,11 +461,11 @@ const ReportsPage: React.FC = () => {
                       Click Rate
                     </Typography>
                     <Typography variant="h3" sx={{ fontWeight: 700, color: 'info.main' }}>
-                      {mockAnalytics.avgClickRate}%
+                      {ANALYTICS.avgClickRate}%
                     </Typography>
                     <LinearProgress 
                       variant="determinate" 
-                      value={mockAnalytics.avgClickRate}
+                      value={ANALYTICS.avgClickRate}
                       sx={{ 
                         mt: 1,
                         height: 4,
@@ -334,10 +495,10 @@ const ReportsPage: React.FC = () => {
                       Delivery Success
                     </Typography>
                     <Typography variant="h3" sx={{ fontWeight: 700, color: 'warning.main' }}>
-                      {mockAnalytics.deliverySuccess}%
+                      {ANALYTICS.deliverySuccess}%
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {mockAnalytics.mostPopularTemplate} most used
+                      {ANALYTICS.mostPopularTemplate} most used
                     </Typography>
                   </Box>
                   <CheckCircle sx={{ fontSize: 48, color: 'warning.main', opacity: 0.7 }} />
@@ -351,10 +512,10 @@ const ReportsPage: React.FC = () => {
       {/* Main Content with Tabs */}
       <Paper sx={{ overflow: 'hidden' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={selectedTab} onChange={handleTabChange} aria-label="reports tabs">
-            <Tab label="Report Builder" icon={<Settings />} />
-            <Tab label="Scheduled Reports" icon={<Schedule />} />
-            <Tab label="Analytics" icon={<Analytics />} />
+          <Tabs value={selectedTab} onChange={handleTabChange} aria-label="Reports sections">
+            <Tab id="report-tab-0" aria-controls="report-tabpanel-0" label="Report Builder" icon={<Settings />} />
+            <Tab id="report-tab-1" aria-controls="report-tabpanel-1" label="Scheduled Reports" icon={<Schedule />} />
+            <Tab id="report-tab-2" aria-controls="report-tabpanel-2" label="Analytics" icon={<Analytics />} />
           </Tabs>
         </Box>
 
@@ -369,7 +530,7 @@ const ReportsPage: React.FC = () => {
                   title="Report Configuration"
                   subheader="Customize your report settings"
                   action={
-                    <IconButton size="small">
+                    <IconButton size="small" aria-label="save report">
                       <Save />
                     </IconButton>
                   }
@@ -381,6 +542,14 @@ const ReportsPage: React.FC = () => {
                       <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
                         Basic Information
                       </Typography>
+                      <TextField
+                        fullWidth
+                        label="Email Subject"
+                        placeholder="e.g., Checks Report: Daily Health Summary"
+                        value={reportConfig.subject}
+                        onChange={(e) => setReportConfig({ ...reportConfig, subject: e.target.value })}
+                        sx={{ mb: 2 }}
+                      />
                       <TextField
                         fullWidth
                         label="Report Name"
@@ -461,16 +630,41 @@ const ReportsPage: React.FC = () => {
                         sx={{ mb: 2 }}
                       />
 
-                      {/* Check Selection */}
+                       {/* Check Selection */}
                       <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>
                         Include Checks
                       </Typography>
-                      <FormGroup>
-                        <FormControlLabel control={<Checkbox defaultChecked />} label="Trading Platform Checks" />
-                        <FormControlLabel control={<Checkbox defaultChecked />} label="Banking Services Checks" />
-                        <FormControlLabel control={<Checkbox />} label="Payment Systems Checks" />
-                        <FormControlLabel control={<Checkbox />} label="Infrastructure Checks" />
-                      </FormGroup>
+                       <Stack spacing={1.5}>
+                         <TextField
+                           inputRef={searchInputRef}
+                           placeholder="Search checks (press '/' to focus)"
+                           value={searchQuery}
+                           onChange={(e) => handleSearch(e.target.value)}
+                           InputProps={{ startAdornment: <Search fontSize="small" sx={{ mr: 1 }} /> }}
+                           aria-label="Search checks to add to report"
+                         />
+                         {searchLoading ? (
+                           <Typography variant="caption" color="text.secondary">Searching…</Typography>
+                         ) : searchResults.length > 0 ? (
+                           <List dense sx={{ border: `1px dashed ${theme.palette.divider}`, borderRadius: 1 }}>
+                             {searchResults.map((r) => (
+                               <ListItem key={r.id} secondaryAction={
+                                 <Button size="small" onClick={() => handleAddCheck(r.id)}>Add</Button>
+                               }>
+                                 <ListItemText primary={r.name} secondary={r.csiName} />
+                               </ListItem>
+                             ))}
+                           </List>
+                         ) : null}
+                         <Stack direction="row" spacing={1} flexWrap="wrap">
+                           {reportConfig.checks.map((id) => (
+                             <Chip key={id} label={id} size="small" onDelete={() => handleRemoveCheck(id)} />
+                           ))}
+                           {reportConfig.checks.length === 0 && (
+                             <Typography variant="caption" color="text.secondary">No checks selected</Typography>
+                           )}
+                         </Stack>
+                       </Stack>
                     </Box>
                   </Stack>
                 </CardContent>
@@ -486,12 +680,21 @@ const ReportsPage: React.FC = () => {
                   subheader="Real-time email preview"
                   action={
                     <Stack direction="row" spacing={1}>
-                      <IconButton size="small">
-                        <Send />
-                      </IconButton>
-                      <IconButton size="small">
-                        <Download />
-                      </IconButton>
+                      <Tooltip title="Generate Preview (⌘⏎)"><span>
+                        <IconButton size="small" onClick={handleGeneratePreview} disabled={saving}>
+                          <Preview />
+                        </IconButton>
+                      </span></Tooltip>
+                      <Tooltip title="Save Draft (⌘S)"><span>
+                        <IconButton size="small" onClick={handleSaveReport} disabled={saving}>
+                          <Send />
+                        </IconButton>
+                      </span></Tooltip>
+                      <Tooltip title="Export HTML">
+                        <IconButton size="small" disabled>
+                          <Download />
+                        </IconButton>
+                      </Tooltip>
                     </Stack>
                   }
                 />
@@ -512,86 +715,105 @@ const ReportsPage: React.FC = () => {
                     {/* Email Header */}
                     <Box sx={{ mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
                       <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                        {reportConfig.name || 'Report Preview'}
+                        {reportConfig.subject || reportConfig.name || 'Report Preview'}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        From: noreply@citi.com | {new Date().toLocaleDateString()}
+                        To: {reportConfig.recipients || 'recipients@citi.com'} | {new Date().toLocaleDateString()}
                       </Typography>
                     </Box>
 
-                    {/* Email Body Preview */}
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body1" sx={{ mb: 2 }}>
-                        {reportConfig.description || 'Your automated health monitoring report is ready.'}
-                      </Typography>
-
-                      {/* Sample Content */}
-                      <Grid container spacing={2} sx={{ mb: 3 }}>
-                        <Grid item xs={6}>
-                          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: alpha(theme.palette.success.main, 0.1) }}>
-                            <Typography variant="h4" color="success.main" sx={{ fontWeight: 700 }}>
-                              42
-                            </Typography>
-                            <Typography variant="caption">Passing Checks</Typography>
-                          </Paper>
+                    {/* Live text preview if available */}
+                    {generatingPreview ? (
+                      <Typography variant="body2" color="text.secondary">Generating preview…</Typography>
+                    ) : previewContent ? (
+                      <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: 'background.paper' }}>
+                        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace' }}>{previewContent}</pre>
+                      </Paper>
+                    ) : (
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body1" sx={{ mb: 2 }}>
+                          {reportConfig.description || 'Your automated health monitoring report is ready.'}
+                        </Typography>
+                        <Grid container spacing={2} sx={{ mb: 3 }}>
+                          <Grid item xs={6}>
+                            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: alpha(theme.palette.success.main, 0.1) }}>
+                              <Typography variant="h4" color="success.main" sx={{ fontWeight: 700 }}>
+                                42
+                              </Typography>
+                              <Typography variant="caption">Passing Checks</Typography>
+                            </Paper>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: alpha(theme.palette.error.main, 0.1) }}>
+                              <Typography variant="h4" color="error.main" sx={{ fontWeight: 700 }}>
+                                3
+                              </Typography>
+                              <Typography variant="caption">Failed Checks</Typography>
+                            </Paper>
+                          </Grid>
                         </Grid>
-                        <Grid item xs={6}>
-                          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: alpha(theme.palette.error.main, 0.1) }}>
-                            <Typography variant="h4" color="error.main" sx={{ fontWeight: 700 }}>
-                              3
+                        {reportConfig.includeCharts && (
+                          <Box sx={{ mb: 3 }}>
+                            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                              {reportConfig.template === 'alert-digest' ? 'Recent Alerts' : 'System Health Trends'}
                             </Typography>
-                            <Typography variant="caption">Failed Checks</Typography>
-                          </Paper>
-                        </Grid>
-                      </Grid>
-
-                      {reportConfig.includeCharts && (
-                        <Box sx={{ mb: 3 }}>
-                          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                            System Health Trends
-                          </Typography>
-                          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100' }}>
-                            <ShowChart sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
-                            <Typography variant="caption" color="text.secondary">
-                              Chart visualization will appear here
-                            </Typography>
-                          </Paper>
-                        </Box>
-                      )}
-
-                      {/* Sample Table */}
-                      <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
-                        <Table size="small">
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Check Name</TableCell>
-                              <TableCell>Status</TableCell>
-                              <TableCell>Response Time</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell>Trading API</TableCell>
-                              <TableCell>
-                                <Chip label="Passing" size="small" color="success" />
-                              </TableCell>
-                              <TableCell>89ms</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>Database</TableCell>
-                              <TableCell>
-                                <Chip label="Warning" size="small" color="warning" />
-                              </TableCell>
-                              <TableCell>245ms</TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-
-                      <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                        This is a preview of your email report. The actual report will contain live data.
-                      </Typography>
-                    </Box>
+                            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100' }}>
+                              <ShowChart sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
+                              <Typography variant="caption" color="text.secondary">
+                                Chart visualization will appear here
+                              </Typography>
+                            </Paper>
+                          </Box>
+                        )}
+                        <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
+                          <Table size="small">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Check Name</TableCell>
+                                <TableCell>Status</TableCell>
+                                <TableCell>Response Time</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {reportConfig.template === 'alert-digest' ? (
+                                <>
+                                  <TableRow>
+                                    <TableCell>Market Data Feed</TableCell>
+                                    <TableCell><Chip label="Failing" size="small" color="error" /></TableCell>
+                                    <TableCell>Latency {'>'} 200ms</TableCell>
+                                  </TableRow>
+                                  <TableRow>
+                                    <TableCell>Payment Gateway</TableCell>
+                                    <TableCell><Chip label="Warning" size="small" color="warning" /></TableCell>
+                                    <TableCell>Intermittent failures</TableCell>
+                                  </TableRow>
+                                </>
+                              ) : (
+                                <>
+                                  <TableRow>
+                                    <TableCell>Trading API</TableCell>
+                                    <TableCell>
+                                      <Chip label="Passing" size="small" color="success" />
+                                    </TableCell>
+                                    <TableCell>89ms</TableCell>
+                                  </TableRow>
+                                  <TableRow>
+                                    <TableCell>Database</TableCell>
+                                    <TableCell>
+                                      <Chip label="Warning" size="small" color="warning" />
+                                    </TableCell>
+                                    <TableCell>245ms</TableCell>
+                                  </TableRow>
+                                </>
+                              )}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                          This is a preview of your email report. The actual report will contain live data.
+                        </Typography>
+                      </Box>
+                    )}
                   </Paper>
                 </CardContent>
               </Card>
@@ -607,7 +829,9 @@ const ReportsPage: React.FC = () => {
             </Typography>
             
             <Grid container spacing={3}>
-              {mockReports.map((report) => (
+              {reportsLoading === 'loading' ? (
+                <Grid item xs={12}><Typography variant="body2" color="text.secondary">Loading…</Typography></Grid>
+              ) : reports.map((report) => (
                 <Grid item xs={12} md={6} lg={4} key={report.id}>
                   <Card 
                     variant="outlined"
@@ -624,7 +848,7 @@ const ReportsPage: React.FC = () => {
                     <CardHeader
                       avatar={<Email sx={{ color: 'primary.main' }} />}
                       title={report.name}
-                      subheader={report.frequency}
+                      subheader={report.schedule ? `${report.schedule.frequency} ${report.schedule.time ?? ''}` : '—'}
                       action={
                         <Stack direction="row" spacing={0.5}>
                           <Chip 
@@ -645,13 +869,13 @@ const ReportsPage: React.FC = () => {
                       
                       <Box sx={{ mb: 2 }}>
                         <Typography variant="caption" color="text.secondary">
-                          Recipients ({report.recipients.length})
+                          Recipients ({report.recipients?.length || 0})
                         </Typography>
                         <Stack direction="row" spacing={0.5} sx={{ mt: 0.5 }}>
-                          {report.recipients.slice(0, 2).map((email, index) => (
+                          {report.recipients?.slice(0, 2).map((email, index) => (
                             <Chip key={index} label={email} size="small" variant="outlined" />
                           ))}
-                          {report.recipients.length > 2 && (
+                          {report.recipients && report.recipients.length > 2 && (
                             <Chip label={`+${report.recipients.length - 2} more`} size="small" variant="outlined" />
                           )}
                         </Stack>
@@ -660,7 +884,7 @@ const ReportsPage: React.FC = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <AccessTime sx={{ fontSize: 16, color: 'text.secondary' }} />
                         <Typography variant="caption" color="text.secondary">
-                          Last sent: {new Date(report.lastSent).toLocaleDateString()}
+                          Last sent: {report.lastSent ? new Date(report.lastSent).toLocaleDateString() : '—'}
                         </Typography>
                       </Box>
                     </CardContent>
@@ -702,7 +926,7 @@ const ReportsPage: React.FC = () => {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {mockAnalytics.trends.map((trend, index) => (
+                          {ANALYTICS.trends.map((trend, index) => (
                             <TableRow key={index}>
                               <TableCell>{trend.period}</TableCell>
                               <TableCell align="center">{trend.reports}</TableCell>
@@ -746,7 +970,7 @@ const ReportsPage: React.FC = () => {
                           Most Popular Template
                         </Typography>
                         <Chip 
-                          label={mockAnalytics.mostPopularTemplate} 
+                          label={ANALYTICS.mostPopularTemplate} 
                           color="primary" 
                           sx={{ width: '100%' }}
                         />
@@ -757,7 +981,7 @@ const ReportsPage: React.FC = () => {
                           Top Recipient
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {mockAnalytics.topRecipient}
+                          {ANALYTICS.topRecipient}
                         </Typography>
                       </Box>
 
@@ -768,11 +992,11 @@ const ReportsPage: React.FC = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <LinearProgress 
                             variant="determinate" 
-                            value={mockAnalytics.deliverySuccess}
+                            value={ANALYTICS.deliverySuccess}
                             sx={{ flex: 1, height: 8, borderRadius: 4 }}
                           />
                           <Typography variant="caption" sx={{ minWidth: 35 }}>
-                            {mockAnalytics.deliverySuccess}%
+                            {ANALYTICS.deliverySuccess}%
                           </Typography>
                         </Box>
                       </Box>
@@ -800,6 +1024,13 @@ const ReportsPage: React.FC = () => {
           </Box>
         </TabPanel>
       </Paper>
+
+      {/* Toast */}
+      <Snackbar open={snack.open} autoHideDuration={3500} onClose={() => setSnack((s) => ({ ...s, open: false }))}>
+        <Alert severity={snack.severity} onClose={() => setSnack((s) => ({ ...s, open: false }))}>
+          {snack.message}
+        </Alert>
+      </Snackbar>
 
       {/* New Report Dialog */}
       <Dialog open={showNewReportDialog} onClose={() => setShowNewReportDialog(false)} maxWidth="md" fullWidth>

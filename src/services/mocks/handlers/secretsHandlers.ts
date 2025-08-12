@@ -17,7 +17,7 @@ let mockSecrets: SecretRecord[] = [
 
 export const secretsHandlers = [
   // List secrets (metadata only)
-  http.get('/secrets', async () => {
+  http.get('/api/secrets', async () => {
     await delay(250);
     return HttpResponse.json({
       data: mockSecrets.map(({ value, ...meta }) => meta),
@@ -25,7 +25,7 @@ export const secretsHandlers = [
   }),
 
   // Create secret (one-time value echo)
-  http.post('/secrets', async ({ request }) => {
+  http.post('/api/secrets', async ({ request }) => {
     await delay(400);
     const { label, scope, value } = (await request.json()) as { label: string; scope: SecretRecord['scope']; value: string };
     const id = `sec_${Math.random().toString(36).slice(2, 8)}`;
@@ -36,7 +36,7 @@ export const secretsHandlers = [
   }),
 
   // Resolve secret for execution (server-side only; UI should never call this directly)
-  http.post('/internal/resolve-secret', async ({ request }) => {
+  http.post('/api/internal/resolve-secret', async ({ request }) => {
     await delay(120);
     const { id } = (await request.json()) as { id: string };
     const found = mockSecrets.find((s) => s.id === id);

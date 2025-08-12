@@ -24,8 +24,14 @@ export const studioHandlers = [
     mockUITests.push(newTest);
     return HttpResponse.json(newTest, { status: 201 });
   }),
-  http.post('/api/studio/tests/:id/execute', async ({ params }) => {
+  http.post('/api/studio/tests/:id/execute', async ({ params, request }) => {
     const { id } = params;
+    // Accept variables in payload, echo in logs metadata
+    let variables: Record<string, any> | undefined;
+    try {
+      const body: any = await request.json();
+      variables = body && typeof body === 'object' ? body.variables : undefined;
+    } catch {}
     const test = mockUITests.find((t) => t.id === id);
     if (!test) return new HttpResponse(null, { status: 404 });
     const executionId = `exec-ui-${Date.now()}`;
@@ -38,7 +44,8 @@ export const studioHandlers = [
       stepResults: test.steps.map((_, index) => ({ stepIndex: index, status: 'pending' as const, timestamp: startTime })),
       logs: [
         { timestamp: startTime, level: 'info' as const, message: `Starting UI test execution: ${test.name}` },
-      ],
+        variables ? { timestamp: startTime, level: 'info', message: `Variables: ${JSON.stringify(variables)}` } as any : null,
+      ].filter(Boolean),
       // Attach a mock video url when done; set later
     } as any;
     mockUITestExecutions.push(execution);
@@ -118,6 +125,17 @@ export const studioHandlers = [
     const test = mockUITests.find((t) => t.id === id);
     if (!test) return new HttpResponse(null, { status: 404 });
     return HttpResponse.json(test);
+  }),
+  http.post('/api/studio/tests/:id/validate-variables', async ({ params, request }) => {
+    await delay(250);
+    const { id } = params;
+    const test = mockUITests.find((t) => t.id === id);
+    if (!test) return new HttpResponse(null, { status: 404 });
+    const { variables } = (await request.json()) as { variables: Record<string, any> };
+    const required = (test.variables || []).filter((v) => v.required).map((v) => v.name);
+    const missing = required.filter((n) => variables?.[n] == null || (variables[n].kind === 'secret' ? !variables[n].secretId : variables[n].value == null || variables[n].value === ''));
+    const isValid = missing.length === 0;
+    return HttpResponse.json({ isValid, missing });
   }),
   http.delete('/api/studio/tests/:id', async ({ params }) => {
     await delay(200);

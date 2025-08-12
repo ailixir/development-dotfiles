@@ -13,6 +13,7 @@ export interface MockUITest {
     timeout: number;
     waitStrategy: 'none' | 'networkidle' | 'domcontentloaded';
   };
+  variables?: Array<{ name: string; type: 'plain' | 'number' | 'boolean' | 'secret'; required?: boolean; description?: string }>;
   status: 'draft' | 'active' | 'archived';
   createdAt: string;
   updatedAt: string;
@@ -66,6 +67,10 @@ export const mockUITests: MockUITest[] = [
       timeout: 30000,
       waitStrategy: 'networkidle'
     },
+    variables: [
+      { name: 'USERNAME', type: 'plain', required: true },
+      { name: 'PASSWORD', type: 'secret', required: true },
+    ],
     status: 'active',
     createdAt: '2024-01-15T09:00:00Z',
     updatedAt: '2024-01-15T09:00:00Z',
@@ -94,6 +99,10 @@ export const mockUITests: MockUITest[] = [
       timeout: 45000,
       waitStrategy: 'networkidle'
     },
+    variables: [
+      { name: 'SYMBOL', type: 'plain', required: true },
+      { name: 'QUANTITY', type: 'number', required: true },
+    ],
     status: 'draft',
     createdAt: '2024-01-14T15:30:00Z',
     updatedAt: '2024-01-14T15:30:00Z',

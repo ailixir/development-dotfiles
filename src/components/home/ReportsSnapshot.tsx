@@ -38,6 +38,9 @@ const ReportsSnapshot: React.FC<ReportsSnapshotProps> = ({ maxHeight }) => {
             <ListItem
               key={r.id}
               sx={{ px: 0, borderRadius: 1, transition: 'background-color 120ms ease', '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.04) } }}
+              onClick={() => navigate(`/checks/reports/${r.id}`)}
+              role="button"
+              aria-label={`Open report ${r.name}`}
             >
               <ListItemText
                 primary={<Typography variant="body2">{r.name}</Typography>}

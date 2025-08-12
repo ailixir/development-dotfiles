@@ -142,12 +142,20 @@ const ScopeBar: React.FC = () => {
         </Stack>
 
         <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
-          <Button variant="outlined" size="small" disabled>
-            Save
-          </Button>
-          <Button variant="outlined" size="small" disabled>
-            Share
-          </Button>
+          <Tooltip title="Coming soon">
+            <span>
+              <Button variant="outlined" size="small" disabled>
+                Save
+              </Button>
+            </span>
+          </Tooltip>
+          <Tooltip title="Coming soon">
+            <span>
+              <Button variant="outlined" size="small" disabled>
+                Share
+              </Button>
+            </span>
+          </Tooltip>
         </Stack>
       </Stack>
 

@@ -21,15 +21,48 @@ const SecretInput: React.FC<SecretInputProps> = ({ label, value, onChange }) => 
 
   useEffect(() => {
     (async () => {
-      const res = await apiClient.get('/secrets');
-      setSecrets((res as any).data ?? []);
+      // Load from API
+      const res = await apiClient.get('secrets');
+      const apiSecrets: SecretMeta[] = (res as any).data ?? [];
+
+      // Merge with locally persisted secrets for persistence across reloads
+      let persisted: SecretMeta[] = [];
+      try {
+        const raw = typeof window !== 'undefined' ? window.localStorage.getItem('checks:secrets') : null;
+        if (raw) persisted = JSON.parse(raw);
+      } catch {
+        // ignore parse errors
+      }
+      const all = [...apiSecrets];
+      const seen = new Set(all.map((s) => s.id));
+      for (const s of persisted) {
+        if (!seen.has(s.id)) {
+          all.push(s);
+          seen.add(s.id);
+        }
+      }
+      setSecrets(all);
     })();
   }, []);
 
   const handleCreate = async () => {
-    const res = (await apiClient.post('/secrets', { label: newLabel, scope: newScope, value: newValue })) as any;
+    const res = (await apiClient.post('secrets', { label: newLabel, scope: newScope, value: newValue })) as any;
     const created = res as SecretMeta & { value?: string };
-    setSecrets((prev) => [...prev, { id: created.id, label: created.label, scope: created.scope, last4: created.last4, createdAt: created.createdAt }]);
+    const meta: SecretMeta = { id: created.id, label: created.label, scope: created.scope, last4: created.last4, createdAt: created.createdAt };
+    setSecrets((prev) => {
+      const next = [...prev, meta];
+      try {
+        if (typeof window !== 'undefined') {
+          const raw = window.localStorage.getItem('checks:secrets');
+          const persisted: SecretMeta[] = raw ? JSON.parse(raw) : [];
+          const merged = [...persisted, meta].filter((s, idx, arr) => arr.findIndex((x) => x.id === s.id) === idx);
+          window.localStorage.setItem('checks:secrets', JSON.stringify(merged));
+        }
+      } catch {
+        // ignore persistence errors
+      }
+      return next;
+    });
     onChange({ id: created.id });
     setOpen(false);
     setNewLabel('');
@@ -45,7 +78,14 @@ const SecretInput: React.FC<SecretInputProps> = ({ label, value, onChange }) => 
         size="small"
         label={label}
         value={value?.id ?? ''}
-        onChange={(e) => onChange(e.target.value ? { id: e.target.value } : null)}
+        onChange={(e) => {
+          const val = e.target.value;
+          if (val === '__create__') {
+            setOpen(true);
+            return;
+          }
+          onChange(val ? { id: val } : null);
+        }}
         SelectProps={{ displayEmpty: true }}
       >
         <MenuItem value="">
@@ -54,7 +94,7 @@ const SecretInput: React.FC<SecretInputProps> = ({ label, value, onChange }) => 
         {secrets.map((s) => (
           <MenuItem key={s.id} value={s.id}>{s.label} {s.last4 ? `(••••${s.last4})` : ''} • {s.scope}</MenuItem>
         ))}
-        <MenuItem value="__create__" onClick={() => setOpen(true)}>+ Create new secret…</MenuItem>
+        <MenuItem value="__create__">+ Create new secret…</MenuItem>
       </TextField>
 
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>

@@ -5,6 +5,7 @@ import studioHandlers from './studioHandlers';
 import { tagsHandlers } from './tagsHandlers';
 import { dashboardHandlers } from './dashboardHandlers';
 import { secretsHandlers } from './secretsHandlers';
+import { templatesHandlers } from './templatesHandlers';
 
 export const handlers = [
   ...checksHandlers,
@@ -14,4 +15,5 @@ export const handlers = [
   ...studioHandlers,
   ...dashboardHandlers,
   ...secretsHandlers,
+  ...templatesHandlers,
 ];
