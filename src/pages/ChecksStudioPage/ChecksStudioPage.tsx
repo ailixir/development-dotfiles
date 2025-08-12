@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -38,6 +38,18 @@ import {
   alpha,
   CircularProgress,
   GlobalStyles,
+  Snackbar,
+  Tabs,
+  Tab,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Skeleton,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
 } from '@mui/material';
 import {
   PlayArrow,
@@ -68,93 +80,100 @@ import {
   Keyboard,
   TouchApp,
   CameraAlt,
-  FiberManualRecord,
   Schedule,
   AutoMode,
   ListAlt,
   PlaylistAdd,
   Clear,
   Refresh,
+  ExpandMore,
+  KeyboardArrowUp,
+  KeyboardArrowDown,
+  HelpOutline,
 } from '@mui/icons-material';
+import CodeTab from '@/components/studio/CodeTab';
+import OnboardingCoach from '@/components/studio/OnboardingCoach';
+import { useDispatch } from 'react-redux';
+import { useAppSelector } from '@/store';
+import { setAutoSyncCode, setGeneratedCode, setTestIR, setExecutionLogs, setAllStepResults, setExecuting, setCurrentStep as setCurrentStepAction, setVideoUrl as setVideoUrlAction, clearLogs, updateConfiguration } from '@store/slices/studioSlice';
+import { buildDefaultTestIR } from '@/utils/studio/ir/parseSteps';
+import { generatePythonFromIR } from '@/utils/studio/codegen/pythonGenerator';
+import studioApi from '@/services/api/studioApi';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import SecretInput from '@/components/studio/SecretInput';
 
-// Mock test scenarios data
-const mockTestScenarios = [
-  {
-    id: '1',
-    name: 'Trading Platform Login Flow',
-    description: 'Validates complete user authentication flow and dashboard loading',
-    csiId: 'CSI-12345',
-    steps: [
-      'Navigate to https://trading.citi.com',
-      'Click on Login button',
-      'Enter valid credentials',
-      'Verify dashboard loads',
-      'Check account balance display'
-    ],
-    status: 'completed',
-    duration: '2.4s',
-    lastRun: '2025-01-07T10:30:00Z',
-    environment: 'Production',
-  },
-  {
-    id: '2',
-    name: 'Payment Gateway Test',
-    description: 'End-to-end payment processing validation',
-    csiId: 'CSI-67890',
-    steps: [
-      'Open payment form',
-      'Fill payment details',
-      'Submit payment',
-      'Verify confirmation page',
-      'Check transaction status'
-    ],
-    status: 'running',
-    duration: '1.8s',
-    lastRun: '2025-01-07T10:32:00Z',
-    environment: 'Staging',
-  },
-  {
-    id: '3',
-    name: 'Market Data Visualization',
-    description: 'Real-time market data display and interaction validation',
-    csiId: 'CSI-11111',
-    steps: [
-      'Load market dashboard',
-      'Select equity symbols',
-      'Apply date filters',
-      'Verify chart rendering',
-      'Check real-time updates'
-    ],
-    status: 'failed',
-    duration: '3.1s',
-    lastRun: '2025-01-07T10:28:00Z',
-    environment: 'Development',
-  },
-];
+type Scenario = {
+  id: string;
+  name: string;
+  description: string;
+  csiId: string;
+  steps: string[];
+  status: 'draft' | 'active' | 'archived' | string;
+  createdAt?: string;
+  updatedAt?: string;
+  configuration?: any;
+};
 
 const ChecksStudioPage: React.FC = () => {
   const theme = useTheme();
-  const [selectedScenario, setSelectedScenario] = useState<string | null>(mockTestScenarios[0]?.id || null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [isRunning, setIsRunning] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [testSteps, setTestSteps] = useState<string[]>([
-    'Navigate to https://trading.citi.com',
-    'Click on Login button',
-    'Enter valid credentials',
-    'Verify dashboard loads'
-  ]);
+  const [scenarios, setScenarios] = useState<Scenario[] | null>(null);
+  const [scenariosError, setScenariosError] = useState<string | null>(null);
+  const [scenariosLoading, setScenariosLoading] = useState<boolean>(true);
+  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
+  const isRunning = useAppSelector((s: any) => s.studio.isExecuting);
+  const currentStep = Math.max(0, useAppSelector((s: any) => s.studio.currentStep));
+  const [testSteps, setTestSteps] = useState<string[]>([]);
   const [newStep, setNewStep] = useState('');
   const [showNewScenarioDialog, setShowNewScenarioDialog] = useState(false);
-  const [executionLogs, setExecutionLogs] = useState<{ timestamp: string; message: string; type: 'info' | 'success' | 'error' }[]>([
-    { timestamp: '10:30:12', message: 'Test execution started', type: 'info' },
-    { timestamp: '10:30:13', message: 'Browser initialized successfully', type: 'success' },
-    { timestamp: '10:30:14', message: 'Navigating to target URL...', type: 'info' },
-    { timestamp: '10:30:15', message: 'Page loaded in 1.2s', type: 'success' },
-  ]);
-  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const reduxLogs = useAppSelector((s: any) => s.studio.executionLogs);
+  const executionLogs = useMemo(() => (reduxLogs || []).map((l: any) => ({
+    timestamp: new Date(l.timestamp).toLocaleTimeString(),
+    message: l.message,
+    type: l.level === 'error' ? 'error' : 'info',
+  })), [reduxLogs]);
+  const showVideoPlayer = !!useAppSelector((s: any) => s.studio.videoUrl);
+  const videoUrl = useAppSelector((s: any) => s.studio.videoUrl);
   const [videoCurrentTime, setVideoCurrentTime] = useState(0);
-  const [stepResults, setStepResults] = useState<{ [key: number]: 'passed' | 'failed' | 'pending' }>({});
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const stepResultsArr = useAppSelector((s: any) => s.studio.stepResults) as Array<{ stepIndex: number; status: 'pending' | 'running' | 'pass' | 'fail' }>;
+  const stepResultsMap = useMemo(() => {
+    const map: Record<number, 'passed' | 'failed' | 'pending'> = {};
+    (stepResultsArr || []).forEach((r) => {
+      map[r.stepIndex] = r.status === 'pass' ? 'passed' : r.status === 'fail' ? 'failed' : 'pending';
+    });
+    return map;
+  }, [stepResultsArr]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [autosave, setAutosave] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveSnack, setSaveSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+  const [helpOpen, setHelpOpen] = useState(false);
+  // Removed legacy interval-based simulator in favor of API polling
+  const [validation,
+    setValidation] = useState<{ results: Array<{ stepIndex: number; isValid: boolean; suggestion: string | null }>; isValid: boolean; loading: boolean; error?: string }>
+    ({ results: [], isValid: true, loading: false });
+  const config = useAppSelector((s: any) => s.studio.testConfiguration);
+  const [variablesList, setVariablesList] = useState<Array<{ id: string; name: string; type: 'plain' | 'secret'; value?: string; secretId?: string }>>([]);
+  const [rightTab, setRightTab] = useState(0);
+  const [coachStep, setCoachStep] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('studio:coachStep');
+      return saved ? Number(saved) : 0;
+    } catch { return 0; }
+  });
+  const [forceCoach, setForceCoach] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [variablesOpen, setVariablesOpen] = useState(false);
+
+  // Subtle auto-advance for onboarding
+  useEffect(() => {
+    if (!forceCoach && coachStep === 0 && testSteps.length > 0) setCoachStep(1);
+  }, [forceCoach, coachStep, testSteps.length]);
+  useEffect(() => {
+    if (coachStep === 1 && isRunning) setCoachStep(2);
+  }, [coachStep, isRunning]);
+  useEffect(() => {
+    if (coachStep === 2 && !isRunning && (stepResultsArr || []).length > 0) setCoachStep(99);
+  }, [coachStep, isRunning, stepResultsArr]);
   const [newScenarioForm, setNewScenarioForm] = useState({
     name: '',
     environment: 'Development',
@@ -162,55 +181,194 @@ const ChecksStudioPage: React.FC = () => {
     description: ''
   });
   
-  const selectedScenarioData = mockTestScenarios.find(s => s.id === selectedScenario);
+  const location = useLocation();
+  const params = useParams();
+  const navigate = useNavigate();
+  const selectedScenarioData = scenarios?.find(s => s.id === selectedScenario) || null;
+  const dispatch = useDispatch();
+  const { generatedCode, autoSyncCode } = useAppSelector((s: any) => s.studio);
   
-  // Calculate metrics
-  const totalScenarios = mockTestScenarios.length;
-  const passedScenarios = mockTestScenarios.filter(s => s.status === 'completed').length;
-  const failedScenarios = mockTestScenarios.filter(s => s.status === 'failed').length;
-  const successRate = Math.round((passedScenarios / totalScenarios) * 100);
+  // Calculate metrics (simple derived)
+  const totalScenarios = scenarios?.length || 0;
+  const passedScenarios = 0;
+  const failedScenarios = 0;
+  const successRate = totalScenarios ? Math.round((passedScenarios / totalScenarios) * 100) : 0;
 
-  const handleRunTest = () => {
-    setIsRunning(true);
-    setCurrentStep(0);
-    setShowVideoPlayer(true);
-    setStepResults({});
-    // Simulate test execution
-    const interval = setInterval(() => {
-      setCurrentStep(prev => {
-        if (prev < testSteps.length - 1) {
-          // Mark current step as passed
-          setStepResults(results => ({ ...results, [prev]: 'passed' }));
-          setExecutionLogs(logs => [...logs, {
-            timestamp: new Date().toLocaleTimeString(),
-            message: `Executing: ${testSteps[prev + 1]}`,
-            type: 'info'
-          }]);
-          return prev + 1;
-        } else {
-          // Mark final step as passed
-          setStepResults(results => ({ ...results, [prev]: 'passed' }));
-          setIsRunning(false);
-          setExecutionLogs(logs => [...logs, {
-            timestamp: new Date().toLocaleTimeString(),
-            message: 'Test execution completed successfully',
-            type: 'success'
-          }]);
-          clearInterval(interval);
-          return prev;
+  // Load scenarios from API (MSW-backed)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setScenariosLoading(true);
+      setScenariosError(null);
+      try {
+        const res = (await studioApi.listTests()) as any;
+        if (!mounted) return;
+        const list = res.data || res;
+        setScenarios(list);
+        const urlId = params.id;
+        const query = new URLSearchParams(location.search);
+        const autorun = query.get('autorun') === '1';
+        let chosen = list?.[0];
+        if (urlId) {
+          const byId = list?.find((t: any) => t.id === urlId);
+          if (byId) chosen = byId;
         }
-      });
-    }, 1500);
-  };
+        if (chosen) {
+          setSelectedScenario(chosen.id);
+          setTestSteps(chosen.steps || []);
+          if (autorun) {
+            // Delay a moment to allow state to settle
+            setTimeout(() => handleRunTest(), 300);
+          }
+        }
+      } catch (e: any) {
+        if (!mounted) return;
+        setScenariosError(e?.message || 'Failed to load scenarios');
+      } finally {
+        if (mounted) setScenariosLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const reloadScenarios = useCallback(async () => {
+    setScenariosLoading(true);
+    setScenariosError(null);
+    try {
+      const res = (await studioApi.listTests()) as any;
+      const list = res.data || res;
+      setScenarios(list);
+    } catch (e: any) {
+      setScenariosError(e?.message || 'Failed to load scenarios');
+    } finally {
+      setScenariosLoading(false);
+    }
+  }, []);
+
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const currentExecutionIdRef = useRef<string | null>(null);
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  }, []);
+
+  const handleRunTest = useCallback(async () => {
+    if (!validation.isValid || testSteps.length === 0 || !selectedScenarioData?.id) return;
+    try {
+      dispatch(setExecuting(true));
+      dispatch(setCurrentStepAction(0));
+      dispatch(setVideoUrlAction(null as any));
+      dispatch(clearLogs());
+      dispatch(setExecutionLogs([{ timestamp: new Date().toISOString(), level: 'info', message: 'Starting UI test execution' } as any]));
+      const start = await studioApi.executeTest(selectedScenarioData.id);
+      currentExecutionIdRef.current = start.executionId;
+      // start polling
+      stopPolling();
+      pollingRef.current = setInterval(async () => {
+        try {
+          const exec = (await studioApi.getExecution(currentExecutionIdRef.current as string)) as any;
+          if (Array.isArray(exec.stepResults)) {
+            dispatch(setAllStepResults(exec.stepResults.map((r: any) => ({ stepIndex: r.stepIndex, status: r.status }))));
+          }
+          const runningIndex = exec.stepResults?.findIndex((r: any) => r.status === 'running') ?? -1;
+          const passedCount = exec.stepResults?.filter((r: any) => r.status === 'pass').length ?? 0;
+          dispatch(setCurrentStepAction(runningIndex >= 0 ? runningIndex : Math.max(0, passedCount - 1)));
+          // logs
+          if (Array.isArray(exec.logs)) {
+            dispatch(setExecutionLogs(exec.logs as any));
+          }
+          if (exec.videoUrl) {
+            dispatch(setVideoUrlAction(exec.videoUrl));
+          }
+          if (exec.status === 'completed' || exec.status === 'failed' || exec.status === 'timeout') {
+            dispatch(setExecuting(false));
+            stopPolling();
+          }
+        } catch (e) {
+          // stop on polling error
+          dispatch(setExecuting(false));
+          stopPolling();
+        }
+      }, 700);
+    } catch (e: any) {
+      dispatch(setExecuting(false));
+      dispatch(setExecutionLogs([{ timestamp: new Date().toISOString(), level: 'error', message: e?.message || 'Failed to start execution' } as any]));
+    }
+  }, [validation.isValid, testSteps.length, selectedScenarioData, stopPolling, dispatch]);
+
+  // Generate Python code when steps change (autoSync)
+  useEffect(() => {
+    if (!autoSyncCode) return;
+    // Guard: avoid regenerating during scenario switch before steps settle
+    const timeout = setTimeout(() => {
+      const ir = buildDefaultTestIR(selectedScenarioData?.name || 'Untitled Test', testSteps);
+      ir.variables = variablesList.map((v) => (
+        v.type === 'plain'
+          ? { name: v.name, value: { kind: 'plain', value: v.value || '' } }
+          : v.secretId
+          ? { name: v.name, value: { kind: 'secret', ref: { id: v.secretId, label: v.name, scope: 'project', createdAt: new Date().toISOString() } } }
+          : { name: v.name, value: { kind: 'plain', value: '' } }
+      )) as any;
+      dispatch(setTestIR(ir));
+      dispatch(setGeneratedCode(generatePythonFromIR(ir)));
+    }, 50);
+    return () => clearTimeout(timeout);
+  }, [testSteps, autoSyncCode, selectedScenarioData?.name, variablesList, dispatch]);
+
+  // Hydrate steps from localStorage (once)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('studio:steps');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.every((s: any) => typeof s === 'string')) {
+          // Avoid redundant state updates
+          if (JSON.stringify(parsed) !== JSON.stringify(testSteps)) {
+            setTestSteps(parsed as string[]);
+          }
+        }
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist steps to localStorage
+  useEffect(() => {
+    localStorage.setItem('studio:steps', JSON.stringify(testSteps));
+  }, [testSteps]);
+  useEffect(() => {
+    try { localStorage.setItem('studio:coachStep', String(coachStep)); } catch {}
+  }, [coachStep]);
+
+  // Debounced validation on steps change
+  useEffect(() => {
+    let cancelled = false;
+    const id = setTimeout(async () => {
+      try {
+        setValidation((v) => ({ ...v, loading: true, error: undefined }));
+        const res = await studioApi.validateSteps(testSteps);
+        if (!cancelled) setValidation({ results: res.results, isValid: res.isValid, loading: false });
+      } catch (err: any) {
+        if (!cancelled) setValidation({ results: [], isValid: false, loading: false, error: err?.message || 'Validation failed' });
+      }
+    }, 250);
+    return () => { cancelled = true; clearTimeout(id); };
+  }, [testSteps]);
 
   const handleScenarioSelect = (scenarioId: string) => {
+    stopPolling();
+    dispatch(setExecuting(false));
     setSelectedScenario(scenarioId);
-    const scenario = mockTestScenarios.find(s => s.id === scenarioId);
+    const scenario = scenarios?.find(s => s.id === scenarioId);
     if (scenario) {
-      setTestSteps(scenario.steps);
-      setShowVideoPlayer(scenario.status === 'completed');
-      setCurrentStep(0);
-      setStepResults({});
+      setTestSteps(scenario.steps || []);
+      dispatch(setVideoUrlAction(null as any));
+      dispatch(setCurrentStepAction(0));
+      dispatch(setAllStepResults([] as any));
+      dispatch(clearLogs());
     }
   };
 
@@ -230,32 +388,45 @@ const ChecksStudioPage: React.FC = () => {
   const handleStepClick = (stepIndex: number) => {
     if (showVideoPlayer && !isRunning) {
       // Simulate jumping to step timestamp in video
-      setVideoCurrentTime(stepIndex * 30); // 30 seconds per step simulation
-      setCurrentStep(stepIndex);
+      const t = stepIndex * 10;
+      setVideoCurrentTime(t);
+      try { videoRef.current && (videoRef.current.currentTime = t); } catch {}
+      dispatch(setCurrentStepAction(stepIndex));
     }
   };
 
-  const handleCreateNewScenario = () => {
-    // In a real implementation, this would call an API
-    console.log('Creating new scenario:', newScenarioForm);
-    setShowNewScenarioDialog(false);
-    setNewScenarioForm({
-      name: '',
-      environment: 'Development',
-      csiId: '',
-      description: ''
-    });
+  const handleCreateNewScenario = async () => {
+    try {
+      const ir = buildDefaultTestIR(newScenarioForm.name || 'Untitled Test', []);
+      const created = await studioApi.createTest({ ...ir, name: newScenarioForm.name, csiId: newScenarioForm.csiId, meta: { ...ir.meta, description: newScenarioForm.description }, environment: newScenarioForm.environment });
+      setSaveSnack({ open: true, message: 'Scenario created', severity: 'success' });
+      setShowNewScenarioDialog(false);
+      setNewScenarioForm({ name: '', environment: 'Development', csiId: '', description: '' });
+      // reload and select new scenario if id present
+      await reloadScenarios();
+      if ((created as any).id) {
+        setSelectedScenario((created as any).id);
+        setTestSteps((created as any).steps || []);
+      }
+    } catch (e: any) {
+      setSaveSnack({ open: true, message: e?.message || 'Failed to create scenario', severity: 'error' });
+    }
   };
 
   const addTestStep = () => {
     if (newStep.trim()) {
-      setTestSteps([...testSteps, newStep]);
+      // Stop any ongoing polling before mutating steps
+      stopPolling();
+      dispatch(setExecuting(false));
+      setTestSteps(prev => [...prev, newStep]);
       setNewStep('');
     }
   };
 
   const removeTestStep = (index: number) => {
-    setTestSteps(testSteps.filter((_, i) => i !== index));
+    stopPolling();
+    dispatch(setExecuting(false));
+    setTestSteps(prev => prev.filter((_, i) => i !== index));
   };
 
   const getStatusColor = (status: string) => {
@@ -288,164 +459,133 @@ const ChecksStudioPage: React.FC = () => {
             </Box>
           </Box>
           <Stack direction="row" spacing={2}>
+            {/* New Scenario moved to Studio Tests page (+) */}
+            
             <Button
-              variant="outlined"
-              startIcon={<Upload />}
+              variant="text"
               size="small"
+              onClick={() => setTemplatesOpen(true)}
             >
-              Import
+              Templates
             </Button>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setShowNewScenarioDialog(true)}
-            >
-              New Scenario
-            </Button>
+            <Tooltip title="Show guide">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setForceCoach(true);
+                  setCoachStep(0);
+                  try { localStorage.removeItem('studio:coachStep'); } catch {}
+                }}
+                aria-label="Show guide"
+              >
+                <HelpOutline />
+              </IconButton>
+            </Tooltip>
           </Stack>
         </Box>
 
-        {/* Status Bar */}
-        <Paper sx={{ p: 2, background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)} 0%, transparent 100%)` }}>
-          <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box 
-                  sx={{ 
-                    width: 12, 
-                    height: 12, 
-                    borderRadius: '50%', 
-                    bgcolor: isRunning ? 'success.main' : 'grey.400',
-                    animation: isRunning ? 'pulse 2s infinite' : 'none'
-                  }} 
-                />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  Studio Status: {isRunning ? 'Running Test' : 'Ready'}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <BugReport sx={{ fontSize: 18, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {totalScenarios} scenarios • {passedScenarios} passed • {failedScenarios} failed
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Timer sx={{ fontSize: 18, color: 'info.main' }} />
-                <Typography variant="body2" color="text.secondary">
-                  Avg runtime: 2.1s
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <CheckCircle sx={{ fontSize: 18, color: 'success.main' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {successRate}% success rate
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </Paper>
+        {/* Removed status banner per request */}
       </Box>
 
-      {/* Main Three-Panel Interface */}
+      {/* Two-Panel Interface (Proof as a tab in the middle panel) */}
       <Grid container spacing={3} sx={{ minHeight: '600px' }}>
         {/* Left Panel - Test Scenarios & Steps */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <CardHeader
               avatar={<ListAlt sx={{ color: 'primary.main' }} />}
-              title="Test Scenarios & Steps"
+              title="Steps"
               subheader="Your testing checklist"
-              action={
-                <IconButton size="small">
-                  <Refresh />
-                </IconButton>
-              }
             />
             <CardContent sx={{ flex: 1, overflow: 'auto', p: 0 }}>
-              {/* Scenario Selector */}
+              {/* Current Test Summary */}
               <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                  Select Scenario
-                </Typography>
-                <Stack spacing={1}>
-                  {mockTestScenarios.map((scenario) => (
-                    <Card 
-                      key={scenario.id}
-                      variant={selectedScenario === scenario.id ? 'outlined' : 'elevation'}
-                      sx={{ 
-                        cursor: 'pointer',
-                        border: selectedScenario === scenario.id ? 2 : 1,
-                        borderColor: selectedScenario === scenario.id ? 'primary.main' : 'divider',
-                        '&:hover': { boxShadow: 2 },
-                        bgcolor: selectedScenario === scenario.id ? alpha(theme.palette.primary.main, 0.02) : 'background.paper'
-                      }}
-                      onClick={() => handleScenarioSelect(scenario.id)}
-                    >
-                      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                            {scenario.name}
-                          </Typography>
-                          <Chip 
-                            label={scenario.status} 
-                            size="small"
-                            color={getStatusColor(scenario.status) as any}
-                            icon={getStatusIcon(scenario.status)}
-                            sx={{ fontSize: 11 }}
-                          />
-                        </Box>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                          {scenario.description}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {scenario.steps.length} steps • {scenario.environment} • {scenario.csiId}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                          Last run: {new Date(scenario.lastRun).toLocaleString()}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Stack>
+                {scenariosLoading ? (
+                  <Typography variant="body2" color="text.secondary">Loading test…</Typography>
+                ) : selectedScenarioData ? (
+                  <Stack spacing={0.5}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{selectedScenarioData.name}</Typography>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Chip label={selectedScenarioData.status || 'draft'} size="small" color={getStatusColor(selectedScenarioData.status || '') as any} icon={getStatusIcon(selectedScenarioData.status || '')} sx={{ fontSize: 11 }} />
+                        <Button size="small" variant="text" onClick={() => { window.location.href = '/checks/studio/tests'; }}>Change…</Button>
+                      </Stack>
+                    </Stack>
+                    {selectedScenarioData.description && (
+                      <Typography variant="caption" color="text.secondary">{selectedScenarioData.description}</Typography>
+                    )}
+                    <Typography variant="caption" color="text.secondary">Updated: {new Date(selectedScenarioData.updatedAt || selectedScenarioData.createdAt || Date.now()).toLocaleString()}</Typography>
+                  </Stack>
+                ) : (
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2">No test selected.</Typography>
+                    <Button size="small" variant="contained" onClick={() => { window.location.href = '/checks/studio/tests'; }}>Open Tests</Button>
+                  </Stack>
+                )}
               </Box>
 
               {/* Test Steps */}
               <Box sx={{ p: 2 }}>
+                {/* Onboarding coach - Step 0 */}
+                {/* Lightweight onboarding to guide the flow */}
+                {/* Persisted via localStorage */}
+                {coachStep === 0 && (
+                  <OnboardingCoach step={0} onNext={() => setCoachStep(1)} onDismiss={() => setCoachStep(99)} />
+                )}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                     Test Steps ({testSteps.length})
                   </Typography>
-                  <Badge badgeContent={isRunning ? `${currentStep + 1}/${testSteps.length}` : null} color="primary">
-                    <PlaylistAdd sx={{ color: 'text.secondary' }} />
-                  </Badge>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Button size="small" variant="outlined" onClick={() => setVariablesOpen(true)}>Variables</Button>
+                    <Badge badgeContent={isRunning ? `${currentStep + 1}/${testSteps.length}` : null} color="primary">
+                      <PlaylistAdd sx={{ color: 'text.secondary' }} />
+                    </Badge>
+                  </Stack>
                 </Box>
+
+                 {testSteps.length === 0 && !scenariosLoading && (
+                  <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+                    <Typography variant="body2" fontWeight={600}>Add your first step</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Examples: Go to "https://example.com" <br />• Click "Sign On" <br />• Type "&lt;var USERNAME&gt;" in the "User ID" field <br />• Wait for "Welcome" (use tokens: &lt;var NAME&gt;, &lt;secret SECRET_ID&gt;)
+                    </Typography>
+                  </Paper>
+                )}
+                  {scenariosLoading && (
+                    <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+                      <Typography variant="body2">Loading scenarios…</Typography>
+                    </Paper>
+                  )}
+                  {scenariosError && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                      <AlertTitle>Failed to load scenarios</AlertTitle>
+                      {scenariosError}
+                    </Alert>
+                  )}
 
                 <List dense>
                   {testSteps.map((step, index) => {
-                    const stepResult = stepResults[index];
+                    const stepResult = stepResultsMap[index];
                     const isCurrentStep = index === currentStep;
                     const isPastStep = index < currentStep;
                     const isClickable = showVideoPlayer && !isRunning;
+                    const validationEntry = validation.results.find((r) => r.stepIndex === index);
+                    const isInvalid = validationEntry ? !validationEntry.isValid : false;
                     
                     return (
                       <ListItem
                         key={index}
                         sx={{
                           border: '1px solid',
-                          borderColor: isCurrentStep && isRunning ? 'primary.main' : 
+                          borderColor: isInvalid ? 'error.main' : isCurrentStep && isRunning ? 'primary.main' : 
                                        stepResult === 'passed' ? 'success.main' :
                                        stepResult === 'failed' ? 'error.main' : 'divider',
                           borderRadius: 1,
                           mb: 1,
                           bgcolor: isCurrentStep && isRunning ? alpha(theme.palette.primary.main, 0.08) : 
                                    stepResult === 'passed' ? alpha(theme.palette.success.main, 0.05) :
-                                   stepResult === 'failed' ? alpha(theme.palette.error.main, 0.05) : 'transparent',
+                                   stepResult === 'failed' ? alpha(theme.palette.error.main, 0.05) : isInvalid ? alpha(theme.palette.error.main, 0.03) : 'transparent',
                           transition: 'all 0.3s ease',
                           cursor: isClickable ? 'pointer' : 'default',
                           '&:hover': isClickable ? {
@@ -472,23 +612,65 @@ const ChecksStudioPage: React.FC = () => {
                           </Avatar>
                         </Box>
                         <ListItemText 
-                          primary={step}
-                          secondary={isClickable ? 'Click to jump to this step in video' : undefined}
-                          primaryTypographyProps={{
-                            variant: 'body2',
-                            sx: { 
-                              fontWeight: isCurrentStep && isRunning ? 600 : 400,
-                              color: stepResult === 'passed' ? 'success.main' :
-                                     stepResult === 'failed' ? 'error.main' :
-                                     isCurrentStep ? 'primary.main' : 'text.primary'
-                            }
-                          }}
+                          sx={{ pr: 12 }}
+                          primary={
+                            <TextField
+                              variant="standard"
+                              fullWidth
+                              value={step}
+                              onChange={(e) => {
+                                const next = [...testSteps];
+                                next[index] = e.target.value;
+                                setTestSteps(next);
+                              }}
+                              onBlur={() => {
+                                // Optional: trigger validation/save on blur
+                              }}
+                              InputProps={{
+                                disableUnderline: false,
+                                sx: {
+                                  fontSize: '0.875rem',
+                                  fontWeight: isCurrentStep && isRunning ? 600 : 400,
+                                  color: stepResult === 'passed' ? 'success.main' :
+                                         stepResult === 'failed' ? 'error.main' : isInvalid ? 'error.main' :
+                                         isCurrentStep ? 'primary.main' : 'text.primary',
+                                }
+                              }}
+                            />
+                          }
+                          secondary={isInvalid ? (validationEntry?.suggestion || 'Invalid step') : isClickable ? 'Click to jump to this step in video' : undefined}
                           secondaryTypographyProps={{
                             variant: 'caption',
                             sx: { color: 'text.secondary' }
                           }}
                         />
                         <ListItemSecondaryAction>
+                          <Tooltip title="Move up">
+                            <span>
+                              <IconButton size="small" disabled={index === 0} onClick={(e) => {
+                                e.stopPropagation();
+                                const next = [...testSteps];
+                                const [moved] = next.splice(index, 1);
+                                next.splice(index - 1, 0, moved);
+                                setTestSteps(next);
+                              }}>
+                                <KeyboardArrowUp fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip title="Move down">
+                            <span>
+                              <IconButton size="small" disabled={index === testSteps.length - 1} onClick={(e) => {
+                                e.stopPropagation();
+                                const next = [...testSteps];
+                                const [moved] = next.splice(index, 1);
+                                next.splice(index + 1, 0, moved);
+                                setTestSteps(next);
+                              }}>
+                                <KeyboardArrowDown fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
                           <Tooltip title="Remove step">
                             <span>
                               <IconButton 
@@ -526,14 +708,19 @@ const ChecksStudioPage: React.FC = () => {
                       )
                     }}
                   />
+                  {!validation.isValid && (
+                    <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+                      {validation.results.filter((r) => !r.isValid).length} invalid step(s). Fix before running.
+                    </Typography>
+                  )}
                 </Box>
               </Box>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Middle Panel - Control Tower */}
-        <Grid item xs={12} md={4}>
+        {/* Middle Panel - Control Tower (Run, Logs, Code, Proof) */}
+        <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <CardHeader
               avatar={<Settings sx={{ color: 'warning.main' }} />}
@@ -541,32 +728,38 @@ const ChecksStudioPage: React.FC = () => {
               subheader="Test execution & monitoring"
               action={
                 <Stack direction="row" spacing={1}>
-                  <Tooltip title={isRecording ? "Stop Recording" : "Start Recording"}>
-                    <IconButton 
-                      size="small" 
-                      color={isRecording ? "error" : "default"}
-                      onClick={() => setIsRecording(!isRecording)}
-                    >
-                      <FiberManualRecord />
-                    </IconButton>
+                  <Tooltip title="Reload scenarios">
+                    <span>
+                      <IconButton size="small" onClick={reloadScenarios} disabled={scenariosLoading} aria-label="Reload scenarios">
+                        <Refresh />
+                      </IconButton>
+                    </span>
                   </Tooltip>
-                  <IconButton size="small">
-                    <Settings />
-                  </IconButton>
                 </Stack>
               }
             />
             <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
               {/* Control Buttons */}
               <Box sx={{ mb: 3 }}>
+                {coachStep === 1 && (
+                  <OnboardingCoach step={1} onNext={() => setCoachStep(2)} onDismiss={() => setCoachStep(99)} />)
+                }
                 <Stack direction="row" spacing={2} justifyContent="center">
+                   {null}
                   <Button
                     variant="contained"
                     size="large"
                     startIcon={isRunning ? <Stop /> : <PlayArrow />}
-                    onClick={() => isRunning ? setIsRunning(false) : handleRunTest()}
+                      onClick={() => {
+                        if (isRunning) {
+                          dispatch(setExecuting(false));
+                          stopPolling();
+                        } else {
+                          handleRunTest();
+                        }
+                      }}
                     color={isRunning ? "error" : "success"}
-                    disabled={testSteps.length === 0}
+                     disabled={testSteps.length === 0 || !validation.isValid || !selectedScenarioData?.id}
                     sx={{ minWidth: 120 }}
                   >
                     {isRunning ? 'Stop' : 'Run Test'}
@@ -574,7 +767,19 @@ const ChecksStudioPage: React.FC = () => {
                   <Button
                     variant="outlined"
                     startIcon={<Save />}
-                    disabled={isRunning}
+                    disabled={isRunning || isSaving}
+                    onClick={async () => {
+                      try {
+                        setIsSaving(true);
+                        const ir = buildDefaultTestIR(selectedScenarioData?.name || 'Untitled Test', testSteps);
+                        await studioApi.createTest({ ...ir, name: ir.meta.name, csiId: selectedScenarioData?.csiId || 'CSI-00000' });
+                        setSaveSnack({ open: true, message: 'Scenario saved', severity: 'success' });
+                      } catch (e: any) {
+                        setSaveSnack({ open: true, message: e?.message || 'Failed to save', severity: 'error' });
+                      } finally {
+                        setIsSaving(false);
+                      }
+                    }}
                   >
                     Save
                   </Button>
@@ -604,8 +809,17 @@ const ChecksStudioPage: React.FC = () => {
 
               <Divider sx={{ mb: 2 }} />
 
+              <Tabs value={rightTab} onChange={(_, v) => setRightTab(v)} sx={{ mb: 1 }}>
+                <Tab label="Logs" />
+                <Tab label="Code" />
+                <Tab label="Proof" />
+              </Tabs>
+
               {/* Execution Logs */}
-              <Box sx={{ flex: 1 }}>
+              <Box sx={{ flex: 1, display: rightTab === 0 ? 'block' : 'none' }}>
+                {coachStep === 2 && (
+                  <OnboardingCoach step={2} onNext={() => setCoachStep(99)} onDismiss={() => setCoachStep(99)} />
+                )}
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Code sx={{ fontSize: 18 }} />
                   Live Execution Logs
@@ -614,7 +828,7 @@ const ChecksStudioPage: React.FC = () => {
                 <Paper 
                   variant="outlined" 
                   sx={{ 
-                    height: 280, 
+                    height: 480, 
                     overflow: 'auto', 
                     bgcolor: 'grey.900',
                     color: 'white',
@@ -623,7 +837,13 @@ const ChecksStudioPage: React.FC = () => {
                     p: 1
                   }}
                 >
-                  {executionLogs.map((log, index) => (
+                  {validation.loading && (
+                    <Box sx={{ mb: 0.5, color: 'info.light' }}>Validating steps…</Box>
+                  )}
+                  {validation.error && (
+                    <Box sx={{ mb: 0.5, color: 'error.light' }}>Validation error: {validation.error}</Box>
+                  )}
+                   {executionLogs.map((log: { timestamp: string; message: string; type: 'info' | 'error' | 'success' }, index: number) => (
                     <Box key={index} sx={{ mb: 0.5, display: 'flex', gap: 1 }}>
                       <Typography 
                         component="span" 
@@ -657,246 +877,67 @@ const ChecksStudioPage: React.FC = () => {
                       </Typography>
                     </Box>
                   )}
+                  {executionLogs.length === 0 && !isRunning && !validation.loading && (
+                    <Box sx={{ color: 'grey.400' }}>No logs yet. Run the test to see live output.</Box>
+                  )}
                 </Paper>
               </Box>
 
-              {/* Test Configuration */}
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                  Test Configuration
-                </Typography>
-                <Stack direction="row" spacing={1}>
-                  <Chip label="Chrome 120" size="small" variant="outlined" />
-                  <Chip label="1920x1080" size="small" variant="outlined" />
-                  <Chip label="Fast Network" size="small" variant="outlined" />
-                </Stack>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Right Panel - Video Playback */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <CardHeader
-              avatar={<VideoLibrary sx={{ color: 'info.main' }} />}
-              title="Visual Proof"
-              subheader="Synchronized video playback"
-              action={
-                <Stack direction="row" spacing={1}>
-                  <IconButton size="small">
-                    <Download />
-                  </IconButton>
-                  <IconButton size="small">
-                    <Share />
-                  </IconButton>
-                </Stack>
-              }
-            />
-            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
-              {/* Video Player - Core PRD Feature */}
-              <Paper 
-                variant="outlined"
-                sx={{ 
-                  height: 320,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bgcolor: 'grey.900',
-                  color: 'white',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  mb: 2
-                }}
-              >
-                {isRunning || isRecording ? (
-                  <Box sx={{ textAlign: 'center', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <CameraAlt sx={{ fontSize: 48, color: 'primary.light', mb: 2 }} />
-                    <Typography variant="h6" sx={{ mb: 1 }}>
-                      Recording Test Execution
-                    </Typography>
-                    <Typography variant="body2" color="grey.300">
-                      Step {currentStep + 1} of {testSteps.length}: {testSteps[currentStep]}
-                    </Typography>
-                    
-                    {/* Recording indicator */}
-                    <Box sx={{ 
-                      position: 'absolute',
-                      top: 16,
-                      right: 16,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      color: 'error.light',
-                      bgcolor: alpha('#000', 0.7),
-                      px: 1.5,
-                      py: 0.5,
-                      borderRadius: 2
-                    }}>
-                      <FiberManualRecord sx={{ fontSize: 12, animation: 'pulse 2s infinite' }} />
-                      <Typography variant="caption" sx={{ fontWeight: 'bold' }}>RECORDING</Typography>
-                    </Box>
-                    
-                    {/* Progress bar */}
-                    <Box sx={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={((currentStep + 1) / testSteps.length) * 100}
-                        sx={{ 
-                          height: 4,
-                          borderRadius: 2,
-                          bgcolor: alpha('#fff', 0.2),
-                          '& .MuiLinearProgress-bar': {
-                            bgcolor: 'primary.light'
-                          }
-                        }}
-                      />
-                    </Box>
-                  </Box>
-                ) : showVideoPlayer ? (
-                  <Box sx={{ textAlign: 'center', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <Box sx={{ 
-                      width: '100%',
-                      height: '100%',
-                      background: `linear-gradient(45deg, 
-                        ${alpha(theme.palette.primary.main, 0.1)} 25%, 
-                        transparent 25%, 
-                        transparent 50%, 
-                        ${alpha(theme.palette.primary.main, 0.1)} 50%, 
-                        ${alpha(theme.palette.primary.main, 0.1)} 75%, 
-                        transparent 75%, 
-                        transparent)`,
-                      backgroundSize: '20px 20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexDirection: 'column'
-                    }}>
-                      <PlayArrow sx={{ fontSize: 64, color: 'primary.light', mb: 2 }} />
-                      <Typography variant="h6" sx={{ mb: 1 }}>
-                        Test Video Available
-                      </Typography>
-                      <Typography variant="body2" color="grey.300">
-                        {selectedScenarioData?.name} - {selectedScenarioData?.duration}
-                      </Typography>
-                      <Typography variant="caption" color="grey.400" sx={{ mt: 1 }}>
-                        Click on steps to jump to specific moments
-                      </Typography>
-                    </Box>
-                    
-                    {/* Video timeline indicator */}
-                    <Box sx={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="caption">
-                          {Math.floor(videoCurrentTime / 60)}:{(videoCurrentTime % 60).toFixed(0).padStart(2, '0')}
-                        </Typography>
-                        <Typography variant="caption">
-                          {selectedScenarioData?.duration || '0:00'}
-                        </Typography>
-                      </Box>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={(videoCurrentTime / 180) * 100} // Assuming 3-minute max video
-                        sx={{ 
-                          height: 6,
-                          borderRadius: 3,
-                          bgcolor: alpha('#fff', 0.2),
-                          '& .MuiLinearProgress-bar': {
-                            bgcolor: 'info.light'
-                          }
-                        }}
-                      />
-                    </Box>
-                  </Box>
-                ) : (
-                  <Box sx={{ textAlign: 'center' }}>
-                    <VideoLibrary sx={{ fontSize: 48, color: 'grey.600', mb: 2 }} />
-                    <Typography variant="h6" sx={{ mb: 1, color: 'grey.400' }}>
-                      Visual Proof Arena
-                    </Typography>
-                    <Typography variant="body2" color="grey.500">
-                      Run a test to generate synchronized video proof of execution
-                    </Typography>
-                    <Typography variant="caption" color="grey.600" sx={{ mt: 2, display: 'block' }}>
-                      "From Checklist to Reality" - Watch your plain English commands come to life
-                    </Typography>
-                  </Box>
-                )}
-              </Paper>
-
-              {/* Video Controls */}
-              <Box sx={{ mb: 2 }}>
-                <Stack direction="row" justifyContent="center" spacing={1}>
-                  <IconButton disabled={!isRunning}>
-                    <PlayArrow />
-                  </IconButton>
-                  <IconButton disabled={!isRunning}>
-                    <Pause />
-                  </IconButton>
-                  <IconButton disabled={!isRunning}>
-                    <Stop />
-                  </IconButton>
-                </Stack>
-                
-                <LinearProgress 
-                  variant="determinate" 
-                  value={isRunning ? (currentStep / testSteps.length) * 100 : 0}
-                  sx={{ mt: 1, height: 4, borderRadius: 2 }}
+              {/* Code Tab */}
+               <Box sx={{ mt: 2, display: rightTab === 1 ? 'block' : 'none' }}>
+                <CodeTab
+                  code={generatedCode}
+                  autoSync={autoSyncCode}
+                  onToggleAutoSync={(v) => dispatch(setAutoSyncCode(v))}
+                  onRegen={() => {
+                    const ir = buildDefaultTestIR(selectedScenarioData?.name || 'Untitled Test', testSteps);
+                     ir.variables = variablesList.map((v) => (
+                       v.type === 'plain'
+                         ? { name: v.name, value: { kind: 'plain', value: v.value || '' } }
+                         : v.secretId
+                         ? { name: v.name, value: { kind: 'secret', ref: { id: v.secretId, label: v.name, scope: 'project', createdAt: new Date().toISOString() } } }
+                         : { name: v.name, value: { kind: 'plain', value: '' } }
+                     )) as any;
+                    dispatch(setTestIR(ir));
+                    dispatch(setGeneratedCode(generatePythonFromIR(ir)));
+                  }}
                 />
               </Box>
 
-              <Divider sx={{ mb: 2 }} />
-
-              {/* Test Results */}
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                  Test Results & Metrics
-                </Typography>
-                
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Paper variant="outlined" sx={{ p: 1.5, textAlign: 'center' }}>
-                      <Typography variant="h6" color="success.main" sx={{ fontWeight: 700 }}>
-                        2.4s
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Duration
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Paper variant="outlined" sx={{ p: 1.5, textAlign: 'center' }}>
-                      <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
-                        4/4
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Steps Passed
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
-                      <Stack spacing={1}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Speed sx={{ fontSize: 16, color: 'info.main' }} />
-                          <Typography variant="caption">Load Time: 1.2s</Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Memory sx={{ fontSize: 16, color: 'warning.main' }} />
-                          <Typography variant="caption">Memory: 45MB</Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <WebAsset sx={{ fontSize: 16, color: 'success.main' }} />
-                          <Typography variant="caption">DOM Elements: 247</Typography>
-                        </Box>
-                      </Stack>
-                    </Paper>
-                  </Grid>
-                </Grid>
+              {/* Proof Tab */}
+              <Box sx={{ mt: 2, display: rightTab === 2 ? 'block' : 'none' }}>
+                <Paper 
+                  variant="outlined" 
+                  sx={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'grey.900', color: 'white', position: 'relative', overflow: 'hidden' }}
+                >
+                  {isRunning && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'primary.light' }}>
+                      <CircularProgress size={16} sx={{ color: 'primary.light' }} />
+                      <Typography variant="body2">Recording…</Typography>
+                    </Box>
+                  )}
+                  {!isRunning && showVideoPlayer ? (
+                    <video 
+                      ref={videoRef}
+                      src={videoUrl || '/assets/videos/sample-ui-test.mp4'} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      controls 
+                      preload="metadata"
+                      onTimeUpdate={(e) => setVideoCurrentTime((e.target as HTMLVideoElement).currentTime)}
+                    />
+                  ) : null}
+                  {!isRunning && !showVideoPlayer && (
+                    <Typography variant="body2" color="grey.300">Visual proof will appear after run</Typography>
+                  )}
+                </Paper>
               </Box>
+
+              {/* Variables inline panel removed in favor of Variables dialog */}
             </CardContent>
           </Card>
         </Grid>
+
+        {/* Right Panel removed: Proof is integrated as a tab */}
       </Grid>
 
       {/* Enhanced New Scenario Dialog */}
@@ -948,7 +989,7 @@ const ChecksStudioPage: React.FC = () => {
                   label="CSI ID"
                   value={newScenarioForm.csiId}
                   onChange={(e) => setNewScenarioForm(prev => ({ ...prev, csiId: e.target.value }))}
-                  placeholder="CSI-12345"
+                  placeholder="123456"
                   required
                 />
               </Grid>
@@ -999,6 +1040,159 @@ const ChecksStudioPage: React.FC = () => {
           },
         }}
       />
+
+      <Snackbar
+        open={saveSnack.open}
+        autoHideDuration={2500}
+        onClose={() => setSaveSnack((s) => ({ ...s, open: false }))}
+        message={saveSnack.message}
+      />
+
+      <Dialog open={helpOpen} onClose={() => setHelpOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Keyboard Shortcuts</DialogTitle>
+        <DialogContent>
+          <Stack spacing={1} mt={1}>
+            <Typography variant="body2">Cmd/Ctrl+S — Save draft locally</Typography>
+            <Typography variant="body2">R — Run test</Typography>
+            <Typography variant="body2">. — Stop run</Typography>
+            <Typography variant="body2">? — Open this help</Typography>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setHelpOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Variables Dialog */}
+      <Dialog open={variablesOpen} onClose={() => setVariablesOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Variables</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            Configure variables referenced in your steps using &lt;var NAME&gt; or &lt;secret SECRET_ID&gt;.
+          </Typography>
+          <Paper variant="outlined" sx={{ p: 1 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ width: 180 }}>Name</TableCell>
+                  <TableCell sx={{ width: 140 }}>Type</TableCell>
+                  <TableCell>Value / Secret</TableCell>
+                  <TableCell align="right" sx={{ width: 80 }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {variablesList.map((v, i) => (
+                  <TableRow key={v.id} hover>
+                    <TableCell>
+                      <TextField size="small" value={v.name} onChange={(e) => {
+                        const next = [...variablesList];
+                        next[i] = { ...v, name: e.target.value.toUpperCase() };
+                        setVariablesList(next);
+                      }} placeholder="USERNAME" fullWidth />
+                    </TableCell>
+                    <TableCell>
+                      <FormControl size="small" fullWidth>
+                        <Select value={v.type} onChange={(e) => {
+                          const next = [...variablesList];
+                          next[i] = { ...v, type: e.target.value as 'plain' | 'secret' };
+                          setVariablesList(next);
+                        }}>
+                          <MenuItem value="plain">Plain</MenuItem>
+                          <MenuItem value="secret">Secret</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </TableCell>
+                    <TableCell>
+                      {v.type === 'plain' ? (
+                        <TextField size="small" value={v.value || ''} onChange={(e) => {
+                          const next = [...variablesList];
+                          next[i] = { ...v, value: e.target.value };
+                          setVariablesList(next);
+                        }} placeholder="value" fullWidth />
+                      ) : (
+                        <SecretInput label="Select secret" value={v.secretId ? { id: v.secretId } : null} onChange={(ref) => {
+                          const next = [...variablesList];
+                          next[i] = { ...v, secretId: ref?.id };
+                          setVariablesList(next);
+                        }} />
+                      )}
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton size="small" onClick={() => {
+                        const next = variablesList.filter((_, idx) => idx !== i);
+                        setVariablesList(next);
+                      }}>
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                <TableRow>
+                  <TableCell colSpan={4}>
+                    <Button size="small" startIcon={<Add />} onClick={() => setVariablesList((prev) => [...prev, { id: `var_${Date.now()}`, name: '', type: 'plain', value: '' }])}>Add variable</Button>
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>Use in steps as: &lt;var NAME&gt; or &lt;secret SECRET_ID&gt;</Typography>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </Paper>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setVariablesOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={() => {
+            // Persist variables to localStorage and refresh codegen immediately
+            try { localStorage.setItem('studio:variables', JSON.stringify(variablesList)); } catch {}
+            const ir = buildDefaultTestIR(selectedScenarioData?.name || 'Untitled Test', testSteps);
+            ir.variables = variablesList.map((v) => (
+              v.type === 'plain'
+                ? { name: v.name, value: { kind: 'plain', value: v.value || '' } }
+                : v.secretId
+                ? { name: v.name, value: { kind: 'secret', ref: { id: v.secretId, label: v.name, scope: 'project', createdAt: new Date().toISOString() } } }
+                : { name: v.name, value: { kind: 'plain', value: '' } }
+            )) as any;
+            dispatch(setTestIR(ir));
+            dispatch(setGeneratedCode(generatePythonFromIR(ir)));
+            setVariablesOpen(false);
+          }}>Save</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Templates Dialog */}
+      <Dialog open={templatesOpen} onClose={() => setTemplatesOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Quick Start Templates</DialogTitle>
+        <DialogContent>
+          <Stack spacing={1} mt={1}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setTestSteps([
+                  'Go to "https://online.citi.com"',
+                  'Click "Sign On"',
+                  'Type "<var USERNAME>" in the "User ID" field',
+                  'Type "<secret sec_abc123>" in the "Password" field',
+                  'Click "Continue"',
+                  'Wait for "Welcome"',
+                ]);
+                setTemplatesOpen(false);
+              }}
+            >Login flow</Button>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setTestSteps([
+                  'Go to "https://example.com"',
+                  'Wait for "Dashboard"',
+                  'Check url contains "dashboard"',
+                ]);
+                setTemplatesOpen(false);
+              }}
+            >Content check</Button>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTemplatesOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

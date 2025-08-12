@@ -17,6 +17,7 @@ const ReportsPage = React.lazy(() => import('@pages/ReportsPage'));
 // CSIs directory and overview removed
 const ChecksTemplatesPage = React.lazy(() => import('@pages/ChecksTemplatesPage'));
 const StudioRunsPage = React.lazy(() => import('@pages/StudioRunsPage'));
+const StudioTestsPage = React.lazy(() => import('@pages/StudioTestsPage'));
 const ReportsScheduledPage = React.lazy(() => import('@pages/ReportsScheduledPage'));
 const ReportsAnalyticsPage = React.lazy(() => import('@pages/ReportsAnalyticsPage'));
 const ActivityPage = React.lazy(() => import('@pages/ActivityPage'));
@@ -99,8 +100,9 @@ const App: React.FC = () => {
               
               {/* Checks Studio */}
               <Route path="/checks/studio" element={<ChecksStudioPage />} />
-              <Route path="/checks/studio/:id" element={<ChecksStudioPage />} />
+              <Route path="/checks/studio/tests" element={<StudioTestsPage />} />
               <Route path="/checks/studio/runs" element={<StudioRunsPage />} />
+              <Route path="/checks/studio/:id" element={<ChecksStudioPage />} />
               
               {/* Reports */}
               <Route path="/checks/reports" element={<ReportsPage />} />

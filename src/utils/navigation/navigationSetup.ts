@@ -25,11 +25,11 @@ export const registerChecksNavigation = () => {
       {
         id: 'studio',
         label: 'Studio',
-        path: '/checks/studio',
+        path: '/checks/studio/tests',
         icon: 'science',
         description: 'UI testing studio',
         children: [
-          { id: 'studio-scenarios', label: 'Scenarios', path: '/checks/studio', icon: 'science' },
+          { id: 'studio-tests', label: 'Tests', path: '/checks/studio/tests', icon: 'science' },
           { id: 'studio-runs', label: 'Runs', path: '/checks/studio/runs', icon: 'movie' },
         ],
       },
@@ -61,7 +61,8 @@ export const getCurrentPageId = (pathname: string): string => {
   if (pathname.startsWith('/checks/templates')) return 'checks-templates';
   // Studio sub-nav
   if (pathname.startsWith('/checks/studio/runs')) return 'studio-runs';
-  if (pathname.startsWith('/checks/studio')) return 'studio-scenarios';
+  if (pathname.startsWith('/checks/studio/tests')) return 'studio-tests';
+  if (pathname.startsWith('/checks/studio')) return 'studio-tests';
   // Reports sub-nav
   if (pathname.startsWith('/checks/reports/scheduled')) return 'reports-scheduled';
   if (pathname.startsWith('/checks/reports/analytics')) return 'reports-analytics';

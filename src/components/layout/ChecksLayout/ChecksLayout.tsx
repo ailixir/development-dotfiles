@@ -64,6 +64,7 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       {shouldShowSidebar && (
         <PlatformSidebar
+          key={`checks-sidebar-${currentPage}`}
           currentModule="checks"
           currentPage={currentPage}
           onPageChange={handlePageChange}

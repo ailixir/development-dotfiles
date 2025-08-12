@@ -17,6 +17,8 @@ export interface MockUITest {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  lastRunStatus?: 'success' | 'failed' | 'timeout';
+  lastRunAt?: string;
 }
 
 export interface MockUITestExecution {
@@ -47,7 +49,7 @@ export const mockUITests: MockUITest[] = [
   {
     id: 'ui-test-001',
     name: 'Customer Login Flow Test',
-    csiId: 'CSI-11111',
+    csiId: '111111',
     description: 'End-to-end test of the customer login process',
     steps: [
       'Go to "https://online.citi.com"',
@@ -72,7 +74,7 @@ export const mockUITests: MockUITest[] = [
   {
     id: 'ui-test-002',
     name: 'Trade Booking Workflow',
-    csiId: 'CSI-12345',
+    csiId: '123456',
     description: 'Test the complete trade booking process in the trading interface',
     steps: [
       'Go to "https://trading.internal.citi.com"',

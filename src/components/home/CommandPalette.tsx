@@ -27,7 +27,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   useEffect(() => {
     if (!open) return;
     const id = setTimeout(() => {
-      if (q.trim().length >= 2) dispatch(searchAll(q));
+      if (q.trim().length >= 2) dispatch(searchAll({ query: q }));
     }, 150);
     return () => clearTimeout(id);
   }, [dispatch, q, open]);

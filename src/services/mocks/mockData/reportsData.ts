@@ -122,13 +122,13 @@ Here's your daily health summary for the Trading System:
 
 OVERALL STATUS: WARNING (1 of 3 checks failing)
 
-✅ Trade API Health Check (CSI-12345)
+✅ Trade API Health Check (123456)
    Status: PASSING (last 16 hours)
    
-✅ Database Connection Pool (CSI-12345) 
+✅ Database Connection Pool (123456) 
    Status: PASSING (last 8 hours)
    
-⚠️ Trade Settlement Log Analysis (CSI-12345)
+⚠️ Trade Settlement Log Analysis (123456)
    Status: WARNING (last 23 minutes)
    Issue: Settlement delays detected in Splunk logs
    [Investigate in Checks →]
