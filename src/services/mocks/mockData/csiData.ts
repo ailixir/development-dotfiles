@@ -341,7 +341,7 @@ export const mockUsers = [
   {
     id: 'user-001',
     name: 'David Chen',
-    email: 'david.chen@citi.com',
+    email: 'bruno.buger@citi.com',
     role: 'SRE Engineer',
     teams: ['Trading Technology Team'],
     permissions: ['174523', '168942']
@@ -349,7 +349,7 @@ export const mockUsers = [
   {
     id: 'user-002',
     name: 'Priya Sharma',
-    email: 'priya.sharma@citi.com',
+    email: 'bruno.buger@citi.com',
     role: 'L2 Support Analyst',
     teams: ['Trading Technology Team', 'Digital Banking Team'],
     permissions: ['174523', '170456']
@@ -357,7 +357,7 @@ export const mockUsers = [
   {
     id: 'user-003',
     name: 'Maria Garcia',
-    email: 'maria.garcia@citi.com',
+    email: 'matthew.robinson@citi.com',
     role: 'Operations Analyst',
     teams: ['Market Data Engineering'],
     permissions: ['168942']
@@ -365,7 +365,7 @@ export const mockUsers = [
   {
     id: 'user-004',
     name: 'Robert Kim',
-    email: 'robert.kim@citi.com',
+    email: 'emanuel.stanciu@citi.com',
     role: 'IT Director',
     teams: ['Trading Technology Team', 'Risk Technology Team'],
     permissions: ['174523', '171205']

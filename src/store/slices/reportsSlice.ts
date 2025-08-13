@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { AsyncState } from '../../types/common/commonTypes';
-import type { ReportEntity, ReportConfiguration, ReportPreviewResponse, ReportSection } from '@/types/reports/reportTypes';
+import type { ReportEntity, ReportConfiguration, ReportPreviewResponse, ReportSection, ReportExecution } from '@/types/reports/reportTypes';
 import { reportsApi } from '@/services/api/reportsApi';
 
 interface ReportsState extends AsyncState<ReportEntity[]> {
@@ -8,6 +8,7 @@ interface ReportsState extends AsyncState<ReportEntity[]> {
   previewContent: string | null;
   generatingPreview: boolean;
   executionsByReportId?: Record<string, any[]>;
+  errorsById?: Record<string, number | string>;
 }
 
 const initialState: ReportsState = {
@@ -32,6 +33,7 @@ const initialState: ReportsState = {
   previewContent: null,
   generatingPreview: false,
   executionsByReportId: {},
+  errorsById: {},
 };
 
 // Async thunks
@@ -73,9 +75,14 @@ export const generatePreview = createAsyncThunk(
 
 export const fetchReportById = createAsyncThunk(
   'reports/fetchReportById',
-  async (id: string) => {
-    const resp = await reportsApi.getById(id);
-    return resp;
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const resp = await reportsApi.getById(id);
+      return resp;
+    } catch (e: any) {
+      const status = e?.response?.status ?? 'error';
+      return rejectWithValue({ id, status });
+    }
   }
 );
 
@@ -124,6 +131,14 @@ export const deleteReportThunk = createAsyncThunk(
   async (id: string) => {
     await reportsApi.deleteReport(id);
     return id;
+  }
+);
+
+export const runReportNow = createAsyncThunk(
+  'reports/runNow',
+  async (id: string) => {
+    const res = await reportsApi.runNow(id);
+    return res as { ok: boolean; execution: ReportExecution; report: ReportEntity };
   }
 );
 
@@ -223,6 +238,14 @@ const reportsSlice = createSlice({
         const idx = state.data.findIndex((r) => r.id === action.payload.id);
         if (idx === -1) state.data.push(action.payload);
         // hydrate currentReport for editing flows if desired
+        if (state.errorsById) delete state.errorsById[action.payload.id];
+      })
+      .addCase(fetchReportById.rejected, (state, action) => {
+        const payload = action.payload as any;
+        if (payload && payload.id) {
+          if (!state.errorsById) state.errorsById = {};
+          state.errorsById[payload.id] = payload.status || 'error';
+        }
       })
       .addCase(fetchReportExecutions.fulfilled, (state, _action) => {
         const { id, executions } = _action.payload as any;
@@ -242,6 +265,14 @@ const reportsSlice = createSlice({
       })
       .addCase(deleteReportThunk.fulfilled, (state, action) => {
         state.data = state.data.filter((r) => r.id !== action.payload);
+      })
+      .addCase(runReportNow.fulfilled, (state, action) => {
+        const { report, execution } = action.payload;
+        const idx = state.data.findIndex((r) => r.id === report.id);
+        if (idx !== -1) state.data[idx] = report;
+        if (!state.executionsByReportId) state.executionsByReportId = {};
+        const list = state.executionsByReportId[report.id] || [];
+        state.executionsByReportId[report.id] = [execution, ...list];
       });
   }
 });

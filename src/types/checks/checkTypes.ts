@@ -18,6 +18,7 @@ export interface CheckEntity {
   createdBy: string;
   tags: string[];
   description?: string;
+  environment?: string;
 }
 
 export interface CheckConfiguration {

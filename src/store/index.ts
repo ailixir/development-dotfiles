@@ -54,7 +54,7 @@ async function hydrateDashboardPreferences() {
       // Seed smart defaults from mock users (Priya) when available
       try {
         const mod = await import('../services/mocks/mockData/csiData');
-        const priya = (mod as any).mockUsers?.find((u: any) => u.email === 'priya.sharma@citi.com');
+        const priya = (mod as any).mockUsers?.find((u: any) => u.email === 'bruno.buger@citi.com');
         if (priya?.permissions && Array.isArray(priya.permissions)) {
           store.dispatch({ type: 'dashboard/setPinnedCsiIds', payload: priya.permissions.slice(0, 4) });
         }

@@ -76,12 +76,13 @@ const RecipientsEditor: React.FC<RecipientsEditorProps> = ({ value, onChange, re
             onFocus={(e) => e.stopPropagation()}
             helperText={!input || emailRegex.test(input) ? 'Enter to add, comma to separate' : 'Invalid email format'}
             error={Boolean(input) && !emailRegex.test(input)}
+            inputProps={{ ...params.inputProps, 'aria-label': 'Add recipient email' }}
           />
         )}
       />
       <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ rowGap: 1 }}>
         {value.map((e) => (
-          <Chip key={e} label={e} onDelete={() => remove(e)} />
+          <Chip key={e} label={e} onDelete={() => remove(e)} aria-label={`recipient ${e}`} />
         ))}
       </Stack>
       {/* Send test button removed from this component; actions moved to builder toolbar */}

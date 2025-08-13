@@ -48,7 +48,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-10T09:00:00Z',
     updatedAt: '2024-01-15T10:30:00Z',
-    createdBy: 'david.chen@citi.com',
+    createdBy: 'bruno.buger@citi.com',
     tags: ['application:trading-api', 'team:platform-engineering', 'lob:capital-markets', 'priority:critical'],
     description: 'Monitors the health of the main trading API endpoint'
   },
@@ -73,7 +73,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-10T09:15:00Z',
     updatedAt: '2024-01-15T10:29:00Z',
-    createdBy: 'priya.sharma@citi.com',
+    createdBy: 'bruno.buger@citi.com',
     tags: ['application:trading-db', 'team:database-ops', 'lob:capital-markets', 'type:infrastructure'],
     description: 'Checks TCP connectivity to the primary database'
   },
@@ -101,7 +101,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-10T09:30:00Z',
     updatedAt: '2024-01-15T10:25:00Z',
-    createdBy: 'david.chen@citi.com',
+    createdBy: 'bruno.buger@citi.com',
     tags: ['application:settlement-engine', 'team:sre', 'lob:capital-markets', 'priority:business-critical', 'type:log-analysis'],
     description: 'Monitors trade settlement completion times via Splunk logs'
   },
@@ -130,7 +130,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-10T10:00:00Z',
     updatedAt: '2024-01-15T10:28:00Z',
-    createdBy: 'maria.garcia@citi.com',
+    createdBy: 'matthew.robinson@citi.com',
     tags: ['application:market-data-api', 'team:performance-eng', 'lob:capital-markets', 'type:performance', 'priority:high'],
     description: 'Monitors CPU usage for market data processing servers'
   },
@@ -156,7 +156,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-10T10:15:00Z',
     updatedAt: '2024-01-15T10:27:00Z',
-    createdBy: 'robert.kim@citi.com',
+    createdBy: 'emanuel.stanciu@citi.com',
     tags: ['application:itrs-gateway', 'team:monitoring-ops', 'lob:capital-markets', 'type:monitoring'],
     description: 'Checks ITRS sampler status for market data feed connectivity'
   },
@@ -181,7 +181,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-10T11:00:00Z',
     updatedAt: '2024-01-15T10:26:00Z',
-    createdBy: 'sarah.johnson@citi.com',
+    createdBy: 'bruno.buger@citi.com',
     tags: ['application:customer-portal', 'team:customer-experience', 'lob:retail-banking', 'type:apm', 'priority:customer-facing'],
     description: 'Monitors AppDynamics health rules for customer portal performance'
   },
@@ -214,7 +214,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-15T09:00:00Z',
     updatedAt: '2024-01-15T09:00:00Z',
-    createdBy: 'priya.sharma@citi.com',
+    createdBy: 'bruno.buger@citi.com',
     tags: ['application:online-banking', 'team:qa-automation', 'lob:retail-banking', 'type:ui-test', 'priority:customer-facing'],
     description: 'End-to-end test of customer login flow'
   },
@@ -372,7 +372,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-13T09:00:00Z',
     updatedAt: '2024-01-15T10:30:00Z', 
-    createdBy: 'david.chen@citi.com',
+    createdBy: 'bruno.buger@citi.com',
     tags: ['application:payment-processor', 'team:payments-team', 'lob:transaction-services', 'type:splunk-query', 'priority:high'],
     description: 'Monitors payment transaction processing queue via Splunk logs',
     environment: 'Production'
@@ -425,7 +425,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-13T11:00:00Z',
     updatedAt: '2024-01-15T10:28:00Z',
-    createdBy: 'robert.kim@citi.com',
+    createdBy: 'emanuel.stanciu@citi.com',
     tags: ['application:order-management', 'team:trading-ops', 'lob:capital-markets', 'type:itrs-monitor', 'component:gateway'],
     description: 'Monitors ITRS trading system gateway and order flow status',
     environment: 'Production'
@@ -450,7 +450,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-13T12:00:00Z',
     updatedAt: '2024-01-15T10:31:00Z',
-    createdBy: 'sarah.johnson@citi.com',
+    createdBy: 'bruno.buger@citi.com',
     tags: ['application:customer-portal', 'team:database-ops', 'lob:retail-banking', 'type:appdynamics', 'component:db-pool'],
     description: 'Monitors AppDynamics health rule for customer portal database connections',
     environment: 'Production'
@@ -486,7 +486,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-14T08:00:00Z',
     updatedAt: '2024-01-15T09:00:00Z',
-    createdBy: 'priya.sharma@citi.com',
+    createdBy: 'bruno.buger@citi.com',
     tags: ['application:payment-form', 'team:qa-automation', 'lob:transaction-services', 'type:ui-test', 'test-type:e2e'],
     description: 'End-to-end UI test for payment processing form and confirmation',
     environment: 'Staging'
@@ -512,7 +512,7 @@ export const mockChecks: MockCheck[] = [
     },
     createdAt: '2024-01-14T09:00:00Z',
     updatedAt: '2024-01-15T10:33:00Z',
-    createdBy: 'david.chen@citi.com',
+    createdBy: 'bruno.buger@citi.com',
     tags: ['application:redis-cache', 'team:infrastructure', 'lob:retail-banking', 'type:tcp-check', 'component:cache'],
     description: 'Checks TCP connectivity to Redis cache cluster for customer platform',
     environment: 'Production'

@@ -59,6 +59,7 @@ import {
   BugReport,
   Science,
   Refresh,
+  Checklist,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@store/index';
 import { fetchChecks, executeCheck, deleteCheck, pauseCheck, resumeCheck } from '@store/slices/checksSlice';
@@ -79,6 +80,7 @@ const AllChecksPage: React.FC = () => {
   
   const { data: checks, loading, error, executingChecks, schedulingChecks } = useAppSelector(state => state.checks);
   const { selectedCSI, tags: { selected: selectedTags, filterMode } } = useAppSelector(state => state.csi);
+  const searchContext = useAppSelector(state => state.dashboard.searchContext);
   const location = useLocation();
   
   // Local state
@@ -142,12 +144,25 @@ const AllChecksPage: React.FC = () => {
   const filteredChecks = useMemo(() => {
     let result = checks || [];
     
-    // Apply CSI filter
-    if (selectedCSI) {
-      result = result.filter(check => check.csiId === selectedCSI);
+    // Apply CSI filter from global search context
+    if (searchContext.csiId) {
+      result = result.filter(check => check.csiId === searchContext.csiId);
     }
     
-    // Apply tag filter
+    // Apply environment filter from global search context
+    if (searchContext.environment) {
+      result = result.filter(check => check.environment === searchContext.environment);
+    }
+    
+    // Apply tag filter from global search context
+    if (searchContext.tags && searchContext.tags.length > 0) {
+      result = result.filter(check => {
+        const has = (t: string) => check.tags.includes(t);
+        return searchContext.tagMode === 'AND' ? searchContext.tags.every(has) : searchContext.tags.some(has);
+      });
+    }
+    
+    // Apply local tag filter (if still needed)
     if (selectedTags && selectedTags.length > 0) {
       result = result.filter(check => {
         const has = (t: string) => check.tags.includes(t);
@@ -177,7 +192,7 @@ const AllChecksPage: React.FC = () => {
     }
     
     return result;
-  }, [checks, selectedCSI, selectedTags, searchQuery, statusFilter, typeFilter]);
+  }, [checks, searchContext.csiId, searchContext.environment, searchContext.tags, searchContext.tagMode, selectedCSI, selectedTags, filterMode, searchQuery, statusFilter, typeFilter]);
 
   // Pagination
   const paginatedChecks = useMemo(() => {
@@ -362,7 +377,8 @@ const AllChecksPage: React.FC = () => {
       {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
-          <Typography variant="h4" fontWeight={600} gutterBottom>
+          <Typography variant="h4" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Checklist sx={{ fontSize: 32, color: 'primary.main' }} />
             All Checks
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -381,11 +397,23 @@ const AllChecksPage: React.FC = () => {
         </Stack>
       </Stack>
 
+      {/* Global search context indicator */}
+      {(searchContext.csiId || searchContext.environment || searchContext.tags.length > 0) && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="body2">Global filters active:</Typography>
+            {searchContext.csiId && <Chip label={`CSI: ${searchContext.csiId}`} size="small" />}
+            {searchContext.environment && <Chip label={`Env: ${searchContext.environment}`} size="small" />}
+            {searchContext.tags.length > 0 && <Chip label={`Tags: ${searchContext.tags.length}`} size="small" />}
+          </Stack>
+        </Alert>
+      )}
+
       {/* Search and quick controls */}
       <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, mb: 3 }}>
         <CardContent>
-          <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={4}>
+          <Grid container spacing={1} alignItems="center">
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 placeholder="Search checks..."
@@ -435,15 +463,8 @@ const AllChecksPage: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={2}>
               <Stack direction="row" spacing={1} justifyContent="flex-end">
-                <Button
-                  variant="outlined"
-                  startIcon={<Refresh />}
-                  onClick={() => dispatch(fetchChecks({ page: 1, limit: 100 }))}
-                >
-                  Refresh
-                </Button>
                 <Button
                   variant="outlined"
                   startIcon={<FilterList />}
@@ -485,8 +506,11 @@ const AllChecksPage: React.FC = () => {
           {/* Results Summary */}
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Showing {paginatedChecks.length} of {filteredChecks.length} checks
-            {selectedCSI && ' (CSI scope active)'}
-            {selectedTags.length > 0 && ` (${selectedTags.length} tag filters)`}
+            {searchContext.csiId && ` (CSI: ${searchContext.csiId})`}
+            {searchContext.environment && ` (Env: ${searchContext.environment})`}
+            {searchContext.tags.length > 0 && ` (${searchContext.tags.length} global tag filters)`}
+            {selectedCSI && ' (Local CSI scope active)'}
+            {selectedTags.length > 0 && ` (${selectedTags.length} local tag filters)`}
           </Typography>
 
           {/* Checks Table */}
@@ -620,7 +644,7 @@ const AllChecksPage: React.FC = () => {
           handleMenuClose();
         }}>
           <Edit sx={{ mr: 1 }} />
-          Edit Check
+          Edit
         </MenuItem>
         <MenuItem onClick={(e) => {
           lastFocusRef.current = (e.currentTarget as HTMLElement) || (document.activeElement as HTMLElement | null);
@@ -635,7 +659,7 @@ const AllChecksPage: React.FC = () => {
           handleMenuClose();
         }}>
           <Delete sx={{ mr: 1, color: 'error.main' }} />
-          Delete Check
+          Delete
         </MenuItem>
       </Menu>
 

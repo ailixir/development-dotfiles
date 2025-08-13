@@ -49,14 +49,14 @@ export const mockReports: MockReport[] = [
       enabled: true
     },
     recipients: [
-      'robert.kim@citi.com',
+      'emanuel.stanciu@citi.com',
       'trading-ops@citi.com',
-      'david.chen@citi.com'
+      'bruno.buger@citi.com'
     ],
     template: 'standard',
     createdAt: '2024-01-10T09:00:00Z',
     updatedAt: '2024-01-15T08:30:00Z',
-    createdBy: 'david.chen@citi.com',
+    createdBy: 'bruno.buger@citi.com',
     lastSent: '2024-01-15T06:00:00Z',
     status: 'active'
   },
@@ -73,14 +73,14 @@ export const mockReports: MockReport[] = [
       daysOfWeek: [1] // Monday
     },
     recipients: [
-      'robert.kim@citi.com',
+      'emanuel.stanciu@citi.com',
       'infrastructure-team@citi.com',
       'operations-leads@citi.com'
     ],
     template: 'detailed',
     createdAt: '2024-01-08T10:00:00Z',
     updatedAt: '2024-01-14T12:00:00Z',
-    createdBy: 'maria.garcia@citi.com',
+    createdBy: 'matthew.robinson@citi.com',
     lastSent: '2024-01-14T09:00:00Z',
     status: 'active'
   },
@@ -97,12 +97,12 @@ export const mockReports: MockReport[] = [
     },
     recipients: [
       'customer-ops@citi.com',
-      'sarah.johnson@citi.com'
+      'bruno.buger@citi.com'
     ],
     template: 'standard',
     createdAt: '2024-01-12T14:00:00Z',
     updatedAt: '2024-01-12T14:00:00Z',
-    createdBy: 'priya.sharma@citi.com',
+    createdBy: 'bruno.buger@citi.com',
     status: 'draft',
     sections: [
       { id: 'section-1', title: 'Critical Services', kind: 'rule', rule: { status: ['FAILING', 'WARNING'], sort: 'failing-first', limit: 10 } },
@@ -133,28 +133,62 @@ export const mockReportExecutions: MockReportExecution[] = [
     checksIncluded: 3,
     checksFailures: 1,
     generationDuration: 2340,
-    emailContent: `
-Subject: Daily Trading System Health Report - Jan 15, 2024
-
-Good morning,
-
-Here's your daily health summary for the Trading System:
-
-OVERALL STATUS: WARNING (1 of 3 checks failing)
-
-✅ Trade API Health Check (123456)
-   Status: PASSING (last 16 hours)
-   
-✅ Database Connection Pool (123456) 
-   Status: PASSING (last 8 hours)
-   
-⚠️ Trade Settlement Log Analysis (123456)
-   Status: WARNING (last 23 minutes)
-   Issue: Settlement delays detected in Splunk logs
-   [Investigate in Checks →]
-
-Generated at 6:00 AM EST on Jan 15, 2024
-Next report: Jan 16, 2024 at 6:00 AM EST
-    `
+    emailContent: `<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checks Report</title>
+  <style>body { margin:0; padding:0; }</style>
+  </head>
+  <body style="margin:0;padding:0;background:#F3F4F6;">
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#F3F4F6;padding:20px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width:600px;background:#ffffff;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+            <tr>
+              <td style="padding:16px 20px;border-bottom:1px solid #E5E7EB;background:#0F172A;color:#ffffff;">
+                <div style="font-size:16px;font-weight:700;">Checks Report</div>
+                <div style="font-size:12px;opacity:0.85;">Jan 15, 2024, 6:00 AM EST</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 20px;">
+                <div style="font-size:18px;color:#111827;font-weight:700;margin-bottom:4px;">Daily Trading System Health</div>
+                <div style="font-size:13px;color:#6B7280;margin-bottom:12px;">Overall Status: <span style="color:#ED6C02;font-weight:700;">WARNING</span></div>
+                <div style="font-size:12px;color:#6B7280;margin-bottom:12px;">Schedule: daily at 06:00 EST</div>
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:12px 0;">
+                  <thead>
+                    <tr>
+                      <th colspan="2" style="text-align:left;padding:8px 12px;background:#F5F7FA;color:#374151;border:1px solid #eee;border-bottom:none;font-size:14px;">Selected Checks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="padding:8px 12px;border-bottom:1px solid #eee;">Trade API Health Check<div style="color:#757575;font-size:12px;">CSI 123456</div></td>
+                      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;"><span style="display:inline-block;padding:4px 8px;border-radius:16px;background:#2E7D32;color:#fff;font-size:12px;">PASSING</span></td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 12px;border-bottom:1px solid #eee;">Database Connection Pool<div style="color:#757575;font-size:12px;">CSI 123456</div></td>
+                      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;"><span style="display:inline-block;padding:4px 8px;border-radius:16px;background:#2E7D32;color:#fff;font-size:12px;">PASSING</span></td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 12px;border-bottom:1px solid #eee;">Trade Settlement Log Analysis<div style="color:#757575;font-size:12px;">CSI 123456</div></td>
+                      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;"><span style="display:inline-block;padding:4px 8px;border-radius:16px;background:#ED6C02;color:#fff;font-size:12px;">WARNING</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div style="border-top:1px solid #E5E7EB;margin-top:12px;padding-top:12px;font-size:12px;color:#6B7280;">Total Checks: 3</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:12px 20px;background:#F9FAFB;border-top:1px solid #E5E7EB;color:#6B7280;font-size:11px;">Generated by PUT Checks</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
   }
 ];

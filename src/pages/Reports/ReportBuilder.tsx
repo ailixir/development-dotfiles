@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Card, CardContent, CardHeader, Chip, Divider, Grid, IconButton, Paper, Stack, TextField, Tooltip, Typography, alpha, Button, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, Autocomplete } from '@mui/material';
-import { Refresh, Send, ShowChart, Search, Save, Add } from '@mui/icons-material';
+import { Refresh, Send, ShowChart, Search, Save, Add, CheckCircle, Info } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { createReport, fetchReports, generatePreview, addSection, updateSection, removeSection, reorderSections } from '@/store/slices/reportsSlice';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -67,6 +67,7 @@ const ReportBuilder: React.FC = () => {
   }, [reportConfig]);
   const [draftId, setDraftId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [savingIndicator, setSavingIndicator] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [testRecipients, setTestRecipients] = useState<string[]>([]);
   const [sendingTest, setSendingTest] = useState(false);
@@ -77,6 +78,7 @@ const ReportBuilder: React.FC = () => {
   const [manualResults, setManualResults] = useState<Record<string, CheckSearchOption[]>>({});
   const [manualLoading, setManualLoading] = useState<Record<string, boolean>>({});
   const searchTimersRef = useRef<Record<string, any>>({});
+  const autosaveTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (params.id) {
@@ -229,6 +231,7 @@ const ReportBuilder: React.FC = () => {
   const handleSaveReport = async () => {
     try {
       setSaving(true);
+      setSavingIndicator('saving');
       const payload = {
         name: reportConfig.name || 'Untitled Report',
         description: reportConfig.description,
@@ -245,12 +248,16 @@ const ReportBuilder: React.FC = () => {
         try {
           const updated = await reportsApi.updateReport(idToUpdate, payload as any);
           setDraftId(updated.id);
+          setSavingIndicator('saved');
+          window.setTimeout(() => setSavingIndicator('idle'), 1500);
           return updated.id;
         } catch (e: any) {
           // Fallback: if report not found (e.g., mock reset), create a new one seamlessly
           if (e?.response?.status === 404) {
             const created = await dispatch(createReport(payload as any)).unwrap();
             setDraftId(created.id);
+            setSavingIndicator('saved');
+            window.setTimeout(() => setSavingIndicator('idle'), 1500);
             return created.id;
           }
           throw e;
@@ -258,10 +265,13 @@ const ReportBuilder: React.FC = () => {
       } else {
         const created = await dispatch(createReport(payload as any)).unwrap();
         setDraftId(created.id);
+        setSavingIndicator('saved');
+        window.setTimeout(() => setSavingIndicator('idle'), 1500);
         return created.id;
       }
     } catch (e) {
       console.error('Failed to save report', e);
+      setSnack({ open: true, message: 'Save failed', severity: 'error' });
       return null;
     } finally { setSaving(false); }
   };
@@ -287,10 +297,24 @@ const ReportBuilder: React.FC = () => {
         } as any);
       } catch (e) {
         console.error('Failed to update before preview', e);
+        setSnack({ open: true, message: 'Could not sync latest edits before preview', severity: 'error' });
       }
     }
-    await dispatch(generatePreview(id));
+    try {
+      await dispatch(generatePreview(id)).unwrap();
+    } catch {
+      setSnack({ open: true, message: 'Preview failed to generate', severity: 'error' });
+    }
   };
+
+  // Debounced autosave when editing
+  useEffect(() => {
+    if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = window.setTimeout(() => {
+      void handleSaveReport();
+    }, 1200) as unknown as number;
+    return () => { if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current); };
+  }, [reportConfig.name, reportConfig.description, reportConfig.subject, reportConfig.sections, reportConfig.schedule, reportConfig.recipients, reportConfig.template, reportConfig.includeCharts]);
 
   return (
     <Box>
@@ -298,41 +322,22 @@ const ReportBuilder: React.FC = () => {
         <Typography variant="h5" fontWeight={700}>
           {isEditMode ? `Edit Report${reportConfig.name ? `: ${reportConfig.name}` : ''}` : 'Create Report'}
         </Typography>
-        <Stack direction="row" spacing={1}>
-          <Button variant="contained" size="small" startIcon={<Save />} onClick={handleSaveReport} disabled={saving} aria-label="save report">
-            Save Report
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<Send />}
-            onClick={() => { setTestRecipients([]); setTestDialogOpen(true); }}
-            aria-label="send test email"
-          >
-            Send Test
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            startIcon={<Send />}
-            disabled={!reportConfig.recipients.trim()}
-            onClick={async () => {
-              let id = draftId;
-              if (!id) {
-                id = await handleSaveReport();
-              }
-              if (!id) return;
-              try {
-                // Simulate final send via preview endpoint for now
-                await dispatch(generatePreview(id));
-                setSnack({ open: true, message: 'Report sent (mock)', severity: 'success' });
-              } catch {}
-            }}
-            aria-label="send report"
-          >
-            Send
-          </Button>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Tooltip title="Save (⌘S)"><span>
+            <Button variant="contained" size="small" startIcon={<Save />} onClick={handleSaveReport} disabled={saving} aria-label="save report">
+              {saving ? 'Saving…' : 'Save Report'}
+            </Button>
+          </span></Tooltip>
+          <Stack direction="row" spacing={0.5} alignItems="center" sx={{ ml: 1 }} aria-live="polite" role="status">
+            {savingIndicator === 'saving' && <>
+              <Info fontSize="small" color="info" />
+              <Typography variant="caption" color="text.secondary">Saving…</Typography>
+            </>}
+            {savingIndicator === 'saved' && <>
+              <CheckCircle fontSize="small" color="success" />
+              <Typography variant="caption" color="text.secondary">All changes saved</Typography>
+            </>}
+          </Stack>
         </Stack>
       </Stack>
       <Grid container spacing={3}>
@@ -341,7 +346,16 @@ const ReportBuilder: React.FC = () => {
             <CardHeader title="Configuration" />
             <CardContent>
               <Stack spacing={2}>
-              <TextField label="Report Name" value={reportConfig.name} onChange={(e) => setReportConfig({ ...reportConfig, name: e.target.value })} fullWidth />
+                <TextField
+                  label="Report Name"
+                  value={reportConfig.name}
+                  onChange={(e) => setReportConfig({ ...reportConfig, name: e.target.value })}
+                  fullWidth
+                  required
+                  error={!reportConfig.name.trim()}
+                  helperText={!reportConfig.name.trim() ? 'Name is required' : ' '}
+                  inputProps={{ 'aria-label': 'Report Name' }}
+                />
                 <TextField label="Description" value={reportConfig.description} onChange={(e) => setReportConfig({ ...reportConfig, description: e.target.value })} fullWidth multiline rows={3} />
                 {!reportConfig.name && (
                   <Typography variant="caption" color="error">Report name is required to save.</Typography>
@@ -357,7 +371,7 @@ const ReportBuilder: React.FC = () => {
                       <Stack spacing={1}>
                         <Stack direction="row" justifyContent="space-between" alignItems="center">
                           <Stack direction="row" spacing={1} alignItems="center">
-                            <TextField size="small" label="Title" value={s.title || ''} onChange={(e) => {
+                            <TextField size="small" label="Title" value={s.title || ''} required error={!String(s.title || '').trim()} helperText={!String(s.title || '').trim() ? 'Title is required' : ' '} onChange={(e) => {
                               const updated = [...reportConfig.sections];
                               updated[idx] = { ...updated[idx], title: e.target.value };
                               setReportConfig((rc) => ({ ...rc, sections: updated }));
@@ -582,4 +596,5 @@ const ReportBuilder: React.FC = () => {
 };
 
 export default ReportBuilder;
+
 

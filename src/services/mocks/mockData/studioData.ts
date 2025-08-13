@@ -74,7 +74,7 @@ export const mockUITests: MockUITest[] = [
     status: 'active',
     createdAt: '2024-01-15T09:00:00Z',
     updatedAt: '2024-01-15T09:00:00Z',
-    createdBy: 'priya.sharma@citi.com'
+    createdBy: 'bruno.buger@citi.com'
   },
   {
     id: 'ui-test-002',
@@ -106,7 +106,7 @@ export const mockUITests: MockUITest[] = [
     status: 'draft',
     createdAt: '2024-01-14T15:30:00Z',
     updatedAt: '2024-01-14T15:30:00Z',
-    createdBy: 'david.chen@citi.com'
+    createdBy: 'bruno.buger@citi.com'
   }
 ];
 

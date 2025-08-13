@@ -1,6 +1,6 @@
 import apiClient from './apiClient';
 import { API_ENDPOINTS } from '@/utils/constants/appConfig';
-import type { ReportEntity, ReportPreviewResponse, ReportSection, ReportSchedule } from '@/types/reports/reportTypes';
+import type { ReportEntity, ReportPreviewResponse, ReportSection, ReportSchedule, ReportExecution } from '@/types/reports/reportTypes';
 
 export interface CreateReportPayload {
   name: string;
@@ -53,6 +53,10 @@ export const reportsApi = {
 
   async sendTest(id: string, to?: string): Promise<{ ok: boolean; sentAt: string }> {
     return await apiClient.post(`/reports/${id}/send-test`, to ? { to } : undefined);
+  },
+
+  async runNow(id: string): Promise<{ ok: boolean; execution: ReportExecution; report: ReportEntity }> {
+    return await apiClient.post(`/reports/${id}/run-now`);
   },
 
   async deleteReport(id: string): Promise<{ ok: boolean }> {

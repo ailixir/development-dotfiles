@@ -46,13 +46,14 @@ const KPIBar: React.FC<KPIBarProps> = ({ summary, loading, error }) => {
         </Stack>
       ) : (
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={3}>
-            <Stack spacing={0.5}>
+          <Grid item xs={12} md={2}>
+            <Stack spacing={0.5} alignItems="center">
               <Chip
                 label={summary.overallStatus}
                 sx={{
                   width: 'fit-content',
-                  fontWeight: 700,
+                  fontWeight: 800,
+                  fontSize: '24px',
                   bgcolor: alpha(statusColor, 0.12),
                   color: statusColor,
                 }}
@@ -62,7 +63,7 @@ const KPIBar: React.FC<KPIBarProps> = ({ summary, loading, error }) => {
               </Typography>
             </Stack>
           </Grid>
-          <Grid item xs={12} md={9}>
+          <Grid item xs={12} md={10}>
             {/* Distribution bar */}
             <Box sx={{ display: 'flex', height: 10, borderRadius: 5, overflow: 'hidden', border: `1px solid ${alpha(statusColor, 0.2)}` }}>
               <Box sx={{ flex: pct(summary.counts.passing), bgcolor: theme.palette.success.main, minWidth: summary.counts.passing ? 8 : 0 }} />

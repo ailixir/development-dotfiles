@@ -1,15 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Button, Card, CardContent, Chip, Grid, Skeleton, Stack, TextField, Typography, Select, MenuItem, InputLabel, FormControl, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions, Toolbar, Alert, Snackbar, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, LinearProgress, InputAdornment, Menu, CircularProgress, Paper } from '@mui/material';
-import { Search as SearchIcon, FilterList, Add as AddIcon, Visibility, Edit as EditIcon, ContentCopy, Pause, PlayArrow, Delete as DeleteIcon, Preview, MoreVert } from '@mui/icons-material';
+import { Box, Button, Card, CardContent, Chip, Grid, Skeleton, Stack, TextField, Typography, Select, MenuItem, InputLabel, FormControl, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions, Toolbar, Alert, Snackbar, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, LinearProgress, InputAdornment, Menu, CircularProgress, Paper, Tooltip } from '@mui/material';
+import { Search as SearchIcon, FilterList, Add as AddIcon, Visibility, Edit as EditIcon, ContentCopy, Pause, PlayArrow, Delete as DeleteIcon, Preview, MoreVert, Send, Assessment } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { fetchReports, pauseReport, resumeReport, duplicateReport, deleteReportThunk } from '@/store/slices/reportsSlice';
+import { fetchReports, pauseReport, resumeReport, duplicateReport, deleteReportThunk, runReportNow } from '@/store/slices/reportsSlice';
+import { fetchChecks } from '@/store/slices/checksSlice';
 import reportsApi from '@/services/api/reportsApi';
 import { useNavigate } from 'react-router-dom';
+import EmptyState from '@/components/shared/States/EmptyState';
+import ErrorState from '@/components/shared/States/ErrorState';
 
 const ReportsHome: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { data, loading, error, lastFetched } = useAppSelector((s) => s.reports);
+  const searchContext = useAppSelector((s) => s.dashboard.searchContext);
+  const checksData = useAppSelector((s) => s.checks.data);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [templateFilter, setTemplateFilter] = useState<string>('');
@@ -35,7 +40,11 @@ const ReportsHome: React.FC = () => {
     if (!last || Date.now() - last > freshMs) {
       dispatch(fetchReports(undefined));
     }
-  }, [dispatch, lastFetched]);
+    // Also fetch checks to determine CSI relationships
+    if (!checksData || checksData.length === 0) {
+      dispatch(fetchChecks({ page: 1, limit: 100 }));
+    }
+  }, [dispatch, lastFetched, checksData]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -61,6 +70,32 @@ const ReportsHome: React.FC = () => {
 
   const filteredReports = useMemo(() => {
     let result = data || [];
+    
+    // Apply global CSI filter
+    if (searchContext.csiId && checksData) {
+      // Get all check IDs that belong to the selected CSI
+      const csiCheckIds = checksData
+        .filter(check => check.csiId === searchContext.csiId)
+        .map(check => check.id);
+      
+      // Filter reports that either:
+      // 1. Include checks from the selected CSI
+      // 2. Have sections with rules that include the selected CSI
+      result = result.filter((report) => {
+        // Check if report has any checks from the selected CSI
+        const hasChecksFromCSI = report.selectedChecks.some(checkId => 
+          csiCheckIds.includes(checkId)
+        );
+        
+        // Check if report has sections with rules that include the CSI
+        const hasSectionWithCSI = (report as any).sections?.some((section: any) => 
+          section.rule?.csiIds?.includes(searchContext.csiId)
+        );
+        
+        return hasChecksFromCSI || hasSectionWithCSI;
+      });
+    }
+    
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter((r) => r.name.toLowerCase().includes(q) || (r.description || '').toLowerCase().includes(q));
@@ -72,7 +107,7 @@ const ReportsHome: React.FC = () => {
       result = result.filter((r) => (r as any).template === templateFilter);
     }
     return result;
-  }, [data, searchQuery, statusFilter, templateFilter]);
+  }, [data, searchQuery, statusFilter, templateFilter, searchContext.csiId, checksData]);
 
   const paginatedReports = useMemo(() => {
     const start = page * rowsPerPage;
@@ -81,9 +116,12 @@ const ReportsHome: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={3} sx={{ rowGap: 1 }}>
         <Box>
-          <Typography variant="h4" fontWeight={600} gutterBottom>All Reports</Typography>
+          <Typography variant="h4" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Assessment sx={{ fontSize: 32, color: 'primary.main' }} />
+            All Reports
+          </Typography>
           <Typography variant="body2" color="text.secondary">Create, preview, and manage scheduled reports</Typography>
         </Box>
         <Stack direction="row" spacing={1}>
@@ -91,10 +129,23 @@ const ReportsHome: React.FC = () => {
         </Stack>
       </Stack>
 
+      {/* Global search context indicator */}
+      {searchContext.csiId && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="body2">Global filter active:</Typography>
+            <Chip label={`CSI: ${searchContext.csiId}`} size="small" />
+            <Typography variant="body2" sx={{ ml: 2 }}>
+              Showing reports that include checks or rules for this CSI
+            </Typography>
+          </Stack>
+        </Alert>
+      )}
+
       <Card elevation={0} sx={{ border: theme => `1px solid ${theme.palette.divider}`, mb: 3 }}>
         <CardContent>
-          <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={4}>
+          <Grid container spacing={1} alignItems="center">
+            <Grid item xs={12} md={6}>
               <TextField fullWidth placeholder="Search reports..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon /></InputAdornment>) }} />
             </Grid>
             <Grid item xs={6} md={2}>
@@ -121,7 +172,7 @@ const ReportsHome: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={2}>
               <Stack direction="row" spacing={1} justifyContent="flex-end">
                 <Button variant="outlined" startIcon={<FilterList />} onClick={() => { setSearchQuery(''); setStatusFilter(''); setTemplateFilter(''); }}>Clear Filters</Button>
               </Stack>
@@ -148,7 +199,7 @@ const ReportsHome: React.FC = () => {
         {loading === 'loading' && <LinearProgress />}
         {loading === 'failed' && (
           <Box sx={{ p: 2 }}>
-            <Alert severity="error" action={<Button size="small" onClick={() => dispatch(fetchReports(undefined))}>Retry</Button>}>{error || 'Failed to load reports'}</Alert>
+            <ErrorState message={error || 'Failed to load reports'} onRetry={() => dispatch(fetchReports(undefined))} />
           </Box>
         )}
         <TableContainer>
@@ -195,10 +246,7 @@ const ReportsHome: React.FC = () => {
               ) : paginatedReports.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
-                    <Typography variant="body2" color="text.secondary">No reports match the current filters</Typography>
-                    <Box sx={{ mt: 1 }}>
-                      <Button size="small" variant="outlined" onClick={() => navigate('/checks/reports/new')}>Create your first report</Button>
-                    </Box>
+                    <EmptyState title="No reports found" description="Adjust filters or create a new report to get started." actionLabel="Create Report" onAction={() => navigate('/checks/reports/new')} />
                   </TableCell>
                 </TableRow>
               )}
@@ -229,12 +277,13 @@ const ReportsHome: React.FC = () => {
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                     <Typography variant="body2">{r.recipients?.length ?? 0}</Typography>
                   </TableCell>
-                  <TableCell align="right">
+                   <TableCell align="right">
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
                     {r.status !== 'draft' && (
-                        <IconButton
+                        <Tooltip title={r.status === 'paused' ? 'Resume' : 'Pause'}>
+                          <span>
+                            <IconButton
                           size="small"
-                          title={r.status === 'paused' ? 'Resume' : 'Pause'}
                           onClick={async () => {
                             try {
                               setStatusLoadingId(r.id);
@@ -255,6 +304,7 @@ const ReportsHome: React.FC = () => {
                             }
                           }}
                           disabled={statusLoadingId === r.id}
+                          aria-label={r.status === 'paused' ? 'resume report' : 'pause report'}
                         >
                           {statusLoadingId === r.id ? (
                             <CircularProgress size={16} />
@@ -264,8 +314,12 @@ const ReportsHome: React.FC = () => {
                             <Pause />
                           )}
                         </IconButton>
+                          </span>
+                        </Tooltip>
                       )}
-                      <IconButton size="small" title="Quick Preview" aria-label="quick preview" onClick={async () => {
+                      <Tooltip title="Quick Preview">
+                        <span>
+                      <IconButton size="small" aria-label="quick preview" onClick={async () => {
                         try {
                           setPreviewLoading(true);
                           setPreviewLoadingId(r.id);
@@ -283,6 +337,22 @@ const ReportsHome: React.FC = () => {
                       }}>
                         {previewLoadingId === r.id ? (<CircularProgress size={16} />) : (<Preview />)}
                       </IconButton>
+                        </span>
+                      </Tooltip>
+                      <Tooltip title="Send now">
+                        <span>
+                      <IconButton size="small" aria-label="send now" onClick={async () => {
+                        try {
+                          await dispatch(runReportNow(r.id)).unwrap();
+                          setSnackbar({ open: true, message: 'Report sent (mock)', severity: 'success' });
+                        } catch {
+                          setSnackbar({ open: true, message: 'Send failed', severity: 'error' });
+                        }
+                      }}>
+                        <Send />
+                      </IconButton>
+                        </span>
+                      </Tooltip>
                       <IconButton size="small" onClick={(e) => { setMenuAnchorEl(e.currentTarget); setMenuReportId(r.id); }}>
                         <MoreVert />
                       </IconButton>
@@ -357,7 +427,6 @@ const ReportsHome: React.FC = () => {
 
       {/* Row Actions Menu */}
       <Menu anchorEl={menuAnchorEl} open={Boolean(menuAnchorEl)} onClose={() => { setMenuAnchorEl(null); setMenuReportId(null); }}>
-        <MenuItem onClick={() => { if (menuReportId) navigate(`/checks/reports/${menuReportId}`); setMenuAnchorEl(null); }}>View Details</MenuItem>
         <MenuItem onClick={() => { if (menuReportId) navigate(`/checks/reports/${menuReportId}/edit`); setMenuAnchorEl(null); }}>Edit</MenuItem>
         
         <MenuItem onClick={async () => { if (menuReportId) await dispatch(duplicateReport(menuReportId)); setMenuAnchorEl(null); }}>Duplicate</MenuItem>

@@ -5,7 +5,7 @@ export const registerChecksNavigation = () => {
   navigationRegistry.register({
     moduleId: 'checks',
     moduleLabel: 'Checks',
-    moduleIcon: 'health_and_safety',
+    moduleIcon: 'monitor_heart',
     version: '1.0.0',
     navigation: [
       { id: 'home', label: 'Home', path: '/', icon: 'home', description: 'Attention, CSIs, and upcoming' },
@@ -26,7 +26,7 @@ export const registerChecksNavigation = () => {
         id: 'checks',
         label: 'Checks',
         path: '/checks/all',
-        icon: 'monitor_heart',
+        icon: 'checklist',
         description: 'View and manage checks',
       },
       {
@@ -34,10 +34,9 @@ export const registerChecksNavigation = () => {
         label: 'Reports',
         path: '/checks/reports',
         icon: 'assessment',
-        description: 'Reporting tools',
+        description: 'Reporting checks',
       },
-      { id: 'activity', label: 'Activity', path: '/checks/activity', icon: 'dynamic_feed', description: 'Recent changes & executions' },
-      { id: 'schedules', label: 'Schedules', path: '/checks/schedules', icon: 'event', description: 'Upcoming schedules' },
+      // Activity and Schedules intentionally removed from sidebar
     ]
   });
 };
@@ -58,8 +57,6 @@ export const getCurrentPageId = (pathname: string): string => {
   if (pathname.startsWith('/checks/reports/new')) return 'reports';
   if (pathname.startsWith('/checks/reports/') && pathname.endsWith('/edit')) return 'reports';
   if (pathname.startsWith('/checks/reports')) return 'reports';
-  // Standalone
-  if (pathname.startsWith('/checks/activity')) return 'activity';
-  if (pathname.startsWith('/checks/schedules')) return 'schedules';
+  // Standalone (activity and schedules removed)
   return 'dashboard';
 };

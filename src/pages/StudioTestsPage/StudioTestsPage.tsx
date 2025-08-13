@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Card, CardContent, Chip, Divider, Grid, IconButton, InputAdornment, MenuItem, Pagination, Paper, Select, Stack, TextField, Tooltip, Typography, Skeleton, CircularProgress, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel } from '@mui/material';
-import { Add, Delete, Edit, PlayArrow, Refresh, Search } from '@mui/icons-material';
+import { Add, Delete, PlayArrow, Refresh, Search, Science } from '@mui/icons-material';
 import studioApi from '@/services/api/studioApi';
 import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '@/store';
 
 interface UITestItem {
   id: string;
@@ -24,6 +25,7 @@ const StudioTestsPage: React.FC = () => {
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
+  const searchContext = useAppSelector(state => state.dashboard.searchContext);
   const [running, setRunning] = useState<Record<string, boolean>>({});
   const [lastOutcome, setLastOutcome] = useState<Record<string, 'success' | 'failed' | 'timeout'>>({});
   const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error'; id?: string }>({ open: false, message: '', severity: 'success' });
@@ -46,11 +48,15 @@ const StudioTestsPage: React.FC = () => {
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
     return (tests || []).filter((t) => {
+      // Apply global CSI filter
+      if (searchContext.csiId && t.csiId !== searchContext.csiId) {
+        return false;
+      }
       const matchesQ = !term || t.name.toLowerCase().includes(term) || t.description?.toLowerCase().includes(term);
       const matchesStatus = !status || t.status === status;
       return matchesQ && matchesStatus;
     });
-  }, [tests, q, status]);
+  }, [tests, q, status, searchContext.csiId]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paged = useMemo(() => filtered.slice((page - 1) * pageSize, page * pageSize), [filtered, page]);
@@ -58,13 +64,12 @@ const StudioTestsPage: React.FC = () => {
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h4" fontWeight={700}>Studio Tests</Typography>
+        <Typography variant="h4" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Science sx={{ fontSize: 32, color: 'primary.main' }} />
+          Studio Tests
+        </Typography>
         <Stack direction="row" spacing={1}>
-          <Tooltip title="Refresh">
-            <span>
-              <IconButton onClick={load} disabled={loading}><Refresh /></IconButton>
-            </span>
-          </Tooltip>
+          
           <Button
             variant="contained"
             startIcon={<Add />}
@@ -75,6 +80,16 @@ const StudioTestsPage: React.FC = () => {
           </Button>
         </Stack>
       </Stack>
+
+      {/* Global search context indicator */}
+      {searchContext.csiId && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="body2">Global filter active:</Typography>
+            <Chip label={`CSI: ${searchContext.csiId}`} size="small" />
+          </Stack>
+        </Alert>
+      )}
 
       <Paper sx={{ p: 2, mb: 2 }}>
         <Grid container spacing={1} alignItems="center">
@@ -99,7 +114,20 @@ const StudioTestsPage: React.FC = () => {
               <CardContent sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
                 <Stack spacing={1}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography variant="subtitle1" fontWeight={600}>{t.name || <Skeleton width={160} />}</Typography>
+                    <Typography 
+                      variant="subtitle1" 
+                      fontWeight={600}
+                      onClick={() => !loading && !running[t.id] && navigate(`/checks/studio/${t.id}`)}
+                      sx={{ 
+                        cursor: loading || running[t.id] ? 'default' : 'pointer',
+                        color: loading || running[t.id] ? 'text.primary' : 'primary.main',
+                        '&:hover': { 
+                          textDecoration: loading || running[t.id] ? 'none' : 'underline' 
+                        }
+                      }}
+                    >
+                      {t.name || <Skeleton width={160} />}
+                    </Typography>
                     <Stack direction="row" spacing={0.5}>
                       <Tooltip title={running[t.id] ? 'Running…' : 'Run'}>
                         <span>
@@ -139,9 +167,6 @@ const StudioTestsPage: React.FC = () => {
                           </IconButton>
                         </span>
                       </Tooltip>
-                      <Tooltip title="Edit in Studio">
-                        <span><IconButton size="small" disabled={loading || !!running[t.id]} onClick={() => navigate(`/checks/studio/${t.id}`)}><Edit fontSize="small" /></IconButton></span>
-                      </Tooltip>
                       <Tooltip title="Delete">
                         <span><IconButton size="small" disabled={loading || !!running[t.id]} onClick={async () => { try { await studioApi.deleteTest(t.id); await load(); } catch {} }}><Delete fontSize="small" /></IconButton></span>
                       </Tooltip>
@@ -165,6 +190,10 @@ const StudioTestsPage: React.FC = () => {
       </Grid>
 
       <Stack alignItems="center" sx={{ mt: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          Showing {paged.length} of {filtered.length} tests
+          {searchContext.csiId && ` (filtered by CSI: ${searchContext.csiId})`}
+        </Typography>
         <Pagination count={totalPages} page={page} onChange={(_, v) => setPage(v)} size="small" />
       </Stack>
 

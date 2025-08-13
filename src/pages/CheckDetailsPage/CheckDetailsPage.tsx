@@ -21,7 +21,7 @@ import {
   Tooltip,
   IconButton,
 } from '@mui/material';
-import { PlayArrow, Schedule, Edit, OpenInNew } from '@mui/icons-material';
+import { PlayArrow, Schedule, Edit, OpenInNew, RemoveRedEye } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchCheckById, executeCheck } from '@/store/slices/checksSlice';
 import { checksApi } from '@/services/api/checksApi';
