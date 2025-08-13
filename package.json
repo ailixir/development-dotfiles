@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:fed": "webpack serve --mode development",
+    "dev:fed": "webpack serve --config webpack.config.cjs --mode development",
     "build": "vite build",
-    "build:fed": "webpack --mode production",
+    "build:fed": "webpack --config webpack.config.cjs --mode production",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
@@ -36,12 +36,11 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.48.0",
     "react-redux": "^9.0.0",
-    "react-router-dom": "^7.0.0",
+    "react-router-dom": "^6.21.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {
     "@cypress/react18": "^2.0.0",
-    "@module-federation/enhanced": "^0.1.0",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.0.0",

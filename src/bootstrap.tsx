@@ -65,13 +65,9 @@ const Bootstrap: React.FC<BootstrapProps> = ({
 // MSW initialization is handled in main.tsx for Vite mode
 // For Module Federation mode, the host should handle MSW initialization
 
-// For Module Federation - expose the component
+// For Module Federation - no global exposure needed; host consumes via remote container
 if (typeof window !== 'undefined') {
-  // Mark as Module Federation powered
   (window as any).__CHECKS_MODULE_FEDERATION__ = true;
-  
-  // Expose for host applications
-  (window as any).ChecksModule = Bootstrap;
 }
 
 // Note: Standalone rendering is handled by main.tsx for Vite development

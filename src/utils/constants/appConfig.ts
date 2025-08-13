@@ -1,9 +1,37 @@
 import { AppConfig } from '../../types/common/commonTypes';
 
+// Safe access to Vite env in both Vite and Webpack builds
+const viteEnv: Record<string, any> = (() => {
+  try {
+    return (import.meta as any)?.env ?? {};
+  } catch {
+    return {};
+  }
+})();
+
+const getStringEnv = (key: string, fallback?: string): string | undefined => {
+  const val = viteEnv[key];
+  if (typeof val === 'string' && val.length > 0) return val;
+  // Fallback to process.env only when available (e.g., SSR/build tools)
+  try {
+    if (typeof process !== 'undefined' && (process as any).env) {
+      const p = (process as any).env[key];
+      if (typeof p === 'string' && p.length > 0) return p;
+    }
+  } catch {}
+  return fallback;
+};
+
+const getBoolEnv = (key: string, defaultTrue = true): boolean => {
+  const raw = getStringEnv(key);
+  if (raw === undefined) return defaultTrue;
+  return !(raw === 'false' || raw === '0');
+};
+
 export const APP_CONFIG: AppConfig = {
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
-  enableMSW: import.meta.env.VITE_ENABLE_MSW !== 'false',
-  debugMode: import.meta.env.VITE_DEBUG_MODE === 'true',
+  apiBaseUrl: getStringEnv('VITE_API_BASE_URL', '/api') || '/api',
+  enableMSW: getBoolEnv('VITE_ENABLE_MSW', true),
+  debugMode: getStringEnv('VITE_DEBUG_MODE') === 'true',
   version: '1.0.0',
   buildDate: new Date().toISOString(),
 };

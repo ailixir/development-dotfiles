@@ -178,7 +178,7 @@ const StudioTestsPage: React.FC = () => {
                       size="small"
                       label={(t.status || 'draft')}
                       color={t.status === 'active' ? 'success' : t.status === 'archived' ? 'default' : 'warning'}
-                      variant="contained"
+                      variant="filled"
                     />
                     <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>Updated {t.updatedAt ? new Date(t.updatedAt).toLocaleString() : ''}</Typography>
                   </Stack>
