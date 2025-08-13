@@ -4,7 +4,7 @@ import { CSI, CSIMetrics, CSIHealthSummary } from '../types/csi/csiTypes';
 export const mockCSIs: CSI[] = [
   {
     id: '172087',
-    name: 'Automated Management of Production',
+    name: 'Production Tools',
     description: 'Automated systems for managing production workloads and deployments',
     businessUnit: 'Technology Infrastructure',
     criticality: 'CRITICAL',

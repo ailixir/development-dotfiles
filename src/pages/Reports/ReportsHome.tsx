@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Button, Card, CardContent, Chip, Grid, Skeleton, Stack, TextField, Typography, Select, MenuItem, InputLabel, FormControl, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions, Toolbar, Alert, Snackbar, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, LinearProgress, InputAdornment, Menu, CircularProgress } from '@mui/material';
+import { Box, Button, Card, CardContent, Chip, Grid, Skeleton, Stack, TextField, Typography, Select, MenuItem, InputLabel, FormControl, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions, Toolbar, Alert, Snackbar, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, LinearProgress, InputAdornment, Menu, CircularProgress, Paper } from '@mui/material';
 import { Search as SearchIcon, FilterList, Add as AddIcon, Visibility, Edit as EditIcon, ContentCopy, Pause, PlayArrow, Delete as DeleteIcon, Preview, MoreVert } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { fetchReports, pauseReport, resumeReport, duplicateReport, deleteReportThunk, sendTestReport } from '@/store/slices/reportsSlice';
+import { fetchReports, pauseReport, resumeReport, duplicateReport, deleteReportThunk } from '@/store/slices/reportsSlice';
 import reportsApi from '@/services/api/reportsApi';
 import { useNavigate } from 'react-router-dom';
 
 const ReportsHome: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { data, loading, error } = useAppSelector((s) => s.reports);
+  const { data, loading, error, lastFetched } = useAppSelector((s) => s.reports);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [templateFilter, setTemplateFilter] = useState<string>('');
@@ -26,10 +26,38 @@ const ReportsHome: React.FC = () => {
   const [previewLoadingId, setPreviewLoadingId] = useState<string | null>(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [menuReportId, setMenuReportId] = useState<string | null>(null);
+  const [statusLoadingId, setStatusLoadingId] = useState<string | null>(null);
+  const [optimisticStatus, setOptimisticStatus] = useState<Record<string, 'active' | 'paused' | 'draft'>>({});
 
   useEffect(() => {
-    dispatch(fetchReports(undefined));
-  }, [dispatch]);
+    const freshMs = 60 * 1000;
+    const last = lastFetched ? new Date(lastFetched).getTime() : 0;
+    if (!last || Date.now() - last > freshMs) {
+      dispatch(fetchReports(undefined));
+    }
+  }, [dispatch, lastFetched]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const el = document.querySelector<HTMLInputElement>('input[placeholder="Search reports..."]');
+        el?.focus();
+      }
+      if (e.key.toLowerCase() === 'p' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const first = (data && data.length > 0) ? data[0] : undefined;
+        if (first) {
+          setPreviewOpen(true);
+          setPreviewTitle(first.name);
+          setPreviewLoading(true);
+          reportsApi.previewReport(first.id).then((resp) => setPreviewContent(resp.preview)).finally(() => setPreviewLoading(false));
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [data]);
 
   const filteredReports = useMemo(() => {
     let result = data || [];
@@ -109,7 +137,6 @@ const ReportsHome: React.FC = () => {
             <Stack direction="row" spacing={1}>
               <Button size="small" variant="outlined" onClick={async () => { await Promise.all(selectedIds.map(id => dispatch(pauseReport(id)))); setSelectedIds([]); setSnackbar({ open: true, message: 'Paused selected reports', severity: 'success' }); }}>Pause</Button>
               <Button size="small" variant="outlined" onClick={async () => { await Promise.all(selectedIds.map(id => dispatch(resumeReport(id)))); setSelectedIds([]); setSnackbar({ open: true, message: 'Resumed selected reports', severity: 'success' }); }}>Resume</Button>
-              <Button size="small" variant="outlined" onClick={async () => { await Promise.all(selectedIds.map(id => dispatch(duplicateReport(id)))); setSelectedIds([]); setSnackbar({ open: true, message: 'Duplicated selected reports', severity: 'success' }); }}>Duplicate</Button>
               <Button size="small" color="error" variant="contained" onClick={() => { setSelectedReport(null); setDeleteDialogOpen(true); }}>Delete</Button>
               <Button size="small" onClick={() => setSelectedIds([])}>Clear</Button>
             </Stack>
@@ -119,6 +146,11 @@ const ReportsHome: React.FC = () => {
 
       <Card elevation={0} sx={{ border: theme => `1px solid ${theme.palette.divider}` }}>
         {loading === 'loading' && <LinearProgress />}
+        {loading === 'failed' && (
+          <Box sx={{ p: 2 }}>
+            <Alert severity="error" action={<Button size="small" onClick={() => dispatch(fetchReports(undefined))}>Retry</Button>}>{error || 'Failed to load reports'}</Alert>
+          </Box>
+        )}
         <TableContainer>
           <Table size="small">
             <TableHead>
@@ -146,10 +178,27 @@ const ReportsHome: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {loading === 'loading' ? null : paginatedReports.length === 0 && (
+              {loading === 'loading' ? (
+                <TableRow>
+                  <TableCell colSpan={7} sx={{ py: 4 }}>
+                    <Stack spacing={1}>
+                      {[...Array(5)].map((_, idx) => (
+                        <Stack key={idx} direction="row" spacing={2} alignItems="center">
+                          <Skeleton variant="circular" width={24} height={24} />
+                          <Skeleton variant="text" sx={{ flex: 1 }} height={20} />
+                          <Skeleton variant="text" width={120} height={20} />
+                        </Stack>
+                      ))}
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ) : paginatedReports.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
                     <Typography variant="body2" color="text.secondary">No reports match the current filters</Typography>
+                    <Box sx={{ mt: 1 }}>
+                      <Button size="small" variant="outlined" onClick={() => navigate('/checks/reports/new')}>Create your first report</Button>
+                    </Box>
                   </TableCell>
                 </TableRow>
               )}
@@ -167,7 +216,12 @@ const ReportsHome: React.FC = () => {
                     </Stack>
                   </TableCell>
                   <TableCell>
-                    <Chip label={r.status} size="small" color={r.status === 'active' ? 'success' : r.status === 'paused' ? 'warning' : 'default'} />
+                    {(() => {
+                      const rowStatus = optimisticStatus[r.id] ?? r.status;
+                      return (
+                        <Chip label={rowStatus} size="small" color={rowStatus === 'active' ? 'success' : rowStatus === 'paused' ? 'warning' : 'default'} aria-label={`status ${rowStatus}`} />
+                      );
+                    })()}
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2">{r.schedule ? `${r.schedule.frequency} ${r.schedule.time ?? ''}` : '—'}</Typography>
@@ -176,15 +230,50 @@ const ReportsHome: React.FC = () => {
                     <Typography variant="body2">{r.recipients?.length ?? 0}</Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Stack direction="row" spacing={1}>
-                      <IconButton size="small" title="Quick Preview" onClick={async () => {
+                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    {r.status !== 'draft' && (
+                        <IconButton
+                          size="small"
+                          title={r.status === 'paused' ? 'Resume' : 'Pause'}
+                          onClick={async () => {
+                            try {
+                              setStatusLoadingId(r.id);
+                              const previous = r.status;
+                              const next = previous === 'paused' ? 'active' : 'paused';
+                              setOptimisticStatus((prev) => ({ ...prev, [r.id]: next }));
+                              const action = previous === 'paused' ? resumeReport(r.id) : pauseReport(r.id);
+                              try {
+                                await dispatch(action).unwrap();
+                              } catch {
+                                // revert visual override on failure
+                                setOptimisticStatus((prev) => ({ ...prev, [r.id]: previous }));
+                              }
+                            } finally {
+                              setStatusLoadingId(null);
+                              // clear override to reflect store state
+                              setOptimisticStatus((prev) => { const { [r.id]: _omit, ...rest } = prev; return rest; });
+                            }
+                          }}
+                          disabled={statusLoadingId === r.id}
+                        >
+                          {statusLoadingId === r.id ? (
+                            <CircularProgress size={16} />
+                          ) : r.status === 'paused' ? (
+                            <PlayArrow />
+                          ) : (
+                            <Pause />
+                          )}
+                        </IconButton>
+                      )}
+                      <IconButton size="small" title="Quick Preview" aria-label="quick preview" onClick={async () => {
                         try {
                           setPreviewLoading(true);
                           setPreviewLoadingId(r.id);
                           setPreviewOpen(true);
                           setPreviewTitle(r.name);
                           const resp = await reportsApi.previewReport(r.id);
-                          setPreviewContent(resp.preview);
+                          try { (window as any).__REPORT_HTML_PREVIEW__ = resp?.html; } catch {}
+                          setPreviewContent(resp.preview || '');
                         } catch {
                           setPreviewContent('Failed to load preview');
                         } finally {
@@ -235,15 +324,26 @@ const ReportsHome: React.FC = () => {
       </Dialog>
 
       {/* Quick Preview Dialog */}
-      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>{previewTitle}</DialogTitle>
+        <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} maxWidth="md" fullWidth aria-labelledby="quick-preview-title">
+        <DialogTitle id="quick-preview-title">{previewTitle}</DialogTitle>
         <DialogContent>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>{new Date().toLocaleString()}</Typography>
-          {previewLoading ? (
-            <Typography variant="body2" color="text.secondary">Loading…</Typography>
-          ) : (
-            <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace' }}>{previewContent}</pre>
-          )}
+            {previewLoading ? (
+              <Typography variant="body2" color="text.secondary" role="status" aria-live="polite">Loading…</Typography>
+            ) : (
+              <Paper variant="outlined" sx={{ p: 0, overflow: 'hidden' }}>
+                <iframe
+                  title="Report Quick Preview"
+                  style={{ border: 'none', width: '100%', height: 520, background: '#f3f4f6' }}
+                  srcDoc={(() => {
+                    const anyWin = window as any;
+                    if (typeof anyWin.__REPORT_HTML_PREVIEW__ === 'string' && anyWin.__REPORT_HTML_PREVIEW__.length > 0) return anyWin.__REPORT_HTML_PREVIEW__;
+                    const safe = (previewContent || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    return `<!DOCTYPE html><html><body style=\"font-family:ui-sans-serif,system-ui,Helvetica,Arial,sans-serif;padding:16px;\"><pre style=\"white-space:pre-wrap;margin:0;\">${safe}</pre></body></html>`;
+                  })()}
+                />
+              </Paper>
+            )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPreviewOpen(false)}>Close</Button>
@@ -259,7 +359,7 @@ const ReportsHome: React.FC = () => {
       <Menu anchorEl={menuAnchorEl} open={Boolean(menuAnchorEl)} onClose={() => { setMenuAnchorEl(null); setMenuReportId(null); }}>
         <MenuItem onClick={() => { if (menuReportId) navigate(`/checks/reports/${menuReportId}`); setMenuAnchorEl(null); }}>View Details</MenuItem>
         <MenuItem onClick={() => { if (menuReportId) navigate(`/checks/reports/${menuReportId}/edit`); setMenuAnchorEl(null); }}>Edit</MenuItem>
-        <MenuItem onClick={async () => { if (!menuReportId) return; const r = filteredReports.find(x => x.id === menuReportId); if (r?.status === 'paused') { await dispatch(resumeReport(menuReportId)); } else { await dispatch(pauseReport(menuReportId)); } setMenuAnchorEl(null); }}>Pause/Resume</MenuItem>
+        
         <MenuItem onClick={async () => { if (menuReportId) await dispatch(duplicateReport(menuReportId)); setMenuAnchorEl(null); }}>Duplicate</MenuItem>
         <MenuItem onClick={() => { setSelectedReport(menuReportId); setDeleteDialogOpen(true); setMenuAnchorEl(null); }}>Delete</MenuItem>
       </Menu>

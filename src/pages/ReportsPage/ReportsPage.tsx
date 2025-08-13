@@ -87,45 +87,7 @@ import { fetchReports, createReport, generatePreview } from '@/store/slices/repo
 import { checksApi } from '@/services/api/checksApi';
 import type { ReportEntity } from '@/types/reports/reportTypes';
 
-// Mock reports data
-const mockReports = [
-  {
-    id: '1',
-    name: 'Daily Health Summary',
-    description: 'Daily overview of all system health checks',
-    frequency: 'Daily at 8:00 AM',
-    recipients: ['platform-team@citi.com', 'ops@citi.com'],
-    lastSent: '2025-01-07T08:00:00Z',
-    status: 'active',
-    includeCharts: true,
-    checks: ['Trading API', 'Database', 'Payment Gateway'],
-    template: 'executive-summary'
-  },
-  {
-    id: '2',
-    name: 'Weekly Executive Report',
-    description: 'Weekly executive summary with trends and insights',
-    frequency: 'Weekly on Monday at 9:00 AM',
-    recipients: ['executives@citi.com'],
-    lastSent: '2025-01-06T09:00:00Z',
-    status: 'active',
-    includeCharts: true,
-    checks: ['All Checks'],
-    template: 'executive-dashboard'
-  },
-  {
-    id: '3',
-    name: 'Critical Alerts Digest',
-    description: 'Real-time digest of critical system alerts',
-    frequency: 'Every 4 hours',
-    recipients: ['oncall@citi.com', 'sre@citi.com'],
-    lastSent: '2025-01-07T10:00:00Z',
-    status: 'paused',
-    includeCharts: false,
-    checks: ['Critical Systems Only'],
-    template: 'alert-digest'
-  }
-];
+// Deprecated component. Keeping for backward-compat in demos; replaced by pages in `pages/Reports/`.
 
 // Placeholder analytics (static for prototype)
 const ANALYTICS = {

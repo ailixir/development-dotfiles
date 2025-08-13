@@ -21,8 +21,7 @@ const ReportDetailsPage = React.lazy(() => import('./pages/Reports/ReportDetails
 // CSIs directory and overview removed
 const StudioRunsPage = React.lazy(() => import('@pages/StudioRunsPage'));
 const StudioTestsPage = React.lazy(() => import('@pages/StudioTestsPage'));
-const ReportsScheduledPage = React.lazy(() => import('@pages/ReportsScheduledPage'));
-const ReportsAnalyticsPage = React.lazy(() => import('@pages/ReportsAnalyticsPage'));
+// Removed Scheduled and Analytics pages
 const ActivityPage = React.lazy(() => import('@pages/ActivityPage'));
 const SchedulesPage = React.lazy(() => import('@pages/SchedulesPage'));
 
@@ -113,8 +112,7 @@ const App: React.FC = () => {
               <Route path="/checks/reports/new" element={<ReportBuilder />} />
               <Route path="/checks/reports/:id" element={<ReportDetailsPage />} />
               <Route path="/checks/reports/:id/edit" element={<ReportBuilder />} />
-              <Route path="/checks/reports/scheduled" element={<ReportsScheduledPage />} />
-              <Route path="/checks/reports/analytics" element={<ReportsAnalyticsPage />} />
+              {/* Reports sub-pages removed (Scheduled, Analytics) per UX alignment */}
 
               {/* CSIs */}
               <Route path="/checks/csis" element={<Navigate to="/" replace />} />

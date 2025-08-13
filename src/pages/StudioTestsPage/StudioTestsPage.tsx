@@ -65,9 +65,14 @@ const StudioTestsPage: React.FC = () => {
               <IconButton onClick={load} disabled={loading}><Refresh /></IconButton>
             </span>
           </Tooltip>
-          <Tooltip title="New Test">
-            <IconButton onClick={() => setCreateOpen(true)}><Add /></IconButton>
-          </Tooltip>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => setCreateOpen(true)}
+            size="large"
+          >
+            Create Test
+          </Button>
         </Stack>
       </Stack>
 

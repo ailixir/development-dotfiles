@@ -324,10 +324,10 @@ export const mockChecks: MockCheck[] = [
   },
   {
     id: 'check-012',
-    name: 'Automated Production Management',
+    name: 'Production Tools',
     type: 'HTTP',
     csiId: '172087',
-    csiName: 'Automated Management of Production',
+    csiName: 'Production Tools',
     status: 'PASSING',
     lastExecution: '2024-01-15T10:35:00Z',
     nextExecution: '2024-01-15T10:40:00Z',
@@ -800,7 +800,7 @@ export const mockCheckStats = {
     '171205': 2,  // Risk Management Systems
     '168942': 1,  // Core Banking Platform
     '172954': 1,  // Security Operations Platform
-    '172087': 1,  // Automated Management of Production
+    '172087': 1,  // Production Tools
     '173621': 1   // Mobile Banking Platform
   }
 };

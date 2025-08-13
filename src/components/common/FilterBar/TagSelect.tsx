@@ -19,6 +19,8 @@ interface TagSelectProps {
   onTagsChange: (tags: string[]) => void;
   loading?: boolean;
   disabled?: boolean;
+  placeholder?: string;
+  label?: string;
 }
 
 const TagSelect: React.FC<TagSelectProps> = ({
@@ -26,7 +28,9 @@ const TagSelect: React.FC<TagSelectProps> = ({
   selectedTags,
   onTagsChange,
   loading = false,
-  disabled = false
+  disabled = false,
+  placeholder = 'Add tags...',
+  label = 'Filter by Tags',
 }) => {
   const theme = useTheme();
 
@@ -37,8 +41,8 @@ const TagSelect: React.FC<TagSelectProps> = ({
   return (
     <Autocomplete
       multiple
-      options={tags}
-      value={selectedTags}
+      options={Array.isArray(tags) ? tags : []}
+      value={Array.isArray(selectedTags) ? selectedTags : []}
       onChange={handleTagChange}
       loading={loading}
       disabled={disabled}
@@ -46,8 +50,8 @@ const TagSelect: React.FC<TagSelectProps> = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          label="Filter by Tags"
-          placeholder={disabled ? "Select CSI first..." : "Add tags..."}
+          label={label}
+          placeholder={disabled ? "Select CSI first..." : placeholder}
           InputProps={{
             ...params.InputProps,
             startAdornment: (
@@ -120,6 +124,7 @@ const TagSelect: React.FC<TagSelectProps> = ({
         </li>
       )}
       noOptionsText={disabled ? "Select a CSI first to see available tags" : "No tags found"}
+      filterSelectedOptions
       getOptionLabel={(option) => option}
       isOptionEqualToValue={(option, value) => option === value}
       ChipProps={{

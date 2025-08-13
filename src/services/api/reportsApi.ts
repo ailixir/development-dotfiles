@@ -1,6 +1,6 @@
 import apiClient from './apiClient';
 import { API_ENDPOINTS } from '@/utils/constants/appConfig';
-import type { ReportEntity, ReportPreviewResponse, ReportSection } from '@/types/reports/reportTypes';
+import type { ReportEntity, ReportPreviewResponse, ReportSection, ReportSchedule } from '@/types/reports/reportTypes';
 
 export interface CreateReportPayload {
   name: string;
@@ -12,6 +12,7 @@ export interface CreateReportPayload {
   template: string;
   checks: string[];
   sections?: ReportSection[];
+  schedule?: ReportSchedule;
 }
 
 export const reportsApi = {

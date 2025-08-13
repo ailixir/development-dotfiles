@@ -9,6 +9,7 @@ export interface ReportSchedule {
   enabled: boolean;
   daysOfWeek?: number[];
   daysOfMonth?: number[];
+  cron?: string;
 }
 
 export interface ReportEntity {
@@ -33,11 +34,13 @@ export interface ReportConfiguration {
   schedule: ReportSchedule;
   recipients: string[];
   template: ReportTemplate;
+  sections?: ReportSection[];
 }
 
 export interface ReportPreviewResponse {
   preview: string;
   generatedAt: string;
+  html?: string;
 }
 
 export type ReportExecutionStatus = 'success' | 'failed' | 'partial';
@@ -53,4 +56,33 @@ export interface ReportExecution {
   generationDuration: number; // milliseconds
   emailContent?: string;
 }
+
+// Report sections enable grouped content within a report
+export type ReportSectionKind = 'manual' | 'rule';
+
+export interface ManualReportSection {
+  id: string;
+  title: string;
+  kind: 'manual';
+  checkIds: string[];
+}
+
+export interface RuleConfig {
+  csiIds?: string[];
+  tags?: string[];
+  types?: string[];
+  status?: string[];
+  timeframe?: '' | '5m' | '15m' | '1h' | '24h';
+  sort?: '' | 'failing-first' | 'recently-failed' | 'alphabetical';
+  limit?: number;
+}
+
+export interface RuleReportSection {
+  id: string;
+  title: string;
+  kind: 'rule';
+  rule: RuleConfig;
+}
+
+export type ReportSection = ManualReportSection | RuleReportSection;
 

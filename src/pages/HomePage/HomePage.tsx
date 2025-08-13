@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Box, Grid, Stack, Typography } from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
 import { useAppDispatch, useAppSelector } from '@/store';
 import {
   fetchDashboardSummary,
@@ -50,11 +51,12 @@ const HomePage: React.FC = () => {
   return (
     <Box>
       <Stack spacing={2} mb={2}>
-        <Typography variant="h4" fontWeight={700}>
+        <Typography variant="h4" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <HomeIcon sx={{ fontSize: 32, color: 'primary.main' }} />
           Home
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          A calm command center for what needs attention, by CSI.
+          Your centralized view of critical checks, anomalies, and system health across all environments.
         </Typography>
       </Stack>
 

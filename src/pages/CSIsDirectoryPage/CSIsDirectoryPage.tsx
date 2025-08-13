@@ -4,7 +4,7 @@ import { Box, Grid, Card, CardContent, Typography, Chip, Stack, Paper, Divider }
 // Static CSI directory placeholder per UI implementation plan
 const CSIsDirectoryPage: React.FC = () => {
   const placeholderCSIs = [
-    { id: '172087', name: 'Automated Management of Production', bu: 'Technology Infrastructure', criticality: 'CRITICAL', tags: ['application:automation-platform', 'team:devops'] },
+    { id: '172087', name: 'Production tools', bu: 'Technology Infrastructure', criticality: 'CRITICAL', tags: ['application:automation-platform', 'team:devops'] },
     { id: '168942', name: 'Core Banking Platform', bu: 'Consumer Banking', criticality: 'CRITICAL', tags: ['application:core-banking', 'team:core-systems'] },
     { id: '174523', name: 'Trading Platform Services', bu: 'Markets & Securities', criticality: 'CRITICAL', tags: ['application:trading-platform', 'team:platform-engineering'] },
     { id: '169834', name: 'Payment Gateway Infrastructure', bu: 'Payments', criticality: 'CRITICAL', tags: ['application:payment-gateway', 'team:payments-team'] },

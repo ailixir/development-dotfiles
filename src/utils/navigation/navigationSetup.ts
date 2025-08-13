@@ -10,17 +10,7 @@ export const registerChecksNavigation = () => {
     navigation: [
       { id: 'home', label: 'Home', path: '/', icon: 'home', description: 'Attention, CSIs, and upcoming' },
       // CSIs entry removed
-      {
-        id: 'checks',
-        label: 'Checks',
-        path: '/checks/all',
-        icon: 'monitor_heart',
-        description: 'View and manage checks',
-        children: [
-          { id: 'checks-catalog', label: 'Catalog', path: '/checks/all', icon: 'view_list' },
-          { id: 'checks-create', label: 'Create', path: '/checks/create', icon: 'add_circle' },
-        ],
-      },
+      
       {
         id: 'studio',
         label: 'Studio',
@@ -33,17 +23,18 @@ export const registerChecksNavigation = () => {
         ],
       },
       {
+        id: 'checks',
+        label: 'Checks',
+        path: '/checks/all',
+        icon: 'monitor_heart',
+        description: 'View and manage checks',
+      },
+      {
         id: 'reports',
         label: 'Reports',
         path: '/checks/reports',
         icon: 'assessment',
         description: 'Reporting tools',
-        children: [
-          { id: 'reports-home', label: 'All Reports', path: '/checks/reports', icon: 'list' },
-          { id: 'reports-builder', label: 'Create Report', path: '/checks/reports/new', icon: 'build' },
-          { id: 'reports-scheduled', label: 'Scheduled', path: '/checks/reports/scheduled', icon: 'schedule' },
-          { id: 'reports-analytics', label: 'Analytics', path: '/checks/reports/analytics', icon: 'analytics' },
-        ],
       },
       { id: 'activity', label: 'Activity', path: '/checks/activity', icon: 'dynamic_feed', description: 'Recent changes & executions' },
       { id: 'schedules', label: 'Schedules', path: '/checks/schedules', icon: 'event', description: 'Upcoming schedules' },
@@ -55,20 +46,18 @@ export const registerChecksNavigation = () => {
 export const getCurrentPageId = (pathname: string): string => {
   if (pathname === '/') return 'home';
   // CSIs removed
-  // Checks sub-nav
-  if (pathname.startsWith('/checks/all')) return 'checks-catalog';
-  if (pathname.startsWith('/checks/create')) return 'checks-create';
+  // Checks parent should highlight when in checks area
+  if (pathname.startsWith('/checks/all')) return 'checks';
+  if (pathname.startsWith('/checks/create')) return 'checks';
   // templates removed
   // Studio sub-nav
   if (pathname.startsWith('/checks/studio/runs')) return 'studio-runs';
   if (pathname.startsWith('/checks/studio/tests')) return 'studio-tests';
   if (pathname.startsWith('/checks/studio')) return 'studio-tests';
-  // Reports sub-nav
-  if (pathname.startsWith('/checks/reports/scheduled')) return 'reports-scheduled';
-  if (pathname.startsWith('/checks/reports/analytics')) return 'reports-analytics';
-  if (pathname.startsWith('/checks/reports/new')) return 'reports-builder';
-  if (pathname.startsWith('/checks/reports/') && pathname.endsWith('/edit')) return 'reports-builder';
-  if (pathname.startsWith('/checks/reports')) return 'reports-home';
+  // Reports parent should highlight when in reports area
+  if (pathname.startsWith('/checks/reports/new')) return 'reports';
+  if (pathname.startsWith('/checks/reports/') && pathname.endsWith('/edit')) return 'reports';
+  if (pathname.startsWith('/checks/reports')) return 'reports';
   // Standalone
   if (pathname.startsWith('/checks/activity')) return 'activity';
   if (pathname.startsWith('/checks/schedules')) return 'schedules';

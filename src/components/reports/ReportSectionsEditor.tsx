@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Paper, Stack, TextField, Typography, Button, Chip } from '@mui/material';
 import { Search } from '@mui/icons-material';
-import type { ReportSection } from '@/types/reports/reportTypes';
+import type { ReportSection, ManualReportSection } from '@/types/reports/reportTypes';
 
 interface Props {
   sections: ReportSection[];
@@ -62,13 +62,23 @@ const ReportSectionsEditor: React.FC<Props> = ({ sections, onChange, search, onS
                     </Paper>
                   )}
                   <Stack direction="row" spacing={1} flexWrap="wrap">
-                    {(s.checkIds || []).map((id) => (
-                      <Chip key={id} size="small" label={id} onDelete={() => {
-                        const updated = [...sections];
-                        const target = updated[idx];
-                        updated[idx] = { ...target, checkIds: (target.checkIds || []).filter((x) => x !== id) };
-                        onChange(updated);
-                      }} />
+                    {((s as ManualReportSection).checkIds || []).map((id: string) => (
+                      <Chip
+                        key={id}
+                        size="small"
+                        label={id}
+                        onDelete={() => {
+                          const updated: ReportSection[] = [...sections];
+                          if (updated[idx].kind === 'manual') {
+                            const manual = updated[idx] as ManualReportSection;
+                            updated[idx] = {
+                              ...manual,
+                              checkIds: (manual.checkIds || []).filter((checkId: string) => checkId !== id),
+                            };
+                            onChange(updated);
+                          }
+                        }}
+                      />
                     ))}
                   </Stack>
                 </Stack>

@@ -1,6 +1,6 @@
 import { http, HttpResponse, delay } from 'msw';
 import { mockReports, mockReportExecutions } from '../mockData/reportsData';
-import { mockChecks } from '../mockData/checksData';
+import { mockChecks, mockExecutionResults } from '../mockData/checksData';
 
 export const reportsHandlers = [
   // Get all reports
@@ -125,13 +125,24 @@ export const reportsHandlers = [
     
     const reportIndex = mockReports.findIndex(r => r.id === id);
     if (reportIndex === -1) {
-      return new HttpResponse(null, { status: 404 });
+      // Seamless upsert: if not found (e.g., mock data reset) create it on-the-fly
+      const created = {
+        id: id as string,
+        ...updateData,
+        status: (updateData as any)?.status || 'draft',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'current.user@citi.com'
+      };
+      mockReports.push(created as any);
+      return HttpResponse.json(created);
     }
     
     mockReports[reportIndex] = {
       ...mockReports[reportIndex],
       ...updateData,
       ...(Array.isArray((updateData as any).sections) ? { sections: (updateData as any).sections } : {}),
+      ...(updateData.schedule ? { schedule: { ...mockReports[reportIndex].schedule, ...updateData.schedule } } : {}),
       updatedAt: new Date().toISOString()
     };
     
@@ -165,7 +176,7 @@ export const reportsHandlers = [
           let list = [...mockChecks];
           const rule = section.rule || {};
           if (rule.csiIds && rule.csiIds.length) list = list.filter(c => rule.csiIds!.includes(c.csiId));
-          if (rule.tags && rule.tags.length) list = list.filter(c => rule.tags!.some(t => c.tags.includes(t)));
+          if (rule.tags && rule.tags.length) list = list.filter(c => rule.tags!.some((t: string) => c.tags.includes(t)));
           if (rule.types && rule.types.length) list = list.filter(c => rule.types!.includes(c.type as any));
           if (rule.status && rule.status.length) list = list.filter(c => rule.status!.includes(c.status as any));
           if (rule.timeframe) {
@@ -199,14 +210,31 @@ export const reportsHandlers = [
       sections.push({ title: 'Selected Checks', checkIds: chosenChecks });
     }
 
+    // Build a richer preview inspired by PRD
     const lines: string[] = [];
-    lines.push(`Subject: ${report.name} - ${new Date().toLocaleDateString()}`);
+    const subject = (report as any).subject || report.name;
+    const now = new Date();
+    lines.push(`Subject: Checks Report: ${subject}`);
     lines.push('');
     lines.push('-----------------------------------------------------');
     lines.push('');
-    lines.push(`Report Generated: ${new Date().toLocaleString()}`);
-    lines.push('Status: PREVIEW MODE');
+    lines.push(`Report for: ${now.toLocaleString()}`);
+
+    // Compute overall status (warning if any failing/warning)
+    const allCheckIds = sections.flatMap(s => s.checkIds);
+    const allChecks = allCheckIds.map(id => mockChecks.find(c => c.id === id)).filter(Boolean) as typeof mockChecks[number][];
+    const hasFailing = allChecks.some(c => c.status === 'FAILING');
+    const hasWarning = allChecks.some(c => c.status === 'WARNING');
+    const overall = hasFailing ? 'FAILING' : hasWarning ? 'WARNING' : (allChecks.length ? 'PASSING' : 'UNKNOWN');
+    lines.push(`Overall Status: ${overall}`);
     lines.push('');
+
+    if (report.schedule) {
+      const sched = report.schedule as any;
+      lines.push(`Schedule: ${sched.frequency}${sched.time ? ` at ${sched.time}` : ''}${sched.cron ? ` (cron: ${sched.cron})` : ''}${sched.timezone ? ` ${sched.timezone}` : ''}`);
+      lines.push('');
+    }
+
     for (const s of sections) {
       lines.push(`# ${s.title}`);
       if (s.checkIds.length === 0) {
@@ -214,8 +242,32 @@ export const reportsHandlers = [
       } else {
         for (const id of s.checkIds) {
           const check = mockChecks.find(c => c.id === id);
-          if (!check) { lines.push(`• ${id}`); continue; }
-          lines.push(`• ${check.name} (${check.csiName}) — ${check.status}`);
+          if (!check) { lines.push(`- Check: ${id}`); continue; }
+          // Compute since-last-execution duration in a human way
+          let since = '';
+          if (check.lastExecution) {
+            const ms = now.getTime() - new Date(check.lastExecution).getTime();
+            const mins = Math.max(0, Math.round(ms / 60000));
+            if (mins < 60) since = `${mins} minutes`;
+            else {
+              const hours = Math.round(mins / 60);
+              since = `${hours} hours`;
+            }
+          }
+          lines.push(`- Check: ${check.name} (CSI: ${check.csiId})`);
+          lines.push(`  Status: ${check.status}${since ? ` (for ${since})` : ''}`);
+
+          // Include recent error/details if available from mockExecutionResults
+          const lastExec = [...mockExecutionResults]
+            .filter(r => r.checkId === check.id)
+            .sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())[0];
+          if (lastExec && (check.status === 'FAILING' || lastExec.status === 'FAILURE')) {
+            const err = lastExec.error || lastExec.output?.slice(0, 180) || 'Failure reported';
+            lines.push(`  Error: ${err}`);
+          }
+          // Deep link to investigate
+          lines.push(`  [Investigate in Checks] → /checks/details/${check.id}`);
+          lines.push('');
         }
       }
       lines.push('');
@@ -225,9 +277,73 @@ export const reportsHandlers = [
     lines.push(`Total Checks: ${total}`);
     lines.push('Generated with PUT Checks Platform');
     const mockPreview = lines.join('\n');
+
+    // Build HTML email (simple, professional, email-safe)
+    const statusColor = overall === 'FAILING' ? '#D32F2F' : overall === 'WARNING' ? '#ED6C02' : overall === 'PASSING' ? '#2E7D32' : '#616161';
+    const sectionHtml = sections.map((s) => {
+      const items = s.checkIds.map((id) => {
+        const check = mockChecks.find(c => c.id === id);
+        if (!check) return '';
+        const chipColor = check.status === 'FAILING' ? '#D32F2F' : check.status === 'WARNING' ? '#ED6C02' : check.status === 'PASSING' ? '#2E7D32' : '#616161';
+        return `<tr>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;">${check.name}<div style="color:#757575;font-size:12px;">${check.csiName}</div></td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;"><span style="display:inline-block;padding:4px 8px;border-radius:16px;background:${chipColor};color:#fff;font-size:12px;">${check.status}</span></td>
+        </tr>`;
+      }).join('');
+      return `
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:12px 0;">
+          <thead>
+            <tr>
+              <th colspan="2" style="text-align:left;padding:8px 12px;background:#F5F7FA;color:#374151;border:1px solid #eee;border-bottom:none;font-size:14px;">${s.title}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items || `<tr><td style="padding:12px;color:#757575;border:1px solid #eee;border-top:none;" colspan="2">No checks match</td></tr>`}
+          </tbody>
+        </table>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html>
+    <html>
+    <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </head>
+    <body style="margin:0;padding:0;background:#F3F4F6;">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#F3F4F6;padding:20px 0;">
+        <tr>
+          <td align="center">
+            <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width:600px;background:#ffffff;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+              <tr>
+                <td style="padding:16px 20px;border-bottom:1px solid #E5E7EB;background:#0F172A;color:#ffffff;">
+                  <div style="font-size:16px;font-weight:700;">Checks Report</div>
+                  <div style="font-size:12px;opacity:0.85;">${now.toLocaleString()}</div>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:16px 20px;">
+                  <div style="font-size:18px;color:#111827;font-weight:700;margin-bottom:4px;">${subject}</div>
+                  <div style="font-size:13px;color:#6B7280;margin-bottom:12px;">Overall Status: <span style="color:${statusColor};font-weight:700;">${overall}</span></div>
+                  <div style="font-size:12px;color:#6B7280;margin-bottom:12px;">Schedule: ${report?.schedule?.frequency || 'n/a'}${report?.schedule?.time ? ` at ${report?.schedule?.time}` : ''}${(report as any)?.schedule?.timezone ? ` ${(report as any).schedule.timezone}` : ''}</div>
+                  ${sectionHtml}
+                  <div style="border-top:1px solid #E5E7EB;margin-top:12px;padding-top:12px;font-size:12px;color:#6B7280;">Total Checks: ${total}</div>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:12px 20px;background:#F9FAFB;border-top:1px solid #E5E7EB;color:#6B7280;font-size:11px;">
+                  Generated by PUT Checks Platform
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>`;
     
     return HttpResponse.json({
       preview: mockPreview,
+      html,
       generatedAt: new Date().toISOString()
     });
   }),

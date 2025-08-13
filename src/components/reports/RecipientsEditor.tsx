@@ -18,8 +18,8 @@ const COMMON_RECIPIENTS = [
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const RecipientsEditor: React.FC<RecipientsEditorProps> = ({ value, onChange, reportId }) => {
-  const [input, setInput] = useState('');
-  const suggestions = useMemo(() => COMMON_RECIPIENTS.filter((e) => !value.includes(e)), [value]);
+  const [input, setInput] = useState<string>('');
+  const suggestions = useMemo(() => COMMON_RECIPIENTS.filter((e) => !value?.includes(e)), [value]);
   const [sending, setSending] = useState(false);
 
   const add = (email: string) => {
@@ -29,9 +29,11 @@ const RecipientsEditor: React.FC<RecipientsEditorProps> = ({ value, onChange, re
     setInput('');
   };
 
-  const remove = (email: string) => onChange(value.filter((e) => e !== email));
+  const remove = (email: string) => onChange((value || []).filter((e) => e !== email));
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    // Prevent global shortcuts from firing while typing in recipients
+    e.stopPropagation();
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       add(input);
@@ -39,6 +41,11 @@ const RecipientsEditor: React.FC<RecipientsEditorProps> = ({ value, onChange, re
     if (e.key === 'Backspace' && !input && value.length) {
       remove(value[value.length - 1]);
     }
+  };
+
+  const onKeyUp: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    // Block bubbling to avoid app-level hotkeys (like '/')
+    e.stopPropagation();
   };
 
   const sendTest = async () => {
@@ -54,22 +61,30 @@ const RecipientsEditor: React.FC<RecipientsEditorProps> = ({ value, onChange, re
       <Typography variant="subtitle2">Recipients</Typography>
       <Autocomplete
         freeSolo
-        options={suggestions}
+        options={suggestions || []}
         inputValue={input}
         onInputChange={(_, v) => setInput(v)}
         onChange={(_, v) => { if (typeof v === 'string') add(v); }}
         renderInput={(params) => (
-          <TextField {...params} label="Add recipient" placeholder="name@citi.com" onKeyDown={onKeyDown} />
+          <TextField
+            {...params}
+            label="Add recipient"
+            placeholder="name@citi.com"
+            onKeyDown={onKeyDown}
+            onKeyUp={onKeyUp}
+            onKeyPress={(e) => e.stopPropagation()}
+            onFocus={(e) => e.stopPropagation()}
+            helperText={!input || emailRegex.test(input) ? 'Enter to add, comma to separate' : 'Invalid email format'}
+            error={Boolean(input) && !emailRegex.test(input)}
+          />
         )}
       />
-      <Stack direction="row" spacing={1} flexWrap="wrap">
+      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ rowGap: 1 }}>
         {value.map((e) => (
           <Chip key={e} label={e} onDelete={() => remove(e)} />
         ))}
       </Stack>
-      <Stack direction="row" spacing={1}>
-        <Button variant="outlined" size="small" onClick={sendTest} disabled={!reportId || sending || value.length === 0}>Send test</Button>
-      </Stack>
+      {/* Send test button removed from this component; actions moved to builder toolbar */}
     </Stack>
   );
 };

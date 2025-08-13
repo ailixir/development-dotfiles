@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Card, CardContent, CardHeader, Chip, Divider, Grid, IconButton, Stack, Tab, Tabs, Typography, Button } from '@mui/material';
+import { Box, Card, CardContent, CardHeader, Chip, Divider, Grid, IconButton, Stack, Tab, Tabs, Typography, Button, Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Paper } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchReportById, fetchReportExecutions, pauseReport, resumeReport, duplicateReport, generatePreview, sendTestReport } from '@/store/slices/reportsSlice';
@@ -10,7 +10,7 @@ const ReportDetailsPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [tab, setTab] = useState(0);
-  const { data: reports, generatingPreview, previewContent } = useAppSelector((s) => s.reports);
+  const { data: reports, generatingPreview, previewContent, executionsByReportId } = useAppSelector((s) => s.reports);
   const report = useMemo(() => reports.find((r) => r.id === id), [reports, id]);
 
   useEffect(() => {
@@ -37,8 +37,12 @@ const ReportDetailsPage: React.FC = () => {
             <Button size="small" variant="outlined" startIcon={<Pause />} onClick={() => dispatch(pauseReport(id))}>Pause</Button>
           )}
           <Button size="small" variant="outlined" startIcon={<ContentCopy />} onClick={() => dispatch(duplicateReport(id))}>Duplicate</Button>
-          <Button size="small" variant="outlined" startIcon={<Send />} onClick={() => dispatch(sendTestReport({ id }))}>Send test</Button>
-          <Button size="small" variant="outlined" startIcon={<Preview />} onClick={() => dispatch(generatePreview(id))} disabled={generatingPreview}>Preview</Button>
+          <Button size="small" variant="outlined" startIcon={<Send />} onClick={() => dispatch(sendTestReport({ id }))} title="Send a test email to the first recipient" aria-label="send test email">Send test</Button>
+          <Button size="small" variant="outlined" startIcon={<Preview />} onClick={async () => {
+            const resp = await (await import('@/services/api/reportsApi')).default.previewReport(id);
+            try { (window as any).__REPORT_HTML_PREVIEW__ = resp?.html; } catch {}
+            await dispatch(generatePreview(id));
+          }} disabled={generatingPreview}>Preview</Button>
         </Stack>
       </Stack>
 
@@ -86,15 +90,59 @@ const ReportDetailsPage: React.FC = () => {
             </Grid>
           )}
           {tab === 1 && (
-            <Typography variant="body2" color="text.secondary">Execution history UI to be implemented (wired thunk present).</Typography>
-          )}
-          {tab === 2 && (
             <Box>
-              {generatingPreview ? (
-                <Typography variant="body2" color="text.secondary">Generating preview…</Typography>
-              ) : previewContent ? (
+              {Array.isArray(executionsByReportId?.[id]) && executionsByReportId![id].length > 0 ? (
+                <TableContainer component={Paper} variant="outlined">
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Time</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell align="right">Recipients</TableCell>
+                        <TableCell align="right">Checks</TableCell>
+                        <TableCell align="right">Failures</TableCell>
+                        <TableCell align="right">Generation</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {executionsByReportId![id].map((exec: any) => (
+                        <TableRow key={exec.id} hover>
+                          <TableCell>{new Date(exec.executionTime).toLocaleString()}</TableCell>
+                          <TableCell>
+                            <Chip size="small" label={exec.status} color={exec.status === 'success' ? 'success' : exec.status === 'partial' ? 'warning' : 'error'} />
+                          </TableCell>
+                          <TableCell align="right">{exec.recipientCount}</TableCell>
+                          <TableCell align="right">{exec.checksIncluded}</TableCell>
+                          <TableCell align="right">{exec.checksFailures}</TableCell>
+                          <TableCell align="right">{Math.round(exec.generationDuration)} ms</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Typography variant="body2" color="text.secondary">No executions yet.</Typography>
+              )}
+            </Box>
+          )}
+           {tab === 2 && (
+            <Box>
+               {generatingPreview ? (
+                <Typography variant="body2" color="text.secondary" role="status" aria-live="polite">Generating preview…</Typography>
+               ) : previewContent ? (
                 <Card variant="outlined"><CardContent>
-                  <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>{previewContent}</pre>
+                  <Paper variant="outlined" sx={{ p: 0, overflow: 'hidden' }}>
+                    <iframe
+                      title="Report Preview"
+                      style={{ border: 'none', width: '100%', height: 520, background: '#f3f4f6' }}
+                      srcDoc={(() => {
+                        const anyWin = window as any;
+                        if (typeof anyWin.__REPORT_HTML_PREVIEW__ === 'string' && anyWin.__REPORT_HTML_PREVIEW__.length > 0) return anyWin.__REPORT_HTML_PREVIEW__;
+                        const safe = (previewContent || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        return `<!DOCTYPE html><html><body style=\"font-family:ui-sans-serif,system-ui,Helvetica,Arial,sans-serif;padding:16px;\"><pre style=\"white-space:pre-wrap;margin:0;\">${safe}</pre></body></html>`;
+                      })()}
+                    />
+                  </Paper>
                 </CardContent></Card>
               ) : (
                 <Typography variant="body2" color="text.secondary">No preview yet.</Typography>

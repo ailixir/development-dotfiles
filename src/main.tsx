@@ -22,7 +22,7 @@ async function startApp() {
       const { worker } = await import('@services/mocks/browser');
       await worker.start({
         serviceWorker: { url: '/mockServiceWorker.js' },
-        onUnhandledRequest: 'bypass',
+        onUnhandledRequest: 'warn',
       });
       console.log('✅ MSW ready');
     } catch (e) {

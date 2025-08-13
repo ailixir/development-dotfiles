@@ -10,14 +10,30 @@ export interface MockReport {
     enabled: boolean;
     daysOfWeek?: number[];
     daysOfMonth?: number[];
+    cron?: string;
   };
   recipients: string[];
-  template: 'standard' | 'executive' | 'detailed';
+  template: 'standard' | 'executive' | 'detailed' | 'alert-digest' | 'trend-analysis';
   createdAt: string;
   updatedAt: string;
   createdBy: string;
   lastSent?: string;
   status: 'active' | 'paused' | 'draft';
+  sections?: Array<{
+    id: string;
+    title: string;
+    kind: 'manual' | 'rule';
+    checkIds?: string[];
+    rule?: {
+      csiIds?: string[];
+      tags?: string[];
+      types?: string[];
+      status?: string[];
+      timeframe?: '' | '5m' | '15m' | '1h' | '24h';
+      sort?: '' | 'failing-first' | 'recently-failed' | 'alphabetical';
+      limit?: number;
+    };
+  }>;
 }
 
 export const mockReports: MockReport[] = [
@@ -87,7 +103,11 @@ export const mockReports: MockReport[] = [
     createdAt: '2024-01-12T14:00:00Z',
     updatedAt: '2024-01-12T14:00:00Z',
     createdBy: 'priya.sharma@citi.com',
-    status: 'draft'
+    status: 'draft',
+    sections: [
+      { id: 'section-1', title: 'Critical Services', kind: 'rule', rule: { status: ['FAILING', 'WARNING'], sort: 'failing-first', limit: 10 } },
+      { id: 'section-2', title: 'Core Checks', kind: 'manual', checkIds: ['check-001','check-002'] }
+    ]
   }
 ];
 

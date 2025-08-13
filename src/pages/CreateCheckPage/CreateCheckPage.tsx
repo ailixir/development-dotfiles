@@ -72,6 +72,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { fetchCheckById } from '@/store/slices/checksSlice';
 import { checksApi } from '@/services/api/checksApi';
 import SecretInput from '@/components/studio/SecretInput';
+import ScheduleEditor from '@/components/reports/ScheduleEditor';
 
 const checkTypes = [
   { 
@@ -223,6 +224,7 @@ const CreateCheckPage: React.FC = () => {
   const [autosaveEnabled, setAutosaveEnabled] = useState<boolean>(true);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
   const [availableUITests, setAvailableUITests] = useState<Array<{ id: string; name: string }>>([]);
+  const [schedule, setSchedule] = useState<{ enabled: boolean; frequency: 'hourly'|'daily'|'weekly'|'monthly'|'custom'; time?: string; cron?: string; timezone?: string; daysOfWeek?: number[]; daysOfMonth?: number[] }>({ enabled: true, frequency: 'hourly', time: '09:00', cron: '', timezone: 'EST', daysOfWeek: [], daysOfMonth: [] });
 
   useEffect(() => {
     dispatch(fetchCSIs());
@@ -465,11 +467,13 @@ const CreateCheckPage: React.FC = () => {
         tags: formData.tags,
         configuration: getConfigurationForCheckType(),
         schedule: {
-          enabled: formData.enabled,
-          frequency: formData.frequency,
-          ...(formData.frequency === '1w' ? { dayOfWeek: (formData as any).dayOfWeek || 'mon' } : {}),
-          ...(formData.frequency === '1mo' ? { dayOfMonth: (formData as any).dayOfMonth ?? 1 } : {}),
-          ...(formData.frequency === 'custom' ? { cron: (formData as any).cron || '' } : {}),
+          enabled: schedule.enabled,
+          frequency: schedule.frequency,
+          ...(schedule.time ? { time: schedule.time } : {}),
+          ...(schedule.cron ? { cron: schedule.cron } : {}),
+          ...(schedule.daysOfWeek && schedule.daysOfWeek.length ? { daysOfWeek: schedule.daysOfWeek } : {}),
+          ...(schedule.daysOfMonth && schedule.daysOfMonth.length ? { daysOfMonth: schedule.daysOfMonth } : {}),
+          timezone: schedule.timezone,
         },
         alerting: {
           enabled: formData.alertOnFailure,
@@ -1239,88 +1243,25 @@ const CreateCheckPage: React.FC = () => {
               </Typography>
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Check Frequency</InputLabel>
-                <Select
-                  value={formData.frequency}
-                  label="Check Frequency"
-                  onChange={handleInputChange('frequency')}
-                >
-                  {frequencies.map((freq) => (
-                    <MenuItem key={freq.value} value={freq.value}>
-                      {freq.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            {formData.frequency === '1w' && (
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Day of Week</InputLabel>
-                  <Select
-                    value={(formData as any).dayOfWeek || 'mon'}
-                    label="Day of Week"
-                    onChange={(e) => setFormData((p) => ({ ...p, dayOfWeek: e.target.value }))}
-                  >
-                    {[['sun','Sunday'],['mon','Monday'],['tue','Tuesday'],['wed','Wednesday'],['thu','Thursday'],['fri','Friday'],['sat','Saturday']].map(([v, l]) => (
-                      <MenuItem key={v} value={v}>{l}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            )}
-
-            {formData.frequency === '1mo' && (
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  type="number"
-                  label="Day of Month"
-                  value={(formData as any).dayOfMonth ?? 1}
-                  onChange={(e) => setFormData((p) => ({ ...p, dayOfMonth: Math.max(1, Math.min(28, Number(e.target.value) || 1)) }))}
-                  helperText="Runs monthly on this day (1-28)"
-                  InputProps={{ inputProps: { min: 1, max: 28 } }}
-                />
-              </Grid>
-            )}
-
-            {formData.frequency === 'custom' && (
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Cron Expression"
-                  placeholder="e.g. 0 9 * * MON"
-                  value={(formData as any).cron || ''}
-                  onChange={(e) => setFormData((p) => ({ ...p, cron: e.target.value }))}
-                  helperText={(() => {
-                    const cron = (formData as any).cron || '';
-                    const isValid = /^\s*([^\s]+\s+){4}[^\s]+\s*$/.test(cron);
-                    return isValid ? 'Valid cron' : 'Supports standard 5-field cron (min hour day month dow)';
-                  })()}
-                />
-              </Grid>
-            )}
-            {formData.frequency === 'custom' && (
-              <Grid item xs={12}>
-                <Typography variant="caption" color="text.secondary">
-                  Examples: "0 */2 * * *" (every 2 hours), "30 9 * * 1" (Mondays 09:30), "0 0 1 * *" (first day monthly)
-                </Typography>
-              </Grid>
-            )}
-
-            <Grid item xs={12} md={6}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.enabled}
-                    onChange={handleInputChange('enabled')}
-                    color="primary"
-                  />
-                }
-                label="Enable Check Immediately After Creation"
+            <Grid item xs={12} md={8}>
+              <ScheduleEditor
+                enabled={schedule.enabled}
+                frequency={schedule.frequency}
+                time={schedule.time}
+                cron={schedule.cron}
+                timezone={schedule.timezone}
+                daysOfWeek={schedule.daysOfWeek}
+                daysOfMonth={schedule.daysOfMonth}
+                onChange={(n) => setSchedule((s) => ({
+                  ...s,
+                  enabled: typeof n.enabled === 'boolean' ? n.enabled : s.enabled,
+                  frequency: (n.frequency as any) || s.frequency,
+                  time: n.time || s.time,
+                  cron: n.cron || s.cron,
+                  timezone: n.timezone || s.timezone,
+                  daysOfWeek: (n as any).daysOfWeek || s.daysOfWeek,
+                  daysOfMonth: (n as any).daysOfMonth || s.daysOfMonth,
+                }))}
               />
             </Grid>
 
@@ -1603,8 +1544,17 @@ const CreateCheckPage: React.FC = () => {
     <Box>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <AddIcon sx={{ fontSize: 32, color: 'primary.main' }} />
-          Create New Check
+          {editId ? (
+            <>
+              <Edit sx={{ fontSize: 32, color: 'primary.main' }} />
+              Edit Check{formData.name ? `: ${formData.name}` : ''}
+            </>
+          ) : (
+            <>
+              <AddIcon sx={{ fontSize: 32, color: 'primary.main' }} />
+              Create Check
+            </>
+          )}
         </Typography>
         <Stack direction="row" spacing={2} alignItems="center">
           <Typography variant="body1" color="text.secondary">
@@ -1690,11 +1640,13 @@ const CreateCheckPage: React.FC = () => {
                               tags: formData.tags,
                               configuration: getConfigurationForCheckType(),
                               schedule: {
-                                enabled: formData.enabled,
-                                frequency: formData.frequency,
-                                ...(formData.frequency === '1w' ? { dayOfWeek: (formData as any).dayOfWeek || 'mon' } : {}),
-                                ...(formData.frequency === '1mo' ? { dayOfMonth: (formData as any).dayOfMonth ?? 1 } : {}),
-                                ...(formData.frequency === 'custom' ? { cron: (formData as any).cron || '' } : {}),
+                                enabled: schedule.enabled,
+                                frequency: schedule.frequency,
+                                ...(schedule.time ? { time: schedule.time } : {}),
+                                ...(schedule.cron ? { cron: schedule.cron } : {}),
+                                ...(schedule.daysOfWeek && schedule.daysOfWeek.length ? { daysOfWeek: schedule.daysOfWeek } : {}),
+                                ...(schedule.daysOfMonth && schedule.daysOfMonth.length ? { daysOfMonth: schedule.daysOfMonth } : {}),
+                                timezone: schedule.timezone,
                               },
                               alerting: {
                                 enabled: formData.alertOnFailure,

@@ -63,6 +63,10 @@ export const generatePreview = createAsyncThunk(
   'reports/generatePreview',
   async (id: string) => {
     const resp: ReportPreviewResponse = await reportsApi.previewReport(id);
+    // Expose HTML for iframe rendering without changing state shape
+    try {
+      (window as any).__REPORT_HTML_PREVIEW__ = resp?.html;
+    } catch {}
     return resp;
   }
 );
@@ -127,6 +131,13 @@ const reportsSlice = createSlice({
   name: 'reports',
   initialState,
   reducers: {
+    // Optimistic toggles for pause/resume from UI listings
+    toggleReportStatusOptimistic: (state, action: PayloadAction<{ id: string; status: 'active' | 'paused' }>) => {
+      const idx = state.data.findIndex((r) => r.id === action.payload.id);
+      if (idx !== -1) {
+        state.data[idx] = { ...state.data[idx], status: action.payload.status } as any;
+      }
+    },
     updateCurrentReport: (state, action: PayloadAction<Partial<ReportConfiguration>>) => {
       state.currentReport = { ...state.currentReport, ...action.payload };
     },
@@ -247,5 +258,8 @@ export const {
   removeSection,
   reorderSections,
 } = reportsSlice.actions;
+
+// Export specific action creators explicitly when needed for IDE/linter consistency
+export const toggleReportStatusOptimistic = reportsSlice.actions.toggleReportStatusOptimistic;
 
 export default reportsSlice.reducer;

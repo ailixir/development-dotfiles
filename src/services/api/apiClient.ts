@@ -29,7 +29,7 @@ class ApiClient {
         // Inject MSW debug params for development scenarios
         try {
           const isDev = typeof window !== 'undefined' && (import.meta as any).env?.DEV;
-          if (isDev) {
+          if (isDev && APP_CONFIG.debugMode) {
             const slow = window.localStorage.getItem('__msw_debug_slow');
             const fail = window.localStorage.getItem('__msw_debug_fail');
             const empty = window.localStorage.getItem('__msw_debug_empty');

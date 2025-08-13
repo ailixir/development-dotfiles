@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Stack, TextField, useTheme, useMediaQuery } from '@mui/material';
 import CommandPalette from '@/components/home/CommandPalette';
 import HelpDialog from './HelpDialog';
@@ -78,6 +78,17 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onKeyDown]);
 
+  const showGlobalSearch = useMemo(() => {
+    const p = location.pathname;
+    if (p === '/') return true; // Home
+    if (p === '/checks/all') return true; // Checks catalog
+    if (p === '/checks/reports') return true; // Reports catalog
+    if (p === '/checks/studio') return true; // Studio landing
+    if (p.startsWith('/checks/studio/tests')) return true; // Studio Tests
+    if (p.startsWith('/checks/studio/runs')) return true; // Studio Runs
+    return false;
+  }, [location.pathname]);
+
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <SkipLink targetId="checks-main" />
@@ -112,9 +123,11 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
         }}
       >
           <Box component="div" id="checks-main" tabIndex={-1} sx={{ position: 'absolute', top: 0 }} />
-          <Stack spacing={2} sx={{ mb: 2 }}>
-            <GlobalSearch />
-          </Stack>
+          {showGlobalSearch && (
+            <Stack spacing={2} sx={{ mb: 2 }}>
+              <GlobalSearch />
+            </Stack>
+          )}
         {children}
           <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
           <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
