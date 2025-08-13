@@ -16,7 +16,7 @@ export const studioHandlers = [
     const newTest = {
       id: `ui-test-${Date.now()}`,
       ...newTestData,
-      status: 'draft',
+      status: 'paused',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       createdBy: 'current.user@citi.com',

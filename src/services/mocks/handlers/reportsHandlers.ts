@@ -135,7 +135,7 @@ export const reportsHandlers = [
       ...newReportData,
       selectedChecks,
       sections: Array.isArray((newReportData as any).sections) ? (newReportData as any).sections : undefined,
-      status: 'draft',
+      status: 'paused',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       createdBy: 'current.user@citi.com'
@@ -523,6 +523,7 @@ export const reportsHandlers = [
     };
     mockReportExecutions.unshift(exec as any);
     report.updatedAt = new Date().toISOString();
+    (report as any).lastSent = exec.executionTime;
     return HttpResponse.json({ ok: true, execution: exec, report });
   }),
 

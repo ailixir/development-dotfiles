@@ -103,7 +103,7 @@ export const mockReports: MockReport[] = [
     createdAt: '2024-01-12T14:00:00Z',
     updatedAt: '2024-01-12T14:00:00Z',
     createdBy: 'bruno.buger@citi.com',
-    status: 'draft',
+    status: 'paused',
     sections: [
       { id: 'section-1', title: 'Critical Services', kind: 'rule', rule: { status: ['FAILING', 'WARNING'], sort: 'failing-first', limit: 10 } },
       { id: 'section-2', title: 'Core Checks', kind: 'manual', checkIds: ['check-001','check-002'] }

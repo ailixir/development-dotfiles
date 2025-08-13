@@ -146,7 +146,7 @@ const ReportsHome: React.FC = () => {
         <CardContent>
           <Grid container spacing={1} alignItems="center">
             <Grid item xs={12} md={6}>
-              <TextField fullWidth placeholder="Search reports..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon /></InputAdornment>) }} />
+              <TextField fullWidth placeholder="Search reports..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon /> </InputAdornment>) }} />
             </Grid>
             <Grid item xs={6} md={2}>
               <FormControl fullWidth>
@@ -174,7 +174,7 @@ const ReportsHome: React.FC = () => {
             </Grid>
             <Grid item xs={12} md={2}>
               <Stack direction="row" spacing={1} justifyContent="flex-end">
-                <Button variant="outlined" startIcon={<FilterList />} onClick={() => { setSearchQuery(''); setStatusFilter(''); setTemplateFilter(''); }}>Clear Filters</Button>
+                 <Button variant="outlined" startIcon={<FilterList />} onClick={() => { setSearchQuery(''); setStatusFilter(''); setTemplateFilter(''); }}>Clear Filters</Button>
               </Stack>
             </Grid>
           </Grid>

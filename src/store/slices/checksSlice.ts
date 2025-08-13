@@ -172,6 +172,12 @@ const checksSlice = createSlice({
       .addCase(fetchCheckById.fulfilled, (state, action) => {
         state.loading = 'succeeded';
         state.selectedCheck = action.payload;
+        const idx = state.data.findIndex(c => c.id === action.payload.id);
+        if (idx === -1) {
+          state.data.push(action.payload);
+        } else {
+          state.data[idx] = action.payload;
+        }
       })
       .addCase(fetchCheckById.rejected, (state, action) => {
         state.loading = 'failed';

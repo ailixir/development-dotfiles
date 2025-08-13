@@ -195,7 +195,7 @@ const ReportDetailsPage: React.FC = () => {
                     </Table>
                   </TableContainer>
                 ) : (
-                  <EmptyState title="No sends yet" description="This report hasn't been sent yet." actionLabel="Send now" onAction={async () => { try { await dispatch(runReportNow(id)).unwrap(); } catch {} }} />
+                  <EmptyState title="No sends yet" description="This report hasn't been sent yet." onAction={async () => { try { await dispatch(runReportNow(id)).unwrap(); } catch {} }} />
                 )}
               </CardContent>
             </Card>

@@ -17,7 +17,7 @@ const ReportsSnapshot: React.FC<ReportsSnapshotProps> = ({ maxHeight }) => {
       <SectionBox
       title="Reports"
       accentColor={theme.palette.success.main}
-      action={<Button size="small" onClick={() => navigate('/checks/reports')}>Create report</Button>}
+      action={<Button size="small" onClick={() => navigate('/checks/reports')}>View all</Button>}
       maxHeight={maxHeight}
     >
       {loading === 'loading' ? (
