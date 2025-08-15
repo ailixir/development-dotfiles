@@ -8,7 +8,7 @@ export const registerChecksNavigation = () => {
     moduleIcon: 'monitor_heart',
     version: '1.0.0',
     navigation: [
-      { id: 'home', label: 'Home', path: '/', icon: 'home', description: 'Attention, CSIs, and upcoming' },
+      { id: 'home', label: 'Home', path: '/checks', icon: 'home', description: 'Attention, CSIs, and upcoming' },
       // CSIs entry removed
       
       {
@@ -43,7 +43,7 @@ export const registerChecksNavigation = () => {
 
 // Helper function to get current page ID from path
 export const getCurrentPageId = (pathname: string): string => {
-  if (pathname === '/') return 'home';
+  if (pathname === '/checks' || pathname === '/') return 'home';
   // CSIs removed
   // Checks parent should highlight when in checks area
   if (pathname.startsWith('/checks/all')) return 'checks';

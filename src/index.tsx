@@ -1,17 +1,63 @@
 // Module Federation entry point for remote dev server standalone preview
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import ChecksModule from './Module';
+async function bootstrap() {
+  // Ensure default share scope is initialized before consuming shared modules
+  try {
+    const initSharing = (globalThis as any).__webpack_init_sharing__;
+    if (typeof initSharing === 'function') {
+      await initSharing('default');
+    }
+  } catch {}
 
-const container = document.getElementById('root');
-if (container) {
+  // Start MSW in webpack MF standalone preview
+  if (process.env.NODE_ENV !== 'production') {
+    try {
+      const { worker } = await import('@services/mocks/browser');
+      await worker.start({
+        serviceWorker: { url: '/mockServiceWorker.js' },
+        onUnhandledRequest: 'bypass',
+      });
+      // Ensure SW takes control on first run
+      try {
+        const RELOAD_FLAG = '__msw_first_run__';
+        const hasReloaded = sessionStorage.getItem(RELOAD_FLAG) === '1';
+        if (navigator.serviceWorker && !navigator.serviceWorker.controller && !hasReloaded) {
+          sessionStorage.setItem(RELOAD_FLAG, '1');
+          window.location.reload();
+          return;
+        }
+      } catch {}
+    } catch (e) {
+      console.warn('⚠️ MSW failed to start (webpack MF standalone)', e);
+    }
+  }
+
+  const [ReactNS, ReactDomNS, RouterNS, ModuleNS] = await Promise.all([
+    import('react'),
+    import('react-dom/client'),
+    import('react-router-dom'),
+    import('./ChecksModule'),
+  ]);
+
+  const React = ReactNS.default as typeof import('react');
+  const { createRoot } = ReactDomNS as any;
+  const { BrowserRouter } = RouterNS as any;
+  const ChecksModule = ModuleNS.default as any;
+
+  const container = document.getElementById('root');
+  if (!container) return;
+
   const root = createRoot(container);
   root.render(
-    <React.StrictMode>
-      <BrowserRouter basename="/">
-        <ChecksModule />
-      </BrowserRouter>
-    </React.StrictMode>
+    React.createElement(
+      React.StrictMode,
+      null,
+      React.createElement(
+        BrowserRouter,
+        { basename: '/' },
+        React.createElement(ChecksModule, null)
+      )
+    )
   );
 }
+
+bootstrap();

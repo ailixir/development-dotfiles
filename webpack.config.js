@@ -21,7 +21,7 @@ const config = {
     clean: true,
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
+    extensions: ['.mjs', '.tsx', '.ts', '.jsx', '.js', '.json'],
     alias: {
       '@': path.resolve(process.cwd(), 'src'),
       '@components': path.resolve(process.cwd(), 'src/components'),
@@ -31,6 +31,10 @@ const config = {
       '@types': path.resolve(process.cwd(), 'src/types'),
       '@utils': path.resolve(process.cwd(), 'src/utils'),
       '@store': path.resolve(process.cwd(), 'src/store'),
+      // Use built output of local linked package to avoid bundling its dev deps
+      '@put/core-components': path.resolve(process.cwd(), '../put-core-components/dist'),
+      react: path.resolve(process.cwd(), 'node_modules/react'),
+      'react-dom': path.resolve(process.cwd(), 'node_modules/react-dom'),
       'process/browser': require.resolve('process/browser'),
       process: require.resolve('process/browser'),
     },
@@ -40,6 +44,7 @@ const config = {
       stream: require.resolve('stream-browserify'),
     },
     fullySpecified: false,
+    symlinks: false,
   },
   module: {
     rules: [
@@ -64,11 +69,12 @@ const config = {
       name: 'checks',
       filename: 'remoteEntry.js',
       exposes: {
-        './Module': './src/Module',
+        './Module': './src/ChecksModule',
       },
       shared: {
-        react: { singleton: true, requiredVersion: '^18.2.0' },
-        'react-dom': { singleton: true, requiredVersion: '^18.2.0' },
+        react: { singleton: true, requiredVersion: false, strictVersion: false },
+        'react-dom': { singleton: true, requiredVersion: false, strictVersion: false },
+        '@put/core-components': { singleton: true, requiredVersion: false },
         'react-router-dom': { singleton: true, requiredVersion: '^6.21.0' },
         '@mui/material': { singleton: true, requiredVersion: '^5.15.0' },
         '@mui/icons-material': { singleton: true, requiredVersion: '^5.15.0' },
@@ -95,7 +101,9 @@ const config = {
     static: { directory: path.join(process.cwd(), 'public'), publicPath: '/' },
   },
   optimization: {
-    splitChunks: { chunks: 'all' },
+    // Module Federation remotes work best without splitChunks to avoid
+    // async ordering issues that can cause eager shared consumption errors
+    splitChunks: false,
     runtimeChunk: false,
     moduleIds: 'deterministic',
   },

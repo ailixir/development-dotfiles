@@ -4,7 +4,8 @@ import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import App from './App';
+// Lazy import to avoid eager shared consumption of shared singletons
+const LazyApp = React.lazy(() => import('./App'));
 import { store } from '@store/index';
 import { theme } from './theme';
 
@@ -58,9 +59,11 @@ const Bootstrap: React.FC<BootstrapProps> = ({
       <Provider store={store}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <RouterComponent>
-            <App />
-          </RouterComponent>
+          <React.Suspense fallback={null}>
+            <RouterComponent>
+              <LazyApp />
+            </RouterComponent>
+          </React.Suspense>
         </ThemeProvider>
       </Provider>
     </QueryClientProvider>

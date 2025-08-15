@@ -1,6 +1,5 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import Bootstrap from './bootstrap';
 
 console.log('🚀 Starting MF dev application (webpack)...');
 
@@ -34,6 +33,15 @@ async function start() {
     console.warn('⚠️ MSW failed to start (webpack dev)', e);
   }
 
+  // Initialize default share scope before consuming shared singletons
+  try {
+    const initSharing = (globalThis as any).__webpack_init_sharing__;
+    if (typeof initSharing === 'function') {
+      await initSharing('default');
+    }
+  } catch {}
+
+  const { default: Bootstrap } = await import('./bootstrap');
   const root = createRoot(container);
   root.render(
     <React.StrictMode>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import Bootstrap from './bootstrap';
+// Lazy import to avoid eager shared consumption during bootstrap
+const loadBootstrap = () => import('./bootstrap');
 import { APP_CONFIG } from '@utils/constants/appConfig';
 
 console.log('🚀 Main.tsx loaded');
@@ -31,6 +32,14 @@ async function startApp() {
   }
 
   try {
+    // Initialize default share scope before consuming shared singletons
+    try {
+      const initSharing = (globalThis as any).__webpack_init_sharing__;
+      if (typeof initSharing === 'function') {
+        await initSharing('default');
+      }
+    } catch {}
+
     let root: Root;
     if (!(window as any).__REACT_ROOT__) {
       console.log('🔧 Creating React root...');
@@ -41,6 +50,7 @@ async function startApp() {
       root = (window as any).__REACT_ROOT__;
     }
     console.log('🎨 Rendering Bootstrap component...');
+    const { default: Bootstrap } = await loadBootstrap();
     root.render(
       <React.StrictMode>
         <Bootstrap routingStrategy="browser" />
