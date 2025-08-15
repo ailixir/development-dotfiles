@@ -49,6 +49,8 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
   // In federated mode, we might not show the sidebar depending on host configuration
   const shouldShowSidebar = deploymentMode === 'standalone' || !isMobile;
   const sidebarSpace = shouldShowSidebar ? (sidebarCollapsed ? 100 : 320) : 0;
+  // Match vertical rhythm used by SidebarHeader: larger top padding when expanded
+  const contentPaddingTop = 0; // px
 
   const onKeyDown = useCallback((e: KeyboardEvent) => {
     const isMac = navigator.platform.toLowerCase().includes('mac');
@@ -80,7 +82,7 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
 
   const showGlobalSearch = useMemo(() => {
     const p = location.pathname;
-    if (p === '/') return true; // Home
+    if (p === '/' || p === '/checks') return true; // Home (standalone and host base)
     if (p === '/checks/all') return true; // Checks catalog
     if (p === '/checks/reports') return true; // Reports catalog
     if (p === '/checks/studio') return true; // Studio landing
@@ -112,8 +114,11 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
           // Reserve space for the sidebar without causing overflow
           marginLeft: isMobile ? 0 : `${sidebarSpace}px`,
           width: isMobile ? '100%' : `calc(100% - ${sidebarSpace}px)`,
-          marginTop: '80px',
-          padding: shouldShowSidebar ? '24px 48px 24px 24px' : theme.spacing(3),
+          // Avoid extra offset; host shell provides its own top spacing
+          marginTop: 0,
+          padding: shouldShowSidebar 
+            ? `${contentPaddingTop}px 48px 24px 24px`
+            : `${contentPaddingTop}px 24px 24px 24px`,
           transition: 'margin-left 300ms ease',
           '@media (max-width: 1024px)': {
             marginLeft: 0,

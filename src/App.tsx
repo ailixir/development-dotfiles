@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { LayoutProvider } from '@components/layout/LayoutProvider';
 import { ChecksLayout } from '@components/layout/ChecksLayout';
@@ -83,55 +83,78 @@ const ModuleErrorFallback: React.FC<{ error?: Error }> = ({ error }) => (
   </Box>
 );
 
+const ModuleShell: React.FC = () => (
+  <ErrorBoundary fallback={<ModuleErrorFallback />}>
+    <LayoutProvider>
+      <ChecksLayout>
+        <Suspense fallback={<PageLoadingFallback />}>
+          <Outlet />
+        </Suspense>
+      </ChecksLayout>
+    </LayoutProvider>
+  </ErrorBoundary>
+);
+
 const App: React.FC = () => {
   return (
-    <ErrorBoundary fallback={<ModuleErrorFallback />}>
-      <LayoutProvider>
-        <ChecksLayout>
-          <Suspense fallback={<PageLoadingFallback />}>
-            <Routes>
-              {/* Home - Default route */}
-              <Route path="/checks" element={<HomePage />} />
-              <Route path="/" element={<HomePage />} />
+    <Routes>
+      {/* Host mount: explicit /checks base */}
+      <Route path="/checks/*" element={<ModuleShell />}>
+        <Route index element={<HomePage />} />
+        <Route path="all" element={<AllChecksPage />} />
+        <Route path="create" element={<CreateCheckPage />} />
+        <Route path="details/:id" element={<CheckDetailsPage />} />
+        <Route path="edit/:id" element={<EditCheckPage />} />
+        <Route path="studio" element={<ChecksStudioPage />} />
+        <Route path="studio/tests" element={<StudioTestsPage />} />
+        <Route path="studio/runs" element={<StudioRunsPage />} />
+        <Route path="studio/:id" element={<ChecksStudioPage />} />
+        <Route path="reports" element={<ReportsHome />} />
+        <Route path="reports/new" element={<ReportBuilder />} />
+        <Route path="reports/:id" element={<ReportDetailsPage />} />
+        <Route path="reports/:id/edit" element={<ReportBuilder />} />
+        <Route path="csis" element={<Navigate to="." replace />} />
+        <Route path="csis/:csiId" element={<Navigate to="." replace />} />
+        <Route path="activity" element={<ActivityPage />} />
+        <Route path="schedules" element={<SchedulesPage />} />
+        <Route path="*" element={<Navigate to="." replace />} />
+      </Route>
 
-              {/* Check Management */}
-              <Route path="/checks/all" element={<AllChecksPage />} />
-              <Route path="/checks/create" element={<CreateCheckPage />} />
-              <Route path="/checks/details/:id" element={<CheckDetailsPage />} />
-              <Route path="/checks/edit/:id" element={<EditCheckPage />} />
+      {/* Layout route captures current base (e.g., /checks/* in host, or /* in standalone) */}
+      <Route path="/*" element={<ModuleShell />}>
+        {/* Home */}
+        <Route index element={<HomePage />} />
 
-              {/* Checks Studio */}
-              <Route path="/checks/studio" element={<ChecksStudioPage />} />
-              <Route path="/checks/studio/tests" element={<StudioTestsPage />} />
-              <Route path="/checks/studio/runs" element={<StudioRunsPage />} />
-              <Route path="/checks/studio/:id" element={<ChecksStudioPage />} />
+        {/* Check Management */}
+        <Route path="all" element={<AllChecksPage />} />
+        <Route path="create" element={<CreateCheckPage />} />
+        <Route path="details/:id" element={<CheckDetailsPage />} />
+        <Route path="edit/:id" element={<EditCheckPage />} />
 
-              {/* Reports */}
-              <Route path="/checks/reports" element={<ReportsHome />} />
-              <Route path="/checks/reports/new" element={<ReportBuilder />} />
-              <Route path="/checks/reports/:id" element={<ReportDetailsPage />} />
-              <Route path="/checks/reports/:id/edit" element={<ReportBuilder />} />
-              {/* Standalone convenience routes (for direct dev server deep links) */}
-              <Route path="/reports" element={<ReportsHome />} />
-              <Route path="/reports/new" element={<ReportBuilder />} />
-              <Route path="/reports/:id" element={<ReportDetailsPage />} />
-              <Route path="/reports/:id/edit" element={<ReportBuilder />} />
+        {/* Checks Studio */}
+        <Route path="studio" element={<ChecksStudioPage />} />
+        <Route path="studio/tests" element={<StudioTestsPage />} />
+        <Route path="studio/runs" element={<StudioRunsPage />} />
+        <Route path="studio/:id" element={<ChecksStudioPage />} />
 
-              {/* CSIs */}
-              <Route path="/checks/csis" element={<Navigate to="/checks" replace />} />
-              <Route path="/checks/csis/:csiId" element={<Navigate to="/checks" replace />} />
+        {/* Reports */}
+        <Route path="reports" element={<ReportsHome />} />
+        <Route path="reports/new" element={<ReportBuilder />} />
+        <Route path="reports/:id" element={<ReportDetailsPage />} />
+        <Route path="reports/:id/edit" element={<ReportBuilder />} />
 
-              {/* Activity & Schedules */}
-              <Route path="/checks/activity" element={<ActivityPage />} />
-              <Route path="/checks/schedules" element={<SchedulesPage />} />
+        {/* CSIs */}
+        <Route path="csis" element={<Navigate to="." replace />} />
+        <Route path="csis/:csiId" element={<Navigate to="." replace />} />
 
-              {/* Catch all - redirect to module home */}
-              <Route path="*" element={<Navigate to="/checks" replace />} />
-            </Routes>
-          </Suspense>
-        </ChecksLayout>
-      </LayoutProvider>
-    </ErrorBoundary>
+        {/* Activity & Schedules */}
+        <Route path="activity" element={<ActivityPage />} />
+        <Route path="schedules" element={<SchedulesPage />} />
+
+        {/* Catch all - redirect to module home */}
+        <Route path="*" element={<Navigate to="." replace />} />
+      </Route>
+    </Routes>
   );
 };
 

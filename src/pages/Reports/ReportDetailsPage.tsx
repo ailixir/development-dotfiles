@@ -69,8 +69,6 @@ const ReportDetailsPage: React.FC = () => {
             </Stack>
             <Stack direction="row" spacing={2} sx={{ mt: 0.5 }}>
               <Typography variant="caption" color="text.secondary">Last sent: {report?.lastSent ? new Date(report.lastSent).toLocaleString() : '—'}</Typography>
-              <Typography variant="caption" color="text.secondary">Next send: {report ? (computeNextRun(report.schedule) || '—') : '—'}</Typography>
-              <Typography variant="caption" color="text.secondary">Owner: {report?.createdBy || '—'}</Typography>
             </Stack>
           </Stack>
           <Stack direction="row" spacing={1}>
@@ -95,11 +93,6 @@ const ReportDetailsPage: React.FC = () => {
           <Tooltip title="Duplicate">
             <span>
               <Button size="small" variant="outlined" startIcon={<ContentCopy />} onClick={() => dispatch(duplicateReport(id))}>Duplicate</Button>
-            </span>
-          </Tooltip>
-          <Tooltip title="Send a test email">
-            <span>
-              <Button size="small" variant="outlined" startIcon={<Send />} onClick={() => dispatch(sendTestReport({ id })).then(() => setSnack({ open: true, message: 'Test email sent (mock)', severity: 'success' })).catch(() => setSnack({ open: true, message: 'Test email failed', severity: 'error' }))} aria-label="send test email">Send test</Button>
             </span>
           </Tooltip>
           <Tooltip title="Send now">

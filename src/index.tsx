@@ -16,7 +16,7 @@ async function bootstrap() {
         serviceWorker: { url: '/mockServiceWorker.js' },
         onUnhandledRequest: 'bypass',
       });
-      // Ensure SW takes control on first run
+      // Ensure SW takes control on first run (reload once)
       try {
         const RELOAD_FLAG = '__msw_first_run__';
         const hasReloaded = sessionStorage.getItem(RELOAD_FLAG) === '1';
@@ -24,6 +24,15 @@ async function bootstrap() {
           sessionStorage.setItem(RELOAD_FLAG, '1');
           window.location.reload();
           return;
+        }
+      } catch {}
+      // Additionally, wait until the service worker is actually controlling the page
+      try {
+        if (navigator.serviceWorker && !navigator.serviceWorker.controller) {
+          await new Promise<void>((resolve) => {
+            const onCtrl = () => resolve();
+            navigator.serviceWorker.addEventListener('controllerchange', onCtrl, { once: true } as any);
+          });
         }
       } catch {}
     } catch (e) {
