@@ -70,6 +70,8 @@ const config = {
       filename: 'remoteEntry.js',
       exposes: {
         './Module': './src/ChecksModule',
+        // Expose MSW handlers so the host can start mocks at its origin
+        './mocks': './src/services/mocks/handlers/index.ts',
       },
       shared: {
         react: { singleton: true, requiredVersion: false, strictVersion: false },

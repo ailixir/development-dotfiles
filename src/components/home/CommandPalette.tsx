@@ -10,9 +10,8 @@ interface CommandPaletteProps {
 }
 
 const NAV_ITEMS = [
-  { title: 'Home', path: '/' },
+  { title: 'Home', path: '/checks' },
   { title: 'All Checks', path: '/checks/all' },
-  { title: 'Dashboard (legacy)', path: '/checks' },
   { title: 'Reports', path: '/checks/reports' },
   { title: 'Studio', path: '/checks/studio' },
 ];

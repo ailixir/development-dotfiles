@@ -68,7 +68,7 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
     if (e.key.toLowerCase() === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) {
       // simple Go home
       e.preventDefault();
-      navigate('/');
+      navigate('/checks');
     }
     // Reduced motion preference: no-op shortcut but show how we'd adapt animations if needed
   }, []);

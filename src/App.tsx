@@ -91,39 +91,42 @@ const App: React.FC = () => {
           <Suspense fallback={<PageLoadingFallback />}>
             <Routes>
               {/* Home - Default route */}
-              <Route path="/checks" element={<Navigate to="/" replace />} />
+              <Route path="/checks" element={<HomePage />} />
               <Route path="/" element={<HomePage />} />
-              
+
               {/* Check Management */}
               <Route path="/checks/all" element={<AllChecksPage />} />
               <Route path="/checks/create" element={<CreateCheckPage />} />
               <Route path="/checks/details/:id" element={<CheckDetailsPage />} />
               <Route path="/checks/edit/:id" element={<EditCheckPage />} />
-              {/* Templates route removed per product decision */}
-              
+
               {/* Checks Studio */}
               <Route path="/checks/studio" element={<ChecksStudioPage />} />
               <Route path="/checks/studio/tests" element={<StudioTestsPage />} />
               <Route path="/checks/studio/runs" element={<StudioRunsPage />} />
               <Route path="/checks/studio/:id" element={<ChecksStudioPage />} />
-              
+
               {/* Reports */}
               <Route path="/checks/reports" element={<ReportsHome />} />
               <Route path="/checks/reports/new" element={<ReportBuilder />} />
               <Route path="/checks/reports/:id" element={<ReportDetailsPage />} />
               <Route path="/checks/reports/:id/edit" element={<ReportBuilder />} />
-              {/* Reports sub-pages removed (Scheduled, Analytics) per UX alignment */}
+              {/* Standalone convenience routes (for direct dev server deep links) */}
+              <Route path="/reports" element={<ReportsHome />} />
+              <Route path="/reports/new" element={<ReportBuilder />} />
+              <Route path="/reports/:id" element={<ReportDetailsPage />} />
+              <Route path="/reports/:id/edit" element={<ReportBuilder />} />
 
               {/* CSIs */}
-              <Route path="/checks/csis" element={<Navigate to="/" replace />} />
-              <Route path="/checks/csis/:csiId" element={<Navigate to="/" replace />} />
+              <Route path="/checks/csis" element={<Navigate to="/checks" replace />} />
+              <Route path="/checks/csis/:csiId" element={<Navigate to="/checks" replace />} />
 
               {/* Activity & Schedules */}
               <Route path="/checks/activity" element={<ActivityPage />} />
               <Route path="/checks/schedules" element={<SchedulesPage />} />
-              
-              {/* Catch all - redirect to home */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+
+              {/* Catch all - redirect to module home */}
+              <Route path="*" element={<Navigate to="/checks" replace />} />
             </Routes>
           </Suspense>
         </ChecksLayout>

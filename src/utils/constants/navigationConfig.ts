@@ -4,7 +4,7 @@ export const CHECKS_NAVIGATION: NavigationItem[] = [
   {
     id: 'home',
     label: 'Home',
-    path: '/',
+    path: '/checks',
     icon: 'home',
     description: 'Attention, CSIs, and upcoming',
   },
