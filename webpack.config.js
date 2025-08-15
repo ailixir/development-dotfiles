@@ -17,7 +17,8 @@ const config = {
     path: path.resolve(process.cwd(), 'dist'),
     filename: isDevelopment ? '[name].bundle.js' : '[name].[contenthash].js',
     chunkFilename: isDevelopment ? '[name].chunk.js' : '[name].[contenthash].chunk.js',
-    publicPath: 'auto',
+    // Use absolute root in dev to avoid nested path chunk loading issues
+    publicPath: isDevelopment ? 'http://localhost:3002/' : 'auto',
     clean: true,
   },
   resolve: {
@@ -40,7 +41,7 @@ const config = {
     },
     fallback: {
       process: require.resolve('process/browser'),
-      buffer: require.resolve('buffer/'),
+      buffer: require.resolve('buffer'),
       stream: require.resolve('stream-browserify'),
     },
     fullySpecified: false,
@@ -96,7 +97,10 @@ const config = {
   devServer: {
     port: 3002,
     host: 'localhost',
-    historyApiFallback: true,
+    historyApiFallback: {
+      index: '/',
+      disableDotRule: true,
+    },
     hot: true,
     compress: true,
     headers: { 'Access-Control-Allow-Origin': '*' },
