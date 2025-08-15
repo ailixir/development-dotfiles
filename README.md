@@ -17,14 +17,13 @@ npm install
 # Initialize Mock Service Worker
 npm run msw:init
 
-# Start development (choose one)
-npm run dev          # Vite standalone (http://localhost:5173) - Recommended
-npm run dev:fed      # Webpack federated (http://localhost:3002) - MFE testing
+# Start development (Module Federation dev server)
+npm run dev          # Webpack federated (http://localhost:3002)
 
 # Other commands
 npm run type-check   # TypeScript validation
 npm run test         # Unit tests with Vitest
-npm run build        # Production build
+npm run build        # Production federated build (outputs remoteEntry.js)
 ```
 
 ## 🎯 What You'll See
