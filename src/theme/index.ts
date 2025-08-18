@@ -45,6 +45,7 @@ export const theme = createTheme({
   },
   typography: {
     fontFamily: [
+      'Citi Sans Display',
       'Inter',
       'Helvetica Neue', 
       'Arial',

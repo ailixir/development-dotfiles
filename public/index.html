@@ -28,10 +28,40 @@
     />
     
     <style>
+      /* Citi Sans Display font faces - ensure files exist under /public/fonts */
+      @font-face {
+        font-family: 'Citi Sans Display';
+        src: url('/fonts/CitiSansDisplay-Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Citi Sans Display';
+        src: url('/fonts/CitiSansDisplay-Medium.woff2') format('woff2');
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Citi Sans Display';
+        src: url('/fonts/CitiSansDisplay-SemiBold.woff2') format('woff2');
+        font-weight: 600;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Citi Sans Display';
+        src: url('/fonts/CitiSansDisplay-Bold.woff2') format('woff2');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
       body {
         margin: 0;
         padding: 0;
-        font-family: 'Inter', 'Helvetica Neue', 'Arial', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: 'Citi Sans Display', 'Inter', 'Helvetica Neue', 'Arial', -apple-system, BlinkMacSystemFont, sans-serif;
         background: #eff5f7;
         color: #1A2332;
         line-height: 1.6;
