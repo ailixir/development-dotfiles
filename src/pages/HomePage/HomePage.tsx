@@ -15,6 +15,7 @@ import ActivityFeed from '@/components/home/ActivityFeed';
 import ReportsSnapshot from '@/components/home/ReportsSnapshot';
 import UpcomingSchedules from '@/components/home/UpcomingSchedules';
 import PinnedCSIs from '@/components/home/PinnedCSIs';
+import EmptyState from '@/components/shared/States/EmptyState';
 
 const HomePage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -23,6 +24,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const load = () => {
+      if (!searchContext.csiId) return;
       dispatch(fetchDashboardSummary());
       dispatch(fetchAttention({ limit: 20 }));
       dispatch(fetchActivity({ scope: 'ALL', hours: 24 }));
@@ -31,16 +33,17 @@ const HomePage: React.FC = () => {
     };
     load();
     const id = setInterval(() => {
-      if (!document.hidden) {
+      if (!document.hidden && searchContext.csiId) {
         dispatch(fetchDashboardSummary());
         dispatch(fetchAttention({ limit: 20 }));
       }
     }, 60000);
     return () => clearInterval(id);
-  }, [dispatch]);
+  }, [dispatch, searchContext.csiId]);
 
   // Refetch scoped widgets when search context changes
   useEffect(() => {
+    if (!searchContext.csiId) return;
     dispatch(fetchDashboardSummary());
     dispatch(fetchAttention({ limit: 20 }));
     dispatch(fetchActivity({ scope: 'ALL', hours: 24 }));
@@ -67,23 +70,34 @@ const HomePage: React.FC = () => {
           <PinnedCSIs />
         </Grid>
 
-        <Grid item xs={12}>
-          <KPIBar summary={summary.data} loading={summary.loading} error={summary.error} />
-        </Grid>
+        {!searchContext.csiId ? (
+          <Grid item xs={12}>
+            <EmptyState
+              title="Select a CSI to view data"
+              description="Use the global search above to choose a CSI. You can also set one from My CSIs."
+            />
+          </Grid>
+        ) : (
+          <>
+            <Grid item xs={12}>
+              <KPIBar summary={summary.data} loading={summary.loading} error={summary.error} />
+            </Grid>
 
-        <Grid item xs={12} md={7}>
-          <AttentionPanel maxHeight={420} />
-        </Grid>
-        <Grid item xs={12} md={5}>
-          <UpcomingSchedules maxHeight={420} />
-        </Grid>
+            <Grid item xs={12} md={7}>
+              <AttentionPanel maxHeight={420} />
+            </Grid>
+            <Grid item xs={12} md={5}>
+              <UpcomingSchedules maxHeight={420} />
+            </Grid>
 
-        <Grid item xs={12} md={7}>
-          <ActivityFeed maxHeight={360} />
-        </Grid>
-        <Grid item xs={12} md={5}>
-          <ReportsSnapshot maxHeight={360} />
-        </Grid>
+            <Grid item xs={12} md={7}>
+              <ActivityFeed maxHeight={360} />
+            </Grid>
+            <Grid item xs={12} md={5}>
+              <ReportsSnapshot maxHeight={360} />
+            </Grid>
+          </>
+        )}
       </Grid>
     </Box>
   );

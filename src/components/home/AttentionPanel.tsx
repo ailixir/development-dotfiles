@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Chip, IconButton, List, ListItem, ListItemText, ListItemIcon, Skeleton, Stack, Typography, alpha, useTheme, Tooltip, Alert, Snackbar } from '@mui/material';
-import { Error, Warning, AssignmentInd, CheckCircle } from '@mui/icons-material';
+import { Error, Warning, AssignmentInd, CheckCircle, Campaign } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { acknowledgeCheck, assignCheck, fetchAttention, optimisticallyRemoveAttentionItem, restoreAttentionItem } from '@/store/slices/dashboardSlice';
 import type { AttentionItem } from '@/types/dashboard/dashboardTypes';
@@ -10,6 +10,7 @@ import SectionBox from './SectionBox';
 
 const Row: React.FC<{ item: AttentionItem; onAck: () => void; onAssign: () => void; onOpen: () => void }> = ({ item, onAck, onAssign, onOpen }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const isFail = item.status === 'FAILING';
   const color = isFail ? theme.palette.error.main : theme.palette.warning.main;
   const icon = isFail ? <Error sx={{ color }} /> : <Warning sx={{ color }} />;
@@ -49,6 +50,18 @@ const Row: React.FC<{ item: AttentionItem; onAck: () => void; onAssign: () => vo
         <Tooltip title="Assign">
           <IconButton size="small" onClick={onAssign}>
             <AssignmentInd />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Comms">
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              const query = new URLSearchParams({ incidentId: item.id, csiId: item.csiId }).toString();
+              navigate(`/comms/compose?${query}`);
+            }}
+          >
+            <Campaign />
           </IconButton>
         </Tooltip>
       </Stack>
