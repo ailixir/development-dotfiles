@@ -13,7 +13,8 @@ async function bootstrap() {
     try {
       const { worker } = await import('@services/mocks/browser');
       await worker.start({
-        serviceWorker: { url: '/mockServiceWorker.js' },
+        // Use relative path so it follows the same base as remoteEntry/assets
+        serviceWorker: { url: 'mockServiceWorker.js' },
         onUnhandledRequest: 'bypass',
       });
       // Ensure SW takes control on first run (reload once)

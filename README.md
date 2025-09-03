@@ -21,6 +21,42 @@ npm install
 npm start
 ```
 
+## Environment Variables
+
+These env vars make the module environment-agnostic across local dev, CI/CD, and hosted environments.
+
+- **PUBLIC_PATH**: Base URL from which static assets and `remoteEntry.js` are served.
+  - Default: `auto` (Webpack infers at runtime)
+  - Example (CDN build):
+  ```bash
+  PUBLIC_PATH=https://cdn.example.com/checks/ npm run build
+  ```
+
+- **HOST**: Dev server host for `npm start`.
+  - Default: `0.0.0.0`
+  - Example:
+  ```bash
+  HOST=0.0.0.0 npm start
+  ```
+
+- **PORT**: Dev server port for `npm start`.
+  - Default: `3002`
+  - Example:
+  ```bash
+  PORT=4002 npm start
+  ```
+
+Notes:
+- If `PUBLIC_PATH` is not set, `publicPath` uses `auto`, which works in most hosting setups and Module Federation hosts.
+- Set `PUBLIC_PATH` in CI when serving assets from a CDN or non-root path.
+ - Both Webpack and Vite load environment variables via dotenv. Create a `.env` file in the project root (not committed) or set vars in your shell/CI.
+   - Example `.env`:
+   ```bash
+   PUBLIC_PATH=https://cdn.example.com/checks/
+   HOST=0.0.0.0
+   PORT=3002
+   ```
+
 ## Scope
 
 ### Dashboard (Fully Functional)

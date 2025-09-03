@@ -16,7 +16,8 @@ async function start() {
   try {
     const { worker } = await import('@services/mocks/browser');
     await worker.start({
-      serviceWorker: { url: '/mockServiceWorker.js' },
+      // Relative so it follows base path under MF dev
+      serviceWorker: { url: 'mockServiceWorker.js' },
       onUnhandledRequest: 'bypass',
     });
     console.log('✅ MSW ready (webpack dev)');

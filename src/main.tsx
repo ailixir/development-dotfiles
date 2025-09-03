@@ -22,7 +22,8 @@ async function startApp() {
       console.log('🛠️ Starting MSW...');
       const { worker } = await import('@services/mocks/browser');
       await worker.start({
-        serviceWorker: { url: '/mockServiceWorker.js' },
+        // Relative so it works when hosted under a subpath
+        serviceWorker: { url: 'mockServiceWorker.js' },
         onUnhandledRequest: 'warn',
       });
       console.log('✅ MSW ready');

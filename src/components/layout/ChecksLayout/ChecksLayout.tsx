@@ -7,7 +7,6 @@ import { PlatformSidebar } from '@put/core-components';
 import { useLayout } from '../LayoutProvider';
 import { registerChecksNavigation, getCurrentPageId } from '../../../utils/navigation/navigationSetup';
 import GlobalSearch from '@/components/home/GlobalSearch';
-import SkipLink from './SkipLink';
 import Notifications from './Notifications';
 
 interface ChecksLayoutProps {
@@ -93,7 +92,6 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <SkipLink targetId="checks-main" />
       {shouldShowSidebar && (
         <PlatformSidebar
           key={`checks-sidebar-${currentPage}`}

@@ -2,11 +2,17 @@ import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack from 'webpack';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 import { createRequire } from 'module';
+import dotenv from 'dotenv';
 const require = createRequire(import.meta.url);
+
+// Load env vars from .env files
+dotenv.config();
 
 const { ModuleFederationPlugin } = webpack.container;
 const isDevelopment = process.env.NODE_ENV !== 'production';
+const resolvedPublicPath = process.env.PUBLIC_PATH || 'auto';
 
 /** @type {import('webpack').Configuration} */
 const config = {
@@ -17,8 +23,8 @@ const config = {
     path: path.resolve(process.cwd(), 'dist'),
     filename: isDevelopment ? '[name].bundle.js' : '[name].[contenthash].js',
     chunkFilename: isDevelopment ? '[name].chunk.js' : '[name].[contenthash].chunk.js',
-    // Use absolute root in dev to avoid nested path chunk loading issues
-    publicPath: isDevelopment ? 'http://localhost:3002/' : 'auto',
+    // Use runtime-based resolution by default; allow override via PUBLIC_PATH
+    publicPath: resolvedPublicPath,
     clean: true,
   },
   resolve: {
@@ -91,12 +97,22 @@ const config = {
       inject: true,
       scriptLoading: 'defer',
     }),
+    // Copy static assets from public/ (excludes index.html handled by HtmlWebpackPlugin)
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(process.cwd(), 'public'),
+          to: '.',
+          globOptions: { ignore: ['**/index.html'] },
+        },
+      ],
+    }),
     new webpack.ProvidePlugin({ process: 'process/browser', Buffer: ['buffer', 'Buffer'] }),
     isDevelopment && new ReactRefreshWebpackPlugin(),
   ].filter(Boolean),
   devServer: {
-    port: 3002,
-    host: 'localhost',
+    port: parseInt(process.env.PORT || '3002', 10),
+    host: process.env.HOST || '0.0.0.0',
     historyApiFallback: {
       index: '/',
       disableDotRule: true,
