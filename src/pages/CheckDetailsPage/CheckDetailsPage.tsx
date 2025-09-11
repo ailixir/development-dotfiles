@@ -29,7 +29,8 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
-import { PlayArrow, Schedule, Edit, OpenInNew, RemoveRedEye } from '@mui/icons-material';
+import { PlayArrow, Schedule, Edit, OpenInNew, RemoveRedEye, Campaign } from '@mui/icons-material';
+import { createCommsTemplateFromCheckDetails } from '@/utils/commsBridge';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchCheckById, executeCheck } from '@/store/slices/checksSlice';
 import { checksApi } from '@/services/api/checksApi';
@@ -132,6 +133,34 @@ const CheckDetailsPage: React.FC = () => {
               <Button variant="contained" color="success" startIcon={<PlayArrow />} onClick={onExecute} disabled={!id || isExecuting}>
                 {isExecuting ? 'Executing…' : 'Execute Now'}
               </Button>
+              {check && (
+                <Tooltip title="Send to Comms">
+                  <IconButton
+                    color="primary"
+                    onClick={() => {
+                      const payload = createCommsTemplateFromCheckDetails({
+                        id: check.id,
+                        name: check.name,
+                        status: check.status,
+                        csiId: check.csiId,
+                        csiName: check.csiName,
+                        type: check.type,
+                        tags: check.tags,
+                        configuration: check.configuration,
+                      });
+                      const handoffKey = `put:handoff:comms:${Date.now()}:${Math.random().toString(36).slice(2)}`;
+                      try {
+                        sessionStorage.setItem(handoffKey, JSON.stringify(payload));
+                        sessionStorage.setItem('put:handoff:comms:latest', JSON.stringify(payload));
+                        console.log('[Checks] Sending to Comms from Check Details:', { title: payload.templateTitle, subject: payload.templateSubject, hasContent: !!payload.templateContent });
+                      } catch {}
+                      navigate(`/comms?handoff=${encodeURIComponent(handoffKey)}`);
+                    }}
+                  >
+                    <Campaign />
+                  </IconButton>
+                </Tooltip>
+              )}
             </Stack>
           </Stack>
         </CardContent>

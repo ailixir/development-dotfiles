@@ -6,6 +6,7 @@ import { acknowledgeCheck, assignCheck, fetchAttention, optimisticallyRemoveAtte
 import type { AttentionItem } from '@/types/dashboard/dashboardTypes';
 import { useNavigate } from 'react-router-dom';
 import TriageDrawer from './TriageDrawer';
+import { createCommsTemplateFromCheck } from '@/utils/commsBridge';
 import SectionBox from './SectionBox';
 
 const Row: React.FC<{ item: AttentionItem; onAck: () => void; onAssign: () => void; onOpen: () => void }> = ({ item, onAck, onAssign, onOpen }) => {
@@ -57,8 +58,18 @@ const Row: React.FC<{ item: AttentionItem; onAck: () => void; onAssign: () => vo
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              const query = new URLSearchParams({ incidentId: item.id, csiId: item.csiId }).toString();
-              navigate(`/comms/compose?${query}`);
+              // Build payload and store in sessionStorage for cross-MFE handoff
+              try {
+                const payload = createCommsTemplateFromCheck(item);
+                const handoffKey = `put:handoff:comms:${Date.now()}:${Math.random().toString(36).slice(2)}`;
+                sessionStorage.setItem(handoffKey, JSON.stringify(payload));
+                // Save a stable alias so Comms can recover if query is lost
+                sessionStorage.setItem('put:handoff:comms:latest', JSON.stringify(payload));
+                // Navigate to Comms root with handoff; Comms will forward to /communications/new
+                navigate(`/comms?handoff=${encodeURIComponent(handoffKey)}`);
+              } catch {
+                navigate('/comms');
+              }
             }}
           >
             <Campaign />
