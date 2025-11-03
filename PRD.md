@@ -60,26 +60,26 @@ This section outlines the expanded feature set for the V2.2 vision of the "Check
 
 ### 5.1. Core Check Capabilities
 * **CSI Association:** All checks must be associated with a registered **CSI** and a corresponding application/component.
-* **GUI-Based Check Builder:** An intuitive interface for building all check types.
+* **GUI-Based Check Builder:** An intuitive interface for building all check types with advanced form validation and real-time preview
 * **Check Library:** A comprehensive library of supported check types, categorized as follows:
     * **Basic Checks:**
-        * HTTP(S) API Endpoint
-        * TCP Port Check
+        * HTTP(S) API Endpoint - Full configuration with method selection, headers, body, and status code validation
+        * TCP Port Check - Host/port connectivity with configurable timeout
     * **Integration-Driven Checks:**
-        * Splunk Log Query
-        * Grafana Metric Threshold: Check if a specific Grafana metric has crossed a defined threshold.
-        * ITRS Geneos Sampler Status: Check the state (`OK`, `CRITICAL`) of a specific sampler in ITRS.
-        * AppDynamics Health Rule Violation: Check if a specific AppDynamics health rule has been violated.
+        * Splunk Log Query - Complex SPL query execution with result threshold validation
+        * Grafana Metric Threshold - Dashboard/panel metric monitoring with multiple operator support
+        * ITRS Geneos Sampler Status - Real-time sampler state monitoring with expected value comparison
+        * AppDynamics Health Rule Violation - Application health rule monitoring and APM integration
     * **UI Test Checks:**
-        * No-Code UI Test: A new feature for creating and executing browser-based UI tests using plain English commands (see section 5.2).
-* **Secure Parameterization:** Integration with the enterprise secrets vault.
-* **Execution & Scheduling Engine:** On-demand and scheduled execution for all check types.
-* **Dashboards & Visualization:** CSI-centric dashboards with history views.
-* **Reporting:** A flexible reporting tool to create and schedule email-based status reports with a "live-preview" editor.
+        * No-Code UI Test - Plain English commands with video recording and Python code generation (see section 5.2)
+* **Secure Parameterization:** Integration with the enterprise secrets vault with `<secret ID>` token support
+* **Execution & Scheduling Engine:** On-demand and scheduled execution for all check types with cron expression support
+* **Dashboards & Visualization:** CSI-centric dashboards with history views, real-time updates and KPI tracking
+* **Reporting:** A flexible reporting tool to create and schedule email-based status reports with a "live-preview" editor, autosave and cross-CSI support
 
 ### 5.2. UI Testing Feature ("Checks Studio")
 
-This is a new, flagship capability designed to empower all users, regardless of technical skill, to create robust UI tests.
+This flagship capability is designed to empower all users, regardless of technical skill, to create robust UI tests.
 
 > #### **Core UX Philosophy: "From Checklist to Reality"**
 > The entire experience should feel like writing a simple checklist of instructions and then watching a video of a robot perfectly executing that list. The goal is to build **trust** and **empowerment**. The user should feel confident that their plain English commands are being understood, and the video provides undeniable proof.
@@ -90,15 +90,28 @@ A clean, three-panel screen separating user *instructions* from system *actions*
 1.  **Left Panel: The Test Steps (Your Checklist)**
     * A simple, numbered text editor where each line is a distinct step (`1. Go to...`, `2. Click...`).
     * After a run, each line gets a status icon: **green checkmark (✓)** for pass or **red X (✗)** for fail.
+    * Includes syntax highlighting, auto-completion, variable support (`<var NAME>`), and secret tokens (`<secret ID>`).
 
 2.  **Middle Panel: The Control Tower (The "Go" Button & Logs)**
     * Contains the **Test Name**, a large **"Run Test"** button, and a **Live Log** area for real-time text updates during execution.
+    * Includes test metadata, environment selection, schedule configuration, and Python code generation.
 
 3.  **Right Panel: The Visual Proof (The Video)**
     * After a test run, a **video player** appears here, showing a full screen recording of the test.
     * The video timeline is synchronized with the test steps.
+    * Includes step-synchronized timeline, screenshot capture, and download capabilities.
 
-### 5.3. Out of Scope for V2.2
+### 5.3. Additional Features
+
+* **Bulk Operations:** Multi-select and bulk actions for check management
+* **Advanced Filtering:** Global search context with CSI, environment, and tag filtering
+* **Autosave:** Draft persistence for check creation and reports
+* **Code Generation:** Python code generation from Checks Studio tests
+* **Template Library:** Pre-built templates for common UI test scenarios
+* **Keyboard Shortcuts:** Comprehensive keyboard navigation throughout the application
+* **Accessibility:** Full ARIA support and screen reader compatibility
+
+### 5.4. Out of Scope for V2.2
 
 * **Automated Remediation:** The platform will report and alert but will not attempt to automatically fix failures (e.g., restart a service).
 * **ML-Powered Anomaly Detection:** All checks are based on user-defined logic and thresholds.

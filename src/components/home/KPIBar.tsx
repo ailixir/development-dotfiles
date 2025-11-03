@@ -76,22 +76,22 @@ const KPIBar: React.FC<KPIBarProps> = ({ summary, loading, error }) => {
             <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1.25 }}>
               <Chip
                 icon={<CheckCircle />}
-                label={`Passing: ${summary.counts.passing}`}
+                label={`Passing: ${summary?.counts?.passing ?? 0}`}
                 sx={{ bgcolor: alpha(theme.palette.success.main, 0.1), color: theme.palette.success.main }}
               />
               <Chip
                 icon={<Warning />}
-                label={`Degraded: ${summary.counts.warning}`}
+                label={`Degraded: ${summary?.counts?.warning ?? 0}`}
                 sx={{ bgcolor: alpha(theme.palette.warning.main, 0.1), color: theme.palette.warning.main }}
               />
               <Chip
                 icon={<Error />}
-                label={`Failing: ${summary.counts.failing}`}
+                label={`Failing: ${summary?.counts?.failing ?? 0}`}
                 sx={{ bgcolor: alpha(theme.palette.error.main, 0.1), color: theme.palette.error.main }}
               />
               <Chip
                 icon={<VolumeOff />}
-                label={`Muted: ${summary.counts.muted}`}
+                label={`Muted: ${summary?.counts?.muted ?? 0}`}
                 sx={{ bgcolor: alpha(theme.palette.grey[500], 0.1), color: theme.palette.text.secondary }}
               />
             </Stack>

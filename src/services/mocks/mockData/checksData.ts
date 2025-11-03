@@ -189,7 +189,7 @@ export const mockChecks: MockCheck[] = [
     id: 'check-007',
     name: 'Customer Login Flow Test',
     type: 'UI_TEST',
-    csiId: '170456',
+    csiId: '174523',
     csiName: 'Customer Digital Platform',
     status: 'PENDING',
     lastExecution: null,

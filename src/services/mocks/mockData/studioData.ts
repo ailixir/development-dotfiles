@@ -50,7 +50,7 @@ export const mockUITests: MockUITest[] = [
   {
     id: 'ui-test-001',
     name: 'Customer Login Flow Test',
-    csiId: '111111',
+    csiId: '174523',
     description: 'End-to-end test of the customer login process',
     steps: [
       'Go to "https://online.citi.com"',
