@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { store } from '@store/index';
 import { theme } from './theme';
 import App from './App';
+import { MswGate } from '@components/providers/MswGate';
 
 // Use the Vite app's route configuration to ensure identical routes
 
@@ -82,7 +83,9 @@ const ChecksModule: React.FC<ChecksModuleProps> = () => {
         <Provider store={store}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <App />
+            <MswGate>
+              <App />
+            </MswGate>
           </ThemeProvider>
         </Provider>
       </QueryClientProvider>

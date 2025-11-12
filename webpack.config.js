@@ -39,7 +39,6 @@ const config = {
       '@utils': path.resolve(process.cwd(), 'src/utils'),
       '@store': path.resolve(process.cwd(), 'src/store'),
       // Use built output of local linked package to avoid bundling its dev deps
-      '@put/core-components': path.resolve(process.cwd(), '../put-core-components/dist'),
       react: path.resolve(process.cwd(), 'node_modules/react'),
       'react-dom': path.resolve(process.cwd(), 'node_modules/react-dom'),
       'process/browser': require.resolve('process/browser'),
@@ -89,6 +88,7 @@ const config = {
         '@mui/icons-material': { singleton: true, requiredVersion: '^5.15.0' },
         '@emotion/react': { singleton: true, requiredVersion: '^11.11.0' },
         '@emotion/styled': { singleton: true, requiredVersion: '^11.11.0' },
+        msw: { singleton: true, requiredVersion: false },
       },
     }),
     new HtmlWebpackPlugin({
