@@ -9,7 +9,7 @@
 epic_id: EPIC-01
 milestone: M1
 title: "Walking skeleton — CSI + Checks CRUD + HTTP executor + BFF auth"
-status: planning                # planning | in_progress | completed | paused
+status: in_progress             # planning | in_progress | completed | paused
 created_at: "2026-04-17"
 created_by: "@pm (Morgan)"
 
@@ -41,10 +41,10 @@ stories:
   - story_id: "1.1"
     title: "Project scaffold (Gradle KTS, Spring Boot 3.3, profiles)"
     size: S
-    status: pending
+    status: draft                                    # drafted 2026-04-17 by @sm
     depends_on: []
     assigned_dev: null
-    story_file: "docs/stories/1.1.story.md"          # to be created by @sm *draft
+    story_file: "docs/stories/1.1.story.md"          # drafted — awaiting @po validation
 
   - story_id: "1.2"
     title: "Flyway V1 migration — full §7 schema + current-month partition"
@@ -65,7 +65,7 @@ stories:
   - story_id: "1.4"
     title: "BFF identity-propagation contract with Core team (DEBT-04 / R-08)"
     size: S
-    status: pending
+    status: draft                                    # drafted 2026-04-17 by @sm
     depends_on: []
     blocker: true
     blocker_note: "Blocks 1.5 + every story using @PreAuthorize. External touchpoint: put-platform-shell Core team."
@@ -340,19 +340,20 @@ sdc_cycle_per_story:
 # Progress tracking (updated by agents during execution)
 # ─────────────────────────────────────────────────────────────
 progress:
-  stories_drafted: 0
+  stories_drafted: 2
   stories_validated: 0
   stories_done: 0
   stories_blocked: 0
   current_wave: 0
-  notes: []
+  notes:
+    - "2026-04-17 — @sm drafted 1.1 (scaffold) + 1.4 (BFF contract) in parallel (wave 0). Awaiting @po *validate-story-draft for both."
 
 # ─────────────────────────────────────────────────────────────
 # Handoff
 # ─────────────────────────────────────────────────────────────
 handoff:
-  next_action: "@sm *draft 1.1 (start wave 0, parallel with @pm *engage-core-team for story 1.4 external touchpoint)"
-  alternative: "If staffing supports it, @sm *draft 1.1 AND 1.4 simultaneously — both are depends_on: []."
+  next_action: "@po *validate-story-draft 1.1 AND 1.4 (both drafted 2026-04-17 — validate in parallel)."
+  alternative: "Skip validation (risk: story ambiguity caught later in QA gate) and go straight to @dev *develop-story 1.1 + @pm *engage-core-team for 1.4."
   cadence: "One wave per sprint-week is a comfortable pace for the 17-story epic. Aggressive pace (with 3 devs): 2 waves/week → epic completes in ~6 weeks."
 
 attestation:
