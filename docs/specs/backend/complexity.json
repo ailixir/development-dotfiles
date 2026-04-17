@@ -1,0 +1,219 @@
+{
+  "$schema": "aios://spec-pipeline/complexity/v1",
+  "spec_id": "backend-v2.2",
+  "phase": "assess",
+  "generated_by": "@architect (Aria)",
+  "generated_at": "2026-04-16",
+  "inputs": {
+    "requirements_file": "./requirements.json",
+    "requirements_commit": "2e5552def"
+  },
+
+  "resolved_open_questions": {
+    "OQ-01": {
+      "question": "Enterprise vault client protocol",
+      "decision": "HashiCorp Vault",
+      "decided_by": "user",
+      "decision_date": "2026-04-16",
+      "implications": [
+        "Use spring-cloud-starter-vault-config or raw VaultTemplate from spring-vault package.",
+        "KV v2 secret engine assumed; path convention: secret/checks/{scope}/{owner}/{label}.",
+        "Auth method: AppRole (service) or Kubernetes (pod-scoped) — to be finalized in implementation plan.",
+        "Token caching via Caffeine with TTL < vault token TTL; refresh on failed resolution."
+      ]
+    },
+    "OQ-02": {
+      "question": "Browser automation for Checks Studio",
+      "decision": "Playwright (Java binding com.microsoft.playwright:playwright) running locally on the backend pod — NOT Selenium Grid, NOT cloud Playwright",
+      "decided_by": "user",
+      "decision_date": "2026-04-16",
+      "implications": [
+        "Playwright browser binaries (chromium/firefox/webkit) bundled into the backend container image — adds ~200-400MB per browser.",
+        "Pod resource profile must accommodate browser memory: suggest 2 vCPU / 4Gi memory per concurrent UI test.",
+        "Concurrency cap per pod = 2-3 tests (NFR-THRU-04 requires 50 → need 17-25 pod replicas OR a dedicated 'studio-runner' StatefulSet).",
+        "Video recording: Playwright native .webm via BrowserContext.startTracing / video option — no separate video service needed (simplifies ASM-03).",
+        "Proposed package: backend/src/main/java/com/citi/put/checks/studio/playwright/ as the Playwright adapter.",
+        "ARCH §4.4 M5 wording needs amendment: 'Selenium Grid client' → 'Playwright local runner'. Track as DEBT-01 for spec.md to resolve.",
+        "ARCH §11 ASM-02 (Browser Automation Service) becomes internal — no external service dependency. This REDUCES a dependency."
+      ],
+      "debt_items": [
+        { "id": "DEBT-01", "target": "ARCH.md §4.4 M5 + §11 Browser Automation Service", "change": "Selenium Grid → Playwright local runner", "owner": "@architect", "phase": "spec" }
+      ]
+    },
+    "OQ-03": {
+      "question": "Retention policy for tags and secrets tables",
+      "decision": "Proposal by @architect, based on domain semantics",
+      "decided_by": "@architect",
+      "decision_date": "2026-04-16",
+      "proposal": {
+        "tags": {
+          "retention": "INDEFINITE (soft-delete not needed)",
+          "rationale": "Tags are low-cardinality metadata (~100s-1000s rows across the platform). Orphaned tags (no referencing check/csi) are not a correctness issue; junction tables (check_tags, csi_tags) auto-clean via ON DELETE CASCADE when a check or CSI is hard-deleted. Cost of retention is negligible. Risk of accidental deletion > benefit of cleanup.",
+          "action": "Keep as-is. No retention policy."
+        },
+        "secrets": {
+          "retention": "INDEFINITE for active references; respect expires_at at resolution time",
+          "rationale": "The `secrets` table stores only vault REFERENCES (reference_id, label, last_four), never the secret value. A reference with expires_at in the past is still useful audit data (shows which check once used which vault entry). Hard-deleting breaks check history traceability.",
+          "action": "On execution attempt with a secret whose expires_at < NOW(), FAIL the check execution with error='Secret reference expired' and emit audit event. Do not delete the row. Dashboard surfaces 'stale secret' counts via a metric."
+        }
+      },
+      "revision_needed": true,
+      "debt_items": [
+        { "id": "DEBT-02", "target": "ARCH.md §8 Retention Policy table", "change": "Add rows for Tags (indefinite) and Secret References (indefinite; expiry enforced at use-time)", "owner": "@architect", "phase": "spec" }
+      ]
+    },
+    "OQ-04": {
+      "question": "Schedule endpoint shape: inline with checks, or dedicated /schedules?",
+      "decision": "Dedicated /schedules endpoints",
+      "decided_by": "user",
+      "decision_date": "2026-04-16",
+      "implications": [
+        "New endpoints required (ARCH §12 does not list these — amend as DEBT-03):",
+        "  GET    /api/v1/schedules                 — list all (filter by check_id, enabled)",
+        "  POST   /api/v1/schedules                 — create (body includes check_id)",
+        "  GET    /api/v1/schedules/{id}            — fetch one",
+        "  PUT    /api/v1/schedules/{id}            — replace",
+        "  PATCH  /api/v1/schedules/{id}/enabled    — toggle enabled (lightweight no-op-friendly)",
+        "  DELETE /api/v1/schedules/{id}            — delete (cascades from check delete too)",
+        "One schedule per check enforced by `CREATE UNIQUE INDEX idx_schedules_check` (ARCH §7.1).",
+        "GET /api/v1/checks/{id} response embeds the schedule in a nested field for client convenience (read-only, mirrors /schedules/{id})."
+      ],
+      "debt_items": [
+        { "id": "DEBT-03", "target": "ARCH.md §12.1 API Contract", "change": "Add /schedules endpoint group", "owner": "@architect", "phase": "spec" }
+      ]
+    },
+    "OQ-05": {
+      "question": "Partition maintenance strategy for execution_results without DB-team dependency",
+      "decision": "App-managed partitions via Spring @Scheduled + Flyway for base table only",
+      "decided_by": "user (constraint: no DB team dependency, easiest to maintain)",
+      "decision_date": "2026-04-16",
+      "proposal": {
+        "approach": "Application-managed native PostgreSQL declarative partitioning",
+        "rejected_alternatives": [
+          {
+            "option": "pg_partman extension",
+            "reason_rejected": "Requires CREATE EXTENSION privilege and pg_partman installation on the managed RDS cluster — blocked by DB team dependency constraint."
+          },
+          {
+            "option": "Manual DBA-run DDL each month",
+            "reason_rejected": "Violates user constraint 'prefer not depend on external teams'."
+          }
+        ],
+        "design": {
+          "base_table_in_flyway": "V1__init.sql creates the parent execution_results table declared PARTITION BY RANGE (started_at) PLUS the current month's partition. No future partitions in Flyway.",
+          "runtime_partition_creator": "A Spring bean ExecutionResultsPartitionScheduler annotated @Scheduled(cron='0 0 3 25 * ?') (03:00 UTC on the 25th of each month) runs raw DDL: CREATE TABLE IF NOT EXISTS execution_results_{yyyy}_{mm} PARTITION OF execution_results FOR VALUES FROM ('{yyyy}-{mm}-01') TO ('{next_yyyy}-{next_mm}-01'); Safe to re-run (IF NOT EXISTS).",
+          "bootstrapping_safety": "Application also runs the same DDL on startup for (current_month, current_month+1, current_month+2) to cover freshly-deployed environments. Idempotent.",
+          "pruning": "Old partitions (older than 1 year per NFR-RET-01) detached by the same scheduler once a month: ALTER TABLE execution_results DETACH PARTITION execution_results_{old}; DROP TABLE execution_results_{old};",
+          "failure_mode": "If the scheduler fails to create next month's partition, INSERTs starting the 1st of next month will raise 'no partition of relation found'. Mitigation: health check exposes a /actuator/health/partitions indicator that fails if the next-month partition is missing by the 28th — alerts surface BEFORE user impact."
+        },
+        "why_easiest_to_maintain": [
+          "Zero external dependencies (no extension, no DBA ticket).",
+          "One Spring bean + one Flyway migration. Lives in backend/src/main/java/com/citi/put/checks/scheduling/partitioning/.",
+          "Testable via Testcontainers-PostgreSQL (CI) and Zonky embedded (local) with identical semantics.",
+          "Same pattern reused for ui_test_executions (monthly) and report_executions (quarterly) — all three auto-maintained."
+        ]
+      }
+    }
+  },
+
+  "dimensions": {
+    "scope": {
+      "score": 5,
+      "max": 5,
+      "justification": "Greenfield backend — 37 FRs spanning 7 bounded contexts (csi, checks, scheduling, studio, reports, users, secrets). ~20 entities, Flyway migrations, DTO/entity/service/controller layers, 7 CheckExecutor implementations, partitioned tables + materialized view + DB triggers. Conservatively 150-250 Java source files at M6 completion.",
+      "evidence": [
+        "requirements.json → 37 FR + 22 NFR + 27 CON",
+        "ARCH §4.3 Project Structure (8 top-level packages)",
+        "ARCH §7 Database Schema (13 tables + 1 materialized view + 2 triggers)"
+      ]
+    },
+    "integration": {
+      "score": 5,
+      "max": 5,
+      "justification": "Nine external system integrations, each with its own protocol, auth, failure mode, and data contract. This is the single largest complexity driver.",
+      "evidence": [
+        "Citi System Inventory (CSI) API — ASM-05",
+        "Enterprise OIDC issuer — ASM-07, FR-AUTH-01",
+        "HashiCorp Vault — ASM-08, OQ-01 resolution",
+        "SMTP Relay — ASM-01",
+        "Splunk SPL API — ASM-04, FR-CHK-06",
+        "Grafana HTTP API — ASM-04, FR-CHK-07",
+        "ITRS Geneos — ASM-04, FR-CHK-08",
+        "AppDynamics — ASM-04, FR-CHK-09",
+        "S3 (AWS SDK v2) — FR-STUDIO-03, CON-STACK-14",
+        "Playwright (local, in-container) — OQ-02 resolution (not counted as external)"
+      ]
+    },
+    "infrastructure": {
+      "score": 4,
+      "max": 5,
+      "justification": "Kubernetes deployment with multiple replicas, managed PostgreSQL RDS, managed Redis (M6), S3 bucket provisioning, Vault policy/AppRole setup, Playwright-bundled container image (~1-2GB vs. a typical JRE image ~200MB). Score tempered to 4 (not 5) because the architecture deliberately minimizes infra team dependency: Zonky embedded for local dev (ARCH §5), app-managed partitions (OQ-05), Caffeine-first caching (M1-M5 before Redis at M6).",
+      "evidence": [
+        "ARCH §13.1 Containerization + §13.2 Kubernetes",
+        "ARCH §5 Object Storage (S3)",
+        "OQ-02 implications: dedicated 'studio-runner' StatefulSet for concurrency",
+        "OQ-05 resolution: self-maintained partitions reduce infra dependency"
+      ]
+    },
+    "knowledge": {
+      "score": 3,
+      "max": 5,
+      "justification": "Core stack (Java 21, Spring Boot 3, JPA, Gradle KTS, JUnit 5) is well-known to a typical senior Java team. Less-common knowledge required: virtual-thread task executors under load, Zonky embedded PostgreSQL integration patterns, declarative partitioning with app-side maintenance, MapStruct for polymorphic JSONB types, Playwright Java binding (less documented than the Node version), Vault AppRole auth flow. Score 3 = standard team with a handful of knowledge gaps research must close.",
+      "evidence": [
+        "ARCH §4.1 — multiple 'modern' choices (virtual threads, RestClient, @JdbcTypeCode)",
+        "OQ-02 — Playwright Java is the less-documented binding",
+        "OQ-05 — app-managed partitioning is uncommon in Spring Boot apps"
+      ]
+    },
+    "risk": {
+      "score": 5,
+      "max": 5,
+      "justification": "Regulated financial services (Citibank), 99.95% uptime SLO (NFR-AVAIL-01), security-critical (SSO + RBAC + Vault), handles credentials for 4 external monitoring systems, executes UI tests against production URLs (risk of triggering real events on misconfigured tests), report emails go to IT Directors (reputational risk on false positives/negatives).",
+      "evidence": [
+        "NFR-AVAIL-01: 99.95% uptime",
+        "NFR-SEC-01/02/03: SSO + RBAC + Vault",
+        "PRD §4 Personas: Robert (IT Director) consumes reports",
+        "FR-STUDIO-02: UI tests can execute against live citi.com per PRD §6 example"
+      ]
+    }
+  },
+
+  "total_score": 22,
+  "max_score": 25,
+  "classification": "COMPLEX",
+  "threshold_map": {
+    "SIMPLE": "<= 8",
+    "STANDARD": "9 - 15",
+    "COMPLEX": ">= 16"
+  },
+
+  "rationale": "Score 22/25 places this comfortably in COMPLEX. Scope, integration, and risk each max at 5 — any of those three alone would push this out of SIMPLE. Infrastructure at 4 reflects the deliberate design choice to minimize external-team dependency (Zonky, app-managed partitions, Caffeine-first caching) — these mitigations shave one point off what would otherwise also be 5. Knowledge at 3 is the single non-critical dimension.",
+
+  "workflow_implications": {
+    "full_six_phase_pipeline": true,
+    "revision_cycle_expected": "If critique (Phase 5) returns NEEDS_REVISION (avg 3.0-3.9), one revision cycle allowed before re-critique. If BLOCKED (<3.0), escalate to user.",
+    "research_phase_required": true,
+    "research_phase_non_optional_topics": [
+      "Spring Boot 3.3 virtual-thread tuning under partitioned-table write load",
+      "Playwright Java binding stability + concurrency model in containerized runners",
+      "Zonky embedded Postgres + Testcontainers parity on partitioned tables and DB triggers",
+      "HashiCorp Vault AppRole auth flow in Kubernetes + token refresh strategy",
+      "Declarative partitioning without pg_partman — prior art in Spring Boot apps",
+      "MapStruct with JSONB polymorphic configuration types (sealed interface vs Map<String,Object>)"
+    ],
+    "risk_mitigations_to_embed_in_spec": [
+      "Circuit breakers (Resilience4j) on all 9 external integrations",
+      "Per-integration timeout budgets aligned to NFR-PERF SLOs",
+      "Dead-letter audit for failed executions + failed report deliveries",
+      "UI test 'dry-run' mode (no recording, no execution) for config validation",
+      "Secret-reference expiry alerting BEFORE first use-time failure",
+      "Partition missing-future-month alert BEFORE 28th of month"
+    ]
+  },
+
+  "debt_items_collected": [
+    { "id": "DEBT-01", "source": "OQ-02", "target": "ARCH.md §4.4 M5 + §11 Browser Automation Service", "change": "Selenium Grid → Playwright local runner" },
+    { "id": "DEBT-02", "source": "OQ-03", "target": "ARCH.md §8 Retention Policy", "change": "Add rows for tags (indefinite) and secret references (indefinite + expiry-at-use)" },
+    { "id": "DEBT-03", "source": "OQ-04", "target": "ARCH.md §12.1 API Contract", "change": "Add /schedules endpoint group" }
+  ]
+}
