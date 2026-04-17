@@ -1,27 +1,8 @@
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
+# ─────────────────────────────────────────────────────
+# Monorepo: frontend/ (React MFE) + backend/ (Spring Boot)
+# ─────────────────────────────────────────────────────
 
-# Production builds
-/dist
-/build
-
-# Environment files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-backend/local
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# OS generated files
+# ── Shared OS / editor ──
 .DS_Store
 .DS_Store?
 ._*
@@ -29,8 +10,6 @@ lerna-debug.log*
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-# Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
@@ -41,25 +20,44 @@ Thumbs.db
 *.sln
 *.sw?
 
-# Testing
-/coverage
-/.nyc_output
+# ── Frontend (Node / Vite / Webpack / MSW / Cypress) ──
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.js
+frontend/dist/
+frontend/build/
+frontend/coverage/
+frontend/.nyc_output/
+frontend/.cache/
+frontend/.parcel-cache/
+frontend/.federation/
+frontend/cypress/videos/
+frontend/cypress/screenshots/
+frontend/.env
+frontend/.env.backup
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/*.tgz
 
-# Misc
-*.tgz
-*.tar.gz
+# ── Backend (Gradle / JVM / Spring Boot) ──
+backend/.gradle/
+backend/build/
+backend/out/
+backend/bin/
+backend/local/
+backend/*.log
+backend/logs/
+backend/src/main/resources/application-local-override.yml
 
-# Local development
-.env
-.env.backup
-
-# Cache
-.cache
-.parcel-cache
-
-# Webpack
-.federation/
-
-# Cypress
-cypress/videos
-cypress/screenshots
+# ── Legacy / tolerate leftovers ──
+node_modules/
+dist/
+build/
+coverage/
+.cache/

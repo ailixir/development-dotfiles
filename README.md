@@ -1,151 +1,56 @@
-# PUT Checks Module
+# Project "Checks" — Monorepo
 
-> **High-Fidelity MFE Prototype** - A React micro-frontend module for operational health monitoring
+Centralized orchestration and standardization layer for operational health monitoring at Citibank. Sits above ITRS, Splunk, Grafana, and AppDynamics — organized by **CSI (Citi System Inventory)**.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.2+-blue.svg)](https://typescript.org)
-[![React](https://img.shields.io/badge/React-18+-blue.svg)](https://react.dev)
-[![Material-UI](https://img.shields.io/badge/MUI-5+-blue.svg)](https://mui.com)
-[![Module Federation](https://img.shields.io/badge/Module%20Federation-Enhanced-green.svg)](https://module-federation.io)
-[![MSW](https://img.shields.io/badge/MSW-Mock%20API-orange.svg)](https://mswjs.io)
+See [`PRD.md`](./PRD.md) for product requirements (v2.2) and [`ARCH.md`](./ARCH.md) for the technical architecture.
+
+## Repository Layout
+
+```
+put-checks/
+├── frontend/          React 18 + TypeScript MFE (Vite + Webpack/Module Federation)
+├── backend/           Java 21 + Spring Boot 3 (Gradle KTS) — in development
+├── docs/              Stories, specs, architecture docs (AIOS convention)
+│   ├── stories/
+│   ├── specs/
+│   └── architecture/
+├── PRD.md             Product Requirements (v2.2)
+├── ARCH.md            Technical Architecture
+├── CLAUDE.md          Project-level instructions for Claude Code
+└── README.md          (this file)
+```
 
 ## Quick Start
 
+### Frontend
 ```bash
-# Install dependencies
+cd frontend/
 npm install
-
-# Initialize Mock Service Worker
-# npm run msw:init
-
-# Start development (Module Federation dev server)
-npm start
+npm run msw:init
+npm run dev              # Webpack/MF on :3002
+npm run dev:standalone   # Vite standalone on :5173
 ```
+See [`frontend/README.md`](./frontend/README.md) for full details.
 
-## Environment Variables
-
-These env vars make the module environment-agnostic across local dev, CI/CD, and hosted environments.
-
-- **PUBLIC_PATH**: Base URL from which static assets and `remoteEntry.js` are served.
-  - Default: `auto` (Webpack infers at runtime)
-  - Example (CDN build):
-  ```bash
-  PUBLIC_PATH=https://cdn.example.com/checks/ npm run build
-  ```
-
-- **HOST**: Dev server host for `npm start`.
-  - Default: `0.0.0.0`
-  - Example:
-  ```bash
-  HOST=0.0.0.0 npm start
-  ```
-
-- **PORT**: Dev server port for `npm start`.
-  - Default: `3002`
-  - Example:
-  ```bash
-  PORT=4002 npm start
-  ```
-
-- **VITE_ALLOW_INSECURE_MSW_FALLBACK**: Enables inline API mock fallback when Service Worker cannot run (for example, untrusted internal CA / insecure browser context).
-  - Default: `true`
-  - Example:
-  ```bash
-  VITE_ALLOW_INSECURE_MSW_FALLBACK=true npm start
-  ```
-
-Notes:
-- If `PUBLIC_PATH` is not set, `publicPath` uses `auto`, which works in most hosting setups and Module Federation hosts.
-- Set `PUBLIC_PATH` in CI when serving assets from a CDN or non-root path.
- - Both Webpack and Vite load environment variables via dotenv. Create a `.env` file in the project root (not committed) or set vars in your shell/CI.
-   - Example `.env`:
-   ```bash
-   PUBLIC_PATH=https://cdn.example.com/checks/
-   HOST=0.0.0.0
-   PORT=3002
-   ```
-
-## Scope
-
-### Dashboard (Fully Functional)
-- **Health Metrics**: Real-time status cards with passing/failing/warning checks
-- **System Overview**: Uptime and response time monitoring
-- **Recent Activity**: Live activity feed with color-coded status updates
-- **Quick Actions**: Navigation shortcuts to other modules
-
-### Navigation (Complete)
-- **Adaptive Layout**: Automatically detects standalone vs federated mode
-- **Responsive Sidebar**: Collapsible navigation with icons and descriptions
-- **Five Main Pages**: Dashboard, All Checks, Create Check, Checks Studio, Reports
-
-### Mock API (Comprehensive)
-- **6 Check Types**: HTTP, TCP, Splunk, Grafana, ITRS, AppDynamics, UI Tests
-- **CSI Integration**: Mock CSI entities with applications and metadata
-- **Execution Results**: Realistic check execution with success/failure scenarios
-- **WebSocket Simulation**: Real-time updates for Studio and reports
-
-## Architecture
-
-### Module Federation Ready
-```javascript
-// Exposed for host consumption
-exposes: {
-  "./ChecksModule": "./src/bootstrap.tsx"
-}
-
-// Shared dependencies with host
-shared: ['react', 'react-dom', '@mui/material', ...]
+### Backend
+```bash
+cd backend/
+./gradlew bootRun        # Spring Boot on :8080, local profile (Zonky embedded Postgres)
+./gradlew test           # Unit + Testcontainers integration tests
 ```
+_(Backend scaffold in progress — see [`docs/specs/backend/`](./docs/specs/backend/).)_
 
-### Dual Build System
-- **Vite**: Lightning-fast development with HMR
-- **Webpack**: Module Federation for production deployment
+## Development Methodology
 
-### State Management
-- **Redux Toolkit**: Async operations with proper error handling
-- **React Query**: Data fetching and caching layer
-- **Context API**: UI state and layout management
+This repo follows AIOS (Agent-Orchestrated System) conventions:
 
-## Project Structure
+- **Story-driven development** — work tracked in `docs/stories/`.
+- **Agent delegation** — `@pm`, `@architect`, `@sm`, `@po`, `@dev`, `@qa`, `@devops` (see `CLAUDE.md`).
+- **Spec Pipeline → SDC** — complex features pass through `gather → assess → research → spec → critique → plan` before implementation.
 
-```
-src/
-├── components/
-│   ├── layout/              # LayoutProvider, ChecksLayout
-│   └── shared/              # ErrorBoundary, reusable components
-├── pages/                   # Route components (5 main pages)
-├── store/                   # Redux slices for state management
-├── services/
-│   ├── api/                 # API client and service functions
-│   └── mocks/              # MSW handlers with realistic data
-├── types/                   # TypeScript type definitions
-└── utils/                  # Constants, helpers, navigation config
-```
+## Status
 
-#### MSW Dev Toggles (via apiClient)
-- Set in `localStorage` to simulate scenarios at runtime:
-  - `__msw_debug_slow`: number (ms) to delay responses
-  - `__msw_debug_fail`: HTTP status to force failure (e.g., `500`)
-  - `__msw_debug_empty`: `1` to force empty responses
-
-### Testing Ready
-- **Vitest**: Fast unit testing with React Testing Library
-- **MSW Integration**: Mock API responses in tests
-- **Coverage Reports**: Detailed test coverage analysis
-
-## Getting Started!
-
-When integrated with the PUT Platform Shell:
-
-```typescript
-// Host application imports the module
-const ChecksModule = React.lazy(() => import('checks/ChecksModule'));
-
-// Module provides routing for /checks/* paths
-<Route path="/checks/*" element={<ChecksModule />} />
-```
-
-The module automatically detects federated mode and adapts its layout accordingly.
-
----
-
-This implementation provides a high-fidelity prototype that demonstrates all core concepts and is ready for integration testing with the host application.
+| Layer | Phase | Notes |
+|---|---|---|
+| Frontend | **Phase 1 — Prototype (MSW-mocked)** | Ready for stakeholder demos |
+| Backend | **Phase 2 — Spec Pipeline** | See `docs/specs/backend/` |

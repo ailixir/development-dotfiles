@@ -4,9 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**PUT Checks Module** is a React micro-frontend module for the Production Unified Toolkit (PUT) platform at Citibank. It serves as the centralized orchestration and standardization layer for operational health monitoring, integrating with existing tools like ITRS, Splunk, Grafana, and AppDynamics without replacing them.
+**Project "Checks"** is a monorepo containing a React micro-frontend and a Java 21 / Spring Boot 3 backend for the Production Unified Toolkit (PUT) platform at Citibank. It is the centralized orchestration and standardization layer for operational health monitoring, integrating with ITRS, Splunk, Grafana, and AppDynamics without replacing them.
 
 **Key Organizing Principle:** All checks are associated with the Citi System Inventory (CSI) as the primary categorization system.
+
+### Repository Layout
+
+```
+put-checks/
+├── frontend/        # React 18 + TypeScript MFE (MSW-mocked; Phase 1)
+├── backend/         # Java 21 + Spring Boot 3 + Gradle KTS (Phase 2 — in development)
+├── docs/            # AIOS stories, specs, architecture
+├── PRD.md           # Product Requirements (v2.2)
+├── ARCH.md          # Technical Architecture
+└── CLAUDE.md        # (this file)
+```
+
+Almost all FE commands below must be run from `frontend/`. Backend commands run from `backend/`.
 
 ## Architecture
 
@@ -28,29 +42,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Common Development Commands
 
-### Setup and Development
+### Frontend (run from `frontend/`)
 ```bash
-# Initial setup (recommended)
-./scripts/setup.sh
+cd frontend/
 
-# Manual setup
+# Setup
 npm install
 npm run msw:init
 
 # Development servers
-npm run dev          # Standalone mode (port 5173)
-npm run dev:fed      # Federated mode (port 3002)
+npm run dev              # Webpack/Module Federation (port 3002)
+npm run dev:standalone   # Vite standalone (port 5173)
+
+# Quality
+npm run type-check
+npm run lint
+npm run lint:fix
+
+# Tests
+npm run test             # Vitest
+npm run test:ui
+npm run test:e2e         # Cypress
 ```
 
-### Code Quality and Testing
+### Backend (run from `backend/`)
 ```bash
-npm run type-check   # TypeScript validation
-npm run lint         # ESLint checking
-npm run lint:fix     # Auto-fix lint issues
+cd backend/
 
-npm run test         # Unit tests with Vitest
-npm run test:ui      # Test UI
-npm run test:e2e     # Cypress E2E tests
+./gradlew bootRun        # Spring Boot :8080 (local profile → Zonky embedded Postgres)
+./gradlew test           # JUnit 5 + Testcontainers
+./gradlew check          # Full build gate (spotless, checkstyle, spotbugs, jacoco)
 ```
 
 ## Development Approach
@@ -61,7 +82,7 @@ npm run test:e2e     # Cypress E2E tests
 - Full functionality testing with realistic data
 - Stakeholder demos before backend completion
 
-Mock handlers are located in `src/services/mocks/` and provide realistic API responses for all check types, CSI data, and execution results.
+Mock handlers are located in `frontend/src/services/mocks/` and provide realistic API responses for all check types, CSI data, and execution results.
 
 ### Module Federation Integration
 The module exposes `./ChecksModule` via Module Federation and integrates with the PUT Platform Shell using:
@@ -97,7 +118,7 @@ The module exposes `./ChecksModule` via Module Federation and integrates with th
 ## Code Organization
 
 ```
-src/
+frontend/src/
 ├── components/
 │   ├── layout/              # Adaptive layouts (LayoutProvider, ChecksLayout)
 │   ├── common/              # Shared components
@@ -108,6 +129,9 @@ src/
 │   └── mocks/              # MSW API mocking
 ├── types/                  # TypeScript definitions
 └── utils/                  # Utilities & configuration
+
+backend/src/main/java/com/citi/put/checks/   # bounded contexts (csi, checks, scheduling, …)
+backend/src/main/resources/db/migration/     # Flyway forward-only SQL
 ```
 
 ### Environment Configuration
