@@ -1,11 +1,12 @@
 # Backend Specification — Project "Checks" (v2.2, Phase 2)
 
-> **Spec Pipeline Phase 4 output, Phase 5 revision applied.** Owner: `@pm (Morgan)` with architectural input from `@architect (Aria)` and research from `@analyst (Alex)`.
-> **Inputs:** [`requirements.json`](./requirements.json) · [`complexity.json`](./complexity.json) (22/25 COMPLEX) · [`research.json`](./research.json) · [`critique.json`](./critique.json) (v1 NEEDS_REVISION → v2 revisions applied)
+> **Spec Pipeline Phase 4 output, Phase 5 revision + auth-correction applied.** Owner: `@pm (Morgan)` with architectural input from `@architect (Aria)` and research from `@analyst (Alex)`.
+> **Inputs:** [`requirements.json`](./requirements.json) · [`complexity.json`](./complexity.json) (22/25 COMPLEX) · [`research.json`](./research.json) · [`critique.json`](./critique.json) · `put-platform-shell/docs/content/docs/architecture/authentication.md` (auth source of truth)
 > **Constitutional Gate (Article IV — No Invention):** every non-obvious statement in this document carries an inline trace reference like `[FR-CHK-03]`, `[NFR-AVAIL-01]`, `[CON-STACK-07]`, `[PW-R1]`, `[PRD §5.2]`, or `[ARCH §4.2]`. Statements without a trace are either direct consequences of a preceding traced statement or standard Spring Boot / Java idioms.
 > **Revision history:**
 > - 2026-04-16 v1 — initial spec (commit `868fc731b`).
 > - 2026-04-17 v2 — revision pass addressing `critique.json` REV-01..06 + 13 IMP-* items. Added: §6.4 Bulk Operations, §6.5 Rate Limiting, §13.6 SLO Validation, R-08 JWT claim risk, FR-BULK-01 (retroactive), NFR-SEC-04 (new). Tightened: semaphore/KEDA justifications, live-preview SLO, cache hit-rate target, M6 load-test acceptance, parseSteps port call-out, virtual-thread exception note, video-processing-elimination call-out, log retention, pagination (cursor for partitioned tables).
+> - 2026-04-17 v3 — **auth-model correction (DEBT-04).** Platform uses BFF session-cookie pattern (per `put-platform-shell` authoritative auth doc), NOT direct COIN OIDC JWT validation. Replaced: §7.1 BFF Session Authentication (cookie introspection via Core), §7.2 Authorization (CsiOwnershipEvaluator reads identity from `/users/me` response, permissions via `/authz/check` or `/users/me/permissions`), §2 system context, §11 integrations (removed COIN OIDC as direct dependency — now via Core), §15 added DEBT-04, §16 R-08 reframed, stories 1.4/1.5 retitled + rescoped.
 
 ---
 
@@ -15,11 +16,12 @@ The backend is a Java 21 + Spring Boot 3.3+ application `[CON-STACK-01, CON-STAC
 
 ### What changes vs. `ARCH.md`
 
-Three amendments emerged during Phases 2-3 and are embodied in this spec (see §15 ARCH Debt Resolved):
+Four amendments emerged during Phases 2-3 + the v3 auth correction, embodied in this spec (see §15 ARCH Debt Resolved):
 
 1. **`DEBT-01`** — Checks Studio browser automation is **Playwright (Java binding) bundled in the same backend container, scaled horizontally via K8s replicas**. NOT Selenium Grid, NOT a dedicated studio-runner StatefulSet, NOT a cloud Playwright service. (User constraint, 2026-04-16.)
 2. **`DEBT-02`** — `tags` and `secrets` tables have **indefinite retention**. Expired secret references fail at execution-time rather than being deleted (preserves audit trail).
 3. **`DEBT-03`** — **Dedicated `/api/v1/schedules` endpoint group** (not inline with `/checks`). `GET /checks/{id}` still embeds schedule read-only for client convenience.
+4. **`DEBT-04`** — Authentication uses the platform **BFF session-cookie model** (opaque `put_session` HttpOnly cookie + Core service introspection), NOT direct COIN OIDC JWT validation in this backend. ARCH §4.1 stack row "spring-boot-starter-oauth2-resource-server" no longer applies to user auth; kept only for any future service-to-service COIN M2M path (currently not required). (User surfaced the platform auth doc, 2026-04-17.)
 
 ### Key architectural tenets (re-asserted)
 
@@ -62,27 +64,38 @@ All 37 Functional Requirements and 22 Non-Functional Requirements from `requirem
 
 ```
                                 ┌─────────────────────────┐
-                                │  Enterprise OIDC issuer │
+                                │  COIN OIDC (SSO)        │
                                 └──────────┬──────────────┘
-                                           │  JWT validation
-┌───────────────┐   JWT + JSON   ┌─────────▼─────────────┐
-│  React MFE    │ ─────────────▶ │   Spring Boot 3.3     │
-│  (frontend/)  │ ◀───────────── │  (backend/)           │
-└───────────────┘                │  Java 21 + Virtual    │
-                                 │  Threads              │
-                                 │                       │
-                                 │  ┌──── REST handlers   │───▶ PostgreSQL 15 (RDS)
-                                 │  ├──── @Async exec     │◀── S3 (UI test videos)
-                                 │  ├──── @Scheduled      │◀── Vault (K8s auth, KV v2)
-                                 │  └──── Playwright pool │◀── SMTP relay
-                                 └───────────┬───────────┘
-                                             │
-                    Outbound integrations ───┼───────────────────────────────────
-                                             │
+                                           │  code+PKCE exchange
+                                           ▼
+                                ┌─────────────────────────┐
+                                │  Core Service (BFF)     │
+                                │  — put-platform-shell   │
+                                │  — owns OIDC dance      │
+                                │  — mints put_session    │
+                                │  — /users/me, /permissions
+                                │  — /authz/check         │
+                                └──────────┬──────────────┘
+                                           │  cookie introspection
+                                           │  (checks backend → Core)
+┌───────────────┐  cookie only  ┌─────────▼─────────────┐
+│  React MFE    │ ─────────────▶│   Spring Boot 3.3     │
+│  (frontend/)  │ ◀─────────────│  (backend/)           │
+│  put_session  │               │  Java 21 + Virtual    │
+│  HttpOnly     │               │  Threads              │
+└───────────────┘               │                       │
+                                │  ┌──── REST handlers   │───▶ PostgreSQL 15 (RDS)
+                                │  ├──── @Async exec     │◀── S3 (UI test videos)
+                                │  ├──── @Scheduled      │◀── Vault (K8s auth, KV v2)
+                                │  └──── Playwright pool │◀── SMTP relay
+                                └───────────┬───────────┘
+                                            │
+                   Outbound integrations ───┼───────────────────────────────────
+                                            │
           CSI API   Splunk   Grafana   ITRS Geneos   AppDynamics
 ```
 
-**Nine integration surfaces** drive complexity-dimension `integration = 5/5` from `complexity.json`. Each gets a circuit breaker + bounded timeout in §11.
+**Auth surface is the Core BFF** (not COIN directly). COIN is reached only by Core — put-checks backend never talks to COIN. Nine outbound integrations remain (CSI, Splunk, Grafana, ITRS, AppD, Vault, SMTP, S3, **Core service**) — each gets a circuit breaker + bounded timeout in §11.
 
 ---
 
@@ -403,36 +416,172 @@ Admins (`roles=['checks-admin']`) have 10× multipliers on all buckets.
 
 ## 7. Security
 
-### 7.1 Authentication
+### 7.1 BFF Session Authentication (DEBT-04 — NOT direct COIN OIDC)
 
-`spring-boot-starter-oauth2-resource-server` with JWT validation `[CON-STACK-02, FR-AUTH-01, ARCH §4.1]`. Issuer URI configured per environment:
+The platform uses a **BFF (Backend-for-Frontend) session-cookie model** documented authoritatively in `put-platform-shell/docs/content/docs/architecture/authentication.md`. The Core service (part of the PUT platform shell) owns the OIDC dance with COIN + PingFederate + AD; it stores refresh tokens encrypted server-side and issues an **opaque HTTP-only `put_session` cookie** (default name). **No COIN JWTs ever reach the browser or put-checks backend.**
 
-```yaml
-spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${CHECKS_OIDC_ISSUER}    # resolved from K8s ConfigMap
+**put-checks backend MUST NOT:**
+- Include `spring-boot-starter-oauth2-resource-server` for user auth (it validates COIN JWTs that never arrive).
+- Perform any OIDC redirect, code exchange, or callback handling — that's Core's exclusive concern.
+- Accept or issue JWTs to the browser.
+- Fall back to a demo/mock identity on auth errors.
+
+**put-checks backend MUST:**
+- Accept the same `put_session` cookie the browser sends to the shell.
+- Resolve user identity via Core's introspection endpoints (same cookie forwarded).
+- Return `401` (plain, no challenge) on missing/invalid session — the FE emits `put:auth:unauthorized` and the shell redirects to Core's `/api/v1/auth/login`.
+- On `5xx` from Core: surface "Authentication temporarily unavailable" behavior (no demo fallback).
+
+#### 7.1.1 BffSessionAuthenticationFilter
+
+A Spring `OncePerRequestFilter` ordered before `UsernamePasswordAuthenticationFilter`:
+
+```java
+@Component
+public class BffSessionAuthenticationFilter extends OncePerRequestFilter {
+    private final CoreServiceClient core;
+    private final Cache<String, UserIdentity> identityCache; // Caffeine, 60s TTL, max 10_000
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+            throws ServletException, IOException {
+
+        // 0. CORS preflight never carries cookies — never enforce auth
+        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) { chain.doFilter(req, res); return; }
+
+        // 1. Phase-2 forward-compat: trust auth-gateway-injected headers if present
+        //    (e.g., Envoy sidecar in service-mesh rollout — platform-shell/PHASE_2.md)
+        UserIdentity user = tryGatewayHeaders(req);
+
+        // 2. Phase-1 default: introspect session via Core (cookie forwarded)
+        if (user == null) user = tryCookieIntrospection(req);
+
+        if (user != null) {
+            var auth = user.toAuthentication();
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            chain.doFilter(req, res);
+            return;
+        }
+
+        // 3. Unauthenticated — FE listens for 401 and dispatches put:auth:unauthorized
+        res.setStatus(HttpStatus.UNAUTHORIZED.value());
+        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        res.getWriter().write("""
+            {"error":{"code":"UNAUTHENTICATED","message":"Session required","traceId":"%s"}}
+            """.formatted(MDC.get("traceId")));
+    }
+
+    private UserIdentity tryGatewayHeaders(HttpServletRequest req) {
+        var userId = req.getHeader("X-User-Id");
+        if (userId == null || userId.isBlank()) return null;
+        return UserIdentity.fromHeaders(
+            userId,
+            req.getHeader("X-User-Email"),
+            parseCsv(req.getHeader("X-User-Roles")),
+            parseCsv(req.getHeader("X-User-Csi-Ownership"))
+        );
+    }
+
+    private UserIdentity tryCookieIntrospection(HttpServletRequest req) {
+        var sessionCookie = extractCookie(req, "put_session");
+        if (sessionCookie == null) return null;
+        return identityCache.get(sessionCookie, key -> {
+            try {
+                return core.getUserMe(key); // GET /api/v1/users/me with Cookie: put_session=...
+            } catch (CoreServiceUnauthorizedException e) {
+                return null;
+            } catch (CoreServiceUnavailableException e) {
+                throw new AuthTemporarilyUnavailableException(e);
+            }
+        });
+    }
+}
 ```
 
-On each request, Spring Security fetches JWKS (cached per issuer), validates signature + `exp` + `aud`, and populates `SecurityContextHolder` with a `JwtAuthenticationToken`.
+**Design notes:**
+- **Cache TTL 60s** — short enough to catch Core-side session revocation within one minute, long enough to avoid per-request Core calls. Configurable per env.
+- **Caffeine key is the cookie value** — natural boundary; cookie rotation invalidates automatically.
+- **5xx → `AuthTemporarilyUnavailableException`** → ControllerAdvice maps to HTTP `503` + `Retry-After: 5` (matches AUTH_FLOW.md error rule "do not fall back to any demo identity").
+- **Phase-2 forward-compat**: when the platform eventually rolls out Envoy sidecars (per `put-platform-shell/PHASE_2.md`), trusted headers short-circuit the Core call — same filter, no rewrite.
 
-### 7.2 Authorization (RBAC)
+#### 7.1.2 CORS — same-origin preferred, allowlist for cross-origin
 
-Method-level `@PreAuthorize` expressions `[FR-AUTH-02, ARCH §4.5]` referencing a custom `CsiOwnershipEvaluator` bean:
+Per the platform auth doc §"Modules calling separate API origins":
+- **Default deployment**: same-origin with the shell via nginx proxy → no CORS config needed on the backend.
+- **Separate origin deployment**: CORS with `allow_credentials=true`, explicit origin allowlist (never `*`), and `OPTIONS` exempt from auth (handled in 7.1.1 step 0).
+
+```java
+@Bean
+public CorsConfigurationSource corsConfigurationSource(
+        @Value("${checks.cors.allowed-origins:}") List<String> allowedOrigins) {
+    var config = new CorsConfiguration();
+    config.setAllowedOrigins(allowedOrigins);      // no wildcard — explicit shell hosts
+    config.setAllowCredentials(true);              // required for cookie forwarding
+    config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+    config.setAllowedHeaders(List.of("Authorization","Content-Type","Idempotency-Key","X-Requested-With"));
+    config.setExposedHeaders(List.of("Retry-After","X-RateLimit-Remaining","Location"));
+    var source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/api/**", config);
+    return source;
+}
+```
+
+#### 7.1.3 CoreServiceClient
+
+A typed client (Spring 6 `RestClient` `[CON-STACK-11]`) calling Core's public API:
+- `GET /api/v1/users/me` — returns `UserIdentity` (user_id, email, name, department, csi_ownership list, roles).
+- `GET /api/v1/users/me/permissions` — returns `{permissions: [...], roles: [...]}` (consumed lazily; see §7.2.2).
+- `POST /api/v1/authz/check` — returns `{allowed: bool}` for a named permission (e.g., `checks.monitors.edit`).
+
+All three carry the incoming `Cookie: put_session=...` header verbatim. Protected with Resilience4j `@CircuitBreaker(name = "core-service")` + `@Retry(name = "core-service")` — 2s connect / 3s read / 3 retries with exp backoff.
+
+### 7.2 Authorization
+
+Authorization has two layers, reflecting the platform's defense-in-depth model (`put-platform-shell/RBAC_PROFILING_PROPOSAL.md §line 87`):
+
+#### 7.2.1 CSI ownership (embedded in session identity)
+
+`CsiOwnershipEvaluator` reads the `csi_ownership` field of the resolved `UserIdentity` (populated by §7.1.1 — either from the `/users/me` response or from the `X-User-Csi-Ownership` gateway header). Method-level `@PreAuthorize`:
 
 ```java
 @PreAuthorize("@csiOwnershipEvaluator.canWrite(authentication, #checkId)")
 public Check updateCheck(UUID checkId, CheckUpdateRequest req) { ... }
 ```
 
-The evaluator reads:
-1. The JWT's `citi_csi_claims` array (CSI IDs the user owns — schema TBD with platform team).
+The evaluator resolves:
+1. The authenticated user's CSI ownership list (from the session).
 2. The check's `csi_id` from the repository.
-3. The operation (read / write / execute / admin).
+3. The operation type (read / write / execute / admin).
 
-Admins are users whose JWT has `roles=['checks-admin']` — they bypass CSI ownership checks.
+Admins (`roles` contains `checks-admin` or `platform-admin`) bypass CSI ownership checks.
+
+#### 7.2.2 Permission-name checks (optional per-endpoint, via Core `/authz/check`)
+
+For endpoints that require a specific **named permission** beyond CSI ownership (e.g., `checks.bulk.execute`, `reports.schedule`), use a custom `@RequiresPermission("checks.bulk.execute")` annotation evaluated by a `PermissionAspect` that calls Core's `POST /api/v1/authz/check` and short-circuits on `allowed=false`.
+
+Results cached per (userId, permission) for 60s in Caffeine — matches the identity-cache TTL so session/permission changes propagate consistently.
+
+**Why two layers?** CSI ownership is row-level (data-scoped) and must be evaluated against the specific resource. Permission names are endpoint-level (capability-scoped) and come from Core's `ad_group_role_mappings` → `role_permissions` tables — the platform's authoritative RBAC source of truth (`CORE_SERVICE_DATA_MODEL.md`).
+
+#### 7.2.3 Identity contract with Core (blocker — see R-08)
+
+The exact shape of the `/api/v1/users/me` response's `csi_ownership` field is **owned by the Core service team** (peer repo `put-platform-shell`). This spec assumes a minimal shape:
+
+```json
+{
+  "user_id": "alice@citi.com",
+  "email": "alice@citi.com",
+  "name": "Alice",
+  "department": "Citi Ops",
+  "roles": ["checks-operator"],
+  "csi_ownership": [
+    { "csi_id": "174523", "role": "owner" },
+    { "csi_id": "99887",  "role": "contributor" }
+  ]
+}
+```
+
+If the Core team has a different shape (e.g., a flat `["174523","99887"]` or a nested org-context object per `RBAC.md §8.2`), an adapter in `CoreServiceClient` normalizes to `UserIdentity`. **M1 sprint-1 blocker story 1.4 finalizes this contract** with the Core team before `@PreAuthorize` wiring.
 
 ### 7.3 Secrets (Vault K8s auth)
 
@@ -795,7 +944,8 @@ Stored in `application.yml` under `checks.integrations.<name>.*`. Per-env overri
 | Integration | Client | Auth | Timeout budget | Circuit breaker | Used by |
 |---|---|---|---|---|---|
 | CSI API | Spring `RestClient` `[CON-STACK-11]` | mTLS / static token (via Vault) | 2s connect / 5s read | Resilience4j, fallback: cached CSI read | `CsiService` |
-| Enterprise OIDC | Spring Security JWKS | no auth (public key) | 3s | library-default | Every request |
+| **Core service (BFF auth)** `[DEBT-04]` | Spring `RestClient` | Cookie forwarding (`put_session`) | 2s connect / 3s read | `@CircuitBreaker("core-service")` + Caffeine 60s identity cache (§7.1.3) | `BffSessionAuthenticationFilter`, `PermissionAspect` |
+| ~~Enterprise OIDC~~ | — | — | — | — | **N/A — handled by Core; put-checks backend never calls COIN** |
 | HashiCorp Vault | `VaultTemplate` | K8s service-account JWT `[HV-03]` | 1s connect / 3s read | `@CircuitBreaker("vault")` `[HV-R4]` | `SecretResolver` |
 | SMTP | `JavaMailSender` | Relay auth (optional) | 30s | Retry 3× exp backoff | `ReportDispatcher` |
 | Splunk | `RestClient` | Vault-resolved token | 5s connect / 60s read (SPL queries can be slow) | `@CircuitBreaker("splunk")` | `SplunkCheckExecutor` |
@@ -962,6 +1112,24 @@ PATCH  /schedules/{id}/enabled         # Toggle enabled
 DELETE /schedules/{id}                 # Delete schedule
 ```
 
+### DEBT-04 — Authentication uses platform BFF session (not direct COIN JWT)
+
+`ARCH §4.1 Technology Stack` lists `spring-boot-starter-oauth2-resource-server` under Security — this is **not applicable** to put-checks user authentication. The PUT platform uses a BFF session-cookie model owned by the Core service (`put-platform-shell`); module backends receive the same `put_session` cookie and resolve identity via Core's introspection endpoints (`GET /api/v1/users/me`, `POST /api/v1/authz/check`), not by validating COIN OIDC JWTs directly.
+
+**Change ARCH §4.1 Security row to:**
+> Security — Spring Security web (filter chain) + custom `BffSessionAuthenticationFilter` performing session-cookie introspection against Core service; `spring-boot-starter-oauth2-resource-server` **only kept** for future service-to-service COIN M2M flows if needed (currently unused).
+
+**Change ARCH §6 to reference** `put-platform-shell/docs/content/docs/architecture/authentication.md` as the platform-wide source of truth; put-checks backend is a downstream consumer.
+
+**Change ARCH §12.3 Authentication to:**
+> Method: HTTP-only session cookie `put_session` issued by Core (platform shell). Module backends resolve identity via Core's `/api/v1/users/me` using the forwarded cookie. No browser-held JWTs. Refresh tokens live only inside Core, encrypted at rest.
+
+Sources:
+- `put-platform-shell/docs/content/docs/architecture/authentication.md` (authoritative platform auth doc)
+- `put-platform-shell/AUTH_FLOW.md`
+- `put-platform-shell/AUTH_GATEWAY_DATA_MODEL.md`
+- `put-platform-shell/RBAC_PROFILING_PROPOSAL.md` (defense-in-depth, `/authz/check`)
+
 ---
 
 ## 16. Open Risks (carry-forward)
@@ -975,7 +1143,7 @@ DELETE /schedules/{id}                 # Delete schedule
 | **R-05** | Multi-replica scheduler race on partition DETACH `[PG-R5]`. | ShedLock integrated at M2 (not M6) specifically to cover this. | M2 |
 | **R-06** | RDS parameter-group / extension allowlist differences from Zonky + Testcontainers `[ZK-06, ZK-08]`. | RDS-parity lint (§13.2) + staging run before prod promote on every release. | M1 (lint added) |
 | **R-07** | Host PUT platform may inject different Jackson `ObjectMapper` `[MS-07]`, bypassing `@JsonSubTypes` registration. | Federated-mode integration test (M5) asserts polymorphic JSON roundtrip works when module is loaded by the host. | M5 |
-| **R-08** | **JWT claim schema for CSI ownership (`citi_csi_claims`) is TBD with the enterprise identity platform team** `[REV-06, §7.2]`. Blocks `@PreAuthorize` implementation at M1. | Platform-team engagement as first task of M1 sprint 1. Fallback: stubbed local claim for dev/staging, production rollout blocked on real schema contract. | M1 (sprint 1) |
+| **R-08** | **Identity contract with Core service** `[DEBT-04, §7.1, §7.2.3]` — the exact shape of `GET /api/v1/users/me` response (particularly the `csi_ownership` field) is owned by the Core team in `put-platform-shell`. Blocks `CsiOwnershipEvaluator` + `@PreAuthorize` wiring at M1. | Core-team engagement as first task of M1 sprint 1 (story 1.4). Fallback: stub `CoreServiceClient` with a well-defined mock identity shape for dev/staging; production cutover gated on the finalized contract. Adapter in `CoreServiceClient` isolates spec changes. | M1 (sprint 1) |
 
 ---
 
@@ -1081,6 +1249,8 @@ Every claim in this specification traces to at least one of:
 
 Where this spec **extends** `ARCH.md` (the 3 DEBT items in §15), the extension is explicitly labeled and carries its origin trace back to either a user decision (OQ-02, OQ-04) or an @architect proposal (OQ-03, OQ-05).
 
-**Signed:** `@pm (Morgan)` · v1 2026-04-16 · v2 2026-04-17 · inputs at commits `2e5552def` (requirements), `08cde6fc0` (complexity), `20740b686` (research), `49cc591e4` (critique v1).
+**Signed:** `@pm (Morgan)` · v1 2026-04-16 · v2 2026-04-17 · v3 2026-04-17 · inputs at commits `2e5552def` (requirements), `08cde6fc0` (complexity), `20740b686` (research), `49cc591e4` (critique v1), `08c3f7ec7` (critique v2 APPROVED).
 
-**Next step:** re-critique by `@qa (Quinn)` verifies revisions address REV-01..06. Expected verdict: APPROVED → Phase 6 `implementation.yaml` by `@architect`.
+**v3 addendum:** Auth-model correction (DEBT-04) applied after user surfaced `put-platform-shell/docs/content/docs/architecture/authentication.md` as the authoritative platform auth doc. §7.1, §7.2, §2 system context, §11 integrations, §15 DEBT-04, §16 R-08 rewritten to reflect BFF session-cookie pattern. Stories 1.4 and 1.5 retitled in `implementation.yaml`; story 6.8 runbook list extended with CORS/cookie ops. No change to research.json (findings were stack-level, auth-model-independent). No change to complexity.json (dimension scores unchanged — identity-from-Core vs identity-from-JWT is an implementation swap inside the `integration` dimension, not a new dimension).
+
+**Next step:** `@architect` re-emits `implementation.yaml` patch for stories 1.4/1.5/6.8 (sibling task). Then Phase 6 remains closed; pipeline handed off to `@pm *create-epic` for EPIC-01.

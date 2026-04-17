@@ -402,5 +402,57 @@
     "revised_verdict_rationale": "All 6 REV-* items addressed with verifiable evidence in spec.md v2. All 13 IMP-* improvements applied. No new issues introduced. Average score climbed from 4.02 → 4.58 with no dimension below 4.5. Spec is implementation-ready. Cleared for Phase 6 (@architect implementation.yaml).",
     "signed_at": "2026-04-17",
     "signed_by": "@qa (Quinn)"
+  },
+
+  "v3_auth_correction_review": {
+    "reviewed_at": "2026-04-17",
+    "reviewer": "@qa (Quinn)",
+    "trigger": "User surfaced put-platform-shell/docs/content/docs/architecture/authentication.md on 2026-04-17 as the authoritative platform auth doc. Spec v2 §7.1/§7.2 described direct COIN OIDC JWT validation — inconsistent with the platform's BFF session-cookie model.",
+    "sources_verified": [
+      "put-platform-shell/docs/content/docs/architecture/authentication.md (authoritative)",
+      "put-platform-shell/AUTH_FLOW.md",
+      "put-platform-shell/AUTH_GATEWAY_DATA_MODEL.md",
+      "put-platform-shell/RBAC_PROFILING_PROPOSAL.md",
+      "put-platform-shell/COIN.md",
+      "put-platform-shell/PHASE_2.md (forward-compat Envoy mesh)"
+    ],
+    "corrections_applied": [
+      "spec.md §0 revision-history line added for v3.",
+      "spec.md §0 Executive Summary: added DEBT-04 bullet.",
+      "spec.md §2 System Context: replaced 'Enterprise OIDC issuer' with 'COIN OIDC (SSO)' + 'Core Service (BFF)' boxes; browser carries cookie only; backend introspects via Core.",
+      "spec.md §7.1 rewritten as 'BFF Session Authentication' with BffSessionAuthenticationFilter code, Caffeine 60s identity cache, OPTIONS exemption, X-User-* forward-compat, 5xx → AuthTemporarilyUnavailable behavior.",
+      "spec.md §7.1.2 added CORS config with explicit shell-origin allowlist + allow_credentials.",
+      "spec.md §7.1.3 added CoreServiceClient spec (3 endpoints + Resilience4j).",
+      "spec.md §7.2 rewritten as two-layer authorization: CSI ownership (from session) + permission-names (via /authz/check).",
+      "spec.md §7.2.3 added identity contract (R-08) with sample shape and adapter note.",
+      "spec.md §11 integrations table: Core service added; Enterprise OIDC row struck out as N/A.",
+      "spec.md §15 added DEBT-04 with ARCH delta instructions for §4.1, §6, §12.3.",
+      "spec.md §16 R-08 reframed from 'JWT claim schema' to 'BFF identity contract with Core'.",
+      "spec.md §19 attestation updated with v3 signature line.",
+      "requirements.json FR-AUTH-01/02/03 descriptions rewritten; traces updated to cite platform-shell docs.",
+      "implementation.yaml story 1.4 retitled 'BFF identity-propagation contract with Core team'; scope + acceptance criteria rewritten.",
+      "implementation.yaml story 1.5 retitled 'BffSessionAuthenticationFilter + CoreServiceClient + CsiOwnershipEvaluator'; grew from M to L; split_hint added.",
+      "implementation.yaml story 6.8 runbook list extended with docs/runbooks/bff-auth.md.",
+      "implementation.yaml size_distribution updated (M -1, L +1).",
+      "implementation.yaml risk_retirement_schedule R-08 description updated."
+    ],
+    "no_change_required": [
+      "research.json — findings were stack-level (Spring Boot virtual threads, Playwright, Vault, partitioning, Zonky, MapStruct) and auth-model-independent. Vault findings still apply because secret resolution is backend-to-Vault, not user-auth.",
+      "complexity.json — dimension scores unchanged. Identity-from-Core vs identity-from-JWT is an implementation swap inside the 'integration' dimension (already 5/5); does not add a new dimension.",
+      "spec.md §7.3 Secrets (Vault) — unchanged, Vault is for backend secret resolution, orthogonal to user auth.",
+      "spec.md §7.4 Secret expiry — unchanged."
+    ],
+    "revised_scores": {
+      "accuracy": 4.8,
+      "completeness": 4.5,
+      "consistency": 4.7,
+      "testability": 4.5,
+      "clarity": 4.6
+    },
+    "revised_average": 4.62,
+    "revised_verdict": "APPROVED",
+    "revised_verdict_rationale": "Auth-model correction applied with full traceability to platform-shell authoritative docs. Accuracy improved (+0.2) because the spec now matches the platform contract verbatim; consistency slightly down (-0.1) from adding a fourth DEBT item but offset by the explicit §15 delta instructions pointing back to the amended ARCH sections. No new blockers. Spec v3 is implementation-ready.",
+    "signed_at": "2026-04-17",
+    "signed_by": "@qa (Quinn)"
   }
 }

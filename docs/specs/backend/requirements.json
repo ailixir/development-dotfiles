@@ -355,35 +355,39 @@
     },
     {
       "id": "FR-AUTH-01",
-      "title": "Validate enterprise OIDC JWT on every request",
-      "description": "Every authenticated endpoint validates a Bearer JWT against the enterprise OIDC issuer via spring-boot-starter-oauth2-resource-server.",
+      "title": "Authenticate every request via platform BFF session cookie",
+      "description": "Every authenticated endpoint resolves user identity via the platform BFF session (put_session cookie introspection against Core service at /api/v1/users/me, with forward-compat for Envoy-injected X-User-* headers). NOT direct COIN OIDC JWT validation — that is Core's exclusive concern. See spec.md §7.1 and put-platform-shell/docs/content/docs/architecture/authentication.md.",
       "milestone": "M1",
+      "revision_in": "2026-04-17 v3 auth correction (DEBT-04)",
       "traces": [
         { "source": "PRD", "ref": "§7 SSO integration" },
-        { "source": "ARCH", "ref": "§4.1 Spring Security + oauth2-resource-server" },
-        { "source": "ARCH", "ref": "§6 Authentication" },
-        { "source": "ARCH", "ref": "§12.3 Bearer token JWT" }
+        { "source": "platform-shell", "ref": "docs/content/docs/architecture/authentication.md (authoritative)" },
+        { "source": "platform-shell", "ref": "AUTH_FLOW.md" },
+        { "source": "spec.md", "ref": "§7.1 BFF Session Authentication" }
       ]
     },
     {
       "id": "FR-AUTH-02",
-      "title": "RBAC by CSI ownership",
-      "description": "Method-level @PreAuthorize enforces that actions on a check/report scope to CSI ownership claims in the JWT.",
+      "title": "RBAC by CSI ownership + permission-name checks",
+      "description": "Method-level @PreAuthorize with CsiOwnershipEvaluator uses the csi_ownership field of the resolved UserIdentity (from Core's /users/me response or X-User-Csi-Ownership gateway header). Endpoint-level permission-name checks (e.g., checks.bulk.execute) via @RequiresPermission annotation that delegates to Core's /api/v1/authz/check.",
       "milestone": "M1",
+      "revision_in": "2026-04-17 v3 auth correction (DEBT-04)",
       "traces": [
         { "source": "PRD", "ref": "§7 RBAC based on user roles and application ownership" },
-        { "source": "ARCH", "ref": "§4.5 @PreAuthorize on CSI ownership" },
-        { "source": "ARCH", "ref": "§6 Authorization" }
+        { "source": "platform-shell", "ref": "RBAC_PROFILING_PROPOSAL.md §Defense in Depth" },
+        { "source": "spec.md", "ref": "§7.2 Authorization" }
       ]
     },
     {
       "id": "FR-AUTH-03",
-      "title": "User provisioning from JWT claims",
-      "description": "On first-seen JWT, insert into users(sso_id, name, email, department); subsequent auths update last_login.",
+      "title": "User provisioning from Core-service identity",
+      "description": "On first-seen session, upsert into users(sso_id, name, email, department) using fields from the Core /api/v1/users/me response; subsequent auths update last_login. Local users table mirrors platform identity for FK integrity on created_by columns — it is NOT an alternate identity store.",
       "milestone": "M1",
+      "revision_in": "2026-04-17 v3 auth correction (DEBT-04)",
       "traces": [
-        { "source": "ARCH", "ref": "§4.3 users/ package (User provisioning from JWT claims)" },
-        { "source": "ARCH", "ref": "§7.1 users table" }
+        { "source": "ARCH", "ref": "§4.3 users/ package" },
+        { "source": "ARCH", "ref": "§7.1 users table" },
+        { "source": "spec.md", "ref": "§3.1 users/" }
       ]
     },
     {
