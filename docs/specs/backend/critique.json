@@ -1,0 +1,329 @@
+{
+  "$schema": "aios://spec-pipeline/critique/v1",
+  "spec_id": "backend-v2.2",
+  "phase": "critique",
+  "generated_by": "@qa (Quinn)",
+  "generated_at": "2026-04-16",
+  "inputs": {
+    "spec_file": "./spec.md",
+    "spec_commit": "868fc731b",
+    "spec_line_count": 928,
+    "spec_trace_references": 91,
+    "verified_against": [
+      "./requirements.json",
+      "./complexity.json",
+      "./research.json",
+      "../../../PRD.md",
+      "../../../ARCH.md"
+    ]
+  },
+
+  "methodology": {
+    "approach": "Independent adversarial review. Every FR/NFR from requirements.json cross-checked against spec.md coverage. Open questions flagged in earlier phases re-verified as closed. Internal consistency checked for contradictions between sections. Specific attention paid to testability of claims and clarity for a downstream @dev agent.",
+    "reviewer_bias_disclosure": "Reviewer has not participated in Phases 1-4 authoring decisions and is incentivized to find gaps (per AIOS QA gate protocol)."
+  },
+
+  "dimensions": {
+    "accuracy": {
+      "score": 4.2,
+      "max": 5.0,
+      "summary": "Spec faithfully reflects PRD/ARCH/requirements/research. Trace references are accurate. Minor unjustified magic numbers.",
+      "positives": [
+        "All 3 ARCH debts (DEBT-01/02/03) resolved with explicit before/after deltas in §15.",
+        "91 inline trace references to FR-/NFR-/CON-/research IDs — genuinely exceeds the Article IV bar.",
+        "§9 Playwright section accurately reflects the user's 2026-04-16 constraint (same container, horizontal scale).",
+        "§8.2 partition DDL is a correct PG 15 example (IF NOT EXISTS + declarative PARTITION OF).",
+        "§7.3 Vault K8s auth config matches spring-cloud-vault's documented properties verbatim (HV-04 trace verified)."
+      ],
+      "issues": [
+        {
+          "id": "ACC-01",
+          "severity": "minor",
+          "section": "§4.2",
+          "finding": "checkExecutor semaphore cap formula 'dbConnectionPool * 4' is stated without justification or source. Why 4×? Too high allows over-subscription of DB pool under burst; too low throttles throughput.",
+          "recommendation": "Replace with a configurable property (e.g., checks.executor.semaphore-multiplier defaulting to 4) AND add a brief rationale derived from a concrete target (e.g., 'most check executors do 2-3 DB queries per execution; 4× leaves ~1 permit of headroom per executor')."
+        },
+        {
+          "id": "ACC-02",
+          "severity": "minor",
+          "section": "§9.6",
+          "finding": "KEDA scale-up threshold `0.7` (ratio active/capacity) is stated without derivation. Production KEDA configs typically justify the value.",
+          "recommendation": "Add one sentence: '0.7 chosen so that the scaler reacts with ~1 pod of headroom before saturation; tuned in M6 load test.' Or defer to M6 with explicit 'threshold TBD during M6 tuning'."
+        },
+        {
+          "id": "ACC-03",
+          "severity": "minor",
+          "section": "§9.4",
+          "finding": "Math check — '13 pods × 4 tests = 52' vs 'start with 15 replicas at M6 rollout'. Consistent; fine.",
+          "recommendation": "No change; verified accurate."
+        }
+      ]
+    },
+
+    "completeness": {
+      "score": 3.4,
+      "max": 5.0,
+      "summary": "Major functional coverage is solid but a small number of explicit requirements are missing, and several cross-cutting concerns typical of a regulated-domain spec are absent.",
+      "positives": [
+        "All 9 external integrations accounted for in §11 with uniform pattern.",
+        "Milestone roadmap (§14) preserves ARCH §4.4 M1-M6 structure with sensible additions (ShedLock at M2 rather than M6).",
+        "Traceability appendix (§17) includes every FR and NFR from requirements.json."
+      ],
+      "issues": [
+        {
+          "id": "COMP-01",
+          "severity": "blocker",
+          "section": "§6 (missing)",
+          "finding": "FR-BULK-01 (Bulk operations on checks — PRD §5.3) is in the traceability matrix (§17.1) BUT §6.2 API Contract defines NO bulk endpoints. Requirement marked as covered but actually not designed.",
+          "recommendation": "Add `POST /checks/_bulk` (create/update/delete multi-check actions) to §6.2 with request shape (e.g., NDJSON or JSON array of operations), partial-failure semantics (207 Multi-Status), and audit implications. Update §17.1 milestone assignment (M1 for basic delete, M3 for full CRUD)."
+        },
+        {
+          "id": "COMP-02",
+          "severity": "major",
+          "section": "§6 (missing)",
+          "finding": "PRD §5.3 'Template Library: Pre-built templates for common UI test scenarios' is mentioned in PRD but not captured as an FR in requirements.json AND not addressed in spec. This is a known gap carried forward from Phase 1.",
+          "recommendation": "Two options: (a) retroactively add an FR (e.g., FR-TMPL-01 Template library for UI tests) to requirements.json and add corresponding API in §6.2 + storage in §5.2; OR (b) explicitly list it in §1.2 out-of-scope with a 'deferred to v2.3' note. Current state (silent omission) violates Article IV traceability in reverse."
+        },
+        {
+          "id": "COMP-03",
+          "severity": "major",
+          "section": "§4 + §6 (missing)",
+          "finding": "No idempotency guarantee for POST /checks/{id}/execute. A retrying client (network flake) can create duplicate executions, skewing execution_results and triggering duplicate alerts.",
+          "recommendation": "Require Idempotency-Key header (per RFC draft) on mutating execute endpoints; dedupe by key + userId for 5 minutes in Caffeine. Document in §6.1 Conventions."
+        },
+        {
+          "id": "COMP-04",
+          "severity": "major",
+          "section": "§6 (missing)",
+          "finding": "No rate limiting on the API surface. At 500 RPS NFR-THRU-03 and regulated domain, a single compromised JWT could flood the platform.",
+          "recommendation": "Add §6.4 Rate Limiting. Use Bucket4j or Spring Cloud Gateway with per-user token bucket (e.g., 60 req/min for /execute, 600 req/min for reads). Map to NFR-SEC as a new NFR."
+        },
+        {
+          "id": "COMP-05",
+          "severity": "minor",
+          "section": "§6 (missing)",
+          "finding": "Pagination only specifies offset/limit. At NFR-SCALE-02 (1M+ rows/day), `GET /checks/{id}/history?page=5000` will be slow due to offset scanning, and the envelope's `total` count gets expensive.",
+          "recommendation": "Define cursor-based pagination (via ?cursor=<opaque>&limit=20) for execution_results queries. Make `total` optional (omit or approximate) for large result sets. Document in §6.1."
+        },
+        {
+          "id": "COMP-06",
+          "severity": "minor",
+          "section": "§12 (missing)",
+          "finding": "Logs are structured JSON with correlation IDs but the spec does NOT define log retention (hot/warm/cold) at the application level — only NFR-RET-01 references execution results. Compliance audits typically require a log retention statement.",
+          "recommendation": "Add a one-liner in §12.1 referencing enterprise log retention (ARCH §11.2 says '30 days hot, 90 days warm' — propagate here)."
+        },
+        {
+          "id": "COMP-07",
+          "severity": "minor",
+          "section": "§5 (missing)",
+          "finding": "GDPR / right-to-erasure not addressed. Users table stores email + name + department — if a user leaves Citi, what happens?",
+          "recommendation": "Add §5.5 Data Lifecycle for Users. Soft-delete on JWT claim showing 'departed' status; hard-delete after N months. Or explicitly scope-exclude with reference to enterprise user-data handling policy."
+        },
+        {
+          "id": "COMP-08",
+          "severity": "minor",
+          "section": "§9.9",
+          "finding": "§9.9 states 'The frontend's existing parser becomes the contract — backend ports it to Java for server-side execution.' But the milestone estimate for M5 doesn't call out this port as a distinct task. Non-trivial: parseSteps.ts in the frontend has DSL + interpreter logic.",
+          "recommendation": "Add a sub-bullet to M5 scope in §14 explicitly listing 'Port frontend parseSteps IR to Java'. Treat as its own SDC story under EPIC-05."
+        },
+        {
+          "id": "COMP-09",
+          "severity": "minor",
+          "section": "§7.2",
+          "finding": "§7.2 acknowledges 'citi_csi_claims schema TBD with platform team' — this is the only explicit TBD in the spec and should be elevated to the R-series open risks (§16) so it's not forgotten at M1 kickoff.",
+          "recommendation": "Add R-08: 'JWT claim schema for CSI ownership — blocks @PreAuthorize implementation at M1'. Mitigation: platform engagement in M1 sprint 1."
+        }
+      ]
+    },
+
+    "consistency": {
+      "score": 4.6,
+      "max": 5.0,
+      "summary": "No direct contradictions between sections. Minor terminology drift.",
+      "positives": [
+        "Milestone assignments in §14 and §17 traceability matrix agree.",
+        "§4.2 bulkhead design consistent with §9.3 Playwright worker pool (both acknowledge the need for a separate bounded executor).",
+        "§15 DEBT items match exactly what complexity.json flagged."
+      ],
+      "issues": [
+        {
+          "id": "CONS-01",
+          "severity": "minor",
+          "section": "§4.1 vs §9.3",
+          "finding": "§4.1 activates virtual threads 'end-to-end'. §9.3 clarifies that uiTestExecutor uses platform threads (correctly, due to Playwright's thread affinity). The contradiction resolves upon close reading but a casual reader hits it.",
+          "recommendation": "Amend §4.1 final bullet to 'Virtual threads for request handling + most @Async executors; uiTestExecutor is the documented exception (§9.3) — platform threads required by Playwright thread affinity.'"
+        },
+        {
+          "id": "CONS-02",
+          "severity": "minor",
+          "section": "§9.7 vs §11 (integrations table)",
+          "finding": "§9.7 says ASM-03 (Video Processing Service) is 'effectively eliminated'. §11 integrations table still lists S3 (needed) but does NOT remove or comment-out the old 'video processing' dependency — a reader cross-referencing would look for it.",
+          "recommendation": "Add an explicit row/footnote in §11 stating 'Video processing service: N/A — eliminated in DEBT-01 (see §9.7).'"
+        },
+        {
+          "id": "CONS-03",
+          "severity": "minor",
+          "section": "§11 timeout budgets",
+          "finding": "§11 SMTP timeout 30s + retry 3× means worst-case 90s per delivery attempt, yet NFR-PERF-04 P99 report generation < 60s. Large recipient lists (FR-REP-04 cross-CSI) could breach.",
+          "recommendation": "Decouple 'generation' from 'delivery' in metrics — §10.3 already persists email_content before attempting SMTP. Clarify in §11 footnote that SMTP timeouts apply to background dispatch, not to API-visible preview/send latency."
+        }
+      ]
+    },
+
+    "testability": {
+      "score": 3.8,
+      "max": 5.0,
+      "summary": "Most requirements have explicit validation paths. NFR-AVAIL and some operational claims lack concrete verification criteria.",
+      "positives": [
+        "§13 Testing section covers pyramid + RDS parity lint + partition tests + Playwright tests specifically.",
+        "§13.3 Contract tests + OpenAPI diff is a strong testability pattern.",
+        "Open risks (§16) all have a 'phase to retire' — makes verification schedulable."
+      ],
+      "issues": [
+        {
+          "id": "TEST-01",
+          "severity": "major",
+          "section": "§13 or §17",
+          "finding": "NFR-AVAIL-01 (99.95% uptime) is listed in §17.2 'validated in staging soak' but no soak-test duration, acceptance threshold, or error-budget framework is defined.",
+          "recommendation": "Add §13.6 SLO Validation. Define: staging soak duration (e.g., 30 days), error budget (0.05% → ~21m/month allowed downtime), synthetic probe cadence (e.g., 1/min), and the specific alerts that gate prod promotion."
+        },
+        {
+          "id": "TEST-02",
+          "severity": "minor",
+          "section": "§10.2 Live Preview",
+          "finding": "Live preview has no response-time SLO. FR-REP-02 implies interactive use (live editor), but 'live' is subjective.",
+          "recommendation": "Add concrete P95 SLO for /reports/{id}/preview (suggest ≤ 500ms for reports with ≤ 50 checks; ≤ 2s for 50-500). Cite NFR-PERF-01 alignment."
+        },
+        {
+          "id": "TEST-03",
+          "severity": "minor",
+          "section": "§9.4 sizing",
+          "finding": "'M6 load test confirms or corrects PW-05/06/07' — but no explicit pass criterion for the load test is defined.",
+          "recommendation": "Define acceptance: 'M6 load test PASSES if 50 concurrent UI tests complete within P95=60s at ≤ 15 pods, with zero OOMKilled events and zero Chromium zombies across a 1h run.'"
+        },
+        {
+          "id": "TEST-04",
+          "severity": "minor",
+          "section": "§7.3 secret cache",
+          "finding": "No cache hit-rate target for the Vault resolver. Without a target, we cannot detect a regression where the cache is bypassed.",
+          "recommendation": "Add target: 'Vault cache hit rate ≥ 95% steady-state (tracked via checks_secret_cache_hits_total / _misses_total). Alert on < 80%.'"
+        }
+      ]
+    },
+
+    "clarity": {
+      "score": 4.1,
+      "max": 5.0,
+      "summary": "Section structure + trace references make the spec navigable. A handful of dense sections could use concrete examples; some references to external team interactions lack process detail.",
+      "positives": [
+        "§9 Playwright design is a model section — diagram + concurrency discussion + sizing + graceful shutdown + image + autoscaling, each with traces.",
+        "§5.3 Java code example grounds the sealed-interface decision concretely.",
+        "§14 milestone table with exit criteria is implementation-ready."
+      ],
+      "issues": [
+        {
+          "id": "CLR-01",
+          "severity": "minor",
+          "section": "§11",
+          "finding": "9 integrations in one table without per-integration config schema. A @dev at M3 has to infer where to put Splunk URL, token reference, cert path, etc.",
+          "recommendation": "Add §11.1 'Integration configuration shape' with a typed record example (e.g., `record SplunkIntegrationConfig(URI endpoint, String tokenSecretRef, Duration readTimeout) {}`). Applies uniformly to all 9."
+        },
+        {
+          "id": "CLR-02",
+          "severity": "minor",
+          "section": "§4.2 table",
+          "finding": "The executor-bean table lists 'concurrency cap' with formulas but doesn't show the actual @Bean declaration. A @dev has to cross-reference ARCH §4.2 which has partial code.",
+          "recommendation": "Add a short code block showing all three AsyncTaskExecutor @Bean declarations side-by-side, with the MdcTaskDecorator applied."
+        },
+        {
+          "id": "CLR-03",
+          "severity": "minor",
+          "section": "§9.5",
+          "finding": "'POST /actuator/shutdown-studio' is mentioned but the endpoint is not formally defined in §6.2 nor in the health-indicator inventory.",
+          "recommendation": "Either formally declare the endpoint in §6.2 (under Health) or inline a `@Endpoint` definition example in §9.5."
+        }
+      ]
+    }
+  },
+
+  "aggregate": {
+    "scores": {
+      "accuracy": 4.2,
+      "completeness": 3.4,
+      "consistency": 4.6,
+      "testability": 3.8,
+      "clarity": 4.1
+    },
+    "average": 4.02,
+    "verdict_threshold": {
+      "APPROVED": ">= 4.0",
+      "NEEDS_REVISION": "3.0 - 3.9",
+      "BLOCKED": "< 3.0"
+    }
+  },
+
+  "verdict": "NEEDS_REVISION",
+  "verdict_rationale": "Average 4.02 sits just above the APPROVED threshold numerically, BUT contains one BLOCKER (COMP-01: FR-BULK-01 claimed covered in traceability matrix yet nowhere designed) and three MAJOR gaps (COMP-02 template library silently omitted; COMP-03 no execute idempotency; COMP-04 no rate limiting; TEST-01 no SLO validation framework). The blocker forces NEEDS_REVISION regardless of the aggregate — a traceability matrix that claims coverage without delivering it is a direct Article IV violation (by omission). One revision cycle is expected to address the blockers + majors; minors can be addressed or deferred with explicit rationale.",
+
+  "required_revisions": [
+    {
+      "id": "REV-01",
+      "source_issue": "COMP-01",
+      "must_resolve": true,
+      "action": "Design bulk operations API in §6.2 OR remove FR-BULK-01 from §17.1 traceability (if scope-excluded, add to §1.2 with rationale)."
+    },
+    {
+      "id": "REV-02",
+      "source_issue": "COMP-02",
+      "must_resolve": true,
+      "action": "Add FR-TMPL-01 to requirements.json (retroactive amendment) and address in spec §6.2 + §5.2; OR explicitly scope-exclude in §1.2 with reasoning."
+    },
+    {
+      "id": "REV-03",
+      "source_issue": "COMP-03",
+      "must_resolve": true,
+      "action": "Add idempotency requirement + Idempotency-Key header handling for POST /execute and POST /reports/{id}/send."
+    },
+    {
+      "id": "REV-04",
+      "source_issue": "COMP-04",
+      "must_resolve": true,
+      "action": "Add §6.4 Rate Limiting section with per-user token buckets; add corresponding NFR (NFR-SEC-04)."
+    },
+    {
+      "id": "REV-05",
+      "source_issue": "TEST-01",
+      "must_resolve": true,
+      "action": "Add §13.6 SLO Validation with soak duration, error budget, synthetic probe cadence, and prod-promotion gates."
+    },
+    {
+      "id": "REV-06",
+      "source_issue": "COMP-09",
+      "must_resolve": true,
+      "action": "Elevate the JWT claim schema TBD to R-08 in §16 with M1 sprint-1 platform-team engagement as mitigation."
+    }
+  ],
+
+  "recommended_improvements": [
+    { "id": "IMP-01", "source_issue": "COMP-05", "rationale": "Pagination performance at scale", "effort": "small" },
+    { "id": "IMP-02", "source_issue": "COMP-06", "rationale": "Log retention compliance", "effort": "trivial" },
+    { "id": "IMP-03", "source_issue": "COMP-07", "rationale": "GDPR / user data lifecycle", "effort": "small" },
+    { "id": "IMP-04", "source_issue": "COMP-08", "rationale": "Surface parseSteps port as distinct M5 task", "effort": "trivial" },
+    { "id": "IMP-05", "source_issue": "ACC-01", "rationale": "Justify executor semaphore formula", "effort": "trivial" },
+    { "id": "IMP-06", "source_issue": "ACC-02", "rationale": "Justify KEDA 0.7 threshold", "effort": "trivial" },
+    { "id": "IMP-07", "source_issue": "TEST-02", "rationale": "Live preview SLO", "effort": "trivial" },
+    { "id": "IMP-08", "source_issue": "TEST-03", "rationale": "M6 load test acceptance criteria", "effort": "trivial" },
+    { "id": "IMP-09", "source_issue": "TEST-04", "rationale": "Vault cache hit rate target", "effort": "trivial" },
+    { "id": "IMP-10", "source_issue": "CLR-01", "rationale": "Integration config shape example", "effort": "small" },
+    { "id": "IMP-11", "source_issue": "CLR-02", "rationale": "Three-executor code block", "effort": "trivial" },
+    { "id": "IMP-12", "source_issue": "CONS-01", "rationale": "Clarify virtual-thread exception for UI executor", "effort": "trivial" },
+    { "id": "IMP-13", "source_issue": "CONS-02", "rationale": "Call out video-processing elimination in §11", "effort": "trivial" }
+  ],
+
+  "attestation": {
+    "reviewer": "@qa (Quinn)",
+    "signed_at": "2026-04-16",
+    "independence": "Reviewer did not author Phases 1-4 content. Review pass adversarial. Findings based on objective coverage check against requirements.json and PRD §5/§6, not on authoring narrative.",
+    "next_step": "Author (@pm) addresses 6 REV-* items. QA re-reviews. If resolved, verdict changes to APPROVED and pipeline proceeds to Phase 6 (@architect implementation.yaml)."
+  }
+}
