@@ -325,5 +325,82 @@
     "signed_at": "2026-04-16",
     "independence": "Reviewer did not author Phases 1-4 content. Review pass adversarial. Findings based on objective coverage check against requirements.json and PRD §5/§6, not on authoring narrative.",
     "next_step": "Author (@pm) addresses 6 REV-* items. QA re-reviews. If resolved, verdict changes to APPROVED and pipeline proceeds to Phase 6 (@architect implementation.yaml)."
+  },
+
+  "v2_revision_review": {
+    "reviewed_at": "2026-04-17",
+    "reviewer": "@qa (Quinn)",
+    "spec_commit_before_revision": "868fc731b",
+    "spec_commit_after_revision": "<pending commit>",
+    "spec_line_count_delta": "+158 (928 → 1086)",
+    "revision_verification": [
+      {
+        "rev_id": "REV-01",
+        "source_issue": "COMP-01",
+        "addressed": true,
+        "verification": "§6.4 Bulk Operations added. Defines POST /checks/_bulk with max-100-ops, 207 Multi-Status, per-op authorization, idempotency-integration. Milestone split (M1 delete, M3 update+tag). FR-BULK-01 retroactively added to requirements.json. §17.1 traceability row added."
+      },
+      {
+        "rev_id": "REV-02",
+        "source_issue": "COMP-02",
+        "addressed": true,
+        "verification": "§1.2.1 Deferred to v2.3 added with explicit rationale for Template Library. No silent omission; Article IV satisfied."
+      },
+      {
+        "rev_id": "REV-03",
+        "source_issue": "COMP-03",
+        "addressed": true,
+        "verification": "§6.1 Conventions — Idempotency-Key header requirement for all mutating endpoints, 5-minute Caffeine-backed dedupe, explicit call-out for /execute and /reports/send."
+      },
+      {
+        "rev_id": "REV-04",
+        "source_issue": "COMP-04",
+        "addressed": true,
+        "verification": "§6.5 Rate Limiting added with per-endpoint-class token buckets (read/write/execute/send/bulk), 429+Retry-After, Caffeine→Redis migration at M6. NFR-SEC-04 added to requirements.json. §17.2 traceability row added."
+      },
+      {
+        "rev_id": "REV-05",
+        "source_issue": "TEST-01",
+        "addressed": true,
+        "verification": "§13.6 SLO Validation Framework added — 30-day soak, 21.6-min error budget, 1/min synthetic probes, multi-window burn-rate alerts (Google SRE pattern), 4-gate prod promotion. M6 exit criterion extended."
+      },
+      {
+        "rev_id": "REV-06",
+        "source_issue": "COMP-09",
+        "addressed": true,
+        "verification": "R-08 added to §16 risks table. Mitigation: M1 sprint-1 platform-team engagement; fallback stubbed claim for dev/staging."
+      }
+    ],
+    "improvement_verification": {
+      "addressed": [
+        "IMP-01 (COMP-05 cursor pagination) — §6.1 updated",
+        "IMP-02 (COMP-06 log retention) — §12.1 updated with 30d hot/90d warm",
+        "IMP-03 (COMP-07 GDPR) — §1.2.1 addressed as deferred-with-rationale",
+        "IMP-04 (COMP-08 parseSteps port) — §9.9 flagged as distinct story; §14 M5 scope amended",
+        "IMP-05 (ACC-01 semaphore formula) — §4.2 justified + made configurable",
+        "IMP-06 (ACC-02 KEDA threshold) — §9.6 justified with cold-start reasoning",
+        "IMP-07 (TEST-02 preview SLO) — §10.2 added P95 tiered SLOs",
+        "IMP-08 (TEST-03 M6 acceptance) — §9.4 added 5-criteria pass gate",
+        "IMP-09 (TEST-04 cache hit target) — §7.3 added ≥95% target + alert",
+        "IMP-10 (CLR-01 integration config) — §11.1 added uniform record shape",
+        "IMP-11 (CLR-02 executor code block) — §4.2 added full @Bean declarations",
+        "IMP-12 (CONS-01 virtual-thread exception) — §4.1 clarified",
+        "IMP-13 (CONS-02 video-processing) — §11 intro note added"
+      ],
+      "deferred": [],
+      "all_addressed": true
+    },
+    "revised_scores": {
+      "accuracy": 4.6,
+      "completeness": 4.5,
+      "consistency": 4.8,
+      "testability": 4.5,
+      "clarity": 4.5
+    },
+    "revised_average": 4.58,
+    "revised_verdict": "APPROVED",
+    "revised_verdict_rationale": "All 6 REV-* items addressed with verifiable evidence in spec.md v2. All 13 IMP-* improvements applied. No new issues introduced. Average score climbed from 4.02 → 4.58 with no dimension below 4.5. Spec is implementation-ready. Cleared for Phase 6 (@architect implementation.yaml).",
+    "signed_at": "2026-04-17",
+    "signed_by": "@qa (Quinn)"
   }
 }
