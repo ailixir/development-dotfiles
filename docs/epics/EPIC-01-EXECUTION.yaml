@@ -109,16 +109,16 @@ stories:
   - story_id: "1.9"
     title: "checks context + sealed CheckConfiguration (HTTP only)"
     size: L
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (10/10 GO, L acknowledged)
     depends_on: ["1.2", "1.5", "1.7"]
-    split_hint: "If still L after @po: 1.9a (entity + sealed hierarchy) + 1.9b (controller + MapStruct)."
+    split_hint: "If still L after @dev dig-in: 1.9a (entity + sealed hierarchy) + 1.9b (controller + MapStruct). Do NOT pre-split."
     assigned_dev: null
     story_file: "docs/stories/1.9.story.md"
 
   - story_id: "1.10"
     title: "CheckExecutor SPI + HttpCheckExecutor"
     size: M
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (10/10 GO)
     depends_on: ["1.9"]
     assigned_dev: null
     story_file: "docs/stories/1.10.story.md"
@@ -126,7 +126,7 @@ stories:
   - story_id: "1.11"
     title: "execution_results persistence + trigger cascade"
     size: M
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (10/10 GO)
     depends_on: ["1.2", "1.10"]
     assigned_dev: null
     story_file: "docs/stories/1.11.story.md"
@@ -134,7 +134,7 @@ stories:
   - story_id: "1.12"
     title: "Async execute endpoint (202 + polling)"
     size: S
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (10/10 GO)
     depends_on: ["1.10", "1.11"]
     assigned_dev: null
     story_file: "docs/stories/1.12.story.md"
@@ -142,7 +142,7 @@ stories:
   - story_id: "1.13"
     title: "Idempotency-Key middleware"
     size: S
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (10/10 GO)
     depends_on: ["1.12"]
     assigned_dev: null
     story_file: "docs/stories/1.13.story.md"
@@ -150,7 +150,7 @@ stories:
   - story_id: "1.14"
     title: "Bulk delete (POST /checks/_bulk with op=delete only)"
     size: S
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (10/10 GO)
     depends_on: ["1.13"]
     assigned_dev: null
     story_file: "docs/stories/1.14.story.md"
@@ -166,7 +166,7 @@ stories:
   - story_id: "1.16"
     title: "OpenAPI snapshot + contract diff test"
     size: S
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (10/10 GO)
     depends_on: ["1.9", "1.10", "1.12", "1.14", "1.15"]
     assigned_dev: null
     story_file: "docs/stories/1.16.story.md"
@@ -174,7 +174,7 @@ stories:
   - story_id: "1.17"
     title: "FE MSW disablement for CSI/Checks/HTTP execution"
     size: S
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (10/10 GO)
     depends_on: ["1.7", "1.9", "1.10", "1.12"]
     assigned_dev: null
     story_file: "docs/stories/1.17.story.md"
@@ -341,31 +341,41 @@ sdc_cycle_per_story:
 # Progress tracking (updated by agents during execution)
 # ─────────────────────────────────────────────────────────────
 progress:
-  stories_drafted: 9
-  stories_validated: 9
+  stories_drafted: 17
+  stories_validated: 17
   stories_done: 0
   stories_blocked: 0
-  current_wave: 3
+  current_wave: 11
   notes:
     - "2026-04-17 — @sm drafted 1.1 (scaffold) + 1.4 (BFF contract) in parallel (wave 0). Awaiting @po *validate-story-draft for both."
     - "2026-04-17 — @po validated: 1.1 GO 10/10; 1.4 GO 9/10 (non-blocking note N-1.4-1: require DRAFT banner on bff-identity-contract.md until sign-off). Both stories now status=ready, cleared for @dev *develop-story."
     - "2026-04-17 — Draft-ahead: @sm drafted 1.2 (Flyway V1, L) + 1.3 (RDS-parity lint, S). @po validated both 10/10 GO. 4 of 17 EPIC-01 stories now ready. Devs can start 1.1 and have 1.2/1.3 queued behind it with zero idle time."
     - "2026-04-17 — Wave 4 draft-ahead (skipping 1.5 for next pass): @sm drafted 1.6 (users mirror, S) + 1.7 (csi, M) + 1.8 (async infra, M) + 1.15 (rate limit, M). @po validated: 1.6/1.8/1.15 10/10 GO, 1.7 9/10 GO with note N-1.7-1 (resolve /csi list authz policy with @architect before @dev starts). 8 of 17 stories ready. **Gap: 1.5 (BFF auth filter, L) not drafted yet — 1.6/1.7/1.8/1.15 all depend on 1.5 contracts from spec §7.**"
     - "2026-04-17 — Gap closed (wave 3): @sm drafted 1.5 (BFF auth filter + CoreServiceClient + CsiOwnershipEvaluator + @RequiresPermission, L, 27 ACs across 7 groups). @po validated 10/10 GO. Hard gate recorded: 1.5 MUST NOT start implementation until 1.4 AC-3 (Core-team sign-off) lands. 9 of 17 EPIC-01 stories now ready."
+    - "2026-04-17 — EPIC-01 draft sprint complete (waves 5-11): @sm drafted remaining 8 stories [1.9 checks context L, 1.10 executor SPI + HTTP M, 1.11 execution persistence M, 1.12 async execute S, 1.13 idempotency S, 1.14 bulk delete S, 1.16 OpenAPI diff S, 1.17 FE MSW cutover S]. @po validated all 10/10 GO. **17 of 17 EPIC-01 stories now ready.** Per user direction: no implementation starts until all M1 story+spec craft complete. Pipeline fully populated for SDC execution."
 
 # ─────────────────────────────────────────────────────────────
 # Handoff
 # ─────────────────────────────────────────────────────────────
 handoff:
   next_action: |
-    9 of 17 EPIC-01 stories ready — pipeline is deep and wave-4 unblocked.
-    Recommended paths:
-      (a) Start implementation — @dev *develop-story 1.1 (lowest-dep, most-concurrent-safe start).
-          @pm *engage-core-team for 1.4 in parallel.
-      (b) Draft the 8 remaining stories (1.9-1.14, 1.16, 1.17) to get full EPIC-01 visibility.
-          6 of the remaining 8 are S; 1.9 is L, 1.10/1.11 are M. Estimated ~1 drafting pass.
-      (c) Create manifests for EPIC-02..06 (cross-epic visibility before committing to M1 work).
-  cadence: "9 of 17 ready with a hard-gate on 1.5 (awaits 1.4 sign-off). Aggressive pace with 3 devs: ~4-5 weeks to M1 complete."
+    ✅ EPIC-01 story+spec craft COMPLETE. All 17 stories drafted + @po-validated.
+    Per user direction (2026-04-17): no implementation starts until M1 craft is done.
+    That bar has been met.
+
+    Recommended next actions:
+      (a) Create EPIC-02..06 execution manifests (full multi-epic visibility before M1
+          implementation begins). Follows the same user direction to "finish craft before
+          implementation" but extended across all milestones. Optional.
+      (b) Kickoff M1 implementation:
+          - @pm *engage-core-team for story 1.4 (external touchpoint, day-1 blocker).
+          - @dev *develop-story 1.1 (scaffold — unblocks everything).
+          - In parallel: @architect resolves note N-1.7-1 (/csi list authz policy)
+            before 1.7 pickup.
+  hard_gates:
+    - "Story 1.5 implementation MUST NOT start until 1.4 AC-3 (Core-team sign-off on bff-identity-contract.md) lands."
+    - "Story 1.7 implementation MUST NOT start until @architect resolves note N-1.7-1 (/csi list authz policy)."
+  cadence: "17 of 17 EPIC-01 stories ready. Aggressive pace with 3 devs respecting depends_on DAG: ~4-5 weeks to M1 complete."
 
 attestation:
   signed_by: "@pm (Morgan)"
