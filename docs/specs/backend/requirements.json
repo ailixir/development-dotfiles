@@ -1,0 +1,913 @@
+{
+  "$schema": "aios://spec-pipeline/requirements/v1",
+  "spec_id": "backend-v2.2",
+  "phase": "gather",
+  "generated_by": "@pm (Morgan)",
+  "generated_at": "2026-04-16",
+  "scope_subject": "Project Checks — Backend (Java 21 / Spring Boot 3) — Phase 2",
+  "sources": [
+    {
+      "id": "PRD",
+      "path": "../../../PRD.md",
+      "version": "v2.2",
+      "sha_at_gather": "0539d2f1f"
+    },
+    {
+      "id": "ARCH",
+      "path": "../../../ARCH.md",
+      "sha_at_gather": "0539d2f1f"
+    }
+  ],
+  "article_iv_gate": {
+    "description": "Every entry in this file traces to a PRD or ARCH section. No invented requirements. @pm attests.",
+    "signed_by": "@pm (Morgan)",
+    "signed_at": "2026-04-16"
+  },
+  "summary": {
+    "functional_count": 37,
+    "non_functional_count": 22,
+    "constraint_count": 27,
+    "assumption_dependency_count": 8,
+    "out_of_scope_count": 8,
+    "complexity_signals": [
+      "9 external integrations (CSI, ITRS, Splunk, Grafana, AppDynamics, OIDC, Vault, SMTP, Selenium Grid, S3)",
+      "99.95% availability target",
+      "500 RPS + 100k checks/hour throughput",
+      "Regulated domain (Citibank): SSO + RBAC + secrets vault mandatory",
+      "Browser automation infrastructure (video recording, S3 streaming)",
+      "Polymorphic check model with 7 check types via JSONB",
+      "Time-partitioned execution history (1M+ records/day)"
+    ]
+  },
+
+  "functional": [
+    {
+      "id": "FR-CSI-01",
+      "title": "Associate every check with a registered CSI",
+      "description": "All checks MUST reference a CSI ID that exists in csi_systems. CSI is the primary organizing principle for catalog, dashboards, and reports.",
+      "milestone": "M1",
+      "traces": [
+        { "source": "PRD", "ref": "§2.1 Define Once, Execute Anywhere" },
+        { "source": "PRD", "ref": "§5.1 CSI Association" },
+        { "source": "ARCH", "ref": "§7.1 checks.csi_id FK → csi_systems.id" }
+      ]
+    },
+    {
+      "id": "FR-CSI-02",
+      "title": "Expose CSI catalog via REST API",
+      "description": "Backend exposes GET /csi, GET /csi/{id}, GET /csi/{id}/checks for directory and drill-down.",
+      "milestone": "M1",
+      "traces": [
+        { "source": "ARCH", "ref": "§12.1 CSI Management endpoints" },
+        { "source": "ARCH", "ref": "§7.1 csi_systems table" }
+      ]
+    },
+    {
+      "id": "FR-CSI-03",
+      "title": "Aggregate health metrics per CSI",
+      "description": "GET /csi/{id}/metrics returns real-time passing/failing/warning counts and health percentage, backed by the csi_metrics_current materialized view.",
+      "milestone": "M2",
+      "traces": [
+        { "source": "ARCH", "ref": "§7.3 csi_metrics_current materialized view" },
+        { "source": "ARCH", "ref": "§12.1 GET /csi/{id}/metrics" },
+        { "source": "PRD", "ref": "§6 UC-03 dashboard of CSI checks" }
+      ]
+    },
+    {
+      "id": "FR-CHK-01",
+      "title": "Support 7 polymorphic check types",
+      "description": "Supported types: HTTP, TCP, SPLUNK, GRAFANA, ITRS, APPDYNAMICS, UI_TEST. Type-specific configuration stored in JSONB column.",
+      "milestone": "M1-M5 (per type)",
+      "traces": [
+        { "source": "PRD", "ref": "§5.1 Check Library" },
+        { "source": "ARCH", "ref": "§7.1 checks.type CHECK constraint" },
+        { "source": "ARCH", "ref": "§4.5 CheckExecutor SPI (one impl per CheckType)" }
+      ]
+    },
+    {
+      "id": "FR-CHK-02",
+      "title": "Check CRUD operations via REST",
+      "description": "GET /checks (list + filters), POST /checks, GET /checks/{id}, PUT /checks/{id}, DELETE /checks/{id} (soft delete via deleted_at).",
+      "milestone": "M1",
+      "traces": [
+        { "source": "ARCH", "ref": "§12.1 Check Operations endpoints" },
+        { "source": "ARCH", "ref": "§7.1 checks.deleted_at soft-delete column" }
+      ]
+    },
+    {
+      "id": "FR-CHK-03",
+      "title": "On-demand check execution with async response",
+      "description": "POST /checks/{id}/execute returns 202 Accepted with execution ID immediately; work runs on virtual-thread executor; result persisted to execution_results.",
+      "milestone": "M1",
+      "traces": [
+        { "source": "ARCH", "ref": "§4.2 Asynchronous Execution (202 + virtual threads)" },
+        { "source": "ARCH", "ref": "§12.1 POST /checks/{id}/execute" },
+        { "source": "PRD", "ref": "§5.1 On-demand execution" }
+      ]
+    },
+    {
+      "id": "FR-CHK-04",
+      "title": "HTTP(S) endpoint check",
+      "description": "Full configurable: method (GET/POST/...), headers, body, expected status code validation, TLS verification.",
+      "milestone": "M1",
+      "traces": [
+        { "source": "PRD", "ref": "§5.1 Basic Checks — HTTP(S) API Endpoint" }
+      ]
+    },
+    {
+      "id": "FR-CHK-05",
+      "title": "TCP port check",
+      "description": "Host/port connectivity validation with configurable timeout.",
+      "milestone": "M2",
+      "traces": [
+        { "source": "PRD", "ref": "§5.1 Basic Checks — TCP Port Check" },
+        { "source": "ARCH", "ref": "§4.4 M2 TCP executor" }
+      ]
+    },
+    {
+      "id": "FR-CHK-06",
+      "title": "Splunk SPL query check",
+      "description": "Execute complex SPL queries against Splunk and validate result-count thresholds.",
+      "milestone": "M3",
+      "traces": [
+        { "source": "PRD", "ref": "§5.1 Splunk Log Query" },
+        { "source": "PRD", "ref": "§6 UC-05 correlating 'trade received' and 'trade settled'" },
+        { "source": "ARCH", "ref": "§4.4 M3 Splunk executor" }
+      ]
+    },
+    {
+      "id": "FR-CHK-07",
+      "title": "Grafana metric threshold check",
+      "description": "Dashboard/panel metric monitoring with configurable operator (>, <, =, !=, …) and threshold.",
+      "milestone": "M3",
+      "traces": [
+        { "source": "PRD", "ref": "§5.1 Grafana Metric Threshold" },
+        { "source": "PRD", "ref": "§6 UC-06 CPU > 90%" }
+      ]
+    },
+    {
+      "id": "FR-CHK-08",
+      "title": "ITRS Geneos sampler status check",
+      "description": "Real-time sampler state monitoring with expected-value comparison.",
+      "milestone": "M3",
+      "traces": [
+        { "source": "PRD", "ref": "§5.1 ITRS Geneos Sampler Status" }
+      ]
+    },
+    {
+      "id": "FR-CHK-09",
+      "title": "AppDynamics health rule violation check",
+      "description": "Monitors AppDynamics application health rules and APM alerts.",
+      "milestone": "M3",
+      "traces": [
+        { "source": "PRD", "ref": "§5.1 AppDynamics Health Rule Violation" }
+      ]
+    },
+    {
+      "id": "FR-CHK-10",
+      "title": "Persist execution history",
+      "description": "Every execution records status, started_at, ended_at, duration_ms, output, error_message in execution_results (partitioned monthly).",
+      "milestone": "M1",
+      "traces": [
+        { "source": "ARCH", "ref": "§7.1 execution_results partitioned table" },
+        { "source": "ARCH", "ref": "§12.1 GET /checks/{id}/history" }
+      ]
+    },
+    {
+      "id": "FR-CHK-11",
+      "title": "Auto-propagate execution result to parent check status",
+      "description": "DB trigger update_check_on_execution cascades the latest execution status into checks.status + last_execution_at.",
+      "milestone": "M1",
+      "traces": [
+        { "source": "ARCH", "ref": "§7.4 Check Status Update Trigger" }
+      ]
+    },
+    {
+      "id": "FR-CHK-12",
+      "title": "Deep link to investigation URL on failure",
+      "description": "When a check fails, the response includes a URL to the underlying monitoring tool for drill-down.",
+      "milestone": "M3",
+      "traces": [
+        { "source": "PRD", "ref": "§6 UC-04 Investigating" }
+      ]
+    },
+    {
+      "id": "FR-SCHED-01",
+      "title": "Cron-based scheduling",
+      "description": "Support standard cron expressions + human-readable frequency ('every_5_minutes'). Due checks auto-dispatched.",
+      "milestone": "M2",
+      "traces": [
+        { "source": "PRD", "ref": "§5.1 cron expression support" },
+        { "source": "ARCH", "ref": "§4.1 Spring @Scheduled + ThreadPoolTaskScheduler" },
+        { "source": "ARCH", "ref": "§7.1 schedules table" }
+      ]
+    },
+    {
+      "id": "FR-SCHED-02",
+      "title": "Enable/disable schedules without deletion",
+      "description": "schedules.enabled boolean controls active dispatch; indexed for fast dispatcher scan.",
+      "milestone": "M2",
+      "traces": [
+        { "source": "ARCH", "ref": "§7.1 schedules.enabled + idx_schedules_enabled" }
+      ]
+    },
+    {
+      "id": "FR-SCHED-03",
+      "title": "Timezone-aware scheduling",
+      "description": "schedules.timezone (default UTC) ensures cron resolution in the owner's timezone.",
+      "milestone": "M2",
+      "traces": [
+        { "source": "ARCH", "ref": "§7.1 schedules.timezone" },
+        { "source": "PRD", "ref": "§6 report at 6:00 PM EST" }
+      ]
+    },
+    {
+      "id": "FR-SCHED-04",
+      "title": "Cluster-safe scheduling at scale",
+      "description": "Migrate from in-process @Scheduled to Quartz (JDBC-backed) once >1 replica is deployed.",
+      "milestone": "M6",
+      "traces": [
+        { "source": "ARCH", "ref": "§4.1 Quartz when >1 replica" },
+        { "source": "ARCH", "ref": "§4.4 M6 Quartz migration" }
+      ]
+    },
+    {
+      "id": "FR-STUDIO-01",
+      "title": "UI test definition CRUD (Checks Studio)",
+      "description": "Create, read, update, delete UI tests with plain-English steps, browser choice, viewport, timeout.",
+      "milestone": "M5",
+      "traces": [
+        { "source": "PRD", "ref": "§5.2 Checks Studio" },
+        { "source": "ARCH", "ref": "§7.1 ui_tests table" },
+        { "source": "ARCH", "ref": "§12.1 /studio/tests endpoints" }
+      ]
+    },
+    {
+      "id": "FR-STUDIO-02",
+      "title": "Execute UI test via browser automation grid",
+      "description": "POST /studio/tests/{id}/run dispatches to Selenium Grid; results in ui_test_executions.",
+      "milestone": "M5",
+      "traces": [
+        { "source": "PRD", "ref": "§5.2 Run Test button" },
+        { "source": "ARCH", "ref": "§4.4 M5 UI test execution via Selenium Grid client" },
+        { "source": "ARCH", "ref": "§7.1 ui_test_executions table" }
+      ]
+    },
+    {
+      "id": "FR-STUDIO-03",
+      "title": "Video recording + S3 storage",
+      "description": "Every UI test run records a full-screen video, uploaded to S3; database stores URL pointer only.",
+      "milestone": "M5",
+      "traces": [
+        { "source": "PRD", "ref": "§5.2 Right Panel: Visual Proof (Video)" },
+        { "source": "ARCH", "ref": "§5 Object Storage for UI test videos" },
+        { "source": "ARCH", "ref": "§7.1 ui_test_executions.video_url" }
+      ]
+    },
+    {
+      "id": "FR-STUDIO-04",
+      "title": "Video streaming endpoint with step-synchronized timeline",
+      "description": "GET /studio/tests/{id}/video streams video; timeline marks mapped to test steps.",
+      "milestone": "M5",
+      "traces": [
+        { "source": "ARCH", "ref": "§12.1 GET /studio/tests/{id}/video" },
+        { "source": "PRD", "ref": "§5.2 step-synchronized timeline" }
+      ]
+    },
+    {
+      "id": "FR-STUDIO-05",
+      "title": "Variable (<var NAME>) and secret (<secret ID>) interpolation",
+      "description": "Test steps support <var NAME> and <secret ID> tokens; resolved at execution time.",
+      "milestone": "M5",
+      "traces": [
+        { "source": "PRD", "ref": "§5.2 Left Panel variable support" },
+        { "source": "ARCH", "ref": "§4.5 Secret resolution" }
+      ]
+    },
+    {
+      "id": "FR-STUDIO-06",
+      "title": "Python code generation from test steps",
+      "description": "Export executable Python code equivalent to the plain-English steps.",
+      "milestone": "M5",
+      "traces": [
+        { "source": "PRD", "ref": "§5.2 Python code generation" },
+        { "source": "PRD", "ref": "§5.3 Code Generation" }
+      ]
+    },
+    {
+      "id": "FR-REP-01",
+      "title": "Report configuration CRUD",
+      "description": "Create, read, update, delete report definitions with template, schedule, recipients, sections.",
+      "milestone": "M4",
+      "traces": [
+        { "source": "PRD", "ref": "§5.1 Reporting" },
+        { "source": "ARCH", "ref": "§7.2 reports table" },
+        { "source": "ARCH", "ref": "§12.1 /reports endpoints" }
+      ]
+    },
+    {
+      "id": "FR-REP-02",
+      "title": "Live-preview endpoint for report builder",
+      "description": "POST /reports/{id}/preview returns rendered HTML preview without sending email.",
+      "milestone": "M4",
+      "traces": [
+        { "source": "PRD", "ref": "§6 Live Preview is King UX philosophy" },
+        { "source": "ARCH", "ref": "§12.1 POST /reports/{id}/preview" }
+      ]
+    },
+    {
+      "id": "FR-REP-03",
+      "title": "Cross-CSI report composition",
+      "description": "A single report can aggregate checks from multiple CSIs (e.g., Trade Settled from CSI 12345 + Market Data from CSI 99887).",
+      "milestone": "M4",
+      "traces": [
+        { "source": "PRD", "ref": "§6 UX Journey cross-CSI report" }
+      ]
+    },
+    {
+      "id": "FR-REP-04",
+      "title": "Scheduled email delivery via SMTP relay",
+      "description": "Reports delivered via enterprise SMTP at configured cadence (daily/weekly/custom cron).",
+      "milestone": "M4",
+      "traces": [
+        { "source": "PRD", "ref": "§5.1 email-based status reports" },
+        { "source": "ARCH", "ref": "§4.1 Spring Mail JavaMailSender" },
+        { "source": "ARCH", "ref": "§11 Assumptions SMTP relay" }
+      ]
+    },
+    {
+      "id": "FR-REP-05",
+      "title": "Report execution audit trail",
+      "description": "Every delivery persists status, recipient_count, checks_included, generation_duration_ms, email_content, error_message.",
+      "milestone": "M4",
+      "traces": [
+        { "source": "ARCH", "ref": "§7.2 report_executions table" }
+      ]
+    },
+    {
+      "id": "FR-REP-06",
+      "title": "Send-now / ad-hoc trigger",
+      "description": "POST /reports/{id}/send triggers immediate out-of-cycle delivery.",
+      "milestone": "M4",
+      "traces": [
+        { "source": "ARCH", "ref": "§12.1 POST /reports/{id}/send" }
+      ]
+    },
+    {
+      "id": "FR-AUTH-01",
+      "title": "Validate enterprise OIDC JWT on every request",
+      "description": "Every authenticated endpoint validates a Bearer JWT against the enterprise OIDC issuer via spring-boot-starter-oauth2-resource-server.",
+      "milestone": "M1",
+      "traces": [
+        { "source": "PRD", "ref": "§7 SSO integration" },
+        { "source": "ARCH", "ref": "§4.1 Spring Security + oauth2-resource-server" },
+        { "source": "ARCH", "ref": "§6 Authentication" },
+        { "source": "ARCH", "ref": "§12.3 Bearer token JWT" }
+      ]
+    },
+    {
+      "id": "FR-AUTH-02",
+      "title": "RBAC by CSI ownership",
+      "description": "Method-level @PreAuthorize enforces that actions on a check/report scope to CSI ownership claims in the JWT.",
+      "milestone": "M1",
+      "traces": [
+        { "source": "PRD", "ref": "§7 RBAC based on user roles and application ownership" },
+        { "source": "ARCH", "ref": "§4.5 @PreAuthorize on CSI ownership" },
+        { "source": "ARCH", "ref": "§6 Authorization" }
+      ]
+    },
+    {
+      "id": "FR-AUTH-03",
+      "title": "User provisioning from JWT claims",
+      "description": "On first-seen JWT, insert into users(sso_id, name, email, department); subsequent auths update last_login.",
+      "milestone": "M1",
+      "traces": [
+        { "source": "ARCH", "ref": "§4.3 users/ package (User provisioning from JWT claims)" },
+        { "source": "ARCH", "ref": "§7.1 users table" }
+      ]
+    },
+    {
+      "id": "FR-SECRET-01",
+      "title": "Resolve <secret ID> tokens from vault at execution time",
+      "description": "Check configurations contain <secret ID> references; backend resolves at execution time from enterprise vault. Secrets never persisted in plaintext, never returned in API responses.",
+      "milestone": "M3",
+      "traces": [
+        { "source": "PRD", "ref": "§5.1 Secure Parameterization with <secret ID> tokens" },
+        { "source": "PRD", "ref": "§7 Secrets vault integration mandatory" },
+        { "source": "ARCH", "ref": "§4.5 Secret resolution" },
+        { "source": "ARCH", "ref": "§6 Secrets Management" },
+        { "source": "ARCH", "ref": "§7.2 secrets table (reference pointers only)" }
+      ]
+    },
+    {
+      "id": "FR-TAG-01",
+      "title": "Tag checks and CSIs",
+      "description": "Tags are flexible metadata (name, category, color) associated with checks via check_tags and with CSIs via csi_tags.",
+      "milestone": "M3",
+      "traces": [
+        { "source": "PRD", "ref": "§5.3 Advanced Filtering by tag" },
+        { "source": "ARCH", "ref": "§7.2 tags, check_tags, csi_tags tables" }
+      ]
+    },
+    {
+      "id": "FR-FILTER-01",
+      "title": "Multi-dimensional check list filtering",
+      "description": "GET /checks supports filters: csi_id, type, status, environment, tag, created_by, text search.",
+      "milestone": "M1 (basic) → M3 (tags)",
+      "traces": [
+        { "source": "PRD", "ref": "§5.3 Global search context with CSI, environment, and tag filtering" },
+        { "source": "ARCH", "ref": "§7.1 checks indexes on csi_id, type, status" }
+      ]
+    }
+  ],
+
+  "non_functional": [
+    {
+      "id": "NFR-PERF-01",
+      "title": "Dashboard load P50 < 500ms / P95 < 1s / P99 < 2s",
+      "traces": [{ "source": "ARCH", "ref": "§10.1 Response Time SLOs" }]
+    },
+    {
+      "id": "NFR-PERF-02",
+      "title": "Simple check execution P50 < 100ms / P95 < 500ms / P99 < 1s",
+      "traces": [{ "source": "ARCH", "ref": "§10.1" }]
+    },
+    {
+      "id": "NFR-PERF-03",
+      "title": "Complex check execution P50 < 5s / P95 < 10s / P99 < 30s",
+      "traces": [{ "source": "ARCH", "ref": "§10.1" }]
+    },
+    {
+      "id": "NFR-PERF-04",
+      "title": "Report generation P50 < 10s / P95 < 30s / P99 < 60s",
+      "traces": [{ "source": "ARCH", "ref": "§10.1" }]
+    },
+    {
+      "id": "NFR-THRU-01",
+      "title": "Support 1000+ concurrent users",
+      "traces": [{ "source": "ARCH", "ref": "§10.2" }]
+    },
+    {
+      "id": "NFR-THRU-02",
+      "title": "100,000+ check executions per hour",
+      "traces": [{ "source": "ARCH", "ref": "§10.2" }]
+    },
+    {
+      "id": "NFR-THRU-03",
+      "title": "500 RPS API throughput sustained",
+      "traces": [{ "source": "ARCH", "ref": "§10.2" }]
+    },
+    {
+      "id": "NFR-THRU-04",
+      "title": "50 concurrent UI test executions",
+      "traces": [{ "source": "ARCH", "ref": "§10.2" }]
+    },
+    {
+      "id": "NFR-SCALE-01",
+      "title": "10,000+ total checks in catalog",
+      "traces": [{ "source": "ARCH", "ref": "§10.3" }]
+    },
+    {
+      "id": "NFR-SCALE-02",
+      "title": "1M+ execution history records/day",
+      "traces": [
+        { "source": "ARCH", "ref": "§10.3" },
+        { "source": "ARCH", "ref": "§7.5 monthly partitioning" }
+      ]
+    },
+    {
+      "id": "NFR-SCALE-03",
+      "title": "5,000+ CSI entities supported",
+      "traces": [{ "source": "ARCH", "ref": "§10.3" }]
+    },
+    {
+      "id": "NFR-SCALE-04",
+      "title": "1,000+ active reports",
+      "traces": [{ "source": "ARCH", "ref": "§10.3" }]
+    },
+    {
+      "id": "NFR-AVAIL-01",
+      "title": "99.95% uptime target",
+      "traces": [{ "source": "PRD", "ref": "§7 Availability" }]
+    },
+    {
+      "id": "NFR-SEC-01",
+      "title": "SSO via OIDC mandatory",
+      "traces": [
+        { "source": "PRD", "ref": "§7 Security" },
+        { "source": "ARCH", "ref": "§6 Authentication" }
+      ]
+    },
+    {
+      "id": "NFR-SEC-02",
+      "title": "RBAC scoped by CSI ownership",
+      "traces": [
+        { "source": "PRD", "ref": "§7 Security" },
+        { "source": "ARCH", "ref": "§6 Authorization" }
+      ]
+    },
+    {
+      "id": "NFR-SEC-03",
+      "title": "Secrets vault integration mandatory",
+      "traces": [
+        { "source": "PRD", "ref": "§7 Security" },
+        { "source": "ARCH", "ref": "§6 Secrets Management" }
+      ]
+    },
+    {
+      "id": "NFR-OBS-01",
+      "title": "Structured JSON logs with correlation IDs",
+      "traces": [
+        { "source": "ARCH", "ref": "§4.1 Observability (Logback + logstash-logback-encoder)" },
+        { "source": "ARCH", "ref": "§11.2 Structured Logging" }
+      ]
+    },
+    {
+      "id": "NFR-OBS-02",
+      "title": "Distributed tracing via OpenTelemetry",
+      "traces": [
+        { "source": "ARCH", "ref": "§4.1 OpenTelemetry auto-instrumentation agent" },
+        { "source": "ARCH", "ref": "§11.3 Tracing & Debugging" }
+      ]
+    },
+    {
+      "id": "NFR-OBS-03",
+      "title": "Micrometer + Prometheus application metrics",
+      "traces": [
+        { "source": "ARCH", "ref": "§4.1 Observability" },
+        { "source": "ARCH", "ref": "§11.1 Technical Metrics" }
+      ]
+    },
+    {
+      "id": "NFR-QUAL-01",
+      "title": "80% backend line-coverage gate in CI",
+      "traces": [
+        { "source": "ARCH", "ref": "§4.1 JaCoCo 80% line coverage" },
+        { "source": "ARCH", "ref": "§9.1 Test Pyramid" }
+      ]
+    },
+    {
+      "id": "NFR-RET-01",
+      "title": "Execution result retention: 30d hot / 90d warm / 1y cold / hard delete",
+      "traces": [{ "source": "ARCH", "ref": "§8 Retention Policy" }]
+    },
+    {
+      "id": "NFR-RET-02",
+      "title": "UI test video retention: 7d hot / 30d warm / hard delete",
+      "traces": [{ "source": "ARCH", "ref": "§8 Retention Policy" }]
+    }
+  ],
+
+  "constraints": [
+    {
+      "id": "CON-STACK-01",
+      "title": "Java 21 LTS (finalized language features only; preview disabled)",
+      "traces": [{ "source": "ARCH", "ref": "§4.1 Language" }]
+    },
+    {
+      "id": "CON-STACK-02",
+      "title": "Spring Boot 3.3+ on Spring Framework 6.1+",
+      "traces": [{ "source": "ARCH", "ref": "§4.1 Framework" }]
+    },
+    {
+      "id": "CON-STACK-03",
+      "title": "Gradle 8+ with Kotlin DSL (wrapper committed)",
+      "traces": [{ "source": "ARCH", "ref": "§4.1 Build" }]
+    },
+    {
+      "id": "CON-STACK-04",
+      "title": "Virtual threads enabled for request handling (spring.threads.virtual.enabled=true)",
+      "traces": [{ "source": "ARCH", "ref": "§4.1 Web layer" }]
+    },
+    {
+      "id": "CON-STACK-05",
+      "title": "Virtual-thread task executor for @Async check execution",
+      "traces": [{ "source": "ARCH", "ref": "§4.2 Asynchronous Execution" }]
+    },
+    {
+      "id": "CON-STACK-06",
+      "title": "PostgreSQL 15+ in production (managed RDS)",
+      "traces": [
+        { "source": "ARCH", "ref": "§5 Primary Database" },
+        { "source": "ARCH", "ref": "§13.3 Environment Configuration" }
+      ]
+    },
+    {
+      "id": "CON-STACK-07",
+      "title": "Zonky Embedded PostgreSQL for local dev (no Docker, in-process, real Postgres 15 binary)",
+      "traces": [
+        { "source": "ARCH", "ref": "§2.2 Data & Persistence" },
+        { "source": "ARCH", "ref": "§5 Local development database" }
+      ]
+    },
+    {
+      "id": "CON-STACK-08",
+      "title": "Spring Data JPA + Hibernate 6.4+; JSONB via @JdbcTypeCode(SqlTypes.JSON)",
+      "traces": [{ "source": "ARCH", "ref": "§4.1 Persistence" }]
+    },
+    {
+      "id": "CON-STACK-09",
+      "title": "Flyway forward-only migrations under backend/src/main/resources/db/migration/",
+      "traces": [
+        { "source": "ARCH", "ref": "§4.1 Migrations" },
+        { "source": "ARCH", "ref": "§Migration Strategy" }
+      ]
+    },
+    {
+      "id": "CON-STACK-10",
+      "title": "MapStruct for DTO ↔ entity conversion",
+      "traces": [{ "source": "ARCH", "ref": "§4.1 Mapping" }]
+    },
+    {
+      "id": "CON-STACK-11",
+      "title": "Spring 6 RestClient (sync default) + WebClient (streaming) for HTTP integrations",
+      "traces": [{ "source": "ARCH", "ref": "§4.1 HTTP clients" }]
+    },
+    {
+      "id": "CON-STACK-12",
+      "title": "Caffeine local cache for vertical slice; Redis (reactive) layered in when horizontally scaled",
+      "traces": [
+        { "source": "ARCH", "ref": "§4.1 Caching" },
+        { "source": "ARCH", "ref": "§13.1 Cache deployment" }
+      ]
+    },
+    {
+      "id": "CON-STACK-13",
+      "title": "Spring @Scheduled for vertical slice; Quartz (JDBC-backed, cluster-safe) at M6",
+      "traces": [
+        { "source": "ARCH", "ref": "§4.1 Scheduling" },
+        { "source": "ARCH", "ref": "§4.4 M6" }
+      ]
+    },
+    {
+      "id": "CON-STACK-14",
+      "title": "AWS SDK v2 for S3 object storage",
+      "traces": [{ "source": "ARCH", "ref": "§4.1 Object storage" }]
+    },
+    {
+      "id": "CON-STACK-15",
+      "title": "JUnit 5 + AssertJ + Mockito + @SpringBootTest + @DataJpaTest",
+      "traces": [{ "source": "ARCH", "ref": "§4.1 Testing" }]
+    },
+    {
+      "id": "CON-STACK-16",
+      "title": "Testcontainers-PostgreSQL in CI; Zonky embedded in local",
+      "traces": [
+        { "source": "ARCH", "ref": "§4.1 Testing" },
+        { "source": "ARCH", "ref": "§9.1 Integration Tests" }
+      ]
+    },
+    {
+      "id": "CON-STACK-17",
+      "title": "Code quality gates: Spotless (google-java-format) + Checkstyle + SpotBugs + JaCoCo",
+      "traces": [{ "source": "ARCH", "ref": "§4.1 Code quality" }]
+    },
+    {
+      "id": "CON-ARCH-01",
+      "title": "Vertical-slice package layout (bounded context per package, not layered-by-type)",
+      "traces": [{ "source": "ARCH", "ref": "§4.3 Project Structure" }]
+    },
+    {
+      "id": "CON-ARCH-02",
+      "title": "CheckExecutor SPI — one implementation per CheckType",
+      "traces": [{ "source": "ARCH", "ref": "§4.5 Check Orchestration" }]
+    },
+    {
+      "id": "CON-ARCH-03",
+      "title": "Database schema from ARCH §7 mirrored verbatim as Flyway V1 migration",
+      "traces": [
+        { "source": "ARCH", "ref": "§7 Note + §7.1 Core Tables" },
+        { "source": "ARCH", "ref": "§4.3 V1__init.sql mirrors §7 schema exactly" }
+      ]
+    },
+    {
+      "id": "CON-ARCH-04",
+      "title": "JSONB configuration column for polymorphic check types",
+      "traces": [{ "source": "ARCH", "ref": "§7.1 checks.configuration JSONB" }]
+    },
+    {
+      "id": "CON-ARCH-05",
+      "title": "execution_results partitioned monthly by started_at",
+      "traces": [
+        { "source": "ARCH", "ref": "§7.1 PARTITION BY RANGE" },
+        { "source": "ARCH", "ref": "§7.5 Partitioning Strategy" }
+      ]
+    },
+    {
+      "id": "CON-ARCH-06",
+      "title": "csi_metrics_current materialized view refresh strategy required",
+      "traces": [{ "source": "ARCH", "ref": "§7.3 Aggregate/Materialized Views" }]
+    },
+    {
+      "id": "CON-API-01",
+      "title": "REST API base path /api/v1",
+      "traces": [{ "source": "ARCH", "ref": "§12.1 Base URL" }]
+    },
+    {
+      "id": "CON-API-02",
+      "title": "Bearer JWT in Authorization header; 8-hour session with refresh token",
+      "traces": [{ "source": "ARCH", "ref": "§12.3 Authentication" }]
+    },
+    {
+      "id": "CON-API-03",
+      "title": "Standard response envelope: { data, metadata: {total, page, limit, hasMore}, timestamp }",
+      "traces": [{ "source": "ARCH", "ref": "§12.2 Response Format" }]
+    },
+    {
+      "id": "CON-DEPLOY-01",
+      "title": "Containerized Eclipse Temurin 21 JRE; Spring Boot layered jar via bootBuildImage",
+      "traces": [
+        { "source": "ARCH", "ref": "§13.1 Containerization" },
+        { "source": "ARCH", "ref": "§13.2 Kubernetes Deployment" }
+      ]
+    }
+  ],
+
+  "assumptions_dependencies": [
+    {
+      "id": "ASM-01",
+      "title": "Enterprise SMTP relay accessible",
+      "traces": [{ "source": "PRD", "ref": "§11 Email Delivery Service" }]
+    },
+    {
+      "id": "ASM-02",
+      "title": "Browser automation service (Selenium Grid or cloud equivalent) accessible",
+      "traces": [{ "source": "PRD", "ref": "§11 Browser Automation Service" }]
+    },
+    {
+      "id": "ASM-03",
+      "title": "Video processing/storage/streaming service accessible",
+      "traces": [{ "source": "PRD", "ref": "§11 Video Processing Service" }]
+    },
+    {
+      "id": "ASM-04",
+      "title": "ITRS, Grafana, AppDynamics, Splunk APIs + credentials available",
+      "traces": [{ "source": "PRD", "ref": "§11 Expanded API/Client Access" }]
+    },
+    {
+      "id": "ASM-05",
+      "title": "Citi System Inventory (CSI) API available, reliable, performant",
+      "traces": [{ "source": "PRD", "ref": "§11 CSI API" }]
+    },
+    {
+      "id": "ASM-06",
+      "title": "Internal cloud platform provisions required infra (K8s, RDS, Redis, S3)",
+      "traces": [{ "source": "PRD", "ref": "§11 internal cloud platform team" }]
+    },
+    {
+      "id": "ASM-07",
+      "title": "Enterprise OIDC issuer endpoint available with discoverable JWKS",
+      "traces": [{ "source": "ARCH", "ref": "§4.1 oauth2-resource-server vs enterprise OIDC issuer" }]
+    },
+    {
+      "id": "ASM-08",
+      "title": "Enterprise secrets vault with REST/gRPC client available",
+      "traces": [
+        { "source": "PRD", "ref": "§7 Secrets vault integration" },
+        { "source": "ARCH", "ref": "§4.3 secrets/ package (Vault client)" }
+      ]
+    }
+  ],
+
+  "out_of_scope": [
+    {
+      "id": "OOS-01",
+      "title": "Automated remediation (auto-restart, self-healing)",
+      "traces": [{ "source": "PRD", "ref": "§5.4 Automated Remediation" }]
+    },
+    {
+      "id": "OOS-02",
+      "title": "ML-powered anomaly detection",
+      "traces": [{ "source": "PRD", "ref": "§5.4 ML-Powered Anomaly Detection" }]
+    },
+    {
+      "id": "OOS-03",
+      "title": "Fully customizable report builder",
+      "traces": [{ "source": "PRD", "ref": "§5.4 Advanced Report Customization" }]
+    },
+    {
+      "id": "OOS-04",
+      "title": "PDF / CSV report exports",
+      "traces": [{ "source": "PRD", "ref": "§5.4 Advanced Reporting" }]
+    },
+    {
+      "id": "OOS-05",
+      "title": "Replacing ITRS / Grafana / Splunk / AppDynamics",
+      "traces": [{ "source": "PRD", "ref": "§1.2 What We Are NOT Trying to Solve" }]
+    },
+    {
+      "id": "OOS-06",
+      "title": "New alerting engine replacing native tool alerting",
+      "traces": [{ "source": "PRD", "ref": "§1.2" }]
+    },
+    {
+      "id": "OOS-07",
+      "title": "New metrics or log collection system",
+      "traces": [{ "source": "PRD", "ref": "§1.2" }]
+    },
+    {
+      "id": "OOS-08",
+      "title": "All-encompassing dashboarding solution",
+      "traces": [{ "source": "PRD", "ref": "§1.2" }]
+    }
+  ],
+
+  "user_stories_reference": [
+    {
+      "id": "UC-01",
+      "personas": ["Priya (L2 App Support)"],
+      "summary": "Create HTTP health check with CSI association",
+      "maps_to": ["FR-CHK-04", "FR-CSI-01", "FR-CHK-02"],
+      "traces": [{ "source": "PRD", "ref": "§6 UC-01" }]
+    },
+    {
+      "id": "UC-02",
+      "personas": ["David (SRE)"],
+      "summary": "Schedule critical check every 5 minutes",
+      "maps_to": ["FR-SCHED-01", "FR-CHK-03"],
+      "traces": [{ "source": "PRD", "ref": "§6 UC-02" }]
+    },
+    {
+      "id": "UC-03",
+      "personas": ["Any user"],
+      "summary": "View CSI health dashboard",
+      "maps_to": ["FR-CSI-03"],
+      "traces": [{ "source": "PRD", "ref": "§6 UC-03" }]
+    },
+    {
+      "id": "UC-04",
+      "personas": ["David (SRE)"],
+      "summary": "Investigate failed check with deep link",
+      "maps_to": ["FR-CHK-12", "FR-CHK-10"],
+      "traces": [{ "source": "PRD", "ref": "§6 UC-04" }]
+    },
+    {
+      "id": "UC-05",
+      "personas": ["David (SRE)"],
+      "summary": "Correlate trade pipeline Splunk logs",
+      "maps_to": ["FR-CHK-06"],
+      "traces": [{ "source": "PRD", "ref": "§6 UC-05" }]
+    },
+    {
+      "id": "UC-06",
+      "personas": ["App Support"],
+      "summary": "Grafana CPU threshold check",
+      "maps_to": ["FR-CHK-07"],
+      "traces": [{ "source": "PRD", "ref": "§6 UC-06" }]
+    },
+    {
+      "id": "UC-STUDIO",
+      "personas": ["Priya (L2 App Support)"],
+      "summary": "Create no-code UI test for login flow",
+      "maps_to": ["FR-STUDIO-01", "FR-STUDIO-02", "FR-STUDIO-03", "FR-STUDIO-04"],
+      "traces": [{ "source": "PRD", "ref": "§6 Checks Studio UX Journey" }]
+    },
+    {
+      "id": "UC-REPORT",
+      "personas": ["Maria (Operations Analyst)"],
+      "summary": "Build cross-CSI EOD report with live preview and daily 6PM EST delivery",
+      "maps_to": ["FR-REP-01", "FR-REP-02", "FR-REP-03", "FR-REP-04", "FR-SCHED-03"],
+      "traces": [{ "source": "PRD", "ref": "§6 Reports Feature UX Journey" }]
+    }
+  ],
+
+  "open_questions": [
+    {
+      "id": "OQ-01",
+      "question": "What is the enterprise vault's client protocol (Vault OpenAPI / HashiCorp Vault / custom)?",
+      "blocks": ["FR-SECRET-01"],
+      "owner": "@architect",
+      "phase_to_resolve": "research"
+    },
+    {
+      "id": "OQ-02",
+      "question": "Does ARCH §11 §Assumptions confirm the Browser Automation Service is Selenium Grid, or could it be Playwright Cloud?",
+      "blocks": ["FR-STUDIO-02", "FR-STUDIO-06"],
+      "owner": "@architect",
+      "phase_to_resolve": "research",
+      "note": "ARCH §4.4 M5 names 'Selenium Grid client' but §11 Assumptions says 'e.g., Selenium Grid or cloud-based service'"
+    },
+    {
+      "id": "OQ-03",
+      "question": "Schema §7 defines 'tags' and 'secrets' tables but §8 retention policy does not cover their lifecycle. Required?",
+      "blocks": ["NFR-RET-01"],
+      "owner": "@architect",
+      "phase_to_resolve": "spec",
+      "note": "Low priority — can default to no retention (indefinite)"
+    },
+    {
+      "id": "OQ-04",
+      "question": "ARCH §12 does not document schedule CRUD endpoints explicitly. Are schedules managed inline with checks (PUT /checks/{id} with schedule payload) or via dedicated /schedules endpoints?",
+      "blocks": ["FR-SCHED-01", "FR-SCHED-02"],
+      "owner": "@architect",
+      "phase_to_resolve": "spec"
+    },
+    {
+      "id": "OQ-05",
+      "question": "ARCH §7.1 execution_results partition table declares only execution_results_2024_01. What is the partition maintenance strategy (pg_partman? native? cron job?)?",
+      "blocks": ["NFR-SCALE-02"],
+      "owner": "@data-engineer",
+      "phase_to_resolve": "research"
+    }
+  ]
+}
