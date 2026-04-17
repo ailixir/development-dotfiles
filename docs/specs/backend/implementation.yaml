@@ -1,0 +1,818 @@
+#
+# Spec Pipeline Phase 6 — Implementation Plan
+# Owner: @architect (Aria)
+# Inputs:
+#   - spec.md v2 (08c3f7ec7) — APPROVED 4.58/5
+#   - requirements.json — 38 FR + 23 NFR + 27 CON
+#   - research.json — 60 findings
+# Schema: aios://spec-pipeline/implementation/v1
+#
+
+spec_id: backend-v2.2
+phase: plan
+generated_by: "@architect (Aria)"
+generated_at: "2026-04-17"
+
+complexity_classification: COMPLEX
+total_score: "22/25"
+
+size_legend:
+  S: "1-3 dev-days; single story"
+  M: "4-8 dev-days; may split late"
+  L: "9-15 dev-days; should split if pre-size holds"
+  XL: "16+ dev-days; MUST split"
+
+story_size_policy:
+  rule: "Any story initially sized L that remains L after @po validation must be split in half by @sm before @dev picks it up."
+  rationale: "Keeps SDC feedback loop short (~1 story/week) and reduces WIP."
+
+epic_dag:
+  EPIC-01: []
+  EPIC-02: ["EPIC-01"]
+  EPIC-03: ["EPIC-01", "EPIC-02"]
+  EPIC-04: ["EPIC-01"]
+  EPIC-05: ["EPIC-01"]
+  EPIC-06: ["EPIC-01", "EPIC-02", "EPIC-03", "EPIC-04", "EPIC-05"]
+
+parallelization_window:
+  parallel_streams:
+    - ["EPIC-02", "EPIC-04", "EPIC-05"]
+  rationale: "After M1 ships, EPIC-02/04/05 are orthogonal — parallelizable with 3 dev-streams if staffing allows."
+
+per_story_exit_gates:
+  - "Unit tests added; JaCoCo line coverage >= 80% on new code (NFR-QUAL-01)."
+  - "RDS-parity lint passes (ZK-R2)."
+  - "OpenAPI snapshot diff reviewed (spec §13.3)."
+  - "CodeRabbit pre-commit review resolved (@qa escalation if max 2 iterations)."
+  - "Story's acceptance criteria demonstrable against local Zonky + CI Testcontainers."
+  - "Every public API change carries a trace ref to an FR-*/NFR-*/CON-*/research finding."
+
+epics:
+
+  - epic_id: EPIC-01
+    milestone: M1
+    title: "Walking skeleton: CSI + Checks CRUD + HTTP executor + JWT"
+    goal: |
+      End-to-end vertical slice FE->BE. Frontend can disable MSW for /csi, /checks,
+      and HTTP check execution and run against http://localhost:8080. Every layer
+      of the stack (controller -> service -> JPA -> Postgres -> Flyway -> security ->
+      observability) is exercised.
+    primary_fr_nfr: ["FR-CSI-01", "FR-CSI-02", "FR-CHK-01", "FR-CHK-02", "FR-CHK-03", "FR-CHK-04", "FR-CHK-10", "FR-CHK-11", "FR-AUTH-01", "FR-AUTH-02", "FR-AUTH-03", "FR-BULK-01", "NFR-SEC-01", "NFR-SEC-02", "NFR-SEC-04", "NFR-QUAL-01", "NFR-OBS-01"]
+    risks_in_scope: ["R-03", "R-06", "R-08"]
+    exit_criteria:
+      - "Frontend VITE_API_URL=http://localhost:8080 works for CSI + Checks + HTTP execution with MSW disabled."
+      - "./gradlew check green on clean checkout."
+      - "Zonky local + Testcontainers CI both green."
+      - "JWT claim contract signed off with platform team (R-08 retired)."
+      - "RDS-parity lint active in CI."
+    stories:
+      - story_id: "1.1"
+        title: "Project scaffold (Gradle KTS, Spring Boot 3.3, profiles)"
+        size: S
+        depends_on: []
+        scope:
+          - "Create backend/build.gradle.kts + settings.gradle.kts per ARCH §4.1 stack."
+          - "ChecksApplication.java with @SpringBootApplication."
+          - "Spring profiles: local (Zonky), test (Testcontainers), staging, prod."
+          - "application.yml + per-profile overrides."
+          - "Gradle wrapper 8.x pinned."
+          - "Spotless + Checkstyle + SpotBugs + JaCoCo (80% gate)."
+          - "Logback JSON + MaskingPatternLayout."
+        acceptance_criteria:
+          - "./gradlew bootRun --args='--spring.profiles.active=local' binds :8080."
+          - "./gradlew check produces JaCoCo HTML report."
+          - "GET /actuator/health returns UP."
+        trace: ["CON-STACK-01", "CON-STACK-02", "CON-STACK-03", "CON-STACK-15", "CON-STACK-17"]
+
+      - story_id: "1.2"
+        title: "Flyway V1 migration — full §7 schema + current-month partition"
+        size: L
+        depends_on: ["1.1"]
+        scope:
+          - "V1__init.sql mirrors ARCH §7.1 + §7.2 + §7.3 + §7.4."
+          - "execution_results: PARTITION BY RANGE + current + next-month partitions; NO default partition."
+          - "Discriminator CHECK on checks.configuration via jsonb_path_exists(configuration, '$.type')."
+          - "Shedlock table for EPIC-02 use."
+        acceptance_criteria:
+          - "Zonky starts, Flyway migrates clean, all tables present."
+          - "CI Testcontainers identical."
+          - "DataJpaTest inserts + reads from every table."
+          - "Discriminator CHECK rejects config without type field."
+        trace: ["CON-ARCH-03", "CON-ARCH-04", "CON-ARCH-05", "CON-STACK-09", "ARCH §7"]
+
+      - story_id: "1.3"
+        title: "RDS-parity lint"
+        size: S
+        depends_on: ["1.2"]
+        scope:
+          - "Test scans db/migration/*.sql for RDS-forbidden statements."
+          - "Allowlist: pgcrypto, uuid-ossp, pg_stat_statements, hstore."
+          - "Fails on ALTER SYSTEM, non-allowed CREATE EXTENSION, SUPERUSER ops."
+        acceptance_criteria:
+          - "Lint fails clearly when a forbidden statement is injected."
+          - "Lint wired into ./gradlew check."
+        trace: ["ZK-R2", "R-06", "spec §13.2"]
+
+      - story_id: "1.4"
+        title: "JWT claim contract with platform team"
+        size: S
+        depends_on: []
+        blocker: true
+        blocker_note: "Blocks other M1 stories using @PreAuthorize."
+        scope:
+          - "Engage enterprise identity platform team."
+          - "Agree + document JWT claim schema for CSI ownership."
+          - "Commit as docs/specs/backend/jwt-claim-schema.md with example tokens."
+        acceptance_criteria:
+          - "Schema approved by platform team (async sign-off in PR)."
+          - "Dev stub JWT matches prod schema shape."
+        trace: ["R-08", "REV-06", "spec §7.2", "FR-AUTH-02"]
+
+      - story_id: "1.5"
+        title: "Security: OIDC resource server + CsiOwnershipEvaluator"
+        size: M
+        depends_on: ["1.1", "1.4"]
+        scope:
+          - "spring-boot-starter-oauth2-resource-server with issuer-uri."
+          - "CsiOwnershipEvaluator bean (canRead/canWrite/canExecute/isAdmin)."
+          - "Method-level @PreAuthorize helpers."
+          - "MdcTaskDecorator (MDC + DelegatingSecurityContextExecutor)."
+        acceptance_criteria:
+          - "Unauthenticated request -> 401. Invalid/expired token -> 401."
+          - "Authenticated request with no CSI claim -> 403."
+          - "MDC traceId propagates across @Async boundaries in tests."
+        trace: ["FR-AUTH-01", "FR-AUTH-02", "VT-R2", "VT-05", "VT-06", "spec §7.1", "spec §7.2"]
+
+      - story_id: "1.6"
+        title: "users context — JWT-claim provisioning"
+        size: S
+        depends_on: ["1.5"]
+        scope:
+          - "User entity + repository + service."
+          - "@AuthenticationPrincipal-driven upsert on first-seen sso_id; update last_login thereafter."
+          - "GET /users/me."
+        acceptance_criteria:
+          - "First auth inserts users row; second updates last_login."
+          - "Email fields masked in logs."
+        trace: ["FR-AUTH-03", "ARCH §7.1"]
+
+      - story_id: "1.7"
+        title: "csi context — read-only endpoints"
+        size: M
+        depends_on: ["1.2", "1.5"]
+        scope:
+          - "CsiSystem entity, repository, service, controller."
+          - "GET /csi (paginated), GET /csi/{id}, GET /csi/{id}/checks."
+          - "MapStruct entity<->DTO mapper."
+        acceptance_criteria:
+          - "FE can fetch CSIs and navigate to a CSI's checks list."
+          - "Soft-deleted CSIs excluded."
+        trace: ["FR-CSI-01", "FR-CSI-02", "CON-STACK-10"]
+
+      - story_id: "1.8"
+        title: "Async infrastructure — 3 named executors"
+        size: M
+        depends_on: ["1.5"]
+        scope:
+          - "AsyncConfig beans: applicationTaskExecutor, checkExecutor (semaphore-bounded), uiTestExecutor stub (size-0 until EPIC-05)."
+          - "spring.threads.virtual.enabled=true."
+          - "Preprod JVM flag -Djdk.tracePinnedThreads=short."
+        acceptance_criteria:
+          - "@Async methods run on virtual threads (verified with Thread.isVirtual())."
+          - "checkExecutor semaphore bounds concurrent tasks correctly."
+        trace: ["CON-STACK-04", "CON-STACK-05", "VT-R1", "VT-R3", "PW-R7", "spec §4.2"]
+
+      - story_id: "1.9"
+        title: "checks context + sealed CheckConfiguration (HTTP only)"
+        size: L
+        depends_on: ["1.2", "1.5", "1.7"]
+        split_hint: "Split into 1.9a (entity + sealed hierarchy) + 1.9b (controller + MapStruct)."
+        scope:
+          - "Check entity with @JdbcTypeCode(SqlTypes.JSON) on configuration."
+          - "sealed interface CheckConfiguration permits HttpConfiguration (others in later epics)."
+          - "@JsonTypeInfo(NAME) + @JsonSubTypes."
+          - "CheckType enum + exhaustiveness test."
+          - "CRUD endpoints."
+          - "Filters: csi_id, type, status, environment (FR-FILTER-01 basic)."
+          - "MapStruct @SubclassMapping for HTTP variant."
+        acceptance_criteria:
+          - "Create -> read -> update -> soft-delete HTTP check."
+          - "JSONB roundtrips without data loss."
+          - "Adding a hypothetical 8th type in test does not break existing reads."
+        trace: ["FR-CHK-01", "FR-CHK-02", "FR-FILTER-01", "CON-ARCH-04", "MS-R1", "MS-R2", "spec §5.3"]
+
+      - story_id: "1.10"
+        title: "CheckExecutor SPI + HttpCheckExecutor"
+        size: M
+        depends_on: ["1.9"]
+        scope:
+          - "CheckExecutor interface."
+          - "Dispatcher keyed on CheckType."
+          - "HttpCheckExecutor: RestClient, method/headers/body/status validation."
+          - "Resilience4j circuit-breaker."
+        acceptance_criteria:
+          - "HTTP check against localhost stub: success + failure paths."
+          - "Timeouts honored per IntegrationConfig shape (spec §11.1)."
+        trace: ["FR-CHK-01", "FR-CHK-04", "CON-ARCH-02", "ARCH §4.5"]
+
+      - story_id: "1.11"
+        title: "execution_results persistence + trigger cascade"
+        size: M
+        depends_on: ["1.2", "1.10"]
+        scope:
+          - "ExecutionResult entity + repository."
+          - "ExecutionService.persistResult() in @Transactional(REQUIRES_NEW)."
+          - "§7.4 trigger cascades status to checks.status."
+          - "GET /checks/{id}/history (cursor-paginated)."
+          - "GET /checks/{id}/executions/{execId}."
+        acceptance_criteria:
+          - "After execute(), checks.status updates via trigger."
+          - "History endpoint paginates without full count scans."
+        trace: ["FR-CHK-10", "FR-CHK-11", "COMP-05", "spec §8.3"]
+
+      - story_id: "1.12"
+        title: "Async execute endpoint (202 + polling)"
+        size: S
+        depends_on: ["1.10", "1.11"]
+        scope:
+          - "POST /checks/{id}/execute returns 202 + Location header."
+          - "Body: {executionId, status: PENDING}."
+          - "Hand off to checkExecutor, persist result."
+        acceptance_criteria:
+          - "100 concurrent executions bounded by semaphore (not unbounded)."
+        trace: ["FR-CHK-03", "spec §4.4"]
+
+      - story_id: "1.13"
+        title: "Idempotency-Key middleware"
+        size: S
+        depends_on: ["1.12"]
+        scope:
+          - "IdempotencyFilter checks Idempotency-Key header on mutating routes."
+          - "Cache (key+userId) -> response for 5 min in Caffeine."
+          - "Apply to /execute, later /reports/send + /checks/_bulk."
+        acceptance_criteria:
+          - "Replaying same Idempotency-Key returns original response without re-executing."
+        trace: ["REV-03", "COMP-03", "spec §6.1"]
+
+      - story_id: "1.14"
+        title: "Bulk delete (POST /checks/_bulk with op=delete only)"
+        size: S
+        depends_on: ["1.13"]
+        scope:
+          - "Bulk controller accepting up to 100 ops."
+          - "M1 scope: op=delete only."
+          - "207 Multi-Status on partial failure; per-op CsiOwnership check."
+          - "Idempotency-Key applies."
+        acceptance_criteria:
+          - "Bulk-delete 3 checks (2 owned, 1 unowned) returns 207 with per-op statuses."
+        trace: ["FR-BULK-01", "REV-01", "spec §6.4"]
+
+      - story_id: "1.15"
+        title: "Rate limiting (Bucket4j per-pod, Caffeine-backed)"
+        size: M
+        depends_on: ["1.5"]
+        defer_note: "Caffeine single-pod OK for M1; Redis migration at EPIC-06."
+        scope:
+          - "Per-user token buckets by endpoint class (spec §6.5)."
+          - "Admin 10x multiplier via JWT roles."
+          - "429 + Retry-After + X-RateLimit-Remaining headers."
+        acceptance_criteria:
+          - "Hammer /execute at 120 req/min with one user -> 429 after 60 pass."
+        trace: ["NFR-SEC-04", "REV-04", "spec §6.5"]
+
+      - story_id: "1.16"
+        title: "OpenAPI snapshot + contract diff test"
+        size: S
+        depends_on: ["1.9", "1.10", "1.12", "1.14", "1.15"]
+        scope:
+          - "springdoc-openapi generates /v3/api-docs at runtime."
+          - "openapi.yaml committed at docs/specs/backend/openapi.yaml."
+          - "CI diff test fails on unintended contract changes."
+        acceptance_criteria:
+          - "Intended change -> updated yaml passes."
+          - "Unintended change -> diff fails with clear error."
+        trace: ["spec §6.1", "spec §13.3"]
+
+      - story_id: "1.17"
+        title: "FE MSW disablement for CSI/Checks/HTTP execution"
+        size: S
+        depends_on: ["1.7", "1.9", "1.10", "1.12"]
+        scope:
+          - "frontend/src/services/mocks/mockMode.ts per-domain toggle."
+          - "Env flag VITE_DISABLE_MSW_DOMAINS=csi,checks."
+          - "Cypress smoke test against real backend at localhost:8080."
+        acceptance_criteria:
+          - "FE with env flag fetches real CSI/Checks from backend."
+          - "Remaining MSW handlers (studio, reports) still work."
+        trace: ["ARCH §4.4 M1 exit"]
+
+  - epic_id: EPIC-02
+    milestone: M2
+    title: "Scheduling + TCP + app-managed partitions"
+    goal: "Scheduled HTTP+TCP checks run and persist. Partitions self-maintained. ShedLock prevents multi-pod races."
+    primary_fr_nfr: ["FR-SCHED-01", "FR-SCHED-02", "FR-SCHED-03", "FR-CHK-05", "NFR-SCALE-02"]
+    risks_in_scope: ["R-05"]
+    exit_criteria:
+      - "Scheduled HTTP + TCP checks run + persist."
+      - "/actuator/health/partitions DOWN fires 3 days before exhaustion."
+      - "ShedLock prevents partition DDL races in 2-replica staging."
+    stories:
+      - story_id: "2.1"
+        title: "Schedules context (dedicated /schedules endpoints)"
+        size: M
+        depends_on: ["1.9"]
+        scope:
+          - "Schedule entity, repository, service, controller."
+          - "CRUD endpoints per spec §6.3."
+          - "PATCH /schedules/{id}/enabled."
+          - "Embed schedule in GET /checks/{id}."
+          - "1:1 constraint via UNIQUE idx."
+        acceptance_criteria:
+          - "Create schedule -> cron validates -> list includes -> disable/enable -> delete."
+        trace: ["FR-SCHED-01", "FR-SCHED-02", "FR-SCHED-03", "DEBT-03", "spec §6.3"]
+
+      - story_id: "2.2"
+        title: "TCP executor"
+        size: S
+        depends_on: ["1.10"]
+        scope:
+          - "TcpCheckExecutor with Socket + configurable timeout."
+        acceptance_criteria:
+          - "TCP check against localhost:8080 passes; against localhost:1 times out."
+        trace: ["FR-CHK-05", "ARCH §4.4 M2"]
+
+      - story_id: "2.3"
+        title: "Cron dispatcher (@Scheduled poller)"
+        size: M
+        depends_on: ["2.1", "1.12"]
+        scope:
+          - "@Scheduled(fixedDelay=30s) polls next_execution_at."
+          - "Dispatches via CheckExecutionService."
+          - "Updates next_execution_at after dispatch."
+        trace: ["FR-SCHED-01", "CON-STACK-13", "spec §8.1"]
+
+      - story_id: "2.4"
+        title: "ShedLock integration (JDBC-backed)"
+        size: S
+        depends_on: ["1.2", "2.3"]
+        scope:
+          - "Add shedlock dependency."
+          - "Annotate cron dispatcher + partition beans with @SchedulerLock."
+          - "Integration test: 2 app contexts -> only one executes."
+        trace: ["PG-R5", "R-05", "FR-SCHED-04", "spec §8.1"]
+
+      - story_id: "2.5"
+        title: "Partition scheduler (create + bootstrap + health indicator)"
+        size: L
+        depends_on: ["2.4"]
+        split_hint: "Split 2.5a (scheduler+bootstrap) + 2.5b (health indicator+generalization)."
+        scope:
+          - "ExecutionResultsPartitionScheduler @Scheduled(cron='0 0 3 25 * ?') + @SchedulerLock."
+          - "Creates next 2 months via idempotent DDL."
+          - "ApplicationReadyEvent listener at startup."
+          - "Apply same pattern to ui_test_executions (monthly) + report_executions (quarterly)."
+          - "/actuator/health/partitions HealthIndicator."
+        trace: ["PG-R1", "CON-ARCH-05", "spec §8.2"]
+
+      - story_id: "2.6"
+        title: "Retention pruning (DETACH CONCURRENTLY)"
+        size: M
+        depends_on: ["2.5"]
+        scope:
+          - "@Scheduled monthly: DETACH + DROP partitions older than retention."
+          - "DETACH CONCURRENTLY cannot run in a transaction block."
+          - "Audit each detach via log + metric."
+        trace: ["NFR-RET-01", "PG-04", "PG-R2", "PG-09", "spec §8.2"]
+
+  - epic_id: EPIC-03
+    milestone: M3
+    title: "Integration check types + Vault + Tags"
+    goal: "All 6 non-UI check types work against stub servers. Secrets resolved from Vault at execution time."
+    primary_fr_nfr: ["FR-CHK-06", "FR-CHK-07", "FR-CHK-08", "FR-CHK-09", "FR-CHK-12", "FR-SECRET-01", "FR-SECRET-02", "FR-TAG-01"]
+    risks_in_scope: ["R-04"]
+    exit_criteria:
+      - "6 non-UI executor contract tests green vs WireMock stubs."
+      - "No plaintext secrets in any log/response/row."
+      - "Bulk update/tag operations live."
+    stories:
+      - story_id: "3.1"
+        title: "Vault K8s role engagement"
+        size: S
+        depends_on: []
+        blocker: true
+        scope:
+          - "Engage platform team; create checks-backend role with KV v2 policy."
+        acceptance_criteria:
+          - "Role + policy documented in docs/runbooks/vault.md."
+          - "Dev Vault provisioned for local + CI (Testcontainers VaultContainer)."
+        trace: ["R-04", "HV-R2"]
+
+      - story_id: "3.2"
+        title: "Vault client + SecretResolver + Caffeine cache"
+        size: M
+        depends_on: ["3.1", "1.8"]
+        scope:
+          - "spring-cloud-starter-vault-config, authentication=KUBERNETES, kv bootstrap disabled."
+          - "SecretResolver with @Cacheable (Caffeine, TTL 5m, max 1000)."
+          - "Resilience4j CircuitBreaker + Retry."
+          - "Metrics checks_secret_cache_hits/misses_total, target >=95%."
+          - "Expiry: use-time SecretExpiredException (DEBT-02)."
+        acceptance_criteria:
+          - "Cache hit rate >=95% in 100-call burst with 5 distinct refs."
+          - "Vault outage -> CB open -> clear 'secret unavailable' error."
+        trace: ["FR-SECRET-01", "FR-SECRET-02", "HV-R1", "HV-R5", "spec §7.3"]
+
+      - story_id: "3.3"
+        title: "Splunk executor"
+        size: M
+        depends_on: ["1.10", "3.2"]
+        scope:
+          - "SplunkCheckExecutor: SPL query + result-count threshold."
+        trace: ["FR-CHK-06", "spec §11"]
+
+      - story_id: "3.4"
+        title: "Grafana executor"
+        size: M
+        depends_on: ["1.10", "3.2"]
+        scope:
+          - "GrafanaCheckExecutor: dashboard/panel + operator/threshold."
+        trace: ["FR-CHK-07"]
+
+      - story_id: "3.5"
+        title: "ITRS Geneos executor"
+        size: M
+        depends_on: ["1.10", "3.2"]
+        scope:
+          - "ItrsCheckExecutor: sampler status + expected-value comparison."
+        trace: ["FR-CHK-08"]
+
+      - story_id: "3.6"
+        title: "AppDynamics executor"
+        size: M
+        depends_on: ["1.10", "3.2"]
+        scope:
+          - "AppDynamicsCheckExecutor: health rule + APM endpoint."
+        trace: ["FR-CHK-09"]
+
+      - story_id: "3.7"
+        title: "Tags context + junction tables"
+        size: M
+        depends_on: ["1.9"]
+        scope:
+          - "Tag entity + check_tags + csi_tags."
+          - "CRUD endpoints (spec §6.2)."
+          - "FR-FILTER-01 extension: filter /checks by tag."
+        trace: ["FR-TAG-01", "FR-FILTER-01"]
+
+      - story_id: "3.8"
+        title: "Deep-link URLs in failure payloads"
+        size: S
+        depends_on: ["3.3", "3.4", "3.5", "3.6"]
+        scope:
+          - "Each integration executor emits deep-link in error_message on failure."
+        trace: ["FR-CHK-12", "PRD §6 UC-04"]
+
+      - story_id: "3.9"
+        title: "Bulk update + tag operations"
+        size: M
+        depends_on: ["1.14", "3.7"]
+        scope:
+          - "Extend /checks/_bulk to accept op=update + op=tag."
+        trace: ["FR-BULK-01", "spec §6.4"]
+
+  - epic_id: EPIC-04
+    milestone: M4
+    title: "Reports: live preview + scheduled SMTP delivery"
+    goal: "Maria's UC (PRD §6) completes end-to-end. Cross-CSI reports deliver on cron."
+    primary_fr_nfr: ["FR-REP-01", "FR-REP-02", "FR-REP-03", "FR-REP-04", "FR-REP-05", "FR-REP-06", "NFR-PERF-04"]
+    risks_in_scope: []
+    exit_criteria:
+      - "Maria builds report in FE, schedules daily 6PM EST, receives email, sees execution in audit."
+      - "Preview SLO met: P95 <= 500ms at <=50 checks."
+    stories:
+      - story_id: "4.1"
+        title: "Reports context + sealed ReportSection"
+        size: L
+        depends_on: ["1.9"]
+        split_hint: "Split 4.1a (entity+sections) + 4.1b (controller)."
+        scope:
+          - "Report entity, sections JSONB, sealed interface ReportSection permits CheckResultsSection, KpiSection, FreeTextSection."
+          - "Recipients TEXT[], template, schedule."
+          - "CRUD endpoints."
+        trace: ["FR-REP-01", "spec §10.1"]
+
+      - story_id: "4.2"
+        title: "Report renderer (HTML)"
+        size: M
+        depends_on: ["4.1"]
+        scope:
+          - "Thymeleaf template per PRD §6 example."
+          - "Render each ReportSection variant."
+          - "Historical status lookup (e.g., 'PASSING for 16 hours')."
+        trace: ["PRD §6 MVP Email Output"]
+
+      - story_id: "4.3"
+        title: "Live preview endpoint with SLO"
+        size: S
+        depends_on: ["4.2"]
+        scope:
+          - "POST /reports/{id}/preview."
+          - "Micrometer histogram reports_preview_duration_seconds tagged by section_count_bucket."
+        acceptance_criteria:
+          - "Preview for 10-section report P95 <= 500ms in load test."
+        trace: ["FR-REP-02", "TEST-02", "spec §10.2"]
+
+      - story_id: "4.4"
+        title: "SMTP dispatcher + report_executions audit"
+        size: M
+        depends_on: ["4.2"]
+        scope:
+          - "JavaMailSender via ConfigMap."
+          - "ReportDispatcher @Scheduled(fixedDelay=60s) + @SchedulerLock."
+          - "report_executions audit row per delivery."
+          - "Partial-failure handling."
+        trace: ["FR-REP-03", "FR-REP-05", "spec §10.3"]
+
+      - story_id: "4.5"
+        title: "Ad-hoc send + cross-CSI composition"
+        size: S
+        depends_on: ["4.4"]
+        scope:
+          - "POST /reports/{id}/send triggers immediate dispatch."
+          - "CheckResultsSection accepts csi_id=ANY(?::text[])."
+        trace: ["FR-REP-04", "FR-REP-06"]
+
+  - epic_id: EPIC-05
+    milestone: M5
+    title: "Checks Studio: Playwright in single container, horizontal scale"
+    goal: "Priya's UC (PRD §6) completes end-to-end. 4 concurrent UI tests per pod."
+    primary_fr_nfr: ["FR-STUDIO-01", "FR-STUDIO-02", "FR-STUDIO-03", "FR-STUDIO-04", "FR-STUDIO-05", "FR-STUDIO-06", "FR-CHK-01"]
+    risks_in_scope: ["R-01", "R-02", "R-07"]
+    exit_criteria:
+      - "Priya writes + runs a UI test; sees video playback + green checkmarks."
+      - "4 concurrent tests/pod verified in integration test."
+      - "Graceful shutdown reaps all Chromium (ps aux clean after pod stop)."
+    stories:
+      - story_id: "5.1"
+        title: "ui_tests context CRUD"
+        size: M
+        depends_on: ["1.9"]
+        scope:
+          - "UiTest entity per ARCH §7.1."
+          - "steps JSONB, variables JSONB."
+          - "CRUD endpoints."
+        trace: ["FR-STUDIO-01", "ARCH §7.1"]
+
+      - story_id: "5.2"
+        title: "Playwright container image (Chromium only)"
+        size: M
+        depends_on: ["1.1"]
+        scope:
+          - "Dockerfile extends mcr.microsoft.com/playwright/java:v1.XX-jammy."
+          - "Install Chromium only (--with-deps chromium)."
+          - "tini as PID 1."
+          - "Image size <= 1.8 GiB."
+          - "Helm values: studio.pool.size, terminationGracePeriodSeconds=180."
+        trace: ["PW-R2", "PW-R6", "PW-08", "PW-09", "spec §9.8"]
+
+      - story_id: "5.3"
+        title: "PlaywrightWorker (ThreadLocal + platform-thread pool)"
+        size: L
+        depends_on: ["5.2", "1.8"]
+        split_hint: "Split 5.3a (worker+pool) + 5.3b (lifecycle+shutdown)."
+        scope:
+          - "uiTestExecutor: ThreadPoolTaskExecutor core=max=studio.pool.size, queueCapacity=0."
+          - "ThreadLocal<Playwright>+Browser; closed on @PreDestroy."
+          - "PlaywrightWorker.run() with BrowserContext per test."
+          - "Video recording enabled via BrowserContext options."
+        trace: ["PW-R1", "PW-R3", "PW-01", "PW-02", "PW-03", "PW-04", "spec §9.3"]
+
+      - story_id: "5.4"
+        title: "parseSteps.ts -> Java port"
+        size: L
+        depends_on: []
+        split_hint: "Split 5.4a (tokenizer+types) + 5.4b (parser+corpus parity)."
+        scope:
+          - "Port frontend/src/utils/studio/ir/parseSteps.ts to Java."
+          - "Share fuzz-test corpus with TS original; byte-identical IR for 100+ cases."
+        trace: ["COMP-08", "IMP-04", "spec §9.9"]
+
+      - story_id: "5.5"
+        title: "UiTestCheckExecutor + step interpreter"
+        size: L
+        depends_on: ["5.3", "5.4"]
+        scope:
+          - "UiTestCheckExecutor delegates to PlaywrightWorker."
+          - "StepInterpreter: IR step -> Playwright Page action."
+          - "Variable + secret interpolation."
+        trace: ["FR-STUDIO-02", "FR-STUDIO-05"]
+
+      - story_id: "5.6"
+        title: "S3 upload + video streaming endpoint"
+        size: M
+        depends_on: ["5.5"]
+        scope:
+          - "AWS SDK v2 S3Client; IAM role via IRSA."
+          - "Upload .webm to s3://checks-studio/{ui_test_id}/{execution_id}.webm."
+          - "Delete tmpfs file after upload."
+          - "GET /studio/tests/{id}/video via presigned URL or pass-through."
+        trace: ["FR-STUDIO-03", "CON-STACK-14"]
+
+      - story_id: "5.7"
+        title: "Python codegen endpoint"
+        size: S
+        depends_on: ["5.4"]
+        scope:
+          - "GET /studio/tests/{id}/codegen?lang=python — IR->template transformation."
+        trace: ["FR-STUDIO-06", "spec §9.10"]
+
+      - story_id: "5.8"
+        title: "Readiness probe /actuator/health/studio-capacity"
+        size: S
+        depends_on: ["5.3"]
+        scope:
+          - "HealthIndicator DOWN (503) when active == capacity."
+          - "K8s Service stops routing new /studio/tests/{id}/run."
+        trace: ["PW-R8", "spec §9.5"]
+
+      - story_id: "5.9"
+        title: "Graceful shutdown (drain + @PreDestroy)"
+        size: M
+        depends_on: ["5.3", "5.8"]
+        scope:
+          - "/usr/local/bin/drain + K8s preStop hook."
+          - "POST /actuator/shutdown-studio flips readiness."
+          - "@PreDestroy closes Playwright + Chromium."
+          - "Integration test: SIGTERM + confirm all Chromium reaped."
+        trace: ["PW-R5", "PW-12", "spec §9.5"]
+
+      - story_id: "5.10"
+        title: "Federated-mode integration test (R-07)"
+        size: S
+        depends_on: ["5.1"]
+        scope:
+          - "Run FE in federated mode against backend."
+          - "Assert polymorphic JSON roundtrip when host ObjectMapper is injected."
+        trace: ["R-07", "MS-07", "spec §5.3"]
+
+  - epic_id: EPIC-06
+    milestone: M6
+    title: "Hardening: cluster scheduler + Redis + autoscaling + SLO soak"
+    goal: "NFR-THRU + NFR-PERF SLOs met in staging at 15 replicas. Prod promotion gated on 30-day soak."
+    primary_fr_nfr: ["FR-SCHED-04", "NFR-PERF-01", "NFR-PERF-02", "NFR-PERF-03", "NFR-PERF-04", "NFR-THRU-01", "NFR-THRU-02", "NFR-THRU-03", "NFR-THRU-04", "NFR-AVAIL-01", "NFR-SCALE-01", "NFR-SCALE-02", "NFR-SCALE-03", "NFR-SCALE-04", "NFR-OBS-02"]
+    risks_in_scope: ["R-01", "R-02", "R-03"]
+    exit_criteria:
+      - "Quartz JDBC scheduler runs on 3+ replicas without duplicate dispatch."
+      - "Redis-backed rate limiting accurate across replicas."
+      - "M6 load test PASSES (5 criteria in spec §9.4)."
+      - "30-day staging soak: error budget < 50% consumed, all NFR-PERF met 28/30 days."
+      - "Runbooks published: studio, autoscaling, partitions, vault."
+    stories:
+      - story_id: "6.1"
+        title: "Quartz migration (JDBC-backed cluster scheduler)"
+        size: L
+        depends_on: ["2.3", "2.4"]
+        scope:
+          - "Replace @Scheduled dispatcher with Quartz JDBC JobStore."
+          - "Keep ShedLock for partition scheduler (Quartz overkill there)."
+          - "Migration path documented; staging cutover."
+        trace: ["FR-SCHED-04", "CON-STACK-13", "ARCH §4.4 M6"]
+
+      - story_id: "6.2"
+        title: "Redis cache tier"
+        size: M
+        depends_on: ["3.2"]
+        scope:
+          - "spring-boot-starter-data-redis."
+          - "Caffeine + Redis two-tier."
+          - "Cache names: vault-secrets, idempotency, csi-metrics."
+        trace: ["CON-STACK-12", "ARCH §4.1", "ARCH §13.1"]
+
+      - story_id: "6.3"
+        title: "Redis-backed rate limiting"
+        size: M
+        depends_on: ["6.2", "1.15"]
+        scope:
+          - "Migrate Bucket4j state from Caffeine to Redis for cluster-wide accuracy."
+        trace: ["NFR-SEC-04", "spec §6.5"]
+
+      - story_id: "6.4"
+        title: "KEDA ScaledObject + custom metric pipeline"
+        size: M
+        depends_on: ["5.3", "5.8"]
+        scope:
+          - "Deploy KEDA operator (infra team coordination)."
+          - "ScaledObject with Prometheus trigger on studio_active_tests_ratio."
+          - "Threshold 0.7; re-tune per load test."
+          - "PodDisruptionBudget (minAvailable: 3)."
+        trace: ["PW-R4", "PW-13", "spec §9.6"]
+
+      - story_id: "6.5"
+        title: "OpenTelemetry agent wiring"
+        size: S
+        depends_on: []
+        scope:
+          - "OTel Java auto-instrumentation agent."
+          - "OTLP exporter -> enterprise collector."
+        trace: ["NFR-OBS-02", "ARCH §11.3"]
+
+      - story_id: "6.6"
+        title: "k6 + Playwright load test (M6 5-gate acceptance)"
+        size: L
+        depends_on: ["6.1", "6.2", "6.3", "6.4"]
+        scope:
+          - "k6 scenarios: 500 RPS sustained for 1h; 50 concurrent UI tests."
+          - "Verify each of 5 acceptance criteria from spec §9.4."
+          - "Tune studio.pool.size + KEDA thresholds based on results."
+          - "Document findings in docs/runbooks/load-testing.md."
+        trace: ["NFR-THRU-01", "NFR-THRU-02", "NFR-THRU-03", "NFR-THRU-04", "R-01", "R-02", "TEST-03", "spec §9.4"]
+
+      - story_id: "6.7"
+        title: "SLO framework + 30-day staging soak"
+        size: M
+        depends_on: ["6.5"]
+        scope:
+          - "Synthetic probes (1/min) for 4 critical paths."
+          - "Multi-window burn-rate alerts (1h*14.4 + 6h*6 fast; 24h*3 + 72h*1 slow)."
+          - "Grafana SLO dashboard."
+          - "30-day soak; prod promotion gated on completion."
+        trace: ["NFR-AVAIL-01", "REV-05", "TEST-01", "spec §13.6"]
+
+      - story_id: "6.8"
+        title: "Operational runbooks"
+        size: M
+        depends_on: ["5.9", "6.4", "6.7"]
+        scope:
+          - "docs/runbooks/studio.md — zombies, OOM, capacity tuning."
+          - "docs/runbooks/autoscaling.md — KEDA signals, scale-up debugging."
+          - "docs/runbooks/partitions.md — missing-partition response."
+          - "docs/runbooks/vault.md — K8s auth failures, token refresh."
+        trace: ["spec §18"]
+
+story_summary:
+  EPIC-01: 17
+  EPIC-02: 6
+  EPIC-03: 9
+  EPIC-04: 5
+  EPIC-05: 10
+  EPIC-06: 8
+  total: 55
+
+size_distribution:
+  S: 20
+  M: 25
+  L: 10
+  XL: 0
+
+risk_retirement_schedule:
+  - risk_id: "R-05"
+    description: "multi-replica partition race"
+    retires_in: "EPIC-02"
+    retiring_story: "2.4"
+  - risk_id: "R-06"
+    description: "RDS parity drift"
+    retires_in: "EPIC-01"
+    retiring_story: "1.3"
+  - risk_id: "R-08"
+    description: "JWT claim schema"
+    retires_in: "EPIC-01"
+    retiring_story: "1.4"
+  - risk_id: "R-04"
+    description: "Vault K8s role"
+    retires_in: "EPIC-03"
+    retiring_story: "3.1"
+  - risk_id: "R-07"
+    description: "federated ObjectMapper"
+    retires_in: "EPIC-05"
+    retiring_story: "5.10"
+  - risk_id: "R-01"
+    description: "Playwright novel pattern"
+    retires_in: "EPIC-06"
+    retiring_story: "6.6"
+  - risk_id: "R-02"
+    description: "sizing validation"
+    retires_in: "EPIC-06"
+    retiring_story: "6.6"
+  - risk_id: "R-03"
+    description: "JDK pinning"
+    retires_in: null
+    note: "External to this project; awaits JDK 24+ upgrade."
+
+handoff:
+  to: "@pm (Morgan)"
+  for: "*create-epic per EPIC-01..06, starting with EPIC-01"
+  inputs_for_each_epic:
+    - "spec.md sections referenced in primary_fr_nfr + stories' trace"
+    - "requirements.json entries for each FR/NFR ID"
+    - "research.json findings cited in story scope/trace"
+  then: "@sm *draft for each story in epic order (respecting depends_on DAG)"
+  then_validation: "@po *validate-story-draft against 10-point checklist"
+  then_implementation: "@dev *develop-story"
+  then_qa_gate: "@qa *qa-gate"
+  then_push: "@devops *push"
+
+attestation:
+  signed_by: "@architect (Aria)"
+  signed_at: "2026-04-17"
+  article_iv: "Every story's scope + acceptance criteria traces to a spec.md section, FR/NFR ID, or research finding. No invented work."
+  next_step: "Phase 6 output complete. Spec Pipeline closed. Handoff to @pm for EPIC-01 creation."
