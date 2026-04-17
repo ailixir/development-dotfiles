@@ -41,10 +41,10 @@ stories:
   - story_id: "1.1"
     title: "Project scaffold (Gradle KTS, Spring Boot 3.3, profiles)"
     size: S
-    status: draft                                    # drafted 2026-04-17 by @sm
+    status: ready                                    # validated 2026-04-17 by @po (10/10 GO)
     depends_on: []
     assigned_dev: null
-    story_file: "docs/stories/1.1.story.md"          # drafted — awaiting @po validation
+    story_file: "docs/stories/1.1.story.md"
 
   - story_id: "1.2"
     title: "Flyway V1 migration — full §7 schema + current-month partition"
@@ -65,7 +65,7 @@ stories:
   - story_id: "1.4"
     title: "BFF identity-propagation contract with Core team (DEBT-04 / R-08)"
     size: S
-    status: draft                                    # drafted 2026-04-17 by @sm
+    status: ready                                    # validated 2026-04-17 by @po (9/10 GO, note N-1.4-1 captured)
     depends_on: []
     blocker: true
     blocker_note: "Blocks 1.5 + every story using @PreAuthorize. External touchpoint: put-platform-shell Core team."
@@ -341,19 +341,19 @@ sdc_cycle_per_story:
 # ─────────────────────────────────────────────────────────────
 progress:
   stories_drafted: 2
-  stories_validated: 0
+  stories_validated: 2
   stories_done: 0
   stories_blocked: 0
   current_wave: 0
   notes:
     - "2026-04-17 — @sm drafted 1.1 (scaffold) + 1.4 (BFF contract) in parallel (wave 0). Awaiting @po *validate-story-draft for both."
+    - "2026-04-17 — @po validated: 1.1 GO 10/10; 1.4 GO 9/10 (non-blocking note N-1.4-1: require DRAFT banner on bff-identity-contract.md until sign-off). Both stories now status=ready, cleared for @dev *develop-story."
 
 # ─────────────────────────────────────────────────────────────
 # Handoff
 # ─────────────────────────────────────────────────────────────
 handoff:
-  next_action: "@po *validate-story-draft 1.1 AND 1.4 (both drafted 2026-04-17 — validate in parallel)."
-  alternative: "Skip validation (risk: story ambiguity caught later in QA gate) and go straight to @dev *develop-story 1.1 + @pm *engage-core-team for 1.4."
+  next_action: "@dev *develop-story 1.1 (cleared for implementation) AND @pm *engage-core-team to drive 1.4 external coordination. Pair @dev on 1.4's FakeCoreServiceClient + compliance test once strawman has first-round Core-team feedback."
   cadence: "One wave per sprint-week is a comfortable pace for the 17-story epic. Aggressive pace (with 3 devs): 2 waves/week → epic completes in ~6 weeks."
 
 attestation:
