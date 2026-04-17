@@ -1,0 +1,361 @@
+#
+# EPIC-01 Execution Manifest — M1 Walking Skeleton
+# Owner: @pm (Morgan)
+# Framework: AIOS SDC (Story Development Cycle)
+# Source: docs/specs/backend/implementation.yaml (committed 76d94bafc)
+# Spec: docs/specs/backend/spec.md v3 (APPROVED 4.62/5)
+#
+
+epic_id: EPIC-01
+milestone: M1
+title: "Walking skeleton — CSI + Checks CRUD + HTTP executor + BFF auth"
+status: planning                # planning | in_progress | completed | paused
+created_at: "2026-04-17"
+created_by: "@pm (Morgan)"
+
+# ─────────────────────────────────────────────────────────────
+# Epic goal + definition of done
+# ─────────────────────────────────────────────────────────────
+goal: |
+  End-to-end vertical slice FE→BE proving the full stack works together.
+  Frontend points VITE_API_URL at http://localhost:8080, disables MSW for
+  /csi, /checks, and HTTP check execution, and the application works against
+  the real backend. Every architectural layer is exercised: controller →
+  service → JPA → Postgres → Flyway → BFF session auth (Core introspection)
+  → observability.
+
+definition_of_done:
+  - "All 17 stories reach Done via SDC cycle (@sm → @po → @dev → @qa → @devops)."
+  - "`./gradlew check` green on a clean checkout (Spotless + Checkstyle + SpotBugs + JaCoCo 80%)."
+  - "Zonky embedded PG (local) and Testcontainers-PG (CI) both green."
+  - "Frontend standalone + federated modes work against localhost:8080 with the relevant MSW handlers disabled."
+  - "RDS-parity lint active in CI and blocks any migration using SUPERUSER/ALTER SYSTEM/non-allowlisted extensions."
+  - "OpenAPI snapshot committed at docs/specs/backend/openapi.yaml; diff test green."
+  - "Two external contracts signed: (1) BFF identity with Core team (story 1.4), (2) JWT claim stub schema for dev [not applicable — superseded by DEBT-04]."
+  - "R-08 risk retired (BFF identity contract) and R-06 retired (RDS-parity lint)."
+
+# ─────────────────────────────────────────────────────────────
+# Story roster (17 stories; source: implementation.yaml EPIC-01)
+# ─────────────────────────────────────────────────────────────
+stories:
+  - story_id: "1.1"
+    title: "Project scaffold (Gradle KTS, Spring Boot 3.3, profiles)"
+    size: S
+    status: pending
+    depends_on: []
+    assigned_dev: null
+    story_file: "docs/stories/1.1.story.md"          # to be created by @sm *draft
+
+  - story_id: "1.2"
+    title: "Flyway V1 migration — full §7 schema + current-month partition"
+    size: L
+    status: pending
+    depends_on: ["1.1"]
+    assigned_dev: null
+    story_file: "docs/stories/1.2.story.md"
+
+  - story_id: "1.3"
+    title: "RDS-parity lint"
+    size: S
+    status: pending
+    depends_on: ["1.2"]
+    assigned_dev: null
+    story_file: "docs/stories/1.3.story.md"
+
+  - story_id: "1.4"
+    title: "BFF identity-propagation contract with Core team (DEBT-04 / R-08)"
+    size: S
+    status: pending
+    depends_on: []
+    blocker: true
+    blocker_note: "Blocks 1.5 + every story using @PreAuthorize. External touchpoint: put-platform-shell Core team."
+    assigned_dev: null
+    story_file: "docs/stories/1.4.story.md"
+
+  - story_id: "1.5"
+    title: "Security: BffSessionAuthenticationFilter + CoreServiceClient + CsiOwnershipEvaluator"
+    size: L
+    status: pending
+    depends_on: ["1.1", "1.4"]
+    split_hint: "If still L after @po validation: 1.5a (filter + CoreServiceClient + CORS) + 1.5b (evaluator + @RequiresPermission aspect)."
+    assigned_dev: null
+    story_file: "docs/stories/1.5.story.md"
+
+  - story_id: "1.6"
+    title: "users context — identity-mirror provisioning from Core"
+    size: S
+    status: pending
+    depends_on: ["1.5"]
+    assigned_dev: null
+    story_file: "docs/stories/1.6.story.md"
+
+  - story_id: "1.7"
+    title: "csi context — read-only endpoints"
+    size: M
+    status: pending
+    depends_on: ["1.2", "1.5"]
+    assigned_dev: null
+    story_file: "docs/stories/1.7.story.md"
+
+  - story_id: "1.8"
+    title: "Async infrastructure — 3 named executors"
+    size: M
+    status: pending
+    depends_on: ["1.5"]
+    assigned_dev: null
+    story_file: "docs/stories/1.8.story.md"
+
+  - story_id: "1.9"
+    title: "checks context + sealed CheckConfiguration (HTTP only)"
+    size: L
+    status: pending
+    depends_on: ["1.2", "1.5", "1.7"]
+    split_hint: "If still L after @po: 1.9a (entity + sealed hierarchy) + 1.9b (controller + MapStruct)."
+    assigned_dev: null
+    story_file: "docs/stories/1.9.story.md"
+
+  - story_id: "1.10"
+    title: "CheckExecutor SPI + HttpCheckExecutor"
+    size: M
+    status: pending
+    depends_on: ["1.9"]
+    assigned_dev: null
+    story_file: "docs/stories/1.10.story.md"
+
+  - story_id: "1.11"
+    title: "execution_results persistence + trigger cascade"
+    size: M
+    status: pending
+    depends_on: ["1.2", "1.10"]
+    assigned_dev: null
+    story_file: "docs/stories/1.11.story.md"
+
+  - story_id: "1.12"
+    title: "Async execute endpoint (202 + polling)"
+    size: S
+    status: pending
+    depends_on: ["1.10", "1.11"]
+    assigned_dev: null
+    story_file: "docs/stories/1.12.story.md"
+
+  - story_id: "1.13"
+    title: "Idempotency-Key middleware"
+    size: S
+    status: pending
+    depends_on: ["1.12"]
+    assigned_dev: null
+    story_file: "docs/stories/1.13.story.md"
+
+  - story_id: "1.14"
+    title: "Bulk delete (POST /checks/_bulk with op=delete only)"
+    size: S
+    status: pending
+    depends_on: ["1.13"]
+    assigned_dev: null
+    story_file: "docs/stories/1.14.story.md"
+
+  - story_id: "1.15"
+    title: "Rate limiting (Bucket4j per-pod, Caffeine-backed)"
+    size: M
+    status: pending
+    depends_on: ["1.5"]
+    assigned_dev: null
+    story_file: "docs/stories/1.15.story.md"
+
+  - story_id: "1.16"
+    title: "OpenAPI snapshot + contract diff test"
+    size: S
+    status: pending
+    depends_on: ["1.9", "1.10", "1.12", "1.14", "1.15"]
+    assigned_dev: null
+    story_file: "docs/stories/1.16.story.md"
+
+  - story_id: "1.17"
+    title: "FE MSW disablement for CSI/Checks/HTTP execution"
+    size: S
+    status: pending
+    depends_on: ["1.7", "1.9", "1.10", "1.12"]
+    assigned_dev: null
+    story_file: "docs/stories/1.17.story.md"
+
+# ─────────────────────────────────────────────────────────────
+# Drafting order for @sm (respects depends_on DAG, prioritizes unblocking)
+# ─────────────────────────────────────────────────────────────
+sm_draft_queue:
+  # Wave 0 — parallel external-touchpoint kickoff (no code deps)
+  - wave: 0
+    parallel: ["1.1", "1.4"]
+    rationale: "1.1 scaffold + 1.4 Core team engagement run in parallel; neither blocks the other and 1.4 is an async platform-team touchpoint that benefits from starting first."
+
+  # Wave 1 — DB + lint (can run once 1.1 lands)
+  - wave: 1
+    parallel: ["1.2"]
+    after: ["1.1"]
+
+  - wave: 2
+    parallel: ["1.3"]
+    after: ["1.2"]
+    rationale: "RDS-parity lint should land immediately after V1 migration so no future migration slips past it."
+
+  # Wave 3 — security foundation (requires 1.1 scaffold + 1.4 contract)
+  - wave: 3
+    parallel: ["1.5"]
+    after: ["1.1", "1.4"]
+    rationale: "Security is the critical-path gate for most downstream work."
+
+  # Wave 4 — foundational contexts (parallel after 1.5 + 1.2)
+  - wave: 4
+    parallel: ["1.6", "1.7", "1.8", "1.15"]
+    after: ["1.5", "1.2"]
+    rationale: "users, csi, async infra, rate limiting are independent — run 4-wide if staffing allows."
+
+  # Wave 5 — checks context (largest story; may split)
+  - wave: 5
+    parallel: ["1.9"]
+    after: ["1.2", "1.5", "1.7"]
+
+  # Wave 6 — executor + persistence + execute endpoint
+  - wave: 6
+    parallel: ["1.10"]
+    after: ["1.9"]
+
+  - wave: 7
+    parallel: ["1.11"]
+    after: ["1.2", "1.10"]
+
+  - wave: 8
+    parallel: ["1.12"]
+    after: ["1.10", "1.11"]
+
+  # Wave 9 — idempotency + bulk (sequential)
+  - wave: 9
+    parallel: ["1.13"]
+    after: ["1.12"]
+
+  - wave: 10
+    parallel: ["1.14"]
+    after: ["1.13"]
+
+  # Wave 11 — epic-integration (OpenAPI diff + FE cutover)
+  - wave: 11
+    parallel: ["1.16", "1.17"]
+    after: ["1.7", "1.9", "1.10", "1.12", "1.14", "1.15"]
+    rationale: "Last two stories prove the epic end-to-end: 1.16 locks the contract, 1.17 proves FE-BE integration."
+
+# ─────────────────────────────────────────────────────────────
+# External touchpoints (blockers — start these day 1 of sprint)
+# ─────────────────────────────────────────────────────────────
+external_touchpoints:
+  - id: TP-01
+    story: "1.4"
+    team: "put-platform-shell / Core service team"
+    purpose: "Finalize /api/v1/users/me response shape, /authz/check contract, cookie scope/domain compatibility."
+    deliverable: "docs/specs/backend/bff-identity-contract.md (committed in put-checks repo, signed off by Core team in PR)."
+    urgency: "Day 1 of M1. Gates 1.5."
+    fallback: "Dev stub CoreServiceClient with a presumed identity shape (spec §7.2.3 example). Prod cutover blocked on final contract."
+
+# ─────────────────────────────────────────────────────────────
+# Risk tracking (epic-level view of relevant R-* from spec §16)
+# ─────────────────────────────────────────────────────────────
+risks:
+  - risk_id: R-03
+    description: "JDK 21 synchronized pinning may affect 3rd-party libs"
+    status: mitigated
+    mitigation: "Preprod JVM flag -Djdk.tracePinnedThreads=short added in story 1.8."
+    retires_in: "external (JDK 24+)"
+
+  - risk_id: R-06
+    description: "RDS parameter-group / extension allowlist drift from Zonky+Testcontainers"
+    status: mitigated
+    mitigation: "Story 1.3 adds RDS-parity lint in CI."
+    retires_in: "EPIC-01 story 1.3"
+
+  - risk_id: R-08
+    description: "BFF identity contract with Core team (DEBT-04)"
+    status: active_blocker
+    mitigation: "Story 1.4 engages Core team day 1; dev stub CoreServiceClient as interim."
+    retires_in: "EPIC-01 story 1.4"
+    owner: "@pm (for external engagement) + @architect (for adapter design)"
+
+# ─────────────────────────────────────────────────────────────
+# Traceability to spec.md + requirements.json
+# ─────────────────────────────────────────────────────────────
+covers_requirements:
+  functional: ["FR-CSI-01", "FR-CSI-02", "FR-CHK-01", "FR-CHK-02", "FR-CHK-03", "FR-CHK-04", "FR-CHK-10", "FR-CHK-11", "FR-AUTH-01", "FR-AUTH-02", "FR-AUTH-03", "FR-FILTER-01 (basic)", "FR-BULK-01 (delete only)"]
+  non_functional: ["NFR-SEC-01", "NFR-SEC-02", "NFR-SEC-04 (per-pod)", "NFR-QUAL-01", "NFR-OBS-01"]
+  constraints: ["CON-STACK-01", "CON-STACK-02", "CON-STACK-03", "CON-STACK-04", "CON-STACK-05", "CON-STACK-06", "CON-STACK-07", "CON-STACK-08", "CON-STACK-09", "CON-STACK-10", "CON-STACK-11", "CON-STACK-15", "CON-STACK-17", "CON-ARCH-01", "CON-ARCH-02", "CON-ARCH-03", "CON-ARCH-04", "CON-ARCH-05", "CON-API-01", "CON-API-02", "CON-API-03"]
+
+spec_sections_primary:
+  - "§0 Executive Summary (DEBT-04)"
+  - "§1 Scope"
+  - "§3 Module Architecture (bounded contexts)"
+  - "§4 Concurrency & Execution (virtual threads, 3 executors, MdcTaskDecorator)"
+  - "§5 Data Model (§5.1 schema source, §5.3 sealed CheckConfiguration)"
+  - "§6 API Contract (§6.1 conventions, §6.2 endpoint groups, §6.4 bulk delete only in M1, §6.5 rate limiting per-pod)"
+  - "§7 Security (§7.1 BFF session, §7.2 authorization)"
+  - "§8.2 Partitioning (current month only in V1; scheduler in M2)"
+  - "§13 Testing (§13.1 pyramid, §13.2 RDS-parity lint, §13.3 OpenAPI diff)"
+  - "§15 DEBT-04"
+  - "§16 R-08 + R-06 + R-03"
+
+# ─────────────────────────────────────────────────────────────
+# SDC cycle reference (per story)
+# ─────────────────────────────────────────────────────────────
+sdc_cycle_per_story:
+  - phase: draft
+    owner: "@sm (River)"
+    command: "*draft {story_id}"
+    input: "This epic's story entry + spec.md sections + implementation.yaml story"
+    output: "docs/stories/{story_id}.story.md (status: Draft)"
+
+  - phase: validate
+    owner: "@po (Pax)"
+    command: "*validate-story-draft {story_id}"
+    input: "Draft story"
+    output: "Validation verdict (GO >=7 or NO-GO with required fixes)"
+    decision: "GO → status: Ready. NO-GO → @sm revises."
+
+  - phase: implement
+    owner: "@dev (Dex)"
+    command: "*develop-story {story_id}"
+    modes: ["Interactive", "YOLO", "Pre-Flight"]
+    coderabbit: "Self-healing max 2 iterations"
+    output: "Code + tests + updated File List in story"
+    decision: "status: InProgress → InReview"
+
+  - phase: qa_gate
+    owner: "@qa (Quinn)"
+    command: "*qa-gate {story_id}"
+    checks: 7
+    output: "PASS / CONCERNS / FAIL / WAIVED"
+    decision: "PASS → status: Done. CONCERNS/FAIL → back to @dev."
+
+  - phase: push
+    owner: "@devops (Gage)"
+    command: "*push"
+    output: "commit + branch + PR (if user approves)"
+    note: "Push is EXCLUSIVE to @devops — other agents cannot push to remote."
+
+# ─────────────────────────────────────────────────────────────
+# Progress tracking (updated by agents during execution)
+# ─────────────────────────────────────────────────────────────
+progress:
+  stories_drafted: 0
+  stories_validated: 0
+  stories_done: 0
+  stories_blocked: 0
+  current_wave: 0
+  notes: []
+
+# ─────────────────────────────────────────────────────────────
+# Handoff
+# ─────────────────────────────────────────────────────────────
+handoff:
+  next_action: "@sm *draft 1.1 (start wave 0, parallel with @pm *engage-core-team for story 1.4 external touchpoint)"
+  alternative: "If staffing supports it, @sm *draft 1.1 AND 1.4 simultaneously — both are depends_on: []."
+  cadence: "One wave per sprint-week is a comfortable pace for the 17-story epic. Aggressive pace (with 3 devs): 2 waves/week → epic completes in ~6 weeks."
+
+attestation:
+  signed_by: "@pm (Morgan)"
+  signed_at: "2026-04-17"
+  article_iv: "Every story in this epic traces to implementation.yaml EPIC-01; every requirement covered traces to requirements.json; every spec section cited exists in spec.md v3. No invented work."
