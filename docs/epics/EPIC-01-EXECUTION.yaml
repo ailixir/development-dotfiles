@@ -84,7 +84,7 @@ stories:
   - story_id: "1.6"
     title: "users context — identity-mirror provisioning from Core"
     size: S
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (10/10 GO)
     depends_on: ["1.5"]
     assigned_dev: null
     story_file: "docs/stories/1.6.story.md"
@@ -92,7 +92,7 @@ stories:
   - story_id: "1.7"
     title: "csi context — read-only endpoints"
     size: M
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (9/10 GO, note N-1.7-1 on /csi list authz policy)
     depends_on: ["1.2", "1.5"]
     assigned_dev: null
     story_file: "docs/stories/1.7.story.md"
@@ -100,7 +100,7 @@ stories:
   - story_id: "1.8"
     title: "Async infrastructure — 3 named executors"
     size: M
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (10/10 GO)
     depends_on: ["1.5"]
     assigned_dev: null
     story_file: "docs/stories/1.8.story.md"
@@ -157,7 +157,7 @@ stories:
   - story_id: "1.15"
     title: "Rate limiting (Bucket4j per-pod, Caffeine-backed)"
     size: M
-    status: pending
+    status: ready                                    # drafted + validated 2026-04-17 (10/10 GO)
     depends_on: ["1.5"]
     assigned_dev: null
     story_file: "docs/stories/1.15.story.md"
@@ -340,22 +340,29 @@ sdc_cycle_per_story:
 # Progress tracking (updated by agents during execution)
 # ─────────────────────────────────────────────────────────────
 progress:
-  stories_drafted: 4
-  stories_validated: 4
+  stories_drafted: 8
+  stories_validated: 8
   stories_done: 0
   stories_blocked: 0
-  current_wave: 2
+  current_wave: 4
   notes:
     - "2026-04-17 — @sm drafted 1.1 (scaffold) + 1.4 (BFF contract) in parallel (wave 0). Awaiting @po *validate-story-draft for both."
     - "2026-04-17 — @po validated: 1.1 GO 10/10; 1.4 GO 9/10 (non-blocking note N-1.4-1: require DRAFT banner on bff-identity-contract.md until sign-off). Both stories now status=ready, cleared for @dev *develop-story."
     - "2026-04-17 — Draft-ahead: @sm drafted 1.2 (Flyway V1, L) + 1.3 (RDS-parity lint, S). @po validated both 10/10 GO. 4 of 17 EPIC-01 stories now ready. Devs can start 1.1 and have 1.2/1.3 queued behind it with zero idle time."
+    - "2026-04-17 — Wave 4 draft-ahead (skipping 1.5 for next pass): @sm drafted 1.6 (users mirror, S) + 1.7 (csi, M) + 1.8 (async infra, M) + 1.15 (rate limit, M). @po validated: 1.6/1.8/1.15 10/10 GO, 1.7 9/10 GO with note N-1.7-1 (resolve /csi list authz policy with @architect before @dev starts). 8 of 17 stories ready. **Gap: 1.5 (BFF auth filter, L) not drafted yet — 1.6/1.7/1.8/1.15 all depend on 1.5 contracts from spec §7.**"
 
 # ─────────────────────────────────────────────────────────────
 # Handoff
 # ─────────────────────────────────────────────────────────────
 handoff:
-  next_action: "@dev *develop-story 1.1 (cleared for implementation) AND @pm *engage-core-team to drive 1.4 external coordination. Pair @dev on 1.4's FakeCoreServiceClient + compliance test once strawman has first-round Core-team feedback."
-  cadence: "One wave per sprint-week is a comfortable pace for the 17-story epic. Aggressive pace (with 3 devs): 2 waves/week → epic completes in ~6 weeks."
+  next_action: |
+    Two paths forward:
+      (a) Plug the gap — @sm *draft 1.5 (BFF auth filter + CoreServiceClient + CsiOwnershipEvaluator, L).
+          Closes the wave-4 dependency loop so devs picking up 1.6/1.7/1.8/1.15 are not
+          waiting on an undrafted spec for their 1.5 dependency.
+      (b) Start implementation — @dev *develop-story 1.1 (ready). @pm *engage-core-team
+          (1.4 in parallel). 1.5 can be drafted in a following pass while 1.1 is in flight.
+  cadence: "8 of 17 EPIC-01 stories ready. Pipeline is 4-wide if implementing; a 5th draft (1.5) closes the wave-4 prerequisite. Aggressive pace with 3 devs: ~4-5 weeks to M1."
 
 attestation:
   signed_by: "@pm (Morgan)"
