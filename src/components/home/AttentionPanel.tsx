@@ -86,6 +86,7 @@ const AttentionPanel: React.FC<AttentionPanelProps> = ({ maxHeight }) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { data, loading, error } = useAppSelector((s) => s.dashboard.attention);
+  const items = Array.isArray(data) ? data : [];
   const [triageId, setTriageId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>(() => ({ open: false, message: '', severity: 'success' }));
   const theme = useTheme();
@@ -111,13 +112,13 @@ const AttentionPanel: React.FC<AttentionPanelProps> = ({ maxHeight }) => {
     >
       {loading === 'failed' ? (
         <Alert severity="error" role="alert" onClose={() => dispatch(fetchAttention({ limit: 20 }))}>{error || 'Failed to load attention items'}</Alert>
-      ) : data.length === 0 ? (
+      ) : items.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
           All clear. No failing or degrading checks.
         </Typography>
       ) : (
         <List disablePadding>
-          {data.slice(0, 10).map((item) => (
+          {items.slice(0, 10).map((item) => (
             <Row
               key={item.id}
               item={item}

@@ -1,10 +1,16 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosAdapter, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { APP_CONFIG } from '@utils/constants/appConfig';
+import { isInlineMockModeEnabled } from '@services/mocks/mockMode';
+
+type InlineMockResolver = (config: InternalAxiosRequestConfig) => Promise<AxiosResponse | undefined>;
 
 class ApiClient {
   private instance: AxiosInstance;
+  private defaultAdapter: AxiosAdapter;
+  private inlineMockResolverPromise: Promise<InlineMockResolver> | null = null;
 
   constructor() {
+    this.defaultAdapter = axios.getAdapter(axios.defaults.adapter);
     this.instance = axios.create({
       baseURL: APP_CONFIG.apiBaseUrl,
       timeout: 30000,
@@ -13,7 +19,49 @@ class ApiClient {
       },
     });
 
+    this.setupTransportAdapter();
     this.setupInterceptors();
+  }
+
+  private setupTransportAdapter() {
+    this.instance.defaults.adapter = async (config) => {
+      const inlineResponse = await this.tryResolveInlineMock(config);
+      if (inlineResponse) {
+        return inlineResponse;
+      }
+      return this.defaultAdapter(config);
+    };
+  }
+
+  private async getInlineMockResolver(): Promise<InlineMockResolver> {
+    if (!this.inlineMockResolverPromise) {
+      this.inlineMockResolverPromise = import('@services/mocks/inlineMockAdapter').then(
+        ({ resolveInlineMockResponse }) => resolveInlineMockResponse
+      );
+    }
+    return this.inlineMockResolverPromise;
+  }
+
+  private async tryResolveInlineMock(
+    config: InternalAxiosRequestConfig
+  ): Promise<AxiosResponse | undefined> {
+    if (!APP_CONFIG.enableMSW || typeof window === 'undefined' || !isInlineMockModeEnabled()) {
+      return undefined;
+    }
+
+    try {
+      const resolveInlineMockResponse = await this.getInlineMockResolver();
+      return resolveInlineMockResponse(config);
+    } catch (error) {
+      // Preserve HTTP errors from mock handlers (status-based failures)
+      if (axios.isAxiosError(error)) {
+        throw error;
+      }
+      if (APP_CONFIG.debugMode) {
+        console.warn('Inline mock adapter failed, falling back to network adapter.', error);
+      }
+      return undefined;
+    }
   }
 
   private setupInterceptors() {

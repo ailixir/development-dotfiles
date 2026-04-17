@@ -31,6 +31,7 @@ const getBoolEnv = (key: string, defaultTrue = true): boolean => {
 export const APP_CONFIG: AppConfig = {
   apiBaseUrl: getStringEnv('VITE_API_BASE_URL', '/api') || '/api',
   enableMSW: getBoolEnv('VITE_ENABLE_MSW', true),
+  allowInsecureMswFallback: getBoolEnv('VITE_ALLOW_INSECURE_MSW_FALLBACK', true),
   debugMode: getStringEnv('VITE_DEBUG_MODE') === 'true',
   version: '1.0.0',
   buildDate: new Date().toISOString(),

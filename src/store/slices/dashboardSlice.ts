@@ -191,7 +191,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchAttention.fulfilled, (state, action) => {
         state.attention.loading = 'succeeded';
-        state.attention.data = action.payload.data;
+        state.attention.data = Array.isArray(action.payload?.data) ? action.payload.data : [];
         state.attention.lastFetched = new Date().toISOString();
       })
       .addCase(fetchAttention.rejected, (state, action) => {
@@ -205,7 +205,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchActivity.fulfilled, (state, action) => {
         state.activity.loading = 'succeeded';
-        state.activity.data = action.payload.data;
+        state.activity.data = Array.isArray(action.payload?.data) ? action.payload.data : [];
         state.activity.lastFetched = new Date().toISOString();
       })
       .addCase(fetchActivity.rejected, (state, action) => {
@@ -219,7 +219,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchUpcomingSchedules.fulfilled, (state, action) => {
         state.upcoming.loading = 'succeeded';
-        state.upcoming.data = action.payload.data;
+        state.upcoming.data = Array.isArray(action.payload?.data) ? action.payload.data : [];
         state.upcoming.lastFetched = new Date().toISOString();
       })
       .addCase(fetchUpcomingSchedules.rejected, (state, action) => {
@@ -233,7 +233,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchReportsSnapshot.fulfilled, (state, action) => {
         state.reports.loading = 'succeeded';
-        state.reports.data = action.payload.data;
+        state.reports.data = Array.isArray(action.payload?.data) ? action.payload.data : [];
         state.reports.lastFetched = new Date().toISOString();
       })
       .addCase(fetchReportsSnapshot.rejected, (state, action) => {

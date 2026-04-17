@@ -12,6 +12,7 @@ const ReportsSnapshot: React.FC<ReportsSnapshotProps> = ({ maxHeight }) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { data, loading, error } = useAppSelector((s) => s.dashboard.reports);
+  const items = Array.isArray(data) ? data : [];
 
   return (
       <SectionBox
@@ -30,11 +31,11 @@ const ReportsSnapshot: React.FC<ReportsSnapshotProps> = ({ maxHeight }) => {
         </Stack>
       ) : loading === 'failed' ? (
         <Alert role="alert" severity="error" onClose={() => dispatch(fetchReportsSnapshot({ limit: 5 }))}>{error || 'Failed to load reports'}</Alert>
-      ) : data.length === 0 ? (
+      ) : items.length === 0 ? (
         <Typography variant="body2" color="text.secondary">No reports yet</Typography>
       ) : (
         <List dense disablePadding>
-          {data.slice(0, 5).map((r) => (
+          {items.slice(0, 5).map((r) => (
             <ListItem
               key={r.id}
               sx={{ px: 0, borderRadius: 1, transition: 'background-color 120ms ease', '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.04) } }}

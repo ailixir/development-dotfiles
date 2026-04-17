@@ -193,7 +193,7 @@ A clean, three-panel screen separating user *instructions* from system *actions*
 * **Consistent and Predictable:** By strictly implementing the Citi Design System via an MUI theme, the UI will be consistent, predictable, and trustworthy.
 
 ## 9. Technical Considerations
-* **Platform:** A web-based application built with React (TypeScript/Vite) and a Python (FastAPI) backend.
+* **Platform:** A web-based application built with a React (TypeScript/Vite) frontend and a Java 21 (Spring Boot 3) backend. Backend source lives under `backend/` within this repository and is built with Gradle (Kotlin DSL). See `ARCH.md` §4 for the backend architecture and §5 for persistence.
 * **Security:** Must adhere to all relevant data security and privacy policies for internal tools.
 
 ## 10. Success Metrics

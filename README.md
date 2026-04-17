@@ -46,6 +46,13 @@ These env vars make the module environment-agnostic across local dev, CI/CD, and
   PORT=4002 npm start
   ```
 
+- **VITE_ALLOW_INSECURE_MSW_FALLBACK**: Enables inline API mock fallback when Service Worker cannot run (for example, untrusted internal CA / insecure browser context).
+  - Default: `true`
+  - Example:
+  ```bash
+  VITE_ALLOW_INSECURE_MSW_FALLBACK=true npm start
+  ```
+
 Notes:
 - If `PUBLIC_PATH` is not set, `publicPath` uses `auto`, which works in most hosting setups and Module Federation hosts.
 - Set `PUBLIC_PATH` in CI when serving assets from a CDN or non-root path.

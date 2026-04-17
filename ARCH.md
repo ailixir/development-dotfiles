@@ -8,7 +8,7 @@ This document outlines the technical architecture and implementation plan for **
 
 - **Orchestration, Not Replacement:** The system is designed as an orchestration layer that integrates with existing monitoring tools like ITRS, Splunk, Grafana, and AppDynamics, not replace them.
     
-- **Decoupled Frontend & Backend:** The React-based single-page application (SPA) will be developed independently from the Python backend services, enabled by a well-defined API contract.
+- **Decoupled Frontend & Backend:** The React-based single-page application (SPA) will be developed independently from the Java backend services, enabled by a well-defined API contract.
     
 - **Scalability by Design:** The architecture must handle a high volume of checks, including resource-intensive UI tests. For the initial build, this will be managed via in-process background tasks, with a design that allows for future migration to a more robust task queue system.
     
@@ -57,10 +57,10 @@ The current implementation is a **frontend-only micro-frontend module** designed
 
 Upon stakeholder approval of the UI prototype, the full architecture will be implemented with these additional components:
 
-1. **Backend Platform:** A containerized Python (FastAPI) application providing the REST API and check orchestration engine.
+1. **Backend Platform:** A containerized Java 21 application using **Spring Boot 3.3+** providing the REST API and check orchestration engine. Source lives under `backend/` within this repository, built with **Gradle (Kotlin DSL)**. Runs on Eclipse Temurin 21 with Java virtual threads enabled for request handling and async orchestration.
 
 2. **Data & Persistence:**
-   - **Primary Database (PostgreSQL):** Stores all core data including check definitions, schedules, historical results, users, and report configurations.
+   - **Primary Database (PostgreSQL 15+):** Stores all core data including check definitions, schedules, historical results, users, and report configurations. Production uses a managed PostgreSQL service; local development uses an **embedded PostgreSQL** distribution (`io.zonky.test:embedded-postgres`) that runs a real Postgres binary in-process with zero external dependencies (the "SQLite-style" local story — no Docker required). This guarantees identical SQL semantics (JSONB, partitioning, GIN indexes, `gen_random_uuid()`) between local and production, which is why H2/compat-mode alternatives were rejected.
    - **Object Storage (S3/Equivalent):** Dedicated store for large binary objects, specifically video recordings from "Checks Studio".
 
 3. **External & Supporting Services:** Critical dependencies the platform will integrate with:
@@ -109,25 +109,98 @@ To enable independent frontend development and facilitate the prototype-first ap
 
 > **Note:** This section describes the planned backend architecture for Phase 2 implementation, post-UI approval. The current Phase 1 implementation uses MSW for all backend functionality.
 
-The backend will be a Python application using the FastAPI framework, designed for simplicity and performance.
+The backend is a **Java 21 / Spring Boot 3** application, designed for modern concurrency (virtual threads), strong typing, and first-class Citi-tooling interoperability. It lives under `backend/` in this repository.
 
 ### **4.1. Technology Stack**
 
-- **Framework:** Python 3.11+ with FastAPI.
-    
-- **Asynchronous Tasks:** For the initial implementation, long-running operations (e.g., running a UI test) will be handled by **FastAPI's `BackgroundTasks`**. This avoids the complexity of a separate message broker system like Redis. The API will immediately acknowledge the request while processing the check in a background thread.
-    
-- **Persistence:** PostgreSQL with SQLAlchemy as the ORM.
-    
+| Concern | Choice |
+|---|---|
+| Language | **Java 21 (LTS)** with preview features disabled — uses finalized pattern matching, records, sealed types |
+| Framework | **Spring Boot 3.3+** (Spring Framework 6.1+) |
+| Build | **Gradle 8+ (Kotlin DSL)** — `build.gradle.kts`, `settings.gradle.kts`, Gradle Wrapper committed |
+| Web layer | Spring Web MVC with `spring.threads.virtual.enabled=true` (virtual-thread request handling) |
+| Persistence | Spring Data JPA + **Hibernate 6.4+** (JSONB via `@JdbcTypeCode(SqlTypes.JSON)`; no SQLAlchemy/JPA-compat shims) |
+| Migrations | **Flyway** (`org.flywaydb.flyway` Gradle plugin) — forward-only, versioned SQL under `backend/src/main/resources/db/migration` |
+| Local DB | **Zonky Embedded PostgreSQL** (`io.zonky.test:embedded-postgres`) — activated via `local` Spring profile; real Postgres 15 binary, auto-provisioned, no Docker |
+| Validation | Jakarta Bean Validation 3 (`jakarta.validation.constraints.*`) |
+| Mapping | **MapStruct** for DTO ↔ entity conversion |
+| Security | Spring Security + `spring-boot-starter-oauth2-resource-server` (JWT validation against enterprise OIDC issuer) |
+| HTTP clients | Spring 6 `RestClient` (sync, default) and `WebClient` (streaming) for Splunk, Grafana, ITRS, AppDynamics, CSI API |
+| Caching | **Caffeine** (local/in-process) for vertical slice; Redis (via `spring-boot-starter-data-redis-reactive`) layered in when horizontally scaled |
+| Scheduling | Spring `@Scheduled` with `ThreadPoolTaskScheduler` for the vertical slice; **Quartz** (JDBC-backed, cluster-safe) introduced when >1 replica is deployed |
+| Email | Spring Mail (`JavaMailSender`) via enterprise SMTP relay |
+| Object storage | AWS SDK v2 (`software.amazon.awssdk:s3`) for UI test videos |
+| Observability | Micrometer → Prometheus + **OpenTelemetry** auto-instrumentation agent; structured JSON logs via Logback + `logstash-logback-encoder` |
+| Testing | JUnit 5, AssertJ, Mockito, `@SpringBootTest`, `@DataJpaTest`, **Testcontainers-PostgreSQL** for CI integration tests, Zonky embedded Postgres for local integration tests |
+| Code quality | Spotless (google-java-format), Checkstyle, SpotBugs, JaCoCo (80% line coverage gate matching §9.1) |
 
-### **4.2. Key Responsibilities**
+### **4.2. Asynchronous Execution**
 
-- **API Provision:** Exposes a secure RESTful API for the frontend to manage and view all checks, results, and reports.
-    
-- **Check Orchestration:** Contains the logic to execute checks. This involves making API calls to external systems like Splunk or interfacing with the Browser Automation Grid for UI tests.
-    
-- **Authentication & Authorization:** Integrates with the enterprise SSO provider to secure all endpoints. It enforces RBAC based on user roles and application ownership.
-    
+Long-running operations (check executions, UI test runs, report generation) use Spring's `@Async` annotation backed by a **virtual-thread task executor**:
+
+```java
+@Bean("checkExecutor")
+public AsyncTaskExecutor checkExecutor() {
+    return new TaskExecutorAdapter(Executors.newVirtualThreadPerTaskExecutor());
+}
+```
+
+The REST controller immediately returns `202 Accepted` with an execution ID; the `@Async` method performs the work on a virtual thread and persists the result. This gives FastAPI-BackgroundTasks-equivalent simplicity while scaling to tens of thousands of concurrent blocking I/O operations (HTTP probes, Splunk queries) without a thread-per-task OS cost. The design stays queue-agnostic: when multi-instance scheduling or durable retries become required, the `@Async` call sites swap to a Spring Integration / Kafka / Rabbit producer with no controller-level change.
+
+### **4.3. Project Structure**
+
+```
+backend/
+├── build.gradle.kts
+├── settings.gradle.kts
+├── gradle/wrapper/
+├── gradlew, gradlew.bat
+└── src/
+    ├── main/
+    │   ├── java/com/citi/put/checks/
+    │   │   ├── ChecksApplication.java
+    │   │   ├── config/          # Spring, security, async, cache, OpenAPI config
+    │   │   ├── csi/             # CSI bounded context (controller, service, repo, entity, dto)
+    │   │   ├── checks/          # Check management + execution dispatcher
+    │   │   │   ├── executors/   # HttpCheckExecutor, TcpCheckExecutor, SplunkCheckExecutor, ...
+    │   │   ├── scheduling/      # Schedule entity, cron resolution, @Scheduled dispatcher
+    │   │   ├── studio/          # UI Test / Checks Studio
+    │   │   ├── reports/         # Report definitions, rendering, delivery
+    │   │   ├── users/           # User provisioning from JWT claims
+    │   │   ├── secrets/         # Vault client + secret reference resolution
+    │   │   └── common/          # Shared DTOs, error handling, pagination
+    │   └── resources/
+    │       ├── application.yml
+    │       ├── application-local.yml     # activates Zonky embedded Postgres
+    │       ├── application-prod.yml
+    │       └── db/migration/V1__init.sql # mirrors §7 schema exactly
+    └── test/
+        ├── java/…
+        └── resources/
+```
+
+Each bounded context is a package (vertical-slice layout, not layered-by-type) so a feature can be understood and modified in one place. Cross-cutting concerns live in `common/` and `config/`.
+
+### **4.4. Implementation Strategy — Vertical Slice First**
+
+The backend is built as a sequence of end-to-end vertical slices rather than layer-by-layer, to validate the full stack (controller → service → JPA → Postgres → Flyway → security → observability) as early as possible.
+
+| Milestone | Scope | Exit criteria |
+|---|---|---|
+| **M1 — Walking Skeleton** | CSI read-only endpoints + Checks CRUD + **HTTP check** executor + manual `/execute` + history list. JWT auth stubbed (dev issuer). Flyway V1 migration covering §7.1 core tables. Zonky local + Testcontainers CI. | Frontend MSW handlers for CSI/Checks/HTTP execution can be disabled and the UI works against the real backend on `localhost:8080`. |
+| **M2 — Scheduling + more basic checks** | `@Scheduled` dispatcher, cron-based schedules, **TCP** executor. Execution result partitioning (V2 migration). | Scheduled HTTP + TCP checks run and persist results; status updates propagate via DB trigger. |
+| **M3 — Integration check types** | Splunk, Grafana, ITRS, AppDynamics executors. Secrets vault integration for credentials. Caffeine caching for check configs. | All non-UI check types pass contract tests against stub servers. |
+| **M4 — Reports** | Reports CRUD, live-preview endpoint, scheduled delivery, SMTP integration, `report_executions` audit. | Maria's UC (PRD §6) completes end-to-end. |
+| **M5 — Checks Studio (UI tests)** | `ui_tests` CRUD, UI test execution via Selenium Grid client, S3 video upload, video-streaming endpoint. | Priya's UC (PRD §6) completes end-to-end. |
+| **M6 — Hardening** | Quartz migration for cluster-safe scheduling, Redis cache tier, OpenTelemetry wiring, load test vs §10 SLOs. | §10 throughput + §10.1 P95 SLOs met in staging. |
+
+### **4.5. Key Responsibilities**
+
+- **API Provision:** Exposes the RESTful API defined in §12 for the frontend to manage and view all checks, results, and reports.
+- **Check Orchestration:** Dispatches check execution through a `CheckExecutor` SPI (one implementation per `CheckType`); executors make outbound calls to Splunk, Grafana, ITRS, AppDynamics, or the Browser Automation Grid. Results are persisted via a single atomic write path (see §8.2).
+- **Authentication & Authorization:** Validates enterprise OIDC JWTs on every request via Spring Security; enforces RBAC using method-level `@PreAuthorize` expressions keyed on CSI ownership claims.
+- **Scheduling:** Resolves cron expressions and next-execution timestamps, dispatches due checks to the async executor.
+- **Secret resolution:** Replaces `<secret ID>` tokens in check configurations with vault-retrieved values at execution time only (never persisted in plaintext, never returned in API responses).
 
 ---
 
@@ -135,7 +208,9 @@ The backend will be a Python application using the FastAPI framework, designed f
 
 > **Note:** This section describes the planned data persistence strategy for Phase 2. Current Phase 1 uses in-memory mock data via MSW.
 
-- **Primary Database (PostgreSQL):** Will house structured data for check definitions (e.g., HTTP, Splunk Query, UI Test Steps), schedules, historical results, and report configurations. The CSI will be the primary key for organizing most data.
+- **Primary Database (PostgreSQL 15+):** Will house structured data for check definitions (e.g., HTTP, Splunk Query, UI Test Steps), schedules, historical results, and report configurations. The CSI will be the primary key for organizing most data.
+
+- **Local development database:** Uses **Zonky Embedded PostgreSQL** activated by the `local` Spring profile — the backend starts a real Postgres 15 binary in-process on a random port, applies Flyway migrations, and tears it down on shutdown. No Docker, no `brew install postgres`, identical JSONB/partitioning/GIN semantics to production. This is the "SQLite-style" developer story requested in the design brief.
 
 - **Object Storage (S3/Equivalent):** Will be used exclusively for storing video files generated by the "Checks Studio" feature. The database will only store a URL pointer to the video file, which is a scalable approach for handling large binary files.
 
@@ -157,7 +232,7 @@ The backend will be a Python application using the FastAPI framework, designed f
 
 ## **7. Database Schema (Target - Phase 2)**
 
-> **Note:** This section describes the planned PostgreSQL database schema for Phase 2 implementation. The current Phase 1 uses TypeScript interfaces (see `src/types/`) and MSW mock data that mirror this schema design.
+> **Note:** This section describes the planned PostgreSQL database schema for Phase 2 implementation. The current Phase 1 uses TypeScript interfaces (see `src/types/`) and MSW mock data that mirror this schema design. The Java backend maps these tables with Spring Data JPA + Hibernate 6; JSONB columns use `@JdbcTypeCode(SqlTypes.JSON)` with a `Map<String, Object>` or a sealed-interface check-configuration type. All DDL in this section is expressed verbatim as Flyway migrations under `backend/src/main/resources/db/migration/`.
 
 The database schema is designed around the **CSI (Citi System Inventory)** as the primary organizing principle, implementing a normalized relational model with strategic denormalization for performance.
 
@@ -624,23 +699,24 @@ Notify Subscribers → Update Cache
 ## Migration Strategy
 
 ### Schema Versioning
-- Flyway/Liquibase for version control
-- Forward-only migrations
-- Backward compatibility for 2 versions
+- **Flyway** (forward-only) via the `org.flywaydb.flyway` Gradle plugin
+- Migrations under `backend/src/main/resources/db/migration/` named `V{n}__{description}.sql`
+- Backward compatibility for 2 versions (no destructive DDL without a prior additive release)
+- `flywayValidate` runs in CI; `flywayMigrate` runs at app startup in all environments
 
 ## **9. Testing Strategy**
 
 ### **9.1. Test Pyramid**
 
-- **Unit Tests:** 80% coverage target
+- **Unit Tests:** 80% line-coverage target (enforced by JaCoCo gate in Gradle `check` task)
     - Components: React Testing Library
-    - Business Logic: Vitest
-    - API: pytest with FastAPI test client
+    - Frontend Business Logic: Vitest
+    - Backend: **JUnit 5 + AssertJ + Mockito**; slice tests with `@WebMvcTest`, `@DataJpaTest`, `@JsonTest`
 
 - **Integration Tests:** Critical paths
-    - API integration with mock services
-    - Database operations
-    - External service connectors
+    - `@SpringBootTest` with **Testcontainers-PostgreSQL** in CI, **Zonky embedded Postgres** locally (identical Postgres 15 binary both sides, so test parity is preserved)
+    - External service connectors verified against **WireMock** stubs for Splunk/Grafana/ITRS/AppDynamics
+    - Contract tests for the REST API generated from the OpenAPI spec via `springdoc-openapi`
 
 - **E2E Tests:** User journeys
     - Check creation and execution
@@ -788,9 +864,9 @@ POST   /reports/{id}/send       # Send report immediately
 ### **13.1. Containerization**
 
 - **Frontend:** Nginx container serving static React assets
-- **Backend:** Python FastAPI container
-- **Database:** Managed PostgreSQL service
-- **Cache:** Managed Redis cluster
+- **Backend:** Eclipse Temurin 21 JRE running a Spring Boot **layered jar** image produced by the Gradle `bootBuildImage` task (Paketo buildpacks) or a multi-stage `Dockerfile`. Default container port **8080**. `JAVA_TOOL_OPTIONS` tuned for container-aware heap sizing.
+- **Database:** Managed PostgreSQL service (production/staging); Zonky embedded Postgres in local dev (see §5)
+- **Cache:** Managed Redis cluster (introduced at milestone M6 — see §4.4); vertical slice runs with Caffeine only
 
 ### **13.2. Kubernetes Deployment**
 
@@ -834,7 +910,7 @@ spec:
 
 | Environment | Frontend URL | Backend URL | Database |
 |------------|--------------|-------------|----------|
-| Development | localhost:5173 | localhost:8000 | PostgreSQL (local) |
+| Development | localhost:5173 | localhost:8080 | Zonky Embedded PostgreSQL 15 (in-process, `local` profile) |
 | Staging | checks-staging.citi.com | api-staging.checks.citi.com | PostgreSQL (RDS) |
 | Production | checks.citi.com | api.checks.citi.com | PostgreSQL (RDS) |
 

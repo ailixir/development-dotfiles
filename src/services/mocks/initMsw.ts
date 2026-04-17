@@ -1,6 +1,12 @@
 import { APP_CONFIG } from '@/utils/constants/appConfig';
+import { enableInlineMockMode } from './mockMode';
 
 let mswReadyPromise: Promise<void> | null = null;
+
+function shouldUseInlineFallbackForInsecureContext(): boolean {
+  if (typeof window === 'undefined') return false;
+  return APP_CONFIG.allowInsecureMswFallback && !window.isSecureContext;
+}
 
 export async function ensureMswWorkerReady(): Promise<void> {
   if (mswReadyPromise) {
@@ -11,6 +17,10 @@ export async function ensureMswWorkerReady(): Promise<void> {
     if (typeof window === 'undefined') return;
     if (process.env.NODE_ENV === 'production') return;
     if (!APP_CONFIG.enableMSW) return;
+    if (shouldUseInlineFallbackForInsecureContext()) {
+      enableInlineMockMode('insecure browser context (certificate not trusted)');
+      return;
+    }
 
     try {
       const { worker } = await import('./browser');
@@ -48,6 +58,9 @@ export async function ensureMswWorkerReady(): Promise<void> {
         // no-op
       }
     } catch (e) {
+      if (APP_CONFIG.allowInsecureMswFallback) {
+        enableInlineMockMode('MSW service worker registration failed');
+      }
       // eslint-disable-next-line no-console
       console.warn('⚠️ MSW failed to start (hosted via shell)', e);
     }
