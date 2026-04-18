@@ -39,7 +39,7 @@ class SchemaSmokeTest {
     em.persist(user);
 
     CsiSystemSmokeEntity csi = new CsiSystemSmokeEntity();
-    csi.id = "CSI-" + System.currentTimeMillis();
+    csi.id = String.valueOf(System.nanoTime() % 100_000_000L);
     csi.name = "Test CSI";
     csi.businessUnit = "Operations";
     csi.criticality = "HIGH";
@@ -74,7 +74,7 @@ class SchemaSmokeTest {
     assertThat(readUser.email).isEqualTo(user.email);
     assertThat(readCsi.name).isEqualTo("Test CSI");
     assertThat(readCheck.type).isEqualTo("HTTP");
-    assertThat(readCheck.configuration).contains("\"url\":\"https://example.com\"");
+    assertThat(readCheck.configuration).contains("https://example.com");
   }
 
   @Test

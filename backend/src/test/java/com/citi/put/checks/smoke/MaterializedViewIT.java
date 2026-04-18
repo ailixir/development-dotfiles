@@ -21,7 +21,7 @@ class MaterializedViewIT {
   @Test
   void csiMetricsAggregatesAfterRefresh() {
     String email = "mv-" + UUID.randomUUID() + "@citigroup.com";
-    String csiId = "CSI-mv-" + System.nanoTime();
+    String csiId = String.valueOf(System.nanoTime() % 100_000_000L);
 
     jdbc.update(
         "INSERT INTO users (id, sso_id, name, email, created_at, is_active) "

@@ -1,49 +1,40 @@
 package com.citi.put.checks.security;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 @ActiveProfiles("local")
 class CorsAllowedOriginsConfigIT {
 
-  @Autowired TestRestTemplate restTemplate;
+  @Autowired MockMvc mockMvc;
 
   @Test
-  void allowedOriginGetsCorsHeaders() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Origin", "http://localhost:3000");
-    headers.add("Access-Control-Request-Method", "GET");
-
-    ResponseEntity<String> response =
-        restTemplate.exchange(
-            "/api/v1/test", HttpMethod.OPTIONS, new HttpEntity<>(headers), String.class);
-
-    assertThat(response.getHeaders().getFirst("Access-Control-Allow-Origin"))
-        .isEqualTo("http://localhost:3000");
-    assertThat(response.getHeaders().getFirst("Access-Control-Allow-Credentials"))
-        .isEqualTo("true");
+  void allowedOriginGetsCorsHeaders() throws Exception {
+    mockMvc
+        .perform(
+            options("/api/v1/test")
+                .header("Origin", "http://localhost:3000")
+                .header("Access-Control-Request-Method", "GET"))
+        .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:3000"))
+        .andExpect(header().string("Access-Control-Allow-Credentials", "true"));
   }
 
   @Test
-  void nonAllowedOriginDoesNotGetCorsHeaders() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Origin", "http://evil.example.com");
-    headers.add("Access-Control-Request-Method", "GET");
-
-    ResponseEntity<String> response =
-        restTemplate.exchange(
-            "/api/v1/test", HttpMethod.OPTIONS, new HttpEntity<>(headers), String.class);
-
-    assertThat(response.getHeaders().getFirst("Access-Control-Allow-Origin")).isNull();
+  void nonAllowedOriginDoesNotGetCorsHeaders() throws Exception {
+    mockMvc
+        .perform(
+            options("/api/v1/test")
+                .header("Origin", "http://evil.example.com")
+                .header("Access-Control-Request-Method", "GET"))
+        .andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
   }
 }

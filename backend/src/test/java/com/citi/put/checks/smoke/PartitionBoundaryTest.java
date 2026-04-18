@@ -29,7 +29,7 @@ class PartitionBoundaryTest {
   @BeforeEach
   void seed() {
     String email = "part-" + UUID.randomUUID() + "@citigroup.com";
-    String csiId = "CSI-part-" + System.nanoTime();
+    String csiId = String.valueOf(System.nanoTime() % 100_000_000L);
     checkId = UUID.randomUUID();
 
     jdbc.update(

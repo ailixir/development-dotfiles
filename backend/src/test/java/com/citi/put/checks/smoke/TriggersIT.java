@@ -27,7 +27,7 @@ class TriggersIT {
   @BeforeEach
   void seed() {
     userEmail = "trig-" + UUID.randomUUID() + "@citigroup.com";
-    csiId = "CSI-trig-" + System.nanoTime();
+    csiId = String.valueOf(System.nanoTime() % 100_000_000L);
     checkId = UUID.randomUUID();
 
     jdbc.update(

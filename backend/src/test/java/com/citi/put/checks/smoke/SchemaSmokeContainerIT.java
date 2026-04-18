@@ -46,7 +46,7 @@ class SchemaSmokeContainerIT {
     em.persist(user);
 
     CsiSystemSmokeEntity csi = new CsiSystemSmokeEntity();
-    csi.id = "CSI-tc-" + System.currentTimeMillis();
+    csi.id = String.valueOf(System.nanoTime() % 100_000_000L);
     csi.name = "Container CSI";
     csi.businessUnit = "Ops";
     csi.criticality = "MEDIUM";

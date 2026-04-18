@@ -27,7 +27,7 @@ class DiscriminatorCheckTest {
   @BeforeEach
   void seed() {
     userEmail = "disc-" + UUID.randomUUID() + "@citigroup.com";
-    csiId = "CSI-disc-" + System.nanoTime();
+    csiId = String.valueOf(System.nanoTime() % 100_000_000L);
 
     jdbc.update(
         "INSERT INTO users (id, sso_id, name, email, created_at, is_active) "
