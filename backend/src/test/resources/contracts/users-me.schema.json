@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://put.citi.com/checks/contracts/users-me.schema.json",
+  "title": "GET /api/v1/users/me Response",
+  "type": "object",
+  "required": ["user_id", "email", "name", "roles", "csi_ownership"],
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "name": {
+      "type": "string"
+    },
+    "department": {
+      "type": "string"
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "csi_ownership": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["csi_id", "role"],
+        "properties": {
+          "csi_id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["owner", "contributor", "viewer"]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

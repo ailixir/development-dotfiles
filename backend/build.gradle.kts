@@ -41,6 +41,7 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.assertj:assertj-core")
+    testImplementation("com.networknt:json-schema-validator:1.4.0")
     testImplementation("io.zonky.test:embedded-database-spring-test:2.5.1")
     testImplementation("org.testcontainers:postgresql:1.20.2")
     testImplementation("org.testcontainers:junit-jupiter:1.20.2")
@@ -129,6 +130,12 @@ tasks.jacocoTestCoverageVerification {
     }
 }
 
+tasks.register<RdsParityLintTask>("rdsParityLint") {
+    migrationDir.set(file("src/main/resources/db/migration"))
+    allowlistFile.set(file("config/rds-parity/allowlist.yml"))
+}
+
 tasks.check {
     dependsOn(tasks.jacocoTestCoverageVerification)
+    dependsOn("rdsParityLint")
 }
