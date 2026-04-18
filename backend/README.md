@@ -1,0 +1,75 @@
+# PUT Checks — Backend
+
+Spring Boot 3.3 · Java 21 · Gradle (Kotlin DSL).
+
+Part of the [Project Checks monorepo](../README.md). Frontend lives under `../frontend/`.
+
+---
+
+## Prerequisites
+
+- **JDK 21** (temurin-21 recommended). Gradle toolchains will auto-download if your default JDK is older, but a system JDK 21 is faster.
+- **No local Postgres needed for M1.** Story 1.2 wires Zonky embedded Postgres (runs in-process) for the `local` profile; Testcontainers-PG for the `test` profile.
+
+---
+
+## Canonical commands
+
+Run from `backend/`:
+
+| Command | Purpose |
+|---|---|
+| `./gradlew bootRun --args='--spring.profiles.active=local'` | Start the app on `:8080`. Health probe: `GET /actuator/health` → `{"status":"UP"}`. |
+| `./gradlew check` | Full quality gate: Spotless (format), Checkstyle, SpotBugs, JUnit 5, JaCoCo 80% line coverage. |
+| `./gradlew bootJar` | Build the executable jar at `build/libs/checks-backend-0.1.0-SNAPSHOT.jar`. |
+
+Useful extras:
+
+| Command | Purpose |
+|---|---|
+| `./gradlew spotlessApply` | Auto-format all Java sources to google-java-format. |
+| `./gradlew test` | JUnit 5 only (skips lint + coverage gate). |
+| `./gradlew jacocoTestReport` | Produce HTML coverage at `build/reports/jacoco/test/html/index.html`. |
+
+---
+
+## Profiles
+
+Four Spring profiles are defined. Activate via `--spring.profiles.active=<name>` or `SPRING_PROFILES_ACTIVE=<name>`:
+
+| Profile | Purpose | State as of story 1.1 |
+|---|---|---|
+| `local` | Local dev (Zonky embedded Postgres — wired in 1.2) | Placeholder; boots with no DB. |
+| `test` | Integration tests (Testcontainers — wired in 1.2) | Placeholder; boots with no DB. |
+| `staging` | Staging environment (env-var driven) | Placeholder; ready for 5.x stories. |
+| `prod` | Production (env-var driven) | Placeholder; ready for 5.x stories. |
+
+---
+
+## Quality gates
+
+`./gradlew check` runs:
+
+1. **Spotless** — google-java-format. Failing format → `./gradlew spotlessApply` fixes.
+2. **Checkstyle** — config at `config/checkstyle/checkstyle.xml` (google_checks baseline; Citi-standard replacement is a tracked follow-up).
+3. **SpotBugs** — threshold HIGH; exclusions at `config/spotbugs/exclude.xml` (empty baseline).
+4. **JUnit 5** — unit + integration tests.
+5. **JaCoCo** — line coverage ≥ 80% on the project's own packages (excludes `ChecksApplication`, DTOs, generated code).
+
+A red `check` is the shared definition of "not ready to merge."
+
+---
+
+## Follow-up chores
+
+- Replace `config/checkstyle/checkstyle.xml` with the official Citi-standard ruleset once the Citi-standard ruleset artifact is located. Document deviations.
+- Add a `suppressions.xml` when specific files need targeted Checkstyle exemptions.
+
+---
+
+## Related docs
+
+- [`docs/stories/1.1.story.md`](../docs/stories/1.1.story.md) — this scaffold's source story.
+- [`docs/specs/backend/spec.md`](../docs/specs/backend/spec.md) — full backend spec (v3, DEBT-04-corrected).
+- [`docs/epics/EPIC-01-EXECUTION.yaml`](../docs/epics/EPIC-01-EXECUTION.yaml) — M1 execution manifest.
+- [`ARCH.md`](../ARCH.md) — system architecture.
