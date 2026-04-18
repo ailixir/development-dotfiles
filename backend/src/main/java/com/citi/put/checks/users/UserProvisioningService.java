@@ -21,22 +21,23 @@ public class UserProvisioningService {
 
   @Transactional
   public void provisionOrTouch(UserIdentity identity) {
-    userRepository
-        .findBySsoId(identity.userId())
-        .ifPresentOrElse(
-            existing -> {
-              existing.setName(identity.name());
-              existing.setEmail(identity.email());
-              existing.setDepartment(identity.department());
-              existing.setLastLogin(Instant.now());
-              LOG.debug("Updated last_login for user sso_id={}", identity.userId());
-            },
-            () -> {
-              User user =
-                  new User(
-                      identity.userId(), identity.name(), identity.email(), identity.department());
-              userRepository.save(user);
-              LOG.info("Provisioned new user sso_id={}", identity.userId());
-            });
+    var existing =
+        userRepository
+            .findBySsoId(identity.userId())
+            .or(() -> userRepository.findByEmail(identity.email()));
+
+    if (existing.isPresent()) {
+      User user = existing.get();
+      user.setName(identity.name());
+      user.setEmail(identity.email());
+      user.setDepartment(identity.department());
+      user.setLastLogin(Instant.now());
+      LOG.debug("Updated last_login for user sso_id={}", identity.userId());
+    } else {
+      User user =
+          new User(identity.userId(), identity.name(), identity.email(), identity.department());
+      userRepository.save(user);
+      LOG.info("Provisioned new user sso_id={}", identity.userId());
+    }
   }
 }

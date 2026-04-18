@@ -36,12 +36,13 @@ public class CsiService {
       int page,
       int size) {
     Pageable pageable = PageRequest.of(page, Math.min(size, 100), Sort.by("name").ascending());
+    String searchPattern = search != null ? "%" + search.toLowerCase() + "%" : null;
 
     Page<CsiSystem> result;
     if (isAdmin(identity)) {
       result =
           csiRepository.findAllFiltered(
-              businessUnit, criticality, environment, status, search, pageable);
+              businessUnit, criticality, environment, status, searchPattern, pageable);
     } else {
       List<String> ownedCsiIds =
           identity.csiOwnership().stream()
@@ -52,7 +53,7 @@ public class CsiService {
       }
       result =
           csiRepository.findAllVisibleToFiltered(
-              ownedCsiIds, businessUnit, criticality, environment, status, search, pageable);
+              ownedCsiIds, businessUnit, criticality, environment, status, searchPattern, pageable);
     }
 
     return result.map(CsiDto::from);

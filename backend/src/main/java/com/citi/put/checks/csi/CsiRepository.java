@@ -28,8 +28,8 @@ public interface CsiRepository extends JpaRepository<CsiSystem, String> {
         AND (:criticality IS NULL OR c.criticality = :criticality)
         AND (:environment IS NULL OR c.environment = :environment)
         AND (:status IS NULL OR c.status = :status)
-        AND (:search IS NULL OR (LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))
-             OR LOWER(c.description) LIKE LOWER(CONCAT('%', :search, '%'))))
+        AND (:search IS NULL OR (LOWER(c.name) LIKE :search
+             OR (c.description IS NOT NULL AND LOWER(c.description) LIKE :search)))
       """)
   Page<CsiSystem> findAllVisibleToFiltered(
       @Param("ownedCsiIds") Collection<String> ownedCsiIds,
@@ -47,8 +47,8 @@ public interface CsiRepository extends JpaRepository<CsiSystem, String> {
         AND (:criticality IS NULL OR c.criticality = :criticality)
         AND (:environment IS NULL OR c.environment = :environment)
         AND (:status IS NULL OR c.status = :status)
-        AND (:search IS NULL OR (LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))
-             OR LOWER(c.description) LIKE LOWER(CONCAT('%', :search, '%'))))
+        AND (:search IS NULL OR (LOWER(c.name) LIKE :search
+             OR (c.description IS NOT NULL AND LOWER(c.description) LIKE :search)))
       """)
   Page<CsiSystem> findAllFiltered(
       @Param("businessUnit") String businessUnit,
