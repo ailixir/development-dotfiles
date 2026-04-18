@@ -18,50 +18,55 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 public class PermissionAspect {
 
-    private final CoreServiceClient coreServiceClient;
-    private final Cache<String, Boolean> permissionCache;
+  private final CoreServiceClient coreServiceClient;
+  private final Cache<String, Boolean> permissionCache;
 
-    public PermissionAspect(CoreServiceClient coreServiceClient, Cache<String, Boolean> permissionCache) {
-        this.coreServiceClient = coreServiceClient;
-        this.permissionCache = permissionCache;
+  public PermissionAspect(
+      CoreServiceClient coreServiceClient, Cache<String, Boolean> permissionCache) {
+    this.coreServiceClient = coreServiceClient;
+    this.permissionCache = permissionCache;
+  }
+
+  @Around("@annotation(requiresPermission)")
+  public Object checkPermission(
+      ProceedingJoinPoint joinPoint, RequiresPermission requiresPermission) throws Throwable {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (!(auth instanceof BffAuthenticationToken bff)) {
+      throw new AccessDeniedException("Not authenticated");
     }
 
-    @Around("@annotation(requiresPermission)")
-    public Object checkPermission(ProceedingJoinPoint joinPoint, RequiresPermission requiresPermission)
-            throws Throwable {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!(auth instanceof BffAuthenticationToken bff)) {
-            throw new AccessDeniedException("Not authenticated");
-        }
+    String userId = bff.getPrincipal().userId();
+    String permission = requiresPermission.value();
+    String cacheKey = userId + ":" + permission;
 
-        String userId = bff.getPrincipal().userId();
-        String permission = requiresPermission.value();
-        String cacheKey = userId + ":" + permission;
-
-        Boolean allowed = permissionCache.getIfPresent(cacheKey);
-        if (allowed == null) {
-            String cookieValue = extractSessionCookie();
-            allowed = coreServiceClient.checkPermission(cookieValue, permission);
-            permissionCache.put(cacheKey, allowed);
-        }
-
-        if (!allowed) {
-            throw new AccessDeniedException("Permission denied: " + permission);
-        }
-
-        return joinPoint.proceed();
+    Boolean allowed = permissionCache.getIfPresent(cacheKey);
+    if (allowed == null) {
+      String cookieValue = extractSessionCookie();
+      allowed = coreServiceClient.checkPermission(cookieValue, permission);
+      permissionCache.put(cacheKey, allowed);
     }
 
-    private String extractSessionCookie() {
-        ServletRequestAttributes attrs =
-            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attrs == null) return "";
-        HttpServletRequest request = attrs.getRequest();
-        if (request.getCookies() == null) return "";
-        return Arrays.stream(request.getCookies())
-            .filter(c -> "put_session".equals(c.getName()))
-            .map(Cookie::getValue)
-            .findFirst()
-            .orElse("");
+    if (!allowed) {
+      throw new AccessDeniedException("Permission denied: " + permission);
     }
+
+    return joinPoint.proceed();
+  }
+
+  private String extractSessionCookie() {
+    ServletRequestAttributes attrs =
+        (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    if (attrs == null) {
+      return "";
+    }
+    HttpServletRequest request = attrs.getRequest();
+    if (request.getCookies() == null) {
+      return "";
+    }
+    return Arrays.stream(request.getCookies())
+        .filter(c -> "put_session".equals(c.getName()))
+        .map(Cookie::getValue)
+        .findFirst()
+        .orElse("");
+  }
 }

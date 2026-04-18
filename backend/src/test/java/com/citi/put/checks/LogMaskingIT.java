@@ -3,17 +3,15 @@ package com.citi.put.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
+import com.citi.put.checks.config.logging.MaskingMessageJsonProvider;
 import java.io.ByteArrayOutputStream;
 import net.logstash.logback.composite.loggingevent.LogLevelJsonProvider;
 import net.logstash.logback.composite.loggingevent.LoggerNameJsonProvider;
-import net.logstash.logback.composite.loggingevent.LoggingEventJsonProviders;
 import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
-import com.citi.put.checks.config.logging.MaskingMessageJsonProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -31,7 +29,7 @@ class LogMaskingIT {
 
     LoggingEventCompositeJsonEncoder encoder = new LoggingEventCompositeJsonEncoder();
     encoder.setContext(context);
-    LoggingEventJsonProviders providers = encoder.getProviders();
+    var providers = encoder.getProviders();
     providers.addProvider(new LoggerNameJsonProvider());
     providers.addProvider(new LogLevelJsonProvider());
     MaskingMessageJsonProvider maskingProvider = new MaskingMessageJsonProvider();
@@ -48,13 +46,14 @@ class LogMaskingIT {
 
   @Test
   void passwordValueIsMaskedInEncodedJson() {
-    LoggingEvent event = new LoggingEvent(
-        "test",
-        context.getLogger(LogMaskingIT.class),
-        Level.INFO,
-        "request payload: {\"user\":\"alice\",\"password\":\"s3cret!\"}",
-        null,
-        null);
+    LoggingEvent event =
+        new LoggingEvent(
+            "test",
+            context.getLogger(LogMaskingIT.class),
+            Level.INFO,
+            "request payload: {\"user\":\"alice\",\"password\":\"s3cret!\"}",
+            null,
+            null);
     event.setLoggerContextRemoteView(context.getLoggerContextRemoteView());
 
     appender.doAppend(event);
@@ -67,13 +66,14 @@ class LogMaskingIT {
 
   @Test
   void emailIsMaskedInEncodedJson() {
-    LoggingEvent event = new LoggingEvent(
-        "test",
-        context.getLogger(LogMaskingIT.class),
-        Level.INFO,
-        "user alice.smith@citigroup.com logged in",
-        null,
-        null);
+    LoggingEvent event =
+        new LoggingEvent(
+            "test",
+            context.getLogger(LogMaskingIT.class),
+            Level.INFO,
+            "user alice.smith@citigroup.com logged in",
+            null,
+            null);
     event.setLoggerContextRemoteView(context.getLoggerContextRemoteView());
 
     appender.doAppend(event);

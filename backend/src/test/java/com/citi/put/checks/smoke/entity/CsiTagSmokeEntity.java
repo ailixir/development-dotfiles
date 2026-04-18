@@ -35,8 +35,12 @@ public class CsiTagSmokeEntity {
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof CsiTagId that)) return false;
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof CsiTagId that)) {
+        return false;
+      }
       return Objects.equals(csiId, that.csiId) && Objects.equals(tagId, that.tagId);
     }
 

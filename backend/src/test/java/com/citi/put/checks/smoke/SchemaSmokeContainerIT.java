@@ -18,9 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Same assertions as SchemaSmokeTest but against a real PostgreSQL 15 container.
- * Proves Zonky ↔ Testcontainers DDL parity — catches any divergence (e.g., SUPERUSER-only
- * features, extensions, CHECK constraint dialects).
+ * Same assertions as SchemaSmokeTest but against a real PostgreSQL 15 container. Proves Zonky ↔
+ * Testcontainers DDL parity — catches any divergence (e.g., SUPERUSER-only features, extensions,
+ * CHECK constraint dialects).
  *
  * <p>Runs only when Docker is available on the CI runner (@Testcontainers disabledWithoutDocker).
  */
@@ -30,11 +30,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Transactional
 class SchemaSmokeContainerIT {
 
-  @PersistenceContext
-  private EntityManager em;
+  @PersistenceContext private EntityManager em;
 
-  @Autowired
-  private JdbcTemplate jdbc;
+  @Autowired private JdbcTemplate jdbc;
 
   @Test
   void insertRoundtripAgainstRealPostgres() {
@@ -84,10 +82,11 @@ class SchemaSmokeContainerIT {
   @Test
   void discriminatorConstraintFiresOnRealPostgres() {
     // Parity check: ensure the CHECK constraint behaves identically on real PG.
-    Integer rowCount = jdbc.queryForObject(
-        "SELECT COUNT(*) FROM information_schema.table_constraints "
-            + "WHERE table_name = 'checks' AND constraint_name = 'ck_checks_configuration_has_type'",
-        Integer.class);
+    Integer rowCount =
+        jdbc.queryForObject(
+            "SELECT COUNT(*) FROM information_schema.table_constraints "
+                + "WHERE table_name = 'checks' AND constraint_name = 'ck_checks_configuration_has_type'",
+            Integer.class);
     assertThat(rowCount).isEqualTo(1);
   }
 }

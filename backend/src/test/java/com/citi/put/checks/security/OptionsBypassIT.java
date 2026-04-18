@@ -16,18 +16,19 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("local")
 class OptionsBypassIT {
 
-    @Autowired TestRestTemplate restTemplate;
+  @Autowired TestRestTemplate restTemplate;
 
-    @Test
-    void optionsRequestPassesThroughWithoutAuth() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Origin", "http://localhost:3000");
-        headers.add("Access-Control-Request-Method", "GET");
+  @Test
+  void optionsRequestPassesThroughWithoutAuth() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Origin", "http://localhost:3000");
+    headers.add("Access-Control-Request-Method", "GET");
 
-        ResponseEntity<String> response = restTemplate.exchange(
+    ResponseEntity<String> response =
+        restTemplate.exchange(
             "/api/v1/test", HttpMethod.OPTIONS, new HttpEntity<>(headers), String.class);
 
-        assertThat(response.getStatusCode().value()).isNotEqualTo(401);
-        assertThat(response.getStatusCode().value()).isNotEqualTo(503);
-    }
+    assertThat(response.getStatusCode().value()).isNotEqualTo(401);
+    assertThat(response.getStatusCode().value()).isNotEqualTo(503);
+  }
 }

@@ -58,6 +58,10 @@ dependencies {
 // it's on the main classpath (so LocalEmbeddedPostgresConfig compiles) but the @Profile("local")
 // guard ensures EmbeddedPostgres only starts when explicitly activated.
 
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("-parameters")
+}
+
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     include("**/*Test.class", "**/*IT.class")

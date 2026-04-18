@@ -2,6 +2,7 @@ package com.citi.put.checks.smoke;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class DiscriminatorCheckTest {
 
-  @Autowired
-  private JdbcTemplate jdbc;
+  @Autowired private JdbcTemplate jdbc;
 
   private String userEmail;
   private String csiId;
@@ -32,21 +32,37 @@ class DiscriminatorCheckTest {
     jdbc.update(
         "INSERT INTO users (id, sso_id, name, email, created_at, is_active) "
             + "VALUES (?, ?, ?, ?, ?, true)",
-        UUID.randomUUID(), "sso-" + UUID.randomUUID(), "Disc User", userEmail, Instant.now());
+        UUID.randomUUID(),
+        "sso-" + UUID.randomUUID(),
+        "Disc User",
+        userEmail,
+        Timestamp.from(Instant.now()));
 
     jdbc.update(
-        "INSERT INTO csi_systems (id, name, business_unit, criticality, owner_email, environment, status, created_at, updated_at) "
+        "INSERT INTO csi_systems (id, name, business_unit, criticality,"
+            + " owner_email, environment, status, created_at, updated_at) "
             + "VALUES (?, 'Disc CSI', 'Ops', 'HIGH', ?, 'Production', 'OPERATIONAL', ?, ?)",
-        csiId, userEmail, Instant.now(), Instant.now());
+        csiId,
+        userEmail,
+        Timestamp.from(Instant.now()),
+        Timestamp.from(Instant.now()));
   }
 
   @Test
   void insertingConfigurationWithoutTypeKeyViolatesCheckConstraint() {
-    assertThatThrownBy(() ->
-        jdbc.update(
-            "INSERT INTO checks (id, name, type, csi_id, csi_name, status, configuration, created_by, created_at, updated_at) "
-                + "VALUES (?, 'Bad Check', 'HTTP', ?, 'Disc CSI', 'PENDING', '{\"foo\":1}'::jsonb, ?, ?, ?)",
-            UUID.randomUUID(), csiId, userEmail, Instant.now(), Instant.now()))
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "INSERT INTO checks (id, name, type, csi_id, csi_name,"
+                        + " status, configuration, created_by,"
+                        + " created_at, updated_at) "
+                        + "VALUES (?, 'Bad Check', 'HTTP', ?, 'Disc CSI',"
+                        + " 'PENDING', '{\"foo\":1}'::jsonb, ?, ?, ?)",
+                    UUID.randomUUID(),
+                    csiId,
+                    userEmail,
+                    Timestamp.from(Instant.now()),
+                    Timestamp.from(Instant.now())))
         .isInstanceOf(DataIntegrityViolationException.class)
         .hasMessageContaining("ck_checks_configuration_has_type");
   }
@@ -54,8 +70,14 @@ class DiscriminatorCheckTest {
   @Test
   void insertingConfigurationWithTypeKeySucceeds() {
     jdbc.update(
-        "INSERT INTO checks (id, name, type, csi_id, csi_name, status, configuration, created_by, created_at, updated_at) "
-            + "VALUES (?, 'Good Check', 'HTTP', ?, 'Disc CSI', 'PENDING', '{\"type\":\"HTTP\",\"url\":\"x\"}'::jsonb, ?, ?, ?)",
-        UUID.randomUUID(), csiId, userEmail, Instant.now(), Instant.now());
+        "INSERT INTO checks (id, name, type, csi_id, csi_name, status,"
+            + " configuration, created_by, created_at, updated_at) "
+            + "VALUES (?, 'Good Check', 'HTTP', ?, 'Disc CSI', 'PENDING',"
+            + " '{\"type\":\"HTTP\",\"url\":\"x\"}'::jsonb, ?, ?, ?)",
+        UUID.randomUUID(),
+        csiId,
+        userEmail,
+        Timestamp.from(Instant.now()),
+        Timestamp.from(Instant.now()));
   }
 }

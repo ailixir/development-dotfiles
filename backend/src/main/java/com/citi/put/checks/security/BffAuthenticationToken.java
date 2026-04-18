@@ -6,24 +6,24 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public class BffAuthenticationToken extends AbstractAuthenticationToken {
 
-    private final UserIdentity userIdentity;
+  private final UserIdentity userIdentity;
 
-    public BffAuthenticationToken(UserIdentity userIdentity) {
-        super(
-            userIdentity.roles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase().replace("-", "_")))
-                .collect(Collectors.toList()));
-        this.userIdentity = userIdentity;
-        setAuthenticated(true);
-    }
+  public BffAuthenticationToken(UserIdentity userIdentity) {
+    super(
+        userIdentity.roles().stream()
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase().replace("-", "_")))
+            .collect(Collectors.toList()));
+    this.userIdentity = userIdentity;
+    setAuthenticated(true);
+  }
 
-    @Override
-    public Object getCredentials() {
-        return null;
-    }
+  @Override
+  public Object getCredentials() {
+    return null;
+  }
 
-    @Override
-    public UserIdentity getPrincipal() {
-        return userIdentity;
-    }
+  @Override
+  public UserIdentity getPrincipal() {
+    return userIdentity;
+  }
 }

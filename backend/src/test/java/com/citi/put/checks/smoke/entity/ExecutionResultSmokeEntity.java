@@ -63,8 +63,12 @@ public class ExecutionResultSmokeEntity {
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof ExecutionResultId that)) return false;
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof ExecutionResultId that)) {
+        return false;
+      }
       return Objects.equals(id, that.id) && Objects.equals(startedAt, that.startedAt);
     }
 

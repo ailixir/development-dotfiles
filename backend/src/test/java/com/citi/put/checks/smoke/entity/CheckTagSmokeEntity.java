@@ -35,8 +35,12 @@ public class CheckTagSmokeEntity {
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof CheckTagId that)) return false;
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof CheckTagId that)) {
+        return false;
+      }
       return Objects.equals(checkId, that.checkId) && Objects.equals(tagId, that.tagId);
     }
 

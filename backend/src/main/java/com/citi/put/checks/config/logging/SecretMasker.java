@@ -5,14 +5,14 @@ import java.util.regex.Pattern;
 
 public final class SecretMasker {
 
-  private static final List<Pattern> PATTERNS = List.of(
-      Pattern.compile("(?i)(\"password\"\\s*:\\s*\")([^\"]*)(\")"),
-      Pattern.compile("(?i)(\"secret\"\\s*:\\s*\")([^\"]*)(\")"),
-      Pattern.compile("(?i)(\"token\"\\s*:\\s*\")([^\"]*)(\")"),
-      Pattern.compile("(?i)(\"api[_-]?key\"\\s*:\\s*\")([^\"]*)(\")"),
-      Pattern.compile("(?i)(\"authorization\"\\s*:\\s*\")([^\"]*)(\")"),
-      Pattern.compile("([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})")
-  );
+  private static final List<Pattern> PATTERNS =
+      List.of(
+          Pattern.compile("(?i)(\"password\"\\s*:\\s*\")([^\"]*)(\")"),
+          Pattern.compile("(?i)(\"secret\"\\s*:\\s*\")([^\"]*)(\")"),
+          Pattern.compile("(?i)(\"token\"\\s*:\\s*\")([^\"]*)(\")"),
+          Pattern.compile("(?i)(\"api[_-]?key\"\\s*:\\s*\")([^\"]*)(\")"),
+          Pattern.compile("(?i)(\"authorization\"\\s*:\\s*\")([^\"]*)(\")"),
+          Pattern.compile("([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})"));
 
   private SecretMasker() {}
 

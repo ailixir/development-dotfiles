@@ -9,5 +9,4 @@ public record UserIdentity(
     @JsonProperty("name") String name,
     @JsonProperty("department") String department,
     @JsonProperty("roles") List<String> roles,
-    @JsonProperty("csi_ownership") List<CsiOwnershipEntry> csiOwnership
-) {}
+    @JsonProperty("csi_ownership") List<CsiOwnershipEntry> csiOwnership) {}

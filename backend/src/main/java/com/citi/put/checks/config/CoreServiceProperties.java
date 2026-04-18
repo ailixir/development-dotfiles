@@ -1,16 +1,10 @@
 package com.citi.put.checks.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @ConfigurationProperties(prefix = "checks.core-service")
 public record CoreServiceProperties(
-    String baseUrl,
-    Timeout timeout
-) {
-    public record Timeout(int connectMs, int readMs) {}
-
-    public CoreServiceProperties {
-        if (baseUrl == null || baseUrl.isBlank()) baseUrl = "http://localhost:8081";
-        if (timeout == null) timeout = new Timeout(2000, 3000);
-    }
+    @DefaultValue("http://localhost:8081") String baseUrl, @DefaultValue Timeout timeout) {
+  public record Timeout(@DefaultValue("2000") int connectMs, @DefaultValue("3000") int readMs) {}
 }

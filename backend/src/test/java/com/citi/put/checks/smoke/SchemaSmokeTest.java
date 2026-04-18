@@ -21,11 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class SchemaSmokeTest {
 
-  @PersistenceContext
-  private EntityManager em;
+  @PersistenceContext private EntityManager em;
 
-  @Autowired
-  private JdbcTemplate jdbc;
+  @Autowired private JdbcTemplate jdbc;
 
   @Test
   void insertRoundtripAcrossCoreTables() {
@@ -81,13 +79,14 @@ class SchemaSmokeTest {
 
   @Test
   void tablesFromMigrationAllExist() {
-    Integer count = jdbc.queryForObject(
-        "SELECT COUNT(*) FROM information_schema.tables "
-            + "WHERE table_schema = 'public' "
-            + "AND table_name IN ('users','csi_systems','checks','schedules','execution_results',"
-            + "'ui_tests','ui_test_executions','reports','report_executions','tags',"
-            + "'check_tags','csi_tags','secrets','shedlock')",
-        Integer.class);
+    Integer count =
+        jdbc.queryForObject(
+            "SELECT COUNT(*) FROM information_schema.tables "
+                + "WHERE table_schema = 'public' "
+                + "AND table_name IN ('users','csi_systems','checks','schedules','execution_results',"
+                + "'ui_tests','ui_test_executions','reports','report_executions','tags',"
+                + "'check_tags','csi_tags','secrets','shedlock')",
+            Integer.class);
     assertThat(count).isEqualTo(14);
   }
 }
