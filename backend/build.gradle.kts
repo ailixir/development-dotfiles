@@ -30,6 +30,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+    implementation("io.github.resilience4j:resilience4j-spring-boot3:2.2.0")
+    implementation("com.github.ben-manes.caffeine:caffeine")
+
     implementation("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
@@ -45,6 +50,8 @@ dependencies {
     testImplementation("io.zonky.test:embedded-database-spring-test:2.5.1")
     testImplementation("org.testcontainers:postgresql:1.20.2")
     testImplementation("org.testcontainers:junit-jupiter:1.20.2")
+    testImplementation("org.wiremock:wiremock-standalone:3.3.1")
+    testImplementation("org.springframework.security:spring-security-test")
 }
 
 // Make the Zonky embedded-postgres dependency local-profile-only at runtime:
@@ -135,7 +142,42 @@ tasks.register<RdsParityLintTask>("rdsParityLint") {
     allowlistFile.set(file("config/rds-parity/allowlist.yml"))
 }
 
+tasks.register("antiRegressionCheck") {
+    description = "DEBT-04: Blocks spring-boot-starter-oauth2-resource-server and OIDC config keys"
+    doLast {
+        val forbidden = "oauth2-resource-server"
+        val runtimeDeps = configurations["runtimeClasspath"].resolve().map { it.name }
+        val found = runtimeDeps.filter { it.contains(forbidden) }
+        if (found.isNotEmpty()) {
+            throw GradleException(
+                "DEBT-04 anti-regression: forbidden dependency found: $found. " +
+                "put-checks uses BFF session auth, not direct JWT validation."
+            )
+        }
+
+        val configFiles = fileTree("src/main/resources") {
+            include("application*.yml", "application*.yaml", "application*.properties")
+        }
+        val forbiddenKeys = listOf(
+            "spring.security.oauth2.resourceserver.jwt.issuer-uri",
+            "CHECKS_OIDC_ISSUER"
+        )
+        configFiles.forEach { file ->
+            val content = file.readText()
+            forbiddenKeys.forEach { key ->
+                if (content.contains(key)) {
+                    throw GradleException(
+                        "DEBT-04 anti-regression: forbidden config key '$key' found in ${file.name}."
+                    )
+                }
+            }
+        }
+        logger.lifecycle("antiRegressionCheck: DEBT-04 clean — no forbidden deps or config keys.")
+    }
+}
+
 tasks.check {
     dependsOn(tasks.jacocoTestCoverageVerification)
     dependsOn("rdsParityLint")
+    dependsOn("antiRegressionCheck")
 }
