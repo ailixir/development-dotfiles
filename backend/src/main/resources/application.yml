@@ -3,6 +3,9 @@ spring:
     name: checks-backend
   profiles:
     active: local
+  threads:
+    virtual:
+      enabled: true
   jpa:
     hibernate:
       ddl-auto: validate
