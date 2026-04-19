@@ -47,6 +47,14 @@ checks:
       read-ms: 3000
   cors:
     allowed-origins: ${CHECKS_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+  rate-limit:
+    read-per-min: 600
+    write-per-min: 120
+    execute-per-min: 60
+    send-per-min: 10
+    bulk-per-min: 20
+    admin-multiplier: 10
+    max-buckets: 10000
 
 resilience4j:
   circuitbreaker:

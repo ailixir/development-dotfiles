@@ -10,6 +10,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +29,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties({CoreServiceProperties.class, CorsProperties.class})
+@EnableConfigurationProperties({
+  CoreServiceProperties.class,
+  CorsProperties.class,
+  RateLimitProperties.class
+})
 public class SecurityConfig {
 
   @Bean
@@ -56,6 +61,46 @@ public class SecurityConfig {
   }
 
   @Bean
+  public Cache<String, CachedResponse> idempotencyCache(MeterRegistry registry) {
+    Cache<String, CachedResponse> cache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .maximumSize(50_000)
+            .recordStats()
+            .build();
+    CaffeineCacheMetrics.monitor(registry, cache, "idempotency-cache");
+    return cache;
+  }
+
+  @Bean
+  public IdempotencyFilter idempotencyFilter(
+      @Qualifier("idempotencyCache") Cache<String, CachedResponse> idempotencyCache,
+      ObjectMapper objectMapper,
+      MeterRegistry registry) {
+    return new IdempotencyFilter(idempotencyCache, objectMapper, registry);
+  }
+
+  @Bean
+  public RateLimitClassifier rateLimitClassifier() {
+    return new RateLimitClassifier();
+  }
+
+  @Bean
+  public BucketStore bucketStore(
+      RateLimitClassifier rateLimitClassifier, RateLimitProperties rateLimitProps) {
+    return new BucketStore(rateLimitClassifier, rateLimitProps);
+  }
+
+  @Bean
+  public RateLimitFilter rateLimitFilter(
+      BucketStore bucketStore,
+      RateLimitClassifier rateLimitClassifier,
+      ObjectMapper objectMapper,
+      MeterRegistry registry) {
+    return new RateLimitFilter(bucketStore, rateLimitClassifier, objectMapper, registry);
+  }
+
+  @Bean
   public BffSessionAuthenticationFilter bffSessionAuthenticationFilter(
       CoreServiceClient coreServiceClient,
       Cache<String, UserIdentity> identityCache,
@@ -67,7 +112,11 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(
-      HttpSecurity http, BffSessionAuthenticationFilter bffFilter, CorsProperties corsProps)
+      HttpSecurity http,
+      BffSessionAuthenticationFilter bffFilter,
+      IdempotencyFilter idempotencyFilter,
+      RateLimitFilter rateLimitFilter,
+      CorsProperties corsProps)
       throws Exception {
     http.csrf(csrf -> csrf.disable())
         .formLogin(form -> form.disable())
@@ -85,7 +134,9 @@ public class SecurityConfig {
                     .authenticated()
                     .anyRequest()
                     .permitAll())
-        .addFilterBefore(bffFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(bffFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(idempotencyFilter, BffSessionAuthenticationFilter.class)
+        .addFilterAfter(rateLimitFilter, IdempotencyFilter.class);
 
     return http.build();
   }
@@ -102,7 +153,14 @@ public class SecurityConfig {
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(
         List.of("Authorization", "Content-Type", "Idempotency-Key", "X-Requested-With"));
-    config.setExposedHeaders(List.of("Retry-After", "X-RateLimit-Remaining", "Location"));
+    config.setExposedHeaders(
+        List.of(
+            "Retry-After",
+            "X-RateLimit-Limit",
+            "X-RateLimit-Remaining",
+            "X-RateLimit-Reset",
+            "Location",
+            "Idempotent-Replayed"));
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/api/**", config);
