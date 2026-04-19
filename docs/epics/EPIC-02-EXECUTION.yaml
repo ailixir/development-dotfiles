@@ -39,7 +39,7 @@ stories:
   - story_id: "2.1"
     title: "Schedules context (dedicated /schedules endpoints)"
     size: M
-    status: draft
+    status: ready
     depends_on: ["1.9"]
     assigned_dev: null
     story_file: "docs/stories/2.1.story.md"
@@ -47,7 +47,7 @@ stories:
   - story_id: "2.2"
     title: "TCP executor"
     size: S
-    status: draft
+    status: ready
     depends_on: ["1.10"]
     assigned_dev: null
     story_file: "docs/stories/2.2.story.md"
@@ -55,7 +55,7 @@ stories:
   - story_id: "2.3"
     title: "Cron dispatcher (@Scheduled poller)"
     size: M
-    status: draft
+    status: ready
     depends_on: ["2.1", "1.12"]
     assigned_dev: null
     story_file: "docs/stories/2.3.story.md"
@@ -63,7 +63,7 @@ stories:
   - story_id: "2.4"
     title: "ShedLock integration (JDBC-backed)"
     size: S
-    status: draft
+    status: ready
     depends_on: ["1.2", "2.3"]
     assigned_dev: null
     story_file: "docs/stories/2.4.story.md"
@@ -71,7 +71,7 @@ stories:
   - story_id: "2.5"
     title: "Partition scheduler (create + bootstrap + health indicator)"
     size: L
-    status: draft
+    status: ready
     depends_on: ["2.4"]
     split_hint: "Split 2.5a (scheduler+bootstrap) + 2.5b (health indicator+generalization) if still L after dig-in."
     assigned_dev: null
@@ -80,7 +80,7 @@ stories:
   - story_id: "2.6"
     title: "Retention pruning (DETACH CONCURRENTLY)"
     size: M
-    status: draft
+    status: ready
     depends_on: ["2.5"]
     assigned_dev: null
     story_file: "docs/stories/2.6.story.md"
@@ -141,7 +141,7 @@ spec_sections_primary:
 # ─────────────────────────────────────────────────────────────
 progress:
   stories_drafted: 6
-  stories_validated: 0
+  stories_validated: 6
   stories_done: 0
   stories_blocked: 0
   stories_in_progress: 0
@@ -149,6 +149,7 @@ progress:
   notes:
     - "2026-04-18 — @pm created EPIC-02-EXECUTION.yaml. All M1 dependencies satisfied (EPIC-01 complete). Awaiting @sm story drafts."
     - "2026-04-18 — @sm drafted all 6 stories (2.1-2.6). Awaiting @po validation."
+    - "2026-04-18 — @po validated all 6 stories: 10/10 GO across the board. Non-blocking notes: N-2.1-1 (min frequency guard), N-2.3-1 (config property vs @Profile for dispatcher toggle), N-2.5-1 (L split hint evaluation). All 6 stories now Ready for implementation."
 
 # ─────────────────────────────────────────────────────────────
 # Handoff
