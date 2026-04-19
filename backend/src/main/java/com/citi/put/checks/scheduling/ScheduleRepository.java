@@ -1,7 +1,9 @@
 package com.citi.put.checks.scheduling;
 
 import com.citi.put.checks.scheduling.entity.Schedule;
+import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -44,4 +46,14 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
       @Param("enabled") Boolean enabled,
       @Param("timezone") String timezone,
       Pageable pageable);
+
+  @Query(
+      """
+      SELECT s FROM Schedule s
+      WHERE s.enabled = true
+        AND s.nextExecutionAt IS NOT NULL
+        AND s.nextExecutionAt <= :now
+      ORDER BY s.nextExecutionAt ASC
+      """)
+  List<Schedule> findDueSchedules(@Param("now") Instant now, Pageable pageable);
 }
