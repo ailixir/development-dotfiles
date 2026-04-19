@@ -64,9 +64,9 @@ class IdentityCacheIT {
     headers.add("Cookie", "put_session=cached-token");
 
     restTemplate.exchange(
-        "/actuator/health", HttpMethod.GET, new HttpEntity<>(headers), String.class);
+        "/api/v1/checks", HttpMethod.GET, new HttpEntity<>(headers), String.class);
     restTemplate.exchange(
-        "/actuator/health", HttpMethod.GET, new HttpEntity<>(headers), String.class);
+        "/api/v1/checks", HttpMethod.GET, new HttpEntity<>(headers), String.class);
 
     wireMock.verify(1, getRequestedFor(urlEqualTo("/api/v1/users/me")));
   }

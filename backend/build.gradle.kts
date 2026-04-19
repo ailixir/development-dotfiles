@@ -35,6 +35,8 @@ dependencies {
     implementation("io.github.resilience4j:resilience4j-spring-boot3:2.2.0")
     implementation("com.github.ben-manes.caffeine:caffeine")
 
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+
     implementation("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")

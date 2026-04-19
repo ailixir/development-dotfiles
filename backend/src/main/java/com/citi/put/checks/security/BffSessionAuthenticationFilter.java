@@ -49,6 +49,11 @@ public class BffSessionAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
+    if (!request.getRequestURI().startsWith("/api/")) {
+      chain.doFilter(request, response);
+      return;
+    }
+
     String traceId = resolveTraceId(request);
     MDC.put("traceId", traceId);
 

@@ -76,5 +76,11 @@ resilience4j:
         ignore-exceptions:
           - com.citi.put.checks.security.CoreServiceUnauthorizedException
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 logging:
   config: classpath:logback-spring.xml

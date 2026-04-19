@@ -6,6 +6,10 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
 
+springdoc:
+  swagger-ui:
+    enabled: false
+
 management:
   endpoint:
     health:
