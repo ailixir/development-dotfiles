@@ -1,0 +1,168 @@
+#
+# EPIC-02 Execution Manifest — M2 Scheduling + TCP + Partitions
+# Owner: @pm (Morgan)
+# Framework: AIOS SDC (Story Development Cycle)
+# Source: docs/specs/backend/implementation.yaml (EPIC-02)
+# Spec: docs/specs/backend/spec.md v3 (§6.3, §8.1, §8.2)
+#
+
+epic_id: EPIC-02
+milestone: M2
+title: "Scheduling + TCP executor + app-managed partitions"
+status: planning                  # planning | in_progress | completed | paused
+created_at: "2026-04-18"
+created_by: "@pm (Morgan)"
+
+# ─────────────────────────────────────────────────────────────
+# Epic goal + definition of done
+# ─────────────────────────────────────────────────────────────
+goal: |
+  Checks can be scheduled to run on a cron cadence with timezone awareness.
+  TCP port checks are supported alongside HTTP. Execution result partitions
+  are self-maintaining — the app creates future monthly partitions and prunes
+  old ones. ShedLock prevents multi-pod DDL races from M2 onward.
+
+definition_of_done:
+  - "All 6 stories reach Done via SDC cycle."
+  - "`./gradlew check` green — all M1 + M2 tests passing."
+  - "Scheduled HTTP + TCP checks run and persist execution results."
+  - "`/actuator/health/partitions` returns DOWN if the +3-day partition is missing."
+  - "ShedLock prevents partition DDL races in 2-replica staging."
+  - "Retention pruning (DETACH CONCURRENTLY + DROP) tested with old partitions."
+  - "OpenAPI snapshot updated with /schedules endpoints."
+  - "Frontend `VITE_DISABLE_MSW_DOMAINS` extended to include `schedules`."
+
+# ─────────────────────────────────────────────────────────────
+# Story roster (6 stories; source: implementation.yaml EPIC-02)
+# ─────────────────────────────────────────────────────────────
+stories:
+  - story_id: "2.1"
+    title: "Schedules context (dedicated /schedules endpoints)"
+    size: M
+    status: draft
+    depends_on: ["1.9"]
+    assigned_dev: null
+    story_file: "docs/stories/2.1.story.md"
+
+  - story_id: "2.2"
+    title: "TCP executor"
+    size: S
+    status: draft
+    depends_on: ["1.10"]
+    assigned_dev: null
+    story_file: "docs/stories/2.2.story.md"
+
+  - story_id: "2.3"
+    title: "Cron dispatcher (@Scheduled poller)"
+    size: M
+    status: draft
+    depends_on: ["2.1", "1.12"]
+    assigned_dev: null
+    story_file: "docs/stories/2.3.story.md"
+
+  - story_id: "2.4"
+    title: "ShedLock integration (JDBC-backed)"
+    size: S
+    status: draft
+    depends_on: ["1.2", "2.3"]
+    assigned_dev: null
+    story_file: "docs/stories/2.4.story.md"
+
+  - story_id: "2.5"
+    title: "Partition scheduler (create + bootstrap + health indicator)"
+    size: L
+    status: draft
+    depends_on: ["2.4"]
+    split_hint: "Split 2.5a (scheduler+bootstrap) + 2.5b (health indicator+generalization) if still L after dig-in."
+    assigned_dev: null
+    story_file: "docs/stories/2.5.story.md"
+
+  - story_id: "2.6"
+    title: "Retention pruning (DETACH CONCURRENTLY)"
+    size: M
+    status: draft
+    depends_on: ["2.5"]
+    assigned_dev: null
+    story_file: "docs/stories/2.6.story.md"
+
+# ─────────────────────────────────────────────────────────────
+# Drafting order for @sm (respects depends_on DAG)
+# ─────────────────────────────────────────────────────────────
+sm_draft_queue:
+  - wave: 0
+    parallel: ["2.1", "2.2"]
+    rationale: "Schedules context + TCP executor are independent — run in parallel."
+
+  - wave: 1
+    parallel: ["2.3"]
+    after: ["2.1"]
+    rationale: "Cron dispatcher depends on schedules context."
+
+  - wave: 2
+    parallel: ["2.4"]
+    after: ["2.3"]
+    rationale: "ShedLock wraps the cron dispatcher."
+
+  - wave: 3
+    parallel: ["2.5"]
+    after: ["2.4"]
+    rationale: "Partition scheduler uses ShedLock."
+
+  - wave: 4
+    parallel: ["2.6"]
+    after: ["2.5"]
+    rationale: "Retention pruning depends on partition scheduler."
+
+# ─────────────────────────────────────────────────────────────
+# Risk tracking
+# ─────────────────────────────────────────────────────────────
+risks:
+  - risk_id: R-05
+    description: "Multi-replica scheduler race on partition DETACH CONCURRENTLY"
+    status: mitigated_by_design
+    mitigation: "ShedLock (story 2.4) prevents concurrent DDL execution."
+    retires_in: "EPIC-02 story 2.4"
+
+# ─────────────────────────────────────────────────────────────
+# Traceability
+# ─────────────────────────────────────────────────────────────
+covers_requirements:
+  functional: ["FR-SCHED-01", "FR-SCHED-02", "FR-SCHED-03", "FR-CHK-05"]
+  non_functional: ["NFR-SCALE-02", "NFR-RET-01"]
+  constraints: ["CON-STACK-13", "CON-ARCH-05"]
+
+spec_sections_primary:
+  - "§6.3 New /schedules endpoints (DEBT-03)"
+  - "§8.1 Scheduling evolution (ShedLock at M2)"
+  - "§8.2 App-managed partitioning (PG-R1)"
+
+# ─────────────────────────────────────────────────────────────
+# Progress tracking
+# ─────────────────────────────────────────────────────────────
+progress:
+  stories_drafted: 6
+  stories_validated: 0
+  stories_done: 0
+  stories_blocked: 0
+  stories_in_progress: 0
+  current_wave: 0
+  notes:
+    - "2026-04-18 — @pm created EPIC-02-EXECUTION.yaml. All M1 dependencies satisfied (EPIC-01 complete). Awaiting @sm story drafts."
+    - "2026-04-18 — @sm drafted all 6 stories (2.1-2.6). Awaiting @po validation."
+
+# ─────────────────────────────────────────────────────────────
+# Handoff
+# ─────────────────────────────────────────────────────────────
+handoff:
+  next_action: |
+    @sm to draft all 6 stories (2.1-2.6) expanding implementation.yaml scope
+    into full story files with detailed ACs, implementation notes, and test strategy.
+    @po validates each. Then @dev begins implementation following the wave order.
+  hard_gates:
+    - "EPIC-01 must be complete before starting EPIC-02. ✅ Met."
+  cadence: "6 stories, estimated 2-3 weeks with depends_on DAG."
+
+attestation:
+  signed_by: "@pm (Morgan)"
+  signed_at: "2026-04-18"
+  article_iv: "Every story traces to implementation.yaml EPIC-02; every requirement covered traces to requirements.json. No invented work."
