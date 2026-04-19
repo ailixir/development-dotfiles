@@ -4,6 +4,8 @@ import com.citi.put.checks.checks.dto.CheckDto;
 import com.citi.put.checks.checks.dto.CheckRequest;
 import com.citi.put.checks.checks.entity.Check;
 import com.citi.put.checks.csi.CsiRepository;
+import com.citi.put.checks.scheduling.ScheduleRepository;
+import com.citi.put.checks.scheduling.dto.ScheduleDto;
 import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
@@ -30,14 +32,17 @@ public class CheckService {
   private final CheckRepository checkRepository;
   private final CsiRepository csiRepository;
   private final CsiOwnershipEvaluator ownershipEvaluator;
+  private final ScheduleRepository scheduleRepository;
 
   public CheckService(
       CheckRepository checkRepository,
       CsiRepository csiRepository,
-      CsiOwnershipEvaluator ownershipEvaluator) {
+      CsiOwnershipEvaluator ownershipEvaluator,
+      ScheduleRepository scheduleRepository) {
     this.checkRepository = checkRepository;
     this.csiRepository = csiRepository;
     this.ownershipEvaluator = ownershipEvaluator;
+    this.scheduleRepository = scheduleRepository;
   }
 
   @Transactional
@@ -107,7 +112,8 @@ public class CheckService {
       return null;
     }
     requireRead(auth, check.getCsiId());
-    return CheckDto.from(check);
+    ScheduleDto schedule = scheduleRepository.findByCheckId(id).map(ScheduleDto::from).orElse(null);
+    return CheckDto.from(check, schedule);
   }
 
   @Transactional

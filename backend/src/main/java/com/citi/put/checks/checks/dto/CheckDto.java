@@ -2,6 +2,8 @@ package com.citi.put.checks.checks.dto;
 
 import com.citi.put.checks.checks.entity.Check;
 import com.citi.put.checks.checks.model.CheckConfiguration;
+import com.citi.put.checks.scheduling.dto.ScheduleDto;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -17,9 +19,14 @@ public record CheckDto(
     String environment,
     String createdBy,
     Instant createdAt,
-    Instant updatedAt) {
+    Instant updatedAt,
+    @JsonInclude(JsonInclude.Include.NON_NULL) ScheduleDto schedule) {
 
   public static CheckDto from(Check entity) {
+    return from(entity, null);
+  }
+
+  public static CheckDto from(Check entity, ScheduleDto schedule) {
     return new CheckDto(
         entity.getId(),
         entity.getName(),
@@ -32,6 +39,7 @@ public record CheckDto(
         entity.getEnvironment(),
         entity.getCreatedBy(),
         entity.getCreatedAt(),
-        entity.getUpdatedAt());
+        entity.getUpdatedAt(),
+        schedule);
   }
 }
