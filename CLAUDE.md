@@ -33,7 +33,7 @@ Almost all FE commands below must be run from `frontend/`. Backend commands run 
 - **Routing:** React Router v7
 - **State Management:** Redux Toolkit + React Context
 - **Authentication:** OIDC-React with JWT token handling
-- **Testing:** Vitest (unit tests) + Cypress (E2E tests)
+- **Testing:** Vitest (unit tests) + Playwright (E2E tests)
 - **API Mocking:** Mock Service Worker (MSW) for development
 
 ### Deployment Modes
@@ -62,7 +62,7 @@ npm run lint:fix
 # Tests
 npm run test             # Vitest
 npm run test:ui
-npm run test:e2e         # Cypress
+npm run test:e2e         # Playwright
 ```
 
 ### Backend (run from `backend/`)
@@ -186,5 +186,5 @@ backend/src/main/resources/db/migration/     # Flyway forward-only SQL
 
 - **Unit Tests:** Vitest + React Testing Library for components and hooks
 - **Integration Tests:** Full user flows with MSW API mocking
-- **E2E Tests:** Cypress for critical paths like check creation and execution
+- **E2E Tests:** Playwright for critical paths like check creation and execution
 - **Mock Data:** Comprehensive test scenarios including error states and edge cases

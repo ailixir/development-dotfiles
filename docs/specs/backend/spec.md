@@ -1003,7 +1003,7 @@ Exporter: OTLP to enterprise collector (configured per env).
 | Slice | `@WebMvcTest`, `@DataJpaTest`, `@JsonTest` | controllers, repositories, DTO serialization |
 | Integration (local) | `@SpringBootTest` + Zonky embedded PG `[CON-STACK-07]` | full stack, fast |
 | Integration (CI) | `@SpringBootTest` + Testcontainers-Postgres + Testcontainers-Vault `[CON-STACK-16, HV-R5]` | RDS parity |
-| E2E | Cypress (exists in frontend/) + backend deployed to staging | user journeys |
+| E2E | Playwright + backend deployed to staging | user journeys |
 | Load | k6 | `NFR-THRU-01/02/03/04` validation in M6 |
 
 ### 13.2 RDS parity lint (ZK-R2)

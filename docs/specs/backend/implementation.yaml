@@ -312,7 +312,7 @@ epics:
         scope:
           - "frontend/src/services/mocks/mockMode.ts per-domain toggle."
           - "Env flag VITE_DISABLE_MSW_DOMAINS=csi,checks."
-          - "Cypress smoke test against real backend at localhost:8080."
+          - "Playwright E2E test against real backend at localhost:8080."
         acceptance_criteria:
           - "FE with env flag fetches real CSI/Checks from backend."
           - "Remaining MSW handlers (studio, reports) still work."
