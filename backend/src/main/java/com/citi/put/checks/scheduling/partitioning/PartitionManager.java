@@ -111,6 +111,37 @@ public class PartitionManager {
     return (int) partitions.stream().filter(p -> p.compareTo(currentPartition) > 0).count();
   }
 
+  public int pruneExpired(int retentionMonths) {
+    if (!isPartitionedTable()) {
+      LOG.debug(
+          "Skipping partition pruning for {} — table not partitioned or missing", parentTable);
+      return 0;
+    }
+
+    YearMonth cutoff = YearMonth.now(ZoneOffset.UTC).minusMonths(retentionMonths);
+    String cutoffPartition = parentTable + "_" + cutoff.format(PARTITION_FMT);
+    Set<String> partitions = listPartitions();
+    int pruned = 0;
+
+    for (String partition : partitions) {
+      if (partition.compareTo(cutoffPartition) >= 0) {
+        continue;
+      }
+
+      try {
+        jdbc.execute(
+            "ALTER TABLE " + parentTable + " DETACH PARTITION " + partition + " CONCURRENTLY");
+        jdbc.execute("DROP TABLE " + partition);
+        LOG.info("partition_pruned table={} action=detach_drop", partition);
+        pruned++;
+      } catch (Exception e) {
+        LOG.warn("partition_prune_skipped table={} reason={}", partition, e.getMessage());
+      }
+    }
+
+    return pruned;
+  }
+
   private Set<String> listPartitions() {
     return jdbc
         .queryForList(

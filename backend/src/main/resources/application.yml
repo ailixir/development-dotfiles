@@ -43,6 +43,8 @@ checks:
   scheduling:
     dispatcher-enabled: true
     poll-interval-ms: 30000
+  partitioning:
+    retention-months: 12
   core-service:
     base-url: ${CHECKS_CORE_SERVICE_URL:http://localhost:8081}
     timeout:
