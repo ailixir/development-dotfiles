@@ -14,6 +14,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -62,7 +63,10 @@ public class CronDispatcher {
     this.meterRegistry = meterRegistry;
   }
 
-  @Scheduled(fixedDelayString = "${checks.scheduling.poll-interval-ms:30000}")
+  @Scheduled(
+      fixedDelayString = "${checks.scheduling.poll-interval-ms:30000}",
+      initialDelayString = "${checks.scheduling.initial-delay-ms:5000}")
+  @SchedulerLock(name = "cronDispatcher", lockAtMostFor = "5m", lockAtLeastFor = "30s")
   public void pollAndDispatch() {
     MDC.put("schedulerId", "cron-dispatcher");
     try {

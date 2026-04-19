@@ -40,6 +40,7 @@ class CronDispatcherIT {
     wireMock.start();
     registry.add("checks.core-service.base-url", wireMock::baseUrl);
     registry.add("checks.scheduling.dispatcher-enabled", () -> "true");
+    registry.add("checks.scheduling.initial-delay-ms", () -> "300000");
   }
 
   @AfterAll
