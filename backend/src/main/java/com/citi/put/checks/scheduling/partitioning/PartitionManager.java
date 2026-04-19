@@ -17,10 +17,16 @@ public class PartitionManager {
   private static final DateTimeFormatter PARTITION_FMT = DateTimeFormatter.ofPattern("yyyy_MM");
   private static final DateTimeFormatter SQL_DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+  private static final Set<String> ALLOWED_TABLES =
+      Set.of("execution_results", "ui_test_executions", "report_executions");
+
   private final JdbcTemplate jdbc;
   private final String parentTable;
 
   public PartitionManager(JdbcTemplate jdbc, String parentTable) {
+    if (!ALLOWED_TABLES.contains(parentTable)) {
+      throw new IllegalArgumentException("Unknown partitioned table: " + parentTable);
+    }
     this.jdbc = jdbc;
     this.parentTable = parentTable;
   }
