@@ -11,6 +11,12 @@ export default defineConfig(({ mode }) => {
       host: env.HOST || true,
       open: true,
       hmr: true,
+      proxy: {
+        '/api/v1': {
+          target: env.VITE_API_URL || 'http://localhost:8080',
+          changeOrigin: true,
+        },
+      },
     },
     resolve: {
       alias: {

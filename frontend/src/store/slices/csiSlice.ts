@@ -3,6 +3,7 @@ import { CSI, CSIMetrics, CSIHealthSummary, CSIFilters } from '../../types/csi/c
 import { AsyncState } from '../../types/common/commonTypes';
 
 import { csiApi } from '@/services/api/csiApi';
+import { tagsApi } from '@/services/api/tagsApi';
 
 interface TagState {
   selected: string[];
@@ -111,12 +112,8 @@ export const fetchCSIById = createAsyncThunk(
 export const fetchTags = createAsyncThunk(
   'csi/fetchTags',
   async (params?: { csiId?: string }) => {
-    // Use checks MSW to derive tags in handlers in future. For now keep local derivation via checks dataset only.
-    const { mockChecks } = await import('../../services/mocks/mockData/checksData');
-    const all = new Set<string>();
-    const src = params?.csiId ? mockChecks.filter((c) => c.csiId === params.csiId) : mockChecks;
-    src.forEach((c) => c.tags.forEach((t) => all.add(t)));
-    return Array.from(all).sort();
+    const response = await tagsApi.getTags(params?.csiId);
+    return response.data;
   }
 );
 

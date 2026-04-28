@@ -35,14 +35,30 @@ Useful extras:
 
 ## Profiles
 
-Four Spring profiles are defined. Activate via `--spring.profiles.active=<name>` or `SPRING_PROFILES_ACTIVE=<name>`:
+Five Spring profiles are defined. Activate via `--spring.profiles.active=<name>` or `SPRING_PROFILES_ACTIVE=<name>`:
 
-| Profile | Purpose | State as of story 1.1 |
+| Profile | Purpose | State |
 |---|---|---|
-| `local` | Local dev (Zonky embedded Postgres — wired in 1.2) | Placeholder; boots with no DB. |
-| `test` | Integration tests (Testcontainers — wired in 1.2) | Placeholder; boots with no DB. |
+| `local` | Local dev (Zonky embedded Postgres) | Clean schema, no sample data. |
+| `dev` | Local dev + sample data (Zonky embedded Postgres) | Pre-populated with 3 CSIs, 15 checks, ~450 execution results, reports, tags, UI tests. |
+| `test` | Integration tests (Testcontainers) | Clean schema per test. |
 | `staging` | Staging environment (env-var driven) | Placeholder; ready for 5.x stories. |
 | `prod` | Production (env-var driven) | Placeholder; ready for 5.x stories. |
+
+### Dev profile (sample data for development and demos)
+
+```bash
+./gradlew bootRun --args='--spring.profiles.active=dev'
+```
+
+Starts the app with Zonky embedded Postgres pre-populated with realistic sample data:
+- **3 CSI systems** at different health levels (healthy, degraded, green)
+- **15 checks** (HTTP + TCP) with valid configurations
+- **~450 execution results** spanning 28 days with mixed statuses
+- **12 schedules**, **8 tags**, **3 reports**, **3 UI tests**, **2 secrets**
+- Materialized view `csi_metrics_current` refreshed with live metrics
+
+Use for development, frontend integration, and stakeholder presentations.
 
 ---
 

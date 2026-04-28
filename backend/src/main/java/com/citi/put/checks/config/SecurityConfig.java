@@ -9,6 +9,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -116,7 +117,8 @@ public class SecurityConfig {
       BffSessionAuthenticationFilter bffFilter,
       IdempotencyFilter idempotencyFilter,
       RateLimitFilter rateLimitFilter,
-      CorsProperties corsProps)
+      CorsProperties corsProps,
+      Optional<LocalDevAuthFilter> localDevAuthFilter)
       throws Exception {
     http.csrf(csrf -> csrf.disable())
         .formLogin(form -> form.disable())
@@ -137,6 +139,11 @@ public class SecurityConfig {
         .addFilterBefore(bffFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterAfter(idempotencyFilter, BffSessionAuthenticationFilter.class)
         .addFilterAfter(rateLimitFilter, IdempotencyFilter.class);
+
+    // In the local profile, register a dev-only filter BEFORE BffSessionAuthenticationFilter
+    // so that a default identity is injected and the session cookie check is satisfied.
+    localDevAuthFilter.ifPresent(
+        filter -> http.addFilterBefore(filter, BffSessionAuthenticationFilter.class));
 
     return http.build();
   }

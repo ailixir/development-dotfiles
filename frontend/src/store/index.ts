@@ -50,17 +50,6 @@ async function hydrateDashboardPreferences() {
       if (Array.isArray(pinned)) {
         store.dispatch({ type: 'dashboard/setPinnedCsiIds', payload: pinned });
       }
-    } else {
-      // Seed smart defaults from mock users (Priya) when available
-      try {
-        const mod = await import('../services/mocks/mockData/csiData');
-        const priya = (mod as any).mockUsers?.find((u: any) => u.email === 'bruno.buger@citi.com');
-        if (priya?.permissions && Array.isArray(priya.permissions)) {
-          store.dispatch({ type: 'dashboard/setPinnedCsiIds', payload: priya.permissions.slice(0, 4) });
-        }
-      } catch {
-        // ignore if mock data not available in host mode
-      }
     }
 
     const ctxRaw = window.localStorage.getItem(SEARCH_CTX_KEY);

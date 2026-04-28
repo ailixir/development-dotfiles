@@ -1,0 +1,279 @@
+{
+  "$schema": "aios://spec-pipeline/requirements/v1",
+  "spec_id": "dev-seed-v1",
+  "phase": "gather",
+  "generated_by": "@pm (Morgan)",
+  "generated_at": "2026-04-27",
+  "scope_subject": "Project Checks — Dev Profile Sample Data Population",
+  "sources": [
+    {
+      "id": "V1_INIT",
+      "path": "../../../backend/src/main/resources/db/migration/V1__init.sql",
+      "description": "Core schema defining all tables, partitions, constraints, triggers, and materialized views"
+    },
+    {
+      "id": "V2_SCHEDULE",
+      "path": "../../../backend/src/main/resources/db/migration/V2__schedule_next_execution.sql",
+      "description": "Adds schedules.next_execution_at column"
+    },
+    {
+      "id": "V3_TEMPLATES",
+      "path": "../../../backend/src/main/resources/db/migration/V3__check_templates_seed.sql",
+      "description": "check_templates table + 7 seed rows (precedent for seed-via-Flyway pattern)"
+    },
+    {
+      "id": "V4_SECRETS",
+      "path": "../../../backend/src/main/resources/db/migration/V4__secrets_encrypted_value.sql",
+      "description": "Adds secrets.encrypted_value BYTEA column"
+    },
+    {
+      "id": "V5_STORY3",
+      "path": "../../../backend/src/main/resources/db/migration/V5__story_3_schema_additions.sql",
+      "description": "Adds reports.selected_checks, ui_tests.status, ui_tests.schedule"
+    },
+    {
+      "id": "APP_YML",
+      "path": "../../../backend/src/main/resources/application.yml",
+      "description": "Base Spring config — Flyway locations: classpath:db/migration"
+    },
+    {
+      "id": "APP_LOCAL",
+      "path": "../../../backend/src/main/resources/application-local.yml",
+      "description": "Local profile — Zonky embedded Postgres, dispatcher disabled"
+    },
+    {
+      "id": "ARCH",
+      "path": "../../../ARCH.md",
+      "description": "System architecture document"
+    },
+    {
+      "id": "USER_REQ",
+      "description": "Direct user request for dev profile with standalone database and sample data for development and presentations"
+    }
+  ],
+  "article_iv_gate": {
+    "description": "Every entry in this file traces to an existing schema artifact, configuration file, or the direct user request. No invented requirements. @pm attests.",
+    "signed_by": "@pm (Morgan)",
+    "signed_at": "2026-04-27"
+  },
+  "summary": {
+    "functional_count": 8,
+    "non_functional_count": 5,
+    "constraint_count": 7,
+    "assumption_dependency_count": 3,
+    "out_of_scope_count": 4
+  },
+
+  "functional": [
+    {
+      "id": "FR-DEV-01",
+      "title": "Dev Spring profile activates sample data on startup",
+      "description": "A `dev` Spring profile that, when activated via --spring.profiles.active=dev, populates the database with realistic sample data after Flyway versioned migrations complete.",
+      "traces": [
+        { "source": "USER_REQ", "ref": "Direct request for dev profile with sample data population" },
+        { "source": "APP_YML", "ref": "spring.flyway.locations = classpath:db/migration" }
+      ]
+    },
+    {
+      "id": "FR-DEV-02",
+      "title": "Standalone embedded database for dev profile",
+      "description": "The dev profile reuses the Zonky embedded PostgreSQL from the local profile, requiring zero external dependencies (no Docker, no brew install). The database is ephemeral — destroyed on JVM shutdown.",
+      "traces": [
+        { "source": "USER_REQ", "ref": "Direct request for standalone database" },
+        { "source": "APP_LOCAL", "ref": "Zonky auto-configuration under local profile" }
+      ]
+    },
+    {
+      "id": "FR-DEV-03",
+      "title": "Sample data covers all core entities",
+      "description": "Seed data populates: users, csi_systems, checks (HTTP + TCP types at minimum), schedules, execution_results, reports, report_executions, ui_tests, ui_test_executions, tags, check_tags, csi_tags, secrets. All FK relationships satisfied.",
+      "traces": [
+        { "source": "V1_INIT", "ref": "All tables defined in V1__init.sql" },
+        { "source": "V5_STORY3", "ref": "Additional columns on reports and ui_tests" }
+      ]
+    },
+    {
+      "id": "FR-DEV-04",
+      "title": "Execution history demonstrates dashboard metrics",
+      "description": "Enough execution_results rows (mixed SUCCESS/FAILURE/WARNING/TIMEOUT) to produce meaningful csi_metrics_current materialized view data with varied health_percentage values across CSIs.",
+      "traces": [
+        { "source": "V1_INIT", "ref": "csi_metrics_current materialized view definition" },
+        { "source": "V1_INIT", "ref": "update_check_status_from_execution trigger" }
+      ]
+    },
+    {
+      "id": "FR-DEV-05",
+      "title": "Profile exclusivity — dev seed never runs outside dev",
+      "description": "Sample data SQL is only loaded when spring.profiles.active includes dev. Profiles local, test, staging, prod must NOT load seed data.",
+      "traces": [
+        { "source": "APP_YML", "ref": "spring.flyway.locations controls which SQL directories Flyway scans" },
+        { "source": "USER_REQ", "ref": "dev only requirement" }
+      ]
+    },
+    {
+      "id": "FR-DEV-06",
+      "title": "Idempotent on repeated startups",
+      "description": "Running the application with dev profile multiple times (including against a persistent Postgres if configured) must not produce duplicate data or constraint violations.",
+      "traces": [
+        { "source": "V3_TEMPLATES", "ref": "Precedent: V3 uses INSERT with static IDs for idempotency" }
+      ]
+    },
+    {
+      "id": "FR-DEV-07",
+      "title": "Coherent demo narrative",
+      "description": "Data tells a realistic story: multiple CSI systems with varied health states (healthy, degraded, warning) to demonstrate dashboard drill-down, check management, and execution history during presentations.",
+      "traces": [
+        { "source": "USER_REQ", "ref": "Direct request for presentation-ready data" }
+      ]
+    },
+    {
+      "id": "FR-DEV-08",
+      "title": "Execution results span multiple partitions",
+      "description": "Seeded execution_results target both the current month and at least one previous month partition to demonstrate the partitioning strategy during demos.",
+      "traces": [
+        { "source": "V1_INIT", "ref": "execution_results partitioned by RANGE on started_at" },
+        { "source": "V1_INIT", "ref": "Bootstrap partitions: execution_results_2026_04, execution_results_2026_05" }
+      ]
+    }
+  ],
+
+  "non_functional": [
+    {
+      "id": "NFR-DEV-01",
+      "title": "Startup penalty <= 3 seconds",
+      "description": "The additional seed data population must add no more than 3 seconds to the application startup time compared to the local profile.",
+      "traces": [
+        { "source": "USER_REQ", "ref": "Implicit — dev workflow must remain fast" }
+      ]
+    },
+    {
+      "id": "NFR-DEV-02",
+      "title": "No production code changes",
+      "description": "Dev seed data is fully isolated: new profile YAML + new SQL file in a dev-only Flyway location. Zero modifications to existing Java source, existing migrations, or non-dev profile configs.",
+      "traces": [
+        { "source": "APP_YML", "ref": "Flyway locations additive per profile" }
+      ]
+    },
+    {
+      "id": "NFR-DEV-03",
+      "title": "Passes ./gradlew check",
+      "description": "No regressions to Spotless, Checkstyle, SpotBugs, JaCoCo (80%), or RDS-parity lint.",
+      "traces": [
+        { "source": "ARCH", "ref": "Quality gates defined in build.gradle.kts" }
+      ]
+    },
+    {
+      "id": "NFR-DEV-04",
+      "title": "Realistic but non-sensitive data",
+      "description": "All sample data uses fictional names, emails, and URLs. No real Citi internal hostnames, employee names, or credentials.",
+      "traces": [
+        { "source": "ARCH", "ref": "Security constraints — no hardcoded credentials" }
+      ]
+    },
+    {
+      "id": "NFR-DEV-05",
+      "title": "Self-documenting activation",
+      "description": "backend/README.md updated with dev profile usage instructions (one-liner command).",
+      "traces": [
+        { "source": "USER_REQ", "ref": "Developer experience requirement" }
+      ]
+    }
+  ],
+
+  "constraints": [
+    {
+      "id": "CON-DEV-01",
+      "title": "Seed data must NOT be a versioned migration",
+      "description": "Flyway V* migrations are forward-only and run in all profiles. Seed data must use Flyway repeatable (R__) migration or another profile-gated mechanism.",
+      "traces": [
+        { "source": "APP_YML", "ref": "spring.flyway.locations = classpath:db/migration (shared across all profiles)" },
+        { "source": "V1_INIT", "ref": "Forward-only migration contract" }
+      ]
+    },
+    {
+      "id": "CON-DEV-02",
+      "title": "Schema must be current before seed runs",
+      "description": "hibernate.ddl-auto=validate means JPA validates entity mappings against the schema at startup. Seed data must only reference columns that exist after all V* migrations.",
+      "traces": [
+        { "source": "APP_YML", "ref": "spring.jpa.hibernate.ddl-auto: validate" }
+      ]
+    },
+    {
+      "id": "CON-DEV-03",
+      "title": "Execution results must target existing partitions",
+      "description": "execution_results has no DEFAULT partition. INSERTs with started_at values outside existing partition bounds will fail. Seed data must dynamically target current month partitions.",
+      "traces": [
+        { "source": "V1_INIT", "ref": "PARTITION BY RANGE (started_at); no DEFAULT partition" }
+      ]
+    },
+    {
+      "id": "CON-DEV-04",
+      "title": "JSONB must match sealed interface contracts",
+      "description": "checks.configuration JSONB must include a $.type discriminator and match HttpConfiguration or TcpConfiguration field shapes exactly.",
+      "traces": [
+        { "source": "V1_INIT", "ref": "CONSTRAINT ck_checks_configuration_has_type CHECK (jsonb_path_exists(configuration, '$.type'))" }
+      ]
+    },
+    {
+      "id": "CON-DEV-05",
+      "title": "FK ordering in INSERT sequence",
+      "description": "INSERT order must respect foreign key constraints: users -> csi_systems -> checks -> schedules -> execution_results -> tags -> check_tags/csi_tags -> reports -> report_executions -> ui_tests -> ui_test_executions -> secrets.",
+      "traces": [
+        { "source": "V1_INIT", "ref": "FK declarations throughout schema" }
+      ]
+    },
+    {
+      "id": "CON-DEV-06",
+      "title": "Unique constraints must be respected",
+      "description": "Key uniqueness: users.sso_id UNIQUE, users.email UNIQUE (WHERE is_active), schedules.check_id UNIQUE, secrets.reference_id UNIQUE, tags.name UNIQUE.",
+      "traces": [
+        { "source": "V1_INIT", "ref": "UNIQUE indexes throughout schema" }
+      ]
+    },
+    {
+      "id": "CON-DEV-07",
+      "title": "Partition bootstrap runs before seed",
+      "description": "PartitionScheduler.bootstrap() runs on ApplicationReadyEvent and creates partitions for current + 2 months. However, Flyway runs before Spring context is ready. The seed SQL must only target partitions created by V1__init.sql (2026_04, 2026_05) OR use CURRENT_DATE arithmetic that naturally falls within the bootstrap window.",
+      "traces": [
+        { "source": "V1_INIT", "ref": "Bootstrap partitions: execution_results_2026_04, execution_results_2026_05" }
+      ]
+    }
+  ],
+
+  "assumptions_dependencies": [
+    {
+      "id": "AD-01",
+      "description": "Flyway supports spring.flyway.locations override per profile (documented in Flyway 9+ and Spring Boot 3.x)",
+      "risk": "LOW — well-documented feature"
+    },
+    {
+      "id": "AD-02",
+      "description": "Repeatable migrations (R__ prefix) run after all versioned migrations and re-run on checksum change",
+      "risk": "LOW — core Flyway feature since v4"
+    },
+    {
+      "id": "AD-03",
+      "description": "Zonky embedded Postgres starts with a clean database on each bootRun (no persistent state between runs)",
+      "risk": "LOW — verified behavior in local profile"
+    }
+  ],
+
+  "out_of_scope": [
+    {
+      "id": "OOS-01",
+      "description": "Integration check types (SPLUNK, GRAFANA, ITRS, APPDYNAMICS) — seed only HTTP and TCP checks since these are the only implemented executors"
+    },
+    {
+      "id": "OOS-02",
+      "description": "Performance testing data (large volumes for load testing) — this is demo/dev seed data, not stress test fixtures"
+    },
+    {
+      "id": "OOS-03",
+      "description": "Frontend mock data alignment — MSW handlers have separate mock data; this spec covers backend only"
+    },
+    {
+      "id": "OOS-04",
+      "description": "CI profile changes — the test profile uses Testcontainers and does not need seed data"
+    }
+  ]
+}

@@ -2,12 +2,15 @@ package com.citi.put.checks.checks;
 
 import com.citi.put.checks.checks.dto.CheckDto;
 import com.citi.put.checks.checks.dto.CheckRequest;
+import com.citi.put.checks.checks.dto.UpcomingCheckDto;
 import com.citi.put.checks.security.UserIdentity;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -73,6 +76,29 @@ public class CheckController {
   public ResponseEntity<Void> delete(@PathVariable UUID id, Authentication auth) {
     checkService.softDelete(id, auth);
     return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/{id}/pause")
+  @PreAuthorize(
+      "@csiOwnershipEvaluator.canWrite(authentication," + " @checkService.getCsiIdForCheck(#id))")
+  public ResponseEntity<CheckDto> pause(@PathVariable UUID id, Authentication auth) {
+    CheckDto paused = checkService.pause(id, auth);
+    return ResponseEntity.ok(paused);
+  }
+
+  @PostMapping("/{id}/resume")
+  @PreAuthorize(
+      "@csiOwnershipEvaluator.canWrite(authentication," + " @checkService.getCsiIdForCheck(#id))")
+  public ResponseEntity<CheckDto> resume(@PathVariable UUID id, Authentication auth) {
+    CheckDto resumed = checkService.resume(id, auth);
+    return ResponseEntity.ok(resumed);
+  }
+
+  @GetMapping("/upcoming")
+  public ResponseEntity<Map<String, Object>> upcoming(
+      @RequestParam(defaultValue = "20") int limit, @RequestParam(required = false) String csiId) {
+    List<UpcomingCheckDto> upcoming = checkService.getUpcoming(csiId, limit);
+    return ResponseEntity.ok(Map.of("data", upcoming, "total", upcoming.size()));
   }
 
   private Map<String, Object> toEnvelope(Page<CheckDto> page) {

@@ -1,67 +1,20 @@
-import axios, { AxiosAdapter, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { APP_CONFIG } from '@utils/constants/appConfig';
-import { isInlineMockModeEnabled } from '@services/mocks/mockMode';
-
-type InlineMockResolver = (config: InternalAxiosRequestConfig) => Promise<AxiosResponse | undefined>;
 
 class ApiClient {
   private instance: AxiosInstance;
-  private defaultAdapter: AxiosAdapter;
-  private inlineMockResolverPromise: Promise<InlineMockResolver> | null = null;
 
   constructor() {
-    this.defaultAdapter = axios.getAdapter(axios.defaults.adapter);
     this.instance = axios.create({
       baseURL: APP_CONFIG.apiBaseUrl,
       timeout: 30000,
+      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    this.setupTransportAdapter();
     this.setupInterceptors();
-  }
-
-  private setupTransportAdapter() {
-    this.instance.defaults.adapter = async (config) => {
-      const inlineResponse = await this.tryResolveInlineMock(config);
-      if (inlineResponse) {
-        return inlineResponse;
-      }
-      return this.defaultAdapter(config);
-    };
-  }
-
-  private async getInlineMockResolver(): Promise<InlineMockResolver> {
-    if (!this.inlineMockResolverPromise) {
-      this.inlineMockResolverPromise = import('@services/mocks/inlineMockAdapter').then(
-        ({ resolveInlineMockResponse }) => resolveInlineMockResponse
-      );
-    }
-    return this.inlineMockResolverPromise;
-  }
-
-  private async tryResolveInlineMock(
-    config: InternalAxiosRequestConfig
-  ): Promise<AxiosResponse | undefined> {
-    if (!APP_CONFIG.enableMSW || typeof window === 'undefined' || !isInlineMockModeEnabled()) {
-      return undefined;
-    }
-
-    try {
-      const resolveInlineMockResponse = await this.getInlineMockResolver();
-      return resolveInlineMockResponse(config);
-    } catch (error) {
-      // Preserve HTTP errors from mock handlers (status-based failures)
-      if (axios.isAxiosError(error)) {
-        throw error;
-      }
-      if (APP_CONFIG.debugMode) {
-        console.warn('Inline mock adapter failed, falling back to network adapter.', error);
-      }
-      return undefined;
-    }
   }
 
   private setupInterceptors() {
@@ -74,36 +27,9 @@ class ApiClient {
           config.headers.Authorization = `Bearer ${token}`;
         }
 
-        // Inject MSW debug params for development scenarios
-        try {
-          const isDev = typeof window !== 'undefined' && (import.meta as any).env?.DEV;
-          if (isDev && APP_CONFIG.debugMode) {
-            const slow = window.localStorage.getItem('__msw_debug_slow');
-            const fail = window.localStorage.getItem('__msw_debug_fail');
-            const empty = window.localStorage.getItem('__msw_debug_empty');
-            if (slow || fail || empty) {
-              // Normalize params to object
-              let paramsObj: Record<string, any> = {};
-              if (config.params instanceof URLSearchParams) {
-                config.params.forEach((value, key) => {
-                  paramsObj[key] = value;
-                });
-              } else if (typeof config.params === 'object' && config.params !== null) {
-                paramsObj = { ...config.params } as Record<string, any>;
-              }
-              if (slow && !Number.isNaN(Number(slow))) paramsObj.__slow = slow;
-              if (fail && !Number.isNaN(Number(fail))) paramsObj.__fail = fail;
-              if (empty === '1' || empty === 'true') paramsObj.__empty = '1';
-              config.params = paramsObj;
-            }
-          }
-        } catch {
-          // no-op if localStorage not available
-        }
-
         // Log requests in development
         if (APP_CONFIG.debugMode) {
-          console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
+          console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`, {
             params: config.params,
             data: config.data,
           });
@@ -122,7 +48,7 @@ class ApiClient {
       (response: AxiosResponse) => {
         // Log responses in development
         if (APP_CONFIG.debugMode) {
-          console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
+          console.log(`API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
             status: response.status,
             data: response.data,
           });
@@ -179,7 +105,6 @@ class ApiClient {
 
   private getAuthToken(): string | null {
     // In a real application, this would get the token from auth context or storage
-    // For now, return null as we're using MSW
     return null;
   }
 

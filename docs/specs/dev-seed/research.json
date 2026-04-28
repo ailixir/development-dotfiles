@@ -1,0 +1,175 @@
+{
+  "$schema": "aios://spec-pipeline/research/v1",
+  "spec_id": "dev-seed-v1",
+  "phase": "research",
+  "generated_by": "@analyst (Alex)",
+  "generated_at": "2026-04-27",
+  "inputs": {
+    "requirements_file": "./requirements.json",
+    "complexity_file": "./complexity.json"
+  },
+
+  "research_questions": [
+    "RQ-01: What are the available mechanisms for profile-specific seed data in Spring Boot 3 + Flyway?",
+    "RQ-02: How do Flyway repeatable migrations interact with versioned migrations and Spring profile-scoped locations?",
+    "RQ-03: What is the best idempotency strategy for seed data in a partitioned PostgreSQL schema?",
+    "RQ-04: How to write partition-safe INSERTs that work regardless of which month the seed runs?"
+  ],
+
+  "findings": [
+    {
+      "id": "RF-01",
+      "question": "RQ-01",
+      "title": "Three viable mechanisms for profile-scoped seed data",
+      "summary": "Spring Boot 3 + Flyway offers three approaches: (A) Flyway repeatable migrations with profile-scoped spring.flyway.locations, (B) Spring ApplicationRunner with @Profile annotation, (C) spring.sql.init.data-locations. Option A is recommended by Flyway documentation for environment-specific data. Option C is discouraged by Spring when Flyway is active.",
+      "details": {
+        "option_a": {
+          "name": "Flyway Repeatable Migration (R__ prefix)",
+          "mechanism": "spring.flyway.locations adds a second directory only in the target profile. Files with R__ prefix run after all V* migrations. Re-run on checksum change.",
+          "pros": [
+            "Native Flyway mechanism — zero custom code",
+            "Runs before application context (JPA validation succeeds)",
+            "Profile isolation via spring.flyway.locations (additive per profile)",
+            "Pure SQL — no Java code, no compile-time coupling",
+            "Checksum tracking — Flyway detects changes and re-applies"
+          ],
+          "cons": [
+            "SQL must be kept in sync with schema changes manually",
+            "Repeatable migrations lack version ordering (alphabetical by description)"
+          ],
+          "spring_boot_docs_ref": "Spring Boot 3.3.x — Flyway auto-configuration honors spring.flyway.locations property per active profile"
+        },
+        "option_b": {
+          "name": "Spring ApplicationRunner with @Profile(\"dev\")",
+          "mechanism": "@Component @Profile(\"dev\") class DevSeedRunner implements ApplicationRunner. Uses JPA repositories to insert entities programmatically.",
+          "pros": [
+            "Type-safe — uses existing entity classes",
+            "Auto-adapts to entity refactors at compile time",
+            "Can build complex object graphs with builders"
+          ],
+          "cons": [
+            "Runs after full Spring context initialization (slower startup)",
+            "Requires @Order to ensure Flyway completes first",
+            "Mixes data seeding concern with application startup",
+            "Must handle Hibernate managed lifecycle (flush, detach, etc.)",
+            "Execution results partition routing depends on JPA configuration"
+          ]
+        },
+        "option_c": {
+          "name": "spring.sql.init.data-locations",
+          "mechanism": "Spring's native SQL initialization via spring.sql.init.mode=always and spring.sql.init.data-locations=classpath:data-dev.sql",
+          "pros": [
+            "Convention-based, minimal config"
+          ],
+          "cons": [
+            "Spring documentation explicitly warns against using with Flyway (ordering not guaranteed)",
+            "No checksum tracking — re-runs on every startup unless gated",
+            "Does not participate in Flyway's migration lifecycle"
+          ],
+          "spring_boot_docs_ref": "Spring Boot docs: 'We don't recommend using multiple data source initialization technologies' — refers to mixing sql.init with Flyway"
+        }
+      },
+      "recommendation": "Option A (Flyway Repeatable Migration)",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "RF-02",
+      "question": "RQ-02",
+      "title": "Flyway repeatable migration execution semantics",
+      "summary": "Flyway executes all pending versioned (V*) migrations in version order, THEN all pending repeatable (R__) migrations in alphabetical order by description. A repeatable migration is 'pending' when its checksum differs from the last recorded execution. This guarantees schema is fully current before seed data runs.",
+      "details": {
+        "execution_order": "V1 → V2 → V3 → V4 → V5 → R__dev_sample_data",
+        "re_run_trigger": "Checksum change (any edit to the SQL file content)",
+        "profile_scoping": "spring.flyway.locations is a list. The dev profile overrides it to include both classpath:db/migration (versioned) and classpath:db/seed/dev (repeatable seed). Other profiles only see classpath:db/migration.",
+        "important_note": "When the dev profile OVERRIDES spring.flyway.locations, it must INCLUDE the base migration path. Otherwise, versioned migrations won't run. The override replaces, not appends."
+      },
+      "confidence": "HIGH"
+    },
+    {
+      "id": "RF-03",
+      "question": "RQ-03",
+      "title": "Idempotency strategies for seed data",
+      "summary": "Three approaches: (1) DELETE-then-INSERT in a transaction (clean slate), (2) INSERT ON CONFLICT DO NOTHING (additive), (3) UPSERT ON CONFLICT DO UPDATE (replace). For ephemeral Zonky databases, option 1 is simplest and cleanest. For persistent databases, option 2 or 3 is safer.",
+      "details": {
+        "strategy_1_clean_slate": {
+          "sql_pattern": "BEGIN; DELETE FROM child_tables; DELETE FROM parent_tables; INSERT INTO parent_tables ...; INSERT INTO child_tables ...; COMMIT;",
+          "pros": [
+            "Guarantees exact expected state on every startup",
+            "Simplest to reason about — no conditional logic",
+            "DELETE order respects FK (children first, then parents)"
+          ],
+          "cons": [
+            "Destroys any user-created data in the dev database",
+            "Acceptable because Zonky database is ephemeral"
+          ],
+          "use_when": "Ephemeral database (Zonky) — every bootRun gets a fresh DB anyway"
+        },
+        "strategy_2_additive": {
+          "sql_pattern": "INSERT INTO ... ON CONFLICT (pk) DO NOTHING;",
+          "pros": [
+            "Preserves user-created data alongside seed data",
+            "Safe for persistent databases"
+          ],
+          "cons": [
+            "Does not update existing seed rows if seed data changes",
+            "Seed modifications only visible after manual DELETE"
+          ],
+          "use_when": "Persistent database where user data coexists with seed data"
+        },
+        "strategy_3_upsert": {
+          "sql_pattern": "INSERT INTO ... ON CONFLICT (pk) DO UPDATE SET col1=EXCLUDED.col1, ...;",
+          "pros": [
+            "Updates seed data while preserving user-created data",
+            "Most flexible"
+          ],
+          "cons": [
+            "Most verbose SQL — every column listed in SET",
+            "Overkill for ephemeral databases"
+          ],
+          "use_when": "Persistent shared dev database with evolving seed data"
+        }
+      },
+      "recommendation": "Strategy 2 (INSERT ON CONFLICT DO NOTHING) — works for both ephemeral Zonky and hypothetical persistent Postgres. Avoids destructive DELETEs while keeping SQL simple.",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "RF-04",
+      "question": "RQ-04",
+      "title": "Partition-safe timestamp generation in SQL",
+      "summary": "Use date_trunc('month', CURRENT_TIMESTAMP) as the anchor for current-month data and subtract INTERVAL '1 month' for previous month. Adding random offsets within the month creates realistic temporal distribution. PartitionScheduler.bootstrap() creates partitions for current + 2 months on ApplicationReadyEvent, which runs AFTER Flyway — but V1 bootstraps 2026_04 and 2026_05 inline, so the seed SQL can safely target any month from April 2026 forward.",
+      "details": {
+        "current_month_anchor": "date_trunc('month', CURRENT_TIMESTAMP)",
+        "safe_range": "From date_trunc('month', CURRENT_TIMESTAMP) TO date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '1 month'",
+        "previous_month_note": "Previous month partitions exist only if PartitionScheduler.bootstrap() has run (ApplicationReadyEvent). Since Flyway runs BEFORE ApplicationReadyEvent, the seed SQL cannot reliably insert into 'last month' — the partition may not exist yet. HOWEVER, V1__init.sql hardcodes 2026_04 and 2026_05 partitions, and bootstrap() creates current + 2 months. So if today is April 2026 or later and bootstrap has run in any prior startup, the partition exists.",
+        "safe_approach": "Only seed execution_results for the CURRENT month. The seed SQL runs after V1 (which creates 2026_04 and 2026_05) but before bootstrap(). To avoid partition-not-found errors, constrain all started_at values to fall within V1's hardcoded partitions OR use current-month only.",
+        "dynamic_approach": "Use generate_series + CURRENT_TIMESTAMP to distribute data across the most recent 30 days, which naturally falls within the current-month partition. For multi-month spread, the PartitionScheduler.bootstrap() on ApplicationReadyEvent ensures current + 2 future months exist — so after first startup, the seed can target a wider range on subsequent runs.",
+        "recommended_pattern": "Seed for current month only (safe on first run). PartitionScheduler.bootstrap() will create additional partitions, and the R__ migration re-runs on checksum change — so updating the seed later is trivial."
+      },
+      "confidence": "HIGH"
+    },
+    {
+      "id": "RF-05",
+      "question": "RQ-01",
+      "title": "Existing precedent: V3__check_templates_seed.sql",
+      "summary": "The project already seeds data via Flyway. V3 creates check_templates and inserts 7 rows in a versioned migration. This establishes the pattern of using Flyway for data population. The difference: V3 is versioned (runs once, all profiles) while our seed should be repeatable (dev-only, re-runs on change).",
+      "details": {
+        "pattern_in_v3": "CREATE TABLE IF NOT EXISTS + INSERT with static string PKs in a versioned migration",
+        "difference": "V3 seeds reference data needed in ALL environments (templates). Dev seed is environment-specific.",
+        "alignment": "Using Flyway for both schema AND data population is an established pattern in this codebase."
+      },
+      "confidence": "HIGH"
+    },
+    {
+      "id": "RF-06",
+      "question": "RQ-03",
+      "title": "Trigger interaction with seed data",
+      "summary": "V1 defines two triggers: (1) update_updated_at_column (BEFORE UPDATE) and (2) update_check_status_from_execution (AFTER INSERT on execution_results). When seeding execution_results, trigger (2) will fire and propagate status + last_execution_at to the parent check. This means: insert execution_results AFTER checks, and the final execution_result for each check should have the desired 'current' status.",
+      "details": {
+        "implication": "The order of execution_results inserts matters. The LAST inserted result per check_id determines the check's visible status via the trigger.",
+        "strategy": "Insert execution_results sorted by started_at ASC within each check_id. The last row (most recent) propagates the desired current status to the check.",
+        "bonus": "No need to manually SET checks.status — the trigger handles it. INSERT checks with status='PENDING' and let execution_results trigger update it."
+      },
+      "confidence": "HIGH"
+    }
+  ]
+}

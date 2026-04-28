@@ -2,6 +2,7 @@ package com.citi.put.checks.checks;
 
 import com.citi.put.checks.checks.entity.Check;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,4 +53,28 @@ public interface CheckRepository extends JpaRepository<Check, UUID> {
       @Param("createdBy") String createdBy,
       @Param("search") String search,
       Pageable pageable);
+
+  @Query(
+      """
+      SELECT c.status, COUNT(c)
+      FROM Check c
+      WHERE c.csiId = :csiId
+      GROUP BY c.status
+      """)
+  List<Object[]> countByStatusForCsi(@Param("csiId") String csiId);
+
+  @Query(
+      value =
+          """
+          SELECT CAST(c.id AS VARCHAR), c.name, s.next_execution_at, c.csi_name
+          FROM schedules s
+          JOIN checks c ON c.id = s.check_id
+          WHERE s.enabled = true
+            AND s.next_execution_at IS NOT NULL
+            AND c.deleted_at IS NULL
+            AND (:csiId IS NULL OR c.csi_id = :csiId)
+          ORDER BY s.next_execution_at ASC
+          """,
+      nativeQuery = true)
+  List<Object[]> findUpcomingChecks(@Param("csiId") String csiId, Pageable pageable);
 }

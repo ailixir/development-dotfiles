@@ -1,0 +1,230 @@
+#
+# Spec Pipeline Phase 6 — Implementation Plan
+# Owner: @architect (Aria)
+# Inputs:
+#   - spec.md v1 (working-tree) — APPROVED 4.48/5
+#   - requirements.json — 8 FR + 5 NFR + 7 CON
+#   - research.json — 6 findings
+#   - critique.json — 6 issues (all minor/info, 2 conditions)
+# Schema: aios://spec-pipeline/implementation/v1
+#
+
+spec_id: dev-seed-v1
+phase: plan
+generated_by: "@architect (Aria)"
+generated_at: "2026-04-27"
+
+complexity_classification: SIMPLE
+total_score: "7/25"
+
+# ─────────────────────────────────────────────────────────────
+# CRITIQUE CONDITIONS — resolved before implementation starts
+# ─────────────────────────────────────────────────────────────
+
+critique_resolutions:
+  - condition: "COMP-01: Remove 'role' from users seed data"
+    resolution: "Confirmed — V1 users table has no role column. Seed SQL will use only: id, sso_id, name, email, department, created_at, last_login, is_active."
+
+  - condition: "FEAS-01: Partition availability on first startup post-May 2026"
+    resolution: |
+      Option A selected — the seed SQL will include a defensive partition creation block
+      before inserting execution_results:
+
+        DO $$
+        DECLARE
+          partition_name TEXT;
+          range_start   DATE;
+          range_end     DATE;
+        BEGIN
+          partition_name := 'execution_results_' || to_char(CURRENT_DATE, 'YYYY_MM');
+          range_start    := date_trunc('month', CURRENT_DATE);
+          range_end      := date_trunc('month', CURRENT_DATE + INTERVAL '1 month');
+
+          EXECUTE format(
+            'CREATE TABLE IF NOT EXISTS %I PARTITION OF execution_results FOR VALUES FROM (%L) TO (%L)',
+            partition_name, range_start, range_end
+          );
+        END $$;
+
+      This is safe because:
+      - CREATE TABLE IF NOT EXISTS is idempotent (no-op if PartitionScheduler already created it)
+      - Uses the same naming convention as PartitionManager.java (execution_results_YYYY_MM)
+      - Runs inside the same transaction as the seed data
+
+# ─────────────────────────────────────────────────────────────
+# IMPLEMENTATION TASKS
+# ─────────────────────────────────────────────────────────────
+
+story:
+  title: "Dev profile with sample data population for development and demos"
+  scope: "Cross-cutting (Developer Experience)"
+  size: M
+  priority: HIGH
+  depends_on: []
+  branch: "feat/dev-seed-data"
+
+tasks:
+  - id: TASK-01
+    title: "Create application-dev.yml"
+    size: S
+    estimate_hours: 0.25
+    description: |
+      Create backend/src/main/resources/application-dev.yml with:
+      - spring.config.activate.on-profile: dev
+      - spring.profiles.include: local (inherits Zonky)
+      - spring.flyway.locations: [classpath:db/migration, classpath:db/seed/dev]
+      - checks.scheduling.dispatcher-enabled: false
+      - logging.level.com.citi.put.checks: DEBUG
+    files:
+      - path: backend/src/main/resources/application-dev.yml
+        action: CREATE
+    traces: [FR-DEV-01, FR-DEV-02, FR-DEV-05]
+    acceptance_criteria:
+      - "File exists at correct path"
+      - "on-profile: dev activates only for dev profile"
+      - "profiles.include: local ensures Zonky DataSource"
+      - "flyway.locations includes BOTH db/migration AND db/seed/dev"
+
+  - id: TASK-02
+    title: "Create seed directory and R__dev_sample_data.sql"
+    size: L
+    estimate_hours: 3.0
+    description: |
+      Create backend/src/main/resources/db/seed/dev/R__dev_sample_data.sql with:
+
+      1. Header comment with purpose, safety notes, trace refs
+      2. Defensive partition creation (FEAS-01 resolution)
+      3. Users: 5 rows (sso_id, name, email, department, is_active — NO role column per COMP-01)
+      4. CSI Systems: 3 rows (CRITICAL/HIGH/MEDIUM, varied health stories)
+      5. Checks: 15 rows (8 HTTP + 4 TCP + 3 UI_TEST type markers) with valid JSONB configs
+      6. Schedules: 12 rows (various frequencies, cron expressions)
+      7. Tags: 8 rows
+      8. Check Tags: ~20 junction rows
+      9. CSI Tags: ~6 junction rows
+      10. Reports: 3 rows with JSONB schedule
+      11. Report Executions: 9 rows
+      12. Secrets: 2 rows (encrypted_value NULL)
+      13. UI Tests: 3 rows with JSONB steps/variables
+      14. UI Test Executions: 6 rows
+      15. Execution Results: ~450 rows via generate_series with weighted status arrays
+      16. REFRESH MATERIALIZED VIEW CONCURRENTLY csi_metrics_current
+
+      All INSERTs use ON CONFLICT (pk) DO NOTHING for idempotency.
+      FK ordering: users → csi → checks → schedules → tags → junctions → reports → report_execs → secrets → ui_tests → ui_test_execs → execution_results → REFRESH VIEW.
+      Execution results inserted in started_at ASC order per check to ensure trigger propagates correct final status.
+    files:
+      - path: backend/src/main/resources/db/seed/dev/R__dev_sample_data.sql
+        action: CREATE
+    traces: [FR-DEV-03, FR-DEV-04, FR-DEV-06, FR-DEV-07, FR-DEV-08, CON-DEV-01 through CON-DEV-07]
+    acceptance_criteria:
+      - "File uses R__ prefix (repeatable migration)"
+      - "All 15 entity types have seed data"
+      - "JSONB configurations match HttpConfiguration/TcpConfiguration contracts"
+      - "All FK constraints satisfied by insertion order"
+      - "ON CONFLICT DO NOTHING on every INSERT"
+      - "Execution results use CURRENT_TIMESTAMP arithmetic (no hardcoded dates)"
+      - "Defensive partition creation before execution_results INSERT"
+      - "Materialized view refreshed at end"
+      - "No real Citi hostnames, names, or credentials"
+
+  - id: TASK-03
+    title: "Verify dev profile startup"
+    size: S
+    estimate_hours: 0.5
+    description: |
+      Run: ./gradlew bootRun --args='--spring.profiles.active=dev'
+      Verify:
+      - Application starts successfully
+      - Flyway logs show R__dev_sample_data.sql execution
+      - GET /api/v1/csi returns 3 CSI systems
+      - GET /api/v1/checks returns 15 checks
+      - Swagger UI accessible at /swagger-ui.html
+      - Health endpoint returns UP
+    traces: [FR-DEV-01, NFR-DEV-01]
+    acceptance_criteria:
+      - "Application starts in < 15 seconds (Zonky + Flyway + seed)"
+      - "All API endpoints return seeded data"
+      - "No errors in application logs"
+
+  - id: TASK-04
+    title: "Verify profile isolation"
+    size: S
+    estimate_hours: 0.25
+    description: |
+      Verify that the local, test, staging, and prod profiles do NOT load seed data:
+      - ./gradlew bootRun (default=local): No R__dev_sample_data in Flyway log
+      - ./gradlew test: No R__dev_sample_data in Flyway log
+      - Check application-staging.yml and application-prod.yml don't reference db/seed
+    traces: [FR-DEV-05]
+    acceptance_criteria:
+      - "local profile: Flyway runs V1-V5 only"
+      - "test profile: Flyway runs V1-V5 only"
+      - "No db/seed path in any non-dev profile config"
+
+  - id: TASK-05
+    title: "Run ./gradlew check (quality gate)"
+    size: S
+    estimate_hours: 0.25
+    description: |
+      Run full quality gate:
+      - ./gradlew check
+      Verify: Spotless, Checkstyle, SpotBugs, JaCoCo, RDS-parity lint all pass.
+      New files (YAML + SQL) are not subject to Java quality gates, but must not
+      break any existing checks.
+    traces: [NFR-DEV-03]
+    acceptance_criteria:
+      - "./gradlew check passes with exit code 0"
+      - "No regressions in existing test suite"
+
+  - id: TASK-06
+    title: "Update backend/README.md"
+    size: S
+    estimate_hours: 0.25
+    description: |
+      Add a "Dev Profile (Sample Data)" section to backend/README.md with:
+      - One-liner command: ./gradlew bootRun --args='--spring.profiles.active=dev'
+      - What it does: Starts with Zonky embedded Postgres + pre-populated sample data
+      - What's included: 3 CSIs, 15 checks, execution history, reports, tags
+      - When to use: Development, demos, presentations
+    files:
+      - path: backend/README.md
+        action: MODIFY
+    traces: [NFR-DEV-05]
+    acceptance_criteria:
+      - "README includes dev profile section"
+      - "Command is copy-pasteable"
+      - "Brief description of what data is seeded"
+
+# ─────────────────────────────────────────────────────────────
+# EXECUTION PLAN
+# ─────────────────────────────────────────────────────────────
+
+execution_order:
+  - step: 1
+    tasks: [TASK-01]
+    description: "Create profile configuration"
+    parallel: false
+
+  - step: 2
+    tasks: [TASK-02]
+    description: "Create seed SQL (bulk of the work)"
+    parallel: false
+
+  - step: 3
+    tasks: [TASK-03, TASK-04, TASK-05]
+    description: "Verification — can run in parallel"
+    parallel: true
+
+  - step: 4
+    tasks: [TASK-06]
+    description: "Documentation update"
+    parallel: false
+
+total_estimate_hours: 4.5
+
+exit_gates:
+  - "Dev profile starts successfully with all seeded data visible via API"
+  - "Local and test profiles unaffected (no seed data loaded)"
+  - "./gradlew check passes"
+  - "README documents the dev profile usage"
+  - "No real Citi data, hostnames, or credentials in seed SQL"

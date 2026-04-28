@@ -48,8 +48,6 @@ export type DeploymentMode = 'standalone' | 'federated';
 
 export interface AppConfig {
   apiBaseUrl: string;
-  enableMSW: boolean;
-  allowInsecureMswFallback: boolean;
   debugMode: boolean;
   version: string;
   buildDate: string;

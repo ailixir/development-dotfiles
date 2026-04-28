@@ -1,6 +1,8 @@
 package com.citi.put.checks.csi;
 
 import com.citi.put.checks.csi.dto.CsiDto;
+import com.citi.put.checks.csi.dto.CsiHealthSummary;
+import com.citi.put.checks.csi.dto.CsiSearchResult;
 import com.citi.put.checks.security.UserIdentity;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,13 @@ public class CsiController {
     return ResponseEntity.ok(toEnvelope(result));
   }
 
+  @GetMapping("/search")
+  public ResponseEntity<List<CsiSearchResult>> search(
+      @RequestParam("q") String query,
+      @RequestParam(defaultValue = "10") int limit) {
+    return ResponseEntity.ok(csiService.search(query, Math.min(limit, 50)));
+  }
+
   @GetMapping("/{id}")
   @PreAuthorize("@csiOwnershipEvaluator.canRead(authentication, #id)")
   public ResponseEntity<CsiDto> findById(@PathVariable String id) {
@@ -48,6 +57,11 @@ public class CsiController {
       return ResponseEntity.notFound().build();
     }
     return ResponseEntity.ok(dto);
+  }
+
+  @GetMapping("/{id}/health")
+  public ResponseEntity<CsiHealthSummary> health(@PathVariable String id) {
+    return ResponseEntity.ok(csiService.getHealth(id));
   }
 
   @GetMapping("/{id}/checks")

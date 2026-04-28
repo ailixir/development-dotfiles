@@ -35,6 +35,7 @@ dependencies {
     implementation("io.github.resilience4j:resilience4j-spring-boot3:2.2.0")
     implementation("com.github.ben-manes.caffeine:caffeine")
 
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
     implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")

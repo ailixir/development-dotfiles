@@ -29,9 +29,7 @@ const getBoolEnv = (key: string, defaultTrue = true): boolean => {
 };
 
 export const APP_CONFIG: AppConfig = {
-  apiBaseUrl: getStringEnv('VITE_API_BASE_URL', '/api') || '/api',
-  enableMSW: getBoolEnv('VITE_ENABLE_MSW', true),
-  allowInsecureMswFallback: getBoolEnv('VITE_ALLOW_INSECURE_MSW_FALLBACK', true),
+  apiBaseUrl: getStringEnv('VITE_API_BASE_URL', '/api/v1') || '/api/v1',
   debugMode: getStringEnv('VITE_DEBUG_MODE') === 'true',
   version: '1.0.0',
   buildDate: new Date().toISOString(),
@@ -40,9 +38,11 @@ export const APP_CONFIG: AppConfig = {
 export const API_ENDPOINTS = {
   // Checks endpoints
   CHECKS: '/checks',
+  CHECKS_BULK: '/checks/_bulk',
   CHECK_BY_ID: (id: string) => `/checks/${id}`,
   EXECUTE_CHECK: (id: string) => `/checks/${id}/execute`,
   CHECK_EXECUTIONS: (id: string) => `/checks/${id}/executions`,
+  CHECK_HISTORY: (id: string) => `/checks/${id}/history`,
 
   // CSI endpoints
   CSI: '/csi',

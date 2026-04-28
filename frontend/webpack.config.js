@@ -76,8 +76,6 @@ const config = {
       filename: 'remoteEntry.js',
       exposes: {
         './Module': './src/ChecksModule',
-        // Expose MSW handlers so the host can start mocks at its origin
-        './mocks': './src/services/mocks/handlers/index.ts',
       },
       shared: {
         react: { singleton: true, requiredVersion: false, strictVersion: false },
@@ -88,7 +86,6 @@ const config = {
         '@mui/icons-material': { singleton: true, requiredVersion: '^5.15.0' },
         '@emotion/react': { singleton: true, requiredVersion: '^11.11.0' },
         '@emotion/styled': { singleton: true, requiredVersion: '^11.11.0' },
-        msw: { singleton: true, requiredVersion: false },
       },
     }),
     new HtmlWebpackPlugin({
@@ -121,6 +118,13 @@ const config = {
     compress: true,
     headers: { 'Access-Control-Allow-Origin': '*' },
     static: { directory: path.join(process.cwd(), 'public'), publicPath: '/' },
+    proxy: [
+      {
+        context: ['/api/v1'],
+        target: process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    ],
   },
   optimization: {
     // Module Federation remotes work best without splitChunks to avoid

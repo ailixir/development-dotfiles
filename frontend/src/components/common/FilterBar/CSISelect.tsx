@@ -9,7 +9,6 @@ import {
   Domain,
 } from '@mui/icons-material';
 import { CSI } from '../../../types/csi/csiTypes';
-import { getCSIById } from '../../../data/mockCSIData';
 
 interface CSISelectProps {
   csis: CSI[];
@@ -24,7 +23,7 @@ const CSISelect: React.FC<CSISelectProps> = ({
   onCSIChange,
   loading = false
 }) => {
-  const selectedCSIData = selectedCSI ? getCSIById(selectedCSI) : null;
+  const selectedCSIData = selectedCSI ? csis.find(c => c.id === selectedCSI) ?? null : null;
 
   const handleCSIChange = (_event: any, newValue: CSI | null) => {
     onCSIChange(newValue?.id || null);

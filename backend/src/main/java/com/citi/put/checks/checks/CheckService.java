@@ -2,10 +2,13 @@ package com.citi.put.checks.checks;
 
 import com.citi.put.checks.checks.dto.CheckDto;
 import com.citi.put.checks.checks.dto.CheckRequest;
+import com.citi.put.checks.checks.dto.UpcomingCheckDto;
 import com.citi.put.checks.checks.entity.Check;
 import com.citi.put.checks.csi.CsiRepository;
 import com.citi.put.checks.scheduling.ScheduleRepository;
+import com.citi.put.checks.scheduling.ScheduleService;
 import com.citi.put.checks.scheduling.dto.ScheduleDto;
+import com.citi.put.checks.scheduling.entity.Schedule;
 import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
@@ -33,16 +36,19 @@ public class CheckService {
   private final CsiRepository csiRepository;
   private final CsiOwnershipEvaluator ownershipEvaluator;
   private final ScheduleRepository scheduleRepository;
+  private final ScheduleService scheduleService;
 
   public CheckService(
       CheckRepository checkRepository,
       CsiRepository csiRepository,
       CsiOwnershipEvaluator ownershipEvaluator,
-      ScheduleRepository scheduleRepository) {
+      ScheduleRepository scheduleRepository,
+      ScheduleService scheduleService) {
     this.checkRepository = checkRepository;
     this.csiRepository = csiRepository;
     this.ownershipEvaluator = ownershipEvaluator;
     this.scheduleRepository = scheduleRepository;
+    this.scheduleService = scheduleService;
   }
 
   @Transactional
@@ -149,6 +155,70 @@ public class CheckService {
             .orElseThrow(() -> new IllegalArgumentException("Check not found: " + id));
     requireWrite(auth, check.getCsiId());
     check.setDeletedAt(Instant.now());
+  }
+
+  @Transactional
+  public CheckDto pause(UUID id, Authentication auth) {
+    Check check =
+        checkRepository
+            .findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Check not found: " + id));
+    requireWrite(auth, check.getCsiId());
+
+    Schedule schedule =
+        scheduleRepository
+            .findByCheckId(id)
+            .orElseThrow(() -> new IllegalArgumentException("No schedule found for check: " + id));
+    scheduleService.setEnabled(schedule.getId(), false, auth);
+
+    ScheduleDto scheduleDto =
+        scheduleRepository.findByCheckId(id).map(ScheduleDto::from).orElse(null);
+    return CheckDto.from(check, scheduleDto);
+  }
+
+  @Transactional
+  public CheckDto resume(UUID id, Authentication auth) {
+    Check check =
+        checkRepository
+            .findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Check not found: " + id));
+    requireWrite(auth, check.getCsiId());
+
+    Schedule schedule =
+        scheduleRepository
+            .findByCheckId(id)
+            .orElseThrow(() -> new IllegalArgumentException("No schedule found for check: " + id));
+    scheduleService.setEnabled(schedule.getId(), true, auth);
+
+    ScheduleDto scheduleDto =
+        scheduleRepository.findByCheckId(id).map(ScheduleDto::from).orElse(null);
+    return CheckDto.from(check, scheduleDto);
+  }
+
+  @Transactional(readOnly = true)
+  public List<UpcomingCheckDto> getUpcoming(String csiId, int limit) {
+    int effectiveLimit = Math.min(limit, 100);
+    Pageable pageable = PageRequest.of(0, effectiveLimit);
+
+    List<Object[]> rows = checkRepository.findUpcomingChecks(csiId, pageable);
+
+    return rows.stream()
+        .map(
+            row ->
+                new UpcomingCheckDto(
+                    row[0].toString(),
+                    (String) row[1],
+                    ((java.sql.Timestamp) row[2]).toInstant(),
+                    (String) row[3]))
+        .collect(Collectors.toList());
+  }
+
+  /** Returns the CSI ID associated with a given check. Used by @PreAuthorize SpEL expressions. */
+  public String getCsiIdForCheck(UUID checkId) {
+    return checkRepository
+        .findById(checkId)
+        .map(Check::getCsiId)
+        .orElseThrow(() -> new IllegalArgumentException("Check not found: " + checkId));
   }
 
   private void requireRead(Authentication auth, String csiId) {

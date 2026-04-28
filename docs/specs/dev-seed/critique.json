@@ -1,0 +1,156 @@
+{
+  "$schema": "aios://spec-pipeline/critique/v1",
+  "spec_id": "dev-seed-v1",
+  "phase": "critique",
+  "generated_by": "@qa (Quinn)",
+  "generated_at": "2026-04-27",
+  "inputs": {
+    "spec_file": "./spec.md",
+    "spec_commit": "working-tree",
+    "verified_against": [
+      "./requirements.json",
+      "./complexity.json",
+      "./research.json",
+      "../../../backend/src/main/resources/db/migration/V1__init.sql",
+      "../../../backend/src/main/resources/db/migration/V2__schedule_next_execution.sql",
+      "../../../backend/src/main/resources/db/migration/V3__check_templates_seed.sql",
+      "../../../backend/src/main/resources/db/migration/V4__secrets_encrypted_value.sql",
+      "../../../backend/src/main/resources/db/migration/V5__story_3_schema_additions.sql",
+      "../../../backend/src/main/resources/application.yml",
+      "../../../backend/src/main/resources/application-local.yml"
+    ]
+  },
+
+  "methodology": {
+    "approach": "Independent review of spec.md against all requirements, constraints, the live schema (V1-V5), and existing profile configuration. Cross-verified Flyway repeatable migration semantics against Spring Boot 3.3 + Flyway 9 documentation. Validated JSONB shapes against entity source code (HttpConfiguration.java, TcpConfiguration.java).",
+    "reviewer_bias_disclosure": "Reviewer has not participated in Phases 1-4 and is incentivized to find gaps."
+  },
+
+  "dimensions": {
+    "accuracy": {
+      "score": 4.5,
+      "max": 5.0,
+      "summary": "Spec accurately reflects the schema, profile mechanics, and Flyway semantics. All trace references verified. Minor clarification needed on REFRESH MATERIALIZED VIEW CONCURRENTLY.",
+      "positives": [
+        "JSONB configuration shapes (§5.3) exactly match HttpConfiguration and TcpConfiguration Java records — verified field names, types, and defaults.",
+        "FK insertion order (§6.1) correctly sequences all 15 entity types respecting every REFERENCES clause in V1-V5.",
+        "Profile inheritance chain (§7.2) correctly identifies that spring.flyway.locations in dev REPLACES (not appends) the base — RF-02 is accurate per Spring Boot docs.",
+        "Trigger interaction analysis (§5.5, RF-06) is correct: execution_results INSERT trigger propagates status to checks. Inserting in started_at ASC order gives the right final state.",
+        "Partition safety analysis (§5.5, RF-04) correctly identifies the constraint: Flyway runs before ApplicationReadyEvent, so only V1-hardcoded partitions are guaranteed."
+      ],
+      "issues": [
+        {
+          "id": "ACC-01",
+          "severity": "minor",
+          "section": "§6.4",
+          "finding": "REFRESH MATERIALIZED VIEW CONCURRENTLY requires at least one row in csi_metrics_current to exist (PG 15 requirement for CONCURRENTLY with a unique index). On first run against empty DB, this will fail if no data was seeded. Since the seed inserts CSI systems, this is fine — but the spec should note the dependency explicitly.",
+          "recommendation": "Add a note that the REFRESH must run AFTER CSI + checks are inserted. Already the case per §6.1 ordering, but worth making explicit to prevent future reordering errors."
+        },
+        {
+          "id": "ACC-02",
+          "severity": "minor",
+          "section": "§5.1",
+          "finding": "V1 schema defines users.name (VARCHAR 255) but the spec uses 'full_name' in the table header. The actual column is 'name' per V1__init.sql line 16.",
+          "recommendation": "Rename the header column from 'Name' to match 'name' column, and ensure the SQL uses the correct column name. (Cosmetic — the SQL section doesn't repeat this, but consistency matters.)"
+        }
+      ]
+    },
+
+    "completeness": {
+      "score": 4.3,
+      "max": 5.0,
+      "summary": "All 8 FR, 5 NFR, and 7 CON requirements have corresponding spec sections. Two minor gaps identified.",
+      "positives": [
+        "All 15 entity types from V1-V5 are covered in the seed data narrative (§5).",
+        "Traceability matrix (§8) maps every requirement to a specific spec section — no orphans.",
+        "Idempotency strategy (§6.2) is well-reasoned with clear rationale for choosing ON CONFLICT over DELETE+INSERT.",
+        "Activation instructions (§7) include both CLI and env var approaches, plus verification curl commands."
+      ],
+      "issues": [
+        {
+          "id": "COMP-01",
+          "severity": "minor",
+          "section": "§5.3",
+          "finding": "The users table has no 'role' column in V1__init.sql. The requirements.json (§5.1) lists 'Role' as a column (ADMIN, USER, VIEWER) but V1 schema only has: id, sso_id, name, email, department, created_at, last_login, is_active. There is no role column.",
+          "recommendation": "Remove the 'Role' column from the users seed data design. The application may handle roles elsewhere (JWT claims, external RBAC), but the database table does not have a role column."
+        },
+        {
+          "id": "COMP-02",
+          "severity": "info",
+          "section": "§5.5",
+          "finding": "Spec says '~450 rows' (30 per check × 15) but the generate_series pattern in §6.3 uses floor(random()*5) for status — this gives uniform distribution. The spec narrative describes specific distributions per health state (e.g., PASSING checks: 90% SUCCESS). The SQL pattern in §6.3 is simplified vs. the narrative.",
+          "recommendation": "Clarify in the implementation plan that the actual SQL should use weighted arrays per check type, not uniform random. E.g., for a PASSING check: (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','WARNING','TIMEOUT'])[1 + floor(random()*10)::int]. The spec narrative is correct; the code sketch needs refinement during implementation."
+        }
+      ]
+    },
+
+    "feasibility": {
+      "score": 4.8,
+      "max": 5.0,
+      "summary": "Highly feasible. Uses proven Flyway mechanism, no new dependencies, minimal files. Only risk is partition availability on first run.",
+      "positives": [
+        "Zero new Gradle dependencies — Flyway and Zonky already configured.",
+        "R__ migration is a well-documented Flyway feature since v4 — no edge-case risk.",
+        "Profile isolation mechanism (spring.flyway.locations) is the Flyway-blessed approach for environment-specific scripts.",
+        "INSERT ON CONFLICT DO NOTHING works natively on PostgreSQL 9.5+ (project uses 15)."
+      ],
+      "issues": [
+        {
+          "id": "FEAS-01",
+          "severity": "info",
+          "section": "§5.5",
+          "finding": "After May 2026, the V1 hardcoded partitions (2026_04, 2026_05) won't cover CURRENT_TIMESTAMP. The PartitionScheduler.bootstrap() on ApplicationReadyEvent creates current + 2 months — but Flyway runs BEFORE bootstrap. On first-ever startup in June 2026+, the current-month partition may not exist yet.",
+          "recommendation": "The R__ seed SQL should create the current-month partition with CREATE TABLE IF NOT EXISTS before inserting execution_results. This is a defensive measure for the 'first startup in a new month' scenario. Alternatively, accept that on Zonky (always fresh), the partition WILL be missing until bootstrap — and the seed SQL should run AFTER bootstrap. This requires switching to ApplicationRunner (Option B) — or accepting that execution_results seeding fails silently on first run and succeeds on second.",
+          "resolution_options": [
+            "A) Include a CREATE TABLE IF NOT EXISTS ... PARTITION OF execution_results FOR VALUES FROM (date_trunc('month', CURRENT_DATE)) TO (date_trunc('month', CURRENT_DATE + INTERVAL '1 month')) in the seed SQL before the execution_results INSERT block.",
+            "B) Accept the limitation and document it. On Zonky, the app restarts frequently anyway.",
+            "C) Use a hybrid approach: R__ for all static data (users, CSI, checks, tags, etc.) + a @Profile('dev') ApplicationRunner that inserts execution_results after bootstrap has run."
+          ]
+        }
+      ]
+    },
+
+    "maintainability": {
+      "score": 4.0,
+      "max": 5.0,
+      "summary": "SQL-based seed data requires manual updates when schema changes. Mitigated by Flyway checksum detection and the small scope of the seed file.",
+      "positives": [
+        "Single file (R__dev_sample_data.sql) — easy to locate and update.",
+        "Flyway checksum change detection ensures modified seed is re-applied automatically.",
+        "ON CONFLICT DO NOTHING means adding new seed rows is additive — no risk of breaking existing data."
+      ],
+      "issues": [
+        {
+          "id": "MAINT-01",
+          "severity": "minor",
+          "section": "§6",
+          "finding": "When future V* migrations add NOT NULL columns without defaults to existing tables, the R__ seed SQL must be updated in the same PR. There's no compile-time enforcement for this — it's a team discipline issue.",
+          "recommendation": "Add a note to the project's contributing guide or CLAUDE.md: 'When adding NOT NULL columns to seeded tables, update R__dev_sample_data.sql in the same PR.' Alternatively, add a CI check that verifies `./gradlew bootRun --args='--spring.profiles.active=dev'` starts successfully."
+        }
+      ]
+    },
+
+    "risk": {
+      "score": 4.8,
+      "max": 5.0,
+      "summary": "Minimal risk. Dev-only feature with zero production blast radius. Ephemeral database eliminates data corruption concerns.",
+      "positives": [
+        "Profile isolation is enforced by Flyway locations — not a runtime flag that could be misconfigured.",
+        "Zonky database is ephemeral — worst case is a failed dev startup, easily debugged.",
+        "No production code changes — existing tests, profiles, and deployments unaffected.",
+        "ON CONFLICT DO NOTHING (not DELETE) — even on a persistent DB, no data destruction."
+      ],
+      "issues": []
+    }
+  },
+
+  "verdict": {
+    "decision": "APPROVED",
+    "average_score": 4.48,
+    "summary": "Spec is well-structured, accurately reflects the existing schema and profile mechanics, and provides a clear implementation path. All requirements are traceable. Minor issues (ACC-01, ACC-02, COMP-01, COMP-02, FEAS-01, MAINT-01) are addressable during implementation without spec revision.",
+    "conditions": [
+      "COMP-01: Remove 'role' from users seed data — column does not exist in V1 schema.",
+      "FEAS-01: Choose a resolution option for partition availability on first startup post-May 2026. Recommendation: Option A (defensive CREATE TABLE IF NOT EXISTS in seed SQL)."
+    ]
+  }
+}

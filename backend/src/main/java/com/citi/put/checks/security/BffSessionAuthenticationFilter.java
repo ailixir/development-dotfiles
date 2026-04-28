@@ -54,6 +54,13 @@ public class BffSessionAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
+    // If a prior filter (e.g. LocalDevAuthFilter) already set an identity, skip resolution.
+    if (SecurityContextHolder.getContext().getAuthentication() != null
+        && SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+      chain.doFilter(request, response);
+      return;
+    }
+
     String traceId = resolveTraceId(request);
     MDC.put("traceId", traceId);
 

@@ -2,34 +2,16 @@ import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 // Lazy import to avoid eager shared consumption during bootstrap
 const loadBootstrap = () => import('./bootstrap');
-import { APP_CONFIG } from '@utils/constants/appConfig';
-
-console.log('🚀 Main.tsx loaded');
+console.log('Main.tsx loaded');
 
 // Entry point for standalone Vite development
 const container = document.getElementById('root');
-console.log('📦 Root container found:', !!container);
+console.log('Root container found:', !!container);
 
 async function startApp() {
   if (!container) {
-    console.error('❌ No root element found in HTML');
+    console.error('No root element found in HTML');
     return;
-  }
-
-  // Start MSW in development if enabled
-  if (import.meta.env.DEV && APP_CONFIG.enableMSW) {
-    try {
-      console.log('🛠️ Starting MSW...');
-      const { worker } = await import('@services/mocks/browser');
-      await worker.start({
-        // Relative so it works when hosted under a subpath
-        serviceWorker: { url: 'mockServiceWorker.js' },
-        onUnhandledRequest: 'warn',
-      });
-      console.log('✅ MSW ready');
-    } catch (e) {
-      console.warn('⚠️ MSW failed to start; falling back to network', e);
-    }
   }
 
   try {

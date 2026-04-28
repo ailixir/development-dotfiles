@@ -1,4 +1,6 @@
 import apiClient from './apiClient';
+import { normalizePageResponse } from './responseAdapter';
+import { mapCsiResponse } from './mappers/csiMapper';
 
 export interface CsiSearchItem {
   id: string;
@@ -10,14 +12,19 @@ export interface CsiSearchItem {
 
 export const csiApi = {
   async listCsis(params?: { search?: string; businessUnit?: string; environment?: string; status?: string; page?: number; limit?: number }) {
-    return await apiClient.get('/csi', { params });
+    const { page = 1, limit = 20, ...rest } = params ?? {};
+    const raw = await apiClient.get('/csi', { params: { ...rest, page: page - 1, size: limit } });
+    const normalized = normalizePageResponse<any>(raw);
+    normalized.data = normalized.data.map(mapCsiResponse);
+    return normalized;
   },
 
   async getCsiById(id: string) {
-    return await apiClient.get(`/csi/${id}`);
+    const raw = await apiClient.get(`/csi/${id}`);
+    return mapCsiResponse(raw);
   },
 
-  async getBusinessUnits() {
+  async getBusinessUnits(): Promise<string[]> {
     return await apiClient.get('/csi/business-units');
   },
 
@@ -36,4 +43,3 @@ export const csiApi = {
 };
 
 export default csiApi;
-

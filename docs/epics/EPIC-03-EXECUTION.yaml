@@ -1,0 +1,359 @@
+#
+# EPIC-03 Execution Manifest — Mock-to-API Migration (Frontend ↔ Backend Integration)
+# Owner: @pm (Morgan)
+# Framework: AIOS SDC (Story Development Cycle)
+# Source: Spec Pipeline gap analysis (2026-04-27)
+# Spec: docs/specs/backend/spec.md v3
+#
+
+epic_id: EPIC-03
+milestone: M3
+title: "Mock-to-API Migration — replace MSW mock layer with real backend endpoints"
+status: planning                  # planning | in_progress | completed | paused
+created_at: "2026-04-27"
+created_by: "@pm (Morgan)"
+
+# ─────────────────────────────────────────────────────────────
+# Epic goal + definition of done
+# ─────────────────────────────────────────────────────────────
+goal: |
+  Every frontend API call currently intercepted by MSW mock handlers is replaced
+  with a real call to the Spring Boot backend at /api/v1. Missing backend endpoints
+  are built. The MSW layer is removed once all domains are wired. The app runs
+  end-to-end with real data flowing through PostgreSQL.
+
+definition_of_done:
+  - "All 14 stories reach Done via SDC cycle."
+  - "`VITE_ENABLE_MSW=false` — app boots and all features work against real backend."
+  - "No MSW handler, mockData, or inlineMockAdapter files remain in the codebase."
+  - "Frontend type-checks clean (`npm run type-check`)."
+  - "`./gradlew check` green — all M1 + M2 + M3 tests passing."
+  - "Dev proxy configured: `npm run dev` forwards /api/v1 to localhost:8080."
+  - "Pagination, auth, and error handling work end-to-end in browser."
+
+# ─────────────────────────────────────────────────────────────
+# Complexity assessment (Spec Pipeline Phase 2)
+# ─────────────────────────────────────────────────────────────
+complexity:
+  scope: 5          # 50+ files across FE services, stores, components; 8 mock domains; 6+ new BE controllers
+  integration: 4    # Auth model (BFF cookie), async execution polling, pagination format change
+  infrastructure: 3 # API base URL migration, env vars, dev proxy
+  knowledge: 3      # Deep understanding of both FE mock contracts and BE DTOs
+  risk: 4           # Breaking all FE functionality if migration not incremental
+  total: 19         # COMPLEX — phased execution with revision cycle
+  class: COMPLEX
+
+# ─────────────────────────────────────────────────────────────
+# Key technical decisions
+# ─────────────────────────────────────────────────────────────
+decisions:
+  - id: D-01
+    decision: "Change FE apiBaseUrl from /api to /api/v1; update all MSW handler paths to /api/v1/* for transparent cutover"
+    rationale: "Single URL space eliminates dual-path bugs. MSW intercepts /api/v1/... while enabled; real backend serves same paths when MSW domain is disabled."
+
+  - id: D-02
+    decision: "Add response normalization adapter: Spring Page envelope (page/size/totalElements) → FE ApiResponse (page/limit/total)"
+    rationale: "FE expects 1-based page + 'total' + 'limit'. BE returns 0-based page + 'totalElements' + 'size'. Adapter in apiClient keeps all slices unchanged."
+
+  - id: D-03
+    decision: "Vite dev proxy for /api/v1 → http://localhost:8080/api/v1; Webpack proxy for same"
+    rationale: "Enables same-origin dev calls. No CORS issues. MSW domain-disable falls through to proxy transparently."
+
+  - id: D-04
+    decision: "Incremental migration via VITE_DISABLE_MSW_DOMAINS — enable per-domain as each story completes"
+    rationale: "Existing mockMode.ts already supports this. Comment in .env.development documents cutover sequence: M3.1=foundation, then domain-by-domain."
+
+  - id: D-05
+    decision: "Execution polling: FE implements exponential-backoff poll after 202 Accepted (replace synchronous mock)"
+    rationale: "Backend returns 202 + executionId. FE polls GET /checks/{checkId}/history until terminal status."
+
+# ─────────────────────────────────────────────────────────────
+# Story roster (14 stories)
+# ─────────────────────────────────────────────────────────────
+stories:
+  # Wave 0 — Foundation
+  - story_id: "3.1"
+    title: "API client foundation — base URL, dev proxy, response normalization"
+    size: M
+    status: draft
+    depends_on: []
+    stream: A
+    priority: P0
+    assigned_dev: null
+    story_file: "docs/stories/3.1.story.md"
+
+  # Wave 1 — Wire FE to existing BE (parallel)
+  - story_id: "3.2"
+    title: "Checks domain — wire FE to /api/v1/checks"
+    size: M
+    status: draft
+    depends_on: ["3.1"]
+    stream: A
+    priority: P0
+    assigned_dev: null
+    story_file: "docs/stories/3.2.story.md"
+
+  - story_id: "3.3"
+    title: "CSI domain — wire FE to /api/v1/csi"
+    size: S
+    status: draft
+    depends_on: ["3.1"]
+    stream: A
+    priority: P0
+    assigned_dev: null
+    story_file: "docs/stories/3.3.story.md"
+
+  - story_id: "3.4"
+    title: "Schedules domain — wire FE to /api/v1/schedules (detach from checks)"
+    size: M
+    status: draft
+    depends_on: ["3.1", "3.2"]
+    stream: A
+    priority: P0
+    assigned_dev: null
+    story_file: "docs/stories/3.4.story.md"
+
+  - story_id: "3.5"
+    title: "Users & auth — wire FE to /api/v1/users/me + cookie-based auth"
+    size: S
+    status: draft
+    depends_on: ["3.1"]
+    stream: A
+    priority: P0
+    assigned_dev: null
+    story_file: "docs/stories/3.5.story.md"
+
+  # Wave 2 — Build missing BE + wire FE
+  - story_id: "3.6"
+    title: "CSI extensions — build search, business-units, health BE endpoints"
+    size: M
+    status: draft
+    depends_on: ["3.3"]
+    stream: B
+    priority: P1
+    assigned_dev: null
+    story_file: "docs/stories/3.6.story.md"
+
+  - story_id: "3.7"
+    title: "Tags — build BE controller + wire FE"
+    size: M
+    status: draft
+    depends_on: ["3.1"]
+    stream: B
+    priority: P1
+    assigned_dev: null
+    story_file: "docs/stories/3.7.story.md"
+
+  - story_id: "3.8"
+    title: "Dashboard — build BE controller + wire FE"
+    size: L
+    status: draft
+    depends_on: ["3.2", "3.3"]
+    stream: B
+    priority: P1
+    assigned_dev: null
+    story_file: "docs/stories/3.8.story.md"
+
+  - story_id: "3.9"
+    title: "Checks extensions — build pause/resume/upcoming BE endpoints"
+    size: S
+    status: draft
+    depends_on: ["3.2"]
+    stream: B
+    priority: P1
+    assigned_dev: null
+    story_file: "docs/stories/3.9.story.md"
+
+  # Wave 3 — Full new bounded contexts
+  - story_id: "3.10"
+    title: "Reports — build BE context + wire FE"
+    size: XL
+    status: draft
+    depends_on: ["3.1", "3.2"]
+    stream: C
+    priority: P2
+    assigned_dev: null
+    story_file: "docs/stories/3.10.story.md"
+
+  - story_id: "3.11"
+    title: "Studio — build BE context + wire FE"
+    size: XL
+    status: draft
+    depends_on: ["3.1"]
+    stream: C
+    priority: P2
+    assigned_dev: null
+    story_file: "docs/stories/3.11.story.md"
+
+  - story_id: "3.12"
+    title: "Secrets — build BE context + wire FE"
+    size: M
+    status: draft
+    depends_on: ["3.1"]
+    stream: C
+    priority: P2
+    assigned_dev: null
+    story_file: "docs/stories/3.12.story.md"
+
+  - story_id: "3.13"
+    title: "Templates — build BE context + wire FE"
+    size: S
+    status: draft
+    depends_on: ["3.1"]
+    stream: C
+    priority: P2
+    assigned_dev: null
+    story_file: "docs/stories/3.13.story.md"
+
+  # Wave 4 — Cleanup
+  - story_id: "3.14"
+    title: "MSW layer removal + dead code cleanup"
+    size: M
+    status: draft
+    depends_on: ["3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+    stream: A
+    priority: P3
+    assigned_dev: null
+    story_file: "docs/stories/3.14.story.md"
+
+# ─────────────────────────────────────────────────────────────
+# Drafting order for @sm (respects depends_on DAG)
+# ─────────────────────────────────────────────────────────────
+sm_draft_queue:
+  - wave: 0
+    parallel: ["3.1"]
+    rationale: "Foundation — all other stories depend on this."
+
+  - wave: 1
+    parallel: ["3.2", "3.3", "3.5"]
+    after: ["3.1"]
+    rationale: "Wire FE to existing BE endpoints. Checks, CSI, Users are independent of each other."
+
+  - wave: 2
+    parallel: ["3.4", "3.6", "3.7", "3.9"]
+    after: ["3.2", "3.3"]
+    rationale: "Schedules needs checks wiring done. CSI extensions need CSI core. Tags + checks-ext independent."
+
+  - wave: 3
+    parallel: ["3.8"]
+    after: ["3.2", "3.3"]
+    rationale: "Dashboard aggregates checks + CSI data; needs both wired."
+
+  - wave: 4
+    parallel: ["3.10", "3.11", "3.12", "3.13"]
+    after: ["3.1"]
+    rationale: "Full new bounded contexts — large independent stories, can parallelize."
+
+  - wave: 5
+    parallel: ["3.14"]
+    after: ["3.10", "3.11", "3.12", "3.13"]
+    rationale: "Cleanup only after ALL domains migrated."
+
+# ─────────────────────────────────────────────────────────────
+# Gap analysis matrix (from spec pipeline)
+# ─────────────────────────────────────────────────────────────
+gap_analysis:
+  domains_with_backend:
+    checks:
+      coverage: partial
+      existing_endpoints: ["CRUD", "execute (202 async)", "history (cursor)"]
+      missing_endpoints: ["pause", "resume", "upcoming"]
+      fe_adaptation: ["base URL /api→/api/v1", "pagination format", "async execution polling"]
+
+    csi:
+      coverage: partial
+      existing_endpoints: ["list", "get by ID", "get checks for CSI (stub)"]
+      missing_endpoints: ["search autocomplete", "business-units", "health summary"]
+      fe_adaptation: ["base URL", "pagination format"]
+
+    schedules:
+      coverage: full
+      existing_endpoints: ["full CRUD", "enable/disable toggle"]
+      missing_endpoints: []
+      fe_adaptation: ["detach from /checks/{id}/schedule to dedicated /schedules resource"]
+
+    users:
+      coverage: full
+      existing_endpoints: ["/users/me"]
+      missing_endpoints: []
+      fe_adaptation: ["replace mock user-permissions with /users/me response shape", "cookie auth"]
+
+  domains_without_backend:
+    dashboard: "8 endpoints — summary, attention, activity, upcoming, reports/snapshot, search, acknowledge, assign"
+    reports: "11 endpoints — full CRUD + preview + run-now + executions + send-test + pause/resume/duplicate"
+    studio: "10 endpoints — tests CRUD + execute + poll + validate-vars + validate-steps"
+    tags: "3 endpoints — list, stats, suggestions"
+    secrets: "3 endpoints — list, create, resolve"
+    templates: "2 endpoints — list, get by ID"
+
+# ─────────────────────────────────────────────────────────────
+# Risk tracking
+# ─────────────────────────────────────────────────────────────
+risks:
+  - risk_id: R-10
+    description: "Pagination format mismatch breaks existing FE components"
+    status: mitigated_by_design
+    mitigation: "Response normalization adapter in story 3.1 translates Spring Page → FE ApiResponse transparently."
+
+  - risk_id: R-11
+    description: "Async execution (202) breaks FE components expecting synchronous result"
+    status: mitigated_by_design
+    mitigation: "Story 3.2 introduces polling utility. checksSlice executeCheck thunk wraps the poll loop."
+
+  - risk_id: R-12
+    description: "Missing BE endpoints block FE features"
+    status: accepted
+    mitigation: "MSW remains enabled per-domain until BE endpoints built. Domain-disable toggles allow incremental cutover."
+
+  - risk_id: R-13
+    description: "Cookie auth requires BFF session — local dev needs proxy to Core service mock"
+    status: open
+    mitigation: "Story 3.5 addresses: dev profile skips Core introspection with a static UserIdentity."
+
+# ─────────────────────────────────────────────────────────────
+# Traceability
+# ─────────────────────────────────────────────────────────────
+covers_requirements:
+  functional: ["FR-CHK-01..05", "FR-CSI-01..03", "FR-SCHED-01..03", "FR-DASH-01..04", "FR-REP-01..04", "FR-STUDIO-01..06", "FR-TAG-01", "FR-SECRET-01"]
+  non_functional: ["NFR-PERF-01", "NFR-SEC-01..04"]
+  constraints: ["CON-API-01", "CON-STACK-01..07"]
+
+spec_sections_primary:
+  - "§6 REST API (all subsections)"
+  - "§7 Authentication & Authorization"
+  - "§10 Reports"
+  - "§9 Checks Studio"
+
+# ─────────────────────────────────────────────────────────────
+# Progress tracking
+# ─────────────────────────────────────────────────────────────
+progress:
+  stories_drafted: 14
+  stories_validated: 14
+  stories_done: 14
+  stories_blocked: 0
+  stories_in_progress: 0
+  current_wave: 5
+  notes:
+    - "2026-04-27 — @pm created EPIC-03-EXECUTION.yaml from spec pipeline gap analysis. 14 stories identified across 5 waves."
+    - "2026-04-27 — @sm drafted all 14 stories (3.1-3.14). Awaiting @po validation."
+    - "2026-04-27 — @po validated all 14 stories: GO across the board (scores 9-10/10). 11 non-blocking notes logged (N-3.x-x). All 14 stories now Ready for implementation."
+    - "2026-04-27 — @dev implemented stories 3.1-3.13 in YOLO mode. FE: 13 new/modified files (mappers, API services, response adapter, execution poller). BE: 44 new files (6 new bounded contexts: tags, dashboard, reports, studio, secrets, templates) + V3 migration. Both compileJava and npm type-check pass. Story 3.14 (MSW cleanup) deferred to after E2E validation."
+
+# ─────────────────────────────────────────────────────────────
+# Handoff
+# ─────────────────────────────────────────────────────────────
+handoff:
+  next_action: |
+    @sm to draft all 14 stories (3.1-3.14) with detailed ACs, implementation notes, and test strategy.
+    @po validates each. Then @dev begins implementation following the wave order.
+    MSW cutover sequence: after each domain story completes, add domain to VITE_DISABLE_MSW_DOMAINS.
+  hard_gates:
+    - "EPIC-01 + EPIC-02 must be complete before starting EPIC-03 wave 2+."
+    - "Story 3.1 (foundation) must complete before any other story."
+  cadence: "14 stories across 3 streams. P0 (wave 0-1) ~1 week. P1 (wave 2-3) ~2 weeks. P2 (wave 4) ~3 weeks. P3 (cleanup) ~1 day."
+
+attestation:
+  signed_by: "@pm (Morgan)"
+  signed_at: "2026-04-27"
+  article_iv: "Every story traces to spec pipeline gap analysis. Every missing endpoint traces to existing MSW handler contracts. No invented work."

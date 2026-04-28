@@ -1,0 +1,74 @@
+backend:
+  replicaCount: 3
+  springProfile: prod
+
+  ingress:
+    host: checks-api.citi.com
+    annotations:
+      nginx.ingress.kubernetes.io/rate-limit: "100"
+      nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    tls:
+      - secretName: checks-api-prod-tls
+        hosts:
+          - checks-api.citi.com
+
+  resources:
+    requests:
+      cpu: "1"
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+  probes:
+    readiness:
+      path: /actuator/health/readiness
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    liveness:
+      path: /actuator/health/liveness
+      initialDelaySeconds: 60
+      periodSeconds: 20
+
+  env:
+    JAVA_OPTS: "-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
+    CHECKS_CORS_ALLOWED_ORIGINS: "https://checks.citi.com"
+    CHECKS_CORE_SERVICE_URL: "http://checks-core.prod.svc.cluster.local:8081"
+
+  envFromSecrets:
+    - secretName: checks-db-credentials-prod
+      keys:
+        - SPRING_DATASOURCE_URL
+        - SPRING_DATASOURCE_USERNAME
+        - SPRING_DATASOURCE_PASSWORD
+
+frontend:
+  replicaCount: 3
+
+  ingress:
+    host: checks.citi.com
+    tls:
+      - secretName: checks-frontend-prod-tls
+        hosts:
+          - checks.citi.com
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+  env:
+    VITE_API_URL: "https://checks-api.citi.com"
+    VITE_API_BASE_URL: "/api/v1"
+    VITE_ENABLE_STUDIO: "true"
+    VITE_ENABLE_REPORTS: "true"
+    VITE_DEBUG_MODE: "false"

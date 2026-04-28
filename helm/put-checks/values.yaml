@@ -1,0 +1,115 @@
+nameOverride: ""
+fullnameOverride: ""
+
+# ---------------------------------------------------------------------------
+# Backend — Java 21 / Spring Boot 3
+# ---------------------------------------------------------------------------
+backend:
+  enabled: true
+
+  image:
+    repository: registry.citi.com/put/checks-backend
+    tag: ""  # defaults to Chart.appVersion
+    pullPolicy: IfNotPresent
+
+  replicaCount: 2
+
+  springProfile: dev
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  ingress:
+    enabled: true
+    className: nginx
+    host: checks-api.dev.citi.com
+    annotations: {}
+    tls: []
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 75
+
+  probes:
+    readiness:
+      path: /actuator/health/readiness
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    liveness:
+      path: /actuator/health/liveness
+      initialDelaySeconds: 45
+      periodSeconds: 15
+
+  env:
+    JAVA_OPTS: "-XX:MaxRAMPercentage=75.0"
+    CHECKS_CORS_ALLOWED_ORIGINS: "http://localhost:3000"
+    CHECKS_CORE_SERVICE_URL: "http://checks-core:8081"
+
+  envFromSecrets: []
+  # - secretName: checks-db-credentials
+  #   keys:
+  #     - SPRING_DATASOURCE_URL
+  #     - SPRING_DATASOURCE_USERNAME
+  #     - SPRING_DATASOURCE_PASSWORD
+
+  configOverrides: {}
+  # spring.datasource.hikari.maximum-pool-size: "20"
+
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# ---------------------------------------------------------------------------
+# Frontend — React MFE served via nginx
+# ---------------------------------------------------------------------------
+frontend:
+  enabled: true
+
+  image:
+    repository: registry.citi.com/put/checks-frontend
+    tag: ""  # defaults to Chart.appVersion
+    pullPolicy: IfNotPresent
+
+  replicaCount: 2
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: true
+    className: nginx
+    host: checks.dev.citi.com
+    annotations: {}
+    tls: []
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+  env:
+    VITE_API_URL: "http://checks-api.dev.citi.com"
+    VITE_API_BASE_URL: "/api/v1"
+    VITE_ENABLE_STUDIO: "true"
+    VITE_ENABLE_REPORTS: "true"
+
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}

@@ -1,0 +1,53 @@
+backend:
+  replicaCount: 2
+  springProfile: staging
+
+  ingress:
+    host: checks-api.uat.citi.com
+    tls:
+      - secretName: checks-api-uat-tls
+        hosts:
+          - checks-api.uat.citi.com
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 768Mi
+    limits:
+      cpu: "2"
+      memory: 1536Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 75
+
+  env:
+    JAVA_OPTS: "-XX:MaxRAMPercentage=75.0"
+    CHECKS_CORS_ALLOWED_ORIGINS: "https://checks.uat.citi.com"
+    CHECKS_CORE_SERVICE_URL: "http://checks-core.uat.svc.cluster.local:8081"
+
+  envFromSecrets:
+    - secretName: checks-db-credentials-uat
+      keys:
+        - SPRING_DATASOURCE_URL
+        - SPRING_DATASOURCE_USERNAME
+        - SPRING_DATASOURCE_PASSWORD
+
+frontend:
+  replicaCount: 2
+
+  ingress:
+    host: checks.uat.citi.com
+    tls:
+      - secretName: checks-frontend-uat-tls
+        hosts:
+          - checks.uat.citi.com
+
+  env:
+    VITE_API_URL: "https://checks-api.uat.citi.com"
+    VITE_API_BASE_URL: "/api/v1"
+    VITE_ENABLE_STUDIO: "true"
+    VITE_ENABLE_REPORTS: "true"
+    VITE_DEBUG_MODE: "false"

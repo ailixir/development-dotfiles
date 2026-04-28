@@ -1,0 +1,69 @@
+{
+  "$schema": "aios://spec-pipeline/complexity/v1",
+  "spec_id": "dev-seed-v1",
+  "phase": "assess",
+  "generated_by": "@architect (Aria)",
+  "generated_at": "2026-04-27",
+  "inputs": {
+    "requirements_file": "./requirements.json",
+    "requirements_commit": "working-tree"
+  },
+
+  "dimensions": {
+    "scope": {
+      "score": 2,
+      "max": 5,
+      "rationale": "2 new files only: application-dev.yml (profile config) + R__dev_sample_data.sql (repeatable migration). 1 minor edit to backend/README.md. No changes to existing Java code, existing migrations, or other profiles."
+    },
+    "integration": {
+      "score": 1,
+      "max": 5,
+      "rationale": "Zero external API integrations. All data is local to the embedded Postgres instance. No network calls, no external services."
+    },
+    "infrastructure": {
+      "score": 1,
+      "max": 5,
+      "rationale": "Reuses existing Zonky embedded Postgres infrastructure from the local profile. No new dependencies in build.gradle.kts. No Docker, no container changes, no CI pipeline changes."
+    },
+    "knowledge": {
+      "score": 2,
+      "max": 5,
+      "rationale": "Requires understanding of all entity relationships (15 tables), FK constraints ordering, partition boundaries, JSONB contract shapes (HttpConfiguration, TcpConfiguration), and Flyway repeatable migration semantics. All well-documented in existing artifacts."
+    },
+    "risk": {
+      "score": 1,
+      "max": 5,
+      "rationale": "Dev-only feature. Zero production blast radius. Zonky database is ephemeral. Worst case: seed SQL has a bug and dev profile fails to start — local and test profiles unaffected."
+    }
+  },
+
+  "total_score": 7,
+  "max_score": 25,
+  "classification": "SIMPLE",
+  "classification_thresholds": {
+    "SIMPLE": "<= 8",
+    "STANDARD": "9-15",
+    "COMPLEX": ">= 16"
+  },
+  "pipeline_phases": ["gather", "spec", "critique"],
+  "pipeline_phases_note": "SIMPLE classification skips Research (Phase 3) and Assessment (Phase 2). However, all 6 phases are included for thoroughness given the breadth of entity coverage.",
+
+  "risk_register": [
+    {
+      "id": "RISK-01",
+      "description": "Hardcoded partition names (execution_results_2026_04) will stop working after May 2026",
+      "likelihood": "CERTAIN (calendar-driven)",
+      "impact": "LOW (dev profile only — seed SQL fails, error is obvious)",
+      "mitigation": "Use CURRENT_DATE arithmetic in SQL to dynamically compute partition-safe timestamps. Partition bootstrap on app startup ensures the target months exist.",
+      "owner": "@dev"
+    },
+    {
+      "id": "RISK-02",
+      "description": "Schema drift: future V* migrations add required columns not covered by seed SQL",
+      "likelihood": "MEDIUM (expected as project evolves)",
+      "impact": "LOW (Flyway checksum unchanged → R__ doesn't re-run → but missing columns have defaults or are nullable. If NOT NULL without default → seed SQL fails visibly on next dev profile startup)",
+      "mitigation": "Repeatable migration (R__) re-runs on checksum change. When adding new V* migrations with NOT NULL columns, update R__dev_sample_data.sql in the same PR.",
+      "owner": "@dev"
+    }
+  ]
+}

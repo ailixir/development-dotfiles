@@ -2,6 +2,7 @@ package com.citi.put.checks.csi;
 
 import com.citi.put.checks.csi.entity.CsiSystem;
 import java.util.Collection;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,6 +30,7 @@ public interface CsiRepository extends JpaRepository<CsiSystem, String> {
         AND (:environment IS NULL OR c.environment = :environment)
         AND (:status IS NULL OR c.status = :status)
         AND (:search IS NULL OR (LOWER(c.name) LIKE :search
+             OR LOWER(c.id) LIKE :search
              OR (c.description IS NOT NULL AND LOWER(c.description) LIKE :search)))
       """)
   Page<CsiSystem> findAllVisibleToFiltered(
@@ -48,6 +50,7 @@ public interface CsiRepository extends JpaRepository<CsiSystem, String> {
         AND (:environment IS NULL OR c.environment = :environment)
         AND (:status IS NULL OR c.status = :status)
         AND (:search IS NULL OR (LOWER(c.name) LIKE :search
+             OR LOWER(c.id) LIKE :search
              OR (c.description IS NOT NULL AND LOWER(c.description) LIKE :search)))
       """)
   Page<CsiSystem> findAllFiltered(
@@ -57,4 +60,14 @@ public interface CsiRepository extends JpaRepository<CsiSystem, String> {
       @Param("status") String status,
       @Param("search") String search,
       Pageable pageable);
+
+  @Query(
+      """
+      SELECT c FROM CsiSystem c
+      WHERE LOWER(c.id) LIKE :query
+         OR LOWER(c.name) LIKE :query
+         OR (c.description IS NOT NULL AND LOWER(c.description) LIKE :query)
+      ORDER BY c.name
+      """)
+  List<CsiSystem> search(@Param("query") String query, Pageable pageable);
 }

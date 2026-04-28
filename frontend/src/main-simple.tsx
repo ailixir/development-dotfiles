@@ -12,28 +12,6 @@ async function start() {
     return;
   }
 
-  // Start MSW in standalone MF dev so /api requests are mocked
-  try {
-    const { worker } = await import('@services/mocks/browser');
-    await worker.start({
-      // Relative so it follows base path under MF dev
-      serviceWorker: { url: 'mockServiceWorker.js' },
-      onUnhandledRequest: 'bypass',
-    });
-    console.log('✅ MSW ready (webpack dev)');
-    try {
-      const RELOAD_FLAG = '__msw_first_run__';
-      const hasReloaded = sessionStorage.getItem(RELOAD_FLAG) === '1';
-      if (navigator.serviceWorker && !navigator.serviceWorker.controller && !hasReloaded) {
-        sessionStorage.setItem(RELOAD_FLAG, '1');
-        window.location.reload();
-        return;
-      }
-    } catch {}
-  } catch (e) {
-    console.warn('⚠️ MSW failed to start (webpack dev)', e);
-  }
-
   // Initialize default share scope before consuming shared singletons
   try {
     const initSharing = (globalThis as any).__webpack_init_sharing__;
