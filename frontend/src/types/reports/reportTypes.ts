@@ -1,4 +1,4 @@
-export type ReportStatus = 'active' | 'paused' | 'draft';
+export type ReportStatus = 'ACTIVE' | 'PAUSED' | 'DRAFT';
 
 export type ReportTemplate = 'standard' | 'executive' | 'detailed' | 'alert-digest' | 'trend-analysis';
 
@@ -43,18 +43,20 @@ export interface ReportPreviewResponse {
   html?: string;
 }
 
-export type ReportExecutionStatus = 'success' | 'failed' | 'partial';
+export type ReportExecutionStatus = 'SUCCESS' | 'FAILED' | 'PARTIAL';
 
 export interface ReportExecution {
   id: string;
   reportId: string;
-  executionTime: string;
+  executedAt: string;
   status: ReportExecutionStatus;
   recipientCount: number;
   checksIncluded: number;
-  checksFailures: number;
-  generationDuration: number; // milliseconds
+  checksFailed: number;
+  generationDurationMs: number;
   emailContent?: string;
+  errorMessage?: string;
+  createdAt?: string;
 }
 
 // Report sections enable grouped content within a report

@@ -27,7 +27,7 @@ const StudioTestsPage: React.FC = () => {
   const navigate = useNavigate();
   const searchContext = useAppSelector(state => state.dashboard.searchContext);
   const [running, setRunning] = useState<Record<string, boolean>>({});
-  const [lastOutcome, setLastOutcome] = useState<Record<string, 'success' | 'failed' | 'timeout'>>({});
+  const [lastOutcome, setLastOutcome] = useState<Record<string, 'SUCCESS' | 'FAILED' | 'TIMEOUT'>>({});
   const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error'; id?: string }>({ open: false, message: '', severity: 'success' });
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -99,9 +99,9 @@ const StudioTestsPage: React.FC = () => {
           <Grid item xs={6} md={3}>
             <TextField fullWidth select label="Status" size="medium" value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}>
               <MenuItem value="">All</MenuItem>
-              <MenuItem value="draft">Draft</MenuItem>
-              <MenuItem value="active">Active</MenuItem>
-              <MenuItem value="archived">Archived</MenuItem>
+              <MenuItem value="DRAFT">Draft</MenuItem>
+              <MenuItem value="ACTIVE">Active</MenuItem>
+              <MenuItem value="ARCHIVED">Archived</MenuItem>
             </TextField>
           </Grid>
         </Grid>
@@ -144,10 +144,10 @@ const StudioTestsPage: React.FC = () => {
                                 const poll = async () => {
                                   try {
                                     const exec = await studioApi.getExecution(execId) as any;
-                                    if (exec?.status === 'completed' || exec?.status === 'failed' || exec?.status === 'timeout') {
+                                    if (exec?.status === 'COMPLETED' || exec?.status === 'FAILED' || exec?.status === 'TIMEOUT') {
                                       setRunning((r) => ({ ...r, [t.id]: false }));
-                                      setLastOutcome((o) => ({ ...o, [t.id]: exec.status === 'completed' ? 'success' : exec.status }));
-                                      setSnack({ open: true, message: `${t.name}: ${exec.status === 'completed' ? 'SUCCESS' : 'FAILED'}`, severity: exec.status === 'completed' ? 'success' : 'error', id: t.id });
+                                      setLastOutcome((o) => ({ ...o, [t.id]: exec.status === 'COMPLETED' ? 'SUCCESS' : exec.status }));
+                                      setSnack({ open: true, message: `${t.name}: ${exec.status === 'COMPLETED' ? 'SUCCESS' : 'FAILED'}`, severity: exec.status === 'COMPLETED' ? 'success' : 'error', id: t.id });
                                       return;
                                     }
                                   } catch {}
@@ -176,8 +176,8 @@ const StudioTestsPage: React.FC = () => {
                   <Stack direction="row" spacing={1} alignItems="center">
                     <Chip
                       size="small"
-                      label={(t.status || 'draft')}
-                      color={t.status === 'active' ? 'success' : t.status === 'archived' ? 'default' : 'warning'}
+                      label={(t.status || 'DRAFT').charAt(0) + (t.status || 'DRAFT').slice(1).toLowerCase()}
+                      color={t.status === 'ACTIVE' ? 'success' : t.status === 'ARCHIVED' ? 'default' : 'warning'}
                       variant="filled"
                     />
                     <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>Updated {t.updatedAt ? new Date(t.updatedAt).toLocaleString() : ''}</Typography>

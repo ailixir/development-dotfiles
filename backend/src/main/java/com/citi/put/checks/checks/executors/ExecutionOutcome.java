@@ -1,5 +1,6 @@
 package com.citi.put.checks.checks.executors;
 
+import com.citi.put.checks.checks.model.CheckType;
 import java.time.Duration;
 
 public sealed interface ExecutionOutcome {
@@ -13,4 +14,10 @@ public sealed interface ExecutionOutcome {
   record Warning(Duration duration, String message) implements ExecutionOutcome {}
 
   record Timeout(Duration duration) implements ExecutionOutcome {}
+
+  record Throttled(Duration duration, CheckType checkType) implements ExecutionOutcome {
+    public Throttled(CheckType checkType) {
+      this(Duration.ZERO, checkType);
+    }
+  }
 }

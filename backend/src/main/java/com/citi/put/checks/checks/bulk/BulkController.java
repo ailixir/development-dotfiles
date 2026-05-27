@@ -1,6 +1,7 @@
 package com.citi.put.checks.checks.bulk;
 
 import java.util.Map;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Profile("!worker")
 @RequestMapping("/api/v1/checks/_bulk")
 public class BulkController {
 
@@ -55,7 +57,7 @@ public class BulkController {
     BulkResponseDto response = bulkService.execute(request, auth);
 
     long successCount =
-        response.results().stream().filter(r -> "success".equals(r.status())).count();
+        response.results().stream().filter(r -> "SUCCESS".equals(r.status())).count();
 
     if (successCount == response.results().size()) {
       return ResponseEntity.ok(response);

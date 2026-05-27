@@ -1,0 +1,82 @@
+backend:
+  replicaCount: 1
+  springProfile: api,dev
+
+  ingress:
+    host: checks-api.dev.citi.com
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+  autoscaling:
+    enabled: false
+
+  podDisruptionBudget:
+    enabled: false
+
+  env:
+    JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m"
+    CHECKS_CORS_ALLOWED_ORIGINS: "https://checks.dev.citi.com"
+    CHECKS_CORE_SERVICE_URL: "http://checks-core.dev.svc.cluster.local:8081"
+
+  configOverrides:
+    spring.datasource.hikari.maximum-pool-size: "10"
+    checks.scheduling.min-interval-seconds: "30"
+
+  topologySpreadConstraints:
+    enabled: false
+
+worker:
+  replicaCount: 1
+  springProfile: worker,dev
+
+  podDisruptionBudget:
+    enabled: false
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+  env:
+    JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m"
+    CHECKS_CORE_SERVICE_URL: "http://checks-core.dev.svc.cluster.local:8081"
+
+  configOverrides:
+    spring.datasource.hikari.maximum-pool-size: "10"
+    checks.executor.max-concurrency: "40"
+    checks.executor.source-limits.HTTP: "30"
+    checks.executor.source-limits.TCP: "30"
+    checks.executor.source-limits.SPLUNK: "10"
+    checks.executor.source-limits.GRAFANA: "10"
+    checks.executor.source-limits.ITRS: "10"
+    checks.executor.source-limits.APPDYNAMICS: "10"
+    checks.executor.source-limits.UI_TEST: "5"
+    checks.scheduling.batch-size: "50"
+    checks.scheduling.poll-interval-ms: "30000"
+    checks.scheduling.min-interval-seconds: "30"
+
+  topologySpreadConstraints:
+    enabled: false
+
+frontend:
+  replicaCount: 1
+
+  ingress:
+    host: checks.dev.citi.com
+
+  env:
+    REACT_APP_API_BASE_URL: "https://checks-api.dev.citi.com/api/v1"
+    VITE_API_URL: "https://checks-api.dev.citi.com"
+    VITE_API_BASE_URL: "/api/v1"
+    VITE_ENABLE_STUDIO: "true"
+    VITE_ENABLE_REPORTS: "true"
+    VITE_DEBUG_MODE: "true"

@@ -4,6 +4,7 @@ import java.util.concurrent.Executors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -12,17 +13,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class AsyncConfig {
 
   @Bean("applicationTaskExecutor")
-  public AsyncTaskExecutor applicationTaskExecutor(MdcTaskDecorator decorator) {
-    TaskExecutorAdapter adapter =
-        new TaskExecutorAdapter(Executors.newVirtualThreadPerTaskExecutor());
-    adapter.setTaskDecorator(decorator);
-    return adapter;
-  }
-
-  @Bean("checkExecutor")
-  public AsyncTaskExecutor checkExecutor(
+  public AsyncTaskExecutor applicationTaskExecutor(
       MdcTaskDecorator decorator,
-      @Value("${checks.executor.semaphore-multiplier:4}") int multiplier,
+      @Value("${checks.executor.app-semaphore-multiplier:2}") int multiplier,
       @Value("${spring.datasource.hikari.maximum-pool-size:10}") int hikariMax) {
     int permits = multiplier * hikariMax;
     SemaphoreBoundedExecutor bounded =
@@ -32,7 +25,29 @@ public class AsyncConfig {
     return adapter;
   }
 
+  @Bean("checkExecutor")
+  public AsyncTaskExecutor checkExecutor(
+      MdcTaskDecorator decorator, SourceConcurrencyProperties concurrencyProps) {
+    int permits = concurrencyProps.maxConcurrency();
+    SemaphoreBoundedExecutor bounded =
+        new SemaphoreBoundedExecutor(Executors.newVirtualThreadPerTaskExecutor(), permits);
+    TaskExecutorAdapter adapter = new TaskExecutorAdapter(bounded);
+    adapter.setTaskDecorator(decorator);
+    return adapter;
+  }
+
+  @Bean("dispatchExecutor")
+  public AsyncTaskExecutor dispatchExecutor(
+      MdcTaskDecorator decorator, @Value("${checks.scheduling.batch-size:500}") int batchSize) {
+    SemaphoreBoundedExecutor bounded =
+        new SemaphoreBoundedExecutor(Executors.newVirtualThreadPerTaskExecutor(), batchSize);
+    TaskExecutorAdapter adapter = new TaskExecutorAdapter(bounded);
+    adapter.setTaskDecorator(decorator);
+    return adapter;
+  }
+
   @Bean("uiTestExecutor")
+  @Profile("!worker")
   public AsyncTaskExecutor uiTestExecutor(
       MdcTaskDecorator decorator, @Value("${studio.pool.size:0}") int poolSize) {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

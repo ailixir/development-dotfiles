@@ -164,9 +164,9 @@ const ReportsPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'paused': return 'warning';
-      case 'failed': return 'error';
+      case 'ACTIVE': return 'success';
+      case 'PAUSED': return 'warning';
+      case 'FAILED': return 'error';
       default: return 'default';
     }
   };

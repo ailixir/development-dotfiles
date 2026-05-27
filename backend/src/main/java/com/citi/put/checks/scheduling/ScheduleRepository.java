@@ -56,4 +56,16 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
       ORDER BY s.nextExecutionAt ASC
       """)
   List<Schedule> findDueSchedules(@Param("now") Instant now, Pageable pageable);
+
+  @Query(
+      """
+      SELECT s FROM Schedule s
+      WHERE s.enabled = true
+        AND s.checkType = :checkType
+        AND s.nextExecutionAt IS NOT NULL
+        AND s.nextExecutionAt <= :now
+      ORDER BY s.nextExecutionAt ASC
+      """)
+  List<Schedule> findDueByType(
+      @Param("now") Instant now, @Param("checkType") String checkType, Pageable pageable);
 }

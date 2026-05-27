@@ -6,6 +6,8 @@ import studioSlice from './slices/studioSlice';
 import reportsSlice from './slices/reportsSlice';
 import uiSlice from './slices/uiSlice';
 import dashboardSlice from './slices/dashboardSlice';
+import sourcesSlice, { fetchSources } from './slices/sourcesSlice';
+import featuresSlice, { fetchFeatures } from './slices/featuresSlice';
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +17,8 @@ export const store = configureStore({
     reports: reportsSlice,
     ui: uiSlice,
     dashboard: dashboardSlice,
+    sources: sourcesSlice,
+    features: featuresSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -80,6 +84,11 @@ function persistDashboardPreferences(state: RootState) {
 // Hydrate immediately in browser
 if (typeof window !== 'undefined') {
   hydrateDashboardPreferences();
+
+  // Fetch check sources at bootstrap (fail-open on error)
+  store.dispatch(fetchSources());
+  store.dispatch(fetchFeatures());
+
   let last = store.getState().dashboard;
   store.subscribe(() => {
     const current = store.getState().dashboard;

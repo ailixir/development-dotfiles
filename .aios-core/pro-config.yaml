@@ -1,0 +1,63 @@
+# AIOS Pro Extension Configuration
+# This file is loaded by aios-core's config-resolver when pro/ submodule is present.
+# Reference: ADR-PRO-002 (Configuration Hierarchy)
+#
+# Merge behavior: Deep merge into project config at the "pro" namespace.
+# Priority: After L2 (project-config), before L3 (app-config).
+
+# Pro extension enabled flag
+# Set to false to disable all pro features without removing the submodule
+pro:
+  enabled: true
+  version: "0.1.0"
+
+# Premium Squads Configuration
+# Defines available premium squad templates and marketplace settings
+squads:
+  # Enable premium squad templates
+  premium_templates: true
+  # Marketplace integration (requires pro.integrations for full functionality)
+  marketplace:
+    enabled: false
+    # registry_url: "https://marketplace.synkra.ai/squads"
+
+# Persistent Memory Configuration
+# Cross-session context and memory analytics
+memory:
+  # Enable persistent memory store
+  persistent: false
+  # Storage backend (local | cloud)
+  backend: local
+  # Cross-session context sharing
+  cross_session: false
+  # Memory analytics and optimization
+  analytics: false
+
+# Usage Metrics Configuration
+# Dashboards, team analytics, and cost tracking
+metrics:
+  # Enable usage dashboards
+  dashboards: false
+  # Team-level analytics
+  team_analytics: false
+  # AI provider cost tracking
+  cost_tracking: false
+
+# Enterprise Integrations Configuration
+# Adapters for project management and collaboration tools
+integrations:
+  # Each integration can be enabled independently
+  gitlab:
+    enabled: false
+    # url: "https://gitlab.example.com"
+  bitbucket:
+    enabled: false
+  jira:
+    enabled: false
+    # url: "https://jira.example.com"
+  azure_devops:
+    enabled: false
+  clickup:
+    enabled: false
+  google_drive:
+    enabled: false

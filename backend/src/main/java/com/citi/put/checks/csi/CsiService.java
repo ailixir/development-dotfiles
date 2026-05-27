@@ -4,7 +4,6 @@ import com.citi.put.checks.checks.CheckRepository;
 import com.citi.put.checks.csi.dto.CsiDto;
 import com.citi.put.checks.csi.dto.CsiHealthSummary;
 import com.citi.put.checks.csi.dto.CsiSearchResult;
-import com.citi.put.checks.csi.entity.CsiSystem;
 import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.UserIdentity;
 import java.time.Instant;
@@ -12,9 +11,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,11 +20,11 @@ public class CsiService {
 
   private static final Set<String> ADMIN_ROLES = Set.of("checks-admin", "platform-admin");
 
-  private final CsiRepository csiRepository;
+  private final CsiApiClient csiApiClient;
   private final CheckRepository checkRepository;
 
-  public CsiService(CsiRepository csiRepository, CheckRepository checkRepository) {
-    this.csiRepository = csiRepository;
+  public CsiService(CsiApiClient csiApiClient, CheckRepository checkRepository) {
+    this.csiApiClient = csiApiClient;
     this.checkRepository = checkRepository;
   }
 
@@ -41,32 +37,19 @@ public class CsiService {
       String search,
       int page,
       int size) {
-    Pageable pageable = PageRequest.of(page, Math.min(size, 100), Sort.by("name").ascending());
-    String searchPattern = search != null ? "%" + search.toLowerCase() + "%" : null;
 
-    Page<CsiSystem> result;
-    if (isAdmin(identity)) {
-      result =
-          csiRepository.findAllFiltered(
-              businessUnit, criticality, environment, status, searchPattern, pageable);
-    } else {
-      List<String> ownedCsiIds =
-          identity.csiOwnership().stream()
-              .map(CsiOwnershipEntry::csiId)
-              .collect(Collectors.toList());
-      if (ownedCsiIds.isEmpty()) {
-        ownedCsiIds = List.of("__none__");
-      }
-      result =
-          csiRepository.findAllVisibleToFiltered(
-              ownedCsiIds, businessUnit, criticality, environment, status, searchPattern, pageable);
-    }
+    List<String> ownedCsiIds =
+        identity.csiOwnership().stream()
+            .map(CsiOwnershipEntry::csiId)
+            .collect(Collectors.toList());
 
-    return result.map(CsiDto::from);
+    return csiApiClient.listFiltered(
+        ownedCsiIds, isAdmin(identity), businessUnit, criticality, environment, status, search,
+        page, size);
   }
 
   public CsiDto findById(String id) {
-    return csiRepository.findById(id).map(CsiDto::from).orElse(null);
+    return csiApiClient.findById(id).orElse(null);
   }
 
   public CsiHealthSummary getHealth(String csiId) {
@@ -80,7 +63,7 @@ public class CsiService {
         case "PASSING" -> passing += count;
         case "FAILING" -> failing += count;
         case "WARNING" -> warning += count;
-        default -> {}
+        default -> passing += 0;
       }
     }
     String overall = failing > 0 ? "CRITICAL" : warning > 0 ? "WARNING" : "HEALTHY";
@@ -88,10 +71,7 @@ public class CsiService {
   }
 
   public List<CsiSearchResult> search(String query, int limit) {
-    String pattern = "%" + query.toLowerCase() + "%";
-    return csiRepository.search(pattern, PageRequest.of(0, limit)).stream()
-        .map(c -> new CsiSearchResult(c.getId(), c.getName()))
-        .toList();
+    return csiApiClient.search(query, limit);
   }
 
   private boolean isAdmin(UserIdentity identity) {

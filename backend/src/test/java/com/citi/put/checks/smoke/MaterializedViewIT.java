@@ -71,7 +71,7 @@ class MaterializedViewIT {
         "INSERT INTO checks (id, name, type, csi_id, csi_name, status,"
             + " configuration, created_by, created_at, updated_at) "
             + "VALUES (?, 'MV Check', 'HTTP', ?, 'MV CSI', ?,"
-            + " '{\"type\":\"HTTP\"}'::jsonb, ?, ?, ?)",
+            + " '{\"type\":\"HTTP\",\"method\":\"GET\",\"url\":\"https://example.com/health\"}'::jsonb, ?, ?, ?)",
         UUID.randomUUID(),
         csiId,
         status,

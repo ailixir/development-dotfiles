@@ -8,13 +8,21 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
+import java.net.http.HttpClient;
+import java.nio.channels.ClosedChannelException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.web.client.ClientHttpRequestFactories;
-import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
-import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
@@ -25,6 +33,8 @@ public class HttpCheckExecutor implements CheckExecutor {
   private static final Logger LOG = LoggerFactory.getLogger(HttpCheckExecutor.class);
 
   private final MeterRegistry meterRegistry;
+  private final ConcurrentHashMap<ClientCacheKey, RestClient> clientCache =
+      new ConcurrentHashMap<>();
 
   public HttpCheckExecutor(MeterRegistry meterRegistry) {
     this.meterRegistry = meterRegistry;
@@ -41,9 +51,9 @@ public class HttpCheckExecutor implements CheckExecutor {
     long start = System.nanoTime();
 
     try {
-      RestClient client = buildClient(config);
+      RestClient client = getOrCreateClient(config);
 
-      int actualStatus =
+      var requestSpec =
           client
               .method(org.springframework.http.HttpMethod.valueOf(config.method()))
               .uri(config.url())
@@ -52,8 +62,13 @@ public class HttpCheckExecutor implements CheckExecutor {
                     if (config.headers() != null) {
                       config.headers().forEach(h::set);
                     }
-                  })
-              .exchange((req, resp) -> resp.getStatusCode().value());
+                  });
+
+      if (config.body() != null && !config.body().isBlank()) {
+        requestSpec.body(config.body());
+      }
+
+      int actualStatus = requestSpec.exchange((req, resp) -> resp.getStatusCode().value());
 
       Duration duration = Duration.ofNanos(System.nanoTime() - start);
       int expected = config.expectedStatusCode();
@@ -80,18 +95,55 @@ public class HttpCheckExecutor implements CheckExecutor {
     }
   }
 
-  private RestClient buildClient(HttpConfiguration config) {
-    ClientHttpRequestFactorySettings settings =
-        ClientHttpRequestFactorySettings.DEFAULTS
-            .withConnectTimeout(Duration.ofMillis(config.timeoutMs()))
-            .withReadTimeout(Duration.ofMillis(config.timeoutMs()));
-    ClientHttpRequestFactory factory = ClientHttpRequestFactories.get(settings);
+  private RestClient getOrCreateClient(HttpConfiguration config) {
+    ClientCacheKey key =
+        new ClientCacheKey(
+            config.timeoutMs(),
+            Boolean.FALSE.equals(config.verifyTls()),
+            Boolean.FALSE.equals(config.followRedirects()));
+    return clientCache.computeIfAbsent(key, this::buildClient);
+  }
 
-    if (Boolean.FALSE.equals(config.verifyTls())) {
+  private RestClient buildClient(ClientCacheKey key) {
+    HttpClient.Builder httpBuilder =
+        HttpClient.newBuilder()
+            .connectTimeout(Duration.ofMillis(key.timeoutMs()))
+            .followRedirects(
+                key.disableRedirects() ? HttpClient.Redirect.NEVER : HttpClient.Redirect.NORMAL);
+
+    if (key.disableTls()) {
       LOG.warn("TLS verification disabled for HTTP check — audit trail");
+      httpBuilder.sslContext(createTrustAllSslContext());
     }
 
+    JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(httpBuilder.build());
+    factory.setReadTimeout(Duration.ofMillis(key.timeoutMs()));
+
     return RestClient.builder().requestFactory(factory).build();
+  }
+
+  private static SSLContext createTrustAllSslContext() {
+    try {
+      TrustManager[] trustAll = {
+        new X509TrustManager() {
+          @Override
+          public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+
+          @Override
+          public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+
+          @Override
+          public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
+          }
+        }
+      };
+      SSLContext ctx = SSLContext.getInstance("TLS");
+      ctx.init(null, trustAll, new SecureRandom());
+      return ctx;
+    } catch (NoSuchAlgorithmException | KeyManagementException e) {
+      throw new IllegalStateException("Failed to create trust-all SSLContext", e);
+    }
   }
 
   private ExecutionOutcome mapTransportError(
@@ -101,7 +153,7 @@ public class HttpCheckExecutor implements CheckExecutor {
     if (cause instanceof java.net.SocketTimeoutException) {
       return new ExecutionOutcome.Timeout(duration);
     }
-    if (cause instanceof ConnectException) {
+    if (cause instanceof ConnectException || cause instanceof ClosedChannelException) {
       return new ExecutionOutcome.Failure(duration, "Connection refused: " + config.url(), null);
     }
     if (cause instanceof UnknownHostException) {
@@ -126,8 +178,9 @@ public class HttpCheckExecutor implements CheckExecutor {
     Counter.builder("checks.execution.total")
         .tag("check_type", "HTTP")
         .tag("status", status)
-        .tag("csi_id", check.getCsiId())
         .register(meterRegistry)
         .increment();
   }
+
+  private record ClientCacheKey(int timeoutMs, boolean disableTls, boolean disableRedirects) {}
 }

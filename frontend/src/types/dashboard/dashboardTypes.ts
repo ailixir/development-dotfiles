@@ -20,11 +20,12 @@ export interface AttentionItem {
   status: 'FAILING' | 'WARNING';
   since: string;
   reason?: string;
+  assignedTo?: string;
 }
 
 export interface ActivityItem {
   id: string;
-  type: 'EXECUTION' | 'EDIT' | 'ASSIGN' | 'COMMENT';
+  type: 'EXECUTION' | 'EDIT' | 'ASSIGN' | 'COMMENT' | 'REPORT_SENT';
   timestamp: string;
   title: string;
   description?: string;

@@ -30,7 +30,7 @@ public class Report {
   private String template;
 
   @Column(nullable = false, length = 20)
-  private String status = "draft";
+  private String status = "DRAFT";
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb", nullable = false)
@@ -57,11 +57,17 @@ public class Report {
   @Column(name = "updated_at", nullable = false)
   private Instant updatedAt;
 
+  @Column(name = "next_delivery_at")
+  private Instant nextDeliveryAt;
+
   @Column(name = "last_sent_at")
   private Instant lastSentAt;
 
   @Column(name = "deleted_at")
   private Instant deletedAt;
+
+  @Column(name = "consecutive_failures", nullable = false)
+  private int consecutiveFailures;
 
   protected Report() {}
 
@@ -170,6 +176,14 @@ public class Report {
     this.updatedAt = updatedAt;
   }
 
+  public Instant getNextDeliveryAt() {
+    return nextDeliveryAt;
+  }
+
+  public void setNextDeliveryAt(Instant nextDeliveryAt) {
+    this.nextDeliveryAt = nextDeliveryAt;
+  }
+
   public Instant getLastSentAt() {
     return lastSentAt;
   }
@@ -184,5 +198,13 @@ public class Report {
 
   public void setDeletedAt(Instant deletedAt) {
     this.deletedAt = deletedAt;
+  }
+
+  public int getConsecutiveFailures() {
+    return consecutiveFailures;
+  }
+
+  public void setConsecutiveFailures(int consecutiveFailures) {
+    this.consecutiveFailures = consecutiveFailures;
   }
 }

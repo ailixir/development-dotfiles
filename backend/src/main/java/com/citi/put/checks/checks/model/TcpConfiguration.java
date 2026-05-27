@@ -15,6 +15,9 @@ public record TcpConfiguration(
     if (timeoutMs == null) {
       timeoutMs = 5000;
     }
+    if (timeoutMs < 1000) {
+      timeoutMs = 1000;
+    }
     if (host == null || host.isBlank()) {
       throw new IllegalArgumentException("TCP host is required");
     }

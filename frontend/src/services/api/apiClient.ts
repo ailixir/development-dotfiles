@@ -66,15 +66,14 @@ class ApiClient {
           data: error.response?.data,
         });
 
-        // Handle common error cases
         if (error.response?.status === 401) {
-          // Handle unauthorized - could redirect to login
-          console.warn('Unauthorized access - token may be expired');
+          window.dispatchEvent(
+            new CustomEvent('put:auth:unauthorized', { detail: { url: error.config?.url } }),
+          );
+          (window as any).__PUT_AUTH__?.login?.();
         } else if (error.response?.status === 403) {
-          // Handle forbidden
           console.warn('Access forbidden - insufficient permissions');
         } else if (error.response?.status >= 500) {
-          // Handle server errors
           console.error('Server error - check service status');
         }
 

@@ -1,10 +1,7 @@
 package com.citi.put.checks.smoke;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
@@ -12,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +49,7 @@ class PartitionBoundaryTest {
         "INSERT INTO checks (id, name, type, csi_id, csi_name, status,"
             + " configuration, created_by, created_at, updated_at) "
             + "VALUES (?, 'Part Check', 'HTTP', ?, 'Part CSI', 'PENDING',"
-            + " '{\"type\":\"HTTP\"}'::jsonb, ?, ?, ?)",
+            + " '{\"type\":\"HTTP\",\"method\":\"GET\",\"url\":\"https://example.com/health\"}'::jsonb, ?, ?, ?)",
         checkId,
         csiId,
         email,
@@ -75,23 +71,20 @@ class PartitionBoundaryTest {
   }
 
   @Test
-  void insertSixMonthsOutIsRejected() {
-    // No partition exists for Oct 2026 — V1 only bootstraps 2026-04 + 2026-05.
+  void insertSixMonthsOutLandsInDefaultPartition() {
+    // V7 adds a DEFAULT partition — overflow rows are caught instead of rejected.
     OffsetDateTime farFuture = OffsetDateTime.of(2026, 10, 15, 12, 0, 0, 0, ZoneOffset.UTC);
 
-    assertThatThrownBy(
-            () ->
-                jdbc.update(
-                    "INSERT INTO execution_results (id, check_id, status,"
-                        + " started_at, ended_at, duration_ms, created_at) "
-                        + "VALUES (?, ?, 'SUCCESS', ?, ?, 100, ?)",
-                    UUID.randomUUID(),
-                    checkId,
-                    Timestamp.from(farFuture.toInstant()),
-                    Timestamp.from(farFuture.plusSeconds(1).toInstant()),
-                    Timestamp.from(Instant.now())))
-        .isInstanceOf(DataIntegrityViolationException.class)
-        .hasMessageContaining("partition");
+    jdbc.update(
+        "INSERT INTO execution_results (id, check_id, status,"
+            + " started_at, ended_at, duration_ms, created_at) "
+            + "VALUES (?, ?, 'SUCCESS', ?, ?, 100, ?)",
+        UUID.randomUUID(),
+        checkId,
+        Timestamp.from(farFuture.toInstant()),
+        Timestamp.from(farFuture.plusSeconds(1).toInstant()),
+        Timestamp.from(Instant.now()));
+    // No exception = DEFAULT partition caught the row.
   }
 
   @Test
@@ -106,6 +99,5 @@ class PartitionBoundaryTest {
         Timestamp.from(mayDate.plusSeconds(1).toInstant()),
         Timestamp.from(Instant.now()));
     // No exception = partition bound honored.
-    LocalDate.of(2026, 5, 10); // silence unused-import tolerance
   }
 }

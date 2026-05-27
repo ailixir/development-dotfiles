@@ -95,6 +95,8 @@ import CodeTab from '@/components/studio/CodeTab';
 import OnboardingCoach from '@/components/studio/OnboardingCoach';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '@/store';
+import { selectIsSourceEnabled } from '@store/slices/sourcesSlice';
+import { selectIsFeatureEnabled } from '@store/slices/featuresSlice';
 import { setAutoSyncCode, setGeneratedCode, setTestIR, setExecutionLogs, setAllStepResults, setExecuting, setCurrentStep as setCurrentStepAction, setVideoUrl as setVideoUrlAction, clearLogs, updateConfiguration } from '@store/slices/studioSlice';
 import { buildDefaultTestIR } from '@/utils/studio/ir/parseSteps';
 import { generatePythonFromIR } from '@/utils/studio/codegen/pythonGenerator';
@@ -108,13 +110,20 @@ type Scenario = {
   description: string;
   csiId: string;
   steps: string[];
-  status: 'draft' | 'active' | 'archived' | string;
+  status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED' | string;
   createdAt?: string;
   updatedAt?: string;
   configuration?: any;
 };
 
-const ChecksStudioPage: React.FC = () => {
+const StudioUnavailable: React.FC = () => (
+  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', textAlign: 'center', p: 4 }}>
+    <Typography variant="h5" gutterBottom>Checks Studio</Typography>
+    <Typography variant="body1" color="text.secondary">Checks Studio is not available in this environment.</Typography>
+  </Box>
+);
+
+const ChecksStudioPageInner: React.FC = () => {
   const theme = useTheme();
   const [scenarios, setScenarios] = useState<Scenario[] | null>(null);
   const [scenariosError, setScenariosError] = useState<string | null>(null);
@@ -135,11 +144,11 @@ const ChecksStudioPage: React.FC = () => {
   const videoUrl = useAppSelector((s: any) => s.studio.videoUrl);
   const [videoCurrentTime, setVideoCurrentTime] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const stepResultsArr = useAppSelector((s: any) => s.studio.stepResults) as Array<{ stepIndex: number; status: 'pending' | 'running' | 'pass' | 'fail' }>;
+  const stepResultsArr = useAppSelector((s: any) => s.studio.stepResults) as Array<{ stepIndex: number; status: 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL' }>;
   const stepResultsMap = useMemo(() => {
     const map: Record<number, 'passed' | 'failed' | 'pending'> = {};
     (stepResultsArr || []).forEach((r) => {
-      map[r.stepIndex] = r.status === 'pass' ? 'passed' : r.status === 'fail' ? 'failed' : 'pending';
+      map[r.stepIndex] = r.status === 'PASS' ? 'passed' : r.status === 'FAIL' ? 'failed' : 'pending';
     });
     return map;
   }, [stepResultsArr]);
@@ -273,8 +282,8 @@ const ChecksStudioPage: React.FC = () => {
           if (Array.isArray(exec.stepResults)) {
             dispatch(setAllStepResults(exec.stepResults.map((r: any) => ({ stepIndex: r.stepIndex, status: r.status }))));
           }
-          const runningIndex = exec.stepResults?.findIndex((r: any) => r.status === 'running') ?? -1;
-          const passedCount = exec.stepResults?.filter((r: any) => r.status === 'pass').length ?? 0;
+          const runningIndex = exec.stepResults?.findIndex((r: any) => r.status === 'RUNNING') ?? -1;
+          const passedCount = exec.stepResults?.filter((r: any) => r.status === 'PASS').length ?? 0;
           dispatch(setCurrentStepAction(runningIndex >= 0 ? runningIndex : Math.max(0, passedCount - 1)));
           // logs
           if (Array.isArray(exec.logs)) {
@@ -283,7 +292,7 @@ const ChecksStudioPage: React.FC = () => {
           if (exec.videoUrl) {
             dispatch(setVideoUrlAction(exec.videoUrl));
           }
-          if (exec.status === 'completed' || exec.status === 'failed' || exec.status === 'timeout') {
+          if (exec.status === 'COMPLETED' || exec.status === 'FAILED' || exec.status === 'TIMEOUT') {
             dispatch(setExecuting(false));
             stopPolling();
           }
@@ -374,11 +383,11 @@ const ChecksStudioPage: React.FC = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed':
+      case 'COMPLETED':
         return <CheckCircle sx={{ fontSize: 14 }} />;
-      case 'running':
+      case 'RUNNING':
         return <CircularProgress size={14} />;
-      case 'failed':
+      case 'FAILED':
         return <Error sx={{ fontSize: 14 }} />;
       default:
         return <Schedule sx={{ fontSize: 14 }} />;
@@ -431,9 +440,9 @@ const ChecksStudioPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'success';
-      case 'running': return 'info';
-      case 'failed': return 'error';
+      case 'COMPLETED': return 'success';
+      case 'RUNNING': return 'info';
+      case 'FAILED': return 'error';
       default: return 'default';
     }
   };
@@ -507,7 +516,7 @@ const ChecksStudioPage: React.FC = () => {
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{selectedScenarioData.name}</Typography>
                       <Stack direction="row" spacing={1} alignItems="center">
-                        <Chip label={selectedScenarioData.status || 'draft'} size="small" color={getStatusColor(selectedScenarioData.status || '') as any} icon={getStatusIcon(selectedScenarioData.status || '')} sx={{ fontSize: 11 }} />
+                        <Chip label={(selectedScenarioData.status || 'DRAFT').charAt(0) + (selectedScenarioData.status || 'DRAFT').slice(1).toLowerCase()} size="small" color={getStatusColor(selectedScenarioData.status || '') as any} icon={getStatusIcon(selectedScenarioData.status || '')} sx={{ fontSize: 11 }} />
                         <Button size="small" variant="text" onClick={() => { window.location.href = '/checks/studio/tests'; }}>Change…</Button>
                       </Stack>
                     </Stack>
@@ -548,7 +557,7 @@ const ChecksStudioPage: React.FC = () => {
                   <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
                     <Typography variant="body2" fontWeight={600}>Add your first step</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Examples: Go to "https://example.com" <br />• Click "Sign On" <br />• Type "&lt;var USERNAME&gt;" in the "User ID" field <br />• Wait for "Welcome" (use tokens: &lt;var NAME&gt;, &lt;secret SECRET_ID&gt;)
+                      Examples: Go to "https://put.internal.citi.com" <br />• Click "Sign On" <br />• Type "&lt;var USERNAME&gt;" in the "User ID" field <br />• Wait for "Welcome" (use tokens: &lt;var NAME&gt;, &lt;secret SECRET_ID&gt;)
                     </Typography>
                   </Paper>
                 )}
@@ -1010,7 +1019,7 @@ const ChecksStudioPage: React.FC = () => {
                 <Alert severity="info">
                   <AlertTitle>Next Steps</AlertTitle>
                   After creating the scenario, you'll be able to add test steps using plain English commands like:
-                  <br />• "Go to https://example.com"
+                  <br />• "Go to https://put.internal.citi.com"
                   <br />• "Click the Login button"
                   <br />• "Wait for Welcome message to appear"
                 </Alert>
@@ -1180,7 +1189,7 @@ const ChecksStudioPage: React.FC = () => {
               variant="outlined"
               onClick={() => {
                 setTestSteps([
-                  'Go to "https://example.com"',
+                  'Go to "https://put.internal.citi.com"',
                   'Wait for "Dashboard"',
                   'Check url contains "dashboard"',
                 ]);
@@ -1195,6 +1204,13 @@ const ChecksStudioPage: React.FC = () => {
       </Dialog>
     </Box>
   );
+};
+
+const ChecksStudioPage: React.FC = () => {
+  const uiTestEnabled = useAppSelector(selectIsSourceEnabled('UI_TEST'));
+  const studioFeatureEnabled = useAppSelector(selectIsFeatureEnabled('STUDIO'));
+  if (!uiTestEnabled || !studioFeatureEnabled) return <StudioUnavailable />;
+  return <ChecksStudioPageInner />;
 };
 
 export default ChecksStudioPage;

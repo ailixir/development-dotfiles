@@ -117,6 +117,16 @@ if [ "$SKIP_CHECKS" = false ]; then
   check_prereqs
 fi
 
+# ── Load .env.local (secrets not committed to git) ────────────────
+if [ -f "$ROOT_DIR/.env.local" ]; then
+  set -a
+  source "$ROOT_DIR/.env.local"
+  set +a
+  ok "Loaded .env.local"
+fi
+
+export SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+
 # ── Resolve JAVA_HOME for JDK 21 ──────────────────────────────────
 if [ "$BACKEND" = true ]; then
   if java -version 2>&1 | grep -q '"21\.'; then
@@ -149,16 +159,27 @@ kill_port() {
   pids=$(lsof -ti:"$port" 2>/dev/null) || true
   if [ -n "$pids" ]; then
     warn "Killing existing processes on port $port"
-    echo "$pids" | xargs kill -9 2>/dev/null || true
-    sleep 1
-    # Verify port is free
+    echo "$pids" | xargs kill -15 2>/dev/null || true
+    for i in $(seq 1 10); do
+      if ! lsof -ti:"$port" &>/dev/null; then break; fi
+      sleep 0.5
+    done
+    if lsof -ti:"$port" &>/dev/null; then
+      warn "Port $port still held after SIGTERM — sending SIGKILL"
+      lsof -ti:"$port" 2>/dev/null | xargs kill -9 2>/dev/null || true
+      sleep 1
+    fi
     if lsof -ti:"$port" &>/dev/null; then
       err "Port $port still occupied after cleanup"
     fi
   fi
 }
 
-if [ "$BACKEND" = true ]; then kill_port 8080; fi
+if [ "$BACKEND" = true ]; then
+  # Stop any leftover Gradle bootRun daemons before port cleanup
+  (cd "$ROOT_DIR/backend" && ./gradlew --stop 2>/dev/null) || true
+  kill_port 8080
+fi
 if [ "$FRONTEND" = true ]; then
   kill_port 5173; kill_port 5174; kill_port 5175
   if [ "$FEDERATED" = true ]; then kill_port 3002; fi
@@ -167,7 +188,7 @@ fi
 # ── Start Backend ──────────────────────────────────────────────────
 if [ "$BACKEND" = true ]; then
   if [ "$SEED" = true ]; then
-    SPRING_PROFILE="dev"
+    SPRING_PROFILE="local,dev"
     log "Starting backend (Spring Boot :8080, sample data enabled)…"
   else
     SPRING_PROFILE="local"

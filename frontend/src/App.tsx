@@ -4,6 +4,7 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 import { LayoutProvider } from '@components/layout/LayoutProvider';
 import { ChecksLayout } from '@components/layout/ChecksLayout';
 import { ErrorBoundary } from '@components/shared/ErrorBoundary';
+import FeatureGate from '@components/shared/FeatureGate';
 
 // Lazy load pages for better performance and code splitting
 const HomePage = React.lazy(() => import('@pages/HomePage'));
@@ -105,18 +106,18 @@ const App: React.FC = () => {
         <Route path="create" element={<CreateCheckPage />} />
         <Route path="details/:id" element={<CheckDetailsPage />} />
         <Route path="edit/:id" element={<EditCheckPage />} />
-        <Route path="studio" element={<ChecksStudioPage />} />
-        <Route path="studio/tests" element={<StudioTestsPage />} />
-        <Route path="studio/runs" element={<StudioRunsPage />} />
-        <Route path="studio/:id" element={<ChecksStudioPage />} />
-        <Route path="reports" element={<ReportsHome />} />
-        <Route path="reports/new" element={<ReportBuilder />} />
-        <Route path="reports/:id" element={<ReportDetailsPage />} />
-        <Route path="reports/:id/edit" element={<ReportBuilder />} />
+        <Route path="studio" element={<FeatureGate featureKey="STUDIO"><ChecksStudioPage /></FeatureGate>} />
+        <Route path="studio/tests" element={<FeatureGate featureKey="STUDIO"><StudioTestsPage /></FeatureGate>} />
+        <Route path="studio/runs" element={<FeatureGate featureKey="STUDIO"><StudioRunsPage /></FeatureGate>} />
+        <Route path="studio/:id" element={<FeatureGate featureKey="STUDIO"><ChecksStudioPage /></FeatureGate>} />
+        <Route path="reports" element={<FeatureGate featureKey="REPORTS"><ReportsHome /></FeatureGate>} />
+        <Route path="reports/new" element={<FeatureGate featureKey="REPORTS"><ReportBuilder /></FeatureGate>} />
+        <Route path="reports/:id" element={<FeatureGate featureKey="REPORTS"><ReportDetailsPage /></FeatureGate>} />
+        <Route path="reports/:id/edit" element={<FeatureGate featureKey="REPORTS"><ReportBuilder /></FeatureGate>} />
         <Route path="csis" element={<Navigate to="." replace />} />
         <Route path="csis/:csiId" element={<Navigate to="." replace />} />
         <Route path="activity" element={<ActivityPage />} />
-        <Route path="schedules" element={<SchedulesPage />} />
+        <Route path="schedules" element={<FeatureGate featureKey="SCHEDULING"><SchedulesPage /></FeatureGate>} />
         <Route path="*" element={<Navigate to="." replace />} />
       </Route>
 
@@ -132,16 +133,16 @@ const App: React.FC = () => {
         <Route path="edit/:id" element={<EditCheckPage />} />
 
         {/* Checks Studio */}
-        <Route path="studio" element={<ChecksStudioPage />} />
-        <Route path="studio/tests" element={<StudioTestsPage />} />
-        <Route path="studio/runs" element={<StudioRunsPage />} />
-        <Route path="studio/:id" element={<ChecksStudioPage />} />
+        <Route path="studio" element={<FeatureGate featureKey="STUDIO"><ChecksStudioPage /></FeatureGate>} />
+        <Route path="studio/tests" element={<FeatureGate featureKey="STUDIO"><StudioTestsPage /></FeatureGate>} />
+        <Route path="studio/runs" element={<FeatureGate featureKey="STUDIO"><StudioRunsPage /></FeatureGate>} />
+        <Route path="studio/:id" element={<FeatureGate featureKey="STUDIO"><ChecksStudioPage /></FeatureGate>} />
 
         {/* Reports */}
-        <Route path="reports" element={<ReportsHome />} />
-        <Route path="reports/new" element={<ReportBuilder />} />
-        <Route path="reports/:id" element={<ReportDetailsPage />} />
-        <Route path="reports/:id/edit" element={<ReportBuilder />} />
+        <Route path="reports" element={<FeatureGate featureKey="REPORTS"><ReportsHome /></FeatureGate>} />
+        <Route path="reports/new" element={<FeatureGate featureKey="REPORTS"><ReportBuilder /></FeatureGate>} />
+        <Route path="reports/:id" element={<FeatureGate featureKey="REPORTS"><ReportDetailsPage /></FeatureGate>} />
+        <Route path="reports/:id/edit" element={<FeatureGate featureKey="REPORTS"><ReportBuilder /></FeatureGate>} />
 
         {/* CSIs */}
         <Route path="csis" element={<Navigate to="." replace />} />
@@ -149,7 +150,7 @@ const App: React.FC = () => {
 
         {/* Activity & Schedules */}
         <Route path="activity" element={<ActivityPage />} />
-        <Route path="schedules" element={<SchedulesPage />} />
+        <Route path="schedules" element={<FeatureGate featureKey="SCHEDULING"><SchedulesPage /></FeatureGate>} />
 
         {/* Catch all - redirect to module home */}
         <Route path="*" element={<Navigate to="." replace />} />

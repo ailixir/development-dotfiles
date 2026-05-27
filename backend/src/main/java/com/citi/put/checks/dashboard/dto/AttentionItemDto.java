@@ -9,4 +9,5 @@ public record AttentionItemDto(
     String csiName,
     String status,
     Instant since,
-    String reason) {}
+    String reason,
+    String assignedTo) {}

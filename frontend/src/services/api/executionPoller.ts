@@ -20,18 +20,19 @@ export async function pollForExecution(
   while (Date.now() - start < maxWait) {
     await sleep(delay);
 
-    const res = await apiClient.get<{
-      data: BackendExecutionResultDto[];
-      hasMore?: boolean;
-      nextCursor?: string | null;
-    }>(`${API_ENDPOINTS.CHECK_HISTORY(checkId)}?limit=5`);
+    try {
+      const res = await apiClient.get<BackendExecutionResultDto>(
+        `${API_ENDPOINTS.CHECK_BY_ID(checkId)}/executions/${executionId}`,
+      );
 
-    const match = res.data?.find((e: any) => String(e.id) === executionId);
-    if (match) {
-      const status = match.status?.toUpperCase();
-      if (status === 'SUCCESS' || status === 'FAILURE' || status === 'WARNING' || status === 'TIMEOUT') {
-        return mapExecutionResponse(match);
+      if (res) {
+        const status = res.status?.toUpperCase();
+        if (status === 'SUCCESS' || status === 'FAILURE' || status === 'WARNING' || status === 'TIMEOUT') {
+          return mapExecutionResponse(res);
+        }
       }
+    } catch {
+      // Execution not persisted yet — keep polling
     }
 
     delay = Math.min(delay * 2, 4_000);

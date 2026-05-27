@@ -3,10 +3,12 @@ package com.citi.put.checks.reports;
 import com.citi.put.checks.reports.dto.ReportDto;
 import com.citi.put.checks.reports.dto.ReportExecutionDto;
 import com.citi.put.checks.reports.dto.ReportRequest;
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Profile("!worker")
 @RequestMapping("/api/v1/reports")
 public class ReportsController {
 
@@ -40,7 +43,8 @@ public class ReportsController {
   }
 
   @PostMapping
-  public ResponseEntity<ReportDto> create(@RequestBody ReportRequest request, Authentication auth) {
+  public ResponseEntity<ReportDto> create(
+      @Valid @RequestBody ReportRequest request, Authentication auth) {
     ReportDto created = reportsService.create(request, auth);
     return ResponseEntity.created(URI.create("/api/v1/reports/" + created.id())).body(created);
   }
@@ -53,7 +57,7 @@ public class ReportsController {
 
   @PutMapping("/{id}")
   public ResponseEntity<ReportDto> update(
-      @PathVariable UUID id, @RequestBody ReportRequest request) {
+      @PathVariable UUID id, @Valid @RequestBody ReportRequest request) {
     ReportDto updated = reportsService.update(id, request);
     return ResponseEntity.ok(updated);
   }
@@ -85,19 +89,15 @@ public class ReportsController {
 
   @PostMapping("/{id}/preview")
   public ResponseEntity<Map<String, Object>> preview(@PathVariable UUID id) {
-    // Verify report exists
-    reportsService.findById(id);
-    return ResponseEntity.ok(
-        Map.of(
-            "preview", "",
-            "html", "<p>Preview not implemented</p>",
-            "generatedAt", Instant.now()));
+    String html = reportsService.renderPreview(id);
+    return ResponseEntity.ok(Map.of("preview", html, "html", html, "generatedAt", Instant.now()));
   }
 
   @PostMapping("/{id}/run-now")
-  public ResponseEntity<ReportExecutionDto> runNow(@PathVariable UUID id) {
+  public ResponseEntity<Map<String, Object>> runNow(@PathVariable UUID id) {
     ReportExecutionDto execution = reportsService.runNow(id);
-    return ResponseEntity.ok(execution);
+    ReportDto report = reportsService.findById(id);
+    return ResponseEntity.ok(Map.of("ok", true, "execution", execution, "report", report));
   }
 
   @GetMapping("/{id}/executions")
@@ -109,11 +109,19 @@ public class ReportsController {
     return ResponseEntity.ok(toExecutionEnvelope(result));
   }
 
+  private static final java.util.regex.Pattern EMAIL_PATTERN =
+      java.util.regex.Pattern.compile("^[\\w.+-]+@[\\w.-]+\\.[a-zA-Z]{2,}$");
+
   @PostMapping("/{id}/send-test")
-  public ResponseEntity<Map<String, Object>> sendTest(@PathVariable UUID id) {
-    // Verify report exists
-    reportsService.findById(id);
-    return ResponseEntity.ok(Map.of("ok", true, "sentAt", Instant.now()));
+  public ResponseEntity<Map<String, Object>> sendTest(
+      @PathVariable UUID id, @RequestBody(required = false) Map<String, String> body) {
+    String to = body != null ? body.get("to") : null;
+    if (to != null && !EMAIL_PATTERN.matcher(to).matches()) {
+      return ResponseEntity.badRequest()
+          .body(Map.of("ok", false, "error", "Invalid email address"));
+    }
+    ReportExecutionDto execution = reportsService.sendTest(id, to);
+    return ResponseEntity.ok(Map.of("ok", true, "sentAt", Instant.now(), "execution", execution));
   }
 
   private Map<String, Object> toEnvelope(Page<ReportDto> page) {

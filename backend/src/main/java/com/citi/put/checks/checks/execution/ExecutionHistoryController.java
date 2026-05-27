@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Profile("!worker")
 @RequestMapping("/api/v1/checks/{checkId}")
 public class ExecutionHistoryController {
 
@@ -80,10 +82,10 @@ public class ExecutionHistoryController {
   }
 
   private void requireReadAccess(UUID checkId, Authentication auth) {
-    var check = checkRepository.findById(checkId).orElse(null);
-    if (check == null) {
-      return;
-    }
+    var check =
+        checkRepository
+            .findById(checkId)
+            .orElseThrow(() -> new IllegalArgumentException("Check not found: " + checkId));
     if (!ownershipEvaluator.canRead(auth, check.getCsiId())) {
       throw new AccessDeniedException("No read access to check " + checkId);
     }

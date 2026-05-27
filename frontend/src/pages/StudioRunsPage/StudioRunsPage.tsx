@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import studioApi from '@/services/api/studioApi';
 import { useAppSelector } from '@/store';
 
-type Status = 'running' | 'completed' | 'failed' | 'timeout';
+type Status = 'RUNNING' | 'COMPLETED' | 'FAILED' | 'TIMEOUT';
 interface RunItem {
   id: string;
   testId: string;
@@ -18,7 +18,7 @@ interface RunItem {
   videoUrl?: string;
 }
 
-const colorFor = (status: string) => (status === 'completed' ? 'success' : status === 'running' ? 'info' : status === 'failed' ? 'error' : 'default');
+const colorFor = (status: string) => (status === 'COMPLETED' ? 'success' : status === 'RUNNING' ? 'info' : status === 'FAILED' ? 'error' : 'default');
 
 const StudioRunsPage: React.FC = () => {
   const [runs, setRuns] = useState<RunItem[]>([]);
@@ -121,12 +121,12 @@ const StudioRunsPage: React.FC = () => {
                         >
                           {r.testName || r.testId}
                         </Typography>
-                        <Chip label={r.status} color={colorFor(r.status) as any} size="small" />
+                        <Chip label={r.status.charAt(0) + r.status.slice(1).toLowerCase()} color={colorFor(r.status) as any} size="small" />
                       </Stack>
                       <Typography variant="caption" color="text.secondary">
-                        Started: {new Date(r.startTime).toLocaleString()} • Duration: {r.duration ? `${Math.round(r.duration/1000)}s` : (r.status === 'running' ? 'in progress' : '—')}
+                        Started: {new Date(r.startTime).toLocaleString()} • Duration: {r.duration ? `${Math.round(r.duration/1000)}s` : (r.status === 'RUNNING' ? 'in progress' : '—')}
                       </Typography>
-                      {r.status === 'running' ? (
+                      {r.status === 'RUNNING' ? (
                         <LinearProgress variant="indeterminate" sx={{ height: 6, borderRadius: 2 }} />
                       ) : (
                         <Box sx={{

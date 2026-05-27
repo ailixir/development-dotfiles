@@ -51,7 +51,7 @@ class LogMaskingIT {
             "test",
             context.getLogger(LogMaskingIT.class),
             Level.INFO,
-            "request payload: {\"user\":\"alice\",\"password\":\"s3cret!\"}",
+            "request payload: {\"user\":\"bruno.buger\",\"password\":\"s3cret!\"}",
             null,
             null);
     event.setLoggerContextRemoteView(context.getLoggerContextRemoteView());
@@ -71,7 +71,7 @@ class LogMaskingIT {
             "test",
             context.getLogger(LogMaskingIT.class),
             Level.INFO,
-            "user alice.smith@citigroup.com logged in",
+            "user bruno.buger@citi.com logged in",
             null,
             null);
     event.setLoggerContextRemoteView(context.getLoggerContextRemoteView());

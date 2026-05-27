@@ -35,6 +35,7 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles("local")
 @TestPropertySource(
     properties = {
+      "checks.local-dev-auth.enabled=false",
       "checks.rate-limit.read-per-min=10000",
       "checks.rate-limit.write-per-min=10000",
       "checks.rate-limit.bulk-per-min=10000",
@@ -90,7 +91,7 @@ class BulkDeleteIT {
     JsonNode json = objectMapper.readTree(resp.getBody());
     assertThat(json.get("results").size()).isEqualTo(3);
     for (JsonNode r : json.get("results")) {
-      assertThat(r.get("status").asText()).isEqualTo("success");
+      assertThat(r.get("status").asText()).isEqualTo("SUCCESS");
     }
   }
 
@@ -115,10 +116,10 @@ class BulkDeleteIT {
     assertThat(resp.getStatusCode().value()).isEqualTo(207);
 
     JsonNode results = objectMapper.readTree(resp.getBody()).get("results");
-    assertThat(results.get(0).get("status").asText()).isEqualTo("success");
-    assertThat(results.get(1).get("status").asText()).isEqualTo("failed");
+    assertThat(results.get(0).get("status").asText()).isEqualTo("SUCCESS");
+    assertThat(results.get(1).get("status").asText()).isEqualTo("FAILED");
     assertThat(results.get(1).get("error").get("code").asText()).isEqualTo("FORBIDDEN");
-    assertThat(results.get(2).get("status").asText()).isEqualTo("success");
+    assertThat(results.get(2).get("status").asText()).isEqualTo("SUCCESS");
   }
 
   @Test
@@ -141,7 +142,7 @@ class BulkDeleteIT {
 
     JsonNode results = objectMapper.readTree(resp.getBody()).get("results");
     for (JsonNode r : results) {
-      assertThat(r.get("status").asText()).isEqualTo("failed");
+      assertThat(r.get("status").asText()).isEqualTo("FAILED");
     }
   }
 

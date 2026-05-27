@@ -56,7 +56,7 @@ public class UITest {
   private String environment;
 
   @Column(length = 20)
-  private String status = "paused";
+  private String status = "PAUSED";
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")
@@ -103,7 +103,7 @@ public class UITest {
     this.viewportHeight = viewportHeight;
     this.environment = environment;
     this.createdBy = createdBy;
-    this.status = "paused";
+    this.status = "PAUSED";
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }

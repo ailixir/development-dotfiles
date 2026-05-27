@@ -21,9 +21,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("local")
+@TestPropertySource(properties = "checks.local-dev-auth.enabled=false")
 class BffFilterHappyPathIT {
 
   static WireMockServer wireMock =
@@ -56,10 +58,10 @@ class BffFilterHappyPathIT {
                 okJson(
                     """
                 {
-                  "user_id": "alice@citi.com",
-                  "email": "alice@citi.com",
-                  "name": "Alice Brown",
-                  "department": "Global Ops",
+                  "user_id": "bruno.buger@citi.com",
+                  "email": "bruno.buger@citi.com",
+                  "name": "Bruno Buger",
+                  "department": "Technology Operations",
                   "roles": ["checks-operator"],
                   "csi_ownership": [
                     { "csi_id": "174523", "role": "owner" }

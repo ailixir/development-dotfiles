@@ -61,6 +61,12 @@ public class Check {
   @Column(name = "last_execution_at")
   private Instant lastExecutionAt;
 
+  @Column(name = "acknowledged_at")
+  private Instant acknowledgedAt;
+
+  @Column(name = "assigned_to")
+  private String assignedTo;
+
   protected Check() {}
 
   public Check(
@@ -162,5 +168,33 @@ public class Check {
 
   public Instant getLastExecutionAt() {
     return lastExecutionAt;
+  }
+
+  public void setStatus(String status) {
+    if (!status.equals(this.status)) {
+      this.acknowledgedAt = null;
+      this.assignedTo = null;
+    }
+    this.status = status;
+  }
+
+  public void setLastExecutionAt(Instant lastExecutionAt) {
+    this.lastExecutionAt = lastExecutionAt;
+  }
+
+  public Instant getAcknowledgedAt() {
+    return acknowledgedAt;
+  }
+
+  public void setAcknowledgedAt(Instant acknowledgedAt) {
+    this.acknowledgedAt = acknowledgedAt;
+  }
+
+  public String getAssignedTo() {
+    return assignedTo;
+  }
+
+  public void setAssignedTo(String assignedTo) {
+    this.assignedTo = assignedTo;
   }
 }

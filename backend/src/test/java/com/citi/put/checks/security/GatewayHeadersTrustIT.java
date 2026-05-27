@@ -48,8 +48,8 @@ class GatewayHeadersTrustIT {
   @Test
   void xUserIdHeaderBypassesCoreCall() {
     HttpHeaders headers = new HttpHeaders();
-    headers.add("X-User-Id", "bob@citi.com");
-    headers.add("X-User-Email", "bob@citi.com");
+    headers.add("X-User-Id", "daniel.estevez@citi.com");
+    headers.add("X-User-Email", "daniel.estevez@citi.com");
     headers.add("X-User-Roles", "checks-admin,platform-admin");
     headers.add("X-User-Csi-Ownership", "174523:owner,99887:contributor");
 

@@ -12,7 +12,7 @@ interface StudioState {
   }>;
   stepResults: Array<{
     stepIndex: number;
-    status: 'pending' | 'running' | 'pass' | 'fail';
+    status: 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL';
     message?: string;
     timestamp: string;
   }>;
@@ -66,7 +66,7 @@ const studioSlice = createSlice({
         state.executionLogs = [];
         state.stepResults = state.testSteps.map((_, index) => ({
           stepIndex: index,
-          status: 'pending',
+          status: 'PENDING',
           timestamp: new Date().toISOString(),
         }));
         state.currentStep = 0;
@@ -83,7 +83,7 @@ const studioSlice = createSlice({
 
     updateStepResult: (
       state,
-      action: PayloadAction<{ stepIndex: number; status: 'pending' | 'running' | 'pass' | 'fail'; message?: string }>
+      action: PayloadAction<{ stepIndex: number; status: 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL'; message?: string }>
     ) => {
       const stepResult = state.stepResults.find((r) => r.stepIndex === action.payload.stepIndex);
       if (stepResult) {
@@ -95,7 +95,7 @@ const studioSlice = createSlice({
 
     setAllStepResults: (
       state,
-      action: PayloadAction<Array<{ stepIndex: number; status: 'pending' | 'running' | 'pass' | 'fail'; message?: string }>>
+      action: PayloadAction<Array<{ stepIndex: number; status: 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL'; message?: string }>>
     ) => {
       // Replace or upsert per provided entries
       const indexByStep: Record<number, number> = {};

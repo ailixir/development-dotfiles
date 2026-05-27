@@ -23,7 +23,7 @@ goal: |
   old ones. ShedLock prevents multi-pod DDL races from M2 onward.
 
 definition_of_done:
-  - "All 6 stories reach Done via SDC cycle."
+  - "All 8 stories reach Done via SDC cycle."
   - "`./gradlew check` green — all M1 + M2 tests passing."
   - "Scheduled HTTP + TCP checks run and persist execution results."
   - "`/actuator/health/partitions` returns DOWN if the +3-day partition is missing."
@@ -85,6 +85,22 @@ stories:
     assigned_dev: null
     story_file: "docs/stories/2.6.story.md"
 
+  - story_id: "2.7"
+    title: "Worker deployment profile (Option C — workload isolation)"
+    size: M
+    status: ready
+    depends_on: ["2.3", "2.4", "2.5", "2.6"]
+    assigned_dev: null
+    story_file: "docs/stories/2.7.story.md"
+
+  - story_id: "2.8"
+    title: "Fix CronDispatcher next-execution drift + configurable batch size"
+    size: S
+    status: ready
+    depends_on: ["2.3"]
+    assigned_dev: null
+    story_file: "docs/stories/2.8.story.md"
+
 # ─────────────────────────────────────────────────────────────
 # Drafting order for @sm (respects depends_on DAG)
 # ─────────────────────────────────────────────────────────────
@@ -113,6 +129,11 @@ sm_draft_queue:
     after: ["2.5"]
     rationale: "Retention pruning depends on partition scheduler."
 
+  - wave: 5
+    parallel: ["2.7", "2.8"]
+    after: ["2.6"]
+    rationale: "Worker profile depends on all schedulers being in place. Drift fix is independent but same wave for batching."
+
 # ─────────────────────────────────────────────────────────────
 # Risk tracking
 # ─────────────────────────────────────────────────────────────
@@ -140,8 +161,8 @@ spec_sections_primary:
 # Progress tracking
 # ─────────────────────────────────────────────────────────────
 progress:
-  stories_drafted: 6
-  stories_validated: 6
+  stories_drafted: 8
+  stories_validated: 8
   stories_done: 0
   stories_blocked: 0
   stories_in_progress: 0
@@ -150,6 +171,8 @@ progress:
     - "2026-04-18 — @pm created EPIC-02-EXECUTION.yaml. All M1 dependencies satisfied (EPIC-01 complete). Awaiting @sm story drafts."
     - "2026-04-18 — @sm drafted all 6 stories (2.1-2.6). Awaiting @po validation."
     - "2026-04-18 — @po validated all 6 stories: 10/10 GO across the board. Non-blocking notes: N-2.1-1 (min frequency guard), N-2.3-1 (config property vs @Profile for dispatcher toggle), N-2.5-1 (L split hint evaluation). All 6 stories now Ready for implementation."
+    - "2026-04-28 — @pm added stories 2.7 (worker deployment profile) and 2.8 (CronDispatcher drift fix + batch config) via Spec Pipeline review."
+    - "2026-04-28 — @po validated stories 2.7 and 2.8: both 10/10 GO. Non-blocking notes: N-2.7-1 (@Profile vs @ConditionalOnProperty for controllers), N-2.7-2 (checkExecutor injection safety in API mode), N-2.7-3 (worker actuator permitAll), N-2.8-1 (drift IT should verify dispatch too), N-2.8-2 (@Value vs @ConfigurationProperties). Both stories now Ready."
 
 # ─────────────────────────────────────────────────────────────
 # Handoff
@@ -161,7 +184,7 @@ handoff:
     @po validates each. Then @dev begins implementation following the wave order.
   hard_gates:
     - "EPIC-01 must be complete before starting EPIC-02. ✅ Met."
-  cadence: "6 stories, estimated 2-3 weeks with depends_on DAG."
+  cadence: "8 stories, estimated 3-4 weeks with depends_on DAG."
 
 attestation:
   signed_by: "@pm (Morgan)"

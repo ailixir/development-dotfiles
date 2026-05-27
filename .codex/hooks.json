@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node '/Users/brunobuger/workspace/citi/put/put-checks/.codex/hooks/precompact-session-digest.cjs'",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node '/Users/brunobuger/workspace/citi/put/put-checks/.codex/hooks/synapse-engine.cjs'",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

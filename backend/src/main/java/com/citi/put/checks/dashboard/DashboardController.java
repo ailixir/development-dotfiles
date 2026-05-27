@@ -3,12 +3,14 @@ package com.citi.put.checks.dashboard;
 import com.citi.put.checks.dashboard.dto.ActivityItemDto;
 import com.citi.put.checks.dashboard.dto.AttentionItemDto;
 import com.citi.put.checks.dashboard.dto.DashboardSummaryDto;
+import com.citi.put.checks.dashboard.dto.ReportSnapshotDto;
 import com.citi.put.checks.dashboard.dto.SearchResultDto;
 import com.citi.put.checks.dashboard.dto.UpcomingItemDto;
 import com.citi.put.checks.security.UserIdentity;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Profile("!worker")
 @RequestMapping("/api/v1/dashboard")
 public class DashboardController {
 
@@ -65,9 +68,11 @@ public class DashboardController {
   }
 
   @GetMapping("/reports/snapshot")
-  public ResponseEntity<Map<String, List<Object>>> getReportsSnapshot(
+  public ResponseEntity<Map<String, List<ReportSnapshotDto>>> getReportsSnapshot(
+      @RequestParam(required = false) String csiId,
       @RequestParam(defaultValue = "5") int limit) {
-    return ResponseEntity.ok(Map.of("data", List.of()));
+    List<ReportSnapshotDto> items = dashboardService.getReportsSnapshot(csiId, limit);
+    return ResponseEntity.ok(Map.of("data", items));
   }
 
   @GetMapping("/search")
@@ -80,14 +85,25 @@ public class DashboardController {
   }
 
   @PostMapping("/attention/{id}/acknowledge")
-  public ResponseEntity<Map<String, Object>> acknowledgeAttentionItem(@PathVariable String id) {
-    return ResponseEntity.ok(Map.of("id", id, "acknowledgedAt", Instant.now()));
+  public ResponseEntity<Map<String, Object>> acknowledgeAttentionItem(
+      @PathVariable String id) {
+    try {
+      Instant acknowledgedAt = dashboardService.acknowledgeCheck(id);
+      return ResponseEntity.ok(Map.of("id", id, "acknowledgedAt", acknowledgedAt));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   @PostMapping("/attention/{id}/assign")
   public ResponseEntity<Map<String, Object>> assignAttentionItem(
       @PathVariable String id, @RequestBody Map<String, String> body) {
     String userId = body.getOrDefault("userId", "");
-    return ResponseEntity.ok(Map.of("id", id, "userId", userId));
+    try {
+      dashboardService.assignCheck(id, userId);
+      return ResponseEntity.ok(Map.of("id", id, "userId", userId));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.notFound().build();
+    }
   }
 }

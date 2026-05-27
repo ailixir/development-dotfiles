@@ -46,6 +46,9 @@ public class Schedule {
   @Column(columnDefinition = "jsonb")
   private String metadata;
 
+  @Column(name = "check_type", nullable = false, length = 20)
+  private String checkType;
+
   @Column(name = "next_execution_at")
   private Instant nextExecutionAt;
 
@@ -72,6 +75,18 @@ public class Schedule {
     this.nextExecutionAt = nextExecutionAt;
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
+  }
+
+  public Schedule(
+      UUID checkId,
+      String checkType,
+      String frequency,
+      String cronExpression,
+      String timezone,
+      boolean enabled,
+      Instant nextExecutionAt) {
+    this(checkId, frequency, cronExpression, timezone, enabled, nextExecutionAt);
+    this.checkType = checkType;
   }
 
   public UUID getId() {
@@ -136,6 +151,14 @@ public class Schedule {
 
   public void setMetadata(String metadata) {
     this.metadata = metadata;
+  }
+
+  public String getCheckType() {
+    return checkType;
+  }
+
+  public void setCheckType(String checkType) {
+    this.checkType = checkType;
   }
 
   public Instant getNextExecutionAt() {

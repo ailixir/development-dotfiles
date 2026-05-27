@@ -74,7 +74,7 @@ public class BulkService {
         results = executePerOp(ops, checkMap, auth, correlationId);
       }
 
-      long successCount = results.stream().filter(r -> "success".equals(r.status())).count();
+      long successCount = results.stream().filter(r -> "SUCCESS".equals(r.status())).count();
       long failCount = results.size() - successCount;
       registry
           .counter("checks_bulk_operations_total", "op", "delete", "outcome", "success")
@@ -116,7 +116,7 @@ public class BulkService {
             for (int i = 0; i < ops.size(); i++) {
               Check check = managed.get(ops.get(i).id());
               check.setDeletedAt(Instant.now());
-              results.add(new BulkResponseDto.OpResult(i, "success", ops.get(i).id(), null));
+              results.add(new BulkResponseDto.OpResult(i, "SUCCESS", ops.get(i).id(), null));
               LOG.info(
                   "bulk op_index={} check_id={} outcome=success correlation={}",
                   i,
@@ -173,7 +173,7 @@ public class BulkService {
               Check c = checkRepository.findById(op.id()).orElseThrow();
               c.setDeletedAt(Instant.now());
             });
-        results.add(new BulkResponseDto.OpResult(i, "success", op.id(), null));
+        results.add(new BulkResponseDto.OpResult(i, "SUCCESS", op.id(), null));
         LOG.info(
             "bulk op_index={} check_id={} outcome=success correlation={}",
             i,
@@ -194,6 +194,6 @@ public class BulkService {
 
   private BulkResponseDto.OpResult failResult(int idx, UUID id, String code, String message) {
     return new BulkResponseDto.OpResult(
-        idx, "failed", id, new BulkResponseDto.OpError(code, message));
+        idx, "FAILED", id, new BulkResponseDto.OpError(code, message));
   }
 }

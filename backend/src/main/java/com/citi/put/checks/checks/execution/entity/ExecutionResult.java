@@ -39,6 +39,7 @@ public class ExecutionResult {
   protected ExecutionResult() {}
 
   public ExecutionResult(
+      UUID executionId,
       UUID checkId,
       String status,
       Instant startedAt,
@@ -46,7 +47,7 @@ public class ExecutionResult {
       int durationMs,
       String output,
       String errorMessage) {
-    this.id = UUID.randomUUID();
+    this.id = executionId;
     this.checkId = checkId;
     this.status = status;
     this.startedAt = startedAt;

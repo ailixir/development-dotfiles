@@ -4,6 +4,8 @@ import com.citi.put.checks.checks.dto.CheckDto;
 import com.citi.put.checks.checks.dto.CheckRequest;
 import com.citi.put.checks.checks.dto.UpcomingCheckDto;
 import com.citi.put.checks.checks.entity.Check;
+import com.citi.put.checks.checks.model.CheckType;
+import com.citi.put.checks.config.CheckSourceProperties;
 import com.citi.put.checks.csi.CsiRepository;
 import com.citi.put.checks.scheduling.ScheduleRepository;
 import com.citi.put.checks.scheduling.ScheduleService;
@@ -13,8 +15,10 @@ import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
+import com.citi.put.checks.tags.CheckTagService;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,24 +41,31 @@ public class CheckService {
   private final CsiOwnershipEvaluator ownershipEvaluator;
   private final ScheduleRepository scheduleRepository;
   private final ScheduleService scheduleService;
+  private final CheckSourceProperties sourceProperties;
+  private final CheckTagService checkTagService;
 
   public CheckService(
       CheckRepository checkRepository,
       CsiRepository csiRepository,
       CsiOwnershipEvaluator ownershipEvaluator,
       ScheduleRepository scheduleRepository,
-      ScheduleService scheduleService) {
+      ScheduleService scheduleService,
+      CheckSourceProperties sourceProperties,
+      CheckTagService checkTagService) {
     this.checkRepository = checkRepository;
     this.csiRepository = csiRepository;
     this.ownershipEvaluator = ownershipEvaluator;
     this.scheduleRepository = scheduleRepository;
     this.scheduleService = scheduleService;
+    this.sourceProperties = sourceProperties;
+    this.checkTagService = checkTagService;
   }
 
   @Transactional
   public CheckDto create(CheckRequest request, Authentication auth) {
     UserIdentity identity = extractIdentity(auth);
     requireWrite(auth, request.csiId());
+    requireSourceEnabled(request.configuration().type());
 
     String csiName =
         csiRepository
@@ -73,7 +84,12 @@ public class CheckService {
             request.environment(),
             identity.email());
     check = checkRepository.save(check);
-    return CheckDto.from(check);
+
+    List<String> tags = request.tags();
+    if (tags != null && !tags.isEmpty()) {
+      checkTagService.replaceTagsForCheck(check.getId(), tags);
+    }
+    return CheckDto.from(check, tags != null ? tags : List.of());
   }
 
   @Transactional(readOnly = true)
@@ -85,6 +101,7 @@ public class CheckService {
       String environment,
       String createdBy,
       String search,
+      List<String> tags,
       int page,
       int size) {
     Pageable pageable =
@@ -108,7 +125,23 @@ public class CheckService {
           checkRepository.findAllVisibleToFiltered(
               ownedCsiIds, csiId, type, status, environment, createdBy, searchPattern, pageable);
     }
-    return result.map(CheckDto::from);
+
+    List<UUID> checkIds = result.getContent().stream().map(Check::getId).toList();
+    Map<UUID, List<String>> tagMap = checkTagService.findTagNamesByCheckIds(checkIds);
+
+    Page<CheckDto> dtoPage =
+        result.map(
+            check -> CheckDto.from(check, tagMap.getOrDefault(check.getId(), List.of())));
+
+    if (tags != null && !tags.isEmpty()) {
+      List<CheckDto> filtered =
+          dtoPage.getContent().stream()
+              .filter(dto -> dto.tags().stream().anyMatch(tags::contains))
+              .toList();
+      return new org.springframework.data.domain.PageImpl<>(filtered, pageable, filtered.size());
+    }
+
+    return dtoPage;
   }
 
   @Transactional(readOnly = true)
@@ -118,8 +151,9 @@ public class CheckService {
       return null;
     }
     requireRead(auth, check.getCsiId());
+    List<String> tags = checkTagService.findTagNamesByCheckId(id);
     ScheduleDto schedule = scheduleRepository.findByCheckId(id).map(ScheduleDto::from).orElse(null);
-    return CheckDto.from(check, schedule);
+    return CheckDto.from(check, tags, schedule);
   }
 
   @Transactional
@@ -144,7 +178,10 @@ public class CheckService {
     check.setConfiguration(request.configuration());
     check.setEnvironment(request.environment());
     check.setUpdatedAt(Instant.now());
-    return CheckDto.from(check);
+
+    List<String> tags = request.tags();
+    checkTagService.replaceTagsForCheck(id, tags);
+    return CheckDto.from(check, tags != null ? tags : List.of());
   }
 
   @Transactional
@@ -171,9 +208,10 @@ public class CheckService {
             .orElseThrow(() -> new IllegalArgumentException("No schedule found for check: " + id));
     scheduleService.setEnabled(schedule.getId(), false, auth);
 
+    List<String> tags = checkTagService.findTagNamesByCheckId(id);
     ScheduleDto scheduleDto =
         scheduleRepository.findByCheckId(id).map(ScheduleDto::from).orElse(null);
-    return CheckDto.from(check, scheduleDto);
+    return CheckDto.from(check, tags, scheduleDto);
   }
 
   @Transactional
@@ -190,9 +228,10 @@ public class CheckService {
             .orElseThrow(() -> new IllegalArgumentException("No schedule found for check: " + id));
     scheduleService.setEnabled(schedule.getId(), true, auth);
 
+    List<String> tags = checkTagService.findTagNamesByCheckId(id);
     ScheduleDto scheduleDto =
         scheduleRepository.findByCheckId(id).map(ScheduleDto::from).orElse(null);
-    return CheckDto.from(check, scheduleDto);
+    return CheckDto.from(check, tags, scheduleDto);
   }
 
   @Transactional(readOnly = true)
@@ -238,6 +277,13 @@ public class CheckService {
       return bff.getPrincipal();
     }
     throw new AccessDeniedException("Not authenticated");
+  }
+
+  private void requireSourceEnabled(String typeName) {
+    CheckType type = CheckType.valueOf(typeName);
+    if (!sourceProperties.isEnabled(type)) {
+      throw new CheckSourceDisabledException(type, sourceProperties.enabledTypeNames());
+    }
   }
 
   private boolean isAdmin(UserIdentity identity) {

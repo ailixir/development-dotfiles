@@ -21,6 +21,7 @@ public record ReportDto(
     String createdBy,
     Instant createdAt,
     Instant updatedAt,
+    Instant nextDeliveryAt,
     Instant lastSentAt) {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -39,11 +40,14 @@ public record ReportDto(
         entity.getCreatedBy(),
         entity.getCreatedAt(),
         entity.getUpdatedAt(),
+        entity.getNextDeliveryAt(),
         entity.getLastSentAt());
   }
 
   private static Object parseJson(String raw) {
-    if (raw == null || raw.isBlank()) return null;
+    if (raw == null || raw.isBlank()) {
+      return null;
+    }
     try {
       return MAPPER.readValue(raw, Object.class);
     } catch (JsonProcessingException e) {
@@ -53,7 +57,9 @@ public record ReportDto(
 
   @SuppressWarnings("unchecked")
   private static List<String> parseJsonList(String raw) {
-    if (raw == null || raw.isBlank()) return Collections.emptyList();
+    if (raw == null || raw.isBlank()) {
+      return Collections.emptyList();
+    }
     try {
       return MAPPER.readValue(raw, List.class);
     } catch (JsonProcessingException e) {

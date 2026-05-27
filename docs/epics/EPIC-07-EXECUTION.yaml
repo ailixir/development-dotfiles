@@ -1,0 +1,76 @@
+#
+# EPIC-07 Execution Manifest — Capacity Hardening & Production Scalability
+# Owner: @pm (Morgan)
+# Framework: AIOS SDC (Story Development Cycle)
+# Source: docs/capacity-planning.md, Spec Pipeline assessment (2026-05-12)
+#
+
+epic_id: EPIC-07
+milestone: M4
+title: "Capacity hardening — dispatch throughput, execution concurrency, resilience"
+status: planning
+created_at: "2026-05-13"
+created_by: "@pm (Morgan)"
+
+# ─────────────────────────────────────────────────────────────
+# Epic goal + definition of done
+# ─────────────────────────────────────────────────────────────
+goal: |
+  The scheduling and execution pipeline handles the documented peak workload
+  (1,500 executions/minute, ~100 concurrent, 250 with headroom) with 2× safety
+  margin. Dispatch throughput reaches 3,000/min, execution slots are decoupled
+  from the DB connection pool, per-source concurrency caps prevent starvation,
+  and the system shuts down gracefully during rolling deployments.
+
+definition_of_done:
+  - "All stories reach Done via SDC cycle."
+  - "`./gradlew check` green — all existing + new tests passing."
+  - "CronDispatcher achieves 3,000 dispatches/min with batch=500, poll=10s."
+  - "Execution concurrency decoupled from Hikari pool — configurable independently."
+  - "Per-source concurrency caps prevent slow integrations from starving fast checks."
+  - "Graceful shutdown drains in-flight executions within 30s."
+  - "E2E integration test covers full dispatch→execute→persist→trigger pipeline."
+
+# ─────────────────────────────────────────────────────────────
+# Stories
+# ─────────────────────────────────────────────────────────────
+stories:
+  - id: "7.1"
+    title: "Decouple execution concurrency from Hikari + per-source caps"
+    size: L
+    wave: 1
+    depends_on: []
+    blocks: ["7.2", "7.3"]
+
+  - id: "7.2"
+    title: "Non-blocking dispatch — fire-and-forget with backpressure"
+    size: L
+    wave: 2
+    depends_on: ["7.1"]
+    blocks: ["7.3"]
+
+  - id: "7.3"
+    title: "Graceful shutdown + transaction ordering + operational fixes"
+    size: M
+    wave: 3
+    depends_on: ["7.1"]
+    blocks: ["7.4"]
+
+  - id: "7.4"
+    title: "E2E pipeline tests + capacity validation"
+    size: L
+    wave: 4
+    depends_on: ["7.1", "7.2", "7.3"]
+    blocks: []
+
+# ─────────────────────────────────────────────────────────────
+# Capacity baseline (from docs/capacity-planning.md)
+# ─────────────────────────────────────────────────────────────
+capacity_baseline:
+  daily_peak_executions: 35000
+  peak_rate_per_minute: 1500
+  avg_execution_duration_sec: 4
+  max_execution_duration_sec: 60
+  target_dispatch_rate_per_minute: 3000
+  target_concurrent_slots: 250
+  target_hikari_pool: 30

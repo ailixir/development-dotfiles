@@ -2,21 +2,28 @@ spring:
   config:
     activate:
       on-profile: local
-  datasource:
-    # Zonky's AutoConfigureEmbeddedDatabase bean-post-processor supplies the DataSource
-    # in @SpringBootTest contexts. For bootRun locally, the embedded-postgres-spring-test
-    # starter auto-registers an EmbeddedPostgres bean wired to spring.datasource.*
-    # Override if another DB is wanted for experiments.
-    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:${LOCAL_PG_PORT:5432}/checks}
-    username: ${DATASOURCE_USER:postgres}
-    password: ${DATASOURCE_PASSWORD:postgres}
-
+  flyway:
+    locations:
+      - classpath:db/migration
+      - classpath:db/seed
   jpa:
     show-sql: false
 
+  mail:
+    host: ${SMTP_HOST:smtp.resend.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASSWORD:}
+
 checks:
   scheduling:
-    dispatcher-enabled: false
+    dispatcher-enabled: true
+  reports:
+    delivery-enabled: true
+    mail:
+      from: onboarding@resend.dev
+  metrics:
+    concurrent-refresh: false
 
 management:
   endpoint:

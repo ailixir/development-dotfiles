@@ -73,7 +73,7 @@ class DiscriminatorCheckTest {
         "INSERT INTO checks (id, name, type, csi_id, csi_name, status,"
             + " configuration, created_by, created_at, updated_at) "
             + "VALUES (?, 'Good Check', 'HTTP', ?, 'Disc CSI', 'PENDING',"
-            + " '{\"type\":\"HTTP\",\"url\":\"x\"}'::jsonb, ?, ?, ?)",
+            + " '{\"type\":\"HTTP\",\"method\":\"GET\",\"url\":\"https://example.com/health\"}'::jsonb, ?, ?, ?)",
         UUID.randomUUID(),
         csiId,
         userEmail,

@@ -2,6 +2,10 @@ spring:
   config:
     activate:
       on-profile: dev
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/checks}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
   flyway:
     locations:
       - classpath:db/migration
@@ -9,7 +13,7 @@ spring:
 
 checks:
   scheduling:
-    dispatcher-enabled: false
+    dispatcher-enabled: true
 
 logging:
   level:

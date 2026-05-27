@@ -9,6 +9,7 @@ import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,35 +33,46 @@ import org.springframework.transaction.annotation.Transactional;
 public class ScheduleService {
 
   private static final Set<String> ADMIN_ROLES = Set.of("checks-admin", "platform-admin");
+  private static final ZonedDateTime REFERENCE_TIME =
+      ZonedDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
 
   private final ScheduleRepository scheduleRepository;
   private final CheckRepository checkRepository;
   private final CsiOwnershipEvaluator ownershipEvaluator;
+  private final int minIntervalSeconds;
 
   public ScheduleService(
       ScheduleRepository scheduleRepository,
       CheckRepository checkRepository,
-      CsiOwnershipEvaluator ownershipEvaluator) {
+      CsiOwnershipEvaluator ownershipEvaluator,
+      @Value("${checks.scheduling.min-interval-seconds:60}") int minIntervalSeconds) {
+    if (minIntervalSeconds < 1) {
+      throw new IllegalStateException(
+          "checks.scheduling.min-interval-seconds must be >= 1, got " + minIntervalSeconds);
+    }
     this.scheduleRepository = scheduleRepository;
     this.checkRepository = checkRepository;
     this.ownershipEvaluator = ownershipEvaluator;
+    this.minIntervalSeconds = minIntervalSeconds;
   }
 
   @Transactional
   public ScheduleDto create(ScheduleRequest request, Authentication auth) {
     Check check = requireCheckExists(request.checkId());
     requireWrite(auth, check.getCsiId());
-    validateCronExpression(request.cronExpression());
+    String cron = normalizeCron(request.cronExpression());
+    validateCronExpression(cron);
     String tz = resolveTimezone(request.timezone());
 
-    Instant nextExecution = computeNextExecution(request.cronExpression(), tz);
+    Instant nextExecution = computeNextExecution(cron, tz);
     boolean enabled = request.enabled() != null ? request.enabled() : true;
 
     Schedule schedule =
         new Schedule(
             request.checkId(),
+            check.getType(),
             request.frequency(),
-            request.cronExpression(),
+            cron,
             tz,
             enabled,
             nextExecution);
@@ -122,16 +135,17 @@ public class ScheduleService {
             .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found: " + id));
     Check check = requireCheckExists(schedule.getCheckId());
     requireWrite(auth, check.getCsiId());
-    validateCronExpression(request.cronExpression());
+    String cron = normalizeCron(request.cronExpression());
+    validateCronExpression(cron);
     String tz = resolveTimezone(request.timezone());
 
     schedule.setFrequency(request.frequency());
-    schedule.setCronExpression(request.cronExpression());
+    schedule.setCronExpression(cron);
     schedule.setTimezone(tz);
     if (request.enabled() != null) {
       schedule.setEnabled(request.enabled());
     }
-    schedule.setNextExecutionAt(computeNextExecution(request.cronExpression(), tz));
+    schedule.setNextExecutionAt(computeNextExecution(cron, tz));
     schedule.setUpdatedAt(Instant.now());
 
     return ScheduleDto.from(schedule);
@@ -173,14 +187,43 @@ public class ScheduleService {
         .orElseThrow(() -> new IllegalArgumentException("Check not found: " + checkId));
   }
 
+  static String normalizeCron(String cron) {
+    if (cron == null) {
+      return null;
+    }
+    String trimmed = cron.strip();
+    if (trimmed.split("\\s+").length == 5) {
+      return "0 " + trimmed;
+    }
+    return trimmed;
+  }
+
   private void validateCronExpression(String cron) {
     if (cron == null || cron.isBlank()) {
       throw new ScheduleValidationException("Cron expression is required");
     }
+    CronExpression expr;
     try {
-      CronExpression.parse(cron);
+      expr = CronExpression.parse(cron);
     } catch (IllegalArgumentException e) {
       throw new ScheduleValidationException("Invalid cron expression: " + cron);
+    }
+    ZonedDateTime next1 = expr.next(REFERENCE_TIME);
+    if (next1 == null) {
+      return;
+    }
+    ZonedDateTime next2 = expr.next(next1);
+    if (next2 == null) {
+      return;
+    }
+    long gapSeconds = Duration.between(next1, next2).getSeconds();
+    if (gapSeconds < minIntervalSeconds) {
+      throw new ScheduleValidationException(
+          "Schedule interval too short: "
+              + gapSeconds
+              + "s between executions, minimum allowed is "
+              + minIntervalSeconds
+              + "s");
     }
   }
 

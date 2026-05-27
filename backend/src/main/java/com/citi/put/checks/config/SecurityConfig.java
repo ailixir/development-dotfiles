@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,11 +30,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties({
-  CoreServiceProperties.class,
-  CorsProperties.class,
-  RateLimitProperties.class
-})
+@Profile("!worker")
 public class SecurityConfig {
 
   @Bean
@@ -131,6 +127,10 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.OPTIONS, "/**")
                     .permitAll()
                     .requestMatchers("/actuator/**")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/checks/sources")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/features")
                     .permitAll()
                     .requestMatchers("/api/**")
                     .authenticated()

@@ -42,7 +42,11 @@ class PartitionHealthIT {
 
   @Test
   void healthUpWhenPartitionsExist() {
-    // Bootstrap already created current + next 2 months
+    // Seed data may leave rows in default partitions; clear them for clean health check
+    jdbc.update("DELETE FROM execution_results_default");
+    jdbc.update("DELETE FROM ui_test_executions_default");
+    jdbc.update("DELETE FROM report_executions_default");
+
     Health health = healthIndicator.health();
     assertThat(health.getStatus()).isEqualTo(Status.UP);
   }

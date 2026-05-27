@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.citi.put.checks.checks.entity.Check;
 import com.citi.put.checks.checks.model.CheckType;
 import com.citi.put.checks.checks.model.HttpConfiguration;
+import com.citi.put.checks.config.CheckSourceProperties;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import java.util.UUID;
@@ -110,7 +111,29 @@ class HttpExecutorIT {
 
   @Test
   void dispatcherThrowsOnMissingType() {
-    CheckExecutorDispatcher dispatcher = new CheckExecutorDispatcher(java.util.List.of(executor));
+    CheckSourceProperties allEnabled =
+        new CheckSourceProperties(
+            java.util.Map.of(
+                CheckType.HTTP,
+                true,
+                CheckType.TCP,
+                true,
+                CheckType.SPLUNK,
+                true,
+                CheckType.GRAFANA,
+                true,
+                CheckType.ITRS,
+                true,
+                CheckType.APPDYNAMICS,
+                true,
+                CheckType.UI_TEST,
+                true));
+    CheckExecutorDispatcher dispatcher =
+        new CheckExecutorDispatcher(
+            java.util.List.of(executor),
+            allEnabled,
+            new com.citi.put.checks.config.SourceConcurrencyProperties(250, null),
+            new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
     Check check =
         new Check(
             "Fake",

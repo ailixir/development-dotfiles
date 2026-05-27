@@ -120,6 +120,102 @@ class ScheduleValidationIT {
   }
 
   @Test
+  void subMinuteScheduleReturns400() {
+    String body =
+        """
+        {
+          "checkId": "%s",
+          "frequency": "custom",
+          "cronExpression": "*/5 * * * * *",
+          "timezone": "UTC",
+          "enabled": true
+        }
+        """
+            .formatted(checkId);
+
+    ResponseEntity<String> resp =
+        restTemplate.exchange(
+            "/api/v1/schedules",
+            HttpMethod.POST,
+            new HttpEntity<>(body, authHeaders("val-sub-minute")),
+            String.class);
+    assertThat(resp.getStatusCode().value()).isEqualTo(400);
+    assertThat(resp.getBody()).contains("minimum allowed");
+  }
+
+  @Test
+  void hourlyScheduleReturns201() {
+    String body =
+        """
+        {
+          "checkId": "%s",
+          "frequency": "hourly",
+          "cronExpression": "0 0 * * * *",
+          "timezone": "UTC",
+          "enabled": true
+        }
+        """
+            .formatted(checkId);
+
+    ResponseEntity<String> resp =
+        restTemplate.exchange(
+            "/api/v1/schedules",
+            HttpMethod.POST,
+            new HttpEntity<>(body, authHeaders("val-hourly")),
+            String.class);
+    assertThat(resp.getStatusCode().value()).isEqualTo(201);
+  }
+
+  @Test
+  void updateToSubMinuteReturns400() throws Exception {
+    // Create a valid schedule first
+    String createBody =
+        """
+        {
+          "checkId": "%s",
+          "frequency": "hourly",
+          "cronExpression": "0 0 * * * *",
+          "timezone": "UTC",
+          "enabled": true
+        }
+        """
+            .formatted(checkId);
+
+    ResponseEntity<String> createResp =
+        restTemplate.exchange(
+            "/api/v1/schedules",
+            HttpMethod.POST,
+            new HttpEntity<>(createBody, authHeaders("val-update-sub")),
+            String.class);
+    assertThat(createResp.getStatusCode().value()).isEqualTo(201);
+
+    String scheduleId =
+        objectMapper.readTree(createResp.getBody()).get("id").asText();
+
+    // Update to sub-minute cron
+    String updateBody =
+        """
+        {
+          "checkId": "%s",
+          "frequency": "custom",
+          "cronExpression": "*/10 * * * * *",
+          "timezone": "UTC",
+          "enabled": true
+        }
+        """
+            .formatted(checkId);
+
+    ResponseEntity<String> updateResp =
+        restTemplate.exchange(
+            "/api/v1/schedules/" + scheduleId,
+            HttpMethod.PUT,
+            new HttpEntity<>(updateBody, authHeaders("val-update-sub")),
+            String.class);
+    assertThat(updateResp.getStatusCode().value()).isEqualTo(400);
+    assertThat(updateResp.getBody()).contains("minimum allowed");
+  }
+
+  @Test
   void duplicateCheckIdReturns409() throws Exception {
     String body =
         """

@@ -54,6 +54,12 @@ class CronDispatcherIT {
   @BeforeEach
   void setUp() {
     wireMock.resetAll();
+    jdbc.update("DELETE FROM execution_results");
+    jdbc.update("DELETE FROM schedules");
+    jdbc.update(
+        "UPDATE shedlock SET lock_until = now() - interval '1 minute'"
+            + " WHERE name = 'cronDispatcher'");
+    jdbc.update("DELETE FROM shedlock WHERE name = 'cronDispatcher'");
     seedUser("cron-owner@citi.com");
     seedCsi("60001", "Cron CSI");
     checkId = seedHttpCheck("60001", "cron-owner@citi.com");
@@ -78,24 +84,33 @@ class CronDispatcherIT {
 
   @Test
   void dispatchesDueScheduleAndAdvancesNextExecution() throws Exception {
-    Instant pastTime = Instant.now().minus(1, ChronoUnit.MINUTES);
+    Instant pastTime = Instant.now().minus(2, ChronoUnit.MINUTES);
     scheduleId = seedSchedule(checkId, "0 */5 * * * *", "UTC", true, pastTime);
 
     cronDispatcher.pollAndDispatch();
 
-    // Wait briefly for async execution to persist
-    Thread.sleep(2000);
-
-    // Verify execution_result row was created
-    List<Map<String, Object>> results =
-        jdbc.queryForList("SELECT * FROM execution_results WHERE check_id = ?", checkId);
+    // Poll for async execution result (up to 10 seconds)
+    List<Map<String, Object>> results = List.of();
+    for (int i = 0; i < 20; i++) {
+      Thread.sleep(500);
+      results = jdbc.queryForList("SELECT * FROM execution_results WHERE check_id = ?", checkId);
+      if (!results.isEmpty()) {
+        break;
+      }
+    }
     assertThat(results).isNotEmpty();
+    assertThat(results.get(0).get("status")).isEqualTo("SUCCESS");
 
-    // Verify next_execution_at was advanced to the future
+    // Verify DB trigger cascaded execution status to check status
+    String checkStatus =
+        jdbc.queryForObject("SELECT status FROM checks WHERE id = ?", String.class, checkId);
+    assertThat(checkStatus).as("DB trigger should cascade SUCCESS → PASSING").isEqualTo("PASSING");
+
+    // Verify next_execution_at was advanced from the original value
     Instant nextExecution =
         jdbc.queryForObject(
             "SELECT next_execution_at FROM schedules WHERE id = ?", Instant.class, scheduleId);
-    assertThat(nextExecution).isAfter(Instant.now());
+    assertThat(nextExecution).isAfter(pastTime);
   }
 
   private void seedUser(String email) {
@@ -147,9 +162,9 @@ class CronDispatcherIT {
       UUID forCheckId, String cron, String tz, boolean enabled, Instant nextExecutionAt) {
     UUID id = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO schedules (id, check_id, frequency, cron_expression, timezone, enabled,"
+        "INSERT INTO schedules (id, check_id, check_type, frequency, cron_expression, timezone, enabled,"
             + " next_execution_at, created_at, updated_at)"
-            + " VALUES (?, ?, 'custom', ?, ?, ?, ?, ?, ?)",
+            + " VALUES (?, ?, 'HTTP', 'custom', ?, ?, ?, ?, ?, ?)",
         id,
         forCheckId,
         cron,

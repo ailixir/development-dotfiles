@@ -4,10 +4,12 @@ import com.citi.put.checks.checks.dto.CheckDto;
 import com.citi.put.checks.checks.dto.CheckRequest;
 import com.citi.put.checks.checks.dto.UpcomingCheckDto;
 import com.citi.put.checks.security.UserIdentity;
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Profile("!worker")
 @RequestMapping("/api/v1/checks")
 public class CheckController {
 
@@ -34,7 +37,8 @@ public class CheckController {
   }
 
   @PostMapping
-  public ResponseEntity<CheckDto> create(@RequestBody CheckRequest request, Authentication auth) {
+  public ResponseEntity<CheckDto> create(
+      @Valid @RequestBody CheckRequest request, Authentication auth) {
     CheckDto created = checkService.create(request, auth);
     return ResponseEntity.created(URI.create("/api/v1/checks/" + created.id())).body(created);
   }
@@ -48,11 +52,12 @@ public class CheckController {
       @RequestParam(required = false) String environment,
       @RequestParam(required = false) String createdBy,
       @RequestParam(required = false) String search,
+      @RequestParam(required = false) List<String> tags,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
     Page<CheckDto> result =
         checkService.list(
-            identity, csiId, type, status, environment, createdBy, search, page, size);
+            identity, csiId, type, status, environment, createdBy, search, tags, page, size);
     return ResponseEntity.ok(toEnvelope(result));
   }
 
@@ -67,7 +72,7 @@ public class CheckController {
 
   @PutMapping("/{id}")
   public ResponseEntity<CheckDto> update(
-      @PathVariable UUID id, @RequestBody CheckRequest request, Authentication auth) {
+      @PathVariable UUID id, @Valid @RequestBody CheckRequest request, Authentication auth) {
     CheckDto updated = checkService.update(id, request, auth);
     return ResponseEntity.ok(updated);
   }

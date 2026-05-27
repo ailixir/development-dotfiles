@@ -1,6 +1,7 @@
 package com.citi.put.checks.config;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 
 public class SemaphoreBoundedExecutor implements Executor {
@@ -19,7 +20,7 @@ public class SemaphoreBoundedExecutor implements Executor {
       semaphore.acquire();
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      throw new RuntimeException("Interrupted waiting for executor permit", e);
+      throw new RejectedExecutionException("Interrupted waiting for executor permit", e);
     }
     delegate.execute(
         () -> {

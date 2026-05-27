@@ -1,0 +1,43 @@
+{{- if .Values.backend.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.api.fullname" . }}-config
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.api.selectorLabels" . | nindent 4 }}
+data:
+  SERVER_PORT: {{ .Values.backend.service.port | quote }}
+  {{- range $key, $val := .Values.backend.configOverrides }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
+{{- end }}
+{{- if .Values.worker.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.worker.fullname" . }}-config
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.worker.selectorLabels" . | nindent 4 }}
+data:
+  SERVER_PORT: {{ .Values.worker.service.port | quote }}
+  {{- range $key, $val := .Values.worker.configOverrides }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
+{{- end }}
+{{- if .Values.frontend.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.frontend.fullname" . }}-config
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.frontend.selectorLabels" . | nindent 4 }}
+data:
+  {{- range $key, $val := .Values.frontend.env }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
+{{- end }}

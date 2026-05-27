@@ -32,9 +32,9 @@ class PermissionAspectCacheIT {
   private static final String IDENTITY_JSON =
       """
             {
-              "user_id": "alice@citi.com",
-              "email": "alice@citi.com",
-              "name": "Alice",
+              "user_id": "bruno.buger@citi.com",
+              "email": "bruno.buger@citi.com",
+              "name": "Bruno Buger",
               "roles": ["checks-operator"],
               "csi_ownership": [{ "csi_id": "174523", "role": "owner" }]
             }

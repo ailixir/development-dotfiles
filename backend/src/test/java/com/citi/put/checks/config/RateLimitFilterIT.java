@@ -31,6 +31,7 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles("local")
 @TestPropertySource(
     properties = {
+      "checks.local-dev-auth.enabled=false",
       "checks.rate-limit.read-per-min=5",
       "checks.rate-limit.write-per-min=3",
       "checks.rate-limit.execute-per-min=2",

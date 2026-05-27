@@ -35,11 +35,12 @@ END $$;
 -- ═══════════════════════════════════════════════════════════════
 
 INSERT INTO users (id, sso_id, name, email, department, is_active, created_at) VALUES
-  ('a1b2c3d4-0001-4000-8000-000000000001', 'jm78901', 'John Martinez',  'john.martinez@example.com', 'Technology Operations',     true, NOW() - INTERVAL '90 days'),
-  ('a1b2c3d4-0001-4000-8000-000000000002', 'sk12345', 'Sarah Kim',      'sarah.kim@example.com',     'Site Reliability Engineering', true, NOW() - INTERVAL '85 days'),
-  ('a1b2c3d4-0001-4000-8000-000000000003', 'rp45678', 'Raj Patel',      'raj.patel@example.com',     'Quality Assurance',         true, NOW() - INTERVAL '80 days'),
-  ('a1b2c3d4-0001-4000-8000-000000000004', 'lw23456', 'Lisa Wang',      'lisa.wang@example.com',     'Software Engineering',      true, NOW() - INTERVAL '75 days'),
-  ('a1b2c3d4-0001-4000-8000-000000000005', 'mc67890', 'Mike Chen',      'mike.chen@example.com',     'Engineering Management',    true, NOW() - INTERVAL '70 days')
+  ('a1b2c3d4-0001-4000-8000-000000000001', 'bb12345', 'Bruno Buger',    'bruno.buger@citi.com', 'Technology Operations',     true, NOW() - INTERVAL '90 days'),
+  ('a1b2c3d4-0001-4000-8000-000000000002', 'de78901', 'Daniel Estevez', 'daniel.estevez@citi.com',     'Site Reliability Engineering', true, NOW() - INTERVAL '85 days'),
+  ('a1b2c3d4-0001-4000-8000-000000000003', 'rp45678', 'Raj Patel',      'raj.patel@citi.com',          'Quality Assurance',         true, NOW() - INTERVAL '80 days'),
+  ('a1b2c3d4-0001-4000-8000-000000000004', 'lw23456', 'Lisa Wang',      'lisa.wang@citi.com',     'Software Engineering',      true, NOW() - INTERVAL '75 days'),
+  ('a1b2c3d4-0001-4000-8000-000000000005', 'mc67890', 'Mike Chen',      'mike.chen@citi.com',     'Engineering Management',    true, NOW() - INTERVAL '70 days'),
+  ('a1b2c3d4-0001-4000-8000-000000000099', 'dev-user', 'Local Developer', 'local.dev@citi.com',     'Development',               true, NOW() - INTERVAL '1 day')
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════
@@ -49,17 +50,17 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO csi_systems (id, name, description, business_unit, criticality, owner_email, environment, status, metadata) VALUES
   ('178672', 'Production Unified Toolkit',
    'Unified operational command center — monitoring orchestration, automated communications, and operational automation. Modules: Checks, Comms, Scripts, Workflows, Solutions.',
-   'Technology', 'CRITICAL', 'john.martinez@example.com', 'Production', 'OPERATIONAL',
+   'Technology', 'CRITICAL', 'bruno.buger@citi.com', 'Production', 'OPERATIONAL',
    '{"region":"NA","datacenter":"NY4","tier":"tier-1","oncall_team":"put-platform-sre","modules":["checks","comms","scripts","workflows","solutions"]}'::jsonb),
 
   ('285614', 'Trade Settlement Engine',
    'Equity and fixed-income trade matching, confirmation, and settlement engine.',
-   'Securities Services', 'HIGH', 'sarah.kim@example.com', 'Production', 'DEGRADED',
+   'Securities Services', 'HIGH', 'daniel.estevez@citi.com', 'Production', 'DEGRADED',
    '{"region":"NA","datacenter":"NY4","tier":"tier-1","oncall_team":"trading-sre"}'::jsonb),
 
   ('396705', 'Developer Portal',
    'Internal developer portal for API documentation, SDK downloads, and sandbox environments.',
-   'Technology', 'MEDIUM', 'lisa.wang@example.com', 'Production', 'OPERATIONAL',
+   'Technology', 'MEDIUM', 'lisa.wang@citi.com', 'Production', 'OPERATIONAL',
    '{"region":"GLOBAL","datacenter":"NJ2","tier":"tier-3","oncall_team":"platform-eng"}'::jsonb)
 ON CONFLICT (id) DO NOTHING;
 
@@ -73,32 +74,32 @@ INSERT INTO checks (id, name, type, csi_id, csi_name, description, environment, 
   ('b2c3d4e5-0001-4000-8000-000000000001',
    'PUT Shell Health', 'HTTP', '178672', 'Production Unified Toolkit',
    'Platform shell health endpoint — serves the unified UI and module federation host', 'Production',
-   '{"type":"HTTP","method":"GET","url":"https://put.internal.example.com/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
-   'PENDING', 'john.martinez@example.com', NOW() - INTERVAL '60 days', NOW()),
+   '{"type":"HTTP","method":"GET","url":"https://put.internal.citi.com/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
+   'PENDING', 'bruno.buger@citi.com', NOW() - INTERVAL '60 days', NOW()),
 
   ('b2c3d4e5-0001-4000-8000-000000000002',
    'PUT Core Service', 'HTTP', '178672', 'Production Unified Toolkit',
    'Core service — SSO session introspection, RBAC, and CSI ownership resolution', 'Production',
-   '{"type":"HTTP","method":"GET","url":"https://put-core.internal.example.com/actuator/health","expectedStatusCode":200,"timeoutMs":3000,"followRedirects":false,"verifyTls":true}'::jsonb,
-   'PENDING', 'john.martinez@example.com', NOW() - INTERVAL '60 days', NOW()),
+   '{"type":"HTTP","method":"GET","url":"https://put-core.internal.citi.com/actuator/health","expectedStatusCode":200,"timeoutMs":3000,"followRedirects":false,"verifyTls":true}'::jsonb,
+   'PENDING', 'bruno.buger@citi.com', NOW() - INTERVAL '60 days', NOW()),
 
   ('b2c3d4e5-0001-4000-8000-000000000003',
    'Checks Module Health', 'HTTP', '178672', 'Production Unified Toolkit',
    'Checks module backend — monitoring orchestration across Grafana, Splunk, ITRS, AppDynamics', 'Production',
-   '{"type":"HTTP","method":"GET","url":"https://put-checks.internal.example.com/actuator/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
-   'PENDING', 'sarah.kim@example.com', NOW() - INTERVAL '55 days', NOW()),
+   '{"type":"HTTP","method":"GET","url":"https://put-checks.internal.citi.com/actuator/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
+   'PENDING', 'daniel.estevez@citi.com', NOW() - INTERVAL '55 days', NOW()),
 
   ('b2c3d4e5-0001-4000-8000-000000000004',
    'Comms Module Health', 'HTTP', '178672', 'Production Unified Toolkit',
    'Comms module backend — AI-powered operational communications, templates, and SMTP relay', 'Production',
-   '{"type":"HTTP","method":"GET","url":"https://put-comms.internal.example.com/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
-   'PENDING', 'john.martinez@example.com', NOW() - INTERVAL '60 days', NOW()),
+   '{"type":"HTTP","method":"GET","url":"https://put-comms.internal.citi.com/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
+   'PENDING', 'bruno.buger@citi.com', NOW() - INTERVAL '60 days', NOW()),
 
   ('b2c3d4e5-0001-4000-8000-000000000005',
    'PUT Database Primary', 'TCP', '178672', 'Production Unified Toolkit',
    'Shared PostgreSQL primary — platform shell, checks, and comms databases', 'Production',
-   '{"type":"TCP","host":"put-db-primary.internal.example.com","port":5432,"timeoutMs":5000}'::jsonb,
-   'PENDING', 'john.martinez@example.com', NOW() - INTERVAL '58 days', NOW())
+   '{"type":"TCP","host":"put-db-primary.internal.citi.com","port":5432,"timeoutMs":5000}'::jsonb,
+   'PENDING', 'bruno.buger@citi.com', NOW() - INTERVAL '58 days', NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- 285614: Trade Settlement Engine (6 checks — 2 PASSING, 3 FAILING, 1 WARNING)
@@ -106,38 +107,38 @@ INSERT INTO checks (id, name, type, csi_id, csi_name, description, environment, 
   ('b2c3d4e5-0002-4000-8000-000000000001',
    'TSE Health Endpoint', 'HTTP', '285614', 'Trade Settlement Engine',
    'Primary health check for trade settlement service', 'Production',
-   '{"type":"HTTP","method":"GET","url":"https://tse.internal.example.com/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
-   'PENDING', 'sarah.kim@example.com', NOW() - INTERVAL '50 days', NOW()),
+   '{"type":"HTTP","method":"GET","url":"https://tse.internal.citi.com/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
+   'PENDING', 'daniel.estevez@citi.com', NOW() - INTERVAL '50 days', NOW()),
 
   ('b2c3d4e5-0002-4000-8000-000000000002',
    'TSE Order Matching', 'HTTP', '285614', 'Trade Settlement Engine',
    'Order matching engine status — intermittent failures', 'Production',
-   '{"type":"HTTP","method":"GET","url":"https://tse.internal.example.com/api/matching/status","expectedStatusCode":200,"timeoutMs":8000,"followRedirects":true,"verifyTls":true}'::jsonb,
-   'PENDING', 'sarah.kim@example.com', NOW() - INTERVAL '48 days', NOW()),
+   '{"type":"HTTP","method":"GET","url":"https://tse.internal.citi.com/api/matching/status","expectedStatusCode":200,"timeoutMs":8000,"followRedirects":true,"verifyTls":true}'::jsonb,
+   'PENDING', 'daniel.estevez@citi.com', NOW() - INTERVAL '48 days', NOW()),
 
   ('b2c3d4e5-0002-4000-8000-000000000003',
    'TSE Settlement Queue', 'HTTP', '285614', 'Trade Settlement Engine',
    'Settlement queue health — backlog building', 'Production',
-   '{"type":"HTTP","method":"GET","url":"https://tse.internal.example.com/api/settlement/queue/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
-   'PENDING', 'sarah.kim@example.com', NOW() - INTERVAL '45 days', NOW()),
+   '{"type":"HTTP","method":"GET","url":"https://tse.internal.citi.com/api/settlement/queue/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
+   'PENDING', 'daniel.estevez@citi.com', NOW() - INTERVAL '45 days', NOW()),
 
   ('b2c3d4e5-0002-4000-8000-000000000004',
    'TSE Risk Calculator', 'HTTP', '285614', 'Trade Settlement Engine',
    'Risk calculation service — elevated response times', 'Production',
-   '{"type":"HTTP","method":"GET","url":"https://tse.internal.example.com/api/risk/status","expectedStatusCode":200,"timeoutMs":10000,"followRedirects":true,"verifyTls":true}'::jsonb,
-   'PENDING', 'raj.patel@example.com', NOW() - INTERVAL '42 days', NOW()),
+   '{"type":"HTTP","method":"GET","url":"https://tse.internal.citi.com/api/risk/status","expectedStatusCode":200,"timeoutMs":10000,"followRedirects":true,"verifyTls":true}'::jsonb,
+   'PENDING', 'raj.patel@citi.com', NOW() - INTERVAL '42 days', NOW()),
 
   ('b2c3d4e5-0002-4000-8000-000000000005',
    'TSE Database Primary', 'TCP', '285614', 'Trade Settlement Engine',
    'PostgreSQL primary instance for trade data', 'Production',
-   '{"type":"TCP","host":"tse-db-primary.internal.example.com","port":5432,"timeoutMs":5000}'::jsonb,
-   'PENDING', 'sarah.kim@example.com', NOW() - INTERVAL '50 days', NOW()),
+   '{"type":"TCP","host":"tse-db-primary.internal.citi.com","port":5432,"timeoutMs":5000}'::jsonb,
+   'PENDING', 'daniel.estevez@citi.com', NOW() - INTERVAL '50 days', NOW()),
 
   ('b2c3d4e5-0002-4000-8000-000000000006',
    'TSE Message Broker', 'TCP', '285614', 'Trade Settlement Engine',
    'RabbitMQ broker connectivity — connection refused', 'Production',
-   '{"type":"TCP","host":"tse-mq.internal.example.com","port":5672,"timeoutMs":5000}'::jsonb,
-   'PENDING', 'sarah.kim@example.com', NOW() - INTERVAL '50 days', NOW())
+   '{"type":"TCP","host":"tse-mq.internal.citi.com","port":5672,"timeoutMs":5000}'::jsonb,
+   'PENDING', 'daniel.estevez@citi.com', NOW() - INTERVAL '50 days', NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- 396705: Developer Portal (4 checks — all PASSING)
@@ -145,51 +146,51 @@ INSERT INTO checks (id, name, type, csi_id, csi_name, description, environment, 
   ('b2c3d4e5-0003-4000-8000-000000000001',
    'DevPortal Health', 'HTTP', '396705', 'Developer Portal',
    'Portal application health endpoint', 'Production',
-   '{"type":"HTTP","method":"GET","url":"https://devportal.internal.example.com/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
-   'PENDING', 'lisa.wang@example.com', NOW() - INTERVAL '40 days', NOW()),
+   '{"type":"HTTP","method":"GET","url":"https://devportal.internal.citi.com/health","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
+   'PENDING', 'lisa.wang@citi.com', NOW() - INTERVAL '40 days', NOW()),
 
   ('b2c3d4e5-0003-4000-8000-000000000002',
    'DevPortal API Gateway', 'HTTP', '396705', 'Developer Portal',
    'API gateway routing and rate limiting', 'Production',
-   '{"type":"HTTP","method":"GET","url":"https://devportal.internal.example.com/api/v1/status","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
-   'PENDING', 'lisa.wang@example.com', NOW() - INTERVAL '38 days', NOW()),
+   '{"type":"HTTP","method":"GET","url":"https://devportal.internal.citi.com/api/v1/status","expectedStatusCode":200,"timeoutMs":5000,"followRedirects":true,"verifyTls":true}'::jsonb,
+   'PENDING', 'lisa.wang@citi.com', NOW() - INTERVAL '38 days', NOW()),
 
   ('b2c3d4e5-0003-4000-8000-000000000003',
    'DevPortal CDN', 'HTTP', '396705', 'Developer Portal',
    'Content delivery network health for static assets', 'Production',
-   '{"type":"HTTP","method":"GET","url":"https://cdn.devportal.internal.example.com/health","expectedStatusCode":200,"timeoutMs":3000,"followRedirects":true,"verifyTls":true}'::jsonb,
-   'PENDING', 'lisa.wang@example.com', NOW() - INTERVAL '35 days', NOW()),
+   '{"type":"HTTP","method":"GET","url":"https://cdn.devportal.internal.citi.com/health","expectedStatusCode":200,"timeoutMs":3000,"followRedirects":true,"verifyTls":true}'::jsonb,
+   'PENDING', 'lisa.wang@citi.com', NOW() - INTERVAL '35 days', NOW()),
 
   ('b2c3d4e5-0003-4000-8000-000000000004',
    'DevPortal Database', 'TCP', '396705', 'Developer Portal',
    'PostgreSQL instance for portal data', 'Production',
-   '{"type":"TCP","host":"devportal-db.internal.example.com","port":5432,"timeoutMs":5000}'::jsonb,
-   'PENDING', 'lisa.wang@example.com', NOW() - INTERVAL '40 days', NOW())
+   '{"type":"TCP","host":"devportal-db.internal.citi.com","port":5432,"timeoutMs":5000}'::jsonb,
+   'PENDING', 'lisa.wang@citi.com', NOW() - INTERVAL '40 days', NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════
 -- 4. Schedules (12 rows — 3 checks intentionally unscheduled)
 -- ═══════════════════════════════════════════════════════════════
 
-INSERT INTO schedules (id, check_id, frequency, cron_expression, timezone, enabled, next_execution_at, created_at, updated_at) VALUES
+INSERT INTO schedules (id, check_id, check_type, frequency, cron_expression, timezone, enabled, next_execution_at, created_at, updated_at) VALUES
   -- 178672: every 5 min for critical health, 15 min for services, hourly for infra
-  ('c3d4e5f6-0001-4000-8000-000000000001', 'b2c3d4e5-0001-4000-8000-000000000001', 'every_5m',  '*/5 * * * *',  'UTC', true,  NOW() + INTERVAL '5 minutes',  NOW() - INTERVAL '60 days', NOW()),
-  ('c3d4e5f6-0001-4000-8000-000000000002', 'b2c3d4e5-0001-4000-8000-000000000002', 'every_15m', '*/15 * * * *', 'UTC', true,  NOW() + INTERVAL '15 minutes', NOW() - INTERVAL '60 days', NOW()),
-  ('c3d4e5f6-0001-4000-8000-000000000003', 'b2c3d4e5-0001-4000-8000-000000000003', 'every_15m', '*/15 * * * *', 'UTC', true,  NOW() + INTERVAL '15 minutes', NOW() - INTERVAL '55 days', NOW()),
-  ('c3d4e5f6-0001-4000-8000-000000000004', 'b2c3d4e5-0001-4000-8000-000000000004', 'hourly',    '0 * * * *',   'UTC', true,  NOW() + INTERVAL '1 hour',     NOW() - INTERVAL '60 days', NOW()),
+  ('c3d4e5f6-0001-4000-8000-000000000001', 'b2c3d4e5-0001-4000-8000-000000000001', 'HTTP', 'every_5m',  '0 */5 * * * *',  'UTC', true,  NOW() + INTERVAL '5 minutes',  NOW() - INTERVAL '60 days', NOW()),
+  ('c3d4e5f6-0001-4000-8000-000000000002', 'b2c3d4e5-0001-4000-8000-000000000002', 'HTTP', 'every_15m', '0 */15 * * * *', 'UTC', true,  NOW() + INTERVAL '15 minutes', NOW() - INTERVAL '60 days', NOW()),
+  ('c3d4e5f6-0001-4000-8000-000000000003', 'b2c3d4e5-0001-4000-8000-000000000003', 'HTTP', 'every_15m', '0 */15 * * * *', 'UTC', true,  NOW() + INTERVAL '15 minutes', NOW() - INTERVAL '55 days', NOW()),
+  ('c3d4e5f6-0001-4000-8000-000000000004', 'b2c3d4e5-0001-4000-8000-000000000004', 'HTTP', 'hourly',    '0 0 * * * *',   'UTC', true,  NOW() + INTERVAL '1 hour',     NOW() - INTERVAL '60 days', NOW()),
   -- PUT Database Primary intentionally unscheduled (manual check)
 
   -- 285614: every 5 min for health, 15 min for services, hourly for infra
-  ('c3d4e5f6-0002-4000-8000-000000000001', 'b2c3d4e5-0002-4000-8000-000000000001', 'every_5m',  '*/5 * * * *',  'UTC', true,  NOW() + INTERVAL '5 minutes',  NOW() - INTERVAL '50 days', NOW()),
-  ('c3d4e5f6-0002-4000-8000-000000000002', 'b2c3d4e5-0002-4000-8000-000000000002', 'every_15m', '*/15 * * * *', 'UTC', true,  NOW() + INTERVAL '15 minutes', NOW() - INTERVAL '48 days', NOW()),
-  ('c3d4e5f6-0002-4000-8000-000000000003', 'b2c3d4e5-0002-4000-8000-000000000003', 'every_15m', '*/15 * * * *', 'UTC', false, NULL,                          NOW() - INTERVAL '45 days', NOW()),
-  ('c3d4e5f6-0002-4000-8000-000000000004', 'b2c3d4e5-0002-4000-8000-000000000004', 'hourly',    '0 * * * *',   'UTC', true,  NOW() + INTERVAL '1 hour',     NOW() - INTERVAL '42 days', NOW()),
-  ('c3d4e5f6-0002-4000-8000-000000000005', 'b2c3d4e5-0002-4000-8000-000000000005', 'hourly',    '0 * * * *',   'UTC', true,  NOW() + INTERVAL '1 hour',     NOW() - INTERVAL '50 days', NOW()),
+  ('c3d4e5f6-0002-4000-8000-000000000001', 'b2c3d4e5-0002-4000-8000-000000000001', 'HTTP', 'every_5m',  '0 */5 * * * *',  'UTC', true,  NOW() + INTERVAL '5 minutes',  NOW() - INTERVAL '50 days', NOW()),
+  ('c3d4e5f6-0002-4000-8000-000000000002', 'b2c3d4e5-0002-4000-8000-000000000002', 'HTTP', 'every_15m', '0 */15 * * * *', 'UTC', true,  NOW() + INTERVAL '15 minutes', NOW() - INTERVAL '48 days', NOW()),
+  ('c3d4e5f6-0002-4000-8000-000000000003', 'b2c3d4e5-0002-4000-8000-000000000003', 'HTTP', 'every_15m', '0 */15 * * * *', 'UTC', false, NULL,                          NOW() - INTERVAL '45 days', NOW()),
+  ('c3d4e5f6-0002-4000-8000-000000000004', 'b2c3d4e5-0002-4000-8000-000000000004', 'HTTP', 'hourly',    '0 0 * * * *',   'UTC', true,  NOW() + INTERVAL '1 hour',     NOW() - INTERVAL '42 days', NOW()),
+  ('c3d4e5f6-0002-4000-8000-000000000005', 'b2c3d4e5-0002-4000-8000-000000000005', 'TCP',  'hourly',    '0 0 * * * *',   'UTC', true,  NOW() + INTERVAL '1 hour',     NOW() - INTERVAL '50 days', NOW()),
   -- TSE Message Broker intentionally unscheduled (connection refused — investigating)
 
   -- 396705: daily for non-critical portal checks
-  ('c3d4e5f6-0003-4000-8000-000000000001', 'b2c3d4e5-0003-4000-8000-000000000001', 'every_5m',  '*/5 * * * *',  'America/New_York', true, NOW() + INTERVAL '5 minutes',  NOW() - INTERVAL '40 days', NOW()),
-  ('c3d4e5f6-0003-4000-8000-000000000002', 'b2c3d4e5-0003-4000-8000-000000000002', 'daily',     '0 8 * * *',   'America/New_York', true, NOW() + INTERVAL '1 day',      NOW() - INTERVAL '38 days', NOW())
+  ('c3d4e5f6-0003-4000-8000-000000000001', 'b2c3d4e5-0003-4000-8000-000000000001', 'HTTP', 'every_5m',  '0 */5 * * * *',  'America/New_York', true, NOW() + INTERVAL '5 minutes',  NOW() - INTERVAL '40 days', NOW()),
+  ('c3d4e5f6-0003-4000-8000-000000000002', 'b2c3d4e5-0003-4000-8000-000000000002', 'HTTP', 'daily',     '0 0 8 * * *',   'America/New_York', true, NOW() + INTERVAL '1 day',      NOW() - INTERVAL '38 days', NOW())
   -- DevPortal CDN and DevPortal Database intentionally unscheduled
 ON CONFLICT (id) DO NOTHING;
 
@@ -265,30 +266,30 @@ ON CONFLICT (csi_id, tag_id) DO NOTHING;
 INSERT INTO reports (id, name, description, template, status, schedule, recipients, sections, selected_checks, created_by, created_at, updated_at) VALUES
   ('e5f6a7b8-0001-4000-8000-000000000001',
    'Daily Health Summary', 'Automated daily summary of all CSI health metrics',
-   'standard', 'active',
+   'standard', 'ACTIVE',
    '{"frequency":"daily","time":"08:00","timezone":"America/New_York"}'::jsonb,
-   ARRAY['john.martinez@example.com', 'sarah.kim@example.com'],
-   '[{"type":"health_overview"},{"type":"failing_checks"},{"type":"trend_7d"}]'::jsonb,
+   ARRAY['bruno.buger@citi.com', 'daniel.estevez@citi.com'],
+   '[{"id":"sec-health-1","title":"Health Overview","kind":"manual","checkIds":["b2c3d4e5-0001-4000-8000-000000000001"]},{"id":"sec-failing-1","title":"Failing Checks","kind":"rule","rule":{"limit":10,"sort":"failing-first"}},{"id":"sec-trend-1","title":"7-Day Trend","kind":"manual","checkIds":["b2c3d4e5-0002-4000-8000-000000000001","b2c3d4e5-0003-4000-8000-000000000001"]}]'::jsonb,
    '["b2c3d4e5-0001-4000-8000-000000000001","b2c3d4e5-0002-4000-8000-000000000001","b2c3d4e5-0003-4000-8000-000000000001"]'::jsonb,
-   'john.martinez@example.com', NOW() - INTERVAL '30 days', NOW()),
+   'bruno.buger@citi.com', NOW() - INTERVAL '30 days', NOW()),
 
   ('e5f6a7b8-0001-4000-8000-000000000002',
    'Weekly SLA Report', 'Weekly service level agreement compliance report',
-   'detailed', 'active',
+   'detailed', 'ACTIVE',
    '{"frequency":"weekly","dayOfWeek":1,"time":"09:00","timezone":"America/New_York"}'::jsonb,
-   ARRAY['mike.chen@example.com'],
-   '[{"type":"sla_compliance"},{"type":"uptime_chart"},{"type":"incident_list"}]'::jsonb,
+   ARRAY['mike.chen@citi.com'],
+   '[{"id":"sec-sla-1","title":"SLA Compliance","kind":"rule","rule":{"limit":20,"sort":"failing-first"}},{"id":"sec-uptime-1","title":"Uptime Chart","kind":"manual","checkIds":[]},{"id":"sec-incidents-1","title":"Incident List","kind":"rule","rule":{"limit":10,"sort":"failing-first"}}]'::jsonb,
    NULL,
-   'mike.chen@example.com', NOW() - INTERVAL '25 days', NOW()),
+   'mike.chen@citi.com', NOW() - INTERVAL '25 days', NOW()),
 
   ('e5f6a7b8-0001-4000-8000-000000000003',
    'Monthly Executive Brief', 'Executive summary of platform health and trends',
-   'executive', 'active',
+   'executive', 'ACTIVE',
    '{"frequency":"monthly","dayOfMonth":1,"time":"10:00","timezone":"America/New_York"}'::jsonb,
-   ARRAY['mike.chen@example.com', 'john.martinez@example.com'],
-   '[{"type":"executive_summary"},{"type":"kpi_dashboard"},{"type":"risk_register"}]'::jsonb,
+   ARRAY['mike.chen@citi.com', 'bruno.buger@citi.com'],
+   '[{"id":"sec-exec-1","title":"Executive Summary","kind":"manual","checkIds":[]},{"id":"sec-kpi-1","title":"KPI Dashboard","kind":"rule","rule":{"limit":15,"sort":"failing-first"}},{"id":"sec-risk-1","title":"Risk Register","kind":"manual","checkIds":[]}]'::jsonb,
    NULL,
-   'mike.chen@example.com', NOW() - INTERVAL '20 days', NOW())
+   'mike.chen@citi.com', NOW() - INTERVAL '20 days', NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════
@@ -297,18 +298,18 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO report_executions (id, report_id, status, executed_at, recipient_count, checks_included, checks_failed, generation_duration_ms) VALUES
   -- Daily Health Summary
-  ('f6a7b8c9-0001-4000-8000-000000000001', 'e5f6a7b8-0001-4000-8000-000000000001', 'success', NOW() - INTERVAL '1 day',  2, 15, 4, 1250),
-  ('f6a7b8c9-0001-4000-8000-000000000002', 'e5f6a7b8-0001-4000-8000-000000000001', 'success', NOW() - INTERVAL '2 days', 2, 15, 3, 1180),
-  ('f6a7b8c9-0001-4000-8000-000000000003', 'e5f6a7b8-0001-4000-8000-000000000001', 'partial', NOW() - INTERVAL '3 days', 2, 15, 5, 2340),
+  ('f6a7b8c9-0001-4000-8000-000000000001', 'e5f6a7b8-0001-4000-8000-000000000001', 'SUCCESS', NOW() - INTERVAL '1 day',  2, 15, 4, 1250),
+  ('f6a7b8c9-0001-4000-8000-000000000002', 'e5f6a7b8-0001-4000-8000-000000000001', 'SUCCESS', NOW() - INTERVAL '2 days', 2, 15, 3, 1180),
+  ('f6a7b8c9-0001-4000-8000-000000000003', 'e5f6a7b8-0001-4000-8000-000000000001', 'PARTIAL', NOW() - INTERVAL '3 days', 2, 15, 5, 2340),
   -- Weekly SLA Report
-  ('f6a7b8c9-0001-4000-8000-000000000004', 'e5f6a7b8-0001-4000-8000-000000000002', 'success', NOW() - INTERVAL '7 days',  1, 15, 4, 3200),
-  ('f6a7b8c9-0001-4000-8000-000000000005', 'e5f6a7b8-0001-4000-8000-000000000002', 'success', NOW() - INTERVAL '14 days', 1, 15, 2, 2800),
-  ('f6a7b8c9-0001-4000-8000-000000000006', 'e5f6a7b8-0001-4000-8000-000000000002', 'failed',  NOW() - INTERVAL '21 days', 1, 15, 6, 450),
+  ('f6a7b8c9-0001-4000-8000-000000000004', 'e5f6a7b8-0001-4000-8000-000000000002', 'SUCCESS', NOW() - INTERVAL '7 days',  1, 15, 4, 3200),
+  ('f6a7b8c9-0001-4000-8000-000000000005', 'e5f6a7b8-0001-4000-8000-000000000002', 'SUCCESS', NOW() - INTERVAL '14 days', 1, 15, 2, 2800),
+  ('f6a7b8c9-0001-4000-8000-000000000006', 'e5f6a7b8-0001-4000-8000-000000000002', 'FAILED',  NOW() - INTERVAL '21 days', 1, 15, 6, 450),
   -- Monthly Executive Brief
-  ('f6a7b8c9-0001-4000-8000-000000000007', 'e5f6a7b8-0001-4000-8000-000000000003', 'success', NOW() - INTERVAL '1 day',   2, 15, 4, 4500),
-  ('f6a7b8c9-0001-4000-8000-000000000008', 'e5f6a7b8-0001-4000-8000-000000000003', 'success', NOW() - INTERVAL '30 days', 2, 15, 3, 4200),
-  ('f6a7b8c9-0001-4000-8000-000000000009', 'e5f6a7b8-0001-4000-8000-000000000003', 'success', NOW() - INTERVAL '60 days', 2, 15, 1, 3900)
-ON CONFLICT (id) DO NOTHING;
+  ('f6a7b8c9-0001-4000-8000-000000000007', 'e5f6a7b8-0001-4000-8000-000000000003', 'SUCCESS', NOW() - INTERVAL '1 day',   2, 15, 4, 4500),
+  ('f6a7b8c9-0001-4000-8000-000000000008', 'e5f6a7b8-0001-4000-8000-000000000003', 'SUCCESS', NOW() - INTERVAL '30 days', 2, 15, 3, 4200),
+  ('f6a7b8c9-0001-4000-8000-000000000009', 'e5f6a7b8-0001-4000-8000-000000000003', 'SUCCESS', NOW() - INTERVAL '60 days', 2, 15, 1, 3900)
+ON CONFLICT DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════
 -- 10. Secrets (2 rows)
@@ -317,11 +318,11 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO secrets (id, reference_id, label, scope, owner, last_four, created_at, expires_at) VALUES
   ('a7b8c9d0-0001-4000-8000-000000000001',
    'vault/checks/project/put-api-key', 'PUT Platform API Key', 'project',
-   'john.martinez@example.com', 'k3y1', NOW() - INTERVAL '60 days', NOW() + INTERVAL '180 days'),
+   'bruno.buger@citi.com', 'k3y1', NOW() - INTERVAL '60 days', NOW() + INTERVAL '180 days'),
 
   ('a7b8c9d0-0001-4000-8000-000000000002',
    'vault/checks/org/tse-broker-cert', 'TSE Broker Certificate', 'org',
-   'sarah.kim@example.com', 'rt01', NOW() - INTERVAL '45 days', NOW() + INTERVAL '90 days')
+   'daniel.estevez@citi.com', 'rt01', NOW() - INTERVAL '45 days', NOW() + INTERVAL '90 days')
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════
@@ -333,9 +334,9 @@ INSERT INTO ui_tests (id, name, csi_id, description, environment, browser, viewp
    'PUT Shell Login Flow', '178672',
    'Verifies the SSO login flow from the PUT platform shell through to the dashboard', 'Production',
    'chrome', 1920, 1080, 30, 'networkidle',
-   '[{"step":1,"action":"navigate","target":"https://put.internal.example.com/login"},{"step":2,"action":"type","target":"#username","value":"{USERNAME}"},{"step":3,"action":"type","target":"#password","value":"{PASSWORD}"},{"step":4,"action":"click","target":"button[type=submit]"},{"step":5,"action":"assert_url_contains","value":"dashboard"}]'::jsonb,
+   '[{"step":1,"action":"navigate","target":"https://put.internal.citi.com/login"},{"step":2,"action":"type","target":"#username","value":"{USERNAME}"},{"step":3,"action":"type","target":"#password","value":"{PASSWORD}"},{"step":4,"action":"click","target":"button[type=submit]"},{"step":5,"action":"assert_url_contains","value":"dashboard"}]'::jsonb,
    '[{"name":"USERNAME","value":"testuser"},{"name":"PASSWORD","value":"***"}]'::jsonb,
-   'john.martinez@example.com', 'active',
+   'bruno.buger@citi.com', 'ACTIVE',
    '{"frequency":"daily","time":"06:00","timezone":"America/New_York"}'::jsonb,
    NOW() - INTERVAL '30 days', NOW()),
 
@@ -343,9 +344,9 @@ INSERT INTO ui_tests (id, name, csi_id, description, environment, browser, viewp
    'Dashboard Load Test', '396705',
    'Verifies dashboard loads all widgets within timeout', 'Production',
    'chrome', 1920, 1080, 45, 'networkidle',
-   '[{"step":1,"action":"navigate","target":"https://devportal.internal.example.com/dashboard"},{"step":2,"action":"wait_for","target":".metrics-widget","timeout":10000},{"step":3,"action":"assert_visible","target":".widget-count"},{"step":4,"action":"screenshot","target":"dashboard-loaded"}]'::jsonb,
+   '[{"step":1,"action":"navigate","target":"https://devportal.internal.citi.com/dashboard"},{"step":2,"action":"wait_for","target":".metrics-widget","timeout":10000},{"step":3,"action":"assert_visible","target":".widget-count"},{"step":4,"action":"screenshot","target":"dashboard-loaded"}]'::jsonb,
    '[]'::jsonb,
-   'lisa.wang@example.com', 'active',
+   'lisa.wang@citi.com', 'ACTIVE',
    '{"frequency":"daily","time":"07:00","timezone":"America/New_York"}'::jsonb,
    NOW() - INTERVAL '25 days', NOW()),
 
@@ -353,9 +354,9 @@ INSERT INTO ui_tests (id, name, csi_id, description, environment, browser, viewp
    'API Health Check UI', '285614',
    'Navigates to API status page and verifies all endpoints listed', 'Production',
    'firefox', 1920, 1080, 30, 'networkidle',
-   '[{"step":1,"action":"navigate","target":"https://tse.internal.example.com/status"},{"step":2,"action":"wait_for","target":"table.endpoints"},{"step":3,"action":"assert_count","target":"table.endpoints tbody tr","min":5},{"step":4,"action":"screenshot","target":"api-status-page"}]'::jsonb,
+   '[{"step":1,"action":"navigate","target":"https://tse.internal.citi.com/status"},{"step":2,"action":"wait_for","target":"table.endpoints"},{"step":3,"action":"assert_count","target":"table.endpoints tbody tr","min":5},{"step":4,"action":"screenshot","target":"api-status-page"}]'::jsonb,
    '[]'::jsonb,
-   'sarah.kim@example.com', 'paused', NULL,
+   'daniel.estevez@citi.com', 'PAUSED', NULL,
    NOW() - INTERVAL '20 days', NOW())
 ON CONFLICT (id) DO NOTHING;
 
@@ -366,40 +367,40 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO ui_test_executions (id, ui_test_id, status, started_at, ended_at, duration_ms, video_url, screenshot_urls, logs) VALUES
   ('c9d0e1f2-0001-4000-8000-000000000001', 'b8c9d0e1-0001-4000-8000-000000000001',
    'PASSED', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day' + INTERVAL '18 seconds', 18200,
-   'https://storage.example.com/videos/login-flow-2026-04-26.webm',
-   ARRAY['https://storage.example.com/screenshots/login-flow-step5.png'],
+   'https://storage.internal.citi.com/videos/login-flow-2026-04-26.webm',
+   ARRAY['https://storage.internal.citi.com/screenshots/login-flow-step5.png'],
    'Step 1: Navigate OK (320ms) | Step 2: Type OK | Step 3: Type OK | Step 4: Click OK | Step 5: Assert URL contains "dashboard" — PASSED'),
 
   ('c9d0e1f2-0001-4000-8000-000000000002', 'b8c9d0e1-0001-4000-8000-000000000001',
    'PASSED', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days' + INTERVAL '17 seconds', 17400,
-   'https://storage.example.com/videos/login-flow-2026-04-25.webm',
-   ARRAY['https://storage.example.com/screenshots/login-flow-step5-prev.png'],
+   'https://storage.internal.citi.com/videos/login-flow-2026-04-25.webm',
+   ARRAY['https://storage.internal.citi.com/screenshots/login-flow-step5-prev.png'],
    'Step 1: Navigate OK (280ms) | Step 2: Type OK | Step 3: Type OK | Step 4: Click OK | Step 5: Assert URL — PASSED'),
 
   ('c9d0e1f2-0001-4000-8000-000000000003', 'b8c9d0e1-0001-4000-8000-000000000002',
    'PASSED', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day' + INTERVAL '8 seconds', 8100,
-   'https://storage.example.com/videos/dashboard-load-2026-04-26.webm',
-   ARRAY['https://storage.example.com/screenshots/dashboard-loaded.png'],
+   'https://storage.internal.citi.com/videos/dashboard-load-2026-04-26.webm',
+   ARRAY['https://storage.internal.citi.com/screenshots/dashboard-loaded.png'],
    'Step 1: Navigate OK | Step 2: Wait for .metrics-widget OK (2.1s) | Step 3: Assert visible OK | Step 4: Screenshot OK'),
 
   ('c9d0e1f2-0001-4000-8000-000000000004', 'b8c9d0e1-0001-4000-8000-000000000002',
    'FAILED', NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days' + INTERVAL '45 seconds', 45000,
-   'https://storage.example.com/videos/dashboard-load-2026-04-24.webm',
-   ARRAY['https://storage.example.com/screenshots/dashboard-timeout.png'],
+   'https://storage.internal.citi.com/videos/dashboard-load-2026-04-24.webm',
+   ARRAY['https://storage.internal.citi.com/screenshots/dashboard-timeout.png'],
    'Step 1: Navigate OK | Step 2: Wait for .metrics-widget TIMEOUT after 10000ms — FAILED'),
 
   ('c9d0e1f2-0001-4000-8000-000000000005', 'b8c9d0e1-0001-4000-8000-000000000003',
    'PASSED', NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days' + INTERVAL '12 seconds', 12300,
-   'https://storage.example.com/videos/api-health-2026-04-22.webm',
-   ARRAY['https://storage.example.com/screenshots/api-status-page.png'],
+   'https://storage.internal.citi.com/videos/api-health-2026-04-22.webm',
+   ARRAY['https://storage.internal.citi.com/screenshots/api-status-page.png'],
    'Step 1: Navigate OK | Step 2: Wait for table OK (1.8s) | Step 3: Assert count >= 5 OK (found 8) | Step 4: Screenshot OK'),
 
   ('c9d0e1f2-0001-4000-8000-000000000006', 'b8c9d0e1-0001-4000-8000-000000000003',
    'FAILED', NOW() - INTERVAL '8 days', NOW() - INTERVAL '8 days' + INTERVAL '31 seconds', 31000,
-   'https://storage.example.com/videos/api-health-2026-04-19.webm',
-   ARRAY['https://storage.example.com/screenshots/api-status-error.png'],
+   'https://storage.internal.citi.com/videos/api-health-2026-04-19.webm',
+   ARRAY['https://storage.internal.citi.com/screenshots/api-status-error.png'],
    'Step 1: Navigate OK | Step 2: Wait for table TIMEOUT after 30000ms — FAILED')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════
 -- 13. Execution Results (~450 rows via generate_series)
@@ -420,8 +421,8 @@ SELECT
     'b2c3d4e5-0001-4000-8000-000000000001'::uuid,
     (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','WARNING',
            'SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','TIMEOUT','SUCCESS'])[1 + (n % 20)],
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes') + INTERVAL '200 milliseconds' + (n % 5) * INTERVAL '100 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes') + INTERVAL '200 milliseconds' + (n % 5) * INTERVAL '100 milliseconds',
     150 + (n % 350),
     CASE WHEN (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','WARNING',
            'SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','TIMEOUT','SUCCESS'])[1 + (n % 20)] = 'SUCCESS'
@@ -439,8 +440,8 @@ SELECT
     'b2c3d4e5-0001-4000-8000-000000000002'::uuid,
     (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','WARNING','SUCCESS',
            'SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','TIMEOUT'])[1 + (n % 20)],
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes') + INTERVAL '120 milliseconds' + (n % 3) * INTERVAL '80 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes') + INTERVAL '120 milliseconds' + (n % 3) * INTERVAL '80 milliseconds',
     100 + (n % 200),
     '{"statusCode":200}',
     '{}'::jsonb
@@ -456,8 +457,8 @@ SELECT
          ELSE (ARRAY['SUCCESS','FAILURE','FAILURE','FAILURE','FAILURE','SUCCESS','FAILURE','FAILURE','WARNING','TIMEOUT',
                       'FAILURE','FAILURE','SUCCESS','FAILURE','FAILURE','SUCCESS','FAILURE','FAILURE','WARNING','TIMEOUT'])[1 + (n % 20)]
     END,
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes') + INTERVAL '800 milliseconds' + (n % 10) * INTERVAL '200 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes') + INTERVAL '800 milliseconds' + (n % 10) * INTERVAL '200 milliseconds',
     500 + (n % 9500),
     CASE WHEN n = 29 OR (ARRAY['SUCCESS','FAILURE','FAILURE','FAILURE','FAILURE','SUCCESS','FAILURE','FAILURE','WARNING','TIMEOUT',
                       'FAILURE','FAILURE','SUCCESS','FAILURE','FAILURE','SUCCESS','FAILURE','FAILURE','WARNING','TIMEOUT'])[1 + (n % 20)] != 'SUCCESS'
@@ -475,8 +476,8 @@ SELECT
     'b2c3d4e5-0001-4000-8000-000000000004'::uuid,
     (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS',
            'SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','WARNING'])[1 + (n % 20)],
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes') + INTERVAL '15 milliseconds' + (n % 3) * INTERVAL '5 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes') + INTERVAL '15 milliseconds' + (n % 3) * INTERVAL '5 milliseconds',
     10 + (n % 40),
     '{"connected":true}',
     '{}'::jsonb
@@ -490,8 +491,8 @@ SELECT
     'b2c3d4e5-0001-4000-8000-000000000005'::uuid,
     (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS',
            'SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','WARNING','SUCCESS'])[1 + (n % 20)],
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '51 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '51 minutes') + INTERVAL '8 milliseconds' + (n % 2) * INTERVAL '4 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '51 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '51 minutes') + INTERVAL '8 milliseconds' + (n % 2) * INTERVAL '4 milliseconds',
     5 + (n % 20),
     '{"connected":true}',
     '{}'::jsonb
@@ -505,8 +506,8 @@ SELECT
     'b2c3d4e5-0002-4000-8000-000000000001'::uuid,
     (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','WARNING','SUCCESS',
            'SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','TIMEOUT'])[1 + (n % 20)],
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes') + INTERVAL '180 milliseconds' + (n % 4) * INTERVAL '90 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes') + INTERVAL '180 milliseconds' + (n % 4) * INTERVAL '90 milliseconds',
     120 + (n % 400),
     '{"statusCode":200}',
     '{}'::jsonb
@@ -522,8 +523,8 @@ SELECT
          ELSE (ARRAY['FAILURE','SUCCESS','FAILURE','FAILURE','FAILURE','SUCCESS','FAILURE','FAILURE','WARNING','TIMEOUT',
                       'FAILURE','SUCCESS','FAILURE','FAILURE','SUCCESS','FAILURE','FAILURE','FAILURE','WARNING','TIMEOUT'])[1 + (n % 20)]
     END,
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes') + INTERVAL '2 seconds' + (n % 8) * INTERVAL '500 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes') + INTERVAL '2 seconds' + (n % 8) * INTERVAL '500 milliseconds',
     2000 + (n % 6000),
     CASE WHEN n = 29 THEN '{"statusCode":503,"body":"Order matching engine overloaded"}'
          ELSE '{"statusCode":200}'
@@ -541,8 +542,8 @@ SELECT
          ELSE (ARRAY['FAILURE','FAILURE','SUCCESS','FAILURE','FAILURE','FAILURE','SUCCESS','FAILURE','WARNING','TIMEOUT',
                       'FAILURE','FAILURE','FAILURE','SUCCESS','FAILURE','FAILURE','FAILURE','SUCCESS','WARNING','TIMEOUT'])[1 + (n % 20)]
     END,
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes') + INTERVAL '1 second' + (n % 5) * INTERVAL '300 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes') + INTERVAL '1 second' + (n % 5) * INTERVAL '300 milliseconds',
     1000 + (n % 4000),
     CASE WHEN n = 29 THEN '{"statusCode":500,"body":"Settlement queue backlog: 12,847 pending"}'
          ELSE '{"statusCode":200}'
@@ -560,8 +561,8 @@ SELECT
          ELSE (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','WARNING','WARNING','WARNING','SUCCESS',
                       'SUCCESS','SUCCESS','WARNING','WARNING','WARNING','SUCCESS','SUCCESS','SUCCESS','FAILURE','WARNING'])[1 + (n % 20)]
     END,
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes') + INTERVAL '3 seconds' + (n % 7) * INTERVAL '1 second',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes') + INTERVAL '3 seconds' + (n % 7) * INTERVAL '1 second',
     3000 + (n % 7000),
     CASE WHEN n = 29 THEN '{"statusCode":200,"body":"OK","warning":"Response time 4.2s exceeds 3s threshold"}'
          ELSE '{"statusCode":200}'
@@ -577,8 +578,8 @@ SELECT
     'b2c3d4e5-0002-4000-8000-000000000005'::uuid,
     (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS',
            'SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','WARNING'])[1 + (n % 20)],
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '51 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '51 minutes') + INTERVAL '12 milliseconds' + (n % 3) * INTERVAL '6 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '51 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '51 minutes') + INTERVAL '12 milliseconds' + (n % 3) * INTERVAL '6 milliseconds',
     8 + (n % 30),
     '{"connected":true}',
     '{}'::jsonb
@@ -594,10 +595,10 @@ SELECT
          ELSE (ARRAY['FAILURE','FAILURE','FAILURE','FAILURE','FAILURE','FAILURE','FAILURE','FAILURE','FAILURE','FAILURE',
                       'SUCCESS','FAILURE','FAILURE','FAILURE','FAILURE','FAILURE','FAILURE','FAILURE','FAILURE','TIMEOUT'])[1 + (n % 20)]
     END,
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '52 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '52 minutes') + INTERVAL '5 seconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '52 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '52 minutes') + INTERVAL '5 seconds',
     5000,
-    '{"error":"Connection refused: tse-mq.internal.example.com:5672"}',
+    '{"error":"Connection refused: tse-mq.internal.citi.com:5672"}',
     '{}'::jsonb
 FROM generate_series(0, 29) AS s(n)
 ON CONFLICT DO NOTHING;
@@ -609,8 +610,8 @@ SELECT
     'b2c3d4e5-0003-4000-8000-000000000001'::uuid,
     (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS',
            'SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS'])[1 + (n % 20)],
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes') + INTERVAL '100 milliseconds' + (n % 2) * INTERVAL '50 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '47 minutes') + INTERVAL '100 milliseconds' + (n % 2) * INTERVAL '50 milliseconds',
     80 + (n % 120),
     '{"statusCode":200,"body":"OK"}',
     '{}'::jsonb
@@ -624,8 +625,8 @@ SELECT
     'b2c3d4e5-0003-4000-8000-000000000002'::uuid,
     (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS',
            'SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS'])[1 + (n % 20)],
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes') + INTERVAL '90 milliseconds' + (n % 3) * INTERVAL '30 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '48 minutes') + INTERVAL '90 milliseconds' + (n % 3) * INTERVAL '30 milliseconds',
     60 + (n % 150),
     '{"statusCode":200}',
     '{}'::jsonb
@@ -639,8 +640,8 @@ SELECT
     'b2c3d4e5-0003-4000-8000-000000000003'::uuid,
     (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS',
            'SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS'])[1 + (n % 20)],
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes') + INTERVAL '25 milliseconds' + (n % 2) * INTERVAL '15 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '49 minutes') + INTERVAL '25 milliseconds' + (n % 2) * INTERVAL '15 milliseconds',
     20 + (n % 40),
     '{"statusCode":200}',
     '{}'::jsonb
@@ -654,8 +655,8 @@ SELECT
     'b2c3d4e5-0003-4000-8000-000000000004'::uuid,
     (ARRAY['SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS',
            'SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS','SUCCESS'])[1 + (n % 20)],
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes'),
-    date_trunc('month', CURRENT_TIMESTAMP) + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes') + INTERVAL '10 milliseconds' + (n % 2) * INTERVAL '5 milliseconds',
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes'),
+    NOW() - INTERVAL '30 days' + ((n % 28) * INTERVAL '1 day') + (n * INTERVAL '50 minutes') + INTERVAL '10 milliseconds' + (n % 2) * INTERVAL '5 milliseconds',
     8 + (n % 25),
     '{"connected":true}',
     '{}'::jsonb

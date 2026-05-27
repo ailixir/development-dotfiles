@@ -8,11 +8,13 @@ import io.github.resilience4j.retry.annotation.Retry;
 import java.time.Duration;
 import org.springframework.boot.web.client.ClientHttpRequestFactories;
 import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Component
+@Profile("!worker")
 public class CoreServiceClient {
 
   private final RestClient restClient;

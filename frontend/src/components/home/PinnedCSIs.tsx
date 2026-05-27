@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Card, CardContent, Grid, IconButton, Stack, Typography, alpha, useTheme, Skeleton, Snackbar, Alert, Tooltip } from '@mui/material';
-import { Close, Flag } from '@mui/icons-material';
+import { Close, Flag, FlagOutlined } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { unpinCsi, setSearchContext } from '@/store/slices/dashboardSlice';
+import { unpinCsi, setSearchContext, clearSearchContext } from '@/store/slices/dashboardSlice';
 import apiClient from '@/services/api/apiClient';
 import SectionBox from './SectionBox';
 
@@ -30,6 +30,7 @@ const PinnedCSIs: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const pinned = useAppSelector((s) => s.dashboard.pinnedCsiIds);
+  const activeCsiId = useAppSelector((s) => s.dashboard.searchContext?.csiId);
   const [health, setHealth] = useState<Record<string, HealthSummary>>({});
   const [csiInfo, setCsiInfo] = useState<Record<string, CsiInfo>>({});
   const [unpinToastOpen, setUnpinToastOpen] = useState(false);
@@ -110,13 +111,13 @@ const PinnedCSIs: React.FC = () => {
                             </Typography>
                           </Box>
                           <Stack direction="row" spacing={0} sx={{ ml: 1, flexShrink: 0 }}>
-                            <Tooltip title="Set as search context">
+                            <Tooltip title={activeCsiId === id ? 'Active context — click to clear' : 'Set as search context'}>
                               <IconButton
                                 size="small"
-                                onClick={() => dispatch(setSearchContext({ csiId: id }))}
-                                sx={{ color: 'text.secondary' }}
+                                onClick={() => dispatch(activeCsiId === id ? clearSearchContext() : setSearchContext({ csiId: id }))}
+                                sx={{ color: activeCsiId === id ? 'primary.main' : 'text.secondary' }}
                               >
-                                <Flag fontSize="small" />
+                                {activeCsiId === id ? <Flag fontSize="small" /> : <FlagOutlined fontSize="small" />}
                               </IconButton>
                             </Tooltip>
                             <Tooltip title="Unpin">

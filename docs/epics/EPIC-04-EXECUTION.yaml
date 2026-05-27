@@ -1,0 +1,176 @@
+#
+# EPIC-04 Execution Manifest — M4 Report Scheduled Delivery
+# Owner: @pm (Morgan)
+# Framework: AIOS SDC (Story Development Cycle)
+# Source: Spec Pipeline 2026-04-28 (Phase 6 — Implementation Plan)
+# Spec: docs/specs/backend/spec.md v3 (§7.2, §12.1), ARCH.md §4.4 M4
+#
+
+epic_id: EPIC-04
+milestone: M4
+title: "Report scheduled delivery via SMTP"
+status: completed                 # planning | in_progress | completed | paused
+created_at: "2026-04-28"
+created_by: "@pm (Morgan)"
+
+# ─────────────────────────────────────────────────────────────
+# Epic goal + definition of done
+# ─────────────────────────────────────────────────────────────
+goal: |
+  Reports are automatically delivered to recipients at their configured
+  schedule (daily, weekly, custom cron) via the enterprise SMTP relay.
+  The delivery pipeline resolves check data, renders HTML, sends email,
+  and persists a full audit trail per delivery attempt. Maria's UC
+  (PRD §6) completes end-to-end.
+
+definition_of_done:
+  - "All 7 stories reach Done via SDC cycle."
+  - "`./gradlew check` green — all M1 + M2 + M3 + M4 tests passing."
+  - "A report with status=active and a daily schedule receives an email on the next poll tick."
+  - "`report_executions` table tracks every delivery with status, duration, recipient count, and rendered HTML."
+  - "Paused reports are NOT delivered (nextDeliveryAt = null)."
+  - "GreenMail IT proves end-to-end: poll → resolve → render → SMTP → audit."
+  - "Worker profile loads ReportDeliveryDispatcher; API profile does not."
+
+# ─────────────────────────────────────────────────────────────
+# Story roster (7 stories; source: Spec Pipeline 2026-04-28)
+# ─────────────────────────────────────────────────────────────
+stories:
+  - story_id: "4.4a"
+    title: "Report next_delivery_at column + Flyway V6 migration"
+    size: S
+    status: ready
+    depends_on: ["1.2"]
+    assigned_dev: null
+    story_file: "docs/stories/4.4a.story.md"
+
+  - story_id: "4.4b"
+    title: "ReportScheduleResolver (JSONB schedule to cron resolution)"
+    size: S
+    status: ready
+    depends_on: ["4.4a"]
+    assigned_dev: null
+    story_file: "docs/stories/4.4b.story.md"
+
+  - story_id: "4.4c"
+    title: "ReportsService lifecycle hooks for nextDeliveryAt"
+    size: S
+    status: ready
+    depends_on: ["4.4a", "4.4b"]
+    assigned_dev: null
+    story_file: "docs/stories/4.4c.story.md"
+
+  - story_id: "4.4d"
+    title: "ReportDeliveryDispatcher (@Scheduled poller + ShedLock)"
+    size: M
+    status: ready
+    depends_on: ["4.4c", "2.4", "2.7"]
+    assigned_dev: null
+    story_file: "docs/stories/4.4d.story.md"
+
+  - story_id: "4.4e"
+    title: "ReportMailSender (JavaMailSender SMTP integration)"
+    size: M
+    status: ready
+    depends_on: []
+    assigned_dev: null
+    story_file: "docs/stories/4.4e.story.md"
+
+  - story_id: "4.4f"
+    title: "ReportDeliveryService (render + send + audit orchestration)"
+    size: M
+    status: ready
+    depends_on: ["4.4d", "4.4e"]
+    assigned_dev: null
+    story_file: "docs/stories/4.4f.story.md"
+
+  - story_id: "4.4g"
+    title: "Integration tests — ReportDeliveryDispatcher + GreenMail stub"
+    size: M
+    status: ready
+    depends_on: ["4.4d", "4.4e", "4.4f"]
+    assigned_dev: null
+    story_file: "docs/stories/4.4g.story.md"
+
+# ─────────────────────────────────────────────────────────────
+# Drafting order for @sm (respects depends_on DAG)
+# ─────────────────────────────────────────────────────────────
+sm_draft_queue:
+  - wave: 1
+    parallel: ["4.4a", "4.4b", "4.4e"]
+    rationale: "Schema migration, resolver, and mail sender are independent foundations."
+
+  - wave: 2
+    parallel: ["4.4c"]
+    after: ["4.4a", "4.4b"]
+    rationale: "Lifecycle hooks depend on column + resolver."
+
+  - wave: 3
+    parallel: ["4.4d", "4.4f"]
+    after: ["4.4c", "4.4e"]
+    rationale: "Dispatcher and delivery service can be developed in parallel once dependencies are met."
+
+  - wave: 4
+    parallel: ["4.4g"]
+    after: ["4.4d", "4.4e", "4.4f"]
+    rationale: "Integration tests require all components."
+
+# ─────────────────────────────────────────────────────────────
+# Risk tracking
+# ─────────────────────────────────────────────────────────────
+risks:
+  - risk_id: R-10
+    description: "Enterprise SMTP relay unavailable or rate-limited"
+    status: open
+    mitigation: "@ConditionalOnProperty on ReportMailSender — graceful degradation when SMTP not configured. Rate limiting via batch-size + poll interval."
+
+  - risk_id: R-11
+    description: "Large report rendering causes OOM or timeout"
+    status: open
+    mitigation: "Batch size limited to 50. Individual report rendering timeout should be capped (future story). lockAtMostFor=10m gives headroom."
+
+# ─────────────────────────────────────────────────────────────
+# Traceability
+# ─────────────────────────────────────────────────────────────
+covers_requirements:
+  functional: ["FR-REP-01", "FR-REP-04", "FR-REP-05", "FR-REP-06"]
+  non_functional: ["NFR-PERF-04"]
+  constraints: []
+
+spec_sections_primary:
+  - "§7.2 reports + report_executions tables"
+  - "§12.1 Reports CRUD + delivery"
+  - "ARCH.md §4.4 M4 exit criteria"
+  - "Spec Pipeline 2026-04-28 §4.1-4.8"
+
+# ─────────────────────────────────────────────────────────────
+# Progress tracking
+# ─────────────────────────────────────────────────────────────
+progress:
+  stories_drafted: 7
+  stories_validated: 7
+  stories_done: 7
+  stories_blocked: 0
+  stories_in_progress: 0
+  current_wave: 4
+  notes:
+    - "2026-04-28 — @pm created EPIC-04-EXECUTION.yaml with 7 stories (4.4a-4.4g) from Spec Pipeline output."
+    - "2026-04-28 — @po validated all 7 stories: 10/10 GO across the board."
+    - "2026-04-28 — @dev implemented all 7 stories (4.4a-4.4g) across 4 waves. 63 tests pass (26 existing + 37 new). GreenMail end-to-end delivery verified. All stories Done."
+
+# ─────────────────────────────────────────────────────────────
+# Handoff
+# ─────────────────────────────────────────────────────────────
+handoff:
+  next_action: |
+    All 7 stories validated (10/10 GO). @dev begins implementation following
+    the wave order: wave 1 (4.4a + 4.4b + 4.4e in parallel), wave 2 (4.4c),
+    wave 3 (4.4d + 4.4f), wave 4 (4.4g).
+  hard_gates:
+    - "EPIC-02 stories 2.4 (ShedLock) and 2.7 (worker profile) must be complete before 4.4d."
+  cadence: "7 stories across 4 waves, estimated 2-3 weeks."
+
+attestation:
+  signed_by: "@pm (Morgan)"
+  signed_at: "2026-04-28"
+  article_iv: "Every story traces to Spec Pipeline 2026-04-28 and FR-REP-* requirements. No invented work."

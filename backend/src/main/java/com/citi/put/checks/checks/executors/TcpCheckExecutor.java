@@ -40,7 +40,7 @@ public class TcpCheckExecutor implements CheckExecutor {
     try (Socket socket = new Socket()) {
       socket.connect(new InetSocketAddress(config.host(), config.port()), config.timeoutMs());
       Duration duration = Duration.ofNanos(System.nanoTime() - start);
-      recordMetrics(check, config, "SUCCESS", duration);
+      recordMetrics(check, "SUCCESS", duration);
       LOG.debug(
           "TCP check {} → {}:{} connected in {}ms",
           check.getId(),
@@ -58,16 +58,16 @@ public class TcpCheckExecutor implements CheckExecutor {
               + "ms");
     } catch (SocketTimeoutException e) {
       Duration duration = Duration.ofNanos(System.nanoTime() - start);
-      recordMetrics(check, config, "TIMEOUT", duration);
+      recordMetrics(check, "TIMEOUT", duration);
       return new ExecutionOutcome.Timeout(duration);
     } catch (UnknownHostException e) {
       Duration duration = Duration.ofNanos(System.nanoTime() - start);
-      recordMetrics(check, config, "FAILURE", duration);
+      recordMetrics(check, "FAILURE", duration);
       return new ExecutionOutcome.Failure(
           duration, "DNS resolution failed for host: " + config.host(), null);
     } catch (IOException e) {
       Duration duration = Duration.ofNanos(System.nanoTime() - start);
-      recordMetrics(check, config, "FAILURE", duration);
+      recordMetrics(check, "FAILURE", duration);
       return new ExecutionOutcome.Failure(
           duration,
           "Connection failed to " + config.host() + ":" + config.port() + " — " + e.getMessage(),
@@ -75,17 +75,15 @@ public class TcpCheckExecutor implements CheckExecutor {
     }
   }
 
-  private void recordMetrics(
-      Check check, TcpConfiguration config, String status, Duration duration) {
-    Timer.builder("checks.tcp.execute.seconds")
-        .tag("host", config.host())
+  private void recordMetrics(Check check, String status, Duration duration) {
+    Timer.builder("checks.execution.duration")
+        .tag("check_type", "TCP")
         .tag("status", status)
         .register(meterRegistry)
         .record(duration);
     Counter.builder("checks.execution.total")
         .tag("check_type", "TCP")
         .tag("status", status)
-        .tag("csi_id", check.getCsiId())
         .register(meterRegistry)
         .increment();
   }

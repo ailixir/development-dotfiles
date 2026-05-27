@@ -7,7 +7,8 @@ import { createRequire } from 'module';
 import dotenv from 'dotenv';
 const require = createRequire(import.meta.url);
 
-// Load env vars from .env files
+// Load env vars from .env files (generic + mode-specific)
+dotenv.config({ path: '.env.development' });
 dotenv.config();
 
 const { ModuleFederationPlugin } = webpack.container;
@@ -101,8 +102,13 @@ const config = {
           from: path.resolve(process.cwd(), 'public'),
           to: '.',
           globOptions: { ignore: ['**/index.html'] },
+          noErrorOnMissing: true,
         },
       ],
+    }),
+    new webpack.DefinePlugin({
+      'process.env.REACT_APP_API_BASE_URL': JSON.stringify(process.env.REACT_APP_API_BASE_URL || ''),
+      'process.env.REACT_APP_STANDALONE': JSON.stringify(process.env.REACT_APP_STANDALONE || ''),
     }),
     new webpack.ProvidePlugin({ process: 'process/browser', Buffer: ['buffer', 'Buffer'] }),
     isDevelopment && new ReactRefreshWebpackPlugin(),

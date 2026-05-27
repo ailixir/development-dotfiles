@@ -127,9 +127,9 @@ class CronDispatcherDisabledIT {
   private void seedSchedule(
       UUID forCheckId, String cron, String tz, boolean enabled, Instant nextExecutionAt) {
     jdbc.update(
-        "INSERT INTO schedules (id, check_id, frequency, cron_expression, timezone, enabled,"
+        "INSERT INTO schedules (id, check_id, check_type, frequency, cron_expression, timezone, enabled,"
             + " next_execution_at, created_at, updated_at)"
-            + " VALUES (?, ?, 'custom', ?, ?, ?, ?, ?, ?)",
+            + " VALUES (?, ?, 'HTTP', 'custom', ?, ?, ?, ?, ?, ?)",
         UUID.randomUUID(),
         forCheckId,
         cron,

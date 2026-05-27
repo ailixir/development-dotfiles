@@ -1,0 +1,13 @@
+spring:
+  config:
+    activate:
+      on-profile: api
+
+checks:
+  scheduling:
+    dispatcher-enabled: false
+    partition-scheduler-enabled: false
+    retention-pruner-enabled: false
+  reports:
+    delivery-enabled: false
+  worker-mode: false

@@ -47,7 +47,16 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ maxHeight }) => {
               <ListItemText
                 primary={
                   <Stack direction="row" spacing={1} alignItems="center">
-                    <Chip size="small" label={e.type} variant="outlined" />
+                    <Chip
+                      size="small"
+                      label={e.type}
+                      variant="outlined"
+                      color={
+                        e.title?.toLowerCase().includes('failed') ? 'error'
+                          : e.title?.toLowerCase().includes('recovered') ? 'success'
+                          : 'default'
+                      }
+                    />
                     <Typography variant="body2">{e.title}</Typography>
                   </Stack>
                 }

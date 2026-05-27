@@ -32,7 +32,7 @@ const ReportsHome: React.FC = () => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [menuReportId, setMenuReportId] = useState<string | null>(null);
   const [statusLoadingId, setStatusLoadingId] = useState<string | null>(null);
-  const [optimisticStatus, setOptimisticStatus] = useState<Record<string, 'active' | 'paused' | 'draft'>>({});
+  const [optimisticStatus, setOptimisticStatus] = useState<Record<string, 'ACTIVE' | 'PAUSED' | 'DRAFT'>>({});
 
   useEffect(() => {
     const freshMs = 60 * 1000;
@@ -153,9 +153,9 @@ const ReportsHome: React.FC = () => {
                 <InputLabel>Status</InputLabel>
                 <Select value={statusFilter} label="Status" onChange={(e) => setStatusFilter(e.target.value)}>
                   <MenuItem value="">All Status</MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="paused">Paused</MenuItem>
-                  <MenuItem value="draft">Draft</MenuItem>
+                  <MenuItem value="ACTIVE">Active</MenuItem>
+                  <MenuItem value="PAUSED">Paused</MenuItem>
+                  <MenuItem value="DRAFT">Draft</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -267,7 +267,7 @@ const ReportsHome: React.FC = () => {
                     {(() => {
                       const rowStatus = optimisticStatus[r.id] ?? r.status;
                       return (
-                        <Chip label={rowStatus} size="small" color={rowStatus === 'active' ? 'success' : rowStatus === 'paused' ? 'warning' : 'default'} aria-label={`status ${rowStatus}`} />
+                        <Chip label={rowStatus.charAt(0) + rowStatus.slice(1).toLowerCase()} size="small" color={rowStatus === 'ACTIVE' ? 'success' : rowStatus === 'PAUSED' ? 'warning' : 'default'} aria-label={`status ${rowStatus}`} />
                       );
                     })()}
                   </TableCell>
@@ -279,8 +279,8 @@ const ReportsHome: React.FC = () => {
                   </TableCell>
                    <TableCell align="right">
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    {r.status !== 'draft' && (
-                        <Tooltip title={r.status === 'paused' ? 'Resume' : 'Pause'}>
+                    {r.status !== 'DRAFT' && (
+                        <Tooltip title={r.status === 'PAUSED' ? 'Resume' : 'Pause'}>
                           <span>
                             <IconButton
                           size="small"
@@ -288,14 +288,14 @@ const ReportsHome: React.FC = () => {
                             try {
                               setStatusLoadingId(r.id);
                               const previous = r.status;
-                              const next = previous === 'paused' ? 'active' : 'paused';
-                              setOptimisticStatus((prev) => ({ ...prev, [r.id]: next }));
-                              const action = previous === 'paused' ? resumeReport(r.id) : pauseReport(r.id);
+                              const next = previous === 'PAUSED' ? 'ACTIVE' : 'PAUSED';
+                              setOptimisticStatus((prev) => ({ ...prev, [r.id]: next as 'ACTIVE' | 'PAUSED' }));
+                              const action = previous === 'PAUSED' ? resumeReport(r.id) : pauseReport(r.id);
                               try {
                                 await dispatch(action).unwrap();
                               } catch {
                                 // revert visual override on failure
-                                setOptimisticStatus((prev) => ({ ...prev, [r.id]: previous }));
+                                setOptimisticStatus((prev) => ({ ...prev, [r.id]: previous as 'ACTIVE' | 'PAUSED' | 'DRAFT' }));
                               }
                             } finally {
                               setStatusLoadingId(null);
@@ -304,11 +304,11 @@ const ReportsHome: React.FC = () => {
                             }
                           }}
                           disabled={statusLoadingId === r.id}
-                          aria-label={r.status === 'paused' ? 'resume report' : 'pause report'}
+                          aria-label={r.status === 'PAUSED' ? 'resume report' : 'pause report'}
                         >
                           {statusLoadingId === r.id ? (
                             <CircularProgress size={16} />
-                          ) : r.status === 'paused' ? (
+                          ) : r.status === 'PAUSED' ? (
                             <PlayArrow />
                           ) : (
                             <Pause />

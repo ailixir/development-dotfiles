@@ -30,10 +30,10 @@ class SecretMaskerTest {
 
   @Test
   void masksEmailLocalPart() {
-    String input = "user alice.smith@citigroup.com just logged in";
+    String input = "user bruno.buger@citi.com just logged in";
     String output = SecretMasker.mask(input);
-    assertThat(output).doesNotContain("alice.smith@citigroup.com");
-    assertThat(output).contains("***@citigroup.com");
+    assertThat(output).doesNotContain("bruno.buger@citi.com");
+    assertThat(output).contains("***@citi.com");
   }
 
   @Test

@@ -18,7 +18,7 @@ class ConfigurationRoundtripIT {
         new HttpConfiguration(
             "HTTP",
             "POST",
-            "https://api.example.com/webhook",
+            "https://api.internal.citi.com/webhook",
             Map.of("Authorization", "Bearer tok123", "Content-Type", "application/json"),
             "{\"key\":\"value\"}",
             201,
@@ -33,7 +33,7 @@ class ConfigurationRoundtripIT {
     HttpConfiguration roundtripped = (HttpConfiguration) deserialized;
     assertThat(roundtripped.type()).isEqualTo("HTTP");
     assertThat(roundtripped.method()).isEqualTo("POST");
-    assertThat(roundtripped.url()).isEqualTo("https://api.example.com/webhook");
+    assertThat(roundtripped.url()).isEqualTo("https://api.internal.citi.com/webhook");
     assertThat(roundtripped.headers()).containsEntry("Authorization", "Bearer tok123");
     assertThat(roundtripped.body()).isEqualTo("{\"key\":\"value\"}");
     assertThat(roundtripped.expectedStatusCode()).isEqualTo(201);

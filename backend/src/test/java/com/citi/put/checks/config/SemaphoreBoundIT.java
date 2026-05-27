@@ -18,8 +18,14 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles("local")
 @TestPropertySource(
     properties = {
-      "checks.executor.semaphore-multiplier=1",
-      "spring.datasource.hikari.maximum-pool-size=2"
+      "checks.executor.max-concurrency=2",
+      "checks.executor.source-limits.HTTP=2",
+      "checks.executor.source-limits.TCP=2",
+      "checks.executor.source-limits.SPLUNK=0",
+      "checks.executor.source-limits.GRAFANA=0",
+      "checks.executor.source-limits.ITRS=0",
+      "checks.executor.source-limits.APPDYNAMICS=0",
+      "checks.executor.source-limits.UI_TEST=0"
     })
 class SemaphoreBoundIT {
 

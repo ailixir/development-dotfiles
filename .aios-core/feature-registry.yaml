@@ -1,0 +1,225 @@
+# AIOS Pro Feature Registry
+#
+# Complete registry of all premium features available in AIOS Pro.
+# Feature IDs follow the format: pro.{module}.{feature-name}
+#
+# @see ADR-PRO-003 - Feature Gating & Licensing
+# @see Story PRO-6 - License Key & Feature Gating System
+#
+# License keys grant access to features via patterns:
+# - Exact match: "pro.squads.premium" grants only that feature
+# - Wildcard: "pro.squads.*" grants all squads features
+# - Module: "pro.*" grants all pro features (enterprise tier)
+
+version: 1
+lastUpdated: "2026-02-05"
+
+# Module: Squads (Premium squad-based workflows)
+squads:
+  - id: pro.squads.premium
+    name: Premium Squads
+    description: Access to premium squad templates and configurations
+    module: squads
+
+  - id: pro.squads.custom
+    name: Custom Squads
+    description: Create and manage custom squad configurations
+    module: squads
+
+  - id: pro.squads.marketplace
+    name: Squad Marketplace
+    description: Browse and install community squads from marketplace
+    module: squads
+
+  - id: pro.squads.export
+    name: Squad Export
+    description: Export squads as shareable packages
+    module: squads
+
+# Module: Memory (Enhanced AI memory and context)
+memory:
+  - id: pro.memory.extended
+    name: Extended Memory
+    description: Extended context window for AI agents
+    module: memory
+
+  - id: pro.memory.pipeline-integration
+    name: Pipeline Integration
+    description: Automatic memory injection during agent activation (MIS-6)
+    module: memory
+
+  - id: pro.memory.persistence
+    name: Memory Persistence
+    description: Persistent memory across sessions
+    module: memory
+
+  - id: pro.memory.search
+    name: Memory Search
+    description: Semantic search across memory stores
+    module: memory
+
+  - id: pro.memory.self_learning
+    name: Self-Learning Engine
+    description: Analyzes session digests, extracts corrections/patterns/heuristics with confidence scoring (MIS-5)
+    module: memory
+
+  - id: pro.memory.auto_evolution
+    name: Auto-Evolution
+    description: Proposes CLAUDE.md, rules, and agent config improvements from learned heuristics (MIS-7)
+    module: memory
+
+  - id: pro.memory.synapse
+    name: SYNAPSE Memory Bridge
+    description: Feature-gated MIS consumer for SYNAPSE engine bracket-aware memory injection (SYN-10)
+    module: memory
+
+  - id: pro.memory.sync
+    name: Memory Sync
+    description: Cross-device memory synchronization
+    module: memory
+
+# Module: Metrics (Advanced analytics and observability)
+metrics:
+  - id: pro.metrics.advanced
+    name: Advanced Metrics
+    description: Detailed agent performance analytics
+    module: metrics
+
+  - id: pro.metrics.dashboard
+    name: Metrics Dashboard
+    description: Real-time metrics visualization dashboard
+    module: metrics
+
+  - id: pro.metrics.export
+    name: Metrics Export
+    description: Export metrics data to external systems
+    module: metrics
+
+  - id: pro.metrics.alerts
+    name: Metric Alerts
+    description: Configurable alerts for metric thresholds
+    module: metrics
+
+# Module: Integrations (Third-party platform integrations)
+integrations:
+  - id: pro.integrations.clickup
+    name: ClickUp Integration
+    description: Full ClickUp synchronization (bidirectional)
+    module: integrations
+
+  - id: pro.integrations.jira
+    name: Jira Integration
+    description: Jira Cloud integration for enterprise workflows
+    module: integrations
+
+  - id: pro.integrations.linear
+    name: Linear Integration
+    description: Linear app integration for modern teams
+    module: integrations
+
+  - id: pro.integrations.github-enterprise
+    name: GitHub Enterprise
+    description: GitHub Enterprise Server integration
+    module: integrations
+
+  - id: pro.integrations.slack
+    name: Slack Integration
+    description: Slack notifications and commands
+    module: integrations
+
+  - id: pro.integrations.notion
+    name: Notion Integration
+    description: Notion database synchronization
+    module: integrations
+
+# Module: Agents (Premium agent capabilities)
+agents:
+  - id: pro.agents.custom
+    name: Custom Agents
+    description: Create custom agents with specialized behaviors
+    module: agents
+
+  - id: pro.agents.teams
+    name: Agent Teams
+    description: Coordinate multiple agents in team workflows
+    module: agents
+
+  - id: pro.agents.autonomy
+    name: Enhanced Autonomy
+    description: Extended autonomous operation capabilities
+    module: agents
+
+  - id: pro.agents.learning
+    name: Agent Learning
+    description: Agents that learn and improve over time
+    module: agents
+
+# Module: CLI (Premium CLI features)
+cli:
+  - id: pro.cli.parallel
+    name: Parallel Execution
+    description: Run multiple agents in parallel
+    module: cli
+
+  - id: pro.cli.scripting
+    name: Advanced Scripting
+    description: Custom CLI scripting and automation
+    module: cli
+
+  - id: pro.cli.profiles
+    name: CLI Profiles
+    description: Multiple configuration profiles
+    module: cli
+
+  - id: pro.cli.remote
+    name: Remote Execution
+    description: Execute agents on remote systems
+    module: cli
+
+# Module: Config (Premium configuration options)
+config:
+  - id: pro.config.enterprise
+    name: Enterprise Config
+    description: Enterprise-grade configuration management
+    module: config
+
+  - id: pro.config.secrets
+    name: Secrets Management
+    description: Secure secrets vault integration
+    module: config
+
+  - id: pro.config.audit
+    name: Config Audit
+    description: Configuration change audit logging
+    module: config
+
+  - id: pro.config.templates
+    name: Config Templates
+    description: Shareable configuration templates
+    module: config
+
+# Feature ID patterns for license validation
+# These patterns are used in license keys to grant access
+patterns:
+  enterprise:
+    pattern: "pro.*"
+    description: Full access to all pro features
+    tier: enterprise
+
+  team:
+    pattern:
+      - "pro.squads.*"
+      - "pro.memory.*"
+      - "pro.metrics.*"
+      - "pro.integrations.*"
+    description: Team tier - core premium features
+    tier: team
+
+  individual:
+    pattern:
+      - "pro.squads.premium"
+      - "pro.memory.extended"
+      - "pro.memory.synapse"
+      - "pro.cli.parallel"
+    description: Individual tier - essential premium features
+    tier: individual

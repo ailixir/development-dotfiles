@@ -119,8 +119,8 @@ class ShedLockCronDispatcherIT {
         method.getAnnotation(net.javacrumbs.shedlock.spring.annotation.SchedulerLock.class);
     assertThat(annotation).isNotNull();
     assertThat(annotation.name()).isEqualTo("cronDispatcher");
-    assertThat(annotation.lockAtMostFor()).isEqualTo("5m");
-    assertThat(annotation.lockAtLeastFor()).isEqualTo("30s");
+    assertThat(annotation.lockAtMostFor()).isEqualTo("2m");
+    assertThat(annotation.lockAtLeastFor()).isEqualTo("10s");
   }
 
   private void seedUser(String email) {
@@ -171,9 +171,9 @@ class ShedLockCronDispatcherIT {
   private void seedSchedule(
       UUID forCheckId, String cron, String tz, boolean enabled, Instant nextExecutionAt) {
     jdbc.update(
-        "INSERT INTO schedules (id, check_id, frequency, cron_expression, timezone, enabled,"
+        "INSERT INTO schedules (id, check_id, check_type, frequency, cron_expression, timezone, enabled,"
             + " next_execution_at, created_at, updated_at)"
-            + " VALUES (?, ?, 'custom', ?, ?, ?, ?, ?, ?)",
+            + " VALUES (?, ?, 'HTTP', 'custom', ?, ?, ?, ?, ?, ?)",
         UUID.randomUUID(),
         forCheckId,
         cron,

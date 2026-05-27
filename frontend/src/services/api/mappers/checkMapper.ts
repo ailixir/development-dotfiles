@@ -13,8 +13,11 @@ export interface BackendCheckDto {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  lastExecutionAt?: string | null;
   schedule?: BackendScheduleDto | null;
   tags?: string[];
+  assignedTo?: string | null;
+  acknowledgedAt?: string | null;
 }
 
 export interface BackendScheduleDto {
@@ -57,7 +60,7 @@ export function mapCheckDtoToEntity(dto: BackendCheckDto): CheckEntity {
     csiId: dto.csiId,
     csiName: dto.csiName,
     status: dto.status as CheckEntity['status'],
-    lastExecution: null,
+    lastExecution: dto.lastExecutionAt ?? null,
     nextExecution: dto.schedule?.nextExecutionAt ?? null,
     configuration: dto.configuration as CheckEntity['configuration'],
     schedule,
@@ -67,6 +70,8 @@ export function mapCheckDtoToEntity(dto: BackendCheckDto): CheckEntity {
     tags: dto.tags ?? [],
     description: dto.description ?? undefined,
     environment: dto.environment ?? undefined,
+    assignedTo: dto.assignedTo ?? undefined,
+    acknowledgedAt: dto.acknowledgedAt ?? undefined,
   };
 }
 

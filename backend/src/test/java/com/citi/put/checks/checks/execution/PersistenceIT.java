@@ -48,9 +48,11 @@ class PersistenceIT {
       throw new RuntimeException(e);
     }
 
-    ExecutionResult result = persistenceService.persistResult(check, outcome, start, end);
+    UUID executionId = UUID.randomUUID();
+    ExecutionResult result =
+        persistenceService.persistResult(executionId, check, outcome, start, end);
 
-    assertThat(result.getId()).isNotNull();
+    assertThat(result.getId()).isEqualTo(executionId);
     assertThat(result.getStatus()).isEqualTo("FAILURE");
     assertThat(result.getDurationMs()).isEqualTo(150);
     assertThat(result.getErrorMessage()).isEqualTo("Bad status");

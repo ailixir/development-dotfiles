@@ -19,6 +19,8 @@ export interface CheckEntity {
   tags: string[];
   description?: string;
   environment?: string;
+  assignedTo?: string;
+  acknowledgedAt?: string;
 }
 
 export interface CheckConfiguration {
@@ -28,6 +30,7 @@ export interface CheckConfiguration {
   headers?: Record<string, string>;
   body?: string;
   expectedStatus?: number;
+  expectedStatusCode?: number;
   timeout?: number;
 
   // TCP Configuration

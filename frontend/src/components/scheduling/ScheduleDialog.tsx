@@ -28,7 +28,9 @@ import {
 } from '@mui/icons-material';
 import { CheckEntity } from '../../types/checks/checkTypes';
 import { useAppDispatch } from '@store/index';
-import { updateCheckSchedule } from '@store/slices/checksSlice';
+import { fetchCheckById } from '@store/slices/checksSlice';
+import { formatNextCronRun, parseCron } from '@/utils/cronNextRun';
+import { schedulesApi } from '@/services/api/schedulesApi';
 
 interface ScheduleDialogProps {
   open: boolean;
@@ -47,6 +49,18 @@ const FREQUENCY_OPTIONS = [
   { value: 'CUSTOM', label: 'Custom cron expression', description: 'Advanced scheduling' },
 ];
 
+const DIALOG_FREQUENCY_VALUES = new Set(FREQUENCY_OPTIONS.map((o) => o.value));
+
+const toDialogFrequency = (raw: string): string => {
+  if (DIALOG_FREQUENCY_VALUES.has(raw)) return raw;
+  const upper = raw.toUpperCase();
+  if (DIALOG_FREQUENCY_VALUES.has(upper)) return upper;
+  if (raw === 'custom') return 'CUSTOM';
+  if (raw === 'daily') return 'DAILY';
+  if (raw === 'hourly') return 'HOURLY';
+  return 'CUSTOM';
+};
+
 const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check }) => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
@@ -60,25 +74,48 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
   useEffect(() => {
     if (check?.schedule) {
       setEnabled(check.schedule.enabled);
-      setFrequency(check.schedule.frequency || 'EVERY_5_MINUTES');
+      setFrequency(toDialogFrequency(check.schedule.frequency || 'EVERY_5_MINUTES'));
       setCronExpression(check.schedule.cron || '');
     }
   }, [check]);
 
+  const dialogFrequencyToCron = (freq: string, cron: string): string => {
+    switch (freq) {
+      case 'EVERY_MINUTE': return '0 * * * * *';
+      case 'EVERY_5_MINUTES': return '0 */5 * * * *';
+      case 'EVERY_15_MINUTES': return '0 */15 * * * *';
+      case 'EVERY_30_MINUTES': return '0 */30 * * * *';
+      case 'HOURLY': return '0 0 * * * *';
+      case 'EVERY_6_HOURS': return '0 0 */6 * * *';
+      case 'DAILY': return '0 0 0 * * *';
+      case 'CUSTOM': return cron;
+      default: return '0 */5 * * * *';
+    }
+  };
+
   const handleSave = async () => {
     if (!check) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      const scheduleData = {
+      const cronExpr = dialogFrequencyToCron(frequency, cronExpression);
+      const existing = await schedulesApi.list({ checkId: check.id, limit: 1 });
+      const current = existing.data?.[0];
+      const payload = {
+        checkId: check.id,
+        frequency,
+        cronExpression: cronExpr,
+        timezone: check.schedule?.timezone || 'America/New_York',
         enabled,
-        frequency: frequency !== 'CUSTOM' ? frequency : undefined,
-        cron: frequency === 'CUSTOM' ? cronExpression : undefined,
       };
-      
-      await dispatch(updateCheckSchedule({ id: check.id, schedule: scheduleData })).unwrap();
+      if (current) {
+        await schedulesApi.update(current.id, payload);
+      } else {
+        await schedulesApi.create(payload);
+      }
+      await dispatch(fetchCheckById(check.id)).unwrap();
       onClose();
     } catch (err) {
       setError('Failed to update schedule. Please try again.');
@@ -118,7 +155,8 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
         nextExecution.setHours(0, 0, 0, 0);
         break;
       case 'CUSTOM':
-        return cronExpression ? `Custom: ${cronExpression}` : 'Custom expression required';
+        if (!cronExpression) return 'Custom expression required';
+        return parseCron(cronExpression) ? `Next run: ${formatNextCronRun(cronExpression)}` : `Invalid cron: ${cronExpression}`;
       default:
         nextExecution = new Date(now.getTime() + 5 * 60 * 1000);
     }
@@ -128,9 +166,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
 
   const validateCronExpression = (expression: string): boolean => {
     if (!expression.trim()) return false;
-    // Basic validation - should have 5 or 6 parts
-    const parts = expression.trim().split(/\s+/);
-    return parts.length === 5 || parts.length === 6;
+    return parseCron(expression) !== null;
   };
 
   if (!check) return null;

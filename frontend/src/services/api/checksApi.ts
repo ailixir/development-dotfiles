@@ -12,6 +12,44 @@ import type {
 } from '../../types/checks/checkTypes';
 import type { ApiResponse, PaginationParams } from '../../types/common/commonTypes';
 
+function toBackendConfiguration(type: string, cfg: Record<string, any>): Record<string, any> {
+  switch (type) {
+    case 'HTTP':
+      return {
+        type: 'HTTP',
+        method: cfg.method ?? 'GET',
+        url: cfg.endpoint ?? cfg.url ?? '',
+        headers: cfg.headers ?? null,
+        body: cfg.body ?? null,
+        expectedStatusCode: cfg.expectedStatus ?? cfg.expectedStatusCode ?? 200,
+        followRedirects: cfg.followRedirects ?? true,
+        timeoutMs: cfg.timeout != null ? cfg.timeout * 1000 : cfg.timeoutMs ?? 5000,
+        verifyTls: cfg.validateSSL ?? cfg.verifyTls ?? true,
+      };
+    case 'TCP':
+      return {
+        type: 'TCP',
+        host: cfg.host ?? '',
+        port: cfg.port ?? 0,
+        timeoutMs: cfg.timeout != null ? cfg.timeout * 1000 : cfg.timeoutMs ?? 5000,
+      };
+    default:
+      return { type, ...cfg };
+  }
+}
+
+function toBackendCheckRequest(checkData: CreateCheckRequest): Record<string, any> {
+  const type = (checkData as any).type ?? (checkData.configuration as any)?.type ?? 'HTTP';
+  return {
+    name: checkData.name,
+    description: checkData.description ?? '',
+    csiId: checkData.csiId,
+    environment: (checkData as any).environment ?? 'Production',
+    configuration: toBackendConfiguration(type, checkData.configuration ?? {}),
+    tags: checkData.tags ?? [],
+  };
+}
+
 interface GetChecksParams extends PaginationParams {
   filters?: Partial<CheckFilters>;
 }
@@ -45,12 +83,12 @@ export const checksApi = {
   },
 
   async createCheck(checkData: CreateCheckRequest): Promise<CheckEntity> {
-    const raw = await apiClient.post(API_ENDPOINTS.CHECKS, checkData);
+    const raw = await apiClient.post(API_ENDPOINTS.CHECKS, toBackendCheckRequest(checkData));
     return mapCheckResponse(raw);
   },
 
   async updateCheck(id: string, updateData: Partial<UpdateCheckRequest>): Promise<CheckEntity> {
-    const raw = await apiClient.put(API_ENDPOINTS.CHECK_BY_ID(id), updateData);
+    const raw = await apiClient.put(API_ENDPOINTS.CHECK_BY_ID(id), toBackendCheckRequest(updateData as CreateCheckRequest));
     return mapCheckResponse(raw);
   },
 
@@ -124,7 +162,7 @@ export const checksApi = {
       const succeeded: string[] = [];
       const failed: string[] = [];
       (res.results ?? []).forEach((r: any) => {
-        if (r.status === 'ok' || r.status === 'success') {
+        if (r.status === 'ok' || r.status === 'SUCCESS') {
           succeeded.push(String(r.id));
         } else {
           failed.push(String(r.id));

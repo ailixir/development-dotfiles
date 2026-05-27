@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { CheckEntity, CreateCheckRequest, CheckFilters, ExecutionResult } from '../../types/checks/checkTypes';
+import { CheckEntity, CreateCheckRequest, UpdateCheckRequest, CheckFilters, ExecutionResult } from '../../types/checks/checkTypes';
 import { AsyncState } from '../../types/common/commonTypes';
 import { checksApi } from '@services/api/checksApi';
 
@@ -56,6 +56,14 @@ export const createCheck = createAsyncThunk(
   'checks/createCheck',
   async (checkData: CreateCheckRequest) => {
     const response = await checksApi.createCheck(checkData);
+    return response;
+  }
+);
+
+export const updateCheck = createAsyncThunk(
+  'checks/updateCheck',
+  async ({ id, data }: { id: string; data: Partial<UpdateCheckRequest> }) => {
+    const response = await checksApi.updateCheck(id, data);
     return response;
   }
 );
@@ -198,7 +206,27 @@ const checksSlice = createSlice({
         state.loading = 'failed';
         state.error = action.error.message || 'Failed to create check';
       })
-      
+
+      // updateCheck
+      .addCase(updateCheck.pending, (state) => {
+        state.loading = 'loading';
+        state.error = null;
+      })
+      .addCase(updateCheck.fulfilled, (state, action) => {
+        state.loading = 'succeeded';
+        const idx = state.data.findIndex(c => c.id === action.payload.id);
+        if (idx !== -1) {
+          state.data[idx] = action.payload;
+        }
+        if (state.selectedCheck?.id === action.payload.id) {
+          state.selectedCheck = action.payload;
+        }
+      })
+      .addCase(updateCheck.rejected, (state, action) => {
+        state.loading = 'failed';
+        state.error = action.error.message || 'Failed to update check';
+      })
+
       // executeCheck
       .addCase(executeCheck.pending, (state, action) => {
         const checkId = action.meta.arg;

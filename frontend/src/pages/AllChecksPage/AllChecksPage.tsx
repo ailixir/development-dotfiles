@@ -64,6 +64,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@store/index';
 import { fetchChecks, executeCheck, deleteCheck, pauseCheck, resumeCheck } from '@store/slices/checksSlice';
 import { addNotification } from '@/store/slices/uiSlice';
+import { selectSources } from '@store/slices/sourcesSlice';
 import EmptyState from '@/components/shared/States/EmptyState';
 import ErrorState from '@/components/shared/States/ErrorState';
 import LoadingState from '@/components/shared/States/LoadingState';
@@ -77,6 +78,12 @@ const AllChecksPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const sources = useAppSelector(selectSources);
+  const isSourceEnabled = (type: string) => {
+    if (sources.length === 0) return true;
+    const s = sources.find((src) => src.type === type);
+    return s ? s.enabled : true;
+  };
   
   const { data: checks, loading, error, executingChecks, schedulingChecks } = useAppSelector(state => state.checks);
   const { selectedCSI, tags: { selected: selectedTags, filterMode } } = useAppSelector(state => state.csi);
@@ -578,7 +585,12 @@ const AllChecksPage: React.FC = () => {
                     </Stack>
                   </TableCell>
                   <TableCell>
-                    {getStatusChip(check.status)}
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      {getStatusChip(check.status)}
+                      {!isSourceEnabled(check.type) && (
+                        <Chip label="Source disabled" size="small" variant="outlined" color="default" />
+                      )}
+                    </Stack>
                   </TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                     <Typography variant="body2">
@@ -593,8 +605,8 @@ const AllChecksPage: React.FC = () => {
                       <IconButton
                         size="small"
                         onClick={() => handleExecuteCheck(check.id)}
-                        title="Execute Now"
-                        disabled={executingChecks.includes(check.id)}
+                        title={isSourceEnabled(check.type) ? 'Execute Now' : 'Source disabled'}
+                        disabled={executingChecks.includes(check.id) || !isSourceEnabled(check.type)}
                       >
                         {executingChecks.includes(check.id) ? (
                           <CircularProgress size={16} />

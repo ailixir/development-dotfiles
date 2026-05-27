@@ -135,8 +135,14 @@ public class PartitionManager {
       }
 
       try {
-        jdbc.execute(
-            "ALTER TABLE " + parentTable + " DETACH PARTITION " + partition + " CONCURRENTLY");
+        try {
+          jdbc.execute(
+              "ALTER TABLE " + parentTable + " DETACH PARTITION " + partition + " CONCURRENTLY");
+        } catch (Exception concurrentEx) {
+          LOG.debug(
+              "DETACH CONCURRENTLY failed for {}, falling back to blocking DETACH", partition);
+          jdbc.execute("ALTER TABLE " + parentTable + " DETACH PARTITION " + partition);
+        }
         jdbc.execute("DROP TABLE " + partition);
         LOG.info("partition_pruned table={} action=detach_drop", partition);
         pruned++;

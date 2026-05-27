@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Profile("!worker")
 @RequestMapping("/api/v1/checks")
 public class CheckExecuteController {
 
@@ -97,8 +99,25 @@ public class CheckExecuteController {
     try {
       ExecutionContext ctx = ExecutionContext.of(executionId, traceId != null ? traceId : "");
       ExecutionOutcome outcome = dispatcher.dispatch(check, ctx);
+
+      if (outcome instanceof ExecutionOutcome.Throttled) {
+        LOG.warn(
+            "Ad-hoc execution throttled executionId={} checkId={} type={}",
+            executionId,
+            check.getId(),
+            check.getType());
+        Instant endedAt = Instant.now();
+        ExecutionOutcome failure =
+            new ExecutionOutcome.Failure(
+                java.time.Duration.between(startedAt, endedAt),
+                "Execution throttled: " + check.getType() + " concurrency limit reached",
+                null);
+        persistenceService.persistResult(executionId, check, failure, startedAt, endedAt);
+        return;
+      }
+
       Instant endedAt = Instant.now();
-      persistenceService.persistResult(check, outcome, startedAt, endedAt);
+      persistenceService.persistResult(executionId, check, outcome, startedAt, endedAt);
     } catch (Exception e) {
       LOG.error("Execution failed for check {}: {}", check.getId(), e.getMessage(), e);
       Instant endedAt = Instant.now();
@@ -108,7 +127,7 @@ public class CheckExecuteController {
               "Internal error: " + e.getMessage(),
               null);
       try {
-        persistenceService.persistResult(check, failure, startedAt, endedAt);
+        persistenceService.persistResult(executionId, check, failure, startedAt, endedAt);
       } catch (Exception persistError) {
         LOG.error("Failed to persist error result: {}", persistError.getMessage());
       }

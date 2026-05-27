@@ -31,8 +31,8 @@ class SchemaSmokeTest {
     UserSmokeEntity user = new UserSmokeEntity();
     user.id = UUID.randomUUID();
     user.ssoId = "sso-" + UUID.randomUUID();
-    user.name = "Alice Tester";
-    user.email = "alice.tester+" + UUID.randomUUID() + "@citigroup.com";
+    user.name = "Bruno Buger";
+    user.email = "bruno.buger+" + UUID.randomUUID() + "@citi.com";
     user.department = "PUT";
     user.createdAt = Instant.now();
     user.isActive = true;

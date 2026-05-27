@@ -51,7 +51,7 @@ class TriggersIT {
         "INSERT INTO checks (id, name, type, csi_id, csi_name, status,"
             + " configuration, created_by, created_at, updated_at) "
             + "VALUES (?, 'Trig Check', 'HTTP', ?, 'Trig CSI', 'PENDING',"
-            + " '{\"type\":\"HTTP\"}'::jsonb, ?, ?, ?)",
+            + " '{\"type\":\"HTTP\",\"method\":\"GET\",\"url\":\"https://example.com/health\"}'::jsonb, ?, ?, ?)",
         checkId,
         csiId,
         userEmail,

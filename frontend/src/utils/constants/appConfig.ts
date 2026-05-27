@@ -28,14 +28,21 @@ const getBoolEnv = (key: string, defaultTrue = true): boolean => {
   return !(raw === 'false' || raw === '0');
 };
 
+// DefinePlugin replaces literal process.env.X references at build time;
+// dynamic access (process.env[key]) is NOT replaced, so we read it directly.
+const _reactApiBase: string = process.env.REACT_APP_API_BASE_URL as unknown as string;
+
 export const APP_CONFIG: AppConfig = {
-  apiBaseUrl: getStringEnv('VITE_API_BASE_URL', '/api/v1') || '/api/v1',
+  apiBaseUrl: (typeof _reactApiBase === 'string' && _reactApiBase.length > 0 ? _reactApiBase : null) || getStringEnv('VITE_API_BASE_URL', '/api/v1') || '/api/v1',
   debugMode: getStringEnv('VITE_DEBUG_MODE') === 'true',
   version: '1.0.0',
   buildDate: new Date().toISOString(),
 };
 
 export const API_ENDPOINTS = {
+  // Check sources (feature flags)
+  CHECK_SOURCES: '/checks/sources',
+
   // Checks endpoints
   CHECKS: '/checks',
   CHECKS_BULK: '/checks/_bulk',

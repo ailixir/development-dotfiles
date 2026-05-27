@@ -15,7 +15,7 @@
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:e2e": "cypress open",
+    "test:e2e": "playwright test",
     "test:coverage": "vitest --coverage",
     "preview": "vite preview"
   },
@@ -40,7 +40,6 @@
     "yup": "^1.4.0"
   },
   "devDependencies": {
-    "@cypress/react18": "^2.0.0",
     "@module-federation/enhanced": "^0.1.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.6.1",
     "@testing-library/jest-dom": "^6.0.0",
@@ -57,7 +56,6 @@
     "babel-loader": "^9.1.0",
     "buffer": "^6.0.3",
     "css-loader": "^6.8.0",
-    "cypress": "^13.0.0",
     "eslint": "^8.0.0",
     "dotenv": "^16.4.5",
     "eslint-plugin-react": "^7.33.0",

@@ -1,0 +1,162 @@
+#
+# EPIC-06 Execution Manifest — Processing Reliability & Scalability Hardening
+# Owner: @pm (Morgan)
+# Framework: AIOS SDC (Story Development Cycle)
+# Source: Spec Pipeline output (2026-05-12) — Architecture Review
+#
+
+epic_id: EPIC-06
+milestone: M4
+title: "Processing reliability & scalability hardening"
+status: planning
+created_at: "2026-05-12"
+created_by: "@pm (Morgan)"
+
+# ─────────────────────────────────────────────────────────────
+# Epic goal + definition of done
+# ─────────────────────────────────────────────────────────────
+goal: |
+  Close all critical and high-priority gaps in the processing and scalability
+  architecture identified by the Spec Pipeline review. After this epic:
+  — Failed scheduled executions and report deliveries are retried with backoff.
+  — All three execution tables are range-partitioned with DEFAULT safety nets.
+  — CronDispatcher dispatches in parallel within a batch.
+  — applicationTaskExecutor is bounded to prevent resource exhaustion.
+  — Resilience4j circuit breaker and report email delivery are integration-tested.
+  — Dispatch failures surface via health indicators and alerting-ready metrics.
+
+definition_of_done:
+  - "All 6 stories reach Done via SDC cycle."
+  - "`./gradlew check` green — all M1-M4 tests passing."
+  - "Failed scheduled dispatches retry up to 3 times with exponential backoff."
+  - "Report delivery retries on transient failure instead of advancing past it."
+  - "`ui_test_executions` and `report_executions` are range-partitioned."
+  - "DEFAULT partitions exist as safety nets on all 3 partitioned tables."
+  - "CronDispatcher dispatches batch items in parallel within semaphore bounds."
+  - "`applicationTaskExecutor` is semaphore-bounded."
+  - "Circuit breaker behavior integration-tested with WireMock."
+  - "Report email delivery integration-tested with GreenMail."
+  - "Dispatcher health indicator reports UP/DOWN for consecutive failures."
+
+# ─────────────────────────────────────────────────────────────
+# Story roster
+# ─────────────────────────────────────────────────────────────
+stories:
+  - story_id: "6.1"
+    title: "Retry mechanism for failed scheduled dispatches"
+    size: L
+    status: ready
+    depends_on: ["2.3", "2.8"]
+    assigned_dev: null
+    story_file: "docs/stories/6.1.story.md"
+
+  - story_id: "6.2"
+    title: "Complete table partitioning + DEFAULT partition safety nets"
+    size: M
+    status: ready
+    depends_on: ["2.5", "2.6"]
+    assigned_dev: null
+    story_file: "docs/stories/6.2.story.md"
+
+  - story_id: "6.3"
+    title: "Parallel dispatch + bounded application executor"
+    size: M
+    status: ready
+    depends_on: ["2.3", "2.8"]
+    assigned_dev: null
+    story_file: "docs/stories/6.3.story.md"
+
+  - story_id: "6.4"
+    title: "Dispatcher health indicators + alerting-ready metrics"
+    size: S
+    status: ready
+    depends_on: ["6.1"]
+    assigned_dev: null
+    story_file: "docs/stories/6.4.story.md"
+
+  - story_id: "6.5"
+    title: "Resilience integration tests (circuit breaker + GreenMail e2e)"
+    size: M
+    status: ready
+    depends_on: ["2.7"]
+    assigned_dev: null
+    story_file: "docs/stories/6.5.story.md"
+
+  - story_id: "6.6"
+    title: "Processing technical debt (SectionResolver, DST, ObjectMapper, materialized view)"
+    size: S
+    status: ready
+    depends_on: []
+    assigned_dev: null
+    story_file: "docs/stories/6.6.story.md"
+
+# ─────────────────────────────────────────────────────────────
+# Drafting order for @sm
+# ─────────────────────────────────────────────────────────────
+sm_draft_queue:
+  - wave: 0
+    parallel: ["6.1", "6.2", "6.3", "6.5", "6.6"]
+    rationale: "6.1/6.2/6.3 are independent infrastructure stories. 6.5/6.6 are test/debt with no code deps."
+
+  - wave: 1
+    parallel: ["6.4"]
+    after: ["6.1"]
+    rationale: "Health indicators depend on retry mechanism existing to report on."
+
+# ─────────────────────────────────────────────────────────────
+# Risk tracking
+# ─────────────────────────────────────────────────────────────
+risks:
+  - risk_id: R-06
+    description: "Converting existing non-partitioned tables to partitioned requires data migration"
+    status: open
+    mitigation: "Story 6.2 handles empty-table case (no production data yet). If data exists, use pg_dump/restore."
+
+  - risk_id: R-07
+    description: "Parallel dispatch in CronDispatcher may change execution ordering semantics"
+    status: mitigated_by_design
+    mitigation: "Ordering within a batch was never guaranteed. ShedLock + semaphore preserve correctness."
+
+# ─────────────────────────────────────────────────────────────
+# Traceability
+# ─────────────────────────────────────────────────────────────
+covers_requirements:
+  functional: ["FR-SCHED-01", "FR-SCHED-02", "FR-RPT-03"]
+  non_functional: ["NFR-SCALE-01", "NFR-SCALE-02", "NFR-REL-01", "NFR-RET-01"]
+  constraints: ["CON-ARCH-05"]
+
+spec_sections_primary:
+  - "Spec Pipeline gap analysis §3.1 (critical gaps C2-C5)"
+  - "Spec Pipeline gap analysis §3.2 (high gaps H2-H7)"
+  - "Spec Pipeline gap analysis §3.3 (medium gaps M1, M3, M4, M8)"
+
+# ─────────────────────────────────────────────────────────────
+# Progress tracking
+# ─────────────────────────────────────────────────────────────
+progress:
+  stories_drafted: 6
+  stories_validated: 6
+  stories_done: 0
+  stories_blocked: 0
+  stories_in_progress: 0
+  current_wave: 0
+  notes:
+    - "2026-05-12 — @pm created EPIC-06-EXECUTION.yaml from Spec Pipeline output. 6 stories covering C2-C5, H2-H7, M1/M3/M4/M8. Secrets (C1) excluded per PO decision."
+    - "2026-05-12 — @sm drafted all 6 stories (6.1-6.6). Awaiting @po validation."
+    - "2026-05-12 — @po validated all 6 stories: 10/10 GO across the board. Non-blocking notes: N-6.1-1 (configurable auto-disable threshold), N-6.2-1 (partition conversion pre-production assumption), N-6.3-1 (join() blocking acceptable with ShedLock), N-6.5-1 (breaker test timing). All 6 stories now Ready."
+
+# ─────────────────────────────────────────────────────────────
+# Handoff
+# ─────────────────────────────────────────────────────────────
+handoff:
+  next_action: |
+    @sm to draft all 6 stories (6.1-6.6) from spec pipeline gap analysis.
+    @po validates each. Then @dev begins implementation following wave order.
+  hard_gates:
+    - "EPIC-02 stories 2.3-2.8 must be complete (scheduling infrastructure in place)."
+  cadence: "6 stories, estimated 2-3 weeks."
+
+attestation:
+  signed_by: "@pm (Morgan)"
+  signed_at: "2026-05-12"
+  article_iv: "Every story traces to Spec Pipeline gap analysis findings. No invented work."

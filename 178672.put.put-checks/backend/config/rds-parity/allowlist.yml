@@ -1,0 +1,16 @@
+# RDS-parity extension allowlist.
+#
+# Only extensions listed here are permitted in Flyway migrations.
+# Listed extensions are *permitted*; they do NOT imply the migration uses them.
+#
+# Adding an entry requires:
+#   1. Confirmation that the extension is enabled in the target RDS parameter group
+#   2. A code-reviewed PR (no author self-merge for allowlist changes)
+#   3. A note in the PR describing why the extension is needed
+extensions:
+  - pgcrypto
+  - uuid-ossp
+  - pg_stat_statements
+  - hstore
+  - btree_gin
+  - btree_gist

@@ -98,10 +98,11 @@ export function createCommsTemplateFromCheckDetails(check: {
 
   const configRows: string[] = [];
   if (check.type === 'HTTP') {
-    const cfg = check.configuration as { method?: string; url?: string; expectedStatus?: number; timeout?: number } | undefined;
+    const cfg = check.configuration as { method?: string; url?: string; expectedStatus?: number; expectedStatusCode?: number; timeout?: number } | undefined;
     configRows.push(`<li><strong>Method:</strong> ${escapeHtml(String(cfg?.method || 'GET'))}</li>`);
     if (cfg?.url) configRows.push(`<li><strong>URL:</strong> ${escapeHtml(cfg.url)}</li>`);
-    if (typeof cfg?.expectedStatus !== 'undefined') configRows.push(`<li><strong>Expected Status:</strong> ${escapeHtml(String(cfg.expectedStatus))}</li>`);
+    const expectedCode = cfg?.expectedStatusCode ?? cfg?.expectedStatus;
+    if (typeof expectedCode !== 'undefined') configRows.push(`<li><strong>Expected Status:</strong> ${escapeHtml(String(expectedCode))}</li>`);
     if (typeof cfg?.timeout !== 'undefined') configRows.push(`<li><strong>Timeout:</strong> ${escapeHtml(String(cfg.timeout))} ms</li>`);
   } else if (check.type === 'TCP') {
     const cfg = check.configuration as { host?: string; port?: number } | undefined;

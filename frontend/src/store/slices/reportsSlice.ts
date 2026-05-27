@@ -24,7 +24,7 @@ const initialState: ReportsState = {
     schedule: {
       frequency: 'daily',
       time: '09:00',
-      timezone: 'EST',
+      timezone: 'America/New_York',
       enabled: true,
     },
     recipients: [],
@@ -147,7 +147,7 @@ const reportsSlice = createSlice({
   initialState,
   reducers: {
     // Optimistic toggles for pause/resume from UI listings
-    toggleReportStatusOptimistic: (state, action: PayloadAction<{ id: string; status: 'active' | 'paused' }>) => {
+    toggleReportStatusOptimistic: (state, action: PayloadAction<{ id: string; status: 'ACTIVE' | 'PAUSED' }>) => {
       const idx = state.data.findIndex((r) => r.id === action.payload.id);
       if (idx !== -1) {
         state.data[idx] = { ...state.data[idx], status: action.payload.status } as any;

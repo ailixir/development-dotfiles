@@ -1,0 +1,31 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  flyway:
+    locations:
+      - classpath:db/migration
+      - classpath:db/seed
+  jpa:
+    show-sql: false
+
+  mail:
+    host: ${SMTP_HOST:smtp.resend.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASSWORD:}
+
+checks:
+  scheduling:
+    dispatcher-enabled: true
+  reports:
+    delivery-enabled: true
+    mail:
+      from: onboarding@resend.dev
+  metrics:
+    concurrent-refresh: false
+
+management:
+  endpoint:
+    health:
+      show-details: always
