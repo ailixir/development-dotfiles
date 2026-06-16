@@ -189,8 +189,7 @@ class ScheduleValidationIT {
             String.class);
     assertThat(createResp.getStatusCode().value()).isEqualTo(201);
 
-    String scheduleId =
-        objectMapper.readTree(createResp.getBody()).get("id").asText();
+    String scheduleId = objectMapper.readTree(createResp.getBody()).get("id").asText();
 
     // Update to sub-minute cron
     String updateBody =

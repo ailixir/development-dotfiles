@@ -13,10 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnProperty(
-    name = "checks.csi.provider",
-    havingValue = "local",
-    matchIfMissing = true)
+@ConditionalOnProperty(name = "checks.csi.provider", havingValue = "local", matchIfMissing = true)
 public class JpaCsiApiClient implements CsiApiClient {
 
   private final CsiRepository csiRepository;

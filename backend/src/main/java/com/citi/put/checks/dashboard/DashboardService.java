@@ -202,8 +202,7 @@ public class DashboardService {
         .map(
             row -> {
               String erStatus = (String) row[1];
-              boolean isFail =
-                  "FAILURE".equals(erStatus) || "TIMEOUT".equals(erStatus);
+              boolean isFail = "FAILURE".equals(erStatus) || "TIMEOUT".equals(erStatus);
               String checkName = (String) row[2];
               String csiName = (String) row[3];
               String errorMessage = (String) row[5];
@@ -217,8 +216,13 @@ public class DashboardService {
               String path = "/checks/details/" + checkId;
 
               return new ActivityItemDto(
-                  row[0].toString(), "EXECUTION", title, description, csiName,
-                  toInstant(row[4]), path);
+                  row[0].toString(),
+                  "EXECUTION",
+                  title,
+                  description,
+                  csiName,
+                  toInstant(row[4]),
+                  path);
             })
         .toList();
   }
@@ -270,7 +274,8 @@ public class DashboardService {
   public Instant acknowledgeCheck(String checkId) {
     Instant now = Instant.now();
     int updated =
-        em.createNativeQuery("UPDATE checks SET acknowledged_at = :now WHERE id = CAST(:id AS uuid)")
+        em.createNativeQuery(
+                "UPDATE checks SET acknowledged_at = :now WHERE id = CAST(:id AS uuid)")
             .setParameter("now", now)
             .setParameter("id", checkId)
             .executeUpdate();
@@ -283,8 +288,7 @@ public class DashboardService {
   @Transactional(readOnly = false)
   public void assignCheck(String checkId, String assigneeEmail) {
     int updated =
-        em.createNativeQuery(
-                "UPDATE checks SET assigned_to = :email WHERE id = CAST(:id AS uuid)")
+        em.createNativeQuery("UPDATE checks SET assigned_to = :email WHERE id = CAST(:id AS uuid)")
             .setParameter("email", assigneeEmail)
             .setParameter("id", checkId)
             .executeUpdate();

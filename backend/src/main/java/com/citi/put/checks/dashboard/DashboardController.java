@@ -69,8 +69,7 @@ public class DashboardController {
 
   @GetMapping("/reports/snapshot")
   public ResponseEntity<Map<String, List<ReportSnapshotDto>>> getReportsSnapshot(
-      @RequestParam(required = false) String csiId,
-      @RequestParam(defaultValue = "5") int limit) {
+      @RequestParam(required = false) String csiId, @RequestParam(defaultValue = "5") int limit) {
     List<ReportSnapshotDto> items = dashboardService.getReportsSnapshot(csiId, limit);
     return ResponseEntity.ok(Map.of("data", items));
   }
@@ -85,8 +84,7 @@ public class DashboardController {
   }
 
   @PostMapping("/attention/{id}/acknowledge")
-  public ResponseEntity<Map<String, Object>> acknowledgeAttentionItem(
-      @PathVariable String id) {
+  public ResponseEntity<Map<String, Object>> acknowledgeAttentionItem(@PathVariable String id) {
     try {
       Instant acknowledgedAt = dashboardService.acknowledgeCheck(id);
       return ResponseEntity.ok(Map.of("id", id, "acknowledgedAt", acknowledgedAt));

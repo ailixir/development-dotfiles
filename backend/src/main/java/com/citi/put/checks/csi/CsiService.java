@@ -39,13 +39,18 @@ public class CsiService {
       int size) {
 
     List<String> ownedCsiIds =
-        identity.csiOwnership().stream()
-            .map(CsiOwnershipEntry::csiId)
-            .collect(Collectors.toList());
+        identity.csiOwnership().stream().map(CsiOwnershipEntry::csiId).collect(Collectors.toList());
 
     return csiApiClient.listFiltered(
-        ownedCsiIds, isAdmin(identity), businessUnit, criticality, environment, status, search,
-        page, size);
+        ownedCsiIds,
+        isAdmin(identity),
+        businessUnit,
+        criticality,
+        environment,
+        status,
+        search,
+        page,
+        size);
   }
 
   public CsiDto findById(String id) {

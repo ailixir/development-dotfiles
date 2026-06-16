@@ -130,8 +130,7 @@ public class CheckService {
     Map<UUID, List<String>> tagMap = checkTagService.findTagNamesByCheckIds(checkIds);
 
     Page<CheckDto> dtoPage =
-        result.map(
-            check -> CheckDto.from(check, tagMap.getOrDefault(check.getId(), List.of())));
+        result.map(check -> CheckDto.from(check, tagMap.getOrDefault(check.getId(), List.of())));
 
     if (tags != null && !tags.isEmpty()) {
       List<CheckDto> filtered =

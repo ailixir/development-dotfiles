@@ -77,7 +77,8 @@ public class ReportRenderer {
     html.append(
         "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\""
             + " style=\"width:100%\"><tr>");
-    html.append("<td style=\"vertical-align:top;color:#fff;font-family:Arial,Helvetica,sans-serif\">");
+    html.append(
+        "<td style=\"vertical-align:top;color:#fff;font-family:Arial,Helvetica,sans-serif\">");
     html.append("<h1 style=\"margin:0;font-size:22px;color:#fff\">").append(esc(report.getName()));
     html.append("</h1>");
     if (report.getDescription() != null && !report.getDescription().isBlank()) {
@@ -85,8 +86,7 @@ public class ReportRenderer {
       html.append(esc(report.getDescription())).append("</p>");
     }
     html.append("</td>");
-    html.append(
-        "<td style=\"vertical-align:top;text-align:right;width:140px;padding-left:16px\">");
+    html.append("<td style=\"vertical-align:top;text-align:right;width:140px;padding-left:16px\">");
     html.append("<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\"");
     html.append(" align=\"right\"><tr><td style=\"background:#4b87cd;padding:4px 10px;");
     html.append("font-size:11px;font-weight:bold;white-space:nowrap;color:#fff;");
@@ -230,8 +230,7 @@ public class ReportRenderer {
     appendSectionHeader(html, section);
 
     if (alerts.isEmpty()) {
-      html.append(
-          "<div style=\"padding:20px;background:#e8f5e9;text-align:center\">");
+      html.append("<div style=\"padding:20px;background:#e8f5e9;text-align:center\">");
       html.append(
           "<span style=\"font-size:28px\">&#10003;</span><br>"
               + "<strong style=\"color:#2e7d32;font-size:15px\">All clear</strong><br>");
@@ -246,7 +245,8 @@ public class ReportRenderer {
         html.append(
             "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\""
                 + " style=\"width:100%\"><tr>");
-        html.append("<td style=\"font-size:14px;font-weight:bold;font-family:Arial,Helvetica,sans-serif\">");
+        html.append(
+            "<td style=\"font-size:14px;font-weight:bold;font-family:Arial,Helvetica,sans-serif\">");
         html.append(esc(c.name())).append("</td>");
         html.append("<td style=\"text-align:right;width:80px\">");
         statusChip(html, c.status());

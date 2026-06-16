@@ -12,4 +12,3 @@ public record CheckRequest(
     CheckConfiguration configuration,
     @Size(max = 20, message = "A check can have at most 20 tags")
         List<@Size(max = 100, message = "Tag name must be at most 100 characters") String> tags) {}
-

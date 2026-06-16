@@ -70,7 +70,8 @@ class CheckServiceSourceGateTest {
     CheckService service = serviceWith(Map.of(CheckType.HTTP, true, CheckType.TCP, true));
     HttpConfiguration config =
         new HttpConfiguration("HTTP", "GET", "http://localhost", null, null, 200, true, 5000, true);
-    CheckRequest request = new CheckRequest("Test", "desc", "CSI1", "Production", config, List.of());
+    CheckRequest request =
+        new CheckRequest("Test", "desc", "CSI1", "Production", config, List.of());
 
     when(ownershipEvaluator.canWrite(any(), anyString())).thenReturn(true);
     CsiSystem csi = mock(CsiSystem.class);
@@ -90,7 +91,8 @@ class CheckServiceSourceGateTest {
     HttpConfiguration config =
         new HttpConfiguration(
             "SPLUNK", "GET", "http://localhost", null, null, 200, true, 5000, true);
-    CheckRequest request = new CheckRequest("Splunk Test", "desc", "CSI1", "Production", config, List.of());
+    CheckRequest request =
+        new CheckRequest("Splunk Test", "desc", "CSI1", "Production", config, List.of());
 
     when(ownershipEvaluator.canWrite(any(), anyString())).thenReturn(true);
 

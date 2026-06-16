@@ -11,6 +11,27 @@ Part of the [Project Checks monorepo](../README.md). Frontend lives under `../fr
 - **JDK 21** (temurin-21 recommended). Gradle toolchains will auto-download if your default JDK is older, but a system JDK 21 is faster.
 - **No local Postgres needed for M1.** Story 1.2 wires Zonky embedded Postgres (runs in-process) for the `local` profile; Testcontainers-PG for the `test` profile.
 
+### Citi Artifactory access
+
+On a Citi VDI, put personal Artifactory credentials in your user-level Gradle properties file, not in this repository:
+
+```properties
+# ~/.gradle/gradle.properties
+citiMavenRepositoryUrl=https://<artifactory-host>/artifactory/<maven-virtual-repo>
+citiGradlePluginRepositoryUrl=https://<artifactory-host>/artifactory/<gradle-plugin-virtual-repo>
+citiArtifactoryUser=<SOE ID>
+citiArtifactoryPassword=<Artifactory identity token>
+```
+
+`citiGradlePluginRepositoryUrl` can be omitted when the Maven virtual repository also proxies the Gradle Plugin Portal. Existing `citiEarUser` / `citiEarPassword` properties are also supported as aliases.
+
+If the Gradle wrapper distribution itself is served from an authenticated Artifactory URL, also set:
+
+```properties
+systemProp.gradle.wrapperUser=<SOE ID>
+systemProp.gradle.wrapperPassword=<Artifactory identity token>
+```
+
 ---
 
 ## Canonical commands

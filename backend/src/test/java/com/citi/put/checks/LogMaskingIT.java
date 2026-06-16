@@ -79,7 +79,7 @@ class LogMaskingIT {
     appender.doAppend(event);
     String encoded = buffer.toString();
 
-    assertThat(encoded).doesNotContain("alice.smith@citigroup.com");
-    assertThat(encoded).contains("***@citigroup.com");
+    assertThat(encoded).doesNotContain("bruno.buger@citi.com");
+    assertThat(encoded).contains("***@citi.com");
   }
 }

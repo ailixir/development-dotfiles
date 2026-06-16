@@ -28,7 +28,12 @@ public class LocalDevAuthFilter extends OncePerRequestFilter {
 
   private static final UserIdentity DEV_IDENTITY =
       new UserIdentity(
-          "bb12345", "bruno.buger@citi.com", "Bruno Buger", null, List.of("checks-admin"), List.of());
+          "bb12345",
+          "bruno.buger@citi.com",
+          "Bruno Buger",
+          null,
+          List.of("checks-admin"),
+          List.of());
 
   @Override
   protected void doFilterInternal(

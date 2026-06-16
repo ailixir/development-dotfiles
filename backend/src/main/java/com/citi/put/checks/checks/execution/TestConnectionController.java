@@ -59,8 +59,10 @@ public class TestConnectionController {
       return ResponseEntity.badRequest()
           .body(
               Map.of(
-                  "status", "ERROR",
-                  "error", e.getMessage() != null ? e.getMessage() : "Unknown error"));
+                  "status",
+                  "ERROR",
+                  "error",
+                  e.getMessage() != null ? e.getMessage() : "Unknown error"));
     }
   }
 
@@ -68,14 +70,20 @@ public class TestConnectionController {
     return switch (outcome) {
       case ExecutionOutcome.Success s ->
           Map.of(
-              "status", "SUCCESS",
-              "durationMs", s.duration().toMillis(),
-              "output", s.output() != null ? s.output() : "");
+              "status",
+              "SUCCESS",
+              "durationMs",
+              s.duration().toMillis(),
+              "output",
+              s.output() != null ? s.output() : "");
       case ExecutionOutcome.Failure f ->
           Map.of(
-              "status", "FAILURE",
-              "durationMs", f.duration().toMillis(),
-              "error", f.errorMessage() != null ? f.errorMessage() : "Check failed");
+              "status",
+              "FAILURE",
+              "durationMs",
+              f.duration().toMillis(),
+              "error",
+              f.errorMessage() != null ? f.errorMessage() : "Check failed");
       case ExecutionOutcome.Timeout t ->
           Map.of(
               "status", "TIMEOUT",
@@ -83,15 +91,20 @@ public class TestConnectionController {
               "error", "Connection timed out");
       case ExecutionOutcome.Warning w ->
           Map.of(
-              "status", "WARNING",
-              "durationMs", w.duration().toMillis(),
-              "output", w.message() != null ? w.message() : "");
+              "status",
+              "WARNING",
+              "durationMs",
+              w.duration().toMillis(),
+              "output",
+              w.message() != null ? w.message() : "");
       case ExecutionOutcome.Throttled th ->
           Map.of(
-              "status", "THROTTLED",
-              "durationMs", 0L,
+              "status",
+              "THROTTLED",
+              "durationMs",
+              0L,
               "error",
-                  "Executor throttled for " + th.checkType().name() + " — try again shortly");
+              "Executor throttled for " + th.checkType().name() + " — try again shortly");
     };
   }
 }
