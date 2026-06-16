@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BACKEND_PID=""
 BACKEND_WATCHER_PID=""
 FRONTEND_PID=""
+GRADLE_WRAPPER_PROPERTIES="$ROOT_DIR/backend/gradle/wrapper/gradle-wrapper.properties"
+GRADLE_WRAPPER_BACKUP=""
 
 # ── Colors ──────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -25,6 +27,10 @@ cleanup() {
   [ -n "$FRONTEND_PID" ]         && kill "$FRONTEND_PID"         2>/dev/null && wait "$FRONTEND_PID"         2>/dev/null
   [ -n "$BACKEND_WATCHER_PID" ]  && kill "$BACKEND_WATCHER_PID"  2>/dev/null && wait "$BACKEND_WATCHER_PID"  2>/dev/null
   [ -n "$BACKEND_PID" ]          && kill "$BACKEND_PID"           2>/dev/null && wait "$BACKEND_PID"          2>/dev/null
+  if [ -n "$GRADLE_WRAPPER_BACKUP" ] && [ -f "$GRADLE_WRAPPER_BACKUP" ]; then
+    mv "$GRADLE_WRAPPER_BACKUP" "$GRADLE_WRAPPER_PROPERTIES"
+    log "Restored Gradle wrapper configuration"
+  fi
   log "Done."
 }
 trap cleanup EXIT INT TERM
@@ -51,6 +57,10 @@ ${BOLD}Examples:${NC}
   ./dev.sh --frontend-only      # Frontend only (proxy to :8080 if running)
   ./dev.sh --federated          # Full stack, frontend in MF mode (:3002)
   ./dev.sh --backend-only       # Backend only
+
+${BOLD}Environment:${NC}
+  GRADLE_DISTRIBUTION_URL       Override Gradle wrapper distribution URL
+                                (e.g. Artifactory mirror)
 EOF
   exit 0
 }
@@ -117,6 +127,37 @@ if [ "$SKIP_CHECKS" = false ]; then
   check_prereqs
 fi
 
+# ── Optional Gradle wrapper URL override (session only) ────────────
+apply_gradle_distribution_override() {
+  if [ "$BACKEND" != true ] || [ -z "${GRADLE_DISTRIBUTION_URL:-}" ]; then
+    return
+  fi
+
+  if [ ! -f "$GRADLE_WRAPPER_PROPERTIES" ]; then
+    warn "Gradle wrapper properties not found: $GRADLE_WRAPPER_PROPERTIES"
+    return
+  fi
+
+  local current_url
+  current_url="$(awk -F= '/^distributionUrl=/{print $2}' "$GRADLE_WRAPPER_PROPERTIES" || true)"
+  if [ "$current_url" = "$GRADLE_DISTRIBUTION_URL" ]; then
+    ok "Gradle distribution URL already configured"
+    return
+  fi
+
+  GRADLE_WRAPPER_BACKUP="$(mktemp "${TMPDIR:-/tmp}/gradle-wrapper.properties.XXXXXX")"
+  cp "$GRADLE_WRAPPER_PROPERTIES" "$GRADLE_WRAPPER_BACKUP"
+
+  awk -v url="$GRADLE_DISTRIBUTION_URL" '
+    BEGIN { updated=0 }
+    /^distributionUrl=/ { print "distributionUrl=" url; updated=1; next }
+    { print }
+    END { if (!updated) print "distributionUrl=" url }
+  ' "$GRADLE_WRAPPER_PROPERTIES" > "${GRADLE_WRAPPER_PROPERTIES}.tmp"
+  mv "${GRADLE_WRAPPER_PROPERTIES}.tmp" "$GRADLE_WRAPPER_PROPERTIES"
+  ok "Applied Gradle distribution override for this run"
+}
+
 # ── Load .env.local (secrets not committed to git) ────────────────
 if [ -f "$ROOT_DIR/.env.local" ]; then
   set -a
@@ -124,6 +165,8 @@ if [ -f "$ROOT_DIR/.env.local" ]; then
   set +a
   ok "Loaded .env.local"
 fi
+
+apply_gradle_distribution_override
 
 export SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
 
