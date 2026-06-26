@@ -1,5 +1,15 @@
 import { AppConfig } from '../../types/common/commonTypes';
 
+type RuntimeChecksConfig = {
+  apiBaseUrl?: string;
+};
+
+declare global {
+  interface Window {
+    __CHECKS_CONFIG__?: RuntimeChecksConfig;
+  }
+}
+
 // Safe access to Vite env in both Vite and Webpack builds
 const viteEnv: Record<string, any> = (() => {
   try {
@@ -31,9 +41,14 @@ const getBoolEnv = (key: string, defaultTrue = true): boolean => {
 // DefinePlugin replaces literal process.env.X references at build time;
 // dynamic access (process.env[key]) is NOT replaced, so we read it directly.
 const _reactApiBase: string = process.env.REACT_APP_API_BASE_URL as unknown as string;
+const _runtimeApiBase = typeof window !== 'undefined' ? window.__CHECKS_CONFIG__?.apiBaseUrl : undefined;
 
 export const APP_CONFIG: AppConfig = {
-  apiBaseUrl: (typeof _reactApiBase === 'string' && _reactApiBase.length > 0 ? _reactApiBase : null) || getStringEnv('VITE_API_BASE_URL', '/api/v1') || '/api/v1',
+  apiBaseUrl:
+    (typeof _runtimeApiBase === 'string' && _runtimeApiBase.length > 0 ? _runtimeApiBase : null) ||
+    (typeof _reactApiBase === 'string' && _reactApiBase.length > 0 ? _reactApiBase : null) ||
+    getStringEnv('VITE_API_BASE_URL', '/api/v1') ||
+    '/api/v1',
   debugMode: getStringEnv('VITE_DEBUG_MODE') === 'true',
   version: '1.0.0',
   buildDate: new Date().toISOString(),
