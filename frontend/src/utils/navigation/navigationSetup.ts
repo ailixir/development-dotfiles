@@ -67,7 +67,7 @@ export const getCurrentPageId = (pathname: string): string => {
   // CSIs removed
   // Checks parent should highlight when in checks area
   if (pathname.startsWith('/checks/all')) return 'checks';
-  if (pathname.startsWith('/checks/create')) return 'checks';
+  if (pathname.startsWith('/checks/create') || pathname.startsWith('/checks/prototype')) return 'checks';
   // templates removed
   // Studio sub-nav
   if (pathname.startsWith('/checks/studio/runs')) return 'studio-runs';

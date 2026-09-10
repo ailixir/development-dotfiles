@@ -2,6 +2,7 @@ import { AppConfig } from '../../types/common/commonTypes';
 
 type RuntimeChecksConfig = {
   apiBaseUrl?: string;
+  debugMode?: boolean;
 };
 
 declare global {
@@ -42,6 +43,7 @@ const getBoolEnv = (key: string, defaultTrue = true): boolean => {
 // dynamic access (process.env[key]) is NOT replaced, so we read it directly.
 const _reactApiBase: string = process.env.REACT_APP_API_BASE_URL as unknown as string;
 const _runtimeApiBase = typeof window !== 'undefined' ? window.__CHECKS_CONFIG__?.apiBaseUrl : undefined;
+const _runtimeDebugMode = typeof window !== 'undefined' ? window.__CHECKS_CONFIG__?.debugMode : undefined;
 
 export const APP_CONFIG: AppConfig = {
   apiBaseUrl:
@@ -49,7 +51,7 @@ export const APP_CONFIG: AppConfig = {
     (typeof _reactApiBase === 'string' && _reactApiBase.length > 0 ? _reactApiBase : null) ||
     getStringEnv('VITE_API_BASE_URL', '/api/v1') ||
     '/api/v1',
-  debugMode: getStringEnv('VITE_DEBUG_MODE') === 'true',
+  debugMode: typeof _runtimeDebugMode === 'boolean' ? _runtimeDebugMode : getStringEnv('VITE_DEBUG_MODE') === 'true',
   version: '1.0.0',
   buildDate: new Date().toISOString(),
 };

@@ -25,6 +25,7 @@ const StudioTestsPage = React.lazy(() => import('@pages/StudioTestsPage'));
 // Removed Scheduled and Analytics pages
 const ActivityPage = React.lazy(() => import('@pages/ActivityPage'));
 const SchedulesPage = React.lazy(() => import('@pages/SchedulesPage'));
+const SplunkPrototypePage = React.lazy(() => import('@pages/SplunkPrototypePage'));
 
 // Loading fallback component
 const PageLoadingFallback: React.FC = () => (
@@ -104,6 +105,7 @@ const App: React.FC = () => {
         <Route index element={<HomePage />} />
         <Route path="all" element={<AllChecksPage />} />
         <Route path="create" element={<CreateCheckPage />} />
+        <Route path="prototype/splunk" element={<SplunkPrototypePage />} />
         <Route path="details/:id" element={<CheckDetailsPage />} />
         <Route path="edit/:id" element={<EditCheckPage />} />
         <Route path="studio" element={<FeatureGate featureKey="STUDIO"><ChecksStudioPage /></FeatureGate>} />
@@ -129,6 +131,7 @@ const App: React.FC = () => {
         {/* Check Management */}
         <Route path="all" element={<AllChecksPage />} />
         <Route path="create" element={<CreateCheckPage />} />
+        <Route path="prototype/splunk" element={<SplunkPrototypePage />} />
         <Route path="details/:id" element={<CheckDetailsPage />} />
         <Route path="edit/:id" element={<EditCheckPage />} />
 

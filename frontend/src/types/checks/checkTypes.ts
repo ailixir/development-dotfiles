@@ -38,8 +38,12 @@ export interface CheckConfiguration {
   port?: number;
 
   // Splunk Configuration
+  type?: CheckType;
   query?: string;
+  index?: string;
   timeRange?: string;
+  expectedCount?: number;
+  countOperator?: '>' | '>=' | '<' | '<=' | '==' | '=';
   threshold?: ThresholdConfig;
 
   // Grafana Configuration

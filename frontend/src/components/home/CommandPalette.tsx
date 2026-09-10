@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { title: 'All Checks', path: '/checks/all' },
   { title: 'Reports', path: '/checks/reports' },
   { title: 'Studio', path: '/checks/studio' },
+  { title: 'Splunk prototype', path: '/checks/prototype/splunk' },
 ];
 
 const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {

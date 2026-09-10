@@ -66,7 +66,7 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     const getCurrentPageFromPath = (path: string): string => {
       if (path === '/checks' || path === '/') return 'dashboard';
       if (path.startsWith('/checks/all')) return 'all-checks';
-      if (path.startsWith('/checks/create')) return 'create-check';
+      if (path.startsWith('/checks/create') || path.startsWith('/checks/prototype')) return 'create-check';
       if (path.startsWith('/checks/studio')) return 'checks-studio';
       if (path.startsWith('/checks/reports')) return 'reports';
       return 'dashboard';

@@ -53,6 +53,10 @@ class CsiListIT {
   void setUp() {
     wireMock.resetAll();
     seedUser("owner@citi.com");
+    stubIdentity("[\"checks-admin\"]", "[{\"csi_id\": \"10001\", \"role\": \"owner\"}]");
+  }
+
+  private void stubIdentity(String rolesJson, String csiOwnershipJson) {
     wireMock.stubFor(
         get(urlEqualTo("/api/v1/users/me"))
             .willReturn(
@@ -62,10 +66,11 @@ class CsiListIT {
           "user_id": "csi-list-user",
           "email": "csilist@citi.com",
           "name": "CSI Lister",
-          "roles": ["checks-admin"],
-          "csi_ownership": [{"csi_id": "10001", "role": "owner"}]
+          "roles": %s,
+          "csi_ownership": %s
         }
-        """)));
+        """
+                        .formatted(rolesJson, csiOwnershipJson))));
   }
 
   private void seedUser(String email) {
@@ -110,6 +115,33 @@ class CsiListIT {
     JsonNode body = objectMapper.readTree(response.getBody());
     assertThat(body.path("data").isArray()).isTrue();
     assertThat(body.path("totalElements").asInt()).isGreaterThanOrEqualTo(2);
+  }
+
+  @Test
+  void temporaryCsiReadBypassListsCsiWithoutOwnership() throws Exception {
+    wireMock.resetAll();
+    stubIdentity("[\"checks-operator\"]", "[]");
+    seedCsi("10007", "Bypass Visible CSI", "Ops", "Production", "OPERATIONAL");
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Cookie", "put_session=csi-read-bypass-token");
+    ResponseEntity<String> response =
+        restTemplate.exchange(
+            "/api/v1/csi?search=Bypass",
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            String.class);
+
+    assertThat(response.getStatusCode().value()).isEqualTo(200);
+    JsonNode body = objectMapper.readTree(response.getBody());
+    assertThat(body.path("totalElements").asInt()).isGreaterThanOrEqualTo(1);
+
+    ResponseEntity<String> directResponse =
+        restTemplate.exchange(
+            "/api/v1/csi/10007", HttpMethod.GET, new HttpEntity<>(headers), String.class);
+    assertThat(directResponse.getStatusCode().value()).isEqualTo(200);
+    JsonNode directBody = objectMapper.readTree(directResponse.getBody());
+    assertThat(directBody.path("id").asText()).isEqualTo("10007");
   }
 
   @Test

@@ -21,6 +21,29 @@ const TEMPLATE_OPTIONS = [
   { value: 'trend-analysis', label: 'Trend Analysis' },
 ];
 
+const AUTOSAVE_DEBOUNCE_MS = 4000;
+
+type ReportConfigState = {
+  name: string;
+  description: string;
+  subject: string;
+  recipients: string[];
+  template: string;
+  selectedChecks: string[];
+  sections: ReportSection[];
+  schedule: ReportSchedule;
+};
+
+const snapshotReportConfig = (cfg: ReportConfigState) => JSON.stringify({
+  name: cfg.name,
+  description: cfg.description,
+  subject: cfg.subject,
+  sections: cfg.sections,
+  schedule: cfg.schedule,
+  recipients: cfg.recipients,
+  template: cfg.template,
+});
+
 const ReportBuilder: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -28,7 +51,7 @@ const ReportBuilder: React.FC = () => {
   const isEditMode = Boolean(params.id);
   const { previewContent, generatingPreview } = useAppSelector((s) => s.reports);
 
-  const [reportConfig, setReportConfig] = useState({
+  const [reportConfig, setReportConfig] = useState<ReportConfigState>({
     name: '',
     description: '',
     subject: '',
@@ -81,9 +104,32 @@ const ReportBuilder: React.FC = () => {
   const [manualLoading, setManualLoading] = useState<Record<string, boolean>>({});
   const searchTimersRef = useRef<Record<string, any>>({});
   const autosaveTimerRef = useRef<number | null>(null);
+  const lastSavedSnapshotRef = useRef<string | null>(null);
+  const reportConfigRef = useRef(reportConfig);
+  const draftIdRef = useRef(draftId);
+  const [autosaveArmed, setAutosaveArmed] = useState(false);
+  reportConfigRef.current = reportConfig;
+  draftIdRef.current = draftId;
+
+  // Arm autosave only after hydration settles (localStorage restore / API load).
+  useEffect(() => {
+    setAutosaveArmed(false);
+    if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
+
+    if (isEditMode) {
+      return;
+    }
+
+    const t = window.setTimeout(() => {
+      lastSavedSnapshotRef.current = snapshotReportConfig(reportConfigRef.current);
+      setAutosaveArmed(true);
+    }, 400);
+    return () => window.clearTimeout(t);
+  }, [isEditMode, params.id]);
 
   useEffect(() => {
     if (params.id) {
+      setAutosaveArmed(false);
       reportsApi.getById(params.id).then((r: any) => {
         const safeSections = Array.isArray(r.sections)
           ? r.sections.map((s: any, i: number) => {
@@ -102,7 +148,7 @@ const ReportBuilder: React.FC = () => {
           : typeof r.recipients === 'string'
             ? r.recipients.split(',').map((s: string) => s.trim()).filter(Boolean)
             : [];
-        setReportConfig({
+        const loaded: ReportConfigState = {
           name: r.name ?? '',
           description: r.description ?? '',
           subject: r.name ?? '',
@@ -111,8 +157,11 @@ const ReportBuilder: React.FC = () => {
           selectedChecks: r.selectedChecks || [],
           sections: safeSections,
           schedule: { frequency: 'daily', time: '18:00', timezone: 'America/New_York', enabled: true, ...r.schedule },
-        });
+        };
+        setReportConfig(loaded);
         setDraftId(r.id);
+        lastSavedSnapshotRef.current = snapshotReportConfig(loaded);
+        setAutosaveArmed(true);
       }).catch(() => {});
     }
   }, [params.id]);
@@ -214,6 +263,10 @@ const ReportBuilder: React.FC = () => {
     selectedChecks: reportConfig.selectedChecks,
   }), [reportConfig]);
 
+  const markSavedSnapshot = () => {
+    lastSavedSnapshotRef.current = snapshotReportConfig(reportConfigRef.current);
+  };
+
   const handleSaveReport = async (): Promise<string | null> => {
     if (saving) return draftId;
     try {
@@ -225,6 +278,7 @@ const ReportBuilder: React.FC = () => {
         try {
           const updated = await reportsApi.updateReport(idToUpdate, payload as any);
           setDraftId(updated.id);
+          markSavedSnapshot();
           setSavingIndicator('saved');
           window.setTimeout(() => setSavingIndicator('idle'), 1500);
           return updated.id;
@@ -232,6 +286,7 @@ const ReportBuilder: React.FC = () => {
           if (e?.response?.status === 404) {
             const created = await dispatch(createReport(payload as any)).unwrap();
             setDraftId(created.id);
+            markSavedSnapshot();
             setSavingIndicator('saved');
             window.setTimeout(() => setSavingIndicator('idle'), 1500);
             return created.id;
@@ -241,6 +296,7 @@ const ReportBuilder: React.FC = () => {
       } else {
         const created = await dispatch(createReport(payload as any)).unwrap();
         setDraftId(created.id);
+        markSavedSnapshot();
         setSavingIndicator('saved');
         window.setTimeout(() => setSavingIndicator('idle'), 1500);
         return created.id;
@@ -261,6 +317,7 @@ const ReportBuilder: React.FC = () => {
     } else {
       try {
         await reportsApi.updateReport(id, buildPayload() as any);
+        markSavedSnapshot();
       } catch (e) {
         console.error('Failed to update before preview', e);
       }
@@ -273,15 +330,22 @@ const ReportBuilder: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!autosaveArmed) return;
+    if (!draftId && !reportConfig.name.trim()) return;
+
+    const snapshot = snapshotReportConfig(reportConfig);
+    if (snapshot === lastSavedSnapshotRef.current) return;
+
     if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
-    autosaveTimerRef.current = window.setTimeout(async () => {
-      const savedId = await handleSaveReport();
-      if (savedId && reportConfig.sections.length > 0) {
-        try { await dispatch(generatePreview(savedId)).unwrap(); } catch {}
-      }
-    }, 1200) as unknown as number;
+    autosaveTimerRef.current = window.setTimeout(() => {
+      if (!draftIdRef.current && !reportConfigRef.current.name.trim()) return;
+      const current = snapshotReportConfig(reportConfigRef.current);
+      if (current === lastSavedSnapshotRef.current) return;
+      void handleSaveReport();
+    }, AUTOSAVE_DEBOUNCE_MS) as unknown as number;
+
     return () => { if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current); };
-  }, [reportConfig.name, reportConfig.description, reportConfig.subject, reportConfig.sections, reportConfig.schedule, reportConfig.recipients, reportConfig.template]);
+  }, [autosaveArmed, reportConfig.name, reportConfig.description, reportConfig.subject, reportConfig.sections, reportConfig.schedule, reportConfig.recipients, reportConfig.template, draftId]);
 
   return (
     <Box>

@@ -38,7 +38,7 @@ import { useAppDispatch, useAppSelector } from '@store/index';
 import { fetchCSIs } from '@store/slices/csiSlice';
 import { createCheck, updateCheck, fetchCheckById } from '@store/slices/checksSlice';
 import { addNotification } from '@/store/slices/uiSlice';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
 import WizardHeader from '@/components/checks/wizard/WizardHeader';
 import CheckTypeSelector from '@/components/checks/wizard/CheckTypeSelector';
 import { HttpConfig, TcpConfig, SplunkConfig, GrafanaConfig, ItrsConfig, AppDynamicsConfig, UiTestConfig } from '@/components/checks/wizard/configs';
@@ -423,6 +423,18 @@ const CreateCheckPage: React.FC = () => {
   return (
     <Box>
       <WizardHeader editId={editId} checkName={formData.name} saveHint={saveHint} autosaveEnabled={autosaveEnabled} onAutosaveChange={setAutosaveEnabled} />
+
+      <Alert
+        severity="info"
+        sx={{ mb: 2 }}
+        action={
+          <Button color="inherit" size="small" component={RouterLink} to="/checks/prototype/splunk">
+            Open prototype
+          </Button>
+        }
+      >
+        Splunk Logs / Metrics UX prototype runs fully offline — no backend required.
+      </Alert>
 
       <Card>
         <CardContent>

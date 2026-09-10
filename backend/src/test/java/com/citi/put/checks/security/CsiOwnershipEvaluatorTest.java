@@ -65,6 +65,22 @@ class CsiOwnershipEvaluatorTest {
   }
 
   @Test
+  void missingOwnershipDeniesAllWithoutThrowing() {
+    var token = tokenFor(List.of("checks-operator"), null);
+    assertThat(evaluator.isAdmin(token)).isFalse();
+    assertThat(evaluator.canRead(token, "100")).isFalse();
+    assertThat(evaluator.canWrite(token, "100")).isFalse();
+  }
+
+  @Test
+  void missingRolesAndOwnershipDenyAllWithoutThrowing() {
+    var token = tokenFor(null, null);
+    assertThat(evaluator.isAdmin(token)).isFalse();
+    assertThat(evaluator.canRead(token, "100")).isFalse();
+    assertThat(evaluator.canWrite(token, "100")).isFalse();
+  }
+
+  @Test
   void wrongCsiIdDeniesAccess() {
     var token =
         tokenFor(List.of("checks-operator"), List.of(new CsiOwnershipEntry("100", "owner")));

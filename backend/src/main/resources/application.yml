@@ -86,6 +86,20 @@ checks:
     timeout:
       connect-ms: 2000
       read-ms: 3000
+  dc:
+    enabled: ${CHECKS_DC_ENABLED:true}
+    base-url: ${CHECKS_DC_BASE_URL:http://localhost:9091}
+    execute-path: ${CHECKS_DC_EXECUTE_PATH:/api/v1/execute}
+    auth:
+      mode: ${CHECKS_DC_AUTH_MODE:none}
+      username: ${CHECKS_DC_AUTH_USERNAME:}
+      password: ${CHECKS_DC_AUTH_PASSWORD:}
+      token: ${CHECKS_DC_AUTH_TOKEN:}
+      header-name: ${CHECKS_DC_AUTH_HEADER_NAME:X-Api-Key}
+      header-value: ${CHECKS_DC_AUTH_HEADER_VALUE:}
+    timeout:
+      connect-ms: 3000
+      read-ms: 60000
   reports:
     delivery-enabled: true
     poll-interval-ms: 60000
@@ -116,6 +130,11 @@ resilience4j:
         minimum-number-of-calls: 10
         failure-rate-threshold: 50
         wait-duration-in-open-state: 30s
+      dailychecks:
+        sliding-window-size: 20
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
   retry:
     instances:
       core-service:
@@ -134,6 +153,16 @@ resilience4j:
         retry-exceptions:
           - java.io.IOException
           - org.springframework.web.client.RestClientException
+      dailychecks:
+        max-attempts: 3
+        wait-duration: 200ms
+        exponential-backoff-multiplier: 3
+        retry-exceptions:
+          - java.io.IOException
+          - org.springframework.web.client.ResourceAccessException
+          - org.springframework.web.client.HttpServerErrorException
+        ignore-exceptions:
+          - org.springframework.web.client.HttpClientErrorException
 
 springdoc:
   api-docs:

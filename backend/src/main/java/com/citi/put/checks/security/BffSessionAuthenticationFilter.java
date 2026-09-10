@@ -9,6 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -16,12 +17,21 @@ import java.util.UUID;
 import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class BffSessionAuthenticationFilter extends OncePerRequestFilter {
 
   private static final String COOKIE_NAME = "put_session";
+  private static final UserIdentity CORE_SERVICE_BYPASS_IDENTITY =
+      new UserIdentity(
+          "platform-bypass",
+          "platform-bypass@citi.com",
+          "Platform Bypass User",
+          "Platform Migration",
+          List.of("checks-admin", "platform-admin"),
+          List.of());
 
   private final CoreServiceClient coreServiceClient;
   private final Cache<String, UserIdentity> identityCache;
@@ -54,9 +64,10 @@ public class BffSessionAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
-    // If a prior filter (e.g. LocalDevAuthFilter) already set an identity, skip resolution.
-    if (SecurityContextHolder.getContext().getAuthentication() != null
-        && SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+    // If a prior filter (e.g. LocalDevAuthFilter) already set our identity, skip resolution.
+    Authentication existingAuthentication = SecurityContextHolder.getContext().getAuthentication();
+    if (existingAuthentication instanceof BffAuthenticationToken
+        && existingAuthentication.isAuthenticated()) {
       chain.doFilter(request, response);
       return;
     }
@@ -66,6 +77,7 @@ public class BffSessionAuthenticationFilter extends OncePerRequestFilter {
 
     try {
       UserIdentity identity = resolveIdentity(request);
+      identity = applyTemporaryCsiReadBypass(request, identity);
 
       MDC.put("userId", identity.userId());
       SecurityContextHolder.getContext().setAuthentication(new BffAuthenticationToken(identity));
@@ -88,6 +100,19 @@ public class BffSessionAuthenticationFilter extends OncePerRequestFilter {
       return parseHeaderIdentity(request, xUserId);
     }
 
+    if (isCoreServiceBypassed()) {
+      return CORE_SERVICE_BYPASS_IDENTITY;
+    }
+
+    return resolveCoreSessionIdentity(request);
+  }
+
+  private boolean isCoreServiceBypassed() {
+    // Temporary hardcoded bypass while the target platform does not provide Core services.
+    return true;
+  }
+
+  private UserIdentity resolveCoreSessionIdentity(HttpServletRequest request) {
     String cookieValue = extractSessionCookie(request);
     if (cookieValue == null || cookieValue.isBlank()) {
       throw new CoreServiceUnauthorizedException("No session cookie");
@@ -101,6 +126,30 @@ public class BffSessionAuthenticationFilter extends OncePerRequestFilter {
     UserIdentity identity = coreServiceClient.getUserMe(cookieValue);
     identityCache.put(cookieValue, identity);
     return identity;
+  }
+
+  private UserIdentity applyTemporaryCsiReadBypass(
+      HttpServletRequest request, UserIdentity identity) {
+    if (!isTemporaryCsiReadBypass(request) || identity.roles().contains("checks-admin")) {
+      return identity;
+    }
+
+    // TODO: Remove this read-only CSI bypass after real CSI ownership is wired into Core.
+    List<String> roles = new ArrayList<>(identity.roles());
+    roles.add("checks-admin");
+    return new UserIdentity(
+        identity.userId(),
+        identity.email(),
+        identity.name(),
+        identity.department(),
+        roles,
+        identity.csiOwnership());
+  }
+
+  private boolean isTemporaryCsiReadBypass(HttpServletRequest request) {
+    String uri = request.getRequestURI();
+    return "GET".equalsIgnoreCase(request.getMethod())
+        && ("/api/v1/csi".equals(uri) || uri.startsWith("/api/v1/csi/"));
   }
 
   private UserIdentity parseHeaderIdentity(HttpServletRequest request, String userId) {

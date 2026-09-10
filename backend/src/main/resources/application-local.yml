@@ -2,10 +2,6 @@ spring:
   config:
     activate:
       on-profile: local
-  flyway:
-    locations:
-      - classpath:db/migration
-      - classpath:db/seed
   jpa:
     show-sql: false
 
