@@ -2,11 +2,11 @@
 
 | Field | Value |
 |---|---|
-| Status | Accepted (architecture decision, 2026-09-11). Amended twice the same day: §11 closes O-7, §12 rules on who may amend this contract, and §14 declares the conflict responses for a deleted or quarantined draft, closing story 10.8's AC-1b escalation across compile, confirm-compile and execute. O-1 and O-2 landed at `86a187267`; one backend assertion in §8.6 awaits its owner. |
+| Status | Accepted (architecture decision, 2026-09-11). Amended three times the same day: §11 closes O-7, §12 rules on who may amend this contract, §14 declares the conflict responses for a deleted or quarantined draft (closing story 10.8's AC-1b), and §15 declares the terminal error-code vocabulary in both directions (closing story 10.7's AC-13a, the last deliberately-red test on the branch). O-1, O-2, O-3, O-5 and O-8 have landed; O-6, O-9, O-10 and the new O-11/O-12 remain, with their statuses re-verified at `10bce34a7` in §15.9. |
 | Author | @architect (Aria) |
 | Source of truth | [Studio architecture v2.1](studio-execution.md) §4.4, §4.5, §5.1–5.5, §6.1–6.4, §8.2, §8.4, §8.5, §9.1–9.3; [ADR-001](ADR-001-studio-runner-scaffolding.md) §4.2, §9 |
 | Amends | `docs/specs/studio/openapi.yaml`, frozen by story 10.1. This ADR is the amendment's rationale; the document is the contract. |
-| Consumers | Stories 10.6, 10.7, 10.8, 10.12, 10.14 ([EPIC-10](../epics/EPIC-10-EXECUTION.yaml)) |
+| Consumers | Stories 10.6, 10.7, 10.8, 10.12, 10.13, 10.14 ([EPIC-10](../epics/EPIC-10-EXECUTION.yaml)), and the MFE (§15.9, O-12) |
 | Does not touch | `docs/specs/studio/artifact.schema.json` and its byte-identical backend copy, guarded by `ArtifactSchemaDriftTest`. Both are unchanged. |
 
 This ADR rules on four divergences between the frozen contract and architecture §8.4, and records the amendment made to `openapi.yaml` to settle them. It contains no implementation code and changes no story's Title, Acceptance Criteria, Scope or Status.
@@ -206,14 +206,16 @@ The assertion encodes the assumption this ADR corrects — that "internal" is a 
 |---|---|---|---|
 | ~~O-1~~ | ~~Step status rename `PASSED`/`FAILED` → `PASS`/`FAIL` in the runner (§7.1)~~ **Landed at `86a187267`; `StepStatus = 'PASS' \| 'FAIL' \| 'SKIPPED'` and the contract test is 14/14.** | ~~@dev (10.6)~~ | — |
 | ~~O-2~~ | ~~Terminal log line `atMs: 0` → `null` (§7.2)~~ **Landed at `86a187267`; `sendFinal` appends with `atMs: null`.** | ~~@dev (10.6)~~ | — |
-| O-3 | `internalRoutesAreTaggedSoTheyStayOutOfThePublicSurface` premise (§8.6) | Owner of 10.1's backend contract test | Backend `check` |
+| ~~O-3~~ | ~~`internalRoutesAreTaggedSoTheyStayOutOfThePublicSurface` premise (§8.6)~~ **Closed. Verified at `10bce34a7`: the assertion is gone and `internalRoutesStayOffThePublicSurfaceAndNameWhatServesThem` replaced it, checking exactly what §8.6 said the corrected form should be. `StudioContractTest` 9/9.** | ~~Owner of 10.1's backend contract test~~ | — |
 | ~~O-4~~ | ~~Close `AdmissionResponse` and the callback response bodies once a producer exists~~ **Closed 2026-09-11 by story 10.7 at `af17549ec` and `7e827e52c`, which is the producer: `AdmissionResponse` is closed with every field named, the progress `200` gained a closed `ProgressAck` where it had declared no content at all, and the duplicate-delivery `200` is documented. Logged in §13.** | ~~10.7~~ | — |
-| O-5 | The runner `outcome.errorCode` set beyond §8.2's `TIMEOUT`; today's `STEP_FAILED`/`RUN_ERROR`/`RUN_NOT_STARTED` are placeholders around a fake launcher | 10.12 | — |
-| O-6 | §8.4 names "approved target/secret-use policy" among the job fields; the envelope carries only declared reference **names** (`references`). Whether destination policy travels on the job or is enforced solely at the egress layer is unresolved, and the contract declares only what exists rather than a field nobody implements. | 10.7 / 10.18 (SPK-05) | Destination enforcement (§9.3) |
+| ~~O-5~~ | ~~The runner `outcome.errorCode` set beyond §8.2's `TIMEOUT`; today's `STEP_FAILED`/`RUN_ERROR`/`RUN_NOT_STARTED` are placeholders around a fake launcher~~ **Closed in substance. `studio-runner/src/run/errors.ts` enumerates ten codes, each traced to an observable condition, with an exhaustive switch over `RunFailureKind`. §15 declares that set as `x-runner-error-codes`, which is the half O-5 left undone. `TIMEOUT` stays reserved for 10.13's enforcement.** | ~~10.12~~ | — |
+| O-6 | §8.4 names "approved target/secret-use policy" among the job fields; the envelope carries only declared reference **names** (`references`). Whether destination policy travels on the job or is enforced solely at the egress layer is unresolved, and the contract declares only what exists rather than a field nobody implements. **Still open at `10bce34a7`; 10.7 has landed with `RunJob` carrying names only, so this is now solely 10.18's.** | ~~10.7 /~~ 10.18 (SPK-05) | Destination enforcement (§9.3) |
 | ~~O-7~~ | ~~Where the §6.4 recorder-origin calibration is applied — runner-side or API-side~~ **Closed 2026-09-11 by §11: runner-side, at the clock. `recordingOriginMs` rejected; the contract gains no field. Remaining work is 10.12's, listed in §11.6.** | ~~10.12~~ | — |
-| O-9 | `x-conflict-codes` on the three internal `409`s (`POST /v1/runs`, the admission and progress callbacks). Their producers are 10.7's and do not exist yet, so a set declared now would be invented. **Pre-ruled in §14.7:** 10.7 may land these directly, listing exactly the codes its own PR emits, with a §13 log line — no escalation needed. The runner propagates the admission callback's code into its own `/v1/runs` refusal, so the two must be closed together. | 10.7 | — |
-| O-10 | A draft that is unknown, soft-deleted or quarantined answers **`400 BAD_REQUEST`** on `GET`/`PUT`/`DELETE /tests/{id}`, because `IllegalArgumentException` maps to `400`. Conventionally that is a `404`. **Not ruled here** — it is Class C, it moves the public surface for three stories mid-wave, and it is not the gap 10.8 raised. No security defect either way: both forms are existence-preserving and neither discloses more than the other. Raise it as its own decision before the pilot, not as a side effect of this one. | @architect (post-wave-3) | — |
-| O-8 | The run-scoped clock of §11: zero at recording-context readiness, injected into step execution, process-origin default removed from the production path, the two origin reads paired, the readiness-to-first-frame gap measured in staging, and a scale assertion the schema cannot make (§11.6) | 10.12 | Step-seek acceptance; the §11.1 defect is live until it lands |
+| O-9 | `x-conflict-codes` on the three internal `409`s (`POST /v1/runs`, the admission and progress callbacks). Their producers are 10.7's and do not exist yet, so a set declared now would be invented. **Pre-ruled in §14.7:** 10.7 may land these directly, listing exactly the codes its own PR emits, with a §13 log line — no escalation needed. The runner propagates the admission callback's code into its own `/v1/runs` refusal, so the two must be closed together. **Still open, but its blocking condition is gone: the producers now exist and §15.9 records the exact sets `AdmissionCasService` and `ProgressReportService` emit at `10bce34a7`. 10.7 landed without using the pre-ruling, so it passes to the next story that touches those routes.** | ~~10.7~~ next story on the internal callbacks | — |
+| O-10 | A draft that is unknown, soft-deleted or quarantined answers **`400 BAD_REQUEST`** on `GET`/`PUT`/`DELETE /tests/{id}`, because `IllegalArgumentException` maps to `400`. Conventionally that is a `404`. **Not ruled here** — it is Class C, it moves the public surface for three stories mid-wave, and it is not the gap 10.8 raised. No security defect either way: both forms are existence-preserving and neither discloses more than the other. Raise it as its own decision before the pilot, not as a side effect of this one. **Untouched by §15 and now due: waves 1–3 have merged.** | @architect (post-wave-3) | — |
+| ~~O-8~~ | **Landed in the runner, verified at `10bce34a7`: `executeSteps` requires an explicit run clock and refuses at both the type level and at run time, `runCoordinator` carries the run-scoped origin, and `test/server/timeline.test.ts` asserts the scale together with the negative control §11.6.4 asked for. §11.6.3's staging measurement has a fixtures-tier home in `test/fixtures-tier/seek-measurement.test.ts`; whether it has been run against staging is the story owner's to confirm.** ~~The run-scoped clock of §11: zero at recording-context readiness, injected into step execution, process-origin default removed from the production path, the two origin reads paired, the readiness-to-first-frame gap measured in staging, and a scale assertion the schema cannot make (§11.6)~~ | ~~10.12~~ | — |
+| O-11 | `ui_test_executions.error_code` carries no CHECK constraint, so the enum §15 declares is enforced on the write path by convention and on the read path by nothing — `ExecutionSnapshotMapper` publishes the column verbatim. The fix is the constraint `video_status` already has in V14 §1. No row can hold an undeclared value today (§15.5); a restored dump or a manual repair could. | Owner of the next Studio migration | — |
+| O-12 | `frontend/src/types/studio/studioTypes.ts` hand-maintains a six-member `ExecutionErrorCode` union that §15 has made narrower than the contract. No runtime effect and no exhaustive switch exists today. Better than widening it by hand: generate it, or assert it in `studioContract.test.ts`, which already reads this document. | The MFE story that next consumes `errorCode` | — |
 
 ## 10. Alternatives considered (summary)
 
@@ -327,8 +329,10 @@ An architect amending the contract still never edits a story's Title, Acceptance
 | 2026-09-11 | `AdmissionResponse` closed — `additionalProperties: false`, all six fields named and required, `state` enumerated `ADMITTED`/`RUNNING`/`FINALIZING`; new closed `ProgressAck` for the progress `200`, which declared no content at all; the duplicate-delivery `200` (`applied: false`) documented (§9 O-4) | A for the content-less `200`; the closures are O-4, which §9 assigned to this story by name | @dev, story 10.7, at `af17549ec` | `StudioContractTest` 8/8 before and after |
 | 2026-09-11 | `x-not-yet-implemented` removed from `streamExecution` and from the two internal callback routes — the contract declared as unshipped three routes this story ships (§9 O-4) | A — a declaration the running system contradicts | @dev, story 10.7, at `af17549ec` and `7e827e52c` | `StudioContractTest` 7/8 → 8/8 |
 | 2026-09-11 | Conflict responses declared for a withheld draft on `compileTest`, `confirmCompile` and `executeTest`; `x-conflict-codes` introduced on every public `409`; missing `400` declared on `compileTest` and `confirmCompile` (§14). Closes story 10.8's AC-1b escalation | C | @architect, this amendment | `test/contract.test.ts` 14/14 before and after (no `internal`-tagged operation touched) |
+| 2026-09-11 | `ExecutionErrorCode` widened to eight values with `AUTHORIZATION_REVOKED` and `REFERENCE_UNAVAILABLE`, each condition and remedy stated; `x-assigned-by` names the assigning component for every member; `x-runner-error-codes` declares the runner's ten codes on the still-open `RunOutcome.errorCode` (§15). Closes story 10.7's AC-13a escalation — the last deliberately-red test on the branch | C | @architect, this amendment | `ExecutionErrorCodeContractEscalationTest` 1/2 → **2/2** with no change to the test; `StudioContractTest` 9/9, `ArtifactSchemaDriftTest` 3/3, `test/contract.test.ts` 14/14, all before and after. Full record in §15.10 |
 
-The two rows above are one story's amendment, recorded against §12's four requirements:
+The two `@dev, story 10.7` rows above are one story's amendment, recorded against §12's four
+requirements (this amendment's own record is in §15.10):
 
 - **The divergence.** `AdmissionResponse` was open by its own admission ("deliberately left open… there is no implementation to close this against yet"); `POST /internal/.../progress` answered `200` with no declared content; and three routes carried `x-not-yet-implemented` while serving traffic. §9 O-4 named the first two and assigned them to story 10.7 once the producer existed. The producer now exists.
 - **The source (Article IV).** No field was invented. `startDeadlineAt` is §8.5's admitted-start deadline and `runDeadlineAt` is §5.4's runtime cap plus its bounded margins; `state` enumerates the ledger states those routes can return; `ProgressAck.applied` states the duplicate rule §5.3 already required by making a terminal report retry until acknowledged, and `revision` is the API's own snapshot revision from §8.4, explicitly not `runnerSequence`.
@@ -500,3 +504,256 @@ Contract-side this is settled. The following is the story's, and it is the whole
 
 This amendment changes no story's Title, Acceptance Criteria, Scope or Status. AC-1b's escalation is
 closed by this section; whether the checkbox is now satisfied is @po's call, not mine.
+
+---
+
+# Amendment, 2026-09-11 (fourth) — the terminal error-code vocabulary
+
+Added on the same branch, at `10bce34a7`. Story 10.7 exercised §12 as §12 asks: AC-13a needed two
+terminal codes, @po ratified their names, the story implemented and persisted them, and it left
+`ExecutionErrorCodeContractEscalationTest.everyCodeTheApiCanPersistIsDeclaredInTheFrozenContract`
+red rather than widening a public enum itself. It was the last deliberately-red test on the
+integrated branch.
+
+## 15. INT-7 — the two ratified `ExecutionErrorCode` values, and the vocabulary they complete
+
+### 15.1 The gap, verified
+
+| Fact | Evidence, worktree `epic/EPIC-10` at `10bce34a7` |
+|---|---|
+| §5.1.3 requires the dispatcher's pre-send recheck to make "a vanished secret or revoked permission … a terminal `ERROR` with an explicit code", and names no code for either. | `studio-execution.md` §5.1, item 3 |
+| The frozen `ExecutionErrorCode` enumerated six values plus `null`. All six trace to §5.4's recovery table or to §8.2. | `openapi.yaml` before this amendment |
+| `StudioDispatcher` closes with `AUTHORIZATION_REVOKED` on `DispatchAuthorization.AuthorizationRevokedException` and with `REFERENCE_UNAVAILABLE` on `StudioReferenceResolver.ReferenceUnavailableException`. Both write `ui_test_executions.error_code` through `closeWithError`. | `studio/dispatch/StudioDispatcher.java:208,243,287` |
+| Both are on the API side by construction: `RunnerOutcomeCodes` maps exactly one runner code into the API vocabulary — `TIMEOUT` — and returns null for every other, "including one that happens to spell an API-assigned code". | `studio/internal/RunnerOutcomeCodes.java` |
+| The runner now enumerates its own ten codes, with `errorCodeFor` switching exhaustively over `RunFailureKind` so a condition without a code does not compile. | `studio-runner/src/run/errors.ts` |
+| `ui_test_executions.error_code` is `VARCHAR(40)` with **no** CHECK constraint, unlike `video_status`, which V14 constrains in the adjacent statement. | `V14__studio_execution_history_v2.sql` §1 |
+
+### 15.2 Ruling
+
+**Both values are ratified, unrenamed, and declared.** `components.schemas.ExecutionErrorCode`
+now enumerates eight values plus `null`.
+
+Nothing is invented. §5.1.3 fixes the two conditions and fixes that each is terminal with an
+explicit code; it declines only to spell the codes, which is why a name had to be chosen and why
+@po ratifying them was the right instrument. What this ruling adds is the judgment §12 reserves to
+an architect: that the two conditions are genuinely two, that neither collapses into the six
+already declared, and that the names chosen say what was observed rather than what followed from
+it.
+
+The amendment also declares the vocabulary's **assigners** (`x-assigned-by`) and the runner's own
+set (`x-runner-error-codes`), for the reason §15.6 gives.
+
+### 15.3 Why two, and why neither collapses into the six
+
+The test is §14.3's and it has not moved: a caller must be able to act differently on each, and the
+axis is *who can clear the condition*. Applied to the whole vocabulary, it also answers what a
+caller may conclude about the browser — which for this enum is the more consequential half, because
+a caller that guesses wrong about whether a browser ran can double-execute a test against a real
+environment.
+
+| Code | Browser | Who can clear it |
+|---|---|---|
+| `DISPATCH_DISABLED` | never started | an operator, platform-wide. Every queued row is closed alike; nothing about *this* execution is wrong |
+| `AUTHORIZATION_REVOKED` | never started | whoever restores **the principal's** entitlement. Another principal would succeed on the same draft |
+| `REFERENCE_UNAVAILABLE` | never started | whoever restores **the reference**, or the author correcting the draft. The same principal would fail again on the same draft |
+| `DISPATCH_FAILED` | definitely not started | the caller, by running again |
+| `DISPATCH_UNKNOWN` | **unknown** | nobody, until investigation resolves it. §5.1 forbids resending browser work on an ambiguous outcome |
+| `START_TIMEOUT` | admitted; start never confirmed | the caller, by running again |
+| `STALE` | started | the caller, by running again |
+| `TIMEOUT` | started, then killed | a shorter test or a higher cap |
+
+The two new codes are the only pair in the table that share a row of the browser column *and* differ
+on the clearing column, which is precisely why they must be two and not one:
+`AUTHORIZATION_REVOKED` is a fact about the **principal**, `REFERENCE_UNAVAILABLE` a fact about the
+**draft and its environment**. Collapsing them would tell an author to chase an entitlement they
+already hold, or tell a platform team to re-provision a secret that never moved. The remedies do not
+merely differ; they point at different people.
+
+Against the six, the decisive line is **the send never happened**. `DISPATCH_FAILED` says a send was
+definitely refused; `DISPATCH_UNKNOWN` says a send may have landed. Both new codes describe the
+dispatcher refusing *before* `beginDispatch`, so no attempt was even recorded — a strictly stronger
+guarantee than `DISPATCH_FAILED`, and one a UI should state plainly rather than dilute.
+`DISPATCH_DISABLED` shares "never started" but differs in blast radius: it is a banner, not a
+per-execution error. `START_TIMEOUT`, `STALE` and `TIMEOUT` are all post-admission and reaper- or
+report-assigned; neither new code can coexist with an admission.
+
+### 15.4 The names, and the ones rejected
+
+| Candidate | Verdict |
+|---|---|
+| `AUTHORIZATION_REVOKED` | **Ratified.** §5.1.3's own word is "revoked", and the word carries the fact that matters: the permission *was* held — §5.1.1 checked it at acceptance — and was lost between acceptance and dispatch. That is what tells an author this is not a mis-request. |
+| `PERMISSION_REVOKED` | Rejected. Equivalent in meaning; `AUTHORIZATION_REVOKED` matches the method that raises it (`DispatchAuthorization.recheck`) and the architecture's own noun ("execution/secret authorization"). No reason to prefer a synonym over the source's word. |
+| `UNAUTHORIZED` / `FORBIDDEN` | Rejected, and the same error §14.2 rejected `403` for. These are the vocabulary of a request-time authorization verdict, and they say the caller never had the right. This code exists because the caller did. |
+| `REFERENCE_UNAVAILABLE` | **Ratified.** The contract's noun for the thing is *reference*: §5.1.1 preflights "variable/secret references" and §8.4's job envelope carries declared reference **names**. The code must span both kinds, because `StudioReferenceResolver.ReferenceUnavailableException` does. |
+| `SECRET_UNAVAILABLE` / `SECRET_VANISHED` | Rejected. Narrower than the condition. A vanished non-secret variable raises the identical exception and would then carry a code that names a secret — a wire statement that is false, and the kind that sends an investigator to the vault for a problem that is not there. |
+| `DISPATCH_FAILED` for both | Rejected, and this is the trap the story avoided. It says the send failed; the send never happened. It is also already the code for a definite refusal *after* an attempt, so reusing it would erase the one distinction §5.1 asks a client to respect. |
+| One shared code for both conditions | Rejected under §15.3. §5.1.3's sentence conjoins two conditions and demands "an explicit code"; reading that as one code for two conditions is grammatically available and substantively wrong, because the remedies point at different people. |
+
+On `UNAVAILABLE` also appearing in `VideoStatus` and `RunnerEvidence.state`: §6.1 warned that a bare
+value meaning two things in one report is a misread waiting to happen, and that warning was about
+bare `FAILED` in two fields. The qualifier is what makes this safe — `REFERENCE_UNAVAILABLE` is
+never confusable with `video.status: UNAVAILABLE` because neither is bare and neither is on the
+other's field. Recorded so the precedent is not read as broader than it is.
+
+### 15.5 The sweep, and its negative results
+
+The instruction was to make the test's name true in both directions, not to add two values. Every
+path that writes `ui_test_executions.error_code`:
+
+| Writer | Codes it can write | Source |
+|---|---|---|
+| `StudioDispatcher.close` / `closeUndispatchedWork` | `DISPATCH_DISABLED`, `DISPATCH_FAILED`, `AUTHORIZATION_REVOKED`, `REFERENCE_UNAVAILABLE` | §5.1.3, §5.4 |
+| `PendingReaper` | `DISPATCH_FAILED`, `DISPATCH_UNKNOWN` | §5.4, row 2 |
+| `RunningReaper` | `START_TIMEOUT`, `STALE` | §5.4, rows 3–4 |
+| `RunnerReportProjection` via `RunnerOutcomeCodes.errorCodeFor` | `TIMEOUT`, or null | §8.2 |
+| `FinalizationReconciler.applyReconciledOutcome` | a literal `null` — a manifest-supplied runner code is recorded, never copied | §5.3, AC-16 |
+
+**Eight values, no ninth.** Every other statement that touches the history row omits `error_code`
+from its `SET` list by design. **And no orphans in the other direction**: each of the six original
+values has a live producer above, so the contract declares nothing the API cannot produce. The
+test's name is true both ways as of this amendment.
+
+Two asymmetries the sweep found that the test's name does not cover, and that are therefore recorded
+rather than fixed here:
+
+- **The read path enforces nothing.** `ExecutionSnapshotMapper` projects `errorCode` through
+  `LegacyStudioAdapter.normalizeErrorCode`, which returns the persisted column verbatim for every
+  status but a legacy `TIMEOUT` with a null code. So the API *publishes* whatever the column holds,
+  and the column has no CHECK — unlike `video_status`, constrained in the adjacent V14 statement. No
+  row can hold a ninth value today: V14 creates the column, so it is null everywhere at that point
+  and the one backfill writes `'TIMEOUT'`. But a restored dump or a manual repair could, and the
+  public enum would then be contradicted by a body the API itself served. **O-11.**
+- **A consumer holds a second, now-narrower copy.** `frontend/src/types/studio/studioTypes.ts`
+  declares `ExecutionErrorCode` as a six-member union, hand-maintained against this document. It is
+  not a runtime failure — the field arrives as a JSON string and the union is erased — and no
+  exhaustive `switch` over it exists today, so nothing breaks. It does mean the MFE cannot narrow on
+  the two new codes, and that an exhaustive `switch` written tomorrow would be wrong. **O-12.**
+  Frontend source is out of this ADR's scope by construction.
+
+### 15.6 The `x-conflict-codes` analogue — `x-assigned-by`, and `x-runner-error-codes`
+
+The lead's question was whether §14's mechanism has an analogue here. It does, but not the obvious
+one, and the difference is worth stating because it is what the escalation actually turned on.
+
+`x-conflict-codes` exists because `ErrorResponse.error` is a free string: the *list* was missing.
+`ExecutionErrorCode` is already an enum, so the list was never missing — **the missing fact was who
+fills it.** That is exactly what could not be checked: story 10.7 added two values to the API's
+vocabulary, and the document had no way to say, let alone test, that both were API-assigned and
+neither reachable from a runner. The escalation test had to assert that half against
+`ExecutionErrorCode.reaperAssigned()` — a second hand-maintained set in Java, which is the same
+shape of hazard as an example.
+
+So two extensions, following §3.1's `x-served-by` precedent:
+
+- **`x-assigned-by` on `ExecutionErrorCode`**, a per-code list of the components that assign it.
+  Per-code rather than a partition, because `DISPATCH_FAILED` is genuinely written by two components
+  and a partition would have forced a false choice.
+- **`x-runner-error-codes` on `RunOutcome.errorCode`**, the exhaustive set the pinned runner image
+  can emit. The field's `type` stays an open string — §6.1's ruling that the runner owns that
+  vocabulary is unchanged, and it is still the one place this contract chooses openness. What
+  changes is that the openness is no longer *undeclared*.
+
+Four properties are now assertable from this one document, each of which was previously either prose
+or a second copy:
+
+1. the keys of `x-assigned-by` are exactly the non-null members of `enum` — no code without an
+   assigner, no assigner without a code, and therefore no silent widening;
+2. no assigner is the runner;
+3. `x-runner-error-codes ∩ ExecutionErrorCode.enum = {TIMEOUT}` — §8.2's single intersection,
+   readable by both sides from the same place rather than from a Java set and a TypeScript object
+   that happen to agree;
+4. the Java vocabulary equals the document's `enum`, which is the escalation test itself.
+
+Property 3 deserves the emphasis: it was asserted in `RunnerOutcomeCodes` and in
+`studio-runner/src/run/errors.ts` independently, in two languages, with no shared source. That is
+the arrangement that produced INT-4.
+
+**§14.7's narrowing extends to `x-runner-error-codes` and to nothing else.** A story that lands a
+new runner failure condition may add its code to that list in the same PR, with a §13 log line,
+provided the code is emitted by the code the PR lands and it adds no others — `errorCodeFor`'s
+exhaustive switch already makes that provable at compile time. Removing a code, adding one the PR
+does not emit, and every edit to `x-assigned-by` or to the `ExecutionErrorCode` enum itself remain
+Class C without exception. The API's terminal vocabulary is a public enum and §12's third rule binds
+it: loosening is never a story's call.
+
+### 15.7 Alternatives rejected
+
+| Option | Why not |
+|---|---|
+| **Reject both and require `DISPATCH_FAILED`** | Would make the contract state that a send failed where no send occurred, and would erase the distinction §5.1 asks clients to respect. It also would not have removed the decision — it would have hidden it in a code whose meaning quietly widened. |
+| **Ratify one shared code (`PREFLIGHT_FAILED`, `DISPATCH_REFUSED`)** | Fails §14.3's test: the two remedies are owned by different people. A single code makes "who do I call" unanswerable from the snapshot, which is the one question a terminal error has to answer. |
+| **Leave the enum at six and narrow the Java vocabulary instead** | Inverts the authority §12 establishes. The behaviour traces to §5.1.3; the contract was silent, not contradicted. Narrowing working code to fit an incomplete document is the manoeuvre §12's "the freeze is not evidence of correctness" paragraph exists to forbid. |
+| **Open `ExecutionErrorCode` to a free string, as `RunOutcome.errorCode` is** | The exact move §12's third rule names: loosening to admit what a producer happens to send, whose only effect is to stop a test telling the truth. The API's vocabulary is closed *because* it is the API's own — §6.1's openness is justified by the runner being a different component with conditions the API cannot enumerate, and none of that applies here. |
+| **Declare the two codes only on the routes that can return them** | They are not conflict codes on a request; they are terminal states on a published snapshot, reachable from `GET /executions/{id}` and from the SSE stream alike. The enum is the right home and `x-assigned-by` carries the per-component fact a per-route declaration would have approximated. |
+| **Add `x-assigned-by` as a partition (`dispatcher` / `reaper` lists)** | `DISPATCH_FAILED` is written by both the dispatcher and the pending reaper. A partition would have had to drop one, and the dropped one would have been the fact a reader most needed. |
+
+### 15.8 What turns the escalation test green
+
+**The amendment alone.** `ExecutionErrorCodeContractEscalationTest` is green with no change to
+itself and no change to any Java file, which is what it predicted: 2/2 after the edit, 1/2 before.
+No production code moves, because the behaviour was already merged and only its declaration was
+missing.
+
+For whoever picks this up — none of it is required to make the test pass, and none of it is mine to
+land:
+
+1. **The class's own documentation is now false.** Its Javadoc opens "DELIBERATELY RED", and both it
+   and `ExecutionErrorCode`'s Javadoc refer to a class named `ExecutionErrorCodeContractTest` that
+   does not exist. Rewording them — and dropping `Escalation` from the class name, since the
+   escalation is closed and the assertion is a permanent conformance gate worth keeping — is
+   housekeeping for the owning story, not an architecture decision.
+2. **Add the assertions §15.6 made possible**, if the owning story wants them: keys of
+   `x-assigned-by` against the enum, no runner among the assigners, and the `{TIMEOUT}` intersection
+   read from `x-runner-error-codes` rather than from a second copy. Each is a few lines and each
+   closes a gap that is currently guarded by a hand-maintained duplicate.
+3. **O-11 and O-12** below.
+
+### 15.9 Open items, after waves 1–3
+
+Checked against the merged branch rather than against the last amendment's notes:
+
+| Item | Status at `10bce34a7` |
+|---|---|
+| **O-3** | **Closed.** `StudioContractTest` no longer contains `internalRoutesAreTaggedSoTheyStayOutOfThePublicSurface`; `internalRoutesStayOffThePublicSurfaceAndNameWhatServesThem` replaced it and asserts what §8.6 said the corrected assertion should be. 9/9 on this branch. |
+| **O-5** | **Closed in substance.** The placeholders are gone: `studio-runner/src/run/errors.ts` enumerates ten codes, each traced to an observable condition, with an exhaustive switch over `RunFailureKind` that makes an unnamed condition a compile error. This amendment declares that set in the contract, which is the part O-5 left undone. `TIMEOUT` remains reserved for 10.13's enforcement. |
+| **O-6** | **Still open, and re-pointed.** 10.7 has landed and `RunJob` carries only declared reference names; destination policy is still unresolved and is now solely 10.18's (SPK-05). The contract continues to declare only what exists. |
+| **O-8** | **Landed in the runner.** `executeSteps` requires an explicit run clock and refuses at both type and run time; `runCoordinator` carries the run-scoped origin; `test/server/timeline.test.ts` asserts the scale *and* carries the negative control §11.6.4 asked for — the same run with a process-origin clock, which must go red. The staging measurement of §11.6.3 has a fixtures-tier home (`test/fixtures-tier/seek-measurement.test.ts`); whether it has been run against staging is the story owner's to confirm, not mine. |
+| **O-9** | **Still open, and now landable.** Its condition has changed: the producer exists. `AdmissionCasService` conflicts on `EXECUTION_UNKNOWN`, `EXECUTION_SETTLED`, `ATTEMPT_SUPERSEDED`, `ADMISSION_OWNED`, `ADMISSION_EXPIRED`, `TRANSITION_REJECTED`; `ProgressReportService` on the same set less `ADMISSION_EXPIRED` and plus `SEQUENCE_REGRESSED`. §14.7's pre-ruling stands and 10.7 did not use it, so the next story to touch those routes may land both lists directly with a §13 line — the runner's `POST /v1/runs` refusal propagates the admission code, so the two close together. **Deliberately not landed here:** these are transport refusals on the internal surface, disjoint from `ExecutionErrorCode` by design (`InternalCallbackCodes`), and bundling them would make this amendment's before/after measurement ambiguous about which change did what. |
+| **O-10** | **Untouched and still open.** `400` versus `404` for an unknown, deleted or quarantined draft on `GET`/`PUT`/`DELETE /tests/{id}` is a public-surface status decision with no relation to the terminal error vocabulary; §14.5 already recorded the reasoning in the document itself. It remains a decision to raise on its own before the pilot. |
+| **O-11** *(new)* | `ui_test_executions.error_code` has no CHECK constraint, so the enum is enforced on the write path by convention and on the read path by nothing. The fix is the constraint `video_status` already has in V14 §1, widened as this enum is. Owner: whoever owns the next Studio migration. Not urgent — no row can hold a ninth value today (§15.5) — and not landable here, since a migration is neither a contract nor mine. |
+| **O-12** *(new)* | `frontend/src/types/studio/studioTypes.ts` declares a six-member `ExecutionErrorCode` union that is now narrower than the contract. No runtime effect and no exhaustive switch exists today. Owner: the MFE story that next consumes `errorCode`. Better than widening it by hand would be generating it, or a frontend test that reads the enum from this document — `studioContract.test.ts` already reads the document and is the natural home. |
+
+### 15.10 Recorded against §12's four requirements
+
+- **The divergence.** `ExecutionErrorCode` enumerated six values; the API persists eight.
+  `AUTHORIZATION_REVOKED` and `REFERENCE_UNAVAILABLE` are written by `StudioDispatcher` and surfaced
+  on the public `ExecutionSnapshot.errorCode`, so the contract was silent about two values a
+  consumer can receive today. Separately, `RunOutcome.errorCode`'s set was undeclared in a document
+  whose own §6.1 asserts it intersects the API's at exactly one value.
+- **The source (Article IV).** Nothing invented. The two conditions and their terminality are
+  §5.1.3; the six originals are §5.4's table and §8.2; the per-code assigners are §5.1.3 (dispatcher),
+  §5.4 (both reapers) and §8.2/§5.3 (the report projection); the runner's ten codes are read from
+  `studio-runner/src/run/errors.ts`, which is merged and compiles its own exhaustiveness. The names
+  were ratified by @po on 2026-09-11 against a §5.1.3 that fixes the conditions and declines to name
+  them; this ruling judges them, it does not originate them.
+- **Consuming stories re-checked.** **10.7** — its dispatcher already emits both codes; no change,
+  and its contract test class needs no edit. **10.12 / 10.13** — the `{TIMEOUT}` intersection is
+  intact and is now checkable from the document; neither new code is reachable from a runner, and
+  `x-runner-error-codes` matches `RUNNER_ERROR_CODES` exactly as merged. **10.6** — no
+  runner-produced body was touched; `RunOutcome` gained an extension key and no field, stays closed,
+  and the runner's validator ignores unknown keywords. **10.14** — evidence untouched. **10.8** —
+  no `409`, no `x-conflict-codes` and no operation was touched. Both copies of
+  `artifact.schema.json` are byte-unchanged. The MFE is the one consumer that needs work, recorded
+  as O-12.
+- **Contract test before and after.** On this branch, before the amendment:
+  `ExecutionErrorCodeContractEscalationTest` 1/2 — `everyCodeTheApiCanPersistIsDeclaredInTheFrozenContract`
+  failed naming both missing codes; `StudioContractTest` 9/9; `ArtifactSchemaDriftTest` 3/3;
+  `studio-runner` `test/contract.test.ts` 14/14. After: **2/2**, 9/9, 3/3 and 14/14 respectively.
+  The frontend's `studioContract.test.ts` could **not** be executed — `frontend/node_modules` is not
+  installed in this worktree — so its result is reasoned, not measured: its Ajv instance is
+  constructed `strict: false`, so the two `x-` keywords are ignored, and widening an `enum` only
+  admits values, so no fixture that validated before can fail now. Whoever next runs the frontend
+  suite should confirm it.
+
+This amendment changes no story's Title, Acceptance Criteria, Scope or Status, and touches no
+backend Java, no frontend source, no `studio-runner/` source and no story file.

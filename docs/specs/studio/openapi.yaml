@@ -33,6 +33,15 @@ info:
     is exhaustive for the operation: an implementation that answers `409` with a code outside the
     list, or that cannot produce one in it, is a conformance failure. See ADR-002 §14.
 
+    **The terminal error-code vocabulary is declared in both directions.** `ExecutionErrorCode` is
+    exhaustive for what the API persists and publishes, and `x-assigned-by` names the component
+    that assigns each of its members; `RunOutcome.errorCode` stays an open string, because the
+    runner owns that vocabulary, but `x-runner-error-codes` declares the set the pinned image can
+    emit. The two sets intersect at `TIMEOUT` and nowhere else, which is now a property a test on
+    either side can read from this document rather than from a second copy of the list. Same
+    mechanism as `x-conflict-codes`, and the same reason: an enum that does not say who fills it,
+    and an open string that says nothing at all, are both facts no test can check. See ADR-002 §15.
+
     **Amending this document.** Freezing it in 10.1 requires that changes be recorded, not that
     they never happen — a wave gate has already proved it both incomplete and wrong about routes
     it did declare. Who may change what is ruled in ADR-002 §12: a story may repair a defect that
@@ -1312,7 +1321,54 @@ components:
     ExecutionErrorCode:
       type: string
       nullable: true
-      enum: [TIMEOUT, DISPATCH_FAILED, DISPATCH_UNKNOWN, START_TIMEOUT, STALE, DISPATCH_DISABLED, null]
+      enum:
+        [TIMEOUT, DISPATCH_FAILED, DISPATCH_UNKNOWN, START_TIMEOUT, STALE, DISPATCH_DISABLED,
+         AUTHORIZATION_REVOKED, REFERENCE_UNAVAILABLE, null]
+      description: |
+        The terminal code carried next to `status: ERROR`. Null on every other status, and null on
+        an `ERROR` whose cause the API could not name.
+
+        **Every value is assigned by the API** — by its dispatcher (§5.1.3), by its pending or
+        running reaper (§5.4), or by the single §8.2 mapping the API applies to a runner's terminal
+        report. A runner never supplies one: `RunOutcome.errorCode` is an open string whose set
+        intersects this one only at `TIMEOUT`, and the API assigns that value itself rather than
+        copying it (ADR-002 §6.1, §15). The exhaustive per-code assigners are in `x-assigned-by`.
+
+        The codes divide on **what a caller may conclude about the browser, and on who can clear the
+        condition** — the same axis that separates the draft-lifecycle `409`s. None is a synonym for
+        another:
+
+        | Code | What the API observed | Browser | What clears it |
+        |---|---|---|---|
+        | `DISPATCH_DISABLED` | Execution was switched off platform-wide before this row was sent (§5.4) | never started | an operator re-enabling execution; affects every queued row, not this one |
+        | `AUTHORIZATION_REVOKED` | The dispatcher's pre-send recheck found the principal's CSI execute permission revoked (§5.1.3) | never started | restoring that principal's entitlement, out of band; retrying cannot |
+        | `REFERENCE_UNAVAILABLE` | A declared variable or secret reference that preflighted at acceptance no longer resolved at dispatch (§5.1.1, §5.1.3) | never started | restoring the reference or correcting the draft's declarations; retrying cannot |
+        | `DISPATCH_FAILED` | The send was definitely refused and not retriable, or the pending deadline passed with no admission (§5.4) | definitely not started | a new execution |
+        | `DISPATCH_UNKNOWN` | The send's outcome was ambiguous and no admission, progress or manifest resolved it (§5.4) | **unknown; a caller must assume neither** | investigation. §5.1 forbids resending browser work on an ambiguous outcome, so a new run is an explicit human decision |
+        | `START_TIMEOUT` | Admitted, but the browser-start deadline passed with no start report and no reconciling manifest (§5.4) | admitted; start never confirmed | a new execution |
+        | `STALE` | Ran past the fixed runtime plus its finalization and delivery margins with no reconciling manifest (§5.4) | started | a new execution |
+        | `TIMEOUT` | The parent enforced the total runtime cap (§8.2) | started, then killed | a shorter test, or a higher configured cap within server limits |
+
+        A step locator or assertion timeout is **not** `TIMEOUT`: it is a step `FAIL` and an
+        execution `FAILED`, with no code at all (§8.2).
+
+        `AUTHORIZATION_REVOKED` and `REFERENCE_UNAVAILABLE` were added by ADR-002 §15 for §5.1.3's
+        two pre-send conditions, which §5.1.3 requires to be terminal with an explicit code and does
+        not name. The other six are 10.1's.
+      x-assigned-by:
+        # Exhaustive, and the machine-readable form of the two facts the prose above states: which
+        # component assigns each code, and that none of them is `studio-runner`. Keys are exactly
+        # the non-null members of `enum`; a code with no assigner, or an assigner with no code, is a
+        # conformance failure. Same mechanism as `x-conflict-codes` (§14) and `x-served-by` (§3.1):
+        # a fact conveyed only by prose or by an example cannot fail a test.
+        TIMEOUT: [report-projection]
+        DISPATCH_FAILED: [dispatcher, pending-reaper]
+        DISPATCH_UNKNOWN: [pending-reaper]
+        START_TIMEOUT: [running-reaper]
+        STALE: [running-reaper]
+        DISPATCH_DISABLED: [dispatcher]
+        AUTHORIZATION_REVOKED: [dispatcher]
+        REFERENCE_UNAVAILABLE: [dispatcher]
 
     StepStatus:
       type: string
@@ -1898,12 +1954,35 @@ components:
           type: string
           nullable: true
           description: |
-            A runner-assigned code, left open rather than enumerated: the codes `ExecutionErrorCode`
-            fixes (`DISPATCH_FAILED`, `DISPATCH_UNKNOWN`, `START_TIMEOUT`, `STALE`,
-            `DISPATCH_DISABLED`) are all assigned by the API's dispatcher and reapers (§5.4) and a
-            runner must never emit one of them. Where §8.2 fixes a runner-observable outcome it
-            governs: a parent-enforced total timeout is `ERROR` with `TIMEOUT`. ADR-002 records
-            that the remaining runner codes are settled by the execution stories, not here.
+            A runner-assigned code. The `type` stays an open string — the runner owns this
+            vocabulary and grows it with its own observable conditions — but the set is no longer
+            undeclared: `x-runner-error-codes` below is exhaustive for the image this contract is
+            pinned to, and it is what makes the disjointness rule assertable from one document
+            instead of from two hand-maintained copies (ADR-002 §15).
+
+            **The two sets intersect at `TIMEOUT` and nowhere else.** Every member of
+            `ExecutionErrorCode` is assigned by the API — see its `x-assigned-by` — and a runner
+            must never emit one. Where §8.2 fixes a runner-observable outcome it governs: a
+            parent-enforced total runtime timeout is `ERROR` with `TIMEOUT`, and the API assigns
+            its own `TIMEOUT` on receiving it rather than copying this field. Any other value here
+            is recorded in the bounded, redacted diagnostic text and never reaches
+            `ExecutionSnapshot.errorCode`.
+          x-runner-error-codes:
+            # Exhaustive. Source: `studio-runner/src/run/errors.ts` `RUNNER_ERROR_CODES`, whose
+            # `errorCodeFor` switches exhaustively over `RunFailureKind`, so a condition without a
+            # code does not compile. A story that adds a condition may add its code here in the
+            # same PR under the §14.7 narrowing; removing one, or adding a code the PR does not
+            # emit, stays Class C.
+            - ARTIFACT_REVALIDATION_FAILED
+            - RUNTIME_INCOMPATIBLE
+            - BROWSER_LAUNCH_FAILED
+            - BROWSER_SANDBOX_UNAVAILABLE
+            - START_DEADLINE_EXCEEDED
+            - UNSUPPORTED_MULTI_PAGE
+            - RECORDING_FAILED
+            - STEP_FAILED
+            - TIMEOUT
+            - RUN_ERROR
         errorMessage:
           type: string
           nullable: true
