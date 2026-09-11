@@ -1,0 +1,434 @@
+{
+  "syntaxReferenceVersion": "1.0.0",
+  "pages": {
+    "home.html": "https://example.com/",
+    "login.html": "https://example.com/login",
+    "dashboard.html": "https://example.com/dashboard",
+    "forms.html": "https://example.com/forms"
+  },
+  "examples": [
+    {
+      "file": "action-check-uncheck.json",
+      "name": "action-check-uncheck",
+      "description": "check and uncheck on checkbox locators.",
+      "page": "forms.html",
+      "methods": [
+        "check",
+        "getByLabel",
+        "uncheck"
+      ],
+      "optionKeys": [
+        "uncheck.force"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "action-hover.json",
+      "name": "action-hover",
+      "description": "hover with a timeout option.",
+      "page": "forms.html",
+      "methods": [
+        "getByRole",
+        "hover"
+      ],
+      "optionKeys": [
+        "getByRole.name",
+        "hover.timeout"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "action-press.json",
+      "name": "action-press",
+      "description": "press with a modifier key combination.",
+      "page": "forms.html",
+      "methods": [
+        "getByRole",
+        "press"
+      ],
+      "optionKeys": [],
+      "referenceKinds": []
+    },
+    {
+      "file": "action-select-option.json",
+      "name": "action-select-option",
+      "description": "selectOption with a literal value.",
+      "page": "forms.html",
+      "methods": [
+        "getByLabel",
+        "selectOption"
+      ],
+      "optionKeys": [],
+      "referenceKinds": []
+    },
+    {
+      "file": "assert-locator-contain-text.json",
+      "name": "assert-locator-contain-text",
+      "description": "expect(locator).toContainText with a string and with a regex.",
+      "page": "dashboard.html",
+      "methods": [
+        "getByTestId",
+        "toContainText"
+      ],
+      "optionKeys": [],
+      "referenceKinds": []
+    },
+    {
+      "file": "assert-locator-have-value.json",
+      "name": "assert-locator-have-value",
+      "description": "expect(locator).toHaveValue against a declared variable.",
+      "page": "dashboard.html",
+      "methods": [
+        "getByLabel",
+        "toHaveValue"
+      ],
+      "optionKeys": [],
+      "referenceKinds": [
+        "variable"
+      ]
+    },
+    {
+      "file": "assert-locator-visible.json",
+      "name": "assert-locator-visible",
+      "description": "expect(locator).toBeVisible with a timeout.",
+      "page": "dashboard.html",
+      "methods": [
+        "getByRole",
+        "toBeVisible"
+      ],
+      "optionKeys": [
+        "getByRole.name",
+        "toBeVisible.timeout"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "assert-option-coverage.json",
+      "name": "assert-option-coverage",
+      "description": "Every permitted assertion option: timeout, ignoreCase and useInnerText on toContainText, timeout on toHaveValue, toHaveURL and toHaveTitle.",
+      "page": "dashboard.html",
+      "methods": [
+        "getByLabel",
+        "getByTestId",
+        "toContainText",
+        "toHaveTitle",
+        "toHaveURL",
+        "toHaveValue"
+      ],
+      "optionKeys": [
+        "toContainText.ignoreCase",
+        "toContainText.timeout",
+        "toContainText.useInnerText",
+        "toHaveTitle.timeout",
+        "toHaveURL.timeout",
+        "toHaveValue.timeout"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "assert-page-have-title.json",
+      "name": "assert-page-have-title",
+      "description": "expect(page).toHaveTitle with a safe regular expression.",
+      "page": "dashboard.html",
+      "methods": [
+        "toHaveTitle"
+      ],
+      "optionKeys": [],
+      "referenceKinds": []
+    },
+    {
+      "file": "assert-page-have-url.json",
+      "name": "assert-page-have-url",
+      "description": "expect(page).toHaveURL with ignoreCase.",
+      "page": "dashboard.html",
+      "methods": [
+        "toHaveURL"
+      ],
+      "optionKeys": [
+        "toHaveURL.ignoreCase"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "flow-login.json",
+      "name": "flow-login",
+      "description": "A multi-step login flow using both reference kinds and several methods.",
+      "page": "login.html",
+      "methods": [
+        "click",
+        "fill",
+        "getByLabel",
+        "getByRole",
+        "goto",
+        "toHaveURL"
+      ],
+      "optionKeys": [
+        "getByRole.name"
+      ],
+      "referenceKinds": [
+        "secret",
+        "variable"
+      ]
+    },
+    {
+      "file": "locator-chained.json",
+      "name": "locator-chained",
+      "description": "A chained locator: a row found by role, narrowed by text.",
+      "page": "dashboard.html",
+      "methods": [
+        "click",
+        "getByRole"
+      ],
+      "optionKeys": [
+        "getByRole.name"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "locator-css-click.json",
+      "name": "locator-css-click",
+      "description": "locator() with a plain CSS selector, then click.",
+      "page": "forms.html",
+      "methods": [
+        "click",
+        "locator"
+      ],
+      "optionKeys": [],
+      "referenceKinds": []
+    },
+    {
+      "file": "locator-get-by-label-fill.json",
+      "name": "locator-get-by-label-fill",
+      "description": "getByLabel, then fill with a literal.",
+      "page": "login.html",
+      "methods": [
+        "fill",
+        "getByLabel"
+      ],
+      "optionKeys": [],
+      "referenceKinds": []
+    },
+    {
+      "file": "locator-get-by-placeholder-fill-variable.json",
+      "name": "locator-get-by-placeholder-fill-variable",
+      "description": "getByPlaceholder, then fill from a declared variable.",
+      "page": "forms.html",
+      "methods": [
+        "fill",
+        "getByPlaceholder"
+      ],
+      "optionKeys": [],
+      "referenceKinds": [
+        "variable"
+      ]
+    },
+    {
+      "file": "locator-get-by-role-click.json",
+      "name": "locator-get-by-role-click",
+      "description": "getByRole with a name option, then click.",
+      "page": "forms.html",
+      "methods": [
+        "click",
+        "getByRole"
+      ],
+      "optionKeys": [
+        "getByRole.name"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "locator-get-by-role-states.json",
+      "name": "locator-get-by-role-states",
+      "description": "Every permitted getByRole option: name, exact, checked, disabled, expanded, pressed, selected, level.",
+      "page": "forms.html",
+      "methods": [
+        "check",
+        "click",
+        "getByRole",
+        "toBeVisible"
+      ],
+      "optionKeys": [
+        "getByRole.checked",
+        "getByRole.disabled",
+        "getByRole.exact",
+        "getByRole.expanded",
+        "getByRole.level",
+        "getByRole.name",
+        "getByRole.pressed",
+        "getByRole.selected"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "locator-get-by-test-id-fill-secret.json",
+      "name": "locator-get-by-test-id-fill-secret",
+      "description": "getByTestId, then fill from a declared secret — the only approved secret position.",
+      "page": "login.html",
+      "methods": [
+        "fill",
+        "getByTestId"
+      ],
+      "optionKeys": [],
+      "referenceKinds": [
+        "secret"
+      ]
+    },
+    {
+      "file": "locator-get-by-text-click.json",
+      "name": "locator-get-by-text-click",
+      "description": "getByText with exact, then click.",
+      "page": "forms.html",
+      "methods": [
+        "click",
+        "getByText"
+      ],
+      "optionKeys": [
+        "getByText.exact"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "locator-text-exact-options.json",
+      "name": "locator-text-exact-options",
+      "description": "The exact option on getByLabel and getByPlaceholder.",
+      "page": "forms.html",
+      "methods": [
+        "fill",
+        "getByLabel",
+        "getByPlaceholder"
+      ],
+      "optionKeys": [
+        "getByLabel.exact",
+        "getByPlaceholder.exact"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "navigation-goto-options.json",
+      "name": "navigation-goto-options",
+      "description": "page.goto with the permitted waitUntil and timeout options.",
+      "page": "home.html",
+      "methods": [
+        "goto"
+      ],
+      "optionKeys": [
+        "goto.timeout",
+        "goto.waitUntil"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "navigation-goto.json",
+      "name": "navigation-goto",
+      "description": "page.goto with an absolute https URL.",
+      "page": "login.html",
+      "methods": [
+        "goto"
+      ],
+      "optionKeys": [],
+      "referenceKinds": []
+    },
+    {
+      "file": "navigation-wait-for-url-options.json",
+      "name": "navigation-wait-for-url-options",
+      "description": "page.waitForURL with the permitted timeout and waitUntil options.",
+      "page": "dashboard.html",
+      "methods": [
+        "waitForURL"
+      ],
+      "optionKeys": [
+        "waitForURL.timeout",
+        "waitForURL.waitUntil"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "navigation-wait-for-url.json",
+      "name": "navigation-wait-for-url",
+      "description": "page.waitForURL with a safe regular expression.",
+      "page": "dashboard.html",
+      "methods": [
+        "waitForURL"
+      ],
+      "optionKeys": [],
+      "referenceKinds": []
+    },
+    {
+      "file": "option-check-uncheck-hover.json",
+      "name": "option-check-uncheck-hover",
+      "description": "Every permitted check, uncheck and hover option: force, trial, timeout.",
+      "page": "forms.html",
+      "methods": [
+        "check",
+        "getByLabel",
+        "getByRole",
+        "hover",
+        "uncheck"
+      ],
+      "optionKeys": [
+        "check.force",
+        "check.timeout",
+        "check.trial",
+        "getByRole.name",
+        "hover.force",
+        "hover.trial",
+        "uncheck.timeout",
+        "uncheck.trial"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "option-click-full.json",
+      "name": "option-click-full",
+      "description": "Every permitted click option: button, clickCount, delay, force, trial, timeout.",
+      "page": "forms.html",
+      "methods": [
+        "click",
+        "getByRole"
+      ],
+      "optionKeys": [
+        "click.button",
+        "click.clickCount",
+        "click.delay",
+        "click.force",
+        "click.timeout",
+        "click.trial",
+        "getByRole.name"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "option-fill-press.json",
+      "name": "option-fill-press",
+      "description": "Every permitted fill and press option: force, timeout, delay.",
+      "page": "login.html",
+      "methods": [
+        "fill",
+        "getByLabel",
+        "press"
+      ],
+      "optionKeys": [
+        "fill.force",
+        "fill.timeout",
+        "press.delay",
+        "press.timeout"
+      ],
+      "referenceKinds": []
+    },
+    {
+      "file": "option-select-option.json",
+      "name": "option-select-option",
+      "description": "Every permitted selectOption option: force, timeout.",
+      "page": "forms.html",
+      "methods": [
+        "getByLabel",
+        "selectOption"
+      ],
+      "optionKeys": [
+        "selectOption.force",
+        "selectOption.timeout"
+      ],
+      "referenceKinds": []
+    }
+  ]
+}

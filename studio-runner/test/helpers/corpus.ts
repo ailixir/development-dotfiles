@@ -34,16 +34,17 @@ export interface AdversarialFixture {
   readonly policy?: ValidationPolicyInput;
 }
 
-function loadDirectory<T>(relative: string): T[] {
+function loadDirectory<T>(relative: string, skip: readonly string[] = []): T[] {
   const directory = join(packageRoot, relative);
   return readdirSync(directory)
-    .filter((file) => file.endsWith('.json'))
+    .filter((file) => file.endsWith('.json') && !skip.includes(file))
     .sort()
     .map((file) => JSON.parse(readFileSync(join(directory, file), 'utf8')) as T);
 }
 
+/** `manifest.json` describes the corpus (10.3 AC-4); it is not itself an example. */
 export function loadReferenceFixtures(): ReferenceFixture[] {
-  return loadDirectory<ReferenceFixture>('fixtures/reference');
+  return loadDirectory<ReferenceFixture>('fixtures/reference', ['manifest.json']);
 }
 
 export function loadAdversarialFixtures(): AdversarialFixture[] {

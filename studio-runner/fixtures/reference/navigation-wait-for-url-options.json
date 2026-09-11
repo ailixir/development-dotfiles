@@ -1,0 +1,40 @@
+{
+  "name": "navigation-wait-for-url-options",
+  "description": "page.waitForURL with the permitted timeout and waitUntil options.",
+  "source": [
+    "Wait for the dashboard to load"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "values": {
+    "variables": {},
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Wait for the dashboard to load",
+        "code": "await page.waitForURL('https://example.com/dashboard', { timeout: 20000, waitUntil: 'networkidle' });"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "waitForURL",
+      "args": [
+        {
+          "kind": "string",
+          "value": "https://example.com/dashboard"
+        },
+        {
+          "timeout": 20000,
+          "waitUntil": "networkidle"
+        }
+      ]
+    }
+  ]
+}

@@ -17,6 +17,18 @@ export const VALIDATOR_SCHEMA_VERSION = '1.0.0';
 export const EXECUTOR_VERSION = '1.0.0';
 
 /**
+ * Version of the pinned syntax reference: the corpus in `fixtures/reference/` together with the
+ * `fixtures/reference/manifest.json` that binds each example to the permitted methods it
+ * demonstrates (architecture §4.3, story 10.3 AC-4).
+ *
+ * It is recorded on every artifact's provenance and compared exactly by `src/compat/`: the same
+ * source compiled against a different reference corpus may have been proposed under a different
+ * set of examples, so an artifact is never reinterpreted across a change here. Bump it whenever an
+ * example is added, removed or changed.
+ */
+export const SYNTAX_REFERENCE_VERSION = '1.0.0';
+
+/**
  * Parser backing the validator. Story 10.2 chose the TypeScript compiler API over
  * `@typescript-eslint/typescript-estree`: it is already required to build the package, it
  * needs no extra runtime dependency, and it reports the exact TypeScript syntax kinds the

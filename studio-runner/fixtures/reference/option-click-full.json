@@ -1,0 +1,73 @@
+{
+  "name": "option-click-full",
+  "description": "Every permitted click option: button, clickCount, delay, force, trial, timeout.",
+  "source": [
+    "Double-click the \"Save\" button"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "values": {
+    "variables": {},
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Double-click the \"Save\" button",
+        "code": "await page.getByRole('button', { name: 'Save' }).click({ button: 'left', clickCount: 2, delay: 100, force: true, trial: false, timeout: 15000 });"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "button",
+              "options": {
+                "name": {
+                  "kind": "literal",
+                  "value": "Save"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "click",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "button",
+              "options": {
+                "name": {
+                  "kind": "literal",
+                  "value": "Save"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "button": "left",
+          "clickCount": 2,
+          "delay": 100,
+          "force": true,
+          "trial": false,
+          "timeout": 15000
+        }
+      ]
+    }
+  ]
+}

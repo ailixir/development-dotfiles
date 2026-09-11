@@ -1,0 +1,113 @@
+{
+  "name": "locator-text-exact-options",
+  "description": "The exact option on getByLabel and getByPlaceholder.",
+  "source": [
+    "Type \"quarterly\" in the \"Notes\" field",
+    "Type \"invoices\" in the \"Search\" box"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "values": {
+    "variables": {},
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Type \"quarterly\" in the \"Notes\" field",
+        "code": "await page.getByLabel('Notes', { exact: true }).fill('quarterly');"
+      },
+      {
+        "stepIndex": 1,
+        "originalText": "Type \"invoices\" in the \"Search\" box",
+        "code": "await page.getByPlaceholder('Search', { exact: true }).fill('invoices');"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Notes"
+              },
+              "options": {
+                "exact": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "fill",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Notes"
+              },
+              "options": {
+                "exact": true
+              }
+            }
+          ]
+        },
+        "quarterly",
+        null
+      ]
+    },
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByPlaceholder",
+              "text": {
+                "kind": "literal",
+                "value": "Search"
+              },
+              "options": {
+                "exact": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "fill",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByPlaceholder",
+              "text": {
+                "kind": "literal",
+                "value": "Search"
+              },
+              "options": {
+                "exact": true
+              }
+            }
+          ]
+        },
+        "invoices",
+        null
+      ]
+    }
+  ]
+}

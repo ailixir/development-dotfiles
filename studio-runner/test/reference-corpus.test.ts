@@ -7,12 +7,12 @@ import {
   createFakeClock,
   createRecordingStepReporter,
 } from '../src/executor/adapters/fake.js';
-import { ACTION_METHODS, LOCATOR_ASSERTIONS, LOCATOR_METHODS, PAGE_ASSERTIONS, PAGE_METHODS } from '../src/validator/language.js';
 import { loadReferenceFixtures, normalise } from './helpers/corpus.js';
 
 /**
- * AC-17: every permitted method has a valid artifact, and each one drives the expected
- * `BrowserAdapter` calls in order against a fake adapter.
+ * 10.2 AC-17 / 10.3 AC-5: every reference example validates on the current validator and drives
+ * the expected `BrowserAdapter` calls in order against a fake adapter. A language-policy change
+ * that breaks an example fails here, in the unit tier, with no browser involved.
  */
 const fixtures = loadReferenceFixtures();
 
@@ -50,33 +50,8 @@ describe('reference corpus', () => {
     },
   );
 
-  it('covers every permitted method at least once', () => {
-    const allCode = fixtures
-      .flatMap((fixture) => {
-        const artifact = fixture.artifact as { steps: { code: string }[] };
-        return artifact.steps.map((step) => step.code);
-      })
-      .join('\n');
-
-    const methods = [
-      ...Object.keys(PAGE_METHODS),
-      ...Object.keys(LOCATOR_METHODS),
-      ...Object.keys(ACTION_METHODS),
-      ...Object.keys(LOCATOR_ASSERTIONS),
-      ...Object.keys(PAGE_ASSERTIONS),
-    ];
-    const missing = methods.filter((method) => !allCode.includes(`${method}(`));
-    expect(missing).toEqual([]);
-  });
-
-  it('covers both reference kinds', () => {
-    const allCode = fixtures
-      .flatMap((fixture) => {
-        const artifact = fixture.artifact as { steps: { code: string }[] };
-        return artifact.steps.map((step) => step.code);
-      })
-      .join('\n');
-    expect(allCode).toContain('vars.get(');
-    expect(allCode).toContain('vars.secret(');
-  });
+  // Permitted-surface completeness (methods, option keys and reference kinds) is asserted in
+  // `reference-manifest.test.ts`, keyed on `src/validator/language.ts` and on the validator's own
+  // typed operations. The textual `method(` search this file used in 10.2 was replaced there
+  // (10.2 QA gate, CR-002): it could not fail when the language grew a construct no example uses.
 });

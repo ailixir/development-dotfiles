@@ -1,0 +1,64 @@
+<!doctype html>
+<!-- Controlled fixture page for the fixture-corpus tier. See home.html for the conventions. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Checks — Forms</title>
+  </head>
+  <body>
+    <h1 role="heading" aria-level="1">Forms</h1>
+
+    <div class="toolbar">
+      <button class="primary" role="button" type="button">Submit</button>
+      <button role="button" type="button">Save</button>
+      <button role="button" type="button">Account</button>
+      <button aria-expanded="false" aria-pressed="false" role="button" type="button">Menu</button>
+    </div>
+
+    <div role="tablist">
+      <button aria-selected="true" role="tab" type="button">Details</button>
+      <button aria-selected="false" role="tab" type="button">History</button>
+    </div>
+
+    <h2 role="heading" aria-level="2">Preferences</h2>
+
+    <p>
+      <input id="remember" role="checkbox" type="checkbox" />
+      <label for="remember">Remember me</label>
+    </p>
+    <p>
+      <input id="marketing" checked role="checkbox" type="checkbox" />
+      <label for="marketing">Marketing</label>
+    </p>
+    <p>
+      <input id="terms" role="checkbox" type="checkbox" />
+      <label for="terms">Terms</label>
+    </p>
+
+    <p>
+      <label for="currency">Currency</label>
+      <select id="currency" name="currency" role="combobox">
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+        <option value="USD">USD</option>
+      </select>
+    </p>
+
+    <p>
+      <label for="notes">Notes</label>
+      <input id="notes" name="notes" role="textbox" type="text" />
+    </p>
+
+    <p>
+      <input
+        id="search"
+        name="search"
+        placeholder="Search"
+        role="searchbox"
+        type="search"
+      />
+    </p>
+
+    <p><a role="link" href="/dashboard">Continue</a></p>
+  </body>
+</html>

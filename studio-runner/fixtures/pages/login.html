@@ -1,0 +1,28 @@
+<!doctype html>
+<!-- Controlled fixture page for the fixture-corpus tier. See home.html for the conventions. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Checks — Sign in</title>
+  </head>
+  <body>
+    <h1 role="heading" aria-level="1">Sign in</h1>
+    <form action="/dashboard" method="get">
+      <p>
+        <label for="username">Username</label>
+        <input id="username" name="username" role="textbox" type="text" value="alice" />
+      </p>
+      <p>
+        <label for="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          data-testid="password"
+          role="textbox"
+          type="password"
+        />
+      </p>
+      <button role="button" type="submit">Sign in</button>
+    </form>
+  </body>
+</html>
