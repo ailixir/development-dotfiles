@@ -105,6 +105,7 @@ import { generatePythonFromIR } from '@/utils/studio/codegen/pythonGenerator';
 import studioApi from '@/services/api/studioApi';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SecretInput from '@/components/studio/SecretInput';
+import { CompileReviewPanel } from '@/components/studio/review';
 
 type Scenario = {
   id: string;
@@ -837,6 +838,18 @@ const ChecksStudioPageInner: React.FC = () => {
                   </Box>
                 )}
               </Box>
+
+              {/*
+                Story 10.10 — review and confirmation, in the Control Tower beside Run (PRD §5.2).
+                A fourth right-panel tab would put the review behind Proof, where a reader reaches
+                Run without having passed it. The prop surface is one draft id on purpose: 10.11
+                rewrites this file's transport and should not have to rewrite the review panel.
+              */}
+              {selectedScenarioData?.id && (
+                <Box sx={{ mb: 2 }}>
+                  <CompileReviewPanel testId={selectedScenarioData.id} />
+                </Box>
+              )}
 
               <Divider sx={{ mb: 2 }} />
 
