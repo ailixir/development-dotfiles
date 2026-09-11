@@ -27,7 +27,7 @@ Works on ANY React/Next.js codebase — source and target can be the same projec
 ## Input
 
 - **source_path** (string)
-  - Description: Root path to scan for components (e.g., `./aios-platform/src/components`)
+  - Description: Root path to scan for components (e.g., `./aiox-platform/src/components`)
   - Required: Yes
 - **file_extensions** (list)
   - Description: File extensions to include

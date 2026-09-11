@@ -86,13 +86,13 @@ commands:
     dual_source_behavior: |
       When --source skill_execution is passed (Story 103.9 AC-5):
       1. Run digester first (*digest) to process any unprocessed execution logs
-      2. Read .aios/learning/entries/{skill}/*.yaml where status: draft
+      2. Read .aiox/learning/entries/{skill}/*.yaml where status: draft
       3. Filter entries with promotion_score >= 3.5 (Pattern/Anti-Pattern) or >= 4.0 (Rule/Veto)
       4. Show promotion prompt identical to lazy promotion in SDC skills:
          "N learnings ready for promotion. Approve? [y=all / n=skip / 1,2=select / d=defer]"
       5. For approved entries: promote to minds/ as L2 card + L3 doc (same as lazy promotion AC-3)
       6. For Rules/Vetos: inline to target SKILL.md ## Rules / ## Vetos sections (AC-4)
-      7. Mark promoted entries status: promoted in .aios/learning/entries/ (AC-6)
+      7. Mark promoted entries status: promoted in .aiox/learning/entries/ (AC-6)
       Hard rule: no promotion without explicit human RECORD (approval).
       This is the CLI fallback for the lazy promotion hook in SDC skills.
     priority: P2
@@ -116,7 +116,7 @@ commands:
     invocation: "node scripts/learning-digester.js [args]"
     integration_path: |
       Dual-source flow (RT-LEARNING-001 D6):
-      1. *digest [--skill X] — roda digester, gera observations em .aios/learning/entries/
+      1. *digest [--skill X] — roda digester, gera observations em .aiox/learning/entries/
       2. *consolidate --source skill_execution — inclui observations geradas no pipeline de consolidação
       Ou use: *digest seguido de *consolidate para pipeline completo.
     source_flag: "--source skill_execution"
@@ -126,14 +126,14 @@ commands:
     label: "*consolidate --source skill_execution"
     description: "Consolidação completa incluindo observations de skill execution (dual-source via D6)"
     task: tasks/consolidate-heuristics.md
-    pre_step: "Execute *digest first to ensure .aios/learning/entries/ is current"
+    pre_step: "Execute *digest first to ensure .aiox/learning/entries/ is current"
     source_types:
       - session_based: "squads/squad-creator-pro/minds/{owner}/heuristics/"
-      - skill_execution: ".aios/learning/entries/{skill}/*.yaml"
+      - skill_execution: ".aiox/learning/entries/{skill}/*.yaml"
     note: |
       When --source skill_execution is passed, the consolidation pipeline:
       1. Reads session-based heuristics (existing flow)
-      2. ALSO reads .aios/learning/entries/**/*.yaml (observations from digester)
+      2. ALSO reads .aiox/learning/entries/**/*.yaml (observations from digester)
       3. Merges candidates into unified inventory for dedup + conflict scan
       Hard rule (RT-LEARNING-001): no Learning Entry created without explicit RECORD (human approval).
       Digester observations are candidates only — promotion happens in Story 103.9.
@@ -276,8 +276,8 @@ data_paths:
   composition_rules: "squads/sinkra-squad/data/composition-rules.yaml"
   token_registry: "squads/sinkra-squad/data/token-registry.yaml"
   # Story 103.7 — Learning System (dual-source RT-LEARNING-001 D6)
-  learning_logs: ".aios/learning/logs/"           # input: execution logs from skill runs
-  learning_entries: ".aios/learning/entries/"     # output: digester-generated observations
+  learning_logs: ".aiox/learning/logs/"           # input: execution logs from skill runs
+  learning_entries: ".aiox/learning/entries/"     # output: digester-generated observations
   learning_digester: "scripts/learning-digester.js"  # digester script
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -356,7 +356,7 @@ workflow:
 
     [Source 2 — skill_execution-based]  ← NEW (Story 103.7)
     *digest [--skill X] [--dry-run]
-      → observations written to .aios/learning/entries/
+      → observations written to .aiox/learning/entries/
         → *consolidate --source skill_execution
           → unified inventory (session + skill_execution observations)
             → detect-conflicts → enhance → promote (P2)

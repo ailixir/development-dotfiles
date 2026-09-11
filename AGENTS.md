@@ -14,7 +14,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 put-checks/
 ├── frontend/        # React 18 + TypeScript MFE (MSW-mocked; Phase 1)
 ├── backend/         # Java 21 + Spring Boot 3 + Gradle KTS (Phase 2 — in development)
-├── docs/            # AIOS stories, specs, architecture
+├── docs/            # AIOX stories, specs, architecture
 ├── PRD.md           # Product Requirements (v2.2)
 ├── ARCH.md          # Technical Architecture
 └── AGENTS.md        # (this file)

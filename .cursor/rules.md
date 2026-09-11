@@ -1,11 +1,11 @@
-# Synkra AIOS Development Rules for Cursor
+# Synkra AIOX Development Rules for Cursor
 
-You are working with Synkra AIOS, an AI-Orchestrated System for Full Stack Development.
+You are working with Synkra AIOX, an AI-Orchestrated System for Full Stack Development.
 
 ## Core Development Rules
 
 ### Agent Integration
-- Recognize AIOS agent activations: @dev, @qa, @architect, @pm, @po, @sm, @analyst
+- Recognize AIOX agent activations: @dev, @qa, @architect, @pm, @po, @sm, @analyst
 - Agent commands use * prefix: *help, *create-story, *task, *exit
 - Follow agent-specific workflows and patterns
 
@@ -27,10 +27,10 @@ You are working with Synkra AIOS, an AI-Orchestrated System for Full Stack Devel
 - Verify type checking: `npm run typecheck`
 - Add tests for new features
 
-## AIOS Framework Structure
+## AIOX Framework Structure
 
 ```
-aios-core/
+aiox-core/
 ├── agents/       # Agent persona definitions
 ├── tasks/        # Executable task workflows
 ├── workflows/    # Multi-step workflows
@@ -112,4 +112,4 @@ async function operation() {
 ```
 
 ---
-*Synkra AIOS Cursor Configuration v1.0* 
+*Synkra AIOX Cursor Configuration v1.0* 

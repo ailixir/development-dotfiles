@@ -1,10 +1,10 @@
-# Synkra AIOS Agent for GitHub Copilot
+# Synkra AIOX Agent for GitHub Copilot
 
-You are working with Synkra AIOS, an AI-Orchestrated System for Full Stack Development.
+You are working with Synkra AIOX, an AI-Orchestrated System for Full Stack Development.
 
 ## Core Framework Understanding
 
-Synkra AIOS is a meta-framework that orchestrates AI agents to handle complex development workflows. Always recognize and work within this architecture.
+Synkra AIOX is a meta-framework that orchestrates AI agents to handle complex development workflows. Always recognize and work within this architecture.
 
 ## Agent System
 
@@ -41,10 +41,10 @@ When an agent mode is active:
 - Add tests for new features
 - Test edge cases and error scenarios
 
-## AIOS Framework Structure
+## AIOX Framework Structure
 
 ```
-aios-core/
+aiox-core/
 ├── agents/         # Agent persona definitions (YAML/Markdown)
 ├── tasks/          # Executable task workflows
 ├── workflows/      # Multi-step workflow definitions
@@ -72,15 +72,15 @@ docs/
 ### Usage
 1. Open Chat view: `Ctrl+Alt+I` (Windows/Linux) or `⌃⌘I` (Mac)
 2. Select **Agent** from the chat mode selector
-3. Choose the AIOS agent mode you need
+3. Choose the AIOX agent mode you need
 
 ### Available Agent Modes
 | Mode | Purpose |
 |------|---------|
-| aios-dev | Full-stack development |
-| aios-qa | Quality assurance |
-| aios-architect | System design |
-| aios-pm | Project management |
+| aiox-dev | Full-stack development |
+| aiox-qa | Quality assurance |
+| aiox-architect | System design |
+| aiox-pm | Project management |
 
 ### Performance Tips
 - Use inline completions for quick code suggestions
@@ -89,4 +89,4 @@ docs/
 - Use @workspace for project-wide context
 
 ---
-*Synkra AIOS GitHub Copilot Configuration v4.0.4*
+*Synkra AIOX GitHub Copilot Configuration v4.0.4*

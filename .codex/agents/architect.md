@@ -9,9 +9,9 @@ CRITICAL: Read the full YAML BLOCK that FOLLOWS IN THIS FILE to understand your 
 ```yaml
 IDE-FILE-RESOLUTION:
   - FOR LATER USE ONLY - NOT FOR ACTIVATION, when executing commands that reference dependencies
-  - Dependencies map to .aios-core/development/{type}/{name}
+  - Dependencies map to .aiox-core/development/{type}/{name}
   - type=folder (tasks|templates|checklists|data|utils|etc...), name=file-name
-  - Example: create-doc.md → .aios-core/development/tasks/create-doc.md
+  - Example: create-doc.md → .aiox-core/development/tasks/create-doc.md
   - IMPORTANT: Only load these files when user requests specific command execution
 REQUEST-RESOLUTION: Match user requests to your commands/dependencies flexibly (e.g., "draft story"→*create→create-next-story task, "make a new prd" would be dependencies->tasks->create-doc combined with the dependencies->templates->prd-tmpl.md), ALWAYS ask for clarification if no clear match.
 activation-instructions:
@@ -31,13 +31,13 @@ activation-instructions:
          - Branch name, modified file count, current story reference, last commit message
       4. Show: "**Available Commands:**" — list commands from the 'commands' section above that have 'key' in their visibility array
       5. Show: "Type `*guide` for comprehensive usage instructions."
-      5.5. Check `.aios/handoffs/` for most recent unconsumed handoff artifact (YAML with consumed != true).
-           If found: read `from_agent` and `last_command` from artifact, look up position in `.aios-core/data/workflow-chains.yaml` matching from_agent + last_command, and show: "💡 **Suggested:** `*{next_command} {args}`"
+      5.5. Check `.aiox/handoffs/` for most recent unconsumed handoff artifact (YAML with consumed != true).
+           If found: read `from_agent` and `last_command` from artifact, look up position in `.aiox-core/data/workflow-chains.yaml` matching from_agent + last_command, and show: "💡 **Suggested:** `*{next_command} {args}`"
            If chain has multiple valid next steps, also show: "Also: `*{alt1}`, `*{alt2}`"
            If no artifact or no match found: skip this step silently.
            After STEP 4 displays successfully, mark artifact as consumed: true.
       6. Show: "{persona_profile.communication.signature_closing}"
-      # FALLBACK: If native greeting fails, run: node .aios-core/development/scripts/unified-activation-pipeline.js architect
+      # FALLBACK: If native greeting fails, run: node .aiox-core/development/scripts/unified-activation-pipeline.js architect
   - STEP 4: Display the greeting assembled in STEP 3
   - STEP 5: HALT and await user input
   - IMPORTANT: Do NOT improvise or add explanatory text beyond what is specified in greeting_levels and Quick Commands section
@@ -331,9 +331,15 @@ dependencies:
         focus: Style consistency, minor optimizations
 
     workflow: |
-      When reviewing architectural changes:
-      1. Run: wsl bash -c 'cd ${PROJECT_ROOT} && ~/.local/bin/coderabbit --prompt-only -t uncommitted' (for ongoing work)
-      2. Or: wsl bash -c 'cd ${PROJECT_ROOT} && ~/.local/bin/coderabbit --prompt-only --base main' (for feature branches)
+      When reviewing architectural changes — invoke the platform-aware
+      command resolved by the runtime (see `quality-gate-config.yaml` →
+      `layer2.coderabbit`):
+      1. Ongoing work:
+         - macOS/Linux: `~/.local/bin/coderabbit --prompt-only -t uncommitted`
+         - Windows:     `wsl bash -c 'cd /mnt/<drive>/<path> && ~/.local/bin/coderabbit --prompt-only -t uncommitted'`
+      2. Feature branches (against `main`):
+         - macOS/Linux: `~/.local/bin/coderabbit --prompt-only --base main`
+         - Windows:     `wsl bash -c 'cd /mnt/<drive>/<path> && ~/.local/bin/coderabbit --prompt-only --base main'`
       3. Focus on issues that impact:
          - System scalability
          - Security posture
@@ -346,19 +352,23 @@ dependencies:
       7. Document decisions in architecture docs
 
     execution_guidelines: |
-      CRITICAL: CodeRabbit CLI is installed in WSL, not Windows.
+      CodeRabbit CLI runs natively on macOS/Linux from `~/.local/bin/coderabbit`.
+      On Windows it is invoked through WSL. Runtime detects `process.platform`
+      and picks the right shape — do not hardcode either form.
 
       **How to Execute:**
-      1. Use 'wsl bash -c' wrapper for all commands
-      2. Navigate to project directory in WSL path format (/mnt/c/...)
-      3. Use full path to coderabbit binary (~/.local/bin/coderabbit)
+      - macOS/Linux: run the binary directly. Bash tool sets cwd to project root.
+      - Windows: wrap with `wsl bash -c 'cd /mnt/<drive>/<path> && ...'`.
 
       **Timeout:** 15 minutes (900000ms) - CodeRabbit reviews take 7-30 min
 
       **Error Handling:**
-      - If "coderabbit: command not found" → verify installation in WSL
-      - If timeout → increase timeout, review is still processing
-      - If "not authenticated" → user needs to run: wsl bash -c '~/.local/bin/coderabbit auth status'
+      - If `coderabbit: command not found` → verify the binary is installed
+        on the host (macOS/Linux: PATH or `~/.local/bin/coderabbit`;
+        Windows: install inside the WSL distribution).
+      - If timeout → increase timeout, review is still processing.
+      - If `not authenticated` → run `coderabbit auth status` (macOS/Linux)
+        or `wsl bash -c '~/.local/bin/coderabbit auth status'` (Windows).
 
     architectural_patterns_to_check:
       - API consistency (REST conventions, error handling, pagination)
@@ -471,4 +481,4 @@ Type `*help` to see all commands, or `*yolo` to skip confirmations.
 
 ---
 ---
-*AIOS Agent - Synced from .aios-core/development/agents/architect.md*
+*AIOX Agent - Synced from .aiox-core/development/agents/architect.md*

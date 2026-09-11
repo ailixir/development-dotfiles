@@ -67,13 +67,16 @@
 | Index strategy execution | Frontend/UI |
 | Migration planning & execution | — |
 
-### @aios-master — Framework Governance
+### @aiox-master — Framework Governance
 
-| Capability | Details |
-|-----------|---------|
-| Execute ANY task directly | No restrictions |
-| Framework governance | Constitutional enforcement |
-| Override agent boundaries | When necessary for framework health |
+Before execution, @aiox-master MUST check whether an exclusive agent owns the request. Delegation is the default for specialized work; direct execution is limited to framework governance, orchestration, workflow-engine mode, and explicit `--force-execute` framework debugging.
+
+| Direct Execution | Delegate By Default | Blocked |
+|------------------|---------------------|---------|
+| Framework governance and constitutional enforcement | Story creation → @sm (`create-next-story.md`, `*draft`, `*create-story`) | `git push` / `gh pr create` / `gh pr merge` → @devops only |
+| Agent/task/workflow framework modifications | Epic/PRD/spec work → @pm | MCP add/remove/configure → @devops only |
+| Cross-agent orchestration and meta-operations | Story validation/backlog → @po | Direct execution of exclusive specialized tasks without `--force-execute` |
+| Workflow-engine execution or explicit `--force-execute` framework debugging | Implementation → @dev; QA/review → @qa; architecture → @architect; database → @data-engineer; research → @analyst | — |
 
 ## Cross-Agent Delegation Patterns
 
@@ -99,7 +102,7 @@ ANY agent → @devops *push
 
 ## Escalation Rules
 
-1. Agent cannot complete task → Escalate to @aios-master
+1. Agent cannot complete task → Escalate to @aiox-master
 2. Quality gate fails → Return to @dev with specific feedback
 3. Constitutional violation detected → BLOCK, require fix before proceed
-4. Agent boundary conflict → @aios-master mediates
+4. Agent boundary conflict → @aiox-master mediates

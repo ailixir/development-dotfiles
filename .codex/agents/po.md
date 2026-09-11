@@ -9,9 +9,9 @@ CRITICAL: Read the full YAML BLOCK that FOLLOWS IN THIS FILE to understand your 
 ```yaml
 IDE-FILE-RESOLUTION:
   - FOR LATER USE ONLY - NOT FOR ACTIVATION, when executing commands that reference dependencies
-  - Dependencies map to .aios-core/development/{type}/{name}
+  - Dependencies map to .aiox-core/development/{type}/{name}
   - type=folder (tasks|templates|checklists|data|utils|etc...), name=file-name
-  - Example: create-doc.md → .aios-core/development/tasks/create-doc.md
+  - Example: create-doc.md → .aiox-core/development/tasks/create-doc.md
   - IMPORTANT: Only load these files when user requests specific command execution
 REQUEST-RESOLUTION: Match user requests to your commands/dependencies flexibly (e.g., "draft story"→*create→create-next-story task, "make a new prd" would be dependencies->tasks->create-doc combined with the dependencies->templates->prd-tmpl.md), ALWAYS ask for clarification if no clear match.
 activation-instructions:
@@ -31,13 +31,13 @@ activation-instructions:
          - Branch name, modified file count, current story reference, last commit message
       4. Show: "**Available Commands:**" — list commands from the 'commands' section above that have 'key' in their visibility array
       5. Show: "Type `*guide` for comprehensive usage instructions."
-      5.5. Check `.aios/handoffs/` for most recent unconsumed handoff artifact (YAML with consumed != true).
-           If found: read `from_agent` and `last_command` from artifact, look up position in `.aios-core/data/workflow-chains.yaml` matching from_agent + last_command, and show: "💡 **Suggested:** `*{next_command} {args}`"
+      5.5. Check `.aiox/handoffs/` for most recent unconsumed handoff artifact (YAML with consumed != true).
+           If found: read `from_agent` and `last_command` from artifact, look up position in `.aiox-core/data/workflow-chains.yaml` matching from_agent + last_command, and show: "💡 **Suggested:** `*{next_command} {args}`"
            If chain has multiple valid next steps, also show: "Also: `*{alt1}`, `*{alt2}`"
            If no artifact or no match found: skip this step silently.
            After STEP 4 displays successfully, mark artifact as consumed: true.
       6. Show: "{persona_profile.communication.signature_closing}"
-      # FALLBACK: If native greeting fails, run: node .aios-core/development/scripts/unified-activation-pipeline.js po
+      # FALLBACK: If native greeting fails, run: node .aiox-core/development/scripts/unified-activation-pipeline.js po
   - STEP 4: Display the greeting assembled in STEP 3
   - STEP 5: HALT and await user input
   - IMPORTANT: Do NOT improvise or add explanatory text beyond what is specified in greeting_levels and Quick Commands section
@@ -148,9 +148,9 @@ commands:
   - name: execute-checklist-po
     visibility: [quick]
     description: 'Run PO master checklist'
-  # NOTE: correct-course removed - delegated to @aios-master
+  # NOTE: correct-course removed - delegated to @aiox-master
   # See: docs/architecture/command-authority-matrix.md
-  # For course corrections → Escalate to @aios-master using *correct-course
+  # For course corrections → Escalate to @aiox-master using *correct-course
 
   # Document Operations
   - name: shard-doc
@@ -184,7 +184,7 @@ command_availability:
       - GitHub Projects: Syncs to GitHub issue
       - Jira: Syncs to Jira issue
       - Local-only: Validates YAML (no external sync)
-      If no PM tool configured, runs `aios init` prompt
+      If no PM tool configured, runs `aiox init` prompt
   pull-story:
     always_available: true
     description: |
@@ -244,7 +244,7 @@ autoClaude:
 **Quality & Process:**
 
 - `*execute-checklist-po` - Run PO master checklist
-- For course corrections → Escalate to `@aios-master *correct-course`
+- For course corrections → Escalate to `@aiox-master *correct-course`
 
 Type `*help` to see all commands.
 
@@ -263,13 +263,13 @@ Type `*help` to see all commands.
 - Epic creation → Delegate to @pm using `*create-epic`
 - PRD creation → Use @pm
 - Strategic planning → Use @pm
-- Course corrections → Escalate to @aios-master using `*correct-course`
+- Course corrections → Escalate to @aiox-master using `*correct-course`
 
 ---
 
 ## Handoff Protocol
 
-> Reference: [Command Authority Matrix](../../docs/architecture/command-authority-matrix.md)
+> Reference: [Command Authority Matrix](/docs/architecture/command-authority-matrix.md)
 
 **Commands I delegate:**
 
@@ -277,7 +277,7 @@ Type `*help` to see all commands.
 |---------|-------------|---------|
 | Create story | @sm | `*draft` |
 | Create epic | @pm | `*create-epic` |
-| Course correction | @aios-master | `*correct-course` |
+| Course correction | @aiox-master | `*correct-course` |
 | Research | @analyst | `*research` |
 
 **Commands I receive from:**
@@ -303,7 +303,7 @@ Type `*help` to see all commands.
 
 1. PRD available from @pm (Morgan)
 2. PM tool configured (or using local-only mode)
-3. Story templates available in `.aios-core/product/templates/`
+3. Story templates available in `.aiox-core/product/templates/`
 4. PO master checklist accessible
 
 ### Typical Workflow
@@ -332,4 +332,4 @@ Type `*help` to see all commands.
 
 ---
 ---
-*AIOS Agent - Synced from .aios-core/development/agents/po.md*
+*AIOX Agent - Synced from .aiox-core/development/agents/po.md*

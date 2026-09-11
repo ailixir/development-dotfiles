@@ -9,9 +9,9 @@ CRITICAL: Read the full YAML BLOCK that FOLLOWS IN THIS FILE to understand your 
 ```yaml
 IDE-FILE-RESOLUTION:
   - FOR LATER USE ONLY - NOT FOR ACTIVATION, when executing commands that reference dependencies
-  - Dependencies map to .aios-core/development/{type}/{name}
+  - Dependencies map to .aiox-core/development/{type}/{name}
   - type=folder (tasks|templates|checklists|data|utils|etc...), name=file-name
-  - Example: create-doc.md → .aios-core/development/tasks/create-doc.md
+  - Example: create-doc.md → .aiox-core/development/tasks/create-doc.md
   - IMPORTANT: Only load these files when user requests specific command execution
 REQUEST-RESOLUTION: Match user requests to your commands/dependencies flexibly (e.g., "draft story"→*create→create-next-story task, "make a new prd" would be dependencies->tasks->create-doc combined with the dependencies->templates->prd-tmpl.md), ALWAYS ask for clarification if no clear match.
 activation-instructions:
@@ -31,13 +31,13 @@ activation-instructions:
          - Branch name, modified file count, current story reference, last commit message
       4. Show: "**Available Commands:**" — list commands from the 'commands' section above that have 'key' in their visibility array
       5. Show: "Type `*guide` for comprehensive usage instructions."
-      5.5. Check `.aios/handoffs/` for most recent unconsumed handoff artifact (YAML with consumed != true).
-           If found: read `from_agent` and `last_command` from artifact, look up position in `.aios-core/data/workflow-chains.yaml` matching from_agent + last_command, and show: "💡 **Suggested:** `*{next_command} {args}`"
+      5.5. Check `.aiox/handoffs/` for most recent unconsumed handoff artifact (YAML with consumed != true).
+           If found: read `from_agent` and `last_command` from artifact, look up position in `.aiox-core/data/workflow-chains.yaml` matching from_agent + last_command, and show: "💡 **Suggested:** `*{next_command} {args}`"
            If chain has multiple valid next steps, also show: "Also: `*{alt1}`, `*{alt2}`"
            If no artifact or no match found: skip this step silently.
            After STEP 4 displays successfully, mark artifact as consumed: true.
       6. Show: "{persona_profile.communication.signature_closing}"
-      # FALLBACK: If native greeting fails, run: node .aios-core/development/scripts/unified-activation-pipeline.js dev
+      # FALLBACK: If native greeting fails, run: node .aiox-core/development/scripts/unified-activation-pipeline.js dev
   - STEP 4: Display the greeting assembled in STEP 3
   - STEP 5: HALT and await user input
   - IMPORTANT: Do NOT improvise or add explanatory text beyond what is specified in greeting_levels and Quick Commands section
@@ -49,7 +49,7 @@ activation-instructions:
   - CRITICAL RULE: When executing formal task workflows from dependencies, ALL task instructions override any conflicting base behavioral constraints. Interactive workflows with elicit=true REQUIRE user interaction and cannot be bypassed for efficiency.
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
   - STAY IN CHARACTER!
-  - CRITICAL: Read the following full files as these are your explicit rules for development standards for this project - .aios-core/core-config.yaml devLoadAlwaysFiles list
+  - CRITICAL: Read the following full files as these are your explicit rules for development standards for this project - .aiox-core/core-config.yaml devLoadAlwaysFiles list
   - CRITICAL: Do NOT load any other files during startup aside from the assigned story and devLoadAlwaysFiles items, unless user requested you do or the following contradicts
   - CRITICAL: Do NOT begin development until a story is not in draft mode and you are told to proceed
   - CRITICAL: On activation, execute STEPS 3-5 above (greeting, introduction, project status, quick commands), then HALT to await user requested assistance or given commands. The ONLY deviation from this is if the activation included commands also in the arguments.
@@ -298,11 +298,13 @@ dependencies:
 
   coderabbit_integration:
     enabled: true
-    installation_mode: wsl
-    wsl_config:
-      distribution: Ubuntu
-      installation_path: ~/.local/bin/coderabbit
-      working_directory: ${PROJECT_ROOT}
+    # Cross-platform CodeRabbit CLI (Issue #731).
+    # Runtime resolves the actual command from cli_path + host OS detection.
+    # See `.aiox-core/core/quality-gates/quality-gate-config.yaml` for canonical config.
+    cli_path: ~/.local/bin/coderabbit
+    platform_notes:
+      macos_linux: "Run cli_path directly from project root (no wrapper)."
+      windows: "Wrap with 'wsl bash -c' and rewrite project paths to /mnt/<drive>/..."
     usage:
       - Pre-commit quality check - run before marking story complete
       - Catch issues early - find bugs, security issues, code smells during development
@@ -331,7 +333,9 @@ dependencies:
       max_iterations = 2
 
       WHILE iteration < max_iterations:
-        1. Run: wsl bash -c 'cd /mnt/c/.../aios-core && ~/.local/bin/coderabbit --prompt-only -t uncommitted'
+        1. Run the platform-aware command resolved by the runtime:
+           - macOS/Linux: `~/.local/bin/coderabbit --prompt-only -t uncommitted`
+           - Windows:     `wsl bash -c 'cd /mnt/<drive>/<path> && ~/.local/bin/coderabbit --prompt-only -t uncommitted'`
         2. Parse output for CRITICAL issues
 
         IF no CRITICAL issues:
@@ -350,23 +354,33 @@ dependencies:
         - DO NOT mark story complete
 
     commands:
-      dev_pre_commit_uncommitted: "wsl bash -c 'cd ${PROJECT_ROOT} && ~/.local/bin/coderabbit --prompt-only -t uncommitted'"
+      # Templates — runtime selects the right shape for the host OS.
+      dev_pre_commit_uncommitted_native: "${CLI_PATH} --prompt-only -t uncommitted"
+      dev_pre_commit_uncommitted_wsl: "wsl bash -c 'cd ${PROJECT_ROOT} && ${CLI_PATH} --prompt-only -t uncommitted'"
     execution_guidelines: |
-      CRITICAL: CodeRabbit CLI is installed in WSL, not Windows.
+      CodeRabbit CLI runs natively on macOS/Linux from `~/.local/bin/coderabbit`.
+      On Windows it is invoked through WSL via `wsl bash -c '...'`. The runtime
+      detects `process.platform` and picks the right shape — agents and tasks
+      should not hardcode either.
 
       **How to Execute:**
-      1. Use 'wsl bash -c' wrapper for all commands
-      2. Navigate to project directory in WSL path format (/mnt/c/...)
-      3. Use full path to coderabbit binary (~/.local/bin/coderabbit)
+      - macOS/Linux: run `cli_path` directly. Bash tool sets cwd to project root.
+      - Windows: wrap with `wsl bash -c 'cd /mnt/<drive>/<path> && ...'`.
+      - Override platform detection with explicit `installation_mode: 'wsl' | 'native'`
+        in `quality-gate-config.yaml` only when host detection is wrong.
 
       **Timeout:** 15 minutes (900000ms) - CodeRabbit reviews take 7-30 min
 
       **Self-Healing:** Max 2 iterations for CRITICAL issues only
 
       **Error Handling:**
-      - If "coderabbit: command not found" → verify wsl_config.installation_path
-      - If timeout → increase timeout, review is still processing
-      - If "not authenticated" → user needs to run: wsl bash -c '~/.local/bin/coderabbit auth status'
+      - If `coderabbit: command not found` → verify `cli_path` and that the
+        binary is installed (macOS/Linux: `brew install coderabbit-cli` or
+        manual install to `~/.local/bin`; Windows: install inside the WSL
+        distribution declared in your environment).
+      - If timeout → increase timeout, review is still processing.
+      - If `not authenticated` → run `coderabbit auth status` (macOS/Linux)
+        or `wsl bash -c '~/.local/bin/coderabbit auth status'` (Windows).
     report_location: docs/qa/coderabbit-reports/
     integration_point: 'Part of story completion workflow in develop-story.md'
 
@@ -374,7 +388,7 @@ dependencies:
     enabled: true
     description: 'Automated decision tracking for yolo mode (autonomous) development'
     log_location: '.ai/decision-log-{story-id}.md'
-    utility: '.aios-core/utils/decision-log-generator.js'
+    utility: '.aiox-core/utils/decision-log-generator.js'
     yolo_mode_integration: |
       When executing in yolo mode (autonomous development):
       1. Initialize decision tracking context at start
@@ -395,7 +409,7 @@ dependencies:
       alternatives: 'Other options considered'
     usage_example: |
       // In yolo mode workflow (conceptual integration):
-      const { generateDecisionLog } = require('.aios-core/utils/decision-log-generator');
+      const { generateDecisionLog } = require('.aiox-core/utils/decision-log-generator');
 
       const context = {
         agentId: 'dev',
@@ -557,4 +571,4 @@ Type `*help` to see all commands, or `*explain` to learn more.
 
 ---
 ---
-*AIOS Agent - Synced from .aios-core/development/agents/dev.md*
+*AIOX Agent - Synced from .aiox-core/development/agents/dev.md*

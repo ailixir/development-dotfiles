@@ -27,7 +27,7 @@ Template para injetar regras obrigatórias em componentes que AI agents leem aut
 
 ```css
 /*
-@AIOS-RULES
+@AIOX-RULES
 ===============================================================================
 COMPONENT: [ComponentName]
 SURFACE: [S1|S2|S3]
@@ -75,7 +75,7 @@ NON-NEGOTIABLE:
 
 ```css
 /*
-@AIOS-RULES
+@AIOX-RULES
 ===============================================================================
 COMPONENT: Button
 SURFACE: S1
@@ -111,7 +111,7 @@ NON-NEGOTIABLE:
 
 ```css
 /*
-@AIOS-RULES
+@AIOX-RULES
 ===============================================================================
 COMPONENT: Input
 SURFACE: S1
@@ -145,7 +145,7 @@ NON-NEGOTIABLE:
 
 ```css
 /*
-@AIOS-RULES
+@AIOX-RULES
 ===============================================================================
 COMPONENT: Card
 SURFACE: S2
@@ -184,7 +184,7 @@ NON-NEGOTIABLE:
 // components/ui/button.tsx
 
 /*
-@AIOS-RULES
+@AIOX-RULES
 ... (cole o template apropriado)
 */
 
@@ -197,14 +197,14 @@ export const buttonVariants = cva(
 
 ### 2. Ao Revisar Componente Existente
 
-1. Verificar se tem @AIOS-RULES
+1. Verificar se tem @AIOX-RULES
 2. Se não tem, adicionar baseado no tipo
 3. Validar que código segue as regras
 
 ### 3. Ao Gerar com AI
 
 O AI agent DEVE:
-1. Ler o @AIOS-RULES do componente
+1. Ler o @AIOX-RULES do componente
 2. Seguir TODAS as regras listadas
 3. Não criar componente novo se variante resolve
 4. Referenciar tokens, não hardcode valores
@@ -214,8 +214,8 @@ O AI agent DEVE:
 ## Validação
 
 ```bash
-# Verificar se componentes têm @AIOS-RULES
-grep -r "@AIOS-RULES" app/components/
+# Verificar se componentes têm @AIOX-RULES
+grep -r "@AIOX-RULES" app/components/
 
 # Verificar se há hardcoded colors (violação)
 grep -r "#[0-9A-Fa-f]{6}" app/components/ --include="*.tsx"
