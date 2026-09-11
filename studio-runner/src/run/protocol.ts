@@ -24,7 +24,7 @@
 
 import type { Operation } from '../executor/operations.js';
 import type { StepStatus } from '../executor/adapters/StepReporter.js';
-import type { RunnerEvidenceState } from './recording.js';
+import type { RecordedEvidenceState } from './recording.js';
 
 /** Bumped when the message shapes change. A mismatch is a refusal, never a best-effort read. */
 export const PROTOCOL_VERSION = 1;
@@ -147,8 +147,14 @@ export interface RecordingReport {
   readonly bytes: number | null;
   /** Redacted diagnostic when the recording could not be produced or flushed. */
   readonly error: string | null;
-  /** `PENDING | FAILED | UNAVAILABLE`. Never `STORED`: storage is 10.14 (AC-9). */
-  readonly state: RunnerEvidenceState;
+  /**
+   * `PENDING | FAILED | UNAVAILABLE`. Never `STORED`.
+   *
+   * The child holds no store client and cannot upload; story 10.14 widened the runner's vocabulary
+   * but kept this one narrow, so "the child reported STORED" is a type error rather than a review
+   * comment (AC-8).
+   */
+  readonly state: RecordedEvidenceState;
   /**
    * Whether the recording covers only part of the session (ADR-002 §17.3).
    *

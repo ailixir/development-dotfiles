@@ -136,18 +136,24 @@ describe('AC-8 — evidence never alters the outcome, in either direction', () =
     );
 
     expect(final.outcome).toMatchObject({ result: 'FAILED', errorCode: 'STEP_FAILED' });
-    expect(final.evidence?.state).toBe('PENDING');
+    // `STORED` since story 10.14: the recorder reports `PENDING` and the terminal path then
+    // uploads it. The property this case is about — a failed step does not damage healthy
+    // evidence — is unchanged; only the word for "healthy" moved on.
+    expect(final.evidence?.state).toBe('STORED');
     expect(final.logs.some((entry) => entry.message.startsWith('recording failed:'))).toBe(false);
     expect(final.steps.map((step) => step.status)).toEqual(['FAIL', 'SKIPPED']);
   });
 });
 
 describe('AC-9 — the evidence vocabulary, and key discipline', () => {
-  it('reports PENDING for a playable recording, because storage is 10.14', async () => {
+  it('reports STORED for a playable recording the store acknowledged (story 10.14 AC-8)', async () => {
     const final = await runWith(
       launcherReporting({ path: '/v/page.webm', bytes: 24_576, error: null, state: 'PENDING' }),
     );
-    expect(final.evidence?.state).toBe('PENDING');
+    // The recorder still produces `PENDING`; the upload is what earns `STORED`. This was
+    // `expect(...).toBe('PENDING')` until story 10.14, with the reason "because storage is 10.14"
+    // written into the test name.
+    expect(final.evidence?.state).toBe('STORED');
   });
 
   it('reports UNAVAILABLE when no usable recording exists at all', async () => {
@@ -157,10 +163,13 @@ describe('AC-9 — the evidence vocabulary, and key discipline', () => {
     expect(final.evidence?.state).toBe('UNAVAILABLE');
   });
 
-  it('never emits STORED, on any path', async () => {
+  it('emits STORED only where an object was actually written (story 10.14 AC-8)', async () => {
+    // The inverse of the test this replaces. Until story 10.14 the assertion was "never emits
+    // STORED, on any path", because `RunnerEvidenceState` had three values and storage belonged to
+    // a later story. The vocabulary widened here, so the guard has to widen with it — otherwise it
+    // would be a test asserting that the feature was not built.
     const bodies: ReportBody[] = [];
     for (const recording of [
-      { path: '/v/page.webm', bytes: 24_576, error: null, state: 'PENDING' as const },
       { path: null, bytes: null, error: 'boom', state: 'FAILED' as const },
       { path: null, bytes: null, error: null, state: 'UNAVAILABLE' as const },
     ]) {
@@ -169,8 +178,13 @@ describe('AC-9 — the evidence vocabulary, and key discipline', () => {
       harness = null;
     }
     for (const body of bodies) expect(body.evidence?.state).not.toBe('STORED');
-    // And the producer cannot express it: `RunnerEvidenceState` has three values.
+    // A recorder that produced nothing is never uploaded at all, so there is nothing to store.
     expect(JSON.stringify(bodies)).not.toContain('STORED');
+
+    const playable = await runWith(
+      launcherReporting({ path: '/v/page.webm', bytes: 24_576, error: null, state: 'PENDING' }),
+    );
+    expect(playable.evidence?.state).toBe('STORED');
   });
 
   it('echoes the job’s server-derived keys exactly, inventing nothing', async () => {

@@ -28,6 +28,11 @@ import type { LogSink, Logger } from './logging.js';
 import { createLogger, createStdoutSink } from './logging.js';
 import type { DeadlineTimers } from '../run/deadline.js';
 import type { RunOrigin } from '../run/timeline.js';
+import { readFile, stat } from 'node:fs/promises';
+
+import { createLocalObjectStore } from '../run/objectStore.js';
+import type { ObjectStoreClient } from '../run/objectStore.js';
+import type { EvidenceFileSystem } from '../run/evidenceUpload.js';
 import { createRunCoordinator } from './runCoordinator.js';
 import type { RunCoordinator } from './runCoordinator.js';
 import { createFsScratchStore } from './scratch.js';
@@ -62,6 +67,9 @@ export interface ApplicationDependencies {
    * has seen fail is not a guard.
    */
   readonly takeOrigin?: (() => RunOrigin) | undefined;
+  /** Substituted by the tests that assert the terminal ordering and the storage failure paths. */
+  readonly objectStore?: ObjectStoreClient | undefined;
+  readonly evidenceFileSystem?: EvidenceFileSystem | undefined;
 }
 
 export interface RunnerApplication {
@@ -85,6 +93,20 @@ function boundsFrom(config: RunnerConfig): ReportBounds {
   };
 }
 
+/**
+ * The production filesystem port for the uploader.
+ *
+ * `readFile` is wired and never called — the uploader streams from a path and the store client
+ * opens it. Declaring the capability is what makes "zero whole-file reads at any recording size" a
+ * counted fact rather than a claim (story 10.14 AC-5).
+ */
+const NODE_EVIDENCE_FILE_SYSTEM: EvidenceFileSystem = {
+  stat: async (path: string): Promise<{ readonly size: number }> => ({
+    size: (await stat(path)).size,
+  }),
+  readFile: (path: string): Promise<Uint8Array> => readFile(path),
+};
+
 const defaultSleep = (ms: number): Promise<void> =>
   new Promise<void>((resolve) => {
     setTimeout(resolve, ms);
@@ -98,6 +120,12 @@ export function createApplication(
   const pool = dependencies.pool ?? createCapacityPool(config.poolSize);
   const http = dependencies.http ?? createFetchHttpClient();
   const scratch = dependencies.scratch ?? createFsScratchStore(config.scratchDir);
+  // `ED-03` is open: the real Sonic endpoint, its write-only credentials and its lifecycle rules
+  // belong to stories 10.18/10.19. Until then the runner writes to a real, local, S3-shaped
+  // compatible store rather than to a stub, so the upload path is exercised wherever the runner
+  // runs and not only where a test substitutes a fake.
+  const objectStore = dependencies.objectStore ?? createLocalObjectStore({ root: config.objectStoreDir });
+  const evidenceFileSystem = dependencies.evidenceFileSystem ?? NODE_EVIDENCE_FILE_SYSTEM;
   const bounds = boundsFrom(config);
 
   const admission = createAdmissionClient({
@@ -128,6 +156,13 @@ export function createApplication(
       windowMs: config.terminalDeliveryWindowMs,
       maxAttempts: config.terminalDeliveryMaxAttempts,
       backoffMs: config.terminalDeliveryBackoffMs,
+    },
+    objectStore,
+    evidenceFileSystem,
+    evidence: {
+      maxAttempts: config.objectStoreMaxAttempts,
+      windowMs: config.objectStoreWindowMs,
+      backoffMs: config.objectStoreBackoffMs,
     },
     now,
     wallClock: dependencies.wallClock ?? ((): Date => new Date()),

@@ -10,6 +10,9 @@ import type { RunOrigin } from '../../src/run/timeline.js';
 import type { RunnerConfig } from '../../src/server/config.js';
 import { CONFIG_PREFIX, loadConfig } from '../../src/server/config.js';
 import { createApplication } from '../../src/server/application.js';
+import type { EvidenceFileSystem } from '../../src/run/evidenceUpload.js';
+import { createFakeObjectStore } from '../../src/run/objectStore.js';
+import type { ObjectStoreClient } from '../../src/run/objectStore.js';
 import type { RunnerApplication } from '../../src/server/application.js';
 import type { CapacityPool } from '../../src/server/capacity.js';
 import { createRecordingLogSink } from '../../src/server/logging.js';
@@ -56,6 +59,18 @@ export interface HarnessOptions {
    * exactly `totalRuntimeMs` after the browser start" is an assertion rather than a sleep.
    */
   readonly scheduler?: FakeScheduler;
+  /** Substitutes the object store; story 10.14's ordering and failure-path tests pass their own. */
+  readonly objectStore?: ObjectStoreClient;
+  /** Substitutes the uploader's filesystem port, so whole-file reads can be counted (AC-5). */
+  readonly evidenceFileSystem?: EvidenceFileSystem;
+  /**
+   * Observes every log line **as it is written**.
+   *
+   * The recorded sink is read after the fact, which is fine for content and useless for order: an
+   * ordering test interleaving pod-log events with store calls needs both at emission time, on one
+   * clock. Story 10.14 AC-3 is decided on that interleaving.
+   */
+  readonly onLogLine?: (line: string) => void;
 }
 
 export interface Harness {
@@ -64,6 +79,8 @@ export interface Harness {
   readonly http: FakeHttpClient;
   readonly launcher: FakeBrowserLauncher;
   readonly scratch: FakeScratchStore;
+  /** The store the terminal path wrote to. A fake by default (story 10.14 AC-18a). */
+  readonly objectStore: ObjectStoreClient;
   readonly log: EventLog;
   readonly sink: RecordingLogSink;
   /** The clock and timer facility the run is driven on (10.13). */
@@ -75,6 +92,20 @@ export interface Harness {
   stop(): Promise<void>;
   readonly port: number;
 }
+
+/**
+ * The filesystem the uploader is given in the unit tier.
+ *
+ * `stat` answers for any path, because the fake session's recording path names no real file, and
+ * `readFile` is present and counted: the uploader must never call it at any recording size
+ * (story 10.14 AC-5).
+ */
+export const FAKE_EVIDENCE_FILE_SYSTEM: EvidenceFileSystem = {
+  stat: (): Promise<{ readonly size: number }> => Promise.resolve({ size: 24_576 }),
+  readFile: (): Promise<Uint8Array> => {
+    throw new Error('the uploader must not read a recording whole');
+  },
+};
 
 export function createHarness(options: HarnessOptions = {}): Harness {
   const config = loadConfig({
@@ -92,7 +123,32 @@ export function createHarness(options: HarnessOptions = {}): Harness {
   const http = createFakeHttpClient(log);
   const launcher = createFakeBrowserLauncher(log);
   const scratch = createFakeScratchStore(log);
-  const sink = createRecordingLogSink();
+  const recorded = createRecordingLogSink();
+  const observe = options.onLogLine;
+  const sink: RecordingLogSink =
+    observe === undefined
+      ? recorded
+      : {
+          lines: recorded.lines,
+          write(line: string): void {
+            recorded.write(line);
+            observe(line);
+          },
+        };
+  // Story 10.14: the terminal path now uploads the recording and writes the manifest before
+  // scratch is cleared. The default harness gives it a working store and a filesystem that
+  // reports a size for whatever path the fake session claims, so a run whose recorder produced a
+  // playable file reaches `STORED` — which is what a working deployment does. Tests that need a
+  // failing store, an unreachable one or a call log pass their own.
+  const objectStore =
+    options.objectStore ??
+    createFakeObjectStore({
+      // The fake session's recording path names no real file; resolving it synthetically keeps
+      // these tests about the terminal path. The ordering, canary and retained-bytes tests use a
+      // store that streams a real temp file instead.
+      resolveFile: () => Promise.resolve(new TextEncoder().encode('webm-bytes')),
+    }).client;
+  const evidenceFileSystem = options.evidenceFileSystem ?? FAKE_EVIDENCE_FILE_SYSTEM;
   const sleeps: number[] = [];
   const scheduler = options.scheduler ?? createFakeScheduler();
   let port = 0;
@@ -117,6 +173,8 @@ export function createHarness(options: HarnessOptions = {}): Harness {
     },
     random: () => 0.5,
     takeOrigin: options.takeOrigin,
+    objectStore,
+    evidenceFileSystem,
   });
 
   return {
@@ -125,6 +183,7 @@ export function createHarness(options: HarnessOptions = {}): Harness {
     http,
     launcher,
     scratch,
+    objectStore,
     log,
     sink,
     scheduler,

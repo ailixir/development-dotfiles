@@ -9,26 +9,34 @@
  * influences a `RunOutcome`: it answers one question — what state is the evidence in — and the
  * child and the coordinator keep the two apart by construction.
  *
- * ## The three words this story may use
+ * ## The four words, and where the fourth is earned
  *
- * `PENDING`, `FAILED`, `UNAVAILABLE`. **`STORED` is not this story's word**: storage is 10.14, so
- * `PENDING` is the honest state for a playable recording nobody has uploaded yet, and the type
- * below cannot express `STORED` at all — which is a stronger guarantee than a review comment
- * saying not to emit it (AC-9).
+ * `PENDING`, `FAILED`, `UNAVAILABLE` — and, since story 10.14, `STORED`.
  *
- * The recording lives and dies in scratch. Until 10.14 uploads it, the file is deleted with the
- * rest of the per-run directory (AC-22), and saying so plainly is better than implying a file
- * survives.
+ * Story 10.13 narrowed this type to three on purpose, because storage was 10.14's and a type that
+ * cannot express `STORED` is a stronger guarantee than a review comment saying not to emit it.
+ * 10.14 widens it **here and only here**, and nothing in this module can produce the new word: it
+ * is set in exactly one place, `uploadRecording` in `src/run/evidenceUpload.ts`, and only after the
+ * store has acknowledged the object write (AC-8). `PENDING` remains what a recorder produces — a
+ * playable recording nobody has uploaded **yet**.
+ *
+ * The recording still lives and dies in scratch. Story 10.14 uploads it **before**
+ * `runScratch.clear()` runs, which is the ordering AC-3 makes normative: 10.13 moved the scratch
+ * clear ahead of the delivery window deliberately, so "before the result is delivered" and "while
+ * the file still exists" are different instants and only the second one is useful.
  */
 
 /**
- * The runner's evidence states.
+ * The runner's evidence states — now the contract's four (story 10.14 AC-8).
  *
- * Deliberately a narrower type than the contract's `RunnerEvidence.state`, which also admits
- * `STORED`. The contract describes what the field may ever hold across the whole epic; this type
- * describes what *this* producer may put there today.
+ * `STORED` is **earned**: it is written by `uploadRecording` after the store acknowledges the put,
+ * never before, never optimistically, and never because a file was playable. Nothing in this module
+ * returns it.
  */
-export type RunnerEvidenceState = 'PENDING' | 'FAILED' | 'UNAVAILABLE';
+export type RunnerEvidenceState = 'PENDING' | 'STORED' | 'FAILED' | 'UNAVAILABLE';
+
+/** What a recorder alone can observe. `STORED` is not reachable from here (AC-8). */
+export type RecordedEvidenceState = Exclude<RunnerEvidenceState, 'STORED'>;
 
 /** The smallest file that can be a webm at all: EBML header plus a cluster (§6.1, AC-7). */
 export const MIN_PLAYABLE_RECORDING_BYTES = 512;
@@ -43,7 +51,8 @@ export interface RecordingOutcome {
   readonly bytes: number | null;
   /** Redacted diagnostic; `null` unless the recording could not be produced or flushed. */
   readonly error: string | null;
-  readonly state: RunnerEvidenceState;
+  /** What a recorder can observe. `STORED` is the uploader's word and is unreachable here. */
+  readonly state: RecordedEvidenceState;
   /**
    * Whether the recording covers only part of the browser session it was recording.
    *
@@ -94,8 +103,13 @@ export interface RecordingObservation {
  *
  * Partiality is meaningful only where a playable object exists (§17.3). `FAILED` and `UNAVAILABLE`
  * are `false`, because a recording that does not exist is not a partial one.
+ *
+ * The parameter is deliberately {@link RecordedEvidenceState} and not {@link RunnerEvidenceState}:
+ * once story 10.14 widened the vocabulary, calling this with `STORED` would return `false` and
+ * silently clear a truthful `partial` on every successful upload — the single most likely accident
+ * in that story (AC-9). Narrowing the parameter makes that call a type error rather than a bug.
  */
-export function partialFor(state: RunnerEvidenceState, orderlyClose: boolean): boolean {
+export function partialFor(state: RecordedEvidenceState, orderlyClose: boolean): boolean {
   if (state !== 'PENDING') return false;
   return !orderlyClose;
 }

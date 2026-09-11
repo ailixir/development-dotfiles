@@ -214,7 +214,9 @@ describe('AC-3 — every deadline outcome is a distinguishable, truthful code', 
     // The vocabulary entry that must not be collapsed into the other one: a slow locator is not
     // a spent browser budget, and the parent killed nothing here.
     expect(final.outcome?.errorCode).not.toBe('TIMEOUT');
-    expect(final.evidence?.state).toBe('PENDING');
+    // `STORED` since story 10.14 uploads a playable recording before scratch is cleared. The
+    // evidence word moved; the outcome vocabulary this row is about did not.
+    expect(final.evidence?.state).toBe('STORED');
   });
 
   it('row 5: the child died for another reason → ERROR / RUN_ERROR', async () => {
@@ -343,7 +345,7 @@ describe('AC-1, AC-2 — the two budgets, end to end', () => {
 // ── AC-16: the three cases, on the serialized body ───────────────────────────────────────────
 
 describe('AC-16 — a truncated run tells the truth about its video', () => {
-  it('(a) the ordered stop completed and left a playable file → PENDING, partial false', async () => {
+  it('(a) the ordered stop completed and left a playable file → STORED, partial false', async () => {
     const { final, finalBytes } = await runToDeadline({
       hangOnStep: 0,
       onStop: 'flush',
@@ -357,14 +359,15 @@ describe('AC-16 — a truncated run tells the truth about its video', () => {
     });
 
     expect(final.outcome?.errorCode).toBe('TIMEOUT');
-    expect(final.evidence?.state).toBe('PENDING');
+    // `PENDING` until story 10.14; the upload now earns `STORED` inside the same terminal path.
+    expect(final.evidence?.state).toBe('STORED');
     // §5.2's ordered close exists precisely so the webm is finalized. **A timeout is not
     // automatically a truncation** (ADR-002 §17.3), and this is the case that says so.
     expect(final.evidence?.partial).toBe(false);
     expect(finalBytes).toContain('"partial":false');
   });
 
-  it('(b) the grace expired, the tree was killed, and the file is nevertheless playable → PENDING, partial TRUE', async () => {
+  it('(b) the grace expired, the tree was killed, and the file is nevertheless playable → STORED, partial TRUE', async () => {
     // The dangerous case, and the one ADR-002 §17.7 item 1 added. Chromium writes the webm
     // incrementally, so a killed recorder usually leaves a readable prefix. Reporting `PENDING`
     // with `partial: false` over it is a salvaged prefix presented as a whole video — the exact
@@ -378,8 +381,8 @@ describe('AC-16 — a truncated run tells the truth about its video', () => {
     });
 
     expect(final.outcome?.errorCode).toBe('TIMEOUT');
-    // Playable, so the evidence is real and worth keeping…
-    expect(final.evidence?.state).toBe('PENDING');
+    // Playable, so the evidence is real, worth keeping and — since story 10.14 — uploaded.
+    expect(final.evidence?.state).toBe('STORED');
     // …and **partial**, because the ordered stop never completed. Today, without this, the API
     // would publish `partial: false` over a salvaged prefix — a whole video that never existed.
     expect(final.evidence?.partial).toBe(true);
@@ -390,7 +393,8 @@ describe('AC-16 — a truncated run tells the truth about its video', () => {
     const { final } = await runToDeadline({ hangOnStep: 0, onStop: 'ignore' });
     expect(final.evidence?.state).toBe('UNAVAILABLE');
     expect(final.evidence?.partial).toBe(false);
-    // `STORED` is not this story's word any more than it was 10.12's.
+    // A recording that does not exist is never uploaded, so `STORED` is still unreachable here —
+    // which is the half of "STORED is earned" that survived story 10.14 unchanged (AC-8).
     expect(JSON.stringify(final)).not.toContain('STORED');
   });
 
