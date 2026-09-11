@@ -1,0 +1,22 @@
+{
+  "name": "expression-function",
+  "expectedClass": "EXPRESSION_FUNCTION",
+  "description": "A callback argument is rejected.",
+  "source": [
+    "Click the \"Submit\" button"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Click the \"Submit\" button",
+        "code": "await page.getByRole('button', { name: 'Submit' }).click(() => 1);"
+      }
+    ]
+  }
+}

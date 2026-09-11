@@ -1,0 +1,55 @@
+{
+  "name": "action-press",
+  "description": "press with a modifier key combination.",
+  "source": [
+    "Press Enter in the search box"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "values": {
+    "variables": {},
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Press Enter in the search box",
+        "code": "await page.getByRole('searchbox').press('Enter');"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "searchbox"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "press",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "searchbox"
+            }
+          ]
+        },
+        "Enter",
+        null
+      ]
+    }
+  ]
+}

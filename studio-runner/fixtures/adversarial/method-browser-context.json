@@ -1,0 +1,22 @@
+{
+  "name": "method-browser-context",
+  "expectedClass": "METHOD_NOT_PERMITTED",
+  "description": "Browser and context management is outside the permitted surface.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "await page.context().newPage();"
+      }
+    ]
+  }
+}

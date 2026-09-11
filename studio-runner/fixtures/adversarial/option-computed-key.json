@@ -1,0 +1,22 @@
+{
+  "name": "option-computed-key",
+  "expectedClass": "OPTION_COMPUTED_KEY",
+  "description": "A computed option key is rejected.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "await page.goto('https://example.com/', { ['time' + 'out']: 1000 });"
+      }
+    ]
+  }
+}

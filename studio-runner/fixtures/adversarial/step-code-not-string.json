@@ -1,0 +1,22 @@
+{
+  "name": "step-code-not-string",
+  "expectedClass": "STEP_CODE_NOT_STRING",
+  "description": "Step code is a number.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": 42
+      }
+    ]
+  }
+}

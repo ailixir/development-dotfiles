@@ -1,0 +1,61 @@
+{
+  "name": "locator-get-by-label-fill",
+  "description": "getByLabel, then fill with a literal.",
+  "source": [
+    "Type \"alice\" in the \"Username\" field"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "values": {
+    "variables": {},
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Type \"alice\" in the \"Username\" field",
+        "code": "await page.getByLabel('Username').fill('alice');"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Username"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "fill",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Username"
+              }
+            }
+          ]
+        },
+        "alice",
+        null
+      ]
+    }
+  ]
+}

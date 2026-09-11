@@ -1,0 +1,65 @@
+{
+  "name": "locator-get-by-placeholder-fill-variable",
+  "description": "getByPlaceholder, then fill from a declared variable.",
+  "source": [
+    "Type \"<var USERNAME>\" in the \"Search\" field"
+  ],
+  "references": {
+    "variables": [
+      "USERNAME"
+    ],
+    "secrets": []
+  },
+  "values": {
+    "variables": {
+      "USERNAME": "alice"
+    },
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Type \"<var USERNAME>\" in the \"Search\" field",
+        "code": "await page.getByPlaceholder('Search').fill(vars.get('USERNAME'));"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByPlaceholder",
+              "text": {
+                "kind": "literal",
+                "value": "Search"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "fill",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByPlaceholder",
+              "text": {
+                "kind": "literal",
+                "value": "Search"
+              }
+            }
+          ]
+        },
+        "alice",
+        null
+      ]
+    }
+  ]
+}

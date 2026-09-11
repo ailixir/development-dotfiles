@@ -1,0 +1,24 @@
+{
+  "name": "reference-position-not-permitted",
+  "expectedClass": "REFERENCE_POSITION_NOT_PERMITTED",
+  "description": "A secret reference in a URL is rejected.",
+  "source": [
+    "Go to the tokenised URL for \"<secret TOKEN>\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": [
+      "TOKEN"
+    ]
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to the tokenised URL for \"<secret TOKEN>\"",
+        "code": "await page.goto(vars.secret('TOKEN'));"
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "unsupported-typescript-locator-chain",
+  "expectedClass": "UNSUPPORTED_TYPESCRIPT",
+  "description": "Type arguments on a locator-chain call are rejected, not just on the outer call.",
+  "source": [
+    "Click the \"Submit\" button"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Click the \"Submit\" button",
+        "code": "await page.locator<string>('div').click();"
+      }
+    ]
+  }
+}

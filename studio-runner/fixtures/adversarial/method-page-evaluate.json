@@ -1,0 +1,22 @@
+{
+  "name": "method-page-evaluate",
+  "expectedClass": "METHOD_NOT_PERMITTED",
+  "description": "page.evaluate is outside the permitted surface.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "await page.evaluate('fetch(\"/admin\")');"
+      }
+    ]
+  }
+}

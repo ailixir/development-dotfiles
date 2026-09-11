@@ -1,0 +1,22 @@
+{
+  "name": "regex-invalid",
+  "expectedClass": "REGEX_INVALID",
+  "description": "A regular expression that does not compile is rejected.",
+  "source": [
+    "Wait for the dashboard URL"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Wait for the dashboard URL",
+        "code": "await page.waitForURL(/\\p{Nope}/u);"
+      }
+    ]
+  }
+}

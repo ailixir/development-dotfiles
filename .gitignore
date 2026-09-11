@@ -45,6 +45,17 @@ frontend/yarn-error.log*
 frontend/pnpm-debug.log*
 frontend/*.tgz
 
+# ── Studio runner (Node / TypeScript / Playwright) ──
+studio-runner/node_modules/
+studio-runner/dist/
+studio-runner/coverage/
+studio-runner/test-results/
+studio-runner/playwright-report/
+studio-runner/.scratch/
+studio-runner/videos/
+studio-runner/runtime-versions.json
+studio-runner/*.log
+
 # ── Backend (Gradle / JVM / Spring Boot) ──
 backend/.gradle/
 backend/build/

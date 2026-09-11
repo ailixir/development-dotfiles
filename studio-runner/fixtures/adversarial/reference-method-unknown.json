@@ -1,0 +1,22 @@
+{
+  "name": "reference-method-unknown",
+  "expectedClass": "REFERENCE_METHOD_UNKNOWN",
+  "description": "vars exposes only get and secret.",
+  "source": [
+    "Type the environment token in the \"Token\" field"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Type the environment token in the \"Token\" field",
+        "code": "await page.getByLabel('Token').fill(vars.env('TOKEN'));"
+      }
+    ]
+  }
+}
