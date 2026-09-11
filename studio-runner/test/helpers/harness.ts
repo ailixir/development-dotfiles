@@ -5,6 +5,8 @@
  * source and `sleep`. Retry schedules and delivery windows are therefore exact rather than
  * timing-dependent, and the suite runs in milliseconds without ever sleeping for real.
  */
+import type { BrowserLauncher, ScratchStore } from '../../src/server/adapters.js';
+import type { RunOrigin } from '../../src/run/timeline.js';
 import type { RunnerConfig } from '../../src/server/config.js';
 import { CONFIG_PREFIX, loadConfig } from '../../src/server/config.js';
 import { createApplication } from '../../src/server/application.js';
@@ -37,6 +39,14 @@ export interface HarnessOptions {
   readonly pool?: CapacityPool;
   /** Overrides the monotonic clock; used to make a synchronous call look slow (AC-4). */
   readonly now?: () => number;
+  /** Overrides how the in-process run origin is taken (10.12 AC-11.3). */
+  readonly takeOrigin?: () => RunOrigin;
+  /** Overrides the recorded runtime versions, so the §4.6 refusal can be driven (10.12 AC-2). */
+  readonly runtimeVersions?: Readonly<Record<string, unknown>>;
+  /** Substitutes the browser launcher; the fixtures tier passes the real Chromium one (AC-20). */
+  readonly launcher?: BrowserLauncher;
+  /** Substitutes the scratch store; the fixtures tier passes a real filesystem one (AC-22). */
+  readonly scratch?: ScratchStore;
 }
 
 export interface Harness {
@@ -77,10 +87,10 @@ export function createHarness(options: HarnessOptions = {}): Harness {
   let port = 0;
 
   const app = createApplication(config, {
-    launcher,
-    runtimeVersions: RUNTIME_VERSIONS,
+    launcher: options.launcher ?? launcher,
+    runtimeVersions: options.runtimeVersions ?? RUNTIME_VERSIONS,
     http,
-    scratch,
+    scratch: options.scratch ?? scratch,
     logSink: sink,
     pool: options.pool,
     now: options.now ?? ((): number => clock),
@@ -92,6 +102,7 @@ export function createHarness(options: HarnessOptions = {}): Harness {
       return Promise.resolve();
     },
     random: () => 0.5,
+    takeOrigin: options.takeOrigin,
   });
 
   return {

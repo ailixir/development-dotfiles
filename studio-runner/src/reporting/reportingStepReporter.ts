@@ -27,12 +27,29 @@ import type {
 import type { ReportClient } from './reportClient.js';
 import type { EvidenceState, ReportBody, RunOutcome, RunSnapshot } from './snapshot.js';
 
+/**
+ * The browser start, as observed (AC-10, AC-11.2).
+ *
+ * `startedAtMs` is a **reading** of the run clock — the result of subtracting the origin from the
+ * monotonic sample that defined it — and is therefore exactly `0`. The browser-start log line
+ * carries that reading. ADR-002 §4.1: `0` is the browser start, and it is a position on the
+ * timeline rather than a missing value.
+ */
+export interface BrowserStartObservation {
+  readonly browserStartedAt: Date;
+  readonly startedAtMs: number;
+}
+
 export interface RunReporter extends StepReporter {
   /**
    * Records the browser start and sends `STARTED`. Call this only once the browser has actually
    * started — not when admission succeeds, and not when an HTTP call begins.
+   *
+   * The instant and the first run-clock reading arrive **together**, from the one place that
+   * observed them: recording-context readiness (AC-10, AC-11.2). Nothing here reads a clock, so
+   * there is no second origin to disagree with the first.
    */
-  browserStarted(): void;
+  browserStarted(origin: BrowserStartObservation): void;
   /** Sends the terminal report with byte-identical bounded retry. Awaits delivery. */
   sendFinal(outcome: RunOutcome, evidence: EvidenceState): Promise<void>;
   /** Resolves once every detached progress delivery has settled (drain path, AC-12). */
@@ -82,10 +99,11 @@ export function createRunReporter(options: RunReporterOptions): RunReporter {
   return {
     built,
 
-    browserStarted(): void {
+    browserStarted(origin: BrowserStartObservation): void {
       if (snapshot.browserStarted) return;
-      snapshot.markBrowserStarted();
-      snapshot.appendLog({ atMs: 0, level: 'info', message: 'browser started' });
+      snapshot.markBrowserStarted(origin.browserStartedAt);
+      // A reading that happens to be `0`, not a constant `0` (AC-10).
+      snapshot.appendLog({ atMs: origin.startedAtMs, level: 'info', message: 'browser started' });
       dispatch(snapshot.build('STARTED'));
     },
 

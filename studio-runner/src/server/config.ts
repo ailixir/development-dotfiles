@@ -57,6 +57,22 @@ export interface RunnerConfig {
   readonly retryAfterSeconds: number;
   /** Grace given to an in-flight run to deliver its terminal report on drain (AC-12). */
   readonly drainTimeoutMs: number;
+  /**
+   * Recording geometry, in pixels (10.12 AC-7, architecture §6.1).
+   *
+   * Explicit rather than implicit: §6.1 requires the text needed for evidence to stay readable,
+   * and an implicit library default is a number nobody chose. The starting value matches the
+   * default viewport; §8.5 says to tune it against staging measurements, and SPK-06 phase A is
+   * where the recommendation comes from.
+   */
+  readonly recordingWidth: number;
+  readonly recordingHeight: number;
+  /** Bound on the browser launch handshake. A child that never reports a start has failed. */
+  readonly browserLaunchTimeoutMs: number;
+  /** Per-operation wall-clock bound handed to the adapter (§8.5 starting value, 30 s). */
+  readonly stepTimeoutMs: number;
+  /** Grace given to a browser child asked to stop before it is killed. */
+  readonly browserStopTimeoutMs: number;
   /** Outbound payload bounds (AC-19). */
   readonly maxReportSteps: number;
   readonly maxReportLogEntries: number;
@@ -142,6 +158,41 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
     required: false,
     fallback: 150_000,
     min: 0,
+  },
+  RECORDING_WIDTH: {
+    field: 'recordingWidth',
+    kind: 'integer',
+    required: false,
+    fallback: 1280,
+    min: 1,
+  },
+  RECORDING_HEIGHT: {
+    field: 'recordingHeight',
+    kind: 'integer',
+    required: false,
+    fallback: 720,
+    min: 1,
+  },
+  BROWSER_LAUNCH_TIMEOUT_MS: {
+    field: 'browserLaunchTimeoutMs',
+    kind: 'integer',
+    required: false,
+    fallback: 60_000,
+    min: 1,
+  },
+  STEP_TIMEOUT_MS: {
+    field: 'stepTimeoutMs',
+    kind: 'integer',
+    required: false,
+    fallback: 30_000,
+    min: 1,
+  },
+  BROWSER_STOP_TIMEOUT_MS: {
+    field: 'browserStopTimeoutMs',
+    kind: 'integer',
+    required: false,
+    fallback: 5_000,
+    min: 1,
   },
   MAX_REPORT_STEPS: {
     field: 'maxReportSteps',

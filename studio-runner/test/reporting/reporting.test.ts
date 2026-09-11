@@ -140,24 +140,33 @@ describe('AC-14a — STARTED is sent only once the browser has actually started'
     expect(all.some((report) => report.kind === 'STARTED')).toBe(false);
     // The run still finalizes: the API is told, rather than left waiting for a reaper.
     expect(all.at(-1)?.kind).toBe('FINAL');
-    expect(all.at(-1)?.outcome).toMatchObject({ result: 'ERROR', errorCode: 'RUN_ERROR' });
+    // 10.6's placeholder `RUN_ERROR` is replaced by the real set (AC-17, ADR-002 O-5): a launch
+    // that failed is `BROWSER_LAUNCH_FAILED`, which is disjoint from every reaper-assigned
+    // `ExecutionErrorCode` (§5.4).
+    expect(all.at(-1)?.outcome).toMatchObject({
+      result: 'ERROR',
+      errorCode: 'BROWSER_LAUNCH_FAILED',
+    });
     expect(all.at(-1)?.browserStartedAt).toBeNull();
   });
 });
 
-describe('AC-14b — real Chromium is story 10.12', () => {
-  /**
-   * Deferred, not blocked, and **skipped, never passed**.
-   *
-   * 10.12 owns the real Playwright adapter and `depends_on: ["10.6"]`. Per the manifest's `ED-05`
-   * gate note, 10.12 may run on a developer machine, so this is a scope deferral rather than an
-   * external block; `ED-05` gates only the in-image form, which lands with 10.18/10.19. This
-   * story installs and launches no browser, so there is nothing honest to assert here yet.
-   */
-  it.skip('admission → real Chromium launch → STARTED — deferred to story 10.12', () => {
-    expect.unreachable('Story 10.12 owns this assertion.');
-  });
-});
+/**
+ * **AC-14b is closed.** Story 10.6 left a skip here — "admission → real Chromium launch →
+ * `STARTED`, deferred to story 10.12" — recorded as *skipped, never passed*. Story 10.12 supplied
+ * the real Playwright adapter and the killable child, and the assertion now runs for real against
+ * pinned Chromium in `test/fixtures-tier/real-chromium.test.ts`:
+ *
+ *   "AC-20 — admission → real Chromium launch → STARTED (closes 10.6 AC-14b)"
+ *
+ * It asserts what this placeholder could not: `browserStartedAt` is stamped only once Chromium has
+ * actually started, the observed start is **measurably distinct** from the dispatch instant rather
+ * than equal to it, the `STARTED` sequence number is lower than any step's, and a run whose launch
+ * fails sends no `STARTED` at all.
+ *
+ * The skip is deleted rather than re-skipped, which is the whole point: a deferral that closes by
+ * being deleted without its assertion running is worse than one left open.
+ */
 
 describe('AC-15 — the StepReporter seam, and reporting asynchronous to execution', () => {
   it("carries the executor's outcomes to the wire unchanged, null timings included", async () => {

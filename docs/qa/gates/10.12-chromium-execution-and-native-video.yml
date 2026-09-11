@@ -1,0 +1,776 @@
+schema: 1
+story: '10.12'
+story_title: Chromium execution and native video
+epic: EPIC-10
+wave: 3
+
+gate: CONCERNS
+status_reason: >-
+  Twenty-three of the twenty-eight criteria are met and were verified by running them, four are
+  honestly deferred as live `it.skip`s naming their owners, and one — AC-6a — is defeated. Every
+  gate reproduces from a clean `rm -rf node_modules dist coverage`: npm ci, build, type-check,
+  lint, test (760 passed / 2 skipped, 34 files), test:fixtures against real pinned Chromium
+  (73 passed / 3 skipped) and check:pins all exit 0, and `check:pins --require-image` fails by
+  design on the unasserted chromiumBuild/image (ED-05 O-2a) with `.nvmrc` still reading 22 and
+  `engines.node` unchanged. No coverage threshold was lowered; `src/run/**` was added to `include`
+  and pinned at the same 85/85/80/80 as its neighbours. Both inherited deferrals genuinely close:
+  10.3's and 10.6's `it.skip`s are deleted from the tree, and the reviewer re-ran the replacement
+  assertions and falsified each — breaking the CSS target in fixtures/pages/forms.html turns the
+  28-example corpus red on a real locator timeout, and making the coordinator stamp a browser start
+  on the launch-failure path turns "sends no STARTED at all when the launch fails" red. The
+  timeline invariant is repaired on all four counts and the repair is falsifiable: substituting a
+  process-origin clock inside takeRunOrigin turns 7 tests red across test/run/timeline.test.ts and
+  test/server/timeline.test.ts. `recordingOriginMs` appears in no source, test or fixture, and
+  docs/specs/studio/openapi.yaml and both artifact.schema.json copies are byte-untouched by this
+  story's five commits. The diff is runner-only. What blocks the gate is one finding: the browser
+  child's inherited-environment allowlist carries `NODE_OPTIONS`, and a `--import`/`--require`
+  preload delivered through it rewrites `chromiumSandbox: true` to `false` and adds `--no-sandbox`.
+  The reviewer demonstrated this end to end through the real `createChildBrowserLauncher`, the
+  launch succeeded, and no lint rule, repo-wide scan or test noticed, because nothing in the
+  repository changed. AC-6a's stated property — "no configuration key, environment variable, job
+  field or code path that can set it to false" — is therefore false as written, and §9.3's
+  "do not disable it silently to make the image run" is exactly the pathway this opens. The fix is
+  one line.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-11T00:00:00Z'
+branch: story/10.12
+head_sha: 751773340
+prior_head_sha: 78427ae5f (gate FAIL, SEC-1 open)
+base_sha: a8a8eeb44
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.12
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands actually executed by the reviewer, not developer claims
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  clean_install:
+    command: rm -rf node_modules dist coverage && npm ci
+    result: PASS
+    detail: exit 0, no browser download attempted
+  build:
+    command: npm run build
+    result: PASS
+    detail: tsc -p tsconfig.build.json + write-runtime-versions.mjs, exit 0
+  type_check:
+    command: npm run type-check
+    result: PASS
+    detail: exit 0, no output
+  lint:
+    command: npm run lint
+    result: PASS
+    detail: eslint ., exit 0, no output
+  unit_tests:
+    command: npm test
+    result: PASS
+    detail: >-
+      34 files, 760 passed, 2 skipped, exit 0. The two skips are AC-6b's in-cluster sandbox
+      deferral (test/run/sandbox.test.ts) and 10.7's inherited SIGKILL skip
+      (test/server/drain.test.ts). No `.only` and no `.todo` anywhere in test/. Coverage:
+      all files 93.62 lines / 90.06 branches / 96.27 functions; src/run/** 86.29 / 88.80 / 94.84
+      against the 85/85/80/80 gate it declares.
+  fixtures_tier:
+    command: npm run test:fixtures
+    result: PASS
+    detail: >-
+      3 files, 73 passed, 3 skipped, exit 0, 53 s wall. Real pinned Chromium: the reviewer
+      confirmed ~/Library/Caches/ms-playwright holds chromium-1243 at playwright 1.63.0, the
+      declared pin. The three skips are exactly AC-18b, AC-12b and AC-12c.
+  pin_check:
+    command: npm run check:pins
+    result: PASS
+    detail: >-
+      exit 0. playwright 1.63.0 agrees across package.json, package-lock.json, the Dockerfile ARG
+      and dist/runtime-versions.json; .nvmrc / engines floor reported as 22 (>=22.11.0 <25.0.0).
+      chromiumBuild and image reported NOT ASSERTED.
+  pin_check_require_image:
+    command: npm run check:pins -- --require-image
+    result: FAIL (EXPECTED BY DESIGN)
+    detail: >-
+      exit 1, naming chromiumBuild and image as unasserted because this build did not run inside
+      the pinned Playwright image. This is ED-05 open item O-2a and a green result here would
+      itself have been a finding. Verified alongside it that .nvmrc still contains exactly `22`
+      and that the only change to package.json in this story's diff is the added
+      `browsers:install` script — `engines`, `dependencies` and `devDependencies` are untouched.
+  coverage_thresholds:
+    command: git diff a8a8eeb44..HEAD -- vitest.config.ts
+    result: NOT LOWERED
+    detail: >-
+      Two additions and nothing else: `src/run/**` joins the coverage `include` list, and a
+      `src/run/**` threshold block is added at 85/85/80/80. Global stays 85 lines / 85 statements
+      / 80 functions / 80 branches; every pre-existing per-directory figure (src/compat, scripts,
+      src/server, src/reporting, src/main.ts) is byte-identical.
+  working_tree:
+    command: git status --short
+    result: CLEAN
+    detail: >-
+      Empty after every falsification edit was reverted. The four mutated files
+      (fixtures/pages/forms.html, src/run/timeline.ts, src/run/browser.ts,
+      src/server/runCoordinator.ts) were restored from byte copies taken before the edit, `dist/`
+      was rebuilt from the restored sources, and a full `npm test` re-run after restoration
+      reproduced 760 passed / 2 skipped with lint exit 0. All probe scripts were written to the
+      session scratchpad, never into the repository.
+
+developer_claims_verified:
+  - claim: 24 of 28 criteria met, 4 deferred
+    verdict: >-
+      CORRECTED TO 23 / 4 / 1. The four deferrals (AC-6b, AC-12b, AC-12c, AC-18b) are real and are
+      each a live skip naming its owner. AC-6a is counted as unmet, not deferred: its stated
+      property is falsifiable today and the reviewer falsified it (see SEC-1). Every other
+      criterion was verified by running it.
+  - claim: 760 tests passing, all gates green from a clean install
+    verdict: >-
+      CONFIRMED — reproduced exactly from rm -rf node_modules dist coverage, and reproduced a
+      second time after all falsification edits were reverted.
+  - claim: AC-12a's median |error| is about 30 ms with 8 of 10 steps inside 48 ms
+    verdict: >-
+      CONFIRMED INDEPENDENTLY on the reviewer's own run — median ~30 ms, 8 of 10 inside 42 ms, and
+      two outliers (+650 ms and +376 ms). See seek_measurement below. The developer's restraint in
+      not claiming the 500 ms target is correct and the reviewer did not disturb it.
+  - claim: no new production dependency
+    verdict: >-
+      CONFIRMED — `dependencies` is still exactly playwright 1.63.0 and typescript 5.9.3, and
+      test/isolation.test.ts passes unmodified inside the 760.
+  - claim: the two self-critique defects in src/run/launcher.ts were found and fixed
+    verdict: >-
+      NOT INDEPENDENTLY RE-DERIVED. Both fixes are present in the source with tests naming them
+      (abandoned-child result recording, guarded reporter forwarding) and both suites are green,
+      but the reviewer did not reconstruct the pre-fix failure. Recorded as verified-by-test only.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The two inherited deferrals — re-run by the reviewer, and falsified
+# ─────────────────────────────────────────────────────────────────────────────
+deferral_closures:
+  story_10_3_ac_6b:
+    closed_by: AC-18a
+    skip_deleted:
+      finding: TRUE
+      proof: >-
+        `git grep '\.skip(' a8a8eeb44 -- studio-runner/test` lists
+        test/fixtures-tier/reference-execution.test.ts:159 "executes every example against a real
+        browser — deferred to story 10.12". That line does not exist at HEAD. The only skip left in
+        that file is a different one, AC-18b, for the corpus *inside the pinned image*, which
+        remains genuinely open under ED-05.
+    assertions_actually_run:
+      finding: TRUE
+      proof: >-
+        The reviewer re-ran the tier. The replacement test executes all 28 reference examples twice
+        through the real createChildBrowserLauncher, a real forked child, real pinned Chromium and
+        a loopback node:http page server, asserting identical per-step statuses and step counts
+        across the two passes and naming `locator-css-click` explicitly.
+    falsification:
+      method: >-
+        Temporarily changed `class="primary"` to `class="primaryX"` on the toolbar button in
+        fixtures/pages/forms.html and re-ran only that test.
+      result: >-
+        RED, exit 1 — "locator-css-click did not pass on real Chromium: TimeoutError: locator.click:
+        Timeout 15000ms exceeded. Call log: - waiting for locator('.toolbar button.primary')". The
+        CSS locator is genuinely resolved in a live DOM; the assertion is not vacuous. Restored.
+    verdict: GENUINELY CLOSED
+  story_10_6_ac_14b:
+    closed_by: AC-20
+    skip_deleted:
+      finding: TRUE
+      proof: >-
+        `git grep '\.skip(' a8a8eeb44` lists test/reporting/reporting.test.ts:157 "admission → real
+        Chromium launch → STARTED — deferred to story 10.12". No skip exists in that file at HEAD.
+    assertions_actually_run:
+      finding: TRUE
+      proof: >-
+        Two tests in test/fixtures-tier/real-chromium.test.ts drive a real HTTP POST /v1/runs
+        against a live runner harness wired to the real child launcher. The first asserts STARTED
+        exists with a non-null browserStartedAt, that the observed start is measurably after the
+        dispatch instant, that STARTED's runnerSequence precedes any step's, and that the run
+        reaches FINAL PASSED with evidence PENDING and echoed keys. The second points childModulePath
+        at a non-existent module so the child cannot start, and asserts no STARTED at all, a null
+        browserStartedAt, BROWSER_LAUNCH_FAILED, empty steps and every log atMs null.
+    falsification:
+      method: >-
+        Temporarily added `reporter.browserStarted(...)` to the launch-failure catch block in
+        src/server/runCoordinator.ts, rebuilt dist, and re-ran the launch-failure test.
+      result: >-
+        RED, exit 1 — AssertionError on `bodies.some(kind === 'STARTED')`, expected true to be
+        false. The no-STARTED-on-failure property is enforced, not described. Restored and rebuilt.
+    residual_note: >-
+      The measurable-gap assertion is `observedStart - dispatchedAt > 20 ms`. A fork plus a Node
+      bootstrap costs more than 20 ms on its own, so this bound would also be satisfied by an
+      instant taken at child start rather than at browser start. The *stronger* property — that the
+      instant is taken at recording-context readiness — is carried by AC-11.2's single-sample
+      assertion in test/run/timeline.test.ts, which the reviewer falsified separately. Recorded as
+      LOW-3 rather than as a gap in the closure.
+    verdict: GENUINELY CLOSED
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEC-1 — the sandbox attack
+# ─────────────────────────────────────────────────────────────────────────────
+sandbox_attack:
+  in_repo_surface:
+    result: NOT DEFEATED
+    attempts:
+      - attempt: Find a second Playwright launch site
+        result: NONE — `chromium.launchPersistentContext` is called in exactly one place,
+          src/run/browser.ts, and `from 'playwright'` appears only there and in the two deliberate
+          lint fixtures under fixtures/lint/.
+      - attempt: Reach the option through a config key
+        result: >-
+          NONE EXISTS. src/server/config.ts enumerates its keys in KEY_SPECS and none of them names
+          a sandbox. src/main.ts createConfiguredLauncher passes only recording geometry and three
+          timeouts, and supplies neither `spawner` nor `childModulePath`.
+      - attempt: Carry it in on an option object / a spread
+        result: >-
+          FAILED. The reviewer called playwrightBrowserFactory.launch against the built dist with
+          `chromiumSandbox: false`, `args: ['--no-sandbox','--disable-setuid-sandbox']`,
+          `sandbox: false` and `headless: true` added to the request object. The launch options are
+          an object literal with no spread, so every extra field was ignored; DEBUG=pw:browser
+          showed zero sandbox-disabling flags on the Chromium command line.
+      - attempt: Environment variables read by the library or the browser
+        result: >-
+          FAILED. PLAYWRIGHT_CHROMIUM_SANDBOX, CHROMIUM_FLAGS, CHROME_DEVEL_SANDBOX and a
+          STUDIO_RUNNER_-namespaced key were all set simultaneously; the launched command line still
+          carried no disabling flag.
+      - attempt: Defeat the guards by editing the source
+        result: >-
+          BOTH GUARDS FIRE. Changing `args: []` to `args: ['--no-sandbox']` in src/run/browser.ts
+          produced an eslint no-restricted-syntax error on that exact line and turned two
+          test/run/sandbox.test.ts assertions red, including the repo-wide scan. Restored.
+  runtime_surface:
+    result: DEFEATED
+    finding_id: SEC-1
+    detail: See the issues section below.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The timeline invariant (ADR-002 §11) — all four claims
+# ─────────────────────────────────────────────────────────────────────────────
+timeline:
+  claim_1_origin_taken_in_the_child_from_one_sample:
+    finding: TRUE
+    proof: >-
+      src/run/timeline.ts takeRunOrigin calls source.monotonicNow() once and derives both the zero
+      and startedAtMs from that single sample; the clock closes over the same value.
+      src/run/childRuntime.ts calls it after the recording context and page are ready, in the
+      child, and assigns the resulting clock to the run state.
+  claim_2_browserStartedAt_read_adjacently_and_shipped_in_the_ready_message:
+    finding: TRUE
+    proof: >-
+      takeRunOrigin takes the wall-clock read immediately after the monotonic one, from the same
+      call; childRuntime puts browserStartedAt.toISOString() and startedAtMs into the same `ready`
+      message. RunSnapshot.markBrowserStarted now *takes* the instant instead of reading a clock,
+      so there is no second origin at the reporting layer.
+  claim_3_executeSteps_default_deleted_and_refused_at_run_time:
+    finding: TRUE
+    proof: >-
+      `const defaultClock: Clock = { now: () => performance.now() }` is deleted from
+      src/executor/executor.ts, `ExecuteOptions.clock` is required, and executeSteps throws when
+      the emitted JavaScript receives undefined.
+  claim_4_null_browserStartedAt_strips_every_reading:
+    finding: TRUE
+    proof: >-
+      RunSnapshot.build enforces it at the producer: when browserStartedAt is null it emits
+      `steps: []` and maps every log entry through withoutReading, so no atMs survives. Observed on
+      the wire by the real launch-failure test, which asserts empty steps and every atMs null.
+  process_origin_fallback_search:
+    command: grep -rn "performance.now" src/
+    finding: NONE ON THE REPORT TIMELINE
+    detail: >-
+      Three sites remain. src/run/timeline.ts systemOriginSource is the intended one and its origin
+      is subtracted away. src/server/application.ts:102 feeds runCoordinator's `now`, used only at
+      lines 318 and 530 for admission-elapsed and deadline arithmetic — never for a reading placed
+      in a report. src/run/playwrightAdapter.ts:169 feeds a polling deadline inside the adapter and
+      is never read into a step or log entry. No report reading can reach a process origin. The
+      coordinator's `session.run?.origin ?? takeRunOrigin(...)` fallback exists only for 10.6's
+      in-process fakes and is itself a properly zeroed origin, not a process one.
+  falsification:
+    method: >-
+      Temporarily replaced the body of takeRunOrigin with the process-origin arrangement
+      (monotonicZero 0, startedAtMs = monotonicNow(), clock = monotonicNow()) and ran
+      test/run/timeline.test.ts and test/server/timeline.test.ts.
+    result: >-
+      RED, exit 1 — 7 failed / 6 passed, including "samples the monotonic clock exactly once",
+      "takes the wall-clock instant adjacently to the monotonic one", "computes the first reading
+      from the sample that defined the zero", "is zeroed against the real monotonic source too" and
+      both scale bounds. Restored.
+  verdict: REPAIRED AND FALSIFIABLE
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AC-12a — the seek measurement, judged rather than accepted
+# ─────────────────────────────────────────────────────────────────────────────
+seek_measurement:
+  reviewer_run:
+    run_1: [-1.0, -34.1, -33.2, +650.4, +376.4]
+    run_2: [-1.3, -34.5, -30.3, -24.4, -21.0]
+    median_absolute_error_ms: ~30
+    within_42ms: 8 of 10
+    outliers: 2, at +650 ms and +376 ms, both in run 1
+  developer_run_for_comparison:
+    outliers: 2, both at ~+370 ms, both at step 4
+  judgement: INSTRUMENT LIMITATION, NOT REAL SEEK ERROR
+  reasoning: >-
+    Three independent lines point the same way. (1) The two runs execute an identical, deterministic
+    step sequence and the *runner's* readings agree to within 5 ms — run 1 step 3 reported 2189.6 ms
+    and run 2 reported 2184.4 ms — yet the detector's answer for that step moved by 680 ms, from
+    2840.0 ms to 2160.0 ms. A real seek error cannot be present in one run and absent in the next
+    while the reading barely moves; a detector that sometimes misses a repaint can. (2) The
+    mis-attributed values are not arbitrary: they land on the *next* scene change in the ~720 ms
+    step cadence, which is the signature of a missed match rather than of a timing offset. The
+    detector's threshold is `peak * 0.12`, so a full-viewport repaint split across two encoded
+    frames falls below it and the match slides to the following change. (3) The error is strictly
+    one-directional and quantized to roughly the inter-step spacing. The developer's attribution is
+    sound and their refusal to claim the 500 ms target is correct.
+  tolerance_not_widened:
+    finding: CONFIRMED
+    detail: >-
+      MEDIAN_TOLERANCE_MS is 100 against a measured median of ~30, and the reported figure is the
+      measured one. The reviewer widened nothing and recommends nothing be widened.
+  residuals:
+    - >-
+      OUTLIER_BOUND_MS is 2500 — five times the §6.4 target — so the per-step assertion carries no
+      evidence about that target. The story says so explicitly. Recorded as MED-1 for flake risk
+      only: a mis-attribution that skipped two steps rather than one would exceed it.
+    - >-
+      firstChangeAtOrAfter matches forward with 60 ms of backward slack, so the measurement is
+      one-sided: a reading systematically late by up to 60 ms would score as near-zero error rather
+      than as negative error. Recorded as LOW-2.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Contract and scope
+# ─────────────────────────────────────────────────────────────────────────────
+contract:
+  recordingOriginMs_absent:
+    finding: TRUE
+    proof: >-
+      A repo-wide grep excluding node_modules and .git finds the token only in prose — story
+      10.7.story.md, story 10.12.story.md and ADR-002 — every occurrence recording the rejection.
+      It appears in no source file, no test, no fixture and in no contract document's schema.
+  specs_untouched:
+    finding: TRUE
+    proof: >-
+      `git diff a8a8eeb44..HEAD -- docs/specs/ docs/architecture/` is empty. docs/specs/studio/
+      openapi.yaml, docs/specs/studio/artifact.schema.json and backend/src/main/resources/studio/
+      artifact.schema.json are byte-identical to the base. The 140-line openapi.yaml and 172-line
+      ADR-002 deltas visible in `git diff epic/EPIC-10..HEAD` come from the two inherited merge
+      commits (5860eec4f, d4363e252) that predate this story's work, not from its five commits.
+    in_package_guard: >-
+      test/run/confinement.test.ts pins the document's SHA-256 at the base commit and asserts the
+      five runner-produced schemas still declare additionalProperties: false. The hash matches.
+scope:
+  finding: RUNNER-ONLY CONFIRMED
+  proof: >-
+    `git diff --name-only a8a8eeb44..HEAD` outside studio-runner/ and docs/stories/ returns
+    nothing. No backend/ and no frontend/ file is in this story's diff.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AC coverage
+# ─────────────────────────────────────────────────────────────────────────────
+ac_coverage:
+  total: 28
+  verified: 23
+  deferred: 4
+  unmet: 1
+  unmet_detail:
+    AC-6a: >-
+      "no configuration key, environment variable, job field or code path that can set it to false"
+      is falsified by SEC-1. The in-repo half of the criterion — the literal option, the empty args
+      array, the lint rule, the repo-wide scan and the no-fallback-relaunch behaviour — all hold.
+  deferred_detail:
+    AC-6b: in-cluster sandbox under PodSecurity — ED-05 / SPK-04 / 10.18, live skip in test/run/sandbox.test.ts
+    AC-12b: 500 ms through the pipeline in staging — SPK-06 phase B, live skip in test/fixtures-tier/seek-measurement.test.ts
+    AC-12c: readiness-to-first-frame gap in staging — owned here, evidenced by SPK-06 phase B, live skip in the same file
+    AC-18b: the corpus inside the pinned image — ED-05 / 10.18, live skip in test/fixtures-tier/reference-execution.test.ts
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Issues
+# ─────────────────────────────────────────────────────────────────────────────
+top_issues:
+  - id: SEC-1
+    severity: high
+    title: NODE_OPTIONS is forwarded into the browser child, and a preload delivered through it unsets the sandbox
+    ac: AC-6a
+    owner: '@dev / 10.12'
+    blocking: true
+    finding: >-
+      src/run/launcher.ts INHERITED_ENV_KEYS lists NODE_OPTIONS among the variables the browser
+      child inherits from the runner process. Node accepts --require and --import inside
+      NODE_OPTIONS, so a file reachable by the runner is executed inside the browser child before
+      src/run/child.js runs. The reviewer wrote such a preload, had it replace
+      chromium.launchPersistentContext with a wrapper spreading the caller's options and overriding
+      chromiumSandbox to false with args ['--no-sandbox'], and drove the *real*
+      createChildBrowserLauncher against the built dist. The preload logged two pids — the parent
+      and the forked browser child — then "INTERCEPTED chromiumSandbox=true", and the launch
+      completed normally, reporting ready with startedAtMs 0. Nothing in the repository changed, so
+      the eslint no-restricted-syntax rule, the repo-wide scan in test/run/sandbox.test.ts and every
+      fixtures-tier launch all stay green.
+    why_it_matters: >-
+      Architecture §9.3 forbids disabling the sandbox *silently* to make the image run. This is
+      precisely that pathway: a NODE_OPTIONS entry plus a mounted file is a Deployment-manifest
+      change with no source diff and no gate to fail, which is the shape an expedient fix takes
+      under deadline. The same channel also runs arbitrary code next to the page that holds the
+      run's resolved secrets, which bears on AC-3's "no generated source crosses into the browser
+      process" and AC-21's canary confinement, both of which were otherwise verified.
+    honest_caveat: >-
+      This is code injection, not a configuration toggle: it needs both the environment variable and
+      a readable file. It does not make the sandbox optional for an ordinary operator, and it is not
+      a defect in the launch code itself. It is nonetheless a real environment-borne path to an
+      unsandboxed launch, delivered through an allowlist this story authored, and AC-6a's wording
+      admits no such path.
+    suggested_fix: >-
+      Remove NODE_OPTIONS from INHERITED_ENV_KEYS. The child needs PATH, HOME and
+      PLAYWRIGHT_BROWSERS_PATH to run; it does not need NODE_OPTIONS, and dropping it is the only
+      entry on that list that grants arbitrary code execution in the browser process. Add an
+      assertion over childEnvironment that the constructed child env contains no key capable of
+      preloading code, so the allowlist cannot silently regrow one.
+    dev_resolution:
+      status: RESOLVED
+      by: '@dev / 10.12'
+      note: >-
+        NODE_OPTIONS removed from INHERITED_ENV_KEYS and the rule restated as a class —
+        assertNoCodeLoadingKeys refuses NODE_*, LD_*, DYLD_* and OPENSSL_* in the constructed child
+        environment on every launch — plus execArgv: [] on the fork, which closed a second channel
+        of the same kind (fork replays the parent's interpreter flags); the reviewer's attack and
+        the execArgv variant were both re-run and no longer preload the child, the five in-repo
+        attacks still fail, and re-adding NODE_OPTIONS turns three launcher.test.ts tests red.
+  - id: MED-1
+    severity: medium
+    title: The per-step seek bound is five times the §6.4 target, so it protects against nothing but a process origin
+    ac: AC-12a
+    owner: '@dev / SPK-06 phase B'
+    blocking: false
+    finding: >-
+      OUTLIER_BOUND_MS is 2500 ms. It exists to tolerate the detector's ~1-in-10 mis-attribution and
+      it does that, but it means the only per-step regression it can catch is one on the scale of a
+      process uptime. The reviewer's own run produced a +650 ms outlier, larger than either of the
+      developer's, so the headroom is being used. A mis-attribution that skipped two steps in the
+      ~720 ms cadence would exceed the bound and make this test flaky rather than strict.
+    note: >-
+      The story states this limitation plainly and does not claim the target. Do NOT widen the bound
+      in response; the right closure is AC-12b in staging with a decoder available.
+    dev_resolution:
+      status: RESOLVED
+      by: '@dev / 10.12'
+      note: >-
+        Lowered, not widened: OUTLIER_BOUND_MS is 1500 ms, chosen against fifty recorded per-step
+        errors (eight fresh runs plus this review's two) whose worst mis-attribution is 657.7 ms, a
+        clean one-step skip — 1500 clears that plus a further full ~720 ms cadence with 122 ms to
+        spare, so a miss one step worse than any observed still passes, while a per-step regression
+        is now caught at 1.5 s rather than 2.5 s. MEDIAN_TOLERANCE_MS untouched at 100 ms.
+  - id: MED-2
+    severity: medium
+    title: childModulePath and spawner are production-reachable seams with no guard that production leaves them unset
+    ac: AC-5
+    owner: '@dev / 10.13'
+    blocking: false
+    finding: >-
+      ChildLauncherOptions carries `spawner` and `childModulePath`, both optional and both honoured
+      by createChildBrowserLauncher. Today src/main.ts createConfiguredLauncher passes neither, so
+      production always forks DEFAULT_CHILD_MODULE_PATH, and no configuration key exposes either.
+      Nothing asserts that, however, and 10.13 is about to touch this constructor. A test over
+      createConfiguredLauncher asserting the constructed launcher carries no spawner and no module
+      override would make the property hold across that change rather than by current habit.
+    dev_resolution:
+      status: RESOLVED
+      by: '@dev / 10.12'
+      note: >-
+        createConfiguredLauncher now builds a literal typed
+        Omit<ChildLauncherOptions, 'spawner' | 'childModulePath' | 'parentEnv'>, so supplying a seam
+        is a compile error (verified: TS2353), and test/run/production-seams.test.ts asserts the
+        constructed options key for key so a seam wired in by 10.13 fails there rather than shipping.
+  - id: LOW-1
+    severity: low
+    title: A source comment overstates where performance.now() appears
+    ac: AC-11
+    owner: '@dev'
+    blocking: false
+    finding: >-
+      src/run/timeline.ts states that performance.now() "appears here and nowhere else on the
+      production path". It also appears in src/server/application.ts:102 and
+      src/run/playwrightAdapter.ts:169. Both are deadline and polling clocks whose values never
+      reach a report, so the invariant the comment is defending genuinely holds — but the sentence
+      as written is checkable and false, and a future reader grepping to confirm it will be
+      misled into thinking the invariant broke.
+  - id: LOW-2
+    severity: low
+    title: The seek matcher is one-sided
+    ac: AC-12a
+    owner: '@dev / SPK-06 phase B'
+    blocking: false
+    finding: >-
+      firstChangeAtOrAfter searches forward with 60 ms of backward slack, so a reading that ran
+      systematically late by up to 60 ms would be scored as near-zero error rather than as negative
+      error. Harmless at today's magnitudes and the slack is documented, but the measurement cannot
+      distinguish "accurate" from "late by less than a frame interval and a half".
+  - id: LOW-3
+    severity: low
+    title: AC-20's measurable-gap bound is weaker than the property it stands for
+    ac: AC-20
+    owner: '@dev'
+    blocking: false
+    finding: >-
+      `observedStart - dispatchedAt > 20 ms` would also be satisfied by an instant taken at child
+      start rather than at browser start, since a fork plus a Node bootstrap alone exceeds it. The
+      stronger property is carried elsewhere (AC-11.2's single-sample assertion, which the reviewer
+      falsified), so the closure stands; the bound itself simply proves less than it appears to.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# What must happen before this merges
+# ─────────────────────────────────────────────────────────────────────────────
+required_before_merge:
+  - >-
+    DONE (see top_issues SEC-1 dev_resolution). Remove NODE_OPTIONS from INHERITED_ENV_KEYS in
+    src/run/launcher.ts and add an assertion over the constructed child environment that no
+    code-preloading key survives (SEC-1).
+recommended_not_blocking:
+  - >-
+    DONE (see top_issues MED-2 dev_resolution). MED-2's assertion over createConfiguredLauncher,
+    before 10.13 touches the constructor.
+  - >-
+    NOT DONE — the three LOW findings were deliberately left out of a security fix. LOW-1's comment
+    correction in src/run/timeline.ts.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Developer response (@dev) — the gate verdict itself is left to @qa to re-judge
+# ─────────────────────────────────────────────────────────────────────────────
+dev_response:
+  date: '2026-09-11'
+  branch: story/10.12
+  scope: runner-only; no contract file, no .nvmrc, no engines, no backend, no frontend
+  sec_1:
+    reproduced_first: >-
+      The attack was reproduced on the unfixed tree before anything was changed: with NODE_OPTIONS
+      carrying --import and nothing in the repository modified, the preload ran inside the forked
+      child (hasIpc=true), logged INTERCEPTED chromiumSandbox=true, rewrote it to false with
+      --no-sandbox, and the launch reported ready.
+    fix: >-
+      A class rule, not a name. NODE_OPTIONS is off the allowlist; assertNoCodeLoadingKeys refuses
+      NODE_*, LD_*, DYLD_* and OPENSSL_* over the *constructed* environment on every launch, so a
+      future addition to INHERITED_ENV_KEYS fails the launch instead of reopening the pathway.
+    second_channel_found_and_closed: >-
+      fork defaults execArgv to process.execArgv, so a runner started `node --import evil
+      dist/main.js` replayed the preload into the browser child even with the environment fully
+      enumerated. Proven by removing execArgv: [] and watching the child get preloaded again, then
+      restored. The child is compiled ESM and now gets no interpreter flags at all.
+    attacks_rerun:
+      - attack: QA's NODE_OPTIONS --import preload, through the real createChildBrowserLauncher
+        result: BLOCKED — the preload runs only in the parent; the child never loads it.
+      - attack: the same preload delivered on the command line (execArgv inheritance)
+        result: BLOCKED — same, and demonstrated DEFEATED again with the guard removed.
+      - attack: a second Playwright launch site
+        result: STILL FAILS — launchPersistentContext in src/run/browser.ts only.
+      - attack: a configuration key
+        result: STILL FAILS — no sandbox key in config.ts; production supplies geometry and three
+          timeouts, now asserted key for key.
+      - attack: extra fields on the launch request / a spread
+        result: STILL FAILS — DEBUG=pw:browser shows zero occurrences of `sandbox` on the command
+          line with chromiumSandbox:false, args:['--no-sandbox','--disable-setuid-sandbox'],
+          sandbox:false and headless:true all added to the request.
+      - attack: library and browser environment variables
+        result: STILL FAILS — PLAYWRIGHT_CHROMIUM_SANDBOX, CHROMIUM_FLAGS, CHROME_DEVEL_SANDBOX and
+          a STUDIO_RUNNER_-namespaced key set together changed nothing.
+      - attack: editing the source to add a disabling flag
+        result: STILL FAILS — eslint no-restricted-syntax on that exact line, plus two
+          test/run/sandbox.test.ts assertions red. Restored.
+    falsification_of_the_new_assertions: >-
+      Re-adding NODE_OPTIONS to INHERITED_ENV_KEYS turns three test/run/launcher.test.ts tests red.
+      Deleting execArgv: [] turns the fork assertion red. Adding a spawner to createConfiguredLauncher
+      is a compile error (TS2353); with the annotation weakened so it compiles, two
+      test/run/production-seams.test.ts tests go red. All four edits restored, tree clean.
+do_not_do:
+  - Do not widen OUTLIER_BOUND_MS or MEDIAN_TOLERANCE_MS. The measured numbers are the criterion.
+  - Do not re-anchor the openapi.yaml SHA-256 in test/run/confinement.test.ts. It is correct.
+  - Do not touch .nvmrc. check:pins --require-image failing is the intended ED-05 O-2a signal.
+
+coderabbit:
+  run: false
+  reason: >-
+    '[AUTO-DECISION] The repository skill drives CodeRabbit through WSL; this review ran on
+    darwin with no WSL available. Decision: proceed without it and compensate with direct
+    falsification of every load-bearing guard (five falsification edits, each reverted). Recorded
+    so the omission is visible rather than implied.'
+
+# ═════════════════════════════════════════════════════════════════════════════
+# RECHECK — 2026-09-11, head 751773340. Gate FAIL -> CONCERNS.
+# Scope: the SEC-1 fix, MED-1 and MED-2 only. The corpus and the 63-file diff
+# were not re-reviewed; their findings above stand unchanged.
+# ═════════════════════════════════════════════════════════════════════════════
+recheck:
+  head_sha: 751773340
+  verdict_change: FAIL -> CONCERNS
+  reason: >-
+    SEC-1 is closed and the closure is falsifiable. The developer additionally found and closed a
+    channel the reviewer did not try (`fork` defaulting `execArgv` to the parent's), which the
+    reviewer reproduced and confirmed blocked. One new finding is recorded as SEC-2 and rated
+    MEDIUM rather than HIGH, with the reasoning stated in full below so it can be overridden.
+
+  counts:
+    clean_gates: >-
+      From rm -rf node_modules dist coverage: npm ci 0, build 0, type-check 0, lint 0,
+      npm test 0 (35 files, **768 passed / 2 skipped**), check:pins 0,
+      check:pins --require-image **1, still by design**.
+    nvmrc: unchanged, reads 22
+    package_json: not in the recheck diff at all
+    coverage_thresholds: >-
+      vitest.config.ts is byte-unchanged by this commit. src/run/** rose to 87.41 lines /
+      88.97 branches against the same 85/85/80/80. Nothing moved.
+    specs_and_scope: >-
+      docs/specs/, docs/architecture/, backend/ and frontend/ are all absent from the recheck diff.
+
+  sec_1_closure:
+    node_options:
+      attack: NODE_OPTIONS="--import <preload>" against the real createChildBrowserLauncher
+      result: >-
+        BLOCKED. The preload now logs exactly one pid — the parent — and no INTERCEPTED line. On
+        the unfixed head it logged two pids and INTERCEPTED chromiumSandbox=true. The variable is
+        off the allowlist, so it never reaches the constructed environment.
+      falsification: >-
+        Re-adding 'NODE_OPTIONS' to INHERITED_ENV_KEYS turns three test/run/launcher.test.ts
+        assertions red — the class rule, the list-agrees-with-the-class rule and the family
+        recogniser. Restored.
+    exec_argv:
+      attack: >-
+        The developer's own find, reproduced by the reviewer: `node --import <preload>
+        <runner entry>`, so the preload sits on the *runner's* command line rather than in its
+        environment.
+      result: >-
+        BLOCKED. One pid, no INTERCEPTED. `execArgv: []` is passed to fork explicitly.
+      falsification: >-
+        Deleting `execArgv: []` turns test/run/production-seams.test.ts "passes an explicitly empty
+        execArgv rather than letting it default to the parent's" red. Restored.
+    guard_shape:
+      assessment: >-
+        CORRECT SHAPE. The class guard is stated over prefixes (NODE_, LD_, DYLD_, OPENSSL_) rather
+        than over the one name that was found, and it re-checks the *constructed* environment on
+        every launch, so it also covers the two literals the allowlist adds (TMPDIR,
+        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD) and any future allowlist entry.
+
+  attacks_run_by_the_reviewer:
+    - id: A1
+      attack: NODE_OPTIONS --import preload
+      result: BLOCKED
+    - id: A2
+      attack: execArgv inheritance — preload on the runner's own command line
+      result: BLOCKED
+    - id: A3
+      attack: NODE_PATH and NODE_REPL_EXTERNAL_MODULE set in the parent
+      result: BLOCKED — neither is on the allowlist; no marker written
+    - id: A4
+      attack: >-
+        PLAYWRIGHT_BROWSERS_PATH pointed at a registry mirroring the real one by symlink, with the
+        chrome-headless-shell binary replaced by a shim that execs the real one with --no-sandbox
+      result: >-
+        **SUCCEEDED.** The shim was invoked and the browser ran with --no-sandbox prepended; the
+        launch reported ready normally with startedAtMs 0. Recorded as SEC-2.
+    - id: A5
+      attack: HOME pointed at a directory whose Library/Caches/ms-playwright is that same registry
+      result: >-
+        **SUCCEEDED**, identically — HOME reaches the same resolution because it is the default
+        browsers root when PLAYWRIGHT_BROWSERS_PATH is unset. Same finding, second key.
+    - id: A6
+      attack: PATH poisoned with a fake `node` and a fake `chrome-headless-shell` ahead of the real ones
+      result: >-
+        BLOCKED. `fork` resolves the interpreter through process.execPath and Playwright resolves
+        the browser by absolute path from the registry, so neither poisoned entry was ever invoked.
+    - id: A7
+      attack: >-
+        Working-directory-relative resolution — the runner started from a directory containing a
+        hostile node_modules/playwright
+      result: >-
+        BLOCKED. ESM bare-specifier resolution walks up from the importing module's URL, not from
+        cwd, so dist/run/browser.js reached the real package. The trap logged nothing.
+    - id: A8
+      attack: Inherited file descriptors
+      result: >-
+        NO CHANNEL. stdio is ['ignore','inherit','inherit','ipc'] — stdin closed, stdout/stderr for
+        the pod log, one IPC channel. No extra descriptor is passed and none can load code.
+    - id: R1-R5
+      attack: The five attacks that failed on the previous head, re-run against the fixed one
+      result: >-
+        ALL STILL FAIL. Extra fields on the request object (chromiumSandbox false, an args array
+        with two disabling flags, sandbox false) are still dropped — the launch options are an
+        object literal with no spread and DEBUG=pw:browser showed no disabling flag. Four hostile
+        env vars still change nothing. Still exactly one launchPersistentContext call site and one
+        playwright import. Still no config key naming a sandbox. src/main.ts still supplies no seam.
+
+top_issues_recheck:
+  - id: SEC-2
+    severity: medium
+    title: PLAYWRIGHT_BROWSERS_PATH and HOME redirect the browser registry, and nothing verifies the binary that launches
+    ac: 'AC-6b (in-cluster), architecture §9.3, ADR-001 §4.2'
+    owner: '@dev / 10.18 under AC-6b'
+    blocking: false
+    finding: >-
+      Both variables are on INHERITED_ENV_KEYS and neither matches the code-loading class guard.
+      The reviewer built a registry that symlinks every real file except chrome-headless-shell,
+      replaced that one with a shim exec'ing the real binary with --no-sandbox prepended, and
+      pointed each variable at it in turn. Both launched the shim. The run reported ready normally
+      and no gate noticed: `chromiumBuild` is recorded by scripts/write-runtime-versions.mjs at
+      *build* time from PLAYWRIGHT_BROWSERS_PATH, and nothing anywhere reads the running browser's
+      identity — `grep -rn '\.version()\|executablePath' src/` returns nothing.
+    why_medium_and_not_high: >-
+      Stated plainly so it can be overridden. (1) It does not set `chromiumSandbox` to `false`.
+      AC-6a's criterion — the launch option, and no key, variable, field or code path that unsets
+      it — now genuinely holds; both code-injection channels into the runner's own process are
+      closed. What this defeats is browser-image *integrity*, a different property. (2) Unlike
+      NODE_OPTIONS these variables cannot be dropped: ADR-001 §4.2 makes PLAYWRIGHT_BROWSERS_PATH
+      the mechanism by which the pinned image tells the library where its browsers live, and HOME
+      is the same thing by default. So this is not a residual of the SEC-1 fix; it needs a
+      different control. (3) That control already has an owner: **AC-6b**, which is open and
+      deferred to ED-05/SPK-04/10.18, and which is precisely where the sandbox is proven to start
+      under the cluster's PodSecurity level with readOnlyRootFilesystem — an immutable browser path
+      is the same property, established by the platform rather than by launch code. (4) The
+      runner-side check that would help is only meaningful in the image, because `chromiumBuild` is
+      null outside it, so it would land with 10.18 regardless.
+      **If the reading is instead "any environment-borne path to an unsandboxed Chromium is HIGH",
+      this qualifies and the gate should be read as blocked.** The reviewer's judgement is that it
+      is not, for the four reasons above.
+    required_of_ac_6b: >-
+      AC-6b's in-cluster criterion must state browser-path immutability explicitly — the browser
+      resolves from the read-only image and neither PLAYWRIGHT_BROWSERS_PATH nor HOME can be
+      pointed at a writable volume — rather than leaving it implied by readOnlyRootFilesystem.
+    suggested_hardening: >-
+      Cheap and in the right place: at launch, when `chromiumBuild` is asserted, compare the
+      resolved executable path and the browser's reported version against it and refuse on
+      disagreement. The runner already records the value for exactly this purpose and today only
+      compares it against itself.
+
+resolved_since_the_fail:
+  - id: SEC-1
+    status: CLOSED
+    detail: >-
+      NODE_OPTIONS off the allowlist, a prefix-class guard over NODE_/LD_/DYLD_/OPENSSL_ re-checked
+      on every launch, and `execArgv: []`. Both channels reproduced as blocked by the reviewer and
+      both guards falsified.
+  - id: MED-2
+    status: CLOSED
+    detail: >-
+      `ProductionLauncherOptions = Omit<ChildLauncherOptions, 'spawner'|'childModulePath'|'parentEnv'>`.
+      The reviewer added `childModulePath: '/tmp/evil.js'` to the production literal and
+      `npm run type-check` exited 2 with TS2353 naming the property. test/run/production-seams.test.ts
+      additionally asserts the constructed options key for key, which also catches a fourth seam
+      added to the type later. Genuinely closed to production, not conventionally unused. Restored.
+  - id: MED-1
+    status: CLOSED
+    detail: >-
+      OUTLIER_BOUND_MS lowered 2_500 -> 1_500. **Lowered, not raised.** MEDIAN_TOLERANCE_MS is
+      unchanged at 100 and the reported measured tolerance is unchanged, so the reviewer's
+      instrument-limitation judgement has not been converted into a widened target. The margin is
+      honest: the reviewer's own worst mis-attribution was 650.4 ms and the developer's fifty
+      measurements report 657.7 ms, leaving roughly one 720 ms cadence of headroom under the bound.
+
+still_open_after_the_recheck:
+  - SEC-2 (medium, above) — assigned to AC-6b / 10.18
+  - LOW-1 — the src/run/timeline.ts comment still claims performance.now() appears nowhere else on
+    the production path; it appears twice more, harmlessly. Not touched by this commit.
+  - LOW-2 — firstChangeAtOrAfter is still one-sided. SPK-06 phase B.
+  - LOW-3 — AC-20's > 20 ms gap bound still proves less than it appears to.
+
+final_decision:
+  gate: CONCERNS
+  merge: SAFE
+  statement: >-
+    All 24 non-deferred criteria are met, including AC-6a, whose stated property now holds against
+    every attack the reviewer could construct against the runner's own process. Four criteria
+    remain honestly deferred as live skips. SEC-2 is a real finding but is browser-image integrity
+    rather than the launch-option guarantee, it cannot be closed by removing a variable, and it
+    belongs to the already-open AC-6b in-cluster deferral — which must be amended to name it.
+    Merge is safe.

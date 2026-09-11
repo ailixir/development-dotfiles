@@ -7,14 +7,16 @@
  */
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { main, UNAVAILABLE_LAUNCHER } from '../../src/main.js';
+import * as mainModule from '../../src/main.js';
+import { createConfiguredLauncher, main } from '../../src/main.js';
 import { resetRuntimeVersionsCache } from '../../src/compat/index.js';
-import { ConfigurationError } from '../../src/server/config.js';
+import { ConfigurationError, loadConfig } from '../../src/server/config.js';
 import { CONFIG_PREFIX } from '../../src/server/config.js';
+import { packageRoot } from '../helpers/corpus.js';
 import type { ReportBody } from '../../src/reporting/snapshot.js';
 import { createHarness, RUNTIME_VERSIONS, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
@@ -172,9 +174,10 @@ describe('src/main.ts — process entry point', () => {
     expect(lines.join('\n')).not.toContain('postgres://db.internal/checks');
   });
 
-  it('defaults to the refusing launcher and the embedded runtime versions', async () => {
-    // No launcher supplied: the process still starts, and an admitted run would report
-    // BROWSER_LAUNCH_UNAVAILABLE rather than silently succeeding (AC-14b deferral to 10.12).
+  it('defaults to the real Chromium launcher and the embedded runtime versions', async () => {
+    // No launcher supplied: the process still starts, and an admitted run would spawn the real
+    // browser child. Nothing is launched here — the assertion is that startup wires a launcher
+    // and does not fall back to a placeholder (10.12 AC-1).
     const result = await main({
       env: validEnv(),
       onSignal: () => undefined,
@@ -216,14 +219,25 @@ describe('src/main.ts — process entry point', () => {
     expect(new ConfigurationError(['x'])).toBeInstanceOf(Error);
   });
 
-  it('ships a launcher that refuses loudly, because 10.12 owns the real one', async () => {
-    await expect(
-      UNAVAILABLE_LAUNCHER.launch({
-        browser: 'chromium',
-        viewport: { width: 1, height: 1 },
-        totalRuntimeMs: 1,
-        scratchPath: '/tmp/none',
-      }),
-    ).rejects.toThrow(/BROWSER_LAUNCH_UNAVAILABLE/u);
+  /**
+   * Story 10.12 removed `UNAVAILABLE_LAUNCHER` and wired the real Chromium child in its place
+   * (AC-1). What 10.6 asserted — that the default launcher is *something definite* rather than a
+   * silent success — still holds, and is now asserted of the real one: it is built from
+   * configuration, and the recording geometry it is given is an explicitly configured value
+   * rather than a library default (§6.1, AC-7).
+   */
+  it('builds the real Chromium launcher from configuration, with no unavailable placeholder', () => {
+    const config = loadConfig(validEnv());
+    expect(config.recordingWidth).toBe(1280);
+    expect(config.recordingHeight).toBe(720);
+    expect(typeof createConfiguredLauncher(config).launch).toBe('function');
+
+    // Removed, not merely unused: the entry point exports no refusing placeholder any more, and
+    // no declaration of one survives. (The module's own comment says where it went, which is why
+    // this reads the declaration rather than grepping for the word.)
+    expect(Object.keys(mainModule)).not.toContain('UNAVAILABLE_LAUNCHER');
+    const source = readFileSync(join(packageRoot, 'src', 'main.ts'), 'utf8');
+    expect(source).not.toMatch(/export const UNAVAILABLE_LAUNCHER/u);
+    expect(source).not.toMatch(/BROWSER_LAUNCH_UNAVAILABLE:/u);
   });
 });

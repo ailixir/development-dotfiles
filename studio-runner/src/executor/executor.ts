@@ -40,18 +40,45 @@ export interface ExecuteOptions {
   readonly adapter: BrowserAdapter;
   readonly reporter: StepReporter;
   readonly resolver: ValueResolver;
-  readonly clock?: Clock | undefined;
+  /**
+   * The run clock. **Required, and deliberately so** (AC-11.1, ADR-002 §11.6).
+   *
+   * It used to be optional, defaulting to `performance.now()` — a clock whose origin is *process
+   * start*. The seam exists so the origin can be chosen; a default quietly chose the wrong one
+   * whenever a caller forgot, and `runCoordinator.ts` forgot, so every step reading the runner
+   * produced was an offset from process start while the browser-start log line carried a literal
+   * `0`. Two origins on a timeline ADR-002 §4.1 requires to have one.
+   *
+   * There is no default any more. `src/run/timeline.ts` takes the origin at recording-context
+   * readiness and passes the clock in; a caller that supplies none is refused at the type level
+   * and again at run time by {@link executeSteps}, because a type-level guard is not one the
+   * emitted JavaScript enforces.
+   */
+  readonly clock: Clock;
   /** Maximum length of a redacted failure message (AC-15). */
   readonly maxFailureMessageLength?: number | undefined;
 }
 
 const DEFAULT_MAX_FAILURE_MESSAGE_LENGTH = 400;
 
-/** Monotonic by construction: `performance.now()` is not affected by wall-clock adjustments. */
-const defaultClock: Clock = { now: () => performance.now() };
-
 export async function executeSteps(options: ExecuteOptions): Promise<ExecutionResult> {
-  const clock = options.clock ?? defaultClock;
+  // The run-time half of AC-11.1. The type says `clock` is required; this says so to JavaScript,
+  // which is what a compiled caller — or a test reaching past the types — actually runs against.
+  // Refusing is the point: a run that silently fell back to process time would produce readings
+  // the API turns into absurd instants, and nothing downstream could tell.
+  const clock: Clock | undefined = options.clock;
+  /*
+   * The type says this cannot happen. The emitted JavaScript is what a compiled caller actually
+   * runs, and a caller that reached past the types — or a stale `dist/` linked by something else
+   * — would otherwise run on process time in silence, which is the exact defect AC-11.1 closes.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (clock === undefined) {
+    throw new Error(
+      'executeSteps requires an explicit run clock: its zero is the browser start, taken at ' +
+        'recording-context readiness (ADR-002 §11.6). There is no process-origin default.',
+    );
+  }
   const maxMessage = options.maxFailureMessageLength ?? DEFAULT_MAX_FAILURE_MESSAGE_LENGTH;
   const redactor = createRedactor(options.resolver.knownValues());
 
