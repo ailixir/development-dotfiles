@@ -82,7 +82,7 @@ class RunnerPinDriftTest {
                 + " already been paid for",
             runnerMaxSteps)
         .isLessThanOrEqualTo(runnerMaxSteps);
-    assertThat(shippedDefault("max-steps"))
+    assertThat(shippedDefault("authoring", "max-steps"))
         .as("the application.yml default must satisfy the same rule as the record default")
         .isLessThanOrEqualTo(runnerMaxSteps);
   }
@@ -119,19 +119,27 @@ class RunnerPinDriftTest {
   }
 
   /**
-   * The default baked into {@code application.yml}, which is what a deployment gets when the
-   * environment variable is unset. Kept separate from the record default so a divergence between
-   * the two is visible rather than averaged away.
+   * The default baked into {@code application.yml} under a named block, which is what a deployment
+   * gets when the environment variable is unset. Kept separate from the record default so a
+   * divergence between the two is visible rather than averaged away.
    *
+   * <p>The block is part of the lookup, not decoration. {@code max-steps} is declared twice in this
+   * file — once here for authoring bounds and once by story 10.7a for the callback body cap — and a
+   * search for the leaf name alone silently read the wrong one, comparing a 500-step callback cap
+   * against the runner's authoring bound and failing for a drift that did not exist.
+   *
+   * @param block the parent key, e.g. {@code authoring}
    * @param key the leaf property name
    * @return the literal after the {@code :} in the placeholder
    */
-  private static int shippedDefault(String key) throws IOException {
+  private static int shippedDefault(String block, String key) throws IOException {
     Path applicationYml = Path.of("src", "main", "resources", "application.yml");
+    String source = Files.readString(applicationYml, StandardCharsets.UTF_8);
+    int start = source.indexOf("\n    " + block + ":");
+    assertThat(start).as("application.yml declares the %s block", block).isNotNegative();
     Matcher matcher =
-        Pattern.compile(key + ":\\s*\\$\\{[A-Z_]+:(\\d+)}")
-            .matcher(Files.readString(applicationYml, StandardCharsets.UTF_8));
-    assertThat(matcher.find()).as("application.yml declares %s", key).isTrue();
+        Pattern.compile(key + ":\\s*\\$\\{[A-Z_]+:(\\d+)}").matcher(source.substring(start));
+    assertThat(matcher.find()).as("application.yml declares %s.%s", block, key).isTrue();
     return Integer.parseInt(matcher.group(1));
   }
 

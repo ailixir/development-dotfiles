@@ -66,4 +66,24 @@ public interface StudioRepository extends JpaRepository<UITest, UUID> {
           """,
       nativeQuery = true)
   Optional<String> findLifecycleState(@Param("id") UUID id);
+
+  /**
+   * The CSI of a draft <em>whatever its lifecycle state</em>, for authorization only.
+   *
+   * <p>ADR-002 §14.4 orders the compile route authorization → lifecycle → bounds, so that a caller
+   * who may not act on the draft's CSI never learns from a status code whether the draft exists.
+   * Authorizing first needs the CSI of a withheld draft, and every entity query hides those rows —
+   * so this read bypasses the {@code &#64;SQLRestriction} exactly as {@link
+   * #findLifecycleState(UUID)} does, and for the same reason.
+   *
+   * <p>It returns the CSI and nothing else: no name, no steps, no state. An absent row and a
+   * quarantined row whose {@code csi_id} is {@code NULL} both yield an empty result, and both are
+   * refused {@code 403} — a row that has lost its only authorization anchor is recoverable by an
+   * administrator, not by a status code (ADR-002 §14.4).
+   *
+   * @param id the draft
+   * @return its CSI, or empty when the row is absent or carries none
+   */
+  @Query(value = "SELECT csi_id FROM ui_tests WHERE id = :id", nativeQuery = true)
+  Optional<String> findCsiIdIncludingWithheld(@Param("id") UUID id);
 }

@@ -4,10 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.StudioConflictException;
+import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.compile.CompilePins;
 import com.citi.put.checks.studio.compile.CompileRequest;
 import com.citi.put.checks.studio.compile.CompileState;
 import com.citi.put.checks.studio.compile.CompileStateService;
+import com.citi.put.checks.studio.dispatch.ExecutionReadiness;
+import com.citi.put.checks.studio.entity.UITest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -38,6 +41,8 @@ class ExecutionReadinessTest {
 
   @Autowired private ExecutionReadinessService readiness;
   @Autowired private CompileStateService states;
+  @Autowired private StudioRepository studioRepository;
+  @Autowired private java.util.Map<String, ExecutionReadiness> implementations;
   @Autowired private JdbcTemplate jdbc;
 
   private UUID testId;
@@ -421,8 +426,9 @@ class ExecutionReadinessTest {
 
   @Test
   void aClientSuppliedAlreadyConfirmedHintIsNotAnInput() {
-    // The gate takes a test id and nothing else: there is no parameter a caller could use to
-    // assert its own readiness.
+    // Every entry point takes exactly one argument, and it identifies a draft rather than
+    // describing one: a test id, or the persisted entity the acceptance transaction already
+    // loaded. There is no parameter carrying a readiness claim for the gate to believe.
     assertThat(
             Stream.of(ExecutionReadinessService.class.getDeclaredMethods())
                 .filter(
@@ -434,8 +440,76 @@ class ExecutionReadinessTest {
         .allSatisfy(
             parameters ->
                 assertThat(parameters)
-                    .as("the gate reads only a test id")
-                    .containsExactly(UUID.class));
+                    .as("the gate reads only an identified draft")
+                    .hasSize(1)
+                    .allMatch(type -> type == UUID.class || type == UITest.class));
+  }
+
+  /**
+   * The stronger half of AC-26, made necessary by the {@link ExecutionReadiness} seam.
+   *
+   * <p>The interface story 10.7a declared hands the gate the {@code UITest} the acceptance
+   * transaction already loaded. A signature check alone no longer settles the criterion: an entity
+   * <em>is</em> a description of a draft, and an implementation that read its terms from the object
+   * it was handed would believe whatever that object said. This drives exactly that attack — a
+   * detached entity mutated in memory so that every term it carries would pass — and asserts the
+   * verdict is the one the database supports, not the one the argument claims.
+   */
+  @Test
+  void theSeamIgnoresWhatTheEntityItIsHandedClaims() {
+    ReadinessFixtures.confirm(states, jdbc, testId, STEPS);
+    jdbc.update(
+        "UPDATE ui_tests SET source_revision = source_revision + 1,"
+            + " steps = CAST('[\"Go somewhere else\"]' AS jsonb) WHERE id = ?",
+        testId);
+
+    UITest detached = studioRepository.findById(testId).orElseThrow();
+    long confirmedSourceRevision =
+        jdbc.queryForObject(
+            "SELECT r.source_revision FROM ui_test_revisions r"
+                + " JOIN ui_tests t ON t.confirmed_revision_id = r.id WHERE t.id = ?",
+            Long.class,
+            testId);
+    detached.setSourceRevision(confirmedSourceRevision);
+
+    ExecutionReadiness.Verdict verdict = readiness.evaluate(detached);
+
+    assertThat(verdict.ready())
+        .as("the entity now claims the draft was never edited; the database says otherwise")
+        .isFalse();
+    assertThat(verdict.errorCode()).isEqualTo(ReadinessVerdict.COMPILE_REQUIRED);
+    assertThat(verdict.message())
+        .isEqualTo(readiness.evaluate(testId).message())
+        .contains("steps of this test were edited after it was confirmed");
+  }
+
+  @Test
+  void theSeamAndTheIdentifiedFormAgreeOnAReadyDraft() {
+    ReadinessFixtures.confirm(states, jdbc, testId, STEPS);
+
+    ExecutionReadiness.Verdict throughTheSeam =
+        readiness.evaluate(studioRepository.findById(testId).orElseThrow());
+
+    assertThat(throughTheSeam.ready()).isTrue();
+    assertThat(throughTheSeam.errorCode()).isNull();
+    assertThat(readiness.evaluate(testId).ready()).isTrue();
+  }
+
+  /**
+   * AC-8a of story 10.7a and T-10.8.7 — one implementation of the seam, and it is this one.
+   *
+   * <p>10.7a shipped a provisional implementation so its acceptance transaction could be written
+   * before this predicate existed. Two beans of one interface is how an acceptance path silently
+   * keeps consulting the weaker gate, so the provisional one was deleted rather than left beside
+   * this one. That is a fact about the deployed context, not about a file, so it is asserted on the
+   * context.
+   */
+  @Test
+  void theReadinessSeamHasExactlyOneImplementationAndItIsTheRealPredicate() {
+    assertThat(implementations.values())
+        .as("a second ExecutionReadiness bean would make which gate runs a wiring accident")
+        .hasSize(1)
+        .allSatisfy(bean -> assertThat(bean).isSameAs(readiness));
   }
 
   // ── helpers ───────────────────────────────────────────────────────────────

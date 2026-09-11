@@ -4,9 +4,12 @@ import com.citi.put.checks.csi.CsiRepository;
 import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
+import com.citi.put.checks.studio.compile.CompilePipeline;
+import com.citi.put.checks.studio.compile.CompileRequest;
 import com.citi.put.checks.studio.compile.CompileState;
 import com.citi.put.checks.studio.compile.ConfigurationChangeClassifier;
 import com.citi.put.checks.studio.dispatch.StudioAcceptanceService;
+import com.citi.put.checks.studio.dto.CompileAcceptedDto;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.ExecutionStatus;
 import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
@@ -40,6 +43,7 @@ public class StudioService {
   private final CsiOwnershipEvaluator csiOwnershipEvaluator;
   private final ExecutionSnapshotMapper snapshotMapper;
   private final StudioAcceptanceService acceptanceService;
+  private final CompilePipeline compilePipeline;
 
   @SuppressWarnings("checkstyle:ParameterNumber")
   public StudioService(
@@ -49,7 +53,8 @@ public class StudioService {
       ConfigurationChangeClassifier changeClassifier,
       CsiOwnershipEvaluator csiOwnershipEvaluator,
       ExecutionSnapshotMapper snapshotMapper,
-      StudioAcceptanceService acceptanceService) {
+      StudioAcceptanceService acceptanceService,
+      CompilePipeline compilePipeline) {
     this.studioRepository = studioRepository;
     this.executionRepository = executionRepository;
     this.csiRepository = csiRepository;
@@ -57,6 +62,7 @@ public class StudioService {
     this.csiOwnershipEvaluator = csiOwnershipEvaluator;
     this.snapshotMapper = snapshotMapper;
     this.acceptanceService = acceptanceService;
+    this.compilePipeline = compilePipeline;
   }
 
   // ── server-side authorization (AC-4a, §9.1) ──────────────────────────────
@@ -77,6 +83,20 @@ public class StudioService {
   /** Owners and explicitly authorized administrators may execute (§9.1). */
   private void requireExecute(Authentication auth, String csiId) {
     if (csiId == null || !csiOwnershipEvaluator.canExecute(auth, csiId)) {
+      throw new StudioAccessDeniedException();
+    }
+  }
+
+  /**
+   * Owners and explicitly authorized administrators may compile and confirm (§9.1).
+   *
+   * <p>A {@code null} CSI is refused rather than treated as unrestricted. That is the answer for a
+   * quarantined row whose {@code csi_id} is {@code NULL} — the other half of V12's CHECK — because
+   * no principal can be authorized against a CSI that is not there. ADR-002 §14.4 states the
+   * consequence: such a row is recoverable by administrator action, not by a status code.
+   */
+  private void requireCompile(Authentication auth, String csiId) {
+    if (csiId == null || !csiOwnershipEvaluator.canWrite(auth, csiId)) {
       throw new StudioAccessDeniedException();
     }
   }
@@ -123,6 +143,16 @@ public class StudioService {
     test.setTimeoutSeconds(request.configuration().timeoutSeconds());
     test.setWaitStrategy(request.configuration().waitStrategy());
     test = studioRepository.save(test);
+    // §8.3 — "persist draft and enqueue compile without waiting for gateway" (AC-2). The enqueue
+    // is registered as an after-commit synchronisation, so the row is committed and readable from
+    // another connection before the compile reads it, and no gateway or runner call is ever made
+    // inside this transaction or on this thread.
+    //
+    // A draft created with no steps has no source to compile; enqueueing one would spend a gateway
+    // call to be told so. It is left for the author's first save, which is a source change.
+    if (!request.steps().isEmpty()) {
+      compilePipeline.enqueueAfterCommit(test.getId(), identity.email());
+    }
     return UITestDto.from(test);
   }
 
@@ -163,6 +193,30 @@ public class StudioService {
    */
   @Transactional
   public UITestDto updateTest(UUID id, UITestRequest request) {
+    return updateTest(id, request, null);
+  }
+
+  /**
+   * The same save, with the identity to attribute an enqueued compile to (AC-2).
+   *
+   * <p>The two-argument form above is the internal one and enqueues nothing: there is no principal
+   * to attribute a gateway call and an audit line to, and inventing one would put a compile in
+   * another user's name. It is not a gap — the save itself has already returned the draft to {@code
+   * STALE} and cleared its candidate, which is exactly the state the author's next explicit
+   * recompile clears.
+   *
+   * <p>A compile is enqueued only when the save actually moved a revision. A name- or
+   * description-only edit moves neither, leaves the confirmed revision confirmable (§4.2) and
+   * therefore has nothing to compile; enqueueing there would drive a confirmed draft to {@code
+   * COMPILING} and spend a gateway call to rediscover the artifact it already holds.
+   *
+   * @param id the draft to save
+   * @param request the new draft state
+   * @param auth the caller, or {@code null} on the internal path
+   * @return the saved draft
+   */
+  @Transactional
+  public UITestDto updateTest(UUID id, UITestRequest request, Authentication auth) {
     if (request.sourceRevision() == null || request.configurationRevision() == null) {
       throw new IllegalArgumentException(
           "sourceRevision and configurationRevision are required on update");
@@ -219,7 +273,47 @@ public class StudioService {
       test.setCompileError(null);
     }
     test.setUpdatedAt(Instant.now());
+    if (change.anyChanged() && auth != null) {
+      compilePipeline.enqueueAfterCommit(id, principalOf(auth));
+    }
     return UITestDto.from(test);
+  }
+
+  /**
+   * Enqueues a compile of the current source and returns its persisted identity (AC-1, §8.3).
+   *
+   * <p>The order of refusal is the contract's, and ADR-002 §14.4 fixes it: <b>authorization, then
+   * the lifecycle guard, then authoring bounds and the credential screen, then {@code
+   * beginCompile}</b>. Authorization runs first so that a caller who may not act on the draft's CSI
+   * never learns from a status code whether the draft exists — which is possible here only because
+   * the CSI is read through the visibility restriction, the same read that makes a {@code 409}
+   * possible at all.
+   *
+   * <p>Everything after authorization belongs to {@code CompilePipeline}: a withheld draft is
+   * refused {@code 409} with its own code ({@code TEST_DELETED} or {@code TEST_QUARANTINED}) by
+   * 10.4's guard, an over-bound or credential-carrying draft is refused {@code 400} with no compile
+   * state moved, and only then is a request identity persisted.
+   *
+   * <p>{@code NOT_SUPPORTED} because this class is {@code readOnly = true} by default: {@code
+   * beginCompile} writes, and without it that write would join a read-only transaction and fail.
+   *
+   * @param testId the draft to compile
+   * @param auth the caller
+   * @return the persisted compile request identity and the revisions it was begun for
+   * @throws StudioAccessDeniedException the caller may not compile this draft, or it does not exist
+   * @throws StudioConflictException the draft is deleted or quarantined ({@code 409})
+   * @throws StudioValidationException over an authoring bound, or an inline credential ({@code
+   *     400}), with no compile state moved
+   */
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
+  public CompileAcceptedDto compileTest(UUID testId, Authentication auth) {
+    requireCompile(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
+    CompileRequest request = compilePipeline.compile(testId, principalOf(auth));
+    return new CompileAcceptedDto(
+        request.requestId(),
+        CompileState.COMPILING.name(),
+        request.sourceRevision(),
+        request.configurationRevision());
   }
 
   private void requireRegisteredCsi(String csiId) {

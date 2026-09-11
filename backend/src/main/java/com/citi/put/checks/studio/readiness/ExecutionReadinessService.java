@@ -3,7 +3,9 @@ package com.citi.put.checks.studio.readiness;
 import com.citi.put.checks.studio.StudioConflictException;
 import com.citi.put.checks.studio.compile.ArtifactCanonicalizer;
 import com.citi.put.checks.studio.compile.CompilePins;
+import com.citi.put.checks.studio.dispatch.ExecutionReadiness;
 import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
+import com.citi.put.checks.studio.entity.UITest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -60,9 +62,18 @@ import org.springframework.transaction.annotation.Transactional;
  * feature flag that skips this gate, and no client-supplied "already confirmed" hint it will read.
  * The only configuration this class binds is {@link RuntimePinProperties}, whose fields are version
  * strings — none of them can make a test ready.
+ *
+ * <h2>The one implementation of {@link ExecutionReadiness}</h2>
+ *
+ * <p>Story 10.7a declared the seam and shipped a provisional implementation against it so that the
+ * acceptance transaction could be written and proved before this predicate existed. This class is
+ * the implementation that replaces it, and 10.7a's is deleted rather than left beside it: two beans
+ * of one interface is how an acceptance path silently keeps consulting the weaker gate. The
+ * acceptance path is wired to the interface and never to a concrete class, so nothing there changed
+ * when the implementation did.
  */
 @Service
-public class ExecutionReadinessService {
+public class ExecutionReadinessService implements ExecutionReadiness {
 
   /**
    * The entire read the predicate performs.
@@ -233,6 +244,28 @@ public class ExecutionReadinessService {
     }
 
     return ReadinessVerdict.ready(confirmedRevisionId);
+  }
+
+  /**
+   * The {@link ExecutionReadiness} seam the acceptance transaction consults (Story 10.7a AC-8a).
+   *
+   * <p>A thin adaptor over {@link #evaluate(UUID)} and deliberately nothing more: the predicate has
+   * one expression, and a second one reachable through the interface would be a second gate. The
+   * draft is re-read by id rather than trusted from the passed entity, because {@link
+   * #READINESS_QUERY} must read the draft and its confirmed revision in one statement — reading
+   * half the terms from a detached entity and half from the database is how a verdict that was
+   * never true of any single state of the database gets produced.
+   *
+   * @param test the draft acceptance wants to run
+   * @return the verdict, never {@code null} and never thrown for an unready draft
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public Verdict evaluate(UITest test) {
+    ReadinessVerdict verdict = evaluate(test.getId());
+    return verdict.ready()
+        ? Verdict.accepted()
+        : new Verdict(false, verdict.code(), verdict.message());
   }
 
   /**

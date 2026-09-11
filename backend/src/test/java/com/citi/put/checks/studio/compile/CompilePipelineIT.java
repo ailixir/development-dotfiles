@@ -8,11 +8,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.StudioConflictException;
+import com.citi.put.checks.studio.StudioExecutionFixtures;
+import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.compile.gateway.CompileResponse;
 import com.citi.put.checks.studio.compile.gateway.GatewayErrorCode;
 import com.citi.put.checks.studio.compile.gateway.GatewayOutcome;
 import com.citi.put.checks.studio.compile.gateway.GatewayProvenance;
 import com.citi.put.checks.studio.compile.gateway.LlmGatewayClient;
+import com.citi.put.checks.studio.dto.UITestDto;
+import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.readiness.ExecutionReadinessService;
 import com.citi.put.checks.studio.readiness.ReadinessVerdict;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -162,6 +166,7 @@ class CompilePipelineIT {
   }
 
   @Autowired private CompilePipeline pipeline;
+  @Autowired private StudioService studioService;
   @Autowired private CompileStateService states;
   @Autowired private ExecutionReadinessService readiness;
   @Autowired private BlockingGateway gateway;
@@ -224,6 +229,67 @@ class CompilePipelineIT {
 
     release.countDown();
     awaitCompileStatus(id, "AWAITING_CONFIRMATION");
+  }
+
+  /**
+   * AC-2, T-10.8.1 — <b>the save routes themselves enqueue</b>, which is the half the test above
+   * cannot see.
+   *
+   * <p>{@code theDraftIsCommittedAndReadableFromASecondConnectionWhileTheCompileIsStillInFlight}
+   * proves the commit-then-enqueue helper behaves, by calling it directly. It would keep passing if
+   * {@code createTest} and {@code updateTest} never called it at all — which was exactly the state
+   * of the branch at the end of phase 1, when {@code FOC-03} held these two files back. So this
+   * drives the service methods and asserts a compile actually started for the draft they saved.
+   */
+  @Test
+  void savingADraftThroughTheServiceIsWhatStartsTheCompile() {
+    UITestDto created =
+        studioService.createTest(draftRequest("Enqueue on create", null, null), owner());
+    awaitCompileStatus(created.id(), "AWAITING_CONFIRMATION");
+    assertThat(gateway.calls.get()).as("create enqueued exactly one attempt").isEqualTo(1);
+
+    UITestDto reloaded = studioService.findTestById(created.id());
+    UITestRequest edit =
+        new UITestRequest(
+            "Enqueue on create",
+            null,
+            CSI_ID,
+            "Production",
+            List.of(
+                "Go to \"https://example.com/login\"",
+                "Click the \"Sign in\" button",
+                "Click \"Next\""),
+            List.of(),
+            com.citi.put.checks.studio.dto.TestConfiguration.defaults(),
+            reloaded.sourceRevision(),
+            reloaded.configurationRevision());
+    studioService.updateTest(created.id(), edit, owner());
+
+    awaitCompileStatus(created.id(), "AWAITING_CONFIRMATION");
+    assertThat(gateway.calls.get()).as("the edit enqueued a second attempt").isEqualTo(2);
+  }
+
+  /**
+   * A name-only edit moves no revision, leaves the confirmation valid (§4.2) and therefore has
+   * nothing to compile. Enqueueing one would drive a confirmed draft to {@code COMPILING} and spend
+   * a gateway call to rediscover the artifact it already holds.
+   */
+  @Test
+  void aNameOnlyEditEnqueuesNothing() {
+    UITestDto created = studioService.createTest(draftRequest("Named draft", null, null), owner());
+    awaitCompileStatus(created.id(), "AWAITING_CONFIRMATION");
+    int afterCreate = gateway.calls.get();
+
+    UITestDto reloaded = studioService.findTestById(created.id());
+    studioService.updateTest(
+        created.id(),
+        draftRequest("Renamed draft", reloaded.sourceRevision(), reloaded.configurationRevision()),
+        owner());
+
+    assertThat(gateway.calls.get())
+        .as("name/description changes invalidate no confirmation and compile nothing")
+        .isEqualTo(afterCreate);
+    assertThat(compileStatus(created.id())).isEqualTo("AWAITING_CONFIRMATION");
   }
 
   @Test
@@ -688,6 +754,23 @@ class CompilePipelineIT {
   private long configurationRevision(UUID id) {
     return jdbc.queryForObject(
         "SELECT configuration_revision FROM ui_tests WHERE id = ?", Long.class, id);
+  }
+
+  private static org.springframework.security.core.Authentication owner() {
+    return StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
+  }
+
+  private static UITestRequest draftRequest(String name, Long sourceRevision, Long configRevision) {
+    return new UITestRequest(
+        name,
+        null,
+        CSI_ID,
+        "Production",
+        STEPS,
+        List.of(),
+        com.citi.put.checks.studio.dto.TestConfiguration.defaults(),
+        sourceRevision,
+        configRevision);
   }
 
   private UUID seedTest(List<String> steps) {
