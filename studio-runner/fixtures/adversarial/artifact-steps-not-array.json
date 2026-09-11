@@ -1,0 +1,22 @@
+{
+  "name": "artifact-steps-not-array",
+  "expectedClass": "ARTIFACT_STEPS_NOT_ARRAY",
+  "description": "\"steps\" is an object rather than an array.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": {
+      "0": {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "await page.goto('https://example.com/');"
+      }
+    }
+  }
+}

@@ -123,15 +123,30 @@ function readStringLiteral(node: ts.Expression, ctx: ArgumentContext, max: numbe
   return node.text;
 }
 
+/**
+ * Outcome of looking for a reference call in an argument position. The three states are kept
+ * apart so a caller can tell "this was not a reference" from "this was a rejected reference"
+ * and never swallow a failure without a diagnostic.
+ */
+export type ReferenceRead =
+  | { readonly status: 'none' }
+  | { readonly status: 'rejected' }
+  | { readonly status: 'ok'; readonly value: VariableValue | SecretValue };
+
+const NOT_A_REFERENCE: ReferenceRead = { status: 'none' };
+const REJECTED_REFERENCE: ReferenceRead = { status: 'rejected' };
+
 /** Recognises `vars.get('NAME')` / `vars.secret('ID')` and nothing else on `vars`. */
 function readReference(
   node: ts.Expression,
   ctx: ArgumentContext,
   argumentKind: ArgumentKind,
-): VariableValue | SecretValue | null {
-  if (!ts.isCallExpression(node) || !ts.isPropertyAccessExpression(node.expression)) return null;
+): ReferenceRead {
+  if (!ts.isCallExpression(node) || !ts.isPropertyAccessExpression(node.expression)) {
+    return NOT_A_REFERENCE;
+  }
   const receiver = node.expression.expression;
-  if (!ts.isIdentifier(receiver) || receiver.text !== 'vars') return null;
+  if (!ts.isIdentifier(receiver) || receiver.text !== 'vars') return NOT_A_REFERENCE;
 
   const excerpt = ctx.excerpt(node);
   const method = node.expression.name.text;
@@ -145,34 +160,34 @@ function readReference(
       node: nodeName(node),
       excerpt,
     });
-    return null;
+    return REJECTED_REFERENCE;
   }
 
-  if (node.arguments.length !== 1) {
+  const first = node.arguments.length === 1 ? node.arguments[0] : undefined;
+  if (
+    first === undefined ||
+    (!ts.isStringLiteral(first) && !ts.isNoSubstitutionTemplateLiteral(first))
+  ) {
     ctx.collector.add({
       code: 'REFERENCE_ARGUMENT_INVALID',
       message: `vars.${method}() takes exactly one string literal argument.`,
       node: nodeName(node),
       excerpt,
     });
-    return null;
-  }
-  const first = node.arguments[0];
-  if (first === undefined || (!ts.isStringLiteral(first) && !ts.isNoSubstitutionTemplateLiteral(first))) {
-    ctx.collector.add({
-      code: 'REFERENCE_ARGUMENT_INVALID',
-      message: `vars.${method}() takes exactly one string literal argument.`,
-      node: nodeName(node),
-      excerpt,
-    });
-    return null;
+    return REJECTED_REFERENCE;
   }
 
   const usage = { kind, name: first.text, argumentKind } as const;
   ctx.recorder.record(usage);
-  if (!checkReferenceUse(usage, ctx.declarations, ctx.bounds, ctx.collector, excerpt)) return null;
+  if (!checkReferenceUse(usage, ctx.declarations, ctx.bounds, ctx.collector, excerpt)) {
+    return REJECTED_REFERENCE;
+  }
 
-  return kind === 'secret' ? { kind: 'secret', id: first.text } : { kind: 'variable', name: first.text };
+  return {
+    status: 'ok',
+    value:
+      kind === 'secret' ? { kind: 'secret', id: first.text } : { kind: 'variable', name: first.text },
+  };
 }
 
 /** Validates a regular expression literal against the safe subset (AC-8). */
@@ -418,6 +433,26 @@ export function readArgument<K extends ArgumentKind>(
   return value as ArgumentValueByKind[K] | null;
 }
 
+/**
+ * Argument kinds that accept only a literal still have to *see* a reference call, so a secret in
+ * one of these positions is reported as a forbidden position rather than as a type error, and so
+ * the usage is recorded and the source-line alignment check stays accurate.
+ */
+function readLiteralOnly(node: ts.Expression, ctx: ArgumentContext, kind: ArgumentKind): boolean {
+  const reference = readReference(node, ctx, kind);
+  if (reference.status === 'rejected') return false;
+  if (reference.status === 'ok') {
+    ctx.collector.add({
+      code: 'ARGUMENT_TYPE',
+      message: `A ${kind} argument must be a literal; references are not permitted here.`,
+      node: nodeName(node),
+      excerpt: ctx.excerpt(node),
+    });
+    return false;
+  }
+  return true;
+}
+
 function readArgumentValue(
   kind: ArgumentKind,
   node: ts.Expression,
@@ -426,16 +461,16 @@ function readArgumentValue(
   switch (kind) {
     case 'url': {
       const reference = readReference(node, ctx, kind);
-      if (reference !== null) return reference;
-      if (ts.isCallExpression(node)) return null;
+      if (reference.status === 'rejected') return null;
+      if (reference.status === 'ok') return reference.value;
       return readUrlLiteral(node, ctx);
     }
     case 'urlMatcher':
     case 'textMatcher': {
       if (ts.isRegularExpressionLiteral(node)) return readRegexLiteral(node, ctx);
       const reference = readReference(node, ctx, kind);
-      if (reference !== null) return reference;
-      if (ts.isCallExpression(node)) return null;
+      if (reference.status === 'rejected') return null;
+      if (reference.status === 'ok') return reference.value;
       const text = readStringLiteral(node, ctx, ctx.bounds.maxStringLength);
       return text === null ? null : { kind: 'literal', value: text };
     }
@@ -443,12 +478,13 @@ function readArgumentValue(
     case 'selectValue':
     case 'testId': {
       const reference = readReference(node, ctx, kind);
-      if (reference !== null) return reference;
-      if (ts.isCallExpression(node)) return null;
+      if (reference.status === 'rejected') return null;
+      if (reference.status === 'ok') return reference.value;
       const text = readStringLiteral(node, ctx, ctx.bounds.maxStringLength);
       return text === null ? null : { kind: 'literal', value: text };
     }
     case 'key': {
+      if (!readLiteralOnly(node, ctx, kind)) return null;
       const text = readStringLiteral(node, ctx, ctx.bounds.maxStringLength);
       if (text === null) return null;
       if (!KEY_PATTERN.test(text)) {
@@ -463,6 +499,7 @@ function readArgumentValue(
       return { kind: 'literal', value: text };
     }
     case 'role': {
+      if (!readLiteralOnly(node, ctx, kind)) return null;
       const text = readStringLiteral(node, ctx, ctx.bounds.maxStringLength);
       if (text === null) return null;
       if (!PERMITTED_ROLES.includes(text)) {
@@ -477,6 +514,7 @@ function readArgumentValue(
       return { kind: 'literal', value: text };
     }
     case 'selector': {
+      if (!readLiteralOnly(node, ctx, kind)) return null;
       const text = readSelector(node, ctx);
       return text === null ? null : { kind: 'literal', value: text };
     }

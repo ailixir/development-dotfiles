@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import importPlugin from 'eslint-plugin-import';
 
-import { executionBoundaryRules, runDirectoryRules } from './eslint.boundary-rules.js';
+import { boundaryGlobals, executionBoundaryRules, runDirectoryRules } from './eslint.boundary-rules.js';
 
 /**
  * ESLint 9 flat config (ADR-001 §6). Deliberately newer than `frontend/`'s ESLint 8 setup;
@@ -28,6 +28,7 @@ export default tseslint.config(
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
+      globals: boundaryGlobals,
     },
     plugins: { import: importPlugin },
     rules: {

@@ -1,0 +1,22 @@
+{
+  "name": "statement-loop",
+  "expectedClass": "STATEMENT_LOOP",
+  "description": "A loop is rejected.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "for (;;) { }"
+      }
+    ]
+  }
+}

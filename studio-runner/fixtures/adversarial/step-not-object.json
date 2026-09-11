@@ -1,0 +1,18 @@
+{
+  "name": "step-not-object",
+  "expectedClass": "STEP_NOT_OBJECT",
+  "description": "A step entry is a string.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      "await page.goto('https://example.com/');"
+    ]
+  }
+}

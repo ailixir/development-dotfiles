@@ -1,0 +1,22 @@
+{
+  "name": "expression-not-permitted",
+  "expectedClass": "EXPRESSION_NOT_PERMITTED",
+  "description": "A bare locator expression is not an action, assertion or navigation.",
+  "source": [
+    "Click the \"Submit\" button"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Click the \"Submit\" button",
+        "code": "await page.getByRole('button', { name: 'Submit' });"
+      }
+    ]
+  }
+}

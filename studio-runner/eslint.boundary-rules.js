@@ -10,6 +10,18 @@
  * containing each forbidden construct actually fails lint.
  */
 
+/**
+ * Globals `no-implied-eval` must be able to resolve. Without them the rule cannot tell that
+ * `setTimeout` is the global one and silently passes, so they are declared alongside the rules
+ * rather than left to whichever environment preset happens to be active.
+ */
+export const boundaryGlobals = {
+  setTimeout: 'readonly',
+  setInterval: 'readonly',
+  setImmediate: 'readonly',
+  execScript: 'readonly',
+};
+
 /** Modules that must never be imported anywhere in the package. */
 export const FORBIDDEN_MODULES = ['vm', 'node:vm', 'worker_threads', 'node:worker_threads'];
 

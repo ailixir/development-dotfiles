@@ -1,0 +1,22 @@
+{
+  "name": "regex-lookbehind",
+  "expectedClass": "REGEX_UNSAFE",
+  "description": "Lookbehind assertions are rejected.",
+  "source": [
+    "Wait for the dashboard URL"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Wait for the dashboard URL",
+        "code": "await page.waitForURL(/(?<=x)dashboard/);"
+      }
+    ]
+  }
+}

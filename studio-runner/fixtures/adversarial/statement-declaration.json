@@ -1,0 +1,22 @@
+{
+  "name": "statement-declaration",
+  "expectedClass": "STATEMENT_DECLARATION",
+  "description": "A variable declaration is rejected.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "const target = 'https://example.com/';"
+      }
+    ]
+  }
+}

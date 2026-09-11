@@ -11,6 +11,7 @@ import {
   LOCATOR_METHODS,
   PAGE_ASSERTIONS,
   PAGE_METHODS,
+  PERMITTED_ROOT_IDENTIFIERS,
   PROTOTYPE_PROPERTY_NAMES,
 } from './language.js';
 import type { ArtifactStep } from './schema.js';
@@ -81,6 +82,11 @@ export function validateStepCode(
   bounds: ValidationBounds,
   collector: DiagnosticCollector,
 ): readonly Operation[] | null {
+  // A step is parsed on its own, as written. One parser subtlety is load-bearing and benign:
+  // outside a module context `await (` parses as a call to an identifier named `await`, so a
+  // parenthesised form such as `await (page.goto('x'));` is reported as STATEMENT_NOT_AWAITED
+  // rather than as a navigation call. That direction is fail-closed — the unparenthesised form
+  // every reference example uses is unambiguous, and the parenthesised one is simply rejected.
   const sourceFile: ParsedSourceFile = ts.createSourceFile(
     'step.ts',
     step.code,
@@ -280,6 +286,19 @@ function readCall(call: ts.CallExpression, ctx: ArgumentContext): Operation | nu
 
   const receiver = callee.expression;
 
+  // A bare identifier receiver must be one of the three roots the language knows. This is what
+  // rejects `process.exit(...)`, `fs.readFile(...)` and `browser.newContext(...)` as receivers
+  // rather than as unknown methods.
+  if (ts.isIdentifier(receiver) && !PERMITTED_ROOT_IDENTIFIERS.includes(receiver.text)) {
+    ctx.collector.add({
+      code: 'RECEIVER_NOT_PERMITTED',
+      message: `"${receiver.text}" is not a permitted receiver; only page, expect(...) and vars exist.`,
+      node: nodeName(receiver),
+      excerpt: ctx.excerpt(receiver),
+    });
+    return null;
+  }
+
   if (Object.prototype.hasOwnProperty.call(ACTION_METHODS, method)) {
     const chain = readLocatorChain(receiver, ctx);
     if (chain === null) return null;
@@ -352,6 +371,16 @@ function collectSegments(
     ctx.collector.add({
       code: 'RECEIVER_NOT_PERMITTED',
       message: `Locator chains must be rooted at page; found "${node.text}".`,
+      node: nodeName(node),
+      excerpt: ctx.excerpt(node),
+    });
+    return true;
+  }
+
+  if (ts.isPropertyAccessExpression(node) && PROTOTYPE_PROPERTY_NAMES.includes(node.name.text)) {
+    ctx.collector.add({
+      code: 'PROTOTYPE_ACCESS',
+      message: `Access to "${node.name.text}" is not permitted.`,
       node: nodeName(node),
       excerpt: ctx.excerpt(node),
     });

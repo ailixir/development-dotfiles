@@ -1,0 +1,27 @@
+{
+  "name": "artifact-too-large",
+  "expectedClass": "ARTIFACT_TOO_LARGE",
+  "description": "The serialized artifact exceeds the configured byte budget.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "await page.goto('https://example.com/');"
+      }
+    ]
+  },
+  "policy": {
+    "bounds": {
+      "maxArtifactBytes": 32
+    }
+  }
+}

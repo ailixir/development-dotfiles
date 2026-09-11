@@ -1,4 +1,4 @@
-// Fixture: `no-implied-eval`.
-export function run(source: string): void {
-  setTimeout(source, 0);
+// Fixture: `no-implied-eval`. The core rule detects a string passed to setTimeout.
+export function run(): void {
+  setTimeout('fetch("/admin")', 0);
 }

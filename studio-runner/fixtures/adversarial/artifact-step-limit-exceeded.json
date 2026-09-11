@@ -1,0 +1,33 @@
+{
+  "name": "artifact-step-limit-exceeded",
+  "expectedClass": "ARTIFACT_STEP_LIMIT_EXCEEDED",
+  "description": "More steps than the configured limit.",
+  "source": [
+    "Go to \"https://example.com/\"",
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "await page.goto('https://example.com/');"
+      },
+      {
+        "stepIndex": 1,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "await page.goto('https://example.com/');"
+      }
+    ]
+  },
+  "policy": {
+    "bounds": {
+      "maxSteps": 1
+    }
+  }
+}

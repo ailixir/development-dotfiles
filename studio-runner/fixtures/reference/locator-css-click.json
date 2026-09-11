@@ -1,0 +1,54 @@
+{
+  "name": "locator-css-click",
+  "description": "locator() with a plain CSS selector, then click.",
+  "source": [
+    "Click the primary action in the toolbar"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "values": {
+    "variables": {},
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Click the primary action in the toolbar",
+        "code": "await page.locator('.toolbar button.primary').click();"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "locator",
+              "selector": ".toolbar button.primary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "click",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "locator",
+              "selector": ".toolbar button.primary"
+            }
+          ]
+        },
+        null
+      ]
+    }
+  ]
+}

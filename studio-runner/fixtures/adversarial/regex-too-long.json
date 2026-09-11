@@ -1,0 +1,27 @@
+{
+  "name": "regex-too-long",
+  "expectedClass": "REGEX_TOO_LONG",
+  "description": "A regular expression longer than the configured limit.",
+  "source": [
+    "Wait for the dashboard URL"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Wait for the dashboard URL",
+        "code": "await page.waitForURL(/dashboard/);"
+      }
+    ]
+  },
+  "policy": {
+    "bounds": {
+      "maxRegexLength": 5
+    }
+  }
+}

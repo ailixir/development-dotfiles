@@ -1,0 +1,25 @@
+{
+  "name": "artifact-unknown-key",
+  "expectedClass": "ARTIFACT_UNKNOWN_KEY",
+  "description": "An extra top-level key is present.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "provenance": {
+      "model": "x"
+    },
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "await page.goto('https://example.com/');"
+      }
+    ]
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "name": "action-check-uncheck",
+  "description": "check and uncheck on checkbox locators.",
+  "source": [
+    "Tick the \"Remember me\" checkbox",
+    "Untick the \"Marketing\" checkbox"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "values": {
+    "variables": {},
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Tick the \"Remember me\" checkbox",
+        "code": "await page.getByLabel('Remember me').check();"
+      },
+      {
+        "stepIndex": 1,
+        "originalText": "Untick the \"Marketing\" checkbox",
+        "code": "await page.getByLabel('Marketing').uncheck({ force: true });"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Remember me"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "check",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Remember me"
+              }
+            }
+          ]
+        },
+        null
+      ]
+    },
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Marketing"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "uncheck",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Marketing"
+              }
+            }
+          ]
+        },
+        {
+          "force": true
+        }
+      ]
+    }
+  ]
+}

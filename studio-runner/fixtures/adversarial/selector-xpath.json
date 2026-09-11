@@ -1,0 +1,22 @@
+{
+  "name": "selector-xpath",
+  "expectedClass": "SELECTOR_NOT_CSS",
+  "description": "locator() rejects an xpath engine prefix.",
+  "source": [
+    "Click the \"Submit\" button"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Click the \"Submit\" button",
+        "code": "await page.locator('xpath=//button').click();"
+      }
+    ]
+  }
+}
