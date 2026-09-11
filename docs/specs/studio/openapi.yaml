@@ -25,6 +25,14 @@ info:
     and their optional fields are declared. A field the contract does not name is a conformance
     failure rather than a silent divergence — see ADR-002 §INT-4.
 
+    **Every `409` declares its code set in `x-conflict-codes`.** `ErrorResponse.error` is a free
+    string, so the codes a conflict can carry were previously conveyed by examples alone — and an
+    example is decorative: no generator reads it and no test can assert it is complete. That is the
+    same hazard as an open body (§INT-4), one level down. `x-conflict-codes` is the machine-readable
+    form of the same fact, in the manner `x-served-by` already carries the serving component, and it
+    is exhaustive for the operation: an implementation that answers `409` with a code outside the
+    list, or that cannot produce one in it, is a conformance failure. See ADR-002 §14.
+
     **Amending this document.** Freezing it in 10.1 requires that changes be recorded, not that
     they never happen — a wave gate has already proved it both incomplete and wrong about routes
     it did declare. Who may change what is ruled in ADR-002 §12: a story may repair a defect that
@@ -44,7 +52,29 @@ servers:
     description: Public Studio API
 tags:
   - name: tests
-    description: Studio drafts (authoring)
+    description: |
+      Studio drafts (authoring).
+
+      **The four `409` codes of the draft lifecycle are not interchangeable, and a caller must act
+      differently on each.** They divide on two axes: whether the draft still exists, and who can
+      clear the condition.
+
+      | Code | The draft | Who clears it | What the caller does |
+      |---|---|---|---|
+      | `STALE_REVISION` | intact and compilable | the caller | reload and retry; the request was built against a revision that moved (§4.2) |
+      | `STALE_CANDIDATE` | intact and compilable | the caller | recompile, then confirm the candidate that results (§4.2) |
+      | `CSI_IMMUTABLE` | intact and compilable | the caller | correct the body; the CSI of a draft is never moved by an update (§9.1) |
+      | `TEST_DELETED` | soft-deleted, history retained | the owner, out of band | stop; no retry of this request can succeed while the draft is deleted (§8.3) |
+      | `TEST_QUARANTINED` | **intact and not lost**, withheld | an administrator or migration, out of band | stop and say so; the authored test still exists and returns when its CSI is resolved (BRD §9) |
+
+      The first three are retriable by the caller after a local correction. The last two are
+      definite refusals that no retry resolves, and they are separate codes because their remedies
+      have different owners: a deleted draft was withdrawn by a principal's own action and can be
+      restored by one, while a quarantined draft was withheld by the platform because its CSI is
+      missing or unregistered, and only an administrator or an explicit migration can return it.
+      Collapsing quarantine into `TEST_DELETED` would tell an author their work was deleted when
+      BRD §9 guarantees no authored test is lost — a false statement that would drive a UI to offer
+      a restore it cannot perform. See ADR-002 §14.
   - name: executions
     description: Execution history, live snapshots and evidence
   - name: internal
@@ -261,7 +291,17 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409':
-          description: Stale revision or attempt to move the CSI
+          description: |
+            Stale revision or attempt to move the CSI.
+
+            **No lifecycle code appears here, deliberately.** A soft-deleted or quarantined draft is
+            not visible to this route's read at all — the single visibility predicate excludes it —
+            so the save resolves as an unknown test and answers `400`, exactly as it does for an id
+            that never existed. Refusal with `TEST_DELETED`/`TEST_QUARANTINED` belongs to
+            compile, confirm-compile and execute, which are the three operations architecture §8.3
+            and the quarantine migration name as having to *reject* rather than merely not see
+            (ADR-002 §14 sweep).
+          x-conflict-codes: [STALE_REVISION, CSI_IMMUTABLE]
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -286,6 +326,17 @@ paths:
       tags: [tests]
       operationId: compileTest
       summary: Enqueue compilation of the current source
+      description: |
+        Order of refusal is part of the contract, because each stage decides what the next may
+        observe. Identity and CSI authorization are evaluated first (`401`, `403`), so a caller who
+        may not act on the draft's CSI never learns from a status code whether the draft exists.
+        The lifecycle guard runs next (`409`). Authoring bounds and the inline-credential screen run
+        last on the request thread (`400`), before any compile request identity is persisted: a
+        draft that cannot be compiled must not first be moved to `COMPILING` and then failed.
+
+        `202` therefore means the attempt was *started*, not that it will succeed. Pool saturation
+        and gateway failure surface asynchronously as `compileStatus: STALE` carrying
+        `compileError`, never as a status code on this response (§4.3).
       x-not-yet-implemented: true
       x-implemented-by: '10.8'
       parameters:
@@ -303,8 +354,42 @@ paths:
                     compileStatus: COMPILING
                     sourceRevision: 4
                     configurationRevision: 1
+        '400':
+          description: |
+            The draft is over an authoring bound, or carries an inline credential. Refused on the
+            request thread before the gateway is called and before any compile state moves
+            (§4.3): `SOURCE_TOO_MANY_STEPS`, `SOURCE_LINE_TOO_LONG`, `SOURCE_TOO_LARGE`,
+            `INLINE_CREDENTIAL`. The message names the offending step index, never its text.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                tooManySteps:
+                  value: { error: SOURCE_TOO_MANY_STEPS, message: 'This test has 61 steps; the maximum is 60. Split it into smaller tests before compiling.' }
+                inlineCredential:
+                  value: { error: INLINE_CREDENTIAL, message: 'Step 4 looks like it contains a credential; use a vault reference instead.' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: |
+            The draft is not in a state that may be compiled. Architecture §8.3 requires a soft
+            delete to reject new compile and execute (`TEST_DELETED`), and a draft whose CSI is
+            missing or unregistered is withheld from compile, confirm and execute while it is
+            quarantined (`TEST_QUARANTINED`, §9.1, BRD §9).
+
+            Definite refusal of the draft as it stands: no compile request identity is persisted,
+            `compileStatus` does not move, and no gateway call is paid for. Neither code is
+            retryable without an out-of-band change — see the `tests` tag for how the two differ
+            from each other and from the revision conflicts.
+          x-conflict-codes: [TEST_DELETED, TEST_QUARANTINED]
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                testDeleted:
+                  value: { error: TEST_DELETED, message: 'UI Test 11111111-1111-1111-1111-111111111111 is deleted; compile and confirm are blocked' }
+                testQuarantined:
+                  value: { error: TEST_QUARANTINED, message: 'UI Test 11111111-1111-1111-1111-111111111111 is quarantined pending CSI resolution; compile and confirm are blocked' }
 
   /tests/{id}/confirm-compile:
     post:
@@ -333,16 +418,31 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TestDto' }
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409':
-          description: The candidate is no longer the current one
+          description: |
+            The candidate is no longer the current one (`STALE_CANDIDATE`, §4.2), or the draft is
+            not in a state that may be confirmed at all.
+
+            The same lifecycle guard that gates compile gates confirmation — it is one method on one
+            service and confirmation calls it before touching a revision row — so this operation
+            carries `TEST_DELETED` and `TEST_QUARANTINED` for the same reasons and with the same
+            remedies. The difference that matters to a caller is retriability: `STALE_CANDIDATE`
+            is cleared by recompiling and confirming again, the other two are not cleared by
+            anything the caller can do.
+          x-conflict-codes: [STALE_CANDIDATE, TEST_DELETED, TEST_QUARANTINED]
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
               examples:
                 staleCandidate:
                   value: { error: STALE_CANDIDATE, message: 'The draft moved on; recompile before confirming' }
+                testDeleted:
+                  value: { error: TEST_DELETED, message: 'UI Test 11111111-1111-1111-1111-111111111111 is deleted; compile and confirm are blocked' }
+                testQuarantined:
+                  value: { error: TEST_QUARANTINED, message: 'UI Test 11111111-1111-1111-1111-111111111111 is quarantined pending CSI resolution; compile and confirm are blocked' }
 
   /tests/{id}/execute:
     post:
@@ -380,7 +480,17 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409':
-          description: Readiness, runtime or idempotency conflict
+          description: |
+            Lifecycle, readiness, runtime or idempotency conflict. Refused before any dispatch
+            effect: no execution row, no ledger row, no browser.
+
+            The readiness predicate's first term is lifecycle, and it refuses a soft-deleted or
+            quarantined draft with that draft's **own** code rather than folding it into
+            `COMPILE_REQUIRED`. The distinction is not cosmetic: `COMPILE_REQUIRED` tells an author
+            to confirm a candidate, which is work they can do and which would not help — a deleted
+            or quarantined draft would refuse the compile too (§8.3, BRD §9).
+          x-conflict-codes:
+            [COMPILE_REQUIRED, RUNTIME_INCOMPATIBLE, IDEMPOTENCY_KEY_REUSED, TEST_DELETED, TEST_QUARANTINED]
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -391,6 +501,10 @@ paths:
                   value: { error: RUNTIME_INCOMPATIBLE, message: 'The confirmed revision is not compatible with the current runner runtime' }
                 idempotencyKeyReused:
                   value: { error: IDEMPOTENCY_KEY_REUSED, message: 'This idempotency key was already used with a different request body' }
+                testDeleted:
+                  value: { error: TEST_DELETED, message: 'UI Test 11111111-1111-1111-1111-111111111111 is deleted and cannot be executed' }
+                testQuarantined:
+                  value: { error: TEST_QUARANTINED, message: 'UI Test 11111111-1111-1111-1111-111111111111 is quarantined pending CSI resolution and cannot be executed' }
         '429':
           description: Pending quota exhausted
           content:
@@ -672,7 +786,14 @@ paths:
         '401': { $ref: '#/components/responses/RunnerUnauthenticated' }
         '403': { $ref: '#/components/responses/RunnerForbidden' }
         '409':
-          description: A competing or expired admission already owns the attempt (§5.1.4)
+          description: |
+            A competing or expired admission already owns the attempt (§5.1.4).
+
+            `code` is the refusal code the API's admission callback returned, propagated unchanged,
+            falling back to `ADMISSION_COMPETING` when that body is unreadable. It therefore carries
+            no `x-conflict-codes`: the set is the callback's to close, and its producer is story
+            10.7 (ADR-002 §14, O-9). Declaring a set here before that producer exists would be
+            inventing one.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/RunnerProblem' }
@@ -766,6 +887,11 @@ paths:
           description: |
             A competing or expired admission already owns the attempt. Definite refusal: the
             runner stops and never re-attempts (§5.1.4).
+
+            No `x-conflict-codes` yet: this operation has no producer until story 10.7, and the
+            runner propagates whatever `error` this body carries into its own `/v1/runs` refusal,
+            so closing the set here closes it in two places at once. 10.7 declares it (ADR-002 §14,
+            O-9).
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -889,6 +1015,10 @@ paths:
             Ownership, sequence or transition conflict: this attempt no longer owns the
             execution, the sequence is not increasing, or the execution is already finalized.
             The runner stops reporting for this run on receipt (§5.3).
+
+            No `x-conflict-codes` yet: the three conditions above are distinguishable and should
+            each carry their own code, but the producer is story 10.7 and the runner branches on
+            the status alone today. 10.7 declares the set (ADR-002 §14, O-9).
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }

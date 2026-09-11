@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Accepted (architecture decision, 2026-09-11). Amended the same day: §11 closes O-7 and §12 rules on who may amend this contract. O-1 and O-2 have since landed at `86a187267`; one backend assertion in §8.6 awaits its owner. |
+| Status | Accepted (architecture decision, 2026-09-11). Amended twice the same day: §11 closes O-7, §12 rules on who may amend this contract, and §14 declares the conflict responses for a deleted or quarantined draft, closing story 10.8's AC-1b escalation across compile, confirm-compile and execute. O-1 and O-2 landed at `86a187267`; one backend assertion in §8.6 awaits its owner. |
 | Author | @architect (Aria) |
 | Source of truth | [Studio architecture v2.1](studio-execution.md) §4.4, §4.5, §5.1–5.5, §6.1–6.4, §8.2, §8.4, §8.5, §9.1–9.3; [ADR-001](ADR-001-studio-runner-scaffolding.md) §4.2, §9 |
 | Amends | `docs/specs/studio/openapi.yaml`, frozen by story 10.1. This ADR is the amendment's rationale; the document is the contract. |
@@ -47,6 +47,7 @@ Article IV. Each change below traces to §8.4, §5, §6, §8.2 or ADR-001. Where
 | INT-4 | `steps`/`outcome`/`evidence`/`runtimeVersions` vs. `stepResults`/`status`/`video`/`runtime` | **The report is not the snapshot.** The internal report keeps the runner's names; the public snapshot keeps its own; the API translates, and the contract now carries the mapping table. Every runner-produced body is declared **closed**, so the next such divergence fails a test. |
 | INT-5 (§11) | Where is the §6.4 recorder-origin calibration applied? (O-7) | **At the runner's clock, not on the wire.** One run-scoped monotonic clock zeroed at recording-context readiness, injected into step execution; `browserStartedAt` read at the same instant. The wire carries one origin and no calibration constant. `recordingOriginMs` **rejected**. |
 | GOV (§12) | May a story amend `openapi.yaml`? | **By class of change.** A story may repair a defect nothing could have satisfied; a field on a closed runner body, and anything touching routes/security/public surface, needs an architect's ruling first. Loosening a schema is never a story's call. |
+| INT-6 (§14) | What does a route answer for a soft-deleted or quarantined draft? (10.8 AC-1b) | **`409`, with the draft's own code, and the two codes stay separate.** `TEST_DELETED` and `TEST_QUARANTINED` are declared on `compileTest`, `confirmCompile` and `executeTest` — all three, swept together. `403` and async-`202` **rejected**; widening `requireCompilable` **rejected**. Every public `409` now declares its exhaustive code set in `x-conflict-codes`, because examples are not assertable. |
 
 ## 3. INT-2 — expressing the runner's surface
 
@@ -210,6 +211,8 @@ The assertion encodes the assumption this ADR corrects — that "internal" is a 
 | O-5 | The runner `outcome.errorCode` set beyond §8.2's `TIMEOUT`; today's `STEP_FAILED`/`RUN_ERROR`/`RUN_NOT_STARTED` are placeholders around a fake launcher | 10.12 | — |
 | O-6 | §8.4 names "approved target/secret-use policy" among the job fields; the envelope carries only declared reference **names** (`references`). Whether destination policy travels on the job or is enforced solely at the egress layer is unresolved, and the contract declares only what exists rather than a field nobody implements. | 10.7 / 10.18 (SPK-05) | Destination enforcement (§9.3) |
 | ~~O-7~~ | ~~Where the §6.4 recorder-origin calibration is applied — runner-side or API-side~~ **Closed 2026-09-11 by §11: runner-side, at the clock. `recordingOriginMs` rejected; the contract gains no field. Remaining work is 10.12's, listed in §11.6.** | ~~10.12~~ | — |
+| O-9 | `x-conflict-codes` on the three internal `409`s (`POST /v1/runs`, the admission and progress callbacks). Their producers are 10.7's and do not exist yet, so a set declared now would be invented. **Pre-ruled in §14.7:** 10.7 may land these directly, listing exactly the codes its own PR emits, with a §13 log line — no escalation needed. The runner propagates the admission callback's code into its own `/v1/runs` refusal, so the two must be closed together. | 10.7 | — |
+| O-10 | A draft that is unknown, soft-deleted or quarantined answers **`400 BAD_REQUEST`** on `GET`/`PUT`/`DELETE /tests/{id}`, because `IllegalArgumentException` maps to `400`. Conventionally that is a `404`. **Not ruled here** — it is Class C, it moves the public surface for three stories mid-wave, and it is not the gap 10.8 raised. No security defect either way: both forms are existence-preserving and neither discloses more than the other. Raise it as its own decision before the pilot, not as a side effect of this one. | @architect (post-wave-3) | — |
 | O-8 | The run-scoped clock of §11: zero at recording-context readiness, injected into step execution, process-origin default removed from the production path, the two origin reads paired, the readiness-to-first-frame gap measured in staging, and a scale assertion the schema cannot make (§11.6) | 10.12 | Step-seek acceptance; the §11.1 defect is live until it lands |
 
 ## 10. Alternatives considered (summary)
@@ -321,3 +324,170 @@ An architect amending the contract still never edits a story's Title, Acceptance
 | 2026-09-11 | 409 description un-truncated, spurious null-valued key removed (§5) | A | @architect, ADR-002 | as above |
 | 2026-09-11 | Runner-produced bodies closed; `RunnerReport → ExecutionSnapshot` mapping table added (§6) | B | @architect, ADR-002 | as above |
 | 2026-09-11 | Run clock and recording origin stated; `minimum: 0` on all timings; `browserStartedAt` paired with the clock zero; API applies no calibration. `recordingOriginMs` **rejected** (§11) | B | @architect, this amendment | `test/contract.test.ts` 14/14 before and after |
+| 2026-09-11 | Conflict responses declared for a withheld draft on `compileTest`, `confirmCompile` and `executeTest`; `x-conflict-codes` introduced on every public `409`; missing `400` declared on `compileTest` and `confirmCompile` (§14). Closes story 10.8's AC-1b escalation | C | @architect, this amendment | `test/contract.test.ts` 14/14 before and after (no `internal`-tagged operation touched) |
+
+---
+
+# Amendment, 2026-09-11 (third) — what a route answers for a draft it may not act on
+
+Added on the same branch, at `a8a8eeb44`. Story 10.8 exercised §12 exactly as §12 asks: it found a
+status code the frozen document does not declare, **named the three workarounds it refused to
+take**, left `CompileRouteContractDivergenceTest.compilingADeletedTestAnswersTheDeclaredStatusCode`
+`@Disabled` against AC-1b, and escalated. It also made `requireCompilable` public without widening
+it, which is the distinction §12's "loosening is never a story's call" rule exists to protect. Four
+sibling tests establish the divergence is real rather than asserted, so this ruling is made against
+verified facts rather than a report of them.
+
+## 14. INT-6 — conflict responses for a deleted or quarantined draft (closes 10.8 AC-1b)
+
+### 14.1 The gap, verified
+
+| Fact | Evidence, worktree `epic/EPIC-10` at `a8a8eeb44` |
+|---|---|
+| `CompileStateService.requireCompilable` throws `StudioConflictException` with `TEST_DELETED` and `TEST_QUARANTINED`; `ChecksExceptionHandler` maps that exception to `409`. Both were merged by 10.4, not proposed by 10.8. | `studio/compile/CompileStateService.java`, `config/ChecksExceptionHandler.java` |
+| `confirm()` calls the same guard before touching a revision row, so confirmation produces the same two codes. | same file |
+| 10.8's `ReadinessVerdict` declares `TEST_DELETED` and `TEST_QUARANTINED` next to `COMPILE_REQUIRED` and `RUNTIME_INCOMPATIBLE`, and `ExecutionReadinessService`'s first term is `deleted_at IS NULL AND quarantined_at IS NULL`. | `studio/readiness/`, on `story/10.8` |
+| The frozen `compileTest` declared `202`, `401`, `403` and nothing else. `confirmCompile`'s `409` named only `STALE_CANDIDATE`; `executeTest`'s named only `COMPILE_REQUIRED`, `RUNTIME_INCOMPATIBLE`, `IDEMPOTENCY_KEY_REUSED`. | `openapi.yaml` before this amendment |
+| `deleted_at` and `quarantined_at` are different columns with different origins. V12 quarantines rows whose CSI is null or unregistered, "never deleted and never reassigned", under the CHECK `(csi_id IS NOT NULL OR quarantined_at IS NOT NULL)`. | `V12__ui_test_revisions_and_compile_state.sql` §3–4 |
+| The two are already distinguished by every consumer that exists: `StudioRepository.findLifecycleState` returns `DELETED`, `QUARANTINED` or `ACTIVE`, and deliberately bypasses the `@SQLRestriction` so the service can tell either from "unknown". | `studio/StudioRepository.java` |
+
+### 14.2 Ruling
+
+**`POST /tests/{id}/compile` answers `409` for a withheld draft, with the draft's own code —
+`TEST_DELETED` or `TEST_QUARANTINED` — and the two codes stay separate.** The response is declared
+with `ErrorResponse` content, both examples, and an `x-conflict-codes` list. The same two codes are
+added to `confirmCompile` and `executeTest`, whose `409` bodies already exist and already carry
+them in code.
+
+Nothing is invented: every code declared here is emitted by merged Java today, and the status is
+the one `ChecksExceptionHandler` already returns for `StudioConflictException`. What was missing
+was the declaration, not the behaviour — which is why 10.8 could not write a conforming route.
+
+**`403` is rejected**, as 10.8 said. A withheld draft is a state of the resource, not a property of
+the caller; answering `403` would tell an owner they lack a permission they hold, and the frontend
+would have to un-learn it later. **`202`-then-fail is rejected**: §4.3 bounds compile attempts and
+10.8's own pipeline refuses before `beginCompile` precisely so a draft nobody may compile is never
+moved to `COMPILING` and then failed, and an async refusal would additionally spend a gateway call
+to say no. **Widening `requireCompilable` is rejected** under §12's third rule; 10.8 was right to
+leave it exactly as 10.4 wrote it.
+
+### 14.3 Why two codes and not one, and why neither is `STALE_*`
+
+A caller must act differently on each of the five, and the axis is *who can clear the condition*:
+
+| Code | The draft | Cleared by | Retriable by the caller |
+|---|---|---|---|
+| `STALE_REVISION` | intact | the caller — reload | yes |
+| `STALE_CANDIDATE` | intact | the caller — recompile, reconfirm | yes |
+| `CSI_IMMUTABLE` | intact | the caller — correct the body | yes |
+| `TEST_DELETED` | soft-deleted; history retained | the owner, out of band | never |
+| `TEST_QUARANTINED` | **intact and not lost**; withheld | an administrator or an explicit migration | never |
+
+The three `STALE_*`/`CSI_*` conflicts say "your copy or your body is wrong, fix it and try again".
+The two lifecycle codes say "this draft is not yours to advance right now, and nothing you can send
+will change that". Collapsing across that line would make a retry loop that can never terminate the
+obvious client implementation.
+
+Between the two lifecycle codes the difference is the one BRD §9 actually guarantees. A deleted
+draft was withdrawn by a principal's own action, its history is retained (§8.3) and a principal can
+restore it. A quarantined draft was withheld by the platform because its CSI is missing or
+unregistered; V12 never deletes and never reassigns it, and it returns when the CSI is resolved.
+**Reporting a quarantined draft as `TEST_DELETED` would state that an authored test was deleted,
+which BRD §9 forbids** — and, concretely, would drive a UI to offer a restore action that no
+principal can perform, while hiding the only remedy that exists. That is not a naming preference;
+it is the wire contradicting a business guarantee. Two codes.
+
+They are equally distinguishable from `CSI_IMMUTABLE`, with which quarantine shares a subject: that
+code refuses *a change to* a CSI on a healthy draft; `TEST_QUARANTINED` reports that the CSI a
+healthy draft already carries is no longer resolvable. Opposite directions, opposite remedies.
+
+### 14.4 Ordering, and the one security consequence
+
+**Authorization is evaluated before lifecycle.** `401` and `403` precede `409`, so a caller who may
+not act on the draft's CSI never learns from a status code whether the draft exists. This is stated
+on `compileTest` because the guard deliberately reads through the visibility restriction (§14.1) —
+that read is what makes a `409` possible at all, and it is also what would leak existence if it ran
+first. §9.1 already requires server-side permission checks on compile/confirm/execute; this fixes
+their order relative to the lifecycle read.
+
+The consequence worth stating plainly: for a quarantined row whose `csi_id` is still present but
+unregistered, an authorized owner reaches `409 TEST_QUARANTINED` and is correctly told their work
+survives. For a quarantined row whose `csi_id` is `NULL` — the other half of V12's CHECK — no
+principal can be authorized against a CSI that is not there, so the answer is `403` and the row is
+recoverable only by administrator action. That is the correct failing-closed behaviour and it is
+not a gap; it is the shape of a row that has lost its only authorization anchor.
+
+### 14.5 The sweep, and its negative results
+
+The lead's instruction was to sweep rather than patch one route, and the sweep's negative results
+matter as much as its positive ones. Every operation that can be reached with a draft id:
+
+| Operation | Same gap? | Ruling |
+|---|---|---|
+| `POST /tests/{id}/compile` | **Yes — no `409` at all** | `409` declared with both codes. Also gains the `400` its authoring bounds and credential screen already produce (`SOURCE_TOO_MANY_STEPS`, `SOURCE_LINE_TOO_LONG`, `SOURCE_TOO_LARGE`, `INLINE_CREDENTIAL`, §4.3) and which nothing declared either. |
+| `POST /tests/{id}/confirm-compile` | **Yes — `409` declared, codes not** | Both codes added; the guard is the same method. Also gains the `400` its `required` typed request body implies. |
+| `POST /tests/{id}/execute` | **Yes — `409` declared, codes not** | Both codes added, traced to 10.8's readiness term 1. |
+| `PUT /tests/{id}` | **No** | A withheld draft is invisible to this route's read, so the save resolves as an unknown test and answers `400` — indistinguishable from an id that never existed, which is the correct behaviour for a route that may not disclose existence. Declaring a lifecycle code here would declare one nothing produces. Recorded *in the document* on its `409`, so the next reader does not re-open the question. |
+| `DELETE /tests/{id}` | **No** | Same visibility predicate; and §8.3 gives delete no refusal beyond it. |
+| `GET /tests`, `GET /tests/{id}` | **No** | Reads. V12's rule is that quarantined rows are *hidden* from user-facing paths and *refused* on compile/confirm/execute; hiding is not a conflict. |
+| `POST /tests` | **No** | No draft exists yet to be withheld. |
+| `POST /v1/runs`, the two `/internal/studio/...` callbacks | **A different, later instance** | Their `409`s declare no codes either, but their producers are 10.7's and do not exist. Declaring a set now would invent one. Recorded as O-9 with a pre-ruling (§14.7) so the question does not come back as an escalation. |
+
+### 14.6 `x-conflict-codes` — why the examples were not enough
+
+`ErrorResponse.error` is a free string. Before this amendment, the set of codes a `409` could carry
+was conveyed only by `examples`, and an example is decorative: no generator reads it, no validator
+enforces it, and no test can assert it is complete. **That is §INT-4's failure mode one level down**
+— a divergence no test could see — and it is why 10.8 had to read the `responses` map by hand to
+prove its point.
+
+So every public `409` now carries `x-conflict-codes`, an exhaustive list. An implementation that
+answers `409` with a code outside its list, or that cannot produce one in it, is a conformance
+failure that a story's own test can assert directly. This follows the `x-served-by` precedent of
+§3.1: the machine-readable form of a fact that tags and examples convey only to humans.
+
+| Option | Why not |
+|---|---|
+| **Examples only** (10.8's candidate amendment) | Correct as far as it goes, and the cheapest edit, but it leaves the code set unassertable — the exact property whose absence made this escalation necessary. It would have closed AC-1b and left the class open. |
+| **Narrow `error` to an enum via a per-route `ConflictResponse` schema** | The strongest form, and rejected on blast radius rather than principle. It narrows a public response body that five stories and the MFE already consume, mid-wave; a code legitimately added later becomes a runtime conformance failure for an API in flight; and `ErrorResponse` is shared with `400`/`401`/`403`, whose code sets are genuinely open. An extension gets the assertability without making the contract brittle. Revisit at GA, when the sets have stopped moving. |
+| **A shared `components/responses/LifecycleConflict`** | Only `compileTest` could `$ref` it: OpenAPI cannot merge a referenced response with the route-specific codes `confirmCompile` and `executeTest` must also carry. It would buy one route's brevity at the cost of expressing the same fact two different ways. |
+| **Declare the codes in prose on each operation** | What `confirmCompile` and `executeTest` effectively already did. It is how the set stayed incomplete without failing anything. |
+
+### 14.7 Pre-ruling, so the same class does not escalate twice
+
+The lead is right that a second escalation for this class in wave 4 would be a process failure.
+Under §12, populating `x-conflict-codes` on an operation is Class C. **It is hereby narrowed for
+this one mechanism:** a story that writes a `409`'s producer may populate that operation's
+`x-conflict-codes` directly, in its own PR with a §13 log line, provided every code it lists is
+emitted by the code the same PR lands, and it lists no others. That is recording what exists, and
+§12's own Class A reasoning applies — it is not a decision, and gating it blocks a wave for nothing.
+
+Everything else stays Class C without exception: choosing the status, *removing* a code, adding a
+code the PR does not produce, or extending the mechanism to any other field. Loosening remains
+never a story's call.
+
+### 14.8 What story 10.8's phase 2 must do
+
+Contract-side this is settled. The following is the story's, and it is the whole of it:
+
+1. **Delete the `@Disabled` annotation and the `throw new AssertionError(...)` body** of
+   `compilingADeletedTestAnswersTheDeclaredStatusCode`, and write the assertion the name already
+   promises: soft-delete the seeded draft, call `POST /tests/{id}/compile` as its authorized owner,
+   and assert `409` with `error: TEST_DELETED`; then the quarantined case with `TEST_QUARANTINED`.
+   Both codes are now declared, so a conforming implementation exists.
+2. **Update `theFrozenCompileOperationDeclaresNoConflictResponse`.** Its `containsExactlyInAnyOrder("202", "401", "403")`
+   is now false by design and will fail. Its premise was the divergence; the divergence is closed.
+   The assertion worth keeping in its place is the one this amendment makes checkable: the set of
+   codes the route can answer equals the operation's `x-conflict-codes`, read from the document.
+   The sibling test asserting `confirmCompile` and `executeTest` carry `409` stays as it is.
+3. **Change nothing in `requireCompilable`.** It was right. The route calls it, in the order §14.4
+   fixes: authorization, then the guard, then authoring bounds and the credential screen, then
+   `beginCompile`.
+4. **Declare the `400` path too when the route lands.** `SOURCE_TOO_MANY_STEPS`,
+   `SOURCE_LINE_TOO_LONG`, `SOURCE_TOO_LARGE` and `INLINE_CREDENTIAL` are now declared on
+   `compileTest`; the route must answer `400` with those codes and with no compile state moved.
+5. **Remove `x-not-yet-implemented` from `compileTest` only** when T-10.8.1 lands the route — that
+   is Class A housekeeping the story already owns, and `x-implemented-by: '10.8'` stays.
+
+This amendment changes no story's Title, Acceptance Criteria, Scope or Status. AC-1b's escalation is
+closed by this section; whether the checkbox is now satisfied is @po's call, not mine.
