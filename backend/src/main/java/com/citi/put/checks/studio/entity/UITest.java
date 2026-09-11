@@ -1,7 +1,10 @@
 package com.citi.put.checks.studio.entity;
 
+import com.citi.put.checks.studio.compile.CompileState;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,7 +17,7 @@ import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "ui_tests")
-@SQLRestriction("deleted_at IS NULL")
+@SQLRestriction("deleted_at IS NULL AND quarantined_at IS NULL")
 public class UITest {
 
   @Id
@@ -79,6 +82,40 @@ public class UITest {
 
   @Column(name = "deleted_at")
   private Instant deletedAt;
+
+  /**
+   * Quarantined drafts (missing or unregistered CSI, V12) are hidden from every user-facing path
+   * and from compile/confirm/execute, but are never deleted or reassigned (BRD §9).
+   */
+  @Column(name = "quarantined_at")
+  private Instant quarantinedAt;
+
+  @Column(name = "source_revision", nullable = false)
+  private long sourceRevision = 1L;
+
+  @Column(name = "configuration_revision", nullable = false)
+  private long configurationRevision = 1L;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "compile_status", nullable = false, length = 30)
+  private CompileState compileStatus = CompileState.STALE;
+
+  @Column(name = "compile_request_id")
+  private UUID compileRequestId;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "compile_error", columnDefinition = "jsonb")
+  private String compileError;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "compile_diagnostics", columnDefinition = "jsonb")
+  private String compileDiagnostics;
+
+  @Column(name = "current_candidate_revision_id")
+  private UUID currentCandidateRevisionId;
+
+  @Column(name = "confirmed_revision_id")
+  private UUID confirmedRevisionId;
 
   protected UITest() {}
 
@@ -254,5 +291,73 @@ public class UITest {
 
   public void setDeletedAt(Instant deletedAt) {
     this.deletedAt = deletedAt;
+  }
+
+  public Instant getQuarantinedAt() {
+    return quarantinedAt;
+  }
+
+  public long getSourceRevision() {
+    return sourceRevision;
+  }
+
+  public void setSourceRevision(long sourceRevision) {
+    this.sourceRevision = sourceRevision;
+  }
+
+  public long getConfigurationRevision() {
+    return configurationRevision;
+  }
+
+  public void setConfigurationRevision(long configurationRevision) {
+    this.configurationRevision = configurationRevision;
+  }
+
+  public CompileState getCompileStatus() {
+    return compileStatus;
+  }
+
+  public void setCompileStatus(CompileState compileStatus) {
+    this.compileStatus = compileStatus;
+  }
+
+  public UUID getCompileRequestId() {
+    return compileRequestId;
+  }
+
+  public void setCompileRequestId(UUID compileRequestId) {
+    this.compileRequestId = compileRequestId;
+  }
+
+  public String getCompileError() {
+    return compileError;
+  }
+
+  public void setCompileError(String compileError) {
+    this.compileError = compileError;
+  }
+
+  public String getCompileDiagnostics() {
+    return compileDiagnostics;
+  }
+
+  public void setCompileDiagnostics(String compileDiagnostics) {
+    this.compileDiagnostics = compileDiagnostics;
+  }
+
+  public UUID getCurrentCandidateRevisionId() {
+    return currentCandidateRevisionId;
+  }
+
+  public void setCurrentCandidateRevisionId(UUID currentCandidateRevisionId) {
+    this.currentCandidateRevisionId = currentCandidateRevisionId;
+  }
+
+  public UUID getConfirmedRevisionId() {
+    return confirmedRevisionId;
+  }
+
+  public void setConfirmedRevisionId(UUID confirmedRevisionId) {
+    this.confirmedRevisionId = confirmedRevisionId;
   }
 }
