@@ -11,7 +11,7 @@ import * as packageSurface from '../../src/index.js';
 import * as reportingSurface from '../../src/reporting/index.js';
 import * as serverSurface from '../../src/server/index.js';
 import { createCounters, createLogger, createRecordingLogSink, createStdoutSink } from '../../src/server/logging.js';
-import { createRedactor } from '../../src/executor/redaction.js';
+import { createRedactor, NULL_REDACTOR } from '../../src/executor/redaction.js';
 import { createRunSnapshot, serializeBounded } from '../../src/reporting/snapshot.js';
 import { DEFAULT_REPORT_BOUNDS, boundSteps, byteLength } from '../../src/reporting/bounds.js';
 import { PERMITTED_DESTINATIONS } from '../../src/server/config.js';
@@ -104,6 +104,7 @@ describe('snapshot and bounds edges', () => {
       identity,
       bounds: DEFAULT_REPORT_BOUNDS,
       runtimeVersions: {},
+      redactor: NULL_REDACTOR,
       wallClock: () => {
         tick += 1;
         return new Date(tick * 1000);
@@ -121,6 +122,7 @@ describe('snapshot and bounds edges', () => {
       identity,
       bounds: DEFAULT_REPORT_BOUNDS,
       runtimeVersions: {},
+      redactor: NULL_REDACTOR,
       wallClock: () => new Date(0),
     });
 
@@ -153,6 +155,7 @@ describe('snapshot and bounds edges', () => {
       identity,
       bounds: { ...DEFAULT_REPORT_BOUNDS, maxLogEntries: 1 },
       runtimeVersions: {},
+      redactor: NULL_REDACTOR,
       wallClock: () => new Date(0),
     });
     snapshot.appendLog({ atMs: 1, level: 'info', message: 'first' });
@@ -167,6 +170,7 @@ describe('snapshot and bounds edges', () => {
       identity,
       bounds: DEFAULT_REPORT_BOUNDS,
       runtimeVersions: { playwright: '1.63.0' },
+      redactor: NULL_REDACTOR,
       wallClock: () => new Date(0),
     });
     snapshot.appendLog({ atMs: 1, level: 'info', message: 'x'.repeat(200) });

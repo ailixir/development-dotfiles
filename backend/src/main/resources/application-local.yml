@@ -27,6 +27,15 @@ management:
       show-details: always
 
 studio:
+  # Studio secret resolution (§9.2, story 10.17 AC-9).
+  #
+  # `provider` has NO default anywhere — not here, not in application.yml, not in code. A
+  # deployed profile that does not name a provider refuses to start rather than falling back
+  # to anything, and `fake` is confined to the test/local/dev profiles. A silent fallback to a
+  # fake vault is the worst failure mode this path can have.
+  secrets:
+    vault:
+      provider: fake
   compile:
     gateway:
       # Local runs never hold R2D2 credentials; keep the gateway off unless a stub is wired in.
@@ -37,3 +46,4 @@ studio:
 logging:
   level:
     com.google.cloud.vertexai: ${STUDIO_GATEWAY_SDK_LOG_LEVEL:INFO}
+

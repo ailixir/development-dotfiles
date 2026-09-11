@@ -79,6 +79,52 @@ no variant the redactor scrubs. It is line- and volume-bounded, its drops are an
 silent, it is synchronous and contained so it can never delay the run or the control endpoints, and
 it is released at the end of the run so nothing holds a path to a resolved value afterwards.
 
+**The chunk-boundary case is closed (story 10.17, AC-21).** The relay's own comment used to say the
+general case could not be closed *"without an unbounded buffer, which is the thing this relay exists
+to prevent."* That was wrong: the buffer required is bounded by the longest thing the redactor could
+possibly match, and the run computes that set at admission. `createRedactor` publishes it as
+`longestVariantLength`; the relay **reads** it and computes nothing, because two derivations of one
+bound in two modules is this codebase's most-repeated defect. The bound is the longest *variant*,
+not the longest known value — base64 is roughly four-thirds of a value, so a tail sized to the raw
+value would close the case a test was written for and miss the case an attacker gets. Peak retention
+per stream is `retentionBound + maxLineLength`, declared in the module and asserted against the
+bound rather than against a number copied into a test.
+
+One case remains and is stated rather than implied: **a child that writes a value with a newline
+through the middle of it** produces two lines by its own choice, and neither half matches anything.
+
+## What a resolved value may touch (story 10.17)
+
+A run receives `resolvedVars` and `resolvedSecrets` on its job envelope and holds them in memory for
+the length of the run. §9.2: *"Never persist them in jobs, retry queues, manifests or diagnostics."*
+
+**Correspondence is checked before capacity.** `validateEnvelope` is step 1 of `submit` — before
+`pool.tryAcquire()`, before admission and before any process — and since story 10.17 it compares the
+resolved maps' keys against `references`: every declared name has a value, no resolved key is
+undeclared in either map, and a name crossed between the two kinds is a refusal. Before that, a job
+declaring a secret and supplying no value was admitted, took a capacity slot, launched Chromium and
+died mid-step in front of a real application. Every refusal carries the reference **name** and never
+a value, which is what makes the whole `detail` array safe to log.
+
+**Both maps are scrubbed, not only the secrets.** The contract describes only `resolvedSecrets` as
+*"additionally scrubbed"*; `knownValuesOf` feeds the redactor both. @po ruled on 2026-09-11 that the
+code's stronger behaviour is correct and intended and that the *document* is what is narrower — a
+variable value is author-supplied free text the system knows nothing about, and a `REGION` today is
+a URL carrying a token tomorrow. Amending the document is Class B and an architect's; story 10.17
+records the divergence and changes nothing.
+
+**The redactor scrubs eight variants**, not seven: plain, `encodeURIComponent`, `encodeURI`,
+double-encoded, four base64 forms, and — since story 10.17 — the **JSON-escaped** form. `logging.ts`
+is serialize-then-redact by design, so the bytes on a log line are escaped and a value containing
+`"`, `\` or a newline was not the value the redactor was looking for. `redact` stays `split`/`join`:
+no `RegExp` is built over attacker-influenced text.
+
+**The retained log buffer truncates before the report client redacts**, and that order is not
+reversed — bounding is `bounds.ts`'s job and scrubbing is not. The requirement that follows is made
+a property of the code rather than of today's callers: `RunSnapshot.appendLog` is the only caller
+reachable from a run and it applies the run's redactor before delegating, so a producer added later
+cannot skip it.
+
 ## The real browser (story 10.12)
 
 **The browser is real from this story onward.** `src/main.ts` no longer ships a launcher that

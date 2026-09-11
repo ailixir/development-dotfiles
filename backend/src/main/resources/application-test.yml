@@ -15,3 +15,14 @@ logging:
     root: INFO
     com.citi.put.checks: DEBUG
     org.flywaydb: INFO
+
+# Studio secret resolution (§9.2, story 10.17 AC-9).
+#
+# `provider` has NO default anywhere — not here, not in application.yml, not in code. A deployed
+# profile that does not name a provider refuses to start rather than falling back to anything, and
+# `fake` is confined to the test/local/dev profiles. A silent fallback to a fake vault is the worst
+# failure mode this path can have, and it is cheaper to make impossible than to detect.
+studio:
+  secrets:
+    vault:
+      provider: fake

@@ -49,8 +49,14 @@ export interface JobEnvelope extends JobIdentity {
   readonly manifestKey: string;
 }
 
-/** Every key a job body may carry. Anything else is a rejection. */
-const ACCEPTED_JOB_KEYS = new Set([
+/**
+ * Every key a job body may carry. Anything else is a rejection.
+ *
+ * Exported since story 10.17 so that AC-16b's gate-shut tripwire can assert over **this** set
+ * rather than over a hand-built test fixture (QA LOW-2). A tripwire that iterates a fixture is a
+ * statement about the fixture; adding `targetPolicy` here left it green.
+ */
+export const ACCEPTED_JOB_KEYS = new Set([
   'executionId',
   'attemptId',
   'revisionId',
@@ -94,7 +100,78 @@ export const ENVELOPE_CODES = {
   callbackNotPermitted: 'JOB_CALLBACK_NOT_PERMITTED',
   missingField: 'JOB_FIELD_MISSING',
   invalidField: 'JOB_FIELD_INVALID',
+  /** A reference the artifact may name, for which the job supplied no value (AC-3). */
+  referenceNotResolved: 'JOB_REFERENCE_NOT_RESOLVED',
+  /** A value the artifact cannot name. A value with no declaration should not be here (AC-3). */
+  resolvedNotDeclared: 'JOB_RESOLVED_NOT_DECLARED',
+  /** The same name declared, or supplied, as both a variable and a secret (AC-3). */
+  referenceCrossedType: 'JOB_REFERENCE_CROSSED_TYPE',
 } as const;
+
+/**
+ * Reference/value correspondence (AC-3, §4.5, §9.2).
+ *
+ * Before story 10.17 this check did not exist. `resolvedVars` and `resolvedSecrets` were checked
+ * to be string records and their keys were **never compared to `references`** — so a job declaring
+ * a secret and supplying no value was admitted, took a capacity slot, launched Chromium, and died
+ * mid-step with `Secret "LOGIN_PW" was not resolved for this run.` in front of a real application.
+ * The epic's acceptance bullet is *"unauthorized or missing reference prevents browser launch"*,
+ * and this is where that becomes true: correspondence is part of envelope validation, which runs
+ * as step 1 of `submit`, before `pool.tryAcquire()`, before admission and before any process.
+ *
+ * Four conditions, and the third and fourth are not symmetry for its own sake:
+ *
+ * 1. every declared secret id has a key in `resolvedSecrets`;
+ * 2. every declared variable name has a key in `resolvedVars`;
+ * 3. **no resolved key is undeclared, in either map.** A value the artifact cannot name is a value
+ *    that should not be in this process at all — it can be read by nothing, so its only possible
+ *    effect is to be leaked;
+ * 4. a secret id appearing among the variables, or the reverse, is a refusal. The two maps mean
+ *    different things — only one of them is a secret whose *position* the validator restricts —
+ *    and a name that is both makes the artifact's own reference check ambiguous.
+ *
+ * Every problem carries the reference **name** and never the value, exactly as every other
+ * envelope problem does, which is what makes the whole `detail` array safe to log.
+ */
+function validateCorrespondence(
+  references: { readonly variables: readonly string[]; readonly secrets: readonly string[] },
+  resolvedVars: Readonly<Record<string, string>>,
+  resolvedSecrets: Readonly<Record<string, string>>,
+  problems: EnvelopeProblem[],
+): void {
+  const declaredVariables = new Set(references.variables);
+  const declaredSecrets = new Set(references.secrets);
+
+  for (const name of declaredVariables) {
+    if (declaredSecrets.has(name)) {
+      problems.push({ code: ENVELOPE_CODES.referenceCrossedType, field: name });
+    }
+  }
+  for (const name of declaredVariables) {
+    if (!Object.hasOwn(resolvedVars, name)) {
+      problems.push({ code: ENVELOPE_CODES.referenceNotResolved, field: name });
+    }
+  }
+  for (const name of declaredSecrets) {
+    if (!Object.hasOwn(resolvedSecrets, name)) {
+      problems.push({ code: ENVELOPE_CODES.referenceNotResolved, field: name });
+    }
+  }
+  for (const name of Object.keys(resolvedVars)) {
+    if (declaredSecrets.has(name) && !declaredVariables.has(name)) {
+      problems.push({ code: ENVELOPE_CODES.referenceCrossedType, field: name });
+    } else if (!declaredVariables.has(name)) {
+      problems.push({ code: ENVELOPE_CODES.resolvedNotDeclared, field: name });
+    }
+  }
+  for (const name of Object.keys(resolvedSecrets)) {
+    if (declaredVariables.has(name) && !declaredSecrets.has(name)) {
+      problems.push({ code: ENVELOPE_CODES.referenceCrossedType, field: name });
+    } else if (!declaredSecrets.has(name)) {
+      problems.push({ code: ENVELOPE_CODES.resolvedNotDeclared, field: name });
+    }
+  }
+}
 
 export interface EnvelopeProblem {
   readonly code: string;
@@ -213,7 +290,19 @@ export function validateEnvelope(body: unknown): EnvelopeResult {
 
   validateConfiguration(body.configuration, problems);
   validateDeadlines(body.deadlines, problems);
-  validateReferences(body.references, problems);
+  const referencesOk = validateReferences(body.references, problems);
+
+  // Correspondence needs all three shapes to have been established first; a malformed `references`
+  // or a non-record resolved map has already been reported and comparing their keys would add
+  // noise rather than a second fact.
+  if (referencesOk && stringRecord(body.resolvedVars) && stringRecord(body.resolvedSecrets)) {
+    validateCorrespondence(
+      body.references as { variables: string[]; secrets: string[] },
+      body.resolvedVars,
+      body.resolvedSecrets,
+      problems,
+    );
+  }
 
   if (problems.length > 0) return { ok: false, problems };
   return { ok: true, job: body as unknown as JobEnvelope };

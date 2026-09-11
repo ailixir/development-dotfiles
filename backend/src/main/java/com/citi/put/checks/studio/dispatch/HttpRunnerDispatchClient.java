@@ -17,7 +17,14 @@ import org.springframework.stereotype.Component;
 
 /**
  * The real dispatch client, built on the JDK HTTP client precisely because its two dangerous
- * behaviours can be switched off explicitly and demonstrably (AC-15).
+ * behaviours can be switched off explicitly and demonstrably (10.7 AC-15).
+ *
+ * <p>Since story 10.17 the body this client serializes carries resolved variable and secret values
+ * (§8.4, §9.2), so it is a new persistence surface and is treated as one: the serialized body is
+ * never logged at any level, never placed in an exception message or cause chain, and nothing
+ * retains it after {@code send} returns. The {@link JsonProcessingException} branch below is the
+ * one place a serializer failure could have carried the body into a message, and it deliberately
+ * says nothing about what failed to serialize.
  *
  * <p>{@link HttpClient.Redirect#NEVER} means a {@code 3xx} is returned to this code as a response
  * rather than followed, so exactly one request leaves the process. The JDK client performs no
@@ -112,17 +119,40 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
     }
   }
 
-  /** Declared reference names only. No resolved value is ever serialized into a job body (§9.2). */
+  /**
+   * The body, and it is the only place this API decides what {@code POST /v1/runs} looks like.
+   *
+   * <p>Exactly the fourteen keys the frozen {@code RunJob} declares, and nothing else. The closed
+   * key set is a security control rather than tidiness — it is what stops a job naming its own
+   * callback destination — and a producer that writes a fifteenth key is refused by the runner
+   * before capacity, before admission and before a browser.
+   *
+   * <p>{@code InternalBodyContractConformanceTest} validates the bytes this method produces against
+   * the schema read from {@code docs/specs/studio/openapi.yaml}, off a real socket. That assertion
+   * landed red, in its own commit, before this method was corrected.
+   */
   private Map<String, Object> body(RunJob job) {
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("executionId", job.executionId());
     body.put("attemptId", job.attemptId());
-    body.put("testId", job.testId());
-    body.put("csiId", job.csiId());
     body.put("revisionId", job.revisionId());
-    body.put("environment", job.environment());
-    body.put("references", job.references());
-    body.put("callbackBaseUrl", job.callbackBaseUrl());
+    body.put("artifactHash", job.artifactHash());
+    body.put("artifact", job.artifact());
+    body.put("source", job.source());
+    body.put("configuration", job.configuration());
+    body.put("csi", job.csi());
+    Map<String, Object> references = new LinkedHashMap<>();
+    references.put("variables", job.references().variables());
+    references.put("secrets", job.references().secrets());
+    body.put("references", references);
+    body.put("resolvedVars", job.resolvedVars());
+    body.put("resolvedSecrets", job.resolvedSecrets());
+    Map<String, Object> deadlines = new LinkedHashMap<>();
+    deadlines.put("admittedStartMs", job.deadlines().admittedStartMs());
+    deadlines.put("totalRuntimeMs", job.deadlines().totalRuntimeMs());
+    body.put("deadlines", deadlines);
+    body.put("videoKey", job.videoKey());
+    body.put("manifestKey", job.manifestKey());
     return body;
   }
 }

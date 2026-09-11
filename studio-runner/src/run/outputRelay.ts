@@ -59,10 +59,27 @@
  *
  * - the child writes a value with a **newline** through the middle of it — two lines, by the
  *   child's own choice, and neither half matches;
- * - a value longer than `maxLineLength` that also spans a chunk boundary, so the relay is forced
- *   to emit before the rest arrives. The retained tail below removes the ordinary case of this
- *   (values shorter than a line, which is all of them in practice); it cannot remove the general
- *   one without an unbounded buffer, which is the thing this relay exists to prevent.
+ * - the child writes a value with a **newline** through the middle of it — two lines, by the
+ *   child's own choice, and neither half matches.
+ *
+ * The second case this comment used to name — a value longer than `maxLineLength` that also spans a
+ * chunk boundary — **is closed**, and the sentence claiming it could not be closed *"without an
+ * unbounded buffer"* was wrong. The buffer required was never unbounded: it is bounded by the
+ * longest thing the redactor could possibly match, and the run computes that set at admission.
+ * `createRedactor` already sorts its variants longest-first, so the number exists; it is published
+ * as `Redactor.longestVariantLength` and **read** here rather than recomputed, because two
+ * derivations of one bound in two modules is this codebase's most-repeated defect.
+ *
+ * The bound is the longest **variant**, not the longest known value, and that distinction is
+ * load-bearing: base64 of a value is roughly four-thirds of it and double URL-encoding can be
+ * longer still, so a tail sized to the raw value would close the case the test was written for and
+ * miss the case an attacker gets.
+ *
+ * **Peak retention per stream is `retentionBound + maxLineLength`**, measured after the trimming
+ * loop and asserted against the bound rather than against a number copied into a test. Nothing is
+ * emitted from the overflow path until at least `retentionBound` has been seen or the stream has
+ * ended, and what is retained afterwards is never less than `retentionBound` — which is the whole
+ * property: a value cannot be cut until enough of it is in hand to recognise it.
  *
  * It is a scrubber for known values it can assemble, exactly as `createRedactor` is, and it is not
  * described as more.
@@ -71,6 +88,13 @@
 /** Just enough of a redactor for this module; `src/executor/redaction.ts` supplies the real one. */
 export interface RelayRedactor {
   redact(text: string): string;
+  /**
+   * The retention bound, read rather than recomputed (AC-21).
+   *
+   * Optional only so that a caller with a trivial stub need not supply it; absent is treated as 0,
+   * which degrades to the previous `maxLineLength` behaviour rather than to an unbounded buffer.
+   */
+  readonly longestVariantLength?: number;
 }
 
 export interface OutputRelayOptions {
@@ -88,10 +112,19 @@ export type OutputStream = 'stdout' | 'stderr';
 export interface OutputRelay {
   /** Feeds a raw chunk. Never throws, never blocks, never returns a promise. */
   write(stream: OutputStream, chunk: string): void;
+  /**
+   * The per-stream retention bound this relay is holding to (AC-21).
+   *
+   * Published so a test can assert peak retention *against the bound* rather than against a number
+   * copied into the test, which would be a third derivation of it.
+   */
+  readonly retentionBound: number;
   /** Flushes any trailing partial line and emits the drop notice if there was one. */
   close(): void;
   /** Drops the redactor. After this the relay emits nothing at all (AC-9). */
   release(): void;
+  /** Largest amount ever held in a single stream's partial buffer. Bounded by `2 x retentionBound`. */
+  readonly peakRetained: number;
   readonly emitted: number;
   readonly dropped: number;
   readonly released: boolean;
@@ -99,6 +132,10 @@ export interface OutputRelay {
 
 export function createOutputRelay(options: OutputRelayOptions): OutputRelay {
   const { maxLineLength, maxLines, emit } = options;
+  // Read from the redactor, never recomputed. A value can only be matched once it is whole, so the
+  // tail that must be held back before any cut is the longest variant the redactor could match.
+  const retentionBound = Math.max(maxLineLength, options.redactor.longestVariantLength ?? 0);
+  let peakRetained = 0;
   let redactor: RelayRedactor | null = options.redactor;
   const partial: Record<OutputStream, string> = { stdout: '', stderr: '' };
   let emitted = 0;
@@ -139,6 +176,10 @@ export function createOutputRelay(options: OutputRelayOptions): OutputRelay {
   }
 
   return {
+    retentionBound,
+    get peakRetained(): number {
+      return peakRetained;
+    },
     get emitted(): number {
       return emitted;
     },
@@ -177,26 +218,36 @@ export function createOutputRelay(options: OutputRelayOptions): OutputRelay {
       // only test that reached this branch ran with no values to redact. The newline path never
       // had the problem because the *child* chose where the line ended. Here the **relay** chooses,
       // so the relay owns the consequence.
-      if (buffer.length > maxLineLength) {
+      if (buffer.length > retentionBound) {
         const active = redactor;
         if (active === null) {
           // Released. There is no redactor, so no cut of this buffer can be made safely and the
-          // whole of it is dropped rather than fragmented.
+          // whole of it is dropped rather than fragmented. Unchanged by AC-21 and re-asserted so
+          // the change does not reopen it.
           dropped += 1;
           buffer = '';
         } else {
           buffer = active.redact(buffer);
-          // Hold one line's worth back rather than cutting to the last byte. A value that spans a
+          // Hold `retentionBound` back rather than cutting to the last byte. A value that spans a
           // *chunk* boundary is incomplete at the moment it arrives and therefore matches nothing;
-          // retaining a tail gives the rest of it a chance to arrive and be scrubbed before
-          // anything is emitted. Memory stays bounded — at most `2 × maxLineLength` per stream.
-          while (buffer.length > maxLineLength * 2) {
+          // retaining a tail at least as long as the longest variant gives the rest of it a chance
+          // to arrive and be scrubbed before anything is emitted. Retaining only `maxLineLength`
+          // closed this for values shorter than a line and left it open for everything else, which
+          // is the general case this bound closes. Memory stays bounded — at most
+          // `2 × retentionBound` per stream, which is declared and asserted.
+          // Two different numbers doing two different jobs, and conflating them loses output.
+          // `retentionBound` is how much must be **held back** before any cut is safe;
+          // `maxLineLength` is how much may be **emitted** at a time. Cutting in `retentionBound`
+          // pieces would hand `deliver` a slice longer than the line cap, which it would then
+          // truncate — discarding the difference silently, on every overflow, forever.
+          while (buffer.length > retentionBound + maxLineLength) {
             deliver(stream, buffer.slice(0, maxLineLength));
             buffer = buffer.slice(maxLineLength);
           }
         }
       }
       partial[stream] = buffer;
+      peakRetained = Math.max(peakRetained, buffer.length);
     },
 
     close(): void {

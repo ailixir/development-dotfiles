@@ -14,7 +14,7 @@
  * state, so it is a per-run counter — and is never reused or decremented, including on a retry.
  */
 import type { StepStatus } from '../executor/adapters/StepReporter.js';
-import type { LogBuffer, LogEntry, ReportBounds } from './bounds.js';
+import type { LogEntry, LogView, ReportBounds } from './bounds.js';
 import { boundSteps, createLogBuffer } from './bounds.js';
 
 export type ReportKind = 'STARTED' | 'PROGRESS' | 'FINAL';
@@ -86,6 +86,27 @@ export interface SnapshotOptions {
   readonly runtimeVersions: Readonly<Record<string, unknown>>;
   /** Wall-clock source for the timestamps that describe the run. */
   readonly wallClock: () => Date;
+  /**
+   * The run's redactor, applied to every log message **before** the bounded buffer truncates it
+   * (AC-22, MED-3).
+   *
+   * This is the call-site guard `createLogBuffer.append` lacks. That buffer truncates
+   * `entry.message` with `slice(0, maxEntryLength - 1)` and the report client redacts the assembled
+   * body afterwards, so the order is truncate-then-redact — which is the order that lets a known
+   * value be cut in half and both halves through. It is **not** live today: both producers of that
+   * field resolve to a single site that redacts first. But the risk was never today's callers, it
+   * was the third one, and a property that holds only because nobody has written the wrong producer
+   * yet is not a property.
+   *
+   * `bounds.ts` is deliberately **not** restructured. Reordering truncation and redaction inside
+   * the buffer would put a redaction responsibility in a module whose job is bounding, and this
+   * codebase has paid three times for two copies of one fact. The redaction stays at the boundary;
+   * this is the boundary, and it is the only caller of `logs.append`.
+   *
+   * Required rather than optional: a default would be a fail-open, which is the shape of the
+   * defect, not its fix.
+   */
+  readonly redactor: { redact(text: string): string };
 }
 
 export interface RunSnapshot {
@@ -105,18 +126,46 @@ export interface RunSnapshot {
   /** Builds a report and consumes the next sequence number. Synchronous by contract. */
   build(kind: ReportKind, outcome?: RunOutcome | null, evidence?: EvidenceState | null): ReportBody;
   readonly lastSequence: number;
-  readonly logs: LogBuffer;
+  /**
+   * The retained log, **read-only** (AC-22, QA-1).
+   *
+   * Deliberately a {@link LogView} and not the {@link LogBuffer} itself. AC-22's own falsification
+   * is *route one existing producer around the redactor*, and until QA performed it that mutation
+   * was green: `snapshot.logs.append(...)` reached the truncating buffer directly, putting the whole
+   * value on the built body — and, with the value straddling `maxLogEntryLength`, a raw fragment
+   * that matches no variant the outbound redactor can scrub.
+   *
+   * A test cannot watch a door that is open; the fix is that there is no door. The buffer is held in
+   * the closure, this view forwards reads only, and `append` is **absent at run time** rather than
+   * merely hidden by a type — so a producer written later that tries to go around
+   * {@link RunSnapshot.appendLog} fails to compile *and* throws.
+   */
+  readonly logs: LogView;
 }
 
 export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
-  const { identity, bounds, runtimeVersions, wallClock } = options;
+  const { identity, bounds, runtimeVersions, wallClock, redactor } = options;
   const logs = createLogBuffer(bounds.maxLogEntries, bounds.maxLogEntryLength);
   const steps = new Map<number, SnapshotStep>();
   let sequence = 0;
   let browserStartedAt: string | null = null;
 
+  /**
+   * Reads forwarded one by one. Not `{ ...logs }` and not `logs` itself: either would carry
+   * `append` across and reopen the bypass this view exists to close.
+   */
+  const logView: LogView = {
+    entries: () => logs.entries(),
+    get truncated(): boolean {
+      return logs.truncated;
+    },
+    get dropped(): number {
+      return logs.dropped;
+    },
+  };
+
   const snapshot: RunSnapshot = {
-    logs,
+    logs: logView,
     get browserStarted(): boolean {
       return browserStartedAt !== null;
     },
@@ -140,7 +189,9 @@ export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
       steps.set(step.stepIndex, step);
     },
     appendLog(entry: LogEntry): void {
-      logs.append(entry);
+      // Redact, then let the buffer bound. Every producer reachable from a run passes through
+      // here, so a producer added later cannot skip it (AC-22).
+      logs.append({ ...entry, message: redactor.redact(entry.message) });
     },
     build(
       kind: ReportKind,

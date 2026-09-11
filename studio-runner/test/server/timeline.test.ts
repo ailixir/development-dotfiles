@@ -19,6 +19,7 @@ import type { ReportBody } from '../../src/reporting/snapshot.js';
 import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
 import { post, validJob } from '../helpers/runner.js';
+import { NULL_REDACTOR } from '../../src/executor/redaction.js';
 
 let harness: Harness | null = null;
 
@@ -156,6 +157,7 @@ describe('AC-11.4 — a report with browserStartedAt: null carries no reading', 
       },
       bounds: DEFAULT_REPORT_BOUNDS,
       runtimeVersions: {},
+      redactor: NULL_REDACTOR,
       wallClock: () => new Date(0),
     });
 

@@ -45,13 +45,27 @@ export interface LogEntry {
   readonly message: string;
 }
 
-export interface LogBuffer {
-  append(entry: LogEntry): void;
+/**
+ * The **read** half of {@link LogBuffer}, and the only half anything outside the snapshot gets.
+ *
+ * Splitting the interface is the AC-22 guard (QA-1). A `LogBuffer` handed out whole is a second way
+ * into the truncating buffer, one that goes *around* `RunSnapshot.appendLog` and therefore around
+ * the run's redactor — and a producer that reached it that way would put a whole value on the
+ * report body, or a raw fragment of one past the cut, which matches no variant the outbound
+ * redactor can scrub. The guard's own falsification is *route one existing producer around the
+ * redactor*, and that mutation has to be **unable to reach the buffer at all** rather than merely
+ * watched.
+ */
+export interface LogView {
   /** Current retained entries, oldest first. */
   entries(): readonly LogEntry[];
   /** True once the cap has been reached and at least one entry has been dropped. */
   readonly truncated: boolean;
   readonly dropped: number;
+}
+
+export interface LogBuffer extends LogView {
+  append(entry: LogEntry): void;
 }
 
 /**
@@ -73,6 +87,19 @@ export function createLogBuffer(maxEntries: number, maxEntryLength: number): Log
       return dropped;
     },
     append(entry: LogEntry): void {
+      // **Truncation precedes redaction in this buffer, and that is on purpose.** Bounding is this
+      // module's job; scrubbing is not, and a second redactor here would be a second copy of a
+      // fact that already has an owner. The requirement that follows is real and is stated rather
+      // than left implicit: **callers are required to redact first**, because a known value cut by
+      // the `slice` below becomes two fragments, and a fragment matches no variant `createRedactor`
+      // produces — so both halves would survive the redaction that happens later on the assembled
+      // body, and concatenating them reconstructs the value.
+      //
+      // `RunSnapshot.appendLog` is the guard: it is the only caller reachable from a run and it
+      // applies the run's redactor before delegating here. A test enforces that requirement with a
+      // planted canary observed on the emitted entry rather than by scanning call sites, because a
+      // producer that built the same string through an innocently named local would pass a scan
+      // (AC-22, AC-23).
       const message =
         entry.message.length <= maxEntryLength
           ? entry.message
