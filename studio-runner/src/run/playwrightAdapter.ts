@@ -285,14 +285,18 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
       });
     },
 
-    locate(chain: LocatorChain): Promise<LocatorHandle> {
+    // `async` rather than a synchronous body returning a promise: a refusal here — the guard, or
+    // a variable with no resolver — must reach the executor as a rejected step, not as a throw
+    // that escapes the operation loop by a different route than every other operation's.
+    async locate(chain: LocatorChain): Promise<LocatorHandle> {
+      await Promise.resolve();
       guard();
       let current: QueryRoot = page;
       for (const segment of chain.segments) current = applySegment(current, segment);
       nextHandleId += 1;
       handles.set(nextHandleId, current as LocatorLike);
       const handle: AdapterLocatorHandle = { kind: 'locator-handle', id: nextHandleId };
-      return Promise.resolve(handle);
+      return handle;
     },
 
     async click(target: LocatorHandle, clickOptions?: ClickOptions): Promise<void> {

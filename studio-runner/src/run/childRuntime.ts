@@ -405,27 +405,36 @@ export function attachChildRuntime(dependencies: ChildRuntimeDependencies): void
     channel.exit(0);
   };
 
+  /**
+   * Messages are **queued, then dispatched** — never dispatched on the phase the parent happened
+   * to be in when the message arrived.
+   *
+   * The parent sends `execute` as soon as `launch` resolves, and `launch` resolves the moment the
+   * child answers `ready` — which happens *inside* the launch phase, before it finishes. Deciding
+   * order at arrival time would therefore race a correct parent into an out-of-order refusal.
+   * Deciding it when the queued item runs cannot: the queue is serial, so the launch phase has
+   * always completed by then.
+   */
   channel.onMessage((value: unknown) => {
     const kind = kindOf(value);
-    if (kind === 'stop') {
-      queue = queue.then(async () => {
+    queue = queue.then(async () => {
+      if (kind === 'stop') {
+        if (phase === 'done') return;
         await teardown();
         phase = 'done';
         channel.exit(0);
-      });
-      return;
-    }
-    if (phase === 'done') return;
-    if (kind === 'launch' && phase === 'idle') {
-      queue = queue.then(() => handleLaunch(value));
-      return;
-    }
-    if (kind === 'execute' && phase === 'launched') {
-      queue = queue.then(() => handleExecute(value));
-      return;
-    }
-    // Anything else is a protocol violation: refuse, tear down, leave.
-    queue = queue.then(async () => {
+        return;
+      }
+      if (phase === 'done') return;
+      if (kind === 'launch' && phase === 'idle') {
+        await handleLaunch(value);
+        return;
+      }
+      if (kind === 'execute' && phase === 'launched') {
+        await handleExecute(value);
+        return;
+      }
+      // Anything else is a protocol violation: refuse, tear down, leave.
       refuse(`The child received an out-of-order message (${String(kind)}).`);
       await teardown();
       phase = 'done';
