@@ -22,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -168,16 +167,7 @@ class InternalBodyContractConformanceTest {
             new StudioExecutionProperties(
                 true, null, null, null, Duration.ofSeconds(5), null, null, null, null, null, null),
             "http://localhost:" + wireMock.port())
-        .send(
-            new RunJob(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                "60406",
-                UUID.randomUUID(),
-                "Production",
-                List.of("REGION", "LOGIN_PW"),
-                "http://put-checks-api:8080"));
+        .send(RunJobFixtures.conformingJob());
 
     var requests = wireMock.findAll(postRequestedFor(urlPathEqualTo("/v1/runs")));
     assertThat(requests)

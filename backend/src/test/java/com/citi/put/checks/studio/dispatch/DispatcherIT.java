@@ -5,6 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
+import com.citi.put.checks.studio.secrets.FakeStudioVaultProvider;
+import com.citi.put.checks.studio.secrets.StudioSecretFixtures;
+import com.citi.put.checks.studio.secrets.StudioVaultProvider;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
@@ -42,6 +45,8 @@ class DispatcherIT {
   private static final String CSI_ID = "60457";
   private static final String OWNER = "dispatcher-owner@citi.com";
 
+  private static final String ENVIRONMENT = "Production";
+
   @TestConfiguration
   static class FakeRunner {
 
@@ -49,6 +54,26 @@ class DispatcherIT {
     @Primary
     RecordingRunnerDispatchClient recordingRunnerDispatchClient() {
       return new RecordingRunnerDispatchClient();
+    }
+
+    /**
+     * A vault and an entitlement set this test can change (story 10.17).
+     *
+     * <p>Story 10.7's two reference tests arranged their conditions by inserting into and deleting
+     * from the platform {@code secrets} table, because the stub resolver read it. The stub is gone
+     * — it never read its {@code csiId} parameter and returned a canary for every name — so the
+     * conditions are now arranged where they actually live.
+     */
+    @Bean
+    @Primary
+    FakeStudioVaultProvider fakeStudioVaultProvider() {
+      return new FakeStudioVaultProvider(java.util.Map.of());
+    }
+
+    @Bean
+    @Primary
+    StudioSecretFixtures.MutableSecretUseAuthorization mutableSecretUseAuthorization() {
+      return new StudioSecretFixtures.MutableSecretUseAuthorization();
     }
   }
 
@@ -59,6 +84,8 @@ class DispatcherIT {
   @Autowired private TransactionTemplate transactions;
   @Autowired private JdbcTemplate jdbc;
   @Autowired private org.springframework.context.ApplicationContext applicationContext;
+  @Autowired private FakeStudioVaultProvider vault;
+  @Autowired private StudioSecretFixtures.MutableSecretUseAuthorization entitlements;
 
   private StudioExecutionFixtures fixtures;
   private Authentication owner;
@@ -68,6 +95,8 @@ class DispatcherIT {
   @BeforeEach
   void setUp() {
     runner.reset();
+    vault.clear();
+    entitlements.clear();
     fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI_ID, OWNER);
@@ -304,12 +333,22 @@ class DispatcherIT {
     UUID withReference =
         fixtures.seedTest("Referencing draft", CSI_ID, OWNER, List.of("Go to the home page"));
     fixtures.confirmRevision(
-        withReference, CSI_ID, List.of("Go to the home page"), "[\"vanishing-reference\"]");
-    seedSecret("vanishing-reference");
+        withReference,
+        CSI_ID,
+        List.of("Go to the home page"),
+        StudioExecutionFixtures.references(List.of(), List.of("vanishing-reference")));
+    entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, "vanishing-reference");
+    vault.rotate(
+        StudioVaultProvider.ReferenceKind.SECRET,
+        CSI_ID,
+        ENVIRONMENT,
+        "vanishing-reference",
+        "a-value-that-is-about-to-vanish");
     UUID execution = studioService.executeTest(withReference, owner, null).executionId();
 
-    // Preflight passed at acceptance; the reference disappears before the send.
-    jdbc.update("DELETE FROM secrets WHERE reference_id = ?", "vanishing-reference");
+    // Preflight passed at acceptance; the reference disappears from the vault before the send.
+    vault.delete(
+        StudioVaultProvider.ReferenceKind.SECRET, CSI_ID, ENVIRONMENT, "vanishing-reference");
 
     dispatcher.dispatch(execution);
 
@@ -348,16 +387,31 @@ class DispatcherIT {
     UUID withReference =
         fixtures.seedTest("Canary draft", CSI_ID, OWNER, List.of("Go to the home page"));
     fixtures.confirmRevision(
-        withReference, CSI_ID, List.of("Go to the home page"), "[\"canary-reference\"]");
-    seedSecret("canary-reference");
+        withReference,
+        CSI_ID,
+        List.of("Go to the home page"),
+        StudioExecutionFixtures.references(List.of(), List.of("canary-reference")));
+    entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, "canary-reference");
+    String canaryValue = "studio-canary-value-do-not-persist";
+    vault.rotate(
+        StudioVaultProvider.ReferenceKind.SECRET,
+        CSI_ID,
+        ENVIRONMENT,
+        "canary-reference",
+        canaryValue);
     UUID execution = studioService.executeTest(withReference, owner, null).executionId();
 
     dispatcher.dispatch(execution);
 
-    String canary = "studio-canary-value-do-not-persist";
+    String canary = canaryValue;
+    // The value *travelled*, proven first, so the absences below are not true for the wrong reason
+    // (story 10.17 Anti-vacuous test requirements, row 1). Story 10.7's version of this test could
+    // not make this assertion, because no value had ever reached the job.
     assertThat(runner.sent())
-        .allSatisfy(job -> assertThat(job.references()).contains("canary-reference"));
-    assertThat(runner.sent().toString()).doesNotContain(canary);
+        .isNotEmpty()
+        .allSatisfy(job -> assertThat(job.references().secrets()).contains("canary-reference"))
+        .allSatisfy(
+            job -> assertThat(job.resolvedSecrets()).containsEntry("canary-reference", canary));
     assertThat(
             jdbc.queryForObject(
                 "SELECT COUNT(*) FROM ui_test_executions WHERE id = ?"
@@ -399,16 +453,6 @@ class DispatcherIT {
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────
-
-  private void seedSecret(String referenceId) {
-    jdbc.update(
-        "INSERT INTO secrets (id, reference_id, label, scope, owner, created_at)"
-            + " VALUES (?, ?, ?, 'project', ?, NOW()) ON CONFLICT (reference_id) DO NOTHING",
-        UUID.randomUUID(),
-        referenceId,
-        referenceId,
-        OWNER);
-  }
 
   /** How many sends left the process for one execution — never the deployment-global count. */
   private long sendsFor(UUID execution) {

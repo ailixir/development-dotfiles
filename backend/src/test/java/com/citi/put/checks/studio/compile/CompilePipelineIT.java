@@ -19,6 +19,8 @@ import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.readiness.ExecutionReadinessService;
 import com.citi.put.checks.studio.readiness.ReadinessVerdict;
+import com.citi.put.checks.studio.secrets.FakeStudioVaultProvider;
+import com.citi.put.checks.studio.secrets.StudioVaultProvider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -145,12 +147,60 @@ class CompilePipelineIT {
     }
   }
 
+  /**
+   * A vault that records every call and can be made to throw (story 10.17 AC-11).
+   *
+   * <p>§4.3 is explicit — <em>"Never supply resolved values or dump request bodies into gateway
+   * audit logs"</em> — and story 10.8 AC-5 asserted it against a stub whose "value" came from the
+   * platform {@code secrets} table. Story 10.17 changes where values come from, so the assertion is
+   * re-made against the new source, and made structural rather than incidental: put into {@link
+   * #throwing} mode, every method fails, and the compile pipeline completes anyway. A pipeline that
+   * had acquired a dependency on the vault could not do that.
+   */
+  static final class RecordingVault implements StudioVaultProvider {
+
+    private final FakeStudioVaultProvider delegate =
+        new FakeStudioVaultProvider(java.util.Map.of());
+    private final List<String> calls = new java.util.concurrent.CopyOnWriteArrayList<>();
+    private volatile boolean throwing;
+
+    @Override
+    public String name() {
+      if (throwing) throw new IllegalStateException("the compile path reached the vault");
+      return delegate.name();
+    }
+
+    @Override
+    public java.util.Optional<VaultEntry> read(
+        ReferenceKind kind, String csiId, String environment, String referenceName) {
+      calls.add(kind + ":" + csiId + ":" + environment + ":" + referenceName);
+      if (throwing) throw new IllegalStateException("the compile path reached the vault");
+      return delegate.read(kind, csiId, environment, referenceName);
+    }
+
+    void seed(String csiId, String environment, String referenceName, String value) {
+      delegate.rotate(ReferenceKind.SECRET, csiId, environment, referenceName, value);
+    }
+
+    void reset() {
+      delegate.clear();
+      calls.clear();
+      throwing = false;
+    }
+  }
+
   @TestConfiguration
   static class Stubs {
     @Bean
     @Primary
     BlockingGateway blockingGateway() {
       return new BlockingGateway();
+    }
+
+    @Bean
+    @Primary
+    RecordingVault recordingVault() {
+      return new RecordingVault();
     }
   }
 
@@ -170,6 +220,7 @@ class CompilePipelineIT {
   @Autowired private CompileStateService states;
   @Autowired private ExecutionReadinessService readiness;
   @Autowired private BlockingGateway gateway;
+  @Autowired private RecordingVault vault;
   @Autowired private JdbcTemplate jdbc;
   @Autowired private PlatformTransactionManager transactionManager;
 
@@ -182,6 +233,7 @@ class CompilePipelineIT {
     runner.resetAll();
     stubValidatorAccepting();
     gateway.reset();
+    vault.reset();
     seedUser();
     seedCsi();
     testId = seedTest(STEPS);
@@ -814,5 +866,87 @@ class CompilePipelineIT {
         OWNER,
         Timestamp.from(Instant.now()),
         Timestamp.from(Instant.now()));
+  }
+
+  // ── Story 10.17 AC-11: the compile path still reads no value, re-falsified against the vault ──
+
+  /**
+   * AC-11 — the compile path completes with a vault provider whose every method throws.
+   *
+   * <p>Structural, not incidental. "The vault was not called on this run" is weaker than "the
+   * pipeline does not depend on the vault", and the difference is exactly what a later refactor
+   * would erase. A pipeline that had acquired that dependency could not finish this test at all.
+   */
+  @Test
+  void theCompilePipelineCompletesWithAVaultProviderWhoseEveryMethodThrows() {
+    vault.throwing = true;
+
+    UUID id = seedTest(STEPS);
+    transactions.executeWithoutResult(status -> pipeline.enqueueAfterCommit(id, OWNER));
+
+    awaitCompileStatus(id, "AWAITING_CONFIRMATION");
+    assertThat(vault.calls).as("the compile path reached the vault").isEmpty();
+  }
+
+  /**
+   * AC-11 — a canary planted in the vault is absent from the gateway payload, the audit line and
+   * the prompt, in all eight encodings of AC-13a.
+   *
+   * <p>The canary is <b>proven resolvable first</b>: it is read straight out of the provider before
+   * the compile, so the absences afterwards are facts about the compile path rather than about an
+   * empty vault. Story 10.8's QA fix established that pattern and it is the reason this file's
+   * `doesNotContain`s are not decorative.
+   */
+  @Test
+  void aValueInTheVaultReachesNoGatewayPayloadNoAuditLineAndNoPrompt() {
+    String canary = "Compile-Path-Vault-Canary-6e02b9";
+    vault.seed(CSI_ID, "Production", "LOGIN_PW", canary);
+
+    // Proven present, in the source this story introduced.
+    assertThat(
+            vault
+                .read(StudioVaultProvider.ReferenceKind.SECRET, CSI_ID, "Production", "LOGIN_PW")
+                .map(entry -> new String(entry.value()))
+                .orElse(""))
+        .isEqualTo(canary);
+    // …and the proof read itself is not counted against the compile below.
+    vault.calls.clear();
+
+    UUID id = seedTest(STEPS);
+    transactions.executeWithoutResult(status -> pipeline.enqueueAfterCommit(id, OWNER));
+    awaitCompileStatus(id, "AWAITING_CONFIRMATION");
+
+    String validatorBodies =
+        runner.findAll(postRequestedFor(urlEqualTo("/v1/validate"))).stream()
+            .map(request -> request.getBodyAsString())
+            .collect(java.util.stream.Collectors.joining("\n"));
+    assertThat(validatorBodies).as("the validator was never called at all").isNotBlank();
+
+    for (String variant : encodingsOf(canary)) {
+      assertThat(validatorBodies)
+          .as("a vault value reached the validator payload as %s", variant)
+          .doesNotContain(variant);
+    }
+    // The compile-path read that would have had to happen for a value to be there never did.
+    assertThat(vault.calls)
+        .as("the compile path read the vault")
+        .noneMatch(call -> call.contains("LOGIN_PW"));
+  }
+
+  /** The eight variants story 10.17 AC-14 settles on, so this file and the runner agree. */
+  private static List<String> encodingsOf(String value) {
+    String base64 =
+        java.util.Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    String jsonEscaped = MAPPER.valueToTree(value).toString();
+    return List.of(
+        value,
+        java.net.URLEncoder.encode(value, StandardCharsets.UTF_8),
+        base64,
+        base64.replace("=", ""),
+        base64.replace('+', '-').replace('/', '_'),
+        base64.replace('+', '-').replace('/', '_').replace("=", ""),
+        jsonEscaped.substring(1, jsonEscaped.length() - 1),
+        java.net.URLEncoder.encode(
+            java.net.URLEncoder.encode(value, StandardCharsets.UTF_8), StandardCharsets.UTF_8));
   }
 }

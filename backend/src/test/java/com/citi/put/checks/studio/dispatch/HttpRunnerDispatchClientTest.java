@@ -13,7 +13,6 @@ import com.github.tomakehurst.wiremock.http.Fault;
 import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,14 +128,6 @@ class HttpRunnerDispatchClientTest {
   }
 
   private static RunJob job() {
-    return new RunJob(
-        UUID.randomUUID(),
-        UUID.randomUUID(),
-        UUID.randomUUID(),
-        "60406",
-        UUID.randomUUID(),
-        "Production",
-        List.of("a-reference"),
-        "http://put-checks-api:8080");
+    return RunJobFixtures.conformingJob();
   }
 }

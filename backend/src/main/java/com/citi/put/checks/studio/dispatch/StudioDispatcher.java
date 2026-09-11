@@ -3,19 +3,19 @@ package com.citi.put.checks.studio.dispatch;
 import com.citi.put.checks.studio.StudioExecutionProperties;
 import com.citi.put.checks.studio.UITestRevisionRepository;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
+import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import com.citi.put.checks.studio.entity.UITestRevision;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -43,6 +43,12 @@ import org.springframework.transaction.support.TransactionTemplate;
  *       permission to resend: the row stays {@code DISPATCHING} and recovery resolves it.
  * </ol>
  *
+ * <p><b>This dispatcher no longer holds a callback base URL.</b> §8.4 makes the callback
+ * destination deployment configuration and <em>"never arbitrary job-supplied URL"</em>; the runner
+ * reads its own {@code STUDIO_RUNNER_CALLBACK_BASE_URL} and keeps a {@code CALLBACK_SHAPED_KEYS}
+ * list to refuse any job that tries to name one. Sending it was tripping that control from the
+ * inside, so the field is gone rather than merely unread.
+ *
  * <p>If the process dies between the commit in step 3 and the send, §5.1 explicitly permits the
  * outcome to end as <em>unknown</em> rather than risk duplicate effects. Ending as unknown is the
  * correct answer there; a "fix" that replays it is the failure.
@@ -61,7 +67,6 @@ public class StudioDispatcher {
   private final ObjectMapper objectMapper;
   private final JdbcTemplate jdbc;
   private final TransactionTemplate transactions;
-  private final String callbackBaseUrl;
   private final String instanceId;
   private final Clock clock;
 
@@ -76,9 +81,7 @@ public class StudioDispatcher {
       StudioExecutionProperties properties,
       ObjectMapper objectMapper,
       JdbcTemplate jdbc,
-      TransactionTemplate transactions,
-      @Value("${studio.execution.callback-base-url:http://put-checks-api:8080}")
-          String callbackBaseUrl) {
+      TransactionTemplate transactions) {
     this(
         statements,
         revisions,
@@ -89,7 +92,6 @@ public class StudioDispatcher {
         objectMapper,
         jdbc,
         transactions,
-        callbackBaseUrl,
         "dispatcher-" + UUID.randomUUID(),
         Clock.systemUTC());
   }
@@ -105,7 +107,6 @@ public class StudioDispatcher {
       ObjectMapper objectMapper,
       JdbcTemplate jdbc,
       TransactionTemplate transactions,
-      String callbackBaseUrl,
       String instanceId,
       Clock clock) {
     this.statements = statements;
@@ -117,7 +118,6 @@ public class StudioDispatcher {
     this.objectMapper = objectMapper;
     this.jdbc = jdbc;
     this.transactions = transactions;
-    this.callbackBaseUrl = callbackBaseUrl;
     this.instanceId = instanceId;
     this.clock = clock;
   }
@@ -210,13 +210,46 @@ public class StudioDispatcher {
     }
 
     UUID revisionId = revisionIdOf(executionId);
-    List<String> referenceNames = referenceNames(revisionId);
+    String environment = environmentOf(executionId);
+
+    UITestRevision revision;
+    ReferenceDeclarations declarations;
+    try {
+      revision = revisionId == null ? null : revisions.findById(revisionId).orElse(null);
+      if (revision == null) {
+        throw new ExecutionReferences.UnreadableReferenceDeclarationException(
+            "the confirmed revision this execution snapshotted cannot be read");
+      }
+      declarations = ExecutionReferences.declared(objectMapper, revision.getReferences());
+    } catch (ExecutionReferences.UnreadableReferenceDeclarationException e) {
+      // Terminal, not an empty set. The previous `orElse(List.of())` made an unreadable revision a
+      // run with no references and no secrets — for a login test, a browser opening a real
+      // application with an empty password field. @po ruled the code REFERENCE_UNAVAILABLE
+      // (ADR-002 §15.3: a fact about the draft and its environment). The message names the
+      // declaration and never the revision's contents (AC-6, AC-10).
+      LOGGER.warn("Studio dispatch refused for execution {}: {}", executionId, e.getMessage());
+      close(executionId, ExecutionErrorCode.REFERENCE_UNAVAILABLE, now);
+      return false;
+    }
 
     UUID attemptId = UUID.randomUUID();
     DispatchOutcome outcome;
-    // Resolution happens here and nowhere else, and the values never leave this block.
-    try (StudioReferenceResolver.Resolved resolved = references.resolve(csiId, referenceNames)) {
-      recordDispatchPolicy(executionId, policyIdentity);
+    // Resolution happens here and nowhere else, and the values leave this block only on the wire.
+    try (StudioReferenceResolver.Resolved resolved =
+        references.resolve(csiId, environment, principal, declarations)) {
+      recordDispatchPolicy(executionId, policyIdentity, resolved.secretVersions());
+
+      RunJob job;
+      try {
+        job = job(executionId, attemptId, testId, csiId, revision, declarations, resolved);
+      } catch (IllegalStateException e) {
+        // The revision's artifact or configuration document could not be read. Not a reference
+        // condition, so it does not borrow a reference code; it is a dispatch that could not be
+        // made. The message never carries the document.
+        LOGGER.warn("Studio dispatch failed for execution {}: {}", executionId, e.getMessage());
+        close(executionId, ExecutionErrorCode.DISPATCH_FAILED, now);
+        return false;
+      }
 
       Integer began =
           transactions.execute(
@@ -227,17 +260,12 @@ public class StudioDispatcher {
       // The transaction above has committed. The send happens strictly after it, so a crash here
       // leaves a committed attempt with no send — which §5.1 permits to end as unknown rather
       // than be replayed into a duplicate browser.
-      outcome =
-          runnerClient.send(
-              new RunJob(
-                  executionId,
-                  attemptId,
-                  testId,
-                  csiId,
-                  revisionId,
-                  environmentOf(executionId),
-                  referenceNames,
-                  callbackBaseUrl));
+      outcome = runnerClient.send(job);
+    } catch (StudioReferenceResolver.SecretUseRevokedException e) {
+      // A fact about the principal (ADR-002 §15.2). The send never happened.
+      LOGGER.warn("Studio dispatch refused for execution {}: {}", executionId, e.getMessage());
+      close(executionId, ExecutionErrorCode.AUTHORIZATION_REVOKED, now);
+      return false;
     } catch (StudioReferenceResolver.ReferenceUnavailableException e) {
       LOGGER.warn("Studio dispatch refused for execution {}: {}", executionId, e.getMessage());
       close(executionId, ExecutionErrorCode.REFERENCE_UNAVAILABLE, now);
@@ -303,15 +331,88 @@ public class StudioDispatcher {
         properties.dispatcherOrDefault().batchSizeOrDefault());
   }
 
-  /** Declared names from the confirmed revision. Never values; there are none to read here. */
-  private List<String> referenceNames(UUID revisionId) {
-    if (revisionId == null) {
-      return List.of();
+  /**
+   * Builds the fourteen-field job the frozen contract declares (§8.4, AC-2).
+   *
+   * <p>Every field has a source and none is invented: the artifact, its hash, the source lines and
+   * the configuration come from the confirmed revision the execution snapshotted (§8.1); the CSI is
+   * the execution's own immutable value (§9.1); the references are the revision's typed
+   * declaration; the two resolved maps are this dispatch's resolution; the deadlines are §8.5's
+   * starting values and the revision's own runtime budget, sent faithfully and clamped nowhere (the
+   * clamp is the runner's, 10.13 AC-6); and the two keys are §6.2's templates over immutable
+   * execution identity. Deriving a key is not writing an object — the objects are story 10.14's.
+   *
+   * <p>The resolved {@code char[]}s become {@link String}s here because a JSON body is text. That
+   * is the residual AC-15 names rather than claims away: {@code Resolved.close()} still erases the
+   * arrays on every exit path, and nothing in this process retains a path to the values after the
+   * send, but the serializer's transient buffers cannot be erased by any code.
+   */
+  private RunJob job(
+      UUID executionId,
+      UUID attemptId,
+      UUID testId,
+      String csiId,
+      UITestRevision revision,
+      ReferenceDeclarations declarations,
+      StudioReferenceResolver.Resolved resolved) {
+    return new RunJob(
+        executionId,
+        attemptId,
+        revision.getId(),
+        revision.getArtifactHash(),
+        document(revision.getArtifact(), "artifact"),
+        LegacyStudioAdapter.parseSteps(revision.getSource()),
+        document(revision.getConfiguration(), "configuration"),
+        csiId,
+        declarations,
+        text(resolved.variables()),
+        text(resolved.secrets()),
+        deadlines(revision),
+        RunJob.videoKeyFor(csiId, testId, executionId, attemptId),
+        RunJob.manifestKeyFor(csiId, testId, executionId, attemptId));
+  }
+
+  /**
+   * §8.5's admitted-start value and the revision's own browser runtime budget, sent faithfully.
+   *
+   * <p>Nothing is clamped here. {@code effectiveRuntimeCapMs(job.deadlines.totalRuntimeMs, maxima)}
+   * is the runner's and stays there (10.13 AC-6); two clamps would be two derivations of one bound,
+   * which is this epic's most-repeated defect.
+   */
+  private RunJob.JobDeadlines deadlines(UITestRevision revision) {
+    long admittedStartMs = properties.startDeadlineOrDefault().toMillis();
+    JsonNode configuration = document(revision.getConfiguration(), "configuration");
+    long totalRuntimeMs = configuration.path("timeoutSeconds").asLong(0L) * 1000L;
+    if (totalRuntimeMs <= 0) {
+      throw new IllegalStateException(
+          "the confirmed revision's configuration declares no usable runtime budget");
     }
-    Optional<UITestRevision> revision = revisions.findById(revisionId);
-    return revision
-        .map(value -> ExecutionReferences.declaredNames(objectMapper, value.getReferences()))
-        .orElse(List.of());
+    return new RunJob.JobDeadlines(admittedStartMs, totalRuntimeMs);
+  }
+
+  /** A stored revision document, read as JSON. The message never carries the document. */
+  private JsonNode document(String json, String field) {
+    if (json == null || json.isBlank()) {
+      throw new IllegalStateException("the confirmed revision carries no '" + field + "' document");
+    }
+    try {
+      JsonNode node = objectMapper.readTree(json);
+      if (node == null || !node.isObject()) {
+        throw new IllegalStateException(
+            "the confirmed revision's '" + field + "' document is not an object");
+      }
+      return node;
+    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+      throw new IllegalStateException(
+          "the confirmed revision's '" + field + "' document is not readable JSON");
+    }
+  }
+
+  /** The wire form of a resolved map. See {@link #job} for the residual this creates. */
+  private static Map<String, String> text(Map<String, char[]> values) {
+    Map<String, String> text = new java.util.LinkedHashMap<>();
+    values.forEach((name, value) -> text.put(name, new String(value)));
+    return text;
   }
 
   private String environmentOf(UUID executionId) {
@@ -352,13 +453,15 @@ public class StudioDispatcher {
    * runner-consumed body — ADR-002 §12 Class B, architect-first — and O-6 has not been ruled. This
    * bumps no revision: it is not a visible change on the public snapshot.
    */
-  private void recordDispatchPolicy(UUID executionId, String policyIdentity) {
+  private void recordDispatchPolicy(
+      UUID executionId, String policyIdentity, Map<String, String> secretVersions) {
     jdbc.update(
         """
         UPDATE ui_test_executions e
            SET configuration_snapshot =
                  COALESCE(e.configuration_snapshot, '{}'::jsonb)
                  || jsonb_build_object('dispatchPolicyIdentity', CAST(? AS text))
+                 || jsonb_build_object('secretVaultVersions', CAST(? AS jsonb))
           FROM studio_dispatch_ledger l
          WHERE l.execution_id = ?
            AND e.id = l.execution_id
@@ -366,7 +469,25 @@ public class StudioDispatcher {
            AND e.status = 'PENDING'
         """,
         policyIdentity,
+        versionsJson(secretVersions),
         executionId);
+  }
+
+  /**
+   * The nonsecret vault version identifiers, as a jsonb document (§4.2, AC-8).
+   *
+   * <p>No migration: this rides {@code configuration_snapshot}'s jsonb exactly as 10.7's {@code
+   * dispatchPolicyIdentity} does, so this story queues behind nothing. The identifiers are opaque
+   * strings the provider supplies — never the value, never a hash of it, and never anything two
+   * values could be compared with: rotating a value to itself still changes the identifier.
+   */
+  private String versionsJson(Map<String, String> secretVersions) {
+    try {
+      return objectMapper.writeValueAsString(secretVersions);
+    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+      // Reference ids and opaque identifiers; there is no shape of these that fails to serialize.
+      throw new IllegalStateException("vault version identifiers could not be recorded");
+    }
   }
 
   private static Instant instant(Object value) {

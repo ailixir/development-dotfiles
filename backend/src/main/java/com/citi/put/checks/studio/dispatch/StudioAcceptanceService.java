@@ -210,9 +210,22 @@ public class StudioAcceptanceService {
           "This revision declares " + steps.size() + " steps; the bound is " + maxSteps);
     }
 
-    // Names only. Values are resolved at dispatch (AC-13a) and nowhere else.
+    // Names only, typed. Values are resolved at dispatch (§5.1.3) and nowhere else.
+    //
+    // Two decisions are made here and they are deliberately separate (AC-4): the route's CSI
+    // check has already established that this principal may execute for this CSI, and the
+    // resolver additionally consults StudioSecretUseAuthorization per declared secret. §9.2 is
+    // explicit that "Secret reference names alone grant no permission", and executing a draft does
+    // not entitle a principal to every reference the draft names.
+    //
+    // The declaration is read from the confirmed revision the execution is about to snapshot,
+    // never from the draft's current `variables` and never from the request (AC-5a). An
+    // unreadable declaration is terminal rather than an empty set (AC-10).
     references.preflight(
-        test.getCsiId(), ExecutionReferences.declaredNames(objectMapper, revision.getReferences()));
+        test.getCsiId(),
+        test.getEnvironment(),
+        principal,
+        ExecutionReferences.declared(objectMapper, revision.getReferences()));
 
     enforcePendingQuotas(test.getCsiId());
 

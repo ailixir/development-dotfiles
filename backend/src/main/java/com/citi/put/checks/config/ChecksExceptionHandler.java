@@ -5,9 +5,9 @@ import com.citi.put.checks.scheduling.ScheduleValidationException;
 import com.citi.put.checks.studio.StudioAccessDeniedException;
 import com.citi.put.checks.studio.StudioConflictException;
 import com.citi.put.checks.studio.StudioValidationException;
-import com.citi.put.checks.studio.dispatch.StubStudioReferenceResolver;
 import com.citi.put.checks.studio.dispatch.StudioDispatchDisabledException;
 import com.citi.put.checks.studio.dispatch.StudioQuotaExceededException;
+import com.citi.put.checks.studio.dispatch.StudioReferenceResolver;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.internal.InternalCallbackException;
 import com.citi.put.checks.studio.sse.WatchedExecutionRegistry;
@@ -113,21 +113,36 @@ public class ChecksExceptionHandler {
   }
 
   /**
-   * A declared reference the CSI may not use (AC-10a). The body names the <em>reference</em> and
-   * never its value — there is no value here to name, because preflight resolves nothing.
+   * A declared reference the CSI may not use (§9.2, AC-6).
+   *
+   * <p>The body names the <em>reference</em> and never its value — not the value, not its length,
+   * not {@code lastFour}, not a hash and not a prefix. Preflight resolves nothing that outlives the
+   * call, so there is no value in scope here to name even accidentally.
    */
-  @ExceptionHandler(StubStudioReferenceResolver.UnknownReferenceException.class)
+  @ExceptionHandler(StudioReferenceResolver.UnknownReferenceException.class)
   public ResponseEntity<Map<String, String>> handleUnknownReference(
-      StubStudioReferenceResolver.UnknownReferenceException ex) {
+      StudioReferenceResolver.UnknownReferenceException ex) {
+    return unknownReference(ex.getReferenceName(), ex.getMessage());
+  }
+
+  /**
+   * The principal is not entitled to use a declared secret (§9.2, AC-4).
+   *
+   * <p>Deliberately the same code and the same wording as an unknown reference. They are different
+   * facts internally, and telling them apart on the wire would let an unentitled caller learn
+   * whether a secret exists — <em>"Secret reference names alone grant no permission"</em> cuts both
+   * ways.
+   */
+  @ExceptionHandler(StudioReferenceResolver.SecretUseNotAuthorizedException.class)
+  public ResponseEntity<Map<String, String>> handleSecretUseNotAuthorized(
+      StudioReferenceResolver.SecretUseNotAuthorizedException ex) {
+    return unknownReference(ex.getReferenceName(), ex.getMessage());
+  }
+
+  private static ResponseEntity<Map<String, String>> unknownReference(
+      String reference, String message) {
     return ResponseEntity.badRequest()
-        .body(
-            Map.of(
-                "error",
-                "UNKNOWN_REFERENCE",
-                "reference",
-                ex.getReferenceName(),
-                "message",
-                ex.getMessage()));
+        .body(Map.of("error", "UNKNOWN_REFERENCE", "reference", reference, "message", message));
   }
 
   /**

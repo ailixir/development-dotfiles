@@ -110,9 +110,34 @@ public final class StudioExecutionFixtures {
    * accepted by the provisional implementation is the day the fixtures stopped describing anything
    * a user could produce.
    */
+  /** What {@code CompileInputs.referencesJson()} writes when nothing is declared (§8.3). */
+  public static final String NO_REFERENCES = "{\"variables\":[],\"secrets\":[]}";
+
+  /** A declaration document in the one shape the typed reader recognises (AC-1). */
+  public static String references(List<String> variables, List<String> secrets) {
+    return "{\"variables\":["
+        + variables.stream()
+            .map(name -> '"' + name + '"')
+            .collect(java.util.stream.Collectors.joining(","))
+        + "],\"secrets\":["
+        + secrets.stream()
+            .map(name -> '"' + name + '"')
+            .collect(java.util.stream.Collectors.joining(","))
+        + "]}";
+  }
+
+  /** A nonsecret configuration in the shape the contract's {@code TestConfiguration} declares. */
+  public static final String DEFAULT_CONFIGURATION =
+      "{\"browser\":\"chromium\",\"viewport\":{\"width\":1280,\"height\":720},"
+          + "\"timeoutSeconds\":30,\"waitStrategy\":\"load\"}";
+
   public UUID confirmRevision(UUID testId, String csiId, List<String> steps, String references) {
     UUID revisionId = UUID.randomUUID();
     String artifact = "{\"steps\":[]}";
+    // The shapes the real producers write. Story 10.17 makes the readers fail closed, so a fixture
+    // that wrote a shape CompileInputs never produces would be testing a path production cannot
+    // reach — and would have kept passing while the dispatch body diverged from the contract.
+    String configuration = DEFAULT_CONFIGURATION;
     jdbc.update(
         "INSERT INTO ui_test_revisions (id, test_id, csi_id, source_revision,"
             + " configuration_revision, source, source_hash, artifact, artifact_hash,"
@@ -120,7 +145,7 @@ public final class StudioExecutionFixtures {
             + " created_at, confirmed_by, confirmed_at)"
             + " VALUES (?, ?, ?, 1, 1, CAST(? AS jsonb), ?,"
             + " CAST(? AS jsonb), ?, ?,"
-            + " CAST('{}' AS jsonb), CAST(? AS jsonb), CAST(? AS jsonb), 'compiler', ?,"
+            + " CAST(? AS jsonb), CAST(? AS jsonb), CAST(? AS jsonb), 'compiler', ?,"
             + " 'confirmer', ?)",
         revisionId,
         testId,
@@ -130,7 +155,8 @@ public final class StudioExecutionFixtures {
         artifact,
         ArtifactCanonicalizer.hash(artifact),
         CompilePins.SUPPORTED_ARTIFACT_VERSION,
-        references == null ? "[]" : references,
+        configuration,
+        references == null ? NO_REFERENCES : references,
         pinnedProvenance(),
         Timestamp.from(Instant.now()),
         Timestamp.from(Instant.now()));
