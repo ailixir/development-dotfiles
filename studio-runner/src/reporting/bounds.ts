@@ -73,6 +73,19 @@ export function createLogBuffer(maxEntries: number, maxEntryLength: number): Log
       return dropped;
     },
     append(entry: LogEntry): void {
+      // **Truncation precedes redaction in this buffer, and that is on purpose.** Bounding is this
+      // module's job; scrubbing is not, and a second redactor here would be a second copy of a
+      // fact that already has an owner. The requirement that follows is real and is stated rather
+      // than left implicit: **callers are required to redact first**, because a known value cut by
+      // the `slice` below becomes two fragments, and a fragment matches no variant `createRedactor`
+      // produces — so both halves would survive the redaction that happens later on the assembled
+      // body, and concatenating them reconstructs the value.
+      //
+      // `RunSnapshot.appendLog` is the guard: it is the only caller reachable from a run and it
+      // applies the run's redactor before delegating here. A test enforces that requirement with a
+      // planted canary observed on the emitted entry rather than by scanning call sites, because a
+      // producer that built the same string through an innocently named local would pass a scan
+      // (AC-22, AC-23).
       const message =
         entry.message.length <= maxEntryLength
           ? entry.message

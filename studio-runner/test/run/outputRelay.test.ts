@@ -349,3 +349,138 @@ describe('AC-9 — no resolved value is retained, and post-kill output is never 
     expect(sink.lines).toHaveLength(after);
   });
 });
+
+/**
+ * Story 10.17 AC-21 (MED-2) — the chunk-boundary hole, closed at the bound the run already knows.
+ *
+ * 10.13's relay retained a fixed `maxLineLength × 2` before cutting an unterminated stream, and its
+ * own comment claimed the general case could not be closed *"without an unbounded buffer, which is
+ * the thing this relay exists to prevent."* @qa judged that reason false and @po upheld @qa: the
+ * buffer needed is bounded by the longest thing the redactor could match, and the run computes
+ * that set at admission. @po's correction to both — and it is the load-bearing part — is that the
+ * bound is the longest **variant**, not the longest known value: base64 is roughly four-thirds of a
+ * value, so a tail sized to the raw value closes the case the test was written for and misses the
+ * case an attacker gets.
+ *
+ * **The fixture is the criterion.** A canary that fits inside one line, or that ends with `\n`,
+ * travels the path that already worked and would give a false pass — which is the exact mistake the
+ * merged relay's own comment records having made. The canary below is longer than `maxLineLength`
+ * **and** arrives split across two `write()` calls at an offset inside it, with **no newline**.
+ */
+describe('AC-21 — a value that outgrows a line and straddles a chunk boundary is still scrubbed', () => {
+  /**
+   * Longer than the 400-character line cap, so the relay itself chooses where to cut.
+   *
+   * **Sized against the old behaviour, not against convenience.** The first version of this fixture
+   * split the value 200 characters in, and the old `maxLineLength` retention reassembled it anyway
+   * — its retained tail of up to `2 × maxLineLength` was larger than the buffered prefix, so the
+   * value was whole by the time anything was cut and the mutation turned nothing red. That is the
+   * wave-4 lesson exactly: a canary that does not straddle the cut proves nothing. The split below
+   * is 900 characters in, which is past what the old retention could hold, so the old code emits a
+   * raw head fragment and then fails to match the remainder.
+   */
+  const LONG_SECRET = `LONG-SECRET-HEAD-${'x'.repeat(1400)}-TAIL-END`;
+  /** The two fragments a cut in the wrong place leaves, one on each side of it. */
+  const LONG_HEAD = 'LONG-SECRET-HEAD-';
+  const LONG_TAIL = '-TAIL-END';
+
+  it('retains max(maxLineLength, redactor.longestVariantLength) and reads the bound rather than recomputing it', () => {
+    const redactor = createRedactor([LONG_SECRET]);
+    const sink = capture();
+    const relay = createOutputRelay({
+      redactor,
+      maxLineLength: 400,
+      maxLines: 500,
+      emit: sink.push,
+    });
+
+    // The bound is the redactor's number, not a constant in this file and not a constant in the
+    // relay. Base64 of a 517-character value is longer than the 400-character line cap, which is
+    // precisely why the raw value would have been the wrong bound.
+    expect(redactor.longestVariantLength).toBeGreaterThan(400);
+    expect(relay.retentionBound).toBe(redactor.longestVariantLength);
+  });
+
+  it('emits nothing before the bound has been seen', () => {
+    const sink = capture();
+    const relay = createOutputRelay({
+      redactor: createRedactor([LONG_SECRET]),
+      maxLineLength: 400,
+      maxLines: 500,
+      emit: sink.push,
+    });
+
+    relay.write('stderr', 'a'.repeat(relay.retentionBound));
+    expect(sink.lines, 'the relay emitted before it had retained the bound').toHaveLength(0);
+  });
+
+  it('scrubs a value delivered across two writes, split inside it, with no newline anywhere', () => {
+    const redactor = createRedactor([LONG_SECRET]);
+    const sink = capture();
+    const relay = createOutputRelay({
+      redactor,
+      maxLineLength: 400,
+      maxLines: 500,
+      emit: sink.push,
+    });
+
+    // Enough ahead of the value to force emits, then the value **split inside itself**. The split
+    // offset is deliberately past the line cap and inside the secret, which is the hazard: at the
+    // moment the first chunk arrives the value is incomplete and matches no variant at all.
+    const lead = 'L'.repeat(1200);
+    const splitAt = 900;
+    relay.write('stderr', lead + LONG_SECRET.slice(0, splitAt));
+    relay.write('stderr', LONG_SECRET.slice(splitAt) + 'T'.repeat(2000));
+    relay.close();
+
+    expect(sink.lines.length, 'nothing was emitted, so nothing has been shown to be scrubbed').toBeGreaterThan(0);
+    expect(sink.contiguous, 'the value survived the chunk boundary').not.toContain(LONG_SECRET);
+    // The two fragments a cut in the wrong place leaves. A fragment matches no variant
+    // `createRedactor` produces, so every `not.toContain(LONG_SECRET)` above would stay green over
+    // a real partial disclosure — these are the assertions that actually discriminate.
+    expect(sink.contiguous, 'the head of the value survived the chunk boundary').not.toContain(LONG_HEAD);
+    expect(sink.contiguous, 'the tail of the value survived the chunk boundary').not.toContain(LONG_TAIL);
+    // It travelled: the lead and the trailer are on the emitted bytes, so the absences above are
+    // absences from a surface that was actually written to.
+    expect(sink.contiguous).toContain('L'.repeat(100));
+    expect(sink.contiguous).toContain(REDACTION_PLACEHOLDER);
+  });
+
+  it('holds peak retention to the declared bound plus one line, and no more', () => {
+    const redactor = createRedactor([LONG_SECRET]);
+    const sink = capture();
+    const relay = createOutputRelay({
+      redactor,
+      maxLineLength: 400,
+      maxLines: 500,
+      emit: sink.push,
+    });
+
+    // A megabyte with no line break in it, in chunks, which is what a chatty browser looks like.
+    for (let i = 0; i < 64; i += 1) relay.write('stdout', 'z'.repeat(16_384));
+
+    // Asserted against the bound rather than against a number written here, which would be a third
+    // derivation of it.
+    expect(relay.peakRetained).toBeLessThanOrEqual(relay.retentionBound + 400);
+    expect(relay.peakRetained, 'the buffer never filled, so the bound was never tested').toBeGreaterThan(
+      relay.retentionBound,
+    );
+  });
+
+  it('still drops rather than fragments when redaction is impossible', () => {
+    // The released-redactor behaviour, re-asserted so that raising the bound did not reopen it.
+    const sink = capture();
+    const relay = createOutputRelay({
+      redactor: createRedactor([LONG_SECRET]),
+      maxLineLength: 400,
+      maxLines: 500,
+      emit: sink.push,
+    });
+    relay.release();
+    relay.write('stderr', `${'m'.repeat(1200)}${LONG_SECRET}`);
+    relay.close();
+
+    expect(sink.lines, 'a released relay emitted something').toHaveLength(0);
+    expect(relay.dropped).toBeGreaterThan(0);
+  });
+});

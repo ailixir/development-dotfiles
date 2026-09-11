@@ -303,6 +303,10 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       bounds: options.bounds,
       runtimeVersions: options.runtimeVersions,
       wallClock: options.wallClock,
+      // The call-site guard over the truncating log buffer (AC-22). Every producer reachable from
+      // this run reaches `logs.append` through `snapshot.appendLog`, and this is what makes
+      // "callers redact first" a property of the code rather than of today's callers.
+      redactor,
     });
     const client = createReportClient({
       http: options.http,

@@ -166,7 +166,9 @@ class CompilePipelineIT {
 
     @Override
     public String name() {
-      if (throwing) throw new IllegalStateException("the compile path reached the vault");
+      if (throwing) {
+        throw new IllegalStateException("the compile path reached the vault");
+      }
       return delegate.name();
     }
 
@@ -174,7 +176,9 @@ class CompilePipelineIT {
     public java.util.Optional<VaultEntry> read(
         ReferenceKind kind, String csiId, String environment, String referenceName) {
       calls.add(kind + ":" + csiId + ":" + environment + ":" + referenceName);
-      if (throwing) throw new IllegalStateException("the compile path reached the vault");
+      if (throwing) {
+        throw new IllegalStateException("the compile path reached the vault");
+      }
       return delegate.read(kind, csiId, environment, referenceName);
     }
 
