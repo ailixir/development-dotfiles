@@ -137,16 +137,43 @@ stories:
     blocks: ["10.13", "10.19"]
 
   # ── Wave 4 ──
+  # Size M → L, recorded by @po 2026-09-11 at story 10.9 validation. The M estimate was made
+  # while AC-22 (the diagnostics exposure) was an *escalation*: persist the document, add a
+  # named disabled test, refer the question to @architect. ADR-002 §16 ruled on 2026-09-11 —
+  # before wave 4 closed, which is the branch AC-22 itself provides for — and converted that
+  # into implementation: four typed component schemas deserialized from two jsonb columns onto
+  # UITestDto, the attempts/exhausted keys, a documented list-projection divergence with its
+  # own test, TestDto added to the schema/record field-name check, and a disabled test turned
+  # into a live round trip. That lands on a story already carrying a migration with an unusual
+  # proof obligation (AC-17: a database seeded with all five compile states, a soft-deleted
+  # row, a quarantined row and a legacy row stranded in COMPILING), a scheduled sweep with two
+  # interleaving ITs, the confirm route, and the bounded repair loop. Four backend subsystems
+  # and fourteen test files is not an M; 10.8 was an M and carried no migration.
+  # If it outgrows the estimate, the cut is the story's own split hint — 10.9a (repair loop)
+  # then 10.9b (confirmation, migration, sweep) — and the §16 work travels with 10.9b.
   - id: "10.9"
     title: "Repair, diagnostics and exact confirmation"
-    size: M
+    size: L
     wave: 4
     depends_on: ["10.8"]
     blocks: ["10.10", "10.19"]
 
+  # Size M → L, recorded by @po 2026-09-11 at story 10.13 validation. Same shape of cause as
+  # 10.9: an architect ruling landed after the estimate. ADR-002 §17 made this story the
+  # producer of RunnerEvidence.partial, adding a third kill-path case AC-16's two-way split
+  # absorbed and an emit-on-every-FINAL obligation. On top of that the story was already three
+  # new modules (deadline, process-tree, output relay), a change to the launcher constructor
+  # and its stdio, a new assertion *dimension* in the fixtures tier (enumerate pids against
+  # real Chromium across six exit paths, where "assert kill was called" is explicitly
+  # insufficient), and a redaction experiment stated as three canary shapes across ~10 captured
+  # surfaces and 7 encoded variants with a falsifying mutation recorded per shape. The
+  # comparable is 10.12 (L), which built the child and the video; this completes it and adds
+  # the observation tier. If it outgrows the estimate, the cut is the story's own split hint —
+  # (i) budgets/kill/cleanup then (ii) the diagnostics surface — and `partial` travels with
+  # (i), never with (ii). Never cut between "kill the child" and "kill the tree".
   - id: "10.13"
     title: "Deadline enforcement, redaction and cleanup"
-    size: M
+    size: L
     wave: 4
     depends_on: ["10.12"]
     blocks: ["10.14", "10.17", "10.18", "10.19"]
@@ -305,6 +332,75 @@ file_ownership_conflicts:
       ExecutionErrorCode enumeration for its disjointness test — 10.12 AC-17 has been
       corrected to read that enumeration rather than a hardcoded list, because 10.7 AC-13a
       adds AUTHORIZATION_REVOKED and REFERENCE_UNAVAILABLE in this same wave.
+
+  - id: FOC-04
+    path: "docs/specs/studio/openapi.yaml — and studio-runner/test/run/confinement.test.ts, which pins its SHA-256"
+    stories: ["10.9", "10.13"]
+    wave: 4
+    conflict: >-
+      The two wave-4 stories are otherwise genuinely disjoint — 10.9 is backend Java, SQL and
+      application.yml; 10.13 is studio-runner TypeScript — and that was checked file by file
+      rather than assumed. One artefact is shared and it is not a merge-noise conflict, it is a
+      false red. 10.9 AC-2 removes x-not-yet-implemented from confirmCompile, the single edit it
+      makes to openapi.yaml. 10.13 AC-18 asserts that document byte-unchanged by pinning its
+      SHA-256 in a literal constant, BASE_SHA256, in test/run/confinement.test.ts. Any 10.9 edit
+      therefore turns a 10.13 test red in a story that made no contract edit, and the failure
+      accuses the wrong story. The pin is ALSO already red on the branch before either story
+      starts: verified 2026-09-11, the constant holds 6a20513c496208ffbc0d9c886b013861ae953d2aa
+      50d14b529092a9a24f7157a from base commit a8a8eeb44, while the document now hashes to
+      815aae9b0068335e8d5ab5270dccecac4d1fd6f472306ca3dc04292187dd0d80 after the ADR-002 §14,
+      §15, §16 and §17 amendments. Those amendments landed as architect rulings rather than in a
+      story PR, so the re-anchor the test's own comment calls for was never owned by anyone.
+    mandated_ordering: >-
+      10.9 lands its openapi.yaml marker removal FIRST. 10.13 then re-anchors BASE_SHA256
+      against the resulting document, in its own PR, as a deliberate act, with a comment naming
+      the four ADR-002 amendments and 10.9's removal as what the new digest covers — and it
+      re-reads the digest from the file rather than transcribing one from a story or from this
+      manifest. The reverse order is forbidden: it would force a backend PR whose subject is the
+      confirm route to re-anchor a runner test, which is exactly what confinement.test.ts's own
+      comment rules out ("It must never be re-anchored in a PR whose subject is something
+      else"). No other serialization is needed — every other file in both stories is disjoint,
+      and 10.13's re-anchor is one constant, so 10.9's marker removal is the only wave-4 landing
+      point 10.13 has to wait behind. Both stories start in parallel on day one; only
+      T-10.13.10 waits.
+    source: >-
+      Story 10.9 AC-2 and its File List; story 10.13 AC-18 and its "Must remain unchanged"
+      table; studio-runner/test/run/confinement.test.ts lines 114-131 (BASE_SHA256 and the
+      comment governing re-anchoring); ADR-002 §12 (Class A marker housekeeping), §13 amendment
+      log, §16.8 (no marker moved, no route added) and §17.5. Verified on branch epic/EPIC-10 at
+      0152ebbe3 by comparing the pinned constant against shasum -a 256 of the document. Ruled
+      and recorded by @po 2026-09-11 during wave-4 story validation.
+    resolution_options:
+      - "Serialize on the one artefact: 10.9's marker removal lands first, 10.13 re-anchors after. Everything else in both stories proceeds in parallel from day one."
+      - "Have 10.13 re-anchor first against the current document, and 10.9 re-anchor again in its own PR."
+      - "Replace the SHA-256 pin with a structural assertion (the operations, bodies and required lists 10.13 must not change) so it is insensitive to unrelated edits."
+    resolution: >-
+      SERIALIZE (option 1). Option 2 was rejected because it puts a runner-test edit in a
+      backend PR, which is the one thing the pin's own comment forbids and the manoeuvre that
+      turns a deliberate re-anchor into a laundered one — the second re-anchor would be made by
+      someone whose subject is the confirm route and who has no reason to check what else moved.
+      Option 3 is attractive and is NOT taken now: the pin's strength is that it is
+      indiscriminate, which is why it caught four architect amendments that no structural
+      assertion would have flagged, and replacing it inside a story about deadlines would be
+      scope creep on an L. Recorded instead as a candidate for whichever wave-5+ story next
+      touches confinement.test.ts, if the re-anchoring becomes recurrent rather than twice.
+    note: >-
+      Checked, not assumed: apart from the artefact above the two stories share no file. 10.9
+      touches backend/src/main/java/com/citi/put/checks/studio/** (controller, service, compile
+      package, dto), one new Flyway migration in backend/src/main/resources/db/migration,
+      application.yml, the compile package README and one ADR-002 §13 log row. 10.13 touches
+      studio-runner/src/{run,server,reporting,main.ts}, studio-runner/test/**, and
+      studio-runner's README.md and ci/stages.md. The two README files are different files in
+      different trees. 10.9 adds the epic's next migration and 10.13 adds no SQL at all, so
+      FOC-01's wave-1 failure mode does not recur. FOC-03's two hot files, StudioService.java
+      and StudioController.java, are touched by 10.9 alone in this wave — 10.7 and 10.8 have
+      both merged — so FOC-03 does not extend into wave 4. One read-only coupling remains and
+      needs no serialization: 10.9 implements against the ADR-002 §16 schemas and 10.13 against
+      the §17 optional partial, both already landed on the branch, and neither story edits what
+      the other reads. Note for wave 5: ADR-002 O-13 assigns story 10.14 the API-side half of
+      partial, in the same RunnerReportProjection that 10.13 leaves reporting a truth the API
+      discards — that is a story dependency, already carried by 10.13 blocks: ["10.14", ...],
+      not a file conflict.
 
 # ─────────────────────────────────────────────────────────────
 # External dependencies (Epic 10 "Open external dependencies immediately")
