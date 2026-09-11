@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -112,18 +113,70 @@ class ErrorCodeVocabularyTest {
    * <p>{@code ui_test_executions} is range-partitioned, so a plain {@code ADD CONSTRAINT} would
    * scan every partition under an {@code ACCESS EXCLUSIVE} lock. This is not a style assertion: it
    * is the difference between a deploy and an outage.
+   *
+   * <p><b>Read on the executable statements, never on the file.</b> QA found the original version
+   * of this test satisfied by the migration's own documentation: the operator-remedy comment quotes
+   * the DDL verbatim — {@code ALTER TABLE ui_test_executions VALIDATE CONSTRAINT
+   * ck_ui_test_executions_error_code;} — so a grep over the whole text matched the comment and
+   * stayed green with both statements deleted. A scan over an artefact that quotes itself is a scan
+   * of its own prose. {@link #executableSql()} strips every {@code --} comment first, and the
+   * control below asserts the stripping really removed the quoted copy.
    */
   @Test
   void theConstraintIsAddedNotValidAndValidatedSeparately() {
-    String sql = migrationText();
+    String sql = executableSql();
 
-    assertThat(sql).containsIgnoringCase("NOT VALID");
     assertThat(sql)
+        .as("the ADD is present as a statement, not as prose")
+        .containsIgnoringCase("ALTER TABLE ui_test_executions")
+        .containsIgnoringCase("ADD CONSTRAINT ck_ui_test_executions_error_code")
+        .containsIgnoringCase("NOT VALID");
+    assertThat(sql)
+        .as("and so is the separate VALIDATE — a constraint left NOT VALID is half-applied")
         .containsIgnoringCase(
             "ALTER TABLE ui_test_executions VALIDATE CONSTRAINT ck_ui_test_executions_error_code");
-    assertThat(sql.toUpperCase(java.util.Locale.ROOT).indexOf("NOT VALID"))
+
+    String upper = sql.toUpperCase(Locale.ROOT);
+    assertThat(upper.indexOf("NOT VALID"))
         .as("VALIDATE must come after the NOT VALID add, not before it")
-        .isLessThan(sql.toUpperCase(java.util.Locale.ROOT).indexOf("VALIDATE CONSTRAINT"));
+        .isLessThan(upper.indexOf("VALIDATE CONSTRAINT"));
+    // Exactly one of each: a second VALIDATE, or a second ADD, is a migration nobody reasons about.
+    assertThat(upper.split("NOT VALID", -1)).hasSize(2);
+    assertThat(upper.split("VALIDATE CONSTRAINT", -1)).hasSize(2);
+  }
+
+  /**
+   * The control for the stripping, and for the whole file's scanning discipline.
+   *
+   * <p>Two halves, and both are needed. The <b>trap really exists</b>: the raw file contains a
+   * second, verbatim copy of the {@code VALIDATE} statement inside the operator remedy, so a naive
+   * grep has something to find even with the DDL gone. And the <b>stripping really removes it</b>:
+   * the executable text carries exactly one copy and none of the prose around it.
+   */
+  @Test
+  void theCommentQuotesTheDdlVerbatimAndTheStrippedTextDoesNotCarryThatCopy() {
+    String raw = migrationText();
+    String executable = executableSql();
+    String statement =
+        "ALTER TABLE ui_test_executions VALIDATE CONSTRAINT" + " ck_ui_test_executions_error_code";
+
+    // The trap: two copies in the file, one of them a comment.
+    assertThat(raw.split(statement, -1))
+        .as("the operator remedy quotes the DDL verbatim; that is what made the old scan vacuous")
+        .hasSize(3);
+    // Stripped: one copy, and it is the statement.
+    assertThat(executable.split(statement, -1)).hasSize(2);
+
+    // Nothing that is only ever prose survives the stripping.
+    assertThat(raw).contains("the operator remedy");
+    assertThat(executable)
+        .doesNotContain("the operator remedy")
+        .doesNotContain("PostgreSQL names the")
+        .doesNotContain("SELECT id, started_at, error_code")
+        .doesNotContain("--");
+
+    // And what does survive is only the two statements.
+    assertThat(executable.trim()).startsWith("ALTER TABLE ui_test_executions").endsWith(";");
   }
 
   /**
@@ -159,7 +212,7 @@ class ErrorCodeVocabularyTest {
   }
 
   private static Set<String> migrationValues() {
-    Matcher matcher = CHECK_CLAUSE.matcher(migrationText());
+    Matcher matcher = CHECK_CLAUSE.matcher(executableSql());
     assertThat(matcher.find())
         .as(
             "the CHECK clause could not be located in %s; the parser, not the SQL, is stale",
@@ -171,6 +224,37 @@ class ErrorCodeVocabularyTest {
       values.add(quoted.group(1));
     }
     return values;
+  }
+
+  /**
+   * The migration with every {@code --} comment removed.
+   *
+   * <p>Quote-aware so a value containing {@code --} could never truncate a statement. Nothing in
+   * this migration's list does, and the day one does, this still reads the statement.
+   */
+  private static String executableSql() {
+    StringBuilder stripped = new StringBuilder();
+    for (String line : migrationText().split("\n", -1)) {
+      boolean quoted = false;
+      int cut = -1;
+      for (int index = 0; index < line.length(); index++) {
+        char current = line.charAt(index);
+        if (current == '\'') {
+          quoted = !quoted;
+        } else if (!quoted
+            && current == '-'
+            && index + 1 < line.length()
+            && line.charAt(index + 1) == '-') {
+          cut = index;
+          break;
+        }
+      }
+      String code = cut < 0 ? line : line.substring(0, cut);
+      if (!code.isBlank()) {
+        stripped.append(code).append('\n');
+      }
+    }
+    return stripped.toString();
   }
 
   private static String migrationText() {

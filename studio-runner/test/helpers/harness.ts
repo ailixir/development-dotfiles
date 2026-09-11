@@ -19,7 +19,13 @@ import { createRecordingLogSink } from '../../src/server/logging.js';
 import type { RecordingLogSink } from '../../src/server/logging.js';
 import type { FakeScheduler } from './scheduler.js';
 import { createFakeScheduler } from './scheduler.js';
-import type { EventLog, FakeBrowserLauncher, FakeHttpClient, FakeScratchStore } from './runner.js';
+import type {
+  EventLog,
+  FakeBrowserLauncher,
+  FakeHttpClient,
+  FakeScratchStore,
+  RecordedHttpRequest,
+} from './runner.js';
 import {
   createEventLog,
   createFakeBrowserLauncher,
@@ -71,6 +77,14 @@ export interface HarnessOptions {
    * clock. Story 10.14 AC-3 is decided on that interleaving.
    */
   readonly onLogLine?: (line: string) => void;
+  /**
+   * Observes each report request as the runner hands it to the transport.
+   *
+   * Story 10.14 AC-3 asserts a sequence whose last element is the terminal delivery. That element
+   * has to be produced by the thing that delivers; a `journal.push('sendFinal')` executed by the
+   * test after the run is last whatever the runner did (QA-2).
+   */
+  readonly onReportRequest?: (request: RecordedHttpRequest) => void;
 }
 
 export interface Harness {
@@ -120,7 +134,7 @@ export function createHarness(options: HarnessOptions = {}): Harness {
   });
 
   const log = createEventLog();
-  const http = createFakeHttpClient(log);
+  const http = createFakeHttpClient(log, options.onReportRequest);
   const launcher = createFakeBrowserLauncher(log);
   const scratch = createFakeScratchStore(log);
   const recorded = createRecordingLogSink();

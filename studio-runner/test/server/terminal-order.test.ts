@@ -20,8 +20,12 @@
  *
  * Every element of it is a **captured runtime event**, not a statement position: two of them come
  * from an instrumented store, two from the pod log, one from an instrumented scratch store and one
- * from the HTTP client. Asserting on the order of statements in the source does not satisfy the
- * criterion and would not catch the failure it exists for.
+ * from the HTTP client — the last of these journalled by the transport at the instant the runner
+ * hands the body over, **not** appended by this file after the run. QA found the original version
+ * appending it by hand, which made it last by construction: the `writes the manifest before the
+ * result is delivered` assertion stayed green under falsification (a) while eight siblings went
+ * red. Asserting on the order of statements in the source does not satisfy the criterion either,
+ * and would not catch the failure it exists for.
  *
  * ## The second falsification, and why it needs a scratch store that does not delete
  *
@@ -164,13 +168,20 @@ async function runObserving(
       const event = (JSON.parse(line) as { event?: string }).event;
       if (event === 'run.evidence_settled' || event === 'run.values_wiped') journal.push(event);
     },
+    // The terminal delivery, journalled by the **transport** at the instant the runner hands the
+    // body over. QA-2: a `journal.push('sendFinal')` executed by the test after the run is last
+    // whatever the runner did, and it stayed green under AC-3's falsification (a) while eight
+    // sibling assertions went red.
+    onReportRequest: (request) => {
+      const kind = (JSON.parse(request.body) as { kind?: string }).kind;
+      if (kind === 'FINAL') journal.push('sendFinal');
+    },
   });
   await harness.start();
 
   const response = await post(harness.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
   expect(response.status).toBe(202);
   await until(() => harness?.app.coordinator.inFlight === 0);
-  journal.push('sendFinal');
 
   const raw = harness.http.reportRequests.at(-1)?.body ?? '';
   return { journal, final: JSON.parse(raw) as ReportBody, store };
@@ -206,8 +217,16 @@ describe('AC-3 — upload, settle, manifest, then clear scratch, wipe and delive
     const { journal } = await runObserving();
 
     const manifestPut = journal.indexOf(`put:${MANIFEST_KEY}`);
+    const delivery = journal.indexOf('sendFinal');
+
     expect(manifestPut).toBeGreaterThanOrEqual(0);
-    expect(journal.indexOf('sendFinal')).toBeGreaterThan(manifestPut);
+    // Observed at the transport, not appended afterwards — so a run that never delivered has no
+    // entry at all rather than one this file supplied.
+    expect(delivery).toBeGreaterThanOrEqual(0);
+    expect(delivery).toBeGreaterThan(manifestPut);
+    // The delivery is the *last* thing the run does, and that has to be observed rather than
+    // arranged: it is journalled by the transport, so a run that delivered earlier moves it.
+    expect(journal.at(-1)).toBe('sendFinal');
   });
 
   it('still holds the resolved values when the manifest bytes are produced', async () => {
