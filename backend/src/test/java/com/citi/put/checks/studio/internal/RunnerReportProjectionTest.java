@@ -379,7 +379,7 @@ class RunnerReportProjectionTest {
         false,
         Map.of(),
         new RunOutcome(RunOutcome.PASSED, null, null),
-        new RunnerEvidence("studio/video.webm", "studio/manifest.result.json", state),
+        new RunnerEvidence("studio/video.webm", "studio/manifest.result.json", state, false),
         null);
   }
 

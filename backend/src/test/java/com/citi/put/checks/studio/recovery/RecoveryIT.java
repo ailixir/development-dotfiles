@@ -740,7 +740,8 @@ class RecoveryIT {
         false,
         Map.of(),
         new RunOutcome(result, null, null),
-        new RunnerEvidence("studio/video.webm", "studio/manifest.result.json", evidenceState),
+        new RunnerEvidence(
+            "studio/video.webm", "studio/manifest.result.json", evidenceState, false),
         null);
   }
 
