@@ -442,7 +442,13 @@ issues:
       runtime flag a webpack-visible source as well — e.g. read the already-defined
       process.env.MSW_BUNDLED constant, or add VITE_ENABLE_MSW to the DefinePlugin list.
     suggested_owner: dev
-    status: open
+    status: resolved
+    resolution: >-
+      Fixed by @dev (2026-09-11): the runtime gate now reads process.env.VITE_ENABLE_MSW, substituted
+      by both DefinePlugin and Vite define, and MswGate is mounted in bootstrap.tsx; activation was
+      proved in real Chrome against both dev servers in both flag states (handler-served 200 with the
+      flag on, proxy 504/500 and zero service-worker registrations with it off), with production
+      builds still carrying no mock code. Awaiting @qa verification.
 
 recommendations:
   immediate:
