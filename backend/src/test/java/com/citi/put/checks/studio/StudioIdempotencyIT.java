@@ -60,6 +60,7 @@ class StudioIdempotencyIT {
   @Autowired private ConfigurationChangeClassifier changeClassifier;
   @Autowired private CsiOwnershipEvaluator csiOwnershipEvaluator;
   @Autowired private ExecutionSnapshotMapper snapshotMapper;
+  @Autowired private com.citi.put.checks.studio.compile.CompilePipeline compilePipeline;
   @Autowired private TransactionTemplate transactions;
 
   private UUID testId;
@@ -185,7 +186,8 @@ class StudioIdempotencyIT {
         changeClassifier,
         csiOwnershipEvaluator,
         snapshotMapper,
-        acceptanceService);
+        acceptanceService,
+        compilePipeline);
   }
 
   private static Authentication identity(String email) {

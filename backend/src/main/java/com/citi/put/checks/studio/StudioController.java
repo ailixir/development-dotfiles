@@ -1,5 +1,6 @@
 package com.citi.put.checks.studio;
 
+import com.citi.put.checks.studio.dto.CompileAcceptedDto;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import com.citi.put.checks.studio.dto.UITestDto;
@@ -72,10 +73,28 @@ public class StudioController {
 
   @PutMapping("/tests/{id}")
   public ResponseEntity<UITestDto> updateTest(
-      @PathVariable UUID id, @RequestBody UITestRequest request) {
+      @PathVariable UUID id, @RequestBody UITestRequest request, Authentication auth) {
     LegacyStudioAdapter.validateForWrite(request);
-    UITestDto updated = studioService.updateTest(id, request);
+    UITestDto updated = studioService.updateTest(id, request, auth);
     return ResponseEntity.ok(updated);
+  }
+
+  /**
+   * Enqueues compilation of the current source (Story 10.8 AC-1; Architecture §8.3).
+   *
+   * <p>{@code 202} says the compile request was <em>recorded</em>, not that a model was reached:
+   * acceptance and execution are separate events, so pool saturation, the gateway bulkhead and the
+   * per-attempt budget all surface asynchronously as {@code compileStatus: STALE} with a {@code
+   * compileError} the authoring UI reads, and never as a status code here.
+   *
+   * <p>The refusals are ordered by ADR-002 §14.4 — {@code 401}/{@code 403}, then {@code 409} for a
+   * soft-deleted or quarantined draft, then {@code 400} for an authoring bound or an inline
+   * credential — and every one of them leaves the draft's compile state exactly where it was.
+   */
+  @PostMapping("/tests/{id}/compile")
+  public ResponseEntity<CompileAcceptedDto> compileTest(
+      @PathVariable UUID id, Authentication auth) {
+    return ResponseEntity.accepted().body(studioService.compileTest(id, auth));
   }
 
   @DeleteMapping("/tests/{id}")

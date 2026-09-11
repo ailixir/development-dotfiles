@@ -337,7 +337,6 @@ paths:
         `202` therefore means the attempt was *started*, not that it will succeed. Pool saturation
         and gateway failure surface asynchronously as `compileStatus: STALE` carrying
         `compileError`, never as a status code on this response (§4.3).
-      x-not-yet-implemented: true
       x-implemented-by: '10.8'
       parameters:
         - { $ref: '#/components/parameters/TestId' }

@@ -3,6 +3,8 @@ package com.citi.put.checks.studio;
 import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.UserIdentity;
+import com.citi.put.checks.studio.compile.ArtifactCanonicalizer;
+import com.citi.put.checks.studio.compile.CompilePins;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -92,28 +94,68 @@ public final class StudioExecutionFixtures {
    * the confirmed revision matching both of the draft's revisions, not on {@code compile_status},
    * because a failed <em>optional</em> recompile drives a confirmed unedited draft to {@code STALE}
    * and must not un-run it (story 10.4 ISSUE-003).
+   *
+   * <h2>Why the hashes and the provenance stopped being placeholders</h2>
+   *
+   * <p>Story 10.7a wrote {@code 'source-hash'}, {@code 'artifact-hash-xxxx'} and an empty
+   * provenance here, because the gate it shipped against was its own provisional implementation and
+   * checked neither. Story 10.8's {@code ExecutionReadinessService} checks both: term 5 re-hashes
+   * the draft's ordered {@code originalText} and the revision's artifact, and term 7 compares the
+   * recorded validator and syntax-reference versions against the configured pin.
+   *
+   * <p>So every value below is now derived rather than invented — by {@link ArtifactCanonicalizer},
+   * the same helper the gate re-derives them with, and from {@link CompilePins}, the same constants
+   * it compares against. This is a fixture catching up with a real gate, not a gate being relaxed
+   * to a fixture: a placeholder hash <em>should</em> be refused, and the day these literals were
+   * accepted by the provisional implementation is the day the fixtures stopped describing anything
+   * a user could produce.
    */
   public UUID confirmRevision(UUID testId, String csiId, List<String> steps, String references) {
     UUID revisionId = UUID.randomUUID();
+    String artifact = "{\"steps\":[]}";
     jdbc.update(
         "INSERT INTO ui_test_revisions (id, test_id, csi_id, source_revision,"
             + " configuration_revision, source, source_hash, artifact, artifact_hash,"
             + " artifact_schema_version, configuration, \"references\", provenance, created_by,"
             + " created_at, confirmed_by, confirmed_at)"
-            + " VALUES (?, ?, ?, 1, 1, CAST(? AS jsonb), 'source-hash',"
-            + " CAST('{\"steps\":[]}' AS jsonb), 'artifact-hash-' || ?, 1,"
-            + " CAST('{}' AS jsonb), CAST(? AS jsonb), CAST('{}' AS jsonb), 'compiler', ?,"
+            + " VALUES (?, ?, ?, 1, 1, CAST(? AS jsonb), ?,"
+            + " CAST(? AS jsonb), ?, ?,"
+            + " CAST('{}' AS jsonb), CAST(? AS jsonb), CAST(? AS jsonb), 'compiler', ?,"
             + " 'confirmer', ?)",
         revisionId,
         testId,
         csiId,
         stepsJson(steps),
-        revisionId.toString().substring(0, 8),
+        ArtifactCanonicalizer.sourceHash(steps),
+        artifact,
+        ArtifactCanonicalizer.hash(artifact),
+        CompilePins.SUPPORTED_ARTIFACT_VERSION,
         references == null ? "[]" : references,
+        pinnedProvenance(),
         Timestamp.from(Instant.now()),
         Timestamp.from(Instant.now()));
     jdbc.update("UPDATE ui_tests SET confirmed_revision_id = ? WHERE id = ?", revisionId, testId);
     return revisionId;
+  }
+
+  /**
+   * Provenance recorded under the versions this deployment pins, so the revision is runtime
+   * compatible on the exact-match terms the backend gate owns (story 10.8 AC-25).
+   *
+   * <p>The ranged Playwright/executor terms are recorded and deliberately not compared here — that
+   * rule lives in the runner's own {@code isCompatible}, which revalidates before any browser
+   * launch. One rule, one owner.
+   *
+   * @return the provenance document
+   */
+  private static String pinnedProvenance() {
+    return "{\"model\":\"fixture-model@1\",\"promptVersion\":\""
+        + CompilePins.PROMPT_VERSION
+        + "\",\"syntaxReferenceVersion\":\"1.0.0\",\"validatorSchemaVersion\":\"1.0.0\","
+        + "\"languagePolicyVersion\":\"1.0.0\",\"executorVersion\":\"1.0.0\","
+        + "\"playwrightVersion\":\"1.63.0\",\"artifactSchemaVersion\":"
+        + CompilePins.SUPPORTED_ARTIFACT_VERSION
+        + "}";
   }
 
   /** A draft that is compiled, confirmed and immediately runnable. */

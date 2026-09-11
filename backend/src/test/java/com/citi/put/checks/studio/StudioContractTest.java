@@ -2,6 +2,7 @@ package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.citi.put.checks.studio.dto.CompileAcceptedDto;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.RuntimeVersions;
 import com.citi.put.checks.studio.dto.StepResult;
@@ -156,8 +157,36 @@ class StudioContractTest {
     }
   }
 
+  /**
+   * Story 10.8 AC-1 — the compile route is shipped, and the marker came off for it alone.
+   *
+   * <p>The two gates above already fail if a route is declared as shipped and unreachable, or
+   * reachable and undeclared. What they cannot see is the marker being removed from an operation
+   * whose story has not landed — {@code x-not-yet-implemented} is how the document says "declared
+   * so dependants can build, not served yet", and quietly clearing it on a neighbour would present
+   * three unimplemented routes as shipped. So this asserts both directions at once.
+   */
+  @Test
+  void theCompileRouteIsShippedAndTheMarkerCameOffForThatOperationOnly() throws IOException {
+    assertThat(implementedStudioOperations())
+        .as("T-10.8.1 landed POST /tests/{id}/compile")
+        .contains("POST " + PUBLIC_BASE + "/tests/{id}/compile");
+    assertThat(declaredOperations(false))
+        .as("and the document no longer flags it as pending")
+        .contains("POST " + PUBLIC_BASE + "/tests/{id}/compile");
+    assertThat(pendingOperations())
+        .as(
+            "confirmation (10.9), the SSE stream (10.7) and the video route (10.16) are not this"
+                + " story's; their markers must not have moved")
+        .containsExactlyInAnyOrder(
+            "POST /tests/{id}/confirm-compile",
+            "GET /executions/{id}/events",
+            "GET /executions/{id}/video");
+  }
+
   @Test
   void theFrozenSchemasAndTheJavaTypesShareTheSameFieldNames() {
+    assertSchemaMatchesRecord("CompileAccepted", CompileAcceptedDto.class);
     assertSchemaMatchesRecord("ExecutionSnapshot", ExecutionSnapshotDto.class);
     assertSchemaMatchesRecord("StepResult", StepResult.class);
     assertSchemaMatchesRecord("VideoEvidence", VideoEvidence.class);
@@ -340,6 +369,27 @@ class StudioContractTest {
                           method.toUpperCase(java.util.Locale.ROOT) + " " + prefix + path);
                     }));
     return operations;
+  }
+
+  /** Operations the document still flags as declared-but-not-served, as {@code METHOD path}. */
+  @SuppressWarnings("unchecked")
+  private static Set<String> pendingOperations() {
+    Map<String, Object> paths = (Map<String, Object>) contract.get("paths");
+    Set<String> pending = new TreeSet<>();
+    paths.forEach(
+        (path, item) ->
+            ((Map<String, Object>) item)
+                .forEach(
+                    (method, operation) -> {
+                      if (!(operation instanceof Map)) {
+                        return;
+                      }
+                      if (Boolean.TRUE.equals(
+                          ((Map<String, Object>) operation).get("x-not-yet-implemented"))) {
+                        pending.add(method.toUpperCase(java.util.Locale.ROOT) + " " + path);
+                      }
+                    }));
+    return pending;
   }
 
   /** One internal operation and the three signals that make it attributable (ADR-002 §3.1). */

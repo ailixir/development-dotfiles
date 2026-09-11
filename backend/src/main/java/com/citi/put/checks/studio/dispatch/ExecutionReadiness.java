@@ -6,11 +6,13 @@ import com.citi.put.checks.studio.entity.UITest;
  * The readiness gate acceptance consults, and the only one it consults (AC-8a).
  *
  * <p>The shape of this seam is fixed by @po so that stories 10.7 and 10.8 cannot produce two of it.
- * This story declares the interface and supplies {@link ProvisionalExecutionReadiness}; story 10.8
- * supplies {@code ExecutionReadinessService} as the full implementation of this same interface and
- * deletes the provisional one. Neither story introduces a second type, and the acceptance path is
- * wired to this interface and never to a concrete class — so 10.8 replaces one implementation
- * rather than hunting a condition scattered across the acceptance path.
+ * Story 10.7a declared this interface and supplied a provisional implementation; story 10.8
+ * supplied {@code com.citi.put.checks.studio.readiness.ExecutionReadinessService} as the full
+ * implementation of this same interface and <b>deleted the provisional one</b>, which is why no
+ * implementation of this interface lives in this package any more. Neither story introduced a
+ * second type, and the acceptance path is wired to this interface and never to a concrete class —
+ * so 10.8 replaced one implementation rather than hunting a condition scattered across the
+ * acceptance path.
  *
  * <p>{@link Verdict} already carries both refusals §4.6 names, so 10.8 widens the predicate without
  * widening the type.
