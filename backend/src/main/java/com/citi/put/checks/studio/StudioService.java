@@ -7,9 +7,11 @@ import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.studio.compile.CompilePipeline;
 import com.citi.put.checks.studio.compile.CompileRequest;
 import com.citi.put.checks.studio.compile.CompileState;
+import com.citi.put.checks.studio.compile.CompileStateService;
 import com.citi.put.checks.studio.compile.ConfigurationChangeClassifier;
 import com.citi.put.checks.studio.dispatch.StudioAcceptanceService;
 import com.citi.put.checks.studio.dto.CompileAcceptedDto;
+import com.citi.put.checks.studio.dto.ConfirmCompileRequestDto;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.ExecutionStatus;
 import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
@@ -44,6 +46,7 @@ public class StudioService {
   private final ExecutionSnapshotMapper snapshotMapper;
   private final StudioAcceptanceService acceptanceService;
   private final CompilePipeline compilePipeline;
+  private final CompileStateService compileStateService;
 
   @SuppressWarnings("checkstyle:ParameterNumber")
   public StudioService(
@@ -54,7 +57,8 @@ public class StudioService {
       CsiOwnershipEvaluator csiOwnershipEvaluator,
       ExecutionSnapshotMapper snapshotMapper,
       StudioAcceptanceService acceptanceService,
-      CompilePipeline compilePipeline) {
+      CompilePipeline compilePipeline,
+      CompileStateService compileStateService) {
     this.studioRepository = studioRepository;
     this.executionRepository = executionRepository;
     this.csiRepository = csiRepository;
@@ -63,6 +67,7 @@ public class StudioService {
     this.snapshotMapper = snapshotMapper;
     this.acceptanceService = acceptanceService;
     this.compilePipeline = compilePipeline;
+    this.compileStateService = compileStateService;
   }
 
   // ── server-side authorization (AC-4a, §9.1) ──────────────────────────────
@@ -105,19 +110,25 @@ public class StudioService {
    * Lists drafts, always scoped to the CSIs the caller may read — including when no {@code csiId}
    * filter was supplied (AC-14, Architecture §9.1). The scope is part of the query, so it is
    * applied before paging and page counts never describe rows the caller cannot see.
+   *
+   * <p>The one field this projection omits is {@code compileDiagnostics}, which is always {@code
+   * null} here and is read from {@code GET /tests/{id}} (ADR-002 §16.5). The document is capped per
+   * draft, so a page of drafts in {@code NEEDS_REVISION} would be a multi-megabyte response
+   * carrying per-step reasons no list renders. {@code compileStatus} and the bounded {@code
+   * compileError} stay, so nothing a caller needs in order to know that reasons exist is hidden.
    */
   public Page<UITestDto> listTests(String csiId, int page, int size, Authentication auth) {
     Pageable pageable =
         PageRequest.of(page, Math.min(size, 100), Sort.by("createdAt").descending());
     Optional<Set<String>> readable = csiOwnershipEvaluator.readableCsiIds(auth);
     if (readable.isEmpty()) {
-      return studioRepository.findAllFiltered(csiId, pageable).map(UITestDto::from);
+      return studioRepository.findAllFiltered(csiId, pageable).map(UITestDto::forList);
     }
     Set<String> csiIds = readable.get();
     if (csiIds.isEmpty()) {
       return Page.empty(pageable);
     }
-    return studioRepository.findAllFilteredScoped(csiId, csiIds, pageable).map(UITestDto::from);
+    return studioRepository.findAllFilteredScoped(csiId, csiIds, pageable).map(UITestDto::forList);
   }
 
   /**
@@ -314,6 +325,52 @@ public class StudioService {
         CompileState.COMPILING.name(),
         request.sourceRevision(),
         request.configurationRevision());
+  }
+
+  /**
+   * Confirms exactly the candidate the author reviewed (AC-1, §4.2, §8.3).
+   *
+   * <p>The order of refusal is ADR-002 §14.4's: <b>identity, then CSI authorization, then the
+   * lifecycle guard, then the confirmation transaction</b>. Authorization runs before the lifecycle
+   * read so that a caller who may not act on the draft's CSI never learns from a status code
+   * whether the draft exists — possible here only because the CSI is read through the visibility
+   * restriction, the same read that makes a {@code 409} possible at all.
+   *
+   * <p>The one documented exception is bean validation: a malformed body is rejected {@code 400}
+   * during argument resolution, before this method runs. That discloses nothing — a malformed body
+   * answers identically for an id that never existed.
+   *
+   * <p><b>This method holds no comparison.</b> All four exactness terms travel into {@link
+   * CompileStateService#confirm}'s two conditional statements and are decided by the database
+   * against the committed row. There is no second confirmation path, no read-then-write, and
+   * nothing here loosens the guard 10.4 wrote: a mismatch on any term is {@code 409
+   * STALE_CANDIDATE} and the whole transaction rolls back.
+   *
+   * <p>{@code NOT_SUPPORTED} because this class is {@code readOnly = true} by default: {@code
+   * confirm} writes, and without it that write would join a read-only transaction and fail. The
+   * draft is re-read afterwards, so the {@code 200} body is the committed state rather than the
+   * state the caller hoped for.
+   *
+   * @param testId the draft whose candidate is being confirmed
+   * @param request the frozen four-field body
+   * @param auth the caller
+   * @return the committed draft, now {@code READY}
+   * @throws StudioAccessDeniedException the caller may not confirm this draft, or it does not exist
+   * @throws StudioConflictException the draft is deleted or quarantined, or the body does not match
+   *     the current unconfirmed candidate exactly ({@code 409})
+   */
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
+  public UITestDto confirmCompile(
+      UUID testId, ConfirmCompileRequestDto request, Authentication auth) {
+    requireCompile(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
+    compileStateService.confirm(
+        testId,
+        request.revisionId(),
+        request.artifactHash(),
+        request.sourceRevision(),
+        request.configurationRevision(),
+        principalOf(auth));
+    return findTestById(testId);
   }
 
   private void requireRegisteredCsi(String csiId) {

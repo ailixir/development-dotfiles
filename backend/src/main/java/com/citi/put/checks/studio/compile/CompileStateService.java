@@ -2,6 +2,9 @@ package com.citi.put.checks.studio.compile;
 
 import com.citi.put.checks.studio.StudioConflictException;
 import com.citi.put.checks.studio.StudioRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,8 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
  * draft that moved after its compile began, and no future writer of the revision columns can
  * reintroduce the hole by forgetting to clear the request identity.
  *
- * <p>This class owns the transactions only. The HTTP endpoints (compile, confirm-compile), prompt
- * assembly, validation and the repair loop belong to stories 10.8 and 10.9.
+ * <p>This class owns the transactions only. The HTTP endpoints, prompt assembly, validation, the
+ * repair loop and the sweep's <em>schedule</em> live elsewhere; the sweep's <em>statement</em>
+ * lives here, because story 10.8 AC-3 requires every compile-state write to go through this class
+ * and a scheduler holding SQL would turn that scan red.
  */
 @Service
 public class CompileStateService {
@@ -37,6 +42,8 @@ public class CompileStateService {
   private static final Logger LOGGER = LoggerFactory.getLogger(CompileStateService.class);
 
   private static final String STALE_CANDIDATE = "STALE_CANDIDATE";
+
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private static final String INSERT_REVISION =
       """
@@ -82,6 +89,7 @@ public class CompileStateService {
             UPDATE ui_tests
                SET compile_request_id  = ?,
                    compile_status      = 'COMPILING',
+                   compile_started_at  = NOW(),
                    compile_error       = NULL,
                    compile_diagnostics = NULL
              WHERE id = ? AND deleted_at IS NULL AND quarantined_at IS NULL
@@ -122,6 +130,7 @@ public class CompileStateService {
             UPDATE ui_tests
                SET current_candidate_revision_id = ?,
                    compile_status                = 'AWAITING_CONFIRMATION',
+                   compile_started_at            = NULL,
                    compile_error                 = NULL,
                    compile_diagnostics           = NULL
              WHERE id = ? AND compile_request_id = ? AND source_revision = ?
@@ -157,6 +166,7 @@ public class CompileStateService {
             """
             UPDATE ui_tests
                SET compile_status                = 'NEEDS_REVISION',
+                   compile_started_at            = NULL,
                    compile_diagnostics           = CAST(? AS jsonb),
                    compile_error                 = NULL,
                    current_candidate_revision_id = NULL
@@ -194,6 +204,7 @@ public class CompileStateService {
             """
             UPDATE ui_tests
                SET compile_status                = 'STALE',
+                   compile_started_at            = NULL,
                    compile_error                 = CAST(? AS jsonb),
                    compile_diagnostics           = NULL,
                    current_candidate_revision_id = NULL
@@ -292,6 +303,105 @@ public class CompileStateService {
               + " that is awaiting confirmation");
     }
     return revisionId;
+  }
+
+  /**
+   * Marks abandoned compile requests retryable (story 10.9, AC-18, AC-19; architecture &sect;4.7).
+   *
+   * <p>A compile that was in flight when its API replica died leaves a row in {@code COMPILING}
+   * forever: the per-attempt budget and the late-result drop are held in memory and do not survive
+   * a restart. This moves such a row to <strong>exactly the outcome {@link #publishError} produces
+   * </strong> — {@code STALE}, a retryable {@code compile_error} carrying a bounded code and
+   * nothing else, and the current candidate cleared — so the authoring UI has one state to render
+   * for "the last compile did not produce a candidate" rather than two.
+   *
+   * <h2>Why this clears the request identity, and why no publish guard changes</h2>
+   *
+   * <p>The three publish transitions condition on {@code compile_request_id} intrinsically and
+   * deliberately do <em>not</em> condition on {@code compile_status} — 10.4 made {@code
+   * beginCompile} unconditional on status and 10.8 built AC-23 on that. So a naive sweep that moved
+   * {@code COMPILING -> STALE} while leaving the request identity intact would let a late result
+   * from the swept compile resurrect it, and the tempting fix would be a status term on all three
+   * publish guards: a guard change in service of a sweep, touching code three other criteria depend
+   * on.
+   *
+   * <p>Clearing {@code compile_request_id} <em>is</em> what "this compile request is abandoned"
+   * means. The existing intrinsic guard then does the work unchanged: a late publish finds no
+   * matching request and returns {@link PublishResult#DISCARDED_OUT_OF_ORDER}. No publish guard is
+   * modified, widened or given a new term by this method.
+   *
+   * <h2>Why the statement re-states its own predicate</h2>
+   *
+   * <p>The age predicate and the status are re-stated in the outer {@code WHERE}, not only in the
+   * {@code SELECT ... FOR UPDATE SKIP LOCKED} that chooses the rows. PostgreSQL re-evaluates a
+   * conditional {@code UPDATE}'s predicate against the committed row version once the row lock is
+   * acquired, so a row that settled between the selection and the update is skipped rather than
+   * overwritten. {@code SKIP LOCKED} additionally means concurrent API replicas divide the work
+   * instead of contending for it.
+   *
+   * <p>The selection is a CTE rather than a {@code WHERE id IN (SELECT ... LIMIT n)} subquery, and
+   * that is a correctness fix rather than a style choice. The subquery form was written first and
+   * measured: with five sweepable rows and a batch size of two it updated <em>five</em>, because
+   * the planner is free to re-evaluate an uncorrelated {@code IN} subquery per outer row and the
+   * {@code LIMIT} then bounds each evaluation instead of the statement. A CTE is evaluated once, so
+   * the batch size is a bound on the statement — which is the only reading under which "the run
+   * stops at the cap and the next scheduled run continues" is true.
+   *
+   * <p>The code recorded is {@link CompileErrorCode#COMPILE_BUDGET_EXCEEDED} rather than a twelfth
+   * code invented here. It is literally true: the sweep threshold is validated at startup to exceed
+   * the per-request budget, so by the time a row is old enough to be swept its budget has certainly
+   * elapsed — the sweep is the durable form of a deadline the process was holding in memory when it
+   * died. ADR-002 &sect;16.4 is explicit that needing a new compile error code is a signal the
+   * bound being reported was not in &sect;4.3.
+   *
+   * <p>It writes <strong>no</strong> {@code ui_test_revisions} row and changes <strong>no</strong>
+   * {@code confirmed_revision_id}: an abandoned compile never produced a candidate to confirm, and
+   * the confirmed history is not this method's to touch.
+   *
+   * @param threshold how long a row may sit in {@code COMPILING} before it is abandoned
+   * @param batchSize the maximum number of rows this run may settle
+   * @return how many rows were swept
+   */
+  @Transactional
+  public int sweepAbandoned(Duration threshold, int batchSize) {
+    if (threshold == null || threshold.isNegative() || threshold.isZero() || batchSize <= 0) {
+      throw new IllegalArgumentException(
+          "sweepAbandoned needs a positive threshold and batch size, not "
+              + threshold
+              + "/"
+              + batchSize);
+    }
+    ObjectNode error = MAPPER.createObjectNode();
+    error.put("code", CompileErrorCode.COMPILE_BUDGET_EXCEEDED.name());
+    double thresholdSeconds = threshold.toMillis() / 1000.0d;
+
+    return jdbc.update(
+        """
+        WITH abandoned AS (
+            SELECT id
+              FROM ui_tests
+             WHERE compile_status = 'COMPILING'
+               AND compile_started_at < NOW() - make_interval(secs => ?)
+             ORDER BY compile_started_at
+             LIMIT ?
+               FOR UPDATE SKIP LOCKED
+        )
+        UPDATE ui_tests t
+           SET compile_status                = 'STALE',
+               compile_started_at            = NULL,
+               compile_request_id            = NULL,
+               compile_error                 = CAST(? AS jsonb),
+               compile_diagnostics           = NULL,
+               current_candidate_revision_id = NULL
+          FROM abandoned a
+         WHERE t.id = a.id
+           AND t.compile_status = 'COMPILING'
+           AND t.compile_started_at < NOW() - make_interval(secs => ?)
+        """,
+        thresholdSeconds,
+        batchSize,
+        error.toString(),
+        thresholdSeconds);
   }
 
   /**

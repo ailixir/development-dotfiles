@@ -24,6 +24,13 @@ final class GatewayPayloadSerializer {
     for (String line : request.fencedSourceLines()) {
       payload.append(line).append('\n');
     }
+    // A repair attempt appends the bounded diagnostics of the attempt that just failed, and
+    // nothing else (story 10.9, §4.3). Appended last and still mechanically: the document was
+    // bounded and redacted by DiagnosticsBounder before it reached this type, so the byte
+    // accounting above still measures exactly what leaves the process.
+    if (request.repairDiagnostics() != null && !request.repairDiagnostics().isBlank()) {
+      payload.append(SEPARATOR).append(request.repairDiagnostics()).append('\n');
+    }
     return payload.toString();
   }
 

@@ -55,6 +55,10 @@ final class GatewayErrorScrubber {
       }
       scrubbed = redactFragment(scrubbed, request.outputContract());
       scrubbed = redactFragment(scrubbed, request.syntaxReference());
+      // A repair prompt carries the previous attempt's diagnostics, so a gateway that echoes the
+      // request back can echo those too. They are bounded and redacted already, but they are still
+      // request content and this method's contract is that no request content survives it.
+      scrubbed = redactFragment(scrubbed, request.repairDiagnostics());
     }
     scrubbed = SecretMasker.mask(scrubbed);
     return scrubbed.length() <= MAX_MESSAGE_LENGTH

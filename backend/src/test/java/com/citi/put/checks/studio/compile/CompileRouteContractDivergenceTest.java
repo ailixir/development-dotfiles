@@ -200,7 +200,15 @@ class CompileRouteContractDivergenceTest {
         .isNull();
     assertThat(operationFlag(COMPILE_PATH, "x-implemented-by")).isEqualTo("10.8");
     assertThat(operationFlag("/tests/{id}/confirm-compile", "x-not-yet-implemented"))
-        .as("confirm-compile is story 10.9's and nothing here implements it")
+        .as(
+            "confirm-compile's marker came off in story 10.9, which ships that route; this"
+                + " assertion inverted for the same reason 10.8's did — the route landed. The"
+                + " neighbour that must still be marked is the video route (10.16), asserted"
+                + " below, and StudioContractTest holds the exhaustive pending set")
+        .isNull();
+    assertThat(operationFlag("/tests/{id}/confirm-compile", "x-implemented-by")).isEqualTo("10.9");
+    assertThat(videoOperationFlag("x-not-yet-implemented"))
+        .as("the video route is story 10.16's and nothing has implemented it")
         .isEqualTo(Boolean.TRUE);
   }
 
@@ -391,6 +399,14 @@ class CompileRouteContractDivergenceTest {
     assertThat(item).as("the contract declares %s", path).isNotNull();
     Map<String, Object> post = (Map<String, Object>) item.get("post");
     return (Map<String, Object>) post.get("responses");
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Object videoOperationFlag(String key) {
+    Map<String, Object> paths = (Map<String, Object>) contract.get("paths");
+    Map<String, Object> item = (Map<String, Object>) paths.get("/executions/{id}/video");
+    Map<String, Object> get = (Map<String, Object>) item.get("get");
+    return get.get(key);
   }
 
   @SuppressWarnings("unchecked")
