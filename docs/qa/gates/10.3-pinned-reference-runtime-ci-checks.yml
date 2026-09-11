@@ -1,0 +1,471 @@
+schema: 1
+story: '10.3'
+story_title: Pinned reference/runtime CI checks
+epic: EPIC-10
+wave: 1
+
+gate: CONCERNS
+status_reason: >-
+  All 12 non-deferred acceptance criteria are implemented and independently verified from a clean
+  install; npm ci, build, type-check, lint, test (308), check:pins and test:fixtures (58 passed,
+  1 skipped) all exit 0. The pin check was falsified copy by copy: every one of the five asserted
+  copies was deliberately broken in turn and check:pins exited 1 naming the offending copy each
+  time. The manifest completeness test was falsified the same way and goes red naming the exact
+  uncovered method or option key. AC-6b is a genuine deferral — an it.skip that reports as skipped
+  and is recorded as "skipped — not passed" in ci/stages.md. Two medium findings keep this off
+  PASS, both in the in-image half of the pin: an omitted IMAGE_TAG build arg records image as ""
+  rather than null, which --require-image accepts as a pass; and the recorded Node version is
+  never asserted against .nvmrc, which ADR-001 §4.2 assigns to this story — proven by a real image
+  build that ships Node v24.20.0 against a .nvmrc of 22 while check:pins --require-image says OK.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-11T00:00:00Z'
+branch: story/10.3
+head_sha: 3b3b57ae4
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.3
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands actually executed by the reviewer, not developer claims
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  clean_install:
+    command: rm -rf node_modules dist coverage && npm ci
+    result: PASS
+    detail: 380 packages, exit 0, no browser download attempted
+  build:
+    command: npm run build
+    result: PASS
+    detail: tsc -p tsconfig.build.json + write-runtime-versions.mjs, wrote dist/runtime-versions.json
+  type_check:
+    command: npm run type-check
+    result: PASS
+    detail: exit 0, no output
+  lint:
+    command: npm run lint
+    result: PASS
+    detail: eslint ., exit 0, no output
+  unit_tests:
+    command: npm test
+    result: PASS
+    detail: >-
+      308 tests passed, exit 0. Coverage src/compat/** 100% lines / 95% branches;
+      scripts/** 98.49% lines / 83.67% branches; global 95.56% lines / 90.11% branches.
+      Thresholds unchanged from 10.2 at 85 lines/statements, 80 functions/branches, with
+      per-glob 80/80/80/80 added for src/compat/** and scripts/**. NOT lowered.
+  pin_check:
+    command: npm run check:pins
+    result: PASS
+    detail: >-
+      exit 0. Prints two NOT ASSERTED lines for chromiumBuild and image, then OK listing all five
+      asserted copies at 1.63.0 / node floor 22.
+  fixtures_tier:
+    command: npm run test:fixtures
+    result: PASS
+    detail: 58 passed, 1 skipped (the AC-6b placeholder), exit 0
+  working_tree:
+    command: git status --short
+    result: CLEAN
+    detail: empty after every falsification edit was reverted and the package rebuilt
+
+developer_claims_verified:
+  - claim: 12 of 13 ACs met, AC-6b deferred on ED-05
+    verdict: CONFIRMED
+  - claim: 308 tests plus 58 fixture-tier tests
+    verdict: CONFIRMED (308 unit; 58 passed + 1 skipped in the fixtures tier)
+  - claim: reference corpus grew 20 -> 28 examples
+    verdict: >-
+      CONFIRMED — 29 files in fixtures/reference (28 examples + manifest.json); git diff
+      0af5792d0..HEAD shows 9 additions (8 fixtures + manifest) and zero modifications or
+      deletions of the original 20.
+  - claim: 20 permitted methods and 44 method.optionKey pairs, all with an example
+    verdict: CONFIRMED — surfaceMethods() = 20, surfaceOptionKeys() = 44, both derived at runtime
+  - claim: coverage scripts/** 98.49% lines / 84.53% branches
+    verdict: >-
+      PARTIALLY CONFIRMED — lines 98.49% matches; branches measured 83.67%, not 84.53%. Both
+      comfortably above the 80% gate; recorded as LOW-3.
+  - claim: >-
+      the Dockerfile fix (COPY Dockerfile .nvmrc) was never tested against a real image build
+    verdict: >-
+      HONEST AND NOW SUPERSEDED — the caveat was accurate as written. The reviewer performed the
+      build; see docker_build below. It succeeds.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pin-check falsification — every copy broken in turn, then restored
+# ─────────────────────────────────────────────────────────────────────────────
+pin_check_falsification:
+  method: >-
+    Each copy mutated in the real package root, `npm run check:pins` run, exit code and message
+    captured, then the file restored with `git checkout --` (or the package rebuilt for the
+    generated copy). Working tree verified clean afterwards.
+  cases:
+    - copy: package.json dependencies.playwright
+      mutation: 1.63.0 -> 1.99.0
+      exit_code: 1
+      named: >-
+        "the Playwright pin disagrees across copies" listing package.json = 1.99.0 against the
+        three copies at 1.63.0
+      detected: true
+    - copy: package-lock.json packages['node_modules/playwright'].version
+      mutation: 1.63.0 -> 1.98.0
+      exit_code: 1
+      named: >-
+        disagreement listed with the lockfile at 1.98.0, plus a second failure
+        "runtime-versions.json playwrightLocked is stale"
+      detected: true
+    - copy: Dockerfile ARG PLAYWRIGHT_VERSION
+      mutation: 1.63.0 -> 1.97.0
+      exit_code: 1
+      named: >-
+        disagreement listed with the Dockerfile ARG at 1.97.0, plus
+        "runtime-versions.json playwrightImageTag is stale"
+      detected: true
+    - copy: dist/runtime-versions.json playwright
+      mutation: 1.63.0 -> 1.96.0
+      exit_code: 1
+      named: disagreement listed with the recorded copy at 1.96.0
+      detected: true
+    - copy: .nvmrc vs engines.node floor (direction A)
+      mutation: .nvmrc 22 -> 24
+      exit_code: 1
+      named: >-
+        "the Node major disagrees across copies" with the engines floor at 22 and .nvmrc at 24,
+        plus "runtime-versions.json nodeMajorPin is stale"
+      detected: true
+    - copy: .nvmrc vs engines.node floor (direction B)
+      mutation: engines.node ">=22.11.0 <25.0.0" -> ">=24.0.0 <25.0.0"
+      exit_code: 1
+      named: floor major 24 against .nvmrc 22
+      detected: true
+  additional_probes:
+    - probe: declared pin expressed as a range (^1.63.0)
+      exit_code: 1
+      detail: '"is not an exact version. ADR-001 §4.2 requires an exact pin with no range operator."'
+    - probe: --require-image with chromiumBuild and image null
+      exit_code: 1
+      detail: both NOT ASSERTED entries are promoted to failures and named individually
+    - probe: --require-image with chromiumBuild and image populated
+      exit_code: 0
+      detail: passes, so the flag is not a blanket failure
+    - probe: dist/ removed entirely
+      exit_code: 0 plain / 1 under --require-image
+      detail: >-
+        reports "dist/runtime-versions.json is absent (run `npm run build` first)" as NOT ASSERTED.
+        Documented behaviour, but the fourth copy is unasserted on a plain run — see LOW-1.
+  verdict: >-
+    The pin check provably fails on every broken copy and names the offending copy in each case.
+    It is not a check that can only agree.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Completeness falsification — manifest keyed on the validator surface
+# ─────────────────────────────────────────────────────────────────────────────
+completeness_falsification:
+  method: >-
+    src/validator/language.ts mutated to permit something no fixture exercises, then
+    `vitest run test/reference-manifest.test.ts` executed; file restored with git checkout --.
+  cases:
+    - mutation: added method toBeEnabled to LOCATOR_ASSERTIONS with no fixture
+      exit_code: 1
+      detected: true
+      detail: >-
+        two failures — "demonstrates every permitted method" naming ['toBeEnabled'] and
+        "demonstrates every permitted option key" naming ['toBeEnabled.timeout'].
+        2 failed | 38 passed.
+    - mutation: added option key noWaitAfter to ACTION_METHODS.click with no fixture
+      exit_code: 1
+      detected: true
+      detail: >-
+        "demonstrates every permitted option key" names ['click.noWaitAfter'].
+        1 failed | 39 passed.
+  design_verified: >-
+    The surface is read from the five tables in src/validator/language.ts at run time and each
+    example's claimed coverage is re-derived from the typed operations validateArtifact produces
+    for it, so a manifest entry cannot claim coverage it does not have. This is a real replacement
+    for the textual `method(` search 10.2's CR-002 flagged, not a restatement of it.
+  residual_gap:
+    finding: >-
+      A new AST *node kind* — as opposed to a permitted method or option key — still forces no
+      fixture. There is no permitted-node-kind registry for the manifest to key on; ast.ts
+      enumerates kinds in switch statements. Confirmed by inspection.
+    judgement: >-
+      ACCEPTABLE FOR THIS STORY, recorded as LOW-2. AC-4 asks for coverage of "the permitted method
+      in the validator's surface schema", which is exactly what was delivered and falsified. The
+      developer disclosed this residue unprompted in the Dev Agent Record. It should be carried as
+      an explicit CR-002 remainder rather than closed silently.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Docker — the developer's unverified Dockerfile change, verified
+# ─────────────────────────────────────────────────────────────────────────────
+docker_build:
+  attempted: true
+  abandoned: false
+  engine: Docker 27.4.0
+  command: docker build --build-arg IMAGE_TAG=qa-local-test:10.3 -t studio-runner-qa:10.3 .
+  base_image: mcr.microsoft.com/playwright:v1.63.0-noble (public; ADR-001 §8 permits it locally)
+  result: SUCCESS (exit 0, roughly 90 seconds including the pull)
+  proves: >-
+    `COPY Dockerfile .nvmrc ./` resolves (no .dockerignore in the package) and the in-image
+    `npm run build` completes — the ENOENT the developer predicted is real and the fix is correct.
+  in_image_runtime_versions:
+    playwright: 1.63.0
+    playwrightLocked: 1.63.0
+    playwrightImageTag: 1.63.0
+    chromiumBuild: '1243'
+    node: v24.20.0
+    nodeMajorPin: '22'
+    validatorSchema: 1.0.0
+    syntaxReference: 1.0.0
+    executor: 1.0.0
+    image: qa-local-test:10.3
+  ci_stage_6a_rehearsal:
+    command: >-
+      docker run --rm --entrypoint cat studio-runner-qa:10.3 /app/dist/runtime-versions.json >
+      dist/runtime-versions.json && npm run check:pins -- --require-image
+    result: exit 0 — the documented stage works end to end against a real image
+  note: >-
+    chromiumBuild and image are populated from the real image, so AC-3's environment-derived
+    fields are proven, not asserted. The image was removed afterwards.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Deferral honesty
+# ─────────────────────────────────────────────────────────────────────────────
+deferral_ac_6b:
+  mechanism: >-
+    test/fixtures-tier/reference-execution.test.ts — `it.skip('executes every example against a
+    real browser — deferred to story 10.12 (ED-05 open)')` containing expect.unreachable.
+  reported_as: >-
+    "Tests 58 passed | 1 skipped (59)" in the npm run test:fixtures output — visible, counted
+    separately, and cannot be read as a pass.
+  documented_as: >-
+    ci/stages.md stage 6 — "the pipeline must record it as **skipped — not passed**", with an
+    explicit instruction not to substitute the public mcr image to make it green.
+  browser_touched: NO — no playwright install was run by the developer or the reviewer; the only
+    browser binaries that existed anywhere were inside the base image, never launched.
+  verdict: GENUINE DEFERRAL — not faked, not disguised as a pass.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Scaffold respect (story 10.2 inheritance)
+# ─────────────────────────────────────────────────────────────────────────────
+scaffold_respect:
+  engines_node: UNCHANGED (">=22.11.0 <25.0.0")
+  package_manager: UNCHANGED (npm@11.3.0)
+  dependency_pins: UNCHANGED (playwright 1.63.0, typescript 5.9.3, all devDependencies identical)
+  npmrc: UNCHANGED (save-exact, engine-strict, fund=false, audit=false)
+  package_json_delta: one added script, `check:pins`. Nothing else.
+  coverage_thresholds: >-
+    Global 85/85/80/80 unchanged; per-glob 80s added for the two new directories. Not lowered.
+  reference_corpus: >-
+    Original 20 examples byte-identical (git diff --name-status shows only additions); 8 new
+    fixtures plus manifest.json added.
+  dockerfile: extended only — ARG/ENV IMAGE_TAG and one COPY line; FROM, user, sandbox and CMD
+    untouched.
+  reference_corpus_test: >-
+    The textual coverage assertions were removed from test/reference-corpus.test.ts, but replaced
+    by a strictly stronger keyed test in reference-manifest.test.ts and a comment in the old file
+    pointing at it. This is a deliberate CR-002 fix, not a weakening.
+  verdict: EXTENDED, NOT RESHAPED
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ci/stages.md
+# ─────────────────────────────────────────────────────────────────────────────
+ci_stages_document:
+  describes_not_wires: >-
+    CONFIRMED — prose, command blocks and a summary table only. No pipeline YAML, no workflow file,
+    no CI-provider-specific syntax anywhere in the package.
+  accuracy_checked:
+    - claim: '.npmrc sets engine-strict=true and audit=false'
+      verdict: TRUE (verified in .npmrc)
+    - claim: stage 3 `npm run check:pins` gates on exit code, naming disagreeing copies
+      verdict: TRUE (falsified six ways above)
+    - claim: stage 4 thresholds 85/80 global and 80 for src/compat and scripts
+      verdict: TRUE (matches vitest.config.ts exactly)
+    - claim: stage 5 records the listed 13 fields
+      verdict: TRUE (the real image's file carries exactly those keys)
+    - claim: stage 6 must be recorded as skipped until ED-05
+      verdict: TRUE and consistent with the it.skip
+    - claim: stage 6a docker run + check:pins -- --require-image
+      verdict: TRUE — rehearsed verbatim against a real image, exit 0
+    - claim: stage 7 does not pass PLAYWRIGHT_VERSION as a build arg
+      verdict: CONSISTENT with the Dockerfile default and with stage 3's purpose
+    - claim: 'Node major must match .nvmrc (22)'
+      verdict: >-
+        STATED BUT NOT ENFORCED, AND FALSE OF THE IMAGE BUILT — the pinned base image ships Node
+        v24.20.0. See MED-2.
+  gaps: only MED-2 (no in-image node assertion) and the stage-8 helm chart that story 10.18 owns.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Acceptance criteria
+# ─────────────────────────────────────────────────────────────────────────────
+ac_coverage:
+  total: 13
+  verified: 12
+  deferred: 1
+  unmet: 0
+  detail:
+    AC-1: >-
+      PASS — check:pins compares all four Playwright copies plus the engines.node floor against
+      .nvmrc, exits 1 on any single-copy drift and names the disagreeing copies with their values.
+      Verified by breaking each copy independently.
+    AC-2: >-
+      PASS — test/pins.test.ts holds the four single-copy drift cases in a temp root plus the
+      all-agree control, the exact-pin rule, both .nvmrc directions, a missing copy, a stale
+      recorded copy, --json and the three --require-image states. All green; the reviewer's
+      independent mutations of the real tree reproduce the same verdicts.
+    AC-3: >-
+      PASS — the built runtime-versions.json carries all six required keys plus seven more.
+      chromiumBuild and image are null off the image and reported NOT ASSERTED, never OK; the real
+      image build populated them (1243 / qa-local-test:10.3), proving the environment derivation
+      rather than asserting it. Caveat MED-1: an empty IMAGE_TAG is recorded as "" rather than null
+      and escapes the NOT ASSERTED treatment.
+    AC-4: >-
+      PASS — SYNTAX_REFERENCE_VERSION 1.0.0 plus manifest.json. The completeness test derives the
+      surface from src/validator/language.ts (20 methods, 44 option keys) and each example's
+      coverage from the validator's typed operations. Falsified twice: an uncovered method and an
+      uncovered option key both turn it red with the exact name. An out-of-surface method also
+      fails. Residual node-kind gap recorded as LOW-2.
+    AC-5: >-
+      PASS — test/reference-corpus.test.ts validates and executes all 28 examples browser-free
+      through the fake adapter.
+    AC-6a: >-
+      PASS — npm run test:fixtures exits 0 with 58 passed, driving every example through the
+      BrowserAdapter seam and checking each locator target against the bound page in
+      fixtures/pages/. PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 is set in the config;
+      passWithNoTests is deliberately absent, so an empty run fails.
+    AC-6b: >-
+      DEFERRED to story 10.12 on ED-05 — genuinely, as an it.skip that reports as skipped and is
+      documented as "skipped — not passed". See deferral_ac_6b.
+    AC-7: >-
+      PASS — isCompatible(provenance, runtime?) returns {ok, reason, code, mismatches}; exact for
+      validatorSchema, syntaxReference and playwright, backwardCompatibleMinor for executor, with
+      the rule table documented in both the source and the README. assertCompatible throws
+      RuntimeIncompatibleError carrying code RUNTIME_INCOMPATIBLE and the differing fields. The
+      module imports no adapter and launches nothing. Unparseable versions fail closed.
+    AC-8: >-
+      PASS — an artifact recorded under validatorSchema 0.9.0 is refused before executeSteps and
+      adapter.calls is []; a positive control in the same describe proves the matching provenance
+      does execute, so the empty call list is not vacuous. The 409 mapping is correctly scoped out
+      to 10.8.
+    AC-9: >-
+      PASS — README § "Runtime upgrade procedure", 7 steps covering all four copies in one PR,
+      regeneration, both corpora, the compatibility-rule decision, blocking existing confirmed
+      revisions with RUNTIME_INCOMPATIBLE, and never rewriting approved source. Matches ADR-001
+      §4.2 point for point.
+    AC-10: >-
+      PASS — ci/stages.md lists the eight ADR-001 §7.2 stages plus 6a with exact commands, image
+      requirements, artifacts, the ED-05 gate and the three open items. Describes, does not wire.
+    AC-11: >-
+      PASS — the Change Log entry records the deliberate Dockerfile ARG bump with the verbatim
+      failure output and exit 1. Independently reproduced by the reviewer.
+    AC-12: >-
+      PASS — from a clean rm -rf node_modules dist coverage, all of npm ci, build, type-check,
+      lint, test, check:pins and test:fixtures exit 0. src/compat/** 100%/95% and scripts/**
+      98.49%/83.67%, both above the 80% gate.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Issues
+# ─────────────────────────────────────────────────────────────────────────────
+top_issues:
+  - id: MED-1
+    severity: medium
+    title: An omitted IMAGE_TAG build arg records image as "" and --require-image accepts it
+    ac: AC-3
+    finding: >-
+      The Dockerfile declares `ARG IMAGE_TAG=` with an empty default and exports it as
+      `ENV IMAGE_TAG=${IMAGE_TAG}`, so inside the image the variable is always defined. In
+      write-runtime-versions.mjs the expression is `env.IMAGE_TAG ?? null`, which keeps the empty
+      string. check-pins.mjs then tests `runtime[field] === null || undefined` and so does not
+      raise NOT ASSERTED for an empty tag.
+    proof: >-
+      buildRuntimeVersions with env.IMAGE_TAG = '' yields image: "". With chromiumBuild populated
+      and image set to "", `check-pins.mjs --require-image` exits 0 and prints "check:pins OK".
+    impact: >-
+      CI stage 6a is the stage that makes the browser build part of the pin. If the pipeline builds
+      the image without --build-arg IMAGE_TAG — exactly the operator slip stage 6a exists to
+      catch — the image field is silently recorded as empty and passes the gate that AC-3 says must
+      never be a pass. No capability is gained; the risk is a deployed image whose recorded
+      provenance cannot name itself.
+    suggested_action: >-
+      Coerce empty to null at the source (`env.IMAGE_TAG || null`) and additionally treat an empty
+      string as unasserted in check-pins.mjs, with a test for the empty-tag case.
+    owner: '@dev'
+    blocking: false
+
+  - id: MED-2
+    severity: medium
+    title: The recorded Node version is never asserted against .nvmrc, contrary to ADR-001 §4.2
+    ac: AC-1 (ADR-001 §4.2 obligation assigned to story 10.3)
+    finding: >-
+      ADR-001 §4.2 states "CI (story 10.3) asserts all four agree and that `node --version` inside
+      the image matches `engines`/`.nvmrc`". check:pins asserts engines-floor vs .nvmrc and
+      nodeMajorPin vs .nvmrc — both of which are copies of the declaration, not of reality — but
+      never compares the recorded `node` field, which is the only value derived from the runtime
+      that actually executed.
+    proof: >-
+      The image built from this Dockerfile reports node v24.20.0 while .nvmrc says 22 and
+      ci/stages.md states "Node major must match .nvmrc (22)". Running the documented stage 6a
+      against that image's runtime-versions.json exits 0 with "check:pins OK".
+    impact: >-
+      A live major-version drift between the declared Node and the Node the image runs is
+      undetected by the check that exists to detect drift, and the hand-off document tells @devops
+      something untrue about the image. The engines range does permit 24, so nothing breaks today;
+      the defect is that the pin cannot tell.
+    suggested_action: >-
+      Assert semver-major of `runtime.node` against `.nvmrc` whenever the recorded copy is present,
+      and reconcile .nvmrc / engines / ci/stages.md with the Node the pinned image actually ships
+      (or pass ED-05 the requirement that it ship 22).
+    owner: '@dev' (with @architect for the .nvmrc-vs-image reconciliation)
+    blocking: false
+
+  - id: LOW-1
+    severity: low
+    title: check:pins exits 0 when dist/ is absent, leaving the fourth copy unasserted
+    detail: >-
+      Documented and printed as NOT ASSERTED, and --require-image catches it, but a plain-Node
+      pipeline that runs stage 3 before stage 5 and never runs 6a asserts only three copies.
+      ci/stages.md is explicit about this ordering, so it is a documentation-mitigated gap.
+    owner: '@dev'
+    blocking: false
+
+  - id: LOW-2
+    severity: low
+    title: CR-002 residue — a new AST node kind still forces no fixture
+    detail: >-
+      Disclosed by the developer. Methods and option keys are now keyed on the validator surface;
+      node kinds are not, because there is no registry to key on. Carry as an open CR-002
+      remainder rather than closing CR-002.
+    owner: '@dev'
+    blocking: false
+
+  - id: LOW-3
+    severity: low
+    title: Coverage figure in the story is slightly optimistic
+    detail: >-
+      The Dev Agent Record records scripts/** branches at 84.53%; the reviewer measured 83.67% on
+      the same commit from a clean install. Both above the 80% gate. Correct the figure.
+    owner: '@dev'
+    blocking: false
+
+issue_counts:
+  high: 0
+  medium: 2
+  low: 3
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Reviewer hygiene
+# ─────────────────────────────────────────────────────────────────────────────
+reviewer_hygiene:
+  production_code_modified: NO — every mutation was reverted with git checkout -- and the package
+    rebuilt; git status --short is empty
+  browser_launched: NO
+  playwright_install_run: NO
+  git_push_or_pr: NO
+  docker_image_removed: YES (studio-runner-qa:10.3 deleted after the rehearsal)
+
+recommended_status: >-
+  Ready for Done — the two medium findings are pin-hardening improvements in the ED-05-gated half
+  of the strategy, not unmet acceptance criteria. Fold MED-1 and MED-2 into story 10.12 or 10.19
+  where the real image lands, and correct ci/stages.md's Node claim in the same change.
+merge_safety: SAFE — studio-runner/ is self-contained, all gates pass from a clean install, and
+  nothing outside the package is touched.
