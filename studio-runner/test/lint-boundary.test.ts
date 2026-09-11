@@ -1,11 +1,18 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { ESLint } from 'eslint';
 import tseslint from 'typescript-eslint';
 import { describe, expect, it } from 'vitest';
 
-import { boundaryGlobals, executionBoundaryRules, runDirectoryRules } from '../eslint.boundary-rules.js';
+import {
+  boundaryGlobals,
+  executionBoundaryRules,
+  runDirectoryRules,
+  FORBIDDEN_MODULES,
+  MESSAGE_FOR_MODULE,
+  MODULE_GROUPS,
+} from '../eslint.boundary-rules.js';
 import { packageRoot } from './helpers/corpus.js';
 
 /**
@@ -89,5 +96,85 @@ describe('execution-boundary lint rules', () => {
   it('keeps the lint fixtures out of the package lint run', () => {
     const config = readFileSync(join(packageRoot, 'eslint.config.js'), 'utf8');
     expect(config).toContain("'fixtures/lint/**'");
+  });
+});
+
+/**
+ * AC-22b: every isolation entry is proven to fire against its own fixture.
+ *
+ * One fixture file per entry, not one per category: "the rules are proven to fire rather than
+ * assumed to" is only true if each name is exercised. `fixtures/lint/isolation-manifest.json` maps
+ * module name to fixture file and is generated alongside the fixtures, so an entry added to
+ * `MODULE_GROUPS` without a fixture fails the completeness test below rather than passing quietly.
+ *
+ * These rules are the **second** line of defence. The gate that catches the client nobody
+ * predicted is `test/isolation.test.ts`'s allowlist over the resolved production dependency
+ * closure; a denylist can only ever fail for a name somebody thought of.
+ */
+interface FixtureManifest {
+  readonly [module: string]: string;
+}
+
+const isolationManifest = JSON.parse(
+  readFileSync(join(packageRoot, 'fixtures', 'lint', 'isolation-manifest.json'), 'utf8'),
+) as FixtureManifest;
+
+/** The four evaluation entries predate this story and keep their original fixtures. */
+const EVALUATION_MODULES = new Set(
+  MODULE_GROUPS.find((group) => group.id === 'evaluation')?.modules ?? [],
+);
+
+const ISOLATION_MODULES = FORBIDDEN_MODULES.filter((name) => !EVALUATION_MODULES.has(name));
+
+describe('isolation lint rules (AC-22b)', () => {
+  it('has a fixture for every forbidden isolation module', () => {
+    const withoutFixture = ISOLATION_MODULES.filter(
+      (name) =>
+        isolationManifest[name] === undefined ||
+        !existsSync(join(packageRoot, 'fixtures', 'lint', isolationManifest[name])),
+    );
+    expect(withoutFixture).toEqual([]);
+  });
+
+  it('covers all four credential classes architecture §9.2 names', () => {
+    expect(MODULE_GROUPS.map((group) => group.id).sort()).toEqual([
+      'database',
+      'evaluation',
+      'gateway',
+      'identity',
+      'vault',
+    ]);
+  });
+
+  it.each(ISOLATION_MODULES.map((name) => [name] as const))(
+    'importing %s trips no-restricted-imports',
+    async (name) => {
+      const fixture = isolationManifest[name];
+      expect(fixture).toBeDefined();
+      const ruleIds = await messagesFor(
+        fixture as string,
+        executionBoundaryRules as unknown as Record<string, unknown>,
+      );
+      expect(ruleIds).toContain('no-restricted-imports');
+    },
+  );
+
+  it.each(ISOLATION_MODULES.map((name) => [name] as const))(
+    'still forbids %s inside src/run/**',
+    async (name) => {
+      const ruleIds = await messagesFor(
+        isolationManifest[name] as string,
+        runDirectoryRules as unknown as Record<string, unknown>,
+      );
+      expect(ruleIds).toContain('no-restricted-imports');
+    },
+  );
+
+  it('reports each entry with its own credential-class message', () => {
+    for (const group of MODULE_GROUPS) {
+      for (const name of group.modules) {
+        expect(MESSAGE_FOR_MODULE[name]).toBe(group.message);
+      }
+    }
   });
 });

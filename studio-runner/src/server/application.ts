@@ -1,0 +1,164 @@
+/**
+ * Wiring (AC-11, AC-12). `main.ts` is the thin shell around this; everything testable lives here.
+ *
+ * The drain sequence, in order, because the order is the criterion:
+ *
+ * 1. `pool.beginDrain()` — readiness goes **false** immediately and no further slot is handed
+ *    out, so `/v1/runs` answers `503` from the next request onward.
+ * 2. Wait for the in-flight run to deliver its terminal report, bounded by the drain timeout.
+ *    The process does **not** exit here just because `SIGTERM` arrived: an admitted attempt that
+ *    is abandoned silently becomes the API's problem to reap.
+ * 3. Close the listener.
+ * 4. Clear scratch.
+ *
+ * What this cannot promise, stated plainly: `SIGKILL` skips all four steps, and no test in this
+ * package can claim otherwise. Recovering an attempt whose runner vanished is the running
+ * reaper's job, and that is story 10.7.
+ */
+import { createAdmissionClient } from '../reporting/admissionClient.js';
+import type { HttpClient } from '../reporting/httpClient.js';
+import { createFetchHttpClient } from '../reporting/httpClient.js';
+import type { ReportBounds } from '../reporting/bounds.js';
+import type { BrowserLauncher, ScratchStore } from './adapters.js';
+import { createCapacityPool } from './capacity.js';
+import type { CapacityPool } from './capacity.js';
+import type { RunnerConfig } from './config.js';
+import { createIdentityChecker } from './identity.js';
+import type { LogSink, Logger } from './logging.js';
+import { createLogger, createStdoutSink } from './logging.js';
+import { createRunCoordinator } from './runCoordinator.js';
+import type { RunCoordinator } from './runCoordinator.js';
+import { createFsScratchStore } from './scratch.js';
+import { createRunnerServer } from './server.js';
+import type { RunnerServer } from './server.js';
+
+export interface ApplicationDependencies {
+  readonly launcher: BrowserLauncher;
+  readonly runtimeVersions: Readonly<Record<string, unknown>>;
+  readonly http?: HttpClient | undefined;
+  readonly scratch?: ScratchStore | undefined;
+  readonly logSink?: LogSink | undefined;
+  readonly now?: (() => number) | undefined;
+  readonly wallClock?: (() => Date) | undefined;
+  readonly sleep?: ((ms: number) => Promise<void>) | undefined;
+  readonly random?: (() => number) | undefined;
+  /** Test seam: an alternative pool, used to falsify the atomic-acquire guard (AC-23). */
+  readonly pool?: CapacityPool | undefined;
+}
+
+export interface RunnerApplication {
+  readonly server: RunnerServer;
+  readonly pool: CapacityPool;
+  readonly coordinator: RunCoordinator;
+  readonly logger: Logger;
+  readonly config: RunnerConfig;
+  /** Clears scratch and starts listening. Returns the bound port. */
+  start(): Promise<number>;
+  /** The full `SIGTERM` drain: readiness false → finish in-flight → close → clear scratch. */
+  drain(): Promise<{ readonly completed: boolean }>;
+}
+
+function boundsFrom(config: RunnerConfig): ReportBounds {
+  return {
+    maxSteps: config.maxReportSteps,
+    maxLogEntries: config.maxReportLogEntries,
+    maxLogEntryLength: config.maxReportLogEntryLength,
+    maxBodyBytes: config.maxReportBodyBytes,
+  };
+}
+
+const defaultSleep = (ms: number): Promise<void> =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+export function createApplication(
+  config: RunnerConfig,
+  dependencies: ApplicationDependencies,
+): RunnerApplication {
+  const logger = createLogger({ sink: dependencies.logSink ?? createStdoutSink() });
+  const pool = dependencies.pool ?? createCapacityPool(config.poolSize);
+  const http = dependencies.http ?? createFetchHttpClient();
+  const scratch = dependencies.scratch ?? createFsScratchStore(config.scratchDir);
+  const bounds = boundsFrom(config);
+
+  const admission = createAdmissionClient({
+    http,
+    baseUrl: config.callbackBaseUrl,
+    identityToken: config.callbackIdentityToken,
+    timeoutMs: config.admissionTimeoutMs,
+    logger,
+  });
+
+  const now = dependencies.now ?? ((): number => performance.now());
+
+  const coordinator = createRunCoordinator({
+    pool,
+    admission,
+    launcher: dependencies.launcher,
+    scratch,
+    http,
+    logger,
+    bounds,
+    runtimeVersions: dependencies.runtimeVersions,
+    runnerInstanceId: config.runnerInstanceId,
+    callbackBaseUrl: config.callbackBaseUrl,
+    callbackIdentityToken: config.callbackIdentityToken,
+    retryAfterSeconds: config.retryAfterSeconds,
+    reportTimeoutMs: config.admissionTimeoutMs,
+    terminal: {
+      windowMs: config.terminalDeliveryWindowMs,
+      maxAttempts: config.terminalDeliveryMaxAttempts,
+      backoffMs: config.terminalDeliveryBackoffMs,
+    },
+    now,
+    wallClock: dependencies.wallClock ?? ((): Date => new Date()),
+    sleep: dependencies.sleep ?? defaultSleep,
+    random: dependencies.random ?? Math.random,
+  });
+
+  const server = createRunnerServer({
+    identity: createIdentityChecker(config.serviceIdentityToken),
+    pool,
+    coordinator,
+    logger,
+    maxRequestBodyBytes: config.maxRequestBodyBytes,
+    validateTimeoutMs: config.validateTimeoutMs,
+    now,
+  });
+
+  return {
+    server,
+    pool,
+    coordinator,
+    logger,
+    config,
+
+    async start(): Promise<number> {
+      // A pod that was killed mid-run leaves scratch behind; the next run must not inherit it.
+      await scratch.clearAll();
+      const port = await server.listen(config.port, config.host);
+      logger.info('runner.started', {
+        port,
+        poolSize: pool.size,
+        runnerInstanceId: config.runnerInstanceId,
+      });
+      return port;
+    },
+
+    async drain(): Promise<{ completed: boolean }> {
+      pool.beginDrain();
+      logger.info('runner.draining', { inFlight: coordinator.inFlight });
+      const completed = await coordinator.awaitInFlight(config.drainTimeoutMs);
+      if (!completed) {
+        logger.record('error', 'runner.drain_deadline', 'runner.drain.deadline_exceeded', {
+          inFlight: coordinator.inFlight,
+        });
+      }
+      await server.close();
+      await scratch.clearAll();
+      logger.info('runner.drained', { completed });
+      return { completed };
+    },
+  };
+}
