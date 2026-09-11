@@ -17,12 +17,67 @@ package does today and the defaults callers can override.
 | `src/compat/` | `isCompatible` / `assertCompatible`: refuses an artifact whose recorded runtime differs from the running one, with `RUNTIME_INCOMPATIBLE`. |
 | `src/server/` | The four internal HTTP routes, the capacity pool, the service-identity check, bounded bodies and structured redacted logging. |
 | `src/reporting/` | The admission CAS **client**, the progress/terminal report client, and the `StepReporter` implementation 10.2 left as a seam. |
-| `src/run/` | The real browser: the `BrowserLauncher` that forks a killable child, the data-only parent↔child protocol, the Playwright adapter, the recording lifecycle and evidence vocabulary, the run-scoped clock and the runner error-code set. |
+| `src/run/` | The real browser: the `BrowserLauncher` that forks a killable child, the data-only parent↔child protocol, the Playwright adapter, the recording lifecycle and evidence vocabulary, the run-scoped clock and the runner error-code set — plus story 10.13's **runtime deadline** (`deadline.ts`), **process-tree kill and observation** (`tree.ts`) and **captured, redacted child output relay** (`outputRelay.ts`). |
 | `src/main.ts` | Process entry: configuration, server start, `SIGTERM` drain, scratch clearing at startup and on exit. |
 | `src/versions.ts` | `VALIDATOR_SCHEMA_VERSION`, `SYNTAX_REFERENCE_VERSION`, `EXECUTOR_VERSION`, `ARTIFACT_VERSION`, `VALIDATOR_PARSER`. |
 
-Not yet present: `src/evidence/` (10.14). Deadline enforcement and killing a hung process tree are
-story 10.13's; `src/run/` passes `totalRuntimeMs` through and does not act on it.
+Not yet present: `src/evidence/` (10.14). Uploading a recording, the durable result manifest and
+the `STORED` evidence state are 10.14's; a recording still lives and dies in scratch.
+
+## The two budgets (story 10.13)
+
+**Queue time and browser runtime are separate budgets** (§8.5), with distinct timestamps, and
+neither consumes the other.
+
+| Budget | Measured from | Bound | Enforced by |
+|---|---|---|---|
+| **Queue** — admitted-start | `admittedAtMs`, the instant the admission CAS returned | `job.deadlines.admittedStartMs` (§8.5 starting value 30 s) | a **refusal** in `runCoordinator`: `ERROR` / `START_DEADLINE_EXCEEDED`, no browser started |
+| **Runtime** — total browser | the `ready` handshake, and nothing else | `min(job.deadlines.totalRuntimeMs, STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS)` (§5.2, §8.5, 120 s) | **enforcement**: ordered stop, bounded grace, process-tree kill → `ERROR` / `TIMEOUT` |
+
+A run that spends nine-tenths of its queue budget waiting still gets the **whole** of its browser
+time: the timer is armed at the handshake and the arithmetic never subtracts one budget from the
+other. The parent enforces on its **own** monotonic clock — the child owns the run clock whose zero
+is the recording origin (ADR-002 §11.2) and the parent never re-bases onto it, so the timeout's log
+entry carries `atMs: null` rather than a wall-derived number.
+
+**Nothing extends the maximum.** `RuntimeDeadline` has no `extend`, `reset` or `refresh`, and
+`arm()` is once-only, so a heartbeat, a step event or a protocol keepalive has nothing to call
+(§5.4). A job asking for more browser time than the deployment permits gets the deployment's value:
+both maxima are enumerated configuration keys, so the fail-closed loader owns them.
+
+### What happens when the deadline fires
+
+1. The reason is **recorded before anything is signalled** — otherwise the abandoned-result path
+   reports `run-fault` → `RUN_ERROR`, which is the code for "the protocol broke" rather than for
+   the one condition §8.2 names by hand.
+2. The child is asked to **stop**, and gets exactly `STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS` to
+   close and await the recording context — the only thing that finalizes the webm (§6.1). No step
+   executes during the grace: a run does not buy browser time by being slow to die.
+3. Whether that ordered stop **completed** is recorded, before the signal. It is the fact ADR-002
+   §17.7 makes `RunnerEvidence.partial` depend on, and it stops being observable the instant the
+   tree does.
+4. The **process tree** is ended. Not the fork: the fork's pid is Node, and Chromium is below it.
+   See `src/run/tree.ts` — Playwright starts the browser and the video encoder in process groups of
+   their own, so a single group signal reaches the Node layer and orphans the browser; the tree is
+   enumerated and each member signalled with the group it leads.
+
+### The deadline tier
+
+`test/fixtures-tier/deadline-cleanup.test.ts` is where these stop being claims about a design. It
+runs real pinned Chromium, **suspends the browser** so it cannot exit on its own, kills, and then
+asks each previously observed pid whether it is still alive. Without the suspension the browser
+tidies itself up when its parent dies and any kill looks correct — which is exactly the vacuous
+test AC-11a exists to prevent.
+
+## Child diagnostics (story 10.13)
+
+The child's stdout and stderr are **piped and relayed**, not inherited. §9.2 requires the runner to
+scrub every outbound diagnostic *before persistence*, and a pod log is persistence. The relay
+redacts with the run's own redactor and **then** bounds each line by `maxLogEntryLength` — that
+order, because truncating first would cut a known value in half and the surviving fragment matches
+no variant the redactor scrubs. It is line- and volume-bounded, its drops are announced rather than
+silent, it is synchronous and contained so it can never delay the run or the control endpoints, and
+it is released at the end of the run so nothing holds a path to a resolved value afterwards.
 
 ## The real browser (story 10.12)
 
