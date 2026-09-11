@@ -48,6 +48,12 @@ COPY --from=build /app/dist ./dist
 USER pwuser
 ENV HOME=/home/pwuser
 
-# Story 10.6 adds src/main.ts (server entry point). Until then the image has no entry point
-# beyond the library build, and this CMD fails loudly rather than starting something undefined.
+# Entry point (story 10.6). `dist/main.js` loads configuration, starts the internal HTTP server
+# and drains on SIGTERM. Configuration is fail-closed: an unrecognised STUDIO_RUNNER_* variable
+# stops the container rather than being ignored, so a mounted database URL or vault address is a
+# startup failure by design (architecture §9.2).
+#
+# No ENTRYPOINT wrapper and no shell form: the process must receive SIGTERM directly so the drain
+# path runs. A shell-form CMD would make PID 1 a shell that never forwards the signal, and the
+# pod would be killed with an admitted attempt still in flight.
 CMD ["node", "dist/main.js"]

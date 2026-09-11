@@ -8,18 +8,105 @@ Layout, toolchain, pinning, CI stages and deployment placement are fixed by
 [ADR-001](../docs/architecture/ADR-001-studio-runner-scaffolding.md). This README documents what the
 package does today and the defaults callers can override.
 
-## What ships today (stories 10.2, 10.3)
+## What ships today (stories 10.2, 10.3, 10.6)
 
 | Module | Responsibility |
 |---|---|
 | `src/validator/` | Artifact envelope checks, default-deny AST validation, argument/reference schemas, bounds. Pure and browser-free. |
 | `src/executor/` | Trusted executor over a `BrowserAdapter`, `StepReporter` and `ValueResolver`, with outbound redaction. |
 | `src/compat/` | `isCompatible` / `assertCompatible`: refuses an artifact whose recorded runtime differs from the running one, with `RUNTIME_INCOMPATIBLE`. |
+| `src/server/` | The four internal HTTP routes, the capacity pool, the service-identity check, bounded bodies and structured redacted logging. |
+| `src/reporting/` | The admission CAS **client**, the progress/terminal report client, and the `StepReporter` implementation 10.2 left as a seam. |
+| `src/main.ts` | Process entry: configuration, server start, `SIGTERM` drain, scratch clearing at startup and on exit. |
 | `src/versions.ts` | `VALIDATOR_SCHEMA_VERSION`, `SYNTAX_REFERENCE_VERSION`, `EXECUTOR_VERSION`, `ARTIFACT_VERSION`, `VALIDATOR_PARSER`. |
 
-Not yet present: `src/server/` (10.6), `src/run/` (10.12–10.13), `src/evidence/` (10.14) and the real
-Playwright adapter (10.12). No browser is launched by anything in this package today, and nothing
-here downloads one.
+Not yet present: `src/run/` (10.12–10.13) and `src/evidence/` (10.14). The real Playwright adapter
+is story 10.12's; `src/main.ts` ships a launcher that refuses with `BROWSER_LAUNCH_UNAVAILABLE`
+until then, so an admitted run reports a terminal `ERROR` rather than appearing to succeed. **No
+browser is launched by anything in this package today, and nothing here downloads one.**
+
+## The internal service (story 10.6)
+
+### Routes
+
+| Route | Behaviour |
+|---|---|
+| `POST /v1/validate` | Browser-free wrapper over `validateArtifact` with bounded work. Takes **no capacity slot**, so it answers while the pool is saturated. |
+| `POST /v1/runs` | Envelope → artifact → capacity slot → admission CAS → `202`. Nothing starts before the CAS succeeds. |
+| `GET /health` | Liveness only. Stays `200` while saturated **and** while draining. |
+| `GET /ready` | Ability to admit safely. Saturation alone keeps it **true**; only draining makes it false. |
+
+All four require a restricted service identity in an `Authorization: Bearer` header, checked on the
+request head before the body is read, compared in constant time over SHA-256 digests. There is no
+credential in any URL or query string, inbound or outbound.
+
+### Saturated is not draining
+
+These are different conditions with different answers, and conflating them is a real defect:
+
+| Condition | `/v1/runs` | `/ready` | Why |
+|---|---|---|---|
+| Pool saturated | `429` + `Retry-After` | **`200`, ready** | The pod is healthy and about to be free. Removing it from its Service for being busy is the opposite of backpressure. |
+| Draining | `503` | `503`, not ready | The pod is leaving. |
+
+`429` is a **definite non-acceptance**: no slot held, no admission request issued, no scratch, no
+browser, nothing durable anywhere. It is decided before the runner contacts the API at all.
+
+### Admission, and the two retry policies that must never merge
+
+The runner performs the admission compare-and-set **as a client**; the CAS itself, its ledger and
+every persistence decision behind it are story 10.7's.
+
+| Outcome | Meaning | Runner |
+|---|---|---|
+| `2xx` | This `(runnerInstanceId, admissionId)` owns the attempt | Launch, once |
+| `409` / `401` / `403` | Definite non-acceptance | Stop. Release the slot. **Never re-attempt.** |
+| Timeout, connection loss, `5xx`, `307`/`308` | **Ambiguous** — admission may already have been granted | Stop. Release the slot. **Never resend.** |
+
+Ambiguity is the dangerous case, not the soft one: a timed-out admission may have committed on the
+API side, so a second attempt risks two runners owning one attempt. The runner holds no state and
+cannot resolve it; resolving it is 10.7's reaper work.
+
+Redirects are never followed. A followed `307` on the admission route is a second admission POST
+wearing a different name.
+
+The two retry policies are deliberately opposite and live in the same files so neither can be
+"simplified" into the other:
+
+- **Admission — never retried.** No loop, at any level, and no second `admissionId` for the same
+  `attemptId`.
+- **Terminal report — retried, byte-identically.** The `FINAL` body is serialized once before the
+  first send and those exact bytes are re-sent on every attempt. Nothing is recomputed per attempt,
+  timestamps included: the report's timestamps describe the run, not the delivery. The per-delivery
+  attempt counter travels in the `x-runner-delivery-attempt` header, where it cannot change the
+  bytes the API de-duplicates on. Bounded in count and total time, with jitter.
+
+Progress (`STARTED`, `PROGRESS`) is best-effort: a failed delivery is dropped, because every report
+is a full cumulative snapshot and the next one repairs the gap without replaying anything. A `409`
+on any report stops reporting for that run immediately — it is the API saying this runner no longer
+owns the attempt — and is recorded as a structured audit line plus a counter and nowhere else.
+
+### Drain
+
+`SIGTERM` runs, in this order: readiness goes false → new `/v1/runs` is refused `503` → the
+in-flight run finishes and delivers its terminal report (bounded by `DRAIN_TIMEOUT_MS`) → the
+listener closes → scratch is cleared. Scratch is also cleared at startup, so a pod killed mid-run
+leaves nothing for the next one to inherit.
+
+`SIGKILL` skips all of it. Recovering an attempt whose runner vanished is the running reaper's job
+and belongs to story 10.7; nothing in this package claims otherwise.
+
+### Configuration
+
+Every accepted key is enumerated in `src/server/config.ts` under the `STUDIO_RUNNER_` prefix. **Any
+unrecognised key in that namespace is a startup failure, not an ignored extra** — so a mounted
+database URL or vault address stops the pod rather than sitting unread in the environment. Required:
+`STUDIO_RUNNER_SERVICE_IDENTITY`, `STUDIO_RUNNER_CALLBACK_IDENTITY`,
+`STUDIO_RUNNER_CALLBACK_BASE_URL`. Everything else has a documented default.
+
+The callback destination is deployment configuration only. A job body carrying a callback URL, host
+or port is rejected with `JOB_CALLBACK_NOT_PERMITTED`, and the envelope is default-deny on keys, so
+a callback field nobody enumerated is rejected too.
 
 ## Commands
 
@@ -31,6 +118,7 @@ npm test               # Vitest unit tier, with coverage gate
 npm run build          # tsc -> dist/ + dist/runtime-versions.json
 npm run check:pins     # asserts the four copies of the Playwright pin agree
 npm run test:fixtures  # fixture tier; the reference corpus against fixtures/pages/
+npm start              # node dist/main.js — the image entry point (requires npm run build)
 ```
 
 `ci/stages.md` maps these commands onto the eight CI stages of ADR-001 §7.2 and states which of
@@ -70,6 +158,32 @@ base64 (standard and URL-safe, padded and unpadded) forms.
 The redactor scrubs *known* values. It cannot prove an arbitrary string is free of secrets, and
 inline credentials that never go through `vars.secret` are invisible here — the backend rejects
 known credential patterns before gateway submission (story 10.8).
+
+On the outbound path the redactor runs over the **serialized** payload — the request body string
+handed to the HTTP client and the line handed to the log sink — never over the objects behind them.
+A field added to a report next year is therefore scrubbed automatically, rather than escaping
+because nobody remembered to add it to a redaction list.
+
+### Isolation: no DB, no vault, no CSI, no LLM
+
+Architecture §9.2: *"the runner … has no platform user session or DB/vault/CSI/LLM credentials"*.
+This is the component that renders untrusted pages, so it must hold no credential to anything else.
+Three build-gated parts enforce it:
+
+1. **Allowlist over the resolved production dependency closure** (`test/isolation.test.ts`). The
+   lockfile's transitive non-dev closure must equal an enumerated list — today `playwright`,
+   `playwright-core` and `typescript`. **Any** package not on the list fails, whatever it is. This
+   is the part that catches the client nobody predicted; a denylist only fails for one somebody did.
+2. **Named-module lint rules** (`eslint.boundary-rules.js` `MODULE_GROUPS`), with one proving
+   fixture per entry under `fixtures/lint/`. A fast, readable second line of defence.
+3. **The configuration surface** — see above.
+
+What they cannot prove: they stop the runner *linking* a client, not reaching a database over plain
+HTTP through a dependency it already has. The complement is the configured outbound destination
+allowlist — callback API, object store, target page, and nothing else.
+
+ADR-001 §5 allowed this story one HTTP server library. It took none: `node:http` covers a four-route
+surface with no middleware, so the closure did not grow.
 
 ## Bounds (AC-10 defaults)
 
