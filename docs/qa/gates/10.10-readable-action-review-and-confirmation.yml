@@ -4,9 +4,52 @@ story_title: Readable action review and confirmation
 epic: EPIC-10
 wave: 5
 
-gate: CONCERNS
+gate: PASS
+rounds: 2
 
 status_reason: >-
+  **ROUND 2 (head `5e360b449`) — PASS.** @dev repaired all three findings that were its own, and
+  every repair was verified by measurement rather than by reading. Gates re-run: type-check exit 2
+  with the same two pre-existing `TS2307` errors; `npm run lint` exit 2 having linted **zero** files;
+  `npx vitest run` **Test Files 2 failed | 19 passed (21); Tests 1 failed | 274 passed (275)**. The
+  suites match the round-1 reference exactly and **the +18 is fully accounted by per-file
+  arithmetic** — `compileStates.test.tsx` 35 → 52 (the 5-case tautological `it.each` became 15 named
+  fact cases, +1 harness negative control, +1 table-shape guard, +5 pinned-title cases = +17) and
+  `diagnostics.test.tsx` 14 → 15 (+1 import-scanner guard). Every other file is unchanged to the
+  test. No drift. AC-15 is still red on exactly `confirmCompile.artifactHash`.
+  **VAC-11 is closed, measured against its own probe.** The exact round-1 mutation that left the
+  entire suite green — seven AC-2 facts blanked to `'x'` across `COMPILING`, `READY` and
+  `NEEDS_REVISION` — now reddens **seven named tests**, one per blanked fact, each naming its state
+  and slot. Eight round-2 mutations were re-applied here, all red, all restored byte-identically:
+  two individual blanked facts (each reddening exactly one named case), **all three harness guards
+  disabled in turn** (each reddening the negative control, so the harness that makes the other
+  fifteen able to fail is itself not vacuous), the `SOURCE_TOO_LARGE` fixture reverted to its pre-fix
+  message, the scanner's dynamic-`import()`/`require()` pattern dropped, and the two fact slots
+  collapsed into one — which reddens **ten** of the fifteen, naming each, which is precisely the
+  property the per-slot testids were added for.
+  **MATRIX-1's fixture correction is real, not a loosened predicate.** Reverting only the
+  `SOURCE_TOO_LARGE` message to `'The draft is larger than the maximum source size.'` reddens
+  `FX-REJECTION-SOURCE_TOO_LARGE`; the new predicate still rejects it. The defect the new predicate
+  found was genuine and the fix was to the fixture. **IMPORT-1's planted-forms guard genuinely
+  fails** when a specifier pattern is removed.
+  **Two corrections to this reviewer's own round-1 record, both in @dev's favour.** The matrix holds
+  **23** entries and that is *correct*: `25` appears nowhere in the story, AC-20 carries no count at
+  all, and the figure came from a verbal hand-off. MATRIX-1 was a real tautology and is fixed, but
+  there was never a discrepancy with the story text and this gate should not have implied one. And
+  one correction to @dev's record: *"no test file references `narrativeFor` any more"* is **not
+  true** — `studioContract.test.ts` still imports `narrativeFor` and `COMPILE_STATE_NARRATIVES` and
+  uses them three times. Checked line by line: those are AC-1's set-equality against the **document**,
+  a distinctness check, and the unknown-status throw. **None asserts rendered content against the
+  module, so the hole is closed and only the sentence is wrong.**
+  One new low, latent finding (**PIN-1**) and one new vacuous-guard shape, the epic's twelfth: a
+  deliberate second copy whose independence is protected only by a header comment. What holds this
+  at PASS rather than lower is that the remaining mediums are **not @dev's** — `AD2-1` and `ESC-1`
+  were routed to @po by this reviewer in round 1 and @dev was told not to touch them, `ENV-1` is
+  unowned environment, and `PIN-1` is latent with a one-line remedy. Every finding inside @dev's
+  authority is closed and independently verified.
+
+  ---
+  **ROUND 1 (head `523dcd5f8`) — CONCERNS, retained below verbatim.**
   Every number this story reports about itself was reproduced by running it, at both ends. The
   baseline was measured — not transcribed, and not taken from the story — in a detached worktree at
   the epic base `50f770ed2` sharing this worktree's `node_modules`: `Test Files 1 failed | 9 passed
@@ -56,7 +99,9 @@ status_reason: >-
 reviewer: Quinn (@qa)
 updated: '2026-09-11T00:00:00Z'
 branch: story/10.10
-head_sha: 523dcd5f8
+head_sha: 5e360b449
+round_1_head_sha: 523dcd5f8
+round_1_gate: CONCERNS
 base_sha: 50f770ed2
 worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.10
 
@@ -481,11 +526,240 @@ deferrals_checked:
       is author → save → review, and that confirm is blocked by the contract gap. That is the honest
       report and it matches what the suite demonstrates.
 
+# ═════════════════════════════════════════════════════════════════════════════
+# ROUND 2 — re-gate at 5e360b449. Commands this reviewer executed; numbers returned.
+# ═════════════════════════════════════════════════════════════════════════════
+round_2_evidence:
+  scope:
+    command: git diff --stat fa9dd8b18..HEAD; git status --short
+    result: 7 FILES, NO CONFIG, TREE CLEAN
+    detail: >-
+      431 insertions / 35 deletions across `pinnedNarratives.ts` (new), `CompileReviewPanel.tsx`,
+      `compileStates.test.tsx`, `diagnostics.test.tsx`, `accessibility.test.tsx`,
+      `compileFixtures.ts` and the story. **No** `package.json`, lockfile, `.eslintrc.json`,
+      `tsconfig`, `vitest.config`, `openapi.yaml`, `artifact.schema.json`, `backend/` or
+      `studio-runner/`. Working tree empty before and after every experiment.
+  gates:
+    command: npm run type-check; npm run lint; npx vitest run
+    result: REPRODUCED EXACTLY
+    detail: >-
+      type-check exit **2**, the same two `TS2307` at `ChecksLayout.tsx(6,33)` and
+      `navigationSetup.ts(1,36)`, none in a File List file. lint exit **2**, **0 files linted**,
+      identical missing-config message. vitest **Test Files 2 failed | 19 passed (21); Tests 1
+      failed | 274 passed (275)**. The one non-escalation failure is `ChecksLayout.a11y.test.tsx`,
+      unchanged and pre-existing. AC-15 red on exactly `confirmCompile.artifactHash`.
+  plus_eighteen_accounted:
+    command: per-file test counts, round 1 versus round 2
+    result: ACCOUNTED IN FULL — NO DRIFT
+    detail: >-
+      `compileStates.test.tsx` **35 → 52 (+17)**: the 5-case tautological `it.each(DECLARED_STATES)`
+      became **15** named `(state, slot)` fact cases (+10), plus the harness negative control (+1),
+      the fifteen-rows table-shape guard (+1) and five pinned-title cases (+5). `diagnostics.test.tsx`
+      **14 → 15 (+1)**: the import-scanner planted-forms guard. **Every other test file is unchanged
+      to the test** — `confirmFlow` 10, `blockedConfirm` 4, `recompile` 7, `poll` 4, `accessibility`
+      9, `compilePollBounds` 4, `compileFixtureMatrix` 48, `diagnosticsBounds` 4, `studioEscalation`
+      3, `studioContract` 25, `studioHandlers` 19. 17 + 1 = **18**, exactly as claimed.
+  narrativeFor_grep:
+    command: grep -rn "narrativeFor|COMPILE_STATE_NARRATIVES|compileStateNarratives" over every *.test.ts(x) in src/
+    result: THE CLAIM IS FALSE AS WORDED; THE HOLE IS NONETHELESS CLOSED
+    detail: >-
+      @dev states *"no test file references `narrativeFor` any more"*. It does:
+      `studioContract.test.ts` imports both `narrativeFor` and `COMPILE_STATE_NARRATIVES` (lines
+      9–11) and uses them at lines 251, 253 and 262. Read line by line, all three are legitimate and
+      none is the VAC-11 shape — line 251 compares the module's **keys** against the *document's*
+      `compileStatus` enum in both directions (the independent source is the contract), line 253
+      asserts the five titles are **distinct** and non-empty (a property of the values that can only
+      be read from the values), and line 262 asserts `narrativeFor('SOMETHING_ELSE')` **throws**.
+      No rendered content is asserted against the module anywhere. `compileStates.test.tsx` mentions
+      the module only in a comment; `accessibility.test.tsx`'s two former module-derived title
+      assertions now read `PINNED_STATE_TITLES`. **Record correction, not a defect.**
+  mutation_r2_blank_compiling_whatistrue:
+    command: COMPILING.whatIsTrue -> 'x'; npx vitest run over both studio directories
+    result: RED — THE ROUND-1 PROBE NO LONGER PASSES
+    detail: >-
+      `Tests 2 failed | 202 passed (204)` — the escalation, plus exactly
+      `COMPILING / whatIsTrue states its required fact`. One named failure naming the state and the
+      slot. Restored, SHA-256 06559d15…62e3.
+  mutation_r2_blank_ready_whatisblocked:
+    command: READY.whatIsBlocked -> 'x'; --run compileStates.test.tsx
+    result: RED
+    detail: '`Tests 1 failed | 51 passed (52)`: `READY / whatIsBlocked states its required fact`, alone.'
+  mutation_r2_harness_guard_empty_phrases:
+    command: delete the `phrases.length === 0` throw from assertFactRendered; --run compileStates.test.tsx
+    result: RED
+    detail: '`Tests 1 failed | 51 passed (52)`: `the harness itself refuses to be satisfied by nothing`.'
+  mutation_r2_harness_guard_min_phrase_length:
+    command: delete the MIN_PHRASE_LENGTH throw; --run compileStates.test.tsx
+    result: RED
+    detail: 'Same single failure. `Tests 1 failed | 51 passed (52)`.'
+  mutation_r2_harness_guard_min_rendered_length:
+    command: delete the MIN_RENDERED_FACT_LENGTH throw; --run compileStates.test.tsx
+    result: RED
+    detail: >-
+      Same single failure. `Tests 1 failed | 51 passed (52)`. **All three guards fire**, which is the
+      one that mattered most: the harness is what makes the other fifteen able to fail, so a vacuous
+      harness would have silently restored VAC-11 behind a bigger-looking test count.
+  mutation_r2_fixture_revert:
+    command: >-
+      revert SOURCE_TOO_LARGE's message to its pre-fix text
+      ('The draft is larger than the maximum source size.'); --run compileFixtureMatrix.test.ts
+    result: RED — THE CORRECTION IS REAL, THE PREDICATE WAS NOT LOOSENED
+    detail: >-
+      `Tests 1 failed | 47 passed (48)`:
+      `FX-REJECTION-SOURCE_TOO_LARGE resolves to a fixture that carries the property it exists for`.
+      The old message is 48 characters so it clears the wording-length check; what rejects it is the
+      AC-14 clause requiring a `400` message to name a step index or the bound. The fixture now reads
+      *"This draft is 68120 bytes; the maximum is 65536…"*. The defect the new predicate found was
+      genuine and the fix went into the fixture, not the predicate.
+  mutation_r2_scanner_pattern_dropped:
+    command: remove the dynamic `import()`/`require()` pattern from moduleSpecifiers; --run diagnostics.test.tsx
+    result: RED
+    detail: >-
+      `Tests 1 failed | 14 passed (15)`:
+      `the import scanner sees every specifier form, so its silence means something`. The
+      planted-forms guard genuinely fails.
+  mutation_r2_collapse_two_slots:
+    command: give whatYouCanDo the whatIsTrue testid; --run compileStates.test.tsx
+    result: RED ×10, EACH NAMED
+    detail: >-
+      `Tests 10 failed | 42 passed (52)` — every state's `whatIsTrue` **and** `whatYouCanDo` case,
+      named individually, because `findByTestId` refuses a duplicate. This is exactly what the
+      per-slot testids were added for: an assertion over concatenated region text could not have said
+      which of the three facts went missing.
+  probe_r2_exact_round_1_vac11:
+    command: >-
+      the identical round-1 mutation — COMPILING ×3, READY ×3 and NEEDS_REVISION.whatIsTrue all set
+      to 'x'; npx vitest run over both studio directories
+    result: SEVEN NAMED FAILURES WHERE ROUND 1 HAD ZERO
+    detail: >-
+      `Tests 8 failed | 196 passed (204)` — the expected escalation plus **all seven** blanked facts,
+      each named by state and slot. In round 1 this same mutation left the full suite at its usual
+      `1 failed | 256 passed (257)`. **VAC-11 is closed, measured against its own probe.**
+  probe_r2_dry_refactor_residual:
+    command: >-
+      simulate the refactor `pinnedNarratives.ts`'s header warns against — derive AC2_REQUIRED_FACTS
+      from COMPILE_STATE_NARRATIVES; then, separately, combine it with a blanked fact and with a
+      long-but-wrong rewording
+    result: THE CLEANUP IS UNDETECTABLE; WHAT IT REOPENS IS NARROWER THAN IT LOOKS — see PIN-1
+    detail: >-
+      **Derive alone:** the whole suite stays green, `compileStates` 52/52, whole run `1 failed |
+      203 passed (204)`. Nothing notices that a real pin has become a tautology again.
+      **Derive + blank a fact to `'x'`:** still **RED**, 2 failures — the harness's
+      `MIN_PHRASE_LENGTH` and `MIN_RENDERED_FACT_LENGTH` guards are independent of the pin, so the
+      vacuity shape itself stays closed. That layering is a genuinely good property and is why this
+      is low rather than medium. **Derive + a long-but-wrong rewording of `READY.whatIsTrue`:**
+      **GREEN**, `1 failed | 203 passed (204)` — silent. The same rewording applied to
+      `COMPILING.whatIsTrue` *is* caught, but only incidentally: the negative-control test hardcodes
+      that one sentence as its positive case. So after the DRY cleanup, 14 of the 15 facts could be
+      silently reworded — which is precisely the change the header says *"should need someone to
+      look at it"*.
+  scratchpad_collision_check:
+    command: >-
+      git diff --stat 523dcd5f8..fa9dd8b18; and SHA-256 of every file this reviewer mutated in
+      round 1 against `git show 523dcd5f8:<path>`
+    result: ROUND-1 RESULTS UNAFFECTED — RESTORES WERE THIS REVIEWER'S OWN
+    detail: >-
+      @dev reports the session scratchpad is shared between agents and that this reviewer's
+      `falsify.py` overwrote its file mid-run. **Confirmed harmless on this side, and confirmed by
+      evidence rather than by reasoning.** The round-1 gate commit `fa9dd8b18` changed **only the two
+      documentation files** — had any source file been left mutated, `git status --short` could not
+      have been empty at commit time. And all five files this reviewer mutated that @dev has not
+      since touched are byte-identical today to @dev's pre-review commit `523dcd5f8`:
+      `compileStateNarratives.ts` 06559d15…, `compileErrorCodes.ts` 539265ac…, `DiagnosticsView.tsx`
+      7934a091…, `useCompileReview.ts` 0fc877db… and `studioEscalation.test.ts` f7a8f98a… — the
+      identical SHA-256 values printed in the round-1 evidence.
+      **Mechanism, for the record:** this reviewer's restore copies lived at `/tmp/mut-backup-$$`,
+      PID-suffixed and **outside** the shared scratchpad, and each restore compared SHA-256 against
+      the file's own pre-mutation hash. Only the *mutation scripts* were in the shared directory, and
+      each asserts its anchor text before writing — so an overwritten script would have aborted the
+      run with "MUTATION FAILED TO APPLY" or "mutation produced NO CHANGE" rather than silently
+      applying someone else's edit. Neither fired. Round 2 was run from a uniquely-named harness
+      directory with `mktemp` backups. **The hazard is real even though neither agent was bitten:
+      two agents sharing a mutation harness is a way for a falsification result to be wrong without
+      either noticing, and it belongs in the epic's operating notes.**
+  matrix_count:
+    command: grep for a fixture-shape count in the story; runtime count of COMPILE_FIXTURE_MATRIX
+    result: '@dev IS RIGHT — 23, AND THE STORY NEVER SAID 25'
+    detail: >-
+      `25` appears nowhere in `10.10.story.md` as a fixture-shape count and **AC-20 carries no count
+      at all** — it enumerates categories. The runtime matrix has **23** entries (counted from the
+      verbose reporter: 23 `resolves to a fixture…` cases, matching 2 + 23 + 23 = 48 tests). The
+      "25" was this reviewer's verbal hand-off. MATRIX-1's substance — seven tautological predicates
+      — was real and is fixed; the implication of a discrepancy with the story was not, and is
+      withdrawn here.
+
+round_2_developer_claims_verified:
+  - claim: 'type-check 2 errors, lint 0 files, vitest 2 failed | 19 passed (21) and 1 failed | 274 passed (275)'
+    verdict: REPRODUCED EXACTLY, every figure.
+  - claim: 'the +18 is 15 fact cases + negative control + table guard + 5 titles + 1 scanner guard, not drift'
+    verdict: >-
+      CONFIRMED BY PER-FILE ARITHMETIC. +17 in `compileStates.test.tsx`, +1 in
+      `diagnostics.test.tsx`, every other file unchanged to the test. 17 + 1 = 18.
+  - claim: 'AC-15 is still red on the same single field'
+    verdict: CONFIRMED — `expected [ ''confirmCompile.artifactHash'' ] to deeply equal []`, unchanged.
+  - claim: 'no test file references narrativeFor any more'
+    verdict: >-
+      FALSE AS WORDED, BUT THE HOLE IS CLOSED. `studioContract.test.ts` retains three legitimate,
+      non-tautological uses (document set-equality, title distinctness, the unknown-status throw).
+      Correct the sentence; nothing else.
+  - claim: '27 mutations, all red, all restored byte-identically'
+    verdict: >-
+      EIGHT RE-RUN HERE AND ALL EIGHT RED ON THE NAMED TEST, including two of the fifteen blanked
+      facts and **all three harness-guard disables**. Two were broader than recorded: the slot
+      collapse reddens ten cases, and the full round-1 probe reddens seven. Nineteen rows not re-run
+      and taken on trust.
+  - claim: 'the new predicate reddened FX-REJECTION-SOURCE_TOO_LARGE and the fixture was corrected'
+    verdict: >-
+      CONFIRMED, AND THE PREDICATE WAS NOT LOOSENED. Reverting only the message reddens that entry
+      today. The correction is in the fixture.
+  - claim: 'the matrix holds 23, and the story never carried a count'
+    verdict: CONFIRMED. Both halves. This reviewer's "25" was the error.
+  - claim: 'the enabled-in-flight confirm control was left untouched for @po'
+    verdict: >-
+      CONFIRMED — `CompileReviewPanel.tsx`'s only change is the three `data-testid` attributes;
+      `disabled={!confirmEnabled}` and `aria-busy` are byte-unchanged. Correct compliance with the
+      round-1 instruction, and `AD2-1` stays open against @po rather than against @dev.
+
+open_for_po:
+  - id: AD2-1
+    owner: '@po with @ux'
+    state: OPEN — DELIBERATELY UNTOUCHED BY @dev ON THIS REVIEWER'S ROUND-1 INSTRUCTION
+    ask: >-
+      Rule on whether the confirm control should carry `aria-disabled="true"` while a confirmation is
+      in flight, or stay live with `aria-busy`. Whichever is ruled, the affordance needs one test —
+      it currently has none, and deleting both `aria-busy` and the "Sending your confirmation…" line
+      leaves the suite green (measured in round 1). Not merge-blocking; must not close by silence.
+  - id: ESC-1
+    owner: '@po, then whoever implements @architect''s AC-15 ruling'
+    state: OPEN — ROUTED, AND @dev's TEST IS CORRECTLY SCOPED AND UNAFFECTED
+    ask: >-
+      Narrow the ratified property to the tags it actually holds for. Measured: it fails for
+      `internal` (25 required fields), `runner` (16) and `api-callback` (12) under both matching
+      rules. **Needed before 10.11 extends this assertion.** And when the ruling lands, pin the
+      specific declared field name — a syntactic suffix match cannot tell
+      `currentCandidateArtifactHash` from `supersededRevisionArtifactHash`, and the latter also turns
+      the escalation green.
+  - id: ENV-1
+    owner: unowned — needs an owner from @po
+    state: OPEN — NOT @dev's, AND @dev ADOPTED BOTH CORRECTIONS TO ITS OWN RECORD
+    ask: >-
+      Assign the three environment items together: the `file:../../put-core-components` path that
+      resolves only from the main checkout, the malformed `.eslintrc.json` that lints zero files, and
+      the **real missing skip link** in `ChecksLayout` sitting behind the resolution failure. The
+      third will otherwise be found the hard way by 10.19's conformance pass.
+
 # ─────────────────────────────────────────────────────────────────────────────
+# Round-1 findings, each stamped with its round-2 resolution.
 top_issues:
   - id: VAC-11
     severity: medium
-    finding: >-
+    resolution: >-
+      **FIXED AND VERIFIED AGAINST ITS OWN PROBE (round 2).** The identical round-1 mutation — seven
+      AC-2 facts blanked to `'x'` — now reddens seven named tests where it previously reddened none.
+      The fifteen `(state, slot)` pairs are fifteen named cases reading per-fact `data-testid` slots;
+      the expected text is a second copy in `pinnedNarratives.ts`; and `assertFactRendered` closes the
+      `toContain('')` degenerate case with three guards, **all three of which this reviewer disabled
+      in turn and all three of which fire**. Collapsing two slots reddens ten cases by name. Closed.
       **The eleventh vacuous-guard shape this epic has found: an assertion whose expected value is
       imported from the module under test.** AC-2's principal test is
       `it.each(DECLARED_STATES)('%s renders its three facts and its own name')`, and its body does
@@ -518,6 +792,11 @@ top_issues:
       the four AC-3 origins, the AC-9 honesty sweep) is genuinely guarded.
   - id: AD2-1
     severity: medium
+    resolution: >-
+      **OPEN, AND CORRECTLY SO.** Untouched by @dev on this reviewer's round-1 instruction;
+      `CompileReviewPanel.tsx`'s only change is three `data-testid` attributes and both
+      `disabled={!confirmEnabled}` and `aria-busy` are byte-unchanged. Carried to `open_for_po`. It
+      does not count against @dev and does not block the merge.
     finding: >-
       A product-visible behaviour was changed for a test-harness reason, and the affordance offered in
       its place is guarded by nothing. The confirm control stays enabled while a confirmation is in
@@ -542,6 +821,11 @@ top_issues:
       10.19's conformance pass.
   - id: ESC-1
     severity: medium
+    resolution: >-
+      **OPEN, ROUTED TO @po, AND @dev's TEST IS UNAFFECTED.** The escalation scopes itself to
+      `TAG = 'tests'`, which is honest; what is wrong is the ratified generalisation, which is @po's
+      to narrow, and the suffix aperture, which is the ruling-implementer's to close. Carried to
+      `open_for_po`. Not @dev's to fix in this story.
     finding: >-
       Two defects in the escalation's asserted property, neither of which makes it red-for-the-wrong-
       reason today. **(a)** The widened `isReachable` accepts any response property whose name ends
@@ -562,6 +846,10 @@ top_issues:
       out of scope for it and why. Note this before 10.11, which is told to extend this assertion.
   - id: ENV-1
     severity: medium
+    resolution: >-
+      **OPEN AND UNOWNED; @dev ADOPTED BOTH CORRECTIONS TO ITS OWN RECORD** — that the dependency
+      resolves from the main checkout, and that a real missing skip link sits behind the import
+      failure. Carried to `open_for_po` for an owner. Not @dev's to fix.
     finding: >-
       Not this story's and not to be fixed here, but the epic's record of it is wrong in a way that
       will cost the next reviewer time. `frontend/package.json` declares
@@ -586,6 +874,13 @@ top_issues:
       item in the same bucket and should be assigned with them.
   - id: MATRIX-1
     severity: low
+    resolution: >-
+      **FIXED, AND THIS REVIEWER'S COUNT CLAIM WITHDRAWN.** The seven tautologies are replaced by
+      five real checks; applying them found a genuine defect in `FX-REJECTION-SOURCE_TOO_LARGE` and
+      the **fixture** was corrected — verified by reverting only the message, which reddens that
+      entry today, so the predicate was not loosened to accept it. On the count: **23 is right and
+      the story never said 25.** `25` appears nowhere in `10.10.story.md` and AC-20 carries no count;
+      the figure came from a verbal hand-off. That half of the finding is withdrawn.
     finding: >-
       `COMPILE_FIXTURE_MATRIX` holds **23** entries, not the 25 the review brief describes. The count
       is right for what AC-20 enumerates and both halves are falsifiable, so nothing is missing — but
@@ -602,6 +897,11 @@ top_issues:
       open.
   - id: IMPORT-1
     severity: low
+    resolution: >-
+      **FIXED.** The scan walks `review/` and `services/mocks/studio/` recursively (13+ modules) and
+      reads `from`, bare `import`, dynamic `import()` and `require()` in any quote style, with a guard
+      that plants all five forms and asserts each is found plus asserts it reads real specifiers from
+      the real files. Removing one pattern reddens that guard — verified. Closed.
     finding: >-
       AC-16(a)'s non-import assertion scans only non-test modules in
       `frontend/src/components/studio/review/`. Two modules this story also adds —
@@ -612,50 +912,96 @@ top_issues:
     suggested_action: >-
       Widen the scan to both story directories and accept either quote style. Two lines. Not blocking.
 
+  - id: PIN-1
+    severity: low
+    status: NEW IN ROUND 2 — LATENT, NOT A LIVE DEFECT
+    finding: >-
+      **The epic's twelfth vacuous-guard shape: a deliberate second copy whose independence is
+      protected only by a comment.** `pinnedNarratives.ts` is the right fix for VAC-11 and its header
+      says, correctly, that a future edit must not "remove the duplication" by importing
+      `COMPILE_STATE_NARRATIVES`. **Nothing enforces that.** This reviewer performed exactly that
+      refactor — deriving the fifteen phrase sets from the narratives module — and the suite stayed
+      **fully green**, `compileStates` 52/52. The pin silently becomes a tautology again and no test
+      notices the conversion. The novelty against shape #4 (a pin with an uncompared copy) is that
+      here the copies *are* compared, on every run; what is unguarded is the pin's **provenance**. It
+      is the regression path back into VAC-11 rather than VAC-11 itself.
+      Measured, the damage is narrower than it looks and the design deserves credit for that. After
+      the refactor, **blanking a fact is still caught** (2 red) because `MIN_PHRASE_LENGTH` and
+      `MIN_RENDERED_FACT_LENGTH` are independent of the pin — good layering. What reopens is the
+      **silent rewording**: a long-but-wrong rewrite of `READY.whatIsTrue` passes (`1 failed |
+      203 passed (204)`, only the expected escalation). Fourteen of the fifteen facts would be
+      silently rewordable; `COMPILING.whatIsTrue` alone survives, and only incidentally, because the
+      negative-control test hardcodes that one sentence as its positive case. A silent rewording of
+      what is true, what the user may do or what is blocked is the change the header itself says
+      should need someone to look at it.
+    suggested_action: >-
+      One assertion, and the instrument is already built and already legitimate — the property is
+      about **imports**, which is the same argument AC-16(a) and AC-20's second half already make.
+      Add `'./compileStateNarratives'` (and its `@/` form) to the retired-specifier list *for
+      `pinnedNarratives.ts` only*, inside the AC-16(a) scanner that now walks the directory
+      recursively and reads every specifier form. `studioContract.test.ts` must stay free to import it
+      — its three uses are legitimate — so the ban is on the pin file, not on tests generally. Owner:
+      @dev, follow-up. Not blocking: the pin is a genuine second copy today and every one of the
+      fifteen facts is falsifiable as it stands.
+
 required_before_merge: []
 
 recommended_not_blocking:
-  - VAC-11 — pin AC-2's facts with literal assertions and add the rows to the falsification table.
-    This is the one finding that would change a future review's verdict if left.
-  - AD2-1 — assert the in-flight affordance, and put the aria-disabled question to @po/@ux.
-  - ESC-1 — pin the specific field name when the AC-15 ruling lands; @po to narrow the ratified
-    property to the tags it actually holds for, before 10.11 extends it.
-  - ENV-1 — record on the epic that the dependency resolves in the main checkout, that a real missing
-    skip link sits behind the resolution failure, and assign both alongside the malformed eslint
-    config.
-  - MATRIX-1, IMPORT-1 — small, whenever those files are next open.
+  - PIN-1 — one assertion forbidding `pinnedNarratives.ts` from importing `./compileStateNarratives`,
+    added to the AC-16(a) scanner that already walks the directory and reads every specifier form.
+    This is the one finding that would change a future review's verdict if left, and it is one line.
+  - MATRIX-1 residue — the `400` step-index check is `/\d/`, which any incidental digit satisfies.
+    Tighten to a step index or a declared bound whenever that file is next open.
+  - Record the shared-scratchpad hazard in the epic's operating notes — two agents running mutation
+    harnesses out of one directory are a way for a falsification result to be wrong without either
+    noticing. Neither was bitten here — both checked — but that was the design of the harnesses, not
+    luck that can be relied on twice.
+
+open_and_not_this_story_s:
+  - AD2-1, ESC-1 and ENV-1 — see `open_for_po`. None is @dev's, none blocks the merge, and none may
+    close by silence.
 
 do_not_do:
-  - Do not "fix" `@put/core-components` resolution, `.eslintrc.json`, or the `ChecksLayout` skip link
-    inside this story. None is @dev's and the baseline is the honest thing to preserve.
-  - Do not make AC-15's escalation an `it.fails()` or an `it.skip()`. The developer's reasoning is
-    right — an `it.fails()` is green today and red on the amendment, which inverts the escalation.
-    Leave it red.
+  - Do not "remove the duplication" in `pinnedNarratives.ts`. Deriving its phrases from
+    `COMPILE_STATE_NARRATIVES` turns the pin back into a tautology and **no test notices** — measured
+    in round 2. The header says so, and PIN-1 asks for a guard that says so too.
+  - Do not delete the `state-fact-{slot}` testids to "tidy" the markup. Per-fact slots are what make
+    a missing fact name itself; collapsing two reddens ten tests precisely because they exist.
+  - Do not relax `MIN_PHRASE_LENGTH` or `MIN_RENDERED_FACT_LENGTH` to accommodate a short phrase.
+    Those two guards are what keep blanking detectable even if the pin is ever compromised.
+  - Do not "fix" `@put/core-components`, `.eslintrc.json`, or the `ChecksLayout` skip link inside this
+    story. None is @dev's and the baseline is the honest thing to preserve.
+  - Do not make AC-15's escalation an `it.fails()` or an `it.skip()`. Leave it red.
   - Do not widen the reachability rule further to make a future amendment pass. When the ruling lands,
-    *narrow* it to the declared field name.
+    **narrow** it to the declared field name.
   - Do not tick AC-11(b), AC-16(b), AC-18(b) or AC-19(b), and do not claim the epic's first
     acceptance bullet. Author → save → review works; confirm does not, and the story says so.
-  - Do not hand-widen the frontend error-code union for ADR-002 O-12. That is 10.11's, and its
+  - Do not hand-widen the frontend error-code union for ADR-002 **O-12**. That is 10.11's, and its
     instruction is "generate or assert, not hand-widen".
 
 final_decision:
-  gate: CONCERNS
+  gate: PASS
   merge: SAFE
   rationale: >-
-    This is a careful story and most of it holds up under a hostile hand. The baseline was measured at
-    the base commit rather than adopted from the document and matches to the digit; the after numbers
-    match to the digit; the delta is +158 passing, +11 suites and one deliberate red. Eight
-    falsifications were re-applied here across seven criteria and every one reddened exactly the named
-    test, including both halves of AC-20 — the criterion @po promoted precisely because a vacuous
-    AC-20 would silently defeat AC-7, and it is not vacuous. AC-15 is red for the right reason and was
-    shown, not asserted, to go green on candidate A's amendment with no edit to itself. The four
-    deferrals cannot arm themselves, and the story refuses the epic's first acceptance bullet in
-    writing. No repository file was touched to get any of it running.
-    What holds it at CONCERNS is one new vacuity shape and one unguarded product change. AC-2's
-    per-state facts are asserted against the module they are rendered from, so eight of fifteen
-    required sentences can be reduced to a single character with the suite green — the eleventh shape
-    this epic has found, and the one @po predicted for a UI story. And the `aria-busy` plus
-    "Sending your confirmation…" that the second [AUTO-DECISION] traded the disabled control for can
-    be deleted without a red test, which makes a product-visible decision, taken for a test-harness
-    reason, invisible to the suite. Both are guard defects rather than behavioural ones; neither is a
-    reason to hold the story, and the second needs @po rather than @dev.
+    Round 1 raised six findings. The three that were @dev's are fixed, and each fix was verified by
+    mutation rather than by reading. **VAC-11 is closed against its own probe** — the identical
+    mutation that left the whole suite green now reddens seven named tests, one per blanked fact —
+    and the harness that makes those fifteen able to fail is itself falsifiable, with all three of its
+    guards reddening the negative control when disabled in turn. **MATRIX-1's fix found a real fixture
+    defect** and the correction is in the fixture, not in a loosened predicate: reverting only the
+    message reddens that entry today. **IMPORT-1's planted-forms guard genuinely fails.** The +18 test
+    delta is accounted in full by per-file arithmetic with no drift, the gate numbers reproduce to the
+    digit, and AC-15 is still red on exactly one field.
+    Two corrections belong in this record, one in each direction. This reviewer's MATRIX-1 note
+    implied a discrepancy with the story over "25 fixture shapes"; there was none — AC-20 carries no
+    count and 23 is correct — and that half is withdrawn. And @dev's "no test file references
+    `narrativeFor` any more" is false: `studioContract.test.ts` retains three uses, all of which were
+    read line by line and none of which asserts rendered content against the module, so the hole is
+    closed and only the sentence is wrong.
+    What remains open is not this story's. `AD2-1` and `ESC-1` were routed to @po by this reviewer in
+    round 1 and @dev was told not to touch them — it did not, verifiably, and holding the gate for
+    compliance with that instruction would be perverse. `ENV-1` is unowned environment, and @dev
+    adopted both corrections to its own record without argument. The one new finding, `PIN-1`, is
+    latent: it is the regression path back into VAC-11 rather than VAC-11 itself, the blanking case
+    stays caught by guards independent of the pin, and the remedy is a single assertion in a scanner
+    that already exists. **PASS**, with three items carried to @po that must not close by silence.
