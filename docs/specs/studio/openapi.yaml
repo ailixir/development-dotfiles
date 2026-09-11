@@ -14,10 +14,23 @@ info:
     service identity over encrypted transport. springdoc excludes them from the public UI; the
     contract test still covers them.
 
+    **Two components serve the routes in this document.** The internal surface of §8.4 is split
+    across the backend API and the separately deployed `studio-runner`, which has its own image,
+    its own ClusterIP Service and no ingress at all (ADR-001 §9). An internal operation therefore
+    never inherits the document-level `servers` entry: each declares its own base and carries
+    exactly one of `runner` or `api-callback` next to `internal`, so the component that answers a
+    route is readable without inference. See ADR-002 for the ruling and its alternatives.
+
+    The bodies the runner produces and sends are declared closed (`additionalProperties: false`)
+    and their optional fields are declared. A field the contract does not name is a conformance
+    failure rather than a silent divergence — see ADR-002 §INT-4.
+
     Routes marked `x-not-yet-implemented: true` are declared here so that dependent stories build
     against one frozen shape. Story 10.1 ships the contract, the schema and the snapshot DTO;
     dispatch (10.7), compilation (10.8) and confirmation (10.9) ship the behaviour.
 servers:
+  # Public, browser-facing base only. Every `internal`-tagged path item overrides this with its
+  # own `servers` entry; none of them is served under `/api/v1/studio` (architecture §8.4).
   - url: /api/v1/studio
     description: Public Studio API
 tags:
@@ -26,7 +39,20 @@ tags:
   - name: executions
     description: Execution history, live snapshots and evidence
   - name: internal
-    description: Service-to-service routes; never exposed through public ingress
+    description: |
+      Service-to-service routes; never exposed through public ingress (architecture §8.4). Every
+      internal operation also carries exactly one of `runner` or `api-callback`, and declares its
+      own `servers` entry, so both the serving component and its base are explicit.
+  - name: runner
+    description: |
+      Served by the `studio-runner` Deployment: its own image and ClusterIP Service, no Ingress
+      and no HPA (ADR-001 §9). Reachable from worker and API pods only; the MFE never talks to
+      the runner (architecture §3).
+  - name: api-callback
+    description: |
+      Served by the backend API on its internal base, not under the public `/api/v1/studio`
+      prefix. Called by the runner and by nothing else (architecture §8.4, §9.2). The callback
+      destination is deployment configuration and is never job-supplied (§8.5).
 
 paths:
   /tests:
@@ -511,14 +537,188 @@ paths:
                   value: { error: VIDEO_EXPIRED, message: 'The recording for this execution expired on 2026-08-15T10:04:12Z' }
         '416': { description: Unsatisfiable range }
 
-  /internal/studio/executions/{id}/admission:
+  # ────────────────────────────────────────────────────────────────────────────────────────────
+  # Internal surface, architecture §8.4, in the order that section tabulates it.
+  #
+  # Runner-served routes live on the `studio-runner` Service, not on `/api/v1/studio`. Each path
+  # item states its own base so the two deployments can never be confused for one (ADR-002).
+  # ────────────────────────────────────────────────────────────────────────────────────────────
+
+  /v1/validate:
+    servers:
+      - url: '{runnerBaseUrl}'
+        description: |
+          The `studio-runner` ClusterIP Service (ADR-001 §9). The real value is deployment
+          configuration — the worker's runner URL (§8.5); the default below is only the in-cluster
+          shape this chart renders. The runner has no Ingress, so this is never a public host.
+        variables:
+          runnerBaseUrl:
+            default: http://put-checks-studio-runner:8080
+            description: Deployment configuration (§8.5). Never a public hostname.
     post:
-      tags: [internal]
+      tags: [internal, runner]
+      operationId: runnerValidateArtifact
+      summary: Browser-free schema, AST and policy validation with per-step diagnostics
+      description: |
+        Architecture §8.4 (runner `POST /v1/validate`) and §4.5. Launches nothing, takes no
+        capacity slot and creates no scratch state, so a saturated runner still answers it
+        (§4.5, "control/validation endpoints have separate bounded resources").
+
+        The response carries diagnostics only: never source text and never the typed operation
+        list, which stays inside the runner (§4.5, §9.2).
+      x-internal: true
+      x-served-by: studio-runner
+      x-implemented-by: '10.6'
+      security:
+        - serviceIdentity: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ValidateRequest' }
+      responses:
+        '200':
+          description: Validation ran. `ok` reports the verdict; a rejected artifact is still a 200.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ValidateResponse' }
+        '400':
+          description: Body is not JSON, not an object, carries an undeclared key, or `source` is not a string array
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunnerProblem' }
+        '401': { $ref: '#/components/responses/RunnerUnauthenticated' }
+        '403': { $ref: '#/components/responses/RunnerForbidden' }
+        '413':
+          description: Body or step count over the configured input bound (§4.3)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunnerProblem' }
+        '503':
+          description: Validation exceeded its bounded budget (§4.5)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunnerProblem' }
+
+  /v1/runs:
+    servers:
+      - url: '{runnerBaseUrl}'
+        description: |
+          The `studio-runner` ClusterIP Service (ADR-001 §9). Deployment configuration (§8.5).
+        variables:
+          runnerBaseUrl:
+            default: http://put-checks-studio-runner:8080
+            description: Deployment configuration (§8.5). Never a public hostname.
+    post:
+      tags: [internal, runner]
+      operationId: runnerAdmitRun
+      summary: Short admission request for one dispatched attempt
+      description: |
+        Architecture §8.4 (runner `POST /v1/runs`) and §5.1.4–5.1.5. A **short** request: the
+        runner reserves capacity, performs the admission CAS against the API and answers `202`;
+        the browser starts afterwards, and `RUNNING` is written only by an authenticated
+        `STARTED` report, never by this response.
+
+        Status semantics the caller must obey (§5.1, closing paragraph):
+
+        | Status | Meaning | Worker action |
+        |---|---|---|
+        | `202` | Admitted; exactly one attempt owner | Await reports |
+        | `400` | Invalid job or artifact | Terminal; do not resend |
+        | `401` / `403` | Unauthorized | Terminal; do not resend |
+        | `409` | Competing or expired admission | Terminal; do not resend |
+        | `429` | **Definite** non-acceptance: nothing durable, no browser | Retry with `Retry-After` and jitter inside the pending deadline |
+        | `503` | Draining, or the admission handshake did not settle | Ambiguous unless the code says otherwise; consult admission/progress/manifest state |
+
+        A timeout, transport loss or `5xx` is ambiguous, not a refusal: do not resend browser
+        work, and disable automatic POST retries in clients and proxies (§5.1).
+      x-internal: true
+      x-served-by: studio-runner
+      x-implemented-by: '10.6'
+      security:
+        - serviceIdentity: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RunJob' }
+      responses:
+        '202':
+          description: Admitted. Capacity reserved and the admission CAS committed; the browser has not started yet.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunAccepted' }
+        '400':
+          description: Job envelope or artifact rejected. `detail` carries codes and key names only, never a value.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunnerProblem' }
+              examples:
+                callbackNotPermitted:
+                  summary: A job trying to name its own callback destination (§8.4, §8.5)
+                  value:
+                    code: JOB_INVALID
+                    detail:
+                      - { code: JOB_CALLBACK_NOT_PERMITTED, field: callbackUrl }
+        '401': { $ref: '#/components/responses/RunnerUnauthenticated' }
+        '403': { $ref: '#/components/responses/RunnerForbidden' }
+        '409':
+          description: A competing or expired admission already owns the attempt (§5.1.4)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunnerProblem' }
+        '429':
+          description: |
+            Capacity saturated. Definite non-acceptance: no durable admission and no browser
+            started, so this is the one status that is safe to retry (§5.1, §8.4).
+          headers:
+            Retry-After:
+              schema: { type: integer, minimum: 0 }
+              description: Seconds. Apply jitter and stay inside the pending deadline (§5.1).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunnerProblem' }
+        '503':
+          description: |
+            Draining (`RUNNER_DRAINING`), or the admission handshake was refused or left
+            ambiguous by the API (`ADMISSION_REJECTED`, `ADMISSION_AMBIGUOUS_*`). No browser
+            was started (§5.1.4, §5.4).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunnerProblem' }
+
+  /internal/studio/executions/{id}/admission:
+    servers:
+      - url: '{apiInternalBaseUrl}'
+        description: |
+          The backend API's internal base — **not** the public `/api/v1/studio` prefix these
+          paths would otherwise inherit. It is the runner's callback base, which is deployment
+          configuration (§8.4, §8.5) and never job-supplied. The default below is only the
+          in-cluster shape this chart renders; these paths are not exposed through ingress.
+        variables:
+          apiInternalBaseUrl:
+            default: http://put-checks-api:8080
+            description: Deployment configuration (§8.5). Never a public hostname.
+    post:
+      tags: [internal, api-callback]
       operationId: claimAdmission
       summary: CAS exclusive ownership of an attempt
+      description: |
+        Architecture §8.4 (API `POST /internal/studio/executions/{id}/admission`) and §5.1.4.
+        Compare-and-set on `(attemptId, runnerInstanceId, admissionId)`: at most one identity owns
+        an attempt, a duplicate of the *same* identity is acknowledged idempotently, and a
+        competing or expired one gets `409`. No browser starts without a successful CAS.
+
+        The runner issues **exactly one** of these per run and never generates a second
+        `admissionId` for the same `attemptId`. A timeout, transport loss or `5xx` here is
+        ambiguous — admission may already have committed — so the runner stops rather than
+        resending, and the API's reaper resolves it (§5.1, §5.4).
       x-not-yet-implemented: true
       x-implemented-by: '10.7'
       x-internal: true
+      x-served-by: api
+      security:
+        - serviceIdentity: []
       parameters:
         - { $ref: '#/components/parameters/ExecutionId' }
       requestBody:
@@ -528,37 +728,83 @@ paths:
             schema: { $ref: '#/components/schemas/AdmissionRequest' }
             examples:
               admit:
+                summary: The exact shape the runner sends — identity plus the runtime it will run on (§4.6)
                 value:
+                  executionId: 44444444-4444-4444-4444-444444444444
                   attemptId: 55555555-5555-5555-5555-555555555555
-                  admissionId: 66666666-6666-6666-6666-666666666666
                   runnerInstanceId: studio-runner-0
+                  admissionId: 66666666-6666-6666-6666-666666666666
+                  runtimeVersions:
+                    playwright: 1.63.0
+                    node: v22.11.0
+                    validatorSchema: 1.0.0
+                    executor: 1.0.0
+                    syntaxReference: 1.0.0
       responses:
         '200':
           description: Admission owned by this identity (duplicate identical admission is idempotent)
           content:
             application/json:
               schema: { $ref: '#/components/schemas/AdmissionResponse' }
+        '400':
+          description: Malformed admission body
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409':
-          description: A competing or expired admission already owns the attempt
+          description: |
+            A competing or expired admission already owns the attempt. Definite refusal: the
+            runner stops and never re-attempts (§5.1.4).
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
 
   /internal/studio/executions/{id}/progress:
+    servers:
+      - url: '{apiInternalBaseUrl}'
+        description: |
+          The backend API's internal base — **not** the public `/api/v1/studio` prefix these
+          paths would otherwise inherit. It is the runner's callback base, which is deployment
+          configuration (§8.4, §8.5) and never job-supplied. The default below is only the
+          in-cluster shape this chart renders; these paths are not exposed through ingress.
+        variables:
+          apiInternalBaseUrl:
+            default: http://put-checks-api:8080
+            description: Deployment configuration (§8.5). Never a public hostname.
     post:
-      tags: [internal]
+      tags: [internal, api-callback]
       operationId: reportProgress
       summary: Cumulative STARTED/PROGRESS/FINAL snapshot from the runner
+      description: |
+        Architecture §8.4 (API `POST /internal/studio/executions/{id}/progress`) and §5.3.
+
+        Every report is **full current state, never a delta**, so two lost deliveries are
+        recovered by the third and nothing has to be replayed. The API validates ownership,
+        `runnerSequence` ordering, permitted transitions, redaction and limits; applies the change
+        conditionally; increments its own snapshot `revision`; and acknowledges only after commit.
+        A delayed report may never overwrite a finalized execution or another admission.
+
+        A `409` on any report stops the runner reporting for that run — ownership lost, attempt
+        superseded, or the execution already settled (§5.3).
+
+        The body is `RunnerReport`, which is **not** `ExecutionSnapshot`. It is the runner's
+        vocabulary, the runner's clock and the runner's knowledge; the API projects it onto the
+        public snapshot. See the mapping table on `RunnerReport` and ADR-002.
       x-not-yet-implemented: true
       x-implemented-by: '10.7'
       x-internal: true
+      x-served-by: api
+      security:
+        - serviceIdentity: []
       parameters:
         - { $ref: '#/components/parameters/ExecutionId' }
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ProgressReport' }
+            schema: { $ref: '#/components/schemas/RunnerReport' }
             examples:
               started:
                 summary: Authenticated browser-start report — the only thing that writes RUNNING
@@ -566,39 +812,167 @@ paths:
                   executionId: 44444444-4444-4444-4444-444444444444
                   attemptId: 55555555-5555-5555-5555-555555555555
                   admissionId: 66666666-6666-6666-6666-666666666666
-                  runnerSequence: 1
+                  runnerInstanceId: studio-runner-0
                   kind: STARTED
+                  runnerSequence: 1
                   reportedAt: '2026-09-10T10:00:02Z'
                   browserStartedAt: '2026-09-10T10:00:02Z'
-                  runtime:
-                    playwright: 1.47.2
-                    chromium: 129.0.6668.29
-                    validator: 1.0.0
+                  steps: []
+                  logs:
+                    - { atMs: 0, level: info, message: browser started }
+                  logsTruncated: false
+                  runtimeVersions:
+                    playwright: 1.63.0
+                    node: v22.11.0
+                    validatorSchema: 1.0.0
                     executor: 1.0.0
-                    image: studio-runner@sha256:0f1e2d3c4b5a6978
+                    syntaxReference: 1.0.0
+                  outcome: null
+                  evidence: null
               final:
                 summary: Terminal report; settles outcome and evidence together
+                description: |
+                  `atMs` is an offset on the run timeline, not a wall-clock instant: `0` is the
+                  browser start, and the terminal line carries `null` because the runner holds no
+                  reading at that point. An absolute instant is `browserStartedAt + atMs`.
                 value:
                   executionId: 44444444-4444-4444-4444-444444444444
                   attemptId: 55555555-5555-5555-5555-555555555555
                   admissionId: 66666666-6666-6666-6666-666666666666
-                  runnerSequence: 9
+                  runnerInstanceId: studio-runner-0
                   kind: FINAL
+                  runnerSequence: 9
                   reportedAt: '2026-09-10T10:00:39Z'
-                  status: PASSED
-                  errorCode: null
-                  endedAt: '2026-09-10T10:00:39Z'
-                  durationMs: 37000
-                  stepResults: []
-                  logs: []
+                  browserStartedAt: '2026-09-10T10:00:02Z'
+                  steps:
+                    - { stepIndex: 0, status: PASS, startedAtMs: 120, finishedAtMs: 4300, durationMs: 4180, failure: null }
+                    - { stepIndex: 1, status: PASS, startedAtMs: 4300, finishedAtMs: 36900, durationMs: 32600, failure: null }
+                  logs:
+                    - { atMs: 0, level: info, message: browser started }
+                    - { atMs: 36900, level: info, message: step 1 PASS }
+                    - { atMs: null, level: info, message: run PASSED }
                   logsTruncated: false
-                  video: { status: AVAILABLE, error: null, expiresAt: '2026-10-10T10:00:39Z', partial: false }
-                  manifestKey: studio/60406/11111111-1111-1111-1111-111111111111/44444444-4444-4444-4444-444444444444/55555555-5555-5555-5555-555555555555.result.json
+                  runtimeVersions:
+                    playwright: 1.63.0
+                    node: v22.11.0
+                    validatorSchema: 1.0.0
+                    executor: 1.0.0
+                    syntaxReference: 1.0.0
+                  outcome: { result: PASSED, errorCode: null, errorMessage: null }
+                  evidence:
+                    videoKey: studio/60406/11111111-1111-1111-1111-111111111111/44444444-4444-4444-4444-444444444444/55555555-5555-5555-5555-555555555555.webm
+                    manifestKey: studio/60406/11111111-1111-1111-1111-111111111111/44444444-4444-4444-4444-444444444444/55555555-5555-5555-5555-555555555555.result.json
+                    state: STORED
       responses:
-        '200': { description: Applied and committed }
-        '409': { description: Ownership, sequence or transition conflict }
+        '200':
+          description: |
+            Applied and committed. The acknowledgement is sent only after commit, because the
+            runner retries a terminal report until it is acknowledged (§5.3).
+        '400':
+          description: Malformed report body
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: |
+            Ownership, sequence or transition conflict: this attempt no longer owns the
+            execution, the sequence is not increasing, or the execution is already finalized.
+            The runner stops reporting for this run on receipt (§5.3).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '413':
+          description: Report body over the configured callback bound (§5.4)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /health:
+    servers:
+      - url: '{runnerBaseUrl}'
+        description: |
+          The `studio-runner` ClusterIP Service (ADR-001 §9). Deployment configuration (§8.5).
+        variables:
+          runnerBaseUrl:
+            default: http://put-checks-studio-runner:8080
+            description: Deployment configuration (§8.5). Never a public hostname.
+    get:
+      tags: [internal, runner]
+      operationId: runnerHealth
+      summary: Liveness
+      description: |
+        Architecture §8.4 (runner `GET /health`). Liveness only: it stays `200` while the pool is
+        saturated **and** while the pod is draining, because a draining pod that is finishing an
+        admitted run must not be killed by the kubelet (§5.2, §5.4). Readiness, not liveness, is
+        what removes a draining pod from service. Wired as the liveness probe (ADR-001 §9).
+      x-internal: true
+      x-served-by: studio-runner
+      x-implemented-by: '10.6'
+      security:
+        - serviceIdentity: []
+      responses:
+        '200':
+          description: Process alive
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthResponse' }
+        '401': { $ref: '#/components/responses/RunnerUnauthenticated' }
+        '403': { $ref: '#/components/responses/RunnerForbidden' }
+
+  /ready:
+    servers:
+      - url: '{runnerBaseUrl}'
+        description: |
+          The `studio-runner` ClusterIP Service (ADR-001 §9). Deployment configuration (§8.5).
+        variables:
+          runnerBaseUrl:
+            default: http://put-checks-studio-runner:8080
+            description: Deployment configuration (§8.5). Never a public hostname.
+    get:
+      tags: [internal, runner]
+      operationId: runnerReadiness
+      summary: Ability to admit safely
+      description: |
+        Architecture §8.4 (runner `GET /ready`). **Capacity saturation alone keeps readiness
+        true**: a saturated but healthy pod answers `200` here and refuses work with `429` on
+        `POST /v1/runs`, because removing it from the Service would only move the same saturation
+        onto its peers. Draining sets readiness false, which is how `preStop` takes a terminating
+        pod out of rotation before the grace period runs (§5.2, §5.4, ADR-001 §9).
+      x-internal: true
+      x-served-by: studio-runner
+      x-implemented-by: '10.6'
+      security:
+        - serviceIdentity: []
+      responses:
+        '200':
+          description: Ready to admit. `inUse == size` is still ready.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReadinessResponse' }
+        '401': { $ref: '#/components/responses/RunnerUnauthenticated' }
+        '403': { $ref: '#/components/responses/RunnerForbidden' }
+        '503':
+          description: 'Draining. Same body shape, with `ready` false.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReadinessResponse' }
 
 components:
+  securitySchemes:
+    serviceIdentity:
+      type: http
+      scheme: bearer
+      description: |
+        Restricted service identity over encrypted transport, required on every `internal` route
+        (architecture §8.4, §9.2). Presented as `Authorization: Bearer <token>`; the credential is
+        never carried in a URL or a query string.
+
+        It is not a platform user session and grants no CSI permission by itself: the runner holds
+        no DB, vault, CSI or LLM credential (§9.2). Public routes use the platform gateway identity
+        instead and are unaffected by this scheme.
+
   parameters:
     TestId:
       name: id
@@ -642,6 +1016,18 @@ components:
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
+    RunnerUnauthenticated:
+      description: |
+        No service identity, or one the runner does not accept. Checked on the request head before
+        anything else happens — before the body is read, before capacity is touched.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/RunnerProblem' }
+    RunnerForbidden:
+      description: The service identity is not permitted to call the runner
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/RunnerProblem' }
 
   schemas:
     ErrorResponse:
@@ -793,8 +1179,16 @@ components:
     ExecutionLogEntry:
       type: object
       required: [at, level, message]
+      description: |
+        A log line as the **API publishes** it. The runner does not produce this shape: it posts
+        `RunnerLogEntry`, whose `atMs` is an offset on the run timeline rather than an instant
+        (§6.4). The API derives `at` as `browserStartedAt + atMs` and upper-cases `level`.
+
+        `at` is null where the runner held no reading and the derivation therefore has no input.
+        `stepIndex` has no runner-side source today and is null for runner-produced lines; it is
+        retained for API-produced entries (reaper and evidence updates, §5.3). See ADR-002 §INT-1.
       properties:
-        at: { type: string, format: date-time }
+        at: { type: string, format: date-time, nullable: true }
         level: { type: string, enum: [DEBUG, INFO, WARN, ERROR] }
         message: { type: string, maxLength: 2000 }
         stepIndex: { type: integer, nullable: true }
@@ -924,17 +1318,264 @@ components:
         executionId: { type: string, format: uuid }
         status: { $ref: '#/components/schemas/ExecutionStatus' }
 
+    # ──────────────────────────────────────────────────────────────────────────────────────────
+    # Internal surface schemas (architecture §8.4).
+    #
+    # Everything the runner produces or sends is declared **closed** (`additionalProperties:
+    # false`) with every optional field named. That is deliberate: before ADR-002 the report
+    # schema was open, so the runner could send `steps`/`outcome`/`evidence`/`runtimeVersions`
+    # against a contract naming `stepResults`/`status`/`video`/`runtime` and no conformance check
+    # could see it. An open schema over a wire body is not a contract, it is a suggestion.
+    #
+    # API-produced *response* bodies on the two callbacks stay open for now: story 10.7 has not
+    # implemented them, so there is no producer to close them against. ADR-002 records that.
+    # ──────────────────────────────────────────────────────────────────────────────────────────
+
+    RunnerProblem:
+      type: object
+      additionalProperties: false
+      required: [code]
+      description: |
+        The runner's error body. Codes and key names only — never a value, never an excerpt of a
+        job, never a stack trace (§9.2, §4.7). Safe to log verbatim.
+      properties:
+        code:
+          type: string
+          description: Stable machine code. The caller branches on this, not on the HTTP status alone.
+        fields:
+          type: array
+          maxItems: 10
+          description: Offending key names, bounded. Present on undeclared-key rejections.
+          items: { type: string }
+        detail:
+          type: array
+          description: Per-problem code and key name. Present on job and artifact rejections.
+          items:
+            type: object
+            additionalProperties: false
+            required: [code, field]
+            properties:
+              code: { type: string }
+              field: { type: string }
+
+    ReferenceDeclarations:
+      type: object
+      additionalProperties: false
+      required: [variables, secrets]
+      description: |
+        The declared reference names for a run (§4.5 "References", §9.2). Names only: a resolved
+        secret never travels on a validation request, and a reference name alone grants nothing.
+      properties:
+        variables: { type: array, items: { type: string } }
+        secrets: { type: array, items: { type: string } }
+
+    RunnerDiagnostic:
+      type: object
+      additionalProperties: false
+      required: [code, stepIndex, message, node, excerpt]
+      description: |
+        One validator rejection (§4.5). The code set is the runner's `DIAGNOSTIC_CODES`, which
+        grows with the deny list; it is not enumerated here so that adding a denial does not
+        require re-freezing this document.
+      properties:
+        code: { type: string }
+        stepIndex:
+          type: integer
+          nullable: true
+          description: Null for artifact-level problems belonging to no single step.
+        message: { type: string }
+        node:
+          type: string
+          nullable: true
+          description: Syntax kind of the offending node, when the problem is a node.
+        excerpt:
+          type: string
+          nullable: true
+          description: |
+            Bounded excerpt of the offending node only — never the whole step, and passed through
+            redaction first (§9.2).
+
+    ValidateRequest:
+      type: object
+      additionalProperties: false
+      required: [artifact, source]
+      description: |
+        Candidate validation input (§4.5, §8.4). Key-set is closed on the runner too: an
+        undeclared key is a `400`.
+      properties:
+        artifact:
+          type: object
+          description: |
+            The source artifact of §4.4. Declared opaque on purpose: its normative schema is
+            `docs/specs/studio/artifact.schema.json`, held byte-identical against the backend
+            copy by `ArtifactSchemaDriftTest`. Restating its shape here would create a second
+            place for it to drift.
+        source:
+          type: array
+          description: The ordered original step lines the artifact claims to compile (§4.4).
+          items: { type: string }
+        references: { $ref: '#/components/schemas/ReferenceDeclarations' }
+
+    ValidateResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, validatorSchemaVersion, diagnostics, steps]
+      description: |
+        A rejected artifact is still a `200`: validation ran and produced a verdict. `ok: false`
+        is the verdict, not a transport failure.
+      properties:
+        ok: { type: boolean }
+        validatorSchemaVersion:
+          type: string
+          description: Pinned validator schema version, recorded on the revision's provenance (§4.3, §8.1).
+        diagnostics:
+          type: array
+          description: Artifact-level diagnostics, belonging to no single step.
+          items: { $ref: '#/components/schemas/RunnerDiagnostic' }
+        steps:
+          type: array
+          description: |
+            One entry per artifact step, index aligned. The typed operation list stays inside the
+            runner and is never returned (§4.5, §9.2).
+          items:
+            type: object
+            additionalProperties: false
+            required: [stepIndex, ok, diagnostics]
+            properties:
+              stepIndex: { type: integer, minimum: 0 }
+              ok: { type: boolean }
+              diagnostics:
+                type: array
+                items: { $ref: '#/components/schemas/RunnerDiagnostic' }
+
+    JobDeadlines:
+      type: object
+      additionalProperties: false
+      required: [admittedStartMs, totalRuntimeMs]
+      description: Server-issued deadlines (§8.5). The runner refuses to launch past them.
+      properties:
+        admittedStartMs:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Admitted-start deadline in milliseconds (§8.5 starting value, 30 s).
+        totalRuntimeMs:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Total browser runtime cap in milliseconds, parent-enforced (§5.2, 120 s).
+
+    RunJob:
+      type: object
+      additionalProperties: false
+      required:
+        [executionId, attemptId, revisionId, artifactHash, artifact, source, configuration, csi,
+         references, resolvedVars, resolvedSecrets, deadlines, videoKey, manifestKey]
+      description: |
+        The dispatch envelope of §8.4 ("Job fields: ..."). The key set is closed here and on the
+        runner, and that is a security control rather than tidiness: it is what stops a job from
+        naming its own callback destination, which is deployment configuration and never
+        job-supplied (§8.4, §8.5).
+      properties:
+        executionId: { type: string, format: uuid }
+        attemptId: { type: string, format: uuid }
+        revisionId: { type: string, format: uuid }
+        artifactHash:
+          type: string
+          description: Canonical artifact hash from the confirmed revision (§4.2, §8.1).
+        artifact:
+          type: object
+          description: The immutable confirmed artifact (`artifact.schema.json`, §4.4).
+        source:
+          type: array
+          items: { type: string }
+        configuration: { $ref: '#/components/schemas/TestConfiguration' }
+        csi:
+          type: string
+          description: The execution's own immutable CSI (§8.1, §9.1).
+        references: { $ref: '#/components/schemas/ReferenceDeclarations' }
+        resolvedVars:
+          type: object
+          additionalProperties: { type: string }
+          description: |
+            Ephemeral. Held in runner memory for the run and cleared on every exit path; never
+            written to scratch, a retry buffer, a manifest or a report (§9.2).
+        resolvedSecrets:
+          type: object
+          additionalProperties: { type: string }
+          description: |
+            Ephemeral, as `resolvedVars`, and additionally scrubbed from every outbound
+            diagnostic together with its tested encoded variants (§9.2).
+        deadlines: { $ref: '#/components/schemas/JobDeadlines' }
+        videoKey:
+          type: string
+          description: |
+            Server-derived key (§6.2). The runner writes only this prefix and never invents or
+            accepts an arbitrary key.
+        manifestKey:
+          type: string
+          description: Server-derived terminal result manifest key (§5.3, §6.2).
+
+    RunAccepted:
+      type: object
+      additionalProperties: false
+      required: [code]
+      description: |
+        Admitted. Capacity is reserved and the admission CAS has committed; the browser has not
+        started. `RUNNING` is written by the `STARTED` report, never by this response (§5.1.5).
+      properties:
+        code: { type: string, enum: [ADMITTED] }
+
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required: [status, draining]
+      properties:
+        status: { type: string, enum: [ok] }
+        draining:
+          type: boolean
+          description: True after SIGTERM. Liveness stays `200` while draining so admitted work can finish (§5.2).
+
+    ReadinessResponse:
+      type: object
+      additionalProperties: false
+      required: [ready, draining, inUse, size]
+      description: |
+        Capacity saturation alone keeps `ready` true; the pod refuses work with `429` instead.
+        Draining is what makes it false (§8.4).
+      properties:
+        ready: { type: boolean }
+        draining: { type: boolean }
+        inUse: { type: integer, minimum: 0 }
+        size:
+          type: integer
+          minimum: 0
+          description: Configured pool size. Initially 1 per pod; measure before increasing (§5.2).
+
     AdmissionRequest:
       type: object
-      required: [attemptId, admissionId, runnerInstanceId]
+      additionalProperties: false
+      required: [executionId, attemptId, runnerInstanceId, admissionId, runtimeVersions]
+      description: |
+        Issued **exactly once** per run. The runner never generates a second `admissionId` for the
+        same `attemptId`, because that is the one way a single runner could compete with itself
+        for an attempt it may already own (§5.1.4).
       properties:
+        executionId: { type: string, format: uuid }
         attemptId: { type: string, format: uuid }
+        runnerInstanceId:
+          type: string
+          description: Stable for the life of the runner process. Part of the CAS identity (§5.1.4).
         admissionId: { type: string, format: uuid }
-        runnerInstanceId: { type: string }
+        runtimeVersions: { $ref: '#/components/schemas/ReportedRuntimeVersions' }
 
     AdmissionResponse:
       type: object
       required: [executionId, attemptId, admissionId, state]
+      description: |
+        Deliberately left open: story 10.7 implements the producer, and there is no implementation
+        to close this against yet. The runner reads only the HTTP status (§5.1.4), so nothing
+        depends on the body today.
       properties:
         executionId: { type: string, format: uuid }
         attemptId: { type: string, format: uuid }
@@ -943,32 +1584,212 @@ components:
         startDeadlineAt: { type: string, format: date-time }
         runDeadlineAt: { type: string, format: date-time }
 
-    ProgressReport:
+    ReportedRuntimeVersions:
       type: object
-      required: [executionId, attemptId, admissionId, runnerSequence, kind, reportedAt]
+      description: |
+        Whatever the build recorded in `runtime-versions.json` (ADR-001 §4.2) — Playwright and
+        Chromium builds, Node, validator schema, executor, syntax reference, image digest. Left
+        open because the recorded set is the image's business and grows with the pin; the API
+        keeps the §4.6 subset on the execution as `RuntimeVersions`.
+      additionalProperties: true
+
+    RunnerStepState:
+      type: object
+      additionalProperties: false
+      required: [stepIndex, status, startedAtMs, finishedAtMs, durationMs, failure]
+      description: |
+        One entry per step the runner has **touched**. Steps not yet reached are absent rather
+        than `PENDING`: the API holds the confirmed revision's ordered source (§4.4) and fills the
+        gaps, so the persisted result still has one entry per original step (§8.2).
+
+        `startedAtMs` and `finishedAtMs` are readings of the runner's monotonic clock, never wall
+        clock (§6.4). Where the recorder-origin calibration of §6.4 is applied — turning a reading
+        into the persisted `offsetMs` — is settled by the recording stories; this contract fixes
+        only that every reading crossing it is monotonic and shares one origin within a run.
+      properties:
+        stepIndex: { type: integer, minimum: 0 }
+        status:
+          $ref: '#/components/schemas/StepStatus'
+        startedAtMs:
+          type: number
+          format: double
+          nullable: true
+          description: |
+            Null for a step that never started (`SKIPPED`). Fractional: this is the raw clock
+            reading, not a rounded one. Rounding belongs to whoever applies the §6.4 calibration
+            and persists `offsetMs` — the component that knows the recorder origin. A runner that
+            rounded first would be making a precision decision it has no basis for.
+        finishedAtMs: { type: number, format: double, nullable: true }
+        durationMs:
+          type: number
+          format: double
+          nullable: true
+          description: Browser time for this step. The public `StepResult.durationMs` is its rounded projection.
+        failure:
+          type: string
+          nullable: true
+          description: Redacted failure text (§9.2). Null unless the status is `FAIL`.
+
+    RunnerLogEntry:
+      type: object
+      additionalProperties: false
+      required: [atMs, level, message]
+      description: |
+        A log line positioned on the **run timeline**, not on the wall clock.
+
+        `atMs` is a reading of the same monotonic clock and origin as
+        `RunnerStepState.startedAtMs` (§6.4). That is the whole reason it is not a `date-time`:
+        the runner holds exactly one wall-clock instant for a run — `browserStartedAt` — and a
+        per-entry wall-clock stamp would introduce a second clock whose skew against the recording
+        is unbounded, which is precisely what the 500 ms step-seek target of §6.4 cannot absorb.
+        A consumer wanting an absolute instant computes `browserStartedAt + atMs`; the API does
+        exactly that when it projects `ExecutionLogEntry.at`.
+
+        `atMs` is `null` where the runner genuinely holds no reading. **A zero is a position on
+        the timeline — the browser start — not a missing value, and must never be used as one.**
+        See ADR-002 §INT-1.
+      properties:
+        atMs:
+          type: number
+          format: double
+          nullable: true
+          description: Fractional, for the same reason as `RunnerStepState.startedAtMs`.
+        level:
+          type: string
+          enum: [info, warn, error]
+          description: |
+            The runner's levels. The API upper-cases them onto the public `ExecutionLogEntry.level`
+            vocabulary, whose `DEBUG` has no runner-side producer.
+        message: { type: string, maxLength: 2000 }
+
+    RunOutcome:
+      type: object
+      nullable: true
+      additionalProperties: false
+      required: [result, errorCode, errorMessage]
+      description: Null on `STARTED` and `PROGRESS`; set on `FINAL` (§5.3).
+      properties:
+        result:
+          type: string
+          enum: [PASSED, FAILED, ERROR]
+          description: §8.2. A step locator or assertion timeout is `FAILED`; a parent-enforced total timeout is `ERROR`.
+        errorCode:
+          type: string
+          nullable: true
+          description: |
+            A runner-assigned code, left open rather than enumerated: the codes `ExecutionErrorCode`
+            fixes (`DISPATCH_FAILED`, `DISPATCH_UNKNOWN`, `START_TIMEOUT`, `STALE`,
+            `DISPATCH_DISABLED`) are all assigned by the API's dispatcher and reapers (§5.4) and a
+            runner must never emit one of them. Where §8.2 fixes a runner-observable outcome it
+            governs: a parent-enforced total timeout is `ERROR` with `TIMEOUT`. ADR-002 records
+            that the remaining runner codes are settled by the execution stories, not here.
+        errorMessage:
+          type: string
+          nullable: true
+          description: Redacted (§9.2).
+
+    RunnerEvidence:
+      type: object
+      nullable: true
+      additionalProperties: false
+      required: [videoKey, manifestKey, state]
+      description: |
+        What the runner knows about evidence: whether it stored the objects whose keys the job
+        gave it. Deliberately **not** the public `VideoStatus` of §6.1, because two of those
+        values are the API's judgment and not the runner's — `AVAILABLE` depends on retention, and
+        `EXPIRED` the runner can never observe (it has no Get or List permission, §6.2).
+
+        The API projects: `PENDING → PROCESSING`, `STORED → AVAILABLE`, `FAILED → FAILED`,
+        `UNAVAILABLE → UNAVAILABLE`. `EXPIRED` is set by the API at `videoExpiresAt` and is never
+        reported (§6.1, §6.2). Null on `STARTED` and `PROGRESS`.
+      properties:
+        videoKey:
+          type: string
+          nullable: true
+          description: The server-derived key from the job, echoed back — never one the runner chose (§6.2).
+        manifestKey: { type: string, nullable: true }
+        state: { type: string, enum: [PENDING, STORED, FAILED, UNAVAILABLE] }
+
+    RunnerReport:
+      type: object
+      additionalProperties: false
+      required:
+        [executionId, attemptId, admissionId, runnerInstanceId, kind, runnerSequence, reportedAt,
+         browserStartedAt, steps, logs, logsTruncated, runtimeVersions, outcome, evidence]
+      description: |
+        The cumulative snapshot the runner posts (§5.3, §8.4 "Reports include ..."). Every report
+        is full current state, never a delta, so two lost deliveries are recovered by the third
+        and nothing has to be replayed — which is what lets progress delivery be best-effort from
+        a component that holds no durable state.
+
+        **This is not `ExecutionSnapshot`, and conflating them was the divergence ADR-002 §INT-4
+        settles.** They are different surfaces with different producers: this one carries the
+        runner's vocabulary, the runner's clock and the runner's knowledge; `ExecutionSnapshot` is
+        what the API publishes after projecting it. The API translates:
+
+        | `RunnerReport` | `ExecutionSnapshot` | Why they differ |
+        |---|---|---|
+        | `steps[]` | `stepResults[]` | The runner reports only the steps it touched; the API fills the rest from the revision's ordered source (§4.4, §8.2) |
+        | `steps[].startedAtMs` | `stepResults[].offsetMs` | Monotonic reading vs. calibrated recording-timeline offset (§6.4) |
+        | — | `stepResults[].originalText` | The API holds the confirmed source; the runner does not resend it |
+        | `logs[].atMs` | `logs[].at` | Run-timeline offset vs. `browserStartedAt + atMs` (§INT-1) |
+        | `logs[].level` (lower) | `logs[].level` (upper) | Case normalized by the API |
+        | `outcome.result` | `status` | Same vocabulary (§8.2); the API also owns `PENDING`/`RUNNING` |
+        | `outcome.errorCode` | `errorCode` | Disjoint sets: `ExecutionErrorCode` is reaper-assigned (§5.4) |
+        | `evidence.state` | `video.status` | The runner reports storage; the API reports availability (§6.1) |
+        | `evidence.manifestKey` | — | Recorded by the API, not published (§5.3) |
+        | `runtimeVersions` | `runtime` | Everything the image recorded vs. the §4.6 subset kept on the execution |
+        | `runnerSequence` | `revision` | The runner orders its own reports; the API assigns its own snapshot revision (§8.4) |
       properties:
         executionId: { type: string, format: uuid }
         attemptId: { type: string, format: uuid }
         admissionId: { type: string, format: uuid }
-        runnerSequence: { type: integer, format: int64 }
+        runnerInstanceId:
+          type: string
+          description: Same identity as the admission CAS; the API checks ownership against it (§5.1.4, §5.3).
         kind: { type: string, enum: [STARTED, PROGRESS, FINAL] }
-        reportedAt: { type: string, format: date-time }
-        browserStartedAt: { type: string, format: date-time, nullable: true }
-        status: { $ref: '#/components/schemas/ExecutionStatus' }
-        errorCode: { $ref: '#/components/schemas/ExecutionErrorCode' }
-        endedAt: { type: string, format: date-time, nullable: true }
-        durationMs: { type: integer, format: int64, nullable: true }
-        stepResults:
+        runnerSequence:
+          type: integer
+          format: int64
+          minimum: 1
+          description: |
+            Strictly increasing within an attempt, assigned when the report is **built** rather
+            than when it is sent, because deliveries race by design. Starts fresh for a new
+            attempt and is never reused or decremented, including on a retry (§5.3).
+        reportedAt:
+          type: string
+          format: date-time
+          description: |
+            Describes the **run**, not the delivery: fixed when the report is built and unchanged
+            across terminal retries, so a retried report is byte-identical (§5.3).
+        browserStartedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            The single wall-clock instant the runner holds for a run, and the origin the API adds
+            to `atMs` and to step readings. Null until the browser has actually started; its
+            presence in a `STARTED` report is what writes `RUNNING` (§5.1.5, §8.2).
+        steps:
           type: array
-          items: { $ref: '#/components/schemas/StepResult' }
+          items: { $ref: '#/components/schemas/RunnerStepState' }
         logs:
           type: array
-          items: { $ref: '#/components/schemas/ExecutionLogEntry' }
-        logsTruncated: { type: boolean }
-        video: { $ref: '#/components/schemas/VideoEvidence' }
-        runtime: { $ref: '#/components/schemas/RuntimeVersions' }
-        manifestKey: { type: string, nullable: true }
-
+          description: Bounded retained buffer; oldest entries drop first (§5.5).
+          items: { $ref: '#/components/schemas/RunnerLogEntry' }
+        logsTruncated:
+          type: boolean
+          description: True once the retained-log cap has dropped an entry; stays true (§5.5).
+        runtimeVersions: { $ref: '#/components/schemas/ReportedRuntimeVersions' }
+        outcome: { $ref: '#/components/schemas/RunOutcome' }
+        evidence: { $ref: '#/components/schemas/RunnerEvidence' }
+        payloadReduced:
+          type: boolean
+          description: |
+            Present when bounding had to shed logs, then steps, to fit the configured callback
+            body limit (§5.4). A terminal outcome the API can act on outranks the diagnostics
+            attached to it, because a report rejected for size is a lost result the runner cannot
+            replay.
   examples:
     SnapshotPending:
       summary: Accepted, not yet browser-started
