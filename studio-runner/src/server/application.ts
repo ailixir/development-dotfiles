@@ -26,6 +26,7 @@ import type { RunnerConfig } from './config.js';
 import { createIdentityChecker } from './identity.js';
 import type { LogSink, Logger } from './logging.js';
 import { createLogger, createStdoutSink } from './logging.js';
+import type { DeadlineTimers } from '../run/deadline.js';
 import type { RunOrigin } from '../run/timeline.js';
 import { createRunCoordinator } from './runCoordinator.js';
 import type { RunCoordinator } from './runCoordinator.js';
@@ -43,6 +44,14 @@ export interface ApplicationDependencies {
   readonly wallClock?: (() => Date) | undefined;
   readonly sleep?: ((ms: number) => Promise<void>) | undefined;
   readonly random?: (() => number) | undefined;
+  /**
+   * Test seam: the timer the runtime deadline arms on (10.13 AC-1, AC-2).
+   *
+   * Alongside `now` and `sleep`, and for the same reason: the behavioural suite drives an exact
+   * schedule instead of sleeping, so the kill's timing is asserted rather than raced. Production
+   * supplies none and gets `SYSTEM_DEADLINE_TIMERS`.
+   */
+  readonly timers?: DeadlineTimers | undefined;
   /** Test seam: an alternative pool, used to falsify the atomic-acquire guard (AC-23). */
   readonly pool?: CapacityPool | undefined;
   /**
@@ -124,6 +133,13 @@ export function createApplication(
     wallClock: dependencies.wallClock ?? ((): Date => new Date()),
     sleep: dependencies.sleep ?? defaultSleep,
     random: dependencies.random ?? Math.random,
+    // The server limits a job's deadlines are clamped to (10.13 AC-6, §5.2 "configurable within
+    // server limits"). Enumerated configuration keys, so the fail-closed loader owns them.
+    maxima: {
+      totalRuntimeMs: config.maxTotalRuntimeMs,
+      stepTimeoutMs: config.maxStepTimeoutMs,
+    },
+    timers: dependencies.timers,
     takeOrigin: dependencies.takeOrigin,
   });
 
@@ -164,6 +180,22 @@ export function createApplication(
         logger.record('error', 'runner.drain_deadline', 'runner.drain.deadline_exceeded', {
           inFlight: coordinator.inFlight,
         });
+        // ── Ended, not abandoned (10.13 AC-15, §9.3, §5.4). ────────────────────────────────
+        //
+        // A run still hung when the drain deadline expires is killed — ordered stop, bounded
+        // grace, process group — and then reports. Exiting here instead would leave a browser
+        // running with nobody to answer for it, which is precisely the state §5.4's running
+        // reaper has to guess at. The kill makes each run's awaited result resolve, so every one
+        // of them still reaches its own `finally`: terminal report, values wiped, scratch cleared.
+        const ended = coordinator.terminateInFlight();
+        if (ended > 0) {
+          logger.record('warn', 'runner.drain_killed', 'runner.drain.killed', { runs: ended });
+          // Bounded by the ordered stop's own grace plus the same again for the terminal report:
+          // a second wait, not a second unbounded one. Skipped when nothing was killable, because
+          // a run still inside `launcher.launch` holds no browser and is bounded by its own
+          // launch timeout — waiting on it here would turn the drain into the hang it prevents.
+          await coordinator.awaitInFlight(config.browserStopTimeoutMs * 2);
+        }
       }
       await server.close();
       await scratch.clearAll();

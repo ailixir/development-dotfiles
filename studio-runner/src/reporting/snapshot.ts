@@ -41,6 +41,19 @@ export interface EvidenceState {
   readonly videoKey: string | null;
   readonly manifestKey: string | null;
   readonly state: 'PENDING' | 'STORED' | 'FAILED' | 'UNAVAILABLE';
+  /**
+   * Whether the recording covers only part of the browser session it was recording.
+   *
+   * **Required here even though the contract makes it optional** (ADR-002 §17.5, §17.7 item 2).
+   * The field is optional on the wire so the merged runner stayed conformant while it had no
+   * producer; this runner *is* the producer, so "absent" must be unreachable from it. A
+   * non-optional property is emitted by `JSON.stringify` on every `FINAL`, `false` included, which
+   * is what the assertion on the serialized body checks.
+   *
+   * Never derived from `outcome`, in either direction, by either component (§17.4). It is computed
+   * by `partialFor` from how the **recorder** ended — see `src/run/recording.ts`.
+   */
+  readonly partial: boolean;
 }
 
 export interface ReportIdentity {

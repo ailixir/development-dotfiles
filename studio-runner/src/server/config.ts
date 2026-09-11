@@ -73,6 +73,22 @@ export interface RunnerConfig {
   readonly stepTimeoutMs: number;
   /** Grace given to a browser child asked to stop before it is killed. */
   readonly browserStopTimeoutMs: number;
+  /**
+   * The **server limit** on total browser runtime (§5.2, §8.5 starting value 120 s).
+   *
+   * §5.2: total browser runtime is "configurable within server limits". The job envelope carries
+   * `deadlines.totalRuntimeMs`, and the effective cap is `min(job, this)` — a job asking for less
+   * gets less, a job asking for ten minutes gets this. Enumerated here rather than read from the
+   * job so the fail-closed loader still owns every number the runner obeys (AC-6).
+   */
+  readonly maxTotalRuntimeMs: number;
+  /**
+   * The **server limit** on the per-step timeout (§5.2, §8.5 starting value 30 s).
+   *
+   * `stepTimeoutMs` above is the default used when a job names none; this is the ceiling a job's
+   * `configuration.timeoutSeconds` is clamped to.
+   */
+  readonly maxStepTimeoutMs: number;
   /** Outbound payload bounds (AC-19). */
   readonly maxReportSteps: number;
   readonly maxReportLogEntries: number;
@@ -192,6 +208,23 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
     kind: 'integer',
     required: false,
     fallback: 5_000,
+    min: 1,
+  },
+  // The two server limits a job is clamped to (§5.2 "configurable within server limits", AC-6).
+  // They go through `KEY_SPECS` like everything else, so the loader stays fail-closed and there is
+  // no way to raise a maximum that is not an enumerated key.
+  MAX_TOTAL_RUNTIME_MS: {
+    field: 'maxTotalRuntimeMs',
+    kind: 'integer',
+    required: false,
+    fallback: 120_000,
+    min: 1,
+  },
+  MAX_STEP_TIMEOUT_MS: {
+    field: 'maxStepTimeoutMs',
+    kind: 'integer',
+    required: false,
+    fallback: 30_000,
     min: 1,
   },
   MAX_REPORT_STEPS: {
