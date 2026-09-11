@@ -63,6 +63,25 @@ function asOptions<T>(bag: OptionBag | undefined): T | undefined {
   return bag === undefined ? undefined : (bag as unknown as T);
 }
 
+/** Any node kind may carry `<T>` type arguments; this is checked structurally so none is missed. */
+interface PossiblyTypeArgumented extends ts.Node {
+  readonly typeArguments?: ts.NodeArray<ts.TypeNode> | undefined;
+}
+
+/**
+ * Returns the first node anywhere under `node` that carries TypeScript type arguments.
+ *
+ * Type arguments are erased, so accepting them gains no capability — the emitted operation is
+ * identical to the untyped form. They are denied because AC-6 lists unsupported TypeScript syntax
+ * as a rejected class, and a default-deny surface is only describable if it is uniform. Asking
+ * once over the whole statement covers the outer call, every link in a locator chain and the
+ * `expect(...)` receiver with a single rule, instead of three positions that can drift apart.
+ */
+function findTypeArguments(node: ts.Node): ts.Node | undefined {
+  if ((node as PossiblyTypeArgumented).typeArguments !== undefined) return node;
+  return ts.forEachChild(node, findTypeArguments);
+}
+
 function maxDepth(node: ts.Node, current: number, limit: number): number {
   if (current > limit) return current;
   let deepest = current;
@@ -137,6 +156,19 @@ export function validateStepCode(
         code: 'AST_DEPTH_EXCEEDED',
         message: `Statement nesting depth ${String(depth)} exceeds the limit of ${String(bounds.maxAstDepth)}.`,
         node: nodeName(statement),
+      });
+      continue;
+    }
+    // Uniform type-argument denial. Runs once per statement, after the depth bound has capped the
+    // walk, so it applies to every call position without each reader repeating the check.
+    const typeArgumented = findTypeArguments(statement);
+    if (typeArgumented !== undefined) {
+      ok = false;
+      collector.add({
+        code: 'UNSUPPORTED_TYPESCRIPT',
+        message: 'Type arguments are not permitted.',
+        node: nodeName(typeArgumented),
+        excerpt: excerpt(typeArgumented),
       });
       continue;
     }
@@ -234,15 +266,8 @@ function readCall(call: ts.CallExpression, ctx: ArgumentContext): Operation | nu
     });
     return null;
   }
-  if (call.typeArguments !== undefined) {
-    ctx.collector.add({
-      code: 'UNSUPPORTED_TYPESCRIPT',
-      message: 'Type arguments are not permitted.',
-      node: nodeName(call),
-      excerpt: ctx.excerpt(call),
-    });
-    return null;
-  }
+  // Type arguments are not checked here: `validateStepCode` denies them for the whole statement,
+  // which covers this call, the locator chain and the `expect(...)` receiver from one place.
 
   const callee = call.expression;
   if (ts.isElementAccessExpression(callee)) {

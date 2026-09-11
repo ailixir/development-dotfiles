@@ -22,6 +22,20 @@ worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.2
 waiver:
   active: false
 
+# The CONCERNS verdict above is the reviewer's record as issued and is left unchanged. The single
+# medium finding it rests on has since been fixed on the same branch; see top_issues[SR-001].status.
+post_gate_fixes:
+  - id: SR-001
+    by: '@dev'
+    date: '2026-09-10'
+    note: >-
+      Type-argument denial unified into one statement-level pre-pass in validateStepCode, so chain
+      calls and expect(...) are now rejected alongside the outer call; +2 adversarial fixtures.
+    verification: >-
+      type-check, lint, test (212 passed, 94.84% lines / 90.59% branches) and build all pass; both
+      SR-001 shapes re-probed against the rebuilt dist/ and denied UNSUPPORTED_TYPESCRIPT.
+    requires_qa_recheck: true
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Evidence — commands actually executed by the reviewer, not developer claims
 # ─────────────────────────────────────────────────────────────────────────────
@@ -174,8 +188,9 @@ ac_coverage:
       PASS — probed: step/line count mismatch, stepIndex misalignment, originalText mismatch,
       unknown top-level and step keys, byte/step/code-length bounds all reject
     AC-6: >-
-      CONCERNS — every probed node kind rejected, EXCEPT type arguments on chain/expect calls
-      (see SR-001). No capability gain; the accepted operation is identical to the untyped form.
+      PASS (post-fix) — every probed node kind rejected. The type-argument gap on chain/expect calls
+      (SR-001) is closed: denial is now a single statement-level rule, re-probed against the rebuilt
+      dist/ with both shapes returning UNSUPPORTED_TYPESCRIPT and the untyped forms unchanged.
     AC-7: >-
       PASS — permitted surface is exactly the §4.5 table; every other receiver/method rejected
     AC-8: >-
@@ -205,7 +220,7 @@ ac_coverage:
       PASS — 20 reference fixtures; a test fails if any permitted method has no fixture, and
       both reference kinds are asserted present
     AC-18: >-
-      PASS — 68 adversarial fixtures across 58 denial classes; each asserted to fail closed,
+      PASS — 70 adversarial fixtures across 58 denial classes (68 at review time; two added for SR-001); each asserted to fail closed,
       to return null operations, and to produce zero adapter calls. Spot-checked: they attempt real
       escapes (constructor, __proto__, computed member, require, process, xpath/text engines,
       secret-in-URL, secret-in-press) rather than merely being malformed input.
@@ -221,6 +236,11 @@ ac_coverage:
 top_issues:
   - id: SR-001
     severity: medium
+    status: RESOLVED
+    resolution: >-
+      Fixed 2026-09-10 by @dev — type-argument denial moved into a single statement-level pre-pass in
+      validateStepCode (findTypeArguments), so it now covers the outer call, every locator-chain link
+      and the expect(...) receiver uniformly; two adversarial fixtures added (corpus 68 -> 70).
     finding: >-
       TypeScript type arguments are rejected on the outer call (readCall checks call.typeArguments ->
       UNSUPPORTED_TYPESCRIPT) but are not checked on locator-chain calls in collectSegments nor on the
@@ -344,8 +364,9 @@ foc_02_handoff:
 
 recommendations:
   immediate:
-    - Close SR-001 before 10.3 consumes the language schema, since 10.3 generates the syntax reference
-      from it and the gap would be inherited.
+    - >-
+      DONE — SR-001 closed before 10.3 consumes the language schema (see top_issues[SR-001].resolution).
+      Re-verified — type-check, lint, test (212 passed, 94.84% lines / 90.59% branches) and build all pass.
   future:
     - SR-002..SR-007 are suitable for 10.3's scaffold-hardening pass.
 

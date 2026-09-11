@@ -153,7 +153,10 @@ describe('chain and receiver edge cases', () => {
     // so the parenthesised forms below are rejected as "not an awaited call". Fail-closed.
     ["await ('literal').click();", ['STATEMENT_NOT_AWAITED']],
     ["await new Date().click();", ['EXPRESSION_NEW']],
+    // Type arguments are denied in every call position, not just on the outer call.
     ["await page.goto<string>('https://a.example/');", ['UNSUPPORTED_TYPESCRIPT']],
+    ["await page.locator<string>('div').click();", ['UNSUPPORTED_TYPESCRIPT']],
+    ["await expect<string>(page).toHaveTitle('t');", ['UNSUPPORTED_TYPESCRIPT']],
     ["await (() => page)().click();", ['STATEMENT_NOT_AWAITED']],
   ])('%s', (code, expected) => {
     expect(codesFor(LINE, code)).toEqual(expected);
