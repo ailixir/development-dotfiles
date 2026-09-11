@@ -238,6 +238,28 @@ tasks.jacocoTestCoverageVerification {
                 minimum = "0.80".toBigDecimal()
             }
         }
+        // Story 10.7 AC-40: the dispatch and internal-callback packages carry their own
+        // thresholds so the new surface cannot hide inside the bundle figure. These are the
+        // reliability guarantees of Epic 10; a package-level number is the only way to notice
+        // that one of them arrived untested.
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.dispatch")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.internal")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
     }
 }
 

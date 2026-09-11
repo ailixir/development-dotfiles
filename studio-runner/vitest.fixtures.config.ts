@@ -3,21 +3,34 @@ import { defineConfig } from 'vitest/config';
 /**
  * Fixture-corpus tier (ADR-001 §7.1, story 10.3 AC-6a).
  *
- * Runs every reference example end to end through the `BrowserAdapter` seam against the controlled
- * local HTML pages in `fixtures/pages/`. Today the adapter is the fake from 10.2: `ED-05` (the
- * internal Playwright image) is open, so there is no pinned Chromium to launch. Story 10.12 swaps
- * in the real adapter and serves the pages at the URLs in `fixtures/reference/manifest.json`
- * (AC-6b), and until the pinned image exists the CI stage that would run this tier inside it is
- * recorded as **skipped**, never as passed (`ci/stages.md`, stage 6).
+ * Runs every reference example end to end against the controlled local HTML pages in
+ * `fixtures/pages/`, served on loopback by `test/helpers/pageServer.ts` at the paths
+ * `fixtures/reference/manifest.json` binds them to. **Story 10.12 swapped the fake adapter for the
+ * real one**: this tier now launches pinned Chromium in a real child process, records native webm
+ * and measures step-seek accuracy.
  *
- * `passWithNoTests` is deliberately NOT set: an empty run here would be a silent pass.
+ * `globalSetup` emits `dist/` first, because the browser runs in a child process and a child
+ * process is started from a file on disk — a tier that ran against a stale `dist/` would be
+ * proving something about last week's code.
+ *
+ * Until the pinned internal image exists, the CI stage that would run this tier *inside it* stays
+ * recorded as **skipped**, never as passed (`ci/stages.md`, stage 6; AC-18b, `ED-05`).
+ *
+ * `passWithNoTests` is deliberately NOT set: an empty run here would be a silent pass, and this is
+ * the tier where the real browser lives.
  */
 export default defineConfig({
   test: {
     environment: 'node',
     include: ['test/fixtures-tier/**/*.test.ts'],
-    testTimeout: 60_000,
-    // Never fetch a browser: the browsers come from the image (ADR-001 §4.2).
+    testTimeout: 120_000,
+    hookTimeout: 120_000,
+    globalSetup: ['test/fixtures-tier/globalSetup.ts'],
+    // One browser at a time: POOL_SIZE is 1 in production (ADR-001 §9) and a tier that launched
+    // several at once would be measuring a machine this component never runs on.
+    fileParallelism: false,
+    // Never fetch a browser at run time: the browsers come from the image, or from a local
+    // install at the pinned version (ADR-001 §4.2, `npm run browsers:install`).
     env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1' },
   },
 });

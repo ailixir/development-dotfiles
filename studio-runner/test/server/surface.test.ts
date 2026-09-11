@@ -110,9 +110,9 @@ describe('snapshot and bounds edges', () => {
       },
     });
 
-    snapshot.markBrowserStarted();
+    snapshot.markBrowserStarted(new Date(7_000));
     const first = snapshot.build('STARTED').browserStartedAt;
-    snapshot.markBrowserStarted();
+    snapshot.markBrowserStarted(new Date(9_000));
     expect(snapshot.build('PROGRESS').browserStartedAt).toBe(first);
   });
 
@@ -124,6 +124,11 @@ describe('snapshot and bounds edges', () => {
       wallClock: () => new Date(0),
     });
 
+    // A report with `browserStartedAt: null` carries no reading at all (AC-11.4), so a snapshot
+    // that wants to show a step has to have observed the browser start first. That is not a
+    // technicality: a reading taken before the origin existed would be on a scale the wire has no
+    // way to name (ADR-002 §11.2).
+    snapshot.markBrowserStarted(new Date(0));
     snapshot.stepStarted(0, 10);
     expect(snapshot.build('PROGRESS').steps[0]?.status).toBe('RUNNING');
 

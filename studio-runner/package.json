@@ -23,7 +23,8 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:fixtures": "vitest run --config vitest.fixtures.config.ts"
+    "test:fixtures": "vitest run --config vitest.fixtures.config.ts",
+    "browsers:install": "playwright install chromium"
   },
   "dependencies": {
     "playwright": "1.63.0",

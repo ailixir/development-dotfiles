@@ -1,0 +1,115 @@
+<!doctype html>
+<!--
+  Controlled fixture page for story 10.12 AC-12a: the SPK-06 phase-A seek measurement.
+
+  The measurement compares each step's reported `startedAtMs` with the frame at which that step's
+  visible effect appears in the recording. For the comparison to be possible the effect has to be
+  (a) unmistakable in the encoded video and (b) attributable to exactly one step.
+
+  So every step repaints the **whole viewport** with pseudo-random noise. Noise is the point: a
+  solid colour, however different, costs a VP8 encoder almost nothing, so a colour change is not
+  reliably visible in the frame sizes. A full screen of noise cannot be compressed away, which
+  turns "the frame where this step's effect appears" into a spike rather than a judgement call —
+  and lets the measurement read the container instead of decoding pixels (`test/helpers/webm.ts`).
+
+  The digits in the corner are the page's own monotonic clock, rendered large. They are not what
+  the automated measurement reads; they are there so the recording is independently readable by a
+  person, which is what §6.1's "the text needed for evidence stays readable" is about.
+
+  Deliberately NOT in `fixtures/reference/manifest.json`: that manifest is the pinned syntax
+  reference, compared exactly by `src/compat`, and adding a page to it would bump
+  SYNTAX_REFERENCE_VERSION and make every confirmed artifact incompatible. A test page is not a
+  language change.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Checks — Timeline</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #000000;
+        font-family: monospace;
+      }
+      /*
+        A small canvas scaled to the whole viewport with nearest-neighbour sampling.
+
+        The repaint has to be *instantaneous* on the wall clock, or the frame it lands in stops
+        being attributable to the step that caused it: a full-resolution noise fill costs ~100 ms
+        of JavaScript and the recorder captures the middle of it. 320x180 costs a few milliseconds
+        and, scaled up, still changes every pixel on screen — which is what the encoder measures.
+      */
+      #canvas {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+      }
+      /*
+        Opaque, fixed width, and repainted only when a step repaints — never on a timer.
+        A translucent overlay would re-encode the noise beneath it on every tick, and anything
+        that changes between steps puts a spike in the frame sizes that belongs to no step, which
+        makes the measurement unattributable. The counter is here so a person watching the video
+        can check the automated answer, which is what §6.1's "readable evidence" is for.
+      */
+      #clock {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 260px;
+        color: #ffffff;
+        font-size: 48px;
+        line-height: 1.2;
+        padding: 8px 16px;
+        background: #000000;
+      }
+      #advance {
+        position: absolute;
+        bottom: 24px;
+        left: 24px;
+        font-size: 32px;
+        padding: 12px 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="320" height="180"></canvas>
+    <div id="clock" data-testid="clock" role="status">step 0</div>
+    <button id="advance" role="button" type="button">Advance</button>
+    <script>
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
+      var step = 0;
+
+      // A deterministic generator: two runs of the same artifact paint the same frames, so a
+      // difference between runs is a difference in the *runner*, not in the fixture.
+      function repaint() {
+        step += 1;
+        var image = context.createImageData(canvas.width, canvas.height);
+        var seed = step * 7919 + 1;
+        for (var i = 0; i < image.data.length; i += 4) {
+          seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+          image.data[i] = seed & 255;
+          image.data[i + 1] = (seed >> 8) & 255;
+          image.data[i + 2] = (seed >> 16) & 255;
+          image.data[i + 3] = 255;
+        }
+        context.putImageData(image, 0, 0);
+        document.getElementById('clock').textContent = 'step ' + String(step);
+        document.getElementById('advance').setAttribute('data-step', String(step));
+      }
+
+      document.getElementById('advance').addEventListener('click', repaint);
+      repaint();
+
+      // Deliberately no timer: nothing on this page changes except when a step changes it.
+    </script>
+  </body>
+</html>

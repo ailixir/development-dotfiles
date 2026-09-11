@@ -11,34 +11,64 @@
  * rather than sitting unread in the environment (AC-22c). The process reports the problems and
  * exits non-zero; it does not start degraded.
  *
- * **There is no real browser here.** The `BrowserLauncher` below refuses, loudly and with a code,
- * because story 10.12 owns the real Playwright adapter and this story installs and launches no
- * browser. An admitted run therefore reports a terminal `ERROR` with `BROWSER_LAUNCH_UNAVAILABLE`
- * instead of silently succeeding — which is the honest state of the component today, and is what
- * AC-14b's deferral to 10.12 means in running code.
+ * **The browser is real from story 10.12 onward.** `UNAVAILABLE_LAUNCHER` — the placeholder that
+ * refused every launch with `BROWSER_LAUNCH_UNAVAILABLE` — is gone, replaced by
+ * `createChildBrowserLauncher`: a Chromium child process, sandboxed, recording native webm into
+ * the per-run scratch directory, reporting step timings on one run-scoped clock zeroed at the
+ * browser start. `launcher` stays an injectable dependency so the behavioural suite keeps running
+ * against 10.6's in-process fake and `npm test` launches no browser (AC-25).
  */
 import { fileURLToPath } from 'node:url';
 
 import { currentRuntimeVersions } from './compat/index.js';
-import type { BrowserLauncher, BrowserSession } from './server/adapters.js';
+import { createChildBrowserLauncher } from './run/index.js';
+import type { ChildLauncherOptions } from './run/index.js';
+import type { BrowserLauncher } from './server/adapters.js';
 import { createApplication } from './server/application.js';
 import type { RunnerApplication } from './server/application.js';
 import { ConfigurationError, loadConfig } from './server/config.js';
+import type { RunnerConfig } from './server/config.js';
 
 /**
- * Placeholder launcher. Story 10.12 replaces it with the real Playwright adapter, the child
- * process, native video recording and the killable process tree.
+ * What the production path is allowed to hand the launcher: everything except the test seams.
+ *
+ * `ChildLauncherOptions` carries three injection points — `spawner`, `childModulePath` and
+ * `parentEnv` — that exist so the unit tier can spawn no process, fork no real child and read no
+ * real environment. Each is also honoured in production if supplied, so each is a way to replace
+ * the forked module, the process that forks it, or the environment it is given, from a caller
+ * rather than from a diff to `src/run/launcher.ts`.
+ *
+ * Removing them is not an option: the seams are what keep `npm test` browser-free (AC-25). So the
+ * production path is typed *without* them instead. Object-literal excess-property checking turns
+ * supplying one below into a compile error rather than a habit — and `test/run/production-seams.
+ * test.ts` asserts the same property over the options actually constructed, including a
+ * key-for-key equality that also catches a seam added to `ChildLauncherOptions` later. Story 10.13
+ * is the next change to this constructor, which is why the guard is written now.
  */
-export const UNAVAILABLE_LAUNCHER: BrowserLauncher = {
-  launch(): Promise<BrowserSession> {
-    return Promise.reject(
-      new Error(
-        'BROWSER_LAUNCH_UNAVAILABLE: the real Playwright adapter is story 10.12. This story ' +
-          'installs and launches no browser.',
-      ),
-    );
-  },
-};
+type ProductionLauncherOptions = Omit<
+  ChildLauncherOptions,
+  'spawner' | 'childModulePath' | 'parentEnv'
+>;
+
+/**
+ * The real launcher, built from configuration.
+ *
+ * Everything here is an enumerated configuration key (`src/server/config.ts`), so the recording
+ * geometry and the two browser timeouts are chosen values rather than library defaults — §6.1
+ * requires the recording resolution to be explicit, and §8.5 calls the timeouts starting values to
+ * be tuned against staging measurements. No seam is supplied, so production always forks
+ * `DEFAULT_CHILD_MODULE_PATH` through the real `fork`, with the environment the allowlist builds.
+ */
+export function createConfiguredLauncher(config: RunnerConfig): BrowserLauncher {
+  const options: ProductionLauncherOptions = {
+    recording: { width: config.recordingWidth, height: config.recordingHeight },
+    stepTimeoutMs: config.stepTimeoutMs,
+    launchTimeoutMs: config.browserLaunchTimeoutMs,
+    stopTimeoutMs: config.browserStopTimeoutMs,
+    maxFailureMessageLength: config.maxReportLogEntryLength,
+  };
+  return createChildBrowserLauncher(options);
+}
 
 export interface MainOptions {
   readonly env: Readonly<Record<string, string | undefined>>;
@@ -74,7 +104,7 @@ export async function main(options: MainOptions): Promise<MainResult> {
   }
 
   const application = createApplication(config, {
-    launcher: options.launcher ?? UNAVAILABLE_LAUNCHER,
+    launcher: options.launcher ?? createConfiguredLauncher(config),
     runtimeVersions: { ...currentRuntimeVersions(options.runtimeVersionsFile) } as Record<
       string,
       unknown

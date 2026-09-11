@@ -22,6 +22,7 @@ export default defineConfig({
         'src/compat/**',
         'src/server/**',
         'src/reporting/**',
+        'src/run/**',
         'src/main.ts',
         'scripts/**',
       ],
@@ -42,6 +43,11 @@ export default defineConfig({
         'src/server/**': { lines: 85, statements: 85, functions: 80, branches: 80 },
         'src/reporting/**': { lines: 85, statements: 85, functions: 80, branches: 80 },
         'src/main.ts': { lines: 85, statements: 85, functions: 80, branches: 80 },
+        // Story 10.12 AC-25 gates the directory it adds at the thresholds already enforced for
+        // src/server/** and src/reporting/**. No threshold anywhere above is lowered to make room
+        // for it: the run package is covered by the unit tier against a fake browser factory and
+        // a fake spawn seam, and again by the fixtures tier against real Chromium.
+        'src/run/**': { lines: 85, statements: 85, functions: 80, branches: 80 },
       },
     },
   },

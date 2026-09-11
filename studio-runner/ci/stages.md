@@ -116,9 +116,23 @@ npm run test:fixtures
   the pipeline; ADR-001 §8 permits the public image for local development only.
 - The tier itself does not set `passWithNoTests`, so an empty run fails rather than passing
   silently.
-- Story 10.3 wires this tier against the fake adapter (AC-6a). Story 10.12 supplies the real
-  Playwright adapter, serves `fixtures/pages/` at the URLs in `fixtures/reference/manifest.json`,
-  and is where a real Chromium actually executes the corpus (AC-6b).
+- Story 10.3 wired this tier against the fake adapter (AC-6a). **Story 10.12 supplied the real
+  Playwright adapter**: the tier now launches pinned Chromium in a killable child process against
+  `fixtures/pages/`, served on loopback by `test/helpers/pageServer.ts` at the paths
+  `fixtures/reference/manifest.json` binds them to. All 28 reference examples execute twice with
+  identical per-step statuses, CSS `locator()` selectors resolve in the live DOM, and 10.3's
+  `AC-6b` skip is deleted rather than re-skipped.
+- **What runs here locally vs. what this stage may claim.** 10.12 ran the tier on a developer
+  machine, which the BRD milestone "Real browser, real video (dev)" and `ED-05`'s `gate_note`
+  permit. Running it **inside the pinned internal image** is 10.12's AC-18b and is still
+  `ED-05`-gated: the pipeline records this stage as **skipped — not passed** until 10.18 lands the
+  image and 10.19 confirms it.
+- The tier needs a build: the browser runs in a child process, and a child process is started from
+  `dist/run/child.js`. `vitest.fixtures.config.ts` emits `dist/` in `globalSetup` rather than
+  trusting that a build happened, so the tier cannot quietly test last week's code.
+- Browsers still come from the image (`PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` is set for the tier).
+  For a local run, `npm run browsers:install` installs Chromium at the declared pin; Playwright
+  refuses a mismatched build, so drift fails loudly (ADR-001 §4.2).
 
 #### 6a. Pin consistency against the built image
 
@@ -136,6 +150,13 @@ npm run check:pins -- --require-image
 - The recorded `node` is asserted here too — this is where the `.nvmrc` major rule applies.
   **Expect this stage to fail against the public base image** until `ED-05` lands (see Environment
   above). Record it as a real failure; do not waive it by editing `.nvmrc`.
+- **Open item O-2a is still open, and story 10.12 did not resolve it.** The public base image at
+  the pinned Playwright version ships Node v24.20.0 against a `.nvmrc` of 22, so this stage fails
+  by design. 10.12 ran Chromium on a developer machine, where the in-image rule does not apply —
+  it is read off `chromiumBuild`, which only exists under the image's `PLAYWRIGHT_BROWSERS_PATH` —
+  and `test/run/confinement.test.ts` now asserts `.nvmrc` still reads `22` and that
+  `engines.node` is unchanged, so a convenience edit is a red build rather than a quiet one. The
+  fix remains a base-image choice under `ED-05` or an ADR-001 §4.2 amendment.
 - This is the stage that makes the browser build and the Node major part of the pin rather than a
   convention.
 

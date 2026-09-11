@@ -26,6 +26,7 @@ import type { RunnerConfig } from './config.js';
 import { createIdentityChecker } from './identity.js';
 import type { LogSink, Logger } from './logging.js';
 import { createLogger, createStdoutSink } from './logging.js';
+import type { RunOrigin } from '../run/timeline.js';
 import { createRunCoordinator } from './runCoordinator.js';
 import type { RunCoordinator } from './runCoordinator.js';
 import { createFsScratchStore } from './scratch.js';
@@ -44,6 +45,14 @@ export interface ApplicationDependencies {
   readonly random?: (() => number) | undefined;
   /** Test seam: an alternative pool, used to falsify the atomic-acquire guard (AC-23). */
   readonly pool?: CapacityPool | undefined;
+  /**
+   * Test seam: how the run origin is taken for an **in-process** session (10.12 AC-11.3).
+   *
+   * A real session takes it in the child at recording-context readiness. This exists so the scale
+   * assertion can substitute a process-origin clock and watch the bound go red — a guard nobody
+   * has seen fail is not a guard.
+   */
+  readonly takeOrigin?: (() => RunOrigin) | undefined;
 }
 
 export interface RunnerApplication {
@@ -115,6 +124,7 @@ export function createApplication(
     wallClock: dependencies.wallClock ?? ((): Date => new Date()),
     sleep: dependencies.sleep ?? defaultSleep,
     random: dependencies.random ?? Math.random,
+    takeOrigin: dependencies.takeOrigin,
   });
 
   const server = createRunnerServer({

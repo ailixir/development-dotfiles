@@ -164,10 +164,54 @@ resilience4j:
         ignore-exceptions:
           - org.springframework.web.client.HttpClientErrorException
 
-# Studio compile — Citi/R2D2 LLM gateway (Story 10.5, architecture §4.1/§8.5).
-# Off by default: a stock build never reaches an LLM. Endpoint/project/location/model/credentials
-# are deployment configuration and carry no default value.
+# Studio execution — the one configuration source for dispatch, callbacks, recovery and SSE
+# (Story 10.7, architecture §8.5). Every value here is a §8.5 STARTING value tuned against staging
+# measurements (§10), not a commitment, and every bound AC-38 inventories has its name here.
 studio:
+  execution:
+    # The kill switch (§8.5). When false: new executes are 503 DISPATCH_DISABLED, queued and
+    # claimed work is closed explicitly, admitted work finishes, and reads, callbacks and
+    # recovery all stay active.
+    enabled: ${STUDIO_EXECUTION_ENABLED:true}
+    # Queue time and browser runtime are separate budgets and must stay separate columns.
+    pending-sla: ${STUDIO_PENDING_SLA:600s}
+    start-deadline: ${STUDIO_START_DEADLINE:30s}
+    run-deadline: ${STUDIO_RUN_DEADLINE:600s}
+    admission-timeout: ${STUDIO_ADMISSION_TIMEOUT:10s}
+    evidence-retention: ${STUDIO_EVIDENCE_RETENTION:30d}
+    runner-base-url: ${STUDIO_RUNNER_BASE_URL:http://put-checks-studio-runner:8090}
+    # Deployment configuration, never job-supplied (§8.4, §8.5).
+    callback-base-url: ${STUDIO_CALLBACK_BASE_URL:http://put-checks-api:8080}
+    quotas:
+      per-csi: ${STUDIO_QUOTA_PER_CSI:20}
+      global: ${STUDIO_QUOTA_GLOBAL:200}
+      max-steps-per-test: ${STUDIO_MAX_STEPS:200}
+    dispatcher:
+      enabled: ${STUDIO_DISPATCHER_ENABLED:false}
+      threads: ${STUDIO_DISPATCHER_THREADS:4}
+      batch-size: ${STUDIO_DISPATCHER_BATCH:20}
+      lease: ${STUDIO_DISPATCHER_LEASE:60s}
+      poll-interval-ms: ${STUDIO_DISPATCHER_POLL_MS:2000}
+    callback:
+      max-body-bytes: ${STUDIO_CALLBACK_MAX_BODY:262144}
+      max-steps: ${STUDIO_CALLBACK_MAX_STEPS:500}
+      max-log-entries: ${STUDIO_CALLBACK_MAX_LOGS:500}
+      max-log-entry-chars: ${STUDIO_CALLBACK_MAX_LOG_CHARS:2000}
+      # The restricted service identity of §8.4/§9.1. No default: a deployment that does not set
+      # it gets a chain that refuses every caller, which is the correct failure direction.
+      service-token: ${STUDIO_CALLBACK_SERVICE_TOKEN:}
+    sse:
+      heartbeat: ${STUDIO_SSE_HEARTBEAT:15s}
+      lifetime: ${STUDIO_SSE_LIFETIME:60s}
+      read-interval: ${STUDIO_SSE_READ_INTERVAL:750ms}
+      authorization-refresh: ${STUDIO_SSE_AUTH_REFRESH:30s}
+      max-streams-per-user: ${STUDIO_SSE_MAX_PER_USER:5}
+      max-streams-per-pod: ${STUDIO_SSE_MAX_PER_POD:200}
+      max-watched-executions: ${STUDIO_SSE_MAX_WATCHED:200}
+      sender-threads: ${STUDIO_SSE_SENDER_THREADS:4}
+  # Studio compile — Citi/R2D2 LLM gateway (Story 10.5, architecture §4.1/§8.5).
+  # Off by default: a stock build never reaches an LLM. Endpoint/project/location/model/
+  # credentials are deployment configuration and carry no default value.
   compile:
     gateway:
       enabled: ${STUDIO_GATEWAY_ENABLED:false}
@@ -241,6 +285,10 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+  # The internal callbacks are never part of the public surface (§8.4, AC-6a). The contract test
+  # still covers them; springdoc does not publish them.
+  paths-to-exclude:
+    - /internal/**
 
 logging:
   config: classpath:logback-spring.xml

@@ -118,6 +118,59 @@ export const MESSAGE_FOR_MODULE = Object.fromEntries(
 /** Modules that may only be imported from `src/run/**` (child-process browser launch, 10.12). */
 export const RUN_ONLY_MODULES = ['child_process', 'node:child_process'];
 
+/**
+ * The browser library, confined to one module (story 10.12 AC-1).
+ *
+ * `src/run/browser.ts` is the only file permitted to import it. Everything else — the validator,
+ * the executor, the server, the reporting layer, and even the Playwright *adapter* — is written
+ * against local structural types, so no Playwright type, value or import escapes the one place
+ * that starts a browser. The adapter being on this side of the line is what lets the unit tier
+ * exercise every one of its branches without launching anything (AC-25).
+ *
+ * Confined the same way `child_process` already is, and proven the same way: `fixtures/lint/`
+ * carries a file per entry and `test/lint-boundary.test.ts` asserts each one trips the rule.
+ */
+export const PLAYWRIGHT_MODULES = ['playwright', 'playwright-core'];
+
+const PLAYWRIGHT_MESSAGE =
+  'Playwright is confined to src/run/browser.ts (story 10.12 AC-1, ADR-001 §6). Everything else ' +
+  'is written against the structural page/locator surface in src/run/playwrightAdapter.ts, so no ' +
+  'Playwright type escapes the module that starts a browser.';
+
+/**
+ * The flags that disable a Chromium sandbox (AC-6a, architecture §9.3, ADR-001 §8).
+ *
+ * §9.3 is explicit: *"do not disable it silently to make the image run"*. Playwright's
+ * `chromiumSandbox` defaults to `false` — which adds `--no-sandbox` — so the default is the wrong
+ * way round, and the failure mode this rule exists for is a future engineer adding one of these at
+ * 2 a.m. to make a build pass. A reviewer cannot see an option that was never written; lint can.
+ *
+ * Assembled from parts rather than written out, so the rule definition is not itself a match for
+ * the repo-wide scan in `test/run/sandbox.test.ts`.
+ */
+const SANDBOX_FLAG_PATTERN = [
+  ['--no', '-sandbox'].join(''),
+  ['--disable-setuid', '-sandbox'].join(''),
+  ['--disable-gpu', '-sandbox'].join(''),
+].join('|');
+
+export const SANDBOX_FLAG_SYNTAX = [
+  {
+    selector: `Literal[value=/${SANDBOX_FLAG_PATTERN}/]`,
+    message:
+      'A Chromium sandbox-disabling flag is forbidden anywhere in this package: the launch option ' +
+      'is chromiumSandbox: true and there is no path that turns it off (architecture §9.3, ' +
+      'ADR-001 §8, story 10.12 AC-6a).',
+  },
+  {
+    selector: `TemplateElement[value.raw=/${SANDBOX_FLAG_PATTERN}/]`,
+    message:
+      'A Chromium sandbox-disabling flag is forbidden anywhere in this package: the launch option ' +
+      'is chromiumSandbox: true and there is no path that turns it off (architecture §9.3, ' +
+      'ADR-001 §8, story 10.12 AC-6a).',
+  },
+];
+
 const restrictedImport = (name, message) => ({ name, message });
 
 /** Rules that apply to every linted file in the package. */
@@ -148,6 +201,7 @@ export const executionBoundaryRules = {
       message:
         'Dynamic import() is forbidden in package sources; artifact content must never reach a module loader (architecture §4.5).',
     },
+    ...SANDBOX_FLAG_SYNTAX,
   ],
   'no-restricted-imports': [
     'error',
@@ -160,13 +214,37 @@ export const executionBoundaryRules = {
             'child_process is only permitted in src/run/** (ADR-001 §6).',
           ),
         ),
+        ...PLAYWRIGHT_MODULES.map((name) => restrictedImport(name, PLAYWRIGHT_MESSAGE)),
       ],
     },
   ],
 };
 
-/** Override applied to `src/run/**`, where the killable browser child process lives. */
+/**
+ * Override applied to `src/run/**`, where the killable browser child process lives.
+ *
+ * `child_process` becomes permitted here; **Playwright does not**. The directory holds the
+ * protocol, the launcher, the run clock, the recording vocabulary and the adapter, and none of
+ * them needs the library — only `src/run/browser.ts` does, and it gets its own narrower override.
+ */
 export const runDirectoryRules = {
+  'no-restricted-imports': [
+    'error',
+    {
+      paths: [
+        ...FORBIDDEN_MODULES.map((name) => restrictedImport(name, MESSAGE_FOR_MODULE[name])),
+        ...PLAYWRIGHT_MODULES.map((name) => restrictedImport(name, PLAYWRIGHT_MESSAGE)),
+      ],
+    },
+  ],
+};
+
+/**
+ * Override applied to `src/run/browser.ts` alone: the one module that may import Playwright.
+ *
+ * Everything else the denylist forbids stays forbidden here, sandbox flags included.
+ */
+export const browserModuleRules = {
   'no-restricted-imports': [
     'error',
     {

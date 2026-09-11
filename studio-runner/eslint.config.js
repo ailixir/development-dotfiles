@@ -2,7 +2,12 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import importPlugin from 'eslint-plugin-import';
 
-import { boundaryGlobals, executionBoundaryRules, runDirectoryRules } from './eslint.boundary-rules.js';
+import {
+  boundaryGlobals,
+  browserModuleRules,
+  executionBoundaryRules,
+  runDirectoryRules,
+} from './eslint.boundary-rules.js';
 
 /**
  * ESLint 9 flat config (ADR-001 §6). Deliberately newer than `frontend/`'s ESLint 8 setup;
@@ -46,6 +51,12 @@ export default tseslint.config(
   {
     files: ['src/run/**/*.ts'],
     rules: runDirectoryRules,
+  },
+  {
+    // The one module permitted to import Playwright (story 10.12 AC-1). Ordered after the
+    // directory rule so it narrows it rather than being narrowed by it.
+    files: ['src/run/browser.ts'],
+    rules: browserModuleRules,
   },
   {
     // Build-time scripts are not shipped in the image and never see artifact content. They may
