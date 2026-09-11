@@ -31,6 +31,7 @@
 
 import { chromium } from 'playwright';
 import type { BrowserContext, Page } from 'playwright';
+import { readdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest } from './browserFactory.js';
@@ -46,6 +47,24 @@ function hostOf(url: string): string | null {
     return parsed.protocol === 'about:' || parsed.protocol === 'blob:' ? null : parsed.host || parsed.protocol;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Deletes every file in the run's video directory except the one the single page produced.
+ *
+ * Scoped to that directory and best-effort: a recording that cannot be removed is not worth
+ * failing a run over, and the run is already reporting an unsupported-workflow code.
+ */
+async function removeStrayRecordings(videoDir: string, keep: string): Promise<void> {
+  try {
+    for (const entry of await readdir(videoDir)) {
+      const path = join(videoDir, entry);
+      if (path === keep) continue;
+      await rm(path, { force: true });
+    }
+  } catch {
+    // The directory may not exist if nothing was ever recorded.
   }
 }
 
@@ -89,10 +108,13 @@ export const playwrightBrowserFactory: BrowserFactory = {
     });
 
     let extraPageListener: (() => void) | null = null;
+    let sawExtraPage = false;
     context.on('page', (opened) => {
       if (opened === page) return;
-      // Closed immediately: V1 supports one page, and a second recording is never created or
-      // merged (§5.2, AC-15). The run refuses at its next operation.
+      // Closed immediately (§5.2, AC-15): V1 drives one page, and execution never continues on
+      // the other one. Its recording is dealt with in `close`, below, where the files are
+      // finalized and can actually be removed.
+      sawExtraPage = true;
       void opened.close().catch(() => undefined);
       extraPageListener?.();
     });
@@ -119,7 +141,14 @@ export const playwrightBrowserFactory: BrowserFactory = {
         await context.close();
         await context.browser()?.close();
         if (video === null) return null;
-        return await video.path();
+        const produced = await video.path();
+        // **One run, one video.** A context records per *page*, so a popup starts a second file
+        // even though it is closed on sight. Leaving it in scratch would mean the run produced
+        // two recordings and something downstream would have to choose between them — or worse,
+        // merge them, which §5.2 forbids outright. The stray files go here, after the close that
+        // finalized them, and only ever inside this run's own video directory.
+        if (sawExtraPage) await removeStrayRecordings(videoDir, produced);
+        return produced;
       },
 
       async dispose(): Promise<void> {

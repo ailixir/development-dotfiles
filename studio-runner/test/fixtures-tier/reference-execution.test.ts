@@ -173,28 +173,38 @@ function rewriteOperation(operation: Operation, server: PageServer): Operation {
   const literal = (value: string): string =>
     value.startsWith('https://example.com') ? server.rewrite(value) : value;
   const pattern = (source: string): string =>
-    source.replace(String.raw`https:\/\/example\.com`, `http:\\/\\/127\\.0\\.0\\.1:${String(server.port)}`);
+    source.replace(
+      String.raw`https:\/\/example\.com`,
+      `http:\\/\\/127\\.0\\.0\\.1:${String(server.port)}`,
+    );
 
-  switch (operation.op) {
-    case 'goto':
-      return operation.url.kind === 'literal'
-        ? { ...operation, url: { ...operation.url, value: literal(operation.url.value) } }
-        : operation;
-    case 'waitForURL':
-      return operation.url.kind === 'literal'
-        ? { ...operation, url: { ...operation.url, value: literal(operation.url.value) } }
-        : operation.url.kind === 'regex'
-          ? { ...operation, url: { ...operation.url, source: pattern(operation.url.source) } }
-          : operation;
-    case 'expectUrl':
-      return operation.expected.kind === 'literal'
-        ? { ...operation, expected: { ...operation.expected, value: literal(operation.expected.value) } }
-        : operation.expected.kind === 'regex'
-          ? { ...operation, expected: { ...operation.expected, source: pattern(operation.expected.source) } }
-          : operation;
-    default:
-      return operation;
+  // Only the three operations that carry a URL are rewritten; every other operation crosses
+  // unchanged, which is the point — the corpus is *executed*, not rewritten.
+  if (operation.op === 'goto') {
+    return operation.url.kind === 'literal'
+      ? { ...operation, url: { ...operation.url, value: literal(operation.url.value) } }
+      : operation;
   }
+  if (operation.op === 'waitForURL') {
+    if (operation.url.kind === 'literal') {
+      return { ...operation, url: { ...operation.url, value: literal(operation.url.value) } };
+    }
+    return operation.url.kind === 'regex'
+      ? { ...operation, url: { ...operation.url, source: pattern(operation.url.source) } }
+      : operation;
+  }
+  if (operation.op === 'expectUrl') {
+    if (operation.expected.kind === 'literal') {
+      return {
+        ...operation,
+        expected: { ...operation.expected, value: literal(operation.expected.value) },
+      };
+    }
+    return operation.expected.kind === 'regex'
+      ? { ...operation, expected: { ...operation.expected, source: pattern(operation.expected.source) } }
+      : operation;
+  }
+  return operation;
 }
 
 /**

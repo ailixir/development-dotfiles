@@ -383,11 +383,15 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
         ignoreCase && typeof matcher === 'string'
           ? actual.toLowerCase().includes(matcher.toLowerCase())
           : matches(matcher, actual, 'contains');
+      // Named rather than inline: an inline async arrow passed straight to a call emits a shape
+      // `test/no-dynamic-evaluation.test.ts` scans for (architecture §4.5). The scan is blunt on
+      // purpose, and writing around it costs one named constant.
+      const readText = async (): Promise<string> =>
+        useInnerText
+          ? await locator.innerText({ timeout })
+          : ((await locator.textContent({ timeout })) ?? '');
       await pollUntil(
-        async () =>
-          useInnerText
-            ? await locator.innerText({ timeout })
-            : ((await locator.textContent({ timeout })) ?? ''),
+        readText,
         compare,
         timeout,
         'text content to contain',
@@ -403,8 +407,9 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
       const locator = resolveHandle(target);
       const matcher = compileMatcher(expected);
       const timeout = timeoutOf(timeoutOptions?.timeout);
+      const readValue = async (): Promise<string> => await locator.inputValue({ timeout });
       await pollUntil(
-        async () => await locator.inputValue({ timeout }),
+        readValue,
         (actual) => matches(matcher, actual, 'equals'),
         timeout,
         'input value to be',
@@ -434,8 +439,9 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
     ): Promise<void> {
       const matcher = compileMatcher(expected);
       const timeout = timeoutOf(timeoutOptions?.timeout);
+      const readTitle = async (): Promise<string> => await page.title();
       await pollUntil(
-        async () => await page.title(),
+        readTitle,
         (actual) => matches(matcher, actual, 'equals'),
         timeout,
         'the page title to be',

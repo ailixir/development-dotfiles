@@ -40,6 +40,24 @@ export interface RealRunOutcome {
   clear(): void;
 }
 
+/**
+ * Waits for a condition, on the **wall clock**.
+ *
+ * `test/helpers/harness.ts`'s `until` spends a budget of microtask ticks, which is right for the
+ * unit tier where nothing sleeps. A real browser takes real time, so this tier needs a real bound.
+ */
+export async function untilMs(predicate: () => boolean, timeoutMs = 60_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (!predicate()) {
+    if (Date.now() >= deadline) {
+      throw new Error(`Condition was not met within ${String(timeoutMs)}ms.`);
+    }
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 25);
+    });
+  }
+}
+
 /** A per-run scratch directory on the real filesystem, cleared by the caller (AC-22). */
 export function createScratch(): string {
   return mkdtempSync(join(tmpdir(), 'studio-runner-fixtures-'));
