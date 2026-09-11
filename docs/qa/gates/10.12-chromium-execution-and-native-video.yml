@@ -4,7 +4,7 @@ story_title: Chromium execution and native video
 epic: EPIC-10
 wave: 3
 
-gate: FAIL
+gate: CONCERNS
 status_reason: >-
   Twenty-three of the twenty-eight criteria are met and were verified by running them, four are
   honestly deferred as live `it.skip`s naming their owners, and one — AC-6a — is defeated. Every
@@ -35,7 +35,8 @@ status_reason: >-
 reviewer: Quinn (@qa)
 updated: '2026-09-11T00:00:00Z'
 branch: story/10.12
-head_sha: 78427ae5f
+head_sha: 751773340
+prior_head_sha: 78427ae5f (gate FAIL, SEC-1 open)
 base_sha: a8a8eeb44
 worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.12
 
@@ -586,3 +587,190 @@ coderabbit:
     darwin with no WSL available. Decision: proceed without it and compensate with direct
     falsification of every load-bearing guard (five falsification edits, each reverted). Recorded
     so the omission is visible rather than implied.'
+
+# ═════════════════════════════════════════════════════════════════════════════
+# RECHECK — 2026-09-11, head 751773340. Gate FAIL -> CONCERNS.
+# Scope: the SEC-1 fix, MED-1 and MED-2 only. The corpus and the 63-file diff
+# were not re-reviewed; their findings above stand unchanged.
+# ═════════════════════════════════════════════════════════════════════════════
+recheck:
+  head_sha: 751773340
+  verdict_change: FAIL -> CONCERNS
+  reason: >-
+    SEC-1 is closed and the closure is falsifiable. The developer additionally found and closed a
+    channel the reviewer did not try (`fork` defaulting `execArgv` to the parent's), which the
+    reviewer reproduced and confirmed blocked. One new finding is recorded as SEC-2 and rated
+    MEDIUM rather than HIGH, with the reasoning stated in full below so it can be overridden.
+
+  counts:
+    clean_gates: >-
+      From rm -rf node_modules dist coverage: npm ci 0, build 0, type-check 0, lint 0,
+      npm test 0 (35 files, **768 passed / 2 skipped**), check:pins 0,
+      check:pins --require-image **1, still by design**.
+    nvmrc: unchanged, reads 22
+    package_json: not in the recheck diff at all
+    coverage_thresholds: >-
+      vitest.config.ts is byte-unchanged by this commit. src/run/** rose to 87.41 lines /
+      88.97 branches against the same 85/85/80/80. Nothing moved.
+    specs_and_scope: >-
+      docs/specs/, docs/architecture/, backend/ and frontend/ are all absent from the recheck diff.
+
+  sec_1_closure:
+    node_options:
+      attack: NODE_OPTIONS="--import <preload>" against the real createChildBrowserLauncher
+      result: >-
+        BLOCKED. The preload now logs exactly one pid — the parent — and no INTERCEPTED line. On
+        the unfixed head it logged two pids and INTERCEPTED chromiumSandbox=true. The variable is
+        off the allowlist, so it never reaches the constructed environment.
+      falsification: >-
+        Re-adding 'NODE_OPTIONS' to INHERITED_ENV_KEYS turns three test/run/launcher.test.ts
+        assertions red — the class rule, the list-agrees-with-the-class rule and the family
+        recogniser. Restored.
+    exec_argv:
+      attack: >-
+        The developer's own find, reproduced by the reviewer: `node --import <preload>
+        <runner entry>`, so the preload sits on the *runner's* command line rather than in its
+        environment.
+      result: >-
+        BLOCKED. One pid, no INTERCEPTED. `execArgv: []` is passed to fork explicitly.
+      falsification: >-
+        Deleting `execArgv: []` turns test/run/production-seams.test.ts "passes an explicitly empty
+        execArgv rather than letting it default to the parent's" red. Restored.
+    guard_shape:
+      assessment: >-
+        CORRECT SHAPE. The class guard is stated over prefixes (NODE_, LD_, DYLD_, OPENSSL_) rather
+        than over the one name that was found, and it re-checks the *constructed* environment on
+        every launch, so it also covers the two literals the allowlist adds (TMPDIR,
+        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD) and any future allowlist entry.
+
+  attacks_run_by_the_reviewer:
+    - id: A1
+      attack: NODE_OPTIONS --import preload
+      result: BLOCKED
+    - id: A2
+      attack: execArgv inheritance — preload on the runner's own command line
+      result: BLOCKED
+    - id: A3
+      attack: NODE_PATH and NODE_REPL_EXTERNAL_MODULE set in the parent
+      result: BLOCKED — neither is on the allowlist; no marker written
+    - id: A4
+      attack: >-
+        PLAYWRIGHT_BROWSERS_PATH pointed at a registry mirroring the real one by symlink, with the
+        chrome-headless-shell binary replaced by a shim that execs the real one with --no-sandbox
+      result: >-
+        **SUCCEEDED.** The shim was invoked and the browser ran with --no-sandbox prepended; the
+        launch reported ready normally with startedAtMs 0. Recorded as SEC-2.
+    - id: A5
+      attack: HOME pointed at a directory whose Library/Caches/ms-playwright is that same registry
+      result: >-
+        **SUCCEEDED**, identically — HOME reaches the same resolution because it is the default
+        browsers root when PLAYWRIGHT_BROWSERS_PATH is unset. Same finding, second key.
+    - id: A6
+      attack: PATH poisoned with a fake `node` and a fake `chrome-headless-shell` ahead of the real ones
+      result: >-
+        BLOCKED. `fork` resolves the interpreter through process.execPath and Playwright resolves
+        the browser by absolute path from the registry, so neither poisoned entry was ever invoked.
+    - id: A7
+      attack: >-
+        Working-directory-relative resolution — the runner started from a directory containing a
+        hostile node_modules/playwright
+      result: >-
+        BLOCKED. ESM bare-specifier resolution walks up from the importing module's URL, not from
+        cwd, so dist/run/browser.js reached the real package. The trap logged nothing.
+    - id: A8
+      attack: Inherited file descriptors
+      result: >-
+        NO CHANNEL. stdio is ['ignore','inherit','inherit','ipc'] — stdin closed, stdout/stderr for
+        the pod log, one IPC channel. No extra descriptor is passed and none can load code.
+    - id: R1-R5
+      attack: The five attacks that failed on the previous head, re-run against the fixed one
+      result: >-
+        ALL STILL FAIL. Extra fields on the request object (chromiumSandbox false, an args array
+        with two disabling flags, sandbox false) are still dropped — the launch options are an
+        object literal with no spread and DEBUG=pw:browser showed no disabling flag. Four hostile
+        env vars still change nothing. Still exactly one launchPersistentContext call site and one
+        playwright import. Still no config key naming a sandbox. src/main.ts still supplies no seam.
+
+top_issues_recheck:
+  - id: SEC-2
+    severity: medium
+    title: PLAYWRIGHT_BROWSERS_PATH and HOME redirect the browser registry, and nothing verifies the binary that launches
+    ac: 'AC-6b (in-cluster), architecture §9.3, ADR-001 §4.2'
+    owner: '@dev / 10.18 under AC-6b'
+    blocking: false
+    finding: >-
+      Both variables are on INHERITED_ENV_KEYS and neither matches the code-loading class guard.
+      The reviewer built a registry that symlinks every real file except chrome-headless-shell,
+      replaced that one with a shim exec'ing the real binary with --no-sandbox prepended, and
+      pointed each variable at it in turn. Both launched the shim. The run reported ready normally
+      and no gate noticed: `chromiumBuild` is recorded by scripts/write-runtime-versions.mjs at
+      *build* time from PLAYWRIGHT_BROWSERS_PATH, and nothing anywhere reads the running browser's
+      identity — `grep -rn '\.version()\|executablePath' src/` returns nothing.
+    why_medium_and_not_high: >-
+      Stated plainly so it can be overridden. (1) It does not set `chromiumSandbox` to `false`.
+      AC-6a's criterion — the launch option, and no key, variable, field or code path that unsets
+      it — now genuinely holds; both code-injection channels into the runner's own process are
+      closed. What this defeats is browser-image *integrity*, a different property. (2) Unlike
+      NODE_OPTIONS these variables cannot be dropped: ADR-001 §4.2 makes PLAYWRIGHT_BROWSERS_PATH
+      the mechanism by which the pinned image tells the library where its browsers live, and HOME
+      is the same thing by default. So this is not a residual of the SEC-1 fix; it needs a
+      different control. (3) That control already has an owner: **AC-6b**, which is open and
+      deferred to ED-05/SPK-04/10.18, and which is precisely where the sandbox is proven to start
+      under the cluster's PodSecurity level with readOnlyRootFilesystem — an immutable browser path
+      is the same property, established by the platform rather than by launch code. (4) The
+      runner-side check that would help is only meaningful in the image, because `chromiumBuild` is
+      null outside it, so it would land with 10.18 regardless.
+      **If the reading is instead "any environment-borne path to an unsandboxed Chromium is HIGH",
+      this qualifies and the gate should be read as blocked.** The reviewer's judgement is that it
+      is not, for the four reasons above.
+    required_of_ac_6b: >-
+      AC-6b's in-cluster criterion must state browser-path immutability explicitly — the browser
+      resolves from the read-only image and neither PLAYWRIGHT_BROWSERS_PATH nor HOME can be
+      pointed at a writable volume — rather than leaving it implied by readOnlyRootFilesystem.
+    suggested_hardening: >-
+      Cheap and in the right place: at launch, when `chromiumBuild` is asserted, compare the
+      resolved executable path and the browser's reported version against it and refuse on
+      disagreement. The runner already records the value for exactly this purpose and today only
+      compares it against itself.
+
+resolved_since_the_fail:
+  - id: SEC-1
+    status: CLOSED
+    detail: >-
+      NODE_OPTIONS off the allowlist, a prefix-class guard over NODE_/LD_/DYLD_/OPENSSL_ re-checked
+      on every launch, and `execArgv: []`. Both channels reproduced as blocked by the reviewer and
+      both guards falsified.
+  - id: MED-2
+    status: CLOSED
+    detail: >-
+      `ProductionLauncherOptions = Omit<ChildLauncherOptions, 'spawner'|'childModulePath'|'parentEnv'>`.
+      The reviewer added `childModulePath: '/tmp/evil.js'` to the production literal and
+      `npm run type-check` exited 2 with TS2353 naming the property. test/run/production-seams.test.ts
+      additionally asserts the constructed options key for key, which also catches a fourth seam
+      added to the type later. Genuinely closed to production, not conventionally unused. Restored.
+  - id: MED-1
+    status: CLOSED
+    detail: >-
+      OUTLIER_BOUND_MS lowered 2_500 -> 1_500. **Lowered, not raised.** MEDIAN_TOLERANCE_MS is
+      unchanged at 100 and the reported measured tolerance is unchanged, so the reviewer's
+      instrument-limitation judgement has not been converted into a widened target. The margin is
+      honest: the reviewer's own worst mis-attribution was 650.4 ms and the developer's fifty
+      measurements report 657.7 ms, leaving roughly one 720 ms cadence of headroom under the bound.
+
+still_open_after_the_recheck:
+  - SEC-2 (medium, above) — assigned to AC-6b / 10.18
+  - LOW-1 — the src/run/timeline.ts comment still claims performance.now() appears nowhere else on
+    the production path; it appears twice more, harmlessly. Not touched by this commit.
+  - LOW-2 — firstChangeAtOrAfter is still one-sided. SPK-06 phase B.
+  - LOW-3 — AC-20's > 20 ms gap bound still proves less than it appears to.
+
+final_decision:
+  gate: CONCERNS
+  merge: SAFE
+  statement: >-
+    All 24 non-deferred criteria are met, including AC-6a, whose stated property now holds against
+    every attack the reviewer could construct against the runner's own process. Four criteria
+    remain honestly deferred as live skips. SEC-2 is a real finding but is browser-image integrity
+    rather than the launch-option guarantee, it cannot be closed by removing a variable, and it
+    belongs to the already-open AC-6b in-cluster deferral — which must be amended to name it.
+    Merge is safe.
