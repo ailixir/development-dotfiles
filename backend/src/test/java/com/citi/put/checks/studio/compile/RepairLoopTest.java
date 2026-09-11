@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +30,9 @@ import org.junit.jupiter.api.Test;
  * recorded as <b>skipped, not passed</b>.
  */
 class RepairLoopTest extends AbstractRepairPipelineTest {
+
+  /** A call to {@code confirm(...)} on any receiver — never a declaration, never a longer name. */
+  private static final Pattern CONFIRM_CALL = Pattern.compile("\\.\\s*confirm\\s*\\(");
 
   // ── AC-10a: the four shapes ──────────────────────────────────────────────
 
@@ -193,13 +197,36 @@ class RepairLoopTest extends AbstractRepairPipelineTest {
    * </b>, and this fails on the reference rather than on the call.
    *
    * <p>A behavioural test can only show that the loop did not confirm on the paths it exercised. A
-   * source scan shows that no path exists at all, which is the property the criterion states. The
-   * scan is guarded against vacuity: it asserts it really read the pipeline's source and that the
-   * string it is looking for does occur elsewhere in the package, so a typo in the needle cannot
-   * pass as an absence.
+   * source scan shows that no path exists at all, which is the property the criterion states.
+   *
+   * <p><b>The scan is receiver-agnostic, and it did not start that way.</b> The first version
+   * matched {@code compileStateService.confirm(} and {@code states.confirm(} — the receiver's
+   * <em>variable name</em> — while its non-vacuity guard pinned only the method's spelling. QA
+   * demonstrated the consequence by adding a production {@code @Component} to this very package
+   * calling {@code stateService.confirm(…, "system")}: an auto-confirmation with no principal, in
+   * the package this scan exists to police, and the test stayed green. A guard that cannot fail for
+   * the change it polices is not a guard.
+   *
+   * <p>Two non-vacuity guards, and they now check what the scan checks: the detector is exercised
+   * against the receiver name QA used and three more, and the scan is asserted to have covered the
+   * class that actually runs the loop.
    */
   @Test
   void noClassOnTheCompilePathReferencesTheConfirmTransition() throws IOException {
+    // The detector, before it is trusted. Without this, a broken pattern reports a clean package.
+    for (String receiver :
+        List.of("stateService", "compileStateService", "states", "this.states")) {
+      assertThat(
+              CONFIRM_CALL
+                  .matcher(receiver + ".confirm(id, rev, hash, 1L, 1L, \"system\");")
+                  .find())
+          .as("the detector must match a confirm() call on receiver %s", receiver)
+          .isTrue();
+    }
+    assertThat(CONFIRM_CALL.matcher("service.confirmCompile(id, body, auth);").find())
+        .as("and must not fire on confirmCompile")
+        .isFalse();
+
     Path compilePackage =
         Path.of("src", "main", "java", "com", "citi", "put", "checks", "studio", "compile");
     List<Path> scanned;
@@ -215,7 +242,6 @@ class RepairLoopTest extends AbstractRepairPipelineTest {
         .as("and it must cover the class that runs the loop")
         .anyMatch(path -> path.getFileName().toString().equals("CompilePipeline.java"));
 
-    String needle = ".confirm(";
     assertThat(
             Files.readString(
                 compilePackage.resolve("CompileStateService.java"), StandardCharsets.UTF_8))
@@ -229,13 +255,13 @@ class RepairLoopTest extends AbstractRepairPipelineTest {
           Files.readString(file, StandardCharsets.UTF_8)
               .replaceAll("(?s)/\\*.*?\\*/", " ")
               .replaceAll("(?m)^\\s*//.*$", " ");
-      assertThat(source)
+      assertThat(CONFIRM_CALL.matcher(source).find())
           .as(
-              "%s reaches CompileStateService.confirm; a repaired draft must be confirmed by a"
-                  + " principal calling the route, never by the loop that produced it",
+              "%s reaches CompileStateService.confirm on some receiver; a repaired draft must be"
+                  + " confirmed by a principal calling the route, never by the loop that produced"
+                  + " it",
               file)
-          .doesNotContain("compileStateService" + needle)
-          .doesNotContain("states" + needle);
+          .isFalse();
     }
   }
 }

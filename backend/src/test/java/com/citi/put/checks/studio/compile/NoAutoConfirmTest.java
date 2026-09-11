@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +30,12 @@ class NoAutoConfirmTest {
 
   private static final Path MAIN = Path.of("src", "main", "java");
   private static final Path TEST = Path.of("src", "test", "java");
+
+  /**
+   * A call to {@code confirm(...)} on any receiver — never the declaration, never a longer name.
+   */
+  private static final Pattern CONFIRM_CALL = Pattern.compile("\\.\\s*confirm\\s*\\(");
+
   private static final Path APPLICATION_YML =
       Path.of("src", "main", "resources", "application.yml");
   private static final Path STATE_SERVICE =
@@ -38,11 +45,55 @@ class NoAutoConfirmTest {
       MAIN.resolve(Path.of("com", "citi", "put", "checks", "studio", "StudioService.java"));
 
   /**
+   * The detector this file's scan depends on, exercised before it is trusted.
+   *
+   * <p>QA found the earlier version of that scan to be vacuous, and the shape of the defect is
+   * worth naming because it is subtle: the scan matched the <em>receiver's variable name</em>
+   * ({@code compileStateService.confirm(} / {@code states.confirm(}) while its non-vacuity guard
+   * pinned only the <em>method's</em> spelling ({@code public UUID confirm(}). The guard protecting
+   * the guard therefore checked a different thing than the guard, and a production component
+   * calling {@code stateService.confirm(…, "system")} — an auto-confirmation with no principal —
+   * left the test green.
+   *
+   * <p>So the detector is now receiver-agnostic, and the control below is the receiver name QA
+   * actually used plus three more. A detector that stopped matching would fail here rather than
+   * reporting a clean codebase.
+   */
+  @Test
+  void theConfirmCallDetectorMatchesAnyReceiverSoAnAbsenceIsAnAbsence() {
+    for (String receiver :
+        List.of(
+            "stateService",
+            "compileStateService",
+            "states",
+            "this.compileStateService",
+            "beans.get(CompileStateService.class)")) {
+      assertThat(callsConfirm(receiver + ".confirm(testId, revisionId, hash, 1L, 1L, \"system\");"))
+          .as("the detector must match a confirm() call on receiver %s", receiver)
+          .isTrue();
+    }
+    assertThat(callsConfirm("studioService.confirmCompile(id, request, auth);"))
+        .as("and must not fire on confirmCompile, which is the route's own service method")
+        .isFalse();
+    assertThat(callsConfirm("test.setConfirmedRevisionId(id);"))
+        .as("nor on an unrelated identifier that merely contains the word")
+        .isFalse();
+  }
+
+  /**
    * The confirmation transition has exactly one caller in production code, and it is the route's
    * service method.
    *
-   * <p>Non-vacuity is asserted first: the transition really is spelled {@code confirm(} and really
-   * is called from somewhere, so an empty result below would be a finding and not a typo.
+   * <p>The scan is <b>receiver-agnostic</b> — any {@code .confirm(} in a production file that
+   * references {@code CompileStateService} is a caller, whatever the field is named. Scoping to
+   * files that name the type keeps an unrelated {@code confirm(} elsewhere in the codebase from
+   * becoming a false failure, and it closes nothing: a component cannot be injected with the
+   * service without naming its type.
+   *
+   * <p>Two non-vacuity guards, and they now check the same thing the scan does: the detector is
+   * exercised in {@link #theConfirmCallDetectorMatchesAnyReceiverSoAnAbsenceIsAnAbsence()}, and the
+   * expectation here is {@code hasSize(1)} rather than {@code isEmpty()} — a detector that matched
+   * nothing would fail rather than report a clean codebase.
    */
   @Test
   void theConfirmTransitionHasExactlyOneProductionCaller() throws IOException {
@@ -50,17 +101,27 @@ class NoAutoConfirmTest {
         .as("the transition exists and is spelled this way")
         .contains("public UUID confirm(");
 
+    List<Path> scanned = new ArrayList<>();
     List<Path> callers = new ArrayList<>();
     for (Path file : javaFiles(MAIN)) {
       if (file.equals(STATE_SERVICE)) {
         continue;
       }
       String source = stripComments(Files.readString(file, StandardCharsets.UTF_8));
-      if (source.contains("compileStateService.confirm(") || source.contains("states.confirm(")) {
+      if (!source.contains("CompileStateService")) {
+        continue;
+      }
+      scanned.add(file);
+      if (callsConfirm(source)) {
         callers.add(file);
       }
     }
 
+    assertThat(scanned)
+        .as("the scan must actually cover the production classes that hold the service")
+        .isNotEmpty()
+        .anyMatch(path -> path.getFileName().toString().equals("CompilePipeline.java"))
+        .anyMatch(path -> path.getFileName().toString().equals("StudioService.java"));
     assertThat(callers)
         .as(
             "confirmation must happen only through an authenticated principal's explicit call to"
@@ -232,6 +293,21 @@ class NoAutoConfirmTest {
     try (Stream<Path> files = Files.walk(root)) {
       return files.filter(path -> path.toString().endsWith(".java")).toList();
     }
+  }
+
+  /**
+   * Whether a source body calls {@code confirm(...)} on <em>any</em> receiver.
+   *
+   * <p>{@code \\b} before {@code confirm} is what keeps {@code setConfirmedRevisionId} and {@code
+   * confirmCompile} out: the first has no {@code (} directly after {@code confirm}, and the second
+   * continues the identifier. The dot is required, so a declaration of {@code confirm(} is not a
+   * call to it.
+   *
+   * @param source comment-stripped Java source
+   * @return true when the body invokes the transition
+   */
+  private static boolean callsConfirm(String source) {
+    return CONFIRM_CALL.matcher(source).find();
   }
 
   private static String stripComments(String source) {

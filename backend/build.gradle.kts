@@ -292,6 +292,21 @@ tasks.jacocoTestCoverageVerification {
                 minimum = "0.75".toBigDecimal()
             }
         }
+        // Story 10.9 AC-23: the compile package is this story's main new surface — the repair
+        // loop, the confirmation transaction and the abandoned-compile sweep all live in it. The
+        // bar matches the one story 10.5 set for its sibling `.gateway` package, for the same
+        // reason 10.7 gave: a package-level number is the only way to notice that one of these
+        // arrived untested, because the bundle figure absorbs it. Measured 90.6% when the rule was
+        // added, so this enforces what was measured rather than raising the bar to it.
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.compile")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
     }
 }
 
