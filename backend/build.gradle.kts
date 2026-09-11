@@ -42,6 +42,13 @@ dependencies {
     implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.16.0")
 
+    // Google Vertex AI SDK — R2D2 gateway transport (Story 10.5, arch §4.1).
+    // unverified-against-R2D2: pinned for stub tests; SPK-01 must confirm the version R2D2 accepts.
+    implementation("com.google.cloud:google-cloud-vertexai:1.52.0")
+
+    // Runtime artifact-schema validation for the LLM gateway response parser (Story 10.5, AC-7).
+    implementation("com.networknt:json-schema-validator:1.4.0")
+
     implementation("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
@@ -53,7 +60,6 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.assertj:assertj-core")
-    testImplementation("com.networknt:json-schema-validator:1.4.0")
     testImplementation("io.zonky.test:embedded-database-spring-test:2.5.1")
     testImplementation("org.testcontainers:postgresql:1.20.2")
     testImplementation("org.testcontainers:junit-jupiter:1.20.2")
@@ -147,6 +153,16 @@ tasks.jacocoTestCoverageVerification {
                 counter = "LINE"
                 value = "COVEREDRATIO"
                 minimum = "0.70".toBigDecimal()
+            }
+        }
+        // Story 10.5 AC-15: the R2D2 gateway client carries a higher bar than the repo baseline.
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.compile.gateway")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
             }
         }
     }
