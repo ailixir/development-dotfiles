@@ -179,23 +179,87 @@ stories:
     blocks: ["10.14", "10.17", "10.18", "10.19"]
 
   # ── Wave 5 ──
+  #
+  # SIZE-1 — all three wave-5 stories re-sized M → L by @po at wave-5 validation, 2026-09-11.
+  # This is the fourth, fifth and sixth consecutive M → L in this epic (10.9 and 10.13 were the
+  # first two, at wave-4 validation). At six for six @po ruled this a manifest problem rather than
+  # six story problems, and diagnosed the cause as a *sequencing* defect rather than bad estimating:
+  # every one of the six cites "an architect ruling landed after the estimate", and the manifest's
+  # sizes were all set before ADR-002 §§14–18 existed. ADR-002 has since assigned named open items
+  # to already-sized stories — O-11/O-13/O-14 to 10.14, O-12 to 10.11, O-6 to 10.18 — and each
+  # assignment lands on a number nobody revisited.
+  #
+  # Escalated to @pm (the manifest is @pm's; @po amends story sizes and story context only):
+  #   1. RULE PROPOSED — every ADR-002 amendment that assigns an open item (O-n) to a story MUST
+  #      carry a manifest size re-check for that story, in the same PR as the amendment. That turns
+  #      a validation-time discovery into an amendment-time one and is the only change that stops
+  #      the seventh occurrence.
+  #   2. 10.15 and 10.16 are the only remaining M entries. @po deliberately did NOT re-estimate
+  #      them: neither carries an ADR-002 open item today, so the pattern does not predict them,
+  #      and assigning a number to an undrafted story would be inventing one — the same error the
+  #      three wave-5 drafts refused to make in the other direction. They are flagged
+  #      "size unverified — estimated pre-ADR-002", to be re-checked at draft time by the same
+  #      method these three used: draft honestly, defend nothing.
+  #   3. THE WAVE STRUCTURE HOLDS. 10.11, 10.18 and 10.19 are already L, so the ADR-002
+  #      assignments change their content and not their letter. No re-waving is required by the
+  #      size change. The wave-5 ordering constraints that DO bind are DEF-02 and FOC-05 below,
+  #      and they are sequencing, not capacity.
+
+  # Size M → L (SIZE-1), recorded by @po 2026-09-11 at wave-5 validation. ADR-002 §16 landed on
+  # 2026-09-11 and turned "show diagnostics" into four typed schemas, three distinct truncation
+  # levels each with its own falsifiable rendering obligation, an eleven-value code set and the
+  # attempts/exhausted pair; §18.3 additionally assigned this story a *mechanism* — the
+  # document-reading code-set assertion installed once and extended by 10.11 — rather than a
+  # render. On top of that the story carries a live Class C escalation (AC-15: artifactHash is
+  # reachable from no declared 2xx response of any tests-tagged operation, verified by @po at
+  # validation), which splits the story's headline capability across four a/b criteria. None of
+  # that was visible when the M was set. The named mitigation is the story's own split hint —
+  # (i) the compile-state surface, unblocked today; (ii) review and confirmation, gated on the
+  # AC-15 ruling — and each half is an M.
   - id: "10.10"
     title: "Readable action review and confirmation"
-    size: M
+    size: L
     wave: 5
     depends_on: ["10.9"]
     blocks: ["10.11", "10.19"]
+    story_context:
+      # Assigned by @po 2026-09-11, ruling on 10.10's open question 3. AC-18(b) — a WCAG
+      # conformance audit and assistive-technology verification — had no owner in Epic 10 and
+      # would have been closed by silence. It is 10.19's: a conformance audit needs the assembled
+      # Studio flow and an AT pass, and 10.19 is the first story that has both. Recorded here as
+      # well as in 10.10 so it survives 10.10 being marked Done.
+      wcag_conformance_audit_owner: "10.19 (from 10.10 AC-18b)"
 
+  # Size M → L (SIZE-1), recorded by @po 2026-09-11 at wave-5 validation. Two architect rulings
+  # landed on this story after the estimate: ADR-002 §17 assigned it the API-side half of
+  # RunnerEvidence.partial (O-13 — and §18.1's timed-out step message is O-13's second half, which
+  # the spawn brief did not name), and §18.2 re-pointed O-11's error_code CHECK migration here by
+  # name. Beyond those it carries a runner-side subsystem that does not exist (write-only object
+  # store, upload, manifest writer, bounded idempotent retry, the STORED widening), a partitioned-
+  # table migration with an unusual proof obligation, a Java ResultManifest narrower than §5.3
+  # requires, a cross-tree fixture, and an ED-03 fake with four a/b splits. It spans both trees
+  # plus SQL, which neither wave-4 L did. Mitigation is the story's split hint, and (i) has to
+  # land first regardless — see DEF-02.
   - id: "10.14"
     title: "Video and durable result manifest"
-    size: M
+    size: L
     wave: 5
     depends_on: ["10.6", "10.13"]
     blocks: ["10.15", "10.18", "10.19"]
 
+  # Size M → L (SIZE-1), recorded by @po 2026-09-11 at wave-5 validation. This one differs from the
+  # other five: the trigger was not a late ruling but a late *reading* — the estimate was made
+  # before anyone looked at what the dispatcher actually sends (see DEF-01). The story carries two
+  # components in two languages, a closed fourteen-field job body that must be built from scratch
+  # and asserted against the frozen document rather than against a Java record, a new authorization
+  # axis (secret use as its own decision, with a seam, a fake provider and fail-closed selection),
+  # a six-shape canary experiment through 10.13's harness with a recorded red per shape, a verified
+  # redactor hole to close, and four externally gated criteria. @po additionally routed 10.13's
+  # MED-2 and MED-3 here at wave-5 validation. The comparable is 10.7 (L); this is smaller than
+  # 10.7 and roughly 10.13 with a second language attached.
   - id: "10.17"
     title: "Authorized variable/secret plumbing"
-    size: M
+    size: L
     wave: 5
     depends_on: ["10.7", "10.8", "10.13"]
     blocks: ["10.18", "10.19"]
@@ -208,6 +272,12 @@ stories:
     depends_on: ["10.7", "10.8", "10.10"]
     blocks: ["10.16", "10.19"]
 
+  # SIZE-1 flag, @po 2026-09-11: size UNVERIFIED — estimated pre-ADR-002. Not re-estimated here.
+  # Six consecutive stories have moved M → L at validation, every one citing a ruling that landed
+  # after the estimate. This story carries no ADR-002 open item today, so the pattern does not
+  # predict it and @po declined to invent a number for an undrafted story. Re-check at draft time
+  # by the method the three wave-5 drafts used: size honestly against the criteria the draft
+  # actually needs, and do not compress criteria to defend the manifest's letter.
   - id: "10.15"
     title: "Authorized Range video/download endpoint"
     size: M
@@ -223,6 +293,7 @@ stories:
     blocks: ["10.19"]
 
   # ── Wave 7 ──
+  # SIZE-1 flag, @po 2026-09-11: size UNVERIFIED — estimated pre-ADR-002, same note as 10.15.
   - id: "10.16"
     title: "Evidence state, playback and step seek"
     size: M
@@ -237,6 +308,16 @@ stories:
     wave: 8
     depends_on: ["10.1", "10.2", "10.3", "10.4", "10.5", "10.6", "10.7", "10.8", "10.9", "10.10", "10.11", "10.12", "10.13", "10.14", "10.15", "10.16", "10.17", "10.18"]
     blocks: []
+    story_context:
+      # Assigned by @po 2026-09-11 at wave-5 validation, ruling on 10.10's open question 3.
+      # No Epic 10 story owned a WCAG conformance audit; 10.10's AC-18(a) proves roles, accessible
+      # names and keyboard operability on the rendered tree, and explicitly does NOT make a
+      # conformance claim. The audit needs the assembled Studio flow and an assistive-technology
+      # pass, and 10.19 is the first story that has both. Recorded here so it cannot be closed by
+      # silence once 10.10 is Done.
+      inherited_deferrals:
+        - "10.10 AC-18(b) — WCAG conformance audit and assistive-technology verification."
+        - "10.10 AC-19(b) — representative nontechnical-user trial (BRD §8 rubber-stamp risk, BRD §10 translation-trust metric); additionally depends on 10.10 AC-16(b), which is blocked on the AC-15 Class C ruling."
 
 # ─────────────────────────────────────────────────────────────
 # File-ownership conflicts (wave planning must serialize or single-own)
@@ -401,6 +482,139 @@ file_ownership_conflicts:
       partial, in the same RunnerReportProjection that 10.13 leaves reporting a truth the API
       discards — that is a story dependency, already carried by 10.13 blocks: ["10.14", ...],
       not a file conflict.
+
+  - id: FOC-05
+    path: "docs/specs/studio/openapi.yaml — and studio-runner/test/run/confinement.test.ts, which pins its SHA-256"
+    stories: ["10.14", "10.17"]
+    wave: 5
+    recorded_by: "@po 2026-09-11, at wave-5 validation, ruling on 10.14 open question 4"
+    conflict: >-
+      The three wave-5 stories were checked file by file rather than assumed, and the overlap the
+      draft worried about is empty: 10.10 is frontend-only; 10.17 puts its correspondence check in
+      studio-runner/src/reporting/envelope.ts and lists no runCoordinator.ts edit, while 10.14 owns
+      the coordinator's terminal finally. The real conflict is the contract pin, and it is a false
+      red rather than merge noise — the same shape as FOC-04. Story 10.17 AC-18 asserts
+      openapi.yaml byte-unchanged AND asserts 10.13's BASE_SHA256 is valid, with its File List
+      placing the pin under "must remain unchanged — read it, report it, do not move it". Story
+      10.14's AC-26 (O-14, promoting RunnerEvidence.partial to required) is a Class B contract edit
+      that moves that digest. If AC-26 merges first, 10.17 starts on a pin that is already red
+      through no fault of its own and is forbidden by its own criterion from fixing it.
+    verified_state: >-
+      @po verified at validation that the pin is live and correct on epic/EPIC-10 today:
+      BASE_SHA256 = cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e at
+      confinement.test.ts:149, and shasum -a 256 docs/specs/studio/openapi.yaml returns the
+      identical digest. FOC-04's mandated re-anchor happened. So 10.17's premise holds on the
+      branch as found, and the only thing that can break it inside wave 5 is AC-26.
+    mandated_ordering: >-
+      10.14's AC-26 lands only AFTER story 10.17 has merged, or not in wave 5 at all. This costs
+      nothing: AC-26 is already conditional on three checks and already sequenced last in its own
+      story. If it slips past wave 5 for this reason it is recorded skipped-never-passed with
+      O-14's owner named verbatim from ADR-002 §18.4 — "story 10.14 or the first story after it to
+      touch RunnerEvidence". Everything else in 10.14 proceeds in parallel with 10.17.
+    source: "ADR-002 §12 (Class B), §17.5, §18.4 O-14; manifest FOC-04's re-anchoring rule; story 10.17 AC-18 and its File List; story 10.14 AC-25/AC-26."
+    resolution: "Ordering mandated above. If 10.17 finds the pin red on arrival, that is a FOC-05 violation to raise, not a condition to work around."
+
+# ─────────────────────────────────────────────────────────────
+# Integration defects found by reading, not by a green suite
+#
+# Recorded here rather than only inside the stories that fix them, because a defect that lives in
+# one AC is invisible to everyone who does not already know to look. Both were found at wave-5
+# drafting/validation and both are live on epic/EPIC-10 as of 2026-09-11.
+#
+# The common cause, stated once: the runner validates against docs/specs/studio/openapi.yaml, the
+# backend validates against its own fixtures, and nothing compares the two. Five integration
+# defects in this epic have now been found by reading rather than by a failing test. The control
+# is landed by story 10.17 (T-10.17.2a) as a general producer-conformance assertion, ahead of the
+# fix it enables, and is paired with — not substituted by — story 10.14's AC-24, which checks the
+# Java records' shape rather than the serialized producer bytes.
+# ─────────────────────────────────────────────────────────────
+integration_defects:
+  - id: DEF-01
+    severity: HIGH
+    status: open
+    found_by: "@sm (River) while drafting 10.17, 2026-09-11; every element re-verified by @po at validation"
+    owner: "10.17 (ruled by @po 2026-09-11)"
+    summary: >-
+      The API has never been able to dispatch a run. HttpRunnerDispatchClient.body() writes eight
+      keys — executionId, attemptId, testId, csiId, revisionId, environment, references,
+      callbackBaseUrl. The frozen RunJob is additionalProperties:false over fourteen required
+      names: four of the eight are not properties at all and ten required fields are missing,
+      including artifact, artifactHash, source, configuration, resolvedVars, resolvedSecrets,
+      deadlines, videoKey and manifestKey. The runner's validateEnvelope is default-deny on keys
+      and is step 1 of runCoordinator.submit — before artifact validation and before
+      pool.tryAcquire() — so every real dispatch returns 400 JOB_INVALID, classify maps it to
+      refusedTerminal, and the run ends ERROR / DISPATCH_FAILED. callbackBaseUrl is refused by its
+      own dedicated code, JOB_CALLBACK_NOT_PERMITTED: the API's dispatcher trips the one control
+      the closed key set exists to enforce, which the schema's own description calls "a security
+      control rather than tidiness". Separately, StudioDispatcher:218 opens
+      try (Resolved resolved = references.resolve(...)) and never reads resolved — no secret or
+      variable has ever reached the runner.
+    why_nothing_caught_it: >-
+      HttpRunnerDispatchClientTest asserts status classification, redirect policy and request
+      counts, never the body's keys. StudioContractTest asserts that POST /v1/runs is declared,
+      never that what this API sends conforms to it. grep -rn callbackBaseUrl backend/src/test/
+      returns nothing at all. 10.7's QA round attacked sixteen forged requests at the internal
+      chain and did not look here.
+    ownership_ruling: >-
+      @po 2026-09-11 — stays with 10.17, and it is not a scope violation. (1) A closed body cannot
+      be conformed halfway: additionalProperties:false plus fourteen required means the runner
+      accepts the body or refuses it, so splitting the fields across two stories yields two PRs of
+      which neither can assert conformance — and the assertion is the criterion. (2) Half the
+      missing fields are definitionally 10.17's: resolvedVars/resolvedSecrets are the values it
+      exists to plumb and typed references is its AC-1, while 10.7 shipped dispatch WITHOUT
+      resolved values deliberately and deferred that half here by name in its own AC-10b. (3) The
+      epic's acceptance bullet for 10.17 — "unauthorized or missing reference prevents browser
+      launch" — is unprovable on a branch where every job is refused before the reference check is
+      reached. Reassignment to 10.7 is also unavailable in practice: it is InReview with its gate
+      already run, and reopening it to add a body its own scope excluded would be a scope violation
+      in the other direction.
+    control_timing_ruling: >-
+      @po 2026-09-11 — the missing conformance test does NOT wait for the fix. It lands first, red,
+      in its own commit (10.17 T-10.17.2a), on the ADR-002 §12 "leave it red" precedent and the
+      ExecutionErrorCodeContractEscalationTest pattern this epic has used twice. It is written in
+      its GENERAL form — for every internal body this API produces, the serialized bytes validate
+      against the schema the frozen document declares for it — so it is a control rather than a
+      patch; RunJob is simply its first member and the one that is red today. A test naming only
+      RunJob's fourteen fields would be a fifteenth hand-maintained copy of one vocabulary, which
+      is ADR-002 §15.6's arrangement for the fifth time.
+    carried_by: "Story 10.17 AC-2, tasks T-10.17.2a (red first) and T-10.17.2b (the fix)."
+
+  - id: DEF-02
+    severity: HIGH
+    status: open
+    found_by: "@sm (River) while drafting 10.14, 2026-09-11 (raised as its open question 1); both halves verified by @po at validation"
+    owner: "10.14 (AC-10), landed at the head of wave 5"
+    summary: >-
+      The integrated branch is broken, not degraded: every FINAL the merged runner sends is refused
+      by the merged API. Story 10.13 landed the partial producer and emits it on every FINAL —
+      verified: runCoordinator declares
+      let evidence: EvidenceState = { ...evidenceKeys, state: 'UNAVAILABLE', partial: false }
+      before the try, and sendFinal(outcome: RunOutcome, evidence: EvidenceState) takes it
+      non-optionally, so no exit path including the catch can omit it. The API's RunnerEvidence.java
+      is a three-component record annotated @JsonIgnoreProperties(ignoreUnknown = false), and
+      StrictInternalBodyReader.java:29 builds its mapper with
+      .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES) — deliberately, so that a field the
+      contract does not name is a 400 rather than a silent divergence. The result is
+      400 INVALID_REPORT on every terminal report, terminal delivery retrying until abandoned, and
+      the run reconciled by a reaper instead of by its own result.
+    correction_to_adr: >-
+      ADR-002 §17.7 item 4 states "the runner reports the truth and the API discards it — which is
+      visible, bounded and strictly better than today." On the verified code nothing is discarded;
+      the report is refused. @architect is asked for a one-line §17.7 correction, since the ADR
+      currently describes behaviour the code does not have and a future reader will trust it. Not
+      gating — the fix proceeds without waiting for the correction.
+    why_nothing_caught_it: >-
+      The runner suite validates against the document, which permits partial; the backend suites use
+      their own fixtures. StudioContractTest.assertSchemaMatchesRecord covers nine public DTOs and
+      no internal record at all, which is why ADR-002 §17 could add partial to RunnerEvidence in the
+      document, leave the Java record three-wide, and turn nothing red. That gap is story 10.14's
+      AC-24.
+    mandated_ordering: >-
+      @po 2026-09-11 — 10.14's AC-10 (one nullable Boolean on one record) lands as a standalone
+      commit at the HEAD of wave 5, before any other wave-5 work merges, with the 400 shown red
+      before the change and the 200 after. Until it lands the integrated path is broken rather than
+      degraded, and no wave-5 story should be measured against a branch in that state.
+    carried_by: "Story 10.14 AC-10, AC-11, AC-24; task T-10.14.1."
 
 # ─────────────────────────────────────────────────────────────
 # External dependencies (Epic 10 "Open external dependencies immediately")
