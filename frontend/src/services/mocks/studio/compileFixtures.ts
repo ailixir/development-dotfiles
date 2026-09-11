@@ -509,9 +509,10 @@ export const COMPILE_FIXTURE_MATRIX: readonly RequiredFixture[] = [
           return defect;
         }
         // AC-14: a `400` message names the offending step index or the bound it broke — never the
-        // step's text. Without this the fixture could carry prose that leaks what the author wrote.
+        // step's text. `/\d/` alone was too loose (QA): any incidental digit satisfied it, so
+        // "split this into 2 tests" would have counted as naming a bound.
         const { message } = rejectionResponse(code);
-        return /\d/.test(message)
+        return /\bStep \d+\b/.test(message) || /\bmaximum is \d+\b/i.test(message)
           ? null
           : `${code}'s message names neither a step index nor a bound`;
       },

@@ -251,6 +251,33 @@ describe('AC-16a: two slots, both unavailable, neither filled from the English',
     }
   });
 
+  it('the pinned AC-2 expectations cannot be derived from the module they pin', () => {
+    /*
+     * QA finding PIN-1, the twelfth vacuity shape: a header comment is not a guard. QA performed
+     * the refactor `pinnedNarratives.ts` warns against — deriving the phrases from
+     * `COMPILE_STATE_NARRATIVES` — and the suite stayed fully green, because nothing compared the
+     * pin's *provenance*. The layering held for blanking (the minimum-phrase and
+     * minimum-rendered-length guards are independent of the pin) but fourteen of the fifteen facts
+     * became silently rewordable, which is the regression path straight back into VAC-11.
+     *
+     * This is the one edge that must not exist. `studioContract.test.ts` stays free to import the
+     * narratives module: it asserts set-equality against the **document's** enum, title
+     * distinctness and the unknown-status throw — never rendered content against the module.
+     */
+    const pin = STORY_SOURCE_MODULES.find((file) => file.endsWith('pinnedNarratives.ts'));
+    expect(pin, 'pinnedNarratives.ts is no longer where this guard looks for it').toBeDefined();
+
+    const derived = moduleSpecifiers(fs.readFileSync(pin!, 'utf8')).filter((specifier) =>
+      /(^|[./])compileStateNarratives$/.test(specifier.replace(/\.tsx?$/, '')),
+    );
+
+    expect(
+      derived,
+      'pinnedNarratives.ts imports the module it pins — the expected text would then be read back ' +
+        'out of the thing under test, which is exactly the assertion VAC-11 removed',
+    ).toEqual([]);
+  });
+
   it('the import scanner sees every specifier form, so its silence means something', () => {
     // Without this, the scan above could be reading nothing at all — the shape this epic keeps
     // finding. Each line below is a way a module could reach the retired path.
