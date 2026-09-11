@@ -4,34 +4,56 @@ story_title: Deadline enforcement, redaction and cleanup
 epic: EPIC-10
 wave: 4
 
-gate: CONCERNS
+gate: PASS
 status_reason: >-
+  **RECHECK, commit `4dc9516d4`.** QA-1 is closed and the closure was verified rather than
+  accepted. My own probe over the real relay and the real redactor now emits one 400-character line
+  ending `…[REDACTED] tra…` where it previously emitted `…pppCANARY-Zq7-p@ss` followed by
+  ` w0rd/+= trailing`; both the whole-value and prefix flags are false. MQ-1 — restoring the
+  shipped cut-then-redact order — turns **exactly 6** tests red: both new relay guards, all three
+  canary shapes and the AC-9 post-kill test. I separately confirmed the guards genuinely straddle
+  the cut rather than merely looking as though they do: with the padding put back to 385 and MQ-1
+  still applied the guard **passes**, and at 394 it fails with line 0 ending `…qqqp@ss w` and line
+  1 starting `0rd/+=rrr…`. The re-size is load-bearing and @dev's self-report of having repeated
+  my own finding is accurate. MQ-2 is red on exactly 1 test. MQ-3b survives, and the "no public
+  observable" characterisation is **verified**: I measured `emitted`, `dropped`, `released` and the
+  emitted lines at three points under both versions and they are identical. All gates reproduce:
+  `npm test` 853 passed / 2 skipped over 41 files, fixtures 80 / 7 over 4 files, lint, type-check,
+  build and pins exit 0, `--require-image` exit 1 by design, contract 14/14, `openapi.yaml` still
+  `815aae9b…`, `BASE_SHA256` untouched since the base commit, no `backend/**` file, `.nvmrc` 22.
+  Coverage `src/run/**` 88.52 / 87.69, `outputRelay.ts` 98.82, against the unchanged 85/80 gate.
+  **LOW-1 turned out to be deeper than I wrote it, and @dev corrected me.** My recommendation —
+  raise the test timeout — would by itself have converted a framework failure into a *silent pass*,
+  because the flood was pre-loaded before the clock started. I reproduced that: with the old
+  pre-loaded arrangement and the new 20 000 ms timeout, a relay that blocks for six seconds makes
+  the test **pass in 6 051 ms**. With the flood moved inside the measurement window the same
+  mutation fails on the assertion itself — `expected 6002 to be less than 5000` — so `elapsedMs`
+  is now the discriminator, which it never was. MED-1 is recorded accurately in AC-11b's skip body
+  and I verified the reading against launcher.ts:442-449. The `bounds.ts` second instance is
+  correctly routed and its "not live" claim is **verified**, one step further than @dev took it.
+  Two residuals remain, both narrower than what they replace and both named rather than implied:
+  the relay's chunk-boundary limit for values longer than `2 × maxLineLength` (MED-2, reproduced
+  by me, and the stated justification for it is wrong even though the limitation is real), and the
+  latent truncate-before-redact in `src/reporting/bounds.ts` (MED-3, out of this story's Scope).
+  Neither blocks. Gate moves CONCERNS -> **PASS**.
+  ---
+  **FIRST PASS, commit `0ac098a58` (superseded, retained for the record).**
   Sixteen of the twenty non-deferred criteria were verified by running them, four criteria are
   honestly deferred as live `it.skip`s naming their owners, T-10.13.10 is correctly left undone
-  and un-guessed, and one finding is new and is the reviewer's own. Every gate reproduces:
-  `npm test` 849 passed / 2 skipped over 41 files exit 0, `npm run test:fixtures` against real
-  pinned Chromium 80 passed / 7 skipped over 4 files exit 0, `lint`, `type-check`, `build` and
-  `check:pins` all exit 0, `check:pins --require-image` exits 1 by design (ci/stages.md O-2a),
-  `test/contract.test.ts` 14/14, `.nvmrc` reads 22. Coverage on `src/run/**` is 88.46 lines /
-  87.62 branches against the 85/80 gate it declares and no threshold was lowered. The two defects
-  @dev reports having found are real and the reviewer reproduced both mechanisms: replacing
-  `signalProcessTree` with a complete no-op now turns the fixtures tier RED (the test hangs to its
-  180 s bound on a SIGSTOPped Chromium that nothing reaches), and MT-1' and MT-2' each turn the
-  unit tier red on 4 assertions and the fixtures tier red at the 30 s patience bound with a real
-  orphaned browser. Both §17.4 counter-examples hold under M11. `docs/specs/studio/openapi.yaml`
-  is byte-unchanged at 815aae9b… and the diff touches no `backend/**` file. The reconstructed
-  `src/server/runCoordinator.ts` is clean, and the reviewer verified that against the base commit
-  rather than against a green suite. What holds the gate at CONCERNS is QA-1: `outputRelay.write`'s
-  no-newline overflow branch splits the buffer at `maxLineLength` **before** `deliver` redacts, so
-  a resolved value straddling the cut reaches the pod log as two recognisable fragments. This is
-  the eighth guard in this epic that could not fail — in a shape not yet on the named list — and
-  the story's own canary harness proves it the moment the trailing newline is taken off the
-  planted line.
-
+  and un-guessed, and one finding was new and mine: `outputRelay.write`'s no-newline overflow
+  branch split the buffer at `maxLineLength` **before** `deliver` redacted, so a resolved value
+  straddling the cut reached the pod log as two recognisable fragments — the eighth guard in this
+  epic that could not fail, in a shape not then on the named list. The two defects @dev reported
+  finding were real and I reproduced both mechanisms: a complete no-op kill turns the fixtures tier
+  RED, and MT-1' and MT-2' each turn the unit tier red on 4 assertions and the fixtures tier red at
+  the 30 s patience bound on a real orphaned browser. Both ADR-002 §17.4 counter-examples hold
+  under M11.
 reviewer: Quinn (@qa)
 updated: '2026-09-11T00:00:00Z'
+recheck_updated: '2026-09-11T00:00:00Z'
 branch: story/10.13
-head_sha: 0ac098a58
+head_sha: 4dc9516d4
+prior_head_sha: 0ac098a58 (gate CONCERNS, QA-1 open)
 base_sha: 34138201f
 worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.13
 platform: darwin 23.5.0 / arm64, node v23.10.0, npm 11.3.0
@@ -456,6 +478,7 @@ deferrals:
 top_issues:
   - id: QA-1
     severity: HIGH
+    status: CLOSED at 4dc9516d4 — see recheck below
     title: The relay's no-newline overflow branch splits a resolved value before redacting it
     ac: AC-8, AC-7a
     file: studio-runner/src/run/outputRelay.ts:150-153
@@ -472,6 +495,7 @@ top_issues:
 
   - id: MED-1
     severity: MEDIUM
+    status: ADDRESSED at 4dc9516d4 in AC-11b's skip body; reading verified
     title: AC-11a's launch-failure path has no real-browser observation and is not structurally covered
     ac: AC-11a, AC-11b
     finding: >-
@@ -486,6 +510,7 @@ top_issues:
 
   - id: LOW-1
     severity: LOW
+    status: CLOSED at 4dc9516d4 — and it was deeper than I wrote it; see recheck_low_1
     title: AC-14's derived bound equals vitest's default testTimeout, so it can never be the discriminator
     ac: AC-14
     finding: >-
@@ -609,18 +634,374 @@ do_not_do:
     it leaves no strays after three mutation runs, and without it a failed assertion leaves
     SIGSTOPped browsers on the machine.
 
+# ═════════════════════════════════════════════════════════════════════════════
+# RECHECK — commit 4dc9516d4, @dev's fix for QA-1 and LOW-1
+# ═════════════════════════════════════════════════════════════════════════════
+recheck:
+  head_sha: 4dc9516d4
+  prior_head_sha: 0ac098a58
+  diff: >-
+    6 files, 367 insertions / 23 deletions. src/run/outputRelay.ts (the fix), three test files
+    (outputRelay, canary, hung-child), one fixtures-tier skip body, and the story's Dev Agent
+    Record. **No gate file was touched by @dev** — correct restraint. No production file outside
+    src/run/outputRelay.ts. src/reporting/bounds.ts and reportingStepReporter.ts are NOT modified,
+    which is consistent with @dev's statement that they are outside this story's Scope.
+
+  gates:
+    unit_tests:
+      command: npm test
+      result: PASS
+      detail: >-
+        41 files, **853 passed / 2 skipped**, exit 0. Up 4 from my 849, which is the two new relay
+        guards, the retained-tail bound and the released-discard test. Exactly @dev's figure.
+    fixtures_tier:
+      command: npm run test:fixtures
+      result: PASS
+      detail: 4 files, **80 passed / 7 skipped**, exit 0. Unchanged, as expected.
+    lint: {command: npm run lint, result: 'exit 0'}
+    type_check: {command: npm run type-check, result: 'exit 0'}
+    build: {command: npm run build, result: 'exit 0'}
+    pins: {command: npm run check:pins, result: 'exit 0'}
+    pins_require_image: {command: npm run check:pins -- --require-image, result: 'exit 1, by design (O-2a)'}
+    contract: {command: npx vitest run test/contract.test.ts, result: '14 passed / 14'}
+    coverage:
+      result: RAISED, NOT LOWERED
+      detail: >-
+        src/run/** 88.46 -> **88.52** lines, 87.62 -> **87.69** branches; outputRelay.ts
+        98.68 -> **98.82**. The 85/80 threshold block is unchanged — vitest.config.ts is not in
+        the diff at all. Every figure matches @dev's report.
+    contract_document:
+      result: STILL BYTE-UNCHANGED
+      detail: >-
+        shasum 815aae9b0068335e8d5ab5270dccecac4d1fd6f472306ca3dc04292187dd0d80. `git diff
+        34138201f..HEAD` names no backend/ file, no openapi.yaml, no .nvmrc, no package.json, no
+        isolation.test.ts, no eslint config, no vitest.config.ts, no src/main.ts. `.nvmrc` reads 22.
+    contract_pin:
+      result: STILL CORRECTLY UN-TICKED AND UN-GUESSED
+      detail: >-
+        `BASE_SHA256` still reads 815aae9b… — equal to the live digest — and
+        `git diff 34138201f..HEAD -- test/run/confinement.test.ts` still contains **no** +/- line
+        touching the constant, so the fix commit did not quietly re-anchor it either. T-10.13.10
+        remains `[ ]` and AC-18 remains `[~]`. FOC-04's order is intact.
+    working_tree:
+      result: CLEAN
+      detail: >-
+        Empty after every recheck mutation was reverted with `git checkout HEAD -- <path>` (never
+        `git stash`). A full `npm test` after the last revert reproduced 853 / 2 / 41.
+        `ps -A | grep -iE 'chrome-headless|ffmpeg-mac|headless_shell'` empty. Three throwaway probe
+        files were created under test/run/ and deleted; none is in the tree.
+
+  qa_1_closure:
+    verdict: GENUINELY CLOSED
+    my_own_probe:
+      before: >-
+        On the shipped tree the same probe emitted two lines — `…pppCANARY-Zq7-p@ss` (400 chars)
+        and ` w0rd/+= trailing` — whose concatenation is the value.
+      after: >-
+        One line, 400 characters, ending `ppppp[REDACTED] tra…`. CONTAINS-FULL=false,
+        CONTAINS-PREFIX=false. Independently reproduced, not accepted from the record.
+      also_checked: >-
+        A value **longer than maxLineLength** arriving in a single chunk is now scrubbed whole
+        (the buffer is redacted before any cut), which the old code also failed at. Clean.
+    mq_1:
+      mutation: restore the shipped cut-then-redact order on the overflow branch
+      result: RED on exactly 6 tests
+      detail: >-
+        test/run/outputRelay.test.ts "scrubs a value that straddles the overflow cut" and
+        "reassembles a value split across two chunks"; test/run/canary.test.ts shape 1, shape 2,
+        shape 3 and the AC-9 post-kill test. Exactly @dev's figure of 6.
+    do_the_new_guards_genuinely_straddle:
+      finding: YES — AND I PROVED THE RE-SIZE IS LOAD-BEARING
+      method: >-
+        With MQ-1 still applied I put the padding back to 385 — the value @dev self-reports having
+        written first — and re-ran only that guard.
+      result: >-
+        **It passes.** 1 passed / 17 skipped. At 385 the 12-character value sits entirely on the
+        near side of the 400-character cut, so `deliver`'s own redaction catches it and the guard
+        cannot tell the two orders apart. At 394 it fails, and the failure message shows the
+        straddle directly: line 0 ends `…qqqqqp@ss w` and line 1 begins `0rd/+=rrrr…`. The cut
+        lands at value offset 6. **The guard is genuinely straddle-carrying; the ninth vacuous
+        guard was created and then destroyed by @dev before it shipped.** The self-report is
+        accurate and the restraint in disclosing it is the behaviour this epic wants.
+    mq_2:
+      mutation: redact first, but cut to the last byte with no retained tail
+      result: RED on exactly 1 test
+      detail: '"reassembles a value split across two chunks before it cuts, when it can". Matches @dev.'
+    canary_matrix:
+      finding: THE OVERFLOW SHAPE IS NOW IN THE MATRIX, ON ALL THREE SHAPES
+      detail: >-
+        `OVERFLOW_LEAK` — 385 q + CANARY + ' no-newline-here' + 385 r + CANARY + 600 s, 1 432
+        characters with no newline anywhere — is appended to shape 1, shape 2 and shape 3. The
+        first canary sits at offset 385..407 against a 400-character cut, so it straddles; MQ-1
+        turning all three shapes red is the proof that it does.
+
+  recheck_low_1:
+    verdict: CLOSED — AND @dev CORRECTED THE REVIEWER, WHICH IS THE IMPORTANT PART
+    what_i_recommended: >-
+      "Set testTimeout in vitest.config.ts above validateTimeoutMs, so the derived bound is the
+      assertion that fires. One line."
+    why_that_was_wrong: >-
+      The flood was pre-loaded by `hangOne({ writes: true })` **before** the `/health` request was
+      timed, so the relay had already finished its work when the clock started. Raising the timeout
+      alone would therefore have converted a framework failure into a **silent pass**, which is
+      strictly worse than the state I flagged.
+    reproduced_by_the_reviewer:
+      method: >-
+        Reverted only the flood-placement change (back to the pre-loaded `hangOne({ writes: true })`
+        and a single timed `/health`), kept the new 20 000 ms timeout, and re-applied the 6 000 ms
+        relay busy-wait.
+      result: >-
+        **The test PASSES, in 6 051 ms.** A relay that blocked the event loop for six seconds was
+        declared responsive. My one-line recommendation would have produced exactly this.
+    the_actual_fix:
+      detail: >-
+        The request is now issued first and the 200-line flood written on the same tick, so the
+        relay's work sits between the request and its response. Re-falsified by the reviewer with
+        the same mutation: **`AssertionError: expected 6002 to be less than 5000`**, inside a
+        20 000 ms bound. The `elapsedMs` assertion against `runner.config.validateTimeoutMs` is now
+        the discriminator, which it was not before. The other three AC-14 tests took the 20 000 ms
+        bound only, which is correct — none of them measures the relay.
+
+  mq_3b_judgement:
+    survived: CONFIRMED — 853 passed / 2 skipped, identical to the unmutated suite
+    the_claim: >-
+      Clearing the buffer on the released branch is memory hygiene with no public observable.
+    verdict: THE CLAIM IS VERIFIED, NOT MERELY ASSERTED — BUT THE FRAMING UNDERSTATES IT
+    how_i_checked: >-
+      Measured every member of the public surface — `emitted`, `dropped`, `released` and the
+      emitted lines — at three points (after a post-release overflow write, after a subsequent
+      short write, and after `close`) under both the shipped code and MQ-3b. **Identical in every
+      cell**: dropped 1 / 2 / 2, emitted 0, lines []. Nothing emitted either way, because `deliver`
+      drops unconditionally once the redactor is null.
+    the_distinction_worth_drawing: >-
+      MQ-3b is **not** the same as MC-5. MC-5 is *redundant* — the property it guards is enforced
+      twice, so there is nothing to observe and nothing is lost. MQ-3b is *unobservable*: it guards
+      a property nothing else enforces. Under retention, `partial[stream]` holds the raw buffer
+      including the value for as long as the relay object lives, and AC-9's stated property is
+      "the relay holds no reference to a resolved value after the run". The mutation genuinely
+      breaks a stated criterion; the interface simply has no window onto it.
+    residual_note: >-
+      The test that covers this branch carries a comment claiming that under retention "the
+      accumulated text would still be sitting in the relay and **would surface on the next
+      flush**". It would not, and I measured that it does not — see ninth_vacuous_guard.
+    suggested_hardening: >-
+      One line, and it makes the property falsifiable without changing behaviour: add
+      `readonly retained: number` to `OutputRelay`, returning
+      `partial.stdout.length + partial.stderr.length`. Then MQ-3b is red. Not blocking.
+
+  residual_judgement:
+    subject: >-
+      @dev declares a residual: a value longer than a line that **also** spans a chunk boundary can
+      still fragment, and removing it "would need the unbounded buffer the relay exists to prevent".
+    is_it_real: YES — I REPRODUCED IT
+    reproduction: >-
+      A 1 022-character value (`SECRETBEGIN-` + 1 000 A + `-SECRETEND`) delivered as
+      `'x'*100 + value.slice(0,900)` then `value.slice(900) + 'y'*50`, maxLineLength 400. The relay
+      emits 2 lines and the first begins `xxx…SECRETBEGIN-AAAAAAAAAAAAAAAAAA` — roughly 300
+      characters of the value, verbatim. PREFIX_LEAK=true.
+    is_it_a_second_qa_1_wearing_a_disclaimer: >-
+      **No — but the reason given for it is wrong, and that matters.** It is materially narrower
+      than QA-1: QA-1 fired for *any* value near the relay's own deterministic cut, including a
+      12-character one, on every newline-less overflow. This requires a value longer than
+      `2 × maxLineLength` (800 characters by default) **and** a chunk boundary landing more than
+      800 characters into it — non-deterministic, kernel-scheduled, and out of reach for ordinary
+      secrets. I confirmed the *reducible* half is genuinely closed: a value shorter than a line,
+      split across two chunks, now reassembles before anything is emitted (MQ-2 proves the tail is
+      load-bearing), and a value longer than a line arriving whole in one chunk is scrubbed whole.
+    but_the_justification_does_not_hold: >-
+      "It cannot remove the general one without an unbounded buffer" is false. The buffer needed is
+      bounded by the **longest known value**, which is a number the caller holds —
+      `knownValuesOf(job)` in runCoordinator.ts:300 — and which the job envelope bounds. Retaining
+      `max(maxLineLength, longestKnownValue)` instead of `2 × maxLineLength` closes the general
+      case at bounded, declared memory. That is a smaller claim than unbounded, and it is available.
+    why_it_is_not_blocking_here: >-
+      Today every value is a planted canary of 12 to 23 characters, so the residual is unreachable
+      on this story's own material. It becomes reachable when **10.17** substitutes real vault
+      material, where a PEM key or a long JWT easily exceeds 800 characters. Recorded as MED-2 and
+      routed there, with the fix named rather than left as "irreducible".
+    and_it_has_no_guard: >-
+      Stated because it is the shape that produced QA-1: **no test plants a value longer than
+      `2 × maxLineLength` across a chunk boundary.** The limitation is documented in the module
+      header and nowhere else. Whoever takes MED-2 should land the guard with the fix.
+
+  bounds_ts_second_instance:
+    routed_correctly: YES
+    the_defect_shape: >-
+      `reportingStepReporter.ts:139-141` builds `step {i} {status}: {failure}` and
+      `createLogBuffer.append` in `src/reporting/bounds.ts` truncates it at `maxLogEntryLength`
+      (400) **before** `reportClient` redacts the serialized body — the same cut-then-redact order
+      as QA-1, at a different site. @dev probed it: QA1B-FULL=false PREFIX=true.
+    not_live_claim:
+      dev_position: >-
+        "Not live today, because the only producer of `failure` is the child, whose `safeMessage`
+        redacts before truncating." Labelled by @dev as **inferred, not verified** — it read the
+        call sites and did not drive a real child that violates the invariant.
+      reviewer_verdict: >-
+        **CORRECT, AND I RAISE IT FROM INFERRED TO VERIFIED — one step further than @dev took it.**
+        The claim as phrased is slightly imprecise (there are *two* producers, not one), but the
+        conclusion is sound and the imprecision does not weaken it.
+      what_i_verified:
+        - >-
+          `grep -rn stepFinished src/` gives exactly three paths into
+          `reportingStepReporter.stepFinished`: `src/executor/executor.ts:99` and `:126` (the
+          in-process path, via `runCoordinator.executeInProcess`), and `src/run/launcher.ts:782`
+          (the parent forwarding the child's `step-finished` message).
+        - >-
+          Both executor call sites take `failure` from the **single** construction site
+          `executor.ts:112` — `failure = safeMessage(error, redactor, maxMessage)`. There is no
+          other place in `src/` that assigns a step `failure`.
+        - >-
+          `safeMessage` (`src/executor/redaction.ts:68-77`) redacts **then** truncates, which is
+          the correct order.
+        - >-
+          `launcher.ts:782` is a pass-through: it forwards the string the child already produced
+          through the same `safeMessage`.
+        - >-
+          The redactor at `executor.ts:83` is built from `options.resolver.knownValues()`, which is
+          the same value set as the parent's `createRedactor(knownValuesOf(job))` — so there is no
+          window in which the child's redactor is narrower than the parent's and a value slips
+          through `safeMessage` unscrubbed. (`knownValuesOf` additionally filters empty strings,
+          which is immaterial.)
+      conclusion: >-
+        `failure` is always redacted before it reaches `reportingStepReporter`, so `bounds.ts`
+        cuts text that is already scrubbed. **Not live today — VERIFIED.** No second producer
+        exists, so the routing is not too slow.
+    what_remains: >-
+      A **latent trap**, not a live defect: `createLogBuffer.append` will fragment any future
+      caller's unredacted string longer than `maxLogEntryLength`. Recorded as MED-3.
+    routing: >-
+      @dev suggested 10.17 or a 10.6-area fix. **The 10.6-area fix is the better owner** —
+      `bounds.ts` is 10.6's module and the right change is structural (redact inside `append`, or
+      make the pre-redacted precondition a type rather than a convention), not dependent on real
+      secret material arriving. 10.17 is the right *deadline*, because that is when the trap
+      becomes reachable.
+
+  ninth_vacuous_guard:
+    found: TRUE — ONE, LOW SEVERITY, IN THE NEW MATERIAL
+    id: LOW-5
+    test: >-
+      test/run/outputRelay.test.ts "drops a long newline-less buffer wholesale once released,
+      rather than cutting it"
+    the_overclaim: >-
+      Its second half carries the comment *"If the first buffer had been **retained** rather than
+      discarded, the accumulated text would still be sitting in the relay and **would surface on
+      the next flush**"*, followed by a second write, a `close()` and
+      `expect(sink.text).not.toContain('qqq')`.
+    why_it_is_vacuous: >-
+      It would **not** surface, and I measured that it does not. Once `redactor === null`,
+      `deliver` drops unconditionally, so nothing retained can ever be emitted — a different guard
+      upstream already prevents the surfacing this one claims to detect. Under MQ-3b the whole
+      suite is green, which includes this test: it passes identically under the mutation its own
+      comment says it would catch. The first half (`sink.lines` empty, `dropped > 0`) is fine; the
+      second half is decorative.
+    the_shape: >-
+      New again, and worth adding to the catalogue: **an assertion whose stated discriminating
+      mechanism is pre-empted by a different guard, so it reads as load-bearing and is not.** It is
+      why MQ-3b survives, and @dev reported MQ-3b as surviving without connecting it to this
+      comment.
+    severity: LOW — a comment/assertion mismatch, not a product defect. No value reaches any sink.
+    action: >-
+      Either delete the second half and the claim, or add the `retained` getter suggested above and
+      assert on it, which would make both the comment true and MQ-3b red.
+
+  med_1_reading:
+    verdict: ACCURATE — VERIFIED AGAINST THE SOURCE
+    detail: >-
+      `src/run/launcher.ts:442-449`: when `inbox.awaitReady(options.launchTimeoutMs)` returns a
+      non-ready outcome the launcher calls `child.kill()`, closes and releases the relay, and
+      throws `LaunchFailure`. The coordinator's own `try` around `launcher.launch`
+      (runCoordinator.ts:413-428) converts it to a `RunFailure` **before** `terminate` is ever
+      assigned or registered in `terminators`. So the skip body's statement is correct on every
+      point: no `session.run`, the failure propagates before `terminate` registers, and the reaping
+      is a different call site reached from `awaitReady` expiring rather than from a deadline.
+    one_nuance: >-
+      The *mechanism* does compose — `ChildProcessHandle.kill` is the same `signalProcessTree` call
+      (launcher.ts:302). What does not compose is the **call site and the trigger**, which is the
+      substantive point and is what the skip body says. Recording the phrase "does not compose" as
+      accurate in the sense meant.
+    placement: >-
+      Put in AC-11b's `it.skip` body rather than in the criterion text, because @po owns acceptance
+      criteria. Correct restraint, and the right place: whoever closes AC-11b reads that body.
+
+top_issues_recheck:
+  - id: MED-2
+    severity: MEDIUM
+    title: The relay's chunk-boundary residual is real, is unguarded, and its stated reason is wrong
+    ac: AC-8, AC-7a
+    owner: story 10.17 (deadline), 10.13-area fix
+    finding: >-
+      Reproduced: a 1 022-character value spanning a chunk boundary leaks ~300 characters of
+      verbatim prefix. Unreachable on this story's 12-to-23-character planted canaries; reachable
+      the moment 10.17 substitutes real vault material. The declared justification — that closing
+      it needs an unbounded buffer — is false: the buffer needed is bounded by the longest known
+      value, which `knownValuesOf(job)` already computes.
+    action: >-
+      Retain `max(maxLineLength, longestKnownValue)` rather than `2 × maxLineLength`, and land a
+      guard that plants a value longer than the tail across a chunk boundary. The absence of that
+      guard is the shape that produced QA-1.
+  - id: MED-3
+    severity: MEDIUM
+    title: createLogBuffer.append truncates before reportClient redacts — the QA-1 shape at a second site
+    ac: AC-10 (10.6's area)
+    owner: 10.6-area fix, deadline 10.17
+    finding: >-
+      Latent, not live. Verified by the reviewer that every producer of a step `failure` passes
+      through the single `safeMessage` site, which redacts before truncating, so `bounds.ts` today
+      cuts already-scrubbed text. The trap is that nothing enforces that precondition.
+    action: Redact inside `append`, or make "pre-redacted" a type rather than a convention.
+  - id: LOW-5
+    severity: LOW
+    title: The released-discard test's comment claims a mechanism it does not exercise
+    ac: AC-9
+    finding: See ninth_vacuous_guard above. Passes identically under MQ-3b.
+    action: >-
+      Delete the claim, or add `readonly retained: number` and assert on it.
+
+resolved_since_the_concerns:
+  - id: QA-1
+    status: CLOSED
+    detail: >-
+      Redact-before-cut on the overflow branch, plus a retained tail that reassembles a value split
+      across chunks. Reproduced clean by the reviewer's own probe; MQ-1 red on 6, MQ-2 red on 1;
+      the new guards proven to genuinely straddle by re-running them at the pre-resize padding,
+      where they pass.
+  - id: LOW-1
+    status: CLOSED, AND THE REVIEWER'S PROPOSED FIX WAS WRONG
+    detail: >-
+      The bound is now measured with the flood inside the window, so `elapsedMs` is the
+      discriminator (`expected 6002 to be less than 5000`). The reviewer reproduced that the
+      timeout-only fix it had recommended would have made the mutation pass silently in 6 051 ms.
+  - id: MED-1
+    status: ADDRESSED
+    detail: >-
+      Recorded in AC-11b's skip body with the launch-failure path named as the one that does not
+      compose. Reading verified against launcher.ts:442-449 and runCoordinator.ts:413-428.
+
+still_open_after_the_recheck:
+  - MED-2 — the relay's chunk-boundary residual (10.17)
+  - MED-3 — bounds.ts truncate-before-redact, latent (10.6 area, deadline 10.17)
+  - LOW-2 — the killReason ordering is pinned by value, not by time
+  - LOW-3 — part of AC-7a's count is clean by construction on the kill path
+  - LOW-4 — confinement.test.ts's SOURCE_DIRECTORIES omits three top-level files
+  - LOW-5 — the released-discard test's overclaiming comment
+  - AC-5b / AC-7b / AC-11b / O-13 — live skips, owners named
+  - T-10.13.10 — blocked on 10.9 per FOC-04, correctly un-ticked
+
 final_decision:
-  gate: CONCERNS
-  merge: SAFE WITH QA-1 FIXED FIRST
+  gate: PASS
+  merge: SAFE
   statement: >-
-    This is a strong story. The two defects @dev found are real, were found by the tier that could
-    see them, and the reviewer independently reproduced the mechanism of the more important one:
-    a complete no-op kill now turns the fixtures tier red, which is precisely the failure the
-    split hint named and which the epic has been hunting. The `partial` producer is correct, the
-    §17.4 independence holds in both directions under mutation, the pin is correctly left alone,
-    the reconstruction of runCoordinator.ts is clean against the base commit rather than merely
-    against a green suite, and the developer's decision to report two surviving mutants rather
-    than hide them is exactly the behaviour this epic wants. Against that, the reviewer found an
-    eighth guard that could not fail, in a shape not yet on the list, and behind it a live
-    fragment disclosure on the one surface the epic's acceptance bullet names by hand. It is one
-    `while` loop and one planted newline. Fix QA-1 and this is a PASS.
+    QA-1 is closed and I verified the closure three ways rather than accepting it: my own probe
+    over the real relay now emits `…[REDACTED] tra…` where it emitted a value fragment before;
+    MQ-1 turns exactly 6 tests red across both new guards, all three canary shapes and the AC-9
+    post-kill test; and the guards genuinely straddle the cut, proven by putting the padding back
+    to 385 and watching the guard pass. All gates reproduce at 853 / 2 / 41 and 80 / 7 / 4, the
+    contract pin is still correctly un-anchored, and no threshold moved. The most valuable thing in
+    this commit is not the fix: it is that @dev found my LOW-1 recommendation would have converted
+    a framework failure into a silent pass, and I reproduced that — 6 051 ms, green. A reviewer's
+    one-line suggestion was itself a vacuous-guard generator, and the story caught it. Two residuals
+    stay open and are routed: the relay's chunk-boundary limit, which is real, reproduced, narrower
+    than what it replaces, and justified for the wrong reason, and the latent truncate-before-redact
+    in 10.6's `bounds.ts`, whose "not live" status I raised from inferred to verified. Neither is
+    reachable on this story's own material. One ninth guard turned up — a comment claiming a
+    mechanism a different guard pre-empts — and it is cosmetic. Nothing outstanding blocks. Merge.
