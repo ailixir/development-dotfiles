@@ -326,7 +326,10 @@ paths:
         - name: Idempotency-Key
           in: header
           required: false
-          schema: { type: string, maxLength: 200 }
+          description: |
+            Must be a UUID: the platform idempotency filter rejects any other form with
+            `400 INVALID_IDEMPOTENCY_KEY` before the request reaches Studio.
+          schema: { type: string, format: uuid }
       responses:
         '202':
           description: Execution accepted
