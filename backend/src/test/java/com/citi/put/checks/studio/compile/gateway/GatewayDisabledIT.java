@@ -99,7 +99,12 @@ class GatewayDisabledIT {
 
     UITestDto created = studioService.createTest(request("gateway-disabled-draft"), principal());
     UITestDto updated =
-        studioService.updateTest(created.id(), request("gateway-disabled-draft-v2"));
+        studioService.updateTest(
+            created.id(),
+            request(
+                "gateway-disabled-draft-v2",
+                created.sourceRevision(),
+                created.configurationRevision()));
 
     assertThat(created.id()).isNotNull();
     assertThat(updated.name()).isEqualTo("gateway-disabled-draft-v2");
@@ -120,6 +125,11 @@ class GatewayDisabledIT {
   }
 
   private static UITestRequest request(String name) {
+    return request(name, null, null);
+  }
+
+  private static UITestRequest request(
+      String name, Long sourceRevision, Long configurationRevision) {
     return new UITestRequest(
         name,
         "created by GatewayDisabledIT",
@@ -131,7 +141,9 @@ class GatewayDisabledIT {
         720,
         30,
         "load",
-        "dev");
+        "dev",
+        sourceRevision,
+        configurationRevision);
   }
 
   private static Authentication principal() {
