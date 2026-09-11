@@ -380,6 +380,18 @@ top_issues:
       Add one test that installs a capturing appender and asserts the emitted bytes across a full
       compile, including the error paths. Not blocking: the scan is strict about throwables and the
       forbidden-identifier list covers the real carriers.
+    status: RESOLVED
+    resolution: >-
+      Six tests in CompilePipelineTest now assert on captured output — a logback OutputStreamAppender
+      on the root logger encoding %msg (every argument through its own toString) and %ex{full} (the
+      throwable chain) into a byte buffer, with the two compile loggers lowered to TRACE — across the
+      success, gateway-failure, thrown-exception, validator-rejection and failed-enqueue paths, with
+      canaries planted in a source line, an artifact fragment, a resolved variable value, an
+      exception message and a nested diagnostic excerpt. Falsified three ways, each red naming the
+      leaked value while the source scan stayed green at 11/0: a leak through an innocently named
+      local, a throwable appended on a continuation line, and the nested ValidationOutcome record
+      logged by its own toString. CompilePipeline.java restored byte-identical (md5
+      6adc759c6ca21b8dcd0bf5516c6669e1).
   - id: QUAL-2
     severity: low
     finding: >-

@@ -7,8 +7,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.OutputStreamAppender;
 import com.citi.put.checks.studio.StudioValidationException;
 import com.citi.put.checks.studio.compile.gateway.CompileResponse;
+import com.citi.put.checks.studio.compile.gateway.GatewayAuditLogger;
 import com.citi.put.checks.studio.compile.gateway.GatewayErrorCode;
 import com.citi.put.checks.studio.compile.gateway.GatewayOutcome;
 import com.citi.put.checks.studio.compile.gateway.GatewayProvenance;
@@ -17,18 +23,24 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -40,12 +52,17 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 /**
- * Story 10.8 AC-4, AC-9, AC-10, AC-13, AC-16, AC-17, AC-20 — the pipeline end to end against a stub
- * gateway and a real HTTP runner stub, on a real PostgreSQL.
+ * Story 10.8 AC-4, AC-9, AC-10, AC-13, AC-16, AC-17, AC-20, AC-29 — the pipeline end to end against
+ * a stub gateway and a real HTTP runner stub, on a real PostgreSQL.
  *
  * <p>The runner is WireMock rather than a mocked client on purpose: several criteria assert that no
  * runner call was issued at all, and that assertion is only worth anything when it is made on the
  * wire.
+ *
+ * <p>AC-29 is asserted the same way, on captured output rather than on source text. Every test in
+ * this class runs with a logback appender attached to the root logger, encoding each event — the
+ * formatted message and the full throwable chain — into a byte buffer. What the assertions read is
+ * what the sink was handed.
  */
 @SpringBootTest
 @ActiveProfiles("local")
@@ -56,6 +73,29 @@ class CompilePipelineTest {
   private static final String CSI_ID = "60403";
   private static final List<String> STEPS =
       List.of("Go to \"https://example.com/login\"", "Click the \"Sign in\" button");
+
+  /**
+   * AC-29's canaries, one per way a value realistically reaches a log sink. Each is planted in a
+   * different carrier and the value itself is what the assertion names when it leaks, so a failure
+   * says which path opened rather than only that one did.
+   */
+  private static final String SOURCE_CANARY = "src-canary-7c1f42";
+
+  private static final String ARTIFACT_CANARY = "artifact-canary-b9d3e0";
+  private static final String RESOLVED_VALUE_CANARY = "resolved-canary-4a8e11";
+  private static final String THROWN_MESSAGE_CANARY = "thrown-canary-2f55c7";
+  private static final String NESTED_EXCERPT_CANARY = "nested-canary-e6b704";
+
+  private static final Map<String, String> CANARIES =
+      Map.of(
+          "source line", SOURCE_CANARY,
+          "artifact fragment", ARTIFACT_CANARY,
+          "resolved variable value", RESOLVED_VALUE_CANARY,
+          "exception message", THROWN_MESSAGE_CANARY,
+          "nested diagnostic excerpt", NESTED_EXCERPT_CANARY);
+
+  /** Logged through a compile-package logger so a silent or detached appender cannot pass. */
+  private static final String SINK_PROBE = "log-sink-probe-0a1b2c";
 
   private static WireMockServer runner;
 
@@ -128,14 +168,27 @@ class CompilePipelineTest {
 
   private UUID testId;
 
+  private ByteArrayOutputStream sink;
+  private OutputStreamAppender<ILoggingEvent> sinkAppender;
+  private Map<String, Level> restoreLevels;
+
   @BeforeEach
   void setUp() {
+    attachLogSink();
     runner.resetAll();
     stubValidator(true);
     gateway.reset();
     seedUser();
     seedCsi();
     testId = seedTest(STEPS);
+  }
+
+  @AfterEach
+  void detachLogSink() {
+    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+    context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).detachAppender(sinkAppender);
+    sinkAppender.stop();
+    restoreLevels.forEach((name, level) -> context.getLogger(name).setLevel(level));
   }
 
   // ── AC-16: a successful compile becomes AWAITING_CONFIRMATION, never READY ─
@@ -434,7 +487,241 @@ class CompilePipelineTest {
     runner.verify(1, postRequestedFor(urlEqualTo("/v1/validate")));
   }
 
+  // ── AC-29: the bytes the log sink was actually handed ─────────────────────
+
+  /**
+   * The fixture's own guard. Every {@code doesNotContain} below is worthless if the appender is not
+   * attached, is filtered out by a level, or renders nothing; this asserts the sink is live, that
+   * it is reached through a compile-package logger, that a level as low as TRACE still arrives — so
+   * a leak at DEBUG would be captured too — and that a formatted argument is rendered into the
+   * captured bytes rather than left as a placeholder.
+   */
+  @Test
+  void theCapturingSinkIsLiveAndRendersFormattedArgumentsAndThrowables() {
+    org.slf4j.Logger logger = LoggerFactory.getLogger(CompilePipeline.class);
+    logger.trace("probe argument={}", SOURCE_CANARY);
+    logger.warn("probe throwable", new IllegalStateException(THROWN_MESSAGE_CANARY));
+
+    String captured = captured();
+    assertThat(captured)
+        .as("the appender must be attached to the root logger for the whole class")
+        .contains(SINK_PROBE)
+        .as("a TRACE event from a compile-package logger must reach the buffer")
+        .contains("probe argument=" + SOURCE_CANARY)
+        .as("a throwable handed to a log site must be rendered into the captured bytes")
+        .contains(THROWN_MESSAGE_CANARY)
+        .contains("IllegalStateException");
+  }
+
+  @Test
+  void aSuccessfulCompileHandsNoSourceArtifactOrResolvedValueToTheLogSink() {
+    UUID id = seedTest(List.of("Go to \"https://example.com/" + SOURCE_CANARY + "\""));
+    jdbc.update(
+        "UPDATE ui_tests SET variables = CAST(? AS jsonb) WHERE id = ?",
+        "[{\"name\":\"USERNAME\",\"kind\":\"plain\",\"value\":\"" + RESOLVED_VALUE_CANARY + "\"}]",
+        id);
+    gateway.answer(request -> ok(artifactWithCanaryCode(sourceOf(request))));
+
+    pipeline.compile(id, OWNER);
+    awaitCompileStatus(id, "AWAITING_CONFIRMATION");
+
+    // Non-vacuity: all three values really travelled the compile path on this attempt.
+    assertThat(runner.getAllServeEvents().get(0).getRequest().getBodyAsString())
+        .as("the source and the artifact do reach the validator on the wire")
+        .contains(SOURCE_CANARY)
+        .contains(ARTIFACT_CANARY);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT variables::text FROM ui_tests WHERE id = ?", String.class, id))
+        .as("the resolved value is on the draft the attempt loaded")
+        .contains(RESOLVED_VALUE_CANARY);
+
+    assertNothingSecretReachedTheLogSink();
+  }
+
+  @Test
+  void aGatewayFailureWhoseReasonQuotesTheSourceHandsNothingToTheLogSink() {
+    UUID id = seedTest(List.of("Go to \"https://example.com/" + SOURCE_CANARY + "\""));
+    gateway.answer(
+        request ->
+            CompileResponse.failure(
+                GatewayOutcome.TRANSPORT,
+                GatewayErrorCode.GATEWAY_TRANSPORT,
+                "gateway rejected prompt: " + SOURCE_CANARY + " / " + ARTIFACT_CANARY,
+                null,
+                0,
+                1L,
+                0,
+                0));
+
+    pipeline.compile(id, OWNER);
+    awaitCompileStatus(id, "STALE");
+
+    assertCompileErrorIsExactly(id, GatewayErrorCode.GATEWAY_TRANSPORT.name());
+    assertNothingSecretReachedTheLogSink();
+  }
+
+  /**
+   * The exception path. A parse failure's message can quote the very artifact or source text that
+   * caused it, and a throwable handed to a log sink carries that message and its whole cause chain
+   * into the output. This drives a gateway that throws such an exception and reads the bytes.
+   */
+  @Test
+  void aThrownExceptionQuotingTheSourceNeverReachesTheLogSink() {
+    UUID id = seedTest(List.of("Go to \"https://example.com/" + SOURCE_CANARY + "\""));
+    gateway.answer(
+        request -> {
+          throw new IllegalStateException(
+              "cannot parse " + THROWN_MESSAGE_CANARY + " from " + ARTIFACT_CANARY,
+              new IllegalArgumentException("caused by " + SOURCE_CANARY));
+        });
+
+    pipeline.compile(id, OWNER);
+    awaitCompileStatus(id, "STALE");
+
+    assertCompileErrorIsExactly(id, CompileErrorCode.COMPILE_INTERNAL_ERROR.name());
+    assertThat(captured())
+        .as("the attempt really did fail through the logging catch block")
+        .contains("studio.compile.internal_error");
+    assertNothingSecretReachedTheLogSink();
+  }
+
+  /**
+   * The nested-object path. {@code ValidationOutcome} is a record holding records holding records,
+   * so logging the outcome — or any of its step verdicts — renders the diagnostic excerpt through
+   * the nested record's own {@code toString} without any forbidden identifier appearing at the log
+   * site.
+   */
+  @Test
+  void aDiagnosticExcerptNestedInsideTheValidationOutcomeNeverReachesTheLogSink() {
+    stubValidatorRejectingWithCanaryExcerpt();
+
+    pipeline.compile(testId, OWNER);
+    awaitCompileStatus("NEEDS_REVISION");
+
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT compile_diagnostics::text FROM ui_tests WHERE id = ?",
+                String.class,
+                testId))
+        .as("the excerpt really was carried through the outcome and persisted")
+        .contains(NESTED_EXCERPT_CANARY);
+    assertNothingSecretReachedTheLogSink();
+  }
+
+  @Test
+  void aCompileThatCouldNotEvenStartNeverLogsTheSourceItRefused() {
+    List<String> overLimit = new java.util.ArrayList<>(lines(100));
+    overLimit.add("Go to \"https://example.com/" + SOURCE_CANARY + "\"");
+    UUID id = seedTest(overLimit);
+
+    pipeline.enqueueAfterCommit(id, OWNER);
+
+    assertThat(captured())
+        .as("the enqueue really did fail and log, so the assertion below is not vacuous")
+        .contains("studio.compile.enqueue_failed");
+    assertNothingSecretReachedTheLogSink();
+  }
+
   // ── helpers ───────────────────────────────────────────────────────────────
+
+  /**
+   * Asserts on the bytes the appender wrote, not on the source of the log sites. A leak built from
+   * a local variable under an innocent name, from a formatted argument, from a nested object's own
+   * {@code toString} or from an exception message is caught here and by nothing that reads source
+   * text.
+   */
+  private void assertNothingSecretReachedTheLogSink() {
+    String captured = captured();
+    assertThat(captured)
+        .as("the sink produced no output at all — the appender is not live")
+        .contains(SINK_PROBE);
+    CANARIES.forEach(
+        (carrier, value) ->
+            assertThat(captured)
+                .as("a %s reached the log sink: %s", carrier, value)
+                .doesNotContain(value));
+  }
+
+  private String captured() {
+    return new String(sink.toByteArray(), StandardCharsets.UTF_8);
+  }
+
+  /**
+   * Attaches a real logback appender to the root logger and encodes each event into a byte buffer.
+   *
+   * <p>The encoder is the point. {@code %msg} renders every argument through its own {@code
+   * toString}, so a nested object handed to a placeholder appears in the buffer exactly as it would
+   * appear in a log file; {@code %ex{full}} renders the throwable, its message and its whole cause
+   * chain. The two compile loggers are lowered to TRACE so that a leak emitted below the configured
+   * threshold is captured rather than filtered away before the assertion can see it.
+   */
+  private void attachLogSink() {
+    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+    sink = new ByteArrayOutputStream();
+
+    PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+    encoder.setContext(context);
+    encoder.setPattern("%logger %level %msg%n%ex{full}");
+    encoder.setCharset(StandardCharsets.UTF_8);
+    encoder.start();
+
+    sinkAppender = new OutputStreamAppender<>();
+    sinkAppender.setContext(context);
+    sinkAppender.setEncoder(encoder);
+    sinkAppender.setOutputStream(sink);
+    sinkAppender.setImmediateFlush(true);
+    sinkAppender.start();
+    context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).addAppender(sinkAppender);
+
+    restoreLevels = new LinkedHashMap<>();
+    for (String name : List.of("com.citi.put.checks", GatewayAuditLogger.AUDIT_LOGGER)) {
+      restoreLevels.put(name, context.getLogger(name).getLevel());
+      context.getLogger(name).setLevel(Level.TRACE);
+    }
+
+    LoggerFactory.getLogger(CompilePipeline.class).trace("{} sink is live", SINK_PROBE);
+  }
+
+  private static List<String> sourceOf(
+      com.citi.put.checks.studio.compile.gateway.CompileRequest request) {
+    return request.fencedSourceLines().stream()
+        .map(line -> line.substring(line.indexOf(": ") + 2))
+        .map(
+            quoted -> {
+              try {
+                return MAPPER.readValue(quoted, String.class);
+              } catch (Exception e) {
+                throw new AssertionError("the fence is not a JSON string literal", e);
+              }
+            })
+        .toList();
+  }
+
+  private static String artifactWithCanaryCode(List<String> steps) {
+    return artifactFor(steps)
+        .replace(
+            "await page.goto('https://example.com/login');",
+            "await page.goto('https://example.com/" + ARTIFACT_CANARY + "');");
+  }
+
+  private static void stubValidatorRejectingWithCanaryExcerpt() {
+    runner.resetAll();
+    runner.stubFor(
+        post(urlEqualTo("/v1/validate"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("content-type", "application/json")
+                    .withBody(
+                        "{\"ok\":false,\"validatorSchemaVersion\":\"1.0.0\",\"diagnostics\":[],"
+                            + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]},"
+                            + "{\"stepIndex\":1,\"ok\":false,\"diagnostics\":"
+                            + "[{\"code\":\"DENIED_NODE\",\"stepIndex\":1,\"message\":\"no\","
+                            + "\"node\":\"ForStatement\",\"excerpt\":\""
+                            + NESTED_EXCERPT_CANARY
+                            + "\"}]}]}")));
+  }
 
   private static GatewayOutcome outcomeFor(GatewayErrorCode code) {
     return switch (code) {
