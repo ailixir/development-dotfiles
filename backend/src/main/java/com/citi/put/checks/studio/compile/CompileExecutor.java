@@ -131,7 +131,10 @@ public class CompileExecutor {
             try {
               body.run(claim);
             } catch (RuntimeException e) {
-              LOGGER.warn("studio.compile.attempt_failed", e);
+              // The class name, never the throwable: an exception *message* can quote the JSON or
+              // the source text that caused it, and AC-29's assertion is on the bytes handed to
+              // the log sink rather than on the object that produced them.
+              LOGGER.warn("studio.compile.attempt_failed type={}", e.getClass().getName());
             }
           });
     } catch (RejectedExecutionException rejected) {

@@ -242,6 +242,7 @@ public class ExecutionReadinessService {
    * @return the confirmed revision that may run
    * @throws StudioConflictException {@code 409} carrying the verdict's code and message
    */
+  @Transactional(readOnly = true)
   public UUID requireReady(UUID testId) {
     ReadinessVerdict verdict = evaluate(testId);
     if (!verdict.ready()) {

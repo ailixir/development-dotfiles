@@ -170,7 +170,10 @@ public class CompilePipeline {
       compile(testId, principal);
     } catch (RuntimeException e) {
       // A save must never fail because its optional compile could not start.
-      LOGGER.warn("studio.compile.enqueue_failed testId={} reason={}", testId, e.toString());
+      // The exception type, not its message: a parse failure's message can quote the very source
+      // or artifact text this path must never log (AC-29).
+      LOGGER.warn(
+          "studio.compile.enqueue_failed testId={} type={}", testId, e.getClass().getName());
     }
   }
 
@@ -245,7 +248,9 @@ public class CompilePipeline {
           candidate(inputs, request, artifactJson, response.provenance(), validation));
     } catch (RuntimeException e) {
       LOGGER.warn(
-          "studio.compile.internal_error testId={} reason={}", inputs.testId(), e.toString());
+          "studio.compile.internal_error testId={} type={}",
+          inputs.testId(),
+          e.getClass().getName());
       settleError(
           settlement, inputs.testId(), request, CompileErrorCode.COMPILE_INTERNAL_ERROR.name());
     }

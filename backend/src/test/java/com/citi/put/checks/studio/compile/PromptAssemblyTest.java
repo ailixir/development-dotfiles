@@ -271,6 +271,15 @@ class PromptAssemblyTest {
               .as("%s logs %s — that is source or artifact text on a log sink", file, forbidden)
               .doesNotContain(forbidden);
         }
+        // An exception *message* can quote the JSON or the source text that caused it, so a
+        // throwable on a log site is a log site that may carry source text. Matched with a word
+        // boundary: `line.toString()` is not `e.toString()`.
+        for (String pattern :
+            List.of("\\be\\.toString\\(\\)", "\\be\\.getMessage\\(\\)", ",\\s*e\\)")) {
+          assertThat(java.util.regex.Pattern.compile(pattern).matcher(trimmed).find())
+              .as("%s hands a throwable to a log sink: %s", file, trimmed)
+              .isFalse();
+        }
       }
     }
   }

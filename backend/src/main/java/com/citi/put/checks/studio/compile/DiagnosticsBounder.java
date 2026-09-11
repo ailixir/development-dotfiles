@@ -146,7 +146,11 @@ public class DiagnosticsBounder {
     if (value.length() <= max) {
       return value;
     }
-    int keep = Math.max(0, max - TRUNCATION_MARKER.length());
-    return value.substring(0, keep) + TRUNCATION_MARKER;
+    if (max <= TRUNCATION_MARKER.length()) {
+      // A cap smaller than the marker is absurd configuration, but the cap still wins: a truncation
+      // marker that pushed the value back over the bound would defeat the bound it announces.
+      return value.substring(0, Math.max(0, max));
+    }
+    return value.substring(0, max - TRUNCATION_MARKER.length()) + TRUNCATION_MARKER;
   }
 }

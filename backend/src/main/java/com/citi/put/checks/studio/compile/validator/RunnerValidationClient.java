@@ -104,10 +104,12 @@ public class RunnerValidationClient {
                   });
       return parse(response);
     } catch (ValidatorUnavailableException e) {
-      LOGGER.warn("studio.validate.unavailable reason={}", e.getMessage());
-      return ValidationOutcome.unavailable(e.getMessage());
+      LOGGER.warn("studio.validate.unavailable reason={}", e.reason());
+      return ValidationOutcome.unavailable(e.reason());
     } catch (RuntimeException e) {
-      String reason = scrub(e.getClass().getSimpleName() + ": " + e.getMessage());
+      // The exception type only. A transport failure's message is usually harmless, but "usually"
+      // is not the standard AC-29 sets: the assertion is on the bytes handed to the log sink.
+      String reason = scrub(e.getClass().getSimpleName());
       LOGGER.warn("studio.validate.unavailable reason={}", reason);
       return ValidationOutcome.unavailable(reason);
     }
@@ -215,12 +217,27 @@ public class RunnerValidationClient {
         : single.substring(0, MAX_REASON_LENGTH) + "...";
   }
 
-  /** A validation call that produced no verdict. */
+  /**
+   * A validation call that produced no verdict.
+   *
+   * <p>{@link #reason()} exists instead of {@code getMessage()} so the invariant is carried by the
+   * type rather than by a habit: this exception is constructed <em>only</em> from string literals
+   * declared in this class, never from response content, so its reason is safe to put on a log sink
+   * and into {@code compile_error}. {@code getMessage()} carries no such promise, which is why the
+   * AC-29 scan refuses it on a log site.
+   */
   static final class ValidatorUnavailableException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    ValidatorUnavailableException(String message) {
-      super(message);
+    private final String reason;
+
+    ValidatorUnavailableException(String reason) {
+      super(reason);
+      this.reason = reason;
+    }
+
+    String reason() {
+      return reason;
     }
   }
 }
