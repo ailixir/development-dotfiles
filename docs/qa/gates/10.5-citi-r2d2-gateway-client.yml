@@ -349,3 +349,60 @@ merge: safe
 merge_note: >-
   Introduces no failure beyond the measured 23. The 6 spotlessCheck violations are the same six
   pre-existing files story 10.4 repairs and merges first; this story touched none of them.
+
+post_merge_integration_fix:
+  date: "2026-09-11"
+  branch: fix/wave1-contract-alignment
+  trigger: >-
+    Stories 10.1 and 10.5 were developed in parallel and merged together. 10.1 froze the contract
+    and delivered the real 75-line artifact.schema.json; 10.5 had been written against a 35-line
+    fixture transcription of it and against the pre-10.1 request shape. With both merged the
+    backend suite stood at 438 tests / 25 failures — the 23 ED-02 baseline plus 2 genuinely new.
+  scope: backend only; no contract file edited.
+  findings:
+    - id: FIX-001
+      severity: low
+      kind: stale test fixture
+      where: GatewayDisabledIT
+      detail: >-
+        The fixture built its UITestRequest through the legacy flattened constructor and passed
+        "{}" for variables. Under the frozen contract variables is an array, so the legacy adapter
+        correctly raised INVALID_VARIABLES ("variables must be an array"). The adapter was right
+        and the fixture was stale. Rebuilt on the canonical typed shape (Architecture §8.3):
+        typed steps, a typed StudioVariable list, configuration.viewport, and the canonical
+        chromium engine instead of the legacy chrome alias. No production code changed.
+    - id: FIX-002
+      severity: medium
+      kind: defect in defensive parsing, revealed by the schema swap
+      where: GatewayResponseParser
+      detail: >-
+        The 10.5 fixture pinned version with "const": 1. The frozen contract instead uses
+        {"type":"integer","minimum":1} so that a future V2 artifact stays schema-valid. Swapping
+        in the real schema therefore silently widened the defensive boundary: a gateway answer
+        declaring version 2 became schema-valid and was accepted, persisted and handed onward,
+        even though nothing downstream can execute a V2 artifact. This was a real reduction in
+        safety, not a stale assertion. Fixed in the parser, not the schema: after schema
+        validation the parser now pins SUPPORTED_ARTIFACT_VERSION = 1 and rejects any other
+        declared version with a reason naming $.version. Accept/reject delta — before:
+        {"version":2,...} accepted; after: rejected. Every other accept/reject outcome is
+        unchanged, and aWrongArtifactVersionIsRejected now also asserts that the byte-identical
+        version-1 document is still accepted, so it is the version alone being refused.
+  contract_integrity: >-
+    docs/specs/studio/openapi.yaml, docs/specs/studio/artifact.schema.json and
+    backend/src/main/resources/studio/artifact.schema.json are all unmodified.
+    ArtifactSchemaDriftTest passes (all 3 cases), proving the two schema copies are still
+    byte-identical.
+  verification:
+    - "gradlew test --tests 'com.citi.put.checks.studio.*' -> all pass, 0 failures"
+    - "gradlew check --continue -> 438 tests, exactly 23 failures, all ED-02 baseline classes, 0 in studio"
+    - "gradlew spotlessCheck checkstyleMain checkstyleTest spotbugsMain -> BUILD SUCCESSFUL (the 6 prior spotless violations are gone; 10.4 merged its repair)"
+  open_item_closed:
+    - "before_pilot: 'Replace the artifact.schema.json fixture copy with the canonical file when 10.1a merges' — done by 10.1; this round repaired the two behavioural consequences."
+  for_story_10_1:
+    - >-
+      Informational, not a defect in the contract: artifact.schema.json intentionally permits
+      version >= 1 for forward compatibility, so schema validity alone does not imply the artifact
+      is executable by the current backend or runner. Any future consumer that validates against
+      this schema must pin the version it supports separately, as GatewayResponseParser now does.
+      If 10.1 would rather the contract carried that constraint, a V1-specific profile or a
+      "supportedVersions" note in the schema description would make the expectation explicit.

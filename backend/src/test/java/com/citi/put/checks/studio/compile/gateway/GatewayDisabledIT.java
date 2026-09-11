@@ -5,8 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.studio.StudioService;
+import com.citi.put.checks.studio.dto.StudioVariable;
+import com.citi.put.checks.studio.dto.TestConfiguration;
 import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
+import com.citi.put.checks.studio.dto.Viewport;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import java.sql.Timestamp;
@@ -17,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -79,7 +81,7 @@ class GatewayDisabledIT {
     WIRE_MOCK.stop();
   }
 
-  @TestConfiguration
+  @org.springframework.boot.test.context.TestConfiguration
   static class ThrowingGatewayConfig {
 
     @Bean
@@ -128,20 +130,21 @@ class GatewayDisabledIT {
     return request(name, null, null);
   }
 
+  /**
+   * The frozen contract shape (Architecture &sect;8.3): typed steps, typed variables, {@code
+   * configuration.viewport} and the canonical {@code chromium} engine.
+   */
   private static UITestRequest request(
       String name, Long sourceRevision, Long configurationRevision) {
     return new UITestRequest(
         name,
         "created by GatewayDisabledIT",
         CSI_ID,
-        "[\"1. Go to \\\"https://example.invalid\\\"\"]",
-        "{}",
-        "chrome",
-        1280,
-        720,
-        30,
-        "load",
         "dev",
+        List.of("1. Go to \"https://example.invalid\""),
+        List.of(StudioVariable.plain("USER_ID", "pilot-user")),
+        new TestConfiguration(
+            TestConfiguration.CANONICAL_BROWSER, new Viewport(1280, 720), 30, "load"),
         sourceRevision,
         configurationRevision);
   }

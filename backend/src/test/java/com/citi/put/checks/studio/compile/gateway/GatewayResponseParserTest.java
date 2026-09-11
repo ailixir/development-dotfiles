@@ -75,15 +75,21 @@ class GatewayResponseParserTest {
     assertThat(result.failureReason()).startsWith("schema violation at ");
   }
 
+  /**
+   * The frozen schema allows {@code version >= 1} so a future V2 document stays schema-valid, but
+   * nothing downstream of this parser can execute a V2 artifact. The rejection therefore has to
+   * come from the parser, not from schema validation: an otherwise identical V1 document is
+   * accepted, so it is the version alone that is being refused.
+   */
   @Test
   void aWrongArtifactVersionIsRejected() {
-    ParseResult result =
-        parser.parse(
-            "{\"version\":2,\"steps\":[{\"stepIndex\":0,\"originalText\":\"x\","
-                + "\"code\":\"y\"}]}");
+    String body = "\"steps\":[{\"stepIndex\":0,\"originalText\":\"x\",\"code\":\"y\"}]}";
+
+    ParseResult result = parser.parse("{\"version\":2," + body);
 
     assertThat(result.isValid()).isFalse();
-    assertThat(result.failureReason()).contains("$.version");
+    assertThat(result.failureReason()).contains("$.version").contains("expected 1");
+    assertThat(parser.parse("{\"version\":1," + body).isValid()).isTrue();
   }
 
   @Test

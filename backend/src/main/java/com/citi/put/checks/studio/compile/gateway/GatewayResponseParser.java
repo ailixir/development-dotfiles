@@ -26,6 +26,17 @@ public class GatewayResponseParser {
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private static final int MAX_REASON_LENGTH = 300;
 
+  /**
+   * The only artifact schema version this backend can hand to the runner.
+   *
+   * <p>The frozen schema constrains {@code version} to {@code integer, minimum 1} so that a future
+   * V2 document is still schema-valid. That deliberately leaves {@code version: 2} acceptable to
+   * the validator, which is not the same as executable here: nothing downstream understands a V2
+   * artifact. The parser is the defensive boundary against gateway output, so it pins the version
+   * it can actually consume rather than inheriting the schema's forward-compatible range.
+   */
+  static final int SUPPORTED_ARTIFACT_VERSION = 1;
+
   private final JsonSchema schema;
 
   /**
@@ -65,6 +76,9 @@ public class GatewayResponseParser {
   /**
    * Extracts the JSON document from a gateway answer and validates it against the artifact schema.
    *
+   * <p>Schema validity is necessary but not sufficient: the document must also declare {@link
+   * #SUPPORTED_ARTIFACT_VERSION}, which the schema alone does not require.
+   *
    * @param responseText raw text returned by the gateway; may be pure JSON, fenced JSON or prose
    * @return a valid artifact or the reason it was rejected
    */
@@ -93,6 +107,14 @@ public class GatewayResponseParser {
               + first.getInstanceLocation()
               + ": "
               + truncate(first.getMessage()));
+    }
+    JsonNode version = node.path("version");
+    if (version.intValue() != SUPPORTED_ARTIFACT_VERSION) {
+      return ParseResult.invalid(
+          "unsupported artifact version at $.version: expected "
+              + SUPPORTED_ARTIFACT_VERSION
+              + " but the gateway returned "
+              + version.intValue());
     }
     return ParseResult.valid(node.toString());
   }
