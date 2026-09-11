@@ -1,0 +1,283 @@
+schema: 1
+story: "10.4"
+story_title: "Immutable revisions and compile state"
+epic: "EPIC-10"
+wave: 1
+gate: CONCERNS
+status_reason: >-
+  Every non-deferred acceptance criterion is implemented and verified on this story's own surface:
+  V12 is the only migration added, it applies on top of V11 against a real PostgreSQL 15, revision
+  immutability is enforced by a database trigger (not only by Java), the optimistic PUT and the CSI
+  immutability paths return the specified 409 codes under a real lost-update race, and quarantine
+  preserves every authored test. Three medium state-machine defects remain: the three publish
+  transitions are not conditional on configuration_revision and compile_request_id is not cleared
+  when a revision increments, so a late compile result can overwrite the AC-8 STALE with an
+  unconfirmable AWAITING_CONFIRMATION; confirm does not require AWAITING_CONFIRMATION, so a draft
+  parked in STALE by publishError can still be driven straight to READY; and beginCompile is
+  unconditional, so a failed recompile de-readies a previously confirmed draft. None of these breaks
+  the safety invariant — an artifact the author did not review can still never be confirmed — so the
+  story merges with follow-ups booked against 10.8/10.9. AC-20 is honestly deferred.
+reviewer: "Quinn (Guardian) — @qa"
+updated: "2026-09-10"
+
+branch: story/10.4
+head: 5d0a2a66b
+base: epic/EPIC-10
+diff_scope: "1 commit, 30 files (24 backend + story)"
+
+evidence:
+  - command: "./gradlew spotlessCheck checkstyleMain checkstyleTest spotbugsMain"
+    result: "BUILD SUCCESSFUL — all four static gates pass"
+  - command: "./gradlew test --tests 'com.citi.put.checks.studio.*' --rerun"
+    result: "BUILD SUCCESSFUL — 36 passed, 0 failed, 2 skipped (RevisionRetentionIT, AC-20 deferral)"
+  - command: "./gradlew check --continue"
+    result: "BUILD FAILED — 319 tests completed, 23 failed, 2 skipped. Zero failures in com.citi.put.checks.studio."
+  - command: "./gradlew test --tests 'com.citi.put.checks.studio.*' jacocoTestReport --rerun-tasks"
+    result: >-
+      BUILD SUCCESSFUL. Line coverage from the studio suite alone: CompileStateService 92.8%,
+      StudioService 87.6%, ConfigurationChangeClassifier 80.0%, CompileState/PublishResult/
+      CompileRequest/CandidateRevision/StudioConflictException 100%. Entities and DTOs are excluded
+      by build.gradle.kts jacocoExcludes.
+  - command: "ls backend/src/main/resources/db/migration/"
+    result: "V1..V12 only — this branch adds V12 and no V13/V14 (FOC-01 respected)."
+  - command: "Throwaway probe test (QaProbeTempTest, written, executed, deleted; tree left clean)"
+    result: >-
+      Empirically reproduced ISSUE-001. After beginCompile, an execution-affecting update correctly
+      yields compile_status=STALE, configuration_revision=2, current_candidate_revision_id=null,
+      but compile_request_id is retained; the late publishCandidate returned PUBLISHED and set
+      compile_status=AWAITING_CONFIRMATION with a revision at configuration_revision=1.
+
+baseline_check:
+  independently_reproduced: false
+  note: >-
+    A baseline run of 910de104d was not executed from this worktree (git worktree unavailable per
+    the run instructions). Instead the 23 failures were inspected for contact with this story's
+    surface.
+  failing_classes:
+    - "security: BffFilter503IT, BffFilterUnauthIT, IdentityCacheIT"
+    - "config: RateLimitFilterIT (4)"
+    - "checks: CheckCrudIT (2), BulkDeleteIT (2)"
+    - "reports: ReportsCrudIT (2), ReportsDuplicateIT, ReportsExecutionIT (2), ReportsPreviewIT (2), ReportDeliveryDispatcherIT"
+    - "csi: CsiFetchIT"
+    - "users: UserMeEndpointIT"
+    - "scheduling: ScheduleAuthzIT (2)"
+  reasoning:
+    - "All 23 are org.opentest4j.AssertionFailedError on auth/BFF/rate-limit assertions, not Spring context startup failures."
+    - "grep over all 14 failing test classes returns zero references to studio / ui_test / UITest / StudioConflict."
+    - "The only non-studio production change in this diff is an additive @ExceptionHandler(StudioConflictException.class) in ChecksExceptionHandler; the other four production files are google-java-format line joins with no behaviour change."
+    - "If the diff had broken the shared context, the 39 studio tests sharing that context would also fail; they all pass."
+    - "Count (23) and module spread match the developer's reported baseline exactly."
+
+ac_coverage:
+  verified: 20
+  deferred: 1
+  unmet: 0
+  detail:
+    AC-1: PASS  # ui_test_revisions column set, UNIQUE identity, (test_id, created_at DESC) index, no cascade delete — all present in V12
+    AC-2: PASS  # nine ui_tests columns + ck_ui_tests_compile_status over the five states; RevisionMigrationIT.constrainsCompileStatusToTheFiveStates
+    AC-3: PASS  # quarantined_at set by a DO block that only UPDATEs quarantined_at (never DELETE, never csi_id); @SQLRestriction is the single visibility predicate; StudioVisibilityIT + RevisionMigrationIT.keepsQuarantinedRowsWithTheirOriginalCsiAndSteps
+    AC-4: PASS  # trg_ui_test_revisions_write_once (BEFORE UPDATE) enumerates all 15 immutable columns and blocks re-confirmation; entity has no setters and every @Column is updatable=false
+    AC-5: PASS  # RevisionMigrationIT.leavesEveryLegacyDraftStaleWithNoRevisions, asserted on state captured immediately after V12
+    AC-6: PASS  # OptimisticSaveIT (3 cases); revisions compared as primitive long, no boxed-identity bug
+    AC-7: PASS  # ConfigurationRevisionTest (4 cases) incl. JSON-reformat no-op
+    AC-8: CONCERNS  # correct on the update path; see ISSUE-001 — a late publish can overwrite the mandated STALE
+    AC-9: PASS  # setCsiId removed from updateTest; create validates against csi_systems; CsiImmutabilityIT (3 cases)
+    AC-10: PASS  # single RETURNING statement inside one @Transactional
+    AC-11: PASS  # conditional UPDATE plus a SELECT ... FOR UPDATE guard; CompileStateServiceTest reversed-completion and identical-text cases
+    AC-12: PASS
+    AC-13: PASS  # confirm matches revisionId + artifact_hash + both revisions + unconfirmed, then re-asserts current_candidate under the same transaction
+    AC-14: PASS  # findLifecycleState deliberately bypasses @SQLRestriction to distinguish DELETED/QUARANTINED/unknown
+    AC-15: PASS  # two-stage Flyway (target 11, seed, target 12) on a real postgres:15-alpine container
+    AC-16: PASS  # CyclicBarrier race; exactly one 200 and one 409 STALE_REVISION, source_revision lands at 2
+    AC-17: PASS
+    AC-18: PASS
+    AC-19: PASS
+    AC-20: DEFERRED  # honest — see deferrals below
+    AC-21: CONCERNS  # coverage half verified (all modified classes >= 80% line); "check green" unreachable on a repo that does not start green
+
+issues:
+  - id: ISSUE-001
+    severity: medium
+    category: correctness
+    ac: ["AC-8", "AC-11", "AC-12"]
+    finding: >-
+      publishCandidate, publishInvalid and publishError are conditional on
+      (id, compile_request_id, source_revision) only, and StudioService.updateTest does not clear
+      compile_request_id when it increments a revision. A configuration change made while a compile
+      is in flight therefore does not stop that compile from publishing: the AC-8 STALE is
+      overwritten with AWAITING_CONFIRMATION pointing at a revision whose configuration_revision is
+      already superseded. Because confirm() does match configuration_revision, that candidate can
+      never be confirmed, so the draft is parked in a terminal-looking state until someone
+      recompiles. Empirically reproduced (see evidence).
+    impact: >-
+      No approval breach — an artifact the author did not review still cannot be confirmed or
+      become READY. The defect is a wrong compile_status and a dead-end candidate.
+    suggested_fix: >-
+      Add "AND configuration_revision = ?" to the three publish WHERE clauses (passing
+      CompileRequest.configurationRevision), or null compile_request_id whenever either revision
+      increments in updateTest. Both are one-line changes; the second also covers publishInvalid and
+      publishError.
+    suggested_owner: dev
+  - id: ISSUE-002
+    severity: medium
+    category: correctness
+    ac: ["AC-12", "AC-13"]
+    finding: >-
+      publishError sets compile_status = 'STALE' with compile_error but, unlike publishInvalid, does
+      not clear current_candidate_revision_id. confirm() does not require
+      compile_status = 'AWAITING_CONFIRMATION'. A stale tab can therefore drive STALE -> READY
+      directly, silently clearing the recorded compile_error.
+    impact: >-
+      The confirmed artifact is still exactly the one the author reviewed and still matches both
+      revisions, so this is a state-machine inconsistency with Architecture v2.1 section 4 rather
+      than a safety breach.
+    suggested_fix: >-
+      Either add "AND compile_status = 'AWAITING_CONFIRMATION'" to confirm's ui_tests UPDATE, or
+      clear current_candidate_revision_id in publishError for symmetry with publishInvalid.
+    suggested_owner: dev
+  - id: ISSUE-003
+    severity: medium
+    category: design
+    ac: ["AC-10", "AC-12"]
+    finding: >-
+      beginCompile is unconditional on the current compile_status, so it moves a READY draft to
+      COMPILING; if that compile then fails, publishError leaves it STALE. A previously confirmed,
+      unedited test is thereby made non-runnable by a gateway outage on an optional recompile.
+      AC-12 mandates the STALE, so this is AC-conforming, but it is a live hazard for the readiness
+      gate.
+    impact: "Downstream — 10.8 readiness enforcement and 10.9's repair loop."
+    suggested_fix: >-
+      Book an explicit decision in 10.8: readiness should probably key on confirmed_revision_id
+      still matching the draft's revisions rather than on compile_status = 'READY' alone.
+    suggested_owner: dev
+  - id: ISSUE-004
+    severity: low
+    category: security
+    ac: ["AC-4"]
+    finding: >-
+      V12 installs a BEFORE UPDATE trigger only. Nothing blocks DELETE on ui_test_revisions; only
+      rows referenced by ui_tests.current_candidate_revision_id / confirmed_revision_id are
+      FK-protected, and V14's executions.revision_id will extend that to executed rows. Historical
+      unreferenced revisions remain deletable by direct SQL. AC-4 names UPDATE only.
+    suggested_fix: "Consider a BEFORE DELETE trigger in a later migration, or accept and document."
+  - id: ISSUE-005
+    severity: low
+    category: security
+    ac: ["AC-9"]
+    finding: >-
+      ui_tests.csi_id immutability is enforced only in StudioService.updateTest. The V12 CHECK
+      (csi_id IS NOT NULL OR quarantined_at IS NOT NULL) does not prevent direct SQL from
+      reassigning a test to another registered CSI. Revision-level csi_id is DB-enforced by the
+      write-once trigger, so historical evidence cannot move; only the draft can. AC-9 is
+      API-scoped, so this is conforming.
+  - id: ISSUE-006
+    severity: low
+    category: test-quality
+    ac: ["AC-15"]
+    finding: >-
+      RevisionMigrationIT drops ui_tests_csi_id_fkey to seed the unregistered-CSI row and does not
+      restore it for the remaining assertions in the container. The scenario cannot occur while the
+      V1 FK is in place; the justification (restored dumps, retired CSIs) is documented in the test.
+  - id: ISSUE-007
+    severity: low
+    category: design
+    finding: >-
+      insertOrReuseRevision's ON CONFLICT DO NOTHING reuse path returns an existing — possibly
+      already confirmed — revision, carrying the earlier compile's created_by and provenance. The
+      developer documented the consequence for 10.9 (confirm answers 409 STALE_CANDIDATE, which the
+      repair loop must read as "already confirmed").
+  - id: ISSUE-008
+    severity: low
+    category: completeness
+    ac: ["AC-7"]
+    finding: >-
+      ConfigurationChangeClassifier does not yet cover target policy selection, which Architecture
+      section 4.2 lists as execution-affecting. No such field exists on the contract yet; the
+      javadoc records the obligation to add it with the destination policy work.
+  - id: ISSUE-009
+    severity: low
+    category: security
+    finding: >-
+      publishInvalid accepts an unbounded diagnostics JSON string. The story explicitly defers the
+      per-step message length and count limits to 10.8 section 4.3, so a hostile compile output can
+      bloat compile_diagnostics until then.
+
+deferrals:
+  - ac: "AC-20"
+    honest: true
+    gated_by: "FOC-01 — ui_test_executions.revision_id arrives with story 10.1's V14"
+    verification: >-
+      Verified by running the suite: both RevisionRetentionIT cases report SKIPPED, not PASSED.
+      The skip is an assumeTrue on an information_schema lookup for the column, placed in
+      @BeforeEach, so JUnit aborts rather than silently passing. The test body already writes and
+      reads ui_test_executions through revision_id and addresses history rows by the partition key
+      pair (id, started_at), and drives the real StudioService/CompileStateService rather than raw
+      SQL, so it activates unedited once V14 lands.
+    residual_risk: >-
+      The body is unexecuted code today; the first real run will happen inside 10.1b. 10.1's gate
+      must confirm these two cases flip to PASSED and are not re-skipped.
+
+migration_review:
+  only_migration_added: "V12__ui_test_revisions_and_compile_state.sql"
+  v13_v14_absent: true
+  applies_on_v11: "Verified — Flyway target=11, seed, target=12 against postgres:15-alpine"
+  forward_only: "Yes — additive DDL plus one data UPDATE; no DROP of existing objects (section 8.1)"
+  partitioning: >-
+    ui_tests is a plain table (V1), so REFERENCES ui_tests(id) is valid. V12 adds no FK into the
+    range-partitioned ui_test_executions (PK (id, started_at)) — that reference belongs to 10.1's
+    V14. RevisionRetentionIT already addresses execution rows by the (id, started_at) pair.
+  write_once_trigger: >-
+    trg_ui_test_revisions_write_once enumerates all 15 immutable columns with IS DISTINCT FROM and
+    blocks re-confirmation; ck_ui_test_revisions_confirmation_pair keeps confirmed_by/at in step.
+    Proven by RevisionMigrationIT.rejectsAnyMutationOfAStoredArtifact and
+    acceptsTheFirstConfirmationAndRejectsASecond. Java adds defence in depth: no setters,
+    updatable=false on every column.
+  quarantine_check: >-
+    The DO block only UPDATEs quarantined_at. It never DELETEs and never writes csi_id, so the CHECK
+    cannot be satisfied by discarding or reassigning an authored test (BRD section 9). Asserted by
+    keepsQuarantinedRowsWithTheirOriginalCsiAndSteps.
+
+scope_discipline:
+  out_of_scope_files_are_formatting_only: true
+  detail: >-
+    SplunkCheckExecutor, DailyChecksAdapter, DcClient, DcErrorMapper and the two touched test files
+    (CsiListIT, SplunkMappingTest) are google-java-format argument/comment rejoins. Reviewed line by
+    line: no changed identifier, condition, literal or control flow. ChecksExceptionHandler's
+    +11 lines are a single additive @ExceptionHandler(StudioConflictException.class) returning 409
+    with {error, message}; it is a genuine minimal requirement for AC-6, AC-9 and AC-13 to surface
+    as 409 rather than 500, and it alters no existing handler. UITestDto gained five additive
+    fields.
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: >-
+      Revision immutability is DB-enforced. No secrets in the new columns — the "references" column
+      stores declared references only, per section 8.1. All SQL is parameterised except the test-only
+      literals in RevisionMigrationIT. See ISSUE-009 for the deferred diagnostics bound.
+  reliability:
+    status: CONCERNS
+    notes: "See ISSUE-001, ISSUE-002, ISSUE-003 — state-machine transitions reachable out of order."
+  performance:
+    status: PASS
+    notes: >-
+      Two purpose-built partial indexes (idx_ui_tests_visible_csi, idx_ui_tests_quarantined) plus
+      (test_id, created_at DESC) and (csi_id) on revisions. ADD COLUMN ... NOT NULL DEFAULT is
+      non-rewriting on PG 11+. The FOR UPDATE guard is per draft row, so publishers contend only
+      with their own test.
+  maintainability:
+    status: PASS
+    notes: "Line coverage on every modified non-entity class is >= 80%; design decisions are recorded in the story."
+
+recommendations:
+  immediate:
+    - "ISSUE-001 — make the three publish transitions conditional on configuration_revision, or clear compile_request_id on any revision increment."
+    - "ISSUE-002 — require AWAITING_CONFIRMATION in confirm, or clear the candidate in publishError."
+  future:
+    - "ISSUE-003 — settle the readiness predicate in 10.8 so a failed recompile does not de-ready a confirmed draft."
+    - "AC-20 — 10.1's gate must confirm both RevisionRetentionIT cases flip from SKIPPED to PASSED once V14 lands."
+    - "ISSUE-004 / ISSUE-005 — decide whether DELETE on revisions and csi_id reassignment on drafts warrant DB triggers."
+    - "ISSUE-008 — add target policy selection to ConfigurationChangeClassifier with the destination policy work."
+    - "ISSUE-009 — bound compile_diagnostics in 10.8."
+
+merge: safe
