@@ -2,6 +2,7 @@ package com.citi.put.checks.config;
 
 import com.citi.put.checks.reports.ReportNotFoundException;
 import com.citi.put.checks.scheduling.ScheduleValidationException;
+import com.citi.put.checks.studio.StudioConflictException;
 import java.util.Map;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,16 @@ public class ChecksExceptionHandler {
       ScheduleValidationException ex) {
     return ResponseEntity.badRequest()
         .body(Map.of("error", "SCHEDULE_VALIDATION_ERROR", "message", ex.getMessage()));
+  }
+
+  /**
+   * Studio state conflicts (Architecture §4.2, §9.1): STALE_REVISION, CSI_IMMUTABLE,
+   * STALE_CANDIDATE, TEST_DELETED, TEST_QUARANTINED.
+   */
+  @ExceptionHandler(StudioConflictException.class)
+  public ResponseEntity<Map<String, String>> handleStudioConflict(StudioConflictException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(Map.of("error", ex.getCode(), "message", ex.getMessage()));
   }
 
   @ExceptionHandler(IllegalArgumentException.class)

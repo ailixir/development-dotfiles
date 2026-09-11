@@ -1,5 +1,6 @@
 package com.citi.put.checks.studio.dto;
 
+import com.citi.put.checks.studio.compile.CompileState;
 import com.citi.put.checks.studio.entity.UITest;
 import java.time.Instant;
 import java.util.UUID;
@@ -23,7 +24,12 @@ public record UITestDto(
     Instant createdAt,
     Instant updatedAt,
     Instant lastRunAt,
-    String lastRunStatus) {
+    String lastRunStatus,
+    long sourceRevision,
+    long configurationRevision,
+    CompileState compileStatus,
+    UUID currentCandidateRevisionId,
+    UUID confirmedRevisionId) {
 
   public static UITestDto from(UITest entity) {
     return new UITestDto(
@@ -45,6 +51,11 @@ public record UITestDto(
         entity.getCreatedAt(),
         entity.getUpdatedAt(),
         entity.getLastRunAt(),
-        entity.getLastRunStatus());
+        entity.getLastRunStatus(),
+        entity.getSourceRevision(),
+        entity.getConfigurationRevision(),
+        entity.getCompileStatus(),
+        entity.getCurrentCandidateRevisionId(),
+        entity.getConfirmedRevisionId());
   }
 }

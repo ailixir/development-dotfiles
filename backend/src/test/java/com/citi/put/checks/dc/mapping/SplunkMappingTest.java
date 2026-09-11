@@ -60,8 +60,7 @@ class SplunkMappingTest {
     root.put("comment", "ok");
     root.put("actualCount", 3);
 
-    String detail =
-        SplunkMapping.parseDetail(new DcResponse(200, "SUCCESS", "ok", null, root));
+    String detail = SplunkMapping.parseDetail(new DcResponse(200, "SUCCESS", "ok", null, root));
     assertThat(detail).contains("actualCount=3");
   }
 }

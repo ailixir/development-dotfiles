@@ -13,12 +13,10 @@ final class DcErrorMapper {
 
   static ExecutionOutcome fromHttpStatus(int status, String bodySnippet, Duration duration) {
     if (status == 401 || status == 403) {
-      return new ExecutionOutcome.Failure(
-          duration, "DC auth failed (HTTP " + status + ")", null);
+      return new ExecutionOutcome.Failure(duration, "DC auth failed (HTTP " + status + ")", null);
     }
     if (status >= 500) {
-      return new ExecutionOutcome.Failure(
-          duration, "DC unavailable (HTTP " + status + ")", null);
+      return new ExecutionOutcome.Failure(duration, "DC unavailable (HTTP " + status + ")", null);
     }
     String detail =
         bodySnippet == null || bodySnippet.isBlank()
@@ -36,8 +34,7 @@ final class DcErrorMapper {
       return fromHttpStatus(ex.getStatusCode().value(), ex.getResponseBodyAsString(), duration);
     }
     if (root instanceof ResourceAccessException || root instanceof RestClientException) {
-      return new ExecutionOutcome.Failure(
-          duration, "DC unavailable: " + root.getMessage(), null);
+      return new ExecutionOutcome.Failure(duration, "DC unavailable: " + root.getMessage(), null);
     }
     return new ExecutionOutcome.Failure(
         duration,
