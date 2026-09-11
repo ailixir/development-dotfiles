@@ -262,11 +262,25 @@ class DispatcherIT {
   void asecondDispatchPassDoesNotPickUpADispatchingRow() {
     runner.willAnswer(DispatchOutcome.ambiguous("timeout"));
     dispatcher.dispatch(executionId);
+    assertThat(sendsFor(executionId)).isEqualTo(1);
+    Object attemptBefore = ledger().get("attempt_id");
+    assertThat(attemptBefore).isNotNull();
 
-    int dispatched = dispatcher.dispatchOnce();
+    dispatcher.dispatchOnce();
 
-    assertThat(dispatched).isZero();
-    assertThat(runner.sendCount()).isEqualTo(1);
+    // dispatchOnce() is deployment-global by design and every Studio IT shares one database, so
+    // its return value counts rows this test does not own — StudioOverloadIT deliberately leaves
+    // queued rows behind under another CSI. Asserting zero there made the outcome depend on class
+    // ordering. What this test owns is its own row, and the property is exactly that the pass does
+    // not pick *it* up: no second send for this execution, and the attempt it is already carrying
+    // is neither replaced nor reissued.
+    assertThat(sendsFor(executionId))
+        .as("the DISPATCHING row is not sent a second time by a later pass")
+        .isEqualTo(1);
+    assertThat(ledger().get("state")).isEqualTo("DISPATCHING");
+    assertThat(ledger().get("attempt_id"))
+        .as("and no fresh attempt is issued against it")
+        .isEqualTo(attemptBefore);
   }
 
   // ── AC-13a: the recheck, and the two ratified codes ──────────────────────
@@ -394,6 +408,11 @@ class DispatcherIT {
         referenceId,
         referenceId,
         OWNER);
+  }
+
+  /** How many sends left the process for one execution — never the deployment-global count. */
+  private long sendsFor(UUID execution) {
+    return runner.sent().stream().filter(job -> execution.equals(job.executionId())).count();
   }
 
   private Map<String, Object> ledger() {

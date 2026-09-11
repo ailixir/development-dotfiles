@@ -338,6 +338,12 @@ top_issues:
   - id: QA-1
     severity: medium
     title: A new test asserts an empty global dispatch queue and is therefore order-dependent
+    status: resolved
+    resolution: >-
+      Fixed by @dev. The assertion is now scoped to this test's own execution — no second send for it,
+      still DISPATCHING, same attempt — and was proven both ways: twenty foreign queued rows make the
+      old global assertion fail exactly as in run 1 and leave the new one green, and neutralising all
+      four production guards turns it red with two sends.
     ac: AC-14 / AC-39
     owner: '@dev'
     blocking: false
@@ -354,6 +360,11 @@ top_issues:
   - id: QA-2
     severity: medium
     title: ADR-002 §13 carries no entry for the amendment this story landed
+    status: resolved
+    resolution: >-
+      Fixed by @dev. ADR-002 §13 now records the amendment against §12's four requirements — divergence,
+      Article IV source, the runner re-check, and a measured before/after (StudioContractTest 7/8 → 8/8)
+      — and O-4 is struck in §9.
     ac: AC-1
     owner: '@dev / @architect'
     blocking: false
@@ -368,6 +379,11 @@ top_issues:
   - id: QA-3
     severity: medium
     title: One cached application context died mid-suite and took fifteen tests with it
+    status: resolved
+    resolution: >-
+      Fixed by @dev, as a record correction only: the Change Log now names what actually landed,
+      spring.test.context.cache.maxSize = 64 on the test task, and states that it is a mitigation
+      rather than a cure. TC_DAEMON is gone from the story because it was never in the tree.
     ac: AC-40
     owner: '@dev'
     blocking: false
@@ -427,6 +443,35 @@ reviewer_hygiene:
     docs/specs/studio/openapi.yaml: not edited by the reviewer
     docs/specs/studio/artifact.schema.json: byte-unchanged by the story and by the reviewer
     backend/src/main/resources/studio/artifact.schema.json: byte-unchanged by the story and by the reviewer
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dev fix round — QA-1, QA-2, QA-3 (@dev, after this review)
+# ─────────────────────────────────────────────────────────────────────────────
+dev_fix_verification:
+  full_suite_runs:
+    command: ./gradlew test --continue (three times, --rerun on runs 2 and 3)
+    result: 580 tests / 24 failures in all three, the identical class list each time
+    detail: >-
+      RateLimitFilterIT (4), ScheduleAuthzIT (2), ReportsPreviewIT (2), ReportsExecutionIT (2),
+      ReportsCrudIT (2), CheckCrudIT (2), BulkDeleteIT (2), UserMeEndpointIT (1),
+      ReportsDuplicateIT (1), ReportDeliveryDispatcherIT (1), IdentityCacheIT (1), CsiFetchIT (1),
+      BffFilterUnauthIT (1), BffFilter503IT (1) = 23 ED-02, plus
+      ExecutionErrorCodeContractEscalationTest (1). Zero Studio failures, and no context died in
+      any of the three.
+  dispatcher_it:
+    result: PASS
+    detail: >-
+      Green in all three full runs and green alone. The scoped assertion was falsified rather than
+      assumed: with queuedBatch widened to DISPATCHING, claim's state and lease predicates removed
+      and beginDispatch's attempt_id IS NULL dropped, it fails with two sends for its own
+      execution. Both production files were restored and SHA-256-verified; git status clean.
+  static_gates:
+    command: ./gradlew spotlessCheck checkstyleMain checkstyleTest spotbugsMain
+    result: PASS
+  contract_untouched: >-
+    openapi.yaml is byte-identical to the reviewed head (the pre-amendment copy was restored after
+    the before/after measurement and the hash re-checked); neither artifact.schema.json was opened.
+  production_code_changed: false
 
 recommended_status: >-
   InReview — merge is safe. The three medium findings are test-hygiene and bookkeeping, not
