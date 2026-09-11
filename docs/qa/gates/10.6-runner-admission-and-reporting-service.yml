@@ -659,3 +659,105 @@ recommendation:
   follow_up:
     - Strengthen the AC-1 conformance assertion when 10.1 lands (MED-3)
     - Consider crypto randomUUID for admissionId (LOW-2)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Post-merge integration fix — 2026-09-11, @dev (epic/EPIC-10)
+# ─────────────────────────────────────────────────────────────────────────────
+post_merge_integration_fixes:
+  - id: PMI-1
+    date: '2026-09-11'
+    agent: '@dev'
+    branch: epic/EPIC-10
+    trigger: >-
+      Stories 10.1 and 10.6 both merged. AC-1's skipIf gate armed itself exactly as designed once
+      docs/specs/studio/openapi.yaml appeared, and both conformance cases errored in
+      test/helpers/openapi.ts: "Malformed flow mapping entry:  sequence or transition conflict".
+    diagnosis: >-
+      Not a contract mismatch. Story 10.6's hand-rolled YAML-subset reader was written against a
+      small stub contract and could not read 10.1's real 1188-line document. It died on line 599,
+      '409': { description: Ownership, sequence or transition conflict } — an unquoted comma inside
+      a flow mapping. The reader's fail-loudly design (MED-3) is what surfaced this as an error
+      rather than a vacuous pass, and that behaviour is preserved.
+    change: >-
+      The hand-rolled reader (268 lines) was deleted and replaced by `yaml` 2.9.0, added as an
+      exact-pinned devDependency. parseYaml now throws on any parser error *or warning*, enforces
+      uniqueKeys and bounds alias expansion. The JSON-Schema conformance checker is unchanged. No
+      production source, no coverage threshold and no acceptance criterion was touched.
+    isolation_impact: none
+    isolation_evidence: >-
+      AC-22a allowlists the resolved *production* closure, read off lockfile entries npm did not
+      mark dev. node_modules/yaml is marked "dev": true and has zero transitive dependencies, so
+      the closure is unchanged at playwright, playwright-core, typescript. test/isolation.test.ts
+      passes unmodified; it did not object to a devDependency, which is correct — a test-only
+      parser never enters the image or the browser-facing process.
+    vacuous_pass_guard: >-
+      Falsified, not asserted. Making parseYaml swallow parser problems turns "fails loudly on a
+      document it cannot read, rather than passing vacuously" red; restoring it turns it green and
+      leaves the file byte-identical.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Open integration findings raised by the now-armed AC-1 assertion
+# ─────────────────────────────────────────────────────────────────────────────
+# Both are left failing on purpose. docs/specs/studio/openapi.yaml is frozen and owned by story
+# 10.1; neither the contract nor the acceptance criteria were adjusted to produce a green run.
+integration_findings:
+  - id: INT-1
+    severity: high
+    title: The runner's progress-report log entries do not conform to ExecutionLogEntry
+    ac: AC-1
+    owner: '@dev / 10.7'
+    blocking_for: '10.7'
+    finding: >-
+      ProgressReport.logs[] is ExecutionLogEntry, which requires `at` (format date-time) and a
+      `level` drawn from DEBUG|INFO|WARN|ERROR. The runner sends `atMs` (epoch millis) and a
+      lower-case level, so every progress report violates a required field. Reported violations:
+      progressRequest[n].logs[i].at required property is missing; progressRequest[n].logs[i].level
+      "info" is not one of ["DEBUG","INFO","WARN","ERROR"].
+    why_not_fixed_here: >-
+      It is not a rename. Two of the four appendLog call sites in reportingStepReporter.ts pass
+      `atMs: 0` as a placeholder, so the runner holds no wall-clock instant for those entries.
+      Emitting a conformant `at` means threading the wall clock through appendLog and LogEntry,
+      which changes src/reporting/** and its AC-17, AC-19 and AC-20 tests — a design decision for
+      10.6/10.7, not a parser fix.
+  - id: INT-2
+    severity: high
+    title: The frozen contract declares none of the runner's four routes
+    ac: AC-1
+    owner: '@po / 10.1'
+    blocking_for: '10.6 AC-1'
+    finding: >-
+      AC-1 requires POST /v1/validate, POST /v1/runs, GET /health and GET /ready to conform to the
+      internal-tagged section of docs/specs/studio/openapi.yaml. That document declares none of
+      them: its `servers` is /api/v1/studio and its `internal` tag carries exactly the two API-side
+      callback routes. The response-direction case fails with "The contract declares no path
+      /v1/validate."
+    why_not_fixed_here: >-
+      Story 10.1's own AC-1 undertook "internal routes per architecture §8.4", and §8.4 tabulates
+      six routes, four of them the runner's. Either the frozen document is incomplete or 10.6's
+      AC-1 is scoped to a document that was never meant to carry the runner's surface. Both are
+      decisions above @dev, and the contract is frozen, so this is reported and stopped on.
+  - id: INT-3
+    severity: low
+    title: A truncated description in the frozen contract
+    ac: AC-1
+    owner: '@po / 10.1'
+    blocking: false
+    finding: >-
+      openapi.yaml line 599 reads '409': { description: Ownership, sequence or transition conflict }.
+      A spec-compliant parser reads the unquoted comma as an entry separator, giving
+      description "Ownership" plus a null-valued key "sequence or transition conflict". Cosmetic —
+      it affects no schema — but the 409 description is not what was written. Quoting the string
+      would fix it; the file is frozen, so it is recorded rather than edited.
+  - id: INT-4
+    severity: medium
+    title: ProgressReport and the runner's report body agree on names for almost nothing
+    ac: AC-1
+    owner: '@dev / 10.7'
+    blocking: false
+    finding: >-
+      Beyond INT-1, the contract names stepResults, status/errorCode, video/manifestKey and runtime
+      where the runner sends steps, outcome, evidence and runtimeVersions. The conformance check
+      cannot fail on this: ProgressReport declares neither additionalProperties:false nor these
+      fields as required, so the runner's names pass through as permitted extras and the contract's
+      names are simply absent. Both shapes are faithful to architecture §8.4, which names the
+      fields only in English. 10.7's handler would find no status and no stepResults.

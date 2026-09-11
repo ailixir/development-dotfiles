@@ -1,20 +1,25 @@
 /**
- * A YAML-subset reader and a JSON-Schema conformance checker, for AC-1.
+ * A YAML reader and a JSON-Schema conformance checker, for AC-1.
  *
- * ## Why this exists rather than a dependency
+ * ## The reader
  *
- * AC-22a allowlists the resolved **production** dependency closure, and the story shipped with
- * zero dependencies added on either side of the line. Pulling in a YAML parser and a schema
- * validator to check a contract would spend that, so the two things the check actually needs are
- * written here instead, in `test/` where they are outside the image and outside the coverage gate.
+ * `yaml` (a pinned **devDependency**, YAML 1.2, zero runtime dependencies of its own) parses the
+ * document. It replaced a hand-rolled YAML subset reader that story 10.6 shipped while story
+ * 10.1's contract was still unmerged: written against a small stub, it could not read the real
+ * 1188-line document — `'409': { description: Ownership, sequence or transition conflict }` split
+ * on the unquoted comma and threw. Five stories code against that contract and it keeps growing,
+ * so a parser that has to be extended every time the document does is a liability, and the reader
+ * is now a real one.
  *
- * ## What the reader supports
+ * **This does not spend AC-22a.** That gate is an allowlist over the resolved *production*
+ * dependency closure, read off the lockfile entries npm did not mark `dev`. A devDependency never
+ * enters that closure, never enters the image, and never runs in the browser-facing process; the
+ * closure remains `playwright`, `playwright-core`, `typescript`, and `test/isolation.test.ts`
+ * asserts exactly that on every run.
  *
- * The subset an OpenAPI document uses: block mappings, block sequences, quoted and plain scalars,
- * flow sequences and mappings (`tags: [internal]`), `|`/`>` block scalars for descriptions, `#`
- * comments and `---` markers. It is **deliberately strict** — anything it does not recognise
- * throws rather than being skipped, so a contract it cannot read fails the test loudly instead of
- * passing vacuously. That is the failure mode MED-3 was raised about in the first place.
+ * It stays **deliberately strict**, because that is the property MED-3 was raised about: a parse
+ * error *or a warning* throws, so a contract this cannot read fails the test loudly instead of
+ * passing vacuously. Duplicate keys throw (`uniqueKeys`), and alias expansion is bounded.
  *
  * ## What the checker supports
  *
@@ -23,278 +28,34 @@
  * are ignored, which is safe: ignoring a keyword can only make the check weaker for that one
  * keyword, never wrong about the ones it does read.
  */
+import { parseDocument } from 'yaml';
 
 export type YamlValue = string | number | boolean | null | YamlValue[] | YamlMapping;
 export interface YamlMapping {
   [key: string]: YamlValue;
 }
 
-interface Line {
-  readonly indent: number;
-  readonly content: string;
-  readonly raw: string;
-  readonly number: number;
-}
-
 function isMapping(value: unknown): value is YamlMapping {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-/** Strips a trailing `#` comment that is not inside quotes. */
-function stripComment(text: string): string {
-  let quote: string | null = null;
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index] ?? '';
-    if (quote !== null) {
-      if (character === quote) quote = null;
-      continue;
-    }
-    if (character === '"' || character === "'") {
-      quote = character;
-      continue;
-    }
-    if (character === '#' && (index === 0 || text[index - 1] === ' ')) {
-      return text.slice(0, index);
-    }
-  }
-  return text;
-}
-
-function unquote(text: string): string {
-  if (text.length >= 2 && text.startsWith('"') && text.endsWith('"')) {
-    return text
-      .slice(1, -1)
-      .replace(/\\n/gu, '\n')
-      .replace(/\\"/gu, '"')
-      .replace(/\\\\/gu, '\\');
-  }
-  if (text.length >= 2 && text.startsWith("'") && text.endsWith("'")) {
-    return text.slice(1, -1).replace(/''/gu, "'");
-  }
-  return text;
-}
-
-/** Splits on top-level separators, respecting quotes and nested flow brackets. */
-function splitTopLevel(text: string, separator: string): string[] {
-  const parts: string[] = [];
-  let depth = 0;
-  let quote: string | null = null;
-  let current = '';
-  for (const character of text) {
-    if (quote !== null) {
-      current += character;
-      if (character === quote) quote = null;
-      continue;
-    }
-    if (character === '"' || character === "'") {
-      quote = character;
-      current += character;
-      continue;
-    }
-    if (character === '[' || character === '{') depth += 1;
-    if (character === ']' || character === '}') depth -= 1;
-    if (character === separator && depth === 0) {
-      parts.push(current);
-      current = '';
-      continue;
-    }
-    current += character;
-  }
-  parts.push(current);
-  return parts;
-}
-
-function parseScalar(text: string): YamlValue {
-  const value = text.trim();
-  if (value === '' || value === '~' || value === 'null') return null;
-  if (value === 'true') return true;
-  if (value === 'false') return false;
-  if (value.startsWith('[')) {
-    if (!value.endsWith(']')) throw new Error(`Unterminated flow sequence: ${value}`);
-    const inner = value.slice(1, -1).trim();
-    if (inner === '') return [];
-    return splitTopLevel(inner, ',').map((item) => parseScalar(item));
-  }
-  if (value.startsWith('{')) {
-    if (!value.endsWith('}')) throw new Error(`Unterminated flow mapping: ${value}`);
-    const inner = value.slice(1, -1).trim();
-    const mapping: YamlMapping = {};
-    if (inner === '') return mapping;
-    for (const entry of splitTopLevel(inner, ',')) {
-      const split = splitKey(entry.trim());
-      if (split === null) throw new Error(`Malformed flow mapping entry: ${entry}`);
-      mapping[split.key] = parseScalar(split.rest);
-    }
-    return mapping;
-  }
-  if (/^-?\d+$/u.test(value)) return Number(value);
-  if (/^-?\d*\.\d+$/u.test(value)) return Number(value);
-  return unquote(value);
-}
-
-/** Finds the `key:` separator that is outside quotes and outside flow brackets. */
-function splitKey(text: string): { key: string; rest: string } | null {
-  let quote: string | null = null;
-  let depth = 0;
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index] ?? '';
-    if (quote !== null) {
-      if (character === quote) quote = null;
-      continue;
-    }
-    if (character === '"' || character === "'") {
-      quote = character;
-      continue;
-    }
-    if (character === '[' || character === '{') depth += 1;
-    if (character === ']' || character === '}') depth -= 1;
-    if (character === ':' && depth === 0) {
-      const next = text[index + 1];
-      if (next === undefined || next === ' ') {
-        return { key: unquote(text.slice(0, index).trim()), rest: text.slice(index + 1).trim() };
-      }
-    }
-  }
-  return null;
-}
-
 /**
- * Normalises the document into logical lines, splitting `- key: value` into a `-` marker line and
- * the entry at the column the entry actually starts in. Everything downstream then sees sequences
- * and mappings in one shape.
+ * Parses a YAML document.
+ *
+ * Throws on anything the parser reports — errors and warnings alike — rather than returning a
+ * partial tree. A document that cannot be read in full must not become a green conformance run.
  */
-function toLines(text: string): Line[] {
-  const lines: Line[] = [];
-  const rawLines = text.split('\n');
-  for (const [offset, raw] of rawLines.entries()) {
-    const withoutComment = stripComment(raw);
-    if (withoutComment.trim() === '' || withoutComment.trim() === '---') continue;
-    let indent = withoutComment.length - withoutComment.trimStart().length;
-    let content = withoutComment.trim();
-    if (withoutComment.includes('\t')) {
-      throw new Error(`Tab indentation on line ${String(offset + 1)} is not valid YAML.`);
-    }
-    while (content === '-' || content.startsWith('- ')) {
-      lines.push({ indent, content: '-', raw, number: offset + 1 });
-      if (content === '-') {
-        content = '';
-        break;
-      }
-      const after = content.slice(1);
-      const trimmed = after.trimStart();
-      indent += 1 + (after.length - trimmed.length);
-      content = trimmed;
-    }
-    if (content === '') continue;
-    lines.push({ indent, content, raw, number: offset + 1 });
-  }
-  return lines;
-}
-
-interface Cursor {
-  index: number;
-}
-
-function parseBlock(lines: readonly Line[], cursor: Cursor, indent: number): YamlValue {
-  const line = lines[cursor.index];
-  if (line === undefined) return null;
-  if (line.content === '-') return parseSequence(lines, cursor, indent);
-  if (splitKey(line.content) !== null) return parseMapping(lines, cursor, indent);
-  // A bare scalar block — the item of a sequence of plain strings. Valid only as a lone line at
-  // this indentation; anything else is a shape the reader does not understand, and it says so
-  // rather than guessing.
-  const next = lines[cursor.index + 1];
-  if (next !== undefined && next.indent >= indent) {
-    throw new Error(`Line ${String(line.number)} is not a mapping entry: ${line.content}`);
-  }
-  cursor.index += 1;
-  return parseScalar(line.content);
-}
-
-function parseSequence(lines: readonly Line[], cursor: Cursor, indent: number): YamlValue[] {
-  const items: YamlValue[] = [];
-  while (cursor.index < lines.length) {
-    const line = lines[cursor.index];
-    if (line?.indent !== indent || line.content !== '-') break;
-    cursor.index += 1;
-    const next = lines[cursor.index];
-    if (next !== undefined && next.indent > indent) {
-      items.push(parseBlock(lines, cursor, next.indent));
-    } else {
-      items.push(null);
-    }
-  }
-  return items;
-}
-
-/** Consumes a `|` or `>` block scalar's body: every following line indented past the key. */
-function parseBlockScalar(
-  lines: readonly Line[],
-  cursor: Cursor,
-  indent: number,
-  folded: boolean,
-): string {
-  const parts: string[] = [];
-  while (cursor.index < lines.length) {
-    const line = lines[cursor.index];
-    if (line === undefined || line.indent <= indent) break;
-    parts.push(line.content);
-    cursor.index += 1;
-  }
-  return folded ? parts.join(' ') : parts.join('\n');
-}
-
-function parseMapping(lines: readonly Line[], cursor: Cursor, indent: number): YamlMapping {
-  const mapping: YamlMapping = {};
-  while (cursor.index < lines.length) {
-    const line = lines[cursor.index];
-    if (line?.indent !== indent || line.content === '-') break;
-    const split = splitKey(line.content);
-    if (split === null) {
-      throw new Error(`Line ${String(line.number)} is not a mapping entry: ${line.content}`);
-    }
-    cursor.index += 1;
-    const { key, rest } = split;
-    if (rest.startsWith('|') || rest.startsWith('>')) {
-      mapping[key] = parseBlockScalar(lines, cursor, indent, rest.startsWith('>'));
-      continue;
-    }
-    if (rest !== '') {
-      mapping[key] = parseScalar(rest);
-      continue;
-    }
-    const next = lines[cursor.index];
-    if (next === undefined || (next.indent < indent && next.content !== '-')) {
-      mapping[key] = null;
-      continue;
-    }
-    if (next.indent > indent) {
-      mapping[key] = parseBlock(lines, cursor, next.indent);
-      continue;
-    }
-    if (next.indent === indent && next.content === '-') {
-      // A sequence written at the key's own indentation, which YAML permits.
-      mapping[key] = parseSequence(lines, cursor, indent);
-      continue;
-    }
-    mapping[key] = null;
-  }
-  return mapping;
-}
-
-/** Parses the YAML subset an OpenAPI document uses. Throws on anything it does not recognise. */
 export function parseYaml(text: string): YamlValue {
-  const lines = toLines(text);
-  if (lines.length === 0) return null;
-  const cursor: Cursor = { index: 0 };
-  const value = parseBlock(lines, cursor, lines[0]?.indent ?? 0);
-  if (cursor.index !== lines.length) {
-    const line = lines[cursor.index];
+  const document = parseDocument(text, { prettyErrors: true, uniqueKeys: true });
+  const problems = [...document.errors, ...document.warnings];
+  if (problems.length > 0) {
     throw new Error(
-      `Unconsumed content at line ${String(line?.number ?? 0)}: ${line?.content ?? ''}`,
+      ['The YAML document could not be read:', ...problems.map((p) => `  ${p.message}`)].join('\n'),
     );
   }
-  return value;
+  // `maxAliasCount` bounds alias expansion; an unbounded one is a denial-of-service on the parse.
+  const value: unknown = document.toJS({ maxAliasCount: 100 });
+  return value as YamlValue;
 }
 
 // ── Schema conformance ────────────────────────────────────────────────────────────────────────

@@ -1,14 +1,10 @@
 /**
  * AC-1 — conformance with the `internal`-tagged section of `docs/specs/studio/openapi.yaml`.
  *
- * **That file is story 10.1's deliverable and is not a dependency of this story.** It has not
- * merged: `docs/specs/studio/` does not exist. The conformance test below is therefore recorded
- * as **skipped, never passed** — the pattern story 10.3 established for its `ED-05`-gated stage
- * and that QA verified there. It is `skipIf`-gated rather than commented out, so the moment 10.1
- * lands the assertion runs on the next CI execution without anyone remembering to re-enable it.
- *
- * The routes this runner serves and the API routes it calls are asserted here in the meantime, so
- * a rename on either side is caught by *something* even while the frozen contract is missing.
+ * **Story 10.1 has now merged and this contract is present**, so the two `skipIf`-gated
+ * assertions below arm themselves and run, exactly as they were built to. They are left as
+ * written; what follows records what they found, because a red test that is understood is worth
+ * more than a green one that was arranged.
  *
  * ## What the armed assertion checks, after MED-3
  *
@@ -26,8 +22,34 @@
  *
  * The check is scoped to operations carrying the `internal` tag, and a body with an extra,
  * missing or wrongly typed field fails it. The machinery is proven against a stub contract in the
- * always-running block below, so the strength of the armed assertion is demonstrated **today**
- * rather than asserted for the day 10.1 lands.
+ * always-running block below, so the strength of the armed assertion is demonstrated independently
+ * of whatever the real document happens to say.
+ *
+ * ## Two divergences the armed run found, both open
+ *
+ * Neither is fixed here, and neither is worked around. `docs/specs/studio/openapi.yaml` is frozen
+ * and belongs to story 10.1; the runner's report shape belongs to 10.6 and its reader to 10.7.
+ * Choosing which side moves is a decision across those three, not a test edit.
+ *
+ * 1. **Requests.** `ProgressReport.logs[]` is `ExecutionLogEntry`, which requires `at`
+ *    (`date-time`) and a `level` from `DEBUG|INFO|WARN|ERROR`. The runner sends `atMs` (epoch
+ *    millis) and a lower-case `level`. The rename is not the fix: two of the four `appendLog`
+ *    call sites in `reportingStepReporter.ts` pass `atMs: 0` as a placeholder, so the runner has
+ *    no wall-clock instant to put in `at` at all. A conformant `at` means threading the wall
+ *    clock through `appendLog`, which is a design change, not a serialization tweak.
+ *
+ *    The same comparison shows a wider mismatch the checker cannot fail on, because
+ *    `ProgressReport` declares neither `additionalProperties: false` nor these as required: the
+ *    contract names `stepResults`, `status`/`errorCode`, `video`/`manifestKey` and `runtime`
+ *    where the runner sends `steps`, `outcome`, `evidence` and `runtimeVersions`. Both readings
+ *    are faithful to architecture §8.4's prose, which names the fields only in English.
+ *
+ * 2. **Responses.** The contract declares none of `/v1/validate`, `/v1/runs`, `/health`,
+ *    `/ready`. Its `servers` is `/api/v1/studio` and its `internal` tag carries exactly the two
+ *    API-side callback routes; the runner's own surface is not in it. Story 10.1's AC-1 undertook
+ *    "internal routes per architecture §8.4", and §8.4 tabulates six routes, four of them the
+ *    runner's — so this is a gap in the frozen document rather than a defect in the runner, and
+ *    it is reported rather than papered over.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
