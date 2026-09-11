@@ -1,0 +1,667 @@
+schema: 1
+story: '10.14'
+story_title: Video and durable result manifest
+epic: EPIC-10
+wave: 5
+
+gate: CONCERNS
+status_reason: >-
+  Everything load-bearing in this story is proven, and I proved most of it myself rather than
+  accepting it. AC-10 **did** land alone — `00b9e105d` contains exactly one production file,
+  `RunnerEvidence.java`, and its diff is the one nullable component. I reproduced the `DEF-02`
+  defect by making `partial` an undeclared JSON property again and got the developer's exact
+  message, `expected: 200 but was: 400`, on the AC-10 guard; the third test in that commit,
+  `anUndeclaredEvidencePropertyIsStillRefused`, stayed green under that mutation and is therefore
+  genuinely a **control** and not a guard for AC-10 — @dev's characterisation is correct, and in
+  fact conservative, because the same test is the *only* one that goes red when the record is
+  reopened with `ignoreUnknown = true`. **The PostgreSQL 15 question I re-settled independently**
+  on my own `postgres:15-alpine` container (PostgreSQL 15.19): `ADD CONSTRAINT … NOT VALID` on the
+  partitioned parent is accepted, produces one `pg_constraint` row per relation (parent + both
+  partitions) all `convalidated = f`, is enforced on new writes immediately with the failing row
+  in `DETAIL`, and `VALIDATE` fails loudly naming the **relation** — `ui_test_executions_default`
+  — not the row, then succeeds after repair and flips all three to `t`. All four of @dev's claims
+  and the relation-not-row correction reproduce verbatim. Every gate number reproduces to the
+  unit: backend 827 / 23 / 3 with the failing set identical class-by-class to the @po baseline and
+  zero in `com.citi.put.checks.studio`; runner 44 / 884 / 2; fixtures 5 / 84 / 10; static gates
+  SUCCESSFUL with `--rerun-tasks` (14 executed); coverage SUCCESSFUL with `-x test` and
+  `backend/build.gradle.kts` byte-unchanged against `50f770ed2`. I re-applied **twelve** mutations
+  across AC-3 (both falsifications), AC-6 (both passes), AC-9, AC-10, AC-11, AC-12, AC-15/16,
+  AC-16's seed and AC-17, restored every file byte-identically and watched both suites return to
+  44 / 884 / 2 and 16 / 16.
+  ---
+  **Two guards in this story cannot fail, and I demonstrated both rather than reasoning about
+  them.** QA-1: `ErrorCodeVocabularyTest.theConstraintIsAddedNotValidAndValidatedSeparately`
+  greps the migration's **whole file text**, and the migration's own operator-remedy comment quotes
+  `ALTER TABLE ui_test_executions VALIDATE CONSTRAINT ck_ui_test_executions_error_code;` verbatim —
+  so with the real `VALIDATE` statement deleted the test stays **green** (the container IT catches
+  it, red ×2). That is a thirteenth vacuous-guard shape for this epic: *a source-text scan over an
+  artefact that quotes itself*. QA-2: `terminal-order.test.ts > 'writes the manifest before the
+  result is delivered'` is named for AC-3 falsification (a) and stays **green** under exactly that
+  mutation, because its `sendFinal` sentinel is `journal.push`ed by the test after the run has
+  completed and is last by construction. Both are redundantly covered by sibling assertions in the
+  same files, so nothing is actually unproven — but two named falsifications are carried by tests
+  other than the ones that name them.
+  ---
+  **Three smaller findings.** Two md5s in the AC-22 table do not correspond to any delivered state
+  (`RunnerReportProjection.java` recorded `4ce07638…`, actual `5f9926c4…` at all three commits and
+  in the working tree; `ErrorCodeConstraintMigrationIT.java` recorded `7c7186b8…`, actual
+  `12a5bf62…`) — the *restoration* is provable from git, the *recorded evidence* for those two rows
+  is not. AC-20's "capable of two" neutralises two terms, not the one it names. And the surviving
+  row-22 mutant is unfalsifiable **by the current field set** rather than by construction: I
+  confirmed both halves (pass-2 dropped survives all 44 files; pass-1 dropped goes red ×1 on the
+  JSON-escaping case), and pass 1 does not touch numeric leaves, so a future numeric field sourced
+  from resolved input would make pass 2 load-bearing with nothing to notice.
+  ---
+  **The deliberately-red escalation test went green legitimately.** `dd8932d7f` is an @architect
+  `docs(architecture)` amendment answering story 10.7's §12 escalation, with an ADR-002 §13 Class C
+  log row that records `ExecutionErrorCodeContractEscalationTest 1/2 → 2/2 **with no change to the
+  test**` and a full §15.10 record. The gap closed; nobody widened the thing it measured. That is
+  the designed path, and it is the answer story 10.10's own open escalation should be held to.
+  Nothing blocks the merge.
+reviewer: Quinn (@qa)
+updated: '2026-09-11T00:00:00Z'
+branch: story/10.14
+head_sha: ac57bd5ee
+base_sha: 50f770ed2
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.14
+platform: darwin 23.5.0 / arm64, node v23.10.0, PostgreSQL 15.19 (postgres:15-alpine)
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands actually executed by the reviewer, not developer claims
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  backend_check:
+    command: ./gradlew --no-daemon check --continue
+    result: BUILD FAILED (ED-02 set only) — AS EXPECTED
+    detail: >-
+      **827 tests completed, 23 failed, 3 skipped** in 23m 58s. Exactly the developer's figure and
+      exactly +39 against the @po baseline of 788 / 23 / 3. I extracted the failing set myself and
+      it matches the recorded baseline class by class and count by count: CheckCrudIT 2,
+      bulk.BulkDeleteIT 2, config.RateLimitFilterIT 4, csi.CsiFetchIT 1,
+      reports.ReportDeliveryDispatcherIT 1, reports.ReportsCrudIT 2, reports.ReportsDuplicateIT 1,
+      reports.ReportsExecutionIT 2, reports.ReportsPreviewIT 2, scheduling.ScheduleAuthzIT 2,
+      security.BffFilter503IT 1, security.BffFilterUnauthIT 1, security.IdentityCacheIT 1,
+      users.UserMeEndpointIT 1 = 23. **Zero failures in `com.citi.put.checks.studio`.** No
+      standalone `DispatcherIT` (the single grep hit is `ReportDeliveryDispatcherIT`), so 10.7's
+      order-dependent QA-1 did not appear in this run either.
+  backend_static_gates:
+    command: ./gradlew --no-daemon spotlessCheck checkstyleMain checkstyleTest spotbugsMain --rerun-tasks
+    result: PASS
+    detail: >-
+      **BUILD SUCCESSFUL in 17s, 14 actionable tasks: 14 executed.** Run with `--rerun-tasks` so
+      no UP-TO-DATE cache could answer for them — my own `check` run reported "4 executed, 14
+      up-to-date", which is exactly why this re-run matters. Confirms @dev's finding that the
+      story's expectation of pre-existing spotless violations is **stale**: the base tree is clean.
+  backend_coverage:
+    command: ./gradlew --no-daemon jacocoTestReport jacocoTestCoverageVerification -x test
+    result: PASS
+    detail: >-
+      BUILD SUCCESSFUL against the fresh `test.exec`. `jacocoTestReport` declares
+      `dependsOn(tasks.test)`, so under `--continue` with a failing `:test` the pair must be run
+      this way. **No threshold lowered:** `git diff 50f770ed2..HEAD -- backend/build.gradle.kts` is
+      empty. Verified, not inferred.
+  runner_unit_tests:
+    command: npm test
+    result: PASS
+    detail: >-
+      **44 files, 884 passed, 2 skipped**, exit 0, 4.56 s. Exactly the developer's figure and
+      exactly +3 files / +31 tests against the 41 / 853 / 2 baseline. The 2 skips are the
+      pre-existing unit-tier ones. Re-run after the last mutation revert reproduced the same
+      figure.
+  runner_fixtures_tier:
+    command: npm run test:fixtures
+    result: PASS
+    detail: >-
+      **5 files, 84 passed, 10 skipped**, exit 0, 63.98 s. Exactly the developer's figure. New file
+      `test/fixtures-tier/upload-evidence.test.ts` contributes 7 passing and 4 skipped;
+      `deadline-cleanup.test.ts` is now 11 tests / 3 skipped, down one skip — the O-13 un-skip.
+  runner_lint:
+    command: npm run lint
+    result: PASS
+    detail: eslint ., exit 0, no output.
+  runner_type_check:
+    command: npm run type-check
+    result: PASS
+    detail: tsc -p tsconfig.json --noEmit, exit 0, no output.
+  runner_build:
+    command: npm run build
+    result: PASS
+    detail: tsc -p tsconfig.build.json + write-runtime-versions.mjs, exit 0, dist/runtime-versions.json written.
+  runner_pin_check:
+    command: npm run check:pins
+    result: PASS
+    detail: >-
+      `check:pins OK`, exit 0. playwright 1.63.0 agrees across package.json, package-lock.json,
+      the Dockerfile ARG and dist/runtime-versions.json; node v23.10.0; .nvmrc / engines floor 22.
+      The standing `ED-05` NOT ASSERTED note on `image` is present and expected outside the image.
+  contract_document:
+    command: shasum -a 256 docs/specs/studio/openapi.yaml
+    result: BYTE-UNCHANGED
+    detail: >-
+      `cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e`, identical to
+      `BASE_SHA256` at `studio-runner/test/run/confinement.test.ts:149`.
+      `git diff 50f770ed2..HEAD -- docs/specs/studio/openapi.yaml studio-runner/test/run/confinement.test.ts`
+      is empty. AC-25 and `FOC-05` hold.
+  postgres_15_independent_verification:
+    command: docker run postgres:15-alpine + a hand-built partitioned table and the V17 constraint shape
+    result: CONFIRMED — ALL FOUR CLAIMS, INCLUDING THE CORRECTION
+    detail: >-
+      My own container, `PostgreSQL 15.19 on aarch64-unknown-linux-musl`. (1) `ADD CONSTRAINT …
+      NOT VALID` on the partitioned parent is **accepted** and recurses: three `pg_constraint` rows
+      — `ui_test_executions`, `ui_test_executions_2026_09`, `ui_test_executions_default` — all
+      `convalidated = f`. (2) While still NOT VALID a new undeclared write is refused immediately:
+      `ERROR: new row for relation "ui_test_executions_2026_09" violates check constraint …` with
+      `DETAIL: Failing row contains (…, NOT_A_CODE)`. (3) `VALIDATE CONSTRAINT` on dirty data fails
+      with `ERROR: check constraint "ck_ui_test_executions_error_code" of relation
+      "ui_test_executions_default" is violated by some row` — **the relation, not the row**, which
+      is precisely @dev's correction. (4) After repairing the row, `VALIDATE` succeeds and all three
+      relations flip to `convalidated = t`. §18.2's form is correct and no silent switch happened.
+  ac10_landed_alone:
+    command: git show --name-only --format= 00b9e105d | grep -v /test/
+    result: CONFIRMED
+    detail: >-
+      Exactly one production file:
+      `backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunnerEvidence.java`. The diff
+      adds one component (`Boolean partial`) and its javadoc; `@JsonIgnoreProperties(ignoreUnknown
+      = false)` is untouched. The other five files in the commit are tests — the new
+      `EvidencePartialCallbackIT` plus four call-site updates for the new component. The commit
+      message states plainly that `RunnerReportProjection` still writes `Boolean.FALSE` and that
+      AC-11 lands separately, which is true of that commit.
+  working_tree:
+    command: git status --short
+    result: CLEAN
+    detail: >-
+      Empty after every mutation was reverted. Mutations were applied with python3 in-place edits
+      that assert their anchor before writing, against PID-suffixed copies held in a
+      reviewer-private directory (never the shared scratchpad root, and never `git stash`, per the
+      worktree rule). Restoration confirmed by md5 against the pre-mutation copy AND by an empty
+      `git status --short`.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Developer claims — reproduced, or taken on trust, stated separately
+# ─────────────────────────────────────────────────────────────────────────────
+developer_claims_verified:
+  - claim: "backend check 788/23/3 -> 827/23/3, failing set byte-identical, zero new failures"
+    verdict: >-
+      AFTER-FIGURE CONFIRMED EXACTLY (827 / 23 / 3) and the failing set independently extracted and
+      compared class by class. The **baseline** measurement at `50f770ed2` was NOT re-run by me and
+      is taken on trust; the @po-recorded expectation it matches is in the story and in the epic.
+  - claim: "runner npm test 41/853/2 -> 44/884/2"
+    verdict: AFTER-FIGURE CONFIRMED EXACTLY. Baseline taken on trust.
+  - claim: "runner test:fixtures 4/80/7 -> 5/84/10"
+    verdict: AFTER-FIGURE CONFIRMED EXACTLY. Baseline taken on trust.
+  - claim: "static gates SUCCESSFUL with --rerun-tasks, 14 tasks executed"
+    verdict: CONFIRMED to the task count on my own run.
+  - claim: "coverage SUCCESSFUL with -x test, no threshold lowered"
+    verdict: CONFIRMED. `git diff` on `backend/build.gradle.kts` is empty against the base commit.
+  - claim: "openapi.yaml and confinement.test.ts byte-unchanged; shasum still equals BASE_SHA256"
+    verdict: CONFIRMED by both `git diff` and `shasum`.
+  - claim: "PG15 accepts NOT VALID on a partitioned parent; VALIDATE names the relation not the row"
+    verdict: >-
+      INDEPENDENTLY RE-DERIVED on my own postgres:15-alpine container. All four sub-claims and the
+      correction reproduce. This was open across two prior agents and is now settled twice.
+  - claim: "AC-10 landed first and alone at 00b9e105d, shown red before the fix"
+    verdict: >-
+      CONFIRMED BOTH HALVES. One production file in the commit. I reproduced the red by making
+      `partial` an undeclared JSON property again and got the quoted message verbatim:
+      `expected: 200` / `but was: 400`.
+  - claim: "the third test in 00b9e105d is a control, not a guard"
+    verdict: >-
+      CONFIRMED, AND @dev UNDER-CLAIMED IT. `anUndeclaredEvidencePropertyIsStillRefused` stayed
+      green under the pre-fix wire shape, so it is no evidence at all for AC-10 — correct. But it
+      is also the **sole** test that goes red when I set `ignoreUnknown = true`, i.e. it is a live
+      guard against the obvious wrong fix for `DEF-02`. Under-claiming is the safe direction; the
+      epic's hazard is the reverse and this is not it.
+  - claim: "AC-3's second falsification goes red on the ordering assertions only, evidence still STORED"
+    verdict: >-
+      REPRODUCED VERBATIM. Moving the evidence phase after `runScratch.clear()` gives **2 failed /
+      9 passed**, both on ordering (`expected 0 to be greater than 1`), with
+      `reports STORED with the recorder's partial carried through unchanged` **passing**. The
+      journalling scratch that deletes nothing is the right design: the discriminator really is
+      the sequence and not a missing file.
+  - claim: "21 mutations, every production file restored byte-identically, md5 re-checked"
+    verdict: >-
+      PARTIALLY REPRODUCED, AND TWO RECORDED HASHES ARE WRONG. I re-ran twelve mutations and every
+      one matched the recorded outcome (three of them red on *more* tests than recorded, because
+      @dev scoped some runs to a single file). But of the six md5s in the table, four match the
+      delivered files exactly (`V17` `ad601c91…`, `runCoordinator.ts` `3ebdba23…`,
+      `evidenceUpload.ts` `8228f8f6…`, `manifest.ts` `506954da…`) and **two do not**:
+      `RunnerReportProjection.java` is recorded `4ce07638…` and is actually `5f9926c4…`, and
+      `ErrorCodeConstraintMigrationIT.java` is recorded `7c7186b8…` and is actually `12a5bf62…`.
+      Both files are provably unmodified — identical at `5e72fdf2b`, `b98a5ba85` and `HEAD`, with
+      no working-tree diff — so the *restoration* holds; the *recorded evidence* for those two rows
+      corresponds to no delivered state. See QA-3.
+  - claim: "one mutant survived (the manifest's second redaction pass), reported not counted"
+    verdict: >-
+      CONFIRMED, BOTH HALVES, AND THE CHARACTERISATION NARROWED. Dropping pass 2 leaves the whole
+      44-file suite green; dropping pass 1 instead goes red ×1 on exactly the JSON-escaping case
+      (`expected '{"schemaVersion":1,…' not to contain 'canary-with-a-'`). @dev's reasoning is
+      sound: pass 1 redacts every string leaf **and every key**, so with the manifest's current
+      field set there is no route pass 2 alone catches. It is the 10.13 MC-5 shape —
+      unfalsifiable-by-construction, honestly reported — **but** it is construction only of the
+      *current* field set: `schemaVersion` and `durationMs` are numeric leaves pass 1 never
+      touches. See QA-4.
+  - claim: "AC-21 is asserted through the runner's real bytes, not a live cross-process write"
+    verdict: >-
+      CONFIRMED BY READING THE CODE. `RecoveryIT.runnerProducedManifest` reads
+      `../studio-runner/test/fixtures/result-manifest.json` and deserializes it through
+      `ResultManifest`, substituting only execution and attempt identity. There is no
+      filesystem-backed `ResultManifestStore` on the Java side. The claim is stated exactly as
+      strongly as the evidence supports it, which is the right disposition while `ED-03` is open.
+  - claim: "seven adjacent assertions moved PENDING -> STORED, none relaxed"
+    verdict: >-
+      CONFIRMED by reading the full diff of all four files. Each carries its reason inline and each
+      keeps the property it was written for — the deadline-outcome AC-16 cases still pin
+      `partial` false/true/false and still assert `UNAVAILABLE` never contains `STORED`. The one
+      that mattered, `'never emits STORED, on any path'`, is replaced by its inverse and the
+      negative half is **intact**: the `FAILED` and `UNAVAILABLE` recordings are still asserted
+      `not.toBe('STORED')` and the whole serialized body still `not.toContain('STORED')`. Only the
+      playable/`PENDING` case was removed from that loop, and it is legitimately `STORED` now and
+      is asserted positively two tests above. Nothing relaxed.
+  - claim: "the story's expectation of pre-existing spotless violations is stale"
+    verdict: >-
+      CONFIRMED on my own `--rerun-tasks` run: BUILD SUCCESSFUL, 14 executed, on the delivered
+      tree. Matches the independent finding that the six violations are pre-epic and were fixed by
+      story 10.4.
+  - claim: "httpClient.test.ts 'reports a timeout as ambiguous' failed once, timing-sensitive, unrelated"
+    verdict: >-
+      AGREED — FLAKE, NOT AN INTERMITTENT DEFECT, and @dev was right to report rather than absorb
+      it. Evidence: the file is untouched by this story (last written at `22fd0749c` /
+      `8f4e321d3`, both story 10.6); the test bounds a **real localhost socket** at `timeoutMs: 25`
+      and additionally asserts `responder.hits` is exactly 1, so a loaded box (mine was running
+      Gradle plus Testcontainers) can miss the window in either direction; I ran it **8 times in
+      isolation, 8 green**, and it was green inside my full 44-file run. Routed as LOW-1 for an
+      owner outside this story rather than absorbed here.
+  - claim: "nothing was cut — AC-16's two-stage container test is implemented in full"
+    verdict: >-
+      CONFIRMED, AND TESTED FOR VACUITY. `flywayTo("16")` → seed → `flywayTo("17")` against two
+      databases in one container. The seed lands rows in `ui_test_executions_2026_06` **and** the
+      DEFAULT partition, with nulls, one row per declared value, and — on the dirty database — one
+      `RESTORED_FROM_DUMP` row in DEFAULT. The file carries its own non-vacuity assertion, *"the
+      seed has to span more than one partition, DEFAULT included, or it proves nothing"*. I removed
+      the out-of-vocabulary row from the dirty seed and got **red ×2**, which is @dev's row 10
+      exactly. This is the criterion @po flagged as most cut-prone and it was not cut.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Mutations re-applied by the reviewer — twelve, across both trees and the SQL
+# ─────────────────────────────────────────────────────────────────────────────
+mutation_spot_checks:
+  - id: QM-A
+    criterion: AC-3 falsification (a)
+    mutation: the whole `settleEvidence` call moved after `await reporter.sendFinal(...)`
+    result: >-
+      RED — 8 failed / 3 passed in terminal-order.test.ts. Sequence `toEqual` red
+      (`['scratch.clear', …(5)]`), video-before-clear red (`expected 0 to be greater than 2`),
+      wipe-after-manifest red (`expected 1 to be greater than 4`), STORED red
+      (`expected 'PENDING' to be 'STORED'`), and all four AC-4 evidence assertions red. @dev
+      recorded ×6; I measured ×8 on this file alone. **The test named for this falsification —
+      `writes the manifest before the result is delivered` — stayed GREEN.** See QA-2.
+    restored: runCoordinator.ts md5 3ebdba2384f558e6da80eb0a0384d122
+  - id: QM-B
+    criterion: AC-3 falsification (b) — the one @po demanded
+    mutation: the evidence phase moved after `await runScratch.clear()`
+    result: >-
+      RED ×2, **on the ordering assertions only** — `expected 0 to be greater than 1` — with
+      evidence still `STORED` and the other nine tests green. Byte-for-byte the outcome @dev
+      recorded in row 13. The journalling scratch deletes nothing on purpose, and that is correct:
+      it makes the guard discriminate the **ordering** and not a missing-file symptom.
+    restored: runCoordinator.ts md5 3ebdba2384f558e6da80eb0a0384d122
+  - id: QM-C
+    criterion: AC-6 pass 2 (the reported survivor)
+    mutation: "`redactor.redact(JSON.stringify(scrubbed))` -> `JSON.stringify(scrubbed)`"
+    result: SURVIVED — manifest.test.ts 10/10 green, and the full suite 44 files green. Confirms row 22.
+    restored: manifest.ts md5 506954da8cc2abda921c236cb36bba2f
+  - id: QM-D
+    criterion: AC-6 pass 1 (the control for the survivor)
+    mutation: "`redactStrings(manifest, redactor)` -> `manifest`"
+    result: >-
+      RED ×1 — `scrubs a value that JSON would otherwise escape out of a plain text search`.
+      Exactly the asymmetry @dev claims, verified rather than accepted.
+    restored: manifest.ts md5 506954da8cc2abda921c236cb36bba2f
+  - id: QM-E
+    criterion: AC-9
+    mutation: "`partial: carried` -> `partial: false` on the successful-upload return"
+    result: >-
+      RED ×3 suite-wide — the AC-3 carried-through test plus deadline-outcome's AC-16 (b) and its
+      no-derivation case. @dev recorded ×1, having scoped the run narrower. Stronger than claimed.
+    restored: evidenceUpload.ts md5 8228f8f6f199bd099b2566b9db49db55
+  - id: QM-F
+    criterion: AC-15/AC-16
+    mutation: the `ALTER TABLE … VALIDATE CONSTRAINT …;` statement deleted from V17 (comment copy left intact)
+    result: >-
+      RED ×2 in `ErrorCodeConstraintMigrationIT` —
+      `validatesTheConstraintOnTheParentAndOnEveryPartition` and
+      `refusesToValidateAgainstARowHoldingAValueOutsideTheVocabulary`. @dev's row 9 exactly.
+      **And `ErrorCodeVocabularyTest.theConstraintIsAddedNotValidAndValidatedSeparately` stayed
+      GREEN** — it is satisfied by the migration's operator-remedy comment. See QA-1.
+    restored: V17 md5 ad601c910a02bc89ba11e579a6c50fb2
+  - id: QM-G
+    criterion: AC-17
+    mutation: "`'STALE'` removed from the CHECK statement's `IN (…)`, left in the comment"
+    result: >-
+      RED ×2 — both vocabulary assertions — and the parser control
+      `theMigrationParserReadsTheStatementAndNotTheCommentThatRepeatsIt` stayed **green**, proving
+      the parser really reads the statement. @dev's row 6 exactly, with its control behaving.
+    restored: V17 md5 ad601c910a02bc89ba11e579a6c50fb2
+  - id: QM-H
+    criterion: AC-10 / DEF-02
+    mutation: >-
+      the `partial` record component renamed so the JSON key is undeclared again (the pre-fix wire
+      shape, compile-compatible)
+    result: >-
+      RED — 13 of the file's 16 tests, including `aFinalCarryingEvidencePartialIsAcceptedRatherThanRefused`
+      with the developer's exact message `[the merged runner emits evidence.partial on every FINAL;
+      refusing it costs the whole report, not just the field] expected: 200 … but was: 400`. At the
+      time of `00b9e105d` the file held 3 tests and 2 went red, consistent with the record.
+      `anUndeclaredEvidencePropertyIsStillRefused` **passed** — the control claim is true.
+    restored: RunnerEvidence.java md5 6ad2ed595268b1189f43deef19ff8a2c
+  - id: QM-I
+    criterion: AC-10, against the *wrong* fix
+    mutation: "`@JsonIgnoreProperties(ignoreUnknown = false)` -> `true`"
+    result: >-
+      RED ×1, and it is `anUndeclaredEvidencePropertyIsStillRefused` — the only test in the file
+      that moves. The "control" is a live guard against reopening the record. Recorded as a
+      strength, not a defect.
+    restored: RunnerEvidence.java md5 6ad2ed595268b1189f43deef19ff8a2c
+  - id: QM-J
+    criterion: AC-11
+    mutation: "`videoPartial = Boolean.FALSE` restored"
+    result: >-
+      RED ×3 — `theReportedPartialIsPublishedAndPersistedRatherThanAConstant`,
+      `aPassedRunWhoseRecorderDiedPublishesPartialTrue`,
+      `aTerminalTimeoutMeetingARunningStepReproducesTheContractsOwnExample`. The same three names
+      @dev recorded in row 2.
+    restored: RunnerReportProjection.java md5 5f9926c4046a12a2656c650d4265397b (see QA-3)
+  - id: QM-K
+    criterion: AC-12
+    mutation: "`videoPartial = \"TIMEOUT\".equals(errorCode)`"
+    result: >-
+      RED ×3, including **both** of ADR-002 §17.3's counter-examples —
+      `aPassedRunWhoseRecorderDiedPublishesPartialTrue` and
+      `aDeadlineKillWhoseOrderedStopFlushedCleanlyPublishesTimeoutWithPartialFalse`. Row 3 exactly,
+      and the criterion's "must turn **both** red" is satisfied.
+    restored: RunnerReportProjection.java md5 5f9926c4046a12a2656c650d4265397b
+  - id: QM-L
+    criterion: AC-16 non-vacuity
+    mutation: "the out-of-vocabulary row removed from the dirty seed (`if (false && dirty)`)"
+    result: >-
+      RED ×2 — `refusesToValidateAgainstARowHoldingAValueOutsideTheVocabulary` and
+      `validatesOnceTheOffendingRowIsRepaired`. Row 10 exactly. A seed of only clean data cannot
+      fail, and the suite knows it.
+    restored: ErrorCodeConstraintMigrationIT.java md5 12a5bf62aa8e0b3fe3efe95065841cd5
+  post_mutation_state:
+    runner: "npm test re-run after the last revert -> 44 files, 884 passed, 2 skipped"
+    backend: >-
+      `--tests` over all eight of this story's classes -> BUILD SUCCESSFUL;
+      EvidencePartialCallbackIT 16/16.
+    tree: "`git status --short` empty"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The thirteenth vacuous-guard shape, and a second instance of the same family
+# ─────────────────────────────────────────────────────────────────────────────
+thirteenth_vacuous_guard:
+  shape: >-
+    **A source-text scan over an artefact that quotes itself.** The assertion greps a file for the
+    statement it is asserting the presence and ordering of, and the same file contains a prose copy
+    of that statement — here an operator-remedy comment written, correctly and helpfully, inside
+    the migration. The scan is then satisfied with the statement deleted. It is a relative of the
+    epic's first shape (source-text greps instead of captured output) but is not the same thing:
+    the artefact under test is the one being read, and the false evidence is *inside* it rather
+    than in a neighbouring source file.
+  instance: backend/src/test/java/com/citi/put/checks/studio/ErrorCodeVocabularyTest.java
+  test: theConstraintIsAddedNotValidAndValidatedSeparately
+  demonstration: >-
+    All three of its assertions — `containsIgnoringCase("NOT VALID")`,
+    `containsIgnoringCase("ALTER TABLE ui_test_executions VALIDATE CONSTRAINT
+    ck_ui_test_executions_error_code")` and the `indexOf` ordering check — are satisfied by the
+    comment block alone. I ran QM-F (the `VALIDATE` statement deleted) and the test passed; I also
+    checked analytically that it passes with **both** DDL statements removed and only the comments
+    left. The docstring calls it *"not a style assertion: it is the difference between a deploy and
+    an outage"*, which is exactly the claim it cannot support.
+  why_it_matters_here_and_not_more: >-
+    The same file has a **control** — `theMigrationParserReadsTheStatementAndNotTheCommentThatRepeatsIt`
+    — written for precisely this hazard, but only for the *value list*, not for the *form*
+    assertions. The form is genuinely proven by `ErrorCodeConstraintMigrationIT` against a live
+    container. So nothing about AC-15 is actually unproven; the named guard is decoration standing
+    beside a real one.
+  second_instance_same_family:
+    id: QA-2
+    file: studio-runner/test/server/terminal-order.test.ts
+    test: "'writes the manifest before the result is delivered'"
+    shape: >-
+      **An ordering assertion against a sentinel the test appends after the fact.** Five of the six
+      journal entries are captured at their own seams; the sixth, `'sendFinal'`, is
+      `journal.push`ed by the test body after `await until(() => coordinator.inFlight === 0)`, so it
+      is last **by construction**. Any assertion of the form `indexOf(X) < indexOf('sendFinal')` is
+      unfalsifiable, and only the accompanying `toBeGreaterThanOrEqual(0)` presence check can move.
+    demonstration: >-
+      Under QM-A — AC-3's own falsification (a), *"move the manifest write after `sendFinal` -> the
+      named test red"* — this test **passed** while eight others in the file failed.
+    also: >-
+      The file's docstring states the mechanism as *"one from the HTTP client"*. It is not from the
+      HTTP client; it is a literal appended by the test. That is the epic's ninth shape (a stated
+      discriminating mechanism that is not the live one) recurring in a new place.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Deferrals — each checked, none able to turn green without its gate moving
+# ─────────────────────────────────────────────────────────────────────────────
+deferrals:
+  - id: AC-7b
+    disposition: SKIPPED, NEVER PASSED
+    location: studio-runner/test/fixtures-tier/upload-evidence.test.ts
+    verified: >-
+      `it.skip` with a comment-only body — no assertion exists, so it cannot pass. Gate named: an
+      @architect ruling recorded in ADR-002. Classification (Class B) was ruled by @po, not by the
+      story.
+  - id: AC-18b
+    disposition: SKIPPED, NEVER PASSED
+    verified: "`it.skip`, empty body. Gate named: `ED-03`, owner Platform/SRE, status open."
+  - id: AC-19b
+    disposition: SKIPPED, NEVER PASSED
+    verified: >-
+      `it.skip`, empty body, gate `ED-03`. The criterion's own reviewer instruction was executed: I
+      grepped the delivered source, tests, SQL and story text for a claim of exact-time physical
+      deletion and found **none** — every hit is a statement of the prohibition or a citation of
+      it. AC-19b's checkable half passes.
+  - id: AC-26 (O-14)
+    disposition: SKIPPED, NEVER PASSED
+    verified: >-
+      All three conditions independently re-checked. (i) landed. (ii) satisfied — `evidence` is
+      declared non-nullable before the `try` and `sendFinal` takes it non-optionally, so "absent"
+      is unreachable. (iii) **NOT satisfied** — ADR-002 §18.4 still lists **O-14** as open with
+      owner *"story 10.14 or the first story after it to touch `RunnerEvidence`"*, quoted
+      correctly; no §13 amendment row exists for the promotion. `FOC-05` independently holds:
+      `git merge-base --is-ancestor d98fba14c epic/EPIC-10` is **false**, so story 10.17 has not
+      merged. `it.skip` with an empty body. Correctly skipped.
+    caveat: >-
+      The only record of the 2026-09-11 request for the O-14 ruling is prose — in the story, the
+      commit message and the skip body. There is no request artefact outside the story. That is
+      adequate for this gate and is named so the next owner inherits an outstanding request rather
+      than an unasked question, exactly as AC-26 requires.
+  - id: T-10.14.23
+    disposition: CORRECTLY LEFT UNDONE
+    verified: marked `[~]`, and the contract and the pin are byte-unchanged.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The deliberately-red escalation test that is now green
+# ─────────────────────────────────────────────────────────────────────────────
+escalation_test_disposition:
+  test: ExecutionErrorCodeContractEscalationTest
+  verdict: RESOLVED LEGITIMATELY — NOT DEFUSED
+  evidence: >-
+    `git log -S'AUTHORIZATION_REVOKED' -- docs/specs/studio/openapi.yaml` returns exactly one
+    commit: `dd8932d7f`, *"docs(architecture): declare the execution error code vocabulary
+    (ADR-002)"*. It is an @architect amendment, not a story commit, and its message opens *"Story
+    10.7 escalated the last deliberately-red test on the branch under ADR-002 §12 rather than
+    widening a public enum itself. §15 rules on it."* ADR-002 line 334 carries the §13 log row:
+    Class C, *"@architect, this amendment"*, evidence *"`ExecutionErrorCodeContractEscalationTest`
+    1/2 -> **2/2** with no change to the test"*, with the full record in §15.10 and the ratification
+    reasoning (including the rejected `PERMISSION_REVOKED` alternative) at §15. The enum is eight
+    values; the test still contains no hardcoded list and still reads both sides. Nobody widened
+    the thing it measured; the architect closed the gap the test was holding open, which is the
+    design.
+  consequence_for_the_epic: >-
+    This is the reference disposition for story 10.10's currently-open deliberately-red escalation:
+    green is acceptable **only** when a §13 amendment row names the architect, the class and the
+    before/after measurement, and the test itself is unchanged. All three hold here.
+
+# ─────────────────────────────────────────────────────────────────────────────
+top_issues:
+  - id: QA-1
+    severity: medium
+    finding: >-
+      `ErrorCodeVocabularyTest.theConstraintIsAddedNotValidAndValidatedSeparately` cannot fail —
+      the migration's operator-remedy comment quotes the statement the test greps for, verbatim.
+      Demonstrated: green with the real `VALIDATE CONSTRAINT` statement deleted.
+    impact: >-
+      None on correctness. AC-15's form is genuinely proven by `ErrorCodeConstraintMigrationIT`
+      against a live container, which QM-F turns red ×2. The cost is a test whose docstring claims
+      a guarantee it does not provide, sitting in the file whose whole point is that vocabularies
+      must be read and not transcribed.
+    suggested_action: >-
+      Strip comments before the form assertions — the file already has `CHECK_CLAUSE` and a parser
+      control for the value list; reuse the same discipline. Follow-up, not a blocker.
+  - id: QA-2
+    severity: medium
+    finding: >-
+      `terminal-order.test.ts > 'writes the manifest before the result is delivered'` cannot fail:
+      its `'sendFinal'` sentinel is appended by the test after the run completes. It stayed green
+      under AC-3 falsification (a), the mutation it is named for.
+    impact: >-
+      None on correctness — QM-A turns eight sibling assertions red, including the full-sequence
+      `toEqual`, so the falsification is satisfied by the file. The docstring's *"one from the HTTP
+      client"* is inaccurate.
+    suggested_action: >-
+      Capture the sentinel where it happens — the harness's report client already records the
+      terminal POST — or delete the test and let the `toEqual` carry it. Follow-up.
+  - id: QA-3
+    severity: low
+    finding: >-
+      Two of six md5s in the AC-22 table correspond to no delivered state:
+      `RunnerReportProjection.java` recorded `4ce07638c5a2c201136fad175893c578` (actual
+      `5f9926c4046a12a2656c650d4265397b`) and `ErrorCodeConstraintMigrationIT.java` recorded
+      `7c7186b80c697f3594c08205e207904e` (actual `12a5bf62aa8e0b3fe3efe95065841cd5`).
+    impact: >-
+      The *restoration* claim holds and is independently provable: both files are byte-identical at
+      `5e72fdf2b`, `b98a5ba85` and `HEAD`, with an empty working-tree diff. What fails is the
+      recorded evidence — most likely hashes taken mid-implementation and carried forward past a
+      later `spotlessApply`. AC-22 asks for the hash *after restore*; for these two rows it is not.
+    suggested_action: Re-take the two hashes on the delivered tree and correct the table. Documentation fix.
+  - id: QA-4
+    severity: low
+    finding: >-
+      The surviving row-22 mutant is unfalsifiable by the **current field set**, not by
+      construction. Pass 1 redacts string leaves and keys; `schemaVersion` and `durationMs` are
+      numeric leaves it never touches, and `stringValues` is the only thing keeping
+      `runtimeVersions` out of that category.
+    impact: >-
+      None today — I verified the survival and the pass-1 asymmetry myself, and @dev's reasoning is
+      correct for the manifest as shipped. The hazard is that a future numeric field sourced from
+      resolved input silently makes pass 2 load-bearing, with no test and no type to notice.
+    suggested_action: >-
+      Either add a canary whose value is the digits of a numeric field (which kills the mutant and
+      makes pass 2 a counted guard), or assert that every `ResultManifestBody` field sourced from
+      `ResultManifestInput` is a string. Cheap either way. Follow-up.
+  - id: QA-5
+    severity: low
+    finding: >-
+      AC-20's `theDispatchCounterCanReachTwoAndTheReconciledLedgerStateIsWhatStopsIt` neutralises
+      **two** terms before the counter moves: it resets `studio_dispatch_ledger` to `QUEUED` and
+      separately resets `ui_test_executions.status` to `PENDING`.
+    impact: >-
+      @po's actual requirement — *"the count must be shown capable of reaching two"* — is met, and
+      the epic's canonical vacuous shape is genuinely closed. What is over-claimed is the
+      attribution in the assertion message: the experiment does not isolate which of the two terms
+      was holding the counter at one.
+    suggested_action: Reset one term at a time, or soften the message. Follow-up.
+  - id: LOW-1
+    severity: low
+    finding: >-
+      `studio-runner/test/reporting/httpClient.test.ts > 'reports a timeout as ambiguous'` bounds a
+      real localhost socket at `timeoutMs: 25` and additionally asserts `responder.hits` is exactly
+      1. It is environmentally timing-sensitive and will recur on a loaded box.
+    impact: >-
+      Not this story's surface — the file and the client are story 10.6's and are untouched here. I
+      ran it 8/8 green in isolation and green inside the full suite.
+    suggested_action: >-
+      Raise the budget or make the assertion tolerate a pre-connect timeout. Owner outside this
+      story; recorded here because @dev correctly reported rather than absorbed it.
+
+# ─────────────────────────────────────────────────────────────────────────────
+ac_coverage:
+  implemented_and_verified:
+    - AC-1 (keys echoed, underivable-key test, ManifestKeys agreement)
+    - AC-2 (runtime surface, and the imported constant pinned to a test-side `['put']` literal — the
+      epic's eleventh shape correctly closed)
+    - AC-3 (both falsifications reproduced; boundary is `runScratch.clear()`)
+    - AC-4 (three storage-failure paths + byte-identical outcome + escape falsification)
+    - AC-5 (file-reference argument, zero whole-file reads counted, attempt and window bounds)
+    - AC-6 (three placed canaries with an explicit presence control, asserted at the store boundary)
+    - AC-7a (one committed fixture, provenance checked from both sides)
+    - AC-8, AC-9 (STORED earned; partial carried — QM-E red ×3)
+    - AC-10 (landed alone; red reproduced verbatim)
+    - AC-11 (QM-J red ×3; the O-13 un-skip executed and its assertion live in a tier that is now gated)
+    - AC-12 (QM-K red ×3, both §17.3 counter-examples)
+    - AC-13, AC-14 (refusal not coercion; exclusive predicate)
+    - AC-15, AC-16, AC-17 (V17; two-stage container; three artefacts read, none transcribed)
+    - AC-18a, AC-19a (fake store four modes; retention single-sourced with a control)
+    - AC-20 (count shown capable of two — see QA-5), AC-21 (stated exactly as strongly as the evidence)
+    - AC-22 (twelve of twenty-one re-run by me — see QA-3 for the two stale hashes)
+    - AC-23 (no source scan stands alone, with the two exceptions at QA-1 and QA-2)
+    - AC-24 (eight internal records; `schemaProperties` asserts the schema is declared, so a missing
+      name cannot silently pass; permanent `DEF-02` control throws)
+    - AC-25, AC-27
+  correctly_deferred:
+    - AC-7b, AC-18b, AC-19b, AC-26
+
+required_before_merge: []
+
+recommended_not_blocking:
+  - QA-1 — strip comments before `ErrorCodeVocabularyTest`'s form assertions
+  - QA-2 — capture the `sendFinal` sentinel at its seam, or delete the test
+  - QA-3 — re-take the two md5s on the delivered tree
+  - QA-4 — make the manifest's second redaction pass a counted guard, or type it out of reach
+  - QA-5 — isolate AC-20's neutralised term, or soften the assertion message
+  - LOW-1 — route the httpClient 25 ms budget to an owner outside this story
+
+do_not_do:
+  - Do not land AC-26 before story 10.17 merges — `FOC-05`, verified still binding today.
+  - Do not "fix" the ordering by moving `resolver.wipe()` earlier; AC-6's canary experiment has to
+    be live at the instant the manifest bytes are produced, and an assertion holds that.
+  - Do not count the surviving redaction mutant as proven, and do not delete pass 2 on the strength
+    of its survival.
+  - Do not treat the backend's 23 failures as this story's; they are the `ED-02` set and are
+    identical class-by-class to the baseline.
+
+coderabbit:
+  run: false
+  reason: >-
+    Ruled once for Epic 10 by @po on 2026-09-11 — `coderabbit_integration.installation_mode` is
+    `wsl`, this repository is worked on a Darwin host, the CLI is absent, and
+    `graceful_degradation.skip_if_not_installed: true` applies.
+
+final_decision:
+  gate: CONCERNS
+  merge: SAFE
+  statement: >-
+    This is a strong story and most of what makes it strong is the part @dev chose to report rather
+    than absorb: the surviving redaction mutant, the AC-21 evidence being bytes and not a live
+    cross-process write, the relation-not-row correction, the stale spotless expectation, and a
+    single flaky test it could easily have re-run into silence. I checked all five and all five are
+    honest. AC-10 landed alone and was genuinely red first; the third test in that commit is
+    genuinely a control and is additionally a live guard against the wrong fix. AC-3's second
+    falsification reproduces exactly as described, on the ordering assertions only, with evidence
+    still `STORED` — the fake scratch that deletes nothing is the right design, and the real
+    deletion is separately exercised against a real filesystem and a real Chromium in the fixtures
+    tier. The PostgreSQL 15 question, open across two prior agents, I settled independently on my
+    own container and it agrees with @dev in every particular including the correction. AC-16 was
+    not cut. **Two guards in this story cannot fail** — a grep satisfied by the comment beside the
+    statement it greps for, and an ordering assertion against a sentinel the test appends itself —
+    and I demonstrated both by mutation rather than by argument. Neither leaves anything unproven,
+    because a sibling assertion in each file catches what the named one does not, and both are
+    cheap to fix. The thirteenth shape is added to the epic's list. Two md5s in the mutation table
+    are stale, which is a record-keeping defect and not a restoration one; git proves the files are
+    untouched. Nothing blocks. Merge.

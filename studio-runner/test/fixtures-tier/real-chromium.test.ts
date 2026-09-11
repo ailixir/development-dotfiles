@@ -426,7 +426,10 @@ describe('AC-20 — admission → real Chromium launch → STARTED (closes 10.6 
     expect(final?.kind).toBe('FINAL');
     expect(final?.outcome).toMatchObject({ result: 'PASSED', errorCode: null });
     expect(final?.evidence).toMatchObject({
-      state: 'PENDING',
+      // `PENDING` until story 10.14 gave the terminal path an upload; the harness's store
+      // acknowledges the write, so a real playable recording now earns `STORED` (AC-8). The keys
+      // below are the point of this assertion and are unchanged.
+      state: 'STORED',
       videoKey: job.videoKey,
       manifestKey: job.manifestKey,
     });

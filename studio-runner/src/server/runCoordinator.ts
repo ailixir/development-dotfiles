@@ -53,6 +53,15 @@ import {
   effectiveStepTimeoutMs,
 } from '../run/deadline.js';
 import type { DeadlineTimers, ServerDeadlineMaxima } from '../run/deadline.js';
+import {
+  openEvidenceWindow,
+  uploadRecording,
+  writeResultManifest,
+} from '../run/evidenceUpload.js';
+import type { EvidenceFileSystem, EvidenceUploadBounds } from '../run/evidenceUpload.js';
+import { buildResultManifest, serializeResultManifest } from '../run/manifest.js';
+import { RESULT_MANIFEST_CONTENT_TYPE } from '../run/manifest.js';
+import type { ObjectStoreClient } from '../run/objectStore.js';
 import { takeRunOrigin } from '../run/timeline.js';
 import type { OriginSource, RunOrigin } from '../run/timeline.js';
 import { validateArtifact } from '../validator/index.js';
@@ -65,7 +74,7 @@ import { knownValuesOf, validateEnvelope } from '../reporting/envelope.js';
 import type { ReportBounds } from '../reporting/bounds.js';
 import { createReportClient } from '../reporting/reportClient.js';
 import { createRunSnapshot } from '../reporting/snapshot.js';
-import type { EvidenceState, RunOutcome } from '../reporting/snapshot.js';
+import type { EvidenceState, RunOutcome, RunSnapshot } from '../reporting/snapshot.js';
 import { createRunReporter } from '../reporting/reportingStepReporter.js';
 import type {
   BrowserLauncher,
@@ -106,6 +115,22 @@ export interface RunCoordinatorOptions {
     readonly maxAttempts: number;
     readonly backoffMs: number;
   };
+  /**
+   * Where the terminal evidence goes (story 10.14 AC-1, AC-2).
+   *
+   * Write-only by construction: the type has one operation and no read. The runner holds no Get
+   * and no List permission (§6.2), and this is the same fact stated where the code can enforce it.
+   */
+  readonly objectStore: ObjectStoreClient;
+  /** Bounds for the evidence phase — attempts, window and backoff (AC-5). */
+  readonly evidence: EvidenceUploadBounds;
+  /**
+   * The filesystem the uploader may touch.
+   *
+   * Injected so AC-5's "zero whole-file reads, at any recording size" is a **counted** fact: the
+   * port declares a whole-file read the uploader never performs, and a test counts it.
+   */
+  readonly evidenceFileSystem: EvidenceFileSystem;
   readonly now: () => number;
   readonly wallClock: () => Date;
   readonly sleep: (ms: number) => Promise<void>;
@@ -367,6 +392,10 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
      * fields precisely so nothing can quietly measure the browser's budget from the queue's start.
      */
     let browserReadyAtMs: number | null = null;
+    /** The recording the session left in scratch, or null. Read in the terminal path (AC-3). */
+    let recordingPath: string | null = null;
+    /** ISO instant of the browser start, for the manifest's timings (§5.3). */
+    let browserStartedAtIso: string | null = null;
     let deadline: ReturnType<typeof createRuntimeDeadline> | null = null;
     /**
      * The kill, once ordered. A list rather than a nullable, so "already killing" is a length
@@ -432,6 +461,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         session.run?.origin ?? asSessionOrigin(options.takeOrigin?.() ?? takeRunOrigin(options.originSource));
       // Only now. Not on admission, not when the launch call began (AC-14a, AC-20).
       reporter.browserStarted(origin);
+      browserStartedAtIso = origin.browserStartedAt.toISOString();
 
       // ── The second budget starts **here** (AC-1, AC-2, §8.5). ─────────────────────────────
       //
@@ -537,6 +567,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         state: result.recording.state,
         partial: result.recording.partial,
       };
+      recordingPath = result.recording.path;
       if (result.recording.error !== null) {
         snapshot.appendLog({
           atMs: null,
@@ -569,6 +600,33 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // the highest sequence number of the attempt.
       await reporter.settled();
 
+      // ── The evidence phase, and it is **before** the scratch clear (story 10.14 AC-3). ─────
+      //
+      // The order is: upload the video → settle the evidence → write the manifest → *then* clear
+      // scratch, wipe the values and deliver. `runScratch.clear()` — not `sendFinal` — is the
+      // normative boundary, because 10.13 moved the clear ahead of the delivery window and the
+      // video lives in scratch. "Before delivery" would be satisfied by an implementation that
+      // uploads after the file has been deleted: green on every run, evidence `FAILED` on every
+      // run, and unable to ever work.
+      //
+      // The whole phase shares one deadline, taken here. A slow bucket cannot push the run past
+      // the API's recovery deadline because it cannot outlive this window.
+      //
+      // `resolver.wipe()` still runs after the manifest is written, which is what keeps the
+      // redactor and the resolved values in scope at the moment the manifest bytes are produced —
+      // exactly where §9.2's "never persist them in manifests" has to be enforced.
+      evidence = await settleEvidence({
+        job,
+        admissionId,
+        outcome,
+        evidence,
+        recordingPath,
+        browserStartedAtIso,
+        redactor,
+        logger: childLogger,
+        snapshot,
+      });
+
       // ── Released **before** the delivery window opens, not after it closes (AC-5a, AC-9). ──
       //
       // Terminal delivery is a bounded retry loop that can run for `terminalDeliveryWindowMs`.
@@ -584,9 +642,121 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // this closure when the run returns, which is the same instant the report client does.
       await runScratch.clear();
       resolver.wipe();
+      // The wipe is observable, so AC-3's asserted sequence is read off captured runtime output
+      // rather than off the order of statements in this file (AC-23).
+      childLogger.info('run.values_wiped', {
+        executionId: job.executionId,
+        attemptId: job.attemptId,
+        admissionId,
+      });
 
       await reporter.sendFinal(outcome, evidence);
     }
+  }
+
+  /**
+   * Uploads the recording, settles the evidence and writes the terminal manifest.
+   *
+   * Three properties, each a criterion:
+   *
+   * - **`STORED` is earned** — only after the store acknowledges the object write (AC-8);
+   * - **`partial` is carried, never recomputed** — nothing here reads the uploaded object's size
+   *   or duration, and nothing reads `outcome` (AC-9, ADR-002 §17.4);
+   * - **nothing throws** — a storage failure is evidence `FAILED` with a redacted diagnostic and
+   *   the result is delivered regardless, including when the store is entirely unreachable (AC-4).
+   *
+   * The manifest write failing is a diagnostic and not an outcome: the video's disposition already
+   * reflects what happened to the video, and a run whose result was delivered lost nothing but its
+   * recovery path.
+   */
+  async function settleEvidence(input: {
+    job: JobEnvelope;
+    admissionId: string;
+    outcome: RunOutcome;
+    evidence: EvidenceState;
+    recordingPath: string | null;
+    browserStartedAtIso: string | null;
+    redactor: ReturnType<typeof createRedactor>;
+    logger: Logger;
+    snapshot: RunSnapshot;
+  }): Promise<EvidenceState> {
+    const ports = {
+      store: options.objectStore,
+      fileSystem: options.evidenceFileSystem,
+      bounds: options.evidence,
+      now: options.now,
+      sleep: options.sleep,
+      redactor: input.redactor,
+    };
+    const window = openEvidenceWindow(ports);
+
+    let settled: EvidenceState = input.evidence;
+    try {
+      const uploaded = await uploadRecording(ports, window, {
+        videoKey: input.job.videoKey,
+        path: input.recordingPath,
+        state: input.evidence.state,
+        partial: input.evidence.partial,
+      });
+      settled = {
+        videoKey: input.job.videoKey,
+        manifestKey: input.job.manifestKey,
+        state: uploaded.state,
+        // Verbatim. A successful upload does not make a truncated recording whole.
+        partial: uploaded.partial,
+      };
+      if (uploaded.error !== null) {
+        input.snapshot.appendLog({ atMs: null, level: 'error', message: uploaded.error });
+      }
+      input.logger.info('run.evidence_settled', {
+        executionId: input.job.executionId,
+        attemptId: input.job.attemptId,
+        admissionId: input.admissionId,
+        evidenceState: settled.state,
+        evidencePartial: settled.partial,
+        uploadAttempts: uploaded.attempts,
+      });
+
+      const manifest = buildResultManifest({
+        executionId: input.job.executionId,
+        attemptId: input.job.attemptId,
+        revisionId: input.job.revisionId,
+        artifactHash: input.job.artifactHash,
+        runnerInstanceId: options.runnerInstanceId,
+        outcome: input.outcome,
+        browserStartedAt: input.browserStartedAtIso,
+        endedAt: options.wallClock().toISOString(),
+        runtimeVersions: options.runtimeVersions,
+        videoKey: settled.videoKey ?? input.job.videoKey,
+        manifestKey: settled.manifestKey ?? input.job.manifestKey,
+        evidenceState: settled.state,
+        evidencePartial: settled.partial,
+      });
+      // Serialized **once**, redacted, and the same bytes are handed to every retry attempt.
+      const bytes = serializeResultManifest(manifest, input.redactor);
+      const written = await writeResultManifest(
+        ports,
+        window,
+        input.job.manifestKey,
+        bytes,
+        RESULT_MANIFEST_CONTENT_TYPE,
+      );
+      if (!written.ok && written.error !== null) {
+        input.snapshot.appendLog({ atMs: null, level: 'error', message: written.error });
+      }
+    } catch (error) {
+      // Belt and braces: nothing above is expected to throw, and a terminal path that can throw
+      // is a result nobody receives. The run is delivered with honest evidence either way.
+      input.snapshot.appendLog({
+        atMs: null,
+        level: 'error',
+        message: input.redactor.redact(
+          `evidence settlement failed: ${error instanceof Error ? error.name : 'unknown'}`,
+        ),
+      });
+      settled = { ...settled, state: 'FAILED' };
+    }
+    return settled;
   }
 
   /**

@@ -269,7 +269,10 @@ describe('AC-13 — the slot is released and the next run succeeds', () => {
     const final = JSON.parse(harness.http.reportRequests.at(-1)?.body ?? '') as ReportBody;
     expect(final.kind).toBe('FINAL');
     expect(final.outcome?.result).toBe('PASSED');
-    expect(final.evidence?.state).toBe('PENDING');
+    // `PENDING` until story 10.14 gave the terminal path an upload; a playable recording that the
+    // store acknowledged is `STORED`. What this case is about — the second run works at all after
+    // a killed one — is unchanged.
+    expect(final.evidence?.state).toBe('STORED');
     // And it is not partial: this run's recorder closed in an orderly way.
     expect(final.evidence?.partial).toBe(false);
     // No leaked timer from the killed run fired into this one.

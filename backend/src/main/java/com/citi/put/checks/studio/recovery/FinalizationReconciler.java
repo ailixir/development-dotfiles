@@ -102,6 +102,18 @@ public class FinalizationReconciler {
     }
 
     ResultManifest result = manifest.get();
+    if (!identityMatches(result, identity)) {
+      // §5.3 and story 10.14 AC-7a: the embedded identity is **defence in depth** over the derived
+      // key, never a substitute for it. The key already proves whose manifest this is; this refuses
+      // the case where the two disagree, which can only mean a misdirected write or a store that
+      // served the wrong object. Recorded for investigation, and nothing is applied — the same
+      // disposition §5.3 gives a manifest arriving after finalization.
+      LOGGER.warn(
+          "Studio terminal manifest at the derived key for execution {} carries a different "
+              + "execution/attempt identity; recorded for investigation and nothing applied",
+          executionId);
+      return false;
+    }
     Instant endedAt = result.endedAt() == null ? clock.instant() : result.endedAt();
     String videoStatus = videoStatus(result);
     Instant videoExpiresAt =
@@ -135,6 +147,20 @@ public class FinalizationReconciler {
             + "investigation only; history unchanged and no run dispatched",
         executionId);
     return false;
+  }
+
+  /**
+   * Whether the manifest says it is the one the derived key asked for.
+   *
+   * <p>Absence is treated as a mismatch, not as a pass. Story 10.14 is the first and only producer
+   * of these bytes and it always writes both components; a body that omits them is not an older
+   * dialect, it is a body this API did not expect, and "apply it anyway" is how a defence in depth
+   * becomes a decoration.
+   */
+  private static boolean identityMatches(
+      ResultManifest result, ResultManifestStore.ExecutionIdentity identity) {
+    return identity.executionId().toString().equals(result.executionId())
+        && identity.attemptId().toString().equals(result.attemptId());
   }
 
   private static String normalizedOutcome(ResultManifest result) {

@@ -86,7 +86,17 @@ export interface FakeHttpClient extends HttpClient {
 
 const OK: HttpOutcome = { kind: 'response', status: 200, body: '{}' };
 
-export function createFakeHttpClient(log?: EventLog): FakeHttpClient {
+/**
+ * @param onReportRequest observes a report request **at the instant it is handed to the
+ *     transport**, before any outcome is produced. Story 10.14 AC-3's ordering assertion needs the
+ *     `sendFinal` element of its sequence to come from here and not from the test's own hand: an
+ *     entry the test appends after the run is last by construction and cannot discriminate
+ *     anything (QA-2).
+ */
+export function createFakeHttpClient(
+  log?: EventLog,
+  onReportRequest?: (request: RecordedHttpRequest) => void,
+): FakeHttpClient {
   const requests: RecordedHttpRequest[] = [];
   const admissionRequests: RecordedHttpRequest[] = [];
   const reportRequests: RecordedHttpRequest[] = [];
@@ -128,6 +138,7 @@ export function createFakeHttpClient(log?: EventLog): FakeHttpClient {
       }
       reportRequests.push(recorded);
       log?.push('report.request');
+      onReportRequest?.(recorded);
       const source = client.reportOutcome;
       return typeof source === 'function' ? source(request, reportRequests.length - 1) : source;
     },

@@ -41,6 +41,27 @@ export interface RunnerConfig {
   readonly callbackBaseUrl: string;
   /** Per-run scratch root, cleared at startup and on every exit path (AC-12, AC-21). */
   readonly scratchDir: string;
+  /**
+   * Filesystem root of the local, S3-shaped **compatible** object store (`ED-03`).
+   *
+   * Sonic's real endpoint, its write-only runner credentials and its lifecycle rules are story
+   * 10.18's and 10.19's. Until then the runner writes real objects to a real store — this one —
+   * rather than to a stub, so the upload path, its bounded retry and its idempotency are exercised
+   * by everything that runs the runner rather than only by tests that mock it.
+   */
+  readonly objectStoreDir: string;
+  /** Attempts per object, the first included. Bounded on both axes with the window below. */
+  readonly objectStoreMaxAttempts: number;
+  /**
+   * Wall-clock window for the **whole** evidence phase — video and manifest together.
+   *
+   * It sits between `reporter.settled()` and `runScratch.clear()`, which is the window the video
+   * file exists in (story 10.14 AC-3, AC-5). Not inside the terminal delivery window: story 10.13
+   * moved the scratch clear ahead of delivery on purpose, so the two are consecutive and disjoint.
+   */
+  readonly objectStoreWindowMs: number;
+  /** Base backoff between attempts; linear, because the window is the real bound. */
+  readonly objectStoreBackoffMs: number;
   /** Admission HTTP timeout; §8.5 starting value 10 s. */
   readonly admissionTimeoutMs: number;
   /** Bounded window for terminal delivery retries (AC-17). */
@@ -119,6 +140,33 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
   CALLBACK_IDENTITY: { field: 'callbackIdentityToken', kind: 'string', required: true },
   CALLBACK_BASE_URL: { field: 'callbackBaseUrl', kind: 'string', required: true },
   SCRATCH_DIR: { field: 'scratchDir', kind: 'string', required: false, fallback: '/tmp/studio-runner' },
+  OBJECT_STORE_DIR: {
+    field: 'objectStoreDir',
+    kind: 'string',
+    required: false,
+    fallback: '/tmp/studio-runner-objects',
+  },
+  OBJECT_STORE_MAX_ATTEMPTS: {
+    field: 'objectStoreMaxAttempts',
+    kind: 'integer',
+    required: false,
+    fallback: 3,
+    min: 1,
+  },
+  OBJECT_STORE_WINDOW_MS: {
+    field: 'objectStoreWindowMs',
+    kind: 'integer',
+    required: false,
+    fallback: 15_000,
+    min: 1,
+  },
+  OBJECT_STORE_BACKOFF_MS: {
+    field: 'objectStoreBackoffMs',
+    kind: 'integer',
+    required: false,
+    fallback: 250,
+    min: 0,
+  },
   ADMISSION_TIMEOUT_MS: {
     field: 'admissionTimeoutMs',
     kind: 'integer',

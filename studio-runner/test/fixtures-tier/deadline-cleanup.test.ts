@@ -34,6 +34,7 @@ import { WEBM_MAGIC } from '../../src/run/recording.js';
 import { SCRATCH_SUBDIRECTORIES } from '../../src/run/scratchLayout.js';
 import { descendantsOf, isAlive } from '../../src/run/tree.js';
 import type { BrowserSession, SessionRunResult } from '../../src/server/adapters.js';
+import { createRunSnapshot } from '../../src/reporting/snapshot.js';
 import { startPageServer } from '../helpers/pageServer.js';
 import type { PageServer } from '../helpers/pageServer.js';
 import { CHILD_MODULE_PATH } from './globalSetup.js';
@@ -517,12 +518,79 @@ describe('deferred criteria — skipped, not passed', () => {
     // drive it explicitly rather than assume it is covered.
   });
 
-  it.skip('O-13 — the API still publishes partial: false regardless of what this story reports (story 10.14)', () => {
-    // ADR-002 §17.7 item 4. `RunnerReportProjection` writes `videoPartial = Boolean.FALSE`
-    // unconditionally — verified on the branch — and it is a Java file this story's Scope
-    // excludes. After this story the runner reports the truth and the API discards it, which is
-    // bounded, visible and strictly better than asserting a falsehood; but the public snapshot is
-    // not honest until O-13 lands with 10.14. Recorded here so the half-fix cannot be read as a
-    // whole one. The question is **ruled**, not open: §17 settled it and named the owner.
-  });
+});
+
+/**
+ * **O-13 has landed (story 10.14).** The skip that stood here — *"the API still publishes
+ * `partial: false` regardless of what this story reports"* — is deleted rather than left as an
+ * open item whose named owner has already shipped.
+ *
+ * `RunnerReportProjection` no longer writes `videoPartial = Boolean.FALSE`; it projects
+ * `report.evidence().partial()` with absent meaning `false`, persists it through the statements
+ * that already carried the column, and `ExecutionSnapshotMapper` publishes it. That half is
+ * asserted in the other tree, on the persisted row and the published snapshot, by
+ * `EvidencePartialCallbackIT.theReportedPartialIsPublishedAndPersistedRatherThanAConstant` — with
+ * the mutation that restores the constant recorded as red.
+ *
+ * What is asserted **here**, from a real killed Chromium, is the half this tier can decide: that
+ * the truth reaches the wire at all. The value is taken from the recorder's own observation,
+ * serialized by the runner's own `snapshot.build`, and read back out of the JSON **text** — not
+ * off the object the serializer was handed (AC-23).
+ */
+describe('O-13 — the reported partiality reaches the wire, and the API now publishes it', () => {
+  it('puts the real recorder observation on the serialized FINAL body', async () => {
+    const tree = await hungRealRun({ stopTimeoutMs: 20 });
+    const run = tree.session.run;
+    if (run === undefined) throw new Error('no session run');
+
+    await run.kill('total-runtime');
+    const result = await tree.execution;
+    await expectTreeGone(tree);
+
+    const snapshot = createRunSnapshot({
+      identity: {
+        executionId: '11111111-1111-4111-8111-111111111111',
+        attemptId: '22222222-2222-4222-8222-222222222222',
+        admissionId: '33333333-3333-4333-8333-333333333333',
+        runnerInstanceId: 'studio-runner-0',
+      },
+      bounds: {
+        maxSteps: 100,
+        maxLogEntries: 200,
+        maxLogEntryLength: 400,
+        maxBodyBytes: 512 * 1024,
+      },
+      runtimeVersions: {},
+      wallClock: () => new Date('2026-09-11T10:00:09Z'),
+    });
+    snapshot.markBrowserStarted(new Date('2026-09-11T10:00:02Z'));
+
+    const body = snapshot.build(
+      'FINAL',
+      { result: 'ERROR', errorCode: 'TIMEOUT', errorMessage: null },
+      {
+        videoKey: 'studio/60001/t/e/a.webm',
+        manifestKey: 'studio/60001/t/e/a.result.json',
+        state: result.recording.state,
+        // Carried from the observation, never recomputed and never derived from the outcome.
+        partial: result.recording.partial,
+      },
+    );
+
+    const text = JSON.stringify(body);
+    const onTheWire = JSON.parse(text) as {
+      evidence: { state: string; partial: boolean };
+      outcome: { errorCode: string };
+    };
+
+    expect(text).toContain('"partial"');
+    expect(typeof onTheWire.evidence.partial).toBe('boolean');
+    expect(onTheWire.evidence.partial).toBe(result.recording.partial);
+    // The run timed out either way; whether the recording is partial is a different fact, and the
+    // machine decides which branch the salvaged file took (see the AC-16 case above).
+    expect(onTheWire.outcome.errorCode).toBe('TIMEOUT');
+    if (onTheWire.evidence.state === 'PENDING') {
+      expect(onTheWire.evidence.partial).toBe(true);
+    }
+  }, 180_000);
 });

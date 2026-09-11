@@ -1,6 +1,7 @@
 package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.dto.CompileAcceptedDto;
 import com.citi.put.checks.studio.dto.CompileDiagnosticDto;
@@ -16,6 +17,14 @@ import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.dto.VideoEvidence;
 import com.citi.put.checks.studio.dto.Viewport;
+import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
+import com.citi.put.checks.studio.internal.dto.AdmissionResponse;
+import com.citi.put.checks.studio.internal.dto.ProgressAck;
+import com.citi.put.checks.studio.internal.dto.RunOutcome;
+import com.citi.put.checks.studio.internal.dto.RunnerEvidence;
+import com.citi.put.checks.studio.internal.dto.RunnerLogEntry;
+import com.citi.put.checks.studio.internal.dto.RunnerReport;
+import com.citi.put.checks.studio.internal.dto.RunnerStepState;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -247,6 +256,53 @@ class StudioContractTest {
     assertSchemaMatchesRecord("CompileStepDiagnostics", CompileStepDiagnosticsDto.class);
     assertSchemaMatchesRecord("CompileDiagnostics", CompileDiagnosticsDto.class);
   }
+
+  /**
+   * Story 10.14 AC-24 — the drift check reaches the <b>internal</b> records too.
+   *
+   * <p>The list above covers public DTOs and, until this test existed, no internal one. That is
+   * precisely why ADR-002 §17 could add {@code partial} to {@code RunnerEvidence} in the document,
+   * leave the Java record three components wide, and turn <b>nothing</b> red — while the merged
+   * runner emitted the property on every {@code FINAL} and {@code StrictInternalBodyReader} refused
+   * the whole report. A conformance gate is only as wide as its enumeration (§16.9 item 4).
+   *
+   * <p>Every closed internal body of ADR-002 §6.2 is listed. If one of these ever diverges it is
+   * <b>left red and escalated</b> per §12 — never widened to match, never excluded from this list
+   * to keep the suite green. That is the rule story 10.6 followed and the reason four divergences
+   * were ruled on instead of buried.
+   */
+  @Test
+  void theFrozenInternalSchemasAndTheJavaRecordsShareTheSameFieldNames() {
+    assertSchemaMatchesRecord("RunnerEvidence", RunnerEvidence.class);
+    assertSchemaMatchesRecord("RunnerReport", RunnerReport.class);
+    assertSchemaMatchesRecord("RunnerStepState", RunnerStepState.class);
+    assertSchemaMatchesRecord("RunnerLogEntry", RunnerLogEntry.class);
+    assertSchemaMatchesRecord("RunOutcome", RunOutcome.class);
+    assertSchemaMatchesRecord("AdmissionRequest", AdmissionRequest.class);
+    assertSchemaMatchesRecord("AdmissionResponse", AdmissionResponse.class);
+    assertSchemaMatchesRecord("ProgressAck", ProgressAck.class);
+  }
+
+  /**
+   * The control for the gate above: the shape that existed before this story <b>fails</b> it.
+   *
+   * <p>A conformance list is the easiest kind of vacuous test to write — eight green assertions
+   * prove nothing unless the comparison can go red. {@code RunnerEvidenceBeforeStory1014} is the
+   * exact record `DEF-02` was found on: three components, no {@code partial}, while the document
+   * had declared the property since ADR-002 §17. This asserts the gate would have caught it, which
+   * is the claim AC-24 actually makes.
+   */
+  @Test
+  void theInternalDriftCheckWouldHaveCaughtTheRecordThatCausedDef02() {
+    assertThatThrownBy(
+            () -> assertSchemaMatchesRecord("RunnerEvidence", RunnerEvidenceBeforeStory1014.class))
+        .as("if this does not throw, the eight assertions above are decoration")
+        .isInstanceOf(AssertionError.class)
+        .hasMessageContaining("partial");
+  }
+
+  /** The three-component record as it stood on {@code epic/EPIC-10} before story 10.14. */
+  private record RunnerEvidenceBeforeStory1014(String videoKey, String manifestKey, String state) {}
 
   @Test
   void everySnapshotExampleDeserializesIntoTheSnapshotDto() {

@@ -277,7 +277,7 @@ class ProgressCallbackIT {
             false,
             Map.of(),
             new RunOutcome(RunOutcome.ERROR, ExecutionErrorCode.START_TIMEOUT, "never started"),
-            new RunnerEvidence(null, null, RunnerEvidence.UNAVAILABLE),
+            new RunnerEvidence(null, null, RunnerEvidence.UNAVAILABLE, false),
             null));
 
     ExecutionSnapshotDto after = snapshot();
@@ -543,7 +543,8 @@ class ProgressCallbackIT {
         false,
         Map.of("playwright", "1.63.0"),
         new RunOutcome(result, null, null),
-        new RunnerEvidence("studio/video.webm", "studio/manifest.result.json", evidenceState),
+        new RunnerEvidence(
+            "studio/video.webm", "studio/manifest.result.json", evidenceState, false),
         null);
   }
 

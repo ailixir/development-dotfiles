@@ -1,6 +1,7 @@
 package com.citi.put.checks.studio.internal;
 
 import com.citi.put.checks.studio.StudioValidationException;
+import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.dto.ExecutionLogEntry;
 import com.citi.put.checks.studio.dto.RuntimeVersions;
 import com.citi.put.checks.studio.dto.StepResult;
@@ -60,8 +61,15 @@ public final class RunnerReportProjection {
           StepResult.FAIL,
           StepResult.SKIPPED);
 
+  /** The contract's own text, from example {@code SnapshotErrorTimeout}, {@code stepResults[1]}. */
+  public static final String TIMED_OUT_STEP_MESSAGE = "Total browser runtime deadline reached";
+
   /** The runner's levels. {@code DEBUG} has no runner producer and appears only on API lines. */
   private static final Set<String> RUNNER_LEVELS = Set.of("info", "warn", "error");
+
+  /** The two states in which no playable object exists, so partiality has no meaning (§17.3). */
+  private static final Set<String> EVIDENCE_WITHOUT_AN_OBJECT =
+      Set.of(RunnerEvidence.FAILED, RunnerEvidence.UNAVAILABLE);
 
   private static final Set<String> EVIDENCE_STATES =
       Set.of(
@@ -102,7 +110,7 @@ public final class RunnerReportProjection {
       RunnerReport report, List<StepResult> original, Duration evidenceRetention, Instant now) {
     validate(report);
 
-    List<StepResult> stepResults = projectSteps(report, original);
+    List<StepResult> stepResults = projectSteps(report, original, terminalErrorCode(report));
     List<ExecutionLogEntry> logs = projectLogs(report);
     RuntimeVersions runtime = projectRuntime(report.runtimeVersions());
 
@@ -129,7 +137,10 @@ public final class RunnerReportProjection {
     if (report.evidence() != null) {
       videoKey = report.evidence().videoKey();
       videoStatus = projectEvidenceState(report.evidence().state());
-      videoPartial = Boolean.FALSE;
+      // The reported value, never a constant (O-13, ADR-002 §17.5). Absent means false — which is
+      // defence in depth rather than the only protection, because the merged runner declares
+      // `partial` non-optionally and "absent" is unreachable from it.
+      videoPartial = Boolean.TRUE.equals(report.evidence().partial());
       manifestKey = report.evidence().manifestKey();
       if (VideoEvidence.AVAILABLE.equals(videoStatus)) {
         // AVAILABLE and EXPIRED are the API's judgment against retention, never the runner's:
@@ -219,13 +230,28 @@ public final class RunnerReportProjection {
       throw new StudioValidationException(
           "INVALID_REPORT", "Unknown evidence state: " + report.evidence().state());
     }
+    if (report.evidence() != null
+        && Boolean.TRUE.equals(report.evidence().partial())
+        && EVIDENCE_WITHOUT_AN_OBJECT.contains(report.evidence().state())) {
+      // ADR-002 §17.3: partiality is meaningful only where a playable object exists, so it is
+      // false with FAILED and UNAVAILABLE "because a recording that does not exist is not a
+      // partial one". A runner sending this combination has a bug in its stop observation, and
+      // quietly forcing the value to false would hide it in the one component this story exists
+      // to make honest.
+      throw new StudioValidationException(
+          "INVALID_REPORT",
+          "evidence.partial is true with state "
+              + report.evidence().state()
+              + "; a recording that does not exist is not a partial one");
+    }
   }
 
   /**
    * One entry per original step (§8.2). {@code originalText} comes from the revision; the runner
    * never resends it and this method never invents one.
    */
-  private static List<StepResult> projectSteps(RunnerReport report, List<StepResult> original) {
+  private static List<StepResult> projectSteps(
+      RunnerReport report, List<StepResult> original, String terminalErrorCode) {
     Map<Integer, RunnerStepState> reported = new HashMap<>();
     for (RunnerStepState step : steps(report)) {
       reported.put(step.stepIndex(), step);
@@ -246,7 +272,7 @@ public final class RunnerReportProjection {
               // No calibration, no origin, no re-basing: round the reading and persist it.
               round(step.startedAtMs()),
               round(step.durationMs()),
-              step.failure()));
+              timedOutStepMessage(step, terminalErrorCode)));
     }
     // A runner that reported a step index the revision does not have is a divergence, not a step.
     for (Integer index : reported.keySet()) {
@@ -261,6 +287,52 @@ public final class RunnerReportProjection {
       }
     }
     return List.copyOf(projected);
+  }
+
+  /**
+   * The message for a step the total-runtime deadline caught mid-flight (ADR-002 §18.1, O-13).
+   *
+   * <p>Until this existed {@code projectSteps} copied {@code failure} verbatim, so the contract's
+   * {@code SnapshotErrorTimeout} example was aspirational and nothing produced it. The runner
+   * cannot supply the message: the kill happens in the parent, the step's own reporter is inside a
+   * process that is being stopped, and the step never reports a terminus at all.
+   *
+   * <p>The predicate is <b>exclusive</b> and §18.1 states it as one: the API "may write that
+   * message only where it can name the cause — a terminal {@code errorCode} of {@code TIMEOUT} and
+   * a step still {@code RUNNING} — and must invent nothing for any other code or status". So:
+   *
+   * <ul>
+   *   <li>any other terminal code, {@code RUNNING} step or not — nothing is written;
+   *   <li>{@code TIMEOUT} with no {@code RUNNING} step — nothing is written;
+   *   <li>a step whose runner-supplied {@code failure} is already non-null — never overwritten,
+   *       because the runner observed something and the API did not.
+   * </ul>
+   */
+  private static String timedOutStepMessage(RunnerStepState step, String terminalErrorCode) {
+    if (step.failure() != null) {
+      return step.failure();
+    }
+    if (!ExecutionErrorCode.TIMEOUT.equals(terminalErrorCode)) {
+      return null;
+    }
+    if (!StepResult.RUNNING.equals(step.status())) {
+      return null;
+    }
+    return TIMED_OUT_STEP_MESSAGE;
+  }
+
+  /**
+   * The terminal {@code error_code} this report projects to, or null.
+   *
+   * <p>Read through {@link RunnerOutcomeCodes} rather than from {@code outcome.errorCode}, so the
+   * predicate is the <b>API's</b> verdict and not a string the runner chose. A runner naming a
+   * reaper-assigned code obtains neither the code nor the message.
+   */
+  private static String terminalErrorCode(RunnerReport report) {
+    if (report.outcome() == null) {
+      return null;
+    }
+    return RunnerOutcomeCodes.errorCodeFor(report.outcome().result(), report.outcome().errorCode());
   }
 
   /**
