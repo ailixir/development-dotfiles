@@ -44,6 +44,12 @@ export interface RecordingOutcome {
   /** Redacted diagnostic; `null` unless the recording could not be produced or flushed. */
   readonly error: string | null;
   readonly state: RunnerEvidenceState;
+  /**
+   * Whether the recording covers only part of the browser session it was recording.
+   *
+   * See {@link partialFor}. Emitted on every `FINAL`, `false` included (ADR-002 §17.7 item 2).
+   */
+  readonly partial: boolean;
 }
 
 export interface RecordingObservation {
@@ -55,6 +61,43 @@ export interface RecordingObservation {
   readonly header: boolean;
   /** Whatever went wrong while producing or flushing it. */
   readonly error: string | null;
+  /**
+   * Whether the **recorder was closed in an orderly way** (ADR-002 §17.3).
+   *
+   * In the child this is "`context.close()` resolved"; in the parent, on a deadline kill, it is
+   * "the ordered stop completed within `browserStopTimeoutMs`" — the fact §17.7 names as the
+   * distinguishing one, recorded **before** the signal. It is an observation of how the recording
+   * *ended*, and it is the only input {@link partialFor} takes besides the evidence state.
+   */
+  readonly orderlyClose: boolean;
+}
+
+/**
+ * Whether a recording is partial — **from how it ended, never from how the run ended**.
+ *
+ * ADR-002 §17.3: *"the recording does not cover the whole browser session it was recording"*.
+ * Frames are missing relative to what the browser actually did, because the recorder was not
+ * closed in an orderly way. It is a fact about the **recording**, never about the run.
+ *
+ * Two cases make the difference concrete, and §17.4 names them as the counter-examples that kill
+ * the cheap inference `partial = (errorCode === TIMEOUT)`:
+ *
+ * - a deadline kill whose ordered stop **flushed cleanly** is `partial: false` — §5.2's ordered
+ *   close exists precisely so the webm is finalized, and a timeout is not automatically a
+ *   truncation;
+ * - a recorder that died on a **passing** run is `partial: true`.
+ *
+ * The signature is the guarantee: this function cannot read an outcome, an error code or a step
+ * status, because it is not given one. §17.4 forbids deriving `partial` from `outcome` in either
+ * direction, by either component, and the cheapest way to keep that true is to make the derivation
+ * impossible to write here.
+ *
+ * Partiality is meaningful only where a playable object exists (§17.3). `FAILED` and `UNAVAILABLE`
+ * are `false`, because a recording that does not exist is not a partial one.
+ */
+export function partialFor(state: RunnerEvidenceState, orderlyClose: boolean): boolean {
+  if (state !== 'PENDING') return false;
+  return !orderlyClose;
 }
 
 /**
@@ -70,7 +113,13 @@ export interface RecordingObservation {
  */
 export function evidenceFor(observation: RecordingObservation): RecordingOutcome {
   if (!observation.attempted) {
-    return { path: null, bytes: null, error: observation.error, state: 'UNAVAILABLE' };
+    return {
+      path: null,
+      bytes: null,
+      error: observation.error,
+      state: 'UNAVAILABLE',
+      partial: false,
+    };
   }
 
   const playable =
@@ -87,6 +136,9 @@ export function evidenceFor(observation: RecordingObservation): RecordingOutcome
       error: null,
       // Not `STORED`: this story uploads nothing (AC-9).
       state: 'PENDING',
+      // A playable file the recorder never closed in an orderly way is a salvaged prefix, and
+      // saying `false` here is the sentence the epic's third acceptance bullet forbids.
+      partial: partialFor('PENDING', observation.orderlyClose),
     };
   }
 
@@ -100,6 +152,7 @@ export function evidenceFor(observation: RecordingObservation): RecordingOutcome
         : `The recording file is not playable (${String(observation.bytes ?? 0)} bytes, ` +
           `header ${observation.header ? 'present' : 'absent'}).`),
     state: 'FAILED',
+    partial: false,
   };
 }
 

@@ -58,6 +58,37 @@ export interface SessionRecording {
    * playable recording nobody has uploaded yet (AC-9).
    */
   readonly state: 'PENDING' | 'FAILED' | 'UNAVAILABLE';
+  /**
+   * Whether the recording covers only part of the browser session (ADR-002 §17).
+   *
+   * A fact about the **recording**, never about the run, and never derived from `outcome` in
+   * either direction: a deadline kill whose ordered stop flushed cleanly is `false`, and a
+   * recorder that died on a passing run is `true`. Emitted on every `FINAL`, `false` included.
+   */
+  readonly partial: boolean;
+}
+
+/**
+ * Why the parent decided to end a run it had already started.
+ *
+ * Two conditions, two answers, and they must not be collapsed. `total-runtime` is the
+ * parent-enforced deadline, which §8.2 fixes by hand as `ERROR`/`TIMEOUT`. `drain` is the pod
+ * leaving while a run is still hung: §9.3 requires admitted work to be drained on `SIGTERM`, and
+ * §5.4 requires that a runner never exit holding a browser — but the run did not exceed its
+ * budget, so calling it a timeout would be a false statement about the test. It takes the
+ * documented residual, `RUN_ERROR`.
+ */
+export type SessionKillReason = 'total-runtime' | 'drain';
+
+/** What the parent observed while stopping a run it had decided to end (AC-5a, AC-16). */
+export interface SessionKillOutcome {
+  /**
+   * Whether the ordered stop completed within `browserStopTimeoutMs`.
+   *
+   * Recorded **before** the signal. ADR-002 §17.7 makes this the distinguishing fact for
+   * `partial`, and it stops being observable the instant the process tree does.
+   */
+  readonly orderedStopCompleted: boolean;
 }
 
 export interface SessionRunResult {
@@ -84,6 +115,14 @@ export interface SessionRunResult {
 export interface SessionRun {
   readonly origin: SessionOrigin;
   execute(request: SessionRunRequest): Promise<SessionRunResult>;
+  /**
+   * Ends the run now: the ordered stop within the bounded grace, then the process **group**.
+   *
+   * Called by the runtime deadline and by the drain. `execute`'s promise settles shortly
+   * afterwards, because the child exits — with a result if it honoured the stop, without one if it
+   * was signalled. The returned observation is the parent's, and it is taken before the signal.
+   */
+  kill(reason: SessionKillReason): Promise<SessionKillOutcome>;
 }
 
 export interface BrowserSession {
@@ -99,13 +138,40 @@ export interface BrowserSession {
   readonly run?: SessionRun | undefined;
 }
 
+/**
+ * Where the child's captured stdout and stderr go, and what scrubs them (AC-8).
+ *
+ * Per **run**, not per launcher: the redactor is built from this job's resolved values, and the
+ * launcher outlives any one of them. Optional, because 10.6's in-process fake sessions have no
+ * child and no output; when it is absent the child's streams are drained and discarded rather than
+ * inherited, so an unread pipe can never block the browser.
+ */
+export interface ChildDiagnosticsSink {
+  /** The run's redactor. Applied before the line is bounded, never after. */
+  redact(text: string): string;
+  write(stream: 'stdout' | 'stderr', line: string): void;
+}
+
 export interface LaunchOptions {
   readonly browser: string;
   readonly viewport: { readonly width: number; readonly height: number };
-  /** Total browser runtime cap; 10.13 enforces it, this story only passes it on. */
+  /**
+   * Total browser runtime cap, **already clamped** to the server maximum (AC-6).
+   *
+   * The parent enforces it: `src/server/runCoordinator.ts` arms the timer on its own monotonic
+   * clock at the `ready` handshake, and `SessionRun.kill` is what fires.
+   */
   readonly totalRuntimeMs: number;
+  /**
+   * Per-step timeout for this job, already clamped to the server maximum (AC-6).
+   *
+   * `job.configuration.timeoutSeconds` was validated by the envelope and then ignored by the run;
+   * this is where §5.2's "configurable within server limits" starts being both.
+   */
+  readonly stepTimeoutMs?: number | undefined;
   /** Directory the session may write to. Cleared when the run ends. */
   readonly scratchPath: string;
+  readonly diagnostics?: ChildDiagnosticsSink | undefined;
 }
 
 export interface BrowserLauncher {

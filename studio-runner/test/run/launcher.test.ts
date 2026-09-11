@@ -8,7 +8,7 @@
  * The canary assertions are the ones AC-21 asks to be made *on the spawn arguments actually
  * passed* — which is only checkable if the spawn is a seam rather than an inline statement.
  */
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -26,6 +26,7 @@ import {
 } from '../../src/run/launcher.js';
 import { SCRATCH_SUBDIRECTORIES } from '../../src/run/scratchLayout.js';
 import type { BrowserSession, LaunchOptions } from '../../src/server/adapters.js';
+import { packageRoot } from '../helpers/corpus.js';
 import { createFakeSpawner } from '../helpers/child.js';
 import type { FakeChildProcess, FakeSpawner } from '../helpers/child.js';
 
@@ -541,3 +542,106 @@ describe('the default child module path points at the compiled entry', () => {
 function silentReporter(): StepReporter {
   return { stepStarted: () => undefined, stepFinished: () => undefined };
 }
+
+/**
+ * AC-19 (story 10.13) — the guards that live in this constructor, re-falsified after it changed.
+ *
+ * Story 10.13 is the change QA's MED-2 predicted ("10.13 is the next change to that constructor"),
+ * and it changed two things production depends on: what `stdio` the spawner asks for, and whether
+ * the child leads a process group. The guards around those are therefore restated as assertions
+ * here rather than assumed to have survived.
+ */
+describe('AC-19 — this story left the production seams no wider than it found them', () => {
+  it('keeps INHERITED_ENV_KEYS **exactly** as it was, as a set and not as a subset', () => {
+    // Exact-set, per @po's tightening: an appended key is a red build rather than a passing one.
+    // A `toContain` here would let a future story widen the browser child's trust boundary by
+    // addition, which is precisely the move SEC-1 was.
+    expect([...INHERITED_ENV_KEYS]).toEqual([
+      'PATH',
+      'HOME',
+      'LANG',
+      'LC_ALL',
+      'PLAYWRIGHT_BROWSERS_PATH',
+      'DISPLAY',
+      'XDG_RUNTIME_DIR',
+    ]);
+    expect(INHERITED_ENV_KEYS).toHaveLength(7);
+  });
+
+  it('hands the operating system exactly the allowlist plus the two literals, and nothing else', async () => {
+    const spawner = createFakeSpawner();
+    await launched(spawner, scratchPath());
+    // The whole constructed environment, key for key. **Nothing in this story required a new
+    // environment variable**; if an implementation had found it needed one, AC-19's instruction
+    // was to stop and say so rather than to append here.
+    expect(Object.keys(spawner.requests[0]?.env ?? {}).sort()).toEqual(
+      ['HOME', 'PATH', 'PLAYWRIGHT_BROWSERS_PATH', 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', 'TMPDIR'].sort(),
+    );
+  });
+
+  it('re-checks the constructed environment on every launch, not once at startup', () => {
+    // The class guard is stated over what is actually handed to the operating system, so it covers
+    // the allowlist and the two literals alike — including a key a future story adds.
+    expect(() => {
+      assertNoCodeLoadingKeys({ PATH: '/usr/bin', NODE_OPTIONS: '--import x' });
+    }).toThrow(/code-loading variables/u);
+    expect(() => {
+      assertNoCodeLoadingKeys({ PATH: '/usr/bin', TMPDIR: '/scratch/tmp' });
+    }).not.toThrow();
+  });
+
+  it('asks for piped stdio and its own process group, and still for no interpreter flags', () => {
+    // Read off the source of the one function that talks to `fork`. `test/run/production-seams.
+    // test.ts` drives the same function with `node:child_process` mocked and asserts `execArgv`
+    // and the environment on the actual call; what is asserted here is the pair of options this
+    // story changed, side by side with the one it must not have.
+    const source = readFileSync(join(packageRoot, 'src', 'run', 'launcher.ts'), 'utf8');
+    // `inherit` is gone: §9.2 requires scrubbing every outbound diagnostic *before persistence*,
+    // and a pod log is persistence (AC-8).
+    expect(source).toContain("stdio: ['ignore', 'pipe', 'pipe', 'ipc']");
+    expect(source).not.toContain("'inherit'");
+    // The child leads its own group. Necessary but, as the fixtures tier established, not
+    // sufficient — Playwright starts the browser in a group of its own, so `src/run/tree.ts`
+    // enumerates. Asserted here so a future removal of `detached` is visible.
+    expect(source).toContain('detached: true');
+    // Unchanged, and it is the other half of the environment allowlist (SEC-1).
+    expect(source).toContain('execArgv: []');
+  });
+
+  it('never disables the sandbox, and adds no key, field or path that could', () => {
+    // Comments are stripped first, exactly as `test/run/sandbox.test.ts`'s repo-wide scan does:
+    // a source file is allowed to *name* a disabling flag in order to say it must never appear,
+    // and a scan that could not tell the two apart would be one nobody could write around.
+    const executable = (path: string): string =>
+      readFileSync(path, 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//gu, '')
+        .split('\n')
+        .map((line) => line.replace(/(^|[^:])\/\/.*$/u, '$1'))
+        .join('\n');
+
+    // Assembled at run time, never written out: `test/run/sandbox.test.ts`'s repo-wide scan reads
+    // every file in this package, and a literal here would trip it. Excluding this file from that
+    // scan instead would be widening the gate, which is the one thing AC-19 forbids.
+    const disablingFlags = [
+      ['--no', '-sandbox'].join(''),
+      ['--disable-setuid', '-sandbox'].join(''),
+      ['--disable-gpu', '-sandbox'].join(''),
+    ];
+
+    const browser = executable(join(packageRoot, 'src', 'run', 'browser.ts'));
+    expect(browser).toContain('chromiumSandbox: true');
+    expect(browser).not.toContain('chromiumSandbox: false');
+    for (const flag of disablingFlags) {
+      expect(browser, 'the sandbox must never be disabled to make a deadline test run').not.toContain(flag);
+    }
+    // The three modules this story adds are the obvious place a disabling flag would appear to
+    // "make the kill test run". None of them mentions the option at all, which is stronger than
+    // setting it correctly: there is no code path through the deadline, the tree or the relay
+    // that reaches the sandbox decision.
+    for (const file of ['launcher.ts', 'tree.ts', 'deadline.ts', 'outputRelay.ts']) {
+      const source = executable(join(packageRoot, 'src', 'run', file));
+      expect(source, file).not.toContain('chromiumSandbox');
+      for (const flag of disablingFlags) expect(source, file).not.toContain(flag);
+    }
+  });
+});

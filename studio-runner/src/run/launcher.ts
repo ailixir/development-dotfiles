@@ -30,16 +30,33 @@
  * would run before `child.js` and could unset the sandbox on the way to the library without a
  * single line changing in this repository, which is exactly the silent disabling §9.3 forbids.
  *
- * ## What this story does and does not enforce
+ * ## The two deadlines, and which one lives here
  *
- * The *start* deadline is a refusal and belongs to the coordinator (AC-4). The *total runtime*
- * deadline is enforcement and belongs to **10.13**: `totalRuntimeMs` is passed through to the
- * child, the child is a separate process with a pid, and `close` already has the ordered path and
- * the fallback kill it will need. Nothing here kills a hung tree, and nothing here pretends to.
+ * The *start* deadline is a refusal and belongs to the coordinator. The *total runtime* deadline
+ * is **enforcement**, and story 10.13 splits it across the two files it belongs in: the
+ * coordinator arms it, on its own monotonic clock, at the instant it observes the `ready`
+ * handshake (`src/run/deadline.ts`), because that is the parent's clock and the coordinator is
+ * where the two budgets are kept apart. What happens *when it fires* is here, because only this
+ * module holds the child: the ordered stop, the bounded grace, and then the **process group**
+ * signal.
+ *
+ * Three things about the kill path are ordering, not detail:
+ *
+ * - **The reason is recorded before the signal.** A deadline kill makes the child exit without a
+ *   result, and `createInbox`'s abandoned-result path synthesizes `failureKind: 'run-fault'` →
+ *   `RUN_ERROR`, which is the code for "the protocol broke". §8.2 fixes this condition by hand as
+ *   `ERROR`/`TIMEOUT`. Classifying after the exit would honestly describe the symptom and lose the
+ *   cause, so {@link SessionRun.kill} sets the kind first.
+ * - **Whether the ordered stop completed is recorded before the signal too**, for the same reason.
+ *   It is the fact ADR-002 §17.7 makes `partial` depend on, and it stops existing the moment the
+ *   tree does.
+ * - **The signal goes to the group, not the pid.** The fork's pid is Node; Chromium is below it.
+ *   See `src/run/tree.ts`.
  */
 
 import { fork } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
+import { readdir, readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -48,10 +65,18 @@ import type {
   BrowserLauncher,
   BrowserSession,
   LaunchOptions,
+  SessionKillOutcome,
+  SessionKillReason,
+  SessionRecording,
   SessionRunRequest,
   SessionRunResult,
 } from '../server/adapters.js';
 import { SCRATCH_SUBDIRECTORIES } from './scratchLayout.js';
+import { createOutputRelay } from './outputRelay.js';
+import type { OutputRelay, OutputStream } from './outputRelay.js';
+import type { RecordingObservation } from './recording.js';
+import { evidenceFor, hasWebmHeader } from './recording.js';
+import { signalProcessTree } from './tree.js';
 import type { ChildMessage, ParentMessage, ProtocolStep } from './protocol.js';
 import { PROTOCOL_VERSION, parseChildMessage } from './protocol.js';
 
@@ -60,6 +85,20 @@ export interface ChildProcessHandle {
   send(message: ParentMessage): void;
   onMessage(listener: (value: unknown) => void): void;
   onExit(listener: (code: number | null, signal: string | null) => void): void;
+  /**
+   * Raw stdout/stderr chunks, as bytes arrive.
+   *
+   * Raw on purpose: redaction and bounding are the relay's job (`src/run/outputRelay.ts`), and a
+   * handle that scrubbed would be a second redaction path to keep in step with the first.
+   */
+  onOutput(listener: (stream: OutputStream, chunk: string) => void): void;
+  /**
+   * Signals the child's whole **process group** (AC-11a).
+   *
+   * Named `kill` because it is the only kill this launcher performs: killing the fork alone is
+   * never the right thing to do here, so there is no method that does it. `src/run/tree.ts`
+   * explains why the distinction is a browser process rather than a preference.
+   */
   kill(): void;
   readonly pid: number | null;
 }
@@ -217,9 +256,16 @@ export function createForkSpawner(): ChildSpawner {
         // fully enumerated. The child is compiled ESM and needs no interpreter flags, so it gets
         // none, and neither channel can carry code into the process that opens untrusted pages.
         execArgv: [],
-        // stdout/stderr are inherited so the child's diagnostics reach the pod log; the contract
-        // is not a debugging channel and the child writes nothing structured to the wire (§9.2).
-        stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
+        // **Piped, not inherited.** 10.12 inherited both so the child's diagnostics reached the
+        // pod log; §9.2 requires scrubbing every outbound diagnostic *before persistence*, and a
+        // pod log is persistence. Capturing them is what puts the run's redactor and 10.6's
+        // length cap in front of output this package did not format — a Playwright exception or a
+        // Chromium warning (AC-8).
+        stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+        // The child leads its **own process group**, so one signal reaches Chromium and every
+        // process below it. Without this, `kill` reaches Node and orphans the browser (AC-11a).
+        // Deliberately not `unref`ed: the parent still waits on this child and still reaps it.
+        detached: true,
         serialization: 'json',
       });
       return {
@@ -232,8 +278,28 @@ export function createForkSpawner(): ChildSpawner {
         onExit(listener: (code: number | null, signal: string | null) => void): void {
           child.on('exit', listener);
         },
+        onOutput(listener: (stream: OutputStream, chunk: string) => void): void {
+          child.stdout?.setEncoding('utf8');
+          child.stderr?.setEncoding('utf8');
+          child.stdout?.on('data', (chunk: string) => {
+            listener('stdout', chunk);
+          });
+          child.stderr?.on('data', (chunk: string) => {
+            listener('stderr', chunk);
+          });
+          // A pipe nobody reads eventually blocks the writer, and a blocked browser child is a
+          // hang this story exists to prevent. An `error` listener keeps a closed pipe from
+          // becoming an uncaught exception in the parent.
+          child.stdout?.on('error', () => undefined);
+          child.stderr?.on('error', () => undefined);
+        },
         kill(): void {
-          if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+          const pid = child.pid;
+          if (pid === undefined) return;
+          if (child.exitCode !== null || child.signalCode !== null) return;
+          // The group, never the pid alone. `src/run/tree.ts` falls back to the single pid only
+          // if the group signal is refused, and says which it did.
+          signalProcessTree(pid, 'SIGKILL');
         },
         get pid(): number | null {
           return child.pid ?? null;
@@ -241,6 +307,64 @@ export function createForkSpawner(): ChildSpawner {
       };
     },
   };
+}
+
+/**
+ * What the **parent** can see of the recording once the child is gone (AC-16 case (b)).
+ *
+ * On a deadline kill the child does not get to report: it was signalled. But a playable file may
+ * still be sitting in scratch — Chromium writes the webm incrementally, so a killed recorder often
+ * leaves a readable prefix. Reporting that as `UNAVAILABLE` would throw away real evidence;
+ * reporting it as complete would be the salvaged prefix presented as a whole video that ADR-002
+ * §17.7 item 1 exists to stop. So the parent looks, and reports it as what it is: `PENDING`, and
+ * partial because the ordered stop did not complete.
+ *
+ * `orderlyClose` is passed in rather than inferred from the file, and that is the whole point: the
+ * file cannot tell you how the recorder ended, which is why a mutation that reads partiality from
+ * playability instead of from the stop observation is wrong.
+ *
+ * **`attempted` is `false` when the directory holds nothing**, and that is deliberate rather than
+ * convenient. The child observes the *recorder*; the parent, on this path, observes only the
+ * *directory*, because the process that could have said anything about the recorder is gone. With
+ * no file at all the parent has nothing to have failed, so `evidenceFor` answers `UNAVAILABLE`,
+ * which is what AC-16 case (c) asks for — and §17.3's "a recording that does not exist is not a
+ * partial one" follows from it rather than being a second rule.
+ */
+async function observeScratchRecording(
+  scratchPath: string,
+  orderlyClose: boolean,
+): Promise<RecordingObservation> {
+  const nothing: RecordingObservation = {
+    attempted: false,
+    path: null,
+    bytes: null,
+    header: false,
+    error: null,
+    orderlyClose,
+  };
+  const videoDir = join(scratchPath, SCRATCH_SUBDIRECTORIES.video);
+  try {
+    const entries = await readdir(videoDir);
+    let best: { path: string; bytes: number } | null = null;
+    for (const entry of entries) {
+      const path = join(videoDir, entry);
+      const stats = await stat(path);
+      if (!stats.isFile()) continue;
+      if (best === null || stats.size > best.bytes) best = { path, bytes: stats.size };
+    }
+    if (best === null) return nothing;
+    const head = await readFile(best.path);
+    return {
+      attempted: true,
+      path: best.path,
+      bytes: best.bytes,
+      header: hasWebmHeader(head.subarray(0, 4)),
+      error: null,
+      orderlyClose,
+    };
+  } catch {
+    return nothing;
+  }
 }
 
 function childEnvironment(
@@ -297,6 +421,10 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
         env: childEnvironment(parentEnv, launchOptions.scratchPath),
       });
 
+      // Wired **before** the launch message, so output produced while the browser is still
+      // starting — the failure mode most worth seeing — is captured rather than lost or inherited.
+      const relay = attachOutputRelay(child, launchOptions);
+
       const inbox = createInbox(child);
 
       child.send({
@@ -307,33 +435,67 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
         viewport: launchOptions.viewport,
         recording: options.recording,
         scratchPath: launchOptions.scratchPath,
-        // Passed on, never enforced here: the total-runtime deadline is 10.13's.
+        // Passed on. The parent enforces it; the child structures itself so it can be stopped.
         totalRuntimeMs: launchOptions.totalRuntimeMs,
       });
 
       const ready = await inbox.awaitReady(options.launchTimeoutMs);
       if (ready.kind !== 'ready') {
+        // The launch-failure path is one of AC-11a's six: the tree goes, not just the fork.
         child.kill();
-        throw new LaunchFailure(
-          ready.failureKind,
-          ready.message,
-        );
+        relay.close();
+        relay.release();
+        throw new LaunchFailure(ready.failureKind, ready.message);
       }
 
-      let stopped = false;
-      const stop = async (): Promise<void> => {
-        if (stopped) return;
-        stopped = true;
+      /**
+       * Whether the ordered stop completed within the grace.
+       *
+       * `null` until a stop is ordered. Written **before** the group signal, which is the whole
+       * of ADR-002 §17.7 item 1: after the tree is gone there is nothing left to observe, and the
+       * file cannot answer the question because playability and completeness are different facts.
+       */
+      let orderedStopCompleted: boolean | null = null;
+      /** Set before the signal too, so the report names the cause rather than the symptom. */
+      let killReason: SessionKillReason | null = null;
+
+      /**
+       * The ordered stop, run **once** and awaited by everyone who asks for it.
+       *
+       * Sharing the promise rather than returning early on a flag is load-bearing, not tidiness.
+       * The child sends its `result` *before* it exits, so `execute`'s awaited result resolves
+       * while the first caller — the deadline's `kill` — is still inside `awaitExit`. A second
+       * caller that returned immediately would read `orderedStopCompleted` before the exit that
+       * sets it, conclude the ordered stop had not completed, and report a cleanly flushed
+       * recording as `partial: true`. Found by the real-Chromium tier, which is the only place
+       * the two callers actually overlap.
+       */
+      const performStop = async (): Promise<void> => {
         child.send({ kind: 'stop' });
         const exited = await inbox.awaitExit(stopTimeoutMs);
-        // 10.13 owns killing a hung process *tree* under a deadline; this is the ordered close
-        // path's fallback, so a child that ignores `stop` still cannot outlive its run.
+        orderedStopCompleted = exited;
+        // Bounded, and then the group. A child that ignores `stop` cannot outlive its run, and
+        // signalling the fork alone would leave Chromium holding scratch and the video file.
         if (!exited) child.kill();
+      };
+
+      let stopping: Promise<void> | null = null;
+      const stop = (): Promise<void> => {
+        stopping ??= performStop();
+        return stopping;
+      };
+
+      const finish = (): void => {
+        relay.close();
+        relay.release();
       };
 
       return {
         adapter: createChildOwnedAdapter(),
-        close: stop,
+        async close(): Promise<void> {
+          await stop();
+          finish();
+        },
         run: {
           origin: {
             browserStartedAt: new Date(ready.browserStartedAt),
@@ -342,6 +504,16 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
             // never re-derives an origin (ADR-002 §11.5).
             clock: null,
           },
+
+          async kill(reason: SessionKillReason): Promise<SessionKillOutcome> {
+            // Classified first, signalled second (AC-3). The abandoned-result path would
+            // otherwise report `run-fault` → `RUN_ERROR` for a condition §8.2 names as `TIMEOUT`,
+            // because a killed child exits without a result and the symptom is all that is left.
+            killReason ??= reason;
+            await stop();
+            return { orderedStopCompleted: orderedStopCompleted ?? false };
+          },
+
           async execute(request: SessionRunRequest): Promise<SessionRunResult> {
             const steps: ProtocolStep[] = request.steps.map((step) => ({
               stepIndex: step.stepIndex,
@@ -351,7 +523,9 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
             child.send({
               kind: 'execute',
               protocolVersion: PROTOCOL_VERSION,
-              stepTimeoutMs: options.stepTimeoutMs,
+              // Per-run and already clamped to the server maximum by the coordinator; the
+              // launcher's own value is the fallback for a caller that supplies none (AC-6).
+              stepTimeoutMs: launchOptions.stepTimeoutMs ?? options.stepTimeoutMs,
               steps,
               variables: request.variables,
               secrets: request.secrets,
@@ -360,17 +534,132 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
             });
             const result = await inbox.awaitResult();
             await stop();
+
+            const recording = await settleRecording({
+              reported: result.recording,
+              sawChildResult: inbox.sawChildResult,
+              killed: killReason !== null,
+              orderedStopCompleted,
+              scratchPath: launchOptions.scratchPath,
+            });
+            finish();
+
             return {
-              ok: result.ok,
-              failureKind: result.failureKind,
-              failureMessage: result.failureMessage,
-              recording: result.recording,
+              ok: killReason === null ? result.ok : false,
+              // §8.2 fixes the parent-enforced total timeout as `ERROR`/`TIMEOUT`, and the kind
+              // was decided before the signal rather than inferred from how the child exited. A
+              // drain kill is a different condition and takes the documented residual instead.
+              failureKind: killReason === null ? result.failureKind : KILL_FAILURE_KINDS[killReason],
+              failureMessage:
+                killReason === null ? result.failureMessage : KILL_MESSAGES[killReason],
+              recording,
               observedHosts: result.observedHosts,
             };
           },
         },
       };
     },
+  };
+
+  /** Captures the child's two output streams behind the run's redactor and 10.6's caps (AC-8). */
+  function attachOutputRelay(child: ChildProcessHandle, launchOptions: LaunchOptions): OutputRelay {
+    const diagnostics = launchOptions.diagnostics;
+    const relay = createOutputRelay({
+      // With no sink configured the redaction is total and the output is discarded — but it is
+      // still *drained*, because a pipe nobody reads eventually blocks the writer, and a blocked
+      // browser child is the hang this story exists to prevent.
+      redactor: { redact: (text) => (diagnostics === undefined ? '' : diagnostics.redact(text)) },
+      // The same per-message cap 10.6 already applies to a retained log entry (AC-10).
+      maxLineLength: options.maxFailureMessageLength,
+      maxLines: MAX_CHILD_OUTPUT_LINES,
+      emit: (stream, line) => {
+        diagnostics?.write(stream, line);
+      },
+    });
+    // Synchronous, contained, and never awaited: a relay that could delay the run, the kill or the
+    // parent's control endpoints would be a new way to hang the process this story protects.
+    child.onOutput((stream, chunk) => {
+      relay.write(stream, chunk);
+    });
+    return relay;
+  }
+}
+
+/**
+ * The failure kind each kill reason produces.
+ *
+ * `total-timeout` is §8.2's by-hand ruling and is the one value the runner's code set shares with
+ * the API's `ExecutionErrorCode`. `run-fault` → `RUN_ERROR` is the documented residual, and the
+ * right answer for a drain: the run did not exceed its budget, the pod is leaving.
+ */
+const KILL_FAILURE_KINDS: Readonly<Record<SessionKillReason, string>> = {
+  'total-runtime': 'total-timeout',
+  drain: 'run-fault',
+};
+
+/** What a killed run says about itself. Bounded and value-free, so it is safe to report. */
+const KILL_MESSAGES: Readonly<Record<SessionKillReason, string>> = {
+  'total-runtime':
+    'The total browser runtime deadline was reached and the browser process tree was stopped.',
+  drain:
+    'The runner drained while this run was still in flight; the browser process tree was stopped.',
+};
+
+/** Exported for the tests that assert the exact text on the serialized `FINAL` body. */
+export const TOTAL_TIMEOUT_MESSAGE = KILL_MESSAGES['total-runtime'];
+
+/**
+ * Lines of child output one run may relay before the rest are dropped and counted (AC-8).
+ *
+ * A constant rather than a configuration key: AC-19's instruction is that this story must not
+ * widen the surfaces it touches, and a chatty-browser bound is not something a deployment needs to
+ * tune. It is deliberately larger than `maxLogEntries` (200) — the relay writes to the pod log, not
+ * to the bounded report body, and the two have different consumers.
+ */
+export const MAX_CHILD_OUTPUT_LINES = 500;
+
+/**
+ * Reconciles what the child said about the recording with what the parent observed.
+ *
+ * Three inputs, one of which only exists for an instant:
+ *
+ * - the child's own report, when it lived long enough to make one;
+ * - whether the parent's **ordered stop** completed within the grace, recorded before the signal;
+ * - the scratch directory, which is all that is left when the child was killed.
+ *
+ * None of them is the outcome. `partial` is computed by `evidenceFor`/`partialFor` from
+ * `orderlyClose` alone, and this function never sees an error code (ADR-002 §17.4).
+ */
+async function settleRecording(input: {
+  readonly reported: SessionRecording;
+  readonly sawChildResult: boolean;
+  readonly killed: boolean;
+  readonly orderedStopCompleted: boolean | null;
+  readonly scratchPath: string;
+}): Promise<SessionRecording> {
+  if (!input.killed) return input.reported;
+
+  const orderly = input.orderedStopCompleted === true;
+
+  if (input.sawChildResult) {
+    // The child flushed and reported inside the grace. Its own file reading is better than a
+    // directory scan — but the completeness fact is the parent's, because the parent is the one
+    // that knows whether the stop it ordered finished.
+    return {
+      ...input.reported,
+      partial: input.reported.state === 'PENDING' ? !orderly : false,
+    };
+  }
+
+  // Killed without a word. Whatever is in scratch is the only evidence there is.
+  const observed = await observeScratchRecording(input.scratchPath, orderly);
+  const evidence = evidenceFor(observed);
+  return {
+    path: evidence.path,
+    bytes: evidence.bytes,
+    error: evidence.error,
+    state: evidence.state,
+    partial: evidence.partial,
   };
 }
 
@@ -383,6 +672,13 @@ interface Inbox {
   awaitResult(): Promise<Extract<ChildMessage, { kind: 'result' }>>;
   awaitExit(timeoutMs: number): Promise<boolean>;
   forwardStepsTo(reporter: SessionRunRequest['reporter']): void;
+  /**
+   * Whether the child actually reported, as opposed to the abandoned result synthesized on exit.
+   *
+   * The difference decides who can speak about the recording: a child that reported inspected its
+   * own file, and one that was signalled left only a scratch directory for the parent to look in.
+   */
+  readonly sawChildResult: boolean;
 }
 
 /**
@@ -416,6 +712,7 @@ function createInbox(child: ChildProcessHandle): Inbox {
   let onResult: ((message: Extract<ChildMessage, { kind: 'result' }>) => void) | null = null;
   let pendingReady: ReadyOutcome | null = null;
   let pendingResult: Extract<ChildMessage, { kind: 'result' }> | null = null;
+  let sawChildResult = false;
   let exited = false;
   const exitListeners: (() => void)[] = [];
 
@@ -441,7 +738,15 @@ function createInbox(child: ChildProcessHandle): Inbox {
         executorVersion: '',
         failureKind: 'run-fault',
         failureMessage: 'The browser child process exited before it reported a result.',
-        recording: { path: null, bytes: null, error: null, state: 'UNAVAILABLE' },
+        recording: {
+          path: null,
+          bytes: null,
+          error: null,
+          state: 'UNAVAILABLE',
+          // Not a claim about the file: `settleRecording` looks in scratch on the kill path,
+          // where a killed recorder often leaves a playable prefix (ADR-002 §17.7 item 1).
+          partial: false,
+        },
         observedHosts: [],
       };
       pendingResult = abandoned;
@@ -485,6 +790,7 @@ function createInbox(child: ChildProcessHandle): Inbox {
         });
         return;
       case 'result':
+        sawChildResult = true;
         if (pendingReady === null) {
           // A result before `ready` is a launch that never happened.
           pendingReady = {
@@ -501,6 +807,10 @@ function createInbox(child: ChildProcessHandle): Inbox {
   });
 
   return {
+    get sawChildResult(): boolean {
+      return sawChildResult;
+    },
+
     forwardStepsTo(next: SessionRunRequest['reporter']): void {
       reporter = next;
     },

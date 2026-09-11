@@ -68,13 +68,14 @@ function createDriver(overrides: { originSource?: Parameters<typeof attachChildR
     originSource: overrides.originSource,
     // The file itself is 10.14's business; what this tier exercises is the *vocabulary* the
     // observation maps onto. The fixtures tier reads a real webm off disk (AC-7).
-    inspectRecording: (path) =>
+    inspectRecording: (path, orderlyClose) =>
       Promise.resolve({
         attempted: true,
         path,
         bytes: path === null ? null : 24_576,
         header: path !== null,
         error: null,
+        orderlyClose,
       }),
   });
 
@@ -365,14 +366,31 @@ describe('AC-5 — the child exits on every path, with the browser closed first'
     expect(driver.exits).toEqual([0]);
   });
 
-  it('exits on a stop message', async () => {
+  /**
+   * Changed by story 10.13, deliberately: `stop` **flushes** rather than disposes.
+   *
+   * 10.12's child disposed on `stop`, which tears the browser down without waiting for the
+   * recording context — the same outcome as being killed. §5.2 asks the parent to "close context
+   * to flush video when possible", and the bounded grace 10.13's deadline path gives before the
+   * group signal exists precisely to buy that close. A `stop` that disposed would make the grace
+   * buy nothing, and every deadline kill would report a truncated video.
+   */
+  it('closes and flushes the recording context on a stop message, rather than disposing', async () => {
     const driver = createDriver();
     driver.send(launchMessage());
     await driver.launched();
     driver.send({ kind: 'stop' });
+    const result = await driver.settled();
+    expect(driver.browsers.closed).toBe(1);
+    expect(driver.browsers.disposed).toBe(0);
+    // Flushed, so the file it left is playable and the child says so.
+    expect(result.recording.state).toBe('PENDING');
+    // The child closed in an orderly way, so nothing here is partial (ADR-002 §17.3). The
+    // *parent* decides differently when its ordered stop never completed — that is the kill
+    // path, and it is asserted in `test/server/deadline-outcome.test.ts`.
+    expect(result.recording.partial).toBe(false);
     await tick();
     expect(driver.exits).toEqual([0]);
-    expect(driver.browsers.disposed).toBe(1);
   });
 });
 

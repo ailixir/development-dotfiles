@@ -46,6 +46,13 @@ import { RUNNER_VERSIONS, isCompatible } from '../compat/index.js';
 import type { ArtifactProvenance, RuntimeVersions } from '../compat/index.js';
 import { RUNNER_ERROR_CODES, RUN_FAILURE_KINDS, errorCodeFor, resultFor } from '../run/errors.js';
 import type { RunFailureKind } from '../run/errors.js';
+import {
+  SYSTEM_DEADLINE_TIMERS,
+  createRuntimeDeadline,
+  effectiveRuntimeCapMs,
+  effectiveStepTimeoutMs,
+} from '../run/deadline.js';
+import type { DeadlineTimers, ServerDeadlineMaxima } from '../run/deadline.js';
 import { takeRunOrigin } from '../run/timeline.js';
 import type { OriginSource, RunOrigin } from '../run/timeline.js';
 import { validateArtifact } from '../validator/index.js';
@@ -64,6 +71,8 @@ import type {
   BrowserLauncher,
   BrowserSession,
   ScratchStore,
+  SessionKillOutcome,
+  SessionKillReason,
   SessionOrigin,
   SessionRunResult,
 } from './adapters.js';
@@ -102,6 +111,21 @@ export interface RunCoordinatorOptions {
   readonly sleep: (ms: number) => Promise<void>;
   readonly random: () => number;
   /**
+   * The enumerated server limits a job's deadlines are clamped to (AC-6, §5.2).
+   *
+   * Read from configuration by `createApplication`, so a job cannot enlarge them and there is no
+   * key outside `KEY_SPECS` that can either.
+   */
+  readonly maxima: ServerDeadlineMaxima;
+  /**
+   * The timer facility the runtime deadline arms on.
+   *
+   * Injected alongside `now` and `sleep`, and for the same reason those already are: the
+   * behavioural suite drives an exact schedule rather than sleeping, so "the kill was ordered
+   * `totalRuntimeMs` after the browser start" is an assertion rather than a race.
+   */
+  readonly timers?: DeadlineTimers | undefined;
+  /**
    * How the run origin is taken when the session does **not** run in its own process.
    *
    * A real session takes it in the child, at recording-context readiness, and hands back the
@@ -124,6 +148,19 @@ export interface RunCoordinator {
   submit(body: unknown): Promise<RunDecision>;
   /** Resolves when every admitted run has delivered its terminal report or run out of time. */
   awaitInFlight(timeoutMs: number): Promise<boolean>;
+  /**
+   * Ends every run still in flight: ordered stop, bounded grace, process-group kill (AC-15).
+   *
+   * The drain's last resort. §9.3 requires admitted work to be drained on `SIGTERM` and §5.4
+   * requires the runner not to be the thing a reaper has to guess at — a runner that exits holding
+   * a browser is exactly that. A run ended this way still delivers a terminal report, because the
+   * kill makes its awaited result resolve rather than abandoning it.
+   *
+   * Returns how many runs were actually ended. A run still inside `launcher.launch` has no session
+   * to stop and is not counted: it holds no browser the drain could orphan, and it is already
+   * bounded by `launchTimeoutMs`.
+   */
+  terminateInFlight(): number;
   readonly inFlight: number;
 }
 
@@ -244,6 +281,8 @@ function asSessionOrigin(origin: RunOrigin): SessionOrigin {
 export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordinator {
   const { pool, admission, launcher, scratch, logger } = options;
   const inFlight = new Set<Promise<void>>();
+  /** One entry per run that has a killable session; removed when the run leaves (AC-15). */
+  const terminators = new Set<(reason: SessionKillReason) => void>();
 
   async function execute(
     job: JobEnvelope,
@@ -280,6 +319,28 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     });
     const reporter = createRunReporter({ snapshot, client });
 
+    /**
+     * The child's stdout and stderr, redacted by **this run's** redactor (AC-8).
+     *
+     * `logger.withRedactor` serializes the line and then redacts the finished JSON string, so the
+     * relay's own redaction is not the only one on the path — but it is the one that happens
+     * before the length cap, which is the order that holds. Nothing here is a field of the log
+     * line except the bounded text and the AC-13 identity fields.
+     */
+    const childLogger = logger.withRedactor(redactor);
+    const diagnostics = {
+      redact: (text: string): string => redactor.redact(text),
+      write: (stream: 'stdout' | 'stderr', line: string): void => {
+        childLogger.log(stream === 'stderr' ? 'warn' : 'info', 'run.child_output', {
+          executionId: job.executionId,
+          attemptId: job.attemptId,
+          admissionId,
+          stream,
+          output: line,
+        });
+      },
+    };
+
     let outcome: RunOutcome = {
       result: 'ERROR',
       errorCode: RUNNER_ERROR_CODES.RUN_ERROR,
@@ -288,7 +349,31 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     const evidenceKeys = { videoKey: job.videoKey, manifestKey: job.manifestKey };
     // Echoed from the job's server-derived keys, never invented, derived or accepted from
     // anywhere else (§6.2, AC-9).
-    let evidence: EvidenceState = { ...evidenceKeys, state: 'UNAVAILABLE' };
+    // `partial` is explicit from the start: "absent" is never a value this runner emits
+    // (ADR-002 §17.7 item 2).
+    let evidence: EvidenceState = { ...evidenceKeys, state: 'UNAVAILABLE', partial: false };
+
+    // ── The runtime budget, clamped before anything is launched (AC-6, §5.2). ────────────────
+    //
+    // A job asking for less gets less; a job asking for ten minutes of browser time gets the
+    // deployment's value. This is computed here rather than inside the launcher because it is the
+    // coordinator that holds both budgets and has to keep them apart.
+    const runtimeCapMs = effectiveRuntimeCapMs(job.deadlines.totalRuntimeMs, options.maxima);
+
+    /**
+     * The parent-clock reading taken when the `ready` handshake is observed (AC-1, AC-2).
+     *
+     * A **different read** from `admittedAtMs`, which was taken at the CAS. The two are separate
+     * fields precisely so nothing can quietly measure the browser's budget from the queue's start.
+     */
+    let browserReadyAtMs: number | null = null;
+    let deadline: ReturnType<typeof createRuntimeDeadline> | null = null;
+    /**
+     * The kill, once ordered. A list rather than a nullable, so "already killing" is a length
+     * check that a closure assignment cannot hide from the type-checker.
+     */
+    const kills: Promise<SessionKillOutcome>[] = [];
+    let terminate: ((reason: SessionKillReason) => void) | null = null;
 
     // Scratch is created here — after the CAS succeeded, never before it (AC-6).
     const runScratch = await scratch.create(admissionId);
@@ -329,8 +414,11 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         session = await launcher.launch({
           browser: job.configuration.browser,
           viewport: job.configuration.viewport,
-          totalRuntimeMs: job.deadlines.totalRuntimeMs,
+          // ── Clamped to the server's limits. A job asks; the deployment decides (AC-6). ─────
+          totalRuntimeMs: runtimeCapMs,
+          stepTimeoutMs: effectiveStepTimeoutMs(job.configuration.timeoutSeconds, options.maxima),
           scratchPath: runScratch.path,
+          diagnostics,
         });
       } catch (error) {
         throw new RunFailure(
@@ -345,10 +433,75 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // Only now. Not on admission, not when the launch call began (AC-14a, AC-20).
       reporter.browserStarted(origin);
 
+      // ── The second budget starts **here** (AC-1, AC-2, §8.5). ─────────────────────────────
+      //
+      // `browserReadyAtMs` is a separate read of the parent's monotonic clock from
+      // `admittedAtMs`, which was taken at the CAS. That is the whole of "queue time and browser
+      // runtime are separate budgets": a run that spent nine-tenths of its queue budget waiting
+      // still gets the whole of its browser time, because the timer is armed from this instant
+      // and the arithmetic never subtracts one budget from the other.
+      //
+      // The clock is the parent's, and the reading is never converted into a run-timeline
+      // position: the child owns that scale and the parent must not re-base onto it (§11.5).
+      browserReadyAtMs = options.now();
+      // Both instants, on one line, so "they are not the same read" is observable rather than
+      // argued (AC-1). `runtimeCapMs` is beside them because the interesting property is that it
+      // does **not** shrink as `browserReadyAtMs - admittedAtMs` grows.
+      childLogger.info('run.browser_started', {
+        executionId: job.executionId,
+        attemptId: job.attemptId,
+        admissionId,
+        admittedAtMs,
+        browserReadyAtMs,
+        runtimeCapMs,
+      });
+
+      const runSession = session.run;
+      if (runSession !== undefined) {
+        /**
+         * One path for both reasons a parent ends a run it started (AC-3, AC-15).
+         *
+         * Idempotent: the drain can arrive while the deadline is already killing, and the second
+         * caller must not order a second stop or reclassify the first one's reason.
+         */
+        const endRun = (reason: SessionKillReason): void => {
+          if (kills.length > 0) return;
+          // The entry is written before the signal, so a report built from a snapshot taken
+          // mid-kill already names the cause (AC-3, ADR-002 §17.7 item 1).
+          snapshot.appendLog({
+            // `null`, not `0` and not a computed elapsed time: the parent holds no reading on the
+            // run timeline, and `null` is what the contract provides for exactly this (ADR-002
+            // §INT-1, §11.2). A wall-derived number would be the second origin §11.5 forbids.
+            // Bounded by `maxLogEntryLength` like every other entry (AC-10).
+            atMs: null,
+            level: 'error',
+            message:
+              reason === 'total-runtime'
+                ? `The total browser runtime deadline of ${String(runtimeCapMs)}ms was reached; ` +
+                  'the browser process tree is being stopped.'
+                : 'The runner drained while this run was still in flight; the browser process ' +
+                  'tree is being stopped.',
+          });
+          kills.push(runSession.kill(reason));
+        };
+        terminate = endRun;
+        terminators.add(endRun);
+
+        deadline = createRuntimeDeadline({
+          capMs: runtimeCapMs,
+          now: options.now,
+          timers: options.timers ?? SYSTEM_DEADLINE_TIMERS,
+          onExpire: () => {
+            endRun('total-runtime');
+          },
+        });
+        deadline.arm();
+      }
+
       let result: SessionRunResult;
       try {
-        result = session.run
-          ? await session.run.execute({
+        result = runSession
+          ? await runSession.execute({
               steps,
               variables: job.resolvedVars,
               secrets: job.resolvedSecrets,
@@ -356,8 +509,13 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
             })
           : await executeInProcess(session, steps, resolver, reporter, origin);
       } finally {
+        deadline?.cancel();
         await session.close();
       }
+
+      // The kill, if one was ordered, is settled by the time `execute` resolves — but its promise
+      // is awaited here anyway, so nothing is still in flight when scratch is cleared (AC-5a).
+      await Promise.all(kills);
 
       const failureKind = readFailureKind(result.failureKind);
       outcome =
@@ -371,8 +529,14 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
             };
 
       // Evidence and outcome are settled independently, in that order, and neither reads the
-      // other (§6.1, AC-8). A recording failure is a diagnostic on the report, never a result.
-      evidence = { ...evidenceKeys, state: result.recording.state };
+      // other (§6.1, AC-8, ADR-002 §17.4). `partial` comes from the session's observation of how
+      // the **recorder** ended — never from `outcome`, `errorCode` or any step status. There is
+      // deliberately no expression below in which `outcome` appears.
+      evidence = {
+        ...evidenceKeys,
+        state: result.recording.state,
+        partial: result.recording.partial,
+      };
       if (result.recording.error !== null) {
         snapshot.appendLog({
           atMs: null,
@@ -394,12 +558,34 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         ),
       };
     } finally {
+      if (terminate !== null) terminators.delete(terminate);
+      // Every exit path reaches here — success, step failure, launch failure, start-deadline
+      // refusal, **runtime-deadline kill**, run fault and drain — which is why the kill is made to
+      // resolve `execute` rather than to abandon it. A kill that left the awaited promise pending
+      // would skip this block entirely and leak the slot, the scratch directory and the values.
+      deadline?.cancel();
+
       // Progress deliveries settle before the terminal report is built, so FINAL always carries
       // the highest sequence number of the attempt.
       await reporter.settled();
-      await reporter.sendFinal(outcome, evidence);
-      resolver.wipe();
+
+      // ── Released **before** the delivery window opens, not after it closes (AC-5a, AC-9). ──
+      //
+      // Terminal delivery is a bounded retry loop that can run for `terminalDeliveryWindowMs`.
+      // Clearing scratch and wiping the values afterwards would mean a pod holding a browser
+      // profile, a video file and a set of resolved secrets for the whole of it, on top of the
+      // one report body the retry legitimately needs. The child process is gone and the browser
+      // is gone by this point, so there is nothing left that the directory or the values are for,
+      // and the epic's "retry delivery must not retain unlimited resources" becomes "retry
+      // delivery retains one bounded body".
+      //
+      // The **redactor** is deliberately not released here: it is what scrubs the outbound body
+      // on every attempt, and releasing it early would send an unredacted retry. It dies with
+      // this closure when the run returns, which is the same instant the report client does.
       await runScratch.clear();
+      resolver.wipe();
+
+      await reporter.sendFinal(outcome, evidence);
     }
   }
 
@@ -430,8 +616,9 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       ok: run.ok,
       failureKind: run.ok ? null : 'step',
       failureMessage: null,
-      // No browser, no recorder: nothing was attempted, so nothing failed (AC-9).
-      recording: { path: null, bytes: null, error: null, state: 'UNAVAILABLE' },
+      // No browser, no recorder: nothing was attempted, so nothing failed (AC-9), and a
+      // recording that does not exist is not a partial one (ADR-002 §17.3).
+      recording: { path: null, bytes: null, error: null, state: 'UNAVAILABLE', partial: false },
       observedHosts: [],
     };
   }
@@ -439,6 +626,12 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
   return {
     get inFlight(): number {
       return inFlight.size;
+    },
+
+    terminateInFlight(): number {
+      const pending = [...terminators];
+      for (const end of pending) end('drain');
+      return pending.length;
     },
 
     async awaitInFlight(timeoutMs: number): Promise<boolean> {

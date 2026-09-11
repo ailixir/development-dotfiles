@@ -127,6 +127,19 @@ npm run test:fixtures
   permit. Running it **inside the pinned internal image** is 10.12's AC-18b and is still
   `ED-05`-gated: the pipeline records this stage as **skipped — not passed** until 10.18 lands the
   image and 10.19 confirms it.
+- **Story 10.13 added the deadline/kill/cleanup cases** (`test/fixtures-tier/deadline-cleanup.test.ts`):
+  a parent-enforced runtime deadline against a genuinely hung real browser, the process-tree kill
+  observed by enumerating pids, the filesystem inspected for scratch/profile/temp/partial video,
+  "the next run succeeds", the three `partial` cases of ADR-002 §17, and the canary carried through
+  a real Chromium. That file also holds this story's deferrals as **live skips naming their
+  owners** — AC-5b (10.19 with 10.18), AC-7b (10.19 with 10.17), AC-11b (`ED-05` / 10.18) and
+  **O-13** (10.14, the API-side half of `partial`) — recorded as *skipped, not passed*.
+- **This tier is load-bearing for one property nothing else can check.** 10.13's first attempt at
+  the kill used a single process-group signal, and the unit tier was green. The fixtures tier
+  showed the group signal reaches only the Node fork — Playwright starts the browser and the video
+  encoder detached, in groups of their own. Removing the kill entirely also left the tier green
+  until the browser was suspended so it could not exit on its own. Both facts are recorded in
+  `src/run/tree.ts` and `test/run/tree.test.ts`.
 - The tier needs a build: the browser runs in a child process, and a child process is started from
   `dist/run/child.js`. `vitest.fixtures.config.ts` emits `dist/` in `globalSetup` rather than
   trusting that a build happened, so the tier cannot quietly test last week's code.

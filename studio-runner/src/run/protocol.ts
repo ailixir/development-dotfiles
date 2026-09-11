@@ -149,6 +149,15 @@ export interface RecordingReport {
   readonly error: string | null;
   /** `PENDING | FAILED | UNAVAILABLE`. Never `STORED`: storage is 10.14 (AC-9). */
   readonly state: RunnerEvidenceState;
+  /**
+   * Whether the recording covers only part of the session (ADR-002 §17.3).
+   *
+   * The child reports what *it* observed — whether its own `context.close()` resolved. On a
+   * parent-enforced deadline kill the parent overrides it from its own observation, because the
+   * distinguishing fact there is whether the ordered stop completed within `browserStopTimeoutMs`
+   * and only the parent holds it (§17.7). Never derived from the outcome, on either side.
+   */
+  readonly partial: boolean;
 }
 
 /** Child → parent: the run finished, however it finished. */

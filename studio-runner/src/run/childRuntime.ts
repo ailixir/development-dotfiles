@@ -72,11 +72,31 @@ export interface ChildRuntimeDependencies {
   /** The two adjacent reads of the run origin. Injected only so a test can drive them. */
   readonly originSource?: OriginSource | undefined;
   /** Reads the produced recording. Injected so the evidence branches are testable. */
-  readonly inspectRecording?: ((path: string | null) => Promise<RecordingObservation>) | undefined;
+  readonly inspectRecording?:
+    | ((path: string | null, orderlyClose: boolean) => Promise<RecordingObservation>)
+    | undefined;
 }
 
 /** No recording was ever attempted, so there is nothing to have failed (AC-9). */
-const NO_RECORDING: RecordingReport = { path: null, bytes: null, error: null, state: 'UNAVAILABLE' };
+const NO_RECORDING: RecordingReport = {
+  path: null,
+  bytes: null,
+  error: null,
+  state: 'UNAVAILABLE',
+  // A recording that does not exist is not a partial one (ADR-002 §17.3).
+  partial: false,
+};
+
+/**
+ * Refusal the adapter's guard raises once the parent has ordered a stop (AC-5a).
+ *
+ * The grace the parent gives is for **flushing the recording**, not for more browser work: "a run
+ * does not get more browser time by being slow to die". The guard is consulted per operation, so
+ * the step in flight finishes or fails and no further step starts.
+ */
+const STOPPING_MESSAGE =
+  'RunStopped: the parent ordered this run to stop; no further operation is executed while the ' +
+  'recording context is being closed (architecture §5.2).';
 
 const UNSUPPORTED_MULTI_PAGE_MESSAGE =
   'UnsupportedWorkflow: the page opened a second page or popup. V1 records and drives exactly ' +
@@ -84,9 +104,12 @@ const UNSUPPORTED_MULTI_PAGE_MESSAGE =
   'recording was created or merged (architecture §5.2).';
 
 /** Reads the produced file: its size and whether it begins with a readable webm header. */
-async function inspectRecordingFile(path: string | null): Promise<RecordingObservation> {
+async function inspectRecordingFile(
+  path: string | null,
+  orderlyClose = true,
+): Promise<RecordingObservation> {
   if (path === null) {
-    return { attempted: true, path: null, bytes: null, header: false, error: null };
+    return { attempted: true, path: null, bytes: null, header: false, error: null, orderlyClose };
   }
   try {
     const stats = await stat(path);
@@ -97,6 +120,7 @@ async function inspectRecordingFile(path: string | null): Promise<RecordingObser
       bytes: stats.size,
       header: hasWebmHeader(head.subarray(0, 4)),
       error: null,
+      orderlyClose,
     };
   } catch (error) {
     return {
@@ -105,6 +129,7 @@ async function inspectRecordingFile(path: string | null): Promise<RecordingObser
       bytes: null,
       header: false,
       error: error instanceof Error ? error.name : 'unknown',
+      orderlyClose,
     };
   }
 }
@@ -196,6 +221,26 @@ interface ChildState {
   unsupportedPage: boolean;
   /** The run clock, created at recording-context readiness and used for every reading. */
   clock?: Clock | undefined;
+  /**
+   * Set the moment the parent orders a stop, **before** anything is closed (AC-5a).
+   *
+   * The adapter's guard reads it, so no further step executes during the grace: the grace buys a
+   * flush, not more browser time.
+   */
+  stopping: boolean;
+  /** Every path sends exactly one `result`; this is what makes "exactly one" true (AC-5). */
+  resultSent: boolean;
+}
+
+/** Sends the run's single result message. A second call is a no-op, on any path. */
+function sendResult(
+  channel: ChildChannel,
+  state: ChildState,
+  message: Extract<ChildMessage, { kind: 'result' }>,
+): void {
+  if (state.resultSent) return;
+  state.resultSent = true;
+  channel.send(message);
 }
 
 /** Phase one: start the browser, take the origin, answer `ready`. */
@@ -217,7 +262,7 @@ export async function launchInChild(
     const text = error instanceof Error ? error.message : 'unknown';
     // No relaunch, and never with different arguments: §9.3 forbids disabling the sandbox to make
     // something run, so the only honest answer is to report which failure this was (AC-6a).
-    channel.send({
+    sendResult(channel, state, {
       kind: 'result',
       ok: false,
       executorVersion: '',
@@ -259,7 +304,7 @@ export async function executeInChild(
   const handle = state.handle;
   const clock = state.clock;
   if (handle === null || clock === undefined) {
-    channel.send({
+    sendResult(channel, state, {
       kind: 'result',
       ok: false,
       executorVersion: '',
@@ -276,7 +321,12 @@ export async function executeInChild(
     page: handle.page,
     defaultTimeoutMs: message.stepTimeoutMs,
     resolveVariable: (name) => resolver.variable(name),
-    guard: () => (state.unsupportedPage ? UNSUPPORTED_MULTI_PAGE_MESSAGE : null),
+    guard: () => {
+      if (state.unsupportedPage) return UNSUPPORTED_MULTI_PAGE_MESSAGE;
+      // The ordered stop is in progress: nothing further runs in the browser (AC-5a).
+      if (state.stopping) return STOPPING_MESSAGE;
+      return null;
+    },
   });
 
   const steps: ExecutableStep[] = message.steps.map((step) => ({
@@ -305,6 +355,11 @@ export async function executeInChild(
 
   const observedHosts = handle.observedHosts();
 
+  // The parent ordered a stop while this run was in flight: the stop path owns the close, the
+  // flush and the single result message. Racing it here would close the context twice and could
+  // report a file that was still being written (AC-5a).
+  if (state.stopping) return;
+
   // Closing the context is what flushes the file; the evidence state is read from what it left.
   let producedPath: string | null = null;
   let closeError: string | null = null;
@@ -316,13 +371,24 @@ export async function executeInChild(
   }
   state.handle = null;
 
+  // `orderlyClose` is the child's own observation of how the *recorder* ended, and it is the only
+  // thing `partial` is computed from here (ADR-002 §17.3, §17.4). A recorder that died on a
+  // passing run leaves a playable prefix and is partial; the outcome plays no part in it.
+  const orderlyClose = closeError === null;
   const observation: RecordingObservation =
     closeError === null
-      ? await inspect(producedPath)
-      : { attempted: true, path: producedPath, bytes: null, header: false, error: closeError };
+      ? await inspect(producedPath, true)
+      : {
+          attempted: true,
+          path: producedPath,
+          bytes: null,
+          header: false,
+          error: closeError,
+          orderlyClose,
+        };
   const evidence = evidenceFor(observation);
 
-  channel.send({
+  sendResult(channel, state, {
     kind: 'result',
     ok,
     executorVersion,
@@ -333,6 +399,7 @@ export async function executeInChild(
       bytes: evidence.bytes,
       error: evidence.error,
       state: evidence.state,
+      partial: evidence.partial,
     },
     observedHosts,
   });
@@ -347,12 +414,18 @@ export async function executeInChild(
  */
 export function attachChildRuntime(dependencies: ChildRuntimeDependencies): void {
   const { channel } = dependencies;
-  const state: ChildState = { handle: null, unsupportedPage: false };
+  const inspect = dependencies.inspectRecording ?? inspectRecordingFile;
+  const state: ChildState = {
+    handle: null,
+    unsupportedPage: false,
+    stopping: false,
+    resultSent: false,
+  };
   let phase: 'idle' | 'launched' | 'done' = 'idle';
   let queue: Promise<void> = Promise.resolve();
 
   const refuse = (failureMessage: string): void => {
-    channel.send({
+    sendResult(channel, state, {
       kind: 'result',
       ok: false,
       executorVersion: '',
@@ -361,6 +434,75 @@ export function attachChildRuntime(dependencies: ChildRuntimeDependencies): void
       recording: NO_RECORDING,
       observedHosts: [],
     });
+  };
+
+  /**
+   * The ordered stop: close the recording context, **await it**, report, leave (AC-5a, §5.2).
+   *
+   * Awaiting the context close is the only thing that finalizes the webm — §6.1 — which is the
+   * whole reason the parent gives a bounded grace before it kills the tree. A stop that merely
+   * disposed would leave the file exactly as unplayable as the kill would have, and the grace
+   * would buy nothing.
+   *
+   * It runs **out of band**, not on the message queue. The parent sends `stop` precisely when the
+   * run is too busy to finish, so queueing it behind an in-flight `execute` would guarantee it
+   * arrived after the grace had already expired — the one case it exists for.
+   */
+  const stop = async (): Promise<void> => {
+    if (state.stopping) return;
+    state.stopping = true;
+    const handle = state.handle;
+    state.handle = null;
+    phase = 'done';
+
+    if (handle === null) {
+      // Nothing to flush: either the browser never started or the run already closed it.
+      channel.exit(0);
+      return;
+    }
+
+    let producedPath: string | null = null;
+    let closeError: string | null = null;
+    try {
+      producedPath = await handle.close();
+    } catch (error) {
+      closeError = firstLine(error instanceof Error ? error.message : 'unknown');
+      await handle.dispose().catch(() => undefined);
+    }
+
+    const observation: RecordingObservation =
+      closeError === null
+        ? await inspect(producedPath, true)
+        : {
+            attempted: true,
+            path: producedPath,
+            bytes: null,
+            header: false,
+            error: closeError,
+            orderlyClose: false,
+          };
+    const evidence = evidenceFor(observation);
+
+    // The run was cut short by the parent, so the child has no assertion outcome to claim. The
+    // *kind* it reports is not the one that reaches the wire on a deadline kill — the parent
+    // classified that before it signalled (AC-3) — but a child that reported `ok: true` here
+    // would be claiming steps it never ran.
+    sendResult(channel, state, {
+      kind: 'result',
+      ok: false,
+      executorVersion: '',
+      failureKind: 'run-fault' satisfies RunFailureKind,
+      failureMessage: 'The parent ordered this run to stop before it finished.',
+      recording: {
+        path: evidence.path,
+        bytes: evidence.bytes,
+        error: evidence.error,
+        state: evidence.state,
+        partial: evidence.partial,
+      },
+      observedHosts: [],
+    });
+    channel.exit(0);
   };
 
   const teardown = async (): Promise<void> => {
@@ -400,6 +542,10 @@ export function attachChildRuntime(dependencies: ChildRuntimeDependencies): void
     } catch (error) {
       refuse(firstLine(error instanceof Error ? error.message : 'unknown'));
     }
+    // An ordered stop is in progress and it owns the close, the result and the exit. Leaving here
+    // would end the process while the recording context was still being flushed — which is
+    // exactly the truncation the grace exists to avoid (AC-5a).
+    if (state.stopping) return;
     await teardown();
     phase = 'done';
     channel.exit(0);
@@ -424,14 +570,7 @@ export function attachChildRuntime(dependencies: ChildRuntimeDependencies): void
    * Writing around it costs one named function; loosening it would cost a guard.
    */
   const dispatch = async (kind: string | null, value: unknown): Promise<void> => {
-    if (kind === 'stop') {
-      if (phase === 'done') return;
-      await teardown();
-      phase = 'done';
-      channel.exit(0);
-      return;
-    }
-    if (phase === 'done') return;
+    if (phase === 'done' || state.stopping) return;
     if (kind === 'launch' && phase === 'idle') {
       await handleLaunch(value);
       return;
@@ -449,6 +588,12 @@ export function attachChildRuntime(dependencies: ChildRuntimeDependencies): void
 
   channel.onMessage((value: unknown) => {
     const kind = kindOf(value);
+    if (kind === 'stop') {
+      // Deliberately **not** queued. See `stop` above: the parent sends it when the run is too
+      // busy to finish, and queueing it behind that run is the one way to guarantee it is useless.
+      void stop();
+      return;
+    }
     queue = queue.then(() => dispatch(kind, value));
   });
 }

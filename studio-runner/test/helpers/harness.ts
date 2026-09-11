@@ -14,6 +14,8 @@ import type { RunnerApplication } from '../../src/server/application.js';
 import type { CapacityPool } from '../../src/server/capacity.js';
 import { createRecordingLogSink } from '../../src/server/logging.js';
 import type { RecordingLogSink } from '../../src/server/logging.js';
+import type { FakeScheduler } from './scheduler.js';
+import { createFakeScheduler } from './scheduler.js';
 import type { EventLog, FakeBrowserLauncher, FakeHttpClient, FakeScratchStore } from './runner.js';
 import {
   createEventLog,
@@ -47,6 +49,13 @@ export interface HarnessOptions {
   readonly launcher?: BrowserLauncher;
   /** Substitutes the scratch store; the fixtures tier passes a real filesystem one (AC-22). */
   readonly scratch?: ScratchStore;
+  /**
+   * Drives the monotonic clock **and** the runtime deadline's timer from one place (10.13 AC-1).
+   *
+   * When supplied, `advance` fires whatever the deadline scheduled, so "the kill was ordered
+   * exactly `totalRuntimeMs` after the browser start" is an assertion rather than a sleep.
+   */
+  readonly scheduler?: FakeScheduler;
 }
 
 export interface Harness {
@@ -57,7 +66,9 @@ export interface Harness {
   readonly scratch: FakeScratchStore;
   readonly log: EventLog;
   readonly sink: RecordingLogSink;
-  /** Advances the injected monotonic clock. */
+  /** The clock and timer facility the run is driven on (10.13). */
+  readonly scheduler: FakeScheduler;
+  /** Advances the injected monotonic clock, firing any deadline that comes due. */
   advance(ms: number): void;
   readonly sleeps: readonly number[];
   start(): Promise<number>;
@@ -83,7 +94,7 @@ export function createHarness(options: HarnessOptions = {}): Harness {
   const scratch = createFakeScratchStore(log);
   const sink = createRecordingLogSink();
   const sleeps: number[] = [];
-  let clock = 0;
+  const scheduler = options.scheduler ?? createFakeScheduler();
   let port = 0;
 
   const app = createApplication(config, {
@@ -93,12 +104,15 @@ export function createHarness(options: HarnessOptions = {}): Harness {
     scratch: options.scratch ?? scratch,
     logSink: sink,
     pool: options.pool,
-    now: options.now ?? ((): number => clock),
+    now: options.now ?? scheduler.now,
+    timers: scheduler,
     // Fixed wall clock so a FINAL body is byte-comparable without a fake timer library.
     wallClock: () => new Date('2026-09-11T10:00:00.000Z'),
     sleep: (ms: number) => {
       sleeps.push(ms);
-      clock += ms;
+      // The retry backoff moves the same clock everything else is measured on; a deadline armed
+      // before a terminal retry must therefore still be able to come due during one.
+      scheduler.advance(ms);
       return Promise.resolve();
     },
     random: () => 0.5,
@@ -113,9 +127,10 @@ export function createHarness(options: HarnessOptions = {}): Harness {
     scratch,
     log,
     sink,
+    scheduler,
     sleeps,
     advance(ms: number): void {
-      clock += ms;
+      scheduler.advance(ms);
     },
     get port(): number {
       return port;
