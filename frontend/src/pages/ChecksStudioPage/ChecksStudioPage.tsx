@@ -99,6 +99,8 @@ import { selectIsSourceEnabled } from '@store/slices/sourcesSlice';
 import { selectIsFeatureEnabled } from '@store/slices/featuresSlice';
 import { setAutoSyncCode, setGeneratedCode, setTestIR, setExecutionLogs, setAllStepResults, setExecuting, setCurrentStep as setCurrentStepAction, setVideoUrl as setVideoUrlAction, clearLogs, updateConfiguration } from '@store/slices/studioSlice';
 import { buildDefaultTestIR } from '@/utils/studio/ir/parseSteps';
+import { toTestRequest } from '@/types/studio/legacyTestIr';
+import { isTerminalExecutionStatus } from '@/types/studio/studioTypes';
 import { generatePythonFromIR } from '@/utils/studio/codegen/pythonGenerator';
 import studioApi from '@/services/api/studioApi';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -289,10 +291,15 @@ const ChecksStudioPageInner: React.FC = () => {
           if (Array.isArray(exec.logs)) {
             dispatch(setExecutionLogs(exec.logs as any));
           }
-          if (exec.videoUrl) {
-            dispatch(setVideoUrlAction(exec.videoUrl));
+          // videoPath is the protected API path; the pre-10.1 raw videoUrl is read only so that
+          // history written before the contract still plays back.
+          const videoSource = exec.videoPath ?? exec.videoUrl;
+          if (videoSource) {
+            dispatch(setVideoUrlAction(videoSource));
           }
-          if (exec.status === 'COMPLETED' || exec.status === 'FAILED' || exec.status === 'TIMEOUT') {
+          // Terminal statuses are PASSED | FAILED | ERROR; a timeout is ERROR with a code. The two
+          // legacy values are still accepted so old rows stop the poller instead of hanging it.
+          if (isTerminalExecutionStatus(exec.status) || exec.status === 'COMPLETED' || exec.status === 'TIMEOUT') {
             dispatch(setExecuting(false));
             stopPolling();
           }
@@ -407,7 +414,16 @@ const ChecksStudioPageInner: React.FC = () => {
   const handleCreateNewScenario = async () => {
     try {
       const ir = buildDefaultTestIR(newScenarioForm.name || 'Untitled Test', []);
-      const created = await studioApi.createTest({ ...ir, name: newScenarioForm.name, csiId: newScenarioForm.csiId, meta: { ...ir.meta, description: newScenarioForm.description }, environment: newScenarioForm.environment });
+      // The editor still builds a legacy TestIR; toTestRequest is the single crossing point into
+      // the frozen contract (story 10.1 AC-15). Retiring the IR itself belongs to 10.11.
+      const created = await studioApi.createTest(
+        toTestRequest(ir, {
+          name: newScenarioForm.name,
+          csiId: newScenarioForm.csiId,
+          description: newScenarioForm.description,
+          environment: newScenarioForm.environment,
+        }),
+      );
       setSaveSnack({ open: true, message: 'Scenario created', severity: 'success' });
       setShowNewScenarioDialog(false);
       setNewScenarioForm({ name: '', environment: 'Development', csiId: '', description: '' });
@@ -781,7 +797,13 @@ const ChecksStudioPageInner: React.FC = () => {
                       try {
                         setIsSaving(true);
                         const ir = buildDefaultTestIR(selectedScenarioData?.name || 'Untitled Test', testSteps);
-                        await studioApi.createTest({ ...ir, name: ir.meta.name, csiId: selectedScenarioData?.csiId || 'CSI-00000' });
+                        await studioApi.createTest(
+                          toTestRequest(ir, {
+                            name: ir.meta.name,
+                            csiId: selectedScenarioData?.csiId || 'CSI-00000',
+                            steps: testSteps,
+                          }),
+                        );
                         setSaveSnack({ open: true, message: 'Scenario saved', severity: 'success' });
                       } catch (e: any) {
                         setSaveSnack({ open: true, message: e?.message || 'Failed to save', severity: 'error' });
