@@ -1,12 +1,14 @@
 import { http, HttpResponse } from 'msw';
 import {
   defaultConfiguration,
+  type ConfirmCompileRequest,
   type ExecutionSnapshot,
   type Page,
   type TestDto,
   type TestRequest,
 } from '@/types/studio/studioTypes';
 import { MOCK_READABLE_CSIS, mockExecutions, mockTests } from './fixtures';
+import { compileReviewDrafts, conflictResponse } from './compileFixtures';
 
 /**
  * Studio request handlers for standalone development and Vitest (story 10.1, AC-16).
@@ -53,6 +55,19 @@ export function resetStudioMocks(): void {
 }
 
 const allTests = (): TestDto[] => [...created, ...mockTests];
+
+/**
+ * Story 10.10's compile-review corpus. Reachable by id from `GET /tests/{id}` — the single-draft
+ * read, which is the only route that carries `compileDiagnostics` (ADR-002 §16.5) — and
+ * deliberately **not** folded into the list, so the list projection keeps the shape the contract
+ * declares for it and the existing scoping fixtures keep their counts.
+ */
+const reviewDraft = (id: unknown): TestDto | undefined =>
+  compileReviewDrafts.find((draft) => draft.id === id);
+
+function conflict(code: string) {
+  return HttpResponse.json(conflictResponse(code), { status: 409 });
+}
 const allExecutions = (): ExecutionSnapshot[] => [...acceptedExecutions, ...mockExecutions];
 
 export const studioHandlers = [
@@ -68,7 +83,8 @@ export const studioHandlers = [
   }),
 
   http.get(`${BASE}/tests/:id`, ({ params }) => {
-    const test = readable(allTests()).find((candidate) => candidate.id === params.id);
+    const test =
+      readable(allTests()).find((candidate) => candidate.id === params.id) ?? reviewDraft(params.id);
     if (!test) {
       return badRequest('BAD_REQUEST', `UI Test not found: ${params.id}`);
     }
@@ -173,29 +189,55 @@ export const studioHandlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.post(`${BASE}/tests/:id/compile`, ({ params }) =>
-    HttpResponse.json(
+  http.post(`${BASE}/tests/:id/compile`, ({ params }) => {
+    const test =
+      readable(allTests()).find((candidate) => candidate.id === params.id) ?? reviewDraft(params.id);
+    if (!test) {
+      return badRequest('BAD_REQUEST', `UI Test not found: ${params.id}`);
+    }
+    // The `202` means the attempt was started, never that it will succeed: pool saturation and
+    // gateway failure surface asynchronously as `compileStatus: STALE` (§4.3).
+    return HttpResponse.json(
       {
         compileRequestId: crypto.randomUUID(),
         compileStatus: 'COMPILING',
-        sourceRevision:
-          readable(allTests()).find((test) => test.id === params.id)?.sourceRevision ?? 1,
-        configurationRevision: 1,
+        sourceRevision: test.sourceRevision,
+        configurationRevision: test.configurationRevision,
       },
       { status: 202 },
-    ),
-  ),
+    );
+  }),
 
-  http.post(`${BASE}/tests/:id/confirm-compile`, ({ params }) => {
-    const test = readable(allTests()).find((candidate) => candidate.id === params.id);
+  http.post(`${BASE}/tests/:id/confirm-compile`, async ({ params, request }) => {
+    const test =
+      readable(allTests()).find((candidate) => candidate.id === params.id) ?? reviewDraft(params.id);
     if (!test) {
       return badRequest('BAD_REQUEST', `UI Test not found: ${params.id}`);
+    }
+    const body = (await request.json()) as Partial<ConfirmCompileRequest> | null;
+    // The server's transaction is conditional on all four, so the mock refuses a body that is
+    // short of them rather than teaching the UI that three will do (§4.2, §8.3).
+    const missing = (['revisionId', 'artifactHash', 'sourceRevision', 'configurationRevision'] as const)
+      .filter((field) => body?.[field] === undefined || body?.[field] === null);
+    if (missing.length > 0) {
+      return badRequest('BAD_REQUEST', `confirm-compile requires ${missing.join(', ')}`);
+    }
+    if (test.compileStatus !== 'AWAITING_CONFIRMATION') {
+      return conflict('STALE_CANDIDATE');
+    }
+    if (
+      body!.revisionId !== test.currentCandidateRevisionId ||
+      body!.sourceRevision !== test.sourceRevision ||
+      body!.configurationRevision !== test.configurationRevision
+    ) {
+      return conflict('STALE_CANDIDATE');
     }
     const confirmed: TestDto = {
       ...test,
       compileStatus: 'READY',
-      currentCandidateRevisionId: test.currentCandidateRevisionId ?? crypto.randomUUID(),
-      confirmedRevisionId: test.currentCandidateRevisionId ?? crypto.randomUUID(),
+      confirmedRevisionId: test.currentCandidateRevisionId,
+      compileError: null,
+      compileDiagnostics: null,
     };
     created = [confirmed, ...created.filter((candidate) => candidate.id !== confirmed.id)];
     return HttpResponse.json(confirmed);
