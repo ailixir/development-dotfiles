@@ -16,9 +16,17 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p>Every transition is a conditional statement whose affected-row count is checked; the service
  * never reads a row and writes it back on the strength of what it read. A compile result is
- * published only while the persisted compile request identity and the source revision it was
- * started for are still current, so an out-of-order result — including an older compile for
- * identical text — is discarded instead of replacing a newer candidate.
+ * published only while the persisted compile request identity <em>and both revisions it was started
+ * for</em> are still current, so an out-of-order result — an older compile for identical text, or a
+ * compile whose draft was edited while it was in flight — is discarded instead of replacing a newer
+ * candidate or overwriting the {@code STALE} that the edit mandated (AC-8, AC-11, AC-12).
+ *
+ * <p>The revision pair is named inside each conditional statement rather than being enforced by a
+ * companion write elsewhere (for example nulling {@code compile_request_id} on edit): PostgreSQL
+ * re-evaluates a conditional {@code UPDATE}'s predicate against the committed row version once the
+ * row lock is acquired, so no interleaving of editors and publishers can let a publish land on a
+ * draft that moved after its compile began, and no future writer of the revision columns can
+ * reintroduce the hole by forgetting to clear the request identity.
  *
  * <p>This class owns the transactions only. The HTTP endpoints (compile, confirm-compile), prompt
  * assembly, validation and the repair loop belong to stories 10.8 and 10.9.
@@ -91,25 +99,22 @@ public class CompileStateService {
 
   /**
    * Stores a validated candidate as an immutable revision and makes it the current candidate, but
-   * only while the supplied compile request identity and source revision are still current (AC-11).
-   * Otherwise nothing is written and {@link PublishResult#DISCARDED_OUT_OF_ORDER} is returned.
+   * only while the supplied compile request identity and <em>both</em> revisions it was started for
+   * are still current (AC-8, AC-11). Otherwise nothing is written and {@link
+   * PublishResult#DISCARDED_OUT_OF_ORDER} is returned.
    */
   @Transactional
   public PublishResult publishCandidate(
-      UUID testId, UUID compileRequestId, long sourceRevision, CandidateRevision candidate) {
+      UUID testId, CompileRequest request, CandidateRevision candidate) {
     requireCompilable(testId);
-    List<Map<String, Object>> guarded =
-        lockCurrentRequest(testId, compileRequestId, sourceRevision);
+    requireCandidateMatchesRequest(request, candidate);
+    List<Map<String, Object>> guarded = lockCurrentRequest(testId, request);
     if (guarded.isEmpty()) {
-      LOGGER.info(
-          "Discarding out-of-order compile result for test {} (request {}, sourceRevision {})",
-          testId,
-          compileRequestId,
-          sourceRevision);
+      logDiscard(testId, request);
       return PublishResult.DISCARDED_OUT_OF_ORDER;
     }
     String csiId = (String) guarded.get(0).get("csi_id");
-    UUID revisionId = insertOrReuseRevision(testId, csiId, sourceRevision, candidate);
+    UUID revisionId = insertOrReuseRevision(testId, csiId, request.sourceRevision(), candidate);
 
     int updated =
         jdbc.update(
@@ -120,19 +125,21 @@ public class CompileStateService {
                    compile_error                 = NULL,
                    compile_diagnostics           = NULL
              WHERE id = ? AND compile_request_id = ? AND source_revision = ?
+               AND configuration_revision = ?
                AND deleted_at IS NULL AND quarantined_at IS NULL
             """,
             revisionId,
             testId,
-            compileRequestId,
-            sourceRevision);
+            request.requestId(),
+            request.sourceRevision(),
+            request.configurationRevision());
     if (updated != 1) {
       // Unreachable while the guard row lock is held; fail loudly rather than half-publish.
       throw new IllegalStateException(
           "Candidate publication lost its guard for test "
               + testId
               + " (request "
-              + compileRequestId
+              + request.requestId()
               + ")");
     }
     return PublishResult.PUBLISHED;
@@ -143,8 +150,7 @@ public class CompileStateService {
    * NEEDS_REVISION}, under the same conditional rule as {@link #publishCandidate} (AC-12).
    */
   @Transactional
-  public PublishResult publishInvalid(
-      UUID testId, UUID compileRequestId, long sourceRevision, String diagnosticsJson) {
+  public PublishResult publishInvalid(UUID testId, CompileRequest request, String diagnosticsJson) {
     requireCompilable(testId);
     int updated =
         jdbc.update(
@@ -155,49 +161,72 @@ public class CompileStateService {
                    compile_error                 = NULL,
                    current_candidate_revision_id = NULL
              WHERE id = ? AND compile_request_id = ? AND source_revision = ?
+               AND configuration_revision = ?
                AND deleted_at IS NULL AND quarantined_at IS NULL
             """,
             diagnosticsJson,
             testId,
-            compileRequestId,
-            sourceRevision);
-    return updated == 1 ? PublishResult.PUBLISHED : PublishResult.DISCARDED_OUT_OF_ORDER;
+            request.requestId(),
+            request.sourceRevision(),
+            request.configurationRevision());
+    if (updated != 1) {
+      logDiscard(testId, request);
+      return PublishResult.DISCARDED_OUT_OF_ORDER;
+    }
+    return PublishResult.PUBLISHED;
   }
 
   /**
-   * Records a compile failure (for example a gateway outage). The draft itself is untouched and
-   * stays saved; the compile state falls back to {@code STALE} carrying {@code compile_error}
-   * (AC-12, Architecture §4.7).
+   * Records a compile failure (for example a gateway outage). The authored draft itself is
+   * untouched and stays saved; the compile state falls back to {@code STALE} carrying {@code
+   * compile_error} (AC-12, Architecture §4.7).
+   *
+   * <p>The current candidate is cleared, symmetrically with {@link #publishInvalid}: {@code STALE}
+   * means "no candidate for the current revisions", so a failed compile must not leave a
+   * confirmable candidate behind that could drive {@code STALE -> READY} and silently discard the
+   * recorded error.
    */
   @Transactional
-  public PublishResult publishError(
-      UUID testId, UUID compileRequestId, long sourceRevision, String errorJson) {
+  public PublishResult publishError(UUID testId, CompileRequest request, String errorJson) {
     requireCompilable(testId);
     int updated =
         jdbc.update(
             """
             UPDATE ui_tests
-               SET compile_status      = 'STALE',
-                   compile_error       = CAST(? AS jsonb),
-                   compile_diagnostics = NULL
+               SET compile_status                = 'STALE',
+                   compile_error                 = CAST(? AS jsonb),
+                   compile_diagnostics           = NULL,
+                   current_candidate_revision_id = NULL
              WHERE id = ? AND compile_request_id = ? AND source_revision = ?
+               AND configuration_revision = ?
                AND deleted_at IS NULL AND quarantined_at IS NULL
             """,
             errorJson,
             testId,
-            compileRequestId,
-            sourceRevision);
-    return updated == 1 ? PublishResult.PUBLISHED : PublishResult.DISCARDED_OUT_OF_ORDER;
+            request.requestId(),
+            request.sourceRevision(),
+            request.configurationRevision());
+    if (updated != 1) {
+      logDiscard(testId, request);
+      return PublishResult.DISCARDED_OUT_OF_ORDER;
+    }
+    return PublishResult.PUBLISHED;
   }
 
   /**
    * Confirms exactly the candidate the author reviewed (Architecture §4.2 body {@code {revisionId,
    * artifactHash, sourceRevision, configurationRevision}}).
    *
-   * <p>Succeeds only when the revision is still the current candidate, its artifact hash and
-   * revisions match the supplied values, and it has never been confirmed. Any mismatch is a {@code
-   * 409 STALE_CANDIDATE} and rolls the whole transaction back, so the write-once confirmation is
-   * never partially applied (AC-13).
+   * <p>Succeeds only when the draft is actually {@code AWAITING_CONFIRMATION}, the revision is
+   * still the current candidate, its artifact hash and revisions match the supplied values, and it
+   * has never been confirmed. Any mismatch is a {@code 409 STALE_CANDIDATE} and rolls the whole
+   * transaction back, so the write-once confirmation is never partially applied (AC-13).
+   *
+   * <p>{@code AWAITING_CONFIRMATION} is an explicit precondition, not a consequence of the other
+   * checks: confirmation is the exact-revision approval gate of Architecture §4.2 and must only
+   * accept the state it was offered from. Without it a draft parked in {@code STALE} by a compile
+   * failure, or moved to {@code COMPILING} by a recompile that has not yet published, could still
+   * be driven straight to {@code READY} from a stale tab.
    *
    * @return the confirmed revision id
    */
@@ -244,6 +273,7 @@ public class CompileStateService {
                    compile_error         = NULL,
                    compile_diagnostics   = NULL
              WHERE id = ? AND current_candidate_revision_id = ?
+               AND compile_status = 'AWAITING_CONFIRMATION'
                AND source_revision = ? AND configuration_revision = ?
                AND deleted_at IS NULL AND quarantined_at IS NULL
             """,
@@ -255,7 +285,11 @@ public class CompileStateService {
     if (testUpdated != 1) {
       throw new StudioConflictException(
           STALE_CANDIDATE,
-          "Revision " + revisionId + " is no longer the current candidate of test " + testId);
+          "Revision "
+              + revisionId
+              + " is not the current candidate of a test "
+              + testId
+              + " that is awaiting confirmation");
     }
     return revisionId;
   }
@@ -283,19 +317,48 @@ public class CompileStateService {
     }
   }
 
-  private List<Map<String, Object>> lockCurrentRequest(
-      UUID testId, UUID compileRequestId, long sourceRevision) {
+  private List<Map<String, Object>> lockCurrentRequest(UUID testId, CompileRequest request) {
     return jdbc.queryForList(
         """
         SELECT csi_id, configuration_revision
           FROM ui_tests
          WHERE id = ? AND compile_request_id = ? AND source_revision = ?
+           AND configuration_revision = ?
            AND deleted_at IS NULL AND quarantined_at IS NULL
            FOR UPDATE
         """,
         testId,
-        compileRequestId,
-        sourceRevision);
+        request.requestId(),
+        request.sourceRevision(),
+        request.configurationRevision());
+  }
+
+  /**
+   * Rejects a candidate compiled for a configuration revision other than the one the compile
+   * request was started for. The guard clauses check the draft against {@link CompileRequest}, so a
+   * divergent {@link CandidateRevision#configurationRevision()} would be stored on a revision row
+   * that {@link #confirm} could never match — a programming error in the compile pipeline, not a
+   * race.
+   */
+  private static void requireCandidateMatchesRequest(
+      CompileRequest request, CandidateRevision candidate) {
+    if (candidate.configurationRevision() != request.configurationRevision()) {
+      throw new IllegalArgumentException(
+          "Candidate was compiled for configurationRevision "
+              + candidate.configurationRevision()
+              + " but the compile request was started for "
+              + request.configurationRevision());
+    }
+  }
+
+  private static void logDiscard(UUID testId, CompileRequest request) {
+    LOGGER.info(
+        "Discarding out-of-order compile result for test {} (request {}, sourceRevision {},"
+            + " configurationRevision {})",
+        testId,
+        request.requestId(),
+        request.sourceRevision(),
+        request.configurationRevision());
   }
 
   /**

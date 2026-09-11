@@ -118,6 +118,11 @@ issues:
       increments in updateTest. Both are one-line changes; the second also covers publishInvalid and
       publishError.
     suggested_owner: dev
+    status: resolved
+    resolution: >-
+      Fixed on story/10.4 (see post_gate_fixes) — all three publish transitions now condition on
+      configuration_revision as well, taken from CompileRequest, so the guard is intrinsic to the
+      statement instead of depending on updateTest clearing compile_request_id.
   - id: ISSUE-002
     severity: medium
     category: correctness
@@ -135,6 +140,12 @@ issues:
       Either add "AND compile_status = 'AWAITING_CONFIRMATION'" to confirm's ui_tests UPDATE, or
       clear current_candidate_revision_id in publishError for symmetry with publishInvalid.
     suggested_owner: dev
+    status: resolved
+    resolution: >-
+      Fixed on story/10.4 (see post_gate_fixes) — both remedies applied: confirm's ui_tests UPDATE
+      now requires compile_status = 'AWAITING_CONFIRMATION', and publishError clears
+      current_candidate_revision_id, so STALE -> READY is unreachable and no compile_error is
+      silently discarded.
   - id: ISSUE-003
     severity: medium
     category: design
@@ -146,9 +157,23 @@ issues:
       AC-12 mandates the STALE, so this is AC-conforming, but it is a live hazard for the readiness
       gate.
     impact: "Downstream — 10.8 readiness enforcement and 10.9's repair loop."
+    status: accepted-by-design
     suggested_fix: >-
-      Book an explicit decision in 10.8: readiness should probably key on confirmed_revision_id
-      still matching the draft's revisions rather than on compile_status = 'READY' alone.
+      Not a defect and deliberately NOT changed in the 10.4 fix round: beginCompile must move the
+      draft to COMPILING unconditionally and publishError must fall back to STALE, both of which
+      AC-10 and AC-12 mandate. 10.8 therefore inherits it as a hard constraint, not as a bug to
+      re-litigate.
+    carry_forward_to_10_8: >-
+      compile_status alone is NOT a runnability predicate. After this fix a failed optional
+      recompile leaves a previously confirmed, unedited draft at STALE with compile_error set,
+      confirmed_revision_id still populated and current_candidate_revision_id cleared by
+      publishError. 10.8's readiness gate MUST therefore key on "confirmed_revision_id is non-null
+      AND the revision it points at still carries the draft's current source_revision and
+      configuration_revision", treating compile_status only as the compile-pipeline's own progress
+      field. If 10.8 keys readiness on compile_status = 'READY', a gateway outage on an optional
+      recompile makes a confirmed test non-runnable — the exact hazard recorded here. 10.9's repair
+      loop must read the same predicate so it does not try to "repair" a draft that is already
+      confirmed and runnable.
     suggested_owner: dev
   - id: ISSUE-004
     severity: low
@@ -279,5 +304,56 @@ recommendations:
     - "ISSUE-004 / ISSUE-005 — decide whether DELETE on revisions and csi_id reassignment on drafts warrant DB triggers."
     - "ISSUE-008 — add target policy selection to ConfigurationChangeClassifier with the destination policy work."
     - "ISSUE-009 — bound compile_diagnostics in 10.8."
+
+post_gate_fixes:
+  applied: "2026-09-10 — @dev (Dex), after the gate, on branch story/10.4"
+  scope: "CompileStateService and its tests only; no migration, entity, DTO or endpoint change."
+  issue_001: >-
+    The publish transitions now name the revision pair they compiled against. publishCandidate,
+    publishInvalid and publishError take the CompileRequest itself instead of (requestId,
+    sourceRevision), and every guard — including publishCandidate's SELECT ... FOR UPDATE — adds
+    "AND configuration_revision = ?". The alternative (nulling compile_request_id in updateTest) was
+    rejected: it makes correctness depend on a companion write by a different class, so any future
+    writer of the revision columns reintroduces the hole silently. The chosen guard is evaluated
+    inside the conditional statement itself, and PostgreSQL re-evaluates that predicate against the
+    committed row version once the row lock is granted, so no interleaving of editors and publishers
+    can let a stale compile land. publishCandidate additionally rejects a CandidateRevision whose
+    configurationRevision differs from the request's.
+  issue_002: >-
+    confirm's ui_tests UPDATE now carries "AND compile_status = 'AWAITING_CONFIRMATION'" as an
+    explicit precondition on top of the exact-match body check, and publishError clears
+    current_candidate_revision_id symmetrically with publishInvalid. STALE -> READY and
+    COMPILING -> READY are both unreachable, and a recorded compile_error can no longer be cleared
+    by a confirmation.
+  issue_003: "Behaviour deliberately unchanged; carry-forward sharpened above for 10.8."
+  tests_added:
+    - "aConfigurationEditDuringAnInFlightCompileDiscardsEveryResultOfThatCompile — drives the real StudioService.updateTest, then asserts all three publish paths are discarded and leave STALE untouched."
+    - "aPublishQueuedBehindAnUncommittedEditIsDiscardedWhenTheLockIsGranted — an editor holds the draft's row lock in an open transaction, the in-flight publish queues behind it on pg_stat_activity, the editor commits, and the publish is discarded on the lock grant."
+    - "publishErrorLeavesNoConfirmableCandidateBehind — STALE -> READY is unreachable and the error survives."
+    - "confirmRejectsADraftThatIsNotAwaitingConfirmation — a recompile leaves the reviewed candidate current but the draft is no longer offering it."
+    - "aConfirmQueuedBehindAnUncommittedCompileFailureIsRejected — a compile failure holds the row lock, a stale tab's confirm queues behind it, and is rejected with STALE_CANDIDATE once the failure commits."
+  interleavings_are_deterministic: >-
+    Both interleaving cases hold one transaction open on a latch and poll pg_stat_activity until the
+    other backend is genuinely queued on the ui_tests row lock, so the dangerous ordering is the one
+    asserted rather than whichever ordering the scheduler happened to pick. A first, barrier-based
+    draft of these cases was discarded precisely because it passed against the unfixed code.
+  negative_control: >-
+    With the three guard clauses neutralised in place (configuration_revision predicate disabled,
+    AWAITING_CONFIRMATION precondition removed, publishError's candidate clear removed), all five new
+    cases FAIL; with the fix in place all five PASS, repeated three times with no flake.
+  evidence:
+    - command: "./gradlew test --tests 'com.citi.put.checks.studio.*' --rerun"
+      result: "BUILD SUCCESSFUL — 41 passed, 0 failed, 2 skipped (RevisionRetentionIT, AC-20 deferral unchanged)"
+    - command: "./gradlew spotlessCheck checkstyleMain checkstyleTest spotbugsMain"
+      result: "BUILD SUCCESSFUL"
+    - command: "./gradlew check --continue"
+      result: >-
+        BUILD FAILED — 324 tests completed, 23 failed, 2 skipped. Same 23 failures and the same 14
+        failing classes as the pre-fix baseline recorded above; zero failures in
+        com.citi.put.checks.studio. Test count rose 319 -> 324 for the five new cases.
+  re_adjudication: >-
+    AC-8, AC-12 and AC-13 are still marked CONCERNS in ac_coverage above and the gate verdict is
+    still CONCERNS. Re-scoring them is @qa's call, not the fixing developer's; this block records
+    what changed and how it was verified.
 
 merge: safe

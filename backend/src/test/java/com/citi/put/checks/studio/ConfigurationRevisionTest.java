@@ -268,8 +268,7 @@ class ConfigurationRevisionTest {
     CompileRequest request = compileStateService.beginCompile(testId);
     compileStateService.publishCandidate(
         testId,
-        request.requestId(),
-        request.sourceRevision(),
+        request,
         new CandidateRevision(
             request.configurationRevision(),
             "{\"version\":1,\"steps\":[]}",

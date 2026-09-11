@@ -96,8 +96,7 @@ class StudioVisibilityIT {
     CompileRequest request = compileStateService.beginCompile(visibleTestId);
     compileStateService.publishCandidate(
         visibleTestId,
-        request.requestId(),
-        request.sourceRevision(),
+        request,
         new CandidateRevision(
             request.configurationRevision(),
             "{\"version\":1,\"steps\":[]}",
