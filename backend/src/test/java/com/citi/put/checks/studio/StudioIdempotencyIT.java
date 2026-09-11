@@ -8,6 +8,7 @@ import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.studio.compile.ConfigurationChangeClassifier;
+import com.citi.put.checks.studio.dispatch.StudioAcceptanceService;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -54,7 +55,7 @@ class StudioIdempotencyIT {
   @Autowired private JdbcTemplate jdbc;
   @Autowired private StudioRepository studioRepository;
   @Autowired private UITestExecutionRepository executionRepository;
-  @Autowired private StudioDispatchLedgerRepository ledgerRepository;
+  @Autowired private StudioAcceptanceService acceptanceService;
   @Autowired private CsiRepository csiRepository;
   @Autowired private ConfigurationChangeClassifier changeClassifier;
   @Autowired private CsiOwnershipEvaluator csiOwnershipEvaluator;
@@ -180,11 +181,11 @@ class StudioIdempotencyIT {
     return new StudioService(
         studioRepository,
         executionRepository,
-        ledgerRepository,
         csiRepository,
         changeClassifier,
         csiOwnershipEvaluator,
-        snapshotMapper);
+        snapshotMapper,
+        acceptanceService);
   }
 
   private static Authentication identity(String email) {
@@ -192,21 +193,15 @@ class StudioIdempotencyIT {
         new UserIdentity("uid-" + email, email, email, "Ops", List.of("checks-admin"), List.of()));
   }
 
+  /**
+   * A compiled and confirmed draft. Acceptance runs the readiness gate from story 10.7 onwards, so
+   * a draft with no confirmed revision is refused {@code 409 COMPILE_REQUIRED} rather than executed
+   * — which is the product behaviour, not a test inconvenience.
+   */
   private UUID seedTest(String name) {
-    UUID id = UUID.randomUUID();
-    jdbc.update(
-        "INSERT INTO ui_tests (id, name, csi_id, environment, browser, steps, variables,"
-            + " timeout_seconds, wait_strategy, created_by, created_at, updated_at)"
-            + " VALUES (?, ?, ?, 'Production', 'chromium',"
-            + " CAST('[\"Go to the home page\"]' AS jsonb), CAST('[]' AS jsonb), 30,"
-            + " 'networkidle', ?, ?, ?)",
-        id,
-        name,
-        CSI_ID,
-        OWNER,
-        Timestamp.from(Instant.now()),
-        Timestamp.from(Instant.now()));
-    return id;
+    return new StudioExecutionFixtures(jdbc)
+        .seedRunnableTest(name, CSI_ID, OWNER, List.of("Go to the home page"))
+        .testId();
   }
 
   private void seedUser(String email) {

@@ -128,20 +128,11 @@ class LastRunProjectionIT {
         new UserIdentity("uid", OWNER, OWNER, "Ops", List.of("checks-admin"), List.of()));
   }
 
+  /** A compiled and confirmed draft: acceptance runs the readiness gate from story 10.7 onwards. */
   private UUID seedTest() {
-    UUID id = UUID.randomUUID();
-    jdbc.update(
-        "INSERT INTO ui_tests (id, name, csi_id, environment, browser, steps, variables,"
-            + " timeout_seconds, wait_strategy, created_by, created_at, updated_at)"
-            + " VALUES (?, 'Projection draft', ?, 'Production', 'chromium',"
-            + " CAST('[\"Go to the home page\"]' AS jsonb), CAST('[]' AS jsonb), 30,"
-            + " 'networkidle', ?, ?, ?)",
-        id,
-        CSI_ID,
-        OWNER,
-        Timestamp.from(Instant.now()),
-        Timestamp.from(Instant.now()));
-    return id;
+    return new StudioExecutionFixtures(jdbc)
+        .seedRunnableTest("Projection draft", CSI_ID, OWNER, List.of("Go to the home page"))
+        .testId();
   }
 
   private void seedUser() {

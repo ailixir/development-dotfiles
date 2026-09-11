@@ -63,9 +63,10 @@ public class StudioController {
     return ResponseEntity.created(URI.create("/api/v1/studio/tests/" + created.id())).body(created);
   }
 
+  /** Readers may read, authorized against the draft's CSI on the server, before any work. */
   @GetMapping("/tests/{id}")
-  public ResponseEntity<UITestDto> findTestById(@PathVariable UUID id) {
-    UITestDto dto = studioService.findTestById(id);
+  public ResponseEntity<UITestDto> findTestById(@PathVariable UUID id, Authentication auth) {
+    UITestDto dto = studioService.findTestById(id, auth);
     return ResponseEntity.ok(dto);
   }
 
@@ -84,8 +85,8 @@ public class StudioController {
   }
 
   /**
-   * Accepts an execution. Live dispatch arrives with 10.7; what commits here is the accepted {@code
-   * PENDING} history row plus its durable, principal-scoped idempotency mapping.
+   * Accepts an execution (AC-7 – AC-11). Owners and explicitly authorized administrators only; the
+   * check is on the server and precedes every other step of acceptance.
    */
   @PostMapping("/tests/{id}/execute")
   public ResponseEntity<Map<String, Object>> executeTest(
@@ -97,9 +98,14 @@ public class StudioController {
         .body(Map.of("executionId", execution.executionId(), "status", execution.status()));
   }
 
+  /**
+   * One execution snapshot, authorized against the execution's own immutable CSI — never the parent
+   * test's current value, and equally for a soft-deleted test (AC-4a).
+   */
   @GetMapping("/executions/{id}")
-  public ResponseEntity<ExecutionSnapshotDto> findExecutionById(@PathVariable UUID id) {
-    return ResponseEntity.ok(studioService.findExecutionById(id));
+  public ResponseEntity<ExecutionSnapshotDto> findExecutionById(
+      @PathVariable UUID id, Authentication auth) {
+    return ResponseEntity.ok(studioService.findExecutionById(id, auth));
   }
 
   /** {@code testId} is optional; every result is scoped by the execution's own CSI (AC-14). */
@@ -114,8 +120,9 @@ public class StudioController {
   }
 
   @PostMapping("/tests/{id}/validate-variables")
-  public ResponseEntity<Map<String, Object>> validateVariables(@PathVariable UUID id) {
-    UITestDto test = studioService.findTestById(id);
+  public ResponseEntity<Map<String, Object>> validateVariables(
+      @PathVariable UUID id, Authentication auth) {
+    UITestDto test = studioService.findTestById(id, auth);
     boolean hasVariables = !test.variables().isEmpty();
     return ResponseEntity.ok(Map.of("valid", true, "hasVariables", hasVariables, "testId", id));
   }

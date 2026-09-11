@@ -6,19 +6,15 @@ import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.studio.compile.CompileState;
 import com.citi.put.checks.studio.compile.ConfigurationChangeClassifier;
+import com.citi.put.checks.studio.dispatch.StudioAcceptanceService;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.ExecutionStatus;
 import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
-import com.citi.put.checks.studio.entity.StudioDispatchLedger;
 import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.entity.UITestExecution;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -38,27 +35,50 @@ public class StudioService {
 
   private final StudioRepository studioRepository;
   private final UITestExecutionRepository executionRepository;
-  private final StudioDispatchLedgerRepository ledgerRepository;
   private final CsiRepository csiRepository;
   private final ConfigurationChangeClassifier changeClassifier;
   private final CsiOwnershipEvaluator csiOwnershipEvaluator;
   private final ExecutionSnapshotMapper snapshotMapper;
+  private final StudioAcceptanceService acceptanceService;
 
+  @SuppressWarnings("checkstyle:ParameterNumber")
   public StudioService(
       StudioRepository studioRepository,
       UITestExecutionRepository executionRepository,
-      StudioDispatchLedgerRepository ledgerRepository,
       CsiRepository csiRepository,
       ConfigurationChangeClassifier changeClassifier,
       CsiOwnershipEvaluator csiOwnershipEvaluator,
-      ExecutionSnapshotMapper snapshotMapper) {
+      ExecutionSnapshotMapper snapshotMapper,
+      StudioAcceptanceService acceptanceService) {
     this.studioRepository = studioRepository;
     this.executionRepository = executionRepository;
-    this.ledgerRepository = ledgerRepository;
     this.csiRepository = csiRepository;
     this.changeClassifier = changeClassifier;
     this.csiOwnershipEvaluator = csiOwnershipEvaluator;
     this.snapshotMapper = snapshotMapper;
+    this.acceptanceService = acceptanceService;
+  }
+
+  // ── server-side authorization (AC-4a, §9.1) ──────────────────────────────
+
+  /**
+   * Readers may read; the check happens on the server, before any work, on every route.
+   *
+   * <p>The CSI it keys on is the caller-supplied resource's own, resolved before anything else is
+   * done with it. A caller who may not read it gets {@link StudioAccessDeniedException} — the same
+   * answer an absent id gets, so neither status can be used as an existence oracle.
+   */
+  private void requireRead(Authentication auth, String csiId) {
+    if (csiId == null || !csiOwnershipEvaluator.canRead(auth, csiId)) {
+      throw new StudioAccessDeniedException();
+    }
+  }
+
+  /** Owners and explicitly authorized administrators may execute (§9.1). */
+  private void requireExecute(Authentication auth, String csiId) {
+    if (csiId == null || !csiOwnershipEvaluator.canExecute(auth, csiId)) {
+      throw new StudioAccessDeniedException();
+    }
   }
 
   /**
@@ -106,6 +126,19 @@ public class StudioService {
     return UITestDto.from(test);
   }
 
+  /**
+   * Reads one draft, authorized against its CSI before anything is returned (AC-4a).
+   *
+   * <p>An unreadable CSI and an unknown id give the same answer on purpose: see {@link
+   * StudioAccessDeniedException}.
+   */
+  public UITestDto findTestById(UUID id, Authentication auth) {
+    UITest test = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
+    requireRead(auth, test.getCsiId());
+    return UITestDto.from(test);
+  }
+
+  /** Internal read with no authorization; callers that already authorized use this. */
   public UITestDto findTestById(UUID id) {
     UITest test =
         studioRepository
@@ -208,61 +241,35 @@ public class StudioService {
   }
 
   /**
-   * Accepts an execution and records its durable dispatch identity in one transaction (Architecture
-   * §5.1 step 2).
+   * Accepts an execution (AC-7 – AC-11).
    *
-   * <p>The history row is written {@code PENDING} — accepted, not yet browser-started — which V14
-   * made a legal status; before V14 this placeholder wrote a value its own CHECK constraint
-   * rejected. The ledger row commits with it and carries the principal-scoped idempotency mapping,
-   * so a retry that reaches a different API replica resolves to the same execution instead of
-   * starting a second one.
+   * <p>Authorization happens here, on the server, before any work: only an owner or an explicitly
+   * authorized administrator of the draft's CSI may execute it (§9.1).
    *
-   * <p>No live dispatch happens here: story 10.7 replaces this with the full acceptance
-   * transaction, quotas, readiness checks and the dispatcher.
+   * <p>The transaction itself belongs to {@link StudioAcceptanceService}. This method is
+   * deliberately <em>not</em> transactional: when the durable idempotency index refuses a second
+   * row, the losing transaction is finished and cannot read anything, so the winner is resolved in
+   * a new one. That is what makes "two concurrent executes yield exactly one execution" true across
+   * replicas rather than merely likely.
+   *
+   * <p>{@code NOT_SUPPORTED} because this class is {@code readOnly = true} by default: without it
+   * the acceptance transaction would join a read-only one and every insert would fail.
    */
-  @Transactional
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public ExecutionSnapshotDto executeTest(UUID testId, Authentication auth, String idempotencyKey) {
-    UITest test =
-        studioRepository
-            .findById(testId)
-            .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + testId));
+    UITest test = studioRepository.findById(testId).orElseThrow(StudioAccessDeniedException::new);
+    requireExecute(auth, test.getCsiId());
     String principal = principalOf(auth);
-    String digest = requestDigest(testId, principal);
 
-    if (idempotencyKey != null && !idempotencyKey.isBlank()) {
-      Optional<StudioDispatchLedger> existing =
-          ledgerRepository.findByPrincipalAndIdempotencyKey(principal, idempotencyKey);
-      if (existing.isPresent()) {
-        StudioDispatchLedger ledger = existing.get();
-        if (!digest.equals(ledger.getRequestDigest())) {
-          throw new StudioConflictException(
-              "IDEMPOTENCY_KEY_REUSED",
-              "Idempotency key '"
-                  + idempotencyKey
-                  + "' was already used with a different request body");
-        }
-        return findExecutionById(ledger.getExecutionId());
-      }
+    UUID executionId;
+    try {
+      executionId = acceptanceService.accept(testId, principal, idempotencyKey);
+    } catch (StudioAcceptanceService.IdempotencyRaceException race) {
+      executionId =
+          acceptanceService.resolveIdempotencyRace(
+              testId, race.getPrincipal(), race.getIdempotencyKey());
     }
-
-    Instant acceptedAt = Instant.now();
-    UITestExecution execution =
-        new UITestExecution(testId, ExecutionStatus.PENDING, acceptedAt, test.getCsiId());
-    execution.setPrincipal(principal);
-    execution.setEnvironment(test.getEnvironment());
-    execution = executionRepository.save(execution);
-
-    ledgerRepository.save(
-        new StudioDispatchLedger(
-            execution.getId(),
-            acceptedAt,
-            testId,
-            test.getCsiId(),
-            principal,
-            emptyToNull(idempotencyKey),
-            emptyToNull(idempotencyKey) == null ? null : digest));
-
-    return snapshotMapper.toSnapshot(execution);
+    return findExecutionById(executionId);
   }
 
   /**
@@ -274,6 +281,23 @@ public class StudioService {
         executionRepository
             .findByExecutionId(executionId)
             .orElseThrow(() -> new IllegalArgumentException("Execution not found: " + executionId));
+    return snapshotMapper.toSnapshot(execution);
+  }
+
+  /**
+   * Reads one execution snapshot, authorized against the <b>execution's own immutable CSI</b> —
+   * never the parent test's current value and never a mutable parent lookup, and equally for a
+   * soft-deleted test, whose history must stay readable to the people who could always read it
+   * (AC-4a, §9.1).
+   *
+   * <p>A quarantined row (no CSI at all) is unreadable by everyone, including administrators.
+   */
+  public ExecutionSnapshotDto findExecutionById(UUID executionId, Authentication auth) {
+    UITestExecution execution =
+        executionRepository
+            .findByExecutionId(executionId)
+            .orElseThrow(StudioAccessDeniedException::new);
+    requireRead(auth, execution.getCsiId());
     return snapshotMapper.toSnapshot(execution);
   }
 
@@ -351,26 +375,6 @@ public class StudioService {
 
   private String principalOf(Authentication auth) {
     return extractIdentity(auth).email();
-  }
-
-  /**
-   * Digest of what was actually requested. Reusing an idempotency key for a different request is a
-   * client bug, not a retry, and must not silently return someone else's execution (§5.1).
-   */
-  private static String requestDigest(UUID testId, String principal) {
-    try {
-      MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-      byte[] hash =
-          sha256.digest(
-              ("POST:/tests/" + testId + "/execute:" + principal).getBytes(StandardCharsets.UTF_8));
-      return HexFormat.of().formatHex(hash);
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException("SHA-256 is required to compute a request digest", e);
-    }
-  }
-
-  private static String emptyToNull(String value) {
-    return value == null || value.isBlank() ? null : value;
   }
 
   private UserIdentity extractIdentity(Authentication auth) {

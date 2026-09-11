@@ -132,6 +132,13 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/features")
                     .permitAll()
+                    // The internal callbacks are served by StudioInternalSecurityConfig's
+                    // higher-precedence chain and must never reach the permissive tail below.
+                    // This matcher is defence in depth: if that chain were ever removed or its
+                    // securityMatcher narrowed, /internal/** would otherwise become open again,
+                    // which is exactly the hole story 10.7 AC-6a closes.
+                    .requestMatchers("/internal/**")
+                    .denyAll()
                     .requestMatchers("/api/**")
                     .authenticated()
                     .anyRequest()

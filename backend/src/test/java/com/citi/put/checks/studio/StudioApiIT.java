@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -142,7 +143,10 @@ class StudioApiIT {
             String.class);
 
     assertThat(deleted.getStatusCode().value()).isEqualTo(204);
-    assertThat(get("/api/v1/studio/tests/" + testId).getStatusCode().value()).isEqualTo(400);
+    // 403, not 400: story 10.7 AC-4a makes "you may not read this" and "it is not there"
+    // indistinguishable on every per-id Studio read, because the pair of them is an existence
+    // oracle. The frozen contract declares 400/401/403 on this route and no 404.
+    assertThat(get("/api/v1/studio/tests/" + testId).getStatusCode().value()).isEqualTo(403);
   }
 
   @Test
@@ -197,20 +201,14 @@ class StudioApiIT {
     return headers;
   }
 
+  /**
+   * A compiled and confirmed draft. From story 10.7 onwards acceptance runs the readiness gate, so
+   * an unconfirmed draft is {@code 409 COMPILE_REQUIRED} rather than an accepted run.
+   */
   private UUID seedTest() {
-    UUID id = UUID.randomUUID();
-    jdbc.update(
-        "INSERT INTO ui_tests (id, name, csi_id, environment, browser, steps, variables,"
-            + " timeout_seconds, wait_strategy, created_by, created_at, updated_at)"
-            + " VALUES (?, 'Api draft', ?, 'Production', 'chromium',"
-            + " CAST('[\"Go to the home page\"]' AS jsonb), CAST('[]' AS jsonb), 30,"
-            + " 'networkidle', ?, ?, ?)",
-        id,
-        CSI_ID,
-        OWNER,
-        Timestamp.from(Instant.now()),
-        Timestamp.from(Instant.now()));
-    return id;
+    return new StudioExecutionFixtures(jdbc)
+        .seedRunnableTest("Api draft", CSI_ID, OWNER, List.of("Go to the home page"))
+        .testId();
   }
 
   private void seedUser() {

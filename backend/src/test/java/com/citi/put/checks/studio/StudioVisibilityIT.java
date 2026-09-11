@@ -61,8 +61,10 @@ class StudioVisibilityIT {
     assertThat(list.path("data").toString()).contains(visibleTestId.toString());
     assertThat(list.path("data").toString()).doesNotContain(quarantinedTestId.toString());
 
+    // 403, not 400: AC-4a makes a hidden draft indistinguishable from an unreadable one, so
+    // neither status can be used to discover that a draft exists.
     assertThat(get("/api/v1/studio/tests/" + quarantinedTestId).getStatusCode().value())
-        .isEqualTo(400);
+        .isEqualTo(403);
     assertThat(get("/api/v1/studio/tests/" + visibleTestId).getStatusCode().value()).isEqualTo(200);
 
     assertThat(
@@ -78,7 +80,7 @@ class StudioVisibilityIT {
     assertThat(delete("/api/v1/studio/tests/" + visibleTestId).getStatusCode().value())
         .isEqualTo(204);
 
-    assertThat(get("/api/v1/studio/tests/" + visibleTestId).getStatusCode().value()).isEqualTo(400);
+    assertThat(get("/api/v1/studio/tests/" + visibleTestId).getStatusCode().value()).isEqualTo(403);
     assertThat(revisionRepository.findByIdAndTestId(revisionId, visibleTestId)).isPresent();
     assertThat(revisionRepository.findByTestIdOrderByCreatedAtDesc(visibleTestId)).hasSize(1);
   }
