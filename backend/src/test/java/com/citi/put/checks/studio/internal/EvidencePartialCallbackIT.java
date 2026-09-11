@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
+import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
+import com.citi.put.checks.studio.dto.StepResult;
 import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -67,6 +69,7 @@ class EvidencePartialCallbackIT {
 
   private final HttpClient http = HttpClient.newHttpClient();
 
+  private StudioExecutionFixtures fixtures;
   private Authentication owner;
   private UUID executionId;
   private UUID attemptId;
@@ -74,11 +77,23 @@ class EvidencePartialCallbackIT {
 
   @BeforeEach
   void setUp() {
-    StudioExecutionFixtures fixtures = new StudioExecutionFixtures(jdbc);
+    fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI_ID, OWNER);
     jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
+    provision();
+  }
+
+  /**
+   * A fresh accepted, dispatched and admitted execution.
+   *
+   * <p>Called again by any test that needs a second {@code FINAL}: a terminal report is write-once
+   * and a second one on the same attempt is a {@code 409} by design (story 10.7 AC-21), so
+   * "accepted" has to be decided on a run that has not already finalized or the assertion is about
+   * the conflict rule instead.
+   */
+  private void provision() {
     UUID testId =
         fixtures
             .seedRunnableTest(
@@ -88,13 +103,15 @@ class EvidencePartialCallbackIT {
                 List.of("Go to the home page", "Check the URL"))
             .testId();
     executionId = studioService.executeTest(testId, owner, null).executionId();
-    attemptId = UUID.randomUUID();
+    UUID attempt = UUID.randomUUID();
+    UUID execution = executionId;
     transactions.executeWithoutResult(
         status -> {
           statements.claim(
-              executionId, "test-dispatcher", Instant.now().plusSeconds(60), Instant.now());
-          statements.beginDispatch(executionId, "test-dispatcher", attemptId);
+              execution, "test-dispatcher", Instant.now().plusSeconds(60), Instant.now());
+          statements.beginDispatch(execution, "test-dispatcher", attempt);
         });
+    attemptId = attempt;
     admissionId = UUID.randomUUID();
     admissionService.claim(
         executionId, new AdmissionRequest(executionId, attemptId, RUNNER, admissionId, Map.of()));
@@ -110,7 +127,8 @@ class EvidencePartialCallbackIT {
   void aFinalCarryingEvidencePartialIsAcceptedRatherThanRefused() {
     post(startedBody(1));
 
-    HttpResponse<String> accepted = post(finalBody(2, true));
+    HttpResponse<String> accepted =
+        post(finalBody(2, "PASSED", null, "PENDING", true, StepResult.PASS));
 
     assertThat(accepted.statusCode())
         .as(
@@ -127,7 +145,8 @@ class EvidencePartialCallbackIT {
 
     assertThat(snapshot().status()).isEqualTo("RUNNING");
 
-    assertThat(post(finalBody(2, false)).statusCode()).isEqualTo(200);
+    assertThat(post(finalBody(2, "PASSED", null, "PENDING", false, StepResult.PASS)).statusCode())
+        .isEqualTo(200);
 
     ExecutionSnapshotDto after = snapshot();
     assertThat(after.status())
@@ -141,10 +160,229 @@ class EvidencePartialCallbackIT {
     post(startedBody(1));
 
     HttpResponse<String> refused =
-        post(finalBody(2, true).replace("\"partial\":true", "\"partial\":true,\"salvaged\":true"));
+        post(
+            finalBody(2, "PASSED", null, "PENDING", true, StepResult.PASS)
+                .replace("\"partial\":true", "\"partial\":true,\"salvaged\":true"));
 
     assertThat(refused.statusCode()).isEqualTo(400);
     assertThat(refused.body()).contains("INVALID_REPORT");
+  }
+
+  // ── AC-11: the reported value is projected, persisted and published ───────
+
+  @Test
+  void theReportedPartialIsPublishedAndPersistedRatherThanAConstant() {
+    post(startedBody(1));
+    assertThat(post(finalBody(2, "PASSED", null, "PENDING", true, StepResult.PASS)).statusCode())
+        .isEqualTo(200);
+
+    assertThat(snapshot().video().partial())
+        .as(
+            "RunnerReportProjection wrote Boolean.FALSE unconditionally until O-13 landed, so every"
+                + " execution the API had ever published said the recording was complete")
+        .isTrue();
+    assertThat(persistedVideoPartial()).isTrue();
+  }
+
+  @Test
+  void aReportedFalseIsPublishedAsFalse() {
+    post(startedBody(1));
+    assertThat(post(finalBody(2, "PASSED", null, "PENDING", false, StepResult.PASS)).statusCode())
+        .isEqualTo(200);
+
+    assertThat(snapshot().video().partial()).isFalse();
+    assertThat(persistedVideoPartial()).isFalse();
+  }
+
+  @Test
+  void anAbsentPartialIsPublishedAsFalse() {
+    post(startedBody(1));
+    // "Absent" is unreachable from the merged runner — it declares `partial` non-optionally — so
+    // this is defence in depth against a future producer, and §17.5's stated default.
+    String withoutPartial =
+        finalBody(2, "PASSED", null, "PENDING", false, StepResult.PASS)
+            .replace(",\"partial\":false", "");
+    assertThat(withoutPartial).doesNotContain("partial");
+
+    assertThat(post(withoutPartial).statusCode()).isEqualTo(200);
+    assertThat(snapshot().video().partial()).isFalse();
+    assertThat(persistedVideoPartial()).isFalse();
+  }
+
+  // ── AC-12: partial is never derived from the outcome, in either direction ─
+
+  @Test
+  void aDeadlineKillWhoseOrderedStopFlushedCleanlyPublishesTimeoutWithPartialFalse() {
+    post(startedBody(1));
+    // ADR-002 §17.3's first counter-example: the run ended badly, the recording did not.
+    assertThat(
+            post(finalBody(2, "ERROR", "TIMEOUT", "PENDING", false, StepResult.RUNNING))
+                .statusCode())
+        .isEqualTo(200);
+
+    ExecutionSnapshotDto published = snapshot();
+    assertThat(published.status()).isEqualTo("ERROR");
+    assertThat(published.errorCode()).isEqualTo(ExecutionErrorCode.TIMEOUT);
+    assertThat(published.video().partial())
+        .as("videoPartial = \"TIMEOUT\".equals(errorCode) would make this true")
+        .isFalse();
+  }
+
+  @Test
+  void aPassedRunWhoseRecorderDiedPublishesPartialTrue() {
+    post(startedBody(1));
+    // The second counter-example: the run ended well, the recording did not.
+    assertThat(post(finalBody(2, "PASSED", null, "PENDING", true, StepResult.PASS)).statusCode())
+        .isEqualTo(200);
+
+    ExecutionSnapshotDto published = snapshot();
+    assertThat(published.status()).isEqualTo("PASSED");
+    assertThat(published.errorCode()).isNull();
+    assertThat(published.video().partial())
+        .as("an implementation deriving partial from errorCode would make this false")
+        .isTrue();
+  }
+
+  @Test
+  void noEvidenceFieldInfluencesTheStatusTheErrorCodeOrAnyStepStatus() {
+    post(startedBody(1));
+    assertThat(post(finalBody(2, "PASSED", null, "FAILED", false, StepResult.PASS)).statusCode())
+        .isEqualTo(200);
+
+    ExecutionSnapshotDto published = snapshot();
+    assertThat(published.status())
+        .as("an upload failure never overwrites a known assertion outcome (§6.1)")
+        .isEqualTo("PASSED");
+    assertThat(published.errorCode()).isNull();
+    assertThat(published.stepResults())
+        .allSatisfy(step -> assertThat(step.status()).isEqualTo(StepResult.PASS));
+    assertThat(published.video().status()).isEqualTo("FAILED");
+  }
+
+  // ── AC-13: partial: true with no object is refused, never coerced ─────────
+
+  @Test
+  void partialTrueAlongsideEvidenceThatDoesNotExistIsRefused() {
+    post(startedBody(1));
+
+    for (String state : List.of("FAILED", "UNAVAILABLE")) {
+      HttpResponse<String> refused =
+          post(finalBody(2, "PASSED", null, state, true, StepResult.PASS));
+
+      assertThat(refused.statusCode())
+          .as("a recording that does not exist is not a partial one (§17.3), state %s", state)
+          .isEqualTo(400);
+      assertThat(refused.body()).contains("INVALID_REPORT");
+      assertThat(snapshot().status())
+          .as("a silent coercion would have finalized the row instead")
+          .isEqualTo("RUNNING");
+    }
+  }
+
+  @Test
+  void theThreeValidCombinationsAreAccepted() {
+    for (String state : List.of("FAILED", "UNAVAILABLE")) {
+      provision();
+      post(startedBody(1));
+      assertThat(post(finalBody(2, "PASSED", null, state, false, StepResult.PASS)).statusCode())
+          .as("state %s with partial false is the valid pairing", state)
+          .isEqualTo(200);
+    }
+    provision();
+    post(startedBody(1));
+    assertThat(post(finalBody(2, "PASSED", null, "STORED", true, StepResult.PASS)).statusCode())
+        .as("a stored object may legitimately be a partial recording")
+        .isEqualTo(200);
+  }
+
+  // ── AC-8 (API half): STORED → AVAILABLE, and only AVAILABLE gets an expiry ─
+
+  @Test
+  void anEndToEndStoredReportPublishesAvailableWithANonNullExpiryAndTheOthersGetNone() {
+    post(startedBody(1));
+    assertThat(post(finalBody(2, "PASSED", null, "STORED", false, StepResult.PASS)).statusCode())
+        .isEqualTo(200);
+
+    ExecutionSnapshotDto stored = snapshot();
+    assertThat(stored.video().status()).isEqualTo("AVAILABLE");
+    assertThat(stored.video().expiresAt())
+        .as("AVAILABLE is the API's judgment against retention, and the only state it stamps")
+        .isNotNull();
+
+    for (String state : List.of("FAILED", "UNAVAILABLE")) {
+      provision();
+      post(startedBody(1));
+      assertThat(post(finalBody(2, "PASSED", null, state, false, StepResult.PASS)).statusCode())
+          .isEqualTo(200);
+      assertThat(snapshot().video().expiresAt()).as("no expiry for %s", state).isNull();
+    }
+  }
+
+  // ── AC-14: the timed-out step's message, and the three negatives ──────────
+
+  @Test
+  void aTerminalTimeoutMeetingARunningStepReproducesTheContractsOwnExample() {
+    post(startedBody(1));
+    assertThat(
+            post(finalBody(2, "ERROR", "TIMEOUT", "PENDING", true, StepResult.RUNNING))
+                .statusCode())
+        .isEqualTo(200);
+
+    ExecutionSnapshotDto published = snapshot();
+    assertThat(published.errorCode()).isEqualTo(ExecutionErrorCode.TIMEOUT);
+    assertThat(published.video().partial()).isTrue();
+    assertThat(published.stepResults().get(1).status()).isEqualTo(StepResult.RUNNING);
+    assertThat(published.stepResults().get(1).message())
+        .as("contract example SnapshotErrorTimeout, stepResults[1].message")
+        .isEqualTo("Total browser runtime deadline reached");
+    assertThat(published.stepResults().get(0).message())
+        .as("the finished step is not given a cause it did not have")
+        .isNull();
+  }
+
+  @Test
+  void aTerminalErrorWithAnyOtherCodeInventsNoMessageForARunningStep() {
+    post(startedBody(1));
+    assertThat(
+            post(finalBody(2, "ERROR", "RUN_ERROR", "PENDING", false, StepResult.RUNNING))
+                .statusCode())
+        .isEqualTo(200);
+
+    ExecutionSnapshotDto published = snapshot();
+    assertThat(published.errorCode())
+        .as("an unmapped runner code is recorded in the diagnostic and never in error_code")
+        .isNull();
+    assertThat(published.stepResults()).allSatisfy(step -> assertThat(step.message()).isNull());
+  }
+
+  @Test
+  void aTimeoutWithNoRunningStepProducesNoMessageAnywhere() {
+    post(startedBody(1));
+    assertThat(
+            post(finalBody(2, "ERROR", "TIMEOUT", "PENDING", false, StepResult.PASS)).statusCode())
+        .isEqualTo(200);
+
+    assertThat(snapshot().errorCode()).isEqualTo(ExecutionErrorCode.TIMEOUT);
+    assertThat(snapshot().stepResults()).allSatisfy(step -> assertThat(step.message()).isNull());
+  }
+
+  @Test
+  void aRunnerSuppliedFailureOnARunningStepIsNeverOverwritten() {
+    post(startedBody(1));
+    String body =
+        finalBody(2, "ERROR", "TIMEOUT", "PENDING", true, StepResult.RUNNING)
+            .replace(
+                "\"status\":\"RUNNING\",\"startedAtMs\":4400,\"finishedAtMs\":null,"
+                    + "\"durationMs\":null,\"failure\":null",
+                "\"status\":\"RUNNING\",\"startedAtMs\":4400,\"finishedAtMs\":null,"
+                    + "\"durationMs\":null,\"failure\":\"the runner saw this itself\"");
+    assertThat(body).contains("the runner saw this itself");
+
+    assertThat(post(body).statusCode()).isEqualTo(200);
+
+    assertThat(snapshot().stepResults().get(1).message())
+        .as("the runner observed something and the API did not; the API does not overwrite it")
+        .isEqualTo("the runner saw this itself");
   }
 
   private ExecutionSnapshotDto snapshot() {
@@ -169,8 +407,23 @@ class EvidencePartialCallbackIT {
         + "\"outcome\":null,\"evidence\":null}";
   }
 
-  /** The shape {@code snapshot.build} serializes: {@code partial} beside the three keys. */
-  private String finalBody(long sequence, boolean partial) {
+  /**
+   * The shape {@code snapshot.build} serializes, field for field and in its order.
+   *
+   * <p>Built as <b>text</b> rather than as a {@code RunnerReport} record on purpose. AC-12 and
+   * AC-14 are about what the API does with a report, and the vacuity in that kind of test is never
+   * in the assertion — it is in the input: a projection record constructed by hand can be made to
+   * demonstrate anything. This is a body the runner's own serializer could produce, parsed by the
+   * same {@link StrictInternalBodyReader} a real callback goes through.
+   */
+  private String finalBody(
+      long sequence,
+      String result,
+      String errorCode,
+      String evidenceState,
+      boolean partial,
+      String secondStepStatus) {
+    boolean running = StepResult.RUNNING.equals(secondStepStatus);
     return "{\"executionId\":\""
         + executionId
         + "\",\"attemptId\":\""
@@ -185,16 +438,30 @@ class EvidencePartialCallbackIT {
         + "\"browserStartedAt\":\"2026-09-10T10:00:02Z\","
         + "\"steps\":[{\"stepIndex\":0,\"status\":\"PASS\",\"startedAtMs\":120,"
         + "\"finishedAtMs\":4300,\"durationMs\":4180,\"failure\":null},"
-        + "{\"stepIndex\":1,\"status\":\"PASS\",\"startedAtMs\":4400,"
-        + "\"finishedAtMs\":5000,\"durationMs\":600,\"failure\":null}],"
+        + "{\"stepIndex\":1,\"status\":\""
+        + secondStepStatus
+        + "\",\"startedAtMs\":4400,"
+        + (running
+            ? "\"finishedAtMs\":null,\"durationMs\":null,\"failure\":null}],"
+            : "\"finishedAtMs\":5000,\"durationMs\":600,\"failure\":null}],")
         + "\"logs\":[{\"atMs\":0,\"level\":\"info\",\"message\":\"browser started\"}],"
         + "\"logsTruncated\":false,\"runtimeVersions\":{\"playwright\":\"1.63.0\"},"
-        + "\"outcome\":{\"result\":\"PASSED\",\"errorCode\":null,\"errorMessage\":null},"
+        + "\"outcome\":{\"result\":\""
+        + result
+        + "\",\"errorCode\":"
+        + (errorCode == null ? "null" : "\"" + errorCode + "\"")
+        + ",\"errorMessage\":null},"
         + "\"evidence\":{\"videoKey\":\"studio/video.webm\","
-        + "\"manifestKey\":\"studio/manifest.result.json\",\"state\":\"PENDING\","
-        + "\"partial\":"
+        + "\"manifestKey\":\"studio/manifest.result.json\",\"state\":\""
+        + evidenceState
+        + "\",\"partial\":"
         + partial
         + "}}";
+  }
+
+  private Boolean persistedVideoPartial() {
+    return jdbc.queryForObject(
+        "SELECT video_partial FROM ui_test_executions WHERE id = ?", Boolean.class, executionId);
   }
 
   private HttpResponse<String> post(String body) {
