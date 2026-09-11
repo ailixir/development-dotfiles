@@ -3,6 +3,7 @@ package com.citi.put.checks.config;
 import com.citi.put.checks.reports.ReportNotFoundException;
 import com.citi.put.checks.scheduling.ScheduleValidationException;
 import com.citi.put.checks.studio.StudioConflictException;
+import com.citi.put.checks.studio.StudioValidationException;
 import java.util.Map;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,13 @@ public class ChecksExceptionHandler {
   @ExceptionHandler(StudioConflictException.class)
   public ResponseEntity<Map<String, String>> handleStudioConflict(StudioConflictException ex) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(Map.of("error", ex.getCode(), "message", ex.getMessage()));
+  }
+
+  /** Studio payloads the server will not persist (Architecture §8.3): INVALID_CONFIGURATION. */
+  @ExceptionHandler(StudioValidationException.class)
+  public ResponseEntity<Map<String, String>> handleStudioValidation(StudioValidationException ex) {
+    return ResponseEntity.badRequest()
         .body(Map.of("error", ex.getCode(), "message", ex.getMessage()));
   }
 

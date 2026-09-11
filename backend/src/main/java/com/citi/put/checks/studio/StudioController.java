@@ -1,7 +1,8 @@
 package com.citi.put.checks.studio;
 
+import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
+import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import com.citi.put.checks.studio.dto.UITestDto;
-import com.citi.put.checks.studio.dto.UITestExecutionDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.validation.StepValidator;
 import java.net.URI;
@@ -19,10 +20,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Public Studio API (Architecture §8.3), frozen in {@code docs/specs/studio/openapi.yaml}.
+ *
+ * <p>Legacy request shapes are folded into the typed contract by {@link
+ * UITestRequest.LegacyDeserializer}; this class is the one boundary that rejects a payload the
+ * server will not persist, through {@link LegacyStudioAdapter#validateForWrite(UITestRequest)}.
+ */
 @RestController
 @Profile("!worker")
 @RequestMapping("/api/v1/studio")
@@ -40,14 +49,16 @@ public class StudioController {
   public ResponseEntity<Map<String, Object>> listTests(
       @RequestParam(required = false) String csiId,
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "20") int size) {
-    Page<UITestDto> result = studioService.listTests(csiId, page, size);
+      @RequestParam(defaultValue = "20") int size,
+      Authentication auth) {
+    Page<UITestDto> result = studioService.listTests(csiId, page, size, auth);
     return ResponseEntity.ok(toEnvelope(result));
   }
 
   @PostMapping("/tests")
   public ResponseEntity<UITestDto> createTest(
       @RequestBody UITestRequest request, Authentication auth) {
+    LegacyStudioAdapter.validateForWrite(request);
     UITestDto created = studioService.createTest(request, auth);
     return ResponseEntity.created(URI.create("/api/v1/studio/tests/" + created.id())).body(created);
   }
@@ -61,6 +72,7 @@ public class StudioController {
   @PutMapping("/tests/{id}")
   public ResponseEntity<UITestDto> updateTest(
       @PathVariable UUID id, @RequestBody UITestRequest request) {
+    LegacyStudioAdapter.validateForWrite(request);
     UITestDto updated = studioService.updateTest(id, request);
     return ResponseEntity.ok(updated);
   }
@@ -71,37 +83,40 @@ public class StudioController {
     return ResponseEntity.noContent().build();
   }
 
+  /**
+   * Accepts an execution. Live dispatch arrives with 10.7; what commits here is the accepted {@code
+   * PENDING} history row plus its durable, principal-scoped idempotency mapping.
+   */
   @PostMapping("/tests/{id}/execute")
-  public ResponseEntity<Map<String, Object>> executeTest(@PathVariable UUID id) {
-    UITestExecutionDto execution = studioService.executeTest(id);
+  public ResponseEntity<Map<String, Object>> executeTest(
+      @PathVariable UUID id,
+      @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+      Authentication auth) {
+    ExecutionSnapshotDto execution = studioService.executeTest(id, auth, idempotencyKey);
     return ResponseEntity.accepted()
-        .body(Map.of("executionId", execution.id(), "status", "started"));
+        .body(Map.of("executionId", execution.executionId(), "status", execution.status()));
   }
 
   @GetMapping("/executions/{id}")
-  public ResponseEntity<UITestExecutionDto> findExecutionById(@PathVariable UUID id) {
-    UITestExecutionDto dto = studioService.findExecutionById(id);
-    return ResponseEntity.ok(dto);
+  public ResponseEntity<ExecutionSnapshotDto> findExecutionById(@PathVariable UUID id) {
+    return ResponseEntity.ok(studioService.findExecutionById(id));
   }
 
+  /** {@code testId} is optional; every result is scoped by the execution's own CSI (AC-14). */
   @GetMapping("/executions")
   public ResponseEntity<Map<String, Object>> listExecutions(
       @RequestParam(required = false) UUID testId,
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "20") int size) {
-    if (testId == null) {
-      return ResponseEntity.badRequest()
-          .body(Map.of("error", "testId query parameter is required"));
-    }
-    Page<UITestExecutionDto> result = studioService.listExecutions(testId, page, size);
+      @RequestParam(defaultValue = "20") int size,
+      Authentication auth) {
+    Page<ExecutionSnapshotDto> result = studioService.listExecutions(testId, page, size, auth);
     return ResponseEntity.ok(toExecutionEnvelope(result));
   }
 
   @PostMapping("/tests/{id}/validate-variables")
   public ResponseEntity<Map<String, Object>> validateVariables(@PathVariable UUID id) {
     UITestDto test = studioService.findTestById(id);
-    // Simple check: just confirm the test has variables defined
-    boolean hasVariables = test.variables() != null && !test.variables().equals("[]");
+    boolean hasVariables = !test.variables().isEmpty();
     return ResponseEntity.ok(Map.of("valid", true, "hasVariables", hasVariables, "testId", id));
   }
 
@@ -124,7 +139,7 @@ public class StudioController {
         "totalPages", page.getTotalPages());
   }
 
-  private Map<String, Object> toExecutionEnvelope(Page<UITestExecutionDto> page) {
+  private Map<String, Object> toExecutionEnvelope(Page<ExecutionSnapshotDto> page) {
     return Map.of(
         "data", page.getContent(),
         "page", page.getNumber(),

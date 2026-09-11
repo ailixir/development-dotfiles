@@ -89,7 +89,11 @@ class StudioVisibilityIT {
 
     assertThat(executions.getStatusCode().value()).isEqualTo(200);
     assertThat(objectMapper.readTree(executions.getBody()).path("data").isArray()).isTrue();
-    assertThat(get("/api/v1/studio/executions").getStatusCode().value()).isEqualTo(400);
+    // Story 10.1 AC-14 made testId optional: an unfiltered history request is now a scoped page,
+    // not a 400. Scoping is by the execution's own CSI, so nothing widens here.
+    ResponseEntity<String> unfiltered = get("/api/v1/studio/executions");
+    assertThat(unfiltered.getStatusCode().value()).isEqualTo(200);
+    assertThat(objectMapper.readTree(unfiltered.getBody()).path("data").isArray()).isTrue();
   }
 
   private UUID publishCandidate() {
@@ -135,7 +139,7 @@ class StudioVisibilityIT {
     jdbc.update(
         "INSERT INTO ui_tests (id, name, csi_id, environment, browser, steps, variables,"
             + " timeout_seconds, wait_strategy, created_by, created_at, updated_at)"
-            + " VALUES (?, ?, ?, 'Production', 'chrome',"
+            + " VALUES (?, ?, ?, 'Production', 'chromium',"
             + " CAST('[\"Go to the home page\"]' AS jsonb), CAST('[]' AS jsonb), 30,"
             + " 'networkidle', ?, ?, ?)",
         id,

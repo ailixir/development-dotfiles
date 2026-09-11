@@ -1,13 +1,17 @@
 package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.compile.CandidateRevision;
 import com.citi.put.checks.studio.compile.CompileRequest;
 import com.citi.put.checks.studio.compile.CompileState;
 import com.citi.put.checks.studio.compile.CompileStateService;
+import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
+import com.citi.put.checks.studio.dto.TestConfiguration;
 import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
+import com.citi.put.checks.studio.dto.Viewport;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
@@ -87,11 +91,26 @@ class ConfigurationRevisionTest {
   @Test
   void everyExecutionAffectingFieldAdvancesTheConfigurationRevision() {
     assertConfigurationChange(r -> withEnvironment(r, "Staging"));
-    assertConfigurationChange(r -> withBrowser(r, "firefox"));
     assertConfigurationChange(r -> withViewport(r, 1280, 720));
     assertConfigurationChange(r -> withTimeout(r, 45));
     assertConfigurationChange(r -> withWaitStrategy(r, "load"));
     assertConfigurationChange(r -> withVariables(r, "[{\"name\":\"USER\",\"kind\":\"plain\"}]"));
+  }
+
+  /**
+   * Browser is no longer among the cases above. Since story 10.1 the only engine the product
+   * executes is {@code chromium}: the column carries a CHECK constraint and the controller boundary
+   * rejects anything else, so there is no legal browser change left to advance a revision. What
+   * used to be a configuration change is now a rejected request.
+   */
+  @Test
+  void anUnsupportedEngineIsRejectedBeforeItCanReachTheDraft() {
+    UITestRequest firefox = request(r -> withBrowser(r, "firefox"), "Draft", "d", 1L, 1L);
+
+    assertThatThrownBy(() -> LegacyStudioAdapter.validateForWrite(firefox))
+        .isInstanceOf(StudioValidationException.class)
+        .hasMessageContaining("chromium");
+    assertThat(compileStatus()).isEqualTo("READY");
   }
 
   /** Applies one execution-affecting change to a freshly confirmed draft and checks the fallout. */
@@ -145,106 +164,69 @@ class ConfigurationRevisionTest {
     return mutation.apply(base);
   }
 
-  private static UITestRequest withSteps(UITestRequest r, String steps) {
+  private static UITestRequest withSteps(UITestRequest r, String stepsJson) {
     return new UITestRequest(
         r.name(),
         r.description(),
         r.csiId(),
-        steps,
-        r.variables(),
-        r.browser(),
-        r.viewportWidth(),
-        r.viewportHeight(),
-        r.timeoutSeconds(),
-        r.waitStrategy(),
         r.environment(),
+        LegacyStudioAdapter.parseSteps(stepsJson),
+        r.variables(),
+        r.configuration(),
         r.sourceRevision(),
         r.configurationRevision());
   }
 
-  private static UITestRequest withVariables(UITestRequest r, String variables) {
+  private static UITestRequest withVariables(UITestRequest r, String variablesJson) {
     return new UITestRequest(
         r.name(),
         r.description(),
         r.csiId(),
-        r.steps(),
-        variables,
-        r.browser(),
-        r.viewportWidth(),
-        r.viewportHeight(),
-        r.timeoutSeconds(),
-        r.waitStrategy(),
         r.environment(),
+        r.steps(),
+        LegacyStudioAdapter.parseVariables(variablesJson),
+        r.configuration(),
+        r.sourceRevision(),
+        r.configurationRevision());
+  }
+
+  private static UITestRequest withConfiguration(UITestRequest r, TestConfiguration configuration) {
+    return new UITestRequest(
+        r.name(),
+        r.description(),
+        r.csiId(),
+        r.environment(),
+        r.steps(),
+        r.variables(),
+        configuration,
         r.sourceRevision(),
         r.configurationRevision());
   }
 
   private static UITestRequest withBrowser(UITestRequest r, String browser) {
-    return new UITestRequest(
-        r.name(),
-        r.description(),
-        r.csiId(),
-        r.steps(),
-        r.variables(),
-        browser,
-        r.viewportWidth(),
-        r.viewportHeight(),
-        r.timeoutSeconds(),
-        r.waitStrategy(),
-        r.environment(),
-        r.sourceRevision(),
-        r.configurationRevision());
+    TestConfiguration c = r.configuration();
+    return withConfiguration(
+        r, new TestConfiguration(browser, c.viewport(), c.timeoutSeconds(), c.waitStrategy()));
   }
 
   private static UITestRequest withViewport(UITestRequest r, int width, int height) {
-    return new UITestRequest(
-        r.name(),
-        r.description(),
-        r.csiId(),
-        r.steps(),
-        r.variables(),
-        r.browser(),
-        width,
-        height,
-        r.timeoutSeconds(),
-        r.waitStrategy(),
-        r.environment(),
-        r.sourceRevision(),
-        r.configurationRevision());
+    TestConfiguration c = r.configuration();
+    return withConfiguration(
+        r,
+        new TestConfiguration(
+            c.browser(), new Viewport(width, height), c.timeoutSeconds(), c.waitStrategy()));
   }
 
   private static UITestRequest withTimeout(UITestRequest r, int timeoutSeconds) {
-    return new UITestRequest(
-        r.name(),
-        r.description(),
-        r.csiId(),
-        r.steps(),
-        r.variables(),
-        r.browser(),
-        r.viewportWidth(),
-        r.viewportHeight(),
-        timeoutSeconds,
-        r.waitStrategy(),
-        r.environment(),
-        r.sourceRevision(),
-        r.configurationRevision());
+    TestConfiguration c = r.configuration();
+    return withConfiguration(
+        r, new TestConfiguration(c.browser(), c.viewport(), timeoutSeconds, c.waitStrategy()));
   }
 
   private static UITestRequest withWaitStrategy(UITestRequest r, String waitStrategy) {
-    return new UITestRequest(
-        r.name(),
-        r.description(),
-        r.csiId(),
-        r.steps(),
-        r.variables(),
-        r.browser(),
-        r.viewportWidth(),
-        r.viewportHeight(),
-        r.timeoutSeconds(),
-        waitStrategy,
-        r.environment(),
-        r.sourceRevision(),
-        r.configurationRevision());
+    TestConfiguration c = r.configuration();
+    return withConfiguration(
+        r, new TestConfiguration(c.browser(), c.viewport(), c.timeoutSeconds(), waitStrategy));
   }
 
   private static UITestRequest withEnvironment(UITestRequest r, String environment) {
@@ -252,14 +234,10 @@ class ConfigurationRevisionTest {
         r.name(),
         r.description(),
         r.csiId(),
+        environment,
         r.steps(),
         r.variables(),
-        r.browser(),
-        r.viewportWidth(),
-        r.viewportHeight(),
-        r.timeoutSeconds(),
-        r.waitStrategy(),
-        environment,
+        r.configuration(),
         r.sourceRevision(),
         r.configurationRevision());
   }
@@ -296,7 +274,7 @@ class ConfigurationRevisionTest {
     jdbc.update(
         "INSERT INTO ui_tests (id, name, csi_id, environment, browser, steps, variables,"
             + " timeout_seconds, wait_strategy, created_by, created_at, updated_at)"
-            + " VALUES (?, 'Draft', ?, 'Production', 'chrome',"
+            + " VALUES (?, 'Draft', ?, 'Production', 'chromium',"
             + " CAST('[\"Go to the home page\"]' AS jsonb), CAST('[]' AS jsonb), 30,"
             + " 'networkidle', ?, ?, ?)",
         id,

@@ -588,7 +588,7 @@ class CompileStateServiceTest {
     jdbc.update(
         "INSERT INTO ui_tests (id, name, csi_id, environment, browser, steps, variables,"
             + " created_by, created_at, updated_at) VALUES (?, 'Compile state draft', ?,"
-            + " 'Production', 'chrome', CAST('[\"Go to the home page\"]' AS jsonb),"
+            + " 'Production', 'chromium', CAST('[\"Go to the home page\"]' AS jsonb),"
             + " CAST('[]' AS jsonb), ?, ?, ?)",
         id,
         CSI_ID,

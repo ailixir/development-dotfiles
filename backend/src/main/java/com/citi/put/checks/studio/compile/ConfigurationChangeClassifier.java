@@ -1,20 +1,25 @@
 package com.citi.put.checks.studio.compile;
 
+import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
+import com.citi.put.checks.studio.dto.StudioVariable;
+import com.citi.put.checks.studio.dto.TestConfiguration;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.entity.UITest;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Component;
 
 /**
  * Classifies a draft update as a source change, an execution-affecting configuration change, both,
- * or neither (Architecture §4.2, AC-7).
+ * or neither (Architecture §4.2, story 10.4 AC-7).
  *
  * <p>Step text drives {@code sourceRevision}. Environment, variable values/references, viewport,
  * timeout, browser and wait strategy drive {@code configurationRevision}. Name and description
  * drive neither and never invalidate a confirmation.
+ *
+ * <p>Both sides are read through {@link LegacyStudioAdapter}, so a draft stored in a legacy shape
+ * is compared by value against a request in the typed shape: reformatting, or merely resubmitting
+ * the same content in the new contract, advances nothing.
  *
  * <p>Target policy selection is also an execution-affecting change per §4.2, but no such field
  * exists on the test contract yet; it is introduced with the destination policy work and must be
@@ -22,12 +27,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConfigurationChangeClassifier {
-
-  private final ObjectMapper objectMapper;
-
-  public ConfigurationChangeClassifier(ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
-  }
 
   /**
    * Result of classifying an update.
@@ -43,35 +42,21 @@ public class ConfigurationChangeClassifier {
   }
 
   public Classification classify(UITest stored, UITestRequest request) {
-    boolean sourceChanged = jsonDiffers(stored.getSteps(), request.steps(), "steps");
+    List<String> storedSteps = LegacyStudioAdapter.parseSteps(stored.getSteps());
+    List<StudioVariable> storedVariables =
+        LegacyStudioAdapter.parseVariables(stored.getVariables());
+    TestConfiguration requested = request.configuration();
+
+    boolean sourceChanged = !storedSteps.equals(request.steps());
     boolean configurationChanged =
-        jsonDiffers(stored.getVariables(), request.variables(), "variables")
+        !storedVariables.equals(request.variables())
             || !Objects.equals(stored.getEnvironment(), request.environment())
-            || !Objects.equals(stored.getBrowser(), request.browser())
-            || stored.getViewportWidth() != request.viewportWidth()
-            || stored.getViewportHeight() != request.viewportHeight()
-            || stored.getTimeoutSeconds() != request.timeoutSeconds()
-            || !Objects.equals(stored.getWaitStrategy(), request.waitStrategy());
+            || !Objects.equals(
+                LegacyStudioAdapter.normalizeBrowser(stored.getBrowser()), requested.browser())
+            || !Objects.equals(stored.getViewportWidth(), requested.viewport().width())
+            || !Objects.equals(stored.getViewportHeight(), requested.viewport().height())
+            || !Objects.equals(stored.getTimeoutSeconds(), requested.timeoutSeconds())
+            || !Objects.equals(stored.getWaitStrategy(), requested.waitStrategy());
     return new Classification(sourceChanged, configurationChanged);
-  }
-
-  /**
-   * Compares two JSON documents by value so that formatting-only differences do not advance a
-   * revision. Array order is significant: the source is an ordered list of steps.
-   */
-  private boolean jsonDiffers(String stored, String incoming, String field) {
-    if (stored == null || incoming == null) {
-      return !Objects.equals(stored, incoming);
-    }
-    return !parse(stored, field).equals(parse(incoming, field));
-  }
-
-  private JsonNode parse(String json, String field) {
-    try {
-      return objectMapper.readTree(json);
-    } catch (JsonProcessingException e) {
-      throw new IllegalArgumentException(
-          field + " is not valid JSON: " + e.getOriginalMessage(), e);
-    }
   }
 }
