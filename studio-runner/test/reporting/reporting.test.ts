@@ -173,7 +173,7 @@ describe('AC-15 — the StepReporter seam, and reporting asynchronous to executi
     const final = reports(runner).at(-1);
     expect(final?.steps).toHaveLength(2);
     for (const step of final?.steps ?? []) {
-      expect(['PASSED', 'FAILED', 'SKIPPED']).toContain(step.status);
+      expect(['PASS', 'FAIL', 'SKIPPED']).toContain(step.status);
     }
   });
 
@@ -193,7 +193,7 @@ describe('AC-15 — the StepReporter seam, and reporting asynchronous to executi
     await runOnce(runner);
     const final = reports(runner).at(-1);
     expect(final?.outcome).toMatchObject({ result: 'FAILED', errorCode: 'STEP_FAILED' });
-    expect(final?.steps[0]?.status).toBe('FAILED');
+    expect(final?.steps[0]?.status).toBe('FAIL');
     expect(final?.steps[1]).toMatchObject({
       status: 'SKIPPED',
       startedAtMs: null,
@@ -240,7 +240,7 @@ describe('AC-16 — progress delivery is best-effort and never re-runs work', ()
     const final = all.at(-1);
     // Every step is reported correctly despite the first two deliveries failing.
     expect(final?.steps.map((step) => step.stepIndex)).toEqual([0, 1]);
-    expect(final?.steps.every((step) => step.status === 'PASSED')).toBe(true);
+    expect(final?.steps.every((step) => step.status === 'PASS')).toBe(true);
     // Nothing ran twice.
     const adapter = runner.launcher.adapters[0];
     expect(adapter?.calls.filter((call) => call.method === 'goto')).toHaveLength(1);
@@ -458,9 +458,9 @@ describe('AC-19 — outbound bounds and the retained-log drop policy', () => {
     expect(final?.logs.map((entry) => entry.message)).toEqual([
       'browser started',
       'step 0 started',
-      'step 0 PASSED',
+      'step 0 PASS',
       'step 1 started',
-      'step 1 PASSED',
+      'step 1 PASS',
       'run PASSED',
     ]);
   });
@@ -476,6 +476,87 @@ describe('AC-19 — outbound bounds and the retained-log drop policy', () => {
     const runner = await start({ env: { STUDIO_RUNNER_MAX_REPORT_STEPS: '1' } });
     await runOnce(runner);
     for (const report of reports(runner)) expect(report.steps.length).toBeLessThanOrEqual(1);
+  });
+});
+
+/**
+ * ADR-002 §INT-1 — an `atMs` is a position on the run timeline, never a stand-in for "unknown".
+ *
+ * These are the assertions this story did not have. `sendFinal` shipped the terminal line with
+ * `atMs: 0`, and nothing could see it: `0` is a valid number, the type system accepts it, the
+ * contract's conformance check accepts it, and every assertion in this file passed over it. The
+ * only thing wrong with it was what it *means* — `0` is the browser start, the first frame of the
+ * recording, which is where the run's own result line was being filed.
+ *
+ * So none of these assert a shape. Shape is what the contract test covers, and shape is precisely
+ * what let this through. They assert the correspondence between a log line and the reading it
+ * claims to sit on, which is the property the 500 ms step-seek target of §6.4 rests on.
+ *
+ * The clock is made to tick on every read, so a genuine reading can never be `0` and the origin
+ * is distinguishable from an accident. Under the harness default — a monotonic clock frozen at
+ * `0` until something sleeps — every line in a run reads `0` legitimately, and these assertions
+ * would pass over a run filed entirely at the browser start. That is the same blindness one layer
+ * down, and it is why the clock is overridden here rather than left alone.
+ */
+describe('ADR-002 §INT-1 — log lines carry timeline positions, not placeholders', () => {
+  /** Monotonic, and never returns the origin: under it, `0` can only be the browser start. */
+  function tickingClock(): () => number {
+    let reading = 0;
+    return (): number => {
+      reading += 1;
+      return reading;
+    };
+  }
+
+  it('files the terminal run line with no reading, rather than at the browser start', async () => {
+    const runner = await start({ now: tickingClock() });
+    await runOnce(runner);
+
+    const entries = reports(runner).at(-1)?.logs ?? [];
+    const terminal = entries.at(-1);
+    expect(terminal?.message).toBe('run PASSED');
+    // The run's result is not something the runner read off a clock, so it holds no position.
+    expect(terminal?.atMs).toBeNull();
+    // And the origin belongs to exactly one line — the one that *is* the origin.
+    expect(entries.filter((entry) => entry.atMs === 0).map((entry) => entry.message)).toEqual([
+      'browser started',
+    ]);
+  });
+
+  it('positions every step line on the reading that step itself reported', async () => {
+    const runner = await start({ now: tickingClock() });
+    await runOnce(runner);
+
+    const final = reports(runner).at(-1);
+    const positions = new Map((final?.logs ?? []).map((entry) => [entry.message, entry.atMs]));
+    expect(final?.steps.length).toBeGreaterThan(0);
+    for (const step of final?.steps ?? []) {
+      const index = String(step.stepIndex);
+      // The step line and the step carry the same reading: they seek to the same frame.
+      expect(positions.get(`step ${index} started`)).toBe(step.startedAtMs);
+      expect(positions.get(`step ${index} ${step.status}`)).toBe(step.finishedAtMs);
+      // Readings, not the origin — which is what makes the assertion above say something.
+      expect(step.startedAtMs ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('gives a skipped step no position, because it has no reading to be positioned by', async () => {
+    const runner = await start({ now: tickingClock() });
+    const original = runner.launcher.launch.bind(runner.launcher);
+    Object.assign(runner.launcher, {
+      async launch(options: Parameters<typeof original>[0]) {
+        const session = await original(options);
+        runner.launcher.adapters.at(-1)?.failOn('goto', new Error('NavigationError: refused'));
+        return session;
+      },
+    });
+    await runOnce(runner);
+
+    const final = reports(runner).at(-1);
+    expect(final?.steps[1]).toMatchObject({ status: 'SKIPPED', startedAtMs: null });
+    const skipped = (final?.logs ?? []).find((entry) => entry.message.startsWith('step 1 SKIPPED'));
+    expect(skipped).toBeDefined();
+    expect(skipped?.atMs).toBeNull();
   });
 });
 
@@ -519,7 +600,7 @@ describe('AC-20 — the secret canary appears in no form on any outbound byte', 
 
     // The failure did reach the wire — the test is not green because nothing happened.
     const final = reports(runner).at(-1);
-    expect(final?.steps[0]?.status === 'FAILED' || final?.outcome?.result !== 'PASSED').toBe(true);
+    expect(final?.steps[0]?.status === 'FAIL' || final?.outcome?.result !== 'PASSED').toBe(true);
   });
 
   it('never records job values, resolved values or artifact source text in a log line', async () => {

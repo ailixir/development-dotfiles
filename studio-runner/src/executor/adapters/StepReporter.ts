@@ -3,7 +3,15 @@
  * these events to the API callback; the executor only needs the shape.
  */
 
-export type StepStatus = 'PASSED' | 'FAILED' | 'SKIPPED';
+/**
+ * Architecture §8.2 fixes the per-step vocabulary as `PENDING | RUNNING | PASS | FAIL | SKIPPED`;
+ * the executor produces the three terminal values and the snapshot adds `RUNNING`.
+ *
+ * It is deliberately **not** `PASSED`/`FAILED`: `RunOutcome.result` uses those words for the run
+ * as a whole, and a report carrying `FAILED` in two fields meaning two different things is the
+ * misread ADR-002 §6.1 closes.
+ */
+export type StepStatus = 'PASS' | 'FAIL' | 'SKIPPED';
 
 export interface StepStartedEvent {
   readonly stepIndex: number;
@@ -18,7 +26,7 @@ export interface StepFinishedEvent {
   readonly startedAtMs: number | null;
   readonly finishedAtMs: number | null;
   readonly durationMs: number | null;
-  /** Redacted failure message; `null` unless the status is FAILED. */
+  /** Redacted failure message; `null` unless the status is FAIL. */
   readonly failure: string | null;
 }
 

@@ -114,7 +114,7 @@ describe('reference corpus against the fixture pages', () => {
       expect(run.ok).toBe(true);
       expect(normalise(adapter.calls)).toEqual(fixture.expectedCalls);
       expect(reporter.finished.map((event) => event.status)).toEqual(
-        fixture.source.map(() => 'PASSED'),
+        fixture.source.map(() => 'PASS'),
       );
     },
   );

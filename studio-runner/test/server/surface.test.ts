@@ -129,14 +129,14 @@ describe('snapshot and bounds edges', () => {
 
     snapshot.stepFinished({
       stepIndex: 0,
-      status: 'PASSED',
+      status: 'PASS',
       startedAtMs: 10,
       finishedAtMs: 20,
       durationMs: 10,
       failure: null,
     });
     const report = snapshot.build('PROGRESS');
-    expect(report.steps[0]?.status).toBe('PASSED');
+    expect(report.steps[0]?.status).toBe('PASS');
     // Two builds so far in this test, so the second consumes sequence 2. `build` is the only
     // thing that advances it, which is what keeps it strictly increasing (AC-13).
     expect(report.runnerSequence).toBe(2);

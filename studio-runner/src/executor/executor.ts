@@ -89,7 +89,7 @@ export async function executeSteps(options: ExecuteOptions): Promise<ExecutionRe
     const finishedAtMs = clock.now();
     const outcome: StepOutcome = {
       stepIndex: step.stepIndex,
-      status: failure === null ? 'PASSED' : 'FAILED',
+      status: failure === null ? 'PASS' : 'FAIL',
       startedAtMs,
       finishedAtMs,
       durationMs: finishedAtMs - startedAtMs,

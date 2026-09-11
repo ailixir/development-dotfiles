@@ -36,7 +36,7 @@ describe('trusted executor', () => {
       expect(current).not.toBeNull();
       expect(current ?? 0).toBeGreaterThan(previous ?? 0);
     }
-    expect(result.steps.every((step) => step.status === 'PASSED')).toBe(true);
+    expect(result.steps.every((step) => step.status === 'PASS')).toBe(true);
   });
 
   it('stops at the first failing step and skips the rest with null timings (AC-14)', async () => {
@@ -53,7 +53,7 @@ describe('trusted executor', () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.steps.map((step) => step.status)).toEqual(['FAILED', 'SKIPPED', 'SKIPPED']);
+    expect(result.steps.map((step) => step.status)).toEqual(['FAIL', 'SKIPPED', 'SKIPPED']);
     expect(result.steps[0]?.failure).toContain('navigation refused');
     for (const skipped of result.steps.slice(1)) {
       expect(skipped.startedAtMs).toBeNull();

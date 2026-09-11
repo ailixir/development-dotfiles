@@ -25,31 +25,29 @@
  * always-running block below, so the strength of the armed assertion is demonstrated independently
  * of whatever the real document happens to say.
  *
- * ## Two divergences the armed run found, both open
+ * ## The four divergences the armed run found, and where they went
  *
- * Neither is fixed here, and neither is worked around. `docs/specs/studio/openapi.yaml` is frozen
- * and belongs to story 10.1; the runner's report shape belongs to 10.6 and its reader to 10.7.
- * Choosing which side moves is a decision across those three, not a test edit.
+ * All four were referred rather than papered over, and ADR-002 ruled on them. Two moved the
+ * contract and two moved the runner:
  *
- * 1. **Requests.** `ProgressReport.logs[]` is `ExecutionLogEntry`, which requires `at`
- *    (`date-time`) and a `level` from `DEBUG|INFO|WARN|ERROR`. The runner sends `atMs` (epoch
- *    millis) and a lower-case `level`. The rename is not the fix: two of the four `appendLog`
- *    call sites in `reportingStepReporter.ts` pass `atMs: 0` as a placeholder, so the runner has
- *    no wall-clock instant to put in `at` at all. A conformant `at` means threading the wall
- *    clock through `appendLog`, which is a design change, not a serialization tweak.
+ * 1. **The runner's own surface was absent** from the document, whose `servers` composed the two
+ *    API callbacks onto a base nothing serves. All six routes of architecture §8.4 are now
+ *    declared, each with its own path-item `servers`, a `runner`/`api-callback` tag and
+ *    `x-served-by` (ADR-002 §3).
+ * 2. **A log entry's timestamp** is `atMs`, an offset on the run timeline, not a `date-time`: the
+ *    runner holds exactly one wall-clock instant per run, and the 500 ms step-seek target is an
+ *    offset problem (ADR-002 §4). `null` means no reading; `0` is the browser start.
+ * 3. **`steps`/`outcome`/`evidence`/`runtimeVersions`** keep the runner's names — the internal
+ *    report is not the public snapshot, and the API translates (ADR-002 §6.1). That one was
+ *    invisible here: `ProgressReport` was open and required six of fifteen fields, so three
+ *    field names could disagree and this check still said "conforms". Every runner-produced body
+ *    is now `additionalProperties: false`, which is what turned it into a failure.
+ * 4. **Step statuses `PASSED`/`FAILED`** were the runner being wrong against §8.2's
+ *    `PASS`/`FAIL`, not the contract being wrong against working code, and the runner was
+ *    corrected (ADR-002 §7.1).
  *
- *    The same comparison shows a wider mismatch the checker cannot fail on, because
- *    `ProgressReport` declares neither `additionalProperties: false` nor these as required: the
- *    contract names `stepResults`, `status`/`errorCode`, `video`/`manifestKey` and `runtime`
- *    where the runner sends `steps`, `outcome`, `evidence` and `runtimeVersions`. Both readings
- *    are faithful to architecture §8.4's prose, which names the fields only in English.
- *
- * 2. **Responses.** The contract declares none of `/v1/validate`, `/v1/runs`, `/health`,
- *    `/ready`. Its `servers` is `/api/v1/studio` and its `internal` tag carries exactly the two
- *    API-side callback routes; the runner's own surface is not in it. Story 10.1's AC-1 undertook
- *    "internal routes per architecture §8.4", and §8.4 tabulates six routes, four of them the
- *    runner's — so this is a gap in the frozen document rather than a defect in the runner, and
- *    it is reported rather than papered over.
+ * What is worth carrying out of this: the three that a schema could see were found the day the
+ * schema could see them, and the fourth needed a closed schema to exist at all.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';

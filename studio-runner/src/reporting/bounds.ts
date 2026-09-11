@@ -31,7 +31,16 @@ export const DEFAULT_REPORT_BOUNDS: ReportBounds = {
 };
 
 export interface LogEntry {
-  readonly atMs: number;
+  /**
+   * Position on the **run timeline**: the same monotonic clock and origin as
+   * `SnapshotStep.startedAtMs` (architecture §6.4), so a log line and a step seek to the same
+   * frame. `null` where the runner genuinely holds no reading.
+   *
+   * `0` is the browser start — a position, not a missing value — and must never be used as one
+   * (ADR-002 §INT-1). Held by the "log lines carry timeline positions" block in
+   * `test/reporting/reporting.test.ts`, not by this comment.
+   */
+  readonly atMs: number | null;
   readonly level: 'info' | 'warn' | 'error';
   readonly message: string;
 }

@@ -17,6 +17,7 @@ import java.lang.reflect.RecordComponent;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -99,14 +100,60 @@ class StudioContractTest {
         .containsAll(shipped);
   }
 
+  /**
+   * ADR-002 §8.6 — "internal" is a deployment property, not a path prefix.
+   *
+   * <p>This assertion used to require every {@code internal}-tagged path to contain {@code
+   * /internal/}. That held only while the two API callbacks were the only internal routes declared.
+   * Architecture §8.4 tabulates six, four of them the runner's, and the runner serves {@code
+   * /v1/validate} on its socket — no amount of tagging changes that. The old premise would have
+   * been satisfied by a contract that lied about the wire, which is the trade ADR-002 §3.3 refused.
+   *
+   * <p>What {@code internal} actually means is: not reachable through public ingress, and
+   * attributable to the component that serves it. Both halves are asserted, and both can fail — an
+   * internal operation that inherits the document's public base, carries no component tag, or whose
+   * {@code x-served-by} disagrees with that tag, fails here.
+   */
   @Test
-  void internalRoutesAreTaggedSoTheyStayOutOfThePublicSurface() {
-    Set<String> internal = declaredOperations(true);
+  void internalRoutesStayOffThePublicSurfaceAndNameWhatServesThem() {
+    assertThat(serverUrls(contract.get("servers")))
+        .as(
+            "the document base is the public one — which is what every internal path item overrides")
+        .containsExactly(PUBLIC_BASE);
 
-    assertThat(internal).isNotEmpty();
-    // Internal routes never carry the public base path: they are not exposed through ingress.
-    assertThat(internal).allMatch(operation -> operation.contains("/internal/"));
-    assertThat(internal).noneMatch(operation -> operation.contains(PUBLIC_BASE));
+    List<InternalOperation> internal = internalOperations();
+    assertThat(internal.stream().map(InternalOperation::key))
+        .as("architecture §8.4 tabulates six internal routes and ADR-002 §3.1 declares all six")
+        .containsExactlyInAnyOrder(
+            "POST /v1/validate",
+            "POST /v1/runs",
+            "GET /health",
+            "GET /ready",
+            "POST /internal/studio/executions/{id}/admission",
+            "POST /internal/studio/executions/{id}/progress");
+
+    for (InternalOperation operation : internal) {
+      String key = operation.key();
+
+      // Out of the public surface: not under the public base, and not composed onto it either.
+      assertThat(key).as("%s is declared under the public base", key).doesNotContain(PUBLIC_BASE);
+      assertThat(operation.serverUrls())
+          .as("%s inherits the document base; it must declare its own servers (ADR-002 §3.1)", key)
+          .isNotEmpty()
+          .allSatisfy(url -> assertThat(url).doesNotContain(PUBLIC_BASE));
+
+      // Attributable: the tag names the serving component and x-served-by agrees with it.
+      String component =
+          operation.tags().contains("runner")
+              ? "studio-runner"
+              : operation.tags().contains("api-callback") ? "api" : null;
+      assertThat(component)
+          .as("%s carries neither the runner nor the api-callback tag", key)
+          .isNotNull();
+      assertThat(operation.servedBy())
+          .as("%s: x-served-by and the component tag disagree about who serves it", key)
+          .isEqualTo(component);
+    }
   }
 
   @Test
@@ -293,6 +340,54 @@ class StudioContractTest {
                           method.toUpperCase(java.util.Locale.ROOT) + " " + prefix + path);
                     }));
     return operations;
+  }
+
+  /** One internal operation and the three signals that make it attributable (ADR-002 §3.1). */
+  private record InternalOperation(
+      String key, List<String> tags, String servedBy, List<String> serverUrls) {}
+
+  /** Internal operations with their path item's servers, which {@code declaredOperations} drops. */
+  @SuppressWarnings("unchecked")
+  private static List<InternalOperation> internalOperations() {
+    Map<String, Object> paths = (Map<String, Object>) contract.get("paths");
+    List<InternalOperation> found = new ArrayList<>();
+    paths.forEach(
+        (path, item) -> {
+          Map<String, Object> pathItem = (Map<String, Object>) item;
+          List<String> servers = serverUrls(pathItem.get("servers"));
+          pathItem.forEach(
+              (method, operation) -> {
+                if (!(operation instanceof Map)) {
+                  return;
+                }
+                Map<String, Object> details = (Map<String, Object>) operation;
+                if (!Boolean.TRUE.equals(details.get("x-internal"))
+                    && !tags(details).contains("internal")) {
+                  return;
+                }
+                found.add(
+                    new InternalOperation(
+                        method.toUpperCase(java.util.Locale.ROOT) + " " + path,
+                        tags(details),
+                        String.valueOf(details.get("x-served-by")),
+                        servers));
+              });
+        });
+    return found;
+  }
+
+  /** The {@code url} of every entry in a {@code servers} list; empty when there is no list. */
+  private static List<String> serverUrls(Object servers) {
+    if (!(servers instanceof List<?> entries)) {
+      return List.of();
+    }
+    List<String> urls = new ArrayList<>();
+    for (Object entry : entries) {
+      if (entry instanceof Map<?, ?> server) {
+        urls.add(String.valueOf(server.get("url")));
+      }
+    }
+    return urls;
   }
 
   @SuppressWarnings("unchecked")

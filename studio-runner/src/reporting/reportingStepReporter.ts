@@ -3,7 +3,7 @@
  *
  * 10.2 shipped `StepReporter` as an interface with a comment naming this story as its supplier.
  * This is that supplier — it is wired into the **existing** seam rather than running alongside a
- * parallel reporting path, so the executor's per-step outcomes (`PASSED | FAILED | SKIPPED`, null
+ * parallel reporting path, so the executor's per-step outcomes (`PASS | FAIL | SKIPPED`, null
  * timings for skipped steps) reach the wire exactly as the executor produced them.
  *
  * **Reporting is asynchronous to execution.** `stepStarted` and `stepFinished` return `void` and
@@ -113,8 +113,10 @@ export function createRunReporter(options: RunReporterOptions): RunReporter {
       // text is the executor's already-redacted `safeMessage`, and the whole body passes through
       // the outbound redactor again before it leaves (AC-20).
       snapshot.appendLog({
-        atMs: event.finishedAtMs ?? event.startedAtMs ?? 0,
-        level: event.status === 'FAILED' ? 'error' : 'info',
+        // A skipped step has neither reading, and `0` would file it at the browser start rather
+        // than say "no reading" (ADR-002 §INT-1).
+        atMs: event.finishedAtMs ?? event.startedAtMs,
+        level: event.status === 'FAIL' ? 'error' : 'info',
         message:
           event.failure === null
             ? `step ${String(event.stepIndex)} ${event.status}`
@@ -125,7 +127,10 @@ export function createRunReporter(options: RunReporterOptions): RunReporter {
 
     async sendFinal(outcome: RunOutcome, evidence: EvidenceState): Promise<void> {
       snapshot.appendLog({
-        atMs: 0,
+        // The run result is not a reading: nothing on the monotonic clock was sampled to produce
+        // it, and `0` would place the terminal line at the browser start — the beginning of the
+        // video (ADR-002 §INT-1, §7.2). The browser-start line's `0` above is the origin itself.
+        atMs: null,
         level: outcome.result === 'PASSED' ? 'info' : 'error',
         message:
           outcome.errorCode === null
