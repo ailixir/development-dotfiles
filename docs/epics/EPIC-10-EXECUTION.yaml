@@ -1,0 +1,287 @@
+#
+# EPIC-10 Execution Manifest — Checks Studio Execution (MVP)
+# Owner: @pm (Morgan)
+# Framework: AIOX SDC (Story Development Cycle)
+# Sources (normative, Article IV — every line traces to one of these):
+#   - Epic 10 markdown (docs/stories/10.studio-execution.epic.md) — RETIRED; this manifest replaces it.
+#     Its per-story scope/acceptance text is recoverable from commit 9425e7e7d
+#     (git show 9425e7e7d:docs/stories/10.studio-execution.epic.md) and moves into the drafted
+#     stories. "Epic 10 §10.x" citations below refer to that text.
+#   - docs/architecture/studio-execution.md             (Studio architecture v2.1 — normative contracts)
+#   - docs/brd/checks-ui-studio.brd.md                  (BRD v1.2 — product scope + GA criteria)
+#   - docs/architecture/studio-execution-review.md      (review rationale)
+#   - docs/architecture/studio-sse-viability.md         (SSE rationale)
+#   - ARCH.md §M5 (milestone)
+#
+
+epic_id: EPIC-10
+milestone: M5
+title: "Checks Studio Execution (MVP) — exact-revision confirmation, isolated Chromium execution, SSE progress, private video evidence"
+status: planning
+created_at: "2026-09-10"
+created_by: "@pm (Morgan)"
+
+# ─────────────────────────────────────────────────────────────
+# Epic goal + definition of done
+# ─────────────────────────────────────────────────────────────
+goal: |
+  A CSI-authorized support engineer writes an English checklist, reviews the
+  proposed actions and Playwright source, confirms an immutable revision, and
+  runs it on demand in an isolated Chromium runner. Studio shows live progress
+  over SSE current-state snapshots (GET fallback) and private, step-linked
+  video evidence with authorized download. Compilation happens only at
+  authoring time through the R2D2 LLM gateway; confirmed artifacts replay
+  without an LLM. Accepted work and results are durable across API/worker/
+  runner restarts with explicit recovery, ambiguous attempts are never
+  replayed automatically, check outcome is kept separate from evidence state,
+  and bounded Studio workloads never exhaust ordinary check/REST capacity.
+
+# Traces to Epic 10 "MVP done when" paragraph. First item is the SDC process
+# gate carried from the EPIC-07 format; it operationalizes the paragraph's
+# "pass the acceptance cases below".
+definition_of_done:
+  - "All stories reach Done via SDC cycle (each story's acceptance cases are the gate)."
+  - "In staging, a CSI-authorized user writes steps, reviews generated actions/source, confirms the exact revision, runs it, observes SSE progress, and views/downloads private step-linked video."
+  - "A failed step stops execution; later steps are reported SKIPPED."
+  - "Infrastructure/evidence failure is reported honestly."
+  - "API restart, stale confirmation, duplicate delivery and wrong-CSI access pass the epic's per-story acceptance cases."
+  - "No runtime LLM call during execution; no Chromium on API/worker pods."
+
+# ─────────────────────────────────────────────────────────────
+# Stories
+#
+# Waves are derived from the Epic 10 index dependency table:
+#   wave = 1 + max(wave of depends_on), 10.19 after all prior stories.
+# 10.12 depends only on 10.6 (W2), so it starts in W3 with 10.7/10.8
+# ("Local browser fixtures can proceed independently of the live compiler").
+# That pulls the browser track (10.13, 10.14) and everything downstream one
+# wave earlier than the initial 9-wave draft; the result is 8 waves.
+#
+# Sizes are fresh S/M/L re-estimates. The epic withdraws the old 75-point
+# headline and rollup; no prior points are carried forward. The epic asks that
+# large stories be split into linked implementation tasks while retaining
+# these parent IDs — 10.7 is the primary split candidate.
+# ─────────────────────────────────────────────────────────────
+stories:
+  # ── Wave 1 ── contracts, validator, reference, revisions, gateway ──
+  - id: "10.1"
+    title: "Execution schema and typed snapshot contract"
+    size: L
+    wave: 1
+    depends_on: []
+    blocks: ["10.7", "10.19"]
+
+  - id: "10.2"
+    title: "Exact artifact language and trusted executor"
+    size: L
+    wave: 1
+    depends_on: []
+    blocks: ["10.6", "10.19"]
+
+  - id: "10.3"
+    title: "Pinned reference/runtime CI checks"
+    size: M
+    wave: 1
+    depends_on: []
+    blocks: ["10.8", "10.19"]
+
+  - id: "10.4"
+    title: "Immutable revisions and compile state"
+    size: L
+    wave: 1
+    depends_on: []
+    blocks: ["10.7", "10.8", "10.19"]
+
+  - id: "10.5"
+    title: "Citi/R2D2 gateway client"
+    size: M
+    wave: 1
+    depends_on: []
+    blocks: ["10.8", "10.19"]
+
+  # ── Wave 2 ── runner control plane ──
+  - id: "10.6"
+    title: "Runner admission and reporting service"
+    size: L
+    wave: 2
+    depends_on: ["10.2"]
+    blocks: ["10.7", "10.8", "10.12", "10.14", "10.19"]
+
+  # ── Wave 3 ── backend lifecycle, compile pipeline, browser fixture ──
+  - id: "10.7"
+    title: "Authorized durable dispatch, SSE and recovery"
+    size: L
+    wave: 3
+    depends_on: ["10.1", "10.4", "10.6"]
+    blocks: ["10.11", "10.15", "10.17", "10.18", "10.19"]
+
+  - id: "10.8"
+    title: "Bounded compile pipeline and readiness gate"
+    size: M
+    wave: 3
+    depends_on: ["10.3", "10.4", "10.5", "10.6"]
+    blocks: ["10.9", "10.11", "10.17", "10.19"]
+
+  - id: "10.12"
+    title: "Chromium execution and native video"
+    size: L
+    wave: 3
+    depends_on: ["10.6"]
+    blocks: ["10.13", "10.19"]
+
+  # ── Wave 4 ──
+  - id: "10.9"
+    title: "Repair, diagnostics and exact confirmation"
+    size: M
+    wave: 4
+    depends_on: ["10.8"]
+    blocks: ["10.10", "10.19"]
+
+  - id: "10.13"
+    title: "Deadline enforcement, redaction and cleanup"
+    size: M
+    wave: 4
+    depends_on: ["10.12"]
+    blocks: ["10.14", "10.17", "10.18", "10.19"]
+
+  # ── Wave 5 ──
+  - id: "10.10"
+    title: "Readable action review and confirmation"
+    size: M
+    wave: 5
+    depends_on: ["10.9"]
+    blocks: ["10.11", "10.19"]
+
+  - id: "10.14"
+    title: "Video and durable result manifest"
+    size: M
+    wave: 5
+    depends_on: ["10.6", "10.13"]
+    blocks: ["10.15", "10.18", "10.19"]
+
+  - id: "10.17"
+    title: "Authorized variable/secret plumbing"
+    size: M
+    wave: 5
+    depends_on: ["10.7", "10.8", "10.13"]
+    blocks: ["10.18", "10.19"]
+
+  # ── Wave 6 ──
+  - id: "10.11"
+    title: "Run gate and SSE progress"
+    size: L
+    wave: 6
+    depends_on: ["10.7", "10.8", "10.10"]
+    blocks: ["10.16", "10.19"]
+
+  - id: "10.15"
+    title: "Authorized Range video/download endpoint"
+    size: M
+    wave: 6
+    depends_on: ["10.7", "10.14"]
+    blocks: ["10.16", "10.19"]
+
+  - id: "10.18"
+    title: "Hardened staging deployment and SSE route"
+    size: L
+    wave: 6
+    depends_on: ["10.7", "10.13", "10.14", "10.17"]
+    blocks: ["10.19"]
+
+  # ── Wave 7 ──
+  - id: "10.16"
+    title: "Evidence state, playback and step seek"
+    size: M
+    wave: 7
+    depends_on: ["10.11", "10.15"]
+    blocks: ["10.19"]
+
+  # ── Wave 8 ──
+  - id: "10.19"
+    title: "Integrated staging validation and handover"
+    size: L
+    wave: 8
+    depends_on: ["10.1", "10.2", "10.3", "10.4", "10.5", "10.6", "10.7", "10.8", "10.9", "10.10", "10.11", "10.12", "10.13", "10.14", "10.15", "10.16", "10.17", "10.18"]
+    blocks: []
+
+# ─────────────────────────────────────────────────────────────
+# File-ownership conflicts (wave planning must serialize or single-own)
+# ─────────────────────────────────────────────────────────────
+file_ownership_conflicts:
+  - id: FOC-01
+    path: "backend/src/main/resources/db/migration"
+    stories: ["10.1", "10.4"]
+    wave: 1
+    conflict: "Both stories add forward-only Flyway migrations in the same directory in the same wave; parallel work collides on version ordering."
+    mandated_ordering: "10.4 creates ui_test_revisions; the 10.1 migration that adds the immutable revision reference to execution history must be versioned after it."
+    source: "Epic 10 §10.1 closing note — 'Revision table integration follows 10.4; preserve a migration dependency between the two where required.' Architecture §8.1 (forward-only migrations; execution history carries an immutable revision reference)."
+    resolution_options:
+      - "Serialize inside W1: 10.4 lands its migration first; 10.1 lands its revision-reference migration after. 10.1's non-migration work (OpenAPI/JSON-schema contract, DTOs, MSW fixtures) proceeds in parallel."
+      - "Assign one owner to both stories for this directory."
+    resolution: "TBD at wave-1 planning. Story-level depends_on left as the epic index states (both: none)."
+
+# ─────────────────────────────────────────────────────────────
+# External dependencies (Epic 10 "Open external dependencies immediately")
+# All six converge on 10.18 and 10.19; several also gate earlier stories'
+# pilot/staging acceptance while fixture/stub development proceeds.
+# ─────────────────────────────────────────────────────────────
+external_dependencies:
+  - id: ED-01
+    name: "LLM gateway access (R2D2, Vertex-compatible proxy)"
+    description: "Service credentials plus endpoint/project/location for the Studio compile workload; verified Vertex SDK version, reachable model identifiers, structured-output/temperature behavior and quotas."
+    source: "Architecture §4.1, §8.5, §10; Epic 10 §10.5 acceptance; BRD §3.3."
+    gates: ["10.5", "10.8", "10.19"]
+    gate_note: "10.5 stub tests and 10.8 fixture-only compile can proceed; 10.5 pilot-use acceptance and any real compile path are blocked."
+    fallback: "Stub gateway tests; drafts persist during outage (Architecture §4.7)."
+    owner: "TBD — not assigned in sources"
+    status: open
+
+  - id: ED-02
+    name: "Real trusted identity + vault (replacing stubs)"
+    description: "Production-capable identity through the trusted gateway (strips/replaces identity headers, fails closed when absent, documented CSRF control for cookie-authenticated mutations) and real vault integration with secret-use authorization. The current BffSessionAuthenticationFilter admin bypass and SecretsService REDACTED/plaintext stub cannot satisfy staging acceptance."
+    source: "Architecture §9.1–9.2; Review P1-4; Epic 10 release ordering, §10.7 and §10.17 acceptance."
+    gates: ["10.7", "10.17", "10.18", "10.19"]
+    gate_note: "May be delivered outside Epic 10 but must have linked completed tickets before a credentialed pilot. 10.7 acceptance requires production auth bypass absent before pilot; 10.17 credentialed staging acceptance cannot pass on stubs."
+    fallback: "Development identities confined to local/mock operation; fixture-only runs without secrets."
+    owner: "TBD — not assigned in sources"
+    status: open
+
+  - id: ED-03
+    name: "Sonic write/read credentials and lifecycle behavior"
+    description: "Sonic endpoint/bucket/path-style access; runner write-only credentials scoped to the studio/ prefix; API/recovery read-only credentials; verified 30-day lifecycle rules including versioning/noncurrent-object and incomplete-upload cleanup."
+    source: "Architecture §6.2, §8.5, §10; Epic 10 §10.14 and §10.18 acceptance."
+    gates: ["10.14", "10.15", "10.18", "10.19"]
+    gate_note: "10.14 development uses a local fake/compatible store; real Sonic integration and lifecycle acceptance are blocked."
+    fallback: "Local fake/compatible store (Epic 10 §10.14; 10.7 uses a fake store until 10.14 integration)."
+    owner: "Platform/SRE (storage controls — BRD §4)"
+    status: open
+
+  - id: ED-04
+    name: "Approved target and auth-provider destinations"
+    description: "Approved origins per CSI/environment for the pilot application, including required authentication providers and subresources, plus the platform network/proxy mechanism for domain/egress controls and DNS (standard NetworkPolicy is not URL filtering)."
+    source: "Architecture §9.3; Review P1-6; Epic 10 §10.18 acceptance, §10.19 acceptance."
+    gates: ["10.17", "10.18", "10.19"]
+    gate_note: "10.17 destination-misuse negative tests, 10.18 egress enforcement and the 10.19 approved single-page workflow are blocked."
+    fallback: "Controlled local page fixtures (Epic 10 §10.12, §10.13)."
+    owner: "Platform/SRE (egress/DNS mechanism — BRD §4); application/auth-provider approval owner not named in sources"
+    status: open
+
+  - id: ED-05
+    name: "Internal Playwright image"
+    description: "Internal Playwright/Chromium image pinned to the runner package version, running non-root with the Chromium sandbox enabled and compatible seccomp; sandbox must be proven in staging, never silently disabled."
+    source: "Architecture §4.3, §9.3; Review P1-6; Epic 10 §10.3 and §10.18 acceptance."
+    gates: ["10.3", "10.18", "10.19"]
+    gate_note: "10.3 CI mismatch check needs the pinned image; 10.12/10.13 can run on a developer machine (BRD milestone 'Real browser, real video (dev)')."
+    fallback: "Developer-machine runs; do not disable the sandbox to make an image run (Architecture §9.3)."
+    owner: "Platform/SRE (cluster/sandbox — BRD §4)"
+    status: open
+
+  - id: ED-06
+    name: "Real ingress SSE + media route"
+    description: "Authenticated same-origin session-cookie (or header-capable) route through the actual ingress for EventSource and <video>/download requests, with buffering disabled and idle timeouts above the 15 s heartbeat; validated by the staging streaming spike (two timed snapshots, heartbeat idle, cross-replica reconnect)."
+    source: "Architecture §5.5, §6.3, §10; SSE assessment (Validation); Epic 10 §10.11, §10.15 and §10.18 acceptance."
+    gates: ["10.11", "10.15", "10.18", "10.19"]
+    gate_note: "10.11 verified cookie route and 10.15 media-route prerequisite are blocked; a demonstrated gateway incompatibility uses GET fallback without changing the execution contract."
+    fallback: "Mocked transport scenario in the frontend dev path; bounded GET snapshot polling fallback (SSE assessment; Architecture §5.5)."
+    owner: "Platform/SRE (ingress — BRD §4)"
+    status: open
