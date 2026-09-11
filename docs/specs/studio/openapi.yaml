@@ -843,7 +843,6 @@ paths:
         `admissionId` for the same `attemptId`. A timeout, transport loss or `5xx` here is
         ambiguous — admission may already have committed — so the runner stops rather than
         resending, and the API's reaper resolves it (§5.1, §5.4).
-      x-not-yet-implemented: true
       x-implemented-by: '10.7'
       x-internal: true
       x-served-by: api
@@ -927,7 +926,6 @@ paths:
         The body is `RunnerReport`, which is **not** `ExecutionSnapshot`. It is the runner's
         vocabulary, the runner's clock and the runner's knowledge; the API projects it onto the
         public snapshot. See the mapping table on `RunnerReport` and ADR-002.
-      x-not-yet-implemented: true
       x-implemented-by: '10.7'
       x-internal: true
       x-served-by: api
@@ -1003,6 +1001,29 @@ paths:
           description: |
             Applied and committed. The acknowledgement is sent only after commit, because the
             runner retries a terminal report until it is acknowledged (§5.3).
+
+            A duplicate delivery of an already-applied `(attemptId, runnerSequence)` from the
+            exactly-matching identity is also `200`, with `applied: false` and nothing changed.
+            It is not a `409`: on both internal routes `409` means a *competing* party, and
+            10.6 AC-18 turns any `409` into stop-and-audit. A byte-identical re-delivery is the
+            same owner obeying the retry-until-acknowledged rule this API imposed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProgressAck' }
+              examples:
+                applied:
+                  value:
+                    executionId: 44444444-4444-4444-4444-444444444444
+                    runnerSequence: 9
+                    applied: true
+                    revision: 18
+                duplicate:
+                  summary: The same identity and sequence re-delivered; nothing was applied
+                  value:
+                    executionId: 44444444-4444-4444-4444-444444444444
+                    runnerSequence: 9
+                    applied: false
+                    revision: 18
         '400':
           description: Malformed report body
           content:
@@ -1717,18 +1738,62 @@ components:
 
     AdmissionResponse:
       type: object
-      required: [executionId, attemptId, admissionId, state]
+      additionalProperties: false
+      required: [executionId, attemptId, admissionId, state, startDeadlineAt, runDeadlineAt]
       description: |
-        Deliberately left open: story 10.7 implements the producer, and there is no implementation
-        to close this against yet. The runner reads only the HTTP status (§5.1.4), so nothing
-        depends on the body today.
+        Closed by story 10.7 (ADR-002 O-4). The contract left it open only because closing a schema
+        against an *imagined* producer is how the INT-4 divergence happened; story 10.7 is the
+        producer, so every field is now named and nothing unnamed may appear.
+
+        The runner still reads only the HTTP status (§5.1.4). These fields are the API telling the
+        runner what it was admitted under, not a second source of truth: the deadlines are enforced
+        by the API's reapers and the runner enforces neither.
       properties:
         executionId: { type: string, format: uuid }
         attemptId: { type: string, format: uuid }
         admissionId: { type: string, format: uuid }
-        state: { type: string }
-        startDeadlineAt: { type: string, format: date-time }
-        runDeadlineAt: { type: string, format: date-time }
+        state:
+          type: string
+          description: |
+            The dispatch ledger's state, never an outcome. `ADMITTED` on a fresh CAS; on an
+            idempotent re-admission of the exact same identity it is whatever the run has reached
+            since — `ADMITTED`, `RUNNING` or `FINALIZING`.
+          enum: [ADMITTED, RUNNING, FINALIZING]
+        startDeadlineAt:
+          type: string
+          format: date-time
+          description: |
+            Admitted-start deadline (§8.5, 30 s starting value), derived from the admission instant.
+            A different origin from `pending_deadline_at`, which acceptance set from the acceptance
+            instant: queue time and browser runtime are separate budgets.
+        runDeadlineAt:
+          type: string
+          format: date-time
+          description: |
+            Browser runtime cap plus bounded finalization and delivery margins (§5.4). Heartbeats
+            never extend it.
+
+    ProgressAck:
+      type: object
+      additionalProperties: false
+      required: [executionId, runnerSequence, applied, revision]
+      description: |
+        Closed by story 10.7 (ADR-002 O-4). Sent only after the report's transaction has committed
+        (§5.3, §8.4).
+      properties:
+        executionId: { type: string, format: uuid }
+        runnerSequence: { type: integer, format: int64 }
+        applied:
+          type: boolean
+          description: |
+            False for a duplicate delivery of an already-applied `(attemptId, runnerSequence)` from
+            the exactly-matching identity, which is acknowledged and changes nothing.
+        revision:
+          type: integer
+          format: int64
+          description: |
+            The API's own snapshot revision after this report — never `runnerSequence`. The runner
+            orders its own reports; the API assigns its own revision (§8.4).
 
     ReportedRuntimeVersions:
       type: object

@@ -15,6 +15,13 @@ checks:
     delivery-enabled: true
   worker-mode: true
 
+# The dispatcher and the reapers run here and nowhere else (§5.4, AC-12). An API pod has no
+# scheduler bean at all, so a queued row it can see is a queued row it never claims.
+studio:
+  execution:
+    dispatcher:
+      enabled: true
+
 management:
   server:
     port: 8081
