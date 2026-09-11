@@ -10,6 +10,7 @@ import com.citi.put.checks.studio.dispatch.StudioDispatchDisabledException;
 import com.citi.put.checks.studio.dispatch.StudioQuotaExceededException;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.internal.InternalCallbackException;
+import com.citi.put.checks.studio.sse.WatchedExecutionRegistry;
 import java.util.Map;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -66,6 +67,12 @@ public class ChecksExceptionHandler {
   public ResponseEntity<Map<String, String>> handleStudioAccessDenied(
       StudioAccessDeniedException ex) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        // The content type is set explicitly so the body is written without content negotiation.
+        // The SSE route reaches this handler with `Accept: text/event-stream`, and negotiating a
+        // JSON error against that Accept header yields a 406 rendered as 500 — which would make
+        // the events route and the GET snapshot route disagree about a refusal, and AC-37a's whole
+        // point is that a client can tell a 403 apart from a transient disconnect.
+        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
         .body(
             Map.of(
                 "error",
@@ -80,6 +87,22 @@ public class ChecksExceptionHandler {
       StudioDispatchDisabledException ex) {
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
         .body(Map.of("error", ExecutionErrorCode.DISPATCH_DISABLED, "message", ex.getMessage()));
+  }
+
+  /**
+   * An SSE bound was reached (AC-35, AC-38). A bounded rejection rather than unbounded growth: the
+   * client falls back to the GET snapshot route, which is what §5.5 designates it for.
+   */
+  @ExceptionHandler(WatchedExecutionRegistry.StreamLimitExceededException.class)
+  public ResponseEntity<Map<String, String>> handleStreamLimit(
+      WatchedExecutionRegistry.StreamLimitExceededException ex) {
+    return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+        // Explicit, for the same reason as the forbidden handler: this is reached from a route the
+        // client opened with `Accept: text/event-stream`, and negotiating a JSON body against that
+        // would turn a bounded rejection into a 500 — which is unbounded growth's symptom, not its
+        // refusal.
+        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+        .body(Map.of("error", ex.getCode(), "message", ex.getMessage()));
   }
 
   /** A pending quota is full (AC-9, §5.1.1). */

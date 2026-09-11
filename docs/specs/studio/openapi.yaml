@@ -482,7 +482,6 @@ paths:
       tags: [executions]
       operationId: streamExecution
       summary: SSE snapshot stream
-      x-not-yet-implemented: true
       x-implemented-by: '10.7'
       description: |
         `text/event-stream`. Event type is `execution.snapshot`; the SSE `id` is the snapshot

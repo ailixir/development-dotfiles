@@ -29,11 +29,12 @@ public final class SecondApplicationContext implements AutoCloseable {
   private final ConfigurableApplicationContext context;
 
   public SecondApplicationContext(DataSource sharedWith) {
-    String url;
+    // Touch the first context's datasource so its container is definitely up before the second
+    // context asks the Testcontainers driver for the same URL.
     try (java.sql.Connection connection = sharedWith.getConnection()) {
-      url = connection.getMetaData().getURL();
+      connection.getMetaData().getURL();
     } catch (SQLException e) {
-      throw new IllegalStateException("Could not resolve the first context's JDBC URL", e);
+      throw new IllegalStateException("The first context's database is not reachable", e);
     }
     this.context =
         new SpringApplicationBuilder(ChecksApplication.class)
@@ -48,13 +49,19 @@ public final class SecondApplicationContext implements AutoCloseable {
             .run(
                 "--spring.profiles.active=test",
                 "--server.port=0",
-                "--spring.datasource.url=" + url,
-                "--spring.datasource.driver-class-name=org.postgresql.Driver",
-                "--spring.datasource.username=test",
-                "--spring.datasource.password=test",
+                // No datasource override: application-test.yml's Testcontainers JDBC URL is
+                // cached by the driver per JVM, so the second context attaches to the *same*
+                // container. Handing it a resolved host:port instead looks equivalent and is not:
+                // it survives only as long as that exact container, and a context eviction or a
+                // restart turns it into "Connection refused" in the suite while passing in
+                // isolation.
+                //
                 // The schema is already migrated by the first context; running Flyway again here
                 // is at best a no-op and at worst a race between two contexts starting together.
-                "--spring.flyway.enabled=false");
+                "--spring.flyway.enabled=false",
+                // Several contexts share one container; a 30-connection default each
+                // is how a suite exhausts max_connections.
+                "--spring.datasource.hikari.maximum-pool-size=5");
   }
 
   public <T> T bean(Class<T> type) {

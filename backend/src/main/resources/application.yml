@@ -207,6 +207,8 @@ studio:
       heartbeat: ${STUDIO_SSE_HEARTBEAT:15s}
       lifetime: ${STUDIO_SSE_LIFETIME:60s}
       read-interval: ${STUDIO_SSE_READ_INTERVAL:750ms}
+      # The same 500-1000 ms budget, as a plain millis value for the scheduler annotation.
+      read-interval-ms: ${STUDIO_SSE_READ_INTERVAL_MS:750}
       authorization-refresh: ${STUDIO_SSE_AUTH_REFRESH:30s}
       max-streams-per-user: ${STUDIO_SSE_MAX_PER_USER:5}
       max-streams-per-pod: ${STUDIO_SSE_MAX_PER_POD:200}
