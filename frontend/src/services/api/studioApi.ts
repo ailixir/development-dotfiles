@@ -1,5 +1,7 @@
 import apiClient from './apiClient';
 import type {
+  CompileAccepted,
+  ConfirmCompileRequest,
   ExecuteAccepted,
   ExecutionPage,
   ExecutionSnapshot,
@@ -65,6 +67,25 @@ export const studioApi = {
 
   listExecutions: async (params?: ListExecutionsParams): Promise<ExecutionPage> =>
     apiClient.get('/studio/executions', { params }),
+
+  /**
+   * Enqueues a compile of the draft's current source. The `202` means the attempt was *started*,
+   * not that it will succeed: pool saturation and gateway failure surface asynchronously as
+   * `compileStatus: STALE` carrying `compileError`, never as a status code here (§4.3).
+   *
+   * Declared refusals, and nothing else: `400` with one of the four authoring-bound codes, `409`
+   * with `TEST_DELETED` or `TEST_QUARANTINED`.
+   */
+  compileTest: async (id: string): Promise<CompileAccepted> =>
+    apiClient.post(`/studio/tests/${id}/compile`, undefined),
+
+  /**
+   * Confirms the candidate the caller was looking at. The server's transaction is conditional on
+   * all four fields, so the caller must send the four values it read together — not four values
+   * recombined from separate reads. A candidate that moved answers `409 STALE_CANDIDATE`.
+   */
+  confirmCompile: async (id: string, body: ConfirmCompileRequest): Promise<TestDto> =>
+    apiClient.post(`/studio/tests/${id}/confirm-compile`, body),
 
   validateSteps: async (steps: string[]): Promise<ValidateStepsResponse> =>
     apiClient.post('/studio/validate-steps', { steps }),
