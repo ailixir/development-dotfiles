@@ -49,8 +49,14 @@ export interface JobEnvelope extends JobIdentity {
   readonly manifestKey: string;
 }
 
-/** Every key a job body may carry. Anything else is a rejection. */
-const ACCEPTED_JOB_KEYS = new Set([
+/**
+ * Every key a job body may carry. Anything else is a rejection.
+ *
+ * Exported since story 10.17 so that AC-16b's gate-shut tripwire can assert over **this** set
+ * rather than over a hand-built test fixture (QA LOW-2). A tripwire that iterates a fixture is a
+ * statement about the fixture; adding `targetPolicy` here left it green.
+ */
+export const ACCEPTED_JOB_KEYS = new Set([
   'executionId',
   'attemptId',
   'revisionId',

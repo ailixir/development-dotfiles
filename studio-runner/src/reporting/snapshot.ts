@@ -14,7 +14,7 @@
  * state, so it is a per-run counter — and is never reused or decremented, including on a retry.
  */
 import type { StepStatus } from '../executor/adapters/StepReporter.js';
-import type { LogBuffer, LogEntry, ReportBounds } from './bounds.js';
+import type { LogEntry, LogView, ReportBounds } from './bounds.js';
 import { boundSteps, createLogBuffer } from './bounds.js';
 
 export type ReportKind = 'STARTED' | 'PROGRESS' | 'FINAL';
@@ -126,7 +126,21 @@ export interface RunSnapshot {
   /** Builds a report and consumes the next sequence number. Synchronous by contract. */
   build(kind: ReportKind, outcome?: RunOutcome | null, evidence?: EvidenceState | null): ReportBody;
   readonly lastSequence: number;
-  readonly logs: LogBuffer;
+  /**
+   * The retained log, **read-only** (AC-22, QA-1).
+   *
+   * Deliberately a {@link LogView} and not the {@link LogBuffer} itself. AC-22's own falsification
+   * is *route one existing producer around the redactor*, and until QA performed it that mutation
+   * was green: `snapshot.logs.append(...)` reached the truncating buffer directly, putting the whole
+   * value on the built body — and, with the value straddling `maxLogEntryLength`, a raw fragment
+   * that matches no variant the outbound redactor can scrub.
+   *
+   * A test cannot watch a door that is open; the fix is that there is no door. The buffer is held in
+   * the closure, this view forwards reads only, and `append` is **absent at run time** rather than
+   * merely hidden by a type — so a producer written later that tries to go around
+   * {@link RunSnapshot.appendLog} fails to compile *and* throws.
+   */
+  readonly logs: LogView;
 }
 
 export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
@@ -136,8 +150,22 @@ export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
   let sequence = 0;
   let browserStartedAt: string | null = null;
 
+  /**
+   * Reads forwarded one by one. Not `{ ...logs }` and not `logs` itself: either would carry
+   * `append` across and reopen the bypass this view exists to close.
+   */
+  const logView: LogView = {
+    entries: () => logs.entries(),
+    get truncated(): boolean {
+      return logs.truncated;
+    },
+    get dropped(): number {
+      return logs.dropped;
+    },
+  };
+
   const snapshot: RunSnapshot = {
-    logs,
+    logs: logView,
     get browserStarted(): boolean {
       return browserStartedAt !== null;
     },

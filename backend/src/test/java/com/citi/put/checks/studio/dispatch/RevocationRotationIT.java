@@ -296,4 +296,69 @@ class RevocationRotationIT {
             + " WHERE t.id = ?",
         testId);
   }
+
+  // ── QA LOW-4: the branch the fixture change created, which nothing asserted ──────────────────
+
+  /**
+   * A confirmed revision whose configuration declares no usable runtime budget is a dispatch that
+   * cannot be made — {@code DISPATCH_FAILED}, and no send.
+   *
+   * <p>This branch exists because story 10.17 derives {@code deadlines.totalRuntimeMs} from the
+   * revision's own {@code configuration.timeoutSeconds}, and because {@code
+   * StudioExecutionFixtures.confirmRevision} stopped writing {@code '{}'} for configuration. QA
+   * measured the fixture's blast radius as narrower than reported (six call sites, two classes) but
+   * found the real consequence inverted: the change **created a throwing path** and nothing covered
+   * it. It is covered here.
+   *
+   * <p>It deliberately does <b>not</b> borrow a reference code. This is not a reference condition —
+   * no reference is unavailable and no entitlement has changed — and {@code DISPATCH_FAILED} is the
+   * existing generic terminal code for a dispatch that could not be made. No enum is widened.
+   */
+  @Test
+  void aRevisionWithNoUsableRuntimeBudgetIsTerminalWithoutBorrowingAReferenceCode() {
+    UUID execution = accept();
+
+    UUID budgetlessDraft =
+        fixtures.seedTest("Budgetless draft", CSI_ID, OWNER, List.of("Go to the home page"));
+    UUID budgetlessRevision =
+        fixtures.confirmRevision(
+            budgetlessDraft,
+            CSI_ID,
+            List.of("Go to the home page"),
+            StudioExecutionFixtures.references(List.of(), List.of(SECRET_ID)),
+            // Write-once is enforced by the database, so an unusual configuration is written at
+            // INSERT rather than patched afterwards.
+            "{}");
+    jdbc.update(
+        "UPDATE ui_test_executions SET revision_id = ? WHERE id = ?",
+        budgetlessRevision,
+        execution);
+
+    dispatcher.dispatch(execution);
+
+    assertThat(errorCode(execution)).isEqualTo(ExecutionErrorCode.DISPATCH_FAILED);
+    assertThat(runner.sendCount())
+        .as("POST /v1/runs was issued for a revision with no runtime budget")
+        .isZero();
+  }
+
+  /**
+   * The permit companion: the same path with a usable budget sends, and sends §8.5's values.
+   *
+   * <p>Without it, the refusal above would be satisfied by a dispatcher that refused every revision
+   * — and the deadline values themselves would be asserted nowhere.
+   */
+  @Test
+  void aRevisionWithAUsableBudgetSendsTheDeadlinesFaithfullyAndClampsNothing() {
+    UUID execution = accept();
+
+    dispatcher.dispatch(execution);
+
+    assertThat(runner.sendCount()).isEqualTo(1);
+    RunJob.JobDeadlines deadlines = runner.sent().get(0).deadlines();
+    // §8.5's admitted-start starting value, and the revision's own runtime budget in milliseconds.
+    // The clamp is the runner's (10.13 AC-6) and nothing is clamped here.
+    assertThat(deadlines.admittedStartMs()).isEqualTo(30_000L);
+    assertThat(deadlines.totalRuntimeMs()).isEqualTo(30_000L);
+  }
 }

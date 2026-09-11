@@ -7,6 +7,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.citi.put.checks.studio.StudioExecutionProperties;
+import com.citi.put.checks.studio.compile.validator.RunnerValidationClient;
+import com.citi.put.checks.studio.compile.validator.StudioRunnerProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -22,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -32,6 +35,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -65,8 +70,11 @@ import org.yaml.snakeyaml.Yaml;
  *       silently failed to load would make every producer "conform".
  * </ol>
  *
- * <p>Adding a producer to {@link #internalBodies()} is how this grows. {@code RunJob} is the first
- * member because it is the one that is red today.
+ * <p>Adding a producer to {@link #internalBodies()} is how this grows. {@code RunJob} was the first
+ * member because it was the one that was red; {@code ValidateRequest} is the second, added on QA's
+ * LOW-3 — the registry was <em>general in shape and singular in fact</em>, and a loop over one
+ * member is a claim about one member however it is written. Both bodies are captured off a real
+ * socket from the real client.
  */
 class InternalBodyContractConformanceTest {
 
@@ -110,7 +118,9 @@ class InternalBodyContractConformanceTest {
 
   /** The registry. Every internal body with a producer belongs here. */
   static Stream<InternalBody> internalBodies() {
-    return Stream.of(new InternalBody("RunJob", captureRunJobBody()));
+    return Stream.of(
+        new InternalBody("RunJob", captureRunJobBody()),
+        new InternalBody("ValidateRequest", captureValidateRequestBody()));
   }
 
   @ParameterizedTest(name = "{0}")
@@ -170,6 +180,52 @@ class InternalBodyContractConformanceTest {
         .send(RunJobFixtures.conformingJob());
 
     var requests = wireMock.findAll(postRequestedFor(urlPathEqualTo("/v1/runs")));
+    assertThat(requests)
+        .as("no request reached the socket, so there are no producer bytes to judge")
+        .hasSize(1);
+    return requests.get(0).getBodyAsString();
+  }
+
+  /**
+   * Captures the body the compile path's validation client actually puts on the wire (QA LOW-3).
+   *
+   * <p>The same technique as {@link #captureRunJobBody()} and for the same reason: {@code
+   * RunnerValidationClient.requestBody} could be asserted directly, but the bytes are what the
+   * runner's own closed key set judges, and the two can differ.
+   */
+  private static String captureValidateRequestBody() {
+    wireMock.resetAll();
+    wireMock.stubFor(
+        post(urlPathEqualTo("/v1/validate"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"ok\":true,\"diagnostics\":[],\"steps\":[],"
+                            + "\"validatorSchemaVersion\":\"1.0.0\","
+                            + "\"languagePolicyVersion\":\"1.0.0\","
+                            + "\"syntaxReferenceVersion\":\"1.0.0\","
+                            + "\"executorVersion\":\"1.0.0\"}")));
+
+    SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+    factory.setConnectTimeout(1_000);
+    factory.setReadTimeout(5_000);
+    new RunnerValidationClient(
+            RestClient.builder().requestFactory(factory).build(),
+            new StudioRunnerProperties(
+                "http://localhost:" + wireMock.port(),
+                "conformance-token",
+                Duration.ofSeconds(5),
+                Duration.ofSeconds(1)))
+        .validate(
+            "{\"version\":1,\"steps\":[{\"stepIndex\":0,\"originalText\":\"Go to the home"
+                + " page\",\"code\":\"await page.goto('https://example.com/');\"}]}",
+            List.of("Go to the home page"),
+            List.of("REGION"),
+            List.of("LOGIN_PW"));
+
+    var requests = wireMock.findAll(postRequestedFor(urlPathEqualTo("/v1/validate")));
     assertThat(requests)
         .as("no request reached the socket, so there are no producer bytes to judge")
         .hasSize(1);

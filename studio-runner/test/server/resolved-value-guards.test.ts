@@ -12,6 +12,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createRedactor } from '../../src/executor/redaction.js';
 import { createRunSnapshot } from '../../src/reporting/snapshot.js';
 import { DEFAULT_REPORT_BOUNDS } from '../../src/reporting/bounds.js';
+import type { LogBuffer } from '../../src/reporting/bounds.js';
 import { validateArtifact } from '../../src/validator/index.js';
 import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
@@ -208,15 +209,64 @@ describe('AC-22 — every producer reaching the bounded log buffer goes through 
     expect(snapshot.build('PROGRESS').logs[0]?.message).toContain('127.0.0.1');
   });
 
-  it('enumerates the producers reachable from a run and finds one call site, which is the guard', () => {
-    // The structural half, and it is why a *new* producer cannot skip the redactor: every producer
-    // reaches the truncating buffer through `RunSnapshot.appendLog`, which is the only caller of
-    // `logs.append`. A producer added later that skips the redactor would have to skip `appendLog`
-    // too, which means it would not be writing to the retained log at all.
+  /**
+   * **QA-1.** The guard, asserted on the production surface rather than on a comment.
+   *
+   * The version of this test that shipped in `fa7afa55b` was named *"enumerates the producers …
+   * and finds one call site"* and enumerated nothing: it re-asserted its sibling's planted-canary
+   * property under a structural name, while the structural claim lived only in a prose comment.
+   * `RunSnapshot.logs` was the whole `LogBuffer`, so `snapshot.logs.append(...)` reached the
+   * truncating buffer directly, around the run's redactor — and AC-22's own stated falsification,
+   * *route one existing producer around the redactor*, left the suite at 886 passed.
+   *
+   * That is the epic's **sixteenth** vacuous-guard shape: *a guard whose name states a structural
+   * property of a production symbol while its body asserts over a test-local stand-in.* It survives
+   * ordinary mutation testing because a **sibling** mechanism reddens it — M9 broke `appendLog`
+   * from the inside, where three other tests watch, so the missing outside guard stayed hidden.
+   *
+   * The repair is not a better watcher; a test cannot watch a door that is open. `RunSnapshot.logs`
+   * is now a read-only {@link LogView} and the buffer lives in the closure, so a producer that goes
+   * around `appendLog` **cannot reach the buffer at all**. These assertions are on the production
+   * object, and they go red the moment the buffer is handed out whole again.
+   */
+  it('offers no way into the bounded buffer except appendLog, on the production object (QA-1)', () => {
     const snapshot = snapshotWith([SECRET]);
-    // The buffer is reachable, so this is a statement about a live object rather than about types.
+
+    // The mutation QA performed, attempted here rather than described. `append` is absent at run
+    // time, not merely hidden by a type: `{ ...logs }` or `logs` itself would carry it across and
+    // reopen the bypass, so the view forwards reads one by one.
+    const asBuffer = snapshot.logs as unknown as Partial<LogBuffer>;
+    expect(
+      asBuffer.append,
+      'RunSnapshot.logs exposes append, so a producer can reach the buffer around the redactor',
+    ).toBeUndefined();
+    expect(Object.keys(snapshot.logs).sort()).toEqual(['dropped', 'entries', 'truncated']);
+
+    // …and a producer that tries it fails loudly rather than leaking quietly.
+    expect(() => {
+      (snapshot.logs as unknown as LogBuffer).append({
+        atMs: null,
+        level: 'error',
+        message: `step 0 FAIL: typed ${SECRET}`,
+      });
+    }).toThrow(TypeError);
+
+    // Nothing reached the buffer, so nothing reaches the body.
+    expect(snapshot.build('PROGRESS').logs).toHaveLength(0);
+  });
+
+  it('still forwards every read the report builder needs, so the view is not merely a blockade', () => {
+    // The control for the assertions above: a view that forwarded nothing would satisfy them and
+    // break the product. Reads work; only the write is gone.
+    const snapshot = snapshotWith([SECRET]);
     expect(snapshot.logs.entries()).toHaveLength(0);
+    expect(snapshot.logs.truncated).toBe(false);
+    expect(snapshot.logs.dropped).toBe(0);
+
     snapshot.appendLog({ atMs: null, level: 'error', message: `recording failed: ${SECRET}` });
+
+    expect(snapshot.logs.entries()).toHaveLength(1);
     expect(snapshot.logs.entries()[0]?.message).not.toContain(SECRET);
+    expect(snapshot.build('PROGRESS').logs[0]?.message).not.toContain(SECRET);
   });
 });

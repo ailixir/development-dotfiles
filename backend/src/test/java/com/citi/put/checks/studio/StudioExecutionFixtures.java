@@ -132,12 +132,23 @@ public final class StudioExecutionFixtures {
           + "\"timeoutSeconds\":30,\"waitStrategy\":\"load\"}";
 
   public UUID confirmRevision(UUID testId, String csiId, List<String> steps, String references) {
-    UUID revisionId = UUID.randomUUID();
-    String artifact = "{\"steps\":[]}";
     // The shapes the real producers write. Story 10.17 makes the readers fail closed, so a fixture
     // that wrote a shape CompileInputs never produces would be testing a path production cannot
     // reach — and would have kept passing while the dispatch body diverged from the contract.
-    String configuration = DEFAULT_CONFIGURATION;
+    return confirmRevision(testId, csiId, steps, references, DEFAULT_CONFIGURATION);
+  }
+
+  /**
+   * As {@link #confirmRevision(UUID, String, List, String)}, with the stored configuration chosen.
+   *
+   * <p>The revision row is write-once and the database enforces it, so a configuration a test needs
+   * to be unusual has to be written at INSERT. Used by the {@code DISPATCH_FAILED} branch, which
+   * exists because story 10.17 derives the runtime budget from this document (QA LOW-4).
+   */
+  public UUID confirmRevision(
+      UUID testId, String csiId, List<String> steps, String references, String configuration) {
+    UUID revisionId = UUID.randomUUID();
+    String artifact = "{\"steps\":[]}";
     jdbc.update(
         "INSERT INTO ui_test_revisions (id, test_id, csi_id, source_revision,"
             + " configuration_revision, source, source_hash, artifact, artifact_hash,"

@@ -45,13 +45,27 @@ export interface LogEntry {
   readonly message: string;
 }
 
-export interface LogBuffer {
-  append(entry: LogEntry): void;
+/**
+ * The **read** half of {@link LogBuffer}, and the only half anything outside the snapshot gets.
+ *
+ * Splitting the interface is the AC-22 guard (QA-1). A `LogBuffer` handed out whole is a second way
+ * into the truncating buffer, one that goes *around* `RunSnapshot.appendLog` and therefore around
+ * the run's redactor — and a producer that reached it that way would put a whole value on the
+ * report body, or a raw fragment of one past the cut, which matches no variant the outbound
+ * redactor can scrub. The guard's own falsification is *route one existing producer around the
+ * redactor*, and that mutation has to be **unable to reach the buffer at all** rather than merely
+ * watched.
+ */
+export interface LogView {
   /** Current retained entries, oldest first. */
   entries(): readonly LogEntry[];
   /** True once the cap has been reached and at least one entry has been dropped. */
   readonly truncated: boolean;
   readonly dropped: number;
+}
+
+export interface LogBuffer extends LogView {
+  append(entry: LogEntry): void;
 }
 
 /**

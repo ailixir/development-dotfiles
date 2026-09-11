@@ -66,6 +66,7 @@ import { createFsScratchStore } from '../../src/server/scratch.js';
 import { createChildDriver } from '../helpers/childDriver.js';
 import { createHarness, until, SERVICE_TOKEN } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
+import { ACCEPTED_JOB_KEYS } from '../../src/reporting/envelope.js';
 import { post, validJob } from '../helpers/runner.js';
 import { createFakeScheduler } from '../helpers/scheduler.js';
 
@@ -698,12 +699,18 @@ describe('Blocked halves — recorded as live skips, never as passes', () => {
     // deliberately declares reference names and no policy field, and this story neither invents
     // one nor absorbs O-6.
     //
-    // The assertion: the envelope's accepted key set carries no policy field. If one appears, the
-    // tests above stop being blocked and this line is what says so.
-    const policyShapedKeys = ['approvedOrigins', 'targetPolicy', 'secretUsePolicy', 'destinations'];
-    const job = validJob();
-    for (const key of policyShapedKeys) {
-      expect(Object.keys(job), `${key} exists, so ADR-002 O-6 has been ruled`).not.toContain(key);
+    // The assertion, over the **production** key set (QA LOW-2). The first version of this
+    // iterated `validJob()` — a hand-built test fixture — so adding `targetPolicy` to the real
+    // `ACCEPTED_JOB_KEYS` left it green. A tripwire pointed at a stand-in is a statement about the
+    // stand-in; this is the sixteenth vacuous-guard shape and this file shipped two of them.
+    for (const key of ['approvedOrigins', 'targetPolicy', 'secretUsePolicy', 'destinations']) {
+      expect(
+        [...ACCEPTED_JOB_KEYS],
+        `the envelope accepts '${key}', so ADR-002 O-6 has been ruled and AC-16b is no longer blocked`,
+      ).not.toContain(key);
     }
+    // …and the set is the real one, not an empty stand-in that would satisfy the above.
+    expect(ACCEPTED_JOB_KEYS.has('resolvedSecrets')).toBe(true);
+    expect(ACCEPTED_JOB_KEYS.size).toBe(14);
   });
 });
