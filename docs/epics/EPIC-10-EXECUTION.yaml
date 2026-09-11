@@ -239,6 +239,73 @@ file_ownership_conflicts:
       - "Assign one owner to both runner stories."
     resolution: "TBD at wave-1 planning. Story-level depends_on left as the epic index states (both: none)."
 
+  - id: FOC-03
+    path: "backend/src/main/java/com/citi/put/checks/studio/StudioService.java (382 lines) and StudioController.java (150 lines)"
+    stories: ["10.7", "10.8"]
+    wave: 3
+    conflict: >-
+      Both stories rewrite the execute acceptance path in the same wave. 10.7 replaces
+      StudioService.executeTest wholesale (its own javadoc defers to 10.7) and adds CSI
+      permission enforcement plus the events route to every method on StudioController;
+      10.8 adds POST /tests/{id}/compile to the same controller and, in the same service,
+      commit-then-enqueue on create/update plus the ExecutionReadinessService consultation
+      before acceptance. Parallel work collides textually on both files, and — the reason
+      this matters beyond merge noise — if 10.8 lands first, 10.7 deletes its readiness
+      wiring and restores it by hand. 10.8 AC-26 requires the gate to be unconditional and
+      unskippable; a hand-restored merge is exactly how such a gate goes missing without
+      anyone noticing.
+    mandated_ordering: >-
+      10.7a (durable dispatch, 10.7 AC-1..AC-27) lands on both files first, because it
+      carries the acceptance transaction and declares the ExecutionReadiness seam. 10.8
+      then lands T-10.8.1 (compile route, commit-then-enqueue) and T-10.8.7 (readiness
+      injection) on top. 10.7b (recovery) and 10.7c (SSE) touch neither file and may land
+      in any order after 10.7a. Every other 10.8 task starts immediately and in parallel:
+      the compile package, prompt assembly, authoring limits, credential screen,
+      canonicalizer, diagnostics bounder, the /v1/validate client,
+      ExecutionReadinessService itself and the no-runtime-LLM gate share no file with 10.7.
+      Seam shape is fixed so the two stories cannot produce two readiness types: 10.7a
+      declares the interface ExecutionReadiness with a provisional confirmed_revision_id
+      implementation; 10.8 supplies ExecutionReadinessService against that same interface
+      and deletes the provisional one; the acceptance path is wired to the interface.
+    source: >-
+      Story 10.8 draft, Implementation Notes "Seams to watch" and Open question 1, which
+      flagged that the manifest recorded no wave-3 conflict. Story 10.7 AC-8a (the seam
+      10.8 replaces) and AC-4a (permission enforcement on every StudioController route).
+      Story 10.7 draft Split hint (10.7a/b/c at the snapshot_revision seam). Verified on
+      branch epic/EPIC-10 2026-09-11: StudioService 382 lines, StudioController 150 lines,
+      zero @PreAuthorize annotations on the controller. Ruled and recorded by @po
+      2026-09-11 during wave-3 story validation.
+    resolution_options:
+      - "Serialize on the two shared files: 10.7a first, then 10.8's controller/service wiring. 10.8's compile package proceeds in parallel from day one."
+      - "Assign one owner to both stories for the execute path."
+      - "Fold 10.8's readiness gate into 10.7 and reduce 10.8 to the compile pipeline."
+    resolution: >-
+      SERIALIZE (option 1), and 10.7's three-way split is MANDATED rather than hinted so
+      that 10.7a is a nameable landing point. Single ownership (option 2) was rejected:
+      10.7 is the largest story in the epic at 47 criteria and 13 tasks and is itself
+      being split, so merging the two would build one unreviewable change out of two
+      reviewable ones. Option 3 was rejected because 10.8 AC-22/AC-23 — the predicate that
+      settles 10.4 ISSUE-003 and the three de-ready cases that defend it — is the reason
+      10.8 exists; moving it into 10.7 would separate the predicate from the pipeline whose
+      failures produce the de-ready state, and 10.8's own split hint records that AC-23 is
+      only provable when both land together. Without the mandated split, serialization
+      would queue 10.8's gate behind 10.7's SSE and reapers for no reason, which is what
+      makes the split a prerequisite of this resolution rather than a separate decision.
+    note: >-
+      Story 10.12 is runner-only and shares nothing with either. Checked, not assumed:
+      10.12 touches only studio-runner/**; 10.7 names "any change to studio-runner/" in its
+      Out-of-scope and its File List states no runner change is expected. The one file that
+      would have collided was docs/specs/studio/openapi.yaml — 10.7 AC-1 closes
+      AdmissionResponse and the callback response bodies (ADR-002 O-4) and removes three
+      x-not-yet-implemented markers, and 10.12's draft AC-13 proposed adding
+      recordingOriginMs to RunnerReport. ADR-002 section 11 rejected that field on
+      2026-09-11, so 10.12 now makes no contract edit and the overlap is gone. Two
+      read-only couplings remain and need no serialization: 10.7 AC-40 requires the runner
+      suite to stay green against the amended document, and 10.12 AC-17 reads the API's
+      ExecutionErrorCode enumeration for its disjointness test — 10.12 AC-17 has been
+      corrected to read that enumeration rather than a hardcoded list, because 10.7 AC-13a
+      adds AUTHORIZATION_REVOKED and REFERENCE_UNAVAILABLE in this same wave.
+
 # ─────────────────────────────────────────────────────────────
 # External dependencies (Epic 10 "Open external dependencies immediately")
 # All six converge on 10.18 and 10.19; several also gate earlier stories'
