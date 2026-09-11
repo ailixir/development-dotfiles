@@ -2,11 +2,11 @@
 
 | Field | Value |
 |---|---|
-| Status | Accepted (architecture decision, 2026-09-11). Amended three times the same day: §11 closes O-7, §12 rules on who may amend this contract, §14 declares the conflict responses for a deleted or quarantined draft (closing story 10.8's AC-1b), and §15 declares the terminal error-code vocabulary in both directions (closing story 10.7's AC-13a, the last deliberately-red test on the branch). O-1, O-2, O-3, O-5 and O-8 have landed; O-6, O-9, O-10 and the new O-11/O-12 remain, with their statuses re-verified at `10bce34a7` in §15.9. |
+| Status | Accepted (architecture decision, 2026-09-11). Amended four times the same day: §11 closes O-7, §12 rules on who may amend this contract, §14 declares the conflict responses for a deleted or quarantined draft (closing story 10.8's AC-1b), §15 declares the terminal error-code vocabulary in both directions (closing story 10.7's AC-13a), and §16/§17 declare the compile-diagnostics surface and the evidence partiality signal (closing story 10.9's AC-22 and story 10.13's AC-18, the two wave-4 escalations). O-1, O-2, O-3, O-4, O-5, O-7 and O-8 have landed; O-6, O-9, O-10, O-11, O-12 and the new O-13/O-14 remain, re-verified at `6cc14f220` in §18.4. |
 | Author | @architect (Aria) |
 | Source of truth | [Studio architecture v2.1](studio-execution.md) §4.4, §4.5, §5.1–5.5, §6.1–6.4, §8.2, §8.4, §8.5, §9.1–9.3; [ADR-001](ADR-001-studio-runner-scaffolding.md) §4.2, §9 |
 | Amends | `docs/specs/studio/openapi.yaml`, frozen by story 10.1. This ADR is the amendment's rationale; the document is the contract. |
-| Consumers | Stories 10.6, 10.7, 10.8, 10.12, 10.13, 10.14 ([EPIC-10](../epics/EPIC-10-EXECUTION.yaml)), and the MFE (§15.9, O-12) |
+| Consumers | Stories 10.6, 10.7, 10.8, 10.9, 10.10, 10.12, 10.13, 10.14 ([EPIC-10](../epics/EPIC-10-EXECUTION.yaml)), and the MFE (§15.9 O-12, §18.3) |
 | Does not touch | `docs/specs/studio/artifact.schema.json` and its byte-identical backend copy, guarded by `ArtifactSchemaDriftTest`. Both are unchanged. |
 
 This ADR rules on four divergences between the frozen contract and architecture §8.4, and records the amendment made to `openapi.yaml` to settle them. It contains no implementation code and changes no story's Title, Acceptance Criteria, Scope or Status.
@@ -330,6 +330,8 @@ An architect amending the contract still never edits a story's Title, Acceptance
 | 2026-09-11 | `x-not-yet-implemented` removed from `streamExecution` and from the two internal callback routes — the contract declared as unshipped three routes this story ships (§9 O-4) | A — a declaration the running system contradicts | @dev, story 10.7, at `af17549ec` and `7e827e52c` | `StudioContractTest` 7/8 → 8/8 |
 | 2026-09-11 | Conflict responses declared for a withheld draft on `compileTest`, `confirmCompile` and `executeTest`; `x-conflict-codes` introduced on every public `409`; missing `400` declared on `compileTest` and `confirmCompile` (§14). Closes story 10.8's AC-1b escalation | C | @architect, this amendment | `test/contract.test.ts` 14/14 before and after (no `internal`-tagged operation touched) |
 | 2026-09-11 | `ExecutionErrorCode` widened to eight values with `AUTHORIZATION_REVOKED` and `REFERENCE_UNAVAILABLE`, each condition and remedy stated; `x-assigned-by` names the assigning component for every member; `x-runner-error-codes` declares the runner's ten codes on the still-open `RunOutcome.errorCode` (§15). Closes story 10.7's AC-13a escalation — the last deliberately-red test on the branch | C | @architect, this amendment | `ExecutionErrorCodeContractEscalationTest` 1/2 → **2/2** with no change to the test; `StudioContractTest` 9/9, `ArtifactSchemaDriftTest` 3/3, `test/contract.test.ts` 14/14, all before and after. Full record in §15.10 |
+| 2026-09-11 | `TestDto` gains nullable `compileError` and `compileDiagnostics`, declared as the typed `CompileError` / `CompileDiagnostic` / `CompileStepDiagnostics` / `CompileDiagnostics` schemas read from the merged producer; `x-compile-error-codes` declares the eleven codes; `attempts` and `exhausted` named for 10.9 AC-11; the `GET /tests` list projection's omission and a `needsRevision` example added (§16). Closes story 10.9's AC-22 escalation and unblocks 10.10. **No route added and no marker moved** | C | @architect, this amendment | `StudioContractTest` 9/9, `ArtifactSchemaDriftTest` 3/3, `CompileRouteContractDivergenceTest` 9/9, `test/contract.test.ts` 14/14, frontend 98 passed — all before and after. Full record in §16.10 |
+| 2026-09-11 | `RunnerEvidence` gains an **optional** boolean `partial` — the runner-observed fact that a recording does not cover the whole browser session — with the derivation from `outcome` forbidden in both directions and the producer assigned to story 10.13 (§17). Closes story 10.13's AC-18 escalation. Optional rather than `required` so the merged runner stays conformant; promotion recorded as O-14 | B | @architect, this amendment | as above; `test/contract.test.ts` 14/14 before and after, which is the measurement that matters here. Full record in §17.8 |
 
 The two `@dev, story 10.7` rows above are one story's amendment, recorded against §12's four
 requirements (this amendment's own record is in §15.10):
@@ -757,3 +759,517 @@ Checked against the merged branch rather than against the last amendment's notes
 
 This amendment changes no story's Title, Acceptance Criteria, Scope or Status, and touches no
 backend Java, no frontend source, no `studio-runner/` source and no story file.
+
+---
+
+# Amendment, 2026-09-11 (fifth) — where a user reads the compiler, and what a partial recording is
+
+Added on the same branch, at `6cc14f220`, the merge of the two wave-4 drafts. Both drafts used §12
+rather than inventing, and each found a different half of the same class of defect.
+
+Story **10.9** produces a compile error and bounded per-step diagnostics and found that **no
+declared route returns either**, so the repair loop can generate reasons and nothing can show them;
+it left a named disabled test and escalated (AC-22, Class C). Story **10.13** found that
+**`VideoEvidence.partial` is `required` on the public snapshot and nothing on the runner wire can
+set it**, and escalated rather than adding a field to a closed runner body (AC-18, Class B).
+
+The two are the same defect seen from opposite ends: §6.2's lesson was that a body may declare
+fields no producer sends, and §14.6's was that a `409` may declare a status no code answers. This
+pair adds the third and fourth forms — **a fact produced and persisted that no surface exposes**,
+and **a field declared and required that no producer fills** — and, in the second case, one worse
+thing that the escalation did not yet know: the field is not unpopulated, it is **falsely
+populated**.
+
+## 16. INT-8 — the diagnostics surface (closes 10.9 AC-22; unblocks 10.10)
+
+### 16.1 The gap, verified
+
+| Fact | Evidence, worktree `epic/EPIC-10` at `6cc14f220` |
+|---|---|
+| `ui_tests.compile_error` and `ui_tests.compile_diagnostics` are `jsonb` columns, added by V12 §3 against §8.1. | `V12__ui_test_revisions_and_compile_state.sql:102-103` |
+| `publishInvalid` writes `compile_diagnostics` and clears `compile_error`; `publishError` writes `compile_error` and clears `compile_diagnostics`; `beginCompile`, `publishCandidate` and `confirm` clear both. At most one is ever non-null. | `CompileStateService.java:85,125,161,197,273` |
+| Every one of those statements additionally conditions on `compile_request_id`, `source_revision` **and** `configuration_revision`; a publish whose draft moved underneath it writes nothing and returns `DISCARDED_OUT_OF_ORDER`. | same file |
+| `StudioService.save` clears **both** columns whenever it records a source or configuration change, in the same transaction that advances the revision and sets `STALE`. | `StudioService.java:266-273` |
+| `compile_error` is `{"code": "<CODE>"}` and nothing else — "the bounded, scrubbed code and nothing else: no prompt, no response body, no source text". | `CompilePipeline.java:334-339` |
+| The code set reachable there is exactly `CompileErrorCode`'s four plus `GatewayErrorCode`'s seven — eleven values, from six call sites. | `CompilePipeline.java:133,137,197,205,222,254` |
+| `DiagnosticsBounder.bound` produces one entry per **original** step, index aligned, with explicit truncation at three levels: a clamped `message`/`excerpt` carries a marker, a step that lost diagnostics carries `truncated: true`, and a document that shed steps to fit the byte cap carries a document-level `truncated: true` with a `truncationReason`. | `DiagnosticsBounder.java` |
+| `TestDto` declared twenty properties. `compileError` and `compileDiagnostics` were not among them, and `UITestDto` matched it field for field. | `openapi.yaml` before this amendment; `UITestDto.java` |
+| The `compileTest` operation's own description already told a reader that gateway failure surfaces "as `compileStatus: STALE` carrying `compileError`" — a field the document then declared nowhere. | `openapi.yaml` before this amendment |
+| **No test could have failed on this.** `StudioContractTest.theFrozenSchemasAndTheJavaTypesShareTheSameFieldNames` asserts nine schemas against nine Java records, and `TestDto` is not one of them. | `StudioContractTest.java:187-197` |
+
+The last row is the one worth pausing on. This is §INT-4's failure mode a second time and in the
+opposite direction: there, three field names disagreed and the checker said "conforms" because the
+schema was open; here, two persisted facts had no declared field at all and the checker said
+nothing because `TestDto` is not in the list it checks. A conformance gate is only as wide as its
+enumeration.
+
+### 16.2 Ruling
+
+**The reasons are read from the draft, on the representation that already carries every other
+compile-state fact. `TestDto` gains two nullable, additive fields — `compileError` and
+`compileDiagnostics` — and no route is added.**
+
+Both are declared as typed schemas rather than as free-form objects, from what the merged producer
+writes: `CompileError` (`code`, with the eleven-value set in `x-compile-error-codes`),
+`CompileDiagnostic`, `CompileStepDiagnostics` and `CompileDiagnostics` (`validatorSchemaVersion`,
+`artifact`, `steps`, `truncated`, `truncationReason`, `attempts`, `exhausted`). `TestDto` gains a
+description stating the mutual exclusion and the alignment invariant of §16.3. `attempts` and
+`exhausted` are the two keys story 10.9's AC-11 requires and does not name; naming them here is
+what stops two components guessing at each other, and it is the judgment §12 reserves to an
+architect rather than a decision the story could take alone.
+
+Nothing is invented. §4.7 requires that "unsupported or ambiguous instructions receive actionable
+diagnostics" and that exhausted repair yields `NEEDS_REVISION`; §4.4 fixes index alignment, one
+entry per source line; §4.3 bounds repair at two attempts; §8.5 makes the caps deployment
+configuration; BRD §6 requires that invalid translation "blocks only that candidate **with a
+plain-language reason**". A reason a user cannot read is not a reason. What was missing was the
+declaration, not the behaviour — which is exactly why 10.9 could persist a document nobody could
+fetch.
+
+### 16.3 Per draft, not per revision — and never stale against the draft it arrives with
+
+The question the draft raised is real: revisions are immutable and drafts are not, so the safer
+instinct is to hang diagnostics on the immutable thing. That instinct is wrong here, for a reason
+that is structural rather than stylistic.
+
+**The compile these diagnostics describe produced no revision.** `publishInvalid` writes no
+`ui_test_revisions` row and clears the current candidate; only a *valid* candidate is ever written
+as a revision (§4.2, §8.1). Hanging diagnostics on a revision would therefore require inventing a
+revision for an artifact the author must never be able to confirm — which is the one thing the
+whole confirmation mechanism exists to prevent. The same holds for `compile_error`: a compile that
+never reached the validator has no artifact at all.
+
+And the staleness the instinct is protecting against does not exist, because the merged code
+already closes it in both directions. A publish only lands while the draft's `source_revision` and
+`configuration_revision` are still the ones the compile was started for; any save that moves either
+clears both columns in the same transaction. So a stored diagnostics document always describes the
+draft's current source. The response makes that checkable rather than merely true: `steps`,
+`sourceRevision`, `configurationRevision`, `compileStatus` and `compileDiagnostics` are read from
+one row in one transaction and travel in one body, so a client aligning `steps[i]` to
+`compileDiagnostics.steps[i]` is aligning two facts that were read together. There is no window in
+which a client can hold a diagnostics document that outranks or lags the source next to it, and
+therefore no need for a `sourceRevision` on the document — a field which, had it been added, would
+have been a second representation of a fact already in the body (§10, §11.5).
+
+### 16.4 The codes, and why `code` stays a string
+
+`compile_error.code` is declared as a free string with the exhaustive set in
+`x-compile-error-codes`, exactly as §14.6 declared `x-conflict-codes` and §15.6 declared
+`x-runner-error-codes`, and for the same two reasons: an example is not assertable, and narrowing a
+public response field to an enum mid-wave makes a legitimate later code a runtime conformance
+failure for an API in flight.
+
+**§14.7's narrowing extends to `x-compile-error-codes`, and to nothing else new.** A story that
+lands a new compile failure condition may add its code to that list in its own PR with a §13 log
+line, provided the code is emitted by the code the same PR lands and it adds no others — both
+`CompileErrorCode` and `GatewayErrorCode` are Java enums, so that is provable by reading the PR.
+Removing a code, adding one the PR does not emit, and every other edit to these schemas remain
+Class C.
+
+Story 10.9 adds no code: every bounded refusal it introduces on the repair path — a budget expiry
+mid-loop, a `GATEWAY_BUSY` on a repair call, a transport failure — is one of the eleven already
+declared. If an implementation finds it needs a twelfth, that is a signal that the bound it is
+reporting was not in §4.3, not a licence to extend the list quietly.
+
+### 16.5 Truncation, and the one place the projection diverges
+
+A truncated diagnostic that looks complete is a worse artefact than no diagnostic, because it moves
+the author's attention to the wrong step and leaves them believing they have seen everything. The
+bounder already refuses to be silent about it at three levels, so the declaration carries all
+three: the marker on a clamped `message` or `excerpt`, `truncated` per step, and `truncated` plus
+`truncationReason` on the document. The schema says in as many words that a client which renders
+this document without rendering those flags turns a bounded report into a false one — which is a
+requirement on 10.10, not decoration.
+
+The caps themselves are **not** frozen as `maxLength`. They are `studio.compile.diagnostics.*`
+configuration and §8.5 asks for one configuration source; a `maxLength: 400` in the contract would
+be a second one, and the first to go stale.
+
+One deliberate divergence in the projection, stated in the document rather than discovered:
+**`compileDiagnostics` is always null on `GET /tests`.** The bound is per draft, so a page of
+drafts in `NEEDS_REVISION` would be a multi-megabyte response carrying per-step reasons no list
+renders. The alternative — capping the page size of an unrelated route as a function of one field's
+worst case — is worse. Nothing a caller needs in order to *know* reasons exist is hidden: the list
+carries `compileStatus` and the bounded `compileError`; only the reasons themselves are one read
+away. This is the one field of `TestDto` whose fill depends on the route, and that is precisely why
+it is declared on the operation and on the field rather than left as an implementation habit.
+
+### 16.6 Authorization — the first surface to carry compiler output
+
+This is the first public response to carry anything the compiler produced, so the question is
+asked rather than assumed: **it needs no new gate, and it gets none.**
+
+The fields ride on `GET /tests/{id}`, whose CSI-scoped read authorization §9.1 already fixes and
+10.4 already implements, and they disclose strictly less than the response they travel in. The
+diagnostics are derived from the draft's own source lines, which the same body returns verbatim in
+`steps`; an `excerpt` is a bounded fragment of the offending node, never the whole step, and passes
+through redaction first (§9.2). The compile path resolves no variable and no secret at all — §9.2,
+and story 10.8's canary test asserts it on the bytes — so there is no resolved value in the
+document to protect. Withholding *why* a draft failed to compile from a principal who is already
+being shown *what* it says would disclose nothing extra and help nobody.
+
+Owner-level permission stays where §9.1 puts it: on compile, confirm and execute, which are writes.
+A reader of the CSI may read the reasons; only an owner may act on them. And the refusal ordering
+of §14.4 is unchanged — this is a read, and a caller who may not read the draft never reaches its
+diagnostics because they never reach the draft.
+
+### 16.7 Alternatives rejected
+
+| Option | Why not |
+|---|---|
+| **A new `GET /tests/{id}/compile-diagnostics` route** (10.9's first named non-option) | The largest Class C change available for the smallest need: a new public operation with its own authorization, its own `409` surface, its own paging question and its own `x-not-yet-implemented` bookkeeping — to return one column of a row the client has just read. It also breaks a test this wave depends on; see §16.8. |
+| **Returning diagnostics in `confirm-compile`'s `409` body** | The diagnostics belong to `NEEDS_REVISION`, which that route refuses *before* it would have them, and an error body is not a read API. `ErrorResponse` is shared with `400`/`401`/`403` and narrowing it was already rejected in §14.6. |
+| **Shipping the field on `UITestDto` without declaring it** | INT-4's failure mode exactly, and invisible to every conformance check — the more so here, since §16.1 shows `TestDto` is not even in the list of schemas checked against their Java records. |
+| **Hanging the diagnostics on a revision** | The compile they describe produced no revision, and inventing one for an unconfirmable artifact would corrupt the one mechanism that makes AI-translated tests acceptable to run (§16.3). |
+| **A second draft schema (`TestDetailDto`) so the list keeps the small shape** | Two shapes for one resource, which is the drift §INT-4 settles, and it changes the `200` of four operations. The divergence is one field wide; a documented null is the smaller truth. |
+| **`compileDiagnostics` as a free-form `object`** | An open schema over a body is a suggestion written in YAML (§6.2). It would also leave the truncation flags — the whole point — undiscoverable by a generator, which is how a client comes to render a bounded report as a complete one. |
+| **Declaring `code` as an `enum`** | Rejected on the same blast-radius ground as §14.6: a public response field consumed by the MFE, narrowed mid-wave, makes a legitimate twelfth code a runtime conformance failure. The extension gets assertability without brittleness. |
+| **Adding `sourceRevision` to the diagnostics document so a client can detect staleness** | Two representations of one fact in one body. The staleness it guards against cannot occur: the fields are read in one transaction with the `sourceRevision` beside them, and any save clears them (§16.3). |
+
+### 16.8 The marker assertion, and why no route was added
+
+`StudioContractTest.theCompileRouteIsShippedAndTheMarkerCameOffForThatOperationOnly` asserts that
+`pendingOperations()` is **exactly** the set of operations still flagged `x-not-yet-implemented`,
+and story 10.9 AC-2 updates that set to `GET /executions/{id}/video` alone when it lands
+`confirm-compile`. A new diagnostics route would have had to carry a marker of its own — it has no
+producer in 10.9 and its consumer is a wave-5 frontend story — and the assertion 10.9 is required
+to write would have been false on the day it was written, in a story that may not edit its own
+acceptance criteria to accommodate an architect's ruling.
+
+**This amendment moves no marker and adds no operation**, so that assertion stays satisfiable
+exactly as AC-2 states it: after 10.9, one pending operation, `GET /executions/{id}/video`, owned
+by 10.16. That is not a happy accident of the chosen shape; it is one of the reasons the shape was
+chosen. A ruling that forces a story to break a gate it was written to satisfy has moved the cost
+rather than paid it.
+
+### 16.9 What story 10.9 must do, and what 10.10 may rely on
+
+Contract-side this is settled. AC-22 already provides for both outcomes — "**if @architect rules
+before wave 4 closes, the exposure lands in the same PR**" — and this ruling is made before wave 4
+closes, so the first branch applies and the criterion needs no edit. The story's:
+
+1. **Add the two components to `UITestDto` and map them from the entity**, deserializing the two
+   `jsonb` columns into the declared shapes. This is additive: every existing field keeps its name,
+   its type and its position, and no other response body moves.
+2. **Emit `attempts` and `exhausted`** on the document `DiagnosticsBounder` builds, under those
+   names. AC-11 already requires both facts; this fixes the two keys so 10.10 is not guessing.
+3. **Null `compileDiagnostics` on the list projection** (§16.5), and assert it — one test that a
+   draft with a stored document returns it from `GET /tests/{id}` and not from `GET /tests`.
+4. **Add `TestDto` to `theFrozenSchemasAndTheJavaTypesShareTheSameFieldNames`**, so the gap §16.1's
+   last row describes cannot reopen silently. This is the assertion whose absence let two persisted
+   facts go undeclared for four waves, and it costs one line.
+5. **Turn `DiagnosticsExposureEscalationTest` from a named disabled test into a live one.** Its
+   subject is no longer a missing field; it is the round trip — a compile that fails leaves a
+   document a caller can read, with its truncation flags intact.
+6. **Claim nothing about semantics.** AC-15a's honesty assertion covers the new field descriptions
+   too: nothing on this surface may state or imply that a step the validator accepted does what its
+   author meant (§4.1, §4.5, BRD §6).
+
+**Task T-10.9.9's "No edit to `TestDto` or `UITestDto`" is superseded by this ruling** and by
+AC-22's own first branch. §12 binds an architect not to edit a story's Title, Acceptance Criteria,
+Scope or Status; a task line is the story owner's to apply, and it is named here so the conflict is
+resolved deliberately rather than noticed in review.
+
+**Story 10.10 is unblocked.** It may rely on: both fields on the single-draft read; one diagnostics
+entry per original step, index aligned to the `steps` in the same body; the truncation flags at all
+three levels; `attempts` and `exhausted` for telling an author that repair happened and stopped;
+the eleven-value `compileError` code set for the failure cases that are not the author's fault; and
+the guarantee that what it renders describes the source it is rendering beside. What it may not do
+is render the document without its truncation flags, or describe a validated step as a correct one.
+
+### 16.10 Recorded against §12's four requirements
+
+- **The divergence.** Story 10.9 persists `compile_error` and `compile_diagnostics` through merged,
+  conditional, bounded code, and no declared response body carried either — while the `compileTest`
+  operation's own description referred a reader to `compileError` by name. Story 10.10 depends on
+  10.9 precisely to render those reasons and had no field to read. No test could have caught it:
+  `TestDto` is not among the nine schemas `StudioContractTest` checks against their Java records.
+- **The source (Article IV).** Nothing invented. The diagnostics and their actionability are §4.7;
+  index alignment, one entry per source line, is §4.4; the repair bound that `attempts` and
+  `exhausted` report is §4.3; the caps are §8.5 configuration and are deliberately not frozen as
+  `maxLength`; the public surface and its CSI scoping are §8.3 and §9.1; the plain-language reason
+  a blocked candidate owes its author is BRD §6. The eleven codes and the document's four levels of
+  structure are read from merged Java — `CompileErrorCode`, `GatewayErrorCode` and
+  `DiagnosticsBounder` — not chosen here. The two names this ruling does choose, `attempts` and
+  `exhausted`, name facts §4.3 and §4.7 already fix.
+- **Consuming stories re-checked.** **10.9** — gains the exposure under AC-22's own first branch;
+  no criterion is edited, and §16.9 lists the work. **10.10** — unblocked; its dependency is now
+  satisfiable. **10.11** — consumes `ExecutionErrorCode`, untouched here; see §18.3. **10.8** —
+  merged, and none of its guards, bounds or statements are changed; `DiagnosticsBounder`'s caps and
+  `CompileStateService`'s statements are declared, not altered. **10.6 / 10.7 / 10.12 / 10.13 /
+  10.14** — no runner-produced body, no internal route and no callback is touched by §16. The MFE
+  validates its fixtures against `TestDto` with Ajv and the two fields are optional, so no fixture
+  that validated before can fail now — measured, not reasoned; see §18.5. Both copies of
+  `artifact.schema.json` are byte-unchanged.
+- **Contract test before and after.** Measured on this branch. Before: `StudioContractTest` 9/9,
+  `ArtifactSchemaDriftTest` 3/3, `CompileRouteContractDivergenceTest` 9/9, `studio-runner`
+  `test/contract.test.ts` 14/14, frontend `npx vitest run` 98 passed with one unrelated suite
+  failing to resolve `@put/core-components`. After: identical. §16 adds only optional fields and
+  new component schemas, and both `getTest` examples were validated against the amended `TestDto`
+  with Ajv before the run.
+
+## 17. INT-9 — what `VideoEvidence.partial` means and who sets it (closes 10.13 AC-18)
+
+### 17.1 The gap, verified — and it is worse than "no producer"
+
+| Fact | Evidence, worktree `epic/EPIC-10` at `6cc14f220` |
+|---|---|
+| `VideoEvidence` requires `[status, partial]`; `partial` is documented "True when an available recording covers only part of the run". | `openapi.yaml` |
+| `RunnerEvidence` was closed on `[videoKey, manifestKey, state]` with `state ∈ {PENDING, STORED, FAILED, UNAVAILABLE}`. Nothing on the runner wire could express partiality. | `openapi.yaml` before this amendment |
+| The runner's own type is the same three fields, and its producer narrows the state further to `PENDING \| FAILED \| UNAVAILABLE` — `STORED` is 10.14's word. | `studio-runner/src/reporting/snapshot.ts:40-44`, `src/run/recording.ts` |
+| `evidenceFor` already decides *playability* — a non-trivial size **and** a readable EBML header — but nothing decides *completeness*. | `src/run/recording.ts` |
+| **The API sets `videoPartial = Boolean.FALSE` unconditionally** whenever a report carries evidence. | `RunnerReportProjection.java:126-133` |
+| `ExecutionSnapshotMapper` publishes `Boolean.TRUE.equals(getVideoPartial())`, so a null column also becomes `false`. | `ExecutionSnapshotMapper.java:91` |
+| `V14` created `video_partial BOOLEAN` for §8.1's "partial flag" and nothing has ever written it non-null. | `V14__studio_execution_history_v2.sql:40` |
+| The contract's own `SnapshotErrorTimeout` example carries `partial: true` on precisely the condition story 10.13 creates. | `openapi.yaml` |
+
+The escalation described a field with no producer. The verification found something one step worse:
+**the field is not unpopulated, it is falsely populated.** Every execution the API publishes today
+states `partial: false` — that is, *this recording is complete* — including one whose browser was
+killed mid-step. "Promising a complete video" is the exact wording of the epic's third acceptance
+bullet for story 10.13, and the API currently does it on every run. A field nothing populates is a
+gap; a field something populates with a constant is a wire statement that is false, and it is the
+kind that survives a green build because `false` is a valid boolean.
+
+### 17.2 Ruling
+
+**The field stays, and it gains a producer. `RunnerEvidence` gains an optional boolean `partial`,
+set by the runner, projected by the API unchanged.**
+
+Removing `partial` was considered and is not available: §6.1 requires the API to "expose
+`videoError`, `videoExpiresAt`, and **whether an available recording is partial**", §8.1 lists the
+"partial flag" among the columns V14 creates, BRD §6 requires that crash and storage failures
+"expose honest evidence state", and the epic's own acceptance bullet uses the word. Under Article
+IV the sources fix this field; what was missing was the producer.
+
+**Only the runner can observe it.** Completeness is a property of how the recording *ended* — the
+recorder closed in an orderly way, or it did not — and the component that knows is the one that
+ordered the stop, waited out the bounded grace and then killed the tree. The API holds no fact from
+which it could be derived (§17.4), and it holds no permission to inspect the object either; the
+runner holds no Get or List permission on the bucket at all (§6.2), so neither side can measure the
+file after the fact. The observation exists for exactly one instant, in exactly one process.
+
+### 17.3 What `partial` means, exactly
+
+**The recording does not cover the whole browser session it was recording.** Frames are missing
+relative to what the browser actually did, because the recorder was not closed in an orderly way.
+
+Two readings were available and the wrong one is the tempting one:
+
+- *coverage of the recording* — frames were lost at the end. **This is the ruling.**
+- *coverage of the test* — the test did not finish. **Rejected.** Under that reading a test that
+  fails its second assertion of five would report `partial: true` over a recording that shows
+  perfectly everything that happened, and `partial` would become a second, worse spelling of
+  "`FAILED`". The contract's own examples already contradict it: a `FAILED` execution carries
+  `partial: false`.
+
+Two consequences follow and both are stated in the schema, because each is a case an implementer
+will meet in wave 4:
+
+- **A deadline kill whose ordered stop flushed cleanly is *not* partial.** Story 10.13 gives the
+  child `browserStopTimeoutMs` to close and await the recording context precisely so the webm is
+  finalized; when that succeeds the file covers the session to its end. A timeout is not
+  automatically a truncation.
+- **A recorder that died on a *passing* run *is* partial.** Nothing about partiality follows from
+  the outcome in either direction.
+
+Partiality is meaningful only where a playable object exists — `state: PENDING` or `STORED`, which
+the API projects to `PROCESSING` or `AVAILABLE`. It is `false` with `FAILED` and `UNAVAILABLE`,
+because a recording that does not exist is not a partial one. That is also §6.1's own phrasing:
+whether an **available** recording is partial.
+
+### 17.4 Why it is never derived from the outcome
+
+The cheapest fix available was to infer it API-side: `errorCode == TIMEOUT` → `partial = true`. It
+is rejected, on two independent grounds.
+
+**It inverts the epic's rule.** Evidence state is independent of the check outcome (§6.1), and the
+epic's definition-of-done item is that upload failure never overwrites a known assertion outcome.
+The independence is usually read in one direction — evidence must not corrupt the outcome — but it
+is a statement about two facts with different producers, and deriving one from the other in either
+direction collapses them. An API that computed evidence from outcome would be asserting, on the
+wire, a correlation it has not observed.
+
+**It is false in both directions**, which §17.3 makes concrete: a cleanly flushed timeout is
+complete, and a recorder crash on a passing run is not. Inferring would therefore be wrong on
+exactly the two cases a user most needs to be told the truth about — the run that was cut short but
+whose video is whole, and the run that passed but whose proof is not.
+
+The same reasoning rejects the mirror-image temptation on the runner side: `partial` must not be
+computed from `outcome.errorCode` inside the runner either. It is read from what the stop path
+observed, or it is `false`.
+
+### 17.5 Why optional, and what that costs
+
+`partial` is declared **optional**, with "absent means `false`" stated in the schema, rather than
+added to `RunnerEvidence`'s `required` list. The reason is mechanical: `RunnerEvidence` is closed,
+the merged runner emits three keys, and a new `required` field would turn `test/contract.test.ts`
+red on a producer this ruling is not entitled to change — an architect breaking a green suite to
+declare a field is the mirror of a story loosening a schema to keep one green.
+
+The cost is that an optional boolean can be forgotten. Three things pay it down: the schema states
+which story is the producer and which condition makes it true; §17.7 makes emitting it explicitly
+on every `FINAL` a story-level obligation with a test, so "absent" stops being reachable from the
+runner the moment 10.13 lands; and 10.14 inherits the field already declared, so the story §8.1
+assigns `RunnerEvidence` to never has to reopen a closed body. When 10.14 lands, promoting `partial`
+to `required` is a Class B edit with a one-line rationale and no ambiguity left in it — recorded as
+**O-14** rather than done now, because the producer must precede the requirement. That ordering is
+the whole lesson of this section.
+
+### 17.6 Alternatives rejected
+
+| Option | Why not |
+|---|---|
+| **Remove `partial` from `VideoEvidence`** | §6.1, §8.1, BRD §6 and the epic's acceptance bullet all fix it. Article IV: the source wins. It is also `required` on a public body five stories and the MFE consume, so removal is the most expensive edit on the table, taken to avoid the cheapest one. |
+| **Widen `RunnerEvidence.state` with `STORED_PARTIAL`** | Collapses two orthogonal facts — did storage succeed, and is the recording whole — into one enum, and would need a second value for the `PENDING` case, then a third for 10.14. It also breaks the documented `state → VideoStatus` projection, which is one-to-one today. Widening an enum is Class B for exactly this kind of consequence. |
+| **The API infers it from `errorCode == TIMEOUT`** | Inverts §6.1's independence and is false in both directions (§17.4). |
+| **The API probes the stored object's duration and compares it to `durationMs`** | Invents a measurement nobody specified, on a path with no budget for it, to recover a fact the producer had for free and threw away. It would also be wrong whenever the recorder's own timeline and the run's differ, which §11 has already established they do. |
+| **A `partialReason` string beside the boolean** | Not asked for by any source, and the reason is already carried: `outcome.errorCode` names what stopped the run, and the runner's own log line names a recording failure. A second free-text field on evidence is where a resolved value eventually leaks (§9.2). |
+| **Leave it to 10.14 entire, as §8.1 assigns** | §8.1 assigns *the schema's ownership*, not the observation. 10.14 uploads a file; it cannot see how the recorder ended, because by then the process that knew is gone. Deferring would also have left 10.13 — the story that creates the condition — shipping a truncated recording reported as complete. |
+
+### 17.7 What stories 10.13 and 10.14 must do
+
+Contract-side this is settled. The rest is the stories':
+
+1. **Story 10.13 is the producer.** Its AC-16 already splits the kill path on whether the bounded
+   stop flushed a playable file; this ruling adds the third case that split currently absorbs — the
+   grace expired, the tree was killed, and the file left behind is *nevertheless* playable by
+   `recording.ts`'s size-and-header check. Today that case reports `PENDING` and the API publishes
+   `partial: false`: a salvaged prefix presented as a complete video, which is the epic bullet
+   AC-16 exists to satisfy. The distinguishing fact is one the parent already holds — did the
+   ordered stop complete within `browserStopTimeoutMs` — and it must be recorded **before** the
+   signal, for the same reason AC-3 records the timeout kind before killing.
+2. **It emits `partial` explicitly on every `FINAL` report**, `false` included, so "absent" is not
+   reachable from the runner, and asserts it on the serialized body alongside AC-16's other two
+   cases. This is inside AC-16's own subject — a truncated run telling the truth about its video —
+   and needs no new criterion, but it is a third case where the story drafted two.
+3. **`partial` is never read from, or written from, `outcome`** (§17.4), and AC-16's
+   independence assertion extends to it in both directions: the value is identical for a killed run
+   whose recording flushed and a passing run whose recording did not.
+4. **Story 10.14 carries it through unchanged** when it moves `state` to `STORED`, and lands the
+   API-side half: `RunnerReportProjection` stops writing `Boolean.FALSE` and projects the reported
+   value, `video_partial` is persisted from it, and `ExecutionSnapshotMapper` keeps publishing the
+   column it already reads. Until that lands the runner reports the truth and the API discards it —
+   which is visible, bounded and strictly better than today, where the API states a falsehood.
+   Recorded as **O-13** so it cannot be lost between two stories that each think it is the other's.
+
+### 17.8 Recorded against §12's four requirements
+
+- **The divergence.** `VideoEvidence.partial` is `required` on the public snapshot; `RunnerEvidence`
+  was closed on three fields and could not express it; and `RunnerReportProjection` filled the gap
+  with a hardcoded `Boolean.FALSE`, so the API asserts that every recording is complete — including
+  one whose browser was killed mid-step, which is the condition story 10.13 introduces and the
+  contract's own `SnapshotErrorTimeout` example shows as `partial: true`.
+- **The source (Article IV).** Nothing invented. §6.1 requires exposing "whether an available
+  recording is partial" and separates evidence state from outcome; §8.1 lists the partial flag among
+  V14's columns; §5.2 gives the ordered close that flushes the video and the parent-enforced kill
+  that can pre-empt it; BRD §6 requires honest evidence state on crash and storage failure; the
+  epic's §10.13 acceptance bullet forbids "promising a complete video". The name is the contract's
+  own, unchanged; the type is the public field's own, unchanged.
+- **Consuming stories re-checked.** **10.13** — becomes the producer; no criterion is edited, and
+  §17.7 lists the work inside AC-16's existing subject. **10.14** — inherits the field already
+  declared, so it never reopens a closed body, and owns the API-side projection (O-13). **10.6** —
+  its `admissionClient` and `reportClient` branch on status and do not parse evidence; an optional
+  field adds no requirement, and the merged runner's bodies stay conformant, which is why the field
+  is optional. **10.12** — `evidenceFor` and the `outcome ≠ evidence` independence are untouched.
+  **10.16 / 10.15** — consume `VideoEvidence` as declared; `partial` keeps its name, type and
+  `required` status on the public body, so nothing changes for them except that the value becomes
+  true sometimes. **10.7** — the projection it owns gains one line in a later story, listed as O-13.
+  Both copies of `artifact.schema.json` are byte-unchanged.
+- **Contract test before and after.** Measured. `studio-runner` `test/contract.test.ts` 14/14 before
+  and after — an optional property on a closed body admits the three-key bodies the merged runner
+  sends, and the runner's validator implements `additionalProperties` (which is what would have
+  broken) and ignores nothing relevant here. `StudioContractTest` 9/9, `ArtifactSchemaDriftTest`
+  3/3, `CompileRouteContractDivergenceTest` 9/9, frontend 98 passed — all unchanged.
+
+## 18. Three smaller settlements, and the open items after this amendment
+
+### 18.1 Who writes the timeout text onto a `RUNNING` step (10.13, open question 1)
+
+**Confirmed as drafted: the runner writes nothing, and the API's projection owns the text.** The
+component is `RunnerReportProjection.projectSteps` — story 10.7's, merged — which already
+synthesizes the step rows the runner never touched and already owns `originalText`.
+
+Four reasons, briefly. `RunnerStepState.failure` is documented "null unless the status is `FAIL`",
+so writing it there is a Class B change to a field's meaning, taken to carry a fact the report
+already carries as `outcome.errorCode: TIMEOUT`. The API is the authority for the snapshot it
+publishes (§8.4) and the report is not the snapshot (§INT-4). The text is derivable without
+ambiguity from two facts the API holds — a terminal `TIMEOUT` and exactly the step left `RUNNING`.
+And putting it on the wire would be two representations of one fact, rejected three times already
+in this ADR.
+
+The constraint on the projection: it may write that message **only** where it can name the cause —
+a terminal `errorCode` of `TIMEOUT` and a step still `RUNNING` — and must invent nothing for any
+other code or status. Today `projectSteps` copies `failure` verbatim, so the contract's
+`SnapshotErrorTimeout` example is aspirational and nothing produces it. That is the same defect
+class as §17.1 one field over, and it is assigned with it: **O-13**, story 10.14, which is the next
+story to touch that method and the first after which a real runner `TIMEOUT` can reach it.
+
+### 18.2 O-11 — the missing CHECK on `error_code`
+
+**Not attached to story 10.9, and now pointed at a named owner.** 10.9 does ship the next Studio
+migration, but it is on `ui_tests` and it carries an unusually specific proof obligation — applied
+against a database seeded with rows in all five compile states, a soft-deleted row, a quarantined
+row and a legacy row stranded in `COMPILING` (AC-17). Bolting an unrelated constraint on the
+partitioned execution-history table into that migration would weaken both proofs and widen a story
+whose scope this ruling may not edit.
+
+It moves to **the next migration that touches `ui_test_executions`**, which on the current plan is
+story 10.14's evidence work — the same story that owns O-13, on the same table, for the same
+reason. Two facts recorded so whoever lands it has no decision left to make: the constraint's form
+is V14 §1's own, `error_code IS NULL OR error_code IN (<the eight declared values>)`, widened in
+lockstep with the enum whenever §15's vocabulary grows; and `ui_test_executions` is partitioned, so
+it wants `ADD CONSTRAINT ... NOT VALID` followed by `VALIDATE CONSTRAINT` rather than a blocking
+scan of every partition. The urgency is unchanged: no row can hold a ninth value today, and only a
+restored dump or a manual repair could make one.
+
+### 18.3 O-12 — the frontend's narrower union
+
+**No action now; it is story 10.11's, and it is a requirement rather than a note.**
+
+Verified rather than reasoned this time: `frontend/src/types/studio/studioTypes.ts` still declares a
+six-member `ExecutionErrorCode`, `npx vitest run` in `frontend/` is **98 passed** with one suite
+failing to resolve `@put/core-components` — an unrelated, pre-existing import failure in an
+accessibility test — and nothing in the suite narrows on the union. So the union being two values
+short breaks nothing today, exactly as §15.5 predicted.
+
+Hand-widening it now would be the worst available move: it would spend the edit and leave the
+mechanism that let it drift in place. Story 10.11 is the first story to consume `errorCode`, and it
+must **generate the union from this document or assert it against this document** —
+`studioContract.test.ts` already parses `openapi.yaml` and is the natural home — so that the next
+widening is a red test rather than a silent narrowing.
+
+One addition this amendment creates: §16 declares `x-compile-error-codes`, and story **10.10** is
+the first frontend story to consume a code set of that kind, a wave *earlier* than 10.11. Whichever
+lands first should install the document-reading assertion once, and the other should extend it
+rather than write a second one. Two hand-maintained copies of one vocabulary in two languages is
+the arrangement that produced INT-4 and §15.6, and this is the third time it has come up.
+
+### 18.4 Open items after this amendment
+
+| Item | Status at `6cc14f220` |
+|---|---|
+| **O-6** | Still open, unchanged. Destination policy on the job envelope is 10.18's (SPK-05). |
+| **O-9** | Still open and still landable under §14.7's pre-ruling by the next story to touch the internal callbacks. Untouched by this amendment: §16 and §17 declare no `409` and no conflict code. |
+| **O-10** | Still open and now overdue. `400` versus `404` for an unknown, deleted or quarantined draft on `GET`/`PUT`/`DELETE /tests/{id}` is a public-surface status decision, and §16 deliberately did not fold it in: this amendment adds fields to a `200`, and bundling a status change would have made its before/after measurement ambiguous about which change did what. Raise it on its own before the pilot. |
+| **O-11** | Still open, **re-pointed** to the next migration touching `ui_test_executions` (story 10.14), with the constraint's exact form and the partitioned-table caveat recorded (§18.2). |
+| **O-12** | Still open, **assigned and verified**: story 10.11, as a requirement to generate or assert the union from this document rather than widen it by hand (§18.3). |
+| **O-13** *(new)* | The API-side half of §17 and §18.1, both in `RunnerReportProjection`: stop writing `videoPartial = Boolean.FALSE` and project the runner's reported value; and synthesize the timed-out step's message where — and only where — a terminal `TIMEOUT` meets a step still `RUNNING`. Owner: story **10.14**. Until it lands, the runner reports the truth and the API discards it. |
+| **O-14** *(new)* | Promote `RunnerEvidence.partial` from optional to `required` once 10.14 has landed and every producer emits it (§17.5). Class B, one line, and deliberately sequenced after the producer rather than before it. Owner: story **10.14** or the first story after it to touch `RunnerEvidence`. |
+
+### 18.5 What was measured, and what was not
+
+Every number in §16.10 and §17.8 was measured on this branch, before and after the amendment, in
+the same worktree: `StudioContractTest` 9/9, `ArtifactSchemaDriftTest` 3/3,
+`CompileRouteContractDivergenceTest` 9/9, `studio-runner` `test/contract.test.ts` 14/14, and
+`frontend` `npx vitest run` 98 passed with one unrelated suite failing to resolve
+`@put/core-components`. The frontend suite is the one §15.10 could only reason about because
+`node_modules` was absent; it is installed in this worktree now and the result is a measurement.
+The two new `getTest` examples were validated against the amended `TestDto` with Ajv before the
+suites were run, because an example that does not validate is the decorative artefact §14.6 exists
+to complain about.
+
+This amendment changes no story's Title, Acceptance Criteria, Scope or Status, and touches no
+backend Java, no frontend source and no `studio-runner/` source. It records a ruling in each of the
+two wave-4 story files and supersedes one task line in story 10.9, which is named in §16.9 for its
+owner to apply.

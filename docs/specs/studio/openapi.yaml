@@ -112,6 +112,14 @@ paths:
         Results are filtered by the caller's readable CSIs **before** pagination, even when no
         `csiId` filter is supplied (architecture §9.1). Soft-deleted and quarantined drafts are
         never returned.
+
+        **`compileDiagnostics` is always `null` on this route** and is read from
+        `GET /tests/{id}`. It is the one field of `TestDto` this projection omits, and the reason
+        is its bound: the document is capped per draft at a configured byte limit (§8.5), so a
+        page of drafts in `NEEDS_REVISION` would be a multi-megabyte response carrying per-step
+        reasons no list renders. `compileStatus` — and `compileError`, which is a bounded code —
+        are on this route, so nothing a caller needs in order to know that reasons exist is
+        hidden; only the reasons themselves are one read away (ADR-002 §16.5).
       parameters:
         - { $ref: '#/components/parameters/CsiIdQuery' }
         - { $ref: '#/components/parameters/Page' }
@@ -255,6 +263,61 @@ paths:
                     compileStatus: READY
                     currentCandidateRevisionId: 22222222-2222-2222-2222-222222222222
                     confirmedRevisionId: 22222222-2222-2222-2222-222222222222
+                    compileError: null
+                    compileDiagnostics: null
+                needsRevision:
+                  summary: The compiler could not make this draft runnable, and says why
+                  description: |
+                    `NEEDS_REVISION` after a bounded repair (§4.3, §4.7). One entry per original
+                    step, index aligned, including the steps that were accepted. The second step
+                    lost diagnostics to the per-step cap and says so; nothing here claims the
+                    accepted steps do what their author meant (§4.5).
+                  value:
+                    id: 11111111-1111-1111-1111-111111111111
+                    name: Citi login smoke
+                    description: Verifies the login page still accepts the pilot account
+                    csiId: '60406'
+                    environment: Production
+                    steps:
+                      - Go to "https://www.citi.com"
+                      - Wobble the sidebar until it feels right
+                    variables: []
+                    configuration:
+                      browser: chromium
+                      viewport: { width: 1920, height: 1080 }
+                      timeoutSeconds: 30
+                      waitStrategy: networkidle
+                    status: PAUSED
+                    schedule: null
+                    createdBy: pilot.user@citi.com
+                    createdAt: '2026-09-01T09:00:00Z'
+                    updatedAt: '2026-09-01T09:30:00Z'
+                    lastRunAt: null
+                    lastRunStatus: null
+                    sourceRevision: 4
+                    configurationRevision: 1
+                    compileStatus: NEEDS_REVISION
+                    currentCandidateRevisionId: null
+                    confirmedRevisionId: 22222222-2222-2222-2222-222222222222
+                    compileError: null
+                    compileDiagnostics:
+                      validatorSchemaVersion: 1.0.0
+                      artifact: []
+                      steps:
+                        - { stepIndex: 0, ok: true, diagnostics: [], truncated: false }
+                        - stepIndex: 1
+                          ok: false
+                          diagnostics:
+                            - code: UNSUPPORTED_ACTION
+                              stepIndex: 1
+                              message: 'No supported action matches "wobble"; the supported actions are listed in the syntax reference…[truncated]'
+                              node: action
+                              excerpt: 'Wobble the sidebar'
+                          truncated: true
+                      truncated: false
+                      truncationReason: null
+                      attempts: 3
+                      exhausted: true
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -345,7 +408,8 @@ paths:
 
         `202` therefore means the attempt was *started*, not that it will succeed. Pool saturation
         and gateway failure surface asynchronously as `compileStatus: STALE` carrying
-        `compileError`, never as a status code on this response (§4.3).
+        `compileError`, never as a status code on this response (§4.3). `compileError` and, for an
+        unrunnable result, `compileDiagnostics` are both read from `GET /tests/{id}` (ADR-002 §16).
       x-implemented-by: '10.8'
       parameters:
         - { $ref: '#/components/parameters/TestId' }
@@ -1268,6 +1332,16 @@ components:
     TestDto:
       type: object
       required: [id, name, csiId, environment, steps, variables, configuration, sourceRevision, configurationRevision, compileStatus]
+      description: |
+        One Studio draft. `compileStatus`, `currentCandidateRevisionId`, `confirmedRevisionId`,
+        `compileError` and `compileDiagnostics` are the compile-state projection of §4.2, read
+        from the draft row in one transaction — so the diagnostics in a response are always
+        index-aligned to the `steps` in the *same* response, and describe the `sourceRevision`
+        and `configurationRevision` in the same response (ADR-002 §16.3).
+
+        `compileError` and `compileDiagnostics` are **mutually exclusive** and at most one is
+        ever non-null: a failed compile (`STALE`) carries a code, an unrunnable one
+        (`NEEDS_REVISION`) carries per-step reasons, and every other transition clears both.
       properties:
         id: { type: string, format: uuid }
         name: { type: string }
@@ -1298,6 +1372,8 @@ components:
           enum: [STALE, COMPILING, AWAITING_CONFIRMATION, READY, NEEDS_REVISION]
         currentCandidateRevisionId: { type: string, format: uuid, nullable: true }
         confirmedRevisionId: { type: string, format: uuid, nullable: true }
+        compileError: { $ref: '#/components/schemas/CompileError' }
+        compileDiagnostics: { $ref: '#/components/schemas/CompileDiagnostics' }
 
     TestPage:
       type: object
@@ -1531,6 +1607,144 @@ components:
         artifactHash: { type: string, minLength: 64, maxLength: 64 }
         sourceRevision: { type: integer, format: int64 }
         configurationRevision: { type: integer, format: int64 }
+
+    CompileError:
+      type: object
+      nullable: true
+      required: [code]
+      description: |
+        Why a compile attempt ended without a candidate, for a reason that is **not** the author's
+        source (§4.7). Non-null only with `compileStatus: STALE`, and never non-null at the same
+        time as `compileDiagnostics`.
+
+        **A bounded code and nothing else.** No prompt, no gateway response body, no source text,
+        no stack trace and no resolved value ever reaches this field (§4.3, §9.2). Every condition
+        it names is retryable by the author with no loss: the draft is saved and unchanged, the
+        confirmed revision still runs, and an explicit recompile is the whole remedy.
+
+        `code` stays a free string for the same reason `ErrorResponse.error` does; the exhaustive
+        set the deployed API can write is `x-compile-error-codes`, which is machine-readable for
+        the same reason `x-conflict-codes` is (ADR-002 §14.6, §16.4).
+      properties:
+        code: { type: string }
+      x-compile-error-codes:
+        - COMPILE_POOL_SATURATED
+        - COMPILE_BUDGET_EXCEEDED
+        - VALIDATOR_UNAVAILABLE
+        - COMPILE_INTERNAL_ERROR
+        - GATEWAY_UNAVAILABLE
+        - GATEWAY_BUSY
+        - GATEWAY_TIMEOUT
+        - GATEWAY_TRANSPORT
+        - GATEWAY_PARSE_FAILURE
+        - COMPILE_INPUT_TOO_LARGE
+        - GATEWAY_OUTPUT_TOO_LARGE
+
+    CompileDiagnostic:
+      type: object
+      required: [code, stepIndex, message, node, excerpt]
+      description: |
+        One validator rejection, bounded and redacted for publication (§4.5, §4.7). The same five
+        fields as the internal `RunnerDiagnostic` the validator produces, declared separately
+        because what reaches a user is the **bounded** copy: `message` and `excerpt` are clamped
+        to deployment-configured caps (§8.5) and a clamped string ends with a visible truncation
+        marker, so a cut diagnostic never reads as a complete one. The caps are configuration and
+        are deliberately not frozen here as `maxLength`.
+
+        Nothing here asserts that a step the validator accepted does what its author meant; static
+        validation "cannot prove the locator matches the application or the assertion captures the
+        user's intent" (§4.1, §4.5).
+      properties:
+        code: { type: string }
+        stepIndex:
+          type: integer
+          nullable: true
+          description: Null for artifact-level problems belonging to no single step.
+        message: { type: string }
+        node:
+          type: string
+          nullable: true
+          description: Syntax kind of the offending node, when the problem is a node.
+        excerpt:
+          type: string
+          nullable: true
+          description: Bounded excerpt of the offending node only — never the whole step (§9.2).
+
+    CompileStepDiagnostics:
+      type: object
+      required: [stepIndex, ok, diagnostics, truncated]
+      description: |
+        One entry per **original source step**, index aligned, present even where the validator
+        returned nothing for that step (§4.4, "one entry per source line"). The entry count equals
+        the length of `steps` on the same `TestDto`.
+      properties:
+        stepIndex: { type: integer }
+        ok: { type: boolean }
+        diagnostics:
+          type: array
+          items: { $ref: '#/components/schemas/CompileDiagnostic' }
+        truncated:
+          type: boolean
+          description: |
+            True when this step had more diagnostics than the per-step cap, or when its
+            diagnostics were shed to fit the document cap. "There were no more problems" and "we
+            stopped telling you" are different facts, and this is the field that tells them apart.
+
+    CompileDiagnostics:
+      type: object
+      nullable: true
+      required: [validatorSchemaVersion, artifact, steps, truncated, attempts, exhausted]
+      description: |
+        Why the last compile produced nothing runnable, in the author's own step order (§4.7,
+        "unsupported or ambiguous instructions receive actionable diagnostics"). Non-null only
+        with `compileStatus: NEEDS_REVISION`, and never non-null at the same time as
+        `compileError`.
+
+        **Truncation is explicit at all three levels and never silent**: a clamped `message` or
+        `excerpt` ends with a marker, a step that lost diagnostics carries `truncated: true`, and
+        a document that had to shed whole steps' diagnostics to fit the byte cap carries a
+        document-level `truncated: true` with a `truncationReason`. A client may therefore always
+        distinguish "nothing more was wrong" from "we stopped telling you"; a client that renders
+        this document without rendering those flags turns a bounded report into a false one.
+
+        The document describes **the last attempt only**. Repair is bounded at two attempts
+        (§4.3), so at most three attempts are made; `attempts` says how many happened and
+        `exhausted` says whether the bound was reached with the artifact still invalid. Earlier
+        attempts' diagnostics describe artifacts the author never saw and are not accumulated.
+
+        **It is per draft, not per revision**, because the compile it describes produced no
+        revision: an invalid candidate is never written to `ui_test_revisions` (§4.2, §8.1). It is
+        also never stale against the draft it is returned with — every writer conditions on the
+        draft's `source_revision` and `configuration_revision`, and any save that moves either
+        clears it (ADR-002 §16.3).
+      properties:
+        validatorSchemaVersion: { type: string }
+        artifact:
+          type: array
+          description: Artifact-level rejections belonging to no single step.
+          items: { $ref: '#/components/schemas/CompileDiagnostic' }
+        steps:
+          type: array
+          items: { $ref: '#/components/schemas/CompileStepDiagnostics' }
+        truncated:
+          type: boolean
+          description: True when whole steps' diagnostics were shed to fit the document byte cap.
+        truncationReason:
+          type: string
+          nullable: true
+          enum: [TOTAL_BYTES, null]
+          description: Present only when `truncated` is true.
+        attempts:
+          type: integer
+          minimum: 1
+          description: |
+            How many compile attempts this document describes the last of — 1 when the first
+            attempt was invalid and no repair was made, at most `1 + the repair bound` (§4.3).
+        exhausted:
+          type: boolean
+          description: |
+            True when the repair bound was reached and the artifact was still invalid (§4.7,
+            "Exhausted repair yields NEEDS_REVISION").
 
     ExecuteAccepted:
       type: object
@@ -2009,6 +2223,28 @@ components:
           description: The server-derived key from the job, echoed back — never one the runner chose (§6.2).
         manifestKey: { type: string, nullable: true }
         state: { type: string, enum: [PENDING, STORED, FAILED, UNAVAILABLE] }
+        partial:
+          type: boolean
+          description: |
+            **Whether the recording the runner is reporting covers the whole browser session it
+            was recording** — `true` when frames were lost because the recorder was not closed in
+            an orderly way, typically after a parent-enforced deadline kill whose bounded stop
+            grace expired (§5.2, §6.1, ADR-002 §17).
+
+            It is a fact about the **recording**, never about the run: a test that failed at its
+            second step has a complete recording of what happened, and `partial` stays `false`. It
+            is therefore never derived from `outcome` in either direction, by either component —
+            evidence state is independent of the check outcome (§6.1), and a deadline kill whose
+            ordered stop *did* flush is not partial while a recorder that died on a passing run is.
+
+            Only the runner can observe it. The API holds no fact from which it could be inferred,
+            and it projects this value onto `VideoEvidence.partial` unchanged.
+
+            **Optional, and absent means `false`.** The merged runner does not emit it yet: the
+            producer is the deadline kill of story 10.13, which is also the first condition that
+            can make it true, and story 10.14 carries it through unchanged when it moves `state`
+            to `STORED`. Meaningful only with `state: PENDING` or `STORED`; `false` otherwise,
+            because a recording that does not exist is not a partial one.
 
     RunnerReport:
       type: object
