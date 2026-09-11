@@ -214,3 +214,23 @@ describe('AC-6a — a sandbox failure is reported, never worked around', () => {
     expect(child).not.toMatch(/retry|relaunch/iu);
   });
 });
+
+/**
+ * AC-6b — the same launch proven **in-cluster**.
+ *
+ * Non-root under the cluster's PodSecurity level, with the seccomp profile SPK-04 selects
+ * (`RuntimeDefault` vs. an approved `Localhost`), `readOnlyRootFilesystem: true`, `emptyDir`
+ * scratch and `emptyDir{medium: Memory}` `/dev/shm`, on the internal Playwright image. Verified in
+ * **story 10.18**, evidenced by **SPK-04**; ADR-001 §9 leaves `seccompProfile` to that spike
+ * deliberately.
+ *
+ * Recorded here as **skipped, never passed**, so this package carries the deferral rather than
+ * leaving it to a document. There is no fallback that disables the sandbox, and there will not be
+ * one: if Chromium cannot start sandboxed in-cluster, that is a finding, not a configuration
+ * problem to work around (architecture §9.3).
+ */
+describe('AC-6b — the sandbox proven in-cluster', () => {
+  it.skip('starts sandboxed under the cluster PodSecurity level — deferred to ED-05/SPK-04/10.18', () => {
+    expect.unreachable('Story 10.18 owns this assertion; SPK-04 evidences it.');
+  });
+});
