@@ -186,6 +186,9 @@ studio:
       per-csi: ${STUDIO_QUOTA_PER_CSI:20}
       global: ${STUDIO_QUOTA_GLOBAL:200}
       max-steps-per-test: ${STUDIO_MAX_STEPS:200}
+    recovery:
+      # Both reapers and finalization reconciliation, worker profile only (§5.4).
+      poll-interval-ms: ${STUDIO_RECOVERY_POLL_MS:5000}
     dispatcher:
       enabled: ${STUDIO_DISPATCHER_ENABLED:false}
       threads: ${STUDIO_DISPATCHER_THREADS:4}

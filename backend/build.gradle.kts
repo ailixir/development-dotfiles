@@ -260,6 +260,15 @@ tasks.jacocoTestCoverageVerification {
                 minimum = "0.75".toBigDecimal()
             }
         }
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.recovery")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
     }
 }
 
