@@ -111,19 +111,42 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   });
 
   /**
-   * The document's SHA-256 after the four ADR-002 amendments that landed on top of this
-   * story's base commit `a8a8eeb44`.
+   * The document's SHA-256 after **story 10.9's route landed**, on top of the four ADR-002
+   * amendments that preceded it.
    *
-   * Re-anchored as a wave-4 integration fix. Those amendments are architect rulings
-   * (ADR-002 sections 14 to 17), not a runner edit, so this story's criterion still holds:
-   * nothing here changed the contract. Story 10.13's T-10.13.10 re-anchors again once
-   * story 10.9 removes the confirm-compile marker.
+   * **This is the second re-anchor, and the difference between the two is the point of
+   * T-10.13.10.** What this digest now covers, in the order it happened:
+   *
+   * 1. ADR-002 sections 14, 15, 16 and 17 — architect rulings, not runner edits: the conflict
+   *    responses for a deleted or quarantined draft, the two ratified `ExecutionErrorCode` values,
+   *    the diagnostics surface, and `RunnerEvidence.partial` gaining an optional field and a
+   *    producer. The **first** re-anchor covered these.
+   * 2. Story **10.9** shipping `POST /tests/{id}/confirm-compile` for real and removing its
+   *    `x-not-yet-implemented: true` marker — one deleted line, verified by reading the diff. The
+   *    route's `x-implemented-by: '10.9'` stays. This re-anchor covers that.
+   *
+   * **The criterion is unchanged and still holds: nothing in story 10.13 edited the contract.**
+   * Every byte of difference between this digest and the previous one belongs to another story,
+   * and the four commits of 10.13 touch no file under `docs/specs/`.
+   *
+   * **Why this one has an owner and the last one did not.** The first re-anchor went unowned
+   * across all four amendments — they landed as architect rulings rather than in a story PR, so
+   * nobody's diff was responsible for them, and the red pin was found by @po during story
+   * validation rather than by the changes that caused it. That is the failure this test's own rule
+   * exists to prevent, and it is exactly why 10.13 carries **T-10.13.10** as a task: FOC-04
+   * mandates that 10.9's edit lands first and that this story re-anchors afterwards, deliberately,
+   * in its own PR. The reverse order would have forced a backend PR to re-anchor a runner test —
+   * which the rule below forbids.
+   *
+   * The value was re-read from the document with `shasum -a 256` at the moment of the re-anchor,
+   * never transcribed from a story file or a message: a pin copied from prose is a pin against
+   * prose.
    *
    * A hash rather than a `git diff`: spawning `git` would need `child_process`, which ADR-001 §6
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = '815aae9b0068335e8d5ab5270dccecac4d1fd6f472306ca3dc04292187dd0d80';
+  const BASE_SHA256 = 'cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
