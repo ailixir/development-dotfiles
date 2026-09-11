@@ -40,6 +40,16 @@ class CompileBoundsTest {
 
   private final AuthoringLimits limits = new AuthoringLimits(properties);
 
+  /** The budget handler the admission cases do not exercise. */
+  private static final Runnable NO_BUDGET_HANDLER = CompileBoundsTest::doNothing;
+
+  /** An attempt that does no work: these cases assert admission, not the attempt body. */
+  private static final CompileExecutor.AttemptBody NO_WORK = settlement -> doNothing();
+
+  private static void doNothing() {
+    // Intentionally empty.
+  }
+
   // ── AC-6: steps per draft ─────────────────────────────────────────────────
 
   @Test
@@ -114,13 +124,13 @@ class CompileBoundsTest {
                       started.countDown();
                       await(release);
                     },
-                    () -> {}))
+                    NO_BUDGET_HANDLER))
             .isTrue();
       }
       assertThat(started.await(10, TimeUnit.SECONDS)).isTrue();
 
       long before = System.nanoTime();
-      boolean accepted = executor.submit(settlement -> {}, () -> {});
+      boolean accepted = executor.submit(NO_WORK, NO_BUDGET_HANDLER);
       long elapsedMs = (System.nanoTime() - before) / 1_000_000L;
 
       assertThat(accepted).as("attempt concurrency+1 must be refused, not queued").isFalse();

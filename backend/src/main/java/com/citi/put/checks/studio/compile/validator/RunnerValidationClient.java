@@ -193,7 +193,11 @@ public class RunnerValidationClient {
       parsed.add(
           new RunnerDiagnostic(
               node.path("code").asText(null),
-              stepIndex.isIntegralNumber() ? stepIndex.intValue() : defaultStepIndex,
+              // Integer, not int: a conditional with one int branch unboxes the other, and a
+              // null stepIndex is exactly what an artifact-level diagnostic carries.
+              stepIndex.isIntegralNumber()
+                  ? Integer.valueOf(stepIndex.intValue())
+                  : defaultStepIndex,
               node.path("message").asText(null),
               node.path("node").asText(null),
               node.path("excerpt").asText(null)));

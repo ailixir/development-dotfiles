@@ -204,6 +204,13 @@ public class CompilePipeline {
         return;
       }
 
+      if (settlement.isSettled()) {
+        // The budget already expired while the gateway held the attempt. Stop here rather than
+        // spending a validator call on a result that can no longer be published.
+        dropLateResult(inputs.testId(), request, "gateway");
+        return;
+      }
+
       ValidationOutcome validation =
           validationClient.validate(
               artifactJson, inputs.orderedSource(), inputs.variableNames(), inputs.secretNames());
