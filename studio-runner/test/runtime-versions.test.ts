@@ -105,6 +105,29 @@ describe('runtime-versions generation', () => {
     expect(recorded.image).toBe('registry.citi.com/put/checks-studio-runner:0.1.0-abc1234');
   });
 
+  /**
+   * QA MED-1. `ARG IMAGE_TAG=` with an empty default becomes `ENV IMAGE_TAG=`, so inside the image
+   * the variable is defined-but-empty whenever the pipeline forgot `--build-arg IMAGE_TAG`.
+   * Recording `""` would let `check:pins --require-image` treat an image that cannot name itself
+   * as asserted, which AC-3 forbids. It records `null`, exactly as an absent variable does.
+   */
+  it.each([
+    ['empty', ''],
+    ['whitespace-only', ' \t '],
+  ])('records an %s IMAGE_TAG as null, not as an empty string', (_label, value) => {
+    const recorded = buildRuntimeVersions({
+      root: packageRoot,
+      versions,
+      env: {
+        PLAYWRIGHT_BROWSERS_PATH: makeBrowsersPath(['chromium-1200']),
+        IMAGE_TAG: value,
+      },
+      nodeVersion: process.version,
+    });
+    expect(recorded.chromiumBuild).toBe('1200');
+    expect(recorded.image).toBeNull();
+  });
+
   it('rejects a mixed-version browser root rather than picking one', () => {
     const browsers = makeBrowsersPath(['chromium-1200', 'chromium-1199']);
     expect(() => readChromiumBuild(browsers)).toThrow(/more than one Chromium build/);

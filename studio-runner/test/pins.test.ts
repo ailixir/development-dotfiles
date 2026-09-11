@@ -4,8 +4,17 @@ import { join } from 'node:path';
 
 import { afterAll, describe, expect, it, vi } from 'vitest';
 
-import { checkPins, collectPins, engineFloorMajor, runCli } from '../scripts/check-pins.mjs';
-import { writeRuntimeVersionsFile } from '../scripts/write-runtime-versions.mjs';
+import {
+  checkPins,
+  collectPins,
+  engineFloorMajor,
+  isAsserted,
+  nodeMajor,
+  parseVersion,
+  runCli,
+  satisfiesRange,
+} from '../scripts/check-pins.mjs';
+import { optionalEnv, writeRuntimeVersionsFile } from '../scripts/write-runtime-versions.mjs';
 import {
   ARTIFACT_VERSION,
   EXECUTOR_VERSION,
@@ -290,8 +299,8 @@ describe('copies that cannot be asserted outside the pinned image (AC-3)', () =>
   it('reports null chromiumBuild and image as not asserted', () => {
     const result = checkPins(makeRoot());
     const notAsserted = result.notAsserted.join('\n');
-    expect(notAsserted).toContain('chromiumBuild is null');
-    expect(notAsserted).toContain('image is null');
+    expect(notAsserted).toContain('chromiumBuild is not asserted');
+    expect(notAsserted).toContain('image is not asserted');
   });
 
   it('fails from the CLI under --require-image while they are unasserted', () => {
@@ -307,15 +316,234 @@ describe('copies that cannot be asserted outside the pinned image (AC-3)', () =>
   });
 
   it('passes under --require-image once the image recorded them', () => {
+    // `node` is set explicitly: once `chromiumBuild` says the record came from inside the pinned
+    // image, its major has to equal `.nvmrc`, and the developer machine running this test may be
+    // on any Node the `engines` range permits.
     const root = makeRoot((target) =>
       { editJson<MutableRuntime>(join(target, 'dist', 'runtime-versions.json'), (runtime) => {
         runtime.chromiumBuild = '1200';
         runtime.image = 'registry.citi.com/put/checks-studio-runner:0.1.0-abc1234';
+        runtime.node = `v${readFileSync(join(target, '.nvmrc'), 'utf8').trim()}.11.0`;
       }); },
     );
     const result = checkPins(root, { requireImage: true });
     expect(result.failures).toEqual([]);
     expect(result.notAsserted).toEqual([]);
     expect(result.ok).toBe(true);
+  });
+});
+
+/**
+ * QA MED-1: `--require-image` must not accept an image that cannot name itself.
+ *
+ * The Dockerfile declares `ARG IMAGE_TAG=` and exports it as `ENV IMAGE_TAG=${IMAGE_TAG}`, so a
+ * pipeline that forgets `--build-arg IMAGE_TAG` produces a *defined but empty* variable inside the
+ * image — precisely the operator slip CI stage 6a exists to catch. Absent, empty and
+ * whitespace-only must all be treated as not asserted.
+ */
+describe('an image tag that was never supplied (QA MED-1)', () => {
+  const unsupplied = [
+    ['absent', undefined],
+    ['empty', ''],
+    ['whitespace-only', '   '],
+  ] as const;
+
+  it.each(unsupplied)('records an %s IMAGE_TAG as null', (_label, value) => {
+    const root = makeRoot();
+    const written = JSON.parse(
+      readFileSync(join(root, 'dist', 'runtime-versions.json'), 'utf8'),
+    ) as MutableRuntime;
+    expect(written.image).toBeNull();
+    expect(optionalEnv(value)).toBeNull();
+  });
+
+  it.each(unsupplied)('reports an %s image tag as not asserted', (_label, value) => {
+    const root = makeRoot((target) =>
+      { editJson<MutableRuntime>(join(target, 'dist', 'runtime-versions.json'), (runtime) => {
+        runtime.chromiumBuild = '1200';
+        runtime.image = value ?? null;
+        runtime.node = `v${readFileSync(join(target, '.nvmrc'), 'utf8').trim()}.11.0`;
+      }); },
+    );
+    const result = checkPins(root);
+    // Not a failure on a plain run — but never a pass either.
+    expect(result.ok).toBe(true);
+    expect(result.notAsserted.join('\n')).toContain(
+      'dist/runtime-versions.json image is not asserted',
+    );
+  });
+
+  it.each(unsupplied)('fails --require-image with an %s image tag', (_label, value) => {
+    const root = makeRoot((target) =>
+      { editJson<MutableRuntime>(join(target, 'dist', 'runtime-versions.json'), (runtime) => {
+        runtime.chromiumBuild = '1200';
+        runtime.image = value ?? null;
+        runtime.node = `v${readFileSync(join(target, '.nvmrc'), 'utf8').trim()}.11.0`;
+      }); },
+    );
+    const { status, output } = invoke(root, ['--require-image']);
+    expect(status).toBe(1);
+    expect(output).toContain('copies remain unasserted');
+    expect(output).toContain('dist/runtime-versions.json image is not asserted');
+  });
+
+  it('still passes --require-image with a real tag, so the rule is not a blanket failure', () => {
+    const root = makeRoot((target) =>
+      { editJson<MutableRuntime>(join(target, 'dist', 'runtime-versions.json'), (runtime) => {
+        runtime.chromiumBuild = '1200';
+        runtime.image = 'registry.citi.com/put/checks-studio-runner:0.1.0-abc1234';
+        runtime.node = `v${readFileSync(join(target, '.nvmrc'), 'utf8').trim()}.11.0`;
+      }); },
+    );
+    const { status } = invoke(root, ['--require-image']);
+    expect(status).toBe(0);
+  });
+
+  it('treats absent, empty and blank identically', () => {
+    expect(isAsserted(undefined)).toBe(false);
+    expect(isAsserted(null)).toBe(false);
+    expect(isAsserted('')).toBe(false);
+    expect(isAsserted('  \t ')).toBe(false);
+    expect(isAsserted('qa-local-test:10.3')).toBe(true);
+    expect(isAsserted(1243)).toBe(true);
+    expect(optionalEnv('  padded  ')).toBe('padded');
+    expect(optionalEnv(42)).toBeNull();
+  });
+});
+
+/**
+ * QA MED-2: the recorded Node must be asserted, not merely recorded.
+ *
+ * `node` is the only field in `runtime-versions.json` derived from the runtime that actually
+ * executed; every other comparison in this file is declaration against declaration. Two rules,
+ * scoped differently on purpose (ADR-001 §4.2 and story 10.2's Change Log):
+ *
+ *   * everywhere — it must satisfy `engines.node`;
+ *   * inside the pinned image (`chromiumBuild` present) — its major must equal `.nvmrc`.
+ */
+describe('the Node that actually ran (QA MED-2)', () => {
+  /** Rewrites the recorded Node, optionally marking the record as produced inside the image. */
+  function withRecordedNode(node: string, chromiumBuild: string | null = null): string {
+    return makeRoot((target) =>
+      { editJson<MutableRuntime>(join(target, 'dist', 'runtime-versions.json'), (runtime) => {
+        runtime.node = node;
+        runtime.chromiumBuild = chromiumBuild;
+      }); },
+    );
+  }
+
+  it('fails when the recorded Node is below the engines floor', () => {
+    const result = checkPins(withRecordedNode('v20.19.0'));
+    expect(result.ok).toBe(false);
+    expect(result.failures.join('\n')).toContain(
+      'the recorded Node version does not satisfy engines.node',
+    );
+  });
+
+  it('fails when the recorded Node is above the engines ceiling', () => {
+    const result = checkPins(withRecordedNode('v25.0.0'));
+    expect(result.ok).toBe(false);
+    expect(result.failures.join('\n')).toContain(
+      'the recorded Node version does not satisfy engines.node',
+    );
+  });
+
+  it('fails closed when the recorded Node is unreadable', () => {
+    const result = checkPins(withRecordedNode('lts/jod'));
+    expect(result.ok).toBe(false);
+    expect(result.failures.join('\n')).toContain('could not be checked against engines.node');
+  });
+
+  it('fails closed when engines.node is unreadable', () => {
+    const root = makeRoot((target) =>
+      { editJson<{ engines: { node: string } }>(join(target, 'package.json'), (pkg) => {
+        pkg.engines.node = '>=22.11.0 || 24';
+      }); },
+    );
+    const result = checkPins(root);
+    expect(result.ok).toBe(false);
+    expect(result.failures.join('\n')).toContain('could not be checked against engines.node');
+  });
+
+  it('fails when the recorded Node is missing entirely', () => {
+    const root = makeRoot((target) =>
+      { editJson<MutableRuntime>(join(target, 'dist', 'runtime-versions.json'), (runtime) => {
+        runtime.node = null;
+      }); },
+    );
+    const result = checkPins(root);
+    expect(result.ok).toBe(false);
+    expect(result.failures.join('\n')).toContain('dist/runtime-versions.json node is missing');
+  });
+
+  /**
+   * The regression QA found: the public `mcr.microsoft.com/playwright:v1.63.0-noble` image ships
+   * Node v24.20.0 against a `.nvmrc` of 22, and the check said OK. This is that exact record.
+   */
+  it('fails on the Node the pinned Playwright image actually ships', () => {
+    const { status, output } = invoke(withRecordedNode('v24.20.0', '1243'), []);
+    expect(status).toBe(1);
+    expect(output).toContain(
+      'the Node major inside the pinned Playwright image disagrees with .nvmrc',
+    );
+    expect(output).toContain('major 24');
+    expect(output).toContain('ED-05');
+    expect(output).toContain('FIX THE IMAGE, NOT THIS FILE');
+  });
+
+  it('fails on any in-image Node major other than .nvmrc', () => {
+    const result = checkPins(withRecordedNode('v23.10.0', '1243'));
+    expect(result.ok).toBe(false);
+    expect(result.failures.join('\n')).toContain(
+      'the Node major inside the pinned Playwright image disagrees with .nvmrc',
+    );
+  });
+
+  it('passes when the in-image Node major equals .nvmrc', () => {
+    const result = checkPins(withRecordedNode('v22.11.0', '1243'));
+    expect(result.failures).toEqual([]);
+    expect(result.ok).toBe(true);
+  });
+
+  /**
+   * Off the image the `engines` range is the contract, not `.nvmrc`: story 10.2 widened it
+   * deliberately so the package still installs — and builds — on a newer developer machine.
+   */
+  it('permits an off-image Node whose major differs from .nvmrc but satisfies engines', () => {
+    const result = checkPins(withRecordedNode('v24.20.0', null));
+    expect(result.failures).toEqual([]);
+    expect(result.ok).toBe(true);
+  });
+
+  /** The in-image rule cannot be dodged by dropping the field that triggers it. */
+  it('fails --require-image when chromiumBuild is stripped to dodge the major rule', () => {
+    const root = makeRoot((target) =>
+      { editJson<MutableRuntime>(join(target, 'dist', 'runtime-versions.json'), (runtime) => {
+        runtime.node = 'v24.20.0';
+        runtime.chromiumBuild = null;
+        runtime.image = 'registry.citi.com/put/checks-studio-runner:0.1.0-abc1234';
+      }); },
+    );
+    const { status, output } = invoke(root, ['--require-image']);
+    expect(status).toBe(1);
+    expect(output).toContain('dist/runtime-versions.json chromiumBuild is not asserted');
+  });
+
+  it('reads Node majors and ranges', () => {
+    expect(nodeMajor('v22.11.0')).toBe('22');
+    expect(nodeMajor('24.20.0')).toBe('24');
+    expect(nodeMajor('lts/jod')).toBeNull();
+    expect(parseVersion('v1.2.3')).toEqual([1, 2, 3]);
+    expect(parseVersion(undefined)).toBeNull();
+    expect(satisfiesRange('v22.11.0', '>=22.11.0 <25.0.0')).toBe(true);
+    expect(satisfiesRange('v22.10.0', '>=22.11.0 <25.0.0')).toBe(false);
+    expect(satisfiesRange('v25.0.0', '>=22.11.0 <25.0.0')).toBe(false);
+    expect(satisfiesRange('v24.20.0', '>22.11.0')).toBe(true);
+    expect(satisfiesRange('v22.11.0', '<=22.11.0')).toBe(true);
+    expect(satisfiesRange('v22.11.0', '22.11.0')).toBe(true);
+    expect(satisfiesRange('v22.11.1', '22.11.0')).toBe(false);
+    expect(satisfiesRange('v22.11.0', '^22.11.0')).toBeNull();
+    expect(satisfiesRange('v22.11.0', '')).toBeNull();
+    expect(satisfiesRange('lts/jod', '>=22.11.0')).toBeNull();
   });
 });

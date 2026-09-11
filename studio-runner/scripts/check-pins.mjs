@@ -16,9 +16,23 @@
  * recorded copy exists — that the recorded lockfile/image/node copies and the validator parser
  * still agree with the declared ones.
  *
+ * **Node.** `runtime-versions.json` → `node` is the one recorded value that comes from the runtime
+ * that actually executed rather than from a declaration, so it gets two rules that differ on
+ * purpose (ADR-001 §4.2, QA MED-2):
+ *
+ * | Where | Rule | Why |
+ * |---|---|---|
+ * | Always | `node` must satisfy `engines.node` | Story 10.2 deliberately widened `engines` to a range so the package still installs on a newer developer machine; off the image that range is the contract. |
+ * | Inside the pinned image | `major(node)` must equal `.nvmrc` | ADR-001 §4.2 scopes the `.nvmrc` obligation to the image — "`node --version` inside the image matches `engines`/`.nvmrc`" — and 10.2's Change Log says `.nvmrc` pins *the image's* Node major. |
+ *
+ * "Inside the pinned image" is not a flag the caller asserts: it is read off the record, from a
+ * `chromiumBuild` that only exists under the image's `PLAYWRIGHT_BROWSERS_PATH`. Stripping it to
+ * dodge the rule does not work — `--require-image` fails on the missing `chromiumBuild` instead.
+ *
  * Values that can only be observed *inside* the pinned Playwright image (`chromiumBuild`, `image`)
- * are reported as NOT ASSERTED, never as a pass. `--require-image` turns every NOT ASSERTED entry
- * into a failure; CI uses it for the stages that run inside the image (see `ci/stages.md`).
+ * are reported as NOT ASSERTED, never as a pass; absent, empty and whitespace-only are treated
+ * identically (QA MED-1). `--require-image` turns every NOT ASSERTED entry into a failure; CI uses
+ * it for the stages that run inside the image (see `ci/stages.md`).
  *
  * Usage:
  *   node scripts/check-pins.mjs [--root <dir>] [--require-image] [--json]
@@ -34,6 +48,67 @@ const here = dirname(fileURLToPath(import.meta.url));
 
 /** An exact semantic version: no range operator, no wildcard, no pre-release tolerance. */
 const EXACT_VERSION = /^\d+\.\d+\.\d+$/;
+
+/**
+ * Whether a recorded value counts as asserted.
+ *
+ * Absent, `null`, empty and whitespace-only are all "not asserted". The distinction matters for
+ * the image-derived fields: the Dockerfile's `ARG IMAGE_TAG=` default makes the variable defined
+ * but empty inside the image, and an empty tag names nothing (QA MED-1).
+ */
+export function isAsserted(value) {
+  if (value === null || value === undefined) return false;
+  return typeof value === 'string' ? value.trim() !== '' : true;
+}
+
+/** Parses `v24.20.0` or `24.20.0` into `[major, minor, patch]`; `null` when unreadable. */
+export function parseVersion(value) {
+  if (typeof value !== 'string') return null;
+  const match = /^v?(\d+)\.(\d+)\.(\d+)/.exec(value.trim());
+  if (match === null) return null;
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+/** The major of a recorded Node version, as a string so it compares directly with `.nvmrc`. */
+export function nodeMajor(value) {
+  const parsed = parseVersion(value);
+  return parsed === null ? null : String(parsed[0]);
+}
+
+function compareVersions(left, right) {
+  for (let index = 0; index < 3; index += 1) {
+    if (left[index] !== right[index]) return left[index] < right[index] ? -1 : 1;
+  }
+  return 0;
+}
+
+/**
+ * Whether `version` satisfies a space-separated conjunction of simple comparators, e.g.
+ * `>=22.11.0 <25.0.0`.
+ *
+ * Deliberately narrow: `engines.node` in this package is written in exactly that form, and adding
+ * a semver dependency to a security component for one comparison is not worth it. Anything this
+ * cannot read returns `null` — "unreadable" — so the caller fails closed instead of assuming a
+ * pass. Pre-release identifiers are ignored; Node does not ship them to this package.
+ */
+export function satisfiesRange(version, range) {
+  const parsed = parseVersion(version);
+  if (parsed === null || typeof range !== 'string' || range.trim() === '') return null;
+  for (const comparator of range.trim().split(/\s+/)) {
+    const match = /^(>=|<=|>|<|=)?v?(\d+)\.(\d+)\.(\d+)$/.exec(comparator);
+    if (match === null) return null;
+    const order = compareVersions(parsed, [Number(match[2]), Number(match[3]), Number(match[4])]);
+    const operator = match[1] ?? '=';
+    const satisfied =
+      operator === '>=' ? order >= 0
+      : operator === '>' ? order > 0
+      : operator === '<=' ? order <= 0
+      : operator === '<' ? order < 0
+      : order === 0;
+    if (!satisfied) return false;
+  }
+  return true;
+}
 
 /** Reads JSON, returning `null` when the file is absent rather than throwing. */
 function readJsonIfPresent(path) {
@@ -177,12 +252,68 @@ export function checkPins(root, options = {}) {
       }
     }
 
-    // Observable only inside the pinned image (AC-3): null is "not asserted", never a pass.
+    // Observable only inside the pinned image (AC-3): absent, null, empty and whitespace-only are
+    // all "not asserted", never a pass. An omitted `--build-arg IMAGE_TAG` leaves `IMAGE_TAG`
+    // defined-but-empty inside the image, and an empty tag names no image (QA MED-1).
     for (const field of ['chromiumBuild', 'image']) {
-      if (runtime[field] === null || runtime[field] === undefined) {
+      if (!isAsserted(runtime[field])) {
         notAsserted.push(
-          `dist/runtime-versions.json ${field} is null: this build did not run inside the pinned ` +
-            'Playwright image, so the browser build was not asserted (ED-05).',
+          `dist/runtime-versions.json ${field} is not asserted (it is ` +
+            `${JSON.stringify(runtime[field] ?? null)}): this build did not run inside the pinned ` +
+            'Playwright image, or ran there without being told which image it was, so the browser ' +
+            'build was not asserted (ED-05).',
+        );
+      }
+    }
+
+    // ── The Node that actually ran (ADR-001 §4.2, QA MED-2) ───────────────────────────────────
+    // Everything above compares declarations with declarations. `node` is the only recorded value
+    // produced by the runtime itself, and until now nothing compared it to anything.
+    const inPinnedImage = isAsserted(runtime.chromiumBuild);
+    if (!isAsserted(runtime.node)) {
+      failures.push(
+        'dist/runtime-versions.json node is missing; the runtime that produced this build was ' +
+          'not recorded, so the Node pin cannot be asserted.',
+      );
+    } else {
+      // Rule 1, everywhere: the recorded Node must satisfy the declared range.
+      const satisfies = satisfiesRange(runtime.node, pins.engines);
+      if (satisfies === null) {
+        failures.push(
+          [
+            'the recorded Node version could not be checked against engines.node:',
+            `dist/runtime-versions.json node = ${JSON.stringify(runtime.node)}`,
+            `package.json engines.node       = ${JSON.stringify(pins.engines)}`,
+            'One of the two is not a form this check can read, so it fails closed rather than',
+            'reporting a pass it did not establish.',
+          ].join('\n      '),
+        );
+      } else if (!satisfies) {
+        failures.push(
+          [
+            'the recorded Node version does not satisfy engines.node:',
+            `dist/runtime-versions.json node = ${runtime.node}`,
+            `package.json engines.node       = ${pins.engines}`,
+          ].join('\n      '),
+        );
+      }
+
+      // Rule 2, inside the pinned image only: the major must equal `.nvmrc`.
+      const recordedMajor = nodeMajor(runtime.node);
+      if (inPinnedImage && pins.nvmrc !== null && recordedMajor !== pins.nvmrc) {
+        failures.push(
+          [
+            'the Node major inside the pinned Playwright image disagrees with .nvmrc:',
+            `dist/runtime-versions.json node = ${runtime.node} (major ${recordedMajor}), ` +
+              `recorded inside the image (chromiumBuild ${String(runtime.chromiumBuild)})`,
+            `.nvmrc                          = ${pins.nvmrc}`,
+            'ADR-001 §4.2 requires the Node inside the pinned image to match .nvmrc, and story',
+            "10.2's Change Log states that .nvmrc pins the image's Node major (the engines range",
+            'is wider only so the package installs on a newer developer machine).',
+            'FIX THE IMAGE, NOT THIS FILE: the internal Playwright image (ED-05) must be built on',
+            'the .nvmrc major. Widening .nvmrc to match whatever the base image happens to ship',
+            'would delete the only copy that pins Node, and is an ADR change, not a build fix.',
+          ].join('\n      '),
         );
       }
     }
@@ -250,6 +381,7 @@ export function runCli(argv) {
     ["package-lock.json node_modules/playwright", locked],
     ['Dockerfile ARG PLAYWRIGHT_VERSION', image],
     ['dist/runtime-versions.json playwright', recorded ?? '(not built)'],
+    ['dist/runtime-versions.json node', result.pins.runtime?.node ?? '(not built)'],
     ['.nvmrc / engines.node floor', `${nvmrc} (${engines})`],
   ]) {
     console.log(`  ${format(line)}`);

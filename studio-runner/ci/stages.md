@@ -16,8 +16,19 @@ workspace member and shares no lockfile with `frontend/` (ADR-001 §3).
 | `IMAGE_TAG` | full image tag being built | Recorded as `image` in `runtime-versions.json`. Only set on stages 5–7 when they run inside the image. |
 | `PLAYWRIGHT_BROWSERS_PATH` | inherited from the image | Source of the recorded `chromiumBuild`. Never point it at a mixed-version browser root. |
 
-Node major must match `.nvmrc` (22). `.npmrc` sets `engine-strict=true`, so a wrong Node fails at
-install time rather than at runtime.
+**Node.** `.nvmrc` (22) pins the Node major **the image must ship**; `engines.node`
+(`>=22.11.0 <25.0.0`) is the wider range story 10.2 chose deliberately so the package still
+installs on a newer developer machine. `.npmrc` sets `engine-strict=true`, so a Node outside the
+range fails at install time rather than at runtime. Stage 3 asserts the recorded Node against the
+range everywhere, and against the `.nvmrc` major whenever the record came from inside the pinned
+image.
+
+> **OPEN — stage 6a fails today, deliberately.** The public
+> `mcr.microsoft.com/playwright:v1.63.0-noble` base image ships **Node v24.20.0**, not 22. Stage 6a
+> now names that as a failure instead of passing quietly. It is a real conflict, not a check bug:
+> the internal image (`ED-05`) must be built on the `.nvmrc` major, or `.nvmrc` must be changed by
+> ADR amendment with @architect. Do **not** widen `.nvmrc` to turn the pipeline green — that
+> deletes the only copy that pins Node.
 
 ## Stages
 
@@ -54,6 +65,10 @@ npm run check:pins
 - **Asserts:** `package.json` `dependencies.playwright`, the lockfile's resolved `playwright`, the
   `Dockerfile` `ARG PLAYWRIGHT_VERSION` and — once stage 5 has run — `runtime-versions.json` all
   carry the same exact version, and that the `engines.node` floor major equals `.nvmrc`.
+- **Also asserts the Node that ran**, once stage 5 has run: the recorded `node` must satisfy
+  `engines.node`, and — when the record came from inside the pinned image, evidenced by a recorded
+  `chromiumBuild` — its major must equal `.nvmrc`. The in-image half cannot be dodged by dropping
+  `chromiumBuild`: `--require-image` fails on the missing field instead.
 - **Failure output** names every disagreeing copy with its value and exits `1`.
 - Run it **before** the build for a fast failure, and again as stage 6a against the built image.
   Before the build, the recorded copy is reported as `NOT ASSERTED`, never as a pass.
@@ -115,8 +130,14 @@ npm run check:pins -- --require-image
 - Runs on the host, where the `Dockerfile` and `package.json` live, against the
   `runtime-versions.json` the image actually carries.
 - `--require-image` turns every `NOT ASSERTED` entry into a failure, so a `chromiumBuild` or
-  `image` that the build did not record fails the pipeline instead of passing quietly.
-- This is the stage that makes the browser build part of the pin rather than a convention.
+  `image` that the build did not record fails the pipeline instead of passing quietly. An
+  `IMAGE_TAG` build arg that was omitted arrives as an empty string inside the image; empty and
+  whitespace-only count as *not recorded*, so the slip this stage exists to catch is caught.
+- The recorded `node` is asserted here too — this is where the `.nvmrc` major rule applies.
+  **Expect this stage to fail against the public base image** until `ED-05` lands (see Environment
+  above). Record it as a real failure; do not waive it by editing `.nvmrc`.
+- This is the stage that makes the browser build and the Node major part of the pin rather than a
+  convention.
 
 ### 7. Image build and push
 
@@ -170,4 +191,5 @@ helm template helm-chart/put-checks --set studioRunner.enabled=true
 |---|---|---|
 | O-1 | Pipeline definition location, image-build slot, registry credentials | @devops |
 | O-2 | Internal Playwright image following the `v<version>-<distro>` tag convention (`ED-05`) | Platform/SRE |
+| O-2a | **The internal image must ship the `.nvmrc` Node major (22).** The public base image at the pinned Playwright version ships Node v24.20.0, so stage 6a fails today by design. Resolving it is either a base-image choice (`ED-05`) or an ADR-001 §4.2 amendment — not a change to `.nvmrc`. | Platform/SRE with @architect |
 | O-3 | Location of the language-neutral contract files consumed by `backend/` and `studio-runner/` | 10.1 |

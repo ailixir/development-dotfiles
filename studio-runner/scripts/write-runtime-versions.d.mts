@@ -25,6 +25,8 @@ export interface VersionConstants {
 }
 
 export declare function readChromiumBuild(browsersPath: string | undefined): string | null;
+/** Absent, empty and whitespace-only environment values all collapse to `null` (QA MED-1). */
+export declare function optionalEnv(value: unknown): string | null;
 export interface RuntimeVersionsInput {
   readonly root: string;
   readonly versions: VersionConstants;

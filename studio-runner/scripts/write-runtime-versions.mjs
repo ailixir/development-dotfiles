@@ -12,13 +12,29 @@
  * `chromiumBuild` and `image` describe the runtime the build happened in and can only be observed
  * inside the pinned Playwright image: `chromiumBuild` from the `chromium-<revision>` directory
  * under `PLAYWRIGHT_BROWSERS_PATH`, `image` from the `IMAGE_TAG` build arg. On a plain Node build
- * both are `null`, and `check:pins` reports them as NOT ASSERTED — never as a pass.
+ * both are `null`, and `check:pins` reports them as NOT ASSERTED — never as a pass. An omitted
+ * build arg is recorded as `null`, not as `""` (see `optionalEnv`).
  */
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
+
+/**
+ * An environment-supplied value that was not actually supplied.
+ *
+ * The Dockerfile declares `ARG IMAGE_TAG=` with an empty default and exports it as
+ * `ENV IMAGE_TAG=${IMAGE_TAG}`, so inside the image the variable is always *defined* — and empty
+ * whenever the operator forgot `--build-arg IMAGE_TAG`. Recording that as `""` would let
+ * `check:pins --require-image` treat an image that cannot name itself as asserted, which AC-3
+ * forbids. Absent, empty and whitespace-only are therefore all recorded identically, as `null`.
+ */
+export function optionalEnv(value) {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed === '' ? null : trimmed;
+}
 
 /**
  * Reads the Chromium build revision out of a Playwright browsers directory.
@@ -89,7 +105,9 @@ export function buildRuntimeVersions({ root, versions, env, nodeVersion }) {
     executor: versions.EXECUTOR_VERSION,
     artifact: versions.ARTIFACT_VERSION,
     // `ARG IMAGE_TAG` in the Dockerfile, exported as an env var for this script (AC-3).
-    image: env.IMAGE_TAG ?? null,
+    // Absent, empty and whitespace-only all record as null so an unnamed image cannot pass
+    // `--require-image` (QA MED-1).
+    image: optionalEnv(env.IMAGE_TAG),
   };
 }
 

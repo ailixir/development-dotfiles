@@ -143,7 +143,10 @@ versions (architecture §4.6, ADR-001 §4.2).
 `chromium-<revision>` directory under `PLAYWRIGHT_BROWSERS_PATH` and from the `IMAGE_TAG` build arg.
 On a plain Node build they are `null`, and `check:pins` prints them as `NOT ASSERTED`: never as a
 pass. `npm run check:pins -- --require-image` turns that into a failure, which is what CI runs
-against the built image (`ci/stages.md`, stage 6a).
+against the built image (`ci/stages.md`, stage 6a). An `IMAGE_TAG` build arg that was never passed
+arrives inside the image as an empty string rather than as an absent variable, because the
+`Dockerfile` gives the `ARG` an empty default; empty and whitespace-only are recorded as `null` and
+treated as *not asserted*, so an image that cannot name itself does not pass `--require-image`.
 
 ### The pin
 
@@ -159,6 +162,30 @@ ADR-001 §4.2: **one declared pin, four asserted copies.**
 `npm run check:pins` asserts all four agree and that the `engines.node` floor major equals `.nvmrc`.
 Any disagreement exits non-zero and names the copies with their values. `test/pins.test.ts` drifts
 each copy alone in a temporary directory and asserts the check fails for every one of them.
+
+#### The Node pin
+
+`.nvmrc` and `engines.node` are not two spellings of the same thing, and `check:pins` treats them
+differently on purpose:
+
+| Copy | What it pins | Asserted how |
+|---|---|---|
+| `.nvmrc` (`22`) | the Node major **the image must ship** | equals the `engines.node` floor major; and equals the major of the recorded `node` whenever the record came from inside the pinned image |
+| `engines.node` (`>=22.11.0 <25.0.0`) | what the package is allowed to be installed and built on | the recorded `node` must satisfy it, everywhere |
+
+Story 10.2 widened `engines.node` to a range deliberately, so the package still installs on a
+developer machine running a newer Node under `engine-strict=true`. That widening is not licence for
+the *image* to drift: ADR-001 §4.2 scopes the `.nvmrc` obligation to the image ("`node --version`
+inside the image"), and that is exactly where `check:pins` applies it. "Inside the image" is read
+off the record — a recorded `chromiumBuild` exists only under the image's `PLAYWRIGHT_BROWSERS_PATH`
+— so it cannot be asserted by a flag, and dropping it to dodge the rule fails `--require-image` on
+the missing field instead.
+
+> **Known conflict (`ED-05`).** The public `mcr.microsoft.com/playwright:v1.63.0-noble` base image
+> ships Node v24.20.0, which satisfies `engines.node` but is not the `.nvmrc` major. `check:pins`
+> therefore **fails** against that image, by design, and says so. The fix belongs to the internal
+> image or to an ADR amendment. Widening `.nvmrc` to match whatever the base image ships would
+> delete the only copy that pins Node and is not an acceptable way to make the pipeline green.
 
 ### Runtime upgrade procedure
 

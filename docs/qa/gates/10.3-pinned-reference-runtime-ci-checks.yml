@@ -391,6 +391,12 @@ top_issues:
       string as unasserted in check-pins.mjs, with a test for the empty-tag case.
     owner: '@dev'
     blocking: false
+    status: RESOLVED
+    resolution: >-
+      Fixed at both ends — `optionalEnv` in write-runtime-versions.mjs records an absent, empty or
+      whitespace-only IMAGE_TAG as null, and `isAsserted` in check-pins.mjs treats all three as NOT
+      ASSERTED for chromiumBuild and image. Falsified with chromiumBuild populated: unset, empty and
+      whitespace all exit 1 naming "image is not asserted"; a real tag exits 0. Six tests added.
 
   - id: MED-2
     severity: medium
@@ -417,6 +423,16 @@ top_issues:
       (or pass ED-05 the requirement that it ship 22).
     owner: '@dev' (with @architect for the .nvmrc-vs-image reconciliation)
     blocking: false
+    status: RESOLVED
+    resolution: >-
+      `.nvmrc` made authoritative for the Node major the image must ship (ADR-001 §4.2 scopes the
+      obligation to the image; engines.node left at 10.2's deliberate range). check:pins now asserts
+      the recorded node against engines.node everywhere and against the .nvmrc major whenever the
+      record came from inside the image (evidenced by chromiumBuild, which --require-image makes
+      non-strippable). Consequence accepted, not waived: the public base image's Node v24.20.0 now
+      fails --require-image loudly; .nvmrc was not widened. Handed to ED-05 as ci/stages.md open
+      item O-2a. Falsified: QA's in-image record replayed verbatim exits 1; node v22.11.0 exits 0;
+      breaking it back to v23.10.0 exits 1. Nine tests added.
 
   - id: LOW-1
     severity: low
@@ -451,6 +467,29 @@ issue_counts:
   high: 0
   medium: 2
   low: 3
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Fix round — @dev, 2026-09-11, after the gate
+# ─────────────────────────────────────────────────────────────────────────────
+fix_round:
+  agent: '@dev'
+  date: '2026-09-11'
+  scope: MED-1 and MED-2 only; LOW-1, LOW-2 and LOW-3 left to their owners
+  med_1: RESOLVED — absent, empty and whitespace-only image tags are identically NOT ASSERTED
+  med_2: >-
+    RESOLVED — .nvmrc is the authoritative copy for the image's Node major; the recorded node is
+    now asserted against engines.node everywhere and against .nvmrc in-image
+  known_consequence: >-
+    ci/stages.md stage 6a now FAILS against mcr.microsoft.com/playwright:v1.63.0-noble (Node
+    v24.20.0 vs .nvmrc 22). Deliberate and documented; the fix belongs to the internal image
+    (ED-05, new open item O-2a) or to an ADR-001 §4.2 amendment, not to .nvmrc.
+  gate_rerun: >-
+    From a clean rm -rf node_modules dist coverage: npm ci, build, type-check, lint, test (332),
+    test:fixtures (58 passed / 1 skipped) and check:pins all exit 0. Coverage thresholds unchanged
+    and none lowered (global 95.79/90.57; scripts/** 98.94/88.81). Working tree clean.
+  docker_rebuild: >-
+    NOT REPEATED — the Dockerfile is unchanged by this round and the reviewer's recorded in-image
+    runtime-versions.json was replayed verbatim through the new assertions instead.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Reviewer hygiene

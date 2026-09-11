@@ -27,6 +27,12 @@ export interface PinCheckResult {
 
 export declare function collectPins(root: string): PinCopies;
 export declare function engineFloorMajor(range: unknown): string | null;
+/** `false` for absent, null, empty and whitespace-only values (QA MED-1). */
+export declare function isAsserted(value: unknown): boolean;
+export declare function parseVersion(value: unknown): [number, number, number] | null;
+export declare function nodeMajor(value: unknown): string | null;
+/** `true`/`false`, or `null` when either side is in a form this check cannot read. */
+export declare function satisfiesRange(version: unknown, range: unknown): boolean | null;
 export declare function checkPins(
   root: string,
   options?: { requireImage?: boolean },
