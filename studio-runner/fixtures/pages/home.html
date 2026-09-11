@@ -1,0 +1,23 @@
+<!doctype html>
+<!--
+  Controlled fixture page for the fixture-corpus tier (ADR-001 §7.1, story 10.3 AC-6a).
+
+  Every element the reference corpus targets carries an EXPLICIT `role` attribute, even where the
+  native element already implies it. The fixture tier verifies a reference example against the page
+  it is bound to by looking for the role and the accessible name it queries; explicit roles make
+  that check exact instead of a guess at native-element role mapping, and Playwright honours the
+  explicit role unchanged when story 10.12 runs the same corpus in a real browser.
+
+  These pages are static and self-contained: no script, no network, no external asset.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Checks — Home</title>
+  </head>
+  <body>
+    <h1 role="heading" aria-level="1">Checks</h1>
+    <p>Landing page used by the navigation examples.</p>
+    <a role="link" href="/login">Sign in</a>
+  </body>
+</html>

@@ -1,0 +1,207 @@
+{
+  "name": "locator-get-by-role-states",
+  "description": "Every permitted getByRole option: name, exact, checked, disabled, expanded, pressed, selected, level.",
+  "source": [
+    "Tick the \"Terms\" checkbox",
+    "Open the \"Menu\" button",
+    "Check that the \"Details\" tab is selected",
+    "Check that the section heading is visible"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "values": {
+    "variables": {},
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Tick the \"Terms\" checkbox",
+        "code": "await page.getByRole('checkbox', { name: 'Terms', exact: true, checked: false, disabled: false }).check();"
+      },
+      {
+        "stepIndex": 1,
+        "originalText": "Open the \"Menu\" button",
+        "code": "await page.getByRole('button', { name: 'Menu', expanded: false, pressed: false }).click();"
+      },
+      {
+        "stepIndex": 2,
+        "originalText": "Check that the \"Details\" tab is selected",
+        "code": "await expect(page.getByRole('tab', { name: 'Details', selected: true })).toBeVisible();"
+      },
+      {
+        "stepIndex": 3,
+        "originalText": "Check that the section heading is visible",
+        "code": "await expect(page.getByRole('heading', { level: 2 })).toBeVisible();"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "checkbox",
+              "options": {
+                "name": {
+                  "kind": "literal",
+                  "value": "Terms"
+                },
+                "exact": true,
+                "checked": false,
+                "disabled": false
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "check",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "checkbox",
+              "options": {
+                "name": {
+                  "kind": "literal",
+                  "value": "Terms"
+                },
+                "exact": true,
+                "checked": false,
+                "disabled": false
+              }
+            }
+          ]
+        },
+        null
+      ]
+    },
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "button",
+              "options": {
+                "name": {
+                  "kind": "literal",
+                  "value": "Menu"
+                },
+                "expanded": false,
+                "pressed": false
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "click",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "button",
+              "options": {
+                "name": {
+                  "kind": "literal",
+                  "value": "Menu"
+                },
+                "expanded": false,
+                "pressed": false
+              }
+            }
+          ]
+        },
+        null
+      ]
+    },
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "tab",
+              "options": {
+                "name": {
+                  "kind": "literal",
+                  "value": "Details"
+                },
+                "selected": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "expectVisible",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "tab",
+              "options": {
+                "name": {
+                  "kind": "literal",
+                  "value": "Details"
+                },
+                "selected": true
+              }
+            }
+          ]
+        },
+        null
+      ]
+    },
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "heading",
+              "options": {
+                "level": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "expectVisible",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByRole",
+              "role": "heading",
+              "options": {
+                "level": 2
+              }
+            }
+          ]
+        },
+        null
+      ]
+    }
+  ]
+}

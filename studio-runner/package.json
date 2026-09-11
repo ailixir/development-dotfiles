@@ -16,6 +16,7 @@
     "build": "tsc -p tsconfig.build.json && node scripts/write-runtime-versions.mjs",
     "clean": "node -e \"import('node:fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
     "type-check": "tsc -p tsconfig.json --noEmit",
+    "check:pins": "node scripts/check-pins.mjs",
     "typecheck": "npm run type-check",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

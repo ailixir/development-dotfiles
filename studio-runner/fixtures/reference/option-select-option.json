@@ -1,0 +1,64 @@
+{
+  "name": "option-select-option",
+  "description": "Every permitted selectOption option: force, timeout.",
+  "source": [
+    "Choose \"GBP\" in the \"Currency\" list"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "values": {
+    "variables": {},
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Choose \"GBP\" in the \"Currency\" list",
+        "code": "await page.getByLabel('Currency').selectOption('GBP', { force: true, timeout: 5000 });"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Currency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "selectOption",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Currency"
+              }
+            }
+          ]
+        },
+        "GBP",
+        {
+          "force": true,
+          "timeout": 5000
+        }
+      ]
+    }
+  ]
+}
