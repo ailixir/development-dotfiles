@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://put.citi.com/schemas/studio/artifact.schema.json",
+  "$comment": "FIXTURE COPY pending story 10.1a. Transcribed from Studio architecture v2.1 §4.4 so story 10.5 does not block on 10.1a. Replace this file with the canonical docs/specs/studio/artifact.schema.json when 10.1a merges, and repoint studio.compile.gateway.artifact-schema if the packaging differs.",
+  "title": "Studio source artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "steps"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stepIndex", "originalText", "code"],
+        "properties": {
+          "stepIndex": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "originalText": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

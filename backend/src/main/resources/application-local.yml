@@ -25,3 +25,15 @@ management:
   endpoint:
     health:
       show-details: always
+
+studio:
+  compile:
+    gateway:
+      # Local runs never hold R2D2 credentials; keep the gateway off unless a stub is wired in.
+      enabled: ${STUDIO_GATEWAY_ENABLED:false}
+      credentials:
+        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:none}
+
+logging:
+  level:
+    com.google.cloud.vertexai: ${STUDIO_GATEWAY_SDK_LOG_LEVEL:INFO}

@@ -1,0 +1,351 @@
+schema: 1
+story: "10.5"
+story_title: "Citi/R2D2 LLM gateway client"
+epic: "EPIC-10"
+wave: 1
+gate: CONCERNS
+status_reason: >-
+  AC-1..AC-15 are implemented and independently verified; AC-16 is an honest deferral on ED-01.
+  The SDK deviation is sound and gax auto-retries are provably off, so there is no double-retry
+  against the gateway. No credentials anywhere and the gateway is off by default in every profile.
+  CONCERNS is driven by the unpinned transitive dependency footprint the Vertex pin drags in, by
+  three inert canary assertions behind AC-10, and by the JaCoCo gate not actually executing under
+  `check` while ED-02 keeps `:test` red.
+  FIX ROUND 2026-09-11 (@dev): MED-001 and MED-002 are RESOLVED — see their `resolution` fields.
+  MED-003 is determined PRE-EXISTING repository wiring and deliberately left alone. The five LOW
+  findings are untouched and still belong to their listed owners. Re-verified at baseline:
+  `./gradlew check --continue` fails on exactly two tasks, `:test` with the same 23 ED-02 failures
+  across the same 14 classes and `:spotlessJavaCheck` on the same six story-10.4 files; 0 failures
+  in studio/compile/gateway, now 51 tests there. The gate verdict is unchanged at CONCERNS —
+  re-grading is @qa's call, not the fix round's.
+reviewer: "Quinn (@qa)"
+updated: "2026-09-10"
+branch: "story/10.5"
+head_sha: "6b5b339aa"
+base_ref: "epic/EPIC-10"
+waiver: { active: false }
+
+# ---------------------------------------------------------------------------
+# Evidence — every line below was produced by running the command, not read
+# from the developer record.
+# ---------------------------------------------------------------------------
+evidence:
+  commands:
+    - cmd: "./gradlew check --rerun-tasks --continue"
+      result: >-
+        BUILD FAILED in 4m 44s with exactly 2 task failures. `:test` — 329 tests completed,
+        23 failed. `:spotlessJavaCheck` — 6 files. `:checkstyleMain`, `:checkstyleTest`,
+        `:spotbugsMain`, `:rdsParityLint` all passed.
+      verdict: "AT BASELINE — no regression"
+    - cmd: "XML scan of backend/build/test-results/test/*.xml (112 classes)"
+      result: >-
+        23 failures across 14 classes, all auth/BFF/rate-limit/reports ITs (CheckCrudIT,
+        BulkDeleteIT, RateLimitFilterIT, CsiFetchIT, Reports*, ScheduleAuthzIT, BffFilter*IT,
+        IdentityCacheIT, UserMeEndpointIT, ReportDeliveryDispatcherIT). Identical to the
+        orchestrator's measured ED-02 baseline set. No 24th failure. No gateway test failed.
+      verdict: PASS
+    - cmd: "per-class tally of studio.compile.gateway test XML"
+      result: "48 tests, 0 failures, 0 skipped across 8 classes."
+      verdict: PASS
+    - cmd: "./gradlew jacocoTestReport -x test  (then parse jacocoTestReport.xml)"
+      result: >-
+        package com/citi/put/checks/studio/compile/gateway — LINE 380/401 = 94.76%
+        (branch 135/174 = 77.6%, method 65/70, class 18/18). Developer's 94.8% claim confirmed.
+      verdict: "PASS vs the AC-15 80% line gate"
+    - cmd: "./gradlew jacocoTestCoverageVerification -x test"
+      result: >-
+        FAILS on the pre-existing bundle-wide rule only — 'lines covered ratio is 0.69,
+        expected minimum 0.70'. The new package rule is NOT among the violations. Computed
+        by hand: without the gateway package the bundle would be 0.6686, so this story RAISED
+        bundle coverage; the 0.70 miss is the 23 ED-02 ITs aborting before they exercise code.
+      verdict: "NOT a 10.5 regression"
+    - cmd: "javap on google-cloud-vertexai-1.52.0.jar — GenerativeModel, VertexAI, genai.Client"
+      result: >-
+        GenerativeModel.generateContent() calls VertexAI.getPredictionServiceClient()
+        .generateContentCallable().call(...); getPredictionServiceClient() is a bare supplier
+        read, so the injected client is used by the SDK's own generated stub. VertexAI carries
+        the string constant '%s:443' — setApiEndpoint genuinely cannot express http://host:port.
+        GenerativeModel and ResponseHandler both carry Deprecated:true. genai.Client exposes
+        exactly one public surface field: `agentEngines` — no model surface.
+      verdict: "Developer decisions 2 and 3 CONFIRMED"
+    - cmd: "throwaway QA probe (temporary JUnit class, deleted after the run)"
+      result: >-
+        PROBE_A: a PredictionServiceClient built with SDK defaults ONLY, against a permanent
+        WireMock 503, issued exactly 1 HTTP request. PROBE_B: default
+        generateContentSettings().getRetryableCodes() == [] and countTokensSettings()
+        .getRetryableCodes() == []. PROBE_C: with the canary placed in fencedSourceLines the
+        wire body carries it (unavoidably — it is source text) while the audit line and the
+        diagnostic logger do not.
+      verdict: "retries provably off; AC-10 property holds; canary assertions are inert"
+    - cmd: "javap on gax-2.76.0 / gax-httpjson-2.76.0"
+      result: >-
+        ApiException exposes getStatusCode/getReason/getDomain/getMetadata/getErrorDetails and no
+        header map. getMetadata() returns null unless ErrorInfo is present, and
+        HttpJsonApiExceptionFactory only ever calls the ApiExceptionFactory.createException
+        overloads that take no ErrorDetails. Response headers, and therefore Retry-After, are
+        structurally unavailable on the httpjson path.
+      verdict: "AC-4 deviation is a GENUINE SDK limitation, not a shortcut"
+    - cmd: "./gradlew -q dependencies --configuration runtimeClasspath"
+      result: >-
+        google-cloud-vertexai:1.52.0 resolves exactly (jar + pom in cache, Apache-2.0);
+        json-schema-validator:1.4.0 resolves exactly (Apache-2.0). 189 artifacts on
+        runtimeClasspath; ~48 in the Google/gRPC/protobuf/conscrypt/threeten family, none of
+        which the project declared before — see MED-001.
+      verdict: "versions real, licences clean, transitive footprint flagged"
+    - cmd: "regex sweep of all 31 changed files for endpoints, keys, tokens and private keys"
+      result: >-
+        Zero hits. Only *.example.invalid placeholders in tests and 'R2D2' in comments and one
+        error message. No endpoint, project, location, key or token anywhere.
+      verdict: PASS
+    - cmd: "grep studio.compile.gateway.enabled across all 8 application*.yml profiles"
+      result: >-
+        Set in application.yml (${STUDIO_GATEWAY_ENABLED:false}), application-local.yml and
+        application-staging.yml, all defaulting false. api/dev/prod/test/worker declare no
+        `studio:` block at all and therefore inherit false.
+      verdict: "PASS — default false in every profile"
+
+# ---------------------------------------------------------------------------
+# Acceptance criteria
+# ---------------------------------------------------------------------------
+ac_coverage:
+  verified: [AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10, AC-11, AC-12, AC-13, AC-14, AC-15]
+  deferred:
+    - id: AC-16
+      reason: >-
+        Pilot-use record. EPIC-10 ED-01 is status `open` and its gate_note reads "10.5 stub tests
+        and 10.8 fixture-only compile can proceed; 10.5 pilot-use acceptance and any real compile
+        path are blocked." docs/qa/spikes/SPK-01/README.md exists, is headed "Status: OPEN.
+        Nothing here is verified against R2D2 yet", lists 10 assumptions A1-A10 each mapped to a
+        spike question, and leaves every Findings row blank. Nothing unverified is asserted as
+        fact. This is an honest deferral, not a faked one.
+  unmet: []
+  notes:
+    AC-3: >-
+      Pin present and commented `unverified-against-R2D2`. Version 1.52.0 resolves for real.
+    AC-4: >-
+      Verified twice over. Explicitly: VertexAiClientFactory.disableSdkRetries clears the
+      retryable code set and sets maxAttempts(1) plus a logical/total timeout on
+      generateContentSettings, which is the exact UnaryCallSettings the SDK path uses.
+      Empirically: SDK defaults alone already yield 1 attempt on a permanent 503, and the story's
+      own threeUnavailableResponsesExhaustTheBoundedRetry sees exactly 3 serve events for
+      maxRetries=2. There is NO double-retry. Client-side backoff is
+      IntervalFunction.ofExponentialRandomBackoff(250ms, 2.0, jitter 0.5) capped at maxRetries+1
+      attempts — bounded and jittered as claimed. Retry-After deviation accepted (see evidence).
+    AC-7: >-
+      Structured and plain-text answers take the identical extraction+validation path. Extraction
+      is a string- and escape-aware balanced-brace scan, so a brace inside originalText cannot
+      truncate the document; unterminated objects, prose without JSON, unknown fields and a wrong
+      version are all rejected. The schema is a fixture copy, which the story's Depends-on row and
+      Implementation Notes explicitly permit, and it is marked with a `$comment` naming story
+      10.1a plus a FIXTURE COPY comment in application.yml. Marking is clear and temporary.
+    AC-15: >-
+      Package coverage verified at 94.76%. The "check green" half of the AC is unreachable while
+      ED-02 holds; see MED-003.
+
+# ---------------------------------------------------------------------------
+# Issues
+# ---------------------------------------------------------------------------
+top_issues:
+  - id: MED-001
+    severity: medium
+    category: supply-chain
+    finding: >-
+      The single exact pin com.google.cloud:google-cloud-vertexai:1.52.0 pulls roughly 45
+      previously-absent artifacts onto runtimeClasspath, none of them pinned and with no BOM
+      (`platform("com.google.cloud:libraries-bom")`) and no Gradle dependency locking. The set
+      includes the entire gRPC stack (grpc-netty-shaded, grpc-xds, grpc-alts, grpc-grpclb,
+      grpc-services 1.76.3), org.conscrypt:conscrypt-openjdk-uber:2.5.2, protobuf-java:4.33.2,
+      guava:33.5.0-jre and re2j. The client is httpjson/REST only, so none of the gRPC, Netty or
+      Conscrypt code is on any executed path — it is pure supply-chain surface in a Citi backend.
+      Separately, com.google.genai:google-genai:1.47.0 — the artifact Dev Decision 3 says was
+      deliberately NOT adopted — arrives transitively and unpinned anyway, and its requested
+      gson 2.12.1 is silently downgraded to 2.10.1 by the Spring Boot BOM.
+    suggested_owner: dev
+    suggested_action: >-
+      Before ED-01 closes and the flag is ever set true: add the Google libraries BOM or explicit
+      pins, exclude io.grpc/netty/conscrypt from the vertexai dependency since the transport is
+      httpjson, and enable dependency locking so the resolved set is reviewable. Record the final
+      artifact list in SPK-01 alongside A1.
+    refs: ["backend/build.gradle.kts"]
+    blocks_merge: false
+    resolution: >-
+      RESOLVED 2026-09-11 by @dev. 27 artifacts excluded from the Vertex pin — the gRPC runtime,
+      shaded Netty, xDS/ALTS/grpclb/services/googleapis, Conscrypt, perfmark, re2j, the gRPC
+      service stubs, and com.google.genai:google-genai with its okhttp/okio/kotlin/Java-WebSocket
+      transport. runtimeClasspath 186 -> 159, measured both ways, nothing added. io.grpc:grpc-api
+      and com.google.api:gax-grpc are KEPT because PredictionServiceStubSettings.createStub()
+      evaluates `instanceof GrpcTransportChannel` before reaching the httpjson branch — excluding
+      them was tried and every gateway test failed with NoClassDefFoundError. The 31 surviving
+      Google/gRPC/protobuf/threeten transitives now carry explicit `constraints` at the tested
+      versions; resolution is byte-identical with and without them. Note honestly: these are
+      `require` constraints, so they hold the floor but a higher version requested by a future
+      Vertex pin still wins conflict resolution — Gradle dependency locking was NOT enabled, as it
+      would rewrite every configuration in the repo and is out of scope for a story fix round.
+      google-genai contradiction closed by exclusion: a constant-pool scan of the 1.52.0 jar shows
+      every com.google.genai reference is confined to the unused com.google.cloud.vertexai.genai.*
+      package, so Dev Decision 3 and SPK-01 A3 are now literally true. Decision 3 corrected in the
+      story and the full before/after artifact list recorded in SPK-01 alongside A1.
+  - id: MED-002
+    severity: medium
+    category: test-quality
+    finding: >-
+      AC-10's canary assertions cannot fail. GatewayTestSupport.CANARY is never placed into any
+      CompileRequest, so the three doesNotContain(CANARY) assertions in
+      GatewayAuditTest.auditLineNeverCarriesPromptOrResponseContent and
+      placeholderReachesTheWireButTheResolvedValueNeverDoes are vacuously true. I probed the
+      substantive property by hand — canary inside fencedSourceLines — and it holds: audit and
+      diagnostic output both exclude it. So this is a test-strength gap, not a live defect. The
+      non-vacuous coverage of AC-10 rests entirely on the doesNotContain("Go to "),
+      doesNotContain("await page.goto") and doesNotContain("PLAYWRIGHT SYNTAX REFERENCE")
+      assertions in the same test.
+    note: >-
+      AC-10 as written is self-contradictory — source-line text necessarily reaches the wire, so
+      "a CompileRequest whose source lines contain a canary ... produces a captured HTTP request
+      ... not any resolved canary value" cannot both hold. Dev Decision 8's reading is the
+      coherent one and is accepted; the test should still assert something falsifiable.
+    suggested_owner: dev
+    suggested_action: >-
+      Put the canary into fencedSourceLines and assert the audit line and diagnostic logger
+      exclude it while the wire carries it. That version passes today and would fail if audit
+      fields ever started echoing source.
+    refs: ["backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GatewayAuditTest.java"]
+    blocks_merge: false
+    resolution: >-
+      RESOLVED 2026-09-11 by @dev. The canary now travels inside fencedSourceLines via
+      GatewayTestSupport.requestWithCanaryInSource(), and every canary test first asserts the
+      canary really is in the request, so no doesNotContain can pass vacuously. Coverage is the
+      four escape routes named in the finding: the audit line, the diagnostic logger, a returned
+      failureReason, and the serialized wire request (which must CONTAIN it — asserted, since a
+      silent non-send would be the other way to pass for free). Two new cases carry it: a 400 body
+      echoing the canary, and a 200 whose model text parrots it into an unparseable response.
+      Falsifiability proved by mutation, not by argument — GatewayAuditLogger was made to echo
+      fencedSourceLines, GatewayErrorScrubber.redactFragment was made a no-op, and the parser was
+      made to quote the offending payload; all six canary assertions went red, each on the canary
+      itself, and the mutations were reverted. Gateway suite 48 -> 51 tests, all passing.
+  - id: MED-003
+    severity: medium
+    category: process
+    finding: >-
+      The AC-15 JaCoCo package rule is declared but never executes. Under `./gradlew check`,
+      :jacocoTestReport and :jacocoTestCoverageVerification are skipped because :test fails first
+      (the 23 ED-02 failures), even with --continue. CI therefore does not enforce the 80% gate
+      this story introduced. Verified manually at 94.76%, and the bundle-wide 0.70 rule currently
+      reports 0.69 for the same reason.
+    suggested_owner: devops
+    suggested_action: >-
+      Re-run the gate once ED-02 and story 10.4's spotless repair land; no action inside 10.5.
+    refs: ["backend/build.gradle.kts"]
+    blocks_merge: false
+    resolution: >-
+      PRE-EXISTING, not changed — @dev determination 2026-09-11. `git diff fda4ca5f8~1 HEAD --
+      backend/build.gradle.kts` shows story 10.5 only ADDED a PACKAGE rule inside the existing
+      jacocoTestCoverageVerification block. The wiring that makes the gate unreachable —
+      `tasks.check { dependsOn(tasks.jacocoTestCoverageVerification) }` and
+      `tasks.jacocoTestReport { dependsOn(tasks.test) }` — predates the story, and the trigger is
+      ED-02's 23 failing ITs. Confirmed by task list: under `./gradlew check --continue` neither
+      :jacocoTestReport nor :jacocoTestCoverageVerification is scheduled at all. Build wiring is
+      therefore left alone; this needs its own story alongside ED-02. The AC-15 number is
+      unaffected — package LINE coverage re-measured at 380/401 = 94.76% after the fix round.
+  - id: LOW-001
+    severity: low
+    category: correctness
+    finding: >-
+      GatewayFailureClassifier.isTimeout walks the whole cause chain applying a
+      message.toLowerCase().contains("timed out") substring heuristic. A gateway error body that
+      echoes that phrase would be classified TIMEOUT and, by AC-4, made non-retryable —
+      attacker- or proxy-influenced classification.
+    suggested_owner: dev
+    blocks_merge: false
+  - id: LOW-002
+    severity: low
+    category: observability
+    finding: >-
+      HTTP 400 / INVALID_ARGUMENT is audited as outcome=TRANSPORT with errorCode
+      GATEWAY_TRANSPORT, conflating a permanent request error with a transport fault. Within the
+      letter of AC-9's fixed vocabulary, but it will mislead triage.
+    suggested_owner: dev
+    blocks_merge: false
+  - id: LOW-003
+    severity: low
+    category: sdk-fidelity
+    finding: >-
+      Injecting PredictionServiceClient through the supplier bypasses VertexAI's own header
+      provider, so the SDK's 'model-builder/{version}' user-agent is not sent. Request and
+      response bodies are unaffected. If R2D2 keys on that header the pilot will fail in a way
+      the stub cannot reveal.
+    suggested_owner: architect
+    suggested_action: "Add as an eleventh assumption under SPK-01 question 1."
+    blocks_merge: false
+  - id: LOW-004
+    severity: low
+    category: resource
+    finding: >-
+      VertexAiClientFactory eagerly creates an LlmUtilityServiceClient that this story never uses,
+      and unlike the prediction client it gets no deadline. I probed its defaults —
+      countTokensSettings().getRetryableCodes() is already empty — so there is no double-retry
+      risk today, but a future countTokens() call would run with no configured timeout.
+    suggested_owner: dev
+    blocks_merge: false
+  - id: LOW-005
+    severity: low
+    category: supply-chain
+    finding: >-
+      com.google.code.gson resolves 2.12.1 -> 2.10.1 under the Spring Boot BOM for the
+      transitively-added google-genai. Unused today; a latent NoSuchMethodError if that surface
+      is ever adopted.
+    suggested_owner: dev
+    blocks_merge: false
+
+# ---------------------------------------------------------------------------
+# NFR
+# ---------------------------------------------------------------------------
+nfr_validation:
+  security:
+    status: PASS
+    notes: >-
+      No credential, endpoint, project or location anywhere in code, config, tests or fixtures.
+      Gateway defaults to false in all 8 profiles. Credentials are mode-based — a raw key or user
+      token is not accepted as a property value; MODE_NONE is documented as stub-only. Audit
+      fields are a closed allow-list built from metadata the logger is structurally incapable of
+      receiving prompt or response text through. Error bodies are redacted against the request's
+      own source lines, syntax reference and output contract, then SecretMasker'd, then truncated
+      to 200 chars — asserted by gatewayErrorBodyEchoingTheRequestIsScrubbedBeforeLogging.
+      Hostile LLM output is rejected: additionalProperties:false plus a balanced-brace scan that
+      is string- and escape-aware, with oversized responses discarded before parsing or logging.
+  reliability:
+    status: PASS
+    notes: >-
+      SDK auto-retries provably off; exactly one bounded jittered retry layer. Timeouts and
+      ambiguous 5xx never retried. Bulkhead with maxWaitDuration ZERO fails fast on saturation.
+      Input rejected pre-flight, output post-flight. Every failure mode is a CompileResponse
+      value rather than a thrown exception, so §4.7 draft persistence cannot be coupled to the
+      gateway — enforced by GatewayDisabledIT swapping in a bean that throws.
+  maintainability:
+    status: PASS
+    notes: >-
+      LlmGatewayClient carries no SDK type; VertexLlmGatewayClient is the single class that knows
+      the SDK. Package line coverage 94.76%.
+  performance:
+    status: CONCERNS
+    notes: >-
+      Deadline comes from gax RetrySettings logical/total timeout rather than a resilience4j
+      TimeLimiter (Dev Decision 5) — a defensible SDK-native choice, proved to fire by
+      timeoutIsNotRetried. It bounds one attempt, not the whole propose() call: worst case is
+      (maxRetries+1) x requestTimeout plus backoff, 3 x 60s by default. 10.8 should apply its own
+      wall-clock budget rather than assume requestTimeout bounds the call.
+
+recommendations:
+  immediate: []
+  before_pilot:
+    - "MED-001 — DONE in the 2026-09-11 fix round; re-measure the artifact set if SPK-01 moves the Vertex version."
+    - "AC-16 — fill SPK-01 Findings, close ED-01, re-check A1-A10 plus LOW-003."
+    - "Replace the artifact.schema.json fixture copy with the canonical file when 10.1a merges."
+  future:
+    - "MED-002 — DONE in the 2026-09-11 fix round; falsifiability proved by mutation."
+    - "MED-003 — pre-existing; needs its own story with ED-02, not a 10.5 change."
+    - "LOW-001, LOW-002, LOW-004. LOW-005 is moot: google-genai is no longer on the classpath."
+
+merge: safe
+merge_note: >-
+  Introduces no failure beyond the measured 23. The 6 spotlessCheck violations are the same six
+  pre-existing files story 10.4 repairs and merges first; this story touched none of them.

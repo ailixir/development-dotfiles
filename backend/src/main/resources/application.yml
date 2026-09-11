@@ -164,6 +164,34 @@ resilience4j:
         ignore-exceptions:
           - org.springframework.web.client.HttpClientErrorException
 
+# Studio compile — Citi/R2D2 LLM gateway (Story 10.5, architecture §4.1/§8.5).
+# Off by default: a stock build never reaches an LLM. Endpoint/project/location/model/credentials
+# are deployment configuration and carry no default value.
+studio:
+  compile:
+    gateway:
+      enabled: ${STUDIO_GATEWAY_ENABLED:false}
+      endpoint: ${STUDIO_GATEWAY_ENDPOINT:}
+      project: ${STUDIO_GATEWAY_PROJECT:}
+      location: ${STUDIO_GATEWAY_LOCATION:}
+      model: ${STUDIO_GATEWAY_MODEL:}
+      credentials:
+        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
+        service-account-key-file: ${STUDIO_GATEWAY_CREDENTIALS_KEY_FILE:}
+      request-timeout: ${STUDIO_GATEWAY_REQUEST_TIMEOUT:60s}
+      max-concurrency: ${STUDIO_GATEWAY_MAX_CONCURRENCY:4}
+      max-input-bytes: ${STUDIO_GATEWAY_MAX_INPUT_BYTES:262144}
+      max-output-bytes: ${STUDIO_GATEWAY_MAX_OUTPUT_BYTES:262144}
+      structured-output: ${STUDIO_GATEWAY_STRUCTURED_OUTPUT:true}
+      temperature: ${STUDIO_GATEWAY_TEMPERATURE:0}
+      retry:
+        max-retries: 2
+        initial-backoff: 250ms
+        backoff-multiplier: 2.0
+        jitter-factor: 0.5
+      # FIXTURE COPY pending story 10.1a; see the $comment in the schema file.
+      artifact-schema: ${STUDIO_GATEWAY_ARTIFACT_SCHEMA:classpath:studio/artifact.schema.json}
+
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -172,3 +200,8 @@ springdoc:
 
 logging:
   config: classpath:logback-spring.xml
+  level:
+    # Vertex AI SDK debug logging stays off outside the local profile (Story 10.5).
+    com.google.cloud.vertexai: WARN
+    com.google.api: WARN
+    io.grpc: WARN

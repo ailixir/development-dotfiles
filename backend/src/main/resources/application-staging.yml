@@ -10,3 +10,12 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+studio:
+  compile:
+    gateway:
+      # ED-01/SPK-01: no verified R2D2 endpoint, project, location or credentials exist yet, so
+      # staging stays off until the spike record in docs/qa/spikes/SPK-01/ is filled in.
+      enabled: ${STUDIO_GATEWAY_ENABLED:false}
+      credentials:
+        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
