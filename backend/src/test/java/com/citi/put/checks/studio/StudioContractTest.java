@@ -176,12 +176,11 @@ class StudioContractTest {
         .contains("POST " + PUBLIC_BASE + "/tests/{id}/compile");
     assertThat(pendingOperations())
         .as(
-            "confirmation (10.9), the SSE stream (10.7) and the video route (10.16) are not this"
-                + " story's; their markers must not have moved")
+            "confirmation (10.9) and the video route (10.16) are not this story's; their"
+                + " markers must not have moved. The SSE stream lost its marker in 10.7, which"
+                + " ships that route (ADR-002 section 13)")
         .containsExactlyInAnyOrder(
-            "POST /tests/{id}/confirm-compile",
-            "GET /executions/{id}/events",
-            "GET /executions/{id}/video");
+            "POST /tests/{id}/confirm-compile", "GET /executions/{id}/video");
   }
 
   @Test
