@@ -2,6 +2,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { studioMockServer } from './server';
 import { resetStudioMocks } from './handlers';
 import { MOCK_READABLE_CSIS, OTHER_CSI, mockExecutions, mockTests } from './fixtures';
+import { awaitingDraft, needsRevisionDraft, readyDraft } from './compileFixtures';
 import studioApi from '@/services/api/studioApi';
 import { defaultConfiguration } from '@/types/studio/studioTypes';
 
@@ -151,5 +152,74 @@ describe('execute acceptance', () => {
     const second = await studioApi.executeTest(mockTests[0].id);
 
     expect(second.executionId).not.toBe(first.executionId);
+  });
+});
+
+
+describe('story 10.10: the compile-review corpus is served the way the contract declares', () => {
+  it('the single-draft read carries the diagnostics document', async () => {
+    const test = await studioApi.getTest(needsRevisionDraft.id);
+
+    expect(test.compileStatus).toBe('NEEDS_REVISION');
+    expect(test.compileDiagnostics).not.toBeNull();
+    expect(test.compileDiagnostics!.steps).toHaveLength(test.steps.length);
+  });
+
+  it('the list never carries a review draft, so the projection stays the declared one', async () => {
+    const page = await studioApi.listTests();
+    expect(page.data.map((test) => test.id)).not.toContain(needsRevisionDraft.id);
+    for (const test of page.data) {
+      expect(test.compileDiagnostics ?? null).toBeNull();
+    }
+  });
+
+  it('confirm-compile refuses a body short of the four declared fields', async () => {
+    await expect(
+      studioApi.confirmCompile(awaitingDraft.id, {
+        revisionId: awaitingDraft.currentCandidateRevisionId!,
+        sourceRevision: awaitingDraft.sourceRevision,
+        configurationRevision: awaitingDraft.configurationRevision,
+      } as never),
+    ).rejects.toBeDefined();
+  });
+
+  it('confirm-compile answers 409 STALE_CANDIDATE when the identity does not match', async () => {
+    await expect(
+      studioApi.confirmCompile(awaitingDraft.id, {
+        revisionId: '22222222-2222-2222-2222-2222222222ff',
+        artifactHash: 'b'.repeat(64),
+        sourceRevision: awaitingDraft.sourceRevision,
+        configurationRevision: awaitingDraft.configurationRevision,
+      }),
+    ).rejects.toThrow('STALE_CANDIDATE');
+  });
+
+  it('confirm-compile answers 409 for a draft that is not awaiting confirmation', async () => {
+    await expect(
+      studioApi.confirmCompile(readyDraft.id, {
+        revisionId: readyDraft.currentCandidateRevisionId!,
+        artifactHash: 'b'.repeat(64),
+        sourceRevision: readyDraft.sourceRevision,
+        configurationRevision: readyDraft.configurationRevision,
+      }),
+    ).rejects.toThrow('STALE_CANDIDATE');
+  });
+
+  it('confirming the exact identity on screen moves the draft to READY', async () => {
+    const confirmed = await studioApi.confirmCompile(awaitingDraft.id, {
+      revisionId: awaitingDraft.currentCandidateRevisionId!,
+      artifactHash: 'b'.repeat(64),
+      sourceRevision: awaitingDraft.sourceRevision,
+      configurationRevision: awaitingDraft.configurationRevision,
+    });
+
+    expect(confirmed.compileStatus).toBe('READY');
+    expect(confirmed.confirmedRevisionId).toBe(awaitingDraft.currentCandidateRevisionId);
+  });
+
+  it('compile answers 202 with the revisions it was asked about', async () => {
+    const accepted = await studioApi.compileTest(awaitingDraft.id);
+    expect(accepted.compileStatus).toBe('COMPILING');
+    expect(accepted.sourceRevision).toBe(awaitingDraft.sourceRevision);
   });
 });

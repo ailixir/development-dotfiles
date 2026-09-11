@@ -70,6 +70,98 @@ export interface TestRequest {
   configurationRevision?: number | null;
 }
 
+/**
+ * Why a compile attempt ended without a candidate, for a reason that is **not** the author's
+ * source. Mirrored from `CompileError` (ADR-002 §16.2). Non-null only with
+ * `compileStatus: STALE`, and never non-null at the same time as `compileDiagnostics`.
+ *
+ * `code` is deliberately a free string, not a union: §14.7 lets the deployed API add a code in
+ * its own PR, and a union narrowed here would turn a legitimate twelfth code into a runtime
+ * conformance failure (§16.4). The exhaustive set the API can write today is
+ * `x-compile-error-codes`, which `studioContract.test.ts` compares against the UI's explanations
+ * in both directions (ADR-002 §18.3).
+ */
+export interface CompileError {
+  code: string;
+}
+
+/**
+ * One validator rejection, already bounded and redacted by the server. `message` and `excerpt`
+ * are clamped to deployment-configured caps and a clamped string ends with a visible truncation
+ * marker, so a cut diagnostic never reads as a complete one — which is why the marker must
+ * survive rendering (ADR-002 §16.5).
+ */
+export interface CompileDiagnostic {
+  code: string;
+  /** Null for artifact-level problems belonging to no single step. */
+  stepIndex: number | null;
+  message: string;
+  /** Syntax kind of the offending node, when the problem is a node. */
+  node: string | null;
+  /** Bounded excerpt of the offending node only — never the whole step (§9.2). */
+  excerpt: string | null;
+}
+
+/**
+ * One entry per **original source step**, index aligned, present even where the validator
+ * returned nothing for that step (§4.4). The entry count equals the length of `steps` on the
+ * same `TestDto`.
+ */
+export interface CompileStepDiagnostics {
+  stepIndex: number;
+  ok: boolean;
+  diagnostics: CompileDiagnostic[];
+  /**
+   * True when this step had more diagnostics than the per-step cap, or when its diagnostics were
+   * shed to fit the document cap. "There were no more problems" and "we stopped telling you" are
+   * different facts, and this is the field that tells them apart.
+   */
+  truncated: boolean;
+}
+
+/** The only reason the document declares for shedding whole steps' diagnostics. */
+export type TruncationReason = 'TOTAL_BYTES';
+
+/**
+ * Why the last compile produced nothing runnable, in the author's own step order. Non-null only
+ * with `compileStatus: NEEDS_REVISION`, and never non-null at the same time as `compileError`.
+ *
+ * The document describes **the last attempt only**: `attempts` says how many happened and
+ * `exhausted` says whether the repair bound was reached with the artifact still invalid.
+ */
+export interface CompileDiagnostics {
+  validatorSchemaVersion: string;
+  /** Artifact-level rejections belonging to no single step. */
+  artifact: CompileDiagnostic[];
+  steps: CompileStepDiagnostics[];
+  /** True when whole steps' diagnostics were shed to fit the document byte cap. */
+  truncated: boolean;
+  /** Present only when `truncated` is true. */
+  truncationReason?: TruncationReason | null;
+  attempts: number;
+  exhausted: boolean;
+}
+
+/** The `202` body of `POST /tests/{id}/compile`. Acceptance of an attempt, never its success. */
+export interface CompileAccepted {
+  compileRequestId: string;
+  compileStatus: string;
+  sourceRevision?: number | null;
+  configurationRevision?: number | null;
+}
+
+/**
+ * The confirmation body, exactly the four fields `ConfirmCompileRequest.required` declares
+ * (architecture §4.2, §8.3). The transaction is conditional on all four, so all four must come
+ * from the one response the user was looking at.
+ */
+export interface ConfirmCompileRequest {
+  revisionId: string;
+  artifactHash: string;
+  sourceRevision: number;
+  configurationRevision: number;
+}
+
 export interface TestDto {
   id: string;
   name: string;
@@ -91,6 +183,17 @@ export interface TestDto {
   compileStatus: CompileStatus;
   currentCandidateRevisionId: string | null;
   confirmedRevisionId: string | null;
+  /**
+   * Non-null only with `compileStatus: STALE`. Present on both `GET /tests` and `GET /tests/{id}`
+   * (ADR-002 §16.5).
+   */
+  compileError?: CompileError | null;
+  /**
+   * Non-null only with `compileStatus: NEEDS_REVISION`, and **always null on `GET /tests`** — the
+   * list projection drops it deliberately (ADR-002 §16.5), so the review surface reads the
+   * single-draft route regardless of what the list already holds.
+   */
+  compileDiagnostics?: CompileDiagnostics | null;
 }
 
 /** One entry per original step. Skipped or unstarted steps carry null timings. */
