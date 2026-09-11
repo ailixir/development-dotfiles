@@ -68,6 +68,22 @@ const CANARY_PREFIX = 'CANARY-Zq7-';
 const PAD = 'p'.repeat(385);
 
 /**
+ * The same value again, on a run of output that **never sends a newline** (QA-1).
+ *
+ * The line above ends with `\n`, so it travels the relay's per-line path. That left the relay's
+ * *other* cut — the overflow bound for a stream with no line break in it — carrying a canary in no
+ * test at all, and it had the redact/cut order backwards: a value straddling the cut was emitted
+ * as two fragments that match no variant, and concatenating them reconstructs the value. Coverage
+ * read 98.68 % over the branch because a different test reached it with nothing to redact.
+ *
+ * This is what a child signalled mid-write actually leaves in the pipe, which is why it belongs in
+ * the matrix rather than only in a unit test. Long enough to force an emit rather than merely to
+ * sit in the retained tail: two canaries, one near the first cut and one past it.
+ */
+const OVERFLOW_LEAK =
+  `${'q'.repeat(385)}${CANARY} no-newline-here` + `${'r'.repeat(385)}${CANARY}${'s'.repeat(600)}`;
+
+/**
  * The seven encodings AC-7a enumerates, each one a shape the value takes after a browser, an HTTP
  * client or a proxy has touched it.
  */
@@ -195,7 +211,8 @@ function leakFor(shape: Shape): { stderr: string; failureMessage: string; stepFa
       return {
         stderr:
           `pw:debug filling ${field} with ${CANARY} on http://127.0.0.1/login\n` +
-          `${PAD}${CANARY} trailing\n`,
+          `${PAD}${CANARY} trailing\n` +
+          OVERFLOW_LEAK,
         failureMessage: `locator.fill: could not type ${CANARY} into ${field}`,
         stepFailure: `AssertionFailed: expected ${field} to contain ${CANARY}`,
       };
@@ -208,7 +225,8 @@ function leakFor(shape: Shape): { stderr: string; failureMessage: string; stepFa
       return {
         stderr:
           `${thrown.name}: ${thrown.message}\n    at Connection.<anonymous>\n` +
-          `${PAD}${CANARY} trailing\n`,
+          `${PAD}${CANARY} trailing\n` +
+          OVERFLOW_LEAK,
         failureMessage: `${thrown.name}: ${thrown.message}`,
         stepFailure: `${thrown.name}: ${thrown.message}`,
       };
@@ -228,7 +246,7 @@ function leakFor(shape: Shape): { stderr: string; failureMessage: string; stepFa
       };
       const rendered = `request failed: ${String(nested.request.credentials)}`;
       return {
-        stderr: `${rendered}\n${PAD}${CANARY} trailing\n`,
+        stderr: `${rendered}\n${PAD}${CANARY} trailing\n${OVERFLOW_LEAK}`,
         failureMessage: rendered,
         stepFailure: rendered,
       };

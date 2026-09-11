@@ -40,15 +40,32 @@
  * moment ago writes its most useful lines on the way out. {@link OutputRelay.release} is the hard
  * stop: after it the redactor is gone and everything is dropped.
  *
- * ## Redact, then truncate — in that order
+ * ## Redact, then cut — in that order, on **every** path that cuts
  *
- * Truncating first would cut a known value in half, and half a value does not match any variant
- * the redactor scrubs, so the surviving half would reach the log. Redacting the assembled line and
- * bounding the result afterwards is the only order that holds.
+ * Cutting first would split a known value in half, and half a value matches no variant the
+ * redactor scrubs, so both halves reach the log and concatenating them reconstructs the value.
+ * Redacting the assembled text and bounding the result afterwards is the only order that holds.
  *
- * The honest limit: a value split across a **newline** is two lines, and neither half matches. The
- * relay bounds and scrubs what it can assemble; it is a scrubber for known values, exactly as
- * `createRedactor` is, and it is not described as more.
+ * There are **two** places this relay cuts, and the rule applies to both: the per-line bound in
+ * `deliver`, and the overflow bound in `write` for a stream that never sends a newline. The second
+ * one had the order backwards and shipped that way — QA-1 — because the two guards each covered
+ * half the property and the branch that needed both never carried a value. Whenever a cut is added
+ * here, the question to ask is *what is this cutting, and has it been redacted yet*.
+ *
+ * ## What this still cannot do, stated rather than implied
+ *
+ * A value the relay never sees **whole** cannot be matched, because it matches no variant until it
+ * is complete. Two cases:
+ *
+ * - the child writes a value with a **newline** through the middle of it — two lines, by the
+ *   child's own choice, and neither half matches;
+ * - a value longer than `maxLineLength` that also spans a chunk boundary, so the relay is forced
+ *   to emit before the rest arrives. The retained tail below removes the ordinary case of this
+ *   (values shorter than a line, which is all of them in practice); it cannot remove the general
+ *   one without an unbounded buffer, which is the thing this relay exists to prevent.
+ *
+ * It is a scrubber for known values it can assemble, exactly as `createRedactor` is, and it is not
+ * described as more.
  */
 
 /** Just enough of a redactor for this module; `src/executor/redaction.ts` supplies the real one. */
@@ -145,11 +162,39 @@ export function createOutputRelay(options: OutputRelayOptions): OutputRelay {
         buffer = buffer.slice(index + 1);
         index = buffer.indexOf('\n');
       }
-      // A stream with no newline in it must not be able to grow this buffer without limit: cut it
-      // at the line bound and deliver, so the memory held is bounded by `maxLineLength` per stream.
-      while (buffer.length > maxLineLength) {
-        deliver(stream, buffer.slice(0, maxLineLength));
-        buffer = buffer.slice(maxLineLength);
+
+      // ── The overflow path: a stream with no newline in it (QA-1). ─────────────────────────
+      //
+      // A browser that writes megabytes without a line break must not grow this buffer without
+      // limit, so the relay cuts it itself. **That cut is made on redacted text, never on raw
+      // text**, which is the same rule `deliver` follows and for the same reason: a known value
+      // straddling a raw cut becomes two fragments, and a fragment matches no variant
+      // `createRedactor` produces, so *both halves* reach the log — and concatenating them
+      // reconstructs the value exactly.
+      //
+      // This branch got the order wrong and no test could see it: the guard that plants a value
+      // across the cut ended its line with `\n`, so it travelled the newline path above, and the
+      // only test that reached this branch ran with no values to redact. The newline path never
+      // had the problem because the *child* chose where the line ended. Here the **relay** chooses,
+      // so the relay owns the consequence.
+      if (buffer.length > maxLineLength) {
+        const active = redactor;
+        if (active === null) {
+          // Released. There is no redactor, so no cut of this buffer can be made safely and the
+          // whole of it is dropped rather than fragmented.
+          dropped += 1;
+          buffer = '';
+        } else {
+          buffer = active.redact(buffer);
+          // Hold one line's worth back rather than cutting to the last byte. A value that spans a
+          // *chunk* boundary is incomplete at the moment it arrives and therefore matches nothing;
+          // retaining a tail gives the rest of it a chance to arrive and be scrubbed before
+          // anything is emitted. Memory stays bounded — at most `2 × maxLineLength` per stream.
+          while (buffer.length > maxLineLength * 2) {
+            deliver(stream, buffer.slice(0, maxLineLength));
+            buffer = buffer.slice(maxLineLength);
+          }
+        }
       }
       partial[stream] = buffer;
     },

@@ -122,7 +122,10 @@ describe('AC-14 — the control endpoints stay responsive while a child is hung'
 
     scheduler.advance(TOTAL_RUNTIME_MS);
     await until(() => runner.app.coordinator.inFlight === 0, 20_000);
-  });
+    // Four times the bound under test. `validateTimeoutMs` defaults to 5 000 ms, which is exactly
+    // vitest's default `testTimeout` — so without this the framework kills the test first and the
+    // `elapsedMs` assertion below can never be the thing that fires (QA LOW-1).
+  }, 20_000);
 
   it('validates an artifact normally while the browser child is hung', async () => {
     const { harness: runner, scheduler } = await hangOne();
@@ -160,7 +163,7 @@ describe('AC-14 — the control endpoints stay responsive while a child is hung'
 
     scheduler.advance(TOTAL_RUNTIME_MS);
     await until(() => runner.app.coordinator.inFlight === 0, 20_000);
-  });
+  }, 20_000);
 
   it('answers a second POST /v1/runs with 429 and Retry-After rather than blocking on the hang', async () => {
     const { harness: runner, scheduler } = await hangOne();
@@ -185,16 +188,32 @@ describe('AC-14 — the control endpoints stay responsive while a child is hung'
 
     scheduler.advance(TOTAL_RUNTIME_MS);
     await until(() => runner.app.coordinator.inFlight === 0, 20_000);
-  });
+  }, 20_000);
 
   it('stays responsive while the hung child floods its captured output', async () => {
     // The relay is new, it runs on the parent's event loop, and it is exactly the kind of thing
-    // that turns "the child is hung" into "the parent is hung". 200 lines of 300 characters each
-    // arrive before the control endpoints are asked anything.
-    const { harness: runner, scheduler } = await hangOne({ writes: true });
+    // that turns "the child is hung" into "the parent is hung".
+    //
+    // **The flood is written *inside* the measurement window, deliberately** (QA LOW-1). The first
+    // version of this test pre-loaded the output at launch and then timed a `/health` request
+    // afterwards — so the relay had already finished its work before the clock started, and a
+    // relay that blocked for six seconds still produced a fast `/health`. It failed only because
+    // six seconds exceeded vitest's default five-second `testTimeout`, which means the *framework*
+    // was the discriminator and the `elapsedMs` assertion could never fire. Raising the timeout
+    // alone would have made the mutation survive silently, which is worse.
+    //
+    // Issuing the request first and flooding on the same tick puts the relay's work between the
+    // request and its response, which is the only arrangement in which "the relay cannot delay a
+    // control endpoint" is a claim this assertion can refute.
+    const { harness: runner, scheduler, driver } = await hangOne();
     const boundMs = runner.config.validateTimeoutMs;
 
-    const health = await timed(() => get(runner.port, '/health', SERVICE_TOKEN));
+    const pending = timed(() => get(runner.port, '/health', SERVICE_TOKEN));
+    for (let index = 0; index < 200; index += 1) {
+      driver.write('stderr', `[chromium] noisy line ${String(index)} ${'n'.repeat(300)}\n`);
+    }
+    const health = await pending;
+
     expect(health.value.status).toBe(200);
     expect(health.elapsedMs).toBeLessThan(boundMs);
 
@@ -205,7 +224,7 @@ describe('AC-14 — the control endpoints stay responsive while a child is hung'
 
     scheduler.advance(TOTAL_RUNTIME_MS);
     await until(() => runner.app.coordinator.inFlight === 0, 20_000);
-  });
+  }, 20_000);
 });
 
 describe('AC-13 — the slot is released and the next run succeeds', () => {

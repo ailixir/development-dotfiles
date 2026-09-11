@@ -498,6 +498,23 @@ describe('deferred criteria — skipped, not passed', () => {
     // zombie reaping by the image's entry point (§9.3). Reaping is a property of the image, not of
     // this package: a developer machine cannot create the condition and this story does not claim
     // it. Skipped, never passed.
+    //
+    // **Which of the six paths this file observes, and which it composes** (QA MED-1). Two are
+    // observed here by enumerating real pids: **success** and the **runtime-deadline kill**. Three
+    // more — step failure, run fault and drain — reach the *identical* `child.kill()` in
+    // `src/run/launcher.ts`, which is the `signalProcessTree` call the two observed paths prove,
+    // so composing them from the unit tier's `child.killed` / `pool.inUse` / `scratch.list()`
+    // assertions is sound.
+    //
+    // **The launch-failure path is the exception and is named rather than implied.** It has no
+    // `session.run` at all: `launcher.launch` throws before it returns, the coordinator's
+    // `RunFailure` propagates before `terminate` is ever registered, and the tree is reaped
+    // through the launch-timeout branch — `child.kill()` inside `launch`, reached from
+    // `awaitReady` expiring rather than from a deadline. It therefore does **not** compose from
+    // the two observed paths: it is a different call site with a different trigger, proven today
+    // only in the unit tier (`test/run/launcher.test.ts`, the `BROWSER_LAUNCH_FAILED` cases) and
+    // never by pid observation against a real browser. Whoever closes AC-11b in the image should
+    // drive it explicitly rather than assume it is covered.
   });
 
   it.skip('O-13 — the API still publishes partial: false regardless of what this story reports (story 10.14)', () => {

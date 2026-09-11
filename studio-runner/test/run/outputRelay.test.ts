@@ -15,9 +15,19 @@ import type { OutputStream } from '../../src/run/outputRelay.js';
 
 const CANARY = 'p@ss w0rd/+=';
 
+/**
+ * A recognisable piece of the value. A partial disclosure is a disclosure.
+ *
+ * Short on purpose: the fragment a cut actually leaves is whatever happened to fall on the near
+ * side of it, and a longer needle would let the real leak through. The padding below is sized so
+ * the cut lands **inside** the value — which, the first time these were written, it did not.
+ */
+const CANARY_FRAGMENT = 'p@ss';
+
 interface Capture {
   readonly lines: { stream: OutputStream; line: string }[];
   readonly text: string;
+  readonly contiguous: string;
 }
 
 function capture(): Capture & { readonly push: (stream: OutputStream, line: string) => void } {
@@ -30,6 +40,16 @@ function capture(): Capture & { readonly push: (stream: OutputStream, line: stri
     },
     get text(): string {
       return lines.map((entry) => entry.line).join('\n');
+    },
+    /**
+     * The emitted bytes with no separator between them.
+     *
+     * The overflow path cuts a long buffer into several bounded lines, so a placeholder can land
+     * across two of them. Joining with `\n` would then hide it — which says nothing about
+     * redaction and everything about where the cut fell.
+     */
+    get contiguous(): string {
+      return lines.map((entry) => entry.line).join('');
     },
   };
 }
@@ -131,6 +151,68 @@ describe('AC-8, AC-10 — line-bounded, volume-bounded, and the drop is visible'
     expect(notice?.line).toBe('[child output truncated: 90 line(s) dropped]');
   });
 
+  /**
+   * QA-1 — the relay's **other** cut, with a value across it.
+   *
+   * The guard above plants the canary across a cut and ends its line with `\n`, so it travels the
+   * per-line path. The only test that reached the overflow path ran with `values: []` and asserted
+   * line lengths. Two guards, half a property each, and the branch that needed both carried no
+   * value — so the overflow path cut **raw** text and shipped. Coverage read 98.68 % over it.
+   *
+   * A child signalled mid-write leaves exactly this in the pipe: a run of output with no trailing
+   * newline. The probe that proved it emitted `…pppCANARY-Zq7-p@ss` and ` w0rd/+= trailing`, whose
+   * concatenation is the value.
+   */
+  it('scrubs a value that straddles the overflow cut, on a stream that never sends a newline', () => {
+    const sink = capture();
+    const relay = relayWith(sink, { maxLineLength: 400 });
+
+    // No `\n` anywhere. 394 characters of padding puts the value across the 400-character cut —
+    // sized deliberately, because padding that stops short of the cut leaves the value whole on
+    // the near side and the test cannot tell the two orders apart. Long enough overall that the
+    // relay is forced to emit rather than hold it all back.
+    relay.write('stdout', `${'q'.repeat(394)}${CANARY}${'r'.repeat(900)}`);
+    relay.close();
+
+    expect(sink.lines.length, 'the overflow path must actually have emitted').toBeGreaterThan(0);
+    expect(sink.text).not.toContain(CANARY);
+    // The fragments a raw cut produces. Neither matches any variant the redactor scrubs, so
+    // asserting only on the whole value is exactly what let this through.
+    expect(sink.text).not.toContain(CANARY_FRAGMENT);
+    expect(sink.text).not.toContain('w0rd/+=');
+    // On the contiguous bytes: the placeholder itself straddles a cut here, which is fine — a
+    // split placeholder is not a secret — but it means the per-line view would not show it.
+    expect(sink.contiguous).toContain(REDACTION_PLACEHOLDER);
+    for (const entry of sink.lines) expect(entry.line.length).toBeLessThanOrEqual(400);
+  });
+
+  it('reassembles a value split across two chunks before it cuts, when it can', () => {
+    const sink = capture();
+    const relay = relayWith(sink, { maxLineLength: 400 });
+    // The value arrives in halves and there is still no newline. The first chunk alone is 406
+    // characters — over the line bound — so a relay that cut to the last byte would emit the
+    // incomplete first half, which matches nothing and therefore reaches the log verbatim. The
+    // retained tail is what gives the second half a chance to arrive first.
+    relay.write('stdout', `${'q'.repeat(395)}${CANARY.slice(0, 11)}`);
+    relay.write('stdout', `${CANARY.slice(11)}${'r'.repeat(500)}`);
+    relay.close();
+
+    expect(sink.text).not.toContain(CANARY);
+    expect(sink.text).not.toContain(CANARY_FRAGMENT);
+    expect(sink.contiguous).toContain(REDACTION_PLACEHOLDER);
+  });
+
+  it('holds at most two lines’ worth per stream, so the retained tail is still bounded', () => {
+    const sink = capture();
+    const relay = relayWith(sink, { maxLineLength: 100, maxLines: 5_000, values: [] });
+    relay.write('stdout', 'z'.repeat(100 * 1024));
+    // Everything above the retained tail has been emitted; what is held back is bounded by
+    // `2 × maxLineLength`, which is what keeps a chatty browser from being a parent-side leak.
+    const emittedChars = sink.lines.reduce((total, entry) => total + entry.line.length, 0);
+    expect(100 * 1024 - emittedChars).toBeLessThanOrEqual(200);
+    relay.close();
+  });
+
   it('bounds a stream that never writes a newline at all', () => {
     const sink = capture();
     const relay = relayWith(sink, { maxLineLength: 100, maxLines: 5_000, values: [] });
@@ -203,6 +285,30 @@ describe('AC-9 — no resolved value is retained, and post-kill output is never 
     expect(sink.lines).toHaveLength(before);
     expect(sink.text).not.toContain(CANARY);
     expect(relay.released).toBe(true);
+  });
+
+  it('drops a long newline-less buffer wholesale once released, rather than cutting it', () => {
+    const sink = capture();
+    const relay = relayWith(sink);
+    relay.release();
+
+    // The overflow path is the one place the relay itself decides where to cut. With no redactor
+    // there is no safe cut to make, so the buffer is discarded entire rather than fragmented —
+    // and it is not retained either, because a released relay still holding a value is exactly
+    // what AC-9 forbids.
+    relay.write('stdout', `${'q'.repeat(900)}${CANARY}${'r'.repeat(900)}`);
+
+    expect(sink.lines).toEqual([]);
+    expect(relay.dropped).toBeGreaterThan(0);
+
+    // A second, short write. If the first buffer had been *retained* rather than discarded, the
+    // accumulated text would still be sitting in the relay and would surface on the next flush.
+    relay.write('stdout', 'more\n');
+    expect(sink.lines).toEqual([]);
+    relay.close();
+    expect(sink.text).not.toContain(CANARY);
+    expect(sink.text).not.toContain(CANARY_FRAGMENT);
+    expect(sink.text).not.toContain('qqq');
   });
 
   it('drops the redactor reference, which is what holds the values', () => {
