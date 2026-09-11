@@ -183,23 +183,9 @@ CREATE INDEX idx_ui_test_exec_projection
 -- 'chromium' is the only engine V1 executes. Legacy 'chrome' is the same engine under its old
 -- name. Any other engine is converted to chromium so the row stays authored and readable, but
 -- those drafts are STALE from V12 and cannot execute until they are recompiled and confirmed.
-DO $$
-DECLARE
-    renamed INTEGER;
-    converted INTEGER;
-BEGIN
-    UPDATE ui_tests SET browser = 'chromium' WHERE browser = 'chrome';
-    GET DIAGNOSTICS renamed = ROW_COUNT;
-
-    UPDATE ui_tests SET browser = 'chromium' WHERE browser <> 'chromium';
-    GET DIAGNOSTICS converted = ROW_COUNT;
-
-    RAISE NOTICE 'V14: renamed % ui_tests row(s) from chrome to chromium', renamed;
-    RAISE NOTICE 'V14: converted % ui_tests row(s) from a non-chrome legacy engine to chromium; '
-                 'they remain STALE until recompiled and confirmed', converted;
-END
-$$;
-
+-- V1's inline ui_tests_browser_check permits only chrome/firefox/safari/edge, so it MUST be
+-- dropped BEFORE any row is rewritten to 'chromium'. Rewriting first aborts the whole migration
+-- with SQLSTATE 23514 on any database that already holds a legacy row.
 DO $$
 DECLARE
     r RECORD;
@@ -216,6 +202,23 @@ BEGIN
     LOOP
         EXECUTE format('ALTER TABLE ui_tests DROP CONSTRAINT %I', r.conname);
     END LOOP;
+END
+$$;
+
+DO $$
+DECLARE
+    renamed INTEGER;
+    converted INTEGER;
+BEGIN
+    UPDATE ui_tests SET browser = 'chromium' WHERE browser = 'chrome';
+    GET DIAGNOSTICS renamed = ROW_COUNT;
+
+    UPDATE ui_tests SET browser = 'chromium' WHERE browser <> 'chromium';
+    GET DIAGNOSTICS converted = ROW_COUNT;
+
+    RAISE NOTICE 'V14: renamed % ui_tests row(s) from chrome to chromium', renamed;
+    RAISE NOTICE 'V14: converted % ui_tests row(s) from a non-chrome legacy engine to chromium; '
+                 'they remain STALE until recompiled and confirmed', converted;
 END
 $$;
 

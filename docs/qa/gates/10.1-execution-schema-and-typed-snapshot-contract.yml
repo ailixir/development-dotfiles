@@ -213,7 +213,10 @@ issues:
       already added after both. The same ordering hazard does not exist in section 3: the status
       UPDATEs only ever write PASSED and ERROR, which the old V7 CHECK already permitted.
     suggested_owner: dev
-    status: open
+    status: resolved
+    resolution: >-
+      The constraint-drop DO block now runs before both UPDATEs in V14 section 6, so the old
+      ui_tests_browser_check is gone before any row is rewritten to 'chromium'.
   - id: ISSUE-002
     severity: medium
     category: security
@@ -237,7 +240,11 @@ issues:
       tree-shaken, or expose the mock entry only from the Vite standalone entry rather than from
       ChecksModule. Also confirm mockServiceWorker.js is excluded from the production asset copy.
     suggested_owner: dev
-    status: open
+    status: resolved
+    resolution: >-
+      A build-time constant (process.env.MSW_BUNDLED, folded to 'false' by DefinePlugin in the
+      production webpack build) makes the dynamic import unreachable: the 292.2 KiB msw chunk is no
+      longer emitted and mockServiceWorker.js is no longer copied; dev and Vite are unchanged.
   - id: ISSUE-003
     severity: medium
     category: test-quality
@@ -261,7 +268,11 @@ issues:
       exactly the CSI-bearing executions. Note for whoever writes it: V12 adds
       ck_ui_tests_csi_registered, so the no-CSI draft must also set quarantined_at.
     suggested_owner: dev
-    status: open
+    status: resolved
+    resolution: >-
+      LegacyDataMigrationIT runs Flyway to target 12, seeds legacy drafts and executions, then
+      migrates to 14; it fails with ui_tests_browser_check / SQLSTATE 23514 against the old
+      ordering, which was verified before the fix was restored.
   - id: ISSUE-004
     severity: medium
     category: test-quality
@@ -286,7 +297,11 @@ issues:
       Fix the javadoc. Optionally revisit the real two-context test in 10.7, which owns the
       acceptance transaction anyway.
     suggested_owner: dev
-    status: open
+    status: resolved
+    resolution: >-
+      The StudioIdempotencyIT class javadoc now states that the test runs in a single Spring
+      context and names the two properties it does prove; the acceptance criterion text is
+      untouched and a real two-context test stays with 10.7.
   - id: ISSUE-005
     severity: low
     category: correctness
@@ -344,3 +359,17 @@ tree_note: >-
   `git status --short` at the end of the review shows exactly one modified file: the authorised
   one-word seed correction in RevisionRetentionIT. The drift-guard mutation was restored and the
   throwaway migration probe was deleted.
+
+dev_fixes:
+  by: "Dex (Builder) — @dev"
+  date: "2026-09-11"
+  resolved: ["ISSUE-001", "ISSUE-002", "ISSUE-003", "ISSUE-004"]
+  still_open: ["ISSUE-005 (deferred to 10.7)", "ISSUE-006 (low)", "ISSUE-007 (low)"]
+  verification:
+    - "./gradlew check --continue -> 387 tests, 23 failed: the exact ED-02 baseline class-for-class, none in studio."
+    - "./gradlew spotlessCheck checkstyleMain checkstyleTest spotbugsMain -> BUILD SUCCESSFUL."
+    - "LegacyDataMigrationIT 7/7 PASSED against the fix; initializationError with SQLSTATE 23514 against the old ordering."
+    - "Production webpack build -> 37 assets / 10261.7 KiB before, 35 assets / 9965.8 KiB after; no msw module left in dist."
+    - "npx tsc --noEmit -> 2 pre-existing TS2307 errors; npx vitest run -> 96 passed, 1 pre-existing failing suite."
+  note: >-
+    Re-review required: the gate verdict is @qa's to change.

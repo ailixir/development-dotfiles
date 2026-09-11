@@ -32,8 +32,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * is why the dispatch ledger carries a unique {@code (principal, idempotency_key)} row committed
  * with the execution (Architecture §5.1).
  *
- * <p>The second Spring context here is the point of the test: it is a genuinely separate
- * application instance, sharing only the database, exactly like a second replica.
+ * <p>This test runs in a single Spring context. It does not start a second JVM, so it cannot prove
+ * anything that depends on one. What it does prove is the pair of properties the durability claim
+ * actually rests on: {@link StudioService} holds no per-instance idempotency state — a second
+ * service object built from the same beans, in its own transaction, resolves the retry from the
+ * committed ledger row — and the database itself refuses a second row for the same {@code
+ * (principal, idempotency_key)} by constraint name. Hibernate's second-level cache is off and the
+ * retry runs in a fresh transaction, so that resolution genuinely reaches the database. A true
+ * two-context test belongs with the acceptance transaction in 10.7.
  */
 @SpringBootTest
 @ActiveProfiles("test")
