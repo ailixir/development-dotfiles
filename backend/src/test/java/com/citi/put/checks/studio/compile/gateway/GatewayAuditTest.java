@@ -24,8 +24,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Story 10.5 AC-9, AC-10, AC-11, AC-14: what the gateway is allowed to write down.
  *
- * <p>The secret canary is never handed to the client — it stands for the resolved value a caller
- * must keep out of the gateway. These assertions are the regression guard that keeps it that way.
+ * <p>The canary is planted in the request's own source lines and each test first asserts it is
+ * really there, so no {@code doesNotContain} below can pass vacuously. Source text necessarily
+ * reaches the wire; what must never happen is the canary surfacing in the audit line, in the
+ * diagnostic stream or in a returned failure reason. Break the redaction in {@link
+ * GatewayErrorScrubber} or start echoing source into {@link GatewayAuditLogger} and these go red.
  */
 class GatewayAuditTest {
 
@@ -91,8 +94,10 @@ class GatewayAuditTest {
   @Test
   void auditLineNeverCarriesPromptOrResponseContent() throws Exception {
     stubOk(GatewayTestSupport.VALID_ARTIFACT);
+    CompileRequest request = GatewayTestSupport.requestWithCanaryInSource();
+    assertCanaryIsReallyInTheRequest(request);
 
-    client().propose(GatewayTestSupport.request());
+    client().propose(request);
 
     String line = onlyAuditLine();
     assertThat(line)
@@ -104,19 +109,83 @@ class GatewayAuditTest {
   }
 
   @Test
-  void placeholderReachesTheWireButTheResolvedValueNeverDoes() throws Exception {
+  void sourceTextReachesTheWireButNeverTheAuditOrDiagnosticStream() throws Exception {
     stubOk(GatewayTestSupport.VALID_ARTIFACT);
+    CompileRequest request = GatewayTestSupport.requestWithCanaryInSource();
+    assertCanaryIsReallyInTheRequest(request);
 
-    client().propose(GatewayTestSupport.request());
+    client().propose(request);
 
     String captured =
         wireMock.getAllServeEvents().stream()
             .map(event -> event.getRequest().getBodyAsString())
             .collect(Collectors.joining("\n"));
-    assertThat(captured).contains(GatewayTestSupport.SECRET_PLACEHOLDER);
-    assertThat(captured).doesNotContain(GatewayTestSupport.CANARY);
+    // The wire carries the source text, canary included — that is unavoidable and is asserted so
+    // that the two doesNotContain checks below cannot pass because nothing was ever sent.
+    assertThat(captured)
+        .contains(GatewayTestSupport.SECRET_PLACEHOLDER)
+        .contains(GatewayTestSupport.CANARY);
     assertThat(logged(auditAppender)).doesNotContain(GatewayTestSupport.CANARY);
     assertThat(logged(diagnosticAppender)).doesNotContain(GatewayTestSupport.CANARY);
+  }
+
+  @Test
+  void aGatewayErrorBodyEchoingTheCanaryNeverReachesTheReasonOrTheLogs() throws Exception {
+    CompileRequest request = GatewayTestSupport.requestWithCanaryInSource();
+    assertCanaryIsReallyInTheRequest(request);
+    String canaryLine = request.fencedSourceLines().get(2);
+    wireMock.stubFor(
+        post(urlPathMatching(GENERATE_CONTENT_PATH))
+            .willReturn(
+                aResponse()
+                    .withStatus(400)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"error\":{\"code\":400,\"status\":\"INVALID_ARGUMENT\",\"message\":\""
+                            + "rejected prompt: "
+                            + canaryLine.replace("\"", "\\\"")
+                            + "\"}}")));
+
+    CompileResponse response = client().propose(request);
+
+    assertThat(response.outcome()).isEqualTo(GatewayOutcome.TRANSPORT);
+    assertThat(response.failureReason()).doesNotContain(GatewayTestSupport.CANARY);
+    assertThat(logged(diagnosticAppender)).doesNotContain(GatewayTestSupport.CANARY);
+    assertThat(logged(auditAppender)).doesNotContain(GatewayTestSupport.CANARY);
+  }
+
+  @Test
+  void anUnparseableResponseEchoingTheCanaryNeverReachesTheReasonOrTheLogs() throws Exception {
+    CompileRequest request = GatewayTestSupport.requestWithCanaryInSource();
+    assertCanaryIsReallyInTheRequest(request);
+    // The model parrots the canary back inside text that is not a usable artifact. Quoting the
+    // offending payload into the parse failure reason is the obvious implementation mistake here,
+    // so this asserts it is not made.
+    stubOk("I cannot comply. You asked me to check for " + GatewayTestSupport.CANARY + ".");
+
+    CompileResponse response = client().propose(request);
+
+    assertThat(response.outcome()).isEqualTo(GatewayOutcome.PARSE_FAILURE);
+    assertThat(response.failureReason()).doesNotContain(GatewayTestSupport.CANARY);
+    assertThat(logged(diagnosticAppender)).doesNotContain(GatewayTestSupport.CANARY);
+    assertThat(logged(auditAppender)).doesNotContain(GatewayTestSupport.CANARY);
+  }
+
+  @Test
+  void anExceptionMessageEchoingTheCanaryIsRedacted() {
+    CompileRequest request = GatewayTestSupport.requestWithCanaryInSource();
+    assertCanaryIsReallyInTheRequest(request);
+
+    String scrubbed =
+        GatewayErrorScrubber.scrub(
+            new IllegalStateException(
+                "gateway rejected prompt: " + request.fencedSourceLines().get(2)),
+            request);
+
+    assertThat(scrubbed)
+        .startsWith("IllegalStateException: ")
+        .contains("[REDACTED]")
+        .doesNotContain(GatewayTestSupport.CANARY);
   }
 
   @Test
@@ -186,6 +255,13 @@ class GatewayAuditTest {
     assertThat(response.provenance()).isNull();
     assertThat(onlyAuditLine()).contains("outcome=DISABLED").contains("model=null");
     assertThat(wireMock.getAllServeEvents()).isEmpty();
+  }
+
+  /** Guards every canary assertion in this class against passing for the wrong reason. */
+  private static void assertCanaryIsReallyInTheRequest(CompileRequest request) {
+    assertThat(String.join("\n", request.fencedSourceLines()))
+        .contains(GatewayTestSupport.CANARY)
+        .contains(GatewayTestSupport.SECRET_PLACEHOLDER);
   }
 
   private LlmGatewayClient client() throws Exception {

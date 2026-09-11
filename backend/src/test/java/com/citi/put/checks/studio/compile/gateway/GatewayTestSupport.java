@@ -11,7 +11,14 @@ import org.springframework.core.io.ClassPathResource;
 /** Shared fixtures for the gateway tests. Never contains a real endpoint or credential. */
 final class GatewayTestSupport {
 
+  /**
+   * A marker planted inside a request's own source lines. The wire body must carry it — it is
+   * source text — while the audit line, the diagnostic log and every returned failure reason must
+   * not. Asserting on it is only meaningful when it is genuinely in the request, so it is reached
+   * through {@link #requestWithCanaryInSource()} and never through a literal.
+   */
   static final String CANARY = "CANARY-8f3c1d2e-not-a-real-secret";
+
   static final String SECRET_PLACEHOLDER = "<secret LOGIN_PW>";
   static final String PROJECT = "stub-project";
   static final String LOCATION = "stub-location";
@@ -66,6 +73,19 @@ final class GatewayTestSupport {
         List.of(
             "1. Go to \"https://example.invalid\"",
             "2. Type \"" + SECRET_PLACEHOLDER + "\" in the \"Password\" field"));
+  }
+
+  /**
+   * A request carrying both the secret placeholder and the canary in its source lines (AC-10).
+   *
+   * <p>Index 2 is the canary line; error-path tests echo it back from the stub gateway.
+   */
+  static CompileRequest requestWithCanaryInSource() {
+    return request(
+        List.of(
+            "1. Go to \"https://example.invalid\"",
+            "2. Type \"" + SECRET_PLACEHOLDER + "\" in the \"Password\" field",
+            "3. Assert the confirmation banner reads \"" + CANARY + "\""));
   }
 
   static CompileRequest request(List<String> sourceLines) {

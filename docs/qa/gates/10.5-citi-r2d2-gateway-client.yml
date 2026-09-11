@@ -11,6 +11,13 @@ status_reason: >-
   CONCERNS is driven by the unpinned transitive dependency footprint the Vertex pin drags in, by
   three inert canary assertions behind AC-10, and by the JaCoCo gate not actually executing under
   `check` while ED-02 keeps `:test` red.
+  FIX ROUND 2026-09-11 (@dev): MED-001 and MED-002 are RESOLVED — see their `resolution` fields.
+  MED-003 is determined PRE-EXISTING repository wiring and deliberately left alone. The five LOW
+  findings are untouched and still belong to their listed owners. Re-verified at baseline:
+  `./gradlew check --continue` fails on exactly two tasks, `:test` with the same 23 ED-02 failures
+  across the same 14 classes and `:spotlessJavaCheck` on the same six story-10.4 files; 0 failures
+  in studio/compile/gateway, now 51 tests there. The gate verdict is unchanged at CONCERNS —
+  re-grading is @qa's call, not the fix round's.
 reviewer: "Quinn (@qa)"
 updated: "2026-09-10"
 branch: "story/10.5"
@@ -161,6 +168,23 @@ top_issues:
       artifact list in SPK-01 alongside A1.
     refs: ["backend/build.gradle.kts"]
     blocks_merge: false
+    resolution: >-
+      RESOLVED 2026-09-11 by @dev. 27 artifacts excluded from the Vertex pin — the gRPC runtime,
+      shaded Netty, xDS/ALTS/grpclb/services/googleapis, Conscrypt, perfmark, re2j, the gRPC
+      service stubs, and com.google.genai:google-genai with its okhttp/okio/kotlin/Java-WebSocket
+      transport. runtimeClasspath 186 -> 159, measured both ways, nothing added. io.grpc:grpc-api
+      and com.google.api:gax-grpc are KEPT because PredictionServiceStubSettings.createStub()
+      evaluates `instanceof GrpcTransportChannel` before reaching the httpjson branch — excluding
+      them was tried and every gateway test failed with NoClassDefFoundError. The 31 surviving
+      Google/gRPC/protobuf/threeten transitives now carry explicit `constraints` at the tested
+      versions; resolution is byte-identical with and without them. Note honestly: these are
+      `require` constraints, so they hold the floor but a higher version requested by a future
+      Vertex pin still wins conflict resolution — Gradle dependency locking was NOT enabled, as it
+      would rewrite every configuration in the repo and is out of scope for a story fix round.
+      google-genai contradiction closed by exclusion: a constant-pool scan of the 1.52.0 jar shows
+      every com.google.genai reference is confined to the unused com.google.cloud.vertexai.genai.*
+      package, so Dev Decision 3 and SPK-01 A3 are now literally true. Decision 3 corrected in the
+      story and the full before/after artifact list recorded in SPK-01 alongside A1.
   - id: MED-002
     severity: medium
     category: test-quality
@@ -186,6 +210,18 @@ top_issues:
       fields ever started echoing source.
     refs: ["backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GatewayAuditTest.java"]
     blocks_merge: false
+    resolution: >-
+      RESOLVED 2026-09-11 by @dev. The canary now travels inside fencedSourceLines via
+      GatewayTestSupport.requestWithCanaryInSource(), and every canary test first asserts the
+      canary really is in the request, so no doesNotContain can pass vacuously. Coverage is the
+      four escape routes named in the finding: the audit line, the diagnostic logger, a returned
+      failureReason, and the serialized wire request (which must CONTAIN it — asserted, since a
+      silent non-send would be the other way to pass for free). Two new cases carry it: a 400 body
+      echoing the canary, and a 200 whose model text parrots it into an unparseable response.
+      Falsifiability proved by mutation, not by argument — GatewayAuditLogger was made to echo
+      fencedSourceLines, GatewayErrorScrubber.redactFragment was made a no-op, and the parser was
+      made to quote the offending payload; all six canary assertions went red, each on the canary
+      itself, and the mutations were reverted. Gateway suite 48 -> 51 tests, all passing.
   - id: MED-003
     severity: medium
     category: process
@@ -200,6 +236,16 @@ top_issues:
       Re-run the gate once ED-02 and story 10.4's spotless repair land; no action inside 10.5.
     refs: ["backend/build.gradle.kts"]
     blocks_merge: false
+    resolution: >-
+      PRE-EXISTING, not changed — @dev determination 2026-09-11. `git diff fda4ca5f8~1 HEAD --
+      backend/build.gradle.kts` shows story 10.5 only ADDED a PACKAGE rule inside the existing
+      jacocoTestCoverageVerification block. The wiring that makes the gate unreachable —
+      `tasks.check { dependsOn(tasks.jacocoTestCoverageVerification) }` and
+      `tasks.jacocoTestReport { dependsOn(tasks.test) }` — predates the story, and the trigger is
+      ED-02's 23 failing ITs. Confirmed by task list: under `./gradlew check --continue` neither
+      :jacocoTestReport nor :jacocoTestCoverageVerification is scheduled at all. Build wiring is
+      therefore left alone; this needs its own story alongside ED-02. The AC-15 number is
+      unaffected — package LINE coverage re-measured at 380/401 = 94.76% after the fix round.
   - id: LOW-001
     severity: low
     category: correctness
@@ -291,12 +337,13 @@ nfr_validation:
 recommendations:
   immediate: []
   before_pilot:
-    - "MED-001 — pin or exclude the transitive Google/gRPC set before studio.compile.gateway.enabled is ever true."
+    - "MED-001 — DONE in the 2026-09-11 fix round; re-measure the artifact set if SPK-01 moves the Vertex version."
     - "AC-16 — fill SPK-01 Findings, close ED-01, re-check A1-A10 plus LOW-003."
     - "Replace the artifact.schema.json fixture copy with the canonical file when 10.1a merges."
   future:
-    - "MED-002 — make the canary assertions falsifiable."
-    - "LOW-001, LOW-002, LOW-004, LOW-005."
+    - "MED-002 — DONE in the 2026-09-11 fix round; falsifiability proved by mutation."
+    - "MED-003 — pre-existing; needs its own story with ED-02, not a 10.5 change."
+    - "LOW-001, LOW-002, LOW-004. LOW-005 is moot: google-genai is no longer on the classpath."
 
 merge: safe
 merge_note: >-

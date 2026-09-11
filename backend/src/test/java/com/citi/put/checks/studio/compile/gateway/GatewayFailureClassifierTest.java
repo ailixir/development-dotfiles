@@ -2,10 +2,10 @@ package com.citi.put.checks.studio.compile.gateway;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.api.gax.grpc.GrpcStatusCode;
+import com.google.api.gax.httpjson.HttpJsonStatusCode;
 import com.google.api.gax.rpc.ApiException;
 import com.google.api.gax.rpc.ApiExceptionFactory;
-import io.grpc.Status;
+import com.google.api.gax.rpc.StatusCode;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketException;
@@ -23,11 +23,13 @@ class GatewayFailureClassifierTest {
 
   @Test
   void unavailableAndResourceExhaustedAreRetried() {
-    assertThat(GatewayFailureClassifier.isRetryableTransport(apiException(Status.Code.UNAVAILABLE)))
+    assertThat(
+            GatewayFailureClassifier.isRetryableTransport(
+                apiException(StatusCode.Code.UNAVAILABLE)))
         .isTrue();
     assertThat(
             GatewayFailureClassifier.isRetryableTransport(
-                apiException(Status.Code.RESOURCE_EXHAUSTED)))
+                apiException(StatusCode.Code.RESOURCE_EXHAUSTED)))
         .isTrue();
   }
 
@@ -53,19 +55,20 @@ class GatewayFailureClassifierTest {
         .isFalse();
     assertThat(
             GatewayFailureClassifier.isRetryableTransport(
-                apiException(Status.Code.DEADLINE_EXCEEDED)))
+                apiException(StatusCode.Code.DEADLINE_EXCEEDED)))
         .isFalse();
   }
 
   @Test
   void ambiguousServerErrorsAreNotRetried() {
-    assertThat(GatewayFailureClassifier.isRetryableTransport(apiException(Status.Code.INTERNAL)))
+    assertThat(
+            GatewayFailureClassifier.isRetryableTransport(apiException(StatusCode.Code.INTERNAL)))
         .isFalse();
-    assertThat(GatewayFailureClassifier.isRetryableTransport(apiException(Status.Code.UNKNOWN)))
+    assertThat(GatewayFailureClassifier.isRetryableTransport(apiException(StatusCode.Code.UNKNOWN)))
         .isFalse();
     assertThat(
             GatewayFailureClassifier.isRetryableTransport(
-                apiException(Status.Code.INVALID_ARGUMENT)))
+                apiException(StatusCode.Code.INVALID_ARGUMENT)))
         .isFalse();
     assertThat(GatewayFailureClassifier.isRetryableTransport(new IllegalStateException("boom")))
         .isFalse();
@@ -76,7 +79,7 @@ class GatewayFailureClassifierTest {
   void outcomeAndErrorCodeFollowTheClassification() {
     assertThat(GatewayFailureClassifier.outcomeFor(new SocketTimeoutException("Read timed out")))
         .isEqualTo(GatewayOutcome.TIMEOUT);
-    assertThat(GatewayFailureClassifier.outcomeFor(apiException(Status.Code.UNAVAILABLE)))
+    assertThat(GatewayFailureClassifier.outcomeFor(apiException(StatusCode.Code.UNAVAILABLE)))
         .isEqualTo(GatewayOutcome.TRANSPORT);
     assertThat(GatewayFailureClassifier.errorCodeFor(GatewayOutcome.TIMEOUT))
         .isEqualTo(GatewayErrorCode.GATEWAY_TIMEOUT);
@@ -84,8 +87,8 @@ class GatewayFailureClassifierTest {
         .isEqualTo(GatewayErrorCode.GATEWAY_TRANSPORT);
   }
 
-  private static ApiException apiException(Status.Code code) {
+  private static ApiException apiException(StatusCode.Code code) {
     return ApiExceptionFactory.createException(
-        new IllegalStateException("stub"), GrpcStatusCode.of(code), false);
+        new IllegalStateException("stub"), HttpJsonStatusCode.of(code), false);
   }
 }
