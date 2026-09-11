@@ -1,0 +1,626 @@
+schema: 1
+story: '10.13'
+story_title: Deadline enforcement, redaction and cleanup
+epic: EPIC-10
+wave: 4
+
+gate: CONCERNS
+status_reason: >-
+  Sixteen of the twenty non-deferred criteria were verified by running them, four criteria are
+  honestly deferred as live `it.skip`s naming their owners, T-10.13.10 is correctly left undone
+  and un-guessed, and one finding is new and is the reviewer's own. Every gate reproduces:
+  `npm test` 849 passed / 2 skipped over 41 files exit 0, `npm run test:fixtures` against real
+  pinned Chromium 80 passed / 7 skipped over 4 files exit 0, `lint`, `type-check`, `build` and
+  `check:pins` all exit 0, `check:pins --require-image` exits 1 by design (ci/stages.md O-2a),
+  `test/contract.test.ts` 14/14, `.nvmrc` reads 22. Coverage on `src/run/**` is 88.46 lines /
+  87.62 branches against the 85/80 gate it declares and no threshold was lowered. The two defects
+  @dev reports having found are real and the reviewer reproduced both mechanisms: replacing
+  `signalProcessTree` with a complete no-op now turns the fixtures tier RED (the test hangs to its
+  180 s bound on a SIGSTOPped Chromium that nothing reaches), and MT-1' and MT-2' each turn the
+  unit tier red on 4 assertions and the fixtures tier red at the 30 s patience bound with a real
+  orphaned browser. Both §17.4 counter-examples hold under M11. `docs/specs/studio/openapi.yaml`
+  is byte-unchanged at 815aae9b… and the diff touches no `backend/**` file. The reconstructed
+  `src/server/runCoordinator.ts` is clean, and the reviewer verified that against the base commit
+  rather than against a green suite. What holds the gate at CONCERNS is QA-1: `outputRelay.write`'s
+  no-newline overflow branch splits the buffer at `maxLineLength` **before** `deliver` redacts, so
+  a resolved value straddling the cut reaches the pod log as two recognisable fragments. This is
+  the eighth guard in this epic that could not fail — in a shape not yet on the named list — and
+  the story's own canary harness proves it the moment the trailing newline is taken off the
+  planted line.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-11T00:00:00Z'
+branch: story/10.13
+head_sha: 0ac098a58
+base_sha: 34138201f
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.13
+platform: darwin 23.5.0 / arm64, node v23.10.0, npm 11.3.0
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands actually executed by the reviewer, not developer claims
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  unit_tests:
+    command: npm test
+    result: PASS
+    detail: >-
+      41 files, 849 passed, 2 skipped, exit 0, 3.57 s. Exactly the developer's figure. The two
+      skips are the pre-existing unit-tier ones and are untouched by this story. Coverage,
+      read off the reviewer's own run: src/run/** 88.46 lines / 87.62 branches / 92.30 functions
+      against the 85/85/80/80 block it declares; src/server/** 96.50 / 92.30. deadline.ts 100/100,
+      outputRelay.ts 98.68 / 93.54, tree.ts 95.12 / 86.36, launcher.ts 94.75 / 88.77,
+      runCoordinator.ts 94.64 / 88.23.
+  fixtures_tier:
+    command: npm run test:fixtures
+    result: PASS
+    detail: >-
+      4 files, 80 passed, 7 skipped, exit 0. Exactly the developer's figure. The new file
+      test/fixtures-tier/deadline-cleanup.test.ts contributes 7 passing and 4 skipped. Real pinned
+      Chromium: the kill-tree case launches a live browser, waits until descendants appear below
+      the fork, SIGSTOPs them, kills, and rechecks each snapshotted pid individually.
+  lint:
+    command: npm run lint
+    result: PASS
+    detail: eslint ., exit 0, no output. Confirmed by a second run discarding stdout to read $?.
+  type_check:
+    command: npm run type-check
+    result: PASS
+    detail: tsc -p tsconfig.json --noEmit, exit 0, no output.
+  build:
+    command: npm run build
+    result: PASS
+    detail: tsc -p tsconfig.build.json + write-runtime-versions.mjs, exit 0.
+  pin_check:
+    command: npm run check:pins
+    result: PASS
+    detail: >-
+      exit 0. playwright 1.63.0 agrees across package.json, package-lock.json, the Dockerfile ARG
+      and dist/runtime-versions.json; .nvmrc / engines floor reported as 22 (>=22.11.0 <25.0.0).
+      chromiumBuild and image reported NOT ASSERTED, as expected outside the image.
+  pin_check_require_image:
+    command: npm run check:pins -- --require-image
+    result: FAIL (EXPECTED BY DESIGN)
+    detail: >-
+      exit 1 on the unasserted chromiumBuild and image. ci/stages.md O-2a. A green result here
+      would itself have been the finding. `.nvmrc` re-read as exactly `22`; package.json is not in
+      this story's diff at all, so `engines` is untouched.
+  contract_test:
+    command: npx vitest run test/contract.test.ts
+    result: PASS
+    detail: 14 passed / 14, exit 0. Unchanged by ADR-002 §17's optional `partial`, as §17.8 measured.
+  contract_document:
+    command: shasum -a 256 docs/specs/studio/openapi.yaml
+    result: BYTE-UNCHANGED
+    detail: >-
+      815aae9b0068335e8d5ab5270dccecac4d1fd6f472306ca3dc04292187dd0d80, identical to the
+      BASE_SHA256 constant in test/run/confinement.test.ts. The file does not appear in
+      `git diff --name-status 34138201f..HEAD` at all.
+  scope:
+    command: git diff --name-status 34138201f..HEAD
+    result: IN SCOPE
+    detail: >-
+      31 files: 1 story markdown, and 30 under studio-runner/ (3 new source modules, 9 modified
+      source files including README.md and ci/stages.md, 9 new tests, 7 modified tests, 2 new test
+      helpers). **No backend/**, no Java, no SQL, no frontend, no contract file, no `.nvmrc`, no
+      `package.json`, no `test/isolation.test.ts`, no `eslint.config.js`, no `src/main.ts`, no
+      `vitest.config.ts`.** Every "Not modified, deliberately" claim in the File List is true.
+  working_tree:
+    command: git status --short
+    result: CLEAN
+    detail: >-
+      Empty after every mutation was reverted. Mutations were applied with python3 in-place edits
+      and reverted with `git checkout HEAD -- <path>` (never `git stash`, per the worktree rule);
+      restoration was confirmed byte-identical by an empty `git status --short` before each new
+      mutation. A full `npm test` re-run after the last revert reproduced 849 passed / 2 skipped /
+      41 files. `ps -A | grep -iE 'chrome-headless|ffmpeg-mac|headless_shell'` was empty after the
+      three fixtures-tier mutation runs, so the SIGSTOP arrangement's afterEach cleanup works.
+      Two throwaway probe test files were created under test/run/ and deleted; neither is in the
+      tree at gate time.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Developer claims — reproduced, or taken on trust, stated separately
+# ─────────────────────────────────────────────────────────────────────────────
+developer_claims_verified:
+  - claim: "npm test 768 -> 849 passed / 2 skipped, 35 -> 41 files"
+    verdict: >-
+      AFTER-FIGURE CONFIRMED EXACTLY (849 / 2 / 41). The baseline figure at 34138201f was NOT
+      re-run by the reviewer and is taken on trust; it is not load-bearing for any criterion.
+  - claim: "npm run test:fixtures 73 -> 80 passed, 3 -> 7 skipped, 3 -> 4 files"
+    verdict: >-
+      AFTER-FIGURE CONFIRMED EXACTLY (80 / 7 / 4). Baseline taken on trust.
+  - claim: "lint / type-check / build / check:pins exit 0"
+    verdict: CONFIRMED — all four run by the reviewer, all exit 0.
+  - claim: "src/run/** coverage 88.46 lines / 87.62 branches against 85/80"
+    verdict: CONFIRMED to the decimal on the reviewer's own run.
+  - claim: "openapi.yaml byte-unchanged; no backend/** file touched"
+    verdict: CONFIRMED by shasum and by the full name-status diff.
+  - claim: "17 mutations recorded, 17 red"
+    verdict: >-
+      PARTIALLY REPRODUCED. The reviewer re-ran six mutations across five criteria (see
+      mutation_spot_checks) and found five red as claimed. One — M9 as the reviewer first phrased
+      it, moving `killReason ??= reason` to after `await stop()` — SURVIVED, 849 green. The
+      stronger form of the same mutation (M9b, take `failureKind` from the child's exit rather
+      than from the recorded reason) is RED on 11 tests. The difference is recorded as LOW-2, not
+      as a contradiction of the developer's table: what the suite pins is the *value*
+      `total-timeout`, not the temporal ordering of the assignment.
+  - claim: "MC-3 and MC-5 survived, reported rather than hidden"
+    verdict: >-
+      MC-5 CONFIRMED SURVIVING by the reviewer (849 passed suite-wide with the coordinator's
+      failureMessage redaction bypassed). MC-3 taken on trust; not re-run. The honesty of
+      reporting both is the right call and is recorded as a strength.
+  - claim: "three guards were not assertions at all until a mutation survived (M5, M6, MT-1/MT-2)"
+    verdict: >-
+      NOT INDEPENDENTLY RE-DERIVED for M5 and M6 — the pre-fix versions are not reconstructable
+      from the tree. The MT-1/MT-2 half IS independently re-derived: the reviewer applied a
+      complete no-op kill and the fixtures tier went red, which is the property the story claims
+      the fix bought. The source-side fix for M6 (`close` flushes and keeps relaying, `release` is
+      the hard stop) is present and both branches are reachable.
+  - claim: "AC-7a shipped larger than estimated: 3 x 17 x 8 = 408 assertions"
+    verdict: >-
+      STRUCTURE CONFIRMED, COUNT NOT RECOUNTED. `assertEverySurfaceClean` enumerates 15 numbered
+      surfaces of which one expands to the 7 posted bodies, and `expectClean` makes 7 encoding
+      checks plus 1 fragment check. The control test is real and is reported below with its limit.
+      See LOW-3 for surfaces that are clean by construction on the kill path.
+  - claim: "AC-14's bound reads runner.config.validateTimeoutMs rather than restating 5000"
+    verdict: >-
+      CONFIRMED — four call sites in test/server/hung-child.test.ts read
+      `runner.config.validateTimeoutMs`; the literal 5000 appears nowhere in that file. See LOW-1
+      for what that bound can and cannot discriminate.
+  - claim: "SEC-1 not regressed"
+    verdict: >-
+      CONFIRMED by reading the source and the guard. INHERITED_ENV_KEYS is exactly the seven keys
+      with no NODE_OPTIONS; test/run/launcher.test.ts asserts it with `toEqual` over the literal
+      list plus `toHaveLength(7)` — exact-set, not subset; the constructed environment is asserted
+      key-for-key as exactly HOME, PATH, PLAYWRIGHT_BROWSERS_PATH, PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD,
+      TMPDIR; CODE_LOADING_ENV_PREFIXES is ['NODE_','LD_','DYLD_','OPENSSL_'] and
+      `assertNoCodeLoadingKeys(env)` runs on every launch; `execArgv: []` is explicit in
+      createForkSpawner.
+  - claim: "T-10.13.10 not done; BASE_SHA256 left at 815aae9b…, re-read not transcribed"
+    verdict: >-
+      CONFIRMED, AND THE STRONGER FORM CHECKED. The constant reads 815aae9b… which equals the
+      live `shasum -a 256` of the document; and `git diff 34138201f..HEAD -- confinement.test.ts`
+      shows no +/- line touching BASE_SHA256, so the re-anchor was performed by the base commit
+      34138201f and NOT preemptively guessed by this story. T-10.13.10 is correctly un-ticked.
+  - claim: "one self-inflicted incident: runCoordinator.ts destroyed and reconstructed"
+    verdict: >-
+      RECONSTRUCTION IS CLEAN, verified against the base commit rather than against the suite. See
+      reconstructed_file_review.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Mutation spot-checks — applied and run by the reviewer
+# ─────────────────────────────────────────────────────────────────────────────
+mutation_spot_checks:
+  no_op_kill:
+    ac: AC-11a
+    mutation: >-
+      `signalProcessTree` returns `{ signalled: [] }` immediately for any positive pid — a complete
+      no-op, which the story reports left BOTH tiers green before the fix.
+    command: npx vitest run --config vitest.fixtures.config.ts test/fixtures-tier/deadline-cleanup.test.ts
+    result: RED
+    detail: >-
+      1 failed / 6 passed / 4 skipped. "kills the browser below the Node layer when the ordered
+      stop cannot complete" timed out at its 180 000 ms bound: with the browser SIGSTOPped it can
+      no longer exit on its own when the parent's pipe closes, so the child never resolves and the
+      test cannot reach a passing state. **The exact failure the split hint warned about is now
+      caught.** The other six tests in the file stayed green, which is correct — they do not
+      suspend the tree.
+  MT_1_prime:
+    ac: AC-11a
+    mutation: one group signal only — `kill(-pid, signal)` on the root, nothing else.
+    commands:
+      - npx vitest run test/run/tree.test.ts
+      - npx vitest run --config vitest.fixtures.config.ts test/fixtures-tier/deadline-cleanup.test.ts -t "kills the browser below the Node layer"
+    result: RED on both tiers
+    detail: >-
+      Unit: 4 failed / 5 passed — "reaches the browser and the encoder, which are not in the fork's
+      process group", "signals deepest-first and the root last", "enumerates before it signals",
+      "never throws when a process is already gone". Fixtures: RED at the 30 000 ms patience bound
+      inside `expectTreeGone` — a real Chromium descended from the fork was still alive. Matches
+      the developer's table exactly.
+  MT_2_prime:
+    ac: AC-11a
+    mutation: signal only the fork's own pid.
+    result: RED on both tiers
+    detail: Unit 4 failed / 5 passed; fixtures RED at the 30 000 ms bound in `expectTreeGone`.
+  MC_1:
+    ac: AC-7a (per-shape canary proof)
+    mutation: "`const scrubbed = raw` — the relay's redaction removed."
+    command: npx vitest run test/run/canary.test.ts
+    result: RED on all three shapes
+    detail: >-
+      4 failed / 3 passed. shape 1 (formatted argument), shape 2 (exception message thrown from
+      below the run path) and shape 3 (nested toString) all red, plus the post-kill AC-9 test. The
+      per-shape obligation is discharged.
+  M9b:
+    ac: AC-3
+    mutation: "`failureKind: result.failureKind` — infer the kind from the child's exit."
+    command: npm test
+    result: RED
+    detail: >-
+      11 failed / 838 passed across 3 files, including "row 3, the negative: a killed child must
+      NOT report RUN_ERROR" and "row 3: total browser runtime exceeded -> ERROR / TIMEOUT". AC-3's
+      negative test is live. (The developer recorded 9 failures for their phrasing of M9; the
+      reviewer's phrasing is broader.)
+  M11:
+    ac: AC-16 / ADR-002 §17.4
+    mutation: "`partial: errorCodeFor(failureKind) === RUNNER_ERROR_CODES.TIMEOUT`."
+    command: npm test
+    result: RED
+    detail: >-
+      3 failed / 846 passed — "(a) the ordered stop completed and left a playable file -> PENDING,
+      partial false", "(c) no playable file -> UNAVAILABLE, partial false" and "never derives
+      partial from the outcome, in either direction". **Both §17.4 counter-examples hold.**
+      Independently confirms the developer's figure of 3.
+  MH_4b:
+    ac: AC-14
+    mutation: a 6 000 ms busy-wait inside the relay's first delivery.
+    command: npx vitest run test/server/hung-child.test.ts
+    result: RED
+    detail: >-
+      1 failed / 7 passed — "stays responsive while the hung child floods its captured output".
+      The bound is live. See LOW-1 for which assertion actually fired.
+  MC_5:
+    ac: AC-7a
+    mutation: "coordinator's `redactor.redact(result.failureMessage)` bypassed."
+    command: npm test
+    result: SURVIVED
+    detail: 849 passed / 2 skipped / 41 files — identical to the unmutated suite. See mc5_judgement.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The reviewer's judgements the mission asked for
+# ─────────────────────────────────────────────────────────────────────────────
+mc5_judgement:
+  claim_under_test: >-
+    The developer claims MC-5 is "genuinely redundant: reportClient redacts the whole serialized
+    body afterwards", and explicitly declines to claim a mutation proof for it.
+  verdict: THE CLAIM IS CORRECT, AND THE HONESTY IS THE RIGHT CALL.
+  evidence:
+    - >-
+      src/reporting/reportClient.ts:111 is `redactor.redact(serializeBounded(body, bounds))` — the
+      whole serialized payload is redacted once, and the returned string IS the payload. Every
+      field on the body, including `outcome.errorMessage`, is downstream of it.
+    - >-
+      test/run/canary.test.ts asserts `outcome.errorMessage` on
+      `JSON.stringify(run.final.outcome)` where `run.final` is parsed from `bodies.at(-1)` — the
+      bytes that were posted. So the surface the coordinator's field-level redaction would protect
+      is already protected, on the same bytes, by the client.
+    - >-
+      The only consumer of the unredacted in-memory `outcome` object is the snapshot, which is
+      serialized through the same client. No path reads it otherwise.
+  characterisation: >-
+    MC-5 is unfalsifiable **by construction**, not untested. That is a materially different thing
+    from a guard that could not fail: there is no surface at which it could be observed, because
+    the surface it would defend is defended twice. Leaving the call in place is correct — removing
+    it would make wire redaction a single point of failure. No action required; the developer's
+    refusal to claim a proof for it is the behaviour this epic wants.
+
+ac_11a_partial_coverage_judgement:
+  disclosure_under_test: >-
+    Only success and runtime-deadline kill are observed by enumerating real pids. Step failure,
+    launch failure, run fault and drain rely on unit-tier `child.killed` / `pool.inUse` /
+    `scratch.list()` assertions — the same assertion shape that missed the vacuous kill.
+  verdict: ACCEPTABLE, AS A NAMED CONCERNS ITEM — NOT A BLOCKER.
+  reasoning:
+    - >-
+      The mechanism is shared and is now proven. `createForkSpawner`'s `ChildProcessHandle.kill`
+      calls `signalProcessTree(pid, 'SIGKILL')` (src/run/launcher.ts:302), and every one of the six
+      paths reaches the tree through `SessionRun.kill` or `session.close` -> `stop()` ->
+      `child.kill()`. The defect the unit tier missed was in the *mechanism*, and the mechanism is
+      falsified against real Chromium on two paths. `child.killed >= 1` on the other four is then
+      a composition argument rather than an independent claim, and the composition is sound.
+    - >-
+      The one path where the composition is genuinely weaker is **launch failure**: there is no
+      `session.run`, the coordinator throws before `terminate` is registered, and a half-started
+      Chromium under a fork that never reported `ready` is reaped by the launcher's own
+      launchTimeout path rather than by `signalProcessTree`. That path has no real-browser
+      observation and is not structurally identical to the two that do.
+  required_of: >-
+    AC-11b (ED-05 / story 10.18) should name the launch-failure path explicitly among the six it
+    proves in-image, rather than leaving it inside "the same six paths". Recorded as MED-1.
+
+reconstructed_file_review:
+  file: studio-runner/src/server/runCoordinator.ts
+  incident: >-
+    @dev ran `git checkout -- src/server/runCoordinator.ts` to revert a mutation, destroyed that
+    file's real edits, reconstructed it in full, and verified only by the suite going green.
+  method: >-
+    The reviewer did NOT rely on the suite. `git diff 34138201f..HEAD -- <file>` was inspected for
+    removed lines, and the File List's seven claimed edits were each located in the file at HEAD.
+  no_base_content_lost:
+    finding: TRUE
+    proof: >-
+      The diff removes exactly nine lines, and every one has an accounted-for replacement: the
+      `evidence` initialiser and the `evidence =` assignment each gain `partial`; the in-process
+      `recording` literal gains `partial: false`; `totalRuntimeMs: job.deadlines.totalRuntimeMs`
+      becomes the clamped `runtimeCapMs`; `session.run` becomes the hoisted `runSession`; one
+      comment is extended for §17.4; and `sendFinal`/`resolver.wipe()` are deliberately reordered
+      so scratch is cleared and values wiped before the delivery window opens. Nothing the base
+      commit had is gone.
+  all_claimed_edits_present:
+    finding: TRUE
+    detail: >-
+      browserReadyAtMs as a separate read from admittedAtMs (:446 vs :723); the clamps
+      (effectiveRuntimeCapMs :361, effectiveStepTimeoutMs :419); the per-run diagnostics sink
+      (:331-342); `endRun` for both kill reasons with `snapshot.appendLog` written before
+      `runSession.kill(reason)` (:467-486); `terminateInFlight()` (:631-635); scratch cleared and
+      values wiped before `sendFinal` (:585-588); `partial` on the evidence with no `outcome`
+      expression anywhere in the assignment (:535-539).
+  verdict: >-
+    CLEAN. This is stronger evidence than the developer had, and the result is that the incident
+    left no residue. One unrelated observation is recorded as LOW-4.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The eighth vacuous guard
+# ─────────────────────────────────────────────────────────────────────────────
+eighth_vacuous_guard:
+  found: TRUE
+  id: QA-1
+  shape: >-
+    NOT one of the five named prior shapes. A new one: **two guards each covering half of a
+    property, with the branch that needs both never carrying the canary.** Line coverage reports
+    98.68 % on the module and hides it, because the branch is exercised — just never with a value
+    to scrub.
+  the_two_halves:
+    - >-
+      test/run/outputRelay.test.ts "redacts **before** it truncates, so a cut cannot free half a
+      value" plants the canary across the cut — but the planted line ends in `\n`, so it travels
+      the *newline* delivery path, where the order genuinely is redact-then-truncate. This test is
+      not vacuous; M5/MC-2 turn it red. It simply never reaches the other branch.
+    - >-
+      test/run/outputRelay.test.ts "bounds a stream that never writes a newline at all" is the one
+      test that drives `write`'s overflow branch — and it is constructed with `values: []`, so the
+      redactor has nothing to scrub and the test asserts only line lengths.
+  the_defect: >-
+    src/run/outputRelay.ts `write` lines 150-153:
+    `while (buffer.length > maxLineLength) { deliver(stream, buffer.slice(0, maxLineLength)); ... }`.
+    The slice happens **before** `deliver` calls `active.redact(raw)`. A known value straddling the
+    cut is therefore split into two fragments, neither of which matches any variant `createRedactor`
+    produces, and both are emitted. This contradicts the module's own header — *"Redacting the
+    assembled line and bounding the result afterwards is the only order that holds"* — and it is
+    not the honest limit the header concedes, because that one is about a value the **child** split
+    across a newline; here the **relay itself** creates the split.
+  proof_1_unit:
+    method: >-
+      Throwaway vitest file over the real `createOutputRelay` and the real `createRedactor`, with
+      maxLineLength 400 and the chunk `'p'.repeat(385) + CANARY` and no newline.
+    result: >-
+      RED. Emitted line 1 ends `...pppCANARY-Zq7-p@ss` and line 2 is ` w0rd/+= trailing`. The
+      `CANARY-Zq7-` fragment reached the sink verbatim.
+  proof_2_end_to_end:
+    method: >-
+      Copied test/run/canary.test.ts and removed only the trailing `\n` from the three planted
+      `${PAD}${CANARY} trailing` lines — the exact condition a killed child produces, since a child
+      signalled mid-write does not terminate its line.
+    result: >-
+      RED, 4 failed / 3 passed. "the log sink carries a fragment of the canary" on shape 1, shape 2
+      and shape 3, and "the log sink after the kill carries a fragment of the canary". The story's
+      own harness catches it the moment the newline is removed.
+  second_line_of_defence_does_not_help: >-
+    INFERRED, not run. The coordinator's `diagnostics.write` hands the line to
+    `logger.withRedactor(redactor)`, which serialises then redacts — but against the same known
+    values, and a fragment matches none of them. The 10.6 sink cannot recover what the relay
+    already split.
+  severity: HIGH
+  scope_of_impact: >-
+    AC-8 and AC-7a, on the surface the epic's acceptance bullet names by hand ("Canary values never
+    appear in **stdout**"). Today the values are planted canaries on `resolvedVars` /
+    `resolvedSecrets`; story 10.17 replaces them with real vault material, at which point this
+    becomes a real partial secret disclosure to persisted pod logs (§9.2).
+  suggested_fix: >-
+    Redact the buffer before the overflow split, or carry a `maxLineLength`-sized overlap across
+    the cut so a value spanning it is still matchable, or refuse to split mid-buffer and instead
+    drop-with-notice past the bound. Whichever is chosen, the canary matrix needs one planted line
+    **without** a trailing newline, and the "bounds a stream that never writes a newline" test
+    needs to stop running with `values: []`.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Deferrals and the blocked task
+# ─────────────────────────────────────────────────────────────────────────────
+deferrals:
+  live_skips:
+    result: ALL FOUR ARE LIVE SKIPS NAMING THEIR OWNERS
+    detail: >-
+      test/fixtures-tier/deadline-cleanup.test.ts lines 480, 489, 496, 503 — AC-5b (10.19, gated
+      with 10.18), AC-7b (10.19, with 10.17), AC-11b (ED-05 / 10.18), O-13 (10.14). Each appears
+      in the reporter output with a `↓` and its owner in the title; the reviewer saw all four in
+      every fixtures run. None is a deleted test: none of the four has ever existed as a passing
+      assertion in this package, and each body carries the reasoning for why the condition cannot
+      be created here.
+    on_the_could_they_pass_question: >-
+      Each body is empty, so un-skipping one would pass trivially. That is the epic's established
+      convention — the three pre-existing fixtures-tier skips in reference-execution.test.ts and
+      seek-measurement.test.ts have the identical shape — and the gate that has to move is
+      external to this package in all four cases (a deployed configuration, an API, an image, a
+      Java projection). Consistent with precedent; not treated as a finding.
+  t_10_13_10:
+    result: CORRECTLY NOT DONE, AND NOT GUESSED
+    detail: >-
+      BASE_SHA256 reads 815aae9b0068335e8d5ab5270dccecac4d1fd6f472306ca3dc04292187dd0d80, which is
+      the live digest of the document on this branch. `git diff 34138201f..HEAD --
+      studio-runner/test/run/confinement.test.ts` contains no +/- line touching the constant; the
+      re-anchor to 815aae9b… was performed by the base commit 34138201f, whose message says so.
+      Story 10.9's marker removal is not on this branch, so the post-10.9 digest is unknown and
+      nothing was invented for it. AC-18 is correctly marked `[~]` and T-10.13.10 `[ ]`.
+  sec_2:
+    result: NOT TREATED AS A FINDING
+    detail: >-
+      Deferred to 10.18 per @po's confirmed declination. The reviewer did not re-attack it. SEC-1
+      was re-verified and is not regressed (see developer_claims_verified).
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Findings
+# ─────────────────────────────────────────────────────────────────────────────
+top_issues:
+  - id: QA-1
+    severity: HIGH
+    title: The relay's no-newline overflow branch splits a resolved value before redacting it
+    ac: AC-8, AC-7a
+    file: studio-runner/src/run/outputRelay.ts:150-153
+    finding: >-
+      See eighth_vacuous_guard above for the full proof. Two independent reproductions: a direct
+      unit probe over the real relay and the real redactor, and the story's own canary matrix with
+      the trailing newline removed from the planted line (4 tests red across all three shapes).
+    why_it_survived_review: >-
+      The redact-before-truncate guard and the no-newline-bound guard each cover one half of the
+      property and neither covers the intersection. Line coverage on the module is 98.68 %.
+    action: >-
+      Fix the split order and add one planted canary line without a trailing newline to the AC-7a
+      matrix. The fix is contained to one `while` loop.
+
+  - id: MED-1
+    severity: MEDIUM
+    title: AC-11a's launch-failure path has no real-browser observation and is not structurally covered
+    ac: AC-11a, AC-11b
+    finding: >-
+      Four of six paths rest on `child.killed` / `pool.inUse` / `scratch.list()` against the fake
+      spawner. Three of them (step failure, run fault, drain) reach the identical
+      `signalProcessTree` that the two observed paths prove. Launch failure does not: no
+      `session.run` exists, the coordinator throws before `terminate` is registered, and the reaping
+      is the launcher's launchTimeout path.
+    action: >-
+      AC-11b (ED-05 / 10.18) must name the launch-failure path explicitly among the six it proves
+      in-image, rather than leaving it inside "the same six paths".
+
+  - id: LOW-1
+    severity: LOW
+    title: AC-14's derived bound equals vitest's default testTimeout, so it can never be the discriminator
+    ac: AC-14
+    finding: >-
+      `config.validateTimeoutMs` defaults to 5 000 ms and vitest.config.ts sets no `testTimeout`,
+      so the unit tier's default is also 5 000 ms. Under MH-4b the reviewer's run died with
+      "Test timed out in 5000ms", NOT with `expect(elapsedMs).toBeLessThan(boundMs)`. Any violation
+      large enough to trip the derived bound also trips the framework's timeout first, so the
+      assertion the developer describes as "the bound is live, not decorative" is in fact strictly
+      dominated. The *criterion* is still falsifiable — the test does go red — but the derived
+      bound is not what makes it so. The developer's narrower claim (the test reads the config
+      rather than restating the number) is true and was verified.
+    action: >-
+      Set `testTimeout` in vitest.config.ts above `validateTimeoutMs`, so the derived bound is the
+      assertion that fires. One line.
+
+  - id: LOW-2
+    severity: LOW
+    title: The "recorded before the signal" ordering is pinned for orderedStopCompleted but not for killReason
+    ac: AC-3
+    finding: >-
+      Moving `killReason ??= reason` to after `await stop()` inside `SessionRun.kill` leaves the
+      suite fully green (849 passed). What the suite pins is the resulting *value*
+      (`total-timeout`), which M9b falsifies on 11 tests. The temporal property AC-3 states —
+      "records the timeout kind before killing" — is therefore protected only by the shared-promise
+      arrangement, not by an assertion. For `orderedStopCompleted` the temporal property IS
+      load-bearing and IS falsifiable (M10), which is the case that mattered.
+    action: Optional. Note it rather than add a timing assertion that would pin an implementation detail.
+
+  - id: LOW-3
+    severity: LOW
+    title: Part of AC-7a's 408 is clean by construction on the kill path
+    ac: AC-7a
+    finding: >-
+      On a killed run `outcome.errorMessage` is `KILL_MESSAGES['total-runtime']`, a module constant
+      (src/run/launcher.ts:552-554 selects it whenever `killReason !== null`), so the child's
+      canary-bearing `failureMessage` is discarded before it gets there; and `spawnArgs` is asserted
+      `toEqual([])`. Those two surfaces cannot carry the canary on the path the matrix drives, so
+      roughly 16 of the 136 assertions per shape are defensive rather than load-bearing. The control
+      test ("the experiment is capable of failing") proves the relay surface and the scratch capture
+      are genuinely reached, but not the other fifteen.
+    not_a_defect_because: >-
+      Every other surface IS reached with the canary — the child emits a `step-finished` carrying
+      `leak.stepFailure`, writes `leak.stderr` on both streams, and the terminal retry is forced to
+      three attempts so the byte-identical bodies are real. A defensive `not.toContain` over a
+      constant is not wrong; it is simply not evidence. Recorded so "408" is read accurately.
+    action: >-
+      Extend the control test to assert the control value is found on each of the 17 surfaces it
+      can reach, so the matrix's reach is measured rather than argued.
+
+  - id: LOW-4
+    severity: LOW
+    title: confinement.test.ts's "child_process nowhere else" scan omits three top-level source files
+    ac: AC-20
+    finding: >-
+      `SOURCE_DIRECTORIES` is the hardcoded list ['validator','executor','server','reporting',
+      'compat']. `src/main.ts`, `src/index.ts` and `src/versions.ts` are not scanned, so a
+      `node:child_process` import added to `src/main.ts` would pass that assertion.
+    not_a_defect_because: >-
+      The primary mechanism is eslint.boundary-rules.js `RUN_ONLY_MODULES`, which restricts
+      child_process to `src/run/**` across the whole package including src/main.ts, and
+      `npm run lint` exits 0. This is defence-in-depth with a gap, not an unguarded surface.
+    action: Optional — derive SOURCE_DIRECTORIES from the filesystem minus 'run'.
+
+# ─────────────────────────────────────────────────────────────────────────────
+ac_coverage:
+  met_and_verified:
+    - AC-1 (two budgets, separate reads; M11/M9b runs exercised the harness that drives them)
+    - AC-2 (parent's own clock; timeout log entry `atMs: null` at runCoordinator.ts:476)
+    - AC-3 (five codes; falsified by M9b — 11 red including the RUN_ERROR negative)
+    - AC-4 (un-extendable by construction — deadline.ts has no extend/reset/refresh)
+    - AC-5a (ordered stop then group kill; grace bounded; falsified by the no-op and MT mutations)
+    - AC-6 (clamps; effectiveRuntimeCapMs / effectiveStepTimeoutMs through KEY_SPECS)
+    - AC-9 (wipe and release after a kill; asserted on the kill path in canary.test.ts)
+    - AC-10 (caps on the deadline path; FINAL within maxReportBodyBytes)
+    - AC-11a (PARTIAL — see MED-1; the two observed paths are genuinely falsified)
+    - AC-12 (filesystem inspection after the kill, fixtures tier, passing)
+    - AC-13 (next run succeeds on real Chromium, fixtures tier, passing)
+    - AC-14 (met; see LOW-1 for what the bound discriminates)
+    - AC-15 (drain ends rather than abandons; classified RUN_ERROR not TIMEOUT)
+    - AC-16 (three cases; falsified by M11 on both §17.4 counter-examples)
+    - AC-17 (in-flight step stays RUNNING with nulls; asserted on the serialized body)
+    - AC-18 (a) byte-unchanged + (b)/(c) correctly deferred to T-10.13.10 after 10.9 — marked `[~]`
+    - AC-19 (SEC-1 not regressed; exact-set allowlist, class guard, execArgv, Omit-typed seams)
+    - AC-20 (all gates green, tiers honest, no threshold lowered, no new dependency)
+  met_with_a_defect_against_them:
+    - AC-7a (the matrix is real and MC-1 falsifies all three shapes — but see QA-1)
+    - AC-8 (the four properties hold on the newline path — but see QA-1 for the overflow branch)
+  deferred_live_skips:
+    - AC-5b (10.19, gated with 10.18)
+    - AC-7b (10.19, with 10.17)
+    - AC-11b (ED-05 / 10.18)
+    - O-13 (10.14)
+  blocked:
+    - T-10.13.10 (story 10.9 / FOC-04) — correctly un-ticked, digest not guessed
+
+coderabbit:
+  run: false
+  reason: >-
+    @po's epic-wide ruling for Epic 10 — `coderabbit_integration.installation_mode: wsl`, Darwin
+    host, CLI absent, `graceful_degradation.skip_if_not_installed: true`. The reviewer confirmed
+    the ruling is recorded in the story's Implementation Notes and did not attempt the run.
+
+required_before_merge:
+  - QA-1 — fix the overflow-branch split order in src/run/outputRelay.ts, and plant one canary line
+    without a trailing newline in test/run/canary.test.ts so the branch is covered by the matrix.
+
+recommended_not_blocking:
+  - MED-1 — name the launch-failure path explicitly in AC-11b (ED-05 / 10.18).
+  - LOW-1 — set an explicit testTimeout above validateTimeoutMs.
+  - LOW-3 — extend the canary control test to measure the matrix's reach.
+  - LOW-4 — derive confinement.test.ts's SOURCE_DIRECTORIES from the filesystem.
+
+do_not_do:
+  - Do not re-anchor BASE_SHA256 in this story before 10.9 lands. FOC-04's order is mandated and
+    the constant is currently correct.
+  - Do not lower any coverage threshold or edit .nvmrc / engines to make check:pins --require-image
+    pass. Its failure is O-2a and is by design.
+  - Do not "fix" MC-5 by adding a test for it. It is unfalsifiable by construction; the honest
+    record is better than a test that asserts a redundant call was made.
+  - Do not remove the suspended-pid afterEach cleanup in the fixtures tier. The reviewer confirmed
+    it leaves no strays after three mutation runs, and without it a failed assertion leaves
+    SIGSTOPped browsers on the machine.
+
+final_decision:
+  gate: CONCERNS
+  merge: SAFE WITH QA-1 FIXED FIRST
+  statement: >-
+    This is a strong story. The two defects @dev found are real, were found by the tier that could
+    see them, and the reviewer independently reproduced the mechanism of the more important one:
+    a complete no-op kill now turns the fixtures tier red, which is precisely the failure the
+    split hint named and which the epic has been hunting. The `partial` producer is correct, the
+    §17.4 independence holds in both directions under mutation, the pin is correctly left alone,
+    the reconstruction of runCoordinator.ts is clean against the base commit rather than merely
+    against a green suite, and the developer's decision to report two surviving mutants rather
+    than hide them is exactly the behaviour this epic wants. Against that, the reviewer found an
+    eighth guard that could not fail, in a shape not yet on the list, and behind it a live
+    fragment disclosure on the one surface the epic's acceptance bullet names by hand. It is one
+    `while` loop and one planted newline. Fix QA-1 and this is a PASS.
