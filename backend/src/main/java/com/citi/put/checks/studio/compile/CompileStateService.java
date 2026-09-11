@@ -297,8 +297,17 @@ public class CompileStateService {
   /**
    * Rejects compile/confirm work for a test that does not exist, was soft-deleted (AC-14) or is
    * quarantined because its CSI is missing or unregistered (AC-3).
+   *
+   * <p>Public since story 10.8 so the compile pipeline can apply this guard <em>before</em> reading
+   * the draft and enforcing authoring limits, rather than reimplementing it. It is a read: it
+   * writes no compile-state column and so does not weaken 10.8 AC-3, which requires every
+   * transition to go through this class. Deliberately left exactly as 10.4 wrote it — widening it
+   * so that a deleted test can be compiled would be loosening a guard to silence a test, which
+   * ADR-002 &sect;12 names as the one manoeuvre whose only effect is to hide a failure.
+   *
+   * @param testId the draft to check
    */
-  private void requireCompilable(UUID testId) {
+  public void requireCompilable(UUID testId) {
     String state =
         studioRepository
             .findLifecycleState(testId)

@@ -34,8 +34,14 @@ public class GatewayResponseParser {
    * the validator, which is not the same as executable here: nothing downstream understands a V2
    * artifact. The parser is the defensive boundary against gateway output, so it pins the version
    * it can actually consume rather than inheriting the schema's forward-compatible range.
+   *
+   * <p>Public since story 10.8: the compile pipeline re-asserts this same pin on whatever artifact
+   * it is handed, records it as {@code ui_test_revisions.artifact_schema_version}, and the
+   * readiness gate re-asserts it again before every execute (10.8 AC-10, AC-25). One constant, read
+   * by all four, so there is no second place for the supported version to be decided.
    */
-  static final int SUPPORTED_ARTIFACT_VERSION = 1;
+  public static final int SUPPORTED_ARTIFACT_VERSION =
+      com.citi.put.checks.studio.compile.CompilePins.SUPPORTED_ARTIFACT_VERSION;
 
   private final JsonSchema schema;
 

@@ -192,6 +192,50 @@ studio:
       # FIXTURE COPY pending story 10.1a; see the $comment in the schema file.
       artifact-schema: ${STUDIO_GATEWAY_ARTIFACT_SCHEMA:classpath:studio/artifact.schema.json}
 
+    # Bounded compile work (Story 10.8, AC-17/AC-18/AC-19). Every value below is a starting value
+    # to be tuned against staging measurements (§8.5), and every one has a defined behaviour at the
+    # bound with a test that drives the input past it.
+    pipeline:
+      # Fixed pool, NO queue: attempt concurrency+1 is refused, not parked.
+      concurrency: ${STUDIO_COMPILE_CONCURRENCY:4}
+      # Total wall-clock per attempt. Must be strictly greater than gateway.request-timeout above,
+      # or a slow gateway call would be abandoned by this budget before the gateway gave up and the
+      # recorded code would name the wrong bound. Startup fails if it is not.
+      attempt-budget: ${STUDIO_COMPILE_ATTEMPT_BUDGET:180s}
+    # Enforced before beginCompile: over-limit is a 400 and no compile state changes (AC-6).
+    authoring:
+      # Must never be looser than the runner's DEFAULT_BOUNDS.maxSteps, or a draft could be
+      # authorable and structurally uncompilable. RunnerBoundsAlignmentTest enforces that.
+      max-steps: ${STUDIO_COMPILE_MAX_STEPS:100}
+      max-line-chars: ${STUDIO_COMPILE_MAX_LINE_CHARS:1024}
+      max-source-bytes: ${STUDIO_COMPILE_MAX_SOURCE_BYTES:65536}
+    # Applied before publishInvalid; truncation is explicit in the stored structure (AC-15).
+    diagnostics:
+      max-per-step: ${STUDIO_COMPILE_MAX_DIAGNOSTICS_PER_STEP:10}
+      max-message-chars: ${STUDIO_COMPILE_MAX_DIAGNOSTIC_MESSAGE:400}
+      max-excerpt-chars: ${STUDIO_COMPILE_MAX_DIAGNOSTIC_EXCERPT:120}
+      max-total-bytes: ${STUDIO_COMPILE_MAX_DIAGNOSTICS_BYTES:65536}
+  # The studio-runner Service. The base URL is deployment configuration and never job- or
+  # user-supplied (§8.4, §8.5). Empty by default: without it the pipeline reports
+  # VALIDATOR_UNAVAILABLE and the draft stays retryable, rather than publishing an unvalidated
+  # candidate.
+  runner:
+    base-url: ${STUDIO_RUNNER_BASE_URL:}
+    service-identity-token: ${STUDIO_RUNNER_SERVICE_TOKEN:}
+    validate-timeout: ${STUDIO_RUNNER_VALIDATE_TIMEOUT:10s}
+    connect-timeout: ${STUDIO_RUNNER_CONNECT_TIMEOUT:2s}
+  # The exact-match half of the §4.6 compatibility rule. The ranged Playwright/executor terms stay
+  # with the runner's own isCompatible, which revalidates before any browser launch — one rule, one
+  # owner, no drift. executor-version and playwright-version below are RECORDED on revision
+  # provenance and never compared by this backend.
+  runtime:
+    pin:
+      artifact-schema-version: 1
+      validator-schema-version: ${STUDIO_RUNTIME_VALIDATOR_SCHEMA_VERSION:1.0.0}
+      syntax-reference-version: ${STUDIO_RUNTIME_SYNTAX_REFERENCE_VERSION:1.0.0}
+      executor-version: ${STUDIO_RUNTIME_EXECUTOR_VERSION:1.0.0}
+      playwright-version: ${STUDIO_RUNTIME_PLAYWRIGHT_VERSION:1.63.0}
+
 springdoc:
   api-docs:
     path: /v3/api-docs
