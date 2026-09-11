@@ -25,6 +25,15 @@ info:
     and their optional fields are declared. A field the contract does not name is a conformance
     failure rather than a silent divergence — see ADR-002 §INT-4.
 
+    **Amending this document.** Freezing it in 10.1 requires that changes be recorded, not that
+    they never happen — a wave gate has already proved it both incomplete and wrong about routes
+    it did declare. Who may change what is ruled in ADR-002 §12: a story may repair a defect that
+    no producer or consumer could ever have satisfied, in its own PR, logged in ADR-002 §13; a
+    field added to, removed from, renamed on or redefined on a closed runner-produced body, and
+    anything touching routes, security, tags, servers or the public surface, needs an architect's
+    ruling first. Loosening a schema to admit what a producer happens to send is never a story's
+    call. A story that finds a divergence leaves its contract test red and escalates.
+
     Routes marked `x-not-yet-implemented: true` are declared here so that dependent stories build
     against one frozen shape. Story 10.1 ships the contract, the schema and the snapshot DTO;
     dispatch (10.7), compilation (10.8) and confirmation (10.9) ship the behaviour.
@@ -1172,7 +1181,12 @@ components:
           type: integer
           format: int64
           nullable: true
-          description: Start offset on the recording timeline; null unless the step was attempted.
+          description: |
+            Start offset on the recording timeline; null unless the step was attempted. It is the
+            rounded `RunnerStepState.startedAtMs`: the reading arrives already on the recording
+            timeline (§6.4), so the API rounds and persists it and performs no calibration of its
+            own — in particular it never re-bases readings against the first one it sees (ADR-002
+            §INT-5).
         durationMs: { type: integer, format: int64, nullable: true }
         message: { type: string, nullable: true }
 
@@ -1182,7 +1196,9 @@ components:
       description: |
         A log line as the **API publishes** it. The runner does not produce this shape: it posts
         `RunnerLogEntry`, whose `atMs` is an offset on the run timeline rather than an instant
-        (§6.4). The API derives `at` as `browserStartedAt + atMs` and upper-cases `level`.
+        (§6.4). The API derives `at` as `browserStartedAt + atMs` and upper-cases `level`. That
+        addition is the whole derivation: `atMs` is already zeroed on the recording origin, and
+        `browserStartedAt` is the wall-clock reading of that same origin (ADR-002 §INT-5).
 
         `at` is null where the runner held no reading and the derivation therefore has no input.
         `stepIndex` has no runner-side source today and is null for runner-produced lines; it is
@@ -1602,10 +1618,14 @@ components:
         than `PENDING`: the API holds the confirmed revision's ordered source (§4.4) and fills the
         gaps, so the persisted result still has one entry per original step (§8.2).
 
-        `startedAtMs` and `finishedAtMs` are readings of the runner's monotonic clock, never wall
-        clock (§6.4). Where the recorder-origin calibration of §6.4 is applied — turning a reading
-        into the persisted `offsetMs` — is settled by the recording stories; this contract fixes
-        only that every reading crossing it is monotonic and shares one origin within a run.
+        `startedAtMs` and `finishedAtMs` are readings of the **run clock**, never wall clock
+        (§6.4): one monotonic clock per run, whose zero is the recording origin — the instant the
+        recording context became ready, which is also the instant `browserStartedAt` was read.
+        The §6.4 recorder-origin calibration is therefore **already applied when the reading is
+        taken**, by the only component that observes the recorder (ADR-002 §INT-5 / O-7). The wire
+        carries exactly one origin and no calibration constant; a consumer applies none and adds
+        none. Readings are non-negative by construction: nothing the runner observes precedes the
+        origin, and an event with no reading carries `null`, never `0` and never a negative value.
       properties:
         stepIndex: { type: integer, minimum: 0 }
         status:
@@ -1614,16 +1634,19 @@ components:
           type: number
           format: double
           nullable: true
+          minimum: 0
           description: |
-            Null for a step that never started (`SKIPPED`). Fractional: this is the raw clock
-            reading, not a rounded one. Rounding belongs to whoever applies the §6.4 calibration
-            and persists `offsetMs` — the component that knows the recorder origin. A runner that
-            rounded first would be making a precision decision it has no basis for.
-        finishedAtMs: { type: number, format: double, nullable: true }
+            Offset of the step start from the recording origin. Null for a step that never started
+            (`SKIPPED`). Fractional: the run clock is fractional and the raw difference crosses the
+            wire unrounded. Rounding belongs to whoever **persists** `offsetMs`, which is the API;
+            a runner that rounded here would spend precision the seek budget may later want, and
+            rounding in both components would compound two errors over one measurement.
+        finishedAtMs: { type: number, format: double, nullable: true, minimum: 0 }
         durationMs:
           type: number
           format: double
           nullable: true
+          minimum: 0
           description: Browser time for this step. The public `StepResult.durationMs` is its rounded projection.
         failure:
           type: string
@@ -1637,13 +1660,14 @@ components:
       description: |
         A log line positioned on the **run timeline**, not on the wall clock.
 
-        `atMs` is a reading of the same monotonic clock and origin as
+        `atMs` is a reading of the same run clock, with the same recording origin, as
         `RunnerStepState.startedAtMs` (§6.4). That is the whole reason it is not a `date-time`:
         the runner holds exactly one wall-clock instant for a run — `browserStartedAt` — and a
         per-entry wall-clock stamp would introduce a second clock whose skew against the recording
         is unbounded, which is precisely what the 500 ms step-seek target of §6.4 cannot absorb.
         A consumer wanting an absolute instant computes `browserStartedAt + atMs`; the API does
-        exactly that when it projects `ExecutionLogEntry.at`.
+        exactly that when it projects `ExecutionLogEntry.at`. There is nothing else to apply: the
+        recording origin is already the zero of this scale (ADR-002 §INT-5).
 
         `atMs` is `null` where the runner genuinely holds no reading. **A zero is a position on
         the timeline — the browser start — not a missing value, and must never be used as one.**
@@ -1653,7 +1677,11 @@ components:
           type: number
           format: double
           nullable: true
-          description: Fractional, for the same reason as `RunnerStepState.startedAtMs`.
+          minimum: 0
+          description: |
+            Fractional, for the same reason as `RunnerStepState.startedAtMs`. `0` is the recording
+            origin exactly, which is why the browser-start line carries a literal `0` rather than a
+            reading.
         level:
           type: string
           enum: [info, warn, error]
@@ -1730,7 +1758,7 @@ components:
         | `RunnerReport` | `ExecutionSnapshot` | Why they differ |
         |---|---|---|
         | `steps[]` | `stepResults[]` | The runner reports only the steps it touched; the API fills the rest from the revision's ordered source (§4.4, §8.2) |
-        | `steps[].startedAtMs` | `stepResults[].offsetMs` | Monotonic reading vs. calibrated recording-timeline offset (§6.4) |
+        | `steps[].startedAtMs` | `stepResults[].offsetMs` | Same recording-timeline offset, fractional vs. rounded at persistence. The API applies no calibration and adds no origin (§6.4, ADR-002 §INT-5) |
         | — | `stepResults[].originalText` | The API holds the confirmed source; the runner does not resend it |
         | `logs[].atMs` | `logs[].at` | Run-timeline offset vs. `browserStartedAt + atMs` (§INT-1) |
         | `logs[].level` (lower) | `logs[].level` (upper) | Case normalized by the API |
@@ -1770,6 +1798,16 @@ components:
             The single wall-clock instant the runner holds for a run, and the origin the API adds
             to `atMs` and to step readings. Null until the browser has actually started; its
             presence in a `STARTED` report is what writes `RUNNING` (§5.1.5, §8.2).
+
+            **It is read at the same instant as the run clock's zero** — the recording-context
+            readiness of §6.4 — not re-derived later and not taken at launch-call time. That
+            pairing is what makes `browserStartedAt + atMs` an instant on the recording timeline
+            rather than an approximation of one.
+
+            It follows that a report carrying `browserStartedAt: null` carries no reading at all:
+            every `atMs` is `null` and `steps` is empty. The runner never emits a value measured
+            before the origin existed, which is what keeps one origin on this wire (ADR-002
+            §INT-5).
         steps:
           type: array
           items: { $ref: '#/components/schemas/RunnerStepState' }

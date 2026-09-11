@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Accepted (architecture decision, 2026-09-11). Two runner corrections in §7 await @dev; one backend assertion in §8.6 awaits its owner. |
+| Status | Accepted (architecture decision, 2026-09-11). Amended the same day: §11 closes O-7 and §12 rules on who may amend this contract. O-1 and O-2 have since landed at `86a187267`; one backend assertion in §8.6 awaits its owner. |
 | Author | @architect (Aria) |
 | Source of truth | [Studio architecture v2.1](studio-execution.md) §4.4, §4.5, §5.1–5.5, §6.1–6.4, §8.2, §8.4, §8.5, §9.1–9.3; [ADR-001](ADR-001-studio-runner-scaffolding.md) §4.2, §9 |
 | Amends | `docs/specs/studio/openapi.yaml`, frozen by story 10.1. This ADR is the amendment's rationale; the document is the contract. |
@@ -45,6 +45,8 @@ Article IV. Each change below traces to §8.4, §5, §6, §8.2 or ADR-001. Where
 | INT-1 | What is a log entry's timestamp? | **A relative offset on the run timeline**, `atMs`, on the same monotonic clock and origin as the step readings, `null` where the runner holds no reading. The API derives the public absolute `at` as `browserStartedAt + atMs`. |
 | INT-3 | Truncated 409 description | **Fixed.** Quoted; the full description is restored and the spurious key is gone. |
 | INT-4 | `steps`/`outcome`/`evidence`/`runtimeVersions` vs. `stepResults`/`status`/`video`/`runtime` | **The report is not the snapshot.** The internal report keeps the runner's names; the public snapshot keeps its own; the API translates, and the contract now carries the mapping table. Every runner-produced body is declared **closed**, so the next such divergence fails a test. |
+| INT-5 (§11) | Where is the §6.4 recorder-origin calibration applied? (O-7) | **At the runner's clock, not on the wire.** One run-scoped monotonic clock zeroed at recording-context readiness, injected into step execution; `browserStartedAt` read at the same instant. The wire carries one origin and no calibration constant. `recordingOriginMs` **rejected**. |
+| GOV (§12) | May a story amend `openapi.yaml`? | **By class of change.** A story may repair a defect nothing could have satisfied; a field on a closed runner body, and anything touching routes/security/public surface, needs an architect's ruling first. Loosening a schema is never a story's call. |
 
 ## 3. INT-2 — expressing the runner's surface
 
@@ -168,9 +170,9 @@ No assertion will ever catch this: `0` is a valid number. It is recorded here be
 | Story | Effect |
 |---|---|
 | **10.6** — runner admission and reporting | Its four routes are now declared, so AC-1's response conformance passes. Request conformance passes for admission and for logs. Two corrections remain (§7): the step-status rename, which is failing today, and the terminal `atMs`. AC-1 is **not met** until the first lands. |
-| **10.7** — API dispatch and callbacks | Gains an explicit projection to implement rather than infer: the `RunnerReport → ExecutionSnapshot` mapping table, the `PENDING` step fill from the revision's ordered source, `at = browserStartedAt + atMs`, level upper-casing, and `evidence.state → video.status`. Must not emit an `ExecutionErrorCode` value on a runner's behalf. Closes `AdmissionResponse` and the callback response bodies when it ships. |
+| **10.7** — API dispatch and callbacks | Gains an explicit projection to implement rather than infer: the `RunnerReport → ExecutionSnapshot` mapping table, the `PENDING` step fill from the revision's ordered source, `at = browserStartedAt + atMs`, level upper-casing, and `evidence.state → video.status`. Must not emit an `ExecutionErrorCode` value on a runner's behalf. Closes `AdmissionResponse` and the callback response bodies when it ships. **§11 leaves its arithmetic unchanged and consumes no new field** — see §11.7. |
 | **10.8** — compilation | `POST /v1/validate` now has a declared request and response, including the `RunnerDiagnostic` shape and the fact that a rejected artifact is still a `200`. No change to what 10.8 sends. |
-| **10.12** — execution and recording | Owns where the §6.4 recorder-origin calibration is applied. The contract fixes only that every reading crossing it is monotonic and shares one origin per run; it does not decide whether the runner or the API converts to `offsetMs`. Also owns the real `outcome.errorCode` set, with `ERROR`/`TIMEOUT` already fixed by §8.2. |
+| **10.12** — execution and recording | §11 settles the placement it was asked to choose: calibration is applied at the runner's clock, so it implements the run-scoped clock and the paired origin reads (§11.6, O-8) and adds no contract field. Also owns the real `outcome.errorCode` set, with `ERROR`/`TIMEOUT` already fixed by §8.2. |
 | **10.14** — evidence | `RunnerEvidence` is declared with the runner's own `PENDING/STORED/FAILED/UNAVAILABLE` and the documented projection to `VideoStatus`. `videoKey`/`manifestKey` are echoes of the server-derived job keys; the contract restates that the runner never invents or accepts an arbitrary key (§6.2). |
 
 ### 8.2 Positive
@@ -189,6 +191,8 @@ Story 10.6 line 47 marks AC-1 `[x]`. It is **not met**: the contract test fails 
 
 `npx vitest run` in `studio-runner/`: **577 passed, 2 skipped, 1 failed** (was 576 / 2 / 2). The remaining failure is §7.1 and is a runner defect. Response conformance for all four runner routes now passes, as does admission-request conformance and the log-entry shape.
 
+After O-1 landed at `86a187267`, `test/contract.test.ts` is **14 passed / 14**, and it is still 14/14 after the §11 amendment — which is the expected result, not a reassuring one: §11 added no field and changed no shape, and `minimum` is a keyword this validator does not implement (§11.6.4).
+
 ### 8.6 One backend assertion is now wrong — for its owner
 
 `backend/src/test/java/.../StudioContractTest.java`, `internalRoutesAreTaggedSoTheyStayOutOfThePublicSurface`, asserts that every `internal`-tagged operation's path contains `/internal/`. That was true while only the API callbacks were declared. It is false now and by design: the runner serves `/v1/validate`, `/v1/runs`, `/health`, `/ready`, and no amount of tagging changes what is on its socket.
@@ -199,13 +203,14 @@ The assertion encodes the assumption this ADR corrects — that "internal" is a 
 
 | # | Item | Owner | Blocks |
 |---|---|---|---|
-| O-1 | Step status rename `PASSED`/`FAILED` → `PASS`/`FAIL` in the runner (§7.1) | @dev (10.6) | 10.6 AC-1 |
-| O-2 | Terminal log line `atMs: 0` → `null` (§7.2) | @dev (10.6) | Correct log placement on the video timeline |
+| ~~O-1~~ | ~~Step status rename `PASSED`/`FAILED` → `PASS`/`FAIL` in the runner (§7.1)~~ **Landed at `86a187267`; `StepStatus = 'PASS' \| 'FAIL' \| 'SKIPPED'` and the contract test is 14/14.** | ~~@dev (10.6)~~ | — |
+| ~~O-2~~ | ~~Terminal log line `atMs: 0` → `null` (§7.2)~~ **Landed at `86a187267`; `sendFinal` appends with `atMs: null`.** | ~~@dev (10.6)~~ | — |
 | O-3 | `internalRoutesAreTaggedSoTheyStayOutOfThePublicSurface` premise (§8.6) | Owner of 10.1's backend contract test | Backend `check` |
 | O-4 | Close `AdmissionResponse` and the callback response bodies once a producer exists | 10.7 | — |
 | O-5 | The runner `outcome.errorCode` set beyond §8.2's `TIMEOUT`; today's `STEP_FAILED`/`RUN_ERROR`/`RUN_NOT_STARTED` are placeholders around a fake launcher | 10.12 | — |
 | O-6 | §8.4 names "approved target/secret-use policy" among the job fields; the envelope carries only declared reference **names** (`references`). Whether destination policy travels on the job or is enforced solely at the egress layer is unresolved, and the contract declares only what exists rather than a field nobody implements. | 10.7 / 10.18 (SPK-05) | Destination enforcement (§9.3) |
-| O-7 | Where the §6.4 recorder-origin calibration is applied — runner-side or API-side | 10.12 | Step-seek acceptance |
+| ~~O-7~~ | ~~Where the §6.4 recorder-origin calibration is applied — runner-side or API-side~~ **Closed 2026-09-11 by §11: runner-side, at the clock. `recordingOriginMs` rejected; the contract gains no field. Remaining work is 10.12's, listed in §11.6.** | ~~10.12~~ | — |
+| O-8 | The run-scoped clock of §11: zero at recording-context readiness, injected into step execution, process-origin default removed from the production path, the two origin reads paired, the readiness-to-first-frame gap measured in staging, and a scale assertion the schema cannot make (§11.6) | 10.12 | Step-seek acceptance; the §11.1 defect is live until it lands |
 
 ## 10. Alternatives considered (summary)
 
@@ -217,3 +222,102 @@ Route-surface alternatives are in §3.3. For the timestamp:
 | **API-assigned receipt time** | Varies per delivery for identical facts, contradicting the byte-identical terminal retry of §5.3; and collapses a whole report's log buffer onto one instant, destroying correlation rather than degrading it. |
 | **Both: `atMs` and an optional absolute `at`** | Two representations of one fact on one wire body, with no rule for which wins when they disagree. The derived value belongs on the surface that publishes it, where the API already owns the projection. |
 | **Rename only, keeping `date-time`, and let the runner send `0`-epoch for the two placeholder sites** | Encodes "unknown" as 1970 and would have passed the checker. It is the shape of fix that makes a test green without making the system right. |
+
+---
+
+# Amendment, 2026-09-11 — O-7 and contract authority
+
+Added after the rulings above, on the same branch, at `86a187267`. Story 10.12 exercised the mechanism §6.2 installed: it tried to add a field to a closed body, could not, and referred the question. That is the mechanism working on its first use, and the two sections below are the answer — one on the calibration placement O-7 left open, one on who may move this contract at all.
+
+## 11. INT-5 — where the §6.4 recorder-origin calibration is applied (closes O-7)
+
+### 11.1 The defect story 10.12 found
+
+§INT-1 ruled that `logs[].atMs` sits on the same monotonic clock and origin as the step readings, with `0` meaning browser start. **In the merged code that invariant does not hold.** `executeSteps` takes an optional `clock` and falls back to `defaultClock = () => performance.now()`; `runCoordinator` passes no clock, so every step reading is an offset from *process* start, while `reportingStepReporter` appends the browser-start line with a literal `0`. Verified at `86a187267`: `src/executor/executor.ts:51,54` and `src/reporting/reportingStepReporter.ts:88`.
+
+Two origins, then, on one wire body today. On a pod that has been up an hour, the first step of a run reports `startedAtMs ≈ 3_600_000` while the browser-start log reports `0`, and `browserStartedAt + atMs` — the derivation §INT-1 hands to the API — yields an instant an hour after the run began. The 500 ms step-seek target of §6.4 is not merely missed; the two scales are not comparable at all.
+
+This was invisible to every gate. The readings are monotonic, fractional and non-null, so the schema is satisfied; the contract test checks shape, not scale; and the runner's own tests inject `createFakeClock`, which starts at `1_000` and therefore looks like a small offset. An optional clock parameter with a process-origin default is a defect generator: the seam exists precisely so the origin can be chosen, and the default quietly chooses the wrong one whenever a caller forgets.
+
+### 11.2 Ruling
+
+**Calibration is applied runner-side, at the clock, not on the wire. The proposed `recordingOriginMs` field is rejected and the contract gains no field.**
+
+The runner constructs **one run-scoped monotonic clock whose zero is the recording origin** — the instant the recording context becomes ready — and injects it into step execution, replacing the process-origin fallback. The wall-clock `browserStartedAt` is read at that same instant. Every reading that crosses the contract is therefore already an offset on the recording timeline: `0` is the origin, as §INT-1 already said it was, and the API adds `browserStartedAt` and rounds, and does nothing else.
+
+Amended in `openapi.yaml`: `RunnerStepState` and `RunnerLogEntry` now state the run clock and its origin instead of deferring the placement to "the recording stories"; `startedAtMs`, `finishedAtMs`, `durationMs` and `atMs` gain `minimum: 0`; `browserStartedAt` states the pairing with the clock's zero and the consequence that a report with `browserStartedAt: null` carries no reading at all; `StepResult.offsetMs` and `ExecutionLogEntry` state that the API applies no calibration of its own. Every runner-produced body stays closed. No field was added, removed or retyped.
+
+### 11.3 Why, against the three tests the question was posed on
+
+**The seek budget does not discriminate — and saying so honestly is the point.** Subtracting two readings of one monotonic clock is exact wherever the subtraction happens; arithmetic is associative, and shifting at the clock or shifting at the API produce the same number. The 500 ms budget rules out a *third* option — a per-entry wall clock or an API receipt time, both already rejected in §10 — and is silent between these two. What decides is not accuracy but how many places can get it wrong.
+
+**Clock skew is zero either way, and that is the argument against the field, not for it.** Because there is no skew term to carry, a calibration constant on the wire conveys no information the runner could not have already applied. Its only effect is to make correctness depend on every consumer remembering to apply it. Story 10.7's draft is the proof: it computes `at = browserStartedAt + atMs`, which is right under this ruling and silently wrong under the field, and it is being written right now by an agent that has not seen the field. A contract whose correct use requires knowledge held outside it is the same class of hazard as an open schema — it cannot fail a test, it can only be misused.
+
+**Retry and recovery favour the clock.** A terminal report is retried byte-identically until acknowledged (§5.3), and reports are cumulative, so the same log line appears in many bodies. Zeroing at the clock fixes each entry's value at the moment it is observed, so an entry is identical in every subsequent report and every retry by construction. A wire constant fixes nothing: each report carries its own `recordingOriginMs`, and nothing in a closed schema forbids report *n* and report *n+1* disagreeing about it — which would move every previously reported line. Worse, the timings also travel a second path: the terminal result manifest on Sonic (§5.3), which recovery reads when delivery fails. An API-applied constant would have to be carried there too, in sync, or the recovered timeline would differ from the delivered one. One origin at the clock keeps one number per fact on every path.
+
+**Article IV.** §6.4 says "use a monotonic runner clock and calibrate its origin against the pinned recorder's first frames". It calibrates *the clock's origin*. Zeroing the clock is the literal reading; shipping a constant for someone else to subtract is the inventive one. §INT-1's `0`-is-browser-start is also already ruled and already on the wire — the fix should make the code obey the existing ruling, not rewrite the ruling to match the defect. The contract's own `final` example has always shown `startedAtMs: 120`, a recording-relative value; the field would have made the document's examples wrong.
+
+### 11.4 Answering 10.12's argument directly
+
+Its case for the field is that shifting the runner's own readings would put two origins on one wire. That is true only of a runner that emits a reading taken before the origin exists — and **10.12's own design removes that case**: a clock constructed at recording-context readiness cannot be read before it. Nothing the runner observes on the contract precedes the origin. Steps run after launch by construction (§5.2); anything earlier that ever needs a log line carries `atMs: null`, which §INT-1 and O-2 already established as the encoding for "no reading". The runner may keep a separate process-origin clock for its own stdout diagnostics; the contract is not a debugging channel (§9.2).
+
+So the field is the residue of not having the injected clock. With the clock, it has nothing left to do. The two-origin hazard it was meant to solve is now also stated as a contract invariant — a report with `browserStartedAt: null` carries no reading — so the hole is closed by rule rather than by convention.
+
+### 11.5 Alternatives rejected
+
+| Option | Why not |
+|---|---|
+| **`recordingOriginMs` on the report, API applies** (10.12's proposal) | Conveys no information the runner could not apply itself, since skew is zero; makes correctness depend on every consumer applying it, and 10.7 demonstrably would not have; duplicates the constant onto the manifest path or desynchronises it; permits two reports to disagree about the origin of the same entry; contradicts `0`-is-browser-start and the contract's own examples. |
+| **Runner shifts, and also reports the raw origin for diagnostics** | Two representations of one fact on one wire with no rule for disagreement — rejected for the same reason as `atMs`-plus-`at` in §10. Observability belongs in the runner's stdout, not in a closed contract body. |
+| **API re-bases against the lowest reading it has seen** | Silently wrong whenever the first report is lost or the first step is slow, and it would have made the present defect *invisible* rather than fixed. Explicitly forbidden on `StepResult.offsetMs`. |
+| **Leave O-7 open and let 10.12 choose at implementation time** | This is what the open item already tried. The placement determines 10.7's arithmetic, and 10.7 is drafting in the same wave; an unsettled placement is two stories guessing at each other. |
+| **Runner rounds to integers as it shifts** | Rounding at the clock and again at persistence compounds two errors over one measurement. §4.3 stands: the wire stays fractional, the API rounds once when it persists `offsetMs`. What §4.3 got slightly wrong is only its aside that the API is "the component that knows the recorder origin" — under this ruling the runner is, and it still must not round. |
+
+### 11.6 What 10.12 must do, beyond the rename
+
+Contract-side this is settled; the following are the story's, and the first is the actual root cause:
+
+1. **Remove the process-origin default**, or confine it to test construction. An optional `clock` that defaults to `performance.now()` will re-introduce this the next time a caller is added. The production path must be unable to run without an explicitly supplied run clock.
+2. **Pair the two reads.** `browserStartedAt` and the clock's zero are one instant observed twice; take them adjacently at recording-context readiness, never at launch-call time and never re-derived.
+3. **Measure the gap §6.4 actually names.** Context readiness is a *proxy* for the recorder's first frames, not the same instant. 10.12 owns measuring that gap on the controlled fixture in staging and, if it is a material fraction of the 500 ms budget, folding a measured constant into the origin the runner takes. That correction is runner-side too, so it needs no contract change — which is a second reason to keep the calibration in one component.
+4. **Assert the scale, not just the shape.** `minimum: 0` is documentary here: the runner's contract-test validator implements `$ref`, `type`, `required`, `properties`, `additionalProperties`, `enum`, `allOf`/`anyOf`/`oneOf` and `const`, and ignores `minimum`. A schema cannot tell a process-origin reading from a legitimate late one. The enforcing assertion belongs in 10.12: a run through the fake browser must produce a first step reading within a small bound of `0`, and `createFakeClock`'s `startMs = 1_000` must not be what makes it pass.
+
+### 11.7 What 10.7 must do — it is drafting now, in this wave
+
+**Story 10.7 does not consume `recordingOriginMs` and must not wait for it.** The field does not exist. Its projection is correct exactly as drafted: `at = browserStartedAt + atMs`, and `offsetMs = round(startedAtMs)`. Three things its draft should state explicitly, because each is a silent failure otherwise:
+
+1. **The API applies no calibration and adds no origin.** Readings arrive on the recording timeline already. In particular it must never re-base readings against the lowest or first one it has seen — a plausible-looking "fix" that would have concealed §11.1 rather than surfaced it, and which `StepResult.offsetMs` now forbids in the contract.
+2. **`0` is a position, not a missing value.** `atMs: 0` is the browser start; `null` is the absence of a reading. A null-coalescing projection that treats `0` as absent loses the one line that anchors the timeline.
+3. **It rounds once, at persistence.** The wire is fractional by §4.3; `offsetMs` and `durationMs` are `int64` on the public snapshot.
+
+There is a sequencing fact 10.7's draft should carry, though it changes nothing it implements: **10.7 is correct by contract today and becomes correct in fact when 10.12 lands the injected clock.** Until then a real runner still emits process-origin readings and 10.7's derived instants will be absurd. The right response is to let them be absurd — the defect is upstream and visible. Compensating for it in API code would put a second, undocumented calibration in the component §11 just ruled must hold none, and it would survive long after 10.12 fixed the cause.
+
+## 12. Contract amendment authority
+
+Five stories code against `openapi.yaml` and waves 4 through 8 will ask this again, so it is ruled once here rather than per story.
+
+Two facts have to sit together. Closed bodies exist to force a conversation: a story that can open its own body has an open body, and §6.2's whole point was that an open schema is a suggestion written in YAML. But 10.1's freeze is not evidence of correctness either — a wave gate proved this document incomplete about four routes and wrong about the base of the two it did declare. An architect-only rule would have left 10.6 blocked behind a document that was wrong; a story-may-edit rule would have dissolved the mechanism that found it. So authority follows the **class of change**, not the seniority of the editor.
+
+**Class A — defects no producer or consumer could ever have satisfied.** A truncated or malformed description, a response with no declared content, a `servers` base that composes to a path nothing serves, a `$ref` to a missing schema. **Any story may fix these directly, in its own PR.** They are not decisions. The story demonstrates the defect with a contract-test failure before the edit and a pass after, and adds a line to §13. Gating these behind an architect blocks a wave and buys nothing.
+
+**Class B — the shape or meaning of a runner-produced body.** Adding, removing, renaming or retyping a field on a closed body; changing what an existing field means; widening or narrowing an enum; changing a `required` list. **An architect rules first, in this ADR; the story then implements against the amended document.** The story should propose — with the defect demonstrated and a candidate shape, exactly as 10.12 did, which is why this ruling exists at all — but may not land the edit. The asymmetry that justifies the gate: a wrong local implementation costs one story, a wrong field on a shared closed body costs up to five, and is discovered late by whichever consumer guessed differently.
+
+**Class C — routes, security schemes, tags, `servers`, status-code semantics, and anything on the public surface.** Architect, always. These trace to §8.3/§8.4 and the architecture document is their source; a change here is an architecture change wearing a schema's clothes.
+
+Three rules that bind all three classes:
+
+- **Loosening is never a story's call.** Reopening a closed body, relaxing `required`, or widening an enum to admit what a producer happens to send is Class B even when it looks like Class A. That manoeuvre is what produced INT-4, and it is the one edit whose only effect is to stop a test from telling the truth.
+- **Leave it red and escalate.** A story that finds a divergence it may not fix leaves the contract test failing and refers the question. Story 10.6 did exactly this and it is why four divergences were ruled on instead of buried; it is now the rule, not a good instinct.
+- **Every amendment is recorded.** Freezing means *changes are recorded*, not that they never happen. Each entry names the divergence, the source it traces to (Article IV), the consuming stories re-checked, and the contract-test result before and after.
+
+An architect amending the contract still never edits a story's Title, Acceptance Criteria, Scope or Status; where a ruling invalidates a draft, it says so and the story's owner applies it.
+
+## 13. Amendment log
+
+| Date | Change | Class | By | Contract test |
+|---|---|---|---|---|
+| 2026-09-11 | All six §8.4 routes declared, per-path `servers`, `runner`/`api-callback` tags, `x-served-by`, `serviceIdentity` (§3) | C | @architect, ADR-002 | 576/2/2 → 577/2/1 |
+| 2026-09-11 | `logs[].at` (`date-time`) → `atMs` run-timeline offset (§4) | B | @architect, ADR-002 | as above |
+| 2026-09-11 | 409 description un-truncated, spurious null-valued key removed (§5) | A | @architect, ADR-002 | as above |
+| 2026-09-11 | Runner-produced bodies closed; `RunnerReport → ExecutionSnapshot` mapping table added (§6) | B | @architect, ADR-002 | as above |
+| 2026-09-11 | Run clock and recording origin stated; `minimum: 0` on all timings; `browserStartedAt` paired with the clock zero; API applies no calibration. `recordingOriginMs` **rejected** (§11) | B | @architect, this amendment | `test/contract.test.ts` 14/14 before and after |
