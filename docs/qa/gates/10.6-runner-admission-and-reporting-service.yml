@@ -533,6 +533,11 @@ top_issues:
       asserts on client.sentBodies, so the guard fails when the outbound pass is removed.
     owner: '@dev'
     blocking: false
+    status: RESOLVED
+    resolution: >-
+      Resolved by @dev 2026-09-11: AC-20's finished-bytes case now asserts on a report client
+      given a body no upstream redactor has seen, including an unenumerated field, and goes red
+      when the outbound pass in freezeBytes is deleted.
 
   - id: MED-2
     severity: medium
@@ -555,6 +560,11 @@ top_issues:
       expected module list from the manifest and assert both directions agree.
     owner: '@dev'
     blocking: false
+    status: RESOLVED
+    resolution: >-
+      Resolved by @dev 2026-09-11: the covered set is now pinned by the denylist, the fixture
+      manifest and the fixtures on disk, asserted to agree in both directions, so removing a name
+      from FORBIDDEN_MODULES — with or without the manifest entry — fails.
 
   - id: MED-3
     severity: medium
@@ -577,6 +587,12 @@ top_issues:
       the admission and progress request-body shapes the runner actually serializes.
     owner: '@po'
     blocking: false
+    status: RESOLVED
+    resolution: >-
+      Resolved by @dev 2026-09-11: the armed assertion parses the contract and checks the runner's
+      real request and response bodies against the schemas of internal-tagged operations, proven
+      red against a throwaway contract on a bad body, a bad response type and a missing internal
+      tag.
 
   - id: LOW-1
     severity: low

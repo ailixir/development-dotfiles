@@ -13,9 +13,12 @@
  */
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { createLogBuffer } from '../../src/reporting/bounds.js';
+import { createLogBuffer, DEFAULT_REPORT_BOUNDS } from '../../src/reporting/bounds.js';
 import type { HttpOutcome, HttpRequest } from '../../src/reporting/httpClient.js';
+import { createReportClient } from '../../src/reporting/reportClient.js';
 import type { ReportBody } from '../../src/reporting/snapshot.js';
+import { createRedactor, REDACTION_PLACEHOLDER } from '../../src/executor/redaction.js';
+import { createLogger, createRecordingLogSink } from '../../src/server/logging.js';
 import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
 import { post, validJob } from '../helpers/runner.js';
@@ -530,9 +533,71 @@ describe('AC-20 — the secret canary appears in no form on any outbound byte', 
   });
 
   it('redacts a value added to the payload later, because it redacts the finished bytes', async () => {
-    // The redactor runs over the serialized string, so a field nobody enumerated is still
-    // scrubbed. Demonstrated by the evidence keys and identity fields being the only free-form
-    // strings in the body, and by the canary never appearing even inside `outcome.errorMessage`.
+    // Asserted against the report client directly, with a body **no upstream redactor has ever
+    // seen**. In the end-to-end tests above the canary is already scrubbed by the executor's own
+    // redaction of step failure text before it reaches the snapshot, so those tests would stay
+    // green with the outbound pass deleted. Here the pass in `freezeBytes` is the only thing
+    // between this body and the wire: remove `redactor.redact(...)` and this test goes red.
+    const sent: string[] = [];
+    const client = createReportClient({
+      http: {
+        send(request: HttpRequest): Promise<HttpOutcome> {
+          sent.push(request.body);
+          return Promise.resolve({ kind: 'response', status: 200, body: '{}' });
+        },
+      },
+      baseUrl: 'https://api.internal.example',
+      identityToken: 'outbound-identity',
+      bounds: DEFAULT_REPORT_BOUNDS,
+      logger: createLogger({ sink: createRecordingLogSink(), clock: () => 'T' }),
+      redactor: createRedactor([CANARY]),
+      timeoutMs: 1000,
+      terminal: { windowMs: 10_000, maxAttempts: 3, backoffMs: 10 },
+      now: () => 0,
+      sleep: () => Promise.resolve(),
+      random: () => 0.5,
+    });
+
+    // `fieldAddedLater` is the field nobody enumerated: it is not on `ReportBody`, nothing in the
+    // runner produces it, and it survives `JSON.stringify` all the same. That is exactly the shape
+    // of the regression AC-20 is written against — a field added next year by someone who never
+    // read this file.
+    const body = {
+      executionId: 'exec-1',
+      attemptId: 'attempt-1',
+      admissionId: 'adm-1',
+      runnerInstanceId: 'runner-a',
+      kind: 'FINAL',
+      runnerSequence: 1,
+      reportedAt: '2026-09-11T10:00:00.000Z',
+      browserStartedAt: null,
+      steps: [],
+      logs: [],
+      logsTruncated: false,
+      runtimeVersions: { playwright: '1.63.0' },
+      outcome: { result: 'FAILED', errorCode: 'STEP_FAILED', errorMessage: `FillFailed: ${CANARY}` },
+      evidence: { videoKey: `studio/${CANARY}/video.webm`, manifestKey: null, state: 'PENDING' },
+      fieldAddedLater: CANARY,
+    } as unknown as ReportBody;
+
+    // The canary really is in the object handed over, in three places including the unnamed one.
+    expect(JSON.stringify(body).split(CANARY)).toHaveLength(4);
+
+    const result = await client.deliverTerminal(body);
+    expect(result.kind).toBe('ACKNOWLEDGED');
+    expect(sent).toHaveLength(1);
+
+    for (const bytes of [...sent, ...client.sentBodies]) {
+      expect(bytes).not.toContain(CANARY);
+      expect(bytes).toContain(REDACTION_PLACEHOLDER);
+      // Named explicitly: the unenumerated field is scrubbed, not merely absent.
+      expect(bytes).toContain(`"fieldAddedLater":"${REDACTION_PLACEHOLDER}"`);
+    }
+  });
+
+  it('scrubs the canary from a launch failure that never reaches a step reporter', async () => {
+    // The end-to-end complement of the test above: a failure raised before any step exists, so
+    // the message travels through the run loop rather than the executor's step path.
     const runner = await start();
     const original = runner.launcher.launch.bind(runner.launcher);
     Object.assign(runner.launcher, {
