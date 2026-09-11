@@ -1,11 +1,13 @@
 package com.citi.put.checks.studio;
 
 import com.citi.put.checks.studio.dto.CompileAcceptedDto;
+import com.citi.put.checks.studio.dto.ConfirmCompileRequestDto;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.validation.StepValidator;
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +97,37 @@ public class StudioController {
   public ResponseEntity<CompileAcceptedDto> compileTest(
       @PathVariable UUID id, Authentication auth) {
     return ResponseEntity.accepted().body(studioService.compileTest(id, auth));
+  }
+
+  /**
+   * Confirms exactly the candidate the author reviewed (Story 10.9 AC-1; Architecture §4.2, §8.3).
+   *
+   * <p>The body is the frozen four-field one and every field is load-bearing: the confirmation is
+   * decided by two conditional statements that name all four, so a stale tab approving a newer
+   * artifact, an edit made underneath a review and a second confirmation of an already-confirmed
+   * revision are all {@code 409 STALE_CANDIDATE} with nothing written.
+   *
+   * <p>The refusals are ordered by ADR-002 §14.4 — {@code 401}/{@code 403} first, so a caller who
+   * may not act on the draft's CSI never learns whether it exists, then {@code 409} for a
+   * soft-deleted or quarantined draft, then the confirmation itself. The one documented exception
+   * is bean validation: {@code @Valid} runs during argument resolution and so a malformed body is
+   * {@code 400} before authorization. That discloses nothing, because it answers identically for an
+   * id that never existed.
+   *
+   * <p>{@code 200} carries the committed draft, re-read after the transaction — not the state the
+   * caller asked for.
+   *
+   * @param id the draft whose candidate is being confirmed
+   * @param request the frozen {@code ConfirmCompileRequest} body
+   * @param auth the caller
+   * @return the confirmed draft
+   */
+  @PostMapping("/tests/{id}/confirm-compile")
+  public ResponseEntity<UITestDto> confirmCompile(
+      @PathVariable UUID id,
+      @Valid @RequestBody ConfirmCompileRequestDto request,
+      Authentication auth) {
+    return ResponseEntity.ok(studioService.confirmCompile(id, request, auth));
   }
 
   @DeleteMapping("/tests/{id}")

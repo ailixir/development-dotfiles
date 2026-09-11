@@ -103,9 +103,14 @@ class CompileBudgetExpiryTest {
   @DynamicPropertySource
   static void shortBudget(DynamicPropertyRegistry registry) {
     registry.add("studio.runner.base-url", () -> "http://localhost:" + runner.port());
-    // Both, together: the budget must stay strictly greater than the gateway request timeout or
-    // the context refuses to start — which is itself the AC-19 rule this class relies on.
+    // All three, together: story 10.9 widened the budget to cover the whole request including its
+    // repairs, so the startup rule is now
+    //   budget > (1 + repair.max-attempts) x (gateway.request-timeout + runner.validate-timeout)
+    // = 3 x (200ms + 10ms) = 630ms. The validate timeout has to come down with the others or the
+    // context refuses to start — which is the AC-13 rule this class now also relies on, and which
+    // is why the old pair of overrides was no longer sufficient.
     registry.add("studio.compile.gateway.request-timeout", () -> "200ms");
+    registry.add("studio.runner.validate-timeout", () -> "10ms");
     registry.add("studio.compile.pipeline.attempt-budget", () -> "700ms");
   }
 

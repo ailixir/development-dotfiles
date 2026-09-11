@@ -399,7 +399,14 @@ class CompilePipelineTest {
     assertThat(diagnostics.path("artifact"))
         .as("artifact-level diagnostics are kept separate from step diagnostics")
         .hasSize(1);
-    runner.verify(1, postRequestedFor(urlEqualTo("/v1/validate")));
+    // Story 10.9 changed this number and it is stated rather than quietly relaxed. This stub
+    // rejects *every* artifact, so the compile now makes its two §4.3 repair attempts before
+    // exhausting — three proposals and three validations, which is the bound RepairLoopTest owns.
+    // The sibling below still verifies exactly one call, because a validator *failure* ends the
+    // loop rather than spending a repair on it. What 10.8's assertion was protecting is unchanged
+    // and is asserted above: an invalid artifact publishes no revision, clears the candidate, and
+    // records index-aligned diagnostics.
+    runner.verify(3, postRequestedFor(urlEqualTo("/v1/validate")));
   }
 
   // ── AC-20: the compile cache stays disabled in V1 ─────────────────────────
