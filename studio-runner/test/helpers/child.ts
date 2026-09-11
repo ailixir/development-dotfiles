@@ -260,12 +260,23 @@ export interface FakeChildProcess extends ChildProcessHandle {
   readonly sent: ParentMessage[];
   /** Delivers a message to the parent, as the real child would over IPC. */
   emit(value: unknown): void;
+  /** Writes to the child's captured stdout/stderr, as Playwright or Chromium would (AC-8). */
+  write(stream: 'stdout' | 'stderr', chunk: string): void;
   /** Ends the process, as an exit would. */
   end(code?: number): void;
   readonly killed: number;
+  /**
+   * Makes `kill` **not** end the process, the way a `SIGKILL` to the fork leaves Chromium running.
+   *
+   * There is no in-process way to orphan a browser, so this is the unit tier's stand-in for it:
+   * the real observation is `test/fixtures-tier/deadline-cleanup.test.ts`, which enumerates pids.
+   */
+  survivesKill: boolean;
 }
 
 export interface FakeSpawner extends ChildSpawner {
+  /** Narrowed, so a caller wrapping the child keeps the driving surface (10.13). */
+  spawn(request: ChildSpawnRequest): FakeChildProcess;
   /** Every spawn request, exactly as it would have been handed to the operating system. */
   readonly requests: ChildSpawnRequest[];
   readonly children: FakeChildProcess[];
@@ -282,11 +293,13 @@ export function createFakeSpawner(): FakeSpawner {
       const sent: ParentMessage[] = [];
       const messageListeners: ((value: unknown) => void)[] = [];
       const exitListeners: ((code: number | null, signal: string | null) => void)[] = [];
+      const outputListeners: ((stream: 'stdout' | 'stderr', chunk: string) => void)[] = [];
       let killed = 0;
       let ended = false;
       const child: FakeChildProcess = {
         sent,
         pid: 4242,
+        survivesKill: false,
         get killed(): number {
           return killed;
         },
@@ -299,12 +312,18 @@ export function createFakeSpawner(): FakeSpawner {
         onExit(listener: (code: number | null, signal: string | null) => void): void {
           exitListeners.push(listener);
         },
+        onOutput(listener: (stream: 'stdout' | 'stderr', chunk: string) => void): void {
+          outputListeners.push(listener);
+        },
         kill(): void {
           killed += 1;
-          child.end();
+          if (!child.survivesKill) child.end();
         },
         emit(value: unknown): void {
           for (const listener of messageListeners) listener(value);
+        },
+        write(stream: 'stdout' | 'stderr', chunk: string): void {
+          for (const listener of outputListeners) listener(stream, chunk);
         },
         end(code = 0): void {
           if (ended) return;

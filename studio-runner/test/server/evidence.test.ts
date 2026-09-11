@@ -41,7 +41,14 @@ afterEach(async () => {
  * exercised below is the coordinator's actual mapping from a run result to an outcome and an
  * evidence state, not a simulation of it.
  */
-function launcherReporting(recording: SessionRecording, ok = true): BrowserLauncher {
+function launcherReporting(
+  // `partial` defaults to `false` here so the cases below stay about the *state* vocabulary,
+  // which is what they were written to exercise. Story 10.13's own partiality cases live in
+  // `test/server/deadline-outcome.test.ts`, where the kill path that produces them exists.
+  reported: Omit<SessionRecording, 'partial'> & { readonly partial?: boolean },
+  ok = true,
+): BrowserLauncher {
+  const recording: SessionRecording = { partial: false, ...reported };
   return {
     launch(): Promise<BrowserSession> {
       const origin = takeRunOrigin();
@@ -54,6 +61,8 @@ function launcherReporting(recording: SessionRecording, ok = true): BrowserLaunc
             startedAtMs: origin.startedAtMs,
             clock: null,
           },
+          // This session finishes; nothing here is ever killed. The kill path has its own file.
+          kill: () => Promise.resolve({ orderedStopCompleted: true }),
           execute(request: SessionRunRequest): Promise<SessionRunResult> {
             // Two steps, reported through 10.6's reporter exactly as the child would.
             for (const [index, step] of request.steps.entries()) {

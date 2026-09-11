@@ -25,6 +25,8 @@ function observed(overrides: Partial<RecordingObservation> = {}): RecordingObser
     bytes: 24_576,
     header: true,
     error: null,
+    // The recorder closed in an orderly way unless a case says otherwise (ADR-002 §17.3).
+    orderlyClose: true,
     ...overrides,
   };
 }

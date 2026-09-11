@@ -137,6 +137,19 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
     expect(actual, 'this story may not edit the contract (ADR-002 §12, Class B)').toBe(BASE_SHA256);
   });
 
+  it('emits the optional RunnerEvidence.partial that ADR-002 §17 already landed, without editing it', () => {
+    const document = readFileSync(contract, 'utf8');
+    const start = document.indexOf('    RunnerEvidence:');
+    const body = document.slice(start, start + 2_400);
+    // The field is **already on the document** — §17 landed it as an architect ruling, not as a
+    // runner edit — so story 10.13 implements against it and the SHA-256 above is unchanged by
+    // this story's diff. It stays **optional** on the wire (§17.5) so the merged runner remains
+    // conformant; promoting it to `required` is O-14, deliberately sequenced after the producer.
+    expect(body).toContain('partial:');
+    expect(body).toContain('required: [videoKey, manifestKey, state]');
+    expect(body).not.toContain('required: [videoKey, manifestKey, state, partial]');
+  });
+
   it('keeps every runner-produced body closed, and widens no enum', () => {
     const document = readFileSync(contract, 'utf8');
     for (const schema of ['RunnerStepState', 'RunnerLogEntry', 'RunOutcome', 'RunnerEvidence', 'RunnerReport']) {
@@ -166,6 +179,25 @@ describe('AC-24 — no new production dependency', () => {
     // Story 10.12 added no entry, and the assertion there is what proves it on every run.
     expect(isolation).toContain('playwright-core');
     expect(isolation).not.toContain('@playwright/test');
+  });
+
+  it('keeps story 10.13’s three new modules inside the node: builtins ADR-001 §6 already permits', () => {
+    // Process-group signalling and descendant observation use `node:child_process` and
+    // `node:process`, which ADR-001 §6 confines to `src/run/**` — and all three new modules are
+    // inside it. No package was added to make the kill path work.
+    for (const file of ['deadline.ts', 'tree.ts', 'outputRelay.ts']) {
+      const source = readFileSync(join(packageRoot, 'src', 'run', file), 'utf8');
+      const imports = [...source.matchAll(/from '([^']+)'/gu)].map((match) => match[1] ?? '');
+      for (const specifier of imports) {
+        const external = !specifier.startsWith('.') && !specifier.startsWith('node:');
+        expect(external, `${file} imports ${specifier}`).toBe(false);
+      }
+    }
+    // And `child_process` stays where §6 puts it: inside `src/run/**`, nowhere else.
+    const offenders = SOURCE_DIRECTORIES.flatMap((name) =>
+      filesUnder(join(packageRoot, 'src', name)),
+    ).filter((file) => readFileSync(file, 'utf8').includes('node:child_process'));
+    expect(offenders).toEqual([]);
   });
 
   it('serves the fixture pages from node:http, as the internal server does', () => {
