@@ -1,0 +1,437 @@
+schema: 1
+story: '10.8'
+story_title: Bounded compile pipeline and readiness gate
+epic: EPIC-10
+wave: 3
+
+gate: CONCERNS
+status_reason: >-
+  The load-bearing claim of this story holds, and the reviewer proved it rather than read it. The
+  readiness predicate in ExecutionReadinessService carries all seven AC-22 terms including term 5's
+  originalText re-hash, and READINESS_QUERY selects no compile-state column. The reviewer re-ran the
+  falsification independently — t.compile_status added to the query and a `compile_status = 'READY'`
+  term added to the predicate — and the readiness suite went from 30/0 to 30/7 with all three AC-23
+  cases red, plus falsificationTheThreeCasesGoRedWhenThePredicateReadsCompileStatus,
+  noValueOfCompileStatusChangesTheVerdict and theGateOwnQueryNamesNoCompileStateColumn. The mutant
+  was reverted from a byte copy and the suite is green again. The fixture repair is the direction the
+  developer claims: StudioExecutionFixtures now derives source_hash and artifact_hash through
+  ArtifactCanonicalizer — the same helper the gate re-derives them with — and records provenance under
+  CompilePins and the configured pin. No term of the predicate was dropped, widened or made
+  conditional; the phase-2 diff of ExecutionReadinessService is an `implements` clause and a thin
+  adaptor and nothing else. The contract test keeps TEST_DELETED and TEST_QUARANTINED as separate
+  answers on the wire in one test that would not notice if they were split apart,
+  theFrozenCompileOperationDeclaresNoConflictResponse is replaced by produced-set ==
+  x-conflict-codes failing in both directions, §14.4 ordering is proven by two tests, and the four
+  declared 400 codes are answered with the draft's compile state asserted unmoved. Scope is clean:
+  no Flyway migration, neither artifact.schema.json copy touched, and the openapi.yaml edit is one
+  deleted line — `x-not-yet-implemented: true` on compileTest — with the architect's §14 amendment
+  arriving through the epic merge, not from this story. FOC-03 held: the three phase-1 commits touch
+  neither shared file, phase 2 is additive at both, and exactly one ExecutionReadiness bean exists in
+  the running context with ProvisionalExecutionReadiness deleted.
+  What keeps this off PASS is arithmetic and honesty rather than a defect. `./gradlew check` is not
+  green and AC-30 is therefore unmet on its own words: the reviewer ran the full suite twice and got
+  661 tests / 24 failures / 1 skipped and then 661 / 25 / 1, the difference being DispatcherIT alone.
+  Both runs are the same 23-class ED-02 baseline plus 10.7a's deliberate
+  ExecutionErrorCodeContractEscalationTest. There is no 26th failure and no studio failure this story
+  owns. The DispatcherIT attribution was confirmed independently: at merge base 43e28f063, extracted
+  to a scratch tree with none of this story's code present, AcceptanceIT and DispatcherIT run together
+  reproduce asecondDispatchPassDoesNotPickUpADispatchingRow FAILED, while DispatcherIT alone passes
+  there. Four criteria are carried rather than met — AC-11b (ED-01), AC-12b (ED-05/10.18), AC-24's
+  target-policy case, which has no field on the frozen contract and is the tree's one remaining
+  @Disabled, and AC-30 — each named rather than ticked.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-11T00:00:00Z'
+branch: story/10.8
+head_sha: e80b74353
+merge_base_sha: 43e28f063
+phase_1_head_sha: 1c60c5c48
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.8
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands the reviewer executed, not developer claims
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  full_check:
+    command: ./gradlew check --continue
+    result: FAIL (:test only)
+    detail: >-
+      661 tests, 24 failures, 1 skipped, parsed from build/test-results/test/*.xml rather than from
+      console tail. antiRegressionCheck, checkstyleMain, checkstyleTest, rdsParityLint, spotbugsMain
+      and spotlessCheck all green; :test is the only failing task. The 24 are the 23-class ED-02 set
+      exactly as the story enumerates it — CheckCrudIT 2, BulkDeleteIT 2, RateLimitFilterIT 4,
+      CsiFetchIT 1, ReportDeliveryDispatcherIT 1, ReportsCrudIT 2, ReportsDuplicateIT 1,
+      ReportsExecutionIT 2, ReportsPreviewIT 2, ScheduleAuthzIT 2, BffFilter503IT 1,
+      BffFilterUnauthIT 1, IdentityCacheIT 1, UserMeEndpointIT 1 — plus
+      ExecutionErrorCodeContractEscalationTest.everyCodeTheApiCanPersistIsDeclaredInTheFrozenContract.
+      DispatcherIT PASSED in this run.
+  full_test_rerun:
+    command: ./gradlew test --continue --rerun
+    result: FAIL
+    detail: >-
+      661 tests, 25 failures, 1 skipped. Identical set to the run above plus
+      DispatcherIT.asecondDispatchPassDoesNotPickUpADispatchingRow. Two runs of the same tree
+      differing by exactly that one test is the ordering sensitivity the story describes, measured
+      rather than argued. No 26th failure in either run.
+  readiness_mutation:
+    command: >-
+      mutate ExecutionReadinessService (add t.compile_status to READINESS_QUERY, add a
+      compile_status = 'READY' refusal before ReadinessVerdict.ready) then
+      ./gradlew test --rerun --tests 'com.citi.put.checks.studio.readiness.*'
+    result: RED AS REQUIRED
+    detail: >-
+      30 tests completed, 7 failed, 1 skipped. All three AC-23 cases red —
+      aStaleDraftAfterAFailedOptionalRecompileIsStillRunnable,
+      aDraftWithARecompileInFlightIsStillRunnable,
+      aDraftLeftNeedsRevisionByAFailedValidationIsStillRunnable — together with
+      falsificationTheThreeCasesGoRedWhenThePredicateReadsCompileStatus,
+      noGatewayCallHappensAcrossReadinessInAnyOfTheDeReadyStates,
+      noValueOfCompileStatusChangesTheVerdict and theGateOwnQueryNamesNoCompileStateColumn. Seven
+      rather than the developer's nine because the reviewer placed the mutant term after the
+      never-confirmed and awaiting-candidate branches; the three cases the criterion names are the
+      ones that matter and they all went red.
+  readiness_after_revert:
+    command: ./gradlew test --rerun --tests 'com.citi.put.checks.studio.readiness.*'
+    result: PASS
+    detail: >-
+      BUILD SUCCESSFUL. The mutated file was restored from a byte copy taken before the edit;
+      git status --short is empty.
+  dispatcher_attribution_merge_base:
+    command: >-
+      git archive 43e28f063 | tar -x -C <scratchpad> && ./gradlew test
+      --tests '...dispatch.AcceptanceIT' --tests '...dispatch.DispatcherIT'
+    result: REPRODUCED WITHOUT THIS STORY
+    detail: >-
+      28 tests completed, 1 failed:
+      DispatcherIT.asecondDispatchPassDoesNotPickUpADispatchingRow. The scratch tree is the merge
+      base and contains none of story 10.8's 8073 added lines. A follow-up
+      ./gradlew test --rerun --tests '...DispatcherIT' in the same tree is BUILD SUCCESSFUL, so the
+      failure is cross-class contamination of a global dispatchOnce() scan by AcceptanceIT's QUEUED
+      ledger rows, not anything this story runs.
+  dispatcher_attribution_structural:
+    command: grep -rln 'studio_dispatch_ledger|ui_test_executions|\.accept\(' over the 15 new test files
+    result: NO MATCH
+    detail: >-
+      None of this story's compile/ or readiness/ test classes writes a dispatch ledger row, an
+      execution row or accepts an execution. The story's contribution to the failure is the
+      existence of 13 additional classes in the studio.compile package, which moves discovery order.
+  coverage:
+    command: ./gradlew jacocoTestReport -x test (after the full --rerun)
+    result: THRESHOLD MET
+    detail: >-
+      Parsed from build/reports/jacoco/test/jacocoTestReport.xml.
+      studio.compile 90.5% (506/559), studio.compile.validator 90.0% (108/120),
+      studio.readiness 92.9% (78/84), studio.compile.gateway 95.1% (385/405).
+      92.2% across the four packages against a 70% project threshold. Note that
+      jacocoTestCoverageVerification does not run inside `check` while :test fails, so this figure is
+      the reviewer's own measurement rather than a gate that fired.
+  scope_no_migration:
+    command: git diff 43e28f063 e80b74353 --stat -- backend/src/main/resources/db/migration
+    result: EMPTY
+    detail: No Flyway migration. 10.7a's V15 remains the latest; compile_started_at is carried to 10.9.
+  scope_schema_copies:
+    command: git diff 43e28f063 e80b74353 -- '*artifact.schema.json'
+    result: EMPTY
+    detail: >-
+      Both copies — docs/specs/studio/artifact.schema.json and
+      backend/src/main/resources/studio/artifact.schema.json — are byte-untouched.
+  scope_openapi:
+    command: git diff 43e28f063 e80b74353 -- docs/specs/studio/openapi.yaml
+    result: ONE LINE DELETED
+    detail: >-
+      1 file changed, 0 insertions, 1 deletion. The deleted line is `x-not-yet-implemented: true`
+      under compileTest; x-implemented-by: '10.8' stays. The architect's §14 amendment (409,
+      x-conflict-codes, the four 400 codes, the confirmCompile/executeTest sweep) came in through
+      the epic merge commit 9dd1f82db, not from this story.
+  foc_03_phase_boundary:
+    command: per-commit git show --stat over story/10.8 --not 43e28f063
+    result: HELD
+    detail: >-
+      234cab7de, a724f80b0 and 1c60c5c48 touch neither StudioService.java nor StudioController.java
+      nor openapi.yaml. e80b74353 is the only commit that does, and its changes there are additive:
+      a constructor argument, a two-argument updateTest delegating to a new three-argument overload,
+      one new compileTest method, one new @PostMapping, one new repository @Query. Nothing 10.7a
+      wrote was rewritten.
+  one_readiness_bean:
+    command: grep -rn 'implements ExecutionReadiness' src/main src/test
+    result: EXACTLY ONE
+    detail: >-
+      Only ExecutionReadinessService. ProvisionalExecutionReadiness.java is deleted in e80b74353.
+      ExecutionReadinessTest.theReadinessSeamHasExactlyOneImplementationAndItIsTheRealPredicate
+      asserts this on the running context, not on the filesystem, and passes.
+  working_tree:
+    command: git status --short
+    result: CLEAN
+    detail: >-
+      Empty before and after the mutation experiment. The one mutated production file was restored
+      from a byte copy; no production code was changed by this review. The merge-base tree was
+      extracted with git archive into the session scratchpad, so no second git worktree was created
+      and the shared stash stack was never touched.
+
+# ─────────────────────────────────────────────────────────────────────────────
+developer_claims_verified:
+  - claim: 28 of 30 criteria met, 2 deferred
+    verdict: >-
+      CORRECTED TO 26 MET / 4 CARRIED / 0 UNMET-AND-UNDECLARED. AC-11b and AC-12b are the two the
+      developer counts; AC-24 and AC-30 are also not fully met and the developer's own table says so
+      in prose ("one case recorded not yet reachable", "Met, with the same honest exception") while
+      counting them as met. The distinction is bookkeeping, not concealment — nothing is claimed to
+      pass that does not.
+  - claim: 661 tests, 25 failures, none of them this story's
+    verdict: >-
+      CONFIRMED, with the caveat that the number is 24 or 25 depending on discovery order. Both runs
+      reproduce the exact ED-02 class set the story enumerates. No failure in studio.compile or
+      studio.readiness in either run.
+  - claim: the DispatcherIT failure is 10.7a's, exposed by this branch's class count
+    verdict: >-
+      CONFIRMED INDEPENDENTLY at the merge base, where the pairing fails with none of this story's
+      code present and the class alone passes.
+  - claim: the fixture was fixed by deriving real values, not by relaxing a term
+    verdict: >-
+      CONFIRMED. The diff replaces the 'source-hash' / 'artifact-hash-xxxx' / '{}' literals with
+      ArtifactCanonicalizer.sourceHash(steps), ArtifactCanonicalizer.hash(artifact),
+      CompilePins.SUPPORTED_ARTIFACT_VERSION and a pinned provenance document. The predicate's diff
+      over the same range contains no change to any term.
+  - claim: the readiness mutation turns the three AC-23 cases red
+    verdict: CONFIRMED by the reviewer's own independently written mutant.
+
+# ─────────────────────────────────────────────────────────────────────────────
+readiness_predicate:
+  terms_present_and_unweakened: true
+  detail: >-
+    All seven AC-22 terms are in ExecutionReadinessService.evaluate and each refuses with its own
+    message. Term 1 lifecycle (TEST_DELETED / TEST_QUARANTINED, their own codes, not
+    COMPILE_REQUIRED). Term 2 confirmed_revision_id resolving to a revision of this test and CSI,
+    with a separate branch for a dangling pointer. Term 3 confirmed_by and confirmed_at both
+    non-null. Term 4 source_revision AND configuration_revision both compared. Term 5 both halves —
+    ArtifactCanonicalizer.sourceHash over the draft's ordered originalText parsed by
+    LegacyStudioAdapter.parseSteps, and ArtifactCanonicalizer.hash over the stored artifact. Term 6
+    artifact_schema_version == CompilePins.SUPPORTED_ARTIFACT_VERSION, refusing RUNTIME_INCOMPATIBLE.
+    Term 7 provenance validatorSchemaVersion and syntaxReferenceVersion against RuntimePinProperties,
+    naming both values, with the ranged Playwright/executor terms deliberately left to the runner.
+  term_5_survives: >-
+    AC-22's fifth term — the one @po warned is the only term surviving a counter bug — is present in
+    both halves and is exercised by ExecutionReadinessTest.editedTextUnderAnUnmovedCounterIsCaught
+    OnlyByTheReHash (the counter is held fixed and the text edited) and aTamperedArtifactIsCaught
+    ByItsOwnHash. It is also the term that turned 78 of 10.7a's fixture-seeded tests red, which is
+    independent evidence that it is load-bearing rather than decorative.
+  compile_status_absent: >-
+    READINESS_QUERY names no compile-state column. The one place current_candidate_revision_id is
+    read is neverConfirmedMessage, a second query that runs only after the verdict is already
+    decided, which is a structural choice documented in the method's javadoc.
+  standing_counterfactual: >-
+    DeReadyCarryForwardTest.falsificationTheThreeCasesGoRedWhenThePredicateReadsCompileStatus writes
+    the rejected predicate out in SQL and asserts it refuses the same three rows the shipped one
+    accepts, per case. Without it the three AC-23 tests could become vacuous if a fixture changed.
+    The reviewer confirmed the assertion is per-case and not a single aggregate.
+
+contract_test:
+  codes_separate_on_the_wire: true
+  detail: >-
+    compilingADeletedTestAnswersTheDeclaredStatusCode drives deleted_at then quarantined_at through
+    the same route and asserts 409 TEST_DELETED then 409 TEST_QUARANTINED, deliberately as one test
+    so a pair that both passed while the route collapsed them could not hide. The assertion message
+    names BRD §9. theServiceGuardReallyDoesThrowAConflictForADeletedOrQuarantinedTest asserts the
+    same two codes at the service layer independently of the route.
+  produced_set_assertion: >-
+    theProducedConflictCodesEqualTheOperationsDeclaredSet collects the codes the route actually
+    answers from the wire and asserts containsExactlyInAnyOrderElementsOf against the operation's
+    x-conflict-codes, so it fails both for a code answered but not declared and for one declared but
+    not producible. The replaced test, theFrozenCompileOperationDeclaresNoConflictResponse, is gone
+    and its replacement carries the reason on it.
+  ordering_proven: >-
+    authorizationIsEvaluatedBeforeTheLifecycleGuard compares a withheld-draft 403 byte for byte
+    against an absent-draft 403 and asserts neither body contains TEST_DELETED or the id.
+    theLifecycleGuardIsEvaluatedBeforeTheAuthoringBounds seeds a draft that is both quarantined and
+    101 steps and asserts 409 TEST_QUARANTINED. beginCompile last is proven by the 400 test's
+    compile-state comparison.
+  four_400_codes_no_state_moved: >-
+    theDeclaredBadRequestCodesAreAnsweredWithNoCompileStateMoved covers SOURCE_TOO_MANY_STEPS,
+    SOURCE_LINE_TOO_LONG, SOURCE_TOO_LARGE and INLINE_CREDENTIAL, asserts the body never contains
+    the matched secret, and asserts compileState(id) is equal before and after each refusal.
+  requireCompilable_untouched: >-
+    CompileStateService.requireCompilable was made public in phase 1 and not otherwise edited. The
+    method body is unchanged; the diff is the modifier. It is a read, so AC-3 is unaffected.
+  marker_removal_scoped: >-
+    theOperationIsNoLongerMarkedAsNotYetImplementedAndNoOtherMarkerMoved asserts the flag is null on
+    compileTest and still set on confirmCompile, which is 10.9's.
+  siblings_kept: >-
+    Four siblings survive — theTwoOperationsThatAlreadyCarryTheSameConflictShowHowSmallTheAmendment
+    Is, theServiceGuardReallyDoesThrowAConflictForADeletedOrQuarantinedTest,
+    theOperationIsNoLongerMarkedAsNotYetImplementedAndNoOtherMarkerMoved, and the two ordering
+    tests — two of them now asserting the opposite fact with the reason written on them.
+
+bounds:
+  configuration_single_source: >-
+    application.yml studio.compile.pipeline.* / .authoring.* / .diagnostics.* and studio.runner.*,
+    bound by StudioCompileProperties and StudioRunnerProperties and validated at startup by
+    StudioCompileConfig. No bound is enforced only by a comment.
+  values_confirmed:
+    steps: 100 (STUDIO_COMPILE_MAX_STEPS)
+    line_chars: 1024 (STUDIO_COMPILE_MAX_LINE_CHARS)
+    source_bytes: 65536 (STUDIO_COMPILE_MAX_SOURCE_BYTES)
+    pipeline_concurrency: 4 (STUDIO_COMPILE_CONCURRENCY)
+    attempt_budget: 180s (STUDIO_COMPILE_ATTEMPT_BUDGET)
+    validate_timeout: 10s (STUDIO_RUNNER_VALIDATE_TIMEOUT)
+    diagnostics: 10 per step / 400 message chars / 120 excerpt chars / 65536 total bytes
+  at_and_past_the_bound:
+    steps: exactlyTheStepCapIsAcceptedAndOneMoreIsRejected
+    line_chars: exactlyTheLineCapIsAcceptedAndOneMoreIsRejected (+ the no-echo sibling)
+    source_bytes: exactlyTheSourceByteCapIsAcceptedAndOneMoreByteIsRejected (+ UTF-8 counting)
+    diagnostics_per_step: exactlyThePerStepCapIsKeptAndTheEleventhIsDroppedWithAMarker
+    diagnostic_message: aMessageExactlyAtTheCapIsKeptWholeAndOneCharacterMoreIsMarked
+    diagnostics_excerpt_and_total_bytes: >-
+      covered past the bound by aHostileValidatorResponseIsBoundedAndSaysThatItWasTruncated, which
+      asserts <= maxExcerptChars and <= maxTotalBytes with the truncation marker set. No discrete
+      at-the-bound case for these two rows. See QUAL-2.
+    budget_vs_gateway_timeout: theAttemptBudgetMustBeStrictlyGreaterThanTheGatewayRequestTimeout
+  saturation_non_blocking: >-
+    CompileExecutor is a ThreadPoolExecutor over a SynchronousQueue with AbortPolicy — no queue at
+    all, not a bounded one. saturationRefusesTheNextAttemptRatherThanQueueingIt fills a size-2 pool
+    with blocked attempts, asserts the third submit returns false, and asserts the submitting thread
+    returned in under 1 s. CompilePipelineIT.aSaturatedPoolRefusesTheNextCompileWhileOrdinaryReads
+    StayResponsive covers the read-starvation half against the live context.
+  budget_and_late_result: >-
+    theBudgetExpiresTheAttemptAndTheLateResultPublishesNothing and
+    exactlyOneOfTheBudgetAndTheWorkerEverSettlesAnAttempt prove single-claim settlement by releasing
+    a blocked stub after expiry.
+
+version_pinning:
+  rejected: >-
+    CompilePipelineTest.aSchemaValidVersionTwoArtifactIsNeverValidatedOrPersisted stubs the gateway to
+    return the same fixture with "version":2, and asserts compile_status STALE, compile_error exactly
+    GATEWAY_PARSE_FAILURE, runner.verify(0, postRequestedFor("/v1/validate")) — never sent to the
+    validator — and revisionCount(testId) zero — never persisted as a candidate.
+  premise_asserted: >-
+    ArtifactVersionPinTest.theFrozenSchemaDeliberatelyAcceptsAVersionTwoArtifact validates the
+    version:2 document against the real schema and asserts it is schema-valid, so the criterion's
+    premise is a measured fact rather than an assumption.
+  single_literal: >-
+    thePinIsOneConstantReadByEveryConsumer asserts CompilePins.SUPPORTED_ARTIFACT_VERSION == 1, that
+    GatewayResponseParser's constant is the same object, and scans the tree for a second file
+    assigning a literal to that name.
+  gate_reasserts: Term 6 of the predicate, refusing RUNTIME_INCOMPATIBLE and naming both versions.
+
+scope:
+  migration: NONE
+  schema_copies: UNTOUCHED (both)
+  openapi: one deleted line, the compileTest x-not-yet-implemented marker, nothing else
+  authority: >-
+    No production code was changed by this review. Only the gate file and the story's QA Results
+    section were written.
+
+ac_coverage:
+  verified: 26
+  carried: 4
+  unmet: 0
+  carried_detail:
+    - criterion: AC-11b
+      why: >-
+        Deferred at draft time on ED-01 — no R2D2 endpoint, credentials or model identifiers exist.
+        Verified in story 10.19. Recorded as skipped, not passed, and no shared environment sets
+        studio.compile.gateway.enabled=true.
+    - criterion: AC-12b
+      why: >-
+        Deferred at draft time on ED-05, deployment form only; 10.18 builds the image and 10.19
+        exercises it. AC-12a through AC-16 are verified now against WireMock, as the criterion says
+        they can be.
+    - criterion: AC-24
+      why: >-
+        The target-policy-selection negative case has no field on the frozen test contract and
+        cannot be driven. It is the tree's one remaining @Disabled and is named, never recorded as
+        passing; theClassifierStillDoesNotClassifyTargetPolicySelection asserts the gap still exists
+        so the deferral cannot rot silently. Every other AC-24 case has its own test and message.
+    - criterion: AC-30
+      why: >-
+        `./gradlew check` is not green from clean. 23 failures are the pre-existing ED-02 baseline,
+        class-for-class identical to the merge base; 2 are story 10.7a's. The concurrency cases of
+        AC-4, AC-17 and AC-18 are proven by holding state open and interleaving as required, the
+        falsification AC-30 asks for is recorded and was reproduced by the reviewer, and coverage on
+        the new packages is 92.2%.
+
+# ─────────────────────────────────────────────────────────────────────────────
+top_issues:
+  - id: BUILD-1
+    severity: medium
+    finding: >-
+      `./gradlew check` fails, so AC-30 is unmet as written. 23 of the failures are the ED-02
+      auth/BFF/rate-limit baseline this story did not create and did not change; 2 belong to story
+      10.7a — ExecutionErrorCodeContractEscalationTest, which is red on purpose pending a Class C
+      ruling, and DispatcherIT, which is an ordering-sensitive assertion in 10.7's file.
+    suggested_action: >-
+      None for this story. DispatcherIT's one-line repair — scope the assertion to the row under
+      test, or seed from an empty ledger — belongs to story 10.7 and is already reported to its
+      owner. Do not let it be re-run until green; it passes in isolation, which is exactly the
+      property that would get it dismissed as a flake.
+  - id: QUAL-1
+    severity: medium
+    finding: >-
+      AC-29 asks for the assertion to be made on the bytes handed to the log sink. The log-site
+      assertion, noLogSiteInTheCompilePackageCarriesSourceArtifactOrResolvedValues, is a source-text
+      scan of every LOGGER./AUDIT. line in studio/compile and its subpackages (so it does cover
+      10.5's GatewayAuditLogger) matching forbidden identifiers and throwable handoffs. The
+      byte-level assertion exists only for the HTTP client side, in PromptAssemblyTest and
+      RunnerValidationClientTest.noResolvedValueTravelsOnTheValidationRequest. A log site that built
+      the same string through a local variable named something else would pass the scan.
+    suggested_action: >-
+      Add one test that installs a capturing appender and asserts the emitted bytes across a full
+      compile, including the error paths. Not blocking: the scan is strict about throwables and the
+      forbidden-identifier list covers the real carriers.
+  - id: QUAL-2
+    severity: low
+    finding: >-
+      AC-19 asks for a test at each bound and one past it. The diagnostics excerpt cap and the
+      diagnostics total-byte cap are asserted only as <= inside the hostile-response test; there is
+      no discrete at-the-bound case for those two rows as there is for the step, line, source-byte,
+      per-step and message rows.
+    suggested_action: Two small cases in CompileBoundsTest. Cosmetic relative to the coverage present.
+  - id: QUAL-3
+    severity: low
+    finding: >-
+      AC-27's negative cases are driven through readiness.requireReady rather than through
+      POST /execute; the wire assertion is on the counting WireMock runner, which is what the
+      criterion actually demands. Route-level 409 COMPILE_REQUIRED is covered separately by
+      StudioApiIT and StudioIdempotencyIT, and the single-bean test closes the gap between the two,
+      so nothing is unproven — it is proven across three files rather than one.
+    suggested_action: None required.
+  - id: QUAL-4
+    severity: low
+    finding: >-
+      StudioExecutionFixtures.pinnedProvenance hardcodes "1.0.0" for syntaxReferenceVersion and
+      validatorSchemaVersion rather than reading RuntimePinProperties, while correctly deriving the
+      hashes and the artifact schema version from CompilePins. Changing the pin in application.yml
+      would turn the fixture red rather than following it.
+    suggested_action: >-
+      Read the two strings from RuntimePinProperties. Low because a red fixture is the safe failure
+      direction and the test that would fail says exactly which field disagrees.
+
+required_before_merge: []
+
+recommended_not_blocking:
+  - QUAL-1 — a capturing-appender assertion for AC-29's log sink half.
+  - QUAL-2 — at-the-bound cases for the excerpt and total-byte diagnostics rows.
+  - QUAL-4 — bind the fixture's provenance versions to RuntimePinProperties.
+
+do_not_do:
+  - Do not relax any term of the readiness predicate to make a fixture green. The 78-test episode
+    this story records is the correct behaviour of the gate and the fix direction is already
+    established.
+  - Do not collapse TEST_DELETED and TEST_QUARANTINED into one code. ADR-002 §14 and BRD §9 both
+    forbid it and the contract test is built so a collapse cannot pass.
+  - Do not re-run DispatcherIT until it goes green. It is order-dependent, it reproduces at the
+    merge base, and the repair belongs to story 10.7.
+  - Do not add a compile_status term to the predicate under any framing, including as an
+    optimisation or a fast path.
+
+final_decision:
+  gate: CONCERNS
+  merge: SAFE
+  rationale: >-
+    No readiness term was dropped or weakened, the status-column mutation is red on all three AC-23
+    cases under the reviewer's own hand, the two withheld codes stay separate on the wire, there is
+    no 26th failure, and the only contract edit is the one line ADR-002 §14 authorises. What remains
+    is one unmet criterion whose causes are owned by other stories and four honest carries, each
+    named in the story rather than ticked.
