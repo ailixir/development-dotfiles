@@ -30,11 +30,11 @@ npm run build          # tsc -> dist/ + dist/runtime-versions.json
 npm run test:fixtures  # fixture tier; needs the pinned Playwright image (10.3)
 ```
 
-`npm ci` never fetches browsers: the Dockerfile and CI set `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`, and
-the image supplies Chromium. Set the same variable locally if your npm configuration runs install
-scripts. A developer who does want a local browser installs the matching build with
-`npx playwright install chromium` at the pinned version; Playwright refuses to launch a mismatched
-build, so drift fails loudly.
+`npm ci` fetches no browsers. The pinned `playwright` package declares no install script, and the
+Dockerfile and CI additionally set `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` so that stays true if a
+future version reintroduces one (ADR-001 §4.2). Browsers come from the image. A developer who wants
+a local browser installs the matching build with `npx playwright install chromium` at the pinned
+version; Playwright refuses to launch a mismatched build, so drift fails loudly.
 
 ## Security model
 
