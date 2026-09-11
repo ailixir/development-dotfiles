@@ -1,0 +1,353 @@
+schema: 1
+story: '10.2'
+story_title: Exact artifact language and trusted executor
+epic: EPIC-10
+wave: 1
+
+gate: CONCERNS
+status_reason: >-
+  All 20 acceptance criteria are implemented and independently verified from a clean install; every
+  gate (npm ci, type-check, lint, test, build) passes outright. 31 independent escape attempts against
+  the validator were all rejected fail-closed, and no secret value reached any diagnostic, error or
+  reporter payload. One medium default-deny consistency gap keeps this off PASS: TypeScript type
+  arguments are rejected on the outer call but silently accepted on locator-chain calls and on
+  `expect(...)`, so an artifact shape AC-6 enumerates as rejected is accepted. No capability is gained.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-10T00:00:00Z'
+branch: story/10.2
+head_sha: b248064ff
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.2
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands actually executed by the reviewer, not developer claims
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  clean_install:
+    command: rm -rf node_modules dist coverage && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm ci
+    result: PASS
+    detail: 380 packages, exit 0, no browser download attempted
+  type_check:
+    command: npm run type-check
+    result: PASS
+    detail: tsc -p tsconfig.json --noEmit, exit 0, no output
+  lint:
+    command: npm run lint
+    result: PASS
+    detail: eslint ., exit 0, no output
+  build:
+    command: npm run build
+    result: PASS
+    detail: tsc -p tsconfig.build.json + write-runtime-versions.mjs, wrote dist/runtime-versions.json
+  unit_tests:
+    command: npm test
+    result: PASS
+    detail: 8 files / 208 tests passed; coverage 94.83% lines, 90.57% branches, 97.87% functions
+      over src/validator/** and src/executor/**; vitest thresholds 85/85/80/80 enforced in config
+  fixtures_tier:
+    command: npm run test:fixtures
+    result: EXPECTED_EMPTY
+    detail: 'No test files found, exiting with code 0 — story 10.3 owns this tier'
+  working_tree:
+    command: git status --short
+    result: CLEAN
+    detail: no uncommitted changes after the full gate run
+
+developer_claims_verified:
+  - claim: 20 of 20 ACs met, 0 deferred
+    verdict: CONFIRMED
+  - claim: 208 tests
+    verdict: CONFIRMED (208 passed)
+  - claim: 94.83% line coverage over src/validator and src/executor
+    verdict: CONFIRMED (94.83% lines / 90.57% branches)
+  - claim: write-runtime-versions.mjs records but does not enforce the Playwright pin
+    verdict: CONFIRMED — it records playwright/playwrightLocked/playwrightImageTag and throws only on
+      VALIDATOR_PARSER.version vs the typescript pin. No over-claim of enforcement anywhere in 10.2.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Security boundary — escape attempts run by the reviewer against dist/
+# ─────────────────────────────────────────────────────────────────────────────
+security_probe:
+  attempts: 31
+  escapes_found: 0
+  method: >-
+    Independent probe harness (not the developer's fixtures) invoking validateArtifact from the built
+    dist/, plus an executeSteps run with a canary secret through a throwing fake adapter.
+  blocked:
+    dynamic_evaluation:
+      - "await new Function('return 1')() -> RECEIVER_NOT_PERMITTED"
+      - "await require('child_process').exec('ls') -> METHOD_NOT_PERMITTED"
+      - "await import('node:fs') -> RECEIVER_NOT_PERMITTED"
+      - "await page.evaluate('1+1') -> METHOD_NOT_PERMITTED"
+      - "await page.addInitScript('x') / setContent / route / on -> METHOD_NOT_PERMITTED"
+      - "await (async () => { ... })() -> STATEMENT_NOT_AWAITED"
+    prototype_chain:
+      - "page.locator('div').constructor('return process')().exit() -> METHOD_NOT_PERMITTED"
+      - "page.locator('div').__proto__.click() -> PROTOTYPE_ACCESS"
+      - "page['__proto__'].click() -> EXPRESSION_COMPUTED_MEMBER"
+      - "{ '__proto__': true } option key -> PROTOTYPE_ACCESS"
+      - "{ ['time'+'out']: 1000 } -> OPTION_COMPUTED_KEY"
+      - "{ get exact(){...} } -> OPTION_ACCESSOR; { ...spread } -> EXPRESSION_SPREAD"
+    computed_and_dynamic_member:
+      - "page.locator('div')['click']() -> EXPRESSION_COMPUTED_MEMBER"
+      - "page?.goto(...) / page.goto?.(...) -> EXPRESSION_OPTIONAL_CHAIN"
+      - "page.#x() -> METHOD_NOT_PERMITTED"
+    expression_smuggling:
+      - "template literal with substitution -> EXPRESSION_TEMPLATE_SUBSTITUTION"
+      - "String.raw`...` -> EXPRESSION_TEMPLATE_SUBSTITUTION"
+      - "'a'+'b' / 'a'.toUpperCase() / ternary / logical / typeof / yield / identifier -> ARGUMENT_TYPE"
+      - "await page.goto(await page.title()) -> ARGUMENT_TYPE"
+      - "comma sequence, parenthesised await, non-null assertion, as/satisfies/angle cast -> rejected"
+      - "expect(...).not.toBeVisible() -> RECEIVER_NOT_PERMITTED"
+    secret_smuggling:
+      - "vars.secret in goto URL -> REFERENCE_POSITION_NOT_PERMITTED"
+      - "vars.secret in locator() selector -> REFERENCE_POSITION_NOT_PERMITTED"
+      - "vars.secret in getByLabel / getByTestId -> REFERENCE_POSITION_NOT_PERMITTED"
+      - "vars.secret in press() key -> REFERENCE_POSITION_NOT_PERMITTED"
+      - "vars.secret in selectOption() -> REFERENCE_POSITION_NOT_PERMITTED"
+      - "vars.secret in expect(page).toHaveTitle -> REFERENCE_POSITION_NOT_PERMITTED"
+      - "vars.secret in getByRole({name}) option value -> REFERENCE_POSITION_NOT_PERMITTED"
+      - "vars.secret in waitForURL -> REFERENCE_POSITION_NOT_PERMITTED"
+      - "vars.secret('PW')+'x' concatenation in fill -> ARGUMENT_TYPE"
+      - "undeclared secret id -> REFERENCE_UNDECLARED; token/code misalignment -> REFERENCE_MISSING/EXTRA"
+    denial_of_service:
+      - "/(a+)+$/ and /((a+)+)+b/ -> REGEX_UNSAFE; backreference and \\k<n> -> REGEX_UNSAFE"
+      - "lookbehind -> REGEX_UNSAFE; g flag -> REGEX_FLAGS_NOT_PERMITTED"
+      - "400 nested parentheses -> AST_DEPTH_EXCEEDED (parser and depth walk both bounded)"
+      - "40-segment locator chain -> AST_DEPTH_EXCEEDED; 9 statements -> STATEMENT_LIMIT_EXCEEDED"
+      - "oversized selector / URL -> ARGUMENT_TOO_LONG / STEP_CODE_TOO_LONG"
+    url_scheme:
+      - "javascript: / file: / data: -> ARGUMENT_VALUE_NOT_PERMITTED"
+  succeeded: []
+  secret_redaction_probe:
+    setup: canary secret filled through fill(); fake adapter throws an error echoing the value in
+      plain, URL-encoded and base64 form
+    plain_leaked: false
+    url_encoded_leaked: false
+    base64_leaked: false
+    failure_message_observed: "Error: element not editable, value was [REDACTED] / [REDACTED] / [REDACTED]"
+    unresolved_secret_message: 'Error: Unresolved secret reference "PW".  (id only, never the value)'
+  executor_indirection:
+    playwright_imports_in_src: 0
+    detail: grep -rn "playwright" src/ returns nothing; BrowserAdapter/StepReporter are the only
+      seams and carry no Playwright types. 10.12 can substitute the real browser without reshaping.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Four-copy Playwright pin (ADR-001 §4.2)
+# ─────────────────────────────────────────────────────────────────────────────
+pin_consistency:
+  declared_package_json: 1.63.0
+  locked_package_lock: 1.63.0
+  dockerfile_arg: 1.63.0
+  runtime_versions_json: { playwright: 1.63.0, playwrightLocked: 1.63.0, playwrightImageTag: 1.63.0 }
+  agreement: ALL_FOUR_AGREE
+  enforcement: NONE_IN_10.2 (recorded only; check:pins equality assertion is story 10.3)
+  over_claim_check: PASS — README, script header and story Change Log all state "records, does not
+    enforce". Nothing in 10.2 claims to enforce what it only records.
+  skip_browser_download: present in Dockerfile (both stages) and honoured by the reviewer's npm ci
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Acceptance criteria
+# ─────────────────────────────────────────────────────────────────────────────
+ac_coverage:
+  total: 20
+  verified: 20
+  deferred: 0
+  unmet: 0
+  detail:
+    AC-1: >-
+      PASS — package.json (private/type:module/packageManager/engines/exact pins), lock, .npmrc
+      (save-exact, engine-strict), .nvmrc, tsconfig + tsconfig.build (NodeNext/ES2022/no DOM lib/all
+      ADR §5 strict flags), eslint.config.js (ESLint 9 flat, typescript-eslint strictTypeChecked),
+      vitest.config.ts, vitest.fixtures.config.ts, Dockerfile with ARG PLAYWRIGHT_VERSION all present
+    AC-2: >-
+      PASS — 9 lint fixtures, 13 lint-boundary tests; fixtures/lint is ignored by the package run
+    AC-3: >-
+      PASS — verified end to end on a clean tree with no browser present
+    AC-4: >-
+      PASS — .gitignore lines 49-57 cover node_modules, dist, coverage, test-results,
+      playwright-report, .scratch, videos, logs
+    AC-5: >-
+      PASS — probed: step/line count mismatch, stepIndex misalignment, originalText mismatch,
+      unknown top-level and step keys, byte/step/code-length bounds all reject
+    AC-6: >-
+      CONCERNS — every probed node kind rejected, EXCEPT type arguments on chain/expect calls
+      (see SR-001). No capability gain; the accepted operation is identical to the untyped form.
+    AC-7: >-
+      PASS — permitted surface is exactly the §4.5 table; every other receiver/method rejected
+    AC-8: >-
+      PASS — per-method schemas verified including regex safe subset, option key/value typing,
+      CSS-only selector check and the ARIA role and keyboard-key allowlists
+    AC-9: >-
+      PASS — the single approved secret position (fill value) verified; 8 forbidden positions
+      each rejected; both alignment directions (MISSING/EXTRA) enforced
+    AC-10: >-
+      PASS — README "Bounds (AC-10 defaults)" table matches DEFAULT_BOUNDS entry for entry
+    AC-11: >-
+      PASS — pure, browser-free, returns typed operations never source text. Return shape is a
+      superset of the AC (adds validatorSchemaVersion and artifact-level diagnostics) — acceptable.
+    AC-12: >-
+      PASS — executor consumes operations only; no eval/Function/vm/dynamic import/async IIFE
+      in src or dist (grep test over dist plus reviewer's independent grep)
+    AC-13: >-
+      PASS — verified empirically with a canary in three encodings
+    AC-14: >-
+      PASS — StepReporter events verified; first failure stops the run, remaining steps SKIPPED
+      with null startedAtMs/finishedAtMs/durationMs; clock is performance.now (monotonic)
+    AC-15: >-
+      PASS — message capped at 400, excerpt at 120, excerpt is the failing node only
+    AC-16: >-
+      PASS — VALIDATOR_SCHEMA_VERSION and EXECUTOR_VERSION exported and recorded
+    AC-17: >-
+      PASS — 20 reference fixtures; a test fails if any permitted method has no fixture, and
+      both reference kinds are asserted present
+    AC-18: >-
+      PASS — 68 adversarial fixtures across 58 denial classes; each asserted to fail closed,
+      to return null operations, and to produce zero adapter calls. Spot-checked: they attempt real
+      escapes (constructor, __proto__, computed member, require, process, xpath/text engines,
+      secret-in-URL, secret-in-press) rather than merely being malformed input.
+    AC-19: >-
+      PASS — dedicated redaction test plus the reviewer's independent canary probe
+    AC-20: >-
+      PASS — 94.83/90.57 against thresholds of 85/80; the denial-class completeness test maps
+      every DIAGNOSTIC_CODES entry to a fixture and fails on a missing one
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Issues
+# ─────────────────────────────────────────────────────────────────────────────
+top_issues:
+  - id: SR-001
+    severity: medium
+    finding: >-
+      TypeScript type arguments are rejected on the outer call (readCall checks call.typeArguments ->
+      UNSUPPORTED_TYPESCRIPT) but are not checked on locator-chain calls in collectSegments nor on the
+      expect(...) receiver in readAssertion. Verified accepted: `await page.locator<string>('div').click();`
+      and `await expect<string>(page).toHaveTitle('t');`
+    impact: >-
+      No capability gain — type arguments are erased and the emitted operation is byte-identical to the
+      untyped form. The defect is that the default-deny surface is inconsistent: AC-6 lists "unsupported
+      TypeScript syntax" as a rejected class and two positions do not enforce it, and no adversarial
+      fixture covers the shape, so the gap is invisible to the corpus.
+    file: studio-runner/src/validator/ast.ts (collectSegments, readAssertion)
+    suggested_action: >-
+      Check `node.typeArguments !== undefined` in collectSegments and on the expect receiver, emitting
+      UNSUPPORTED_TYPESCRIPT; add adversarial fixtures for both shapes.
+    ac_refs: [AC-6, AC-18]
+
+  - id: SR-002
+    severity: low
+    finding: >-
+      Unicode-escaped identifiers in method names are accepted, e.g. `await page.\u0067oto('http://a.com');`
+      validates to the same goto operation, because the validator compares Identifier.text (the cooked
+      name).
+    impact: >-
+      Capability-equivalent, so not an escape. It does mean the accepted language admits obfuscated forms
+      the 10.3 syntax reference will never emit and that a human reading the source shown by the UI
+      (architecture §4.7) would not recognise.
+    file: studio-runner/src/validator/ast.ts
+    suggested_action: Consider requiring the identifier's raw text to equal its cooked text; decide in 10.3
+      alongside the syntax reference.
+    ac_refs: [AC-6, AC-7]
+
+  - id: SR-003
+    severity: low
+    finding: >-
+      resolvePolicy spreads caller bounds over the defaults, and Partial<ValidationBounds> permits an
+      explicit undefined. `{ bounds: { maxAstDepth: undefined } }` silently disables that bound — verified:
+      a 40-segment chain that normally yields AST_DEPTH_EXCEEDED validates.
+    impact: Caller-side misconfiguration only (the artifact cannot influence the policy), but the type
+      signature currently allows a bound to be turned off by accident.
+    file: studio-runner/src/validator/bounds.ts (resolvePolicy)
+    suggested_action: >-
+      Filter undefined values when merging, or type the override so that exactOptionalPropertyTypes
+      semantics apply to each bound rather than allowing an explicit undefined.
+    ac_refs: [AC-10]
+
+  - id: SR-004
+    severity: low
+    finding: >-
+      test/no-dynamic-evaluation.test.ts rebuilds dist/ only when dist/index.js is absent, so a local run
+      against a stale dist/ can pass while src/ carries a new violation.
+    impact: CI is unaffected (fresh checkout has no dist) and the ESLint rules catch the same constructs,
+      so defence in depth holds. Local false-green only.
+    file: studio-runner/test/no-dynamic-evaluation.test.ts
+    suggested_action: Always emit into a temporary directory, or compare dist mtimes against src.
+    ac_refs: [AC-12]
+
+  - id: SR-005
+    severity: low
+    finding: >-
+      test/lint-boundary.test.ts constructs its own ESLint flat config from eslint.boundary-rules.js
+      rather than exercising eslint.config.js. Removing `...executionBoundaryRules` from the real config
+      would not fail the test; only the "fixtures/lint/** is ignored" assertion reads the real file.
+    impact: The shared-module design already prevents rule drift; the residual gap is wiring drift.
+    file: studio-runner/test/lint-boundary.test.ts
+    suggested_action: Add one assertion that eslint.config.js spreads executionBoundaryRules, or lint a
+      fixture through the package config with the ignore temporarily lifted.
+    ac_refs: [AC-2]
+
+  - id: SR-006
+    severity: low
+    finding: >-
+      .gitignore entry `studio-runner/runtime-versions.json` points at a path the build never writes; the
+      artefact is emitted to studio-runner/dist/runtime-versions.json, already covered by the dist/ entry.
+    impact: Cosmetic.
+    file: .gitignore
+    suggested_action: Drop the stale line or correct it to dist/runtime-versions.json.
+    ac_refs: [AC-4]
+
+  - id: SR-007
+    severity: low
+    finding: >-
+      engines.node is `>=22.11.0 <25.0.0` rather than ADR-001 §4.1's literal `<major>.x`.
+    impact: Deviation is deliberate and recorded in the story Change Log with a rationale; .nvmrc still
+      pins 22 and 10.3's CI check asserts the image's Node against .nvmrc. Flagged so 10.3 does not treat
+      the range as the image contract.
+    file: studio-runner/package.json
+    suggested_action: Confirm with @architect during 10.3 that the ADR text should be amended.
+    ac_refs: [AC-1]
+
+carried_risks:
+  - id: CR-001
+    owner: '10.13 / 10.18'
+    note: >-
+      Destination policy is explicitly out of scope here, so the validator accepts any absolute http/https
+      URL — `page.goto('http://169.254.169.254/latest/meta-data/')` validates. Architecture §9.3 requires
+      approved origins, link-local/metadata rejection and redirect-time enforcement. This is correct for
+      10.2 but must not be assumed already covered by downstream stories.
+  - id: CR-002
+    owner: '10.3'
+    note: >-
+      The denial-class completeness test is keyed on DIAGNOSTIC_CODES, and the permitted-surface
+      completeness test is a textual `method(` search over the reference corpus. Both hold today. Widening
+      the language by permitting a new *node kind* (rather than a new method or a new denial code) would
+      not force a fixture.
+  - id: CR-003
+    owner: '10.12'
+    note: >-
+      `playwright@1.63.0` is declared but nothing imports it yet; the pin exists so the four copies can
+      agree. `import/no-extraneous-dependencies` does not detect an unused dependency, so the pin's
+      correctness rests entirely on 10.3's check:pins and 10.12's first real adapter.
+
+foc_02_handoff:
+  verdict: READY
+  note: >-
+    The scaffold is complete and stable for 10.3 to build on. src/ folder boundaries match ADR-001 §3
+    one-to-one, the accepted language is already modelled as data in src/validator/language.ts (so the
+    reference corpus and the backend syntax reference can be generated from it), the fixture tier config
+    exists and reports "no test files" rather than passing silently, and runtime-versions.json already
+    emits the fields check:pins needs to compare. None of the findings above require reshaping the
+    package.
+
+recommendations:
+  immediate:
+    - Close SR-001 before 10.3 consumes the language schema, since 10.3 generates the syntax reference
+      from it and the gap would be inherited.
+  future:
+    - SR-002..SR-007 are suitable for 10.3's scaffold-hardening pass.
+
+quality_score: 88
+expires: '2026-09-24T00:00:00Z'
