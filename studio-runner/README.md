@@ -17,13 +17,86 @@ package does today and the defaults callers can override.
 | `src/compat/` | `isCompatible` / `assertCompatible`: refuses an artifact whose recorded runtime differs from the running one, with `RUNTIME_INCOMPATIBLE`. |
 | `src/server/` | The four internal HTTP routes, the capacity pool, the service-identity check, bounded bodies and structured redacted logging. |
 | `src/reporting/` | The admission CAS **client**, the progress/terminal report client, and the `StepReporter` implementation 10.2 left as a seam. |
+| `src/run/` | The real browser: the `BrowserLauncher` that forks a killable child, the data-only parent↔child protocol, the Playwright adapter, the recording lifecycle and evidence vocabulary, the run-scoped clock and the runner error-code set. |
 | `src/main.ts` | Process entry: configuration, server start, `SIGTERM` drain, scratch clearing at startup and on exit. |
 | `src/versions.ts` | `VALIDATOR_SCHEMA_VERSION`, `SYNTAX_REFERENCE_VERSION`, `EXECUTOR_VERSION`, `ARTIFACT_VERSION`, `VALIDATOR_PARSER`. |
 
-Not yet present: `src/run/` (10.12–10.13) and `src/evidence/` (10.14). The real Playwright adapter
-is story 10.12's; `src/main.ts` ships a launcher that refuses with `BROWSER_LAUNCH_UNAVAILABLE`
-until then, so an admitted run reports a terminal `ERROR` rather than appearing to succeed. **No
-browser is launched by anything in this package today, and nothing here downloads one.**
+Not yet present: `src/evidence/` (10.14). Deadline enforcement and killing a hung process tree are
+story 10.13's; `src/run/` passes `totalRuntimeMs` through and does not act on it.
+
+## The real browser (story 10.12)
+
+**The browser is real from this story onward.** `src/main.ts` no longer ships a launcher that
+refuses; it wires `createChildBrowserLauncher`, and an admitted run starts pinned Chromium.
+
+### Where the browser runs, and what it may touch
+
+One browser, one context, one page, per run, **in a child process** that exits on every path —
+success, step failure, launch failure, error. The parent's `/v1/validate`, `/health`, `/ready` and
+`/v1/runs` stay responsive throughout, on separate bounded resources.
+
+The child is forked with **no arguments** and an enumerated environment (`PATH`, `HOME`, `LANG`,
+`LC_ALL`, `NODE_OPTIONS`, `PLAYWRIGHT_BROWSERS_PATH`, `DISPLAY`, `XDG_RUNTIME_DIR`, plus `TMPDIR`
+pointed at the run's scratch). Nothing in the runner's own `STUDIO_RUNNER_*` namespace is passed
+on: the process that opens untrusted pages holds no runner configuration and no service identity.
+Resolved variables and secrets travel over the IPC channel and **only** there — never in `argv`,
+never in the environment, never in a spawn command line.
+
+Everything Chromium writes goes under the per-run scratch directory — `browser-profile/`, `video/`,
+`downloads/`, `traces/`, `tmp/` — which is cleared on success, step failure, launch failure, error
+and drain. **The recording is deleted with it.** Until story 10.14 uploads it, no file survives the
+run; the runner reports `PENDING` because the evidence is real and unstored, not because something
+is being kept.
+
+### The sandbox
+
+`chromiumSandbox: true`, written literally in `src/run/browser.ts`, with **no** configuration key,
+environment variable, job field or code path that can set it to `false`, and an explicitly empty
+`args` array. Playwright's own default is `false` — it adds a disabling flag — so the requirement is
+enforced as a gate rather than left to habit: lint forbids `--no-sandbox`, `--disable-setuid-sandbox`
+and `--disable-gpu-sandbox` anywhere in this package (with proving fixtures under `fixtures/lint/`),
+and a repo-wide scan in `test/run/sandbox.test.ts` covers the `Dockerfile` too.
+
+If Chromium cannot start with the sandbox, the run reports `BROWSER_SANDBOX_UNAVAILABLE` and the
+runner **never** relaunches without it (architecture §9.3).
+
+### The run timeline
+
+Every reading in a report — each step's `startedAtMs`/`finishedAtMs`/`durationMs` and each log
+entry's `atMs` — is a fractional offset on **one** monotonic clock whose zero is the browser start.
+The zero is taken in the child at the instant the recording context and page are ready, and the
+single wall-clock `browserStartedAt` is read **adjacently**, from the same moment. The API computes
+`at = browserStartedAt + atMs` and applies no calibration of its own; the wire carries one origin
+and no calibration constant (ADR-002 §11).
+
+`executeSteps` has no default clock. It used to default to `performance.now()`, whose origin is
+*process start*, which is how the runner came to report offsets from process start while the
+browser-start log line carried a literal `0`. The option is now required, and refused at run time
+as well as at compile time.
+
+A report with `browserStartedAt: null` carries **no** reading at all: every `startedAtMs`,
+`finishedAtMs`, `durationMs` and `atMs` is `null` and `steps` is empty. The snapshot enforces that
+as the producer.
+
+### Running it locally
+
+```bash
+npm run browsers:install   # pinned Chromium, at the version in package.json
+npm run build              # the child entry is spawned from dist/
+npm run test:fixtures      # the real-browser tier
+```
+
+`npm test` (the unit tier) launches **no** browser and downloads none: the Playwright adapter is
+written against a structural page/locator surface and is exercised against a hand-written page, and
+the child runtime is exercised against a fake browser factory.
+
+### Secrets and the video — a disclosed limitation
+
+Architecture §9.2 is explicit and this story does not change it: **a secret typed into a visible
+field appears in the recording.** The runner redacts every outbound report body, log line,
+diagnostic and failure message, and the canary test asserts that on the bytes that leave and on the
+spawn arguments actually passed — but no blurring, masking or transcoding is introduced in V1, and
+Security acceptance for on-screen secrets is not claimed by this story.
 
 ## The internal service (story 10.6)
 
@@ -235,7 +308,7 @@ lookbehind, unpermitted flags and quantifier nesting beyond the configured depth
 | `fixtures/reference/` | The pinned syntax reference: one valid artifact per permitted method and option key, each asserting the exact `BrowserAdapter` call sequence. `manifest.json` binds every example to the methods and option keys it demonstrates and to the fixture page it targets. |
 | `fixtures/adversarial/` | One rejected artifact per denial class. Every code in `DIAGNOSTIC_CODES` must have a fixture; a test fails when one does not. |
 | `fixtures/lint/` | Files containing each construct the execution-boundary lint rules forbid. Excluded from `tsconfig.json` and from `npm run lint` on purpose, and linted programmatically by a test. |
-| `fixtures/pages/` | Controlled local HTML the reference corpus targets. Every element carries an explicit `role` attribute so the fixture tier can check a locator against the page exactly. Served at the URLs in `manifest.json` by the real adapter (10.12). |
+| `fixtures/pages/` | Controlled local HTML the reference corpus targets. Every element carries an explicit `role` attribute so the fixture tier can check a locator against the page exactly. Served on loopback by `test/helpers/pageServer.ts` at the paths `manifest.json` binds them to, so a real Chromium reaches them without reaching `example.com` and without a DNS lookup. `popup.html` and `timeline.html` belong to story 10.12 (unsupported multi-page workflow; seek measurement) and are deliberately **not** in `manifest.json` — that file is the pinned syntax reference, and adding a page to it would bump `SYNTAX_REFERENCE_VERSION`. |
 
 ### Adding a reference example
 

@@ -303,11 +303,12 @@ describe('AC-16 — step events reach 10.6’s reporter, across the process boun
       secrets: {},
       reporter,
     });
-    // The reporter throws on every event; the run still reaches a result, and the readings the
-    // child took are the ones that were reported.
+    // The reporter throws on every event. Nothing escapes: this runs inside the IPC message
+    // handler, and an exception here would surface as an uncaught exception in the **parent** —
+    // the process serving /health, /ready and /v1/validate for everything else.
     expect(() => {
       child.emit({ kind: 'step-started', stepIndex: 0, startedAtMs: 3.5 });
-    }).toThrow();
+    }).not.toThrow();
     child.emit({
       kind: 'result',
       ok: true,
@@ -333,6 +334,23 @@ describe('AC-16 — step events reach 10.6’s reporter, across the process boun
     });
     child.end(137);
     expect(await pending).toMatchObject({ ok: false, failureKind: 'run-fault' });
+  });
+
+  it('reports a run fault when the child died before anyone asked for a result', async () => {
+    // The ordering that hangs if the exit is only *delivered* and never *recorded*: the child is
+    // gone before `execute` is called, so there is no listener to hand the failure to. A run that
+    // never reports is the state a reaper exists to clean up; the runner must not create one.
+    const spawner = createFakeSpawner();
+    const { session, child } = await launched(spawner, scratchPath());
+    child.end(9);
+    const result = await session.run?.execute({
+      steps: [],
+      variables: {},
+      secrets: {},
+      reporter: silentReporter(),
+    });
+    expect(result).toMatchObject({ ok: false, failureKind: 'run-fault' });
+    expect(result?.failureMessage).toMatch(/exited before it reported a result/u);
   });
 });
 

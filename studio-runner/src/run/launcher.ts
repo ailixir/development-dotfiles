@@ -326,6 +326,23 @@ interface Inbox {
  */
 function createInbox(child: ChildProcessHandle): Inbox {
   let reporter: SessionRunRequest['reporter'] | null = null;
+
+  /**
+   * Delivers one step event, and swallows whatever the reporter does with it.
+   *
+   * This runs inside the IPC `message` handler, so a reporter that throws would surface as an
+   * uncaught exception **in the parent** — the process serving `/health`, `/ready` and
+   * `/v1/validate` for every other request. AC-15's "a slow or failing callback cannot block,
+   * delay or alter a step" has to keep holding across the process boundary, and a callback that
+   * kills the parent has done considerably worse than delay a step.
+   */
+  const forward = (deliver: () => void): void => {
+    try {
+      deliver();
+    } catch {
+      // The reporter's problem, not the run's. The readings are already what the child observed.
+    }
+  };
   let onReady: ((outcome: ReadyOutcome) => void) | null = null;
   let onResult: ((message: Extract<ChildMessage, { kind: 'result' }>) => void) | null = null;
   let pendingReady: ReadyOutcome | null = null;
@@ -345,8 +362,11 @@ function createInbox(child: ChildProcessHandle): Inbox {
       pendingReady = failure;
       onReady?.(failure);
     }
-    if (pendingResult === null && onResult !== null) {
-      onResult({
+    if (pendingResult === null) {
+      // Recorded, not merely delivered. A child that died *before* anyone awaited its result
+      // would otherwise leave `awaitResult` with nothing to resolve and the run would hang until
+      // the drain deadline — a runner that never reports is the state a reaper exists to clean up.
+      const abandoned: Extract<ChildMessage, { kind: 'result' }> = {
         kind: 'result',
         ok: false,
         executorVersion: '',
@@ -354,7 +374,9 @@ function createInbox(child: ChildProcessHandle): Inbox {
         failureMessage: 'The browser child process exited before it reported a result.',
         recording: { path: null, bytes: null, error: null, state: 'UNAVAILABLE' },
         observedHosts: [],
-      });
+      };
+      pendingResult = abandoned;
+      onResult?.(abandoned);
       onResult = null;
     }
   });
@@ -374,19 +396,23 @@ function createInbox(child: ChildProcessHandle): Inbox {
         return;
       }
       case 'step-started':
-        reporter?.stepStarted({
-          stepIndex: message.stepIndex,
-          startedAtMs: message.startedAtMs,
+        forward(() => {
+          reporter?.stepStarted({
+            stepIndex: message.stepIndex,
+            startedAtMs: message.startedAtMs,
+          });
         });
         return;
       case 'step-finished':
-        reporter?.stepFinished({
-          stepIndex: message.stepIndex,
-          status: message.status,
-          startedAtMs: message.startedAtMs,
-          finishedAtMs: message.finishedAtMs,
-          durationMs: message.durationMs,
-          failure: message.failure,
+        forward(() => {
+          reporter?.stepFinished({
+            stepIndex: message.stepIndex,
+            status: message.status,
+            startedAtMs: message.startedAtMs,
+            finishedAtMs: message.finishedAtMs,
+            durationMs: message.durationMs,
+            failure: message.failure,
+          });
         });
         return;
       case 'result':
