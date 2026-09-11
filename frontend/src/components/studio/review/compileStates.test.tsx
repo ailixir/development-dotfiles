@@ -20,7 +20,14 @@ import { renderPanel } from './reviewTestHarness';
 import { forbiddenClaimsIn } from './forbiddenClaims';
 import { UNSUPPORTED_WORKFLOW_HEADING } from './unsupportedWorkflows';
 import { COMPILE_ERROR_NARRATIVES, UNDECLARED_COMPILE_ERROR_NARRATIVE } from './compileErrorCodes';
-import { narrativeFor } from './compileStateNarratives';
+import {
+  AC2_FACT_ROWS,
+  AC2_REQUIRED_FACTS,
+  assertFactRendered,
+  FACT_SLOTS,
+  MIN_RENDERED_FACT_LENGTH,
+  PINNED_STATE_TITLES,
+} from './pinnedNarratives';
 
 /**
  * Story 10.10 — the compile state is legible, and five states are not one state
@@ -66,16 +73,65 @@ describe('AC-1: every declared compileStatus renders its own state', () => {
 });
 
 describe('AC-2: each state says what is true, what you may do, and what is blocked', () => {
-  it.each(DECLARED_STATES)('%s renders its three facts and its own name', async (state) => {
-    const narrative = narrativeFor(state);
-    await renderState(draftsByCompileStatus[state]);
+  /*
+   * The expected text is pinned in `pinnedNarratives.ts`, **not** read back out of
+   * `compileStateNarratives`. Reading it from the module under test was the eleventh vacuous shape
+   * this epic has found: `expect(text).toContain(narrative.whatIsTrue)` is true of any content at
+   * all, and eight of these fifteen facts could be blanked with the suite staying green.
+   */
 
+  it('the harness itself refuses to be satisfied by nothing', () => {
+    const phrases = AC2_REQUIRED_FACTS.COMPILING.whatIsTrue;
+
+    // The degenerate case the old assertion had: an empty expectation matches everything.
+    expect(() => assertFactRendered('Your draft is saved and it is running right now.', [])).toThrow(
+      /asserts nothing/,
+    );
+    expect(() => assertFactRendered('whatever the component renders', [/./])).toThrow(/too short/);
+
+    // An empty or stubbed rendering is not a stated fact.
+    expect(() => assertFactRendered('', phrases)).toThrow(/too short to be a stated fact/);
+    expect(() => assertFactRendered('x', phrases)).toThrow(/too short to be a stated fact/);
+
+    // A long but wrong rendering fails on the phrase, not on the length.
+    expect(() =>
+      assertFactRendered(
+        'The weather in Dublin today is mild with occasional showers and a light breeze.',
+        phrases,
+      ),
+    ).toThrow(/does not state/);
+
+    // And the real thing passes.
+    expect(() =>
+      assertFactRendered(
+        'Your draft is saved. A translation of the steps shown above is running right now on the server.',
+        phrases,
+      ),
+    ).not.toThrow();
+  });
+
+  it('fifteen facts are required: five declared states by three slots', () => {
+    expect(DECLARED_STATES.sort()).toEqual(Object.keys(AC2_REQUIRED_FACTS).sort());
+    expect(AC2_FACT_ROWS).toHaveLength(DECLARED_STATES.length * FACT_SLOTS.length);
+    expect(AC2_FACT_ROWS).toHaveLength(15);
+    for (const [state, slot, phrases] of AC2_FACT_ROWS) {
+      expect(phrases.length, `${state}/${slot} is pinned by nothing`).toBeGreaterThan(0);
+    }
+  });
+
+  it.each(AC2_FACT_ROWS)('%s / %s states its required fact', async (state, slot, phrases) => {
+    await renderState(draftsByCompileStatus[state]);
+    const rendered = (await screen.findByTestId(`state-fact-${slot}`)).textContent ?? '';
+    assertFactRendered(rendered, phrases);
+  });
+
+  it.each(DECLARED_STATES)('%s renders its own pinned name', async (state) => {
+    await renderState(draftsByCompileStatus[state]);
     const region = await screen.findByTestId('compile-state-region');
-    const text = region.textContent ?? '';
-    expect(text).toContain(narrative.title);
-    expect(text).toContain(narrative.whatIsTrue);
-    expect(text).toContain(narrative.whatYouCanDo);
-    expect(text).toContain(narrative.whatIsBlocked);
+    const expected = PINNED_STATE_TITLES[state];
+    expect(expected?.length ?? 0).toBeGreaterThan(MIN_RENDERED_FACT_LENGTH / 3);
+    expect(region.getAttribute('aria-label')).toBe(expected);
+    expect(region.textContent).toContain(expected);
   });
 
   it('AWAITING_CONFIRMATION says confirmation is the only route to runnable', async () => {
@@ -157,7 +213,7 @@ describe('AC-5: an undeclared compileError code renders honestly rather than bla
 
     // The generic STALE narrative is the one it borrows, so the state region still explains STALE.
     const region = await screen.findByTestId('compile-state-region');
-    expect(region.getAttribute('aria-label')).toBe(narrativeFor('STALE').title);
+    expect(region.getAttribute('aria-label')).toBe(PINNED_STATE_TITLES.STALE);
   });
 
   it('renders a declared code with its own wording [FX-CODE-DECLARED]', async () => {

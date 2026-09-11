@@ -89,13 +89,30 @@ export function CompileReviewPanel({ testId }: CompileReviewPanelProps) {
             <Typography variant="subtitle1" gutterBottom>
               {narrative.title}
             </Typography>
-            <Typography variant="body2" sx={{ ...UNCLAMPED_TEXT_SX, mb: 0.5 }}>
+            {/*
+              Each fact gets its own slot so a test can pin that fact rather than the paragraph.
+              AC-2 names three separate things — what is true, what you may do, what is blocked —
+              and an assertion over the concatenated text cannot tell which of them went missing.
+            */}
+            <Typography
+              variant="body2"
+              data-testid="state-fact-whatIsTrue"
+              sx={{ ...UNCLAMPED_TEXT_SX, mb: 0.5 }}
+            >
               {narrative.whatIsTrue}
             </Typography>
-            <Typography variant="body2" sx={{ ...UNCLAMPED_TEXT_SX, mb: 0.5 }}>
+            <Typography
+              variant="body2"
+              data-testid="state-fact-whatYouCanDo"
+              sx={{ ...UNCLAMPED_TEXT_SX, mb: 0.5 }}
+            >
               {narrative.whatYouCanDo}
             </Typography>
-            <Typography variant="body2" sx={UNCLAMPED_TEXT_SX}>
+            <Typography
+              variant="body2"
+              data-testid="state-fact-whatIsBlocked"
+              sx={UNCLAMPED_TEXT_SX}
+            >
               {narrative.whatIsBlocked}
             </Typography>
           </Box>

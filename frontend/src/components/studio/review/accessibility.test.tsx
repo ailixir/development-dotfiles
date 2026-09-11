@@ -11,7 +11,7 @@ import {
 } from '@/services/mocks/studio/compileFixtures';
 import { renderPanel } from './reviewTestHarness';
 import { CONFIRM_LABEL, RECOMPILE_LABEL } from './CompileReviewPanel';
-import { narrativeFor } from './compileStateNarratives';
+import { PINNED_STATE_TITLES } from './pinnedNarratives';
 
 /**
  * Story 10.10 AC-18a — operable and programmatically described, asserted on the rendered
@@ -103,7 +103,7 @@ describe('AC-18a: state changes are announced and diagnostics are associated wit
     const region = await screen.findByTestId('compile-state-live-region');
     expect(region).toHaveAttribute('aria-live', 'polite');
     expect(region).toHaveAttribute('role', 'status');
-    expect(region.textContent).toBe(narrativeFor('AWAITING_CONFIRMATION').title);
+    expect(region.textContent).toBe(PINNED_STATE_TITLES.AWAITING_CONFIRMATION);
   });
 
   it("each step's diagnostics are programmatically associated with that step", async () => {
@@ -126,6 +126,6 @@ describe('AC-18a: state changes are announced and diagnostics are associated wit
     const list = await screen.findByTestId('step-review-list');
     expect(list.getAttribute('aria-label')).toBe('Your steps, and what happened to each');
     const state = await screen.findByTestId('compile-state-region');
-    expect(state.getAttribute('aria-label')).toBe(narrativeFor('NEEDS_REVISION').title);
+    expect(state.getAttribute('aria-label')).toBe(PINNED_STATE_TITLES.NEEDS_REVISION);
   });
 });
