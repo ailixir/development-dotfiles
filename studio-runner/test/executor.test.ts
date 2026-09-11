@@ -135,14 +135,56 @@ describe('trusted executor', () => {
     expect(result.steps[0]?.failure).toBe('Non-error thrown: string');
   });
 
-  it('uses the default clock when none is injected', async () => {
-    const result = await executeSteps({
+  /**
+   * AC-11.1 — **there is no default clock any more.**
+   *
+   * The optional `clock` that defaulted to `performance.now()` was a defect generator: the seam
+   * exists so the origin can be chosen, and the default quietly chose *process start* whenever a
+   * caller forgot. `runCoordinator.ts` forgot, which is how the runner came to report step
+   * offsets from process start while the browser-start log line carried a literal `0` — two
+   * origins on a timeline ADR-002 §4.1 requires to have one.
+   *
+   * The type now requires it. This asserts the *run-time* half, reaching past the types the way
+   * a compiled caller would, because a type-level guard is not one the emitted JavaScript
+   * enforces.
+   */
+  it('refuses to run without an explicitly supplied run clock', async () => {
+    const options = {
       steps: [gotoStep(0, 'https://a.example/')],
       adapter: createFakeBrowserAdapter(),
       reporter: createRecordingStepReporter(),
       resolver: createValueResolver({}),
-    });
-    expect(result.steps[0]?.durationMs).not.toBeNull();
+    } as unknown as Parameters<typeof executeSteps>[0];
+
+    await expect(executeSteps(options)).rejects.toThrow(/explicit run clock/u);
+  });
+
+  it('names the origin in the refusal, so the fix is obvious at the call site', async () => {
+    const options = {
+      steps: [],
+      adapter: createFakeBrowserAdapter(),
+      reporter: createRecordingStepReporter(),
+      resolver: createValueResolver({}),
+    } as unknown as Parameters<typeof executeSteps>[0];
+
+    await expect(executeSteps(options)).rejects.toThrow(/recording-context readiness/u);
+  });
+
+  it('carries the clock it is given, at whatever scale it is given', async () => {
+    // AC-11.3's control: the executor reports readings, it does not choose an origin. A clock
+    // starting at 0 and one starting far away both reach the wire unaltered, which is why the
+    // scale property has to be asserted where the origin is *taken*, not here.
+    for (const startMs of [0, 1_000, 5_000_000]) {
+      const result = await executeSteps({
+        steps: [gotoStep(0, 'https://a.example/')],
+        adapter: createFakeBrowserAdapter(),
+        reporter: createRecordingStepReporter(),
+        resolver: createValueResolver({}),
+        clock: createFakeClock(startMs),
+      });
+      expect(result.steps[0]?.startedAtMs).toBe(startMs);
+      expect(result.steps[0]?.durationMs).not.toBeNull();
+    }
   });
 
   it('reports the executor version', async () => {
@@ -151,6 +193,7 @@ describe('trusted executor', () => {
       adapter: createFakeBrowserAdapter(),
       reporter: createRecordingStepReporter(),
       resolver: createValueResolver({}),
+      clock: createFakeClock(),
     });
     expect(result.executorVersion).toMatch(/^\d+\.\d+\.\d+$/u);
   });

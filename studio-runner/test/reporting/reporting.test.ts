@@ -140,7 +140,13 @@ describe('AC-14a — STARTED is sent only once the browser has actually started'
     expect(all.some((report) => report.kind === 'STARTED')).toBe(false);
     // The run still finalizes: the API is told, rather than left waiting for a reaper.
     expect(all.at(-1)?.kind).toBe('FINAL');
-    expect(all.at(-1)?.outcome).toMatchObject({ result: 'ERROR', errorCode: 'RUN_ERROR' });
+    // 10.6's placeholder `RUN_ERROR` is replaced by the real set (AC-17, ADR-002 O-5): a launch
+    // that failed is `BROWSER_LAUNCH_FAILED`, which is disjoint from every reaper-assigned
+    // `ExecutionErrorCode` (§5.4).
+    expect(all.at(-1)?.outcome).toMatchObject({
+      result: 'ERROR',
+      errorCode: 'BROWSER_LAUNCH_FAILED',
+    });
     expect(all.at(-1)?.browserStartedAt).toBeNull();
   });
 });

@@ -11,34 +11,40 @@
  * rather than sitting unread in the environment (AC-22c). The process reports the problems and
  * exits non-zero; it does not start degraded.
  *
- * **There is no real browser here.** The `BrowserLauncher` below refuses, loudly and with a code,
- * because story 10.12 owns the real Playwright adapter and this story installs and launches no
- * browser. An admitted run therefore reports a terminal `ERROR` with `BROWSER_LAUNCH_UNAVAILABLE`
- * instead of silently succeeding — which is the honest state of the component today, and is what
- * AC-14b's deferral to 10.12 means in running code.
+ * **The browser is real from story 10.12 onward.** `UNAVAILABLE_LAUNCHER` — the placeholder that
+ * refused every launch with `BROWSER_LAUNCH_UNAVAILABLE` — is gone, replaced by
+ * `createChildBrowserLauncher`: a Chromium child process, sandboxed, recording native webm into
+ * the per-run scratch directory, reporting step timings on one run-scoped clock zeroed at the
+ * browser start. `launcher` stays an injectable dependency so the behavioural suite keeps running
+ * against 10.6's in-process fake and `npm test` launches no browser (AC-25).
  */
 import { fileURLToPath } from 'node:url';
 
 import { currentRuntimeVersions } from './compat/index.js';
-import type { BrowserLauncher, BrowserSession } from './server/adapters.js';
+import { createChildBrowserLauncher } from './run/index.js';
+import type { BrowserLauncher } from './server/adapters.js';
 import { createApplication } from './server/application.js';
 import type { RunnerApplication } from './server/application.js';
 import { ConfigurationError, loadConfig } from './server/config.js';
+import type { RunnerConfig } from './server/config.js';
 
 /**
- * Placeholder launcher. Story 10.12 replaces it with the real Playwright adapter, the child
- * process, native video recording and the killable process tree.
+ * The real launcher, built from configuration.
+ *
+ * Everything here is an enumerated configuration key (`src/server/config.ts`), so the recording
+ * geometry and the two browser timeouts are chosen values rather than library defaults — §6.1
+ * requires the recording resolution to be explicit, and §8.5 calls the timeouts starting values to
+ * be tuned against staging measurements.
  */
-export const UNAVAILABLE_LAUNCHER: BrowserLauncher = {
-  launch(): Promise<BrowserSession> {
-    return Promise.reject(
-      new Error(
-        'BROWSER_LAUNCH_UNAVAILABLE: the real Playwright adapter is story 10.12. This story ' +
-          'installs and launches no browser.',
-      ),
-    );
-  },
-};
+export function createConfiguredLauncher(config: RunnerConfig): BrowserLauncher {
+  return createChildBrowserLauncher({
+    recording: { width: config.recordingWidth, height: config.recordingHeight },
+    stepTimeoutMs: config.stepTimeoutMs,
+    launchTimeoutMs: config.browserLaunchTimeoutMs,
+    stopTimeoutMs: config.browserStopTimeoutMs,
+    maxFailureMessageLength: config.maxReportLogEntryLength,
+  });
+}
 
 export interface MainOptions {
   readonly env: Readonly<Record<string, string | undefined>>;
@@ -74,7 +80,7 @@ export async function main(options: MainOptions): Promise<MainResult> {
   }
 
   const application = createApplication(config, {
-    launcher: options.launcher ?? UNAVAILABLE_LAUNCHER,
+    launcher: options.launcher ?? createConfiguredLauncher(config),
     runtimeVersions: { ...currentRuntimeVersions(options.runtimeVersionsFile) } as Record<
       string,
       unknown

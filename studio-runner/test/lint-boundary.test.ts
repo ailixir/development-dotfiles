@@ -7,11 +7,13 @@ import { describe, expect, it } from 'vitest';
 
 import {
   boundaryGlobals,
+  browserModuleRules,
   executionBoundaryRules,
   runDirectoryRules,
   FORBIDDEN_MODULES,
   MESSAGE_FOR_MODULE,
   MODULE_GROUPS,
+  SANDBOX_FLAG_SYNTAX,
 } from '../eslint.boundary-rules.js';
 import { packageRoot } from './helpers/corpus.js';
 
@@ -36,6 +38,14 @@ const FIXTURES: readonly { readonly file: string; readonly rule: string }[] = [
   { file: 'vm-import.ts', rule: 'no-restricted-imports' },
   { file: 'worker-threads-import.ts', rule: 'no-restricted-imports' },
   { file: 'child-process-import.ts', rule: 'no-restricted-imports' },
+  // Story 10.12 AC-1: Playwright is confined to `src/run/browser.ts`, proven by a fixture per
+  // package name rather than assumed from the config.
+  { file: 'playwright-import.ts', rule: 'no-restricted-imports' },
+  { file: 'playwright-core-import.ts', rule: 'no-restricted-imports' },
+  // Story 10.12 AC-6a: a sandbox-disabling flag is forbidden in a string, in an args array and in
+  // a template literal. The rule fires on the literal, wherever it is written.
+  { file: 'sandbox-flag-arg.ts', rule: 'no-restricted-syntax' },
+  { file: 'sandbox-flag-template.ts', rule: 'no-restricted-syntax' },
 ];
 
 function boundaryLinter(rules: Record<string, unknown>): ESLint {
@@ -91,6 +101,47 @@ describe('execution-boundary lint rules', () => {
       runDirectoryRules as unknown as Record<string, unknown>,
     );
     expect(ruleIds).not.toContain('no-restricted-imports');
+  });
+
+  /**
+   * AC-1 — the confinement is one file wide, not one directory wide.
+   *
+   * `src/run/**` gets `child_process`; only `src/run/browser.ts` gets Playwright. If the
+   * directory-level override permitted the library, the adapter, the launcher and the protocol
+   * could all grow a Playwright type and the "no Playwright type escapes" claim would quietly
+   * become "no Playwright type escapes `src/run/`", which is a different and much weaker claim.
+   */
+  it.each([['playwright-import.ts'], ['playwright-core-import.ts']] as const)(
+    'still forbids %s inside src/run/**, outside the one browser module',
+    async (file) => {
+      const ruleIds = await messagesFor(
+        file,
+        runDirectoryRules as unknown as Record<string, unknown>,
+      );
+      expect(ruleIds).toContain('no-restricted-imports');
+    },
+  );
+
+  it.each([['playwright-import.ts'], ['playwright-core-import.ts']] as const)(
+    'permits %s in src/run/browser.ts alone',
+    async (file) => {
+      const ruleIds = await messagesFor(
+        file,
+        browserModuleRules as unknown as Record<string, unknown>,
+      );
+      expect(ruleIds).not.toContain('no-restricted-imports');
+    },
+  );
+
+  it('forbids a sandbox-disabling flag even in the one module that launches a browser', async () => {
+    // AC-6a: there is no place in this package where disabling the sandbox is permitted, and the
+    // module that would be tempted is the one that starts the browser.
+    for (const file of ['sandbox-flag-arg.ts', 'sandbox-flag-template.ts']) {
+      const ruleIds = await messagesFor(file, {
+        'no-restricted-syntax': ['error', ...SANDBOX_FLAG_SYNTAX],
+      });
+      expect(ruleIds).toContain('no-restricted-syntax');
+    }
   });
 
   it('keeps the lint fixtures out of the package lint run', () => {

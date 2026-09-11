@@ -76,8 +76,15 @@ export interface SnapshotOptions {
 }
 
 export interface RunSnapshot {
-  /** Records the browser start. Until this is called the run has no `browserStartedAt`. */
-  markBrowserStarted(): void;
+  /**
+   * Records the browser start (AC-10, AC-11.2).
+   *
+   * Takes the instant rather than reading a clock, because the instant is **observed where the
+   * browser is** — at recording-context readiness, adjacently to the run clock's zero — and a
+   * second read here would be a second origin. Until this is called the run has no
+   * `browserStartedAt`, and a report without one carries no reading at all.
+   */
+  markBrowserStarted(at: Date): void;
   readonly browserStarted: boolean;
   stepStarted(stepIndex: number, startedAtMs: number): void;
   stepFinished(step: SnapshotStep): void;
@@ -103,8 +110,8 @@ export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
     get lastSequence(): number {
       return sequence;
     },
-    markBrowserStarted(): void {
-      browserStartedAt ??= wallClock().toISOString();
+    markBrowserStarted(at: Date): void {
+      browserStartedAt ??= at.toISOString();
     },
     stepStarted(stepIndex: number, startedAtMs: number): void {
       steps.set(stepIndex, {
@@ -129,14 +136,20 @@ export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
     ): ReportBody {
       sequence += 1;
       const ordered = [...steps.values()].sort((a, b) => a.stepIndex - b.stepIndex);
+      // ADR-002 §11.2, restated as AC-11.4: **a report with `browserStartedAt: null` carries no
+      // reading.** The runner enforces it here, as the producer, rather than trusting every call
+      // site to have nothing to report — a reading taken before the origin existed would be on a
+      // scale the wire has no way to name, and `minimum: 0` cannot tell a process-origin reading
+      // from a legitimate late one (ADR-002 §11.6 item 3).
+      const started = browserStartedAt !== null;
       return {
         ...identity,
         kind,
         runnerSequence: sequence,
         reportedAt: wallClock().toISOString(),
         browserStartedAt,
-        steps: boundSteps(ordered, bounds.maxSteps),
-        logs: logs.entries(),
+        steps: started ? boundSteps(ordered, bounds.maxSteps) : [],
+        logs: started ? logs.entries() : logs.entries().map(withoutReading),
         logsTruncated: logs.truncated,
         runtimeVersions,
         outcome,
@@ -161,6 +174,11 @@ export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
  * the API could not attribute it to an attempt at all. Configure the bound above the floor; the
  * default (512 KiB) is three orders of magnitude above it.
  */
+/** Strips a reading from a log entry, for the `browserStartedAt: null` invariant (AC-11.4). */
+function withoutReading(entry: LogEntry): LogEntry {
+  return entry.atMs === null ? entry : { ...entry, atMs: null };
+}
+
 export function serializeBounded(body: ReportBody, bounds: ReportBounds): string {
   const full = JSON.stringify(body);
   if (Buffer.byteLength(full, 'utf8') <= bounds.maxBodyBytes) return full;
