@@ -100,9 +100,16 @@ stories:
     blocks: ["10.8", "10.19"]
 
   # ── Wave 2 ── runner control plane ──
+  # Size L → M, recorded by @po 2026-09-11 at story 10.6 validation. The L estimate assumed
+  # this story carried the API-side admission/progress handlers; the retired epic's §10.6
+  # scope line ends "No DB/vault/CSI/LLM access" and §10.7 already owns "internal
+  # admission/progress handlers and SSE", so that half never belonged here. What remains is
+  # one component, one package area (studio-runner/src/{main.ts,server,reporting}), one
+  # contract, no migration and no Java — a high M. If it outgrows the estimate, the seam to
+  # cut is reporting (AC-13..18) from admission (AC-6..12), never inside POST /v1/runs.
   - id: "10.6"
     title: "Runner admission and reporting service"
-    size: L
+    size: M
     wave: 2
     depends_on: ["10.2"]
     blocks: ["10.7", "10.8", "10.12", "10.14", "10.19"]
