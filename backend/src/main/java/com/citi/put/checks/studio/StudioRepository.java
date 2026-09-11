@@ -2,6 +2,7 @@ package com.citi.put.checks.studio;
 
 import com.citi.put.checks.studio.entity.UITest;
 import jakarta.persistence.LockModeType;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,22 @@ public interface StudioRepository extends JpaRepository<UITest, UUID> {
       WHERE (:csiId IS NULL OR t.csiId = :csiId)
       """)
   Page<UITest> findAllFiltered(@Param("csiId") String csiId, Pageable pageable);
+
+  /**
+   * Same listing, additionally scoped to the CSIs the caller may read. The scope is applied in SQL,
+   * before paging, so page counts never leak the existence of other CSIs' drafts (AC-14,
+   * Architecture §9.1).
+   */
+  @Query(
+      """
+      SELECT t FROM UITest t
+      WHERE (:csiId IS NULL OR t.csiId = :csiId)
+        AND t.csiId IN :readableCsiIds
+      """)
+  Page<UITest> findAllFilteredScoped(
+      @Param("csiId") String csiId,
+      @Param("readableCsiIds") Collection<String> readableCsiIds,
+      Pageable pageable);
 
   /**
    * Loads a visible draft and locks its row for the rest of the transaction, so two concurrent

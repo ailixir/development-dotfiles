@@ -1,4 +1,4 @@
-import type { StepIR, TestIR } from '@/types/studio/studioTypes';
+import type { StepIR, TestIR } from '@/types/studio/legacyTestIr';
 
 let idCounter = 0;
 function nextId(prefix: string) {

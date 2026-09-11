@@ -1,0 +1,1188 @@
+openapi: 3.0.3
+info:
+  title: Checks Studio API
+  version: 1.0.0
+  description: |
+    Frozen contract for the Checks Studio UI-testing surface (story 10.1).
+
+    Normative source: `docs/architecture/studio-execution.md` v2.1 — §4.4 (source artifact),
+    §5 (execution and snapshot), §5.5 (SSE parity), §6.1 (evidence state), §8.2 (status
+    vocabulary), §8.3 (public API and legacy adapters), §8.4 (internal contracts), and
+    `docs/architecture/studio-sse-viability.md` (snapshot event shape, GET fallback).
+
+    Routes tagged `internal` are not exposed through public ingress; they require a restricted
+    service identity over encrypted transport. springdoc excludes them from the public UI; the
+    contract test still covers them.
+
+    Routes marked `x-not-yet-implemented: true` are declared here so that dependent stories build
+    against one frozen shape. Story 10.1 ships the contract, the schema and the snapshot DTO;
+    dispatch (10.7), compilation (10.8) and confirmation (10.9) ship the behaviour.
+servers:
+  - url: /api/v1/studio
+    description: Public Studio API
+tags:
+  - name: tests
+    description: Studio drafts (authoring)
+  - name: executions
+    description: Execution history, live snapshots and evidence
+  - name: internal
+    description: Service-to-service routes; never exposed through public ingress
+
+paths:
+  /tests:
+    get:
+      tags: [tests]
+      operationId: listTests
+      summary: List drafts visible to the caller
+      description: |
+        Results are filtered by the caller's readable CSIs **before** pagination, even when no
+        `csiId` filter is supplied (architecture §9.1). Soft-deleted and quarantined drafts are
+        never returned.
+      parameters:
+        - { $ref: '#/components/parameters/CsiIdQuery' }
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/Size' }
+      responses:
+        '200':
+          description: Page of drafts
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TestPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [tests]
+      operationId: createTest
+      summary: Create a draft
+      description: |
+        `csiId` is required, must be a registered CSI, and can never be changed afterwards.
+        Clients submit English steps only; the server generates the executable artifact.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TestRequest' }
+            examples:
+              create:
+                summary: Canonical create
+                value:
+                  name: Citi login smoke
+                  description: Verifies the login page still accepts the pilot account
+                  csiId: '60406'
+                  environment: Production
+                  steps:
+                    - Go to "https://www.citi.com"
+                    - Type "<secret LOGIN_PW>" in the "Password" field
+                    - Check that the URL contains "dashboard"
+                  variables:
+                    - { name: USER_ID, kind: plain, value: pilot-user }
+                    - { name: LOGIN_PW, kind: secretRef, secretId: vault://studio/pilot-pw }
+                  configuration:
+                    browser: chromium
+                    viewport: { width: 1920, height: 1080 }
+                    timeoutSeconds: 30
+                    waitStrategy: networkidle
+              legacyCreate:
+                summary: Legacy adapter — JSON-string steps, flattened viewport, browser `chrome`
+                description: |
+                  Accepted for backward compatibility and normalized at the controller boundary
+                  (architecture §8.3): JSON-string `steps`/`variables` become typed fields, the
+                  flattened viewport becomes `configuration.viewport`, and `chrome` becomes
+                  `chromium`. Any other engine is rejected with `400 INVALID_CONFIGURATION`.
+                value:
+                  name: Citi login smoke
+                  description: legacy client payload
+                  csiId: '60406'
+                  environment: Production
+                  steps: '["Go to \"https://www.citi.com\""]'
+                  variables: '[]'
+                  browser: chrome
+                  viewportWidth: 1920
+                  viewportHeight: 1080
+                  timeoutSeconds: 30
+                  waitStrategy: networkidle
+              legacyTestIrCreate:
+                summary: Legacy adapter — structured TestIR steps become ordered originalText
+                value:
+                  name: Citi login smoke
+                  csiId: '60406'
+                  environment: Production
+                  steps:
+                    - { index: 0, type: go_to, originalText: 'Go to "https://www.citi.com"', url: 'https://www.citi.com' }
+                    - { index: 1, type: click, originalText: 'Click "Sign On"', targetText: Sign On }
+                  configuration:
+                    browser: chromium
+                    viewport: { width: 1920, height: 1080 }
+                    timeoutSeconds: 30
+                    waitStrategy: networkidle
+      responses:
+        '201':
+          description: Draft created
+          headers:
+            Location:
+              schema: { type: string }
+              description: Path of the created draft
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TestDto' }
+        '400':
+          description: Invalid payload, unregistered CSI, or rejected browser engine
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                invalidConfiguration:
+                  value:
+                    error: INVALID_CONFIGURATION
+                    message: "browser 'firefox' is not supported; the canonical engine is 'chromium'"
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /tests/{id}:
+    parameters:
+      - { $ref: '#/components/parameters/TestId' }
+    get:
+      tags: [tests]
+      operationId: getTest
+      summary: Read one draft
+      responses:
+        '200':
+          description: The draft
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TestDto' }
+              examples:
+                ready:
+                  summary: A confirmed, runnable draft
+                  value:
+                    id: 11111111-1111-1111-1111-111111111111
+                    name: Citi login smoke
+                    description: Verifies the login page still accepts the pilot account
+                    csiId: '60406'
+                    environment: Production
+                    steps:
+                      - Go to "https://www.citi.com"
+                      - Check that the URL contains "dashboard"
+                    variables:
+                      - { name: USER_ID, kind: plain, value: pilot-user }
+                    configuration:
+                      browser: chromium
+                      viewport: { width: 1920, height: 1080 }
+                      timeoutSeconds: 30
+                      waitStrategy: networkidle
+                    status: PAUSED
+                    schedule: null
+                    createdBy: pilot.user@citi.com
+                    createdAt: '2026-09-01T09:00:00Z'
+                    updatedAt: '2026-09-01T09:30:00Z'
+                    lastRunAt: '2026-09-02T11:00:00Z'
+                    lastRunStatus: PASSED
+                    sourceRevision: 3
+                    configurationRevision: 1
+                    compileStatus: READY
+                    currentCandidateRevisionId: 22222222-2222-2222-2222-222222222222
+                    confirmedRevisionId: 22222222-2222-2222-2222-222222222222
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      tags: [tests]
+      operationId: updateTest
+      summary: Save a draft under optimistic concurrency
+      description: |
+        `sourceRevision` and `configurationRevision` are required and carry the optimistic check.
+        A mismatch is `409 STALE_REVISION` and changes nothing. A different `csiId` is
+        `409 CSI_IMMUTABLE`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TestRequest' }
+            examples:
+              save:
+                summary: Canonical save
+                value:
+                  name: Citi login smoke
+                  description: Verifies the login page still accepts the pilot account
+                  csiId: '60406'
+                  environment: Production
+                  steps:
+                    - Go to "https://www.citi.com"
+                    - Check that the URL contains "dashboard"
+                  variables: []
+                  configuration:
+                    browser: chromium
+                    viewport: { width: 1920, height: 1080 }
+                    timeoutSeconds: 30
+                    waitStrategy: networkidle
+                  sourceRevision: 3
+                  configurationRevision: 1
+      responses:
+        '200':
+          description: Saved draft
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TestDto' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: Stale revision or attempt to move the CSI
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                staleRevision:
+                  value: { error: STALE_REVISION, message: 'Test is at sourceRevision 4/configurationRevision 1; reload before saving' }
+                csiImmutable:
+                  value: { error: CSI_IMMUTABLE, message: 'Test belongs to CSI 60406 and cannot be moved' }
+    delete:
+      tags: [tests]
+      operationId: deleteTest
+      summary: Soft delete a draft
+      description: Rejects new execute/compile; authorized history stays readable.
+      responses:
+        '204': { description: Deleted }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /tests/{id}/compile:
+    post:
+      tags: [tests]
+      operationId: compileTest
+      summary: Enqueue compilation of the current source
+      x-not-yet-implemented: true
+      x-implemented-by: '10.8'
+      parameters:
+        - { $ref: '#/components/parameters/TestId' }
+      responses:
+        '202':
+          description: Compilation accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CompileAccepted' }
+              examples:
+                accepted:
+                  value:
+                    compileRequestId: 33333333-3333-3333-3333-333333333333
+                    compileStatus: COMPILING
+                    sourceRevision: 4
+                    configurationRevision: 1
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /tests/{id}/confirm-compile:
+    post:
+      tags: [tests]
+      operationId: confirmCompile
+      summary: Confirm the current compiled candidate
+      x-not-yet-implemented: true
+      x-implemented-by: '10.9'
+      parameters:
+        - { $ref: '#/components/parameters/TestId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConfirmCompileRequest' }
+            examples:
+              confirm:
+                value:
+                  revisionId: 22222222-2222-2222-2222-222222222222
+                  artifactHash: 9f2c1d5b7a3e4c6f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7
+                  sourceRevision: 4
+                  configurationRevision: 1
+      responses:
+        '200':
+          description: Candidate confirmed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TestDto' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: The candidate is no longer the current one
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                staleCandidate:
+                  value: { error: STALE_CANDIDATE, message: 'The draft moved on; recompile before confirming' }
+
+  /tests/{id}/execute:
+    post:
+      tags: [tests]
+      operationId: executeTest
+      summary: Accept an execution
+      description: |
+        Durable, principal-scoped idempotency: the same `Idempotency-Key` with the same request
+        digest returns the same `executionId` across API replicas; the same key with a different
+        digest is `409 IDEMPOTENCY_KEY_REUSED`. The response is returned only after commit.
+
+        Story 10.1 persists the accepted `PENDING` execution and its ledger row. Live dispatch
+        arrives with 10.7.
+      parameters:
+        - { $ref: '#/components/parameters/TestId' }
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: |
+            Must be a UUID: the platform idempotency filter rejects any other form with
+            `400 INVALID_IDEMPOTENCY_KEY` before the request reaches Studio.
+          schema: { type: string, format: uuid }
+      responses:
+        '202':
+          description: Execution accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExecuteAccepted' }
+              examples:
+                accepted:
+                  value:
+                    executionId: 44444444-4444-4444-4444-444444444444
+                    status: PENDING
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: Readiness, runtime or idempotency conflict
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                compileRequired:
+                  value: { error: COMPILE_REQUIRED, message: 'The draft changed since its last confirmation' }
+                runtimeIncompatible:
+                  value: { error: RUNTIME_INCOMPATIBLE, message: 'The confirmed revision is not compatible with the current runner runtime' }
+                idempotencyKeyReused:
+                  value: { error: IDEMPOTENCY_KEY_REUSED, message: 'This idempotency key was already used with a different request body' }
+        '429':
+          description: Pending quota exhausted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '503':
+          description: Execution disabled by the kill switch
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                dispatchDisabled:
+                  value: { error: DISPATCH_DISABLED, message: 'Studio execution is currently disabled' }
+
+  /executions:
+    get:
+      tags: [executions]
+      operationId: listExecutions
+      summary: Paged execution history
+      description: |
+        `testId` is optional. Results are filtered by the caller's readable CSIs using the
+        execution's own immutable `csiId` — never the parent test's — **before** pagination.
+        Executions whose `csiId` is null (quarantined legacy history) are never returned.
+      parameters:
+        - name: testId
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/Size' }
+      responses:
+        '200':
+          description: Page of execution snapshots
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExecutionPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /executions/{id}:
+    get:
+      tags: [executions]
+      operationId: getExecution
+      summary: Current execution snapshot
+      description: |
+        The same payload the SSE `execution.snapshot` event carries (architecture §5.5). This is
+        the recovery and fallback path when streaming is unavailable.
+      parameters:
+        - { $ref: '#/components/parameters/ExecutionId' }
+      responses:
+        '200':
+          description: Current snapshot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExecutionSnapshot' }
+              examples:
+                pending:
+                  summary: Accepted, not yet started
+                  value: { $ref: '#/components/examples/SnapshotPending/value' }
+                running:
+                  summary: Browser running, video still processing
+                  value: { $ref: '#/components/examples/SnapshotRunning/value' }
+                passed:
+                  summary: Terminal PASSED with available video
+                  value: { $ref: '#/components/examples/SnapshotPassed/value' }
+                failed:
+                  summary: Terminal FAILED — later steps SKIPPED with null timings
+                  value: { $ref: '#/components/examples/SnapshotFailed/value' }
+                errorTimeout:
+                  summary: Terminal ERROR/TIMEOUT (legacy `TIMEOUT` status maps here)
+                  value: { $ref: '#/components/examples/SnapshotErrorTimeout/value' }
+                evidenceFailed:
+                  summary: Outcome known, evidence production failed
+                  value: { $ref: '#/components/examples/SnapshotEvidenceFailed/value' }
+                evidenceUnavailable:
+                  summary: No usable recording was produced
+                  value: { $ref: '#/components/examples/SnapshotEvidenceUnavailable/value' }
+                evidenceExpired:
+                  summary: Retention window elapsed
+                  value: { $ref: '#/components/examples/SnapshotEvidenceExpired/value' }
+                legacyRow:
+                  summary: Pre-10.1 history — no fabricated confirmation metadata
+                  value: { $ref: '#/components/examples/SnapshotLegacyRow/value' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /executions/{id}/events:
+    get:
+      tags: [executions]
+      operationId: streamExecution
+      summary: SSE snapshot stream
+      x-not-yet-implemented: true
+      x-implemented-by: '10.7'
+      description: |
+        `text/event-stream`. Event type is `execution.snapshot`; the SSE `id` is the snapshot
+        `revision`. Every event body is a complete `ExecutionSnapshot` — identical in shape to
+        `GET /executions/{id}`. The client replaces current state, ignores older revisions, and
+        closes on `streamComplete: true`.
+      parameters:
+        - { $ref: '#/components/parameters/ExecutionId' }
+        - name: Last-Event-ID
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Snapshot stream
+          content:
+            text/event-stream:
+              schema: { type: string }
+              examples:
+                snapshotEvent:
+                  summary: One `execution.snapshot` frame
+                  value: |
+                    id: 17
+                    event: execution.snapshot
+                    data: {"executionId":"44444444-4444-4444-4444-444444444444","revision":17,"status":"RUNNING","streamComplete":false}
+
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /executions/{id}/video:
+    get:
+      tags: [executions]
+      operationId: getExecutionVideo
+      summary: Protected video stream
+      x-not-yet-implemented: true
+      x-implemented-by: '10.16'
+      description: |
+        Authorized against the execution's immutable CSI. Object storage keys are never exposed;
+        `videoPath` on the snapshot is this API path.
+      parameters:
+        - { $ref: '#/components/parameters/ExecutionId' }
+        - name: download
+          in: query
+          required: false
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Full video
+          content:
+            video/webm:
+              schema: { type: string, format: binary }
+        '206': { description: Range response }
+        '404': { description: No evidence for this execution }
+        '410':
+          description: Evidence expired
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                expired:
+                  value: { error: VIDEO_EXPIRED, message: 'The recording for this execution expired on 2026-08-15T10:04:12Z' }
+        '416': { description: Unsatisfiable range }
+
+  /internal/studio/executions/{id}/admission:
+    post:
+      tags: [internal]
+      operationId: claimAdmission
+      summary: CAS exclusive ownership of an attempt
+      x-not-yet-implemented: true
+      x-implemented-by: '10.7'
+      x-internal: true
+      parameters:
+        - { $ref: '#/components/parameters/ExecutionId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdmissionRequest' }
+            examples:
+              admit:
+                value:
+                  attemptId: 55555555-5555-5555-5555-555555555555
+                  admissionId: 66666666-6666-6666-6666-666666666666
+                  runnerInstanceId: studio-runner-0
+      responses:
+        '200':
+          description: Admission owned by this identity (duplicate identical admission is idempotent)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdmissionResponse' }
+        '409':
+          description: A competing or expired admission already owns the attempt
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /internal/studio/executions/{id}/progress:
+    post:
+      tags: [internal]
+      operationId: reportProgress
+      summary: Cumulative STARTED/PROGRESS/FINAL snapshot from the runner
+      x-not-yet-implemented: true
+      x-implemented-by: '10.7'
+      x-internal: true
+      parameters:
+        - { $ref: '#/components/parameters/ExecutionId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProgressReport' }
+            examples:
+              started:
+                summary: Authenticated browser-start report — the only thing that writes RUNNING
+                value:
+                  executionId: 44444444-4444-4444-4444-444444444444
+                  attemptId: 55555555-5555-5555-5555-555555555555
+                  admissionId: 66666666-6666-6666-6666-666666666666
+                  runnerSequence: 1
+                  kind: STARTED
+                  reportedAt: '2026-09-10T10:00:02Z'
+                  browserStartedAt: '2026-09-10T10:00:02Z'
+                  runtime:
+                    playwright: 1.47.2
+                    chromium: 129.0.6668.29
+                    validator: 1.0.0
+                    executor: 1.0.0
+                    image: studio-runner@sha256:0f1e2d3c4b5a6978
+              final:
+                summary: Terminal report; settles outcome and evidence together
+                value:
+                  executionId: 44444444-4444-4444-4444-444444444444
+                  attemptId: 55555555-5555-5555-5555-555555555555
+                  admissionId: 66666666-6666-6666-6666-666666666666
+                  runnerSequence: 9
+                  kind: FINAL
+                  reportedAt: '2026-09-10T10:00:39Z'
+                  status: PASSED
+                  errorCode: null
+                  endedAt: '2026-09-10T10:00:39Z'
+                  durationMs: 37000
+                  stepResults: []
+                  logs: []
+                  logsTruncated: false
+                  video: { status: AVAILABLE, error: null, expiresAt: '2026-10-10T10:00:39Z', partial: false }
+                  manifestKey: studio/60406/11111111-1111-1111-1111-111111111111/44444444-4444-4444-4444-444444444444/55555555-5555-5555-5555-555555555555.result.json
+      responses:
+        '200': { description: Applied and committed }
+        '409': { description: Ownership, sequence or transition conflict }
+
+components:
+  parameters:
+    TestId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ExecutionId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    CsiIdQuery:
+      name: csiId
+      in: query
+      required: false
+      schema: { type: string, maxLength: 20 }
+    Page:
+      name: page
+      in: query
+      required: false
+      schema: { type: integer, minimum: 0, default: 0 }
+    Size:
+      name: size
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Unauthorized:
+      description: No authenticated identity
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Forbidden:
+      description: The identity may not act on this CSI
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error: { type: string }
+        message: { type: string }
+
+    Viewport:
+      type: object
+      required: [width, height]
+      properties:
+        width: { type: integer, minimum: 320, maximum: 3840 }
+        height: { type: integer, minimum: 240, maximum: 2160 }
+
+    TestConfiguration:
+      type: object
+      required: [browser, viewport, timeoutSeconds, waitStrategy]
+      properties:
+        browser:
+          type: string
+          enum: [chromium]
+          description: |
+            Canonical engine. The legacy value `chrome` is normalized to `chromium` at the
+            controller boundary; any other engine is rejected with `400 INVALID_CONFIGURATION`.
+        viewport: { $ref: '#/components/schemas/Viewport' }
+        timeoutSeconds: { type: integer, minimum: 1, maximum: 120 }
+        waitStrategy:
+          type: string
+          enum: [none, networkidle, domcontentloaded, load]
+
+    Variable:
+      type: object
+      required: [name, kind]
+      properties:
+        name: { type: string, maxLength: 64 }
+        kind: { type: string, enum: [plain, secretRef] }
+        value:
+          type: string
+          nullable: true
+          description: Present for `plain` only.
+        secretId:
+          type: string
+          nullable: true
+          description: Present for `secretRef` only. A reference; a resolved secret is never carried on this contract.
+
+    TestRequest:
+      type: object
+      required: [name, environment, steps, configuration]
+      description: |
+        Clients never submit executable code. The server generates the artifact from `steps`.
+        `csiId` is required on create, immutable afterwards. `sourceRevision`/`configurationRevision`
+        are required on update and ignored on create.
+      properties:
+        name: { type: string, maxLength: 255 }
+        description: { type: string, nullable: true }
+        csiId: { type: string, maxLength: 20, nullable: true }
+        environment: { type: string, maxLength: 50 }
+        steps:
+          type: array
+          maxItems: 100
+          items: { type: string, maxLength: 500 }
+        variables:
+          type: array
+          items: { $ref: '#/components/schemas/Variable' }
+        configuration: { $ref: '#/components/schemas/TestConfiguration' }
+        sourceRevision: { type: integer, format: int64, nullable: true }
+        configurationRevision: { type: integer, format: int64, nullable: true }
+
+    TestDto:
+      type: object
+      required: [id, name, csiId, environment, steps, variables, configuration, sourceRevision, configurationRevision, compileStatus]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        csiId: { type: string, nullable: true }
+        environment: { type: string }
+        steps:
+          type: array
+          items: { type: string }
+        variables:
+          type: array
+          items: { $ref: '#/components/schemas/Variable' }
+        configuration: { $ref: '#/components/schemas/TestConfiguration' }
+        status: { type: string, nullable: true }
+        schedule: { type: string, nullable: true }
+        createdBy: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+        lastRunAt: { type: string, format: date-time, nullable: true }
+        lastRunStatus:
+          type: string
+          nullable: true
+          enum: [PASSED, FAILED, ERROR, null]
+        sourceRevision: { type: integer, format: int64 }
+        configurationRevision: { type: integer, format: int64 }
+        compileStatus:
+          type: string
+          enum: [STALE, COMPILING, AWAITING_CONFIRMATION, READY, NEEDS_REVISION]
+        currentCandidateRevisionId: { type: string, format: uuid, nullable: true }
+        confirmedRevisionId: { type: string, format: uuid, nullable: true }
+
+    TestPage:
+      type: object
+      required: [data, page, size, totalElements, totalPages]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/TestDto' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+
+    ExecutionStatus:
+      type: string
+      enum: [PENDING, RUNNING, PASSED, FAILED, ERROR]
+      description: |
+        Legacy values are adapted on read: `COMPLETED` becomes `PASSED`; `TIMEOUT` becomes
+        `ERROR` with `errorCode: TIMEOUT`. A timeout is never a distinct execution status.
+
+    ExecutionErrorCode:
+      type: string
+      nullable: true
+      enum: [TIMEOUT, DISPATCH_FAILED, DISPATCH_UNKNOWN, START_TIMEOUT, STALE, DISPATCH_DISABLED, null]
+
+    StepStatus:
+      type: string
+      enum: [PENDING, RUNNING, PASS, FAIL, SKIPPED]
+
+    StepResult:
+      type: object
+      required: [stepIndex, originalText, status]
+      description: One entry per original step. Skipped or unstarted steps carry null timings.
+      properties:
+        stepIndex: { type: integer, minimum: 0 }
+        originalText: { type: string }
+        status: { $ref: '#/components/schemas/StepStatus' }
+        offsetMs:
+          type: integer
+          format: int64
+          nullable: true
+          description: Start offset on the recording timeline; null unless the step was attempted.
+        durationMs: { type: integer, format: int64, nullable: true }
+        message: { type: string, nullable: true }
+
+    ExecutionLogEntry:
+      type: object
+      required: [at, level, message]
+      properties:
+        at: { type: string, format: date-time }
+        level: { type: string, enum: [DEBUG, INFO, WARN, ERROR] }
+        message: { type: string, maxLength: 2000 }
+        stepIndex: { type: integer, nullable: true }
+
+    VideoStatus:
+      type: string
+      enum: [PROCESSING, AVAILABLE, FAILED, UNAVAILABLE, EXPIRED]
+      description: |
+        Evidence state is independent of the check outcome. `UNAVAILABLE` covers runs with no
+        usable recording; `FAILED` covers evidence production or upload failure.
+
+    VideoEvidence:
+      type: object
+      required: [status, partial]
+      properties:
+        status: { $ref: '#/components/schemas/VideoStatus' }
+        error: { type: string, nullable: true }
+        expiresAt: { type: string, format: date-time, nullable: true }
+        partial:
+          type: boolean
+          description: True when an available recording covers only part of the run.
+
+    RuntimeVersions:
+      type: object
+      description: Actual runtime versions recorded on the execution. Null for legacy history.
+      properties:
+        playwright: { type: string, nullable: true }
+        chromium: { type: string, nullable: true }
+        validator: { type: string, nullable: true }
+        executor: { type: string, nullable: true }
+        image: { type: string, nullable: true }
+
+    ExecutionSnapshot:
+      type: object
+      description: |
+        The single execution payload. `GET /executions/{id}`, the items of `GET /executions`, and
+        the SSE `execution.snapshot` event all carry exactly this shape (architecture §5.5).
+      required:
+        [executionId, testId, csiId, revisionId, status, errorCode, acceptedAt, startedAt, endedAt,
+         durationMs, stepResults, logs, logsTruncated, video, videoPath, runtime, revision,
+         streamComplete]
+      properties:
+        executionId: { type: string, format: uuid }
+        testId: { type: string, format: uuid }
+        csiId:
+          type: string
+          nullable: true
+          description: The execution's own immutable CSI, never the parent test's current value.
+        revisionId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Null for legacy history, which never had a confirmed revision.
+        status: { $ref: '#/components/schemas/ExecutionStatus' }
+        errorCode: { $ref: '#/components/schemas/ExecutionErrorCode' }
+        acceptedAt:
+          type: string
+          format: date-time
+          description: Immutable acceptance instant; also the history partition key.
+        startedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Browser start. Null until an authenticated runner start report is committed.
+        endedAt: { type: string, format: date-time, nullable: true }
+        durationMs:
+          type: integer
+          format: int64
+          nullable: true
+          description: Browser execution time only. Queue time is not included.
+        stepResults:
+          type: array
+          items: { $ref: '#/components/schemas/StepResult' }
+        logs:
+          type: array
+          description: Bounded retained log buffer.
+          items: { $ref: '#/components/schemas/ExecutionLogEntry' }
+        logsTruncated: { type: boolean }
+        video: { $ref: '#/components/schemas/VideoEvidence' }
+        videoPath:
+          type: string
+          nullable: true
+          description: Protected API path. Never an object storage key or a public URL.
+        runtime: { $ref: '#/components/schemas/RuntimeVersions' }
+        revision:
+          type: integer
+          format: int64
+          description: Monotonic API snapshot revision; also the SSE event id.
+        streamComplete:
+          type: boolean
+          description: True once outcome and evidence disposition are both settled.
+
+    ExecutionPage:
+      type: object
+      required: [data, page, size, totalElements, totalPages]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/ExecutionSnapshot' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+
+    CompileAccepted:
+      type: object
+      required: [compileRequestId, compileStatus]
+      properties:
+        compileRequestId: { type: string, format: uuid }
+        compileStatus: { type: string }
+        sourceRevision: { type: integer, format: int64 }
+        configurationRevision: { type: integer, format: int64 }
+
+    ConfirmCompileRequest:
+      type: object
+      required: [revisionId, artifactHash, sourceRevision, configurationRevision]
+      properties:
+        revisionId: { type: string, format: uuid }
+        artifactHash: { type: string, minLength: 64, maxLength: 64 }
+        sourceRevision: { type: integer, format: int64 }
+        configurationRevision: { type: integer, format: int64 }
+
+    ExecuteAccepted:
+      type: object
+      required: [executionId, status]
+      properties:
+        executionId: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/ExecutionStatus' }
+
+    AdmissionRequest:
+      type: object
+      required: [attemptId, admissionId, runnerInstanceId]
+      properties:
+        attemptId: { type: string, format: uuid }
+        admissionId: { type: string, format: uuid }
+        runnerInstanceId: { type: string }
+
+    AdmissionResponse:
+      type: object
+      required: [executionId, attemptId, admissionId, state]
+      properties:
+        executionId: { type: string, format: uuid }
+        attemptId: { type: string, format: uuid }
+        admissionId: { type: string, format: uuid }
+        state: { type: string }
+        startDeadlineAt: { type: string, format: date-time }
+        runDeadlineAt: { type: string, format: date-time }
+
+    ProgressReport:
+      type: object
+      required: [executionId, attemptId, admissionId, runnerSequence, kind, reportedAt]
+      properties:
+        executionId: { type: string, format: uuid }
+        attemptId: { type: string, format: uuid }
+        admissionId: { type: string, format: uuid }
+        runnerSequence: { type: integer, format: int64 }
+        kind: { type: string, enum: [STARTED, PROGRESS, FINAL] }
+        reportedAt: { type: string, format: date-time }
+        browserStartedAt: { type: string, format: date-time, nullable: true }
+        status: { $ref: '#/components/schemas/ExecutionStatus' }
+        errorCode: { $ref: '#/components/schemas/ExecutionErrorCode' }
+        endedAt: { type: string, format: date-time, nullable: true }
+        durationMs: { type: integer, format: int64, nullable: true }
+        stepResults:
+          type: array
+          items: { $ref: '#/components/schemas/StepResult' }
+        logs:
+          type: array
+          items: { $ref: '#/components/schemas/ExecutionLogEntry' }
+        logsTruncated: { type: boolean }
+        video: { $ref: '#/components/schemas/VideoEvidence' }
+        runtime: { $ref: '#/components/schemas/RuntimeVersions' }
+        manifestKey: { type: string, nullable: true }
+
+  examples:
+    SnapshotPending:
+      summary: Accepted, not yet browser-started
+      value:
+        executionId: 44444444-4444-4444-4444-444444444444
+        testId: 11111111-1111-1111-1111-111111111111
+        csiId: '60406'
+        revisionId: 22222222-2222-2222-2222-222222222222
+        status: PENDING
+        errorCode: null
+        acceptedAt: '2026-09-10T10:00:00Z'
+        startedAt: null
+        endedAt: null
+        durationMs: null
+        stepResults:
+          - { stepIndex: 0, originalText: 'Go to "https://www.citi.com"', status: PENDING, offsetMs: null, durationMs: null, message: null }
+          - { stepIndex: 1, originalText: 'Check that the URL contains "dashboard"', status: PENDING, offsetMs: null, durationMs: null, message: null }
+        logs: []
+        logsTruncated: false
+        video: { status: PROCESSING, error: null, expiresAt: null, partial: false }
+        videoPath: null
+        runtime: { playwright: null, chromium: null, validator: null, executor: null, image: null }
+        revision: 1
+        streamComplete: false
+
+    SnapshotRunning:
+      summary: Browser running
+      value:
+        executionId: 44444444-4444-4444-4444-444444444444
+        testId: 11111111-1111-1111-1111-111111111111
+        csiId: '60406'
+        revisionId: 22222222-2222-2222-2222-222222222222
+        status: RUNNING
+        errorCode: null
+        acceptedAt: '2026-09-10T10:00:00Z'
+        startedAt: '2026-09-10T10:00:02Z'
+        endedAt: null
+        durationMs: null
+        stepResults:
+          - { stepIndex: 0, originalText: 'Go to "https://www.citi.com"', status: PASS, offsetMs: 120, durationMs: 1840, message: null }
+          - { stepIndex: 1, originalText: 'Check that the URL contains "dashboard"', status: RUNNING, offsetMs: 1960, durationMs: null, message: null }
+        logs:
+          - { at: '2026-09-10T10:00:02Z', level: INFO, message: 'Browser started', stepIndex: null }
+          - { at: '2026-09-10T10:00:04Z', level: INFO, message: 'Navigated to https://www.citi.com', stepIndex: 0 }
+        logsTruncated: false
+        video: { status: PROCESSING, error: null, expiresAt: null, partial: false }
+        videoPath: null
+        runtime: { playwright: 1.47.2, chromium: 129.0.6668.29, validator: 1.0.0, executor: 1.0.0, image: 'studio-runner@sha256:0f1e2d3c4b5a6978' }
+        revision: 6
+        streamComplete: false
+
+    SnapshotPassed:
+      summary: Terminal PASSED, evidence available
+      value:
+        executionId: 44444444-4444-4444-4444-444444444444
+        testId: 11111111-1111-1111-1111-111111111111
+        csiId: '60406'
+        revisionId: 22222222-2222-2222-2222-222222222222
+        status: PASSED
+        errorCode: null
+        acceptedAt: '2026-09-10T10:00:00Z'
+        startedAt: '2026-09-10T10:00:02Z'
+        endedAt: '2026-09-10T10:00:39Z'
+        durationMs: 37000
+        stepResults:
+          - { stepIndex: 0, originalText: 'Go to "https://www.citi.com"', status: PASS, offsetMs: 120, durationMs: 1840, message: null }
+          - { stepIndex: 1, originalText: 'Check that the URL contains "dashboard"', status: PASS, offsetMs: 1960, durationMs: 35040, message: null }
+        logs:
+          - { at: '2026-09-10T10:00:39Z', level: INFO, message: 'Run finished: PASSED', stepIndex: null }
+        logsTruncated: false
+        video: { status: AVAILABLE, error: null, expiresAt: '2026-10-10T10:00:39Z', partial: false }
+        videoPath: /api/v1/studio/executions/44444444-4444-4444-4444-444444444444/video
+        runtime: { playwright: 1.47.2, chromium: 129.0.6668.29, validator: 1.0.0, executor: 1.0.0, image: 'studio-runner@sha256:0f1e2d3c4b5a6978' }
+        revision: 12
+        streamComplete: true
+
+    SnapshotFailed:
+      summary: Terminal FAILED — remaining steps SKIPPED with null timings
+      value:
+        executionId: 77777777-7777-7777-7777-777777777777
+        testId: 11111111-1111-1111-1111-111111111111
+        csiId: '60406'
+        revisionId: 22222222-2222-2222-2222-222222222222
+        status: FAILED
+        errorCode: null
+        acceptedAt: '2026-09-10T11:00:00Z'
+        startedAt: '2026-09-10T11:00:03Z'
+        endedAt: '2026-09-10T11:00:36Z'
+        durationMs: 33000
+        stepResults:
+          - { stepIndex: 0, originalText: 'Go to "https://www.citi.com"', status: PASS, offsetMs: 110, durationMs: 1700, message: null }
+          - { stepIndex: 1, originalText: 'Click "Sign On"', status: FAIL, offsetMs: 1810, durationMs: 30000, message: 'Locator getByRole(''button'', { name: ''Sign On'' }) did not resolve within 30000 ms' }
+          - { stepIndex: 2, originalText: 'Check that the URL contains "dashboard"', status: SKIPPED, offsetMs: null, durationMs: null, message: null }
+        logs:
+          - { at: '2026-09-10T11:00:36Z', level: ERROR, message: 'Step 2 failed; remaining steps skipped', stepIndex: 1 }
+        logsTruncated: true
+        video: { status: AVAILABLE, error: null, expiresAt: '2026-10-10T11:00:36Z', partial: false }
+        videoPath: /api/v1/studio/executions/77777777-7777-7777-7777-777777777777/video
+        runtime: { playwright: 1.47.2, chromium: 129.0.6668.29, validator: 1.0.0, executor: 1.0.0, image: 'studio-runner@sha256:0f1e2d3c4b5a6978' }
+        revision: 9
+        streamComplete: true
+
+    SnapshotErrorTimeout:
+      summary: Terminal ERROR with errorCode TIMEOUT — the canonical form of the legacy `TIMEOUT` status
+      value:
+        executionId: 88888888-8888-8888-8888-888888888888
+        testId: 11111111-1111-1111-1111-111111111111
+        csiId: '60406'
+        revisionId: 22222222-2222-2222-2222-222222222222
+        status: ERROR
+        errorCode: TIMEOUT
+        acceptedAt: '2026-09-10T12:00:00Z'
+        startedAt: '2026-09-10T12:00:02Z'
+        endedAt: '2026-09-10T12:02:02Z'
+        durationMs: 120000
+        stepResults:
+          - { stepIndex: 0, originalText: 'Go to "https://www.citi.com"', status: PASS, offsetMs: 100, durationMs: 1500, message: null }
+          - { stepIndex: 1, originalText: 'Click "Sign On"', status: RUNNING, offsetMs: 1600, durationMs: null, message: 'Total browser runtime deadline reached' }
+          - { stepIndex: 2, originalText: 'Check that the URL contains "dashboard"', status: SKIPPED, offsetMs: null, durationMs: null, message: null }
+        logs: []
+        logsTruncated: false
+        video: { status: AVAILABLE, error: null, expiresAt: '2026-10-10T12:02:02Z', partial: true }
+        videoPath: /api/v1/studio/executions/88888888-8888-8888-8888-888888888888/video
+        runtime: { playwright: 1.47.2, chromium: 129.0.6668.29, validator: 1.0.0, executor: 1.0.0, image: 'studio-runner@sha256:0f1e2d3c4b5a6978' }
+        revision: 7
+        streamComplete: true
+
+    SnapshotEvidenceFailed:
+      summary: Outcome preserved, evidence production failed
+      value:
+        executionId: 99999999-9999-9999-9999-999999999999
+        testId: 11111111-1111-1111-1111-111111111111
+        csiId: '60406'
+        revisionId: 22222222-2222-2222-2222-222222222222
+        status: PASSED
+        errorCode: null
+        acceptedAt: '2026-09-10T13:00:00Z'
+        startedAt: '2026-09-10T13:00:02Z'
+        endedAt: '2026-09-10T13:00:21Z'
+        durationMs: 19000
+        stepResults:
+          - { stepIndex: 0, originalText: 'Go to "https://www.citi.com"', status: PASS, offsetMs: 90, durationMs: 18800, message: null }
+        logs: []
+        logsTruncated: false
+        video: { status: FAILED, error: 'Evidence upload failed after 3 attempts', expiresAt: null, partial: false }
+        videoPath: null
+        runtime: { playwright: 1.47.2, chromium: 129.0.6668.29, validator: 1.0.0, executor: 1.0.0, image: 'studio-runner@sha256:0f1e2d3c4b5a6978' }
+        revision: 8
+        streamComplete: true
+
+    SnapshotEvidenceUnavailable:
+      summary: No usable recording was produced
+      value:
+        executionId: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+        testId: 11111111-1111-1111-1111-111111111111
+        csiId: '60406'
+        revisionId: 22222222-2222-2222-2222-222222222222
+        status: ERROR
+        errorCode: START_TIMEOUT
+        acceptedAt: '2026-09-10T14:00:00Z'
+        startedAt: null
+        endedAt: '2026-09-10T14:00:30Z'
+        durationMs: null
+        stepResults:
+          - { stepIndex: 0, originalText: 'Go to "https://www.citi.com"', status: SKIPPED, offsetMs: null, durationMs: null, message: null }
+        logs: []
+        logsTruncated: false
+        video: { status: UNAVAILABLE, error: 'The browser never started; there is no recording', expiresAt: null, partial: false }
+        videoPath: null
+        runtime: { playwright: null, chromium: null, validator: null, executor: null, image: null }
+        revision: 3
+        streamComplete: true
+
+    SnapshotEvidenceExpired:
+      summary: Retention window elapsed
+      value:
+        executionId: bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb
+        testId: 11111111-1111-1111-1111-111111111111
+        csiId: '60406'
+        revisionId: 22222222-2222-2222-2222-222222222222
+        status: PASSED
+        errorCode: null
+        acceptedAt: '2026-07-15T10:00:00Z'
+        startedAt: '2026-07-15T10:00:02Z'
+        endedAt: '2026-07-15T10:00:24Z'
+        durationMs: 22000
+        stepResults:
+          - { stepIndex: 0, originalText: 'Go to "https://www.citi.com"', status: PASS, offsetMs: 100, durationMs: 21800, message: null }
+        logs: []
+        logsTruncated: false
+        video: { status: EXPIRED, error: null, expiresAt: '2026-08-14T10:00:24Z', partial: false }
+        videoPath: null
+        runtime: { playwright: 1.47.2, chromium: 129.0.6668.29, validator: 1.0.0, executor: 1.0.0, image: 'studio-runner@sha256:0f1e2d3c4b5a6978' }
+        revision: 11
+        streamComplete: true
+
+    SnapshotLegacyRow:
+      summary: Pre-10.1 history — legacy `COMPLETED` read as `PASSED`, no fabricated provenance
+      value:
+        executionId: cccccccc-cccc-cccc-cccc-cccccccccccc
+        testId: 11111111-1111-1111-1111-111111111111
+        csiId: '60406'
+        revisionId: null
+        status: PASSED
+        errorCode: null
+        acceptedAt: '2026-05-20T08:00:00Z'
+        startedAt: null
+        endedAt: '2026-05-20T08:00:14Z'
+        durationMs: 14000
+        stepResults: []
+        logs: []
+        logsTruncated: false
+        video: { status: UNAVAILABLE, error: null, expiresAt: null, partial: false }
+        videoPath: null
+        runtime: { playwright: null, chromium: null, validator: null, executor: null, image: null }
+        revision: 0
+        streamComplete: true

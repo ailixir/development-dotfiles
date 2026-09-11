@@ -78,8 +78,9 @@ class OptimisticSaveIT {
       assertThat(sourceRevision()).isEqualTo(2L);
       ResponseEntity<String> winner =
           statuses.get(0) == 200 ? results.get(0).get() : results.get(1).get();
-      String winningStep = objectMapper.readTree(winner.getBody()).path("steps").asText();
-      assertThat(storedSteps()).isEqualTo(winningStep);
+      // Steps are a typed array on the contract since 10.1, so the comparison is structural.
+      JsonNode winningSteps = objectMapper.readTree(winner.getBody()).path("steps");
+      assertThat(objectMapper.readTree(storedSteps())).isEqualTo(winningSteps);
     } finally {
       pool.shutdownNow();
     }

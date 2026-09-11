@@ -1,0 +1,175 @@
+package com.citi.put.checks.studio;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
+import com.citi.put.checks.studio.dto.StepResult;
+import com.citi.put.checks.studio.dto.VideoEvidence;
+import com.citi.put.checks.studio.entity.UITestExecution;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Story 10.1 AC-3 / AC-11 — one snapshot shape, and legacy rows that do not pretend to be more than
+ * they are.
+ */
+class ExecutionSnapshotMapperTest {
+
+  private static final Instant NOW = Instant.parse("2026-09-10T12:00:00Z");
+  private static final String CSI_ID = "60400";
+
+  private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+  private final ExecutionSnapshotMapper mapper =
+      new ExecutionSnapshotMapper(objectMapper, Clock.fixed(NOW, ZoneOffset.UTC));
+
+  @Test
+  void anAcceptedRunHasNoBrowserStartNoEndAndNoDuration() {
+    UITestExecution execution = accepted();
+
+    ExecutionSnapshotDto snapshot = mapper.toSnapshot(execution);
+
+    assertThat(snapshot.status()).isEqualTo("PENDING");
+    assertThat(snapshot.acceptedAt()).isEqualTo(NOW.minusSeconds(60));
+    assertThat(snapshot.startedAt()).isNull();
+    assertThat(snapshot.endedAt()).isNull();
+    assertThat(snapshot.durationMs()).isNull();
+    assertThat(snapshot.stepResults()).isEmpty();
+    assertThat(snapshot.logs()).isEmpty();
+    assertThat(snapshot.video().status()).isEqualTo(VideoEvidence.PROCESSING);
+    assertThat(snapshot.videoPath()).isNull();
+    assertThat(snapshot.streamComplete()).isFalse();
+  }
+
+  @Test
+  void acceptedAtIsThePartitionKeyAndStartedAtIsTheBrowserStart() {
+    UITestExecution execution = accepted();
+    Instant browserStart = NOW.minusSeconds(50);
+    execution.setBrowserStartedAt(browserStart);
+    execution.setStatus("RUNNING");
+
+    ExecutionSnapshotDto snapshot = mapper.toSnapshot(execution);
+
+    assertThat(snapshot.acceptedAt()).isEqualTo(execution.getStartedAt());
+    assertThat(snapshot.startedAt()).isEqualTo(browserStart);
+  }
+
+  @Test
+  void legacyStatusesAreReadThroughTheCanonicalVocabulary() {
+    UITestExecution completed = accepted();
+    completed.setStatus("COMPLETED");
+    assertThat(mapper.toSnapshot(completed).status()).isEqualTo("PASSED");
+    assertThat(mapper.toSnapshot(completed).errorCode()).isNull();
+
+    UITestExecution timedOut = accepted();
+    timedOut.setStatus("TIMEOUT");
+    ExecutionSnapshotDto snapshot = mapper.toSnapshot(timedOut);
+    assertThat(snapshot.status()).isEqualTo("ERROR");
+    assertThat(snapshot.errorCode()).isEqualTo("TIMEOUT");
+  }
+
+  @Test
+  void aLegacyRowExposesNullRevisionAndUnknownRuntime() {
+    UITestExecution legacy = accepted();
+    legacy.setStatus("PASSED");
+    legacy.setEndedAt(NOW.minusSeconds(30));
+    legacy.setDurationMs(30_000);
+
+    ExecutionSnapshotDto snapshot = mapper.toSnapshot(legacy);
+
+    assertThat(snapshot.revisionId()).isNull();
+    assertThat(snapshot.runtime().playwright()).isNull();
+    assertThat(snapshot.runtime().chromium()).isNull();
+    // A finished run with no recorded evidence state has no usable recording, not a pending one.
+    assertThat(snapshot.video().status()).isEqualTo(VideoEvidence.UNAVAILABLE);
+    assertThat(snapshot.streamComplete()).isTrue();
+  }
+
+  @Test
+  void anAvailableRecordingIsExposedAsAProtectedApiPathOnly() {
+    UITestExecution execution = finishedWithVideo(VideoEvidence.AVAILABLE, NOW.plusSeconds(3600));
+    execution.setVideoKey("studio/60400/test/exec/attempt.webm");
+
+    ExecutionSnapshotDto snapshot = mapper.toSnapshot(execution);
+
+    assertThat(snapshot.videoPath())
+        .isEqualTo("/api/v1/studio/executions/" + execution.getId() + "/video");
+    assertThat(snapshot.videoPath()).doesNotContain("studio/60400");
+  }
+
+  @Test
+  void logicalExpiryIsEnforcedOnReadEvenBeforePhysicalDeletion() {
+    UITestExecution expired = finishedWithVideo(VideoEvidence.AVAILABLE, NOW.minusSeconds(1));
+
+    ExecutionSnapshotDto snapshot = mapper.toSnapshot(expired);
+
+    assertThat(snapshot.video().status()).isEqualTo(VideoEvidence.EXPIRED);
+    assertThat(snapshot.videoPath()).isNull();
+  }
+
+  @Test
+  void anEvidenceFailureNeverOverwritesAKnownOutcome() {
+    UITestExecution execution = finishedWithVideo(VideoEvidence.FAILED, null);
+    execution.setVideoError("Upload failed after 3 attempts");
+
+    ExecutionSnapshotDto snapshot = mapper.toSnapshot(execution);
+
+    assertThat(snapshot.status()).isEqualTo("PASSED");
+    assertThat(snapshot.video().status()).isEqualTo(VideoEvidence.FAILED);
+    assertThat(snapshot.video().error()).isEqualTo("Upload failed after 3 attempts");
+    assertThat(snapshot.streamComplete()).isTrue();
+  }
+
+  @Test
+  void aTerminalOutcomeDoesNotCompleteTheStreamWhileEvidenceIsStillProcessing() {
+    UITestExecution execution = finishedWithVideo(VideoEvidence.PROCESSING, null);
+
+    assertThat(mapper.toSnapshot(execution).streamComplete()).isFalse();
+  }
+
+  @Test
+  void storedStepResultsAndLogsAreReadIntoTheTypedSnapshot() {
+    UITestExecution execution = accepted();
+    execution.setStatus("FAILED");
+    execution.setStepResults(
+        "[{\"stepIndex\":0,\"originalText\":\"Go home\",\"status\":\"PASS\",\"offsetMs\":100,"
+            + "\"durationMs\":900,\"message\":null},"
+            + "{\"stepIndex\":1,\"originalText\":\"Click Sign On\",\"status\":\"SKIPPED\","
+            + "\"offsetMs\":null,\"durationMs\":null,\"message\":null}]");
+    execution.setLogs(
+        "[{\"at\":\"2026-09-10T11:59:30Z\",\"level\":\"INFO\",\"message\":\"Browser started\","
+            + "\"stepIndex\":null}]");
+    execution.setLogsTruncated(true);
+    execution.setRuntimeVersions("{\"playwright\":\"1.47.2\",\"chromium\":\"129.0.6668.29\"}");
+    execution.setSnapshotRevision(12L);
+
+    ExecutionSnapshotDto snapshot = mapper.toSnapshot(execution);
+
+    assertThat(snapshot.stepResults()).hasSize(2);
+    assertThat(snapshot.stepResults().get(1))
+        .isEqualTo(new StepResult(1, "Click Sign On", StepResult.SKIPPED, null, null, null));
+    assertThat(snapshot.logs()).hasSize(1);
+    assertThat(snapshot.logsTruncated()).isTrue();
+    assertThat(snapshot.runtime().playwright()).isEqualTo("1.47.2");
+    assertThat(snapshot.revision()).isEqualTo(12L);
+  }
+
+  private UITestExecution accepted() {
+    return new UITestExecution(UUID.randomUUID(), "PENDING", NOW.minusSeconds(60), CSI_ID);
+  }
+
+  private UITestExecution finishedWithVideo(String videoStatus, Instant expiresAt) {
+    UITestExecution execution = accepted();
+    execution.setStatus("PASSED");
+    execution.setBrowserStartedAt(NOW.minusSeconds(55));
+    execution.setEndedAt(NOW.minusSeconds(20));
+    execution.setDurationMs(35_000);
+    execution.setVideoStatus(videoStatus);
+    execution.setVideoExpiresAt(expiresAt);
+    return execution;
+  }
+}

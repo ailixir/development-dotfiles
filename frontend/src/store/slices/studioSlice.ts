@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { TestIR } from '@/types/studio/studioTypes';
+import type { TestIR } from '@/types/studio/legacyTestIr';
 
 interface StudioState {
   testSteps: string[];

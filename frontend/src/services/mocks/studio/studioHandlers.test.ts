@@ -1,0 +1,155 @@
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { studioMockServer } from './server';
+import { resetStudioMocks } from './handlers';
+import { MOCK_READABLE_CSIS, OTHER_CSI, mockExecutions, mockTests } from './fixtures';
+import studioApi from '@/services/api/studioApi';
+import { defaultConfiguration } from '@/types/studio/studioTypes';
+
+/**
+ * Story 10.1 AC-16 / AC-21 — the mock behaves like the server, including where it refuses.
+ *
+ * The scoping assertions matter most: a mock that hands back every tenant's rows quietly teaches
+ * the UI to expect data the real API will never return, and the resulting bug surfaces as an
+ * empty screen in production rather than a red test here.
+ */
+
+beforeAll(() => studioMockServer.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => {
+  studioMockServer.resetHandlers();
+  resetStudioMocks();
+});
+afterAll(() => studioMockServer.close());
+
+const otherCsiTest = mockTests.find((test) => test.csiId === OTHER_CSI)!;
+const otherCsiExecution = mockExecutions.find((execution) => execution.csiId === OTHER_CSI)!;
+
+describe('list scoping', () => {
+  it('an unfiltered test list never contains another CSI', async () => {
+    const page = await studioApi.listTests();
+
+    expect(page.data.length).toBeGreaterThan(0);
+    expect(page.data.every((test) => MOCK_READABLE_CSIS.includes(test.csiId!))).toBe(true);
+    expect(page.data.map((test) => test.id)).not.toContain(otherCsiTest.id);
+    expect(page.totalElements).toBe(page.data.length);
+  });
+
+  it('an unfiltered history list never contains another CSI', async () => {
+    const page = await studioApi.listExecutions();
+
+    expect(page.data.length).toBeGreaterThan(0);
+    expect(page.data.every((execution) => MOCK_READABLE_CSIS.includes(execution.csiId!))).toBe(
+      true,
+    );
+    expect(page.data.map((execution) => execution.executionId)).not.toContain(
+      otherCsiExecution.executionId,
+    );
+  });
+
+  it('asking for another CSI explicitly returns nothing rather than widening the scope', async () => {
+    const page = await studioApi.listTests({ csiId: OTHER_CSI });
+
+    expect(page.data).toHaveLength(0);
+    expect(page.totalElements).toBe(0);
+  });
+
+  it('reading another CSI test or execution by id is refused', async () => {
+    await expect(studioApi.getTest(otherCsiTest.id)).rejects.toBeDefined();
+    await expect(studioApi.getExecution(otherCsiExecution.executionId)).rejects.toBeDefined();
+  });
+
+  it('testId is optional on history', async () => {
+    const scoped = await studioApi.listExecutions({ testId: mockTests[0].id });
+    const unscoped = await studioApi.listExecutions();
+
+    expect(scoped.data.every((execution) => execution.testId === mockTests[0].id)).toBe(true);
+    expect(unscoped.totalElements).toBeGreaterThanOrEqual(scoped.totalElements);
+  });
+});
+
+describe('write paths follow the contract', () => {
+  const baseRequest = {
+    name: 'Mock draft',
+    description: 'created by a test',
+    csiId: MOCK_READABLE_CSIS[0],
+    environment: 'Production',
+    steps: ['Go to "https://www.citi.com"'],
+    variables: [],
+    configuration: defaultConfiguration(),
+  };
+
+  it('creates a draft that starts STALE with no confirmed revision', async () => {
+    const created = await studioApi.createTest(baseRequest);
+
+    expect(created.compileStatus).toBe('STALE');
+    expect(created.confirmedRevisionId).toBeNull();
+    expect(created.sourceRevision).toBe(1);
+    expect(created.steps).toEqual(baseRequest.steps);
+  });
+
+  it('rejects an engine other than the canonical one', async () => {
+    await expect(
+      studioApi.createTest({
+        ...baseRequest,
+        configuration: { ...defaultConfiguration(), browser: 'firefox' as never },
+      }),
+    ).rejects.toBeDefined();
+  });
+
+  it('rejects a save that carries stale revisions', async () => {
+    const created = await studioApi.createTest(baseRequest);
+
+    await expect(
+      studioApi.updateTest(created.id, {
+        ...baseRequest,
+        steps: ['Go to "https://www.citi.com/other"'],
+        sourceRevision: 99,
+        configurationRevision: 99,
+      }),
+    ).rejects.toBeDefined();
+  });
+
+  it('advances the source revision and invalidates the candidate on a step change', async () => {
+    const created = await studioApi.createTest(baseRequest);
+
+    const updated = await studioApi.updateTest(created.id, {
+      ...baseRequest,
+      steps: ['Go to "https://www.citi.com/other"'],
+      sourceRevision: created.sourceRevision,
+      configurationRevision: created.configurationRevision,
+    });
+
+    expect(updated.sourceRevision).toBe(created.sourceRevision + 1);
+    expect(updated.compileStatus).toBe('STALE');
+    expect(updated.currentCandidateRevisionId).toBeNull();
+  });
+});
+
+describe('execute acceptance', () => {
+  it('accepts a run as PENDING and exposes it on the snapshot endpoint', async () => {
+    const accepted = await studioApi.executeTest(mockTests[0].id);
+
+    expect(accepted.status).toBe('PENDING');
+    const snapshot = await studioApi.getExecution(accepted.executionId);
+    expect(snapshot.status).toBe('PENDING');
+    expect(snapshot.startedAt).toBeNull();
+    expect(snapshot.endedAt).toBeNull();
+    expect(snapshot.durationMs).toBeNull();
+    expect(snapshot.streamComplete).toBe(false);
+  });
+
+  it('returns the same execution for a retried idempotency key', async () => {
+    const key = 'fixture-key-1';
+
+    const first = await studioApi.executeTest(mockTests[0].id, key);
+    const retry = await studioApi.executeTest(mockTests[0].id, key);
+
+    expect(retry.executionId).toBe(first.executionId);
+  });
+
+  it('starts a new run when no key is supplied', async () => {
+    const first = await studioApi.executeTest(mockTests[0].id);
+    const second = await studioApi.executeTest(mockTests[0].id);
+
+    expect(second.executionId).not.toBe(first.executionId);
+  });
+});

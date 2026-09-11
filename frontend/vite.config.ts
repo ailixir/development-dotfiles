@@ -4,6 +4,9 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  // Runtime gate for the Studio mocks (story 10.1, AC-16). Inline `VITE_ENABLE_MSW=true` wins over
+  // the `.env.development` default, which is off.
+  const mswEnabled = env.VITE_ENABLE_MSW === 'true';
   return {
     plugins: [react()],
     server: {
@@ -35,9 +38,26 @@ export default defineConfig(({ mode }) => {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       global: 'globalThis',
       'process.env.PUBLIC_PATH': JSON.stringify(env.PUBLIC_PATH || ''),
+      // Mirrors the webpack constant: the mocks stay available in standalone development, and in a
+      // production bundle only when VITE_ENABLE_MSW is explicitly on (story 10.1, AC-16).
+      'process.env.MSW_BUNDLED': JSON.stringify(
+        mode !== 'production' || mswEnabled ? 'true' : 'false',
+      ),
+      // Runtime gate, read through process.env so the same expression works under webpack, which
+      // has no import.meta.env. Default off.
+      'process.env.VITE_ENABLE_MSW': JSON.stringify(mswEnabled ? 'true' : 'false'),
     },
     optimizeDeps: {
-      include: ['react', 'react-dom', '@mui/material', '@emotion/react', '@emotion/styled'],
+      include: [
+        'react',
+        'react-dom',
+        '@mui/material',
+        '@emotion/react',
+        '@emotion/styled',
+        // Pre-bundle the worker only when it will actually be imported, so the flag being off costs
+        // nothing and the flag being on does not force a mid-boot reload to optimise the dep.
+        ...(mswEnabled ? ['msw/browser'] : []),
+      ],
       force: true,
     },
     build: {

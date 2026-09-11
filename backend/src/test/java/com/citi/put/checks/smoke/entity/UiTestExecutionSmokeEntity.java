@@ -29,10 +29,11 @@ public class UiTestExecutionSmokeEntity {
   @Column(name = "started_at", nullable = false)
   public Instant startedAt;
 
-  @Column(name = "ended_at", nullable = false)
+  // Nullable since V14: a run that has not finished has neither an end nor a duration.
+  @Column(name = "ended_at")
   public Instant endedAt;
 
-  @Column(name = "duration_ms", nullable = false)
+  @Column(name = "duration_ms")
   public Integer durationMs;
 
   @Column(name = "video_url")
@@ -42,7 +43,9 @@ public class UiTestExecutionSmokeEntity {
   @Column(name = "screenshot_urls", columnDefinition = "text[]")
   public String[] screenshotUrls;
 
-  @Column(name = "logs")
+  // jsonb since V14: the structured, bounded retained log buffer.
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "logs", columnDefinition = "jsonb")
   public String logs;
 
   @JdbcTypeCode(SqlTypes.JSON)
