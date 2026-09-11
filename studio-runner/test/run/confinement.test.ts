@@ -111,13 +111,19 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   });
 
   /**
-   * The document's SHA-256 at this story's base commit (`a8a8eeb44`).
+   * The document's SHA-256 after the four ADR-002 amendments that landed on top of this
+   * story's base commit `a8a8eeb44`.
+   *
+   * Re-anchored as a wave-4 integration fix. Those amendments are architect rulings
+   * (ADR-002 sections 14 to 17), not a runner edit, so this story's criterion still holds:
+   * nothing here changed the contract. Story 10.13's T-10.13.10 re-anchors again once
+   * story 10.9 removes the confirm-compile marker.
    *
    * A hash rather than a `git diff`: spawning `git` would need `child_process`, which ADR-001 §6
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = '6a20513c496208ffbc0d9c886b013861ae953d2aa50d14b529092a9a24f7157a';
+  const BASE_SHA256 = '815aae9b0068335e8d5ab5270dccecac4d1fd6f472306ca3dc04292187dd0d80';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
