@@ -1,0 +1,346 @@
+schema: 1
+story: "10.1"
+story_title: "Execution schema and typed snapshot contract"
+epic: "EPIC-10"
+wave: 1
+gate: FAIL
+status_reason: >-
+  The contract, the typed DTOs, the partition-safe repositories, the CSI scoping and the frontend
+  are all real and verified, and the backend failure count is back to exactly the 23 ED-02 baseline
+  after the authorised one-word seed correction in RevisionRetentionIT — which now passes on its own
+  revision-retention assertions. But V14 cannot be applied to any database that holds a single
+  pre-existing ui_tests row. Section 6 issues
+  `UPDATE ui_tests SET browser = 'chromium'` *before* dropping V1's inline
+  `ui_tests_browser_check`, which permits only chrome/firefox/safari/edge. The update violates the
+  constraint it is meant to replace and Flyway aborts V14. Every test in the suite builds the schema
+  from scratch, so the UPDATE matches zero rows and the defect is invisible to a green build.
+  Reproduced on a pristine V1..V12 postgres:15-alpine container carrying one ordinary legacy draft.
+  AC-10 is unmet and AC-7/9/11 are unreachable on any non-empty database. The fix is to move the
+  existing constraint-drop DO block above the two UPDATEs; no production code was changed here.
+reviewer: "Quinn (Guardian) — @qa"
+updated: "2026-09-11"
+
+branch: story/10.1
+head: 90daabacf
+base: epic/EPIC-10
+merge_base: 7d2814885
+diff_scope: "3 commits, 71 files (epic/EPIC-10...HEAD)"
+
+evidence:
+  - command: "./gradlew check --continue (backend, after the authorised seed fix)"
+    result: >-
+      BUILD FAILED — 380 tests completed, 23 failed. Exactly the ED-02 baseline, 14 auth/BFF/
+      rate-limit classes, zero studio failures. Only :test FAILED; spotlessCheck, checkstyleMain,
+      checkstyleTest, spotbugsMain, rdsParityLint and antiRegressionCheck are all green.
+  - command: "grep per story test class over the same run"
+    result: >-
+      StudioContractTest 8/8, StudioMigrationIT 9/9, StudioIdempotencyIT 5/5, LastRunProjectionIT
+      3/3, StudioCsiScopingIT 6/6, StudioApiIT 7/7, ArtifactSchemaDriftTest 3/3,
+      LegacyStudioAdapterTest 9/9, ExecutionSnapshotMapperTest 9/9, RevisionMigrationIT 8/8 —
+      all PASSED, none skipped.
+  - command: "RevisionRetentionIT after the one-word seed fix"
+    result: >-
+      Both methods PASSED — aSoftDeletedTestStillExposesTheRevisionItsHistoryPointsAt and
+      anExecutionKeepsItsRevisionAfterTheDraftIsEditedAndRecompiled. They now fail nowhere in
+      seedTest() and their revision-retention assertions genuinely executed. 10.4 AC-20 closes.
+  - command: "npx tsc --noEmit (frontend)"
+    result: "2 errors, both TS2307 @put/core-components — the pre-existing baseline, unchanged."
+  - command: "npx vitest run (frontend)"
+    result: >-
+      96 passed; 1 failed suite (ChecksLayout.a11y.test.tsx, same missing federation remote) —
+      the pre-existing baseline, unchanged.
+  - command: "npm run lint (frontend)"
+    result: "Not executed — pre-existing .eslintrc.json misconfiguration, deliberately untouched."
+  - command: >-
+      QaProbeV14MigrationTempIT (QA throwaway; written, executed, deleted — tree left clean).
+      Flyway target=12 on postgres:15-alpine, seed one ordinary legacy draft with the V1-legal
+      browser 'chrome' and nothing else unusual, no constraint tampering, then Flyway target=14.
+    result: >-
+      V14 ABORTS. 'ERROR: new row for relation "ui_tests" violates check constraint
+      "ui_tests_browser_check"' at `UPDATE ui_tests SET browser = 'chromium' WHERE browser =
+      'chrome'`, V14 line 191. flyway_schema_history stops at 13. See ISSUE-001.
+  - command: >-
+      Same probe, earlier variant seeding legacy executions with free-text logs and a NULL-CSI
+      parent.
+    result: >-
+      V14 sections 1-5 all executed successfully against real legacy rows — including the
+      `ALTER COLUMN logs TYPE JSONB USING ...` on the partitioned parent — and the abort happened
+      only at section 6. The blast radius of ISSUE-001 is section 6, not the whole migration body.
+  - command: >-
+      Drift-guard falsification: flipped exactly one byte in
+      backend/src/main/resources/studio/artifact.schema.json ('t' -> 'c' inside the "title" value;
+      byte-count identical, one differing byte asserted programmatically), then
+      `./gradlew test --tests '...ArtifactSchemaDriftTest' --rerun`.
+    result: >-
+      theClasspathCopyIsByteIdenticalToTheCanonicalContract FAILED (AssertionFailedError at line
+      50); the other two methods passed. File restored; sha256 of both copies matches again
+      (3b4627a1...c513) and `git status --short` shows only the authorised seed fix.
+  - command: >-
+      Isolated production-mode webpack build of MswGate.tsx alone (the real `npm run build` cannot
+      complete on this machine — same pre-existing @put/core-components resolution failure).
+    result: >-
+      msw/lib 535 KiB plus services/mocks/studio 26.4 KiB are emitted into an async chunk
+      (778.js, 279 KiB minified); main.js is 3 KiB. MSW is therefore never fetched at runtime
+      unless VITE_ENABLE_MSW === 'true', but the mock code is present in build output. See
+      ISSUE-002.
+  - command: "OpenAPI structural validation (yaml parse + $ref resolution over docs/specs/studio/openapi.yaml)"
+    result: >-
+      40 $refs, 0 unresolved; 23 component schemas, 0 unused; 11 paths; tags tests/executions/
+      internal all declared. The internal-tagged section story 10.6 codes against
+      (/internal/studio/executions/{id}/admission and /progress, with AdmissionRequest,
+      AdmissionResponse and ProgressReport) exists and is complete.
+  - command: "sha256 of the two artifact.schema.json copies, before any mutation"
+    result: "Identical — the byte-identical-copy claim holds."
+
+baseline_check:
+  independently_reproduced: true
+  note: >-
+    The 23 failures were observed directly in this worktree's own `./gradlew check --continue`
+    run at 90daabacf. Class spread matches the orchestrator's measured baseline exactly.
+  failing_classes:
+    - "security: BffFilter503IT, BffFilterUnauthIT, IdentityCacheIT"
+    - "config: RateLimitFilterIT (4)"
+    - "checks: CheckCrudIT (2), BulkDeleteIT (2)"
+    - "reports: ReportsCrudIT (2), ReportsDuplicateIT, ReportsExecutionIT (2), ReportsPreviewIT (2), ReportDeliveryDispatcherIT"
+    - "csi: CsiFetchIT"
+    - "users: UserMeEndpointIT"
+    - "scheduling: ScheduleAuthzIT (2)"
+  frontend_baseline:
+    type_check: "2 pre-existing @put/core-components errors — unchanged"
+    vitest: "1 pre-existing failing suite (ChecksLayout.a11y) — unchanged; 96 tests pass"
+    lint: "does not execute (pre-existing .eslintrc.json misconfiguration) — not touched"
+
+authorised_change:
+  file: "backend/src/test/java/com/citi/put/checks/studio/RevisionRetentionIT.java"
+  change: "seedTest() raw INSERT now writes browser 'chromium' instead of 'chrome' (line 170)."
+  rationale: >-
+    Story 10.4's RevisionRetentionIT was written to self-skip until V14 added
+    ui_test_executions.revision_id and then activate unedited. It activated, and failed in
+    seedTest() because the raw SQL insert predates AC-10's canonical browser. The test's own
+    updateRequest() still submits the legacy 'chrome' through UITestRequest, which keeps exercising
+    the AC-4 adapter — only the direct-SQL seed was stale.
+  verified: "Both RevisionRetentionIT methods now PASS on their revision-retention assertions."
+  scope: "This is the only code change made during the review. Nothing else in the tree is modified."
+
+migrations:
+  added: "V13 and V14 only — `ls db/migration` shows V1..V14, no other new file. FOC-01 respected."
+  v13:
+    verdict: PASS
+    notes: >-
+      Unpartitioned, execution_id as single-column PK, execution_accepted_at as the partition
+      locator, UNIQUE (principal, idempotency_key) with NULLs distinct, the digest-pair CHECK, the
+      three deadline partial indexes and deliberately no FK into the partitioned history table.
+      state CHECK correctly deferred to 10.7 per @po. Verified by
+      StudioMigrationIT.theLedgerIsUnpartitionedAndCarriesThePartitionLocator.
+  v14:
+    verdict: FAIL
+    partitioned_parent: >-
+      Handled correctly. ADD COLUMN (incl. the FK to the unpartitioned ui_test_revisions),
+      ADD/DROP CONSTRAINT and ALTER COLUMN ... TYPE JSONB USING all recurse into every partition;
+      the probe confirmed ck_ui_test_executions_status is present on both
+      ui_test_executions_default and ui_test_executions_2026_05, and started_at is never rewritten.
+    backfill_ordering: >-
+      Correct with respect to the NEW constraint (updates at lines 191/194 precede
+      ck_ui_tests_browser at line 222) and INCORRECT with respect to the OLD one: V1's inline
+      ui_tests_browser_check is not dropped until line 217, four lines after the updates that
+      violate it. This is ISSUE-001.
+    status_widening: >-
+      Deliberate and bounded — PENDING and RUNNING are added to the existing PASSED|FAILED|ERROR;
+      the vocabulary is exactly the five values Architecture §8.2 names. Asserted by
+      StudioMigrationIT.theExecutionStatusVocabularyIsWidened (all five persist),
+      theLegacyCompletedStatusIsNoLongerWritable and theLegacyTimeoutStatusIsNoLongerWritable
+      (both rejected by name). The PENDING widening legalises the pre-existing
+      POST /tests/{id}/execute write rather than papering over it; the acceptance path also now
+      writes csi_id, principal and a ledger row. No live dispatch is enabled.
+
+ac_coverage:
+  verified: 21
+  deferred: 0
+  unmet: 1
+  detail:
+    AC-1: PASS  # docs/specs/studio/openapi.yaml (public + internal, internal tagged) and artifact.schema.json both present; ArtifactSchemaDriftTest.theCanonicalPathIsTheOneThePoDecided pins the location
+    AC-2: PASS  # TestRequest schema carries name/description/csiId/environment/steps/variables/configuration/sourceRevision/configurationRevision; UITestRequest mirrors it; clients submit no code
+    AC-3: PASS  # ExecutionSnapshot declares and requires all 18 AC-3 fields; ExecutionErrorCode enum is exactly the six named codes plus null; StepResult carries the six named fields
+    AC-4: PASS  # LegacyStudioAdapter + LegacyStudioAdapterTest (9/9). chrome -> chromium (case-insensitive), other engines rejected once at the controller boundary with 400 INVALID_CONFIGURATION, TestIR -> originalText, JSON-string steps/variables -> typed, flat viewport -> configuration.viewport, COMPLETED -> PASSED, TIMEOUT -> ERROR + errorCode TIMEOUT. No unmapped engine reaches a write; see ISSUE-006 for a cosmetic asymmetry
+    AC-5: PASS  # examples cover create/save/compile/confirm/execute/history, the adapters, all terminal outcomes and all five evidence states; frontend studioContract.test.ts asserts skipped/unstarted timings are null
+    AC-6: PASS  # V13 as specified — see migrations.v13
+    AC-7: CONCERNS  # every column, type, nullability and CHECK is correct and verified against a from-scratch schema, but the section is unreachable on a non-empty database because ISSUE-001 aborts V14 before it commits
+    AC-8: PASS  # ck_ui_tests_last_run_status widened to PASSED|FAILED|ERROR; LastRunProjectionIT (3/3) proves an older completion does not overwrite a newer projection, ordered by (acceptedAt, executionId)
+    AC-9: CONCERNS  # the backfill/quarantine SQL and the RAISE NOTICE counts are correct as written and the quarantine half is enforced at runtime (StudioCsiScopingIT, incl. invisible-to-admin), but the migration-time backfill never runs in CI and is blocked by ISSUE-001 in production
+    AC-10: FAIL  # ISSUE-001 — the chrome -> chromium UPDATE violates V1's still-present ui_tests_browser_check and aborts V14 on any database holding a legacy row. The final ck_ui_tests_browser and the converted-row NOTICE are correct; the ordering is not
+    AC-11: CONCERNS  # revision_id and runtime_versions are correctly left NULL and the DTO exposes revisionId null; same reachability caveat as AC-7/AC-9
+    AC-12: PASS  # nullable endedAt/browserStartedAt/durationMs; UITestExecutionDto deleted and replaced by ExecutionSnapshotDto; UITestRequest/UITestDto typed with adapters at the boundary
+    AC-13: PASS  # composite UITestExecutionId makes a bare findById(UUID) uncompilable; UITestExecutionRepositoryCustomImpl resolves the locator through the ledger first; StudioMigrationIT.theCompositeKeyIsWhatAddressesAHistoryRow
+    AC-14: PASS  # findByCsiIdIn / findByTestIdAndCsiIdIn filter in the WHERE clause, so scoping precedes paging; StudioCsiScopingIT (6/6) covers unfiltered lists, explicit foreign csiId, by-id reads and quarantined rows
+    AC-15: PASS  # studioTypes.ts mirrors the OpenAPI document, studioApi.ts uses the AC-2/AC-3 shapes, TestIR is confined to legacyTestIr.ts, and studioContract.test.ts validates fixtures against the real schemas with ajv
+    AC-16: CONCERNS  # msw 2.15.0 exact-pinned, handlers under frontend/src/services/mocks/studio/, gated on VITE_ENABLE_MSW (default false) behind a dynamic import, list handlers cannot cross CSI. See ISSUE-002 — the mocks are still emitted into production build output as a dead async chunk
+    AC-17: CONCERNS  # StudioMigrationIT (9/9) proves V12->V14 applies from scratch and covers the 2026_05 / current / future / default partitions and the month-boundary in-place update, but it does not — and structurally cannot — exercise V14 against pre-existing data. That blind spot is exactly what let ISSUE-001 through. See ISSUE-003
+    AC-18: CONCERNS  # StudioIdempotencyIT (5/5) proves more than one thing AC-18 asked for and slightly less than another. See ISSUE-004
+    AC-19: PASS  # LastRunProjectionIT (3/3)
+    AC-20: PASS  # StudioContractTest (8/8) — springdoc output diffed against the frozen document, and the snapshot GET and SSE examples deserialize into the same DTO class
+    AC-21: PASS  # studioContract.test.ts (11 cases) + studioHandlers.test.ts (12 cases); fixtures validate against artifact.schema.json and the OpenAPI component schemas with a real validator, and CSI A never yields CSI B
+    AC-22: CONCERNS  # JaCoCo line coverage on every modified class is above 80% as the developer reports, but `./gradlew check` cannot be green on a repo that does not start green (ED-02) and `npm run lint` does not execute at all. Neither is this story's doing
+
+issues:
+  - id: ISSUE-001
+    severity: high
+    category: correctness
+    ac: ["AC-10", "AC-7", "AC-9", "AC-11"]
+    finding: >-
+      V14 section 6 runs `UPDATE ui_tests SET browser = 'chromium' WHERE browser = 'chrome'`
+      (line 191) and `UPDATE ui_tests SET browser = 'chromium' WHERE browser <> 'chromium'`
+      (line 194) BEFORE the DO block at lines 203-220 drops V1's inline
+      ui_tests_browser_check, which is `CHECK (browser IN ('chrome','firefox','safari','edge'))`
+      and does not permit 'chromium'. The first UPDATE therefore violates the constraint it exists
+      to supersede, and Flyway aborts V14 with SQLSTATE 23514. Reproduced on a pristine
+      postgres:15-alpine migrated to V12, seeded with one ordinary legacy draft
+      (browser 'chrome', registered CSI, no constraint tampering) and then migrated toward V14:
+      flyway_schema_history stops at 13.
+    why_ci_is_green: >-
+      Every existing test builds the schema from scratch through Flyway, so ui_tests is empty when
+      section 6 runs and both UPDATEs match zero rows. A CHECK constraint cannot fire on zero rows.
+      Story 10.4's RevisionMigrationIT is the one two-stage test in the repo and it stops at
+      target 12, so it never reaches V14.
+    impact: >-
+      Blocking for deployment. V14 cannot be applied to staging or production, or to any restored
+      dump, that contains even a single ui_tests row — which is every real environment. Because
+      Flyway runs a migration in one transaction, the abort also rolls back sections 1-5, so
+      AC-7, AC-9 and AC-11 never take effect either. No data is corrupted: the rollback is clean
+      and the database simply stays at V13.
+    suggested_fix: >-
+      Move the existing DO block that drops the browser CHECK (V14 lines 203-220) above the two
+      UPDATEs at lines 191/194. Nothing else needs to change — the new ck_ui_tests_browser is
+      already added after both. The same ordering hazard does not exist in section 3: the status
+      UPDATEs only ever write PASSED and ERROR, which the old V7 CHECK already permitted.
+    suggested_owner: dev
+    status: open
+  - id: ISSUE-002
+    severity: medium
+    category: security
+    ac: ["AC-16"]
+    finding: >-
+      MswGate is mounted inside ChecksModule.tsx, the Module Federation entry used by the
+      production webpack build, and reaches the mocks through a statically analysable
+      `import('@/services/mocks/studio/browser')`. webpack emits that as an async chunk regardless
+      of the flag. An isolated production-mode build of MswGate alone produced a 279 KiB minified
+      chunk containing msw/lib (535 KiB raw) and the Studio handlers and fixtures (26.4 KiB raw),
+      next to a 3 KiB entry. `frontend/public/mockServiceWorker.js` is also committed and will be
+      served by any host that serves the public directory.
+    impact: >-
+      Not a runtime leak: under webpack `import.meta.env` is undefined, the gate evaluates false,
+      the chunk is never requested and the service worker is never registered. The initial-bundle
+      budget is unaffected because the chunk is async. What does ship is roughly a quarter of a
+      megabyte of dead mock code and synthetic fixture data in the deployed artifact.
+    suggested_fix: >-
+      Make the dynamic import unreachable in production builds — e.g. wrap it in a
+      DefinePlugin/import.meta.env-replaced constant that webpack can fold to false so the chunk is
+      tree-shaken, or expose the mock entry only from the Vite standalone entry rather than from
+      ChecksModule. Also confirm mockServiceWorker.js is excluded from the production asset copy.
+    suggested_owner: dev
+    status: open
+  - id: ISSUE-003
+    severity: medium
+    category: test-quality
+    ac: ["AC-17", "AC-9", "AC-10", "AC-11"]
+    finding: >-
+      No test applies V13/V14 to a database that already holds rows. StudioMigrationIT builds the
+      schema from scratch and then inserts, which proves the DDL but cannot prove any of the four
+      data-transformation paths V14 owns: the chrome/other-engine conversion, the executions CSI
+      backfill, the quarantine count, the logs TEXT -> JSONB USING conversion and the partition
+      locator INSERT. 10.4's RevisionMigrationIT has exactly the right two-stage Flyway harness but
+      targets 12.
+    impact: >-
+      This is the gap that hid ISSUE-001 behind a green build, and it would equally hide a silent
+      data-loss bug in the logs conversion or the backfill.
+    suggested_fix: >-
+      Extend StudioMigrationIT (or add a sibling modelled on RevisionMigrationIT) with a two-stage
+      Flyway run: target 12, seed a legacy chrome draft, a non-chrome draft, an execution with
+      free-text logs and an execution whose parent has no CSI, then target 14 and assert the
+      converted browsers, the backfilled and quarantined csi_id counts, the preserved log text as a
+      single INFO entry, the NULL revision_id/runtime_versions, and that a locator row exists for
+      exactly the CSI-bearing executions. Note for whoever writes it: V12 adds
+      ck_ui_tests_csi_registered, so the no-CSI draft must also set quarantined_at.
+    suggested_owner: dev
+    status: open
+  - id: ISSUE-004
+    severity: medium
+    category: test-quality
+    ac: ["AC-18"]
+    finding: >-
+      AC-18 asked for two Spring contexts against one database. The substitute constructs a second
+      StudioService from the same autowired repository beans inside a fresh TransactionTemplate.
+      It genuinely proves the property that matters most — the service holds no per-instance
+      idempotency state, so the retry resolves from the committed ledger row — and the companion
+      method proves the database itself refuses a second row for the same
+      (principal, idempotency_key) by constraint name. What it cannot prove is anything that
+      depends on a second JVM or a cold persistence context; here that is a small residue, because
+      Hibernate's second-level cache is not enabled and the retry runs in its own transaction, so
+      the ledger lookup does reach the database. Net: slightly weaker than asked, and the
+      difference is not load-bearing for this story.
+    secondary: >-
+      The class javadoc still reads "The second Spring context here is the point of the test: it is
+      a genuinely separate application instance" — which is no longer what the test does. That
+      sentence should be corrected to match the AUTO-DECISION recorded in the story, or a future
+      reader will trust a guarantee the test does not provide.
+    suggested_fix: >-
+      Fix the javadoc. Optionally revisit the real two-context test in 10.7, which owns the
+      acceptance transaction anyway.
+    suggested_owner: dev
+    status: open
+  - id: ISSUE-005
+    severity: low
+    category: correctness
+    ac: ["AC-18"]
+    finding: >-
+      StudioService.executeTest does a read-then-insert on (principal, idempotency_key). Two
+      replicas racing on the same key both find no ledger row and both insert; one wins and the
+      other surfaces a DataIntegrityViolationException rather than the idempotent 200 AC-18
+      describes. The unique constraint still prevents a duplicate execution, so the invariant
+      holds; only the response is wrong.
+    impact: "Contained — the acceptance transaction is explicitly 10.7's scope and out of scope here."
+    suggested_fix: "In 10.7, catch the constraint violation and re-resolve the existing ledger row."
+    suggested_owner: dev
+    status: deferred-to-10.7
+  - id: ISSUE-006
+    severity: low
+    category: correctness
+    ac: ["AC-4"]
+    finding: >-
+      LegacyStudioAdapter.normalizeBrowser matches 'chrome' case-insensitively but
+      validateForWrite compares against 'chromium' with exact equality, so a client posting
+      'Chrome' succeeds while 'CHROMIUM' is a 400. Strictness is defensible; the asymmetry is not
+      obviously intentional.
+    suggested_owner: dev
+    status: open
+  - id: ISSUE-007
+    severity: low
+    category: correctness
+    ac: ["AC-7", "AC-8"]
+    finding: >-
+      The two constraint-dropping DO blocks in V14 drop every CHECK constraint that mentions the
+      target column, by attribute membership rather than by name. A future multi-column CHECK that
+      happens to reference status or last_run_status would be silently removed. Harmless today;
+      worth a narrowing predicate if either table gains composite checks.
+    suggested_owner: dev
+    status: open
+
+recommendations:
+  immediate:
+    - "ISSUE-001 — reorder V14 section 6 so the old browser CHECK is dropped before the UPDATEs. One block move; blocks merge."
+    - "ISSUE-003 — add the two-stage Flyway coverage that would have caught ISSUE-001, and would catch its successors."
+  before_wave_2:
+    - "ISSUE-002 — keep the MSW chunk out of the federated production build."
+    - "ISSUE-004 — correct the StudioIdempotencyIT javadoc so it describes what the test actually does."
+  carry_forward:
+    - "10.6 can code against the internal-tagged section of docs/specs/studio/openapi.yaml as frozen: /internal/studio/executions/{id}/admission and /progress, with AdmissionRequest, AdmissionResponse and ProgressReport, all present and all $refs resolving."
+    - "10.7 inherits ISSUE-005 (concurrent same-key acceptance) together with the acceptance transaction it already owns."
+    - "The ledger state CHECK is deliberately absent from V13 and is 10.7's to add."
+
+quality_score: 72
+expires: "2026-10-11"
+
+tree_clean: true
+tree_note: >-
+  `git status --short` at the end of the review shows exactly one modified file: the authorised
+  one-word seed correction in RevisionRetentionIT. The drift-guard mutation was restored and the
+  throwaway migration probe was deleted.

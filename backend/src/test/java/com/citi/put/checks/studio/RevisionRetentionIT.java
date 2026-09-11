@@ -167,7 +167,7 @@ class RevisionRetentionIT {
     jdbc.update(
         "INSERT INTO ui_tests (id, name, csi_id, environment, browser, steps, variables,"
             + " timeout_seconds, wait_strategy, created_by, created_at, updated_at)"
-            + " VALUES (?, 'Retention draft', ?, 'Production', 'chrome',"
+            + " VALUES (?, 'Retention draft', ?, 'Production', 'chromium',"
             + " CAST('[\"Go to the home page\"]' AS jsonb), CAST('[]' AS jsonb), 30,"
             + " 'networkidle', ?, ?, ?)",
         id,
