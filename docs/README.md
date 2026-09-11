@@ -1,6 +1,6 @@
 # `docs/` — Project "Checks" Documentation
 
-AIOS-conventional documentation tree. All agent-driven artifacts (stories, specs, epics) live here.
+AIOX-conventional documentation tree. All agent-driven artifacts (stories, specs, epics) live here.
 
 ## Layout
 

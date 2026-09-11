@@ -220,6 +220,18 @@ file_ownership_conflicts:
       - "Assign one owner to both stories for this directory."
     resolution: "TBD at wave-1 planning. Story-level depends_on left as the epic index states (both: none)."
 
+  - id: FOC-02
+    path: "studio-runner/ package root (package.json, package-lock.json, Dockerfile, vitest.fixtures.config.ts) and fixtures/reference/"
+    stories: ["10.2", "10.3"]
+    wave: 1
+    conflict: "10.2 creates the studio-runner/ scaffold (task T-10.2.0, per ADR-001); 10.3 adds the pin check, fixture-tier config and reference manifest to the same root files and fixtures directory."
+    mandated_ordering: "10.2 T-10.2.0 (scaffold) lands before any 10.3 change; 10.3 unit-tier work may proceed on top of the scaffold branch."
+    source: "ADR-001 §3, §7; story drafts 10.2 (T-10.2.0) and 10.3 (Implementation Notes). Recorded by @po 2026-09-10 as epic context tracking."
+    resolution_options:
+      - "Serialize inside W1: land T-10.2.0 as the first 10.2 PR, then start 10.3."
+      - "Assign one owner to both runner stories."
+    resolution: "TBD at wave-1 planning. Story-level depends_on left as the epic index states (both: none)."
+
 # ─────────────────────────────────────────────────────────────
 # External dependencies (Epic 10 "Open external dependencies immediately")
 # All six converge on 10.18 and 10.19; several also gate earlier stories'
