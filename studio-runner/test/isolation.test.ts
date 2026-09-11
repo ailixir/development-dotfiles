@@ -189,8 +189,9 @@ describe('AC-22c — the configuration surface rejects what it does not enumerat
 
   it('requires both service identities and a callback destination', () => {
     for (const missing of ['SERVICE_IDENTITY', 'CALLBACK_IDENTITY', 'CALLBACK_BASE_URL']) {
-      const env = validEnv();
-      delete env[`${CONFIG_PREFIX}${missing}`];
+      const env = Object.fromEntries(
+        Object.entries(validEnv()).filter(([key]) => key !== `${CONFIG_PREFIX}${missing}`),
+      );
       expect(() => loadConfig(env)).toThrow(ConfigurationError);
     }
   });

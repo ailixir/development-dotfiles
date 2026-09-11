@@ -16,7 +16,15 @@ export default defineConfig({
       provider: 'v8',
       reportsDirectory: 'coverage',
       reporter: ['text', 'json-summary'],
-      include: ['src/validator/**', 'src/executor/**', 'src/compat/**', 'scripts/**'],
+      include: [
+        'src/validator/**',
+        'src/executor/**',
+        'src/compat/**',
+        'src/server/**',
+        'src/reporting/**',
+        'src/main.ts',
+        'scripts/**',
+      ],
       // Declaration files carry no statements; v8 reports them as 0% and drags the gate down.
       exclude: ['**/*.d.ts', '**/*.d.mts'],
       thresholds: {
@@ -28,6 +36,12 @@ export default defineConfig({
         // separately from the global ones above, so the validator/executor gate stays at 85/80.
         'src/compat/**': { lines: 80, statements: 80, functions: 80, branches: 80 },
         'scripts/**': { lines: 80, statements: 80, functions: 80, branches: 80 },
+        // Story 10.6 AC-24 gates the two directories it adds at the thresholds already enforced
+        // for src/validator/** and src/executor/**, stated explicitly so they cannot hide inside
+        // the global figure.
+        'src/server/**': { lines: 85, statements: 85, functions: 80, branches: 80 },
+        'src/reporting/**': { lines: 85, statements: 85, functions: 80, branches: 80 },
+        'src/main.ts': { lines: 85, statements: 85, functions: 80, branches: 80 },
       },
     },
   },

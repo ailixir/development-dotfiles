@@ -15,6 +15,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node scripts/write-runtime-versions.mjs",
     "clean": "node -e \"import('node:fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
+    "start": "node dist/main.js",
     "type-check": "tsc -p tsconfig.json --noEmit",
     "check:pins": "node scripts/check-pins.mjs",
     "typecheck": "npm run type-check",

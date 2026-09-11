@@ -47,7 +47,11 @@ export interface MainOptions {
   readonly write: (line: string) => void;
   readonly setExitCode: (code: number) => void;
   readonly launcher?: BrowserLauncher | undefined;
-  readonly runtimeVersions?: Readonly<Record<string, unknown>> | undefined;
+  /**
+   * Where to read `runtime-versions.json` from. Defaults to the copy the build embedded next to
+   * the compiled entry points; a parameter only so a test can point it at a known record.
+   */
+  readonly runtimeVersionsFile?: string | undefined;
 }
 
 export interface MainResult {
@@ -61,18 +65,20 @@ export async function main(options: MainOptions): Promise<MainResult> {
   try {
     config = loadConfig(options.env);
   } catch (error) {
-    if (error instanceof ConfigurationError) {
-      for (const problem of error.problems) options.write(`configuration rejected: ${problem}`);
-      options.setExitCode(78); // EX_CONFIG
-      return { started: false };
-    }
-    throw error;
+    // `loadConfig` throws only `ConfigurationError`. Anything else is a programming fault and
+    // must not be laundered into an exit code that claims the deployment mis-configured the pod.
+    if (!(error instanceof ConfigurationError)) throw error;
+    for (const problem of error.problems) options.write(`configuration rejected: ${problem}`);
+    options.setExitCode(78); // EX_CONFIG
+    return { started: false };
   }
 
   const application = createApplication(config, {
     launcher: options.launcher ?? UNAVAILABLE_LAUNCHER,
-    runtimeVersions:
-      options.runtimeVersions ?? ({ ...currentRuntimeVersions() } as Record<string, unknown>),
+    runtimeVersions: { ...currentRuntimeVersions(options.runtimeVersionsFile) } as Record<
+      string,
+      unknown
+    >,
   });
 
   const port = await application.start();

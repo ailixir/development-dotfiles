@@ -55,6 +55,7 @@ export function readBoundedBody(request: IncomingMessage, maxBytes: number): Pro
     const chunks: Buffer[] = [];
     let size = 0;
     let done = false;
+    let discarding = false;
 
     const finish = (result: BodyRead): void => {
       if (done) return;
@@ -63,10 +64,14 @@ export function readBoundedBody(request: IncomingMessage, maxBytes: number): Pro
     };
 
     request.on('data', (chunk: Buffer) => {
+      if (discarding) return;
       size += chunk.length;
       if (size > maxBytes) {
+        // Stop buffering immediately, but keep the connection readable so the 413 can be written
+        // and actually reach the caller. Destroying the socket here would answer nothing at all.
+        discarding = true;
+        chunks.length = 0;
         finish({ ok: false, status: 413, code: 'BODY_TOO_LARGE' });
-        request.destroy();
         return;
       }
       chunks.push(chunk);
@@ -90,6 +95,9 @@ export function respond(
   response.writeHead(status, {
     'content-type': 'application/json',
     'cache-control': 'no-store',
+    // Explicit length: chunked framing on a four-route internal API buys nothing and makes the
+    // response harder to read on the wire.
+    'content-length': String(Buffer.byteLength(serialized, 'utf8')),
     ...headers,
   });
   response.end(serialized);
@@ -222,9 +230,12 @@ export function createRequestHandler(
         method,
         code: verdict.code,
       });
+      // Drain the unread body *before* answering: with `connection: close` a response that ends
+      // while the caller is still uploading makes Node destroy the socket, and the caller sees a
+      // connection reset instead of the 401 it was told it would get.
+      request.resume();
       // The body carries a code and no job detail.
       respond(response, verdict.status, { code: verdict.code });
-      request.resume();
       return;
     }
 
@@ -260,7 +271,7 @@ export function createRequestHandler(
       return;
     }
 
-    respond(response, 404, { code: 'NOT_FOUND' });
     request.resume();
+    respond(response, 404, { code: 'NOT_FOUND' });
   };
 }

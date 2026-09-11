@@ -154,6 +154,12 @@ export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
  * The reduced form drops the logs first and the steps second: a terminal outcome the API can act
  * on is worth more than the diagnostics attached to it, and a report the API rejects for size is
  * a lost result the runner cannot replay.
+ *
+ * There is an **irreducible floor**: the identity fields, the runtime versions, the outcome and
+ * the evidence state are the report. If `maxBodyBytes` is configured below that floor the minimal
+ * form is emitted anyway, because a truncated identity is worse than a slightly oversized body —
+ * the API could not attribute it to an attempt at all. Configure the bound above the floor; the
+ * default (512 KiB) is three orders of magnitude above it.
  */
 export function serializeBounded(body: ReportBody, bounds: ReportBounds): string {
   const full = JSON.stringify(body);

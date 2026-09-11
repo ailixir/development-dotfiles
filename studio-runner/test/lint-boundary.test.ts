@@ -111,9 +111,7 @@ describe('execution-boundary lint rules', () => {
  * predicted is `test/isolation.test.ts`'s allowlist over the resolved production dependency
  * closure; a denylist can only ever fail for a name somebody thought of.
  */
-interface FixtureManifest {
-  readonly [module: string]: string;
-}
+type FixtureManifest = Readonly<Record<string, string>>;
 
 const isolationManifest = JSON.parse(
   readFileSync(join(packageRoot, 'fixtures', 'lint', 'isolation-manifest.json'), 'utf8'),
@@ -129,9 +127,10 @@ const ISOLATION_MODULES = FORBIDDEN_MODULES.filter((name) => !EVALUATION_MODULES
 describe('isolation lint rules (AC-22b)', () => {
   it('has a fixture for every forbidden isolation module', () => {
     const withoutFixture = ISOLATION_MODULES.filter(
-      (name) =>
-        isolationManifest[name] === undefined ||
-        !existsSync(join(packageRoot, 'fixtures', 'lint', isolationManifest[name])),
+      (name) => {
+        const fixture = isolationManifest[name];
+        return fixture === undefined || !existsSync(join(packageRoot, 'fixtures', 'lint', fixture));
+      },
     );
     expect(withoutFixture).toEqual([]);
   });
@@ -152,7 +151,7 @@ describe('isolation lint rules (AC-22b)', () => {
       const fixture = isolationManifest[name];
       expect(fixture).toBeDefined();
       const ruleIds = await messagesFor(
-        fixture as string,
+        fixture ?? '',
         executionBoundaryRules as unknown as Record<string, unknown>,
       );
       expect(ruleIds).toContain('no-restricted-imports');
@@ -163,7 +162,7 @@ describe('isolation lint rules (AC-22b)', () => {
     'still forbids %s inside src/run/**',
     async (name) => {
       const ruleIds = await messagesFor(
-        isolationManifest[name] as string,
+        isolationManifest[name] ?? '',
         runDirectoryRules as unknown as Record<string, unknown>,
       );
       expect(ruleIds).toContain('no-restricted-imports');
