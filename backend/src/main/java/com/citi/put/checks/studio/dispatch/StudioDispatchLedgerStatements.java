@@ -556,6 +556,11 @@ public class StudioDispatchLedgerStatements {
    * revision incremented, both conditional on the row still being non-terminal. A second pass
    * therefore changes nothing and bumps no revision, which is the reapers' and the kill switch's
    * idempotency.
+   *
+   * <p>The ledger close is derived from the history write rather than from the row lock alone, so
+   * that an execution whose outcome is <em>already</em> settled cannot be silently closed without
+   * its evidence being settled too. That is a structural guarantee rather than a matter of which
+   * query happened to select the row.
    */
   public int closeWithError(UUID executionId, String errorCode, Instant endedAt) {
     Integer applied =
@@ -583,8 +588,9 @@ public class StudioDispatchLedgerStatements {
             ledger AS (
               UPDATE studio_dispatch_ledger d
                  SET state = 'DONE', updated_at = now()
-                FROM owner o
+                FROM owner o, history h
                WHERE d.execution_id = o.execution_id
+                 AND h.id = o.execution_id
                  AND (o.state, 'DONE') IN
             """
                 + TRANSITION_MATRIX
@@ -598,6 +604,209 @@ public class StudioDispatchLedgerStatements {
             errorCode,
             Timestamp.from(endedAt));
     return applied == null ? 0 : applied;
+  }
+
+  /**
+   * Applies a reconciled terminal outcome read from the result manifest (AC-31).
+   *
+   * <p>One statement, and every precondition is in it: the ledger row is still non-terminal and the
+   * history row is still un-finalized. That is what makes "the manifest wins <b>before</b>
+   * finalization and loses <b>after</b> it" a property of the statement rather than of the order in
+   * which two services happened to run.
+   *
+   * <p>{@code error_code} is the API's own vocabulary; a manifest-supplied runner code is recorded
+   * in the diagnostic text and never here, exactly as for a delivered report (AC-16).
+   */
+  public int applyReconciledOutcome(
+      UUID executionId,
+      String status,
+      String errorCode,
+      Instant endedAt,
+      String videoKey,
+      String videoStatus,
+      Instant videoExpiresAt) {
+    Integer applied =
+        jdbc.queryForObject(
+            """
+            WITH owner AS (
+              SELECT execution_id, execution_accepted_at
+                FROM studio_dispatch_ledger
+               WHERE execution_id = ?
+                 AND state <> 'DONE'
+               FOR UPDATE
+            ),
+            history AS (
+              UPDATE ui_test_executions e
+                 SET status = ?,
+                     error_code = CAST(? AS varchar),
+                     ended_at = COALESCE(e.ended_at, CAST(? AS timestamptz)),
+                     video_key = COALESCE(e.video_key, CAST(? AS text)),
+                     video_status = COALESCE(e.video_status, CAST(? AS varchar)),
+                     video_expires_at = COALESCE(e.video_expires_at, CAST(? AS timestamptz)),
+                     snapshot_revision = e.snapshot_revision + 1
+                FROM owner o
+               WHERE e.id = o.execution_id
+                 AND e.started_at = o.execution_accepted_at
+                 AND e.status IN ('PENDING', 'RUNNING')
+              RETURNING e.id
+            ),
+            ledger AS (
+              UPDATE studio_dispatch_ledger d
+                 SET state = 'DONE', updated_at = now()
+                FROM history h
+               WHERE d.execution_id = h.id
+              RETURNING d.execution_id
+            )
+            SELECT count(*) FROM ledger
+            """,
+            Integer.class,
+            executionId,
+            status,
+            errorCode,
+            endedAt == null ? null : Timestamp.from(endedAt),
+            videoKey,
+            videoStatus,
+            videoExpiresAt == null ? null : Timestamp.from(videoExpiresAt));
+    return applied == null ? 0 : applied;
+  }
+
+  /**
+   * Settles evidence on a finalized execution from the reaper side, <b>preserving the check
+   * outcome</b> (AC-30).
+   *
+   * <p>{@code status} and {@code error_code} are absent from the {@code SET} list. An evidence
+   * deadline passing is not a verdict about whether the test passed, and the one implementation
+   * that would quietly make it one is the implementation this statement's shape rules out.
+   *
+   * <p>The revision moves, because {@code streamComplete} flipping is a visible change (AC-23) —
+   * and the guard makes the write idempotent: once evidence is no longer {@code PROCESSING}, a
+   * second pass matches nothing and bumps nothing.
+   */
+  public int settleEvidenceByReaper(UUID executionId, String videoStatus, String videoError) {
+    Integer applied =
+        jdbc.queryForObject(
+            """
+            WITH owner AS (
+              SELECT execution_id, execution_accepted_at
+                FROM studio_dispatch_ledger
+               WHERE execution_id = ?
+                 AND state <> 'DONE'
+               FOR UPDATE
+            ),
+            history AS (
+              UPDATE ui_test_executions e
+                 SET video_status = ?,
+                     video_error = CAST(? AS text),
+                     snapshot_revision = e.snapshot_revision + 1
+                FROM owner o
+               WHERE e.id = o.execution_id
+                 AND e.started_at = o.execution_accepted_at
+                 AND e.status IN ('PASSED', 'FAILED', 'ERROR')
+                 AND (e.video_status IS NULL OR e.video_status = 'PROCESSING')
+              RETURNING e.id
+            ),
+            ledger AS (
+              UPDATE studio_dispatch_ledger d
+                 SET state = 'DONE', updated_at = now()
+                FROM history h
+               WHERE d.execution_id = h.id
+              RETURNING d.execution_id
+            )
+            SELECT count(*) FROM ledger
+            """,
+            Integer.class,
+            executionId,
+            videoStatus,
+            videoError);
+    return applied == null ? 0 : applied;
+  }
+
+  /**
+   * Rows the <b>pending</b> reaper may act on (AC-29): {@code QUEUED} or {@code CLAIMED} with an
+   * expired lease. {@code DISPATCHING} is absent from this query by construction — a row that
+   * reached it may already have started a browser, whatever its lease says.
+   */
+  public List<UUID> findReclaimable(Instant now, int limit) {
+    return jdbc.queryForList(
+        """
+        SELECT execution_id FROM studio_dispatch_ledger
+         WHERE state IN ('QUEUED', 'CLAIMED')
+           AND (lease_expires_at IS NULL OR lease_expires_at <= ?)
+         ORDER BY execution_accepted_at
+         LIMIT ?
+        """,
+        UUID.class,
+        Timestamp.from(now),
+        limit);
+  }
+
+  /** Non-terminal rows past their pending deadline, in any pre-admission state (AC-29). */
+  public List<UUID> findPastPendingDeadline(Instant now, int limit) {
+    return jdbc.queryForList(
+        """
+        SELECT execution_id FROM studio_dispatch_ledger
+         WHERE state IN ('QUEUED', 'CLAIMED', 'DISPATCHING')
+           AND pending_deadline_at IS NOT NULL
+           AND pending_deadline_at <= ?
+         ORDER BY execution_accepted_at
+         LIMIT ?
+        """,
+        UUID.class,
+        Timestamp.from(now),
+        limit);
+  }
+
+  /** Admitted rows past their start deadline — the index V13 built for exactly this (AC-30). */
+  public List<UUID> findPastStartDeadline(Instant now, int limit) {
+    return jdbc.queryForList(
+        """
+        SELECT execution_id FROM studio_dispatch_ledger
+         WHERE state = 'ADMITTED'
+           AND start_deadline_at IS NOT NULL
+           AND start_deadline_at <= ?
+         ORDER BY start_deadline_at
+         LIMIT ?
+        """,
+        UUID.class,
+        Timestamp.from(now),
+        limit);
+  }
+
+  /** Running rows past their total runtime deadline (AC-30). Heartbeats never move this. */
+  public List<UUID> findPastRunDeadline(Instant now, int limit) {
+    return jdbc.queryForList(
+        """
+        SELECT execution_id FROM studio_dispatch_ledger
+         WHERE state = 'RUNNING'
+           AND run_deadline_at IS NOT NULL
+           AND run_deadline_at <= ?
+         ORDER BY run_deadline_at
+         LIMIT ?
+        """,
+        UUID.class,
+        Timestamp.from(now),
+        limit);
+  }
+
+  /** Outcome known, evidence still unsettled past its deadline (AC-30, third condition). */
+  public List<UUID> findEvidenceUnsettled(Instant now, int limit) {
+    return jdbc.queryForList(
+        """
+        SELECT l.execution_id
+          FROM studio_dispatch_ledger l
+          JOIN ui_test_executions e
+            ON e.id = l.execution_id AND e.started_at = l.execution_accepted_at
+         WHERE l.state = 'FINALIZING'
+           AND e.status IN ('PASSED', 'FAILED', 'ERROR')
+           AND (e.video_status IS NULL OR e.video_status = 'PROCESSING')
+           AND l.run_deadline_at IS NOT NULL
+           AND l.run_deadline_at <= ?
+         ORDER BY l.run_deadline_at
+         LIMIT ?
+        """,
+        UUID.class,
+        Timestamp.from(now),
+        limit);
   }
 
   /** The ledger row, or empty. Used for diagnostics and for classifying a zero-row verdict. */

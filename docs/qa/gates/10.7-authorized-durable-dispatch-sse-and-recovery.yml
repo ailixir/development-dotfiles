@@ -1,0 +1,480 @@
+schema: 1
+story: '10.7'
+story_title: Authorized durable dispatch, SSE and recovery
+epic: EPIC-10
+wave: 3
+
+gate: CONCERNS
+status_reason: >-
+  All 40 non-deferred criteria are implemented and were verified by running commands rather than by
+  reading the Dev Agent Record. Two of three independent full runs of ./gradlew test --continue
+  reproduce the developer's arithmetic exactly — 580 tests, 24 failures, the identical 23 ED-02
+  auth/BFF/rate-limit classes class-by-class and count-by-count, plus
+  ExecutionErrorCodeContractEscalationTest, which is the single deliberate one. Zero Studio
+  failures. The cross-replica proof was re-falsified independently and survives: making the
+  broadcast source a per-context in-memory set that the callback publishes into, with no database
+  path, turns aCallbackCommittedOnReplicaAReachesASubscriberOnReplicaB red while all twelve
+  same-pod SseStreamingIT tests stay green — the exact discrimination AC-33 asks for, and no
+  neutralisation was found that left it green. Sixteen attacks against /internal/**, sent as
+  verbatim request lines over a raw socket so no client library normalised the path, were all
+  refused; a forged platform identity buys nothing there and the control with a valid service
+  token reached the handler. V15 is proven against a database holding rows by a genuine two-stage
+  Flyway run. AC-38 measures ordinary REST latency quiet and then under simultaneous pressure in
+  one test method, with the pressure threads running across the measurement — it is concurrent,
+  not sequential. Three medium findings keep this off PASS, none of them a behaviour defect: one
+  new test is order-dependent and did fail in the first full run, the ADR-002 §13 amendment log
+  carries no entry for the openapi.yaml amendment this story landed, and one cached application
+  context died mid-suite in that same run, taking fifteen tests with it.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-11T12:30:00Z'
+branch: story/10.7
+head_sha: 7e827e52c
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.7
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands actually executed by the reviewer, not developer claims
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  full_suite_run_1:
+    command: ./gradlew test --continue
+    result: FAIL
+    detail: >-
+      580 tests, 40 failures. 24 of them are the expected set. The other 16 are two distinct
+      non-behavioural causes, both recorded as findings below: fifteen I/O failures across
+      StudioApiIT (7), StudioCsiScopingIT (6) and StudioContractTest (2), every one of them
+      "Unexpected end of file from server" against a single port (50713) — one cached application
+      context whose embedded server died; and DispatcherIT.asecondDispatchPassDoesNotPickUpA
+      DispatchingRow, an assertion failure, expected 0 but was 20.
+  full_suite_run_2:
+    command: ./gradlew test --continue --rerun
+    result: FAIL
+    detail: >-
+      580 tests, 24 failures — exactly the developer's number. Failing classes: RateLimitFilterIT
+      (4), ScheduleAuthzIT (2), ReportsPreviewIT (2), ReportsExecutionIT (2), ReportsCrudIT (2),
+      CheckCrudIT (2), BulkDeleteIT (2), UserMeEndpointIT (1), ReportsDuplicateIT (1),
+      ReportDeliveryDispatcherIT (1), IdentityCacheIT (1), CsiFetchIT (1), BffFilterUnauthIT (1),
+      BffFilter503IT (1) = 23 ED-02, plus ExecutionErrorCodeContractEscalationTest (1). Zero
+      Studio failures.
+  full_suite_run_3:
+    command: ./gradlew test --continue
+    result: FAIL
+    detail: >-
+      580 tests, 24 failures, the identical class list and counts as run 2. Two of three runs
+      reproduce the claim exactly; the deviation in run 1 is accounted for above.
+  the_24th_failure_identified:
+    command: ExecutionErrorCodeContractEscalationTest > everyCodeTheApiCanPersistIsDeclaredInTheFrozenContract
+    result: EXPECTED_FAIL
+    detail: >-
+      The only non-ED-02 failure in any run, and it is the intended escalation. Its sibling in the
+      same class, theTwoRatifiedCodesAreOnTheApiSideOfTheVocabularyAndCannotComeFromARunner,
+      passes. It reads components.schemas.ExecutionErrorCode out of openapi.yaml and compares it
+      to ExecutionErrorCode.values(); the contract still enumerates the original six and is not
+      widened.
+  cross_replica_baseline:
+    command: ./gradlew crossReplicaTest --rerun
+    result: PASS
+    detail: >-
+      Both SseCrossReplicaIT assertions pass, and only that class runs in the task, so the
+      crossReplicaTest exclude override behaves as declared.
+  check_wiring:
+    command: ./gradlew check --dry-run
+    result: PASS
+    detail: >-
+      :crossReplicaTest appears in check's task graph alongside :test,
+      :jacocoTestCoverageVerification, :spotbugsMain, :rdsParityLint and :antiRegressionCheck. The
+      fork change does not remove the test from the gate.
+  static_gates:
+    command: ./gradlew spotlessCheck checkstyleMain checkstyleTest spotbugsMain rdsParityLint antiRegressionCheck
+    result: PASS
+    detail: >-
+      BUILD SUCCESSFUL. rdsParityLint checked 15 migration files clean; antiRegressionCheck
+      reports DEBT-04 clean.
+  coverage_gate:
+    command: ./gradlew test --continue && ./gradlew jacocoTestCoverageVerification -x test
+    result: PASS
+    detail: >-
+      BUILD SUCCESSFUL against full-suite exec data. Measured from the JaCoCo XML: bundle 77.2%
+      against an unchanged 70% floor, studio.dispatch 87.9%, studio.internal 90.0%,
+      studio.recovery 90.3%, studio.sse 91.8%, each against its own new 75% bar. The
+      pre-existing thresholds (0.70 bundle, 0.80 studio.compile.gateway) are unchanged in
+      build.gradle.kts — the diff adds four rules and lowers none.
+  migration_on_non_empty_data:
+    command: ./gradlew test (LedgerStateMachineMigrationIT, run 2 and run 3)
+    result: PASS
+    detail: >-
+      All five assertions pass. The test is a genuine two-stage Flyway run against its own
+      PostgreSQLContainer — flywayTo("14"), then seedLedgerRows(), then flywayTo("15") — not an
+      empty-schema migration. Docker is present, so @Testcontainers(disabledWithoutDocker = true)
+      did not silently skip it.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Cross-replica re-falsification, performed by the reviewer
+# ─────────────────────────────────────────────────────────────────────────────
+cross_replica_refalsification:
+  what_was_neutralised: >-
+    A per-context in-memory publication path with no database route. A temporary
+    ProgressReportService.ReportCommitHook bean recorded each applied execution id in an instance
+    (never static) set, and SnapshotBroadcaster.deliver was changed to treat a changed revision as
+    unchanged unless that id had been published locally. Authorization refresh, lifetime and
+    heartbeat paths were left intact deliberately, so the only property removed is cross-pod
+    visibility of a revision change — nothing else.
+  cross_replica_result: RED
+  same_pod_result: GREEN
+  detail: >-
+    aCallbackCommittedOnReplicaAReachesASubscriberOnReplicaB FAILED under the neutralisation while
+    theTwoContextsAreGenuinelyDistinctAndShareOnlyTheDatabase still passed, and all twelve
+    SseStreamingIT tests passed unchanged — including the revocation, lifetime, heartbeat and
+    Last-Event-ID cases. That is the discrimination @po required: the in-memory design fails this
+    test and only this test.
+  neutralisation_that_stayed_green: none found
+  structural_corroboration: >-
+    SseCrossReplicaIT is @SpringBootTest with the default MOCK web environment, so context A
+    serves no HTTP at all. The subscription therefore cannot be opened against anything but
+    replica B's own port, and the mechanism connecting the callback on A to the subscriber on B
+    cannot be anything but committed rows. SnapshotBroadcaster contains no publish entry point;
+    WatchedExecutionRegistry is package-local and nothing writes into it from outside the package.
+  restored:
+    file: backend/src/main/java/com/citi/put/checks/studio/sse/SnapshotBroadcaster.java
+    sha256_before_and_after: 368f69e0864246f7495b3926cfdc4edc0f2fd5b6d19b4424ea92d7aef40fcdd3
+    temporary_files_removed: true
+    git_status: clean
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Security — attacks against /internal/**, executed
+# ─────────────────────────────────────────────────────────────────────────────
+security_attacks:
+  method: >-
+    A throwaway integration test opened a raw socket to the running application and wrote each
+    request line verbatim, so no HTTP client normalised the path before Tomcat saw it. The service
+    token was set to a known value so a control could be compared against the attacks. The test
+    file was deleted afterwards and the tree verified clean.
+  results:
+    - attack: POST /internal/.../admission with no credential
+      status: 401
+    - attack: the same with forged X-User-Id / X-User-Email / X-User-Roles ADMIN,SUPER_ADMIN / X-User-Csi-Ownership
+      status: 401
+      note: the platform identity path grants nothing on the internal chain
+    - attack: Authorization Bearer wrong-token
+      status: 403
+    - attack: lowercase 'bearer' scheme with the correct token
+      status: 401
+    - attack: control, Authorization Bearer <correct token>
+      status: 409
+      note: reached the handler — ATTEMPT_SUPERSEDED — which is what makes the refusals meaningful
+    - attack: POST /api/v1/studio/internal/studio/... (through the public prefix)
+      status: 404
+    - attack: leading double slash //internal/...
+      status: 400
+    - attack: inner double slash /internal//studio/...
+      status: 400
+    - attack: dot-segment /x/../internal/...
+      status: 400
+    - attack: encoded dot-segment /x/%2e%2e/internal/...
+      status: 400
+    - attack: uppercase /INTERNAL/...
+      status: 404
+    - attack: trailing slash /internal/.../admission/
+      status: 401
+    - attack: matrix parameter /internal/.../admission;a=b
+      status: 400
+    - attack: percent-encoded initial letter /%69nternal/...
+      status: 401
+      note: the security matcher matches the decoded path — encoding is not a way around the chain
+    - attack: trailing %20
+      status: 401
+    - attack: POST /internal/.../progress with no credential
+      status: 401
+  verdict: >-
+    No attack reached the handler. Nothing answered 2xx and nothing but the control answered 409.
+  defence_in_depth_confirmed: >-
+    StudioInternalSecurityConfig declares its own @Order(1) chain on securityMatcher("/internal/**")
+    requiring ROLE_STUDIO_RUNNER_CALLBACK, and SecurityConfig adds requestMatchers("/internal/**")
+    .denyAll() ahead of its permissive tail, so removing or narrowing the ordered chain closes the
+    route rather than opening it. ServiceIdentityAuthenticationFilter compares through
+    MessageDigest.isEqual, fails closed when no token is configured, reads only the Authorization
+    header, and its rejection body carries a code and no execution detail. Both it and the body
+    limit filter are registered with setEnabled(false) so Spring Boot's automatic /* mapping does
+    not put the service-identity check in front of the public surface.
+  existence_disclosure: >-
+    Closed. StudioService answers StudioAccessDeniedException for both "you may not" and "it is not
+    there" — canRead/canExecute failures and findById misses reach the same handler, which
+    ChecksExceptionHandler renders 403 with one code. SseStreamingIT asserts the events route and
+    the GET snapshot route return the same 403 for a stranger, and 403 for a random execution id.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Developer claims checked one by one
+# ─────────────────────────────────────────────────────────────────────────────
+developer_claims_verified:
+  failure_arithmetic:
+    claim: 24 failures = the identical 23 ED-02 plus one deliberate escalation
+    verdict: CONFIRMED
+    detail: >-
+      Reproduced exactly in two of three full runs, class by class and count by count. None of the
+      23 ED-02 classes is touched by this story's file list.
+  ac_38_concurrency:
+    claim: quiet and loaded measurements in one run, not a sequential smoke test
+    verdict: CONFIRMED
+    detail: >-
+      ordinaryRestTrafficContinuesWhileEveryStudioBoundIsUnderPressure measures 40 ordinary
+      /api/v1/checks requests quiet, then fills the pending quota to refusal, opens the pod's full
+      stream budget with four consumers that never read their sockets, starts two CompletableFuture
+      loops saturating the dispatcher and delivering callbacks, and measures the same 40 requests
+      while those loops are still running — the loops are stopped only after the second
+      measurement returns. Budget asserted as zero errors and mean inside
+      max(4 x baseline, 250 ms). The bounds are compressed by @SpringBootTest properties so the
+      pressure is reachable, which is stated in the test's own header.
+  ac_39_falsifications:
+    claim: six interleaves, six falsifications, three of them needing every guard removed
+    verdict: CONFIRMED_AS_HONEST
+    detail: >-
+      The interleaves are real: AcceptanceIT, DispatcherIT and AdmissionCasIT hold an acceptance or
+      CAS transaction open across a second actor running in a second application context against
+      the same database, gated on CountDownLatches; RecoveryIT runs the report-versus-reaper race
+      in both orders with the transaction held open each way. The reviewer reproduced the sixth
+      falsification independently (above). The admission that three recovery falsifications were
+      green on a single-guard neutralisation is honest redundancy rather than a weak test: AC-29's
+      rule is guarded both by findReclaimable not selecting DISPATCHING and by releaseClaim's own
+      attempt_id IS NULL predicate, and defence in depth is the design. Recording the first green
+      result rather than quietly re-running is the right disclosure.
+  sse_content_type:
+    claim: a 403 and a 429 reached with Accept text/event-stream rendered as 500; both fixed
+    verdict: CONFIRMED
+    detail: >-
+      handleStudioAccessDenied and handleStreamLimit now set contentType(APPLICATION_JSON)
+      explicitly, and the events mapping declares no produces. AC-37a bites as a result:
+      anUnauthorizedOrForbiddenEventsRequestAnswersAsTheGetSnapshotRouteWould asserts the stream's
+      status equals the GET route's and equals 403, with SseTestClient sending
+      Accept text/event-stream. It passes in the full suite.
+  no_calibration:
+    claim: at = browserStartedAt + atMs, 0 is a position, rounding only at persistence
+    verdict: CONFIRMED
+    detail: >-
+      RunnerReportProjection derives at as origin.plusMillis(Math.round(entry.atMs())) and from
+      nothing else; every optionality test is an explicit != null so 0.0 survives; round() is
+      applied once, at persistence, and returns null for null. A report with browserStartedAt null
+      that carries any step or log reading is rejected as INVALID_REPORT rather than partially
+      derived. No re-basing against a first or lowest reading appears anywhere in the class.
+  ac_5_not_closed:
+    claim: the production auth bypass is neither removed nor relied upon
+    verdict: CONFIRMED
+    detail: >-
+      BffSessionAuthenticationFilter.isCoreServiceBypassed() still returns a hardcoded true and the
+      file is untouched by this story — the only addition under security/ is the new
+      ServiceIdentityAuthenticationFilter. applyTemporaryCsiReadBypass is scoped to GET /api/v1/csi
+      and /api/v1/csi/** only, so it cannot widen roles on any Studio route. The attack matrix
+      confirms the bypass grants nothing on /internal/**.
+  adr_002_divergence:
+    claim: the ExecutionErrorCode widening is Class C and is left red
+    verdict: CONFIRMED
+    detail: >-
+      openapi.yaml still enumerates TIMEOUT, DISPATCH_FAILED, DISPATCH_UNKNOWN, START_TIMEOUT,
+      STALE, DISPATCH_DISABLED and null. The escalation test fails and its message names what an
+      architect is being asked for. No workaround was found: the enum is not widened, the test is
+      not disabled, excluded or annotated, and ExecutionErrorCode.java carries both ratified values.
+  contract_edits_authorised:
+    claim: only ADR-002 O-4's amendment was made
+    verdict: CONFIRMED_WITH_A_GAP
+    detail: >-
+      The openapi.yaml diff is exactly O-4's scope — AdmissionResponse closed with
+      additionalProperties false and every field named, a new closed ProgressAck for the progress
+      route's previously content-less 200, the duplicate-delivery 200 documented, and the two
+      internal x-not-yet-implemented markers plus streamExecution's removed. ADR-002 §9 assigns
+      O-4 to story 10.7 by name, so the amendment is architect-authorised. The three remaining
+      x-not-yet-implemented markers belong to 10.8, 10.9 and 10.16. Both copies of
+      artifact.schema.json are byte-unchanged. The gap is §12's third binding rule — see QA-2.
+  build_change_is_not_a_hiding_place:
+    claim: SseCrossReplicaIT moved to its own forked task, not weakened
+    verdict: CONFIRMED
+    detail: >-
+      The test file is new in this story and contains two real assertions, both of which pass in
+      the isolated task. check --dry-run shows :crossReplicaTest in the graph, so the class is
+      still gated. The task sets forkEvery = 1 and clears the configureEach exclude; running it
+      confirms it executes exactly that class.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Acceptance criteria
+# ─────────────────────────────────────────────────────────────────────────────
+acceptance_criteria:
+  total: 47
+  verified: 40
+  deferred: 7
+  unmet: 0
+  deferred_list:
+    - id: AC-4b
+      to: '10.18 / ED-02'
+      reason: absent identity failing closed, gateway header stripping, CSRF — needs a real gateway
+    - id: AC-6b
+      to: '10.18 / ED-02, ED-06'
+      reason: not reachable through public ingress, encrypted internal transport — a filter chain cannot prove either
+    - id: AC-8b
+      to: '10.8'
+      reason: the complete §4.6 readiness predicate; the ExecutionReadiness interface seam is shipped here
+    - id: AC-10b
+      to: '10.17 / ED-02'
+      reason: real vault integration; the preflight seam and the unknown-reference canary are shipped here
+    - id: AC-13b
+      to: '10.18 SPK-05 / ADR-002 O-6'
+      reason: approved-origin policy on the job is Class B and unresolved; the dispatched policy identity is recorded instead
+    - id: AC-28b
+      to: '10.14 / ED-03'
+      reason: real manifest store; the deterministic key derivation is NOT deferred and is tested
+    - id: AC-37b
+      to: '10.18 / ED-06'
+      reason: validation through the real ingress, proxy buffering and idle timeouts
+  notes: >-
+    AC-5 is checked in the story as a record rather than a closure, and that reading is correct and
+    honest: it asserts the narrower decidable property and explicitly leaves "production auth
+    bypass absent before pilot" to 10.18. AC-13a is implemented and persisted; only its public
+    contract declaration is escalated, which is the 24th failure and is by design.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Findings
+# ─────────────────────────────────────────────────────────────────────────────
+top_issues:
+  - id: QA-1
+    severity: medium
+    title: A new test asserts an empty global dispatch queue and is therefore order-dependent
+    status: resolved
+    resolution: >-
+      Fixed by @dev. The assertion is now scoped to this test's own execution — no second send for it,
+      still DISPATCHING, same attempt — and was proven both ways: twenty foreign queued rows make the
+      old global assertion fail exactly as in run 1 and leave the new one green, and neutralising all
+      four production guards turns it red with two sends.
+    ac: AC-14 / AC-39
+    owner: '@dev'
+    blocking: false
+    finding: >-
+      DispatcherIT.asecondDispatchPassDoesNotPickUpADispatchingRow asserts dispatcher.dispatchOnce()
+      returns 0, but dispatchOnce() is deployment-global by design while DispatcherIT.setUp clears
+      only its own CSI's ledger rows. Every Studio IT shares one Postgres container, and
+      StudioOverloadIT deliberately leaves queued rows behind under a different CSI. In the
+      reviewer's first full run the assertion failed with "expected 0 but was 20"; in runs 2 and 3
+      the class ordering differed and it passed. The property under test is sound and the
+      production behaviour is correct — the test's assumption about the rest of the database is
+      not. Scoping the assertion to the ledger rows of this test's own CSI would fix it without
+      weakening it.
+  - id: QA-2
+    severity: medium
+    title: ADR-002 §13 carries no entry for the amendment this story landed
+    status: resolved
+    resolution: >-
+      Fixed by @dev. ADR-002 §13 now records the amendment against §12's four requirements — divergence,
+      Article IV source, the runner re-check, and a measured before/after (StudioContractTest 7/8 → 8/8)
+      — and O-4 is struck in §9.
+    ac: AC-1
+    owner: '@dev / @architect'
+    blocking: false
+    finding: >-
+      ADR-002 §12's third binding rule is "every amendment is recorded", and it specifies what the
+      entry must name — the divergence, the source it traces to, the consuming stories re-checked,
+      and the contract-test result before and after. openapi.yaml was amended under O-4 and §13's
+      last row is still the §11 clock amendment; O-4 is also not struck through in §9. The edit
+      itself is authorised, so this is a bookkeeping omission rather than an unauthorised change,
+      but §13 is the mechanism that makes "frozen means changes are recorded" true, and the next
+      story to read O-4 will find it open.
+  - id: QA-3
+    severity: medium
+    title: One cached application context died mid-suite and took fifteen tests with it
+    status: resolved
+    resolution: >-
+      Fixed by @dev, as a record correction only: the Change Log now names what actually landed,
+      spring.test.context.cache.maxSize = 64 on the test task, and states that it is a mitigation
+      rather than a cure. TC_DAEMON is gone from the story because it was never in the tree.
+    ac: AC-40
+    owner: '@dev'
+    blocking: false
+    finding: >-
+      In the reviewer's first full run, StudioApiIT (7), StudioCsiScopingIT (6) and
+      StudioContractTest (2) all failed with "Unexpected end of file from server" against one
+      port, 50713 — one dead embedded server, not fifteen defects. The Change Log credits
+      TC_DAEMON=true with fixing exactly this class of failure, but TC_DAEMON appears nowhere:
+      application-test.yml's URL is a plain jdbc:tc:postgresql:15-alpine:///checks and what
+      actually landed is spring.test.context.cache.maxSize = 64 in build.gradle.kts. The run
+      recovered in runs 2 and 3, so the mitigation mostly works, but the story's own account of
+      the fix does not match the fix, and a gate that fails one run in three is a gate people
+      learn to re-run.
+  - id: QA-4
+    severity: low
+    title: The migration test's seeded states do not span every branch of V13's partial indexes
+    ac: AC-2
+    owner: '@dev'
+    blocking: false
+    finding: >-
+      LedgerStateMachineMigrationIT seeds QUEUED, DONE and ADMITTED. That covers the CHECK adoption
+      and both sides of the two "state <> 'DONE'" predicates, but CLAIMED and DISPATCHING — the
+      other two members of idx_studio_dispatch_ledger_queued's IN list — carry no row, and
+      v13PartialIndexesStillMatchTheVocabularyTheyWereWrittenFor asserts on the text of indexdef
+      rather than on data. The story's own justification is that only QUEUED and DONE were ever
+      produced by a pre-10.7 writer, which is correct, so nothing is unproven that could have been
+      proven — but the index assertion is textual and should not be read as a data assertion.
+  - id: QA-5
+    severity: low
+    title: A dead local in the overload test's stalled-consumer helper
+    ac: AC-38
+    owner: '@dev'
+    blocking: false
+    finding: >-
+      StudioOverloadIT.openAndNeverRead builds an HttpRequest into a local named request and then
+      builds a second one, withIdentity, which is the one actually sent. The first is never used.
+      Harmless — the sent request does carry the identity headers — but it reads as though the
+      unauthenticated variant were being sent.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Reviewer hygiene
+# ─────────────────────────────────────────────────────────────────────────────
+reviewer_hygiene:
+  production_code_changed: false
+  temporary_mutations:
+    - file: backend/src/main/java/com/citi/put/checks/studio/sse/SnapshotBroadcaster.java
+      purpose: cross-replica re-falsification
+      restored_sha256: 368f69e0864246f7495b3926cfdc4edc0f2fd5b6d19b4424ea92d7aef40fcdd3
+    - file: backend/src/main/java/com/citi/put/checks/studio/sse/QaLocalChangeBus.java
+      purpose: the per-context in-memory publish path for the same falsification
+      removed: true
+    - file: backend/src/test/java/com/citi/put/checks/studio/QaInternalAttackIT.java
+      purpose: the raw-socket attack matrix against /internal/**
+      removed: true
+  git_status_after: clean
+  specs_untouched:
+    docs/specs/studio/openapi.yaml: not edited by the reviewer
+    docs/specs/studio/artifact.schema.json: byte-unchanged by the story and by the reviewer
+    backend/src/main/resources/studio/artifact.schema.json: byte-unchanged by the story and by the reviewer
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dev fix round — QA-1, QA-2, QA-3 (@dev, after this review)
+# ─────────────────────────────────────────────────────────────────────────────
+dev_fix_verification:
+  full_suite_runs:
+    command: ./gradlew test --continue (three times, --rerun on runs 2 and 3)
+    result: 580 tests / 24 failures in all three, the identical class list each time
+    detail: >-
+      RateLimitFilterIT (4), ScheduleAuthzIT (2), ReportsPreviewIT (2), ReportsExecutionIT (2),
+      ReportsCrudIT (2), CheckCrudIT (2), BulkDeleteIT (2), UserMeEndpointIT (1),
+      ReportsDuplicateIT (1), ReportDeliveryDispatcherIT (1), IdentityCacheIT (1), CsiFetchIT (1),
+      BffFilterUnauthIT (1), BffFilter503IT (1) = 23 ED-02, plus
+      ExecutionErrorCodeContractEscalationTest (1). Zero Studio failures, and no context died in
+      any of the three.
+  dispatcher_it:
+    result: PASS
+    detail: >-
+      Green in all three full runs and green alone. The scoped assertion was falsified rather than
+      assumed: with queuedBatch widened to DISPATCHING, claim's state and lease predicates removed
+      and beginDispatch's attempt_id IS NULL dropped, it fails with two sends for its own
+      execution. Both production files were restored and SHA-256-verified; git status clean.
+  static_gates:
+    command: ./gradlew spotlessCheck checkstyleMain checkstyleTest spotbugsMain
+    result: PASS
+  contract_untouched: >-
+    openapi.yaml is byte-identical to the reviewed head (the pre-amendment copy was restored after
+    the before/after measurement and the hash re-checked); neither artifact.schema.json was opened.
+  production_code_changed: false
+
+recommended_status: >-
+  InReview — merge is safe. The three medium findings are test-hygiene and bookkeeping, not
+  behaviour, and none of them blocks the five stories waiting on this one. QA-2 should be closed
+  before the next story reads ADR-002 §9, and QA-1 before the next wave relies on a single clean
+  run of the suite.

@@ -152,11 +152,25 @@ tasks.withType<JavaCompile>().configureEach {
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     include("**/*Test.class", "**/*IT.class")
+    // Story 10.7 AC-33 runs a *second* Spring application context with its own embedded servlet
+    // container inside one test. That second container's threads keep the Gradle worker JVM alive
+    // past the end of the class, so with forkEvery the worker cannot be recycled and the whole
+    // run stalls. The test itself is sound and is not weakened: it is moved to its own forked
+    // task below, which is wired into `check`, rather than deleted, downgraded or quarantined.
+    exclude("**/SseCrossReplicaIT.class")
     testLogging {
         events("passed", "skipped", "failed")
     }
     jvmArgs("-Xmx1g")
     forkEvery = 12
+
+    // The Testcontainers JDBC driver stops its container when the connection count for a URL
+    // reaches zero. Spring's context cache defaults to 32 entries, and story 10.7 pushed the
+    // suite past that: evicting a context closes its Hikari pool, the count hits zero, the
+    // container stops, and every other cached context is left pointed at a dead port. The symptom
+    // is "Connection refused" in tests that pass in isolation and fail in the suite. Raising the
+    // cache keeps the contexts — and therefore the container — alive for the fork's lifetime.
+    systemProperty("spring.test.context.cache.maxSize", "64")
 }
 
 spotless {
@@ -260,7 +274,44 @@ tasks.jacocoTestCoverageVerification {
                 minimum = "0.75".toBigDecimal()
             }
         }
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.recovery")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.sse")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
     }
+}
+
+/**
+ * Story 10.7 AC-33 — cross-replica SSE visibility, in its own JVM.
+ *
+ * It runs two application contexts against one database, and the second one's embedded servlet
+ * container outlives the test class. One class per fork keeps that contained.
+ */
+tasks.register<Test>("crossReplicaTest") {
+    description = "Story 10.7 AC-33: two application contexts, one database, in an isolated JVM."
+    group = "verification"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    useJUnitPlatform()
+    setIncludes(listOf("**/SseCrossReplicaIT.class"))
+    setExcludes(emptyList<String>())
+    forkEvery = 1
+    jvmArgs("-Xmx1g")
+    testLogging { events("passed", "skipped", "failed") }
 }
 
 tasks.register<RdsParityLintTask>("rdsParityLint") {
@@ -303,6 +354,7 @@ tasks.register("antiRegressionCheck") {
 }
 
 tasks.check {
+    dependsOn("crossReplicaTest")
     dependsOn(tasks.jacocoTestCoverageVerification)
     dependsOn("rdsParityLint")
     dependsOn("antiRegressionCheck")
