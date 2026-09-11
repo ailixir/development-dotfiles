@@ -468,7 +468,6 @@ paths:
       tags: [tests]
       operationId: confirmCompile
       summary: Confirm the current compiled candidate
-      x-not-yet-implemented: true
       x-implemented-by: '10.9'
       parameters:
         - { $ref: '#/components/parameters/TestId' }

@@ -42,8 +42,8 @@ public class StudioCompileConfig {
       StudioGatewayProperties gateway,
       StudioRunnerProperties runner,
       RuntimePinProperties pin) {
-    compile.validate(gateway);
     runner.validate();
+    compile.validate(gateway, runner);
     if (pin.artifactSchemaVersion() != CompilePins.SUPPORTED_ARTIFACT_VERSION) {
       throw new IllegalStateException(
           "studio.runtime.pin.artifact-schema-version is "

@@ -3,11 +3,16 @@ package com.citi.put.checks.studio;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.citi.put.checks.studio.dto.CompileAcceptedDto;
+import com.citi.put.checks.studio.dto.CompileDiagnosticDto;
+import com.citi.put.checks.studio.dto.CompileDiagnosticsDto;
+import com.citi.put.checks.studio.dto.CompileErrorDto;
+import com.citi.put.checks.studio.dto.CompileStepDiagnosticsDto;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.RuntimeVersions;
 import com.citi.put.checks.studio.dto.StepResult;
 import com.citi.put.checks.studio.dto.StudioVariable;
 import com.citi.put.checks.studio.dto.TestConfiguration;
+import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.dto.VideoEvidence;
 import com.citi.put.checks.studio.dto.Viewport;
@@ -176,11 +181,50 @@ class StudioContractTest {
         .contains("POST " + PUBLIC_BASE + "/tests/{id}/compile");
     assertThat(pendingOperations())
         .as(
-            "confirmation (10.9) and the video route (10.16) are not this story's; their"
-                + " markers must not have moved. The SSE stream lost its marker in 10.7, which"
-                + " ships that route (ADR-002 section 13)")
-        .containsExactlyInAnyOrder(
-            "POST /tests/{id}/confirm-compile", "GET /executions/{id}/video");
+            "story 10.9 ships POST /tests/{id}/confirm-compile, so its marker came off and this"
+                + " set shrank to the video route alone. That is why the expectation changed and"
+                + " not because a marker was quietly cleared: the video route (10.16) is the last"
+                + " declared-but-unserved operation, and the mirror assertion in"
+                + " theConfirmRouteIsShippedAndTheMarkerCameOffForThatOperationOnly proves the"
+                + " confirm route is actually reachable rather than merely unflagged. The SSE"
+                + " stream lost its marker in 10.7, which ships that route (ADR-002 section 13)")
+        .containsExactlyInAnyOrder("GET /executions/{id}/video");
+  }
+
+  /**
+   * Story 10.9 AC-2 — the confirmation route is shipped, and the marker came off for it alone.
+   *
+   * <p>The mirror of the assertion above, and it is the half that keeps the edit honest. Removing
+   * {@code x-not-yet-implemented} is one line, and a story that removed it without landing the
+   * route would present an unimplemented operation as shipped — which is the precise failure {@code
+   * everyRouteTheContractPresentsAsShippedIsActuallyReachable} exists to catch, and which that gate
+   * can only catch because this one insists the route really is reachable.
+   *
+   * <p>{@code x-implemented-by} stays: ADR-002 §14.8 item 5 set the precedent on {@code
+   * compileTest}, and the marker records <em>who shipped it</em>, not <em>whether it is
+   * pending</em>.
+   */
+  @Test
+  void theConfirmRouteIsShippedAndTheMarkerCameOffForThatOperationOnly() throws IOException {
+    String route = "POST " + PUBLIC_BASE + "/tests/{id}/confirm-compile";
+    assertThat(implementedStudioOperations())
+        .as("T-10.9.1 landed POST /tests/{id}/confirm-compile")
+        .contains(route);
+    assertThat(declaredOperations(false))
+        .as("and the document no longer flags it as pending")
+        .contains(route);
+    assertThat(operationFlag("/tests/{id}/confirm-compile", "x-not-yet-implemented"))
+        .as("the marker is gone for this operation")
+        .isNull();
+    assertThat(operationFlag("/tests/{id}/confirm-compile", "x-implemented-by"))
+        .as("and x-implemented-by stays, as ADR-002 §14.8 item 5 requires")
+        .isEqualTo("10.9");
+    assertThat(operationFlag("/executions/{id}/video", "x-not-yet-implemented"))
+        .as(
+            "the video route is story 10.16's and nothing here implements it; a story that"
+                + " quietly cleared a neighbour's marker would present an unimplemented route as"
+                + " shipped")
+        .isEqualTo(Boolean.TRUE);
   }
 
   @Test
@@ -194,6 +238,14 @@ class StudioContractTest {
     assertSchemaMatchesRecord("TestConfiguration", TestConfiguration.class);
     assertSchemaMatchesRecord("Variable", StudioVariable.class);
     assertSchemaMatchesRecord("TestRequest", UITestRequest.class);
+    // ADR-002 §16.9 item 4 — TestDto's absence from this list is why `compileError` and
+    // `compileDiagnostics` stayed persisted-but-undeclared for four waves: a conformance gate is
+    // only as wide as its enumeration. Its four component shapes join it for the same reason.
+    assertSchemaMatchesRecord("TestDto", UITestDto.class);
+    assertSchemaMatchesRecord("CompileError", CompileErrorDto.class);
+    assertSchemaMatchesRecord("CompileDiagnostic", CompileDiagnosticDto.class);
+    assertSchemaMatchesRecord("CompileStepDiagnostics", CompileStepDiagnosticsDto.class);
+    assertSchemaMatchesRecord("CompileDiagnostics", CompileDiagnosticsDto.class);
   }
 
   @Test
@@ -269,6 +321,29 @@ class StudioContractTest {
           .as("%s adapts to the canonical engine", entry.getKey())
           .isEqualTo(TestConfiguration.CANONICAL_BROWSER);
     }
+  }
+
+  /**
+   * One extension value on an operation, read from the document rather than from an example.
+   *
+   * @param path the path item, without the public base
+   * @param method the HTTP method key as the document spells it
+   * @param key the extension key
+   * @return the raw value, or null when absent
+   */
+  @SuppressWarnings("unchecked")
+  private static Object operationFlag(String path, String method, String key) {
+    Map<String, Object> paths = (Map<String, Object>) contract.get("paths");
+    Map<String, Object> item = (Map<String, Object>) paths.get(path);
+    assertThat(item).as("the contract declares %s", path).isNotNull();
+    Map<String, Object> operation = (Map<String, Object>) item.get(method);
+    assertThat(operation).as("%s declares a %s operation", path, method).isNotNull();
+    return operation.get(key);
+  }
+
+  /** The same, for the {@code post} operation of a path. */
+  private static Object operationFlag(String path, String key) {
+    return operationFlag(path, path.endsWith("/video") ? "get" : "post", key);
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────

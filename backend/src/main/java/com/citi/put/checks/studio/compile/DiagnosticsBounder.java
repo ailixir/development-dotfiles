@@ -29,6 +29,11 @@ import org.springframework.stereotype.Component;
  * <p>The structure keeps artifact-level diagnostics separate from step diagnostics, exactly as the
  * frozen {@code ValidateResponse} separates them, and holds one entry per original step so the
  * authoring UI can align diagnostics to the line the author wrote (AC-13).
+ *
+ * <p>Story 10.9 added {@code attempts} and {@code exhausted} as two more keys on the same document,
+ * under the spellings ADR-002 &sect;16.2 fixes. It is deliberately <em>not</em> a second bounder: a
+ * second bounding path is how the 64 KiB cap stops being true. The caps, the shedding order and the
+ * truncation behaviour are unchanged.
  */
 @Component
 public class DiagnosticsBounder {
@@ -50,9 +55,14 @@ public class DiagnosticsBounder {
    * @param outcome the validator verdict being recorded
    * @param stepCount the number of <em>original</em> source steps; the document always has exactly
    *     this many step entries, even when the validator returned fewer or more
+   * @param attempts how many compile attempts this document describes the last of, at least 1
+   * @param exhausted whether the repair bound was reached with the artifact still invalid
    * @return a JSON document within every configured cap
    */
-  public String bound(ValidationOutcome outcome, int stepCount) {
+  public String bound(ValidationOutcome outcome, int stepCount, int attempts, boolean exhausted) {
+    if (attempts < 1) {
+      throw new IllegalArgumentException("attempts must be >= 1 but was " + attempts);
+    }
     Map<Integer, ValidationOutcome.StepVerdict> byIndex = new HashMap<>();
     for (ValidationOutcome.StepVerdict step : outcome.steps()) {
       byIndex.putIfAbsent(step.stepIndex(), step);
@@ -73,6 +83,12 @@ public class DiagnosticsBounder {
       step.put("truncated", found.size() > limits.maxPerStep());
     }
     root.put("truncated", false);
+    // ADR-002 §16.2 fixes these two spellings so this producer and story 10.10's consumer are not
+    // guessing at each other. They describe the LAST attempt only: earlier attempts' diagnostics
+    // describe artifacts the author never saw, and accumulating three of them would either breach
+    // the byte cap or make truncation the normal case.
+    root.put("attempts", attempts);
+    root.put("exhausted", exhausted);
 
     return shrinkToByteCap(root, steps);
   }
@@ -132,6 +148,11 @@ public class DiagnosticsBounder {
     minimal.putArray("steps");
     minimal.put("truncated", true);
     minimal.put("truncationReason", "TOTAL_BYTES");
+    // Carried through the last-resort shape too: `attempts` and `exhausted` are `required` on the
+    // declared schema, and a document that dropped them would break its own contract at exactly
+    // the moment a reader most needs to know that repair happened and stopped.
+    minimal.put("attempts", root.path("attempts").asInt(1));
+    minimal.put("exhausted", root.path("exhausted").asBoolean(false));
     return minimal.toString();
   }
 

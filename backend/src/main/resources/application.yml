@@ -247,10 +247,43 @@ studio:
     pipeline:
       # Fixed pool, NO queue: attempt concurrency+1 is refused, not parked.
       concurrency: ${STUDIO_COMPILE_CONCURRENCY:4}
-      # Total wall-clock per attempt. Must be strictly greater than gateway.request-timeout above,
-      # or a slow gateway call would be abandoned by this budget before the gateway gave up and the
-      # recorded code would name the wrong bound. Startup fails if it is not.
-      attempt-budget: ${STUDIO_COMPILE_ATTEMPT_BUDGET:180s}
+      # Total wall-clock for the WHOLE compile request, repairs included (story 10.9 raised this
+      # from 180s and widened its meaning). Two constraints, both checked at startup:
+      #   - strictly greater than gateway.request-timeout, or a slow gateway call would be
+      #     abandoned by this budget before the gateway gave up and the recorded code would name
+      #     the wrong bound;
+      #   - strictly greater than (1 + repair.max-attempts) x (gateway.request-timeout +
+      #     runner.validate-timeout) = 3 x (60s + 10s) = 210s, or a healthy repair loop would be
+      #     abandoned mid-repair by arithmetic nobody checked.
+      # Raising it costs observable pool saturation, not correctness: a worst-case request now
+      # holds one of four pool threads for 240s instead of 180s, and saturation is already routed
+      # to STALE COMPILE_POOL_SATURATED, retryable.
+      attempt-budget: ${STUDIO_COMPILE_ATTEMPT_BUDGET:240s}
+    # The bounded repair loop (§4.3 "a maximum of two repair attempts"). This is a bound the
+    # architecture fixes, not a tuning parameter: at most 3 propose calls and 3 /v1/validate calls
+    # per compile request, and exhaustion is NEEDS_REVISION with the final attempt's diagnostics.
+    # If throughput needs tuning, pipeline.concurrency is the knob.
+    repair:
+      max-attempts: ${STUDIO_COMPILE_REPAIR_MAX_ATTEMPTS:2}
+    # The abandoned-compile sweep (§4.7). A compile in flight when its replica died leaves a row in
+    # COMPILING forever, because the budget and the late-result drop are held in memory. This moves
+    # such a row to exactly what publishError produces — STALE, retryable, candidate cleared — and
+    # additionally clears the request identity, which is what makes a late result from the swept
+    # compile fail the publish guards that already condition on it.
+    #
+    # It buys a truthful authoring display, NOT a recovered capability: readiness never reads
+    # compile_status, so a stranded row blocks nothing and POST /execute is accepted before and
+    # after a sweep.
+    sweep:
+      enabled: ${STUDIO_COMPILE_SWEEP_ENABLED:true}
+      # Must strictly exceed pipeline.attempt-budget, validated at startup, so a healthy in-flight
+      # compile can never be swept out from under itself.
+      threshold: ${STUDIO_COMPILE_SWEEP_THRESHOLD:600s}
+      # The run stops at the cap and the next scheduled run continues; never an unbounded UPDATE.
+      batch-size: ${STUDIO_COMPILE_SWEEP_BATCH:200}
+      # One key, read by both the schedule annotation and the bound validation — not two
+      # representations of one value (§8.5).
+      interval-ms: ${STUDIO_COMPILE_SWEEP_INTERVAL_MS:60000}
     # Enforced before beginCompile: over-limit is a 400 and no compile state changes (AC-6).
     authoring:
       # Must never be looser than the runner's DEFAULT_BOUNDS.maxSteps, or a draft could be

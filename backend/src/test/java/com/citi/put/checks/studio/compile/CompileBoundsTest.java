@@ -36,7 +36,9 @@ class CompileBoundsTest {
       new StudioCompileProperties(
           new StudioCompileProperties.Pipeline(2, Duration.ofMillis(250)),
           new StudioCompileProperties.Authoring(100, 1024, 65536),
-          new StudioCompileProperties.Diagnostics(10, 400, 120, 4096));
+          new StudioCompileProperties.Diagnostics(10, 400, 120, 4096),
+          new StudioCompileProperties.Repair(2),
+          new StudioCompileProperties.Sweep(true, Duration.ofSeconds(600), 200, 60_000L));
 
   private final AuthoringLimits limits = new AuthoringLimits(properties);
 
@@ -222,18 +224,23 @@ class CompileBoundsTest {
             0,
             null,
             "classpath:studio/artifact.schema.json");
+    var runner =
+        new com.citi.put.checks.studio.compile.validator.StudioRunnerProperties(
+            "http://runner:8080", "token", Duration.ofSeconds(10), Duration.ofSeconds(2));
     StudioCompileProperties tooShort =
         new StudioCompileProperties(
             new StudioCompileProperties.Pipeline(4, Duration.ofSeconds(60)),
             properties.authoring(),
-            properties.diagnostics());
+            properties.diagnostics(),
+            properties.repair(),
+            properties.sweep());
 
-    assertThatThrownBy(() -> tooShort.validate(gateway))
+    assertThatThrownBy(() -> tooShort.validate(gateway, runner))
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("attempt-budget")
         .hasMessageContaining("request-timeout");
 
-    assertThatCode(() -> RunnerPinDriftTest.defaults().validate(gateway))
+    assertThatCode(() -> RunnerPinDriftTest.defaults().validate(gateway, runner))
         .as("the shipped defaults must satisfy their own rule")
         .doesNotThrowAnyException();
   }
@@ -256,7 +263,7 @@ class CompileBoundsTest {
     ValidationOutcome hostile =
         ValidationOutcome.verdict(false, "1.0.0", List.of(), Collections.unmodifiableList(steps));
 
-    String stored = bounder.bound(hostile, 20);
+    String stored = bounder.bound(hostile, 20, 1, false);
     JsonNode document = MAPPER.readTree(stored);
 
     assertThat(stored.getBytes(StandardCharsets.UTF_8).length)
@@ -285,11 +292,13 @@ class CompileBoundsTest {
   void exactlyThePerStepCapIsKeptAndTheEleventhIsDroppedWithAMarker() throws Exception {
     DiagnosticsBounder bounder = new DiagnosticsBounder(properties);
 
-    JsonNode atCap = MAPPER.readTree(bounder.bound(outcomeWith(10), 1)).path("steps").get(0);
+    JsonNode atCap =
+        MAPPER.readTree(bounder.bound(outcomeWith(10), 1, 1, false)).path("steps").get(0);
     assertThat(atCap.path("diagnostics")).hasSize(10);
     assertThat(atCap.path("truncated").asBoolean()).isFalse();
 
-    JsonNode overCap = MAPPER.readTree(bounder.bound(outcomeWith(11), 1)).path("steps").get(0);
+    JsonNode overCap =
+        MAPPER.readTree(bounder.bound(outcomeWith(11), 1, 1, false)).path("steps").get(0);
     assertThat(overCap.path("diagnostics")).hasSize(10);
     assertThat(overCap.path("truncated").asBoolean())
         .as("a step that lost diagnostics must say so")
@@ -301,10 +310,10 @@ class CompileBoundsTest {
     DiagnosticsBounder bounder = new DiagnosticsBounder(properties);
 
     String atCap = "m".repeat(400);
-    JsonNode kept = firstDiagnostic(bounder.bound(outcomeWithMessage(atCap), 1));
+    JsonNode kept = firstDiagnostic(bounder.bound(outcomeWithMessage(atCap), 1, 1, false));
     assertThat(kept.path("message").asText()).isEqualTo(atCap);
 
-    JsonNode cut = firstDiagnostic(bounder.bound(outcomeWithMessage("m".repeat(401)), 1));
+    JsonNode cut = firstDiagnostic(bounder.bound(outcomeWithMessage("m".repeat(401)), 1, 1, false));
     assertThat(cut.path("message").asText())
         .hasSize(400)
         .endsWith(DiagnosticsBounder.TRUNCATION_MARKER);
@@ -316,7 +325,8 @@ class CompileBoundsTest {
 
     JsonNode document =
         MAPPER.readTree(
-            bounder.bound(ValidationOutcome.verdict(false, "1.0.0", List.of(), List.of()), 5));
+            bounder.bound(
+                ValidationOutcome.verdict(false, "1.0.0", List.of(), List.of()), 5, 1, false));
 
     assertThat(document.path("steps")).hasSize(5);
     for (int index = 0; index < 5; index++) {

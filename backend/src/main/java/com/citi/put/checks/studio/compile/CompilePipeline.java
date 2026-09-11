@@ -47,6 +47,25 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * two compiles of the same unedited source, where nothing but the request identity distinguishes
  * the older attempt from the newer one.
  *
+ * <h2>The repair loop is bounded, and every attempt goes through the same gate</h2>
+ *
+ * <p>Architecture &sect;4.3 allows "a maximum of two repair attempts", so one compile request makes
+ * at most three {@code propose} calls and at most three {@code /v1/validate} calls, numbered 1, 2,
+ * 3 and never repeated. Every attempt — including a repair — passes the {@code
+ * SUPPORTED_ARTIFACT_VERSION} pin and {@code /v1/validate} before any publication, and a successful
+ * repair is published through {@code publishCandidate} to {@code AWAITING_CONFIRMATION}. There is
+ * no path from this loop to {@code CompileStateService.confirm}: a repaired draft is refused {@code
+ * 409 COMPILE_REQUIRED} by the readiness gate until a principal calls {@code confirm-compile}.
+ *
+ * <p>The settlement is re-checked between <em>every</em> pair of calls in the loop, not only once
+ * per request: the budget now covers the whole request including its repairs, so an expiry can land
+ * between attempt 2's validator call and attempt 3's gateway call, and a late result from an
+ * abandoned repair is dropped in process without calling any publish method.
+ *
+ * <p>A gateway or validator failure on a repair call ends the loop with that code and does not
+ * silently consume a further attempt. Only an {@code ok: false} verdict — a 200 with a verdict, not
+ * a transport failure — spends one.
+ *
  * <h2>No cache</h2>
  *
  * <p>The compile cache stays disabled in V1 (&sect;8.5). There is no cache, no memoization and no
@@ -71,6 +90,8 @@ public class CompilePipeline {
   private final LlmGatewayClient gatewayClient;
   private final RunnerValidationClient validationClient;
   private final RuntimePinProperties runtimePin;
+  private final RepairPromptAssembler repairPromptAssembler;
+  private final StudioCompileProperties properties;
 
   @SuppressWarnings("checkstyle:ParameterNumber")
   public CompilePipeline(
@@ -83,7 +104,9 @@ public class CompilePipeline {
       DiagnosticsBounder diagnosticsBounder,
       LlmGatewayClient gatewayClient,
       RunnerValidationClient validationClient,
-      RuntimePinProperties runtimePin) {
+      RuntimePinProperties runtimePin,
+      RepairPromptAssembler repairPromptAssembler,
+      StudioCompileProperties properties) {
     this.studioRepository = studioRepository;
     this.compileStateService = compileStateService;
     this.executor = executor;
@@ -94,6 +117,8 @@ public class CompilePipeline {
     this.gatewayClient = gatewayClient;
     this.validationClient = validationClient;
     this.runtimePin = runtimePin;
+    this.repairPromptAssembler = repairPromptAssembler;
+    this.properties = properties;
   }
 
   /**
@@ -182,70 +207,98 @@ public class CompilePipeline {
   private void runAttempt(
       CompileInputs inputs, CompileRequest request, CompileExecutor.Settlement settlement) {
     try {
-      com.citi.put.checks.studio.compile.gateway.CompileRequest prompt =
-          promptAssembler.assemble(
-              inputs.testId(),
-              inputs.csiId(),
-              inputs.principal(),
-              request.requestId(),
-              1,
-              inputs.orderedSource());
+      int maxAttempts = 1 + repairAttempts();
+      int stepCount = inputs.orderedSource().size();
+      String lastDiagnostics = null;
 
-      // Exactly one call per compile attempt. Repair attempts are 10.9's; this story issues none.
-      CompileResponse response = gatewayClient.propose(prompt);
-      if (!response.isOk()) {
-        settleError(settlement, inputs.testId(), request, response.errorCode().name());
-        return;
-      }
-
-      String artifactJson = response.artifactJson();
-      if (!isSupportedArtifactVersion(artifactJson)) {
-        // Schema validity is not executability. A schema-valid `version: 2` document is rejected
-        // here, is never written as a candidate revision, and is never sent to /v1/validate.
-        settleError(
-            settlement, inputs.testId(), request, GatewayErrorCode.GATEWAY_PARSE_FAILURE.name());
-        return;
-      }
-
-      if (settlement.isSettled()) {
-        // The budget already expired while the gateway held the attempt. Stop here rather than
-        // spending a validator call on a result that can no longer be published.
-        dropLateResult(inputs.testId(), request, "gateway");
-        return;
-      }
-
-      ValidationOutcome validation =
-          validationClient.validate(
-              artifactJson, inputs.orderedSource(), inputs.variableNames(), inputs.secretNames());
-
-      if (!validation.available()) {
-        settleError(
-            settlement, inputs.testId(), request, CompileErrorCode.VALIDATOR_UNAVAILABLE.name());
-        return;
-      }
-
-      if (!validation.ok()) {
-        // A verdict, not a transport failure: `ok: false` is still a 200. NEEDS_REVISION, no
-        // compile_error and no retry.
-        if (!settlement.claim()) {
-          dropLateResult(inputs.testId(), request, "invalid");
+      for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+        if (settlement.isSettled()) {
+          // The budget expired between attempts. Stop before spending a gateway call on a result
+          // that can no longer be published.
+          dropLateResult(inputs.testId(), request, "repair");
           return;
         }
-        compileStateService.publishInvalid(
-            inputs.testId(),
-            request,
-            diagnosticsBounder.bound(validation, inputs.orderedSource().size()));
-        return;
+
+        com.citi.put.checks.studio.compile.gateway.CompileRequest prompt =
+            attempt == 1
+                ? promptAssembler.assemble(
+                    inputs.testId(),
+                    inputs.csiId(),
+                    inputs.principal(),
+                    request.requestId(),
+                    1,
+                    inputs.orderedSource())
+                : repairPromptAssembler.assemble(
+                    inputs, request.requestId(), attempt, lastDiagnostics);
+
+        CompileResponse response = gatewayClient.propose(prompt);
+        if (!response.isOk()) {
+          // A gateway refusal ends the whole request — on a repair exactly as on the first
+          // attempt. It does not silently consume a further attempt and then try again: the
+          // condition is a bound firing (GATEWAY_BUSY, a timeout, a transport failure), and
+          // spending the remaining repair budget on it would turn one refusal into three.
+          settleError(settlement, inputs.testId(), request, response.errorCode().name());
+          return;
+        }
+
+        String artifactJson = response.artifactJson();
+        if (!isSupportedArtifactVersion(artifactJson)) {
+          // Schema validity is not executability, and a repair goes back through this gate rather
+          // than around it: a schema-valid `version: 2` document returned by attempt 3 is rejected
+          // exactly as it is on attempt 1, is never written as a candidate revision, and is never
+          // sent to /v1/validate.
+          settleError(
+              settlement, inputs.testId(), request, GatewayErrorCode.GATEWAY_PARSE_FAILURE.name());
+          return;
+        }
+
+        if (settlement.isSettled()) {
+          // The budget expired while the gateway held this attempt. Stop here rather than spending
+          // a validator call on a result that can no longer be published.
+          dropLateResult(inputs.testId(), request, "gateway");
+          return;
+        }
+
+        ValidationOutcome validation =
+            validationClient.validate(
+                artifactJson, inputs.orderedSource(), inputs.variableNames(), inputs.secretNames());
+
+        if (!validation.available()) {
+          settleError(
+              settlement, inputs.testId(), request, CompileErrorCode.VALIDATOR_UNAVAILABLE.name());
+          return;
+        }
+
+        if (validation.ok()) {
+          if (!settlement.claim()) {
+            dropLateResult(inputs.testId(), request, "candidate");
+            return;
+          }
+          // A repaired candidate is published exactly as a first-attempt one: through
+          // publishCandidate, to AWAITING_CONFIRMATION, never to READY. Nothing in this loop can
+          // reach CompileStateService.confirm.
+          compileStateService.publishCandidate(
+              inputs.testId(),
+              request,
+              candidate(inputs, request, artifactJson, response.provenance(), validation));
+          return;
+        }
+
+        // A verdict, not a transport failure: `ok: false` is still a 200. Bound the diagnostics
+        // now, because they are both what a repair is given to work from and what is persisted if
+        // this turns out to be the last attempt — one bounding path, so the byte cap stays true.
+        lastDiagnostics =
+            diagnosticsBounder.bound(validation, stepCount, attempt, attempt >= maxAttempts);
       }
 
+      // Exhausted repair yields NEEDS_REVISION (§4.7), carrying the FINAL attempt's diagnostics
+      // only. Earlier attempts describe artifacts the author never saw; `attempts` preserves the
+      // fact that repair happened, and `exhausted` that it stopped at the bound.
       if (!settlement.claim()) {
-        dropLateResult(inputs.testId(), request, "candidate");
+        dropLateResult(inputs.testId(), request, "invalid");
         return;
       }
-      compileStateService.publishCandidate(
-          inputs.testId(),
-          request,
-          candidate(inputs, request, artifactJson, response.provenance(), validation));
+      compileStateService.publishInvalid(inputs.testId(), request, lastDiagnostics);
     } catch (RuntimeException e) {
       LOGGER.warn(
           "studio.compile.internal_error testId={} type={}",
@@ -254,6 +307,17 @@ public class CompilePipeline {
       settleError(
           settlement, inputs.testId(), request, CompileErrorCode.COMPILE_INTERNAL_ERROR.name());
     }
+  }
+
+  /**
+   * The configured repair bound, defensively floored at zero.
+   *
+   * <p>Architecture &sect;4.3 fixes it at two, so the deployed value is two and the startup
+   * validation in {@link StudioCompileProperties#validate} checks the budget against it. A negative
+   * value would mean "fewer than one attempt", which is not a compile.
+   */
+  private int repairAttempts() {
+    return Math.max(0, properties.repair().maxAttempts());
   }
 
   /**

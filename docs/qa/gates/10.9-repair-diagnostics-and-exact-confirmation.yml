@@ -1,0 +1,486 @@
+schema: 1
+story: '10.9'
+story_title: Repair, diagnostics and exact confirmation
+epic: EPIC-10
+wave: 4
+
+gate: CONCERNS
+
+status_reason: >-
+  The route Epic 10 exists to guarantee is here, and the reviewer proved the load-bearing claims by
+  mutating the shipped code rather than by reading it. Six mutations were applied to production
+  source by this reviewer, each run against its named test and each restored from a byte copy with
+  `git status --short` empty afterwards. Neutralising `artifact_hash = ?` in confirm's revision
+  statement turned exactly one test red — aWrongArtifactHashIsStaleCandidateAndWritesNothing, 1 of
+  12. Neutralising `confirmed_by IS NULL AND confirmed_at IS NULL` turned three of four
+  ConfirmationWriteOnceIT tests red and every one of them answered 500, not 409, with V12's
+  write-once trigger raising: the developer's reading of that result is correct and the shipped
+  route answers 409 (that class is 4/4 green in the reviewer's own full run). Deleting
+  `compile_request_id = NULL` from the sweep's SET turned alatePublishArrivingAfterTheSweepIs
+  DiscardedOutOfOrder red. Reverting the sweep's CTE to the `WHERE id IN (SELECT ... LIMIT ?)` form
+  the developer reports as a defect turned theSweepStopsAtItsBatchSizeAndTheNextRunContinues red
+  with "expected 2 but was 5" — the batch bound is real only in the shipped form, measured here and
+  not argued. Dropping `validateTimeoutMs` from the startup formula — a stronger mutation than the
+  developer's `if (false)` — turned theBudgetMustStrictlyExceedTheRepairArithmeticAtExactlyThat
+  Boundary red alone, which settles @po's first weak-criterion question: the test computes the
+  boundary from the three bound values and discriminates the exact formula, and it carries no
+  literal 210 or 240. Turning `isCoreServiceBypassed()` to false turned the live ED-02 sibling red
+  alone, so that holder genuinely fires.
+  Scope is clean. The only `openapi.yaml` edit is one deleted line, `x-not-yet-implemented: true`
+  on confirmCompile, with `x-implemented-by: '10.9'` kept and one ADR-002 §13 row added; the
+  document's SHA-256 moves 815aae9b0068…dd80 → cbf07c99de36…f412 exactly as FOC-04 plans, and
+  `git diff --name-only HEAD~1 HEAD -- studio-runner/` is empty, as is the frontend. The 23 test
+  failures in the reviewer's own `check` are the ED-02 set name for name with zero studio-package
+  failures — and the baseline behind that claim was re-measured rather than accepted: the same 14
+  classes at 34138201f, in a detached worktree holding none of this story's code, fail 23 times with
+  identical per-class counts, while the two contract classes are 18 PASSED / 0 FAILED there. The
+  delta is zero by measurement at both ends. The lead's brief about pre-existing spotless violations
+  does not reproduce either: `spotlessCheck` at the base commit is BUILD SUCCESSFUL.
+  What keeps this off PASS is one guard that cannot fail and one criterion that is unmet as
+  written. AC-21's theConfirmTransitionHasExactlyOneProductionCaller and AC-12's noClassOnThe
+  CompilePathReferencesTheConfirmTransition both match the receiver's *variable name* —
+  `compileStateService.confirm(` and `states.confirm(` — and their non-vacuity guards pin only the
+  method's spelling. The reviewer added a production `@Component` to the compile package that calls
+  `stateService.confirm(..., "system")` with no principal at all, and both tests stayed green. That
+  is the ninth guard this epic has found that could not fail for the change it exists to catch. And
+  AC-23's "green from clean" clause is false while ED-02 is open; leaving its checkbox unticked was
+  the right call and is endorsed here, but the criterion now needs @po rather than another attempt.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-11T00:00:00Z'
+branch: story/10.9
+head_sha: add428343
+base_sha: 34138201f
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.9
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands this reviewer executed. Numbers are what they returned.
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  full_check:
+    command: ./gradlew --no-daemon check --continue
+    result: FAIL (:test only)
+    detail: >-
+      787 tests completed, 23 failed, 3 skipped in 7m19s. The 23 are the ED-02 set exactly —
+      CheckCrudIT 2, BulkDeleteIT 2, RateLimitFilterIT 4, CsiFetchIT 1, ReportDeliveryDispatcherIT
+      1, ReportsCrudIT 2, ReportsDuplicateIT 1, ReportsExecutionIT 2, ReportsPreviewIT 2,
+      ScheduleAuthzIT 2, BffFilter503IT 1, BffFilterUnauthIT 1, IdentityCacheIT 1, UserMeEndpointIT
+      1. Zero failures in any studio package. The developer's headline number is reproduced exactly.
+      The 3 skipped are ConfirmCompileRouteTest.anIdentitylessCallerIsUnauthorized (ED-02),
+      TargetPolicyGapTest.achangedTargetPolicyAdvancesTheConfigurationRevision (10.18) and 10.8's
+      pre-existing ExecutionReadinessTest.targetPolicySelectionAdvancesTheConfigurationRevision.
+      Caveat stated with the result: in this run checkstyleMain, checkstyleTest, spotbugsMain and
+      spotlessCheck reported UP-TO-DATE from the developer's build cache, and the jacoco pair never
+      ran at all because `check` schedules it behind a failing `:test`. Both were therefore executed
+      separately, below.
+  static_gates_reexecuted:
+    command: ./gradlew --no-daemon spotlessCheck checkstyleMain checkstyleTest --rerun-tasks; then spotbugsMain --rerun
+    result: PASS
+    detail: >-
+      BUILD SUCCESSFUL, 13 of 13 tasks executed rather than cached. spotbugsTest is SKIPPED by the
+      project's own configuration and was so before this story.
+  coverage:
+    command: ./gradlew --no-daemon jacocoTestReport jacocoTestCoverageVerification -x test
+    result: PASS
+    detail: >-
+      BUILD SUCCESSFUL against the reviewer's own test.exec from the run above. Parsed from
+      build/reports/jacoco/test/jacocoTestReport.xml: overall LINE 5449/6908 = 78.9% against a 70%
+      bar; studio.compile 587/648 = 90.6%; studio.compile.gateway 390/410 = 95.1%;
+      studio.readiness 78/84 = 92.9%; studio 322/331 = 97.3%. Every figure the developer reported is
+      reproduced to the digit.
+  baseline_remeasured_at_base_commit:
+    command: >-
+      in the detached worktree at 34138201f: ./gradlew --no-daemon test --tests over the 14 ED-02
+      classes plus StudioContractTest and CompileRouteContractDivergenceTest
+    result: THE 23 ARE MEASURED, NOT ASSERTED
+    detail: >-
+      53 tests completed, 23 failed, in 1m47s, with none of this story's code present. The failure
+      set is identical class for class and count for count to the one in the post-change run:
+      CheckCrudIT 2, BulkDeleteIT 2, RateLimitFilterIT 4, CsiFetchIT 1, ReportDeliveryDispatcherIT
+      1, ReportsCrudIT 2, ReportsDuplicateIT 1, ReportsExecutionIT 2, ReportsPreviewIT 2,
+      ScheduleAuthzIT 2, BffFilter503IT 1, BffFilterUnauthIT 1, IdentityCacheIT 1, UserMeEndpointIT
+      1. The delta this story introduces is therefore zero, established by measurement at both ends
+      rather than by the developer's contaminated pre-edit run. The same run also settles the
+      contamination claim: at the base commit the two contract classes are 18 PASSED / 0 FAILED, so
+      the three contract failures in the developer's overlapping baseline can only have come from
+      the openapi.yaml edit that landed mid-run, exactly as reported.
+  spotless_baseline_dispute:
+    command: git worktree add --detach <scratch>/base 34138201f && ./gradlew --no-daemon spotlessCheck
+    result: BASELINE IS CLEAN — THE DEVELOPER IS RIGHT
+    detail: >-
+      BUILD SUCCESSFUL, 7 of 7 tasks executed, at the story's exact base commit. There are no
+      pre-existing spotless violations on this branch; the lead's brief was wrong and the story
+      should not carry that claim. One correction to the developer's account of *why*: its stated
+      mechanism — ":test fails before spotlessCheck runs, so the baseline check never reached it" —
+      is not what this reviewer observed. In `check --continue` the static tasks are scheduled ahead
+      of `:test`. The conclusion stands; the explanation for it does not.
+  mutation_ac5_artifact_hash:
+    command: >-
+      neutralise `artifact_hash = ?` to `(artifact_hash = ? OR TRUE)` in CompileStateService.confirm's
+      revision statement, then ./gradlew --no-daemon test --tests '...ExactConfirmationIT' --rerun
+    result: RED AS REQUIRED
+    detail: >-
+      12 tests completed, 1 failed: aWrongArtifactHashIsStaleCandidateAndWritesNothing. Exactly the
+      corresponding test and no other, which is the property AC-5's one-perturbation-per-test shape
+      is for.
+  mutation_ac8_write_once:
+    command: >-
+      neutralise `confirmed_by IS NULL AND confirmed_at IS NULL`, then --tests
+      '...ConfirmationWriteOnceIT' --rerun
+    result: RED AS REQUIRED, AND THE 500 IS REPRODUCED
+    detail: >-
+      4 tests completed, 3 failed. All three failures are "expected 409 but was 500":
+      reconfirmingTheSameRevisionIsAConflictAndNotAServerError,
+      aDifferentPrincipalCannotOverwriteSomebodyElsesConfirmation and
+      anOlderConfirmedRevisionCannotBeConfirmedAgainWhileANewerCandidateAwaits. With the application
+      guard removed the request reaches V12's write-once trigger and the route answers 500. The
+      developer's reading is confirmed: the application guard is load-bearing, and the shipped code
+      answers 409 (the same class is 4/4 green in the unmutated full run above). Broader than the
+      developer recorded — they named one test, three go red.
+  mutation_ac19b_request_identity:
+    command: delete `compile_request_id = NULL,` from the sweep's SET, then --tests '...AbandonedCompileSweepIT' --rerun
+    result: RED AS REQUIRED
+    detail: >-
+      7 tests completed, 2 failed: alatePublishArrivingAfterTheSweepIsDiscardedOutOfOrder (the one
+      the criterion names) and anAbandonedCompileIsSweptToTheSameOutcomePublishErrorProduces. The
+      guard-reuse argument in the Implementation Notes is load-bearing rather than elegant.
+  mutation_sweep_batch_bound:
+    command: >-
+      revert the sweep's CTE to `UPDATE ... WHERE id IN (SELECT ... ORDER BY ... LIMIT ? FOR UPDATE
+      SKIP LOCKED)`, then --tests '...AbandonedCompileSweepIT' --rerun
+    result: RED — THE DEFECT AND ITS FIX ARE BOTH MEASURED
+    detail: >-
+      7 tests completed, 1 failed: theSweepStopsAtItsBatchSizeAndTheNextRunContinues, with
+      "expected: 2 but was: 5". This is the developer's first reported defect reproduced
+      independently, and it establishes both halves: the IN-subquery form does not bound the
+      statement, the shipped CTE form does, and the test discriminates between them. AC-13's "each
+      row is driven past its bound by a test" is not decoration.
+  mutation_ac13_arithmetic:
+    command: >-
+      drop `validateTimeoutMs` from `worstCaseMs` in StudioCompileProperties.validate, then --tests
+      '...RepairBoundsTest' --rerun
+    result: RED AS REQUIRED
+    detail: >-
+      6 tests completed, 1 failed: theBudgetMustStrictlyExceedTheRepairArithmeticAtExactlyThat
+      Boundary. Deliberately a stronger mutation than the developer's `if (false)` short-circuit: it
+      leaves the branch in place and changes only the formula, so a test that merely asserted "some
+      exception is thrown somewhere below the budget" would have stayed green. It did not. @po's
+      first weak-criterion concern is answered — see ac13_inputs below.
+  mutation_ed02_bypass:
+    command: >-
+      BffSessionAuthenticationFilter.isCoreServiceBypassed() -> false, then --tests
+      '...ConfirmCompileRouteTest' --rerun
+    result: THE HOLDER FIRES
+    detail: >-
+      11 tests completed, 1 failed, 1 skipped. The single failure is the live sibling
+      theUnauthenticatedCaseIsNotReachableWhileTheCoreServiceBypassIsOn, and nothing else moved — a
+      precise alarm, not a blast radius. It fails with a ResourceAccessException ("cannot retry due
+      to server authentication, in streaming mode") rather than by observing a 401; see AUTH-1.
+  probe_auto_confirm_scan:
+    command: >-
+      add a production @Component to studio/compile calling `stateService.confirm(..., "system")`,
+      then --tests '...NoAutoConfirmTest' --tests
+      '...RepairLoopTest.noClassOnTheCompilePathReferencesTheConfirmTransition' --rerun
+    result: BOTH GUARDS STAYED GREEN — see SCAN-1
+    detail: >-
+      BUILD SUCCESSFUL. A production class that confirms a candidate with no authenticated principal
+      at all, sitting in the compile package, is invisible to the two tests written to forbid
+      exactly that. The probe class was deleted and the tree verified clean.
+  repair_fixture_together_and_alone:
+    command: >-
+      --tests '...compile.Repair*' --rerun (one JVM), then each of the five classes in its own
+      invocation
+    result: PASS BOTH WAYS
+    detail: >-
+      Together BUILD SUCCESSFUL in 22s; RepairBoundsTest, RepairExhaustionTest, RepairLoopTest,
+      RepairRedactionTest and RepairBudgetExpiryTest each BUILD SUCCESSFUL alone. All five are also
+      green inside the 787-test run. The @AfterAll-to-shutdown-hook repair is sound and not merely
+      order-dependent: no subclass stops the shared server, and @BeforeEach calls runner.resetAll()
+      so classes cannot leak stubs into each other.
+  migration_two_stage:
+    command: read + observed run of CompileStartedAtMigrationIT inside the full check
+    result: THE BLIND SPOT IS CLOSED
+    detail: >-
+      6 of 6 PASSED. @BeforeAll runs flywayTo("15"), seeds drafts in all five compile states plus a
+      soft-deleted row, a quarantined row and a legacy row stranded in COMPILING, and only then
+      flywayTo("16"). That is a real two-stage migration, not a fresh-schema build, which is the
+      failure mode a wave-1 migration in this repository had. theInvariantHoldsAcrossEveryRowAfter
+      TheMigration carries its own non-vacuity assertion ("not vacuously true because no row is
+      compiling", COUNT = 1) — the discipline this epic's migration tests were previously missing.
+  scope_runner_and_frontend:
+    command: git diff --name-only HEAD~1 HEAD -- studio-runner/ ; ... -- frontend/
+    result: EMPTY BOTH
+    detail: >-
+      Zero files. The only directories touched are backend/src/{main,test}, docs/architecture,
+      docs/specs/studio and docs/stories.
+  scope_openapi:
+    command: git show HEAD -- docs/specs/studio/openapi.yaml; shasum -a 256 on both sides
+    result: ONE LINE DELETED
+    detail: >-
+      1 insertion 0 / 1 deletion — `x-not-yet-implemented: true` under confirmCompile.
+      `x-implemented-by: '10.9'` stays. SHA-256 815aae9b0068335e8d5ab5270dccecac4d1fd6f472306ca3
+      dc04292187dd0d80 -> cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e, matching
+      the story's File List to the digit. ADR-002 gains exactly one §13 row.
+  scope_auth_filter:
+    command: git diff --name-only HEAD~1 HEAD | grep BffSession
+    result: EMPTY
+    detail: >-
+      The ED-02 filter was not touched by this story. Its isCoreServiceBypassed() still returns true
+      unconditionally with the "temporary hardcoded bypass" comment intact.
+  working_tree:
+    command: git status --short
+    result: CLEAN
+    detail: >-
+      Empty before the experiments and empty after every one of them. Six production files were
+      mutated and restored from byte copies, one test file was temporarily un-@Disabled and
+      restored, and one probe class was created and deleted. No production code is changed by this
+      review. The base-commit tree was a detached `git worktree add`, removed afterwards; the shared
+      stash stack was never touched.
+
+# ─────────────────────────────────────────────────────────────────────────────
+developer_claims_verified:
+  - claim: 787 tests, 23 failed, 3 skipped; the 23 are the identical ED-02 set; 0 studio failures
+    verdict: >-
+      REPRODUCED EXACTLY by this reviewer's own `check --continue`. Same total, same failure count,
+      same 14 classes with the same per-class counts, zero studio-package failures.
+  - claim: spotless/checkstyle/spotbugs green and jacoco green at 78.9% / 90.6%
+    verdict: >-
+      CONFIRMED BY RE-EXECUTION rather than by cache. All static gates re-run with --rerun-tasks;
+      the coverage pair run against the reviewer's own test.exec reproduces every package figure.
+  - claim: the "~6 pre-existing spotless violations" in the lead's brief does not reproduce
+    verdict: >-
+      CONFIRMED. spotlessCheck at 34138201f in a detached worktree is BUILD SUCCESSFUL. The
+      developer's *conclusion* is right and the brief was wrong. Its explanation of the mechanism is
+      not — the static tasks run ahead of :test in this build.
+  - claim: the baseline is 23, not the 26 the contaminated pre-edit run reported
+    verdict: >-
+      CONFIRMED BY RE-MEASUREMENT. The developer's own baseline run overlapped its first
+      openapi.yaml edit and is therefore not evidence; it says so plainly, which is the right
+      disclosure, but it leaves the 23 asserted. This reviewer measured it instead: the same 14
+      classes at the base commit, in a detached worktree with none of this story's code present,
+      fail 23 times with identical per-class counts, and the two contract classes are 18 PASSED /
+      0 FAILED there. So the baseline is 23, the delta is 0, and the developer's attribution of the
+      three extra failures to its own in-flight edit is corroborated rather than taken on trust.
+  - claim: eleven mutations, all red, source restored
+    verdict: >-
+      SPOT-CHECKED AND EXTENDED. Six re-run here across five different criteria (AC-5, AC-8a,
+      AC-13, AC-19b and the sweep's batch bound) plus the ED-02 holder, all red, two of them
+      broader or stronger than recorded. No falsification in the developer's table was found to be
+      overstated.
+  - claim: mutating the confirmed_by guard produced 500 from V12's trigger, not 409
+    verdict: >-
+      REPRODUCED. Three tests, all "expected 409 but was 500". The shipped route answers 409.
+  - claim: the sweep's LIMIT did not bound the statement; the CTE does
+    verdict: >-
+      REPRODUCED UNDER MEASUREMENT. The reverted form updates 5 rows with a batch of 2; the shipped
+      form updates 2. Not an argument about planners — a number.
+  - claim: one 10.8 assertion is superseded, not relaxed
+    verdict: >-
+      CONFIRMED. CompilePipelineTest's diff is one number, 1 -> 3, on a stub that rejects every
+      artifact, with a seven-line comment giving the reason. The surrounding assertions — no
+      revision written, candidate cleared, index-aligned diagnostics — are unchanged, and the
+      sibling aValidatorFiveHundredLeavesTheDraftStaleAndRetryableWithoutASecondCall still verifies
+      exactly 1 validator call and is untouched by the diff. A failure ends the loop; only an
+      ok:false verdict spends an attempt. The distinction holds and is assertable from the pair.
+  - claim: nothing under studio-runner/ was touched
+    verdict: CONFIRMED — zero files in the diff, and the working tree shows none either.
+
+# ─────────────────────────────────────────────────────────────────────────────
+ac13_inputs:
+  question: '@po: AC-13''s 210 s inputs were unstated. Are they derived or chosen?'
+  answer: DERIVED, AND THE TEST DRIVES THE DERIVATION RATHER THAN THE NUMBER
+  detail: >-
+    theBudgetMustStrictlyExceedTheRepairArithmeticAtExactlyThatBoundary binds all three inputs from
+    the records' own @DefaultValue declarations through `new Binder(new
+    MapConfigurationPropertySource(Map.of())).bindOrCreate(...)` — an empty property source, so the
+    values are the shipped defaults and nothing else — computes worstCaseMs from them, and asserts
+    that exactly worstCaseMs fails startup and worstCaseMs + 1 passes. There is no literal 210 or
+    240 anywhere in the test body. The reviewer's formula mutation proves it discriminates the
+    arithmetic and not merely the existence of a check. A second test,
+    theConfiguredDeploymentSatisfiesTheSameArithmetic, repeats it against the autowired beans, so a
+    divergence between record defaults and application.yml fails too. This criterion is met on the
+    strength @po asked for.
+
+ac10a_stub_bound:
+  question: '@po: AC-10a''s call counts are only ever proven against a scripted stub.'
+  answer: HONEST SCOPING IS SUFFICIENT HERE — NO CONCERNS ITEM RAISED
+  detail: >-
+    The Dev Agent Record states, unprompted and in the right place, exactly what the counting stub
+    establishes (properties of the pipeline: at most 1 + max-attempts proposals, numbered 1..3 and
+    never repeated, a repair carrying the previous attempt's bounded diagnostics, only an ok:false
+    verdict spending an attempt) and exactly what it does not (nothing about a real model, nothing
+    about repair improving an artifact, nothing about R2D2 accepting this shape). Two details make
+    the scoping more than a disclaimer. The /v1/validate half of every count is measured on the wire
+    through WireMock, so that number is not a stub's self-report; and the validator script is a
+    WireMock *scenario*, so a fourth call receives no stubbed answer rather than silently reusing
+    the third. The unprovable half is AC-10b, gated on ED-01 and owned by 10.19, and it is recorded
+    unticked. A CONCERNS item here would be a complaint about ED-01, not about this story.
+
+ac23_checkbox:
+  question: 'Was leaving AC-23 unticked right, or does the AC need @po?'
+  answer: BOTH — THE CALL WAS RIGHT AND THE CRITERION NOW NEEDS @po
+  detail: >-
+    Leaving it unticked is endorsed. `./gradlew check` is not green from clean and this reviewer
+    reproduced that independently; ticking the box would assert something false, and the story says
+    so in the same breath as its numbers rather than in a footnote. Every other clause of AC-23 is
+    satisfied and was verified here: Testcontainers ITs cover the migration (two-stage), the sweep
+    and the confirmation transaction; every concurrency case holds a transaction open and
+    interleaves with latches rather than calling sequentially; four falsifications were required and
+    eleven were recorded, six re-run here; AC-10b and AC-15b are recorded skipped rather than
+    passed. But the criterion as written is unsatisfiable on this branch for a reason no story in
+    this epic owns, and a criterion that no correct implementation can meet stops being a gate. The
+    recommendation to @po is to amend the first clause for the rest of Epic 10 — "green apart from
+    the enumerated ED-02 set, with zero new failures and zero failures in the story's own packages"
+    — which is the property every gate in this epic has actually been measuring.
+
+unreachable_criteria:
+  - criterion: AC-3's 401
+    gate: ED-02 (status open)
+    holder: ConfirmCompileRouteTest.anIdentitylessCallerIsUnauthorized (@Disabled)
+    live_sibling: theUnauthenticatedCaseIsNotReachableWhileTheCoreServiceBypassIsOn
+    verdict: >-
+      PROPERLY HELD. The sibling exists, is live, ran and PASSED in the full suite, and this reviewer
+      confirmed it genuinely fires by turning isCoreServiceBypassed() to false: it was the single
+      failure in the class. The disabled test throws nothing misleading and its @Disabled string
+      names the gate. See AUTH-1 for the one caveat.
+  - criterion: AC-7's target-policy perturbation
+    gate: ED-04 / ADR-002 O-6 / SPK-05
+    holder: TargetPolicyGapTest.achangedTargetPolicyAdvancesTheConfigurationRevision (@Disabled)
+    live_sibling: theClassifierStillRecordsTheTargetPolicyGap
+    verdict: >-
+      PROPERLY HELD, AND FIRES IN BOTH DIRECTIONS. The sibling reflects over UITestRequest and
+      TestConfiguration for any target/destination-policy component, asserts classify() does not
+      start comparing one, and asserts the classifier's javadoc paragraph recording the gap is still
+      present — so 10.18 cannot close it silently by adding the field, nor by deleting the note. The
+      disabled body throws an AssertionError, so removing @Disabled without landing the field fails
+      loudly rather than passing vacuously.
+  - criterion: AC-10b and AC-15b
+    gate: ED-01 (status open)
+    holder: none — no test exists, by design
+    verdict: >-
+      RECORDED AS SKIPPED AND CANNOT FALSELY TURN GREEN. There is no @Disabled test, no skipIf and
+      no assumption that could arm itself: the criteria are unticked in the story and recorded in
+      the compile README's deferral table. The one mechanism that could have made them look
+      exercised — a shared environment setting studio.compile.gateway.enabled=true — does not exist:
+      application.yml ships it false and the only `=true` in the tree is 10.5's
+      StudioGatewayConfigTest, a context-wiring assertion that makes no call.
+
+# ─────────────────────────────────────────────────────────────────────────────
+top_issues:
+  - id: SCAN-1
+    severity: medium
+    finding: >-
+      The two structural guards that forbid an auto-confirm path match the *receiver's variable
+      name*, not the type or the call. NoAutoConfirmTest.theConfirmTransitionHasExactlyOneProduction
+      Caller and RepairLoopTest.noClassOnTheCompilePathReferencesTheConfirmTransition both scan for
+      the literals `compileStateService.confirm(` and `states.confirm(`. Their non-vacuity guards
+      assert that `public UUID confirm(` exists in CompileStateService — which pins the *method*
+      name and reads reassuringly — but nothing pins the receiver names the scans depend on. This
+      reviewer added a production @Component to com.citi.put.checks.studio.compile holding a
+      `CompileStateService stateService` field and calling `stateService.confirm(..., "system")`,
+      i.e. a production auto-confirmation with no authenticated principal in the package the second
+      scan exists to police, and both tests stayed green. No such caller exists today — that was
+      verified by reading the package as well as by the scans' correct result on today's source — so
+      this is not a behavioural defect. It is a guard that cannot fail for the class of change it
+      was written to catch, which is what AC-21 says it is for ("the failure mode is a *new* one
+      that no behavioural test can anticipate"). Ninth of its kind in this epic, and a new shape:
+      *a structural scan keyed to a variable name, with a non-vacuity guard that only proves the
+      method name exists.*
+    suggested_action: >-
+      Match the call rather than the spelling of the field. Scan for `\.confirm\s*\(` in any file
+      that declares or receives a CompileStateService, or resolve callers by type. One line in each
+      test; the exclusion list (CompileStateService itself, and StudioService as the one legitimate
+      caller) stays as it is. Owner: @dev, in a follow-up — not blocking, because the property is
+      true today.
+  - id: BUILD-1
+    severity: medium
+    finding: >-
+      `./gradlew check` is not green, so AC-23 is unmet as written. All 23 failures are the ED-02
+      auth/BFF/rate-limit baseline, reproduced here name for name, none of them in a package this
+      story touches and none of them created by it — the filter that causes them is not in the diff.
+    suggested_action: >-
+      None for this story. The criterion, not the implementation, is what needs changing; see
+      ac23_checkbox. Do not let AC-23 be ticked to close the bookkeeping.
+  - id: AUTH-1
+    severity: low
+    finding: >-
+      With the ED-02 bypass turned off, neither the held test nor its live sibling behaves the way
+      their javadoc predicts. The sibling goes red — which is the property that matters and the
+      reason the holder cannot be forgotten — but it fails with
+      `ResourceAccessException: cannot retry due to server authentication, in streaming mode` rather
+      than by observing a 401. Enabling anIdentitylessCallerIsUnauthorized under the same condition
+      fails identically. The RestTemplate this test class uses cannot follow a real authentication
+      challenge in streaming mode, so whoever lands ED-02 will need a client-side fix in both tests
+      before either can assert what it says it asserts.
+    suggested_action: >-
+      Note it on ED-02 rather than fixing it here — the fix belongs with the story that removes the
+      bypass, and the alarm already sounds. A line in the sibling's javadoc saying the red may
+      arrive as a transport error would save the next reader ten minutes.
+  - id: COV-1
+    severity: low
+    finding: >-
+      No package-level jacoco rule was added for com.citi.put.checks.studio.compile, this story's
+      principal new surface. Story 10.5 (AC-15) added one for .compile.gateway at 0.80 and story
+      10.7 (AC-40) added four more at 0.75 precisely so "the new surface cannot hide inside the
+      bundle figure". The repair loop, the sweep and the confirmation transaction are covered only
+      by the global 70% rule. The measured figure is 90.6%, so the bar is met in fact; it is simply
+      not enforced, and a regression there would have to drag the whole repository below 70% before
+      anything failed.
+    suggested_action: >-
+      Add one rule for com.citi.put.checks.studio.compile at 0.80, matching the gateway precedent.
+      Not blocking and not required by AC-23, which asks for thresholds met rather than thresholds
+      added.
+  - id: SCOPE-1
+    severity: low
+    finding: >-
+      AC-7 says each of the seven §4.2 execution-affecting fields "is driven by its own perturbation
+      and each must advance configurationRevision", with target policy named as the one unreachable
+      case. In fact there are two. Browser is also not perturbable: since 10.1 the only legal engine
+      is chromium, enforced by a CHECK constraint and the controller boundary, so a browser change
+      is a rejected request rather than a configuration revision. The story handles this honestly —
+      theOnlyLegalBrowserIsTheCanonicalOneSoABrowserChangeIsARefusalRatherThanARevision states it in
+      its name, asserts CANONICAL_BROWSER is chromium and asserts that resubmitting it advances
+      nothing — so the substance of AC-7 is upheld more strongly than by a revision bump. But it is
+      a second reachability limit that the criterion does not declare, and @po ruled only one.
+    suggested_action: >-
+      @po to record browser alongside target policy as a stated non-perturbation in AC-7, or to
+      accept the test's own statement of it. No code change.
+
+required_before_merge: []
+
+recommended_not_blocking:
+  - SCAN-1 — make the two auto-confirm scans match the call, not the field name. This is the one
+    finding that would change a future review's verdict if left.
+  - COV-1 — a package rule for studio.compile at 0.80.
+  - AUTH-1 — a line of javadoc, and a note carried to ED-02's owner.
+  - SCOPE-1 — @po to declare browser as AC-7's second non-perturbation.
+
+do_not_do:
+  - Do not tick AC-23. Its "green from clean" clause is false and the right repair is @po's, not
+    another build.
+  - Do not re-anchor studio-runner/test/run/confinement.test.ts here. The SHA break is FOC-04,
+    it is expected, and 10.13 re-anchors under its own T-10.13.10.
+  - Do not add a status term to any publish guard to help the sweep. Clearing compile_request_id is
+    what makes the existing guard do the work, and the falsification for it is red under this
+    reviewer's own hand.
+  - Do not multiply 409 conflict codes for the exactness failures. @po ruled one code on ADR-002
+    §14.3's remedy axis and the route's produced set is asserted equal to x-conflict-codes in both
+    directions.
+  - Do not "fix" the ED-02 failures inside an Epic 10 story.
+
+final_decision:
+  gate: CONCERNS
+  merge: SAFE
+  rationale: >-
+    Every claim this story makes about its own surface was reproduced by executing it. The four
+    exactness terms, the write-once guard, the sweep's age predicate and request-identity clear, the
+    repair arithmetic and the batch bound are all falsifiable and were falsified here; the
+    confirmation route answers the frozen contract's codes and nothing else; the migration is proven
+    two-stage against a seeded database; the contract edit is one line and the runner tree is
+    untouched. What remains is a guard that cannot fail for the change it polices (SCAN-1, a new
+    shape, not a live defect), a criterion that no implementation can meet while ED-02 is open
+    (BUILD-1, correctly left unticked), and three low-severity notes. None of them is a reason to
+    hold the story, and two of them are @po's rather than @dev's.

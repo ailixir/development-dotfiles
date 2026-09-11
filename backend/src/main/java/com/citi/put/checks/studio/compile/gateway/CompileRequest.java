@@ -22,6 +22,11 @@ import java.util.UUID;
  * @param syntaxReferenceVersion version identifier of that reference
  * @param outputContract the output/allowed-language contract text
  * @param promptVersion pinned prompt version, recorded in provenance and audit
+ * @param repairDiagnostics the bounded, redacted diagnostics of the attempt that just failed, or
+ *     {@code null} on attempt 1. Story 10.9, architecture &sect;4.3: a repair carries the reasons
+ *     the previous artifact was refused and nothing else. It is the document {@code
+ *     DiagnosticsBounder} already produced, so it is inside the same caps and carries the same
+ *     redaction — never a resolved value, never a raw validator body.
  */
 public record CompileRequest(
     UUID testId,
@@ -33,7 +38,48 @@ public record CompileRequest(
     String syntaxReference,
     String syntaxReferenceVersion,
     String outputContract,
-    String promptVersion) {
+    String promptVersion,
+    String repairDiagnostics) {
+
+  /**
+   * A first-attempt request, carrying no repair diagnostics.
+   *
+   * @param testId the UI test being compiled
+   * @param csiId the owning CSI
+   * @param principal the authenticated user that triggered the compile
+   * @param compileRequestId compile request identity, stable across repair attempts
+   * @param attempt 1-based attempt number within that compile request
+   * @param fencedSourceLines ordered source lines, already fenced as data by the caller
+   * @param syntaxReference the versioned Playwright syntax reference body
+   * @param syntaxReferenceVersion version identifier of that reference
+   * @param outputContract the output/allowed-language contract text
+   * @param promptVersion pinned prompt version, recorded in provenance and audit
+   */
+  @SuppressWarnings("checkstyle:ParameterNumber")
+  public CompileRequest(
+      UUID testId,
+      String csiId,
+      String principal,
+      String compileRequestId,
+      int attempt,
+      List<String> fencedSourceLines,
+      String syntaxReference,
+      String syntaxReferenceVersion,
+      String outputContract,
+      String promptVersion) {
+    this(
+        testId,
+        csiId,
+        principal,
+        compileRequestId,
+        attempt,
+        fencedSourceLines,
+        syntaxReference,
+        syntaxReferenceVersion,
+        outputContract,
+        promptVersion,
+        null);
+  }
 
   public CompileRequest {
     Objects.requireNonNull(testId, "testId");
