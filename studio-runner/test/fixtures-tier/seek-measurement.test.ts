@@ -56,9 +56,33 @@ import { runReal } from './realRunner.js';
  *   process-origin reading is out by the process uptime, which is seconds to minutes.
  *
  * Neither is the 500 ms figure of §6.4. That is AC-12b, through the whole pipeline, in staging.
+ *
+ * ## Why the outlier bound is 1500 ms, and how that number was chosen (MED-1)
+ *
+ * It was 2500. QA raised no flakiness against the measurements, but pointed out that a bound five
+ * times the §6.4 target protects against nothing smaller than a process uptime, and that the
+ * headroom was being used. So it is **lowered** against the measurements rather than left at a
+ * round number — and it is emphatically not widened, because the measured numbers are the
+ * criterion and moving them upward after seeing them would be moving a goalpost.
+ *
+ * Fifty per-step errors are on record: eight runs here and two in QA's review. They fall into two
+ * populations with nothing in between.
+ *
+ * - **Attributed correctly** — |error| from 0.8 ms to 59.3 ms. Forty-three of the fifty.
+ * - **Mis-attributed** — the detector missed a repaint and matched the *next* scene change:
+ *   +137.0, +137.5, +374.0, +416.9 and +657.7 here, +376.4 and +650.4 in QA's run. Every one is
+ *   positive and every one lands on a later change in the ~720 ms cadence, which is the signature
+ *   of a missed match rather than of a timing error.
+ *
+ * 1500 ms sits above the worst mis-attribution ever recorded (657.7 ms — a clean one-step skip,
+ * 2222.3 ms reported against a change at 2880.0 ms) *plus a further full cadence* (720 ms), so a
+ * miss one step worse than anything observed still passes, with 122 ms to spare. It remains far
+ * below the process-uptime scale the bound exists to catch, and it is 25× the largest correctly
+ * attributed error. Tightening further would start to bet against the detector; that bet belongs
+ * to AC-12b in staging with a decoder available, not to a bound on a laptop.
  */
 const MEDIAN_TOLERANCE_MS = 100;
-const OUTLIER_BOUND_MS = 2_500;
+const OUTLIER_BOUND_MS = 1_500;
 
 const ADVANCE = {
   segments: [

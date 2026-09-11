@@ -420,6 +420,16 @@ top_issues:
       entry on that list that grants arbitrary code execution in the browser process. Add an
       assertion over childEnvironment that the constructed child env contains no key capable of
       preloading code, so the allowlist cannot silently regrow one.
+    dev_resolution:
+      status: RESOLVED
+      by: '@dev / 10.12'
+      note: >-
+        NODE_OPTIONS removed from INHERITED_ENV_KEYS and the rule restated as a class —
+        assertNoCodeLoadingKeys refuses NODE_*, LD_*, DYLD_* and OPENSSL_* in the constructed child
+        environment on every launch — plus execArgv: [] on the fork, which closed a second channel
+        of the same kind (fork replays the parent's interpreter flags); the reviewer's attack and
+        the execArgv variant were both re-run and no longer preload the child, the five in-repo
+        attacks still fail, and re-adding NODE_OPTIONS turns three launcher.test.ts tests red.
   - id: MED-1
     severity: medium
     title: The per-step seek bound is five times the §6.4 target, so it protects against nothing but a process origin
@@ -435,6 +445,15 @@ top_issues:
     note: >-
       The story states this limitation plainly and does not claim the target. Do NOT widen the bound
       in response; the right closure is AC-12b in staging with a decoder available.
+    dev_resolution:
+      status: RESOLVED
+      by: '@dev / 10.12'
+      note: >-
+        Lowered, not widened: OUTLIER_BOUND_MS is 1500 ms, chosen against fifty recorded per-step
+        errors (eight fresh runs plus this review's two) whose worst mis-attribution is 657.7 ms, a
+        clean one-step skip — 1500 clears that plus a further full ~720 ms cadence with 122 ms to
+        spare, so a miss one step worse than any observed still passes, while a per-step regression
+        is now caught at 1.5 s rather than 2.5 s. MEDIAN_TOLERANCE_MS untouched at 100 ms.
   - id: MED-2
     severity: medium
     title: childModulePath and spawner are production-reachable seams with no guard that production leaves them unset
@@ -448,6 +467,14 @@ top_issues:
       Nothing asserts that, however, and 10.13 is about to touch this constructor. A test over
       createConfiguredLauncher asserting the constructed launcher carries no spawner and no module
       override would make the property hold across that change rather than by current habit.
+    dev_resolution:
+      status: RESOLVED
+      by: '@dev / 10.12'
+      note: >-
+        createConfiguredLauncher now builds a literal typed
+        Omit<ChildLauncherOptions, 'spawner' | 'childModulePath' | 'parentEnv'>, so supplying a seam
+        is a compile error (verified: TS2353), and test/run/production-seams.test.ts asserts the
+        constructed options key for key so a seam wired in by 10.13 fails there rather than shipping.
   - id: LOW-1
     severity: low
     title: A source comment overstates where performance.now() appears
@@ -488,11 +515,65 @@ top_issues:
 # What must happen before this merges
 # ─────────────────────────────────────────────────────────────────────────────
 required_before_merge:
-  - Remove NODE_OPTIONS from INHERITED_ENV_KEYS in src/run/launcher.ts and add an assertion over
-    the constructed child environment that no code-preloading key survives (SEC-1).
+  - >-
+    DONE (see top_issues SEC-1 dev_resolution). Remove NODE_OPTIONS from INHERITED_ENV_KEYS in
+    src/run/launcher.ts and add an assertion over the constructed child environment that no
+    code-preloading key survives (SEC-1).
 recommended_not_blocking:
-  - MED-2's assertion over createConfiguredLauncher, before 10.13 touches the constructor.
-  - LOW-1's comment correction in src/run/timeline.ts.
+  - >-
+    DONE (see top_issues MED-2 dev_resolution). MED-2's assertion over createConfiguredLauncher,
+    before 10.13 touches the constructor.
+  - >-
+    NOT DONE — the three LOW findings were deliberately left out of a security fix. LOW-1's comment
+    correction in src/run/timeline.ts.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Developer response (@dev) — the gate verdict itself is left to @qa to re-judge
+# ─────────────────────────────────────────────────────────────────────────────
+dev_response:
+  date: '2026-09-11'
+  branch: story/10.12
+  scope: runner-only; no contract file, no .nvmrc, no engines, no backend, no frontend
+  sec_1:
+    reproduced_first: >-
+      The attack was reproduced on the unfixed tree before anything was changed: with NODE_OPTIONS
+      carrying --import and nothing in the repository modified, the preload ran inside the forked
+      child (hasIpc=true), logged INTERCEPTED chromiumSandbox=true, rewrote it to false with
+      --no-sandbox, and the launch reported ready.
+    fix: >-
+      A class rule, not a name. NODE_OPTIONS is off the allowlist; assertNoCodeLoadingKeys refuses
+      NODE_*, LD_*, DYLD_* and OPENSSL_* over the *constructed* environment on every launch, so a
+      future addition to INHERITED_ENV_KEYS fails the launch instead of reopening the pathway.
+    second_channel_found_and_closed: >-
+      fork defaults execArgv to process.execArgv, so a runner started `node --import evil
+      dist/main.js` replayed the preload into the browser child even with the environment fully
+      enumerated. Proven by removing execArgv: [] and watching the child get preloaded again, then
+      restored. The child is compiled ESM and now gets no interpreter flags at all.
+    attacks_rerun:
+      - attack: QA's NODE_OPTIONS --import preload, through the real createChildBrowserLauncher
+        result: BLOCKED — the preload runs only in the parent; the child never loads it.
+      - attack: the same preload delivered on the command line (execArgv inheritance)
+        result: BLOCKED — same, and demonstrated DEFEATED again with the guard removed.
+      - attack: a second Playwright launch site
+        result: STILL FAILS — launchPersistentContext in src/run/browser.ts only.
+      - attack: a configuration key
+        result: STILL FAILS — no sandbox key in config.ts; production supplies geometry and three
+          timeouts, now asserted key for key.
+      - attack: extra fields on the launch request / a spread
+        result: STILL FAILS — DEBUG=pw:browser shows zero occurrences of `sandbox` on the command
+          line with chromiumSandbox:false, args:['--no-sandbox','--disable-setuid-sandbox'],
+          sandbox:false and headless:true all added to the request.
+      - attack: library and browser environment variables
+        result: STILL FAILS — PLAYWRIGHT_CHROMIUM_SANDBOX, CHROMIUM_FLAGS, CHROME_DEVEL_SANDBOX and
+          a STUDIO_RUNNER_-namespaced key set together changed nothing.
+      - attack: editing the source to add a disabling flag
+        result: STILL FAILS — eslint no-restricted-syntax on that exact line, plus two
+          test/run/sandbox.test.ts assertions red. Restored.
+    falsification_of_the_new_assertions: >-
+      Re-adding NODE_OPTIONS to INHERITED_ENV_KEYS turns three test/run/launcher.test.ts tests red.
+      Deleting execArgv: [] turns the fork assertion red. Adding a spawner to createConfiguredLauncher
+      is a compile error (TS2353); with the annotation weakened so it compiles, two
+      test/run/production-seams.test.ts tests go red. All four edits restored, tree clean.
 do_not_do:
   - Do not widen OUTLIER_BOUND_MS or MEDIAN_TOLERANCE_MS. The measured numbers are the criterion.
   - Do not re-anchor the openapi.yaml SHA-256 in test/run/confinement.test.ts. It is correct.

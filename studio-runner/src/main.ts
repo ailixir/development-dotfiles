@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 
 import { currentRuntimeVersions } from './compat/index.js';
 import { createChildBrowserLauncher } from './run/index.js';
+import type { ChildLauncherOptions } from './run/index.js';
 import type { BrowserLauncher } from './server/adapters.js';
 import { createApplication } from './server/application.js';
 import type { RunnerApplication } from './server/application.js';
@@ -29,21 +30,44 @@ import { ConfigurationError, loadConfig } from './server/config.js';
 import type { RunnerConfig } from './server/config.js';
 
 /**
+ * What the production path is allowed to hand the launcher: everything except the test seams.
+ *
+ * `ChildLauncherOptions` carries three injection points — `spawner`, `childModulePath` and
+ * `parentEnv` — that exist so the unit tier can spawn no process, fork no real child and read no
+ * real environment. Each is also honoured in production if supplied, so each is a way to replace
+ * the forked module, the process that forks it, or the environment it is given, from a caller
+ * rather than from a diff to `src/run/launcher.ts`.
+ *
+ * Removing them is not an option: the seams are what keep `npm test` browser-free (AC-25). So the
+ * production path is typed *without* them instead. Object-literal excess-property checking turns
+ * supplying one below into a compile error rather than a habit — and `test/run/production-seams.
+ * test.ts` asserts the same property over the options actually constructed, including a
+ * key-for-key equality that also catches a seam added to `ChildLauncherOptions` later. Story 10.13
+ * is the next change to this constructor, which is why the guard is written now.
+ */
+type ProductionLauncherOptions = Omit<
+  ChildLauncherOptions,
+  'spawner' | 'childModulePath' | 'parentEnv'
+>;
+
+/**
  * The real launcher, built from configuration.
  *
  * Everything here is an enumerated configuration key (`src/server/config.ts`), so the recording
  * geometry and the two browser timeouts are chosen values rather than library defaults — §6.1
  * requires the recording resolution to be explicit, and §8.5 calls the timeouts starting values to
- * be tuned against staging measurements.
+ * be tuned against staging measurements. No seam is supplied, so production always forks
+ * `DEFAULT_CHILD_MODULE_PATH` through the real `fork`, with the environment the allowlist builds.
  */
 export function createConfiguredLauncher(config: RunnerConfig): BrowserLauncher {
-  return createChildBrowserLauncher({
+  const options: ProductionLauncherOptions = {
     recording: { width: config.recordingWidth, height: config.recordingHeight },
     stepTimeoutMs: config.stepTimeoutMs,
     launchTimeoutMs: config.browserLaunchTimeoutMs,
     stopTimeoutMs: config.browserStopTimeoutMs,
     maxFailureMessageLength: config.maxReportLogEntryLength,
-  });
+  };
+  return createChildBrowserLauncher(options);
 }
 
 export interface MainOptions {

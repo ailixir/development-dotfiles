@@ -6,7 +6,7 @@
  * that imports Playwright and is **not** re-exported here: nothing outside the child needs it,
  * and an export is an invitation.
  */
-export { createChildBrowserLauncher, createChildOwnedAdapter, createForkSpawner, INHERITED_ENV_KEYS, DEFAULT_CHILD_MODULE_PATH, LaunchFailure } from './launcher.js';
+export { createChildBrowserLauncher, createChildOwnedAdapter, createForkSpawner, assertNoCodeLoadingKeys, isCodeLoadingEnvKey, CODE_LOADING_ENV_PREFIXES, INHERITED_ENV_KEYS, DEFAULT_CHILD_MODULE_PATH, LaunchFailure } from './launcher.js';
 export type {
   ChildLauncherOptions,
   ChildProcessHandle,

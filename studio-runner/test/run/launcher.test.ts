@@ -16,10 +16,13 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import type { StepReporter } from '../../src/executor/adapters/StepReporter.js';
 import {
+  CODE_LOADING_ENV_PREFIXES,
   DEFAULT_CHILD_MODULE_PATH,
   INHERITED_ENV_KEYS,
+  assertNoCodeLoadingKeys,
   createChildBrowserLauncher,
   createChildOwnedAdapter,
+  isCodeLoadingEnvKey,
 } from '../../src/run/launcher.js';
 import { SCRATCH_SUBDIRECTORIES } from '../../src/run/scratchLayout.js';
 import type { BrowserSession, LaunchOptions } from '../../src/server/adapters.js';
@@ -114,6 +117,106 @@ describe('AC-21 — nothing job-shaped reaches the command line or the environme
         'TMPDIR',
       ].sort(),
     );
+  });
+
+  /**
+   * AC-6a / SEC-1 — nothing the child inherits may **load code**.
+   *
+   * `NODE_OPTIONS` was on the allowlist. Node reads `--require`, `--import` and
+   * `--experimental-loader` out of it, so one Deployment environment entry plus a readable file ran
+   * arbitrary code inside the browser child before `child.js` did — enough to wrap
+   * `chromium.launchPersistentContext`, rewrite `chromiumSandbox: true` to `false` and add a
+   * disabling flag, with **no diff in this repository** for the lint rule or the repo-wide scan in
+   * `test/run/sandbox.test.ts` to catch. §9.3 forbids exactly that: disabling the sandbox silently
+   * to make something run.
+   *
+   * The rule is therefore stated over the *class*, not over the name that was found. A denylist of
+   * the variables someone thought of is what failed — `NODE_OPTIONS` was reviewed onto the
+   * allowlist by people who knew what it did.
+   */
+  it('lets no code-loading variable through, as a class rather than by name', async () => {
+    const spawner = createFakeSpawner();
+    const launcher = launcherWith(spawner, {
+      parentEnv: {
+        PATH: '/usr/bin',
+        HOME: '/home/pwuser',
+        PLAYWRIGHT_BROWSERS_PATH: '/ms-playwright',
+        // Set the way a Deployment manifest would set them: every family, all at once.
+        NODE_OPTIONS: '--import file:///tmp/preload.mjs',
+        NODE_PATH: '/tmp/shim',
+        NODE_REPL_EXTERNAL_MODULE: '/tmp/shim.js',
+        LD_PRELOAD: '/tmp/shim.so',
+        LD_AUDIT: '/tmp/audit.so',
+        DYLD_INSERT_LIBRARIES: '/tmp/shim.dylib',
+        OPENSSL_CONF: '/tmp/openssl.cnf',
+      },
+    });
+    const pending = launcher.launch(options(scratchPath()));
+    const child = spawner.children[0];
+    if (child === undefined) throw new Error('the launcher spawned nothing');
+    answerReady(child);
+    await pending;
+
+    const env = spawner.requests[0]?.env ?? {};
+    expect(Object.keys(env).filter((key) => isCodeLoadingEnvKey(key))).toEqual([]);
+    expect(env.NODE_OPTIONS).toBeUndefined();
+    expect(env.LD_PRELOAD).toBeUndefined();
+    expect(env.DYLD_INSERT_LIBRARIES).toBeUndefined();
+    // What the child genuinely needs is still there: the rule removed a capability, not the run.
+    expect(env.PATH).toBe('/usr/bin');
+    expect(env.PLAYWRIGHT_BROWSERS_PATH).toBe('/ms-playwright');
+  });
+
+  it('keeps the allowlist itself free of them, so the list and the class rule agree', () => {
+    expect(INHERITED_ENV_KEYS.filter((key) => isCodeLoadingEnvKey(key))).toEqual([]);
+    expect(INHERITED_ENV_KEYS).not.toContain('NODE_OPTIONS');
+    // Families, not names, so a variable Node or a loader adds later is covered by the namespace
+    // it is born into rather than by an amendment nobody remembers to make.
+    expect(CODE_LOADING_ENV_PREFIXES.every((prefix) => prefix.endsWith('_'))).toBe(true);
+  });
+
+  it('recognises each family, and sweeps up nothing the child actually needs', () => {
+    for (const key of [
+      'NODE_OPTIONS',
+      'NODE_PATH',
+      'NODE_REPL_EXTERNAL_MODULE',
+      'LD_PRELOAD',
+      'LD_AUDIT',
+      'LD_LIBRARY_PATH',
+      'DYLD_INSERT_LIBRARIES',
+      'DYLD_LIBRARY_PATH',
+      'OPENSSL_CONF',
+      // Case is not a defence: environment lookup is case-insensitive on some platforms.
+      'node_options',
+    ]) {
+      expect(isCodeLoadingEnvKey(key), key).toBe(true);
+    }
+    for (const key of [
+      ...INHERITED_ENV_KEYS,
+      'TMPDIR',
+      'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD',
+    ]) {
+      expect(isCodeLoadingEnvKey(key), key).toBe(false);
+    }
+  });
+
+  /**
+   * The falsification. Without it, the assertions above are indistinguishable from a guard that
+   * never fires — and the property they defend is one nothing else in the package would notice
+   * losing, because losing it changes no behaviour until someone sets the variable.
+   */
+  it('refuses the launch outright if the allowlist ever regrows one', () => {
+    const asBuilt = { PATH: '/usr/bin', TMPDIR: '/scratch/run-1/tmp' };
+    expect(() => {
+      assertNoCodeLoadingKeys(asBuilt);
+    }).not.toThrow();
+    // Exactly the environment re-adding NODE_OPTIONS to INHERITED_ENV_KEYS would construct.
+    expect(() => {
+      assertNoCodeLoadingKeys({ ...asBuilt, NODE_OPTIONS: '--import file:///tmp/preload.mjs' });
+    }).toThrow(/NODE_OPTIONS/u);
+    expect(() => {
+      assertNoCodeLoadingKeys({ ...asBuilt, LD_PRELOAD: '/tmp/shim.so' });
+    }).toThrow(/LD_PRELOAD/u);
   });
 
   it('points the browser’s temporary output at the per-run scratch directory', async () => {

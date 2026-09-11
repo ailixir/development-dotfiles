@@ -17,11 +17,18 @@
  *
  * ## Nothing job-shaped reaches the command line
  *
- * The child is forked with **no arguments** and a **minimal, enumerated environment**. Resolved
- * variables and secrets travel over the IPC channel and only there: never in `argv`, never in the
- * environment, never in a spawn command line (AC-21). The environment is built from an allowlist
- * rather than inherited from `process.env`, so the runner's own configuration — including its
- * outbound service identity — never enters the process that opens untrusted pages.
+ * The child is forked with **no arguments**, **no interpreter flags** and a **minimal, enumerated
+ * environment**. Resolved variables and secrets travel over the IPC channel and only there: never
+ * in `argv`, never in the environment, never in a spawn command line (AC-21). The environment is
+ * built from an allowlist rather than inherited from `process.env`, so the runner's own
+ * configuration — including its outbound service identity — never enters the process that opens
+ * untrusted pages.
+ *
+ * Nothing that reaches the child may **load code**: not a variable (`NODE_OPTIONS` and its family
+ * are off the allowlist and a guard re-checks the constructed environment on every launch) and not
+ * an interpreter flag (`execArgv` is set empty rather than inherited from the runner). Either one
+ * would run before `child.js` and could unset the sandbox on the way to the library without a
+ * single line changing in this repository, which is exactly the silent disabling §9.3 forbids.
  *
  * ## What this story does and does not enforce
  *
@@ -93,17 +100,70 @@ export interface ChildLauncherOptions {
  * (ADR-001 §4.2); the rest is what a Node process needs to run at all. Nothing in the runner's own
  * `STUDIO_RUNNER_*` namespace is on this list — the browser process holds no runner configuration
  * and no service identity, which is the same posture §9.2 takes toward credentials.
+ *
+ * **Nothing on this list may load code.** `NODE_OPTIONS` was on it and is not any more: Node reads
+ * `--require`, `--import` and `--experimental-loader` out of that variable, so a single Deployment
+ * environment entry plus a readable file ran arbitrary code inside the browser child *before*
+ * `child.js`, which is enough to rewrite `chromiumSandbox: true` on its way to the library and add
+ * a disabling flag — with no diff anywhere in this repository for a lint rule or a scan to catch.
+ * §9.3 forbids the sandbox being disabled silently to make something run; that was the pathway.
+ *
+ * The allowlist is the shape that holds here, so the guard below is stated over the whole class of
+ * code-loading variables rather than over the one name that was found. `assertNoCodeLoadingKeys`
+ * re-checks the *constructed* environment on every launch, so a future addition to this list fails
+ * the launch loudly instead of quietly widening the browser process's trust boundary.
  */
 export const INHERITED_ENV_KEYS: readonly string[] = [
   'PATH',
   'HOME',
   'LANG',
   'LC_ALL',
-  'NODE_OPTIONS',
   'PLAYWRIGHT_BROWSERS_PATH',
   'DISPLAY',
   'XDG_RUNTIME_DIR',
 ];
+
+/**
+ * Namespaces whose variables can make a process load code it was not asked to load.
+ *
+ * Prefixes, not names. A denylist of the specific variables anyone happened to think of is what
+ * failed — `NODE_OPTIONS` was reviewed onto the allowlist by people who knew what it did — so the
+ * rule is stated over the families instead, and a variable Node or a loader adds later is covered
+ * by the family it is born into rather than by a later amendment here.
+ *
+ * - `NODE_*` — the interpreter's own namespace: `NODE_OPTIONS` carries `--require` / `--import` /
+ *   `--experimental-loader`, `NODE_PATH` redirects module resolution, `NODE_REPL_EXTERNAL_MODULE`
+ *   names a module to load.
+ * - `LD_*` — the glibc dynamic linker in the image: `LD_PRELOAD`, `LD_AUDIT`, `LD_LIBRARY_PATH`.
+ *   This one reaches the *browser* binary, not just Node.
+ * - `DYLD_*` — the same thing on macOS, where the fixtures tier runs.
+ * - `OPENSSL_*` — `OPENSSL_CONF` loads providers and engines, which are shared objects.
+ */
+export const CODE_LOADING_ENV_PREFIXES: readonly string[] = ['NODE_', 'LD_', 'DYLD_', 'OPENSSL_'];
+
+/** True when a variable name belongs to one of the code-loading families above. */
+export function isCodeLoadingEnvKey(key: string): boolean {
+  const upper = key.toUpperCase();
+  return CODE_LOADING_ENV_PREFIXES.some((prefix) => upper.startsWith(prefix));
+}
+
+/**
+ * Refuses to hand the operating system an environment that could load code into the child.
+ *
+ * A launch failure is the right outcome: the alternative is a browser process that starts with
+ * something else's code in it, and §9.3's instruction is to report rather than to proceed.
+ */
+export function assertNoCodeLoadingKeys(env: Readonly<Record<string, string>>): void {
+  const offenders = Object.keys(env).filter((key) => isCodeLoadingEnvKey(key));
+  if (offenders.length > 0) {
+    throw new Error(
+      `The browser child environment carries code-loading variables (${offenders.sort().join(', ')}). ` +
+        'Node and the dynamic linkers execute what these name before the child runs, which is a ' +
+        'path to an unsandboxed browser with no source diff (§9.3). Remove them from ' +
+        'INHERITED_ENV_KEYS.',
+    );
+  }
+}
 
 /** Where the compiled child entry sits, relative to this module, once built. */
 export const DEFAULT_CHILD_MODULE_PATH = fileURLToPath(new URL('./child.js', import.meta.url));
@@ -151,6 +211,12 @@ export function createForkSpawner(): ChildSpawner {
     spawn(request: ChildSpawnRequest): ChildProcessHandle {
       const child = fork(request.modulePath, [...request.args], {
         env: { ...request.env },
+        // The *other* half of the environment allowlist. `fork` defaults `execArgv` to the
+        // parent's, so interpreter flags the runner itself was started with — `node --import x
+        // dist/main.js` — would be replayed into the browser child even though its environment is
+        // fully enumerated. The child is compiled ESM and needs no interpreter flags, so it gets
+        // none, and neither channel can carry code into the process that opens untrusted pages.
+        execArgv: [],
         // stdout/stderr are inherited so the child's diagnostics reach the pod log; the contract
         // is not a debugging channel and the child writes nothing structured to the wire (§9.2).
         stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
@@ -190,6 +256,9 @@ function childEnvironment(
   env.TMPDIR = join(scratchPath, SCRATCH_SUBDIRECTORIES.temp);
   // The browsers come from the image; a child must never fetch one at run time (ADR-001 §4.2).
   env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = '1';
+  // Stated over what is actually handed to the operating system, so it covers the allowlist and
+  // the two literals above alike.
+  assertNoCodeLoadingKeys(env);
   return env;
 }
 
