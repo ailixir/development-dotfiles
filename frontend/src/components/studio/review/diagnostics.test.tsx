@@ -29,6 +29,42 @@ import { SOURCE_UNAVAILABLE, SUMMARY_UNAVAILABLE } from './StepReviewList';
  * one (AC-6, AC-7, AC-8), and the two slots the contract cannot yet fill (AC-16a).
  */
 
+const REVIEW_DIR = __dirname;
+const MOCKS_DIR = path.resolve(__dirname, '../../../services/mocks/studio');
+
+/** Every non-test module this story adds, in both directories it touches. */
+function collectModules(dir: string, added: string[] = []): string[] {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      collectModules(full, added);
+    } else if (/\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name)) {
+      added.push(full);
+    }
+  }
+  return added;
+}
+
+const STORY_SOURCE_MODULES = [...collectModules(REVIEW_DIR), ...collectModules(MOCKS_DIR)];
+
+/** `import`/`export … from`, bare `import '…'`, dynamic `import(…)` and `require(…)`, any quote. */
+function moduleSpecifiers(source: string): string[] {
+  const patterns = [
+    /(?:^|[^\w$])(?:import|export)\s[^;]*?from\s*(['"`])([^'"`]+)\1/gs,
+    /(?:^|[^\w$])import\s*(['"`])([^'"`]+)\1/g,
+    /(?:^|[^\w$])(?:import|require)\s*\(\s*(['"`])([^'"`]+)\1\s*\)/g,
+  ];
+  const found = new Set<string>();
+  const ordered: string[] = [];
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) {
+      ordered.push(match[2]);
+      found.add(match[2]);
+    }
+  }
+  return ordered;
+}
+
 beforeAll(() => studioMockServer.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => {
   studioMockServer.resetHandlers();
@@ -194,21 +230,48 @@ describe('AC-16a: two slots, both unavailable, neither filled from the English',
   it('imports neither the legacy grammar parser nor the Python generator', () => {
     // The property here is about imports, so the instrument is the module text. It is not a
     // substitute for a behavioural assertion — the one above is that.
-    const dir = __dirname;
-    const modules = fs
-      .readdirSync(dir)
-      .filter((name) => /\.tsx?$/.test(name) && !/\.test\.tsx?$/.test(name));
-    expect(modules.length).toBeGreaterThan(5);
+    //
+    // Every module this story adds is scanned, not one directory of them, and every specifier
+    // form is read, not one quote style: a single-quoted `from '…'` scan is blind to a
+    // double-quoted import, a backtick `await import(…)`, and a `require(…)`, which is three ways
+    // for the shortcut to be taken under time pressure without the guard noticing.
+    const modules = STORY_SOURCE_MODULES.map((file) => [file, fs.readFileSync(file, 'utf8')] as const);
+    expect(modules.length).toBeGreaterThanOrEqual(13);
 
-    for (const name of modules) {
-      const source = fs.readFileSync(path.join(dir, name), 'utf8');
-      const imports = [...source.matchAll(/from\s+'([^']+)'/g)].map((match) => match[1]);
-      expect(imports, `${name} imports the legacy grammar parser`).not.toContain(
-        '@/utils/studio/ir/parseSteps',
-      );
-      expect(imports, `${name} imports the retired Python generator`).not.toContain(
-        '@/utils/studio/codegen/pythonGenerator',
-      );
+    const RETIRED = ['@/utils/studio/ir/parseSteps', '@/utils/studio/codegen/pythonGenerator'];
+
+    for (const [file, source] of modules) {
+      const specifiers = moduleSpecifiers(source);
+      for (const retired of RETIRED) {
+        const offending = specifiers.filter(
+          (specifier) => specifier === retired || specifier.endsWith(retired.replace('@/', '/')),
+        );
+        expect(offending, `${path.relative(REVIEW_DIR, file)} imports ${retired}`).toEqual([]);
+      }
     }
+  });
+
+  it('the import scanner sees every specifier form, so its silence means something', () => {
+    // Without this, the scan above could be reading nothing at all — the shape this epic keeps
+    // finding. Each line below is a way a module could reach the retired path.
+    const planted = [
+      "import { buildDefaultTestIR } from '@/utils/studio/ir/parseSteps';",
+      'import { generatePythonFromIR } from "@/utils/studio/codegen/pythonGenerator";',
+      "const mod = await import('@/utils/studio/ir/parseSteps');",
+      "const gen = require('@/utils/studio/codegen/pythonGenerator');",
+      'export { buildDefaultTestIR } from "@/utils/studio/ir/parseSteps";',
+    ].join('\n');
+
+    const found = moduleSpecifiers(planted);
+    expect(found).toHaveLength(5);
+    expect(found.filter((s) => s === '@/utils/studio/ir/parseSteps')).toHaveLength(3);
+    expect(found.filter((s) => s === '@/utils/studio/codegen/pythonGenerator')).toHaveLength(2);
+
+    // And it finds the real imports the modules genuinely have, so it is reading the files.
+    const real = STORY_SOURCE_MODULES.flatMap((file) =>
+      moduleSpecifiers(fs.readFileSync(file, 'utf8')),
+    );
+    expect(real).toContain('@/types/studio/studioTypes');
+    expect(real).toContain('@mui/material');
   });
 });

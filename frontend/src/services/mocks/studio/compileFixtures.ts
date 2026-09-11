@@ -496,17 +496,59 @@ export const COMPILE_FIXTURE_MATRIX: readonly RequiredFixture[] = [
     id: `FX-CONFLICT-${code}`,
     description: `a 409 ${code} response from confirm-compile`,
     resolve: () => conflictResponse(code),
-    satisfies: () => (conflictResponse(code).error === code ? null : `no 409 fixture for ${code}`),
+    satisfies: () => refusalBodyDefect(conflictResponse(code), code),
   })),
   ...['SOURCE_TOO_MANY_STEPS', 'SOURCE_LINE_TOO_LONG', 'SOURCE_TOO_LARGE', 'INLINE_CREDENTIAL'].map(
     (code) => ({
       id: `FX-REJECTION-${code}`,
       description: `a 400 ${code} response from compile`,
       resolve: () => rejectionResponse(code),
-      satisfies: () => (rejectionResponse(code).error === code ? null : `no 400 fixture for ${code}`),
+      satisfies: () => {
+        const defect = refusalBodyDefect(rejectionResponse(code), code);
+        if (defect) {
+          return defect;
+        }
+        // AC-14: a `400` message names the offending step index or the bound it broke — never the
+        // step's text. Without this the fixture could carry prose that leaks what the author wrote.
+        const { message } = rejectionResponse(code);
+        return /\d/.test(message)
+          ? null
+          : `${code}'s message names neither a step index nor a bound`;
+      },
     }),
   ),
 ];
+
+/**
+ * What makes a refusal fixture real rather than an echo of its own argument.
+ *
+ * `error === code` alone is a tautology — the helper was handed the code — so it proves only that
+ * the helper is a function. What the corpus actually needs is that **this particular code has
+ * wording**, that the wording is prose rather than the identifier repeated, that the body is the
+ * two fields `ErrorResponse` declares and nothing else, and that nothing the author wrote leaks
+ * into it. The helper's fallback message fails the length check, so a code with no entry of its
+ * own is red instead of quietly passing.
+ */
+function refusalBodyDefect(body: { error: string; message: string }, code: string): string | null {
+  const keys = Object.keys(body).sort();
+  if (keys.join(',') !== 'error,message') {
+    return `${code}'s body is ${keys.join(',')}, not the two fields ErrorResponse declares`;
+  }
+  if (body.error !== code) {
+    return `${code}'s body carries error ${body.error}`;
+  }
+  if (body.message.trim().length < 25) {
+    return `${code} has no wording of its own — the fixture fell back to "${body.message}"`;
+  }
+  if (body.message.trim() === code || !/\s/.test(body.message.trim())) {
+    return `${code}'s message is the identifier again rather than prose`;
+  }
+  const leaked = BASE_STEPS.find((step) => body.message.includes(step));
+  if (leaked) {
+    return `${code}'s message quotes the author's step text: ${JSON.stringify(leaked)}`;
+  }
+  return null;
+}
 
 /** The `409` bodies, shaped exactly as `ErrorResponse` declares. */
 export function conflictResponse(code: string): { error: string; message: string } {
@@ -523,7 +565,8 @@ export function rejectionResponse(code: string): { error: string; message: strin
   const messages: Record<string, string> = {
     SOURCE_TOO_MANY_STEPS: 'This test has 61 steps; the maximum is 60. Split it into smaller tests before compiling.',
     SOURCE_LINE_TOO_LONG: 'Step 3 is longer than the maximum line length.',
-    SOURCE_TOO_LARGE: 'The draft is larger than the maximum source size.',
+    SOURCE_TOO_LARGE:
+      'This draft is 68120 bytes; the maximum is 65536. Split it into smaller tests before compiling.',
     INLINE_CREDENTIAL: 'Step 3 looks like it contains a credential; use a vault reference instead.',
   };
   return { error: code, message: messages[code] ?? 'Refused' };
