@@ -19,6 +19,7 @@ import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.entity.UITestExecution;
+import com.citi.put.checks.users.UserProvisioningService;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +48,7 @@ public class StudioService {
   private final StudioAcceptanceService acceptanceService;
   private final CompilePipeline compilePipeline;
   private final CompileStateService compileStateService;
+  private final UserProvisioningService userProvisioningService;
 
   @SuppressWarnings("checkstyle:ParameterNumber")
   public StudioService(
@@ -58,7 +60,8 @@ public class StudioService {
       ExecutionSnapshotMapper snapshotMapper,
       StudioAcceptanceService acceptanceService,
       CompilePipeline compilePipeline,
-      CompileStateService compileStateService) {
+      CompileStateService compileStateService,
+      UserProvisioningService userProvisioningService) {
     this.studioRepository = studioRepository;
     this.executionRepository = executionRepository;
     this.csiRepository = csiRepository;
@@ -68,6 +71,7 @@ public class StudioService {
     this.acceptanceService = acceptanceService;
     this.compilePipeline = compilePipeline;
     this.compileStateService = compileStateService;
+    this.userProvisioningService = userProvisioningService;
   }
 
   // ── server-side authorization (AC-4a, §9.1) ──────────────────────────────
@@ -139,6 +143,12 @@ public class StudioService {
   public UITestDto createTest(UITestRequest request, Authentication auth) {
     UserIdentity identity = extractIdentity(auth);
     requireRegisteredCsi(request.csiId());
+    // The draft records its author, and `created_by` REFERENCES users(email) (V1). The mirror row
+    // that satisfies it is written by story 1.6's asynchronous listener, which is racing this very
+    // request: an author whose mirror has not landed yet is a foreign key violation and a 500 on
+    // the first draft they create. The author is a precondition of the write, so it is established
+    // here, in this transaction, rather than hoped for.
+    userProvisioningService.ensureMirrored(identity);
     UITest test =
         new UITest(
             request.name(),

@@ -62,6 +62,7 @@ class StudioIdempotencyIT {
   @Autowired private ExecutionSnapshotMapper snapshotMapper;
   @Autowired private com.citi.put.checks.studio.compile.CompilePipeline compilePipeline;
   @Autowired private com.citi.put.checks.studio.compile.CompileStateService compileStateService;
+  @Autowired private com.citi.put.checks.users.UserProvisioningService userProvisioningService;
   @Autowired private TransactionTemplate transactions;
 
   private UUID testId;
@@ -189,7 +190,8 @@ class StudioIdempotencyIT {
         snapshotMapper,
         acceptanceService,
         compilePipeline,
-        compileStateService);
+        compileStateService,
+        userProvisioningService);
   }
 
   private static Authentication identity(String email) {
