@@ -333,6 +333,9 @@ An architect amending the contract still never edits a story's Title, Acceptance
 | 2026-09-11 | `TestDto` gains nullable `compileError` and `compileDiagnostics`, declared as the typed `CompileError` / `CompileDiagnostic` / `CompileStepDiagnostics` / `CompileDiagnostics` schemas read from the merged producer; `x-compile-error-codes` declares the eleven codes; `attempts` and `exhausted` named for 10.9 AC-11; the `GET /tests` list projection's omission and a `needsRevision` example added (§16). Closes story 10.9's AC-22 escalation and unblocks 10.10. **No route added and no marker moved** | C | @architect, this amendment | `StudioContractTest` 9/9, `ArtifactSchemaDriftTest` 3/3, `CompileRouteContractDivergenceTest` 9/9, `test/contract.test.ts` 14/14, frontend 98 passed — all before and after. Full record in §16.10 |
 | 2026-09-11 | `RunnerEvidence` gains an **optional** boolean `partial` — the runner-observed fact that a recording does not cover the whole browser session — with the derivation from `outcome` forbidden in both directions and the producer assigned to story 10.13 (§17). Closes story 10.13's AC-18 escalation. Optional rather than `required` so the merged runner stays conformant; promotion recorded as O-14 | B | @architect, this amendment | as above; `test/contract.test.ts` 14/14 before and after, which is the measurement that matters here. Full record in §17.8 |
 | 2026-09-11 | `x-not-yet-implemented` removed from `confirmCompile` — story 10.9 lands `POST /tests/{id}/confirm-compile`, so the document no longer declares as unshipped a route the running service serves. `x-implemented-by: '10.9'` stays; no other operation's marker moved and no other edit was made to the document | A — a declaration the running system contradicts, the precedent §14.8 item 5 set for `compileTest` | @dev, story 10.9 | `StudioContractTest.theConfirmRouteIsShippedAndTheMarkerCameOffForThatOperationOnly` red before (the route was absent and the marker present) → green after; `pendingOperations()` is `GET /executions/{id}/video` alone |
+| 2026-09-12 | **AUTHORIZED, NOT YET LANDED.** `RunnerEvidence.partial` promoted from optional to `required` — `required: [videoKey, manifestKey, state, partial]` — and the property's own description corrected, because it still states *"The merged runner does not emit it yet"* about a producer that merged in wave 4 (§20). Closes **O-14** and story 10.14's AC-26, which was recorded *skipped, never passed* for want of exactly this ruling | B | Ruled by @architect, this amendment; **landed by story 10.18**, which in the same PR inverts the two `confinement.test.ts` assertions the promotion falsifies and re-anchors `BASE_SHA256` (§20.4, §20.7) | **Predicted, not measured** — no `node_modules` exists in this worktree, in any tree (§23.3). Predicted: `test/contract.test.ts` 14/14 before and after; `StudioContractTest` unchanged (`assertSchemaMatchesRecord` compares property *names*, never `required`); `confinement.test.ts` **2 red** until the owner's own edit, 0 after. The owner measures and replaces this cell |
+| 2026-09-12 | **AUTHORIZED, NOT YET LANDED.** `TestDto` gains nullable `currentCandidateArtifactHash` and nullable `currentCandidateArtifact` (the frozen `artifact.schema.json` shape), both nulled in the `GET /tests` list projection on §16.5's precedent — closing the gap where `ConfirmCompileRequest` requires a value that **no** `tests`-tagged `2xx` response returns (§21). Closes story 10.10's **AC-15** escalation and unblocks its AC-11(b) and AC-16(b). Candidate **B** (a revision read route) rejected on **correctness**, not on cost | C | Ruled by @architect, this amendment; **landed by story 10.11**, whose scope must widen to include the backend producer — the scope edit is @po's, not mine (§21.9) | **Predicted, not measured** (§23.3). Predicted: `studioEscalation.test.ts` 2/3 → **3/3 with no edit to the test**, measured here by simulation (§21.5); `StudioContractTest.theFrozenSchemasAndTheJavaRecordsShareTheSameFieldNames` **red** until `UITestDto` gains the same two components in the same PR — that is set equality, not a subset check, and it is the reason this edit cannot be document-only |
+| 2026-09-12 | **AUTHORIZED, NOT YET LANDED.** `RunJob.resolvedVars` gains the scrubbing clause in its own right, and `resolvedSecrets`'s *"additionally scrubbed"* is corrected: both are scrubbed with their tested encoded variants, and what is additional to a secret is vault-use authorization, not redaction (§22). **The document was the divergent side, not the code** — architecture §9.2 says *"Runner scrubs known values"*, and `knownValuesOf` has always returned both maps | B | Ruled by @architect, this amendment; **landed by story 10.18** in the same PR as the O-14 row above, so the pin moves once for both (§23.2) | Description text only; no schema shape, no `required` list and no enum changes. Predicted: every suite unchanged. Recorded here rather than left to prose because §12's third rule cuts the other way too — a *strengthening* is still a meaning change on a closed body |
 
 The two `@dev, story 10.7` rows above are one story's amendment, recorded against §12's four
 requirements (this amendment's own record is in §15.10):
@@ -1274,3 +1277,717 @@ This amendment changes no story's Title, Acceptance Criteria, Scope or Status, a
 backend Java, no frontend source and no `studio-runner/` source. It records a ruling in each of the
 two wave-4 story files and supersedes one task line in story 10.9, which is named in §16.9 for its
 owner to apply.
+
+---
+
+# Amendment, 2026-09-12 (sixth) — a promotion, a body that requires what nothing returns, and two unowned controls
+
+Added on `arch/wave6-rulings`, branched from `epic/EPIC-10` at `52af70c93`. Three escalations
+reached an architect at the same time, each classified by @po and each declined by @po on the same
+principle: *a description of an edit is not an authorization to make it*. They are ruled together
+because they collide on one artefact — `docs/specs/studio/openapi.yaml` and the SHA-256 pin that
+watches it — and ruling them apart would move that pin three times.
+
+**One procedural narrowing is made first, because it changes who lands the other three.**
+
+## 19. §12 narrowed once — the architect authorizes, a named story lands
+
+§12 says an architect *"rules first, in this ADR; the story then implements against the amended
+document"*, and in practice the four wave-3/4 amendments were landed by the architect editing
+`openapi.yaml` directly. That is recorded as a failure, in the pin's own words at
+`studio-runner/test/run/confinement.test.ts:132-139`:
+
+> *"The first re-anchor went unowned across all four amendments — they landed as architect rulings
+> rather than in a story PR, so nobody's diff was responsible for them, and the red pin was found
+> by @po during story validation rather than by the changes that caused it. That is the failure
+> this test's own rule exists to prevent."*
+
+`FOC-04` and `FOC-05` both exist to clean up after it. So the mechanism is narrowed, once, exactly
+as §14.7 narrowed `x-conflict-codes` rather than letting the same class escalate twice:
+
+**For Class B and Class C alike, an architect's ruling authorizes an edit and names its owner; the
+named story makes the edit, re-anchors the pin in the same PR, and records the before/after
+measurement in its own §13 cell.** The ruling is still the architect's and is still made first and
+in full — nothing about the decision moves to a story. What moves is the *diff*, to a PR whose
+author is responsible for it and whose gates run over it.
+
+Three consequences, stated so this is a rule and not a preference:
+
+1. **A §13 row may be written before its edit lands**, marked `AUTHORIZED, NOT YET LANDED`, with
+   the owner named and the measurement predicted. The owner replaces the prediction with the
+   measurement. A row that stays `AUTHORIZED` across a whole wave is a visible unclosed item, which
+   is the property O-14 lacked for two waves.
+2. **An authorization is not a licence to redesign.** The owner lands the shape ruled here. A
+   divergence found while landing it is left red and escalated, per §12's second rule.
+3. **The architect still measures what can be measured without the edit** and says plainly what
+   could not be (§23.3). Prior amendments measured before/after in the worktree; this one could
+   not, and says so rather than reporting a prediction as a reading.
+
+---
+
+## 20. O-14 — promoting `RunnerEvidence.partial` to `required` (closes story 10.14 AC-26)
+
+### 20.1 The gate §17.5 set, and whether it is met
+
+§17.5 made the promotion conditional on one thing — *"the producer must precede the requirement"* —
+and §18.4 recorded it as O-14. Story 10.14's AC-26 restated it as three conditions. (i) and (ii)
+were checked by @po and @dev; both were re-checked here **by reading the merged tree at
+`52af70c93`**, not by reading their reports.
+
+| Condition | Verdict | What was read |
+|---|---|---|
+| **(i)** The API accepts and publishes it | **Met.** `RunnerEvidence` is a four-component record, `Boolean partial`, nullable to match the optional property | `…/studio/internal/dto/RunnerEvidence.java`, merged at `00b9e105d`; the projection at `5e72fdf2b` |
+| **(ii)** The runner emits it on every `FINAL`, `false` included | **Met, and *absent* is unreachable by construction rather than by discipline.** `EvidenceState.partial` is `readonly partial: boolean` — non-optional in the type, so `JSON.stringify` emits it on every serialization; `evidence` is initialized `{ …evidenceKeys, state: 'UNAVAILABLE', partial: false }` **before** the `try`; `sendFinal(outcome: RunOutcome, evidence: EvidenceState)` takes it non-optionally; and `snapshot.build` places the object on the body by reference, filtering no key | `snapshot.ts:40-56`, `runCoordinator.ts:381-383`, `reportingStepReporter.ts:54,146`, `snapshot.ts:196-221` |
+| **(iii)** An architect has ruled | **This section.** |
+
+@po's reading of (iii) is upheld and is worth restating, because it is the load-bearing procedural
+finding of wave 5: **§17.5 is a rationale, not an authorization.** §17.5's own sentence is that the
+promotion is *"recorded as O-14 rather than done now"*; §18.4 files O-14 under *"Open items"*; and
+an open item is by construction not a ruling. Reading it as one would have been a story granting
+itself Class B authority on the strength of an architect having described the edit — the precise
+manoeuvre §12's asymmetry argument exists to prevent. @po declined the permissive reading and was
+right to.
+
+### 20.2 Ruling
+
+**`partial` is promoted. `RunnerEvidence.required` becomes `[videoKey, manifestKey, state, partial]`.**
+
+The producer preceded the requirement, which was the whole of the condition §17.5 set, and both
+halves of the consumer followed it. There is nothing left to sequence.
+
+### 20.3 Why `required` — and not "it costs nothing to leave it optional"
+
+The tempting answer is that promotion buys nothing: every producer emits the field, so the
+requirement constrains nobody. That answer is refuted by this epic's own history, one wave ago.
+
+`DEF-02` is what optionality actually bought. Between §17 landing the optional property and story
+10.14's AC-10, **the merged API refused every `FINAL` the merged runner sent** — `400
+INVALID_REPORT`, retried until abandoned, the run reconciled by a reaper instead of by its own
+result — and no suite was red. The runner suite validated against a document that permitted
+`partial`; the backend suites used their own fixtures; and
+`StudioContractTest.assertSchemaMatchesRecord` covered nine public DTOs and no internal record at
+all. Three components held three different opinions about one field and the build was green.
+
+The causal reading has to be exact, or the ruling is made for the wrong reason. **`required` would
+not have prevented `DEF-02`.** `DEF-02` was a record-*width* divergence, and the control that
+catches that class is story 10.14's AC-24 — the internal-record drift check, now merged, with
+`RunnerEvidenceBeforeStory1014` as its own non-vacuity control. What `required` closes is the
+other direction, which nothing closes today:
+
+- **Optional means *absent is legal*, and §17.5 says absent means `false`.** So the document
+  currently licenses a producer to stop emitting the field and be told it is conformant — and the
+  wire statement that results is *this recording is complete*, on a run whose recorder died. That
+  is the exact falsehood §17.1 was written to end: *"a field something populates with a constant is
+  a wire statement that is false, and it is the kind that survives a green build because `false` is
+  a valid boolean."* Optionality preserves a cheap path back to it.
+- **The runner's own conformance test is the enforcing control, and it can only enforce what the
+  document requires.** `test/contract.test.ts` validates the **real serialized progress bodies**,
+  captured off a live harness, against the request schema read from `openapi.yaml`. With `partial`
+  optional, a runner that dropped it stays green there. With `partial` required, the same test —
+  unchanged, no edit — starts failing the moment a producer regresses. The assertion already
+  exists; promotion is what points it at this field.
+
+So the promotion is not bookkeeping. It converts a fact that three components currently *happen* to
+agree on into one the document *requires* them to agree on, at the moment when agreeing costs
+nothing. That is the only moment at which it is ever cheap.
+
+### 20.4 What the promotion breaks, which nobody named
+
+`FOC-05` and story 10.14's AC-25/AC-26 both treat the cost of this edit as *one* thing: the SHA-256
+pin moves, so the edit must not land under a story that asserts the pin unchanged. That is true and
+it is now discharged — story 10.17 merged at `c54df7934`, and the pin is still live and correct:
+`shasum -a 256 docs/specs/studio/openapi.yaml` returns
+`cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e`, identical to `BASE_SHA256` at
+`confinement.test.ts:149`. Verified here.
+
+**But the pin is not the only thing in that file that this edit falsifies, and the second one is
+not self-resolving.** Fourteen lines below the pin, `confinement.test.ts:163-173` carries:
+
+```
+it('emits the optional RunnerEvidence.partial that ADR-002 §17 already landed, without editing it', …
+    expect(body).toContain('required: [videoKey, manifestKey, state]');
+    expect(body).not.toContain('required: [videoKey, manifestKey, state, partial]');
+```
+
+That test asserts, as a positive property, that **the promotion has not happened** — and it names
+the promotion's exact post-edit text in a `not.toContain`. It was correct when story 10.13 wrote
+it: 10.13's criterion was *this story made no contract edit*, and the assertion proved §17's
+optional field was consumed rather than modified. It becomes false the instant O-14 lands, and
+unlike story 10.10's escalation test it does **not** go green on the amendment — it goes red, and
+the failure accuses story 10.13, which is merged and blameless.
+
+This is `FOC-04`'s and `FOC-05`'s shape a third time: a *false red*, in a story that made no edit.
+It is recorded here because neither `FOC-05` nor AC-26 mentions it, and a wave-6 story that
+budgeted for a one-line `required` edit plus a pin re-anchor would meet it at the gate.
+
+The repair is one line of judgment, not a deletion: the assertion's *subject* is right — the
+runner's evidence schema is a thing worth watching from the runner — and only its *tense* is
+wrong. It becomes an assertion that the promotion **has** happened, with the same non-vacuity shape
+(`toContain` the four-key form, `not.toContain` the three-key form), and its comment records that
+the change is O-14's and names this section.
+
+### 20.5 The `§17.7` correction `DEF-02` asked for, landed here
+
+`DEF-02`'s `correction_to_adr` field has been outstanding since wave-5 validation and is closed by
+this sentence. §17.7 item 4 reads:
+
+> *"Until that lands the runner reports the truth and the API discards it — which is visible,
+> bounded and strictly better than today, where the API states a falsehood."*
+
+**That was wrong on the code as merged, and in the direction that matters.** Nothing was discarded:
+`RunnerEvidence` was closed with `@JsonIgnoreProperties(ignoreUnknown = false)` and
+`StrictInternalBodyReader` enables `FAIL_ON_UNKNOWN_PROPERTIES`, so the whole report was **refused**
+`400`. "Visible and bounded" described a degradation; the reality was a broken terminal path. The
+sentence should have read: *until that lands, the runner reports the truth and the API refuses the
+report entire.* It is corrected here rather than by editing §17 in place, so the amendment log's
+reader sees that the document was wrong and when it stopped being wrong.
+
+The general lesson is already this document's own and is restated because it went unlearned once:
+**an ADR that predicts a consumer's behaviour instead of reading it will be believed.** §17.8 listed
+story 10.6's clients as "re-checked" and did not read the Java record's width. The control that now
+exists for this is AC-24; the control that does not yet exist for its mirror image is O-15 (§23.1).
+
+### 20.6 Alternatives rejected
+
+| Option | Why not |
+|---|---|
+| **Leave it optional indefinitely** | The condition §17.5 set is met; leaving it would make the open item permanent, which is the outcome AC-26's *"skipped, never passed, with O-14's owner named"* machinery exists to avoid rather than to institutionalize. It also keeps alive the one wire reading (§20.3) that lets a false `partial: false` be conformant. |
+| **Close AC-26 as declined** | Available, and rejected. A decline needs a reason that survives the producer existing, and there is none: the only reason §17.5 gave for optionality was the absent producer. Declining would be overruling §17.5's own rationale on no new evidence. |
+| **Promote, and also make the API enforce it** | Considered and **not** ordered. Jackson treats a missing field as `null`, so `required` in the document is not enforced by `StrictInternalBodyReader`; the enforcing assertion is the runner's, on its own serialized bytes, which is where a producer obligation belongs. Adding a required-field check to the reader would put a second copy of the contract in Java — §15.6's arrangement for the sixth time. Recorded as a deliberate asymmetry, not an oversight. |
+| **Bundle it into the same PR as §21's `TestDto` edit** | Rejected on ownership, not on principle. That edit needs a backend producer and a frontend consumer; this one needs a runner test-file edit. One story carrying all three trees is how a scope stops being reviewable. The pin cost is paid down instead by §23.2's ordering. |
+
+### 20.7 What the owning story must do
+
+**Owner: story 10.18.** It is the only wave-6 story with `studio-runner` scope, it depends on
+10.13, 10.14 and 10.17, and its subject — hardened staging deployment — is where a runner/API
+disagreement about evidence would surface. §18.4's recorded owner formula was *"story 10.14 or the
+first story after it to touch `RunnerEvidence`"*; 10.14 merged with AC-26 *skipped, never passed*,
+and **no wave-6 story touches `RunnerEvidence` today**, so the formula as written defers forever.
+It is replaced by a named story. Widening 10.18's scope to carry it is @po's edit, not mine; what
+is fixed here is the work, not the criterion.
+
+1. **The edit.** `RunnerEvidence.required` → `[videoKey, manifestKey, state, partial]`. One line.
+2. **The description, in the same edit.** The `partial` property still reads *"Optional, and absent
+   means `false`. The merged runner does not emit it yet: the producer is the deadline kill of
+   story 10.13…"*. Verified false at `52af70c93` — 10.13 merged and the runner emits it on every
+   `FINAL` (§20.1). It becomes: required; emitted on every report that carries evidence; `null` on
+   `STARTED` and `PROGRESS`, where `evidence` itself is null. Leaving stale prose beside a corrected
+   `required` list is how the next reader concludes the list is the stale half.
+3. **`confinement.test.ts`, both halves** (§20.4): invert the promotion assertion, and re-anchor
+   `BASE_SHA256` — re-read with `shasum -a 256` from the file at the moment of the re-anchor, never
+   transcribed from this document or from a story, with a comment naming this section and §22 as
+   what the new digest covers.
+4. **Measure and record.** `test/contract.test.ts`, `StudioContractTest`, `ArtifactSchemaDriftTest`
+   and `CompileRouteContractDivergenceTest` before and after, into this amendment's §13 cell,
+   replacing the prediction.
+5. **Nothing else.** No producer change is required or permitted by this ruling: the producer is
+   the thing that made the ruling possible.
+
+### 20.8 Recorded against §12's four requirements
+
+- **The divergence.** A field that every component emits, that every component reads, and that the
+  document still declares optional — so the document permits a state (`absent`) that would publish
+  `partial: false`, *this recording is complete*, over a recording that is not. The gate §17.5 set
+  against landing it earlier has been met since story 10.13 merged.
+- **The source (Article IV).** Nothing invented, and no new field. §17.5 fixes the edit and its
+  ordering verbatim; §18.4 records it as O-14; §12 Class B assigns the ruling. §6.1 requires
+  exposing *"whether an available recording is partial"*; the name, type and meaning are §17's,
+  unchanged.
+- **Consuming stories re-checked.** **10.13** — the producer; the type is already non-optional, so
+  the requirement adds nothing it must do, and its `confinement.test.ts` assertion is inverted by
+  the owner rather than by it (§20.4). **10.14** — merged; AC-26 was its conditional criterion and
+  is closed by this ruling, not by it. **10.7** — `reportClient` branches on status and parses no
+  acknowledgement; unaffected. **10.15 / 10.16** — consume `VideoEvidence.partial`, which is
+  already `required` on the public body and is untouched here. **10.11** — frontend; reads the
+  public snapshot, not `RunnerEvidence`. Both copies of `artifact.schema.json` are unaffected.
+- **Contract test before and after.** **Predicted, not measured** — see §23.3 for why, stated in
+  the same breath as the prediction. `test/contract.test.ts` 14/14 before and after: it validates
+  the runner's real serialized progress bodies against the schema, and those bodies carry
+  `partial`. `StudioContractTest` unchanged: `assertSchemaMatchesRecord` compares property *name
+  sets* and never reads `required`, verified at `StudioContractTest.java:416-426`.
+  `confinement.test.ts` 2 red until the owner's own edit to it, 0 after. The owner measures.
+
+---
+
+## 21. INT-10 — the confirm body requires a field no response returns (closes story 10.10 AC-15)
+
+### 21.1 The gap, verified — and measured across the whole document
+
+Story 10.10 exercised §12 exactly as §12 asks: it found a field it could not obtain, refused to
+fabricate one, left a contract test **red** with its reason in the test name, filed two candidate
+shapes and took neither.
+
+| Fact | Evidence, `arch/wave6-rulings` at `52af70c93` |
+|---|---|
+| `ConfirmCompileRequest.required` is `[revisionId, artifactHash, sourceRevision, configurationRevision]` | `openapi.yaml` |
+| `TestDto` has 22 properties. `sourceRevision` and `configurationRevision` are among them; `currentCandidateRevisionId` supplies `revisionId`. **No property is `artifactHash` and none ends in `ArtifactHash`** | measured by walking the document |
+| Over the `tests` tag, exactly **one** required request field is unreachable from any declared `2xx` response, and it is `confirmCompile.artifactHash` | measured |
+| `artifactHash` exists on a request *example*, on `ConfirmCompileRequest` itself, and on the internal `RunJob`. An example is not a schema (§14.6) and `RunJob` is not a public response | `openapi.yaml` |
+| The data exists and is persisted: `UITestRevision` carries `source`, `artifact`, `artifactHash`, `artifactSchemaVersion`, `provenance` | story 10.10's verified record, re-read against the schema inventory |
+
+So the client is required to send a value the contract gives it no declared way to read. Under §12
+this is Class C — either candidate moves the public surface — and @po classified it so.
+
+### 21.2 Ruling
+
+**Candidate A. `TestDto` gains two nullable properties:**
+
+- **`currentCandidateArtifactHash`** — the canonical artifact hash of the revision that
+  `currentCandidateRevisionId` already names. `null` when there is no candidate. This is the field
+  `ConfirmCompileRequest.artifactHash` is read from.
+- **`currentCandidateArtifact`** — the candidate revision's immutable validated artifact, the
+  frozen `artifact.schema.json` shape. `null` when there is no candidate.
+
+Both are **nulled in the `GET /tests` list projection**, on §16.5's precedent and documented the
+same way — §16.5 already established that the list projection diverges from the single-draft read
+and that the divergence is declared rather than discovered.
+
+**Candidate B — `GET /tests/{id}/revisions/{revisionId}` — is rejected**, and on correctness rather
+than on cost. See §21.3.
+
+### 21.3 Why A, and why B is wrong rather than merely expensive
+
+@po's preference for A was recorded as a product preference on cost grounds: B is a new public
+operation with its own authorization, `409` surface, paging question and marker bookkeeping, which
+is a wave's work nobody is sized for. That reasoning is sound and it is not the reason A wins.
+
+**`ConfirmCompileRequest` is a conditional transaction, and its four fields must come from one
+read.** That is what the body is *for*: the client asserts the revision, the artifact hash, the
+source revision and the configuration revision it believes it reviewed, and the server refuses with
+`STALE_CANDIDATE` if the draft moved underneath it. Three of those four fields are on `TestDto`.
+
+Under B, the fourth comes from a **second request**. Between the two reads the draft can recompile
+— which is not hypothetical, it is the state machine §16 documents, with `attempts`, `exhausted`
+and a `needsRevision` example. The client would then assemble a four-field conditional body out of
+two reads that disagree, and the conditional transaction would be checking a claim the client never
+coherently held. The failure is worse than a stale refusal: a hash from read 2 paired with a
+revision id from read 1 can be *internally* inconsistent in a way the server's own
+`STALE_CANDIDATE` check was never designed to name.
+
+This is §16.3's ruling, one field over. §16.3 put compiler output on the draft rather than on the
+revision precisely so it could be *"never stale against the draft it arrives with"*, and argued it
+in these words: the client aligns hash, steps and diagnostics **because they are read in one
+transaction**. B reintroduces exactly the seam §16.3 closed, on the one body where the seam is
+load-bearing.
+
+B's stated advantages survive and do not rescue it. Revisions are immutable and cacheable — true,
+and irrelevant to a body whose whole purpose is to assert a *current* alignment. Provenance has no
+home today — true, and it is a real gap, but it is not this gap, and solving an unraised problem
+with a new public operation is how a route acquires an authorization surface nobody reviewed.
+10.11's Code view wants the **confirmed** revision — true, and `confirmedRevisionId` is already on
+`TestDto`; if 10.11 needs the confirmed artifact as well as the candidate's, that is a third
+additive property on the same body, not a route.
+
+### 21.4 The name is fixed here, because the test cannot fix it
+
+@qa found that story 10.10's reachability rule is **wider than the answer it produces**. `isReachable`
+accepts an exact name or any readable property whose name ends with the field name capitalized. So
+a property called `supersededRevisionArtifactHash` — the hash of explicitly the *wrong* revision —
+satisfies it. Verified here by simulation against the real document: injecting
+`currentCandidateArtifactHash` into the readable set empties the unobtainable list, and injecting
+`supersededRevisionArtifactHash` empties it **identically**.
+
+@qa is right, and the consequence is a ruling obligation rather than a test defect. The qualified-
+suffix half of the rule is not sloppiness — it is load-bearing, and story 10.10 was right to write
+it. Without it the escalation would report `revisionId` as a second, false divergence, because
+`revisionId` is genuinely obtainable only through `currentCandidateRevisionId`; and 10.10's own
+sibling test pins that half as live rather than dead code. An escalation that cries about two
+things when one is real is an escalation nobody acts on.
+
+But a syntactic suffix can express *a* correspondence and can never express *the right* one. So:
+
+**The field is named `currentCandidateArtifactHash`, by this ruling, and the name is normative.**
+It is paired with the existing `currentCandidateRevisionId` so that the name itself states which
+revision it hashes — the reader of the confirm call can see the two fields agree without consulting
+this document. `artifactHash` bare is rejected: on a body that also carries `confirmedRevisionId`,
+an unqualified hash does not say which revision it belongs to, and the one thing this body must
+never be ambiguous about is which revision the client is asserting.
+
+The test's role is correspondingly demoted, and the demotion should be written into it when the
+amendment lands: it is a **tripwire that a qualified hash exists**, not a check that the right one
+does. Its green is necessary and not sufficient. That sentence belongs in the test's own comment,
+because the next reader will otherwise take its green as acceptance.
+
+### 21.5 @po's ratified property is false as stated — measured, not argued
+
+@po ratified the property as *"true of every other route in the document"* and re-usable. **The
+generalisation is false.** Measured here by walking every tag in `openapi.yaml` with story 10.10's
+own `isReachable` and `requiredRequestFields` logic:
+
+| Tag | Operations | Required request fields checked | Unreachable |
+|---|---|---|---|
+| `tests` | 8 | 12 | **1** — `confirmCompile.artifactHash` |
+| `executions` | 4 | 0 | 0 *(vacuous: no required request body)* |
+| `api-callback` | 2 | 19 | **12** |
+| `runner` | 4 | 16 | **16** |
+| `internal` | 6 | 35 | **25** |
+
+@qa's three counts — 25, 16 and 12 — reproduce exactly.
+
+**The test is honest and the generalisation is not**, and the distinction is not a technicality.
+Story 10.10's test scopes to the `tests` tag in its own name and in its `TAG` constant, so it
+asserts only what it measured. @po's sentence generalized from it without measuring. This is worth
+recording in a document whose §14.6 exists to complain about facts that are conveyed decoratively:
+a ratification is a statement about the world, and it is checkable.
+
+**Why the scoped form is the true one.** The property is *"a client must be able to read what it is
+required to send"*. That is a property of a **client-facing resource surface**, where the caller
+discovers state by reading and then acts on what it read. `internal`, `runner` and `api-callback`
+are not that. They are a **dispatch** surface and a **report** surface: the API sends the runner a
+job it composed from its own database, and the runner sends the API a report it composed from its
+own observations. Neither sender reads its payload back from the receiver's responses first, and
+requiring it to would be nonsense — `reportProgress.evidence` is the runner's observation, and the
+API returning it on a `2xx` before the runner sends it is not a thing that could exist. The 53
+"failures" are the property being applied outside its domain, not 53 divergences.
+
+The re-usable form, stated so nobody re-generalizes it:
+
+> **Every field named in the `required` list of a request body on a *client-facing* operation must
+> be reachable from some declared `2xx` response schema of an operation on the same surface.**
+> Machine-to-machine command and report surfaces are outside it by construction: their senders
+> compose payloads from state the receiver does not hold.
+
+### 21.6 Whether story 10.11 extends the assertion beyond the `tests` tag — **no**
+
+10.11 is being drafted now and is told to extend it. **It must not**, and the reason is §21.5's
+measurement rather than a judgment about 10.11's scope: extending by tag commits 10.11 to a test
+that is red on 53 counts, every one of which is correct by design. A story that inherits a test red
+on 53 correct facts does one of two things, and both are worse than not writing it — it suppresses
+the tag list, which makes the test a statement about its own exclusion list, or it widens
+`isReachable` until the reds go away, which is §12's *"the one edit whose only effect is to stop a
+test from telling the truth"*.
+
+Extending to `executions` is permitted and nearly worthless: zero required request fields today, so
+the assertion is vacuous, and a vacuous guard is this epic's most-repeated finding — sixteen
+catalogued shapes by story 10.17's gate. If 10.11 adds it, it adds a non-vacuity control in the
+same commit that proves the tag has something to check, and it will find that it does not.
+
+**What 10.11 should spend that edit on instead is already assigned to it and is real: O-12.**
+§18.3 requires 10.11 to *generate the `ExecutionErrorCode` union from this document or assert it
+against this document*, because `frontend/src/types/studio/studioTypes.ts` still declares six
+members against the document's eight. That is a live two-value divergence with a named mechanism
+behind it, and `studioContract.test.ts` is already its natural home. One document-reading assertion
+that catches a real drift is worth more than a second one scoped to a surface that has no drift to
+catch.
+
+### 21.7 Authorization, and what is not weakened
+
+§16.6's argument transfers, and it is checked rather than asserted. The artifact is **derived from
+the author's own steps**, which the same body already returns verbatim in `steps`, and it is read
+on `GET /tests/{id}`, whose CSI scoping §9.1 already fixes — so the new properties are visible to
+exactly the principals who can already read the draft they describe, and to no others.
+
+References stay opaque. §9.2 keeps resolved values off the compile path entirely: the artifact
+names `vars.secret('ID')`, never a value. §16.6 established that the first surface to carry
+compiler output needed no new gate *because the compile path resolves no variable and no secret at
+all*, and that holds identically here — the artifact is the compile path's output. BRD §9.2's
+*"The MFE receives neither resolved secrets nor service credentials"* is not weakened.
+
+One consequence is stated because an implementer will meet it: `currentCandidateArtifact` is the
+**candidate's** artifact, and `steps` is the **draft's** current English. In the `needsRevision`
+state those disagree by design — that is what the state means. The review surface must render the
+artifact, never `steps`, when it claims to show what was validated; deriving the summary from
+`steps` would present the client's reading of the English as the validator's reading of the
+artifact, which is the confusion story 10.10 AC-16(a) exists to prevent and which architecture §8.3
+retires the client grammar path to end.
+
+### 21.8 Alternatives rejected
+
+| Option | Why not |
+|---|---|
+| **B — `GET /tests/{id}/revisions/{revisionId}`** | Splits a conditional transaction's four fields across two reads (§21.3). Also the largest Class C change available (§16.7), with an authorization surface, a `409` set and marker bookkeeping nobody is sized for — but that is the second reason, not the first. |
+| **Relax `ConfirmCompileRequest.required` to drop `artifactHash`** | The manoeuvre §12's third rule names: relaxing a `required` list to stop a test failing. It would also delete the conditional transaction's strongest term — the hash is the only one of the four that pins the *validated artifact* rather than a revision identifier. |
+| **Let the client compute the hash from the artifact it was shown** | Rejected by story 10.10 before it was proposed, and rightly: a client-computed `artifactHash` is the client asserting what the server canonicalized, which is the one thing the conditional transaction exists to check. It would be green, and it would check nothing. |
+| **Return the hash on `POST /tests/{id}/compile`'s `202` only** | The `202` is an acceptance, not a result; the hash does not exist until compilation succeeds. A client that reloads, or a second tab, would have no path to it — and the reload path is exactly what story 10.9's @po ruling 2 said must work. |
+| **Add `provenance` and `artifactSchemaVersion` too, while the body is open** | Not asked for by any source and not needed by any consumer that exists. §18.4's O-10 note is the precedent: bundling an unmotivated change makes the before/after ambiguous about which change did what. If 10.11's Code view needs provenance, it raises it with a consumer. |
+
+### 21.9 What the owning story must do
+
+**Owner: story 10.11.** It is the only wave-6 story still in draft — so its scope can be set
+correctly before it starts rather than amended mid-flight — it depends on 10.10, and its run gate
+is enabled by `compileStatus: READY`, which only confirmation produces. It therefore has both the
+strongest need and the only unfrozen scope. Story 10.10 anticipated this exact assignment: its
+AC-16(b) records *"if the ruling lands after wave 5 closes, owner is 10.11"*. Wave 5 has closed.
+
+**The scope consequence is stated plainly rather than buried: 10.11 as drafted is a frontend story,
+and this edit is not.** It needs the document, a backend producer and a frontend consumer. Widening
+10.11 to carry all three, or splitting the producer into its own story, is @po's decision — this
+ruling fixes the shape and the owner, never the Acceptance Criteria.
+
+1. **The document.** The two nullable properties on `TestDto`, with `null` in the `GET /tests` list
+   projection declared the way §16.5 declares its omission, and a `getTest` example updated. Any
+   new or edited example is validated against the amended `TestDto` with Ajv **before** the suites
+   run — §18.5's rule, because an example that does not validate is the decorative artefact §14.6
+   complains about.
+2. **The backend producer, in the same PR — this edit cannot be document-only.**
+   `StudioContractTest.assertSchemaMatchesRecord` asserts **set equality** between the schema's
+   property names and the Java record's components (verified, `StudioContractTest.java:416-426`),
+   so `TestDto` gaining two properties turns it red until `UITestDto` gains the same two. The
+   producer reads `UITestRevision.artifactHash` and `.artifact` for the revision
+   `currentCandidateRevisionId` names.
+3. **`studioEscalation.test.ts` goes green with no edit to its assertions** — that is the property
+   that made it an escalation. Its *comment* is updated in the same PR to record §21.4: the
+   qualified-suffix rule is a tripwire, its green is necessary and not sufficient, and the correct
+   field was named by ruling.
+4. **Do not extend the assertion beyond the `tests` tag** (§21.6). If the story wants a second
+   document-reading control, O-12 is assigned to it and is real.
+5. **Re-anchor `BASE_SHA256`**, after story 10.18's amendment has merged — see §23.2, and the
+   ordering is not optional.
+6. **Measure and record** into this amendment's §13 cell, replacing the prediction.
+
+### 21.10 Recorded against §12's four requirements
+
+- **The divergence.** `ConfirmCompileRequest` requires `artifactHash`; no `2xx` response of any
+  `tests`-tagged operation returns it or any qualified form of it; and there is no revision read
+  route. The client is required to send a value it cannot obtain, which also denies story 10.10 the
+  action/target/assertion summary and the expandable source that §4.7 requires be *derived from
+  validated operations*.
+- **The source (Article IV).** Nothing invented. `UITestRevision` already persists `artifactHash`
+  and `artifact`; `artifact.schema.json` is frozen since story 10.1 and fixtured as `mockArtifact`;
+  `RunJob.artifactHash` is already described *"Canonical artifact hash from the confirmed
+  revision"*; the epic's §10.10 scope line requires the expandable executable source; §4.7 requires
+  the summary be derived from validated operations; §16.3 supplies the one-read argument and §16.5
+  the list-projection precedent. The **name** is the one thing this ruling adds, and it is
+  constructed from the document's own `currentCandidateRevisionId` (§21.4).
+- **Consuming stories re-checked.** **10.10** — merged; AC-15's test goes green untouched, and
+  AC-11(b)/AC-16(b) are unblocked but remain *skipped, never passed* in a merged story; whether
+  they move to 10.11 or to a follow-up is @po's. **10.9** — owns the compile/confirm surface; the
+  properties are additive on a body it already returns and no route, marker or status changes.
+  **10.11** — the owner. **10.16** — consumes the execution surface, untouched. **10.15 / 10.18** —
+  no `TestDto` dependency. Both copies of `artifact.schema.json` are byte-unchanged: this ruling
+  *references* the frozen shape and does not alter it.
+- **Contract test before and after.** **Predicted, not measured** (§23.3), with one exception that
+  *was* measured: story 10.10's reachability property was re-computed here against the real
+  document, and `currentCandidateArtifactHash` empties the unobtainable list — so
+  `studioEscalation.test.ts` goes 2/3 → 3/3 with no edit to the test. That is the claim @qa made
+  and it reproduces. `StudioContractTest` is **red** on `TestDto` until the Java record follows in
+  the same PR, which is stated as a requirement rather than discovered as a failure.
+
+---
+
+## 22. The `resolvedVars` scrubbing clause — and which side was actually wrong (Class B)
+
+### 22.1 The divergence, verified
+
+Story 10.17 found that the runner's redactor is fed **resolved variables as well as secrets**,
+while `RunJob.resolvedVars`'s description carries no scrubbing clause and
+`RunJob.resolvedSecrets`'s says it is *"additionally scrubbed from every outbound diagnostic
+together with its tested encoded variants"* — a wording that, by naming the scrubbing as
+*additional* to one field, implies its absence from the other. @po ruled the code's stronger
+behaviour correct and referred the document amendment here as Class B.
+
+| Fact | Evidence at `52af70c93` |
+|---|---|
+| `knownValuesOf(job)` returns `[...Object.values(job.resolvedVars), ...Object.values(job.resolvedSecrets)]` and its result *"is handed straight to `createRedactor`"* | `studio-runner/src/reporting/envelope.ts:311-321` |
+| The run's redactor is built from it | `runCoordinator.ts:325` |
+| The parent's job resolver returns both maps from `knownValues()` | `runCoordinator.ts:224-226` |
+| The child's resolver does the same, and its comment states the rule — *"a variable that happens to carry a canary must be redacted for the same reason a secret is"* | `childRuntime.ts:140-160` |
+| The executor builds its redactor from `resolver.knownValues()` | `executor/executor.ts:83` |
+
+### 22.2 Ruling — amend, and the framing is not "document catches up to code"
+
+**The document is amended.** But the escalation's own framing should not be adopted, because it
+misplaces the error and would set a bad precedent for the next one.
+
+Architecture §9.2 reads: *"Runner scrubs **known values** and tested encoded variants from every
+outbound diagnostic before persistence."* **Known values**, not known secrets. The runner
+implements §9.2 exactly. So this is not a case of code being stronger than its contract and the
+contract being relaxed upward to match — it is a case of **the contract having been written
+narrower than its own source**, and the code having been right all along. Under Article IV the
+source wins, and the source here has never said anything else.
+
+That reframing changes the risk assessment, which is why it is worth the paragraph. Read as "prose
+lags behind a generous implementation", leaving it costs nothing. Read correctly, the document
+**licenses a future runner to stop redacting variables and still claim conformance** — and that is
+not theoretical on this surface. Story 10.17's AC-14 found a live redactor hole of exactly this
+kind: serialize-then-redact means a value containing `"`, `\` or a newline is JSON-escaped in the
+line the redactor searches, and an eighth variant had to be added beside the seven. A variable
+carrying a canary is a tested concern in this epic, not a hypothetical one.
+
+**Class B is the right gate** and @po classified it correctly: §12 makes *"changing what an existing
+field means"* Class B, and this changes what two fields mean. §12's third rule — *loosening is
+never a story's call* — is not in play, because this is a **strengthening**; it is recorded anyway,
+because the symmetry matters: a strengthening on a closed body is still a meaning change, and the
+next story that finds one should escalate it rather than reason that only loosening is gated.
+
+### 22.3 What the amended text must say
+
+`resolvedVars`, in its own right: ephemeral, held in runner memory for the run and cleared on every
+exit path; never written to scratch, a retry buffer, a manifest or a report; **and scrubbed, with
+its tested encoded variants, from every outbound diagnostic before persistence (§9.2)**.
+
+`resolvedSecrets`: the same two clauses, stated identically rather than by reference to *additional*
+treatment. What is genuinely additional to a secret is **vault-use authorization** — story 10.17's
+axis, §9.2's *"Scope secret use to approved origins and action arguments"* and *"Secret reference
+names alone grant no permission"* — and the description says that instead. A reader who wants to
+know how the two differ gets a true answer rather than a false one.
+
+**Owner: story 10.18**, in the same PR as §20's promotion, so the pin moves once for both (§23.2).
+Description text only: no shape, no `required` list, no enum. Predicted effect on every suite: none.
+
+### 22.4 Recorded against §12's four requirements
+
+- **The divergence.** The document confines the scrubbing obligation to `resolvedSecrets` and by
+  omission exempts `resolvedVars`, while §9.2 imposes it on *known values* and four merged sites
+  implement it on both.
+- **The source (Article IV).** Architecture §9.2, verbatim, in both halves: *"Runner scrubs known
+  values and tested encoded variants from every outbound diagnostic before persistence"* and
+  *"Scope secret use to approved origins and action arguments… Secret reference names alone grant
+  no permission"*. Nothing invented; no field added, removed, renamed or retyped.
+- **Consuming stories re-checked.** **10.17** — the producer of all four sites; the amendment
+  records what its AC-20 and AC-21 already built and asks it for nothing. **10.13** — owns the
+  canary harness the rule is asserted through; unaffected, since the behaviour does not change.
+  **10.18 / 10.19** — inherit a description that no longer under-states the control they must
+  demonstrate in staging. No public body is touched.
+- **Contract test before and after.** Description text only; predicted unchanged everywhere.
+  Measured by the owner (§23.3).
+
+---
+
+## 23. Two unowned controls, the sequencing, and what was not measured
+
+### 23.1 O-15 and O-16 — recorded here, with owners
+
+Both findings came out of wave 5's gates, both are architectural rather than story-local, and
+neither had an owner. They belong in this document for the same reason §14.6 put
+`x-conflict-codes` here: each is about whether a fact on a **closed §6.2 body** is *assertable*, and
+that is a property of the contract surface, not of whichever story last touched the file.
+
+**O-15 — the runner's `ACCEPTED_JOB_KEYS` is not pinned against the frozen `RunJob`.**
+
+Verified. `src/reporting/envelope.ts:59-74` hard-codes fourteen key strings as the inbound
+default-deny set. The only assertion over it is `test/run/canary.test.ts:713-714` —
+`has('resolvedSecrets')` and `size === 14`. **A count is not a correspondence.** Renaming a key on
+either side, or swapping one for another, leaves the count at fourteen and the suite green. Nothing
+anywhere reads `components.schemas.RunJob` and compares it.
+
+@qa named this *"the remaining half of the `DEF-01` cause"*, and the naming is exact. `DEF-01` was
+this drift in the other direction: `HttpRunnerDispatchClient.body()` sent eight of the fourteen
+required keys plus four the closed schema forbids, so **every real dispatch was refused
+`400 JOB_INVALID`** and ended `ERROR / DISPATCH_FAILED` — the API could never dispatch a run at
+all, and no test looked for it. Story 10.17 closed the API side properly and generally, with
+`InternalBodyContractConformanceTest`: *for every internal body this API produces, the serialized
+bytes validate against the schema the frozen document declares for it*, landed red first with a
+non-vacuity control. The runner side has no counterpart. Two closed key sets, one guarded, one
+counted.
+
+The control's form is stated so the owner has no decision to make: **read the key set of
+`components.schemas.RunJob.properties` from `openapi.yaml` and assert set equality with
+`ACCEPTED_JOB_KEYS`**, with a non-vacuity control in the same commit — a mutation that adds or
+removes one key on either side and the named test that goes red. The `size === 14` assertion is
+**replaced**, not kept beside it: a hand-maintained count sitting next to a derived comparison is
+the fifteenth copy of one vocabulary, which is §15.6's arrangement for the seventh time in this
+epic.
+
+The wider point, recorded because it will recur: this is a **property** assertion where the
+runner currently has a **byte** assertion. `confinement.test.ts`'s SHA-256 pin is the right control
+for *this story made no contract edit* and the wrong one for *the contract is what the runner
+expects* — it has produced a false red on a blameless story twice (`FOC-04`, `FOC-05`) and is about
+to a third time (§20.4). Property assertions over the document do not have that failure mode, and
+every one this epic has added went green on the amendment untouched.
+
+**Owner: story 10.18**, with the runner tree and a staging-conformance subject.
+
+**O-16 — `bounds.ts`'s truncate-before-redact ordering.**
+
+Verified, including the part that makes it *not* live. `createLogBuffer.append` truncates the
+message to `maxEntryLength` and then retains it; its own comment states the requirement it cannot
+enforce — *"callers are required to redact first"*, because a known value cut by the `slice` becomes
+two fragments, no fragment matches any variant `createRedactor` produces, both halves survive the
+later redaction of the assembled body, and concatenating them reconstructs the value.
+
+Today exactly one production caller exists, `RunSnapshot.appendLog` at `snapshot.ts:148`, and it
+redacts first. So the trap is **latent, not live** — @qa's verdict reproduces. What makes it worth
+recording rather than leaving in a comment is that `createLogBuffer` is exported from
+`src/reporting/index.ts`, the package's own module surface: a second producer is one import away,
+and the invariant protecting a redaction boundary would be a paragraph of prose.
+
+The shape of the fix is already established in this epic, by story 10.17's AC-22 repair one level
+down: **make the unsafe capability unreachable rather than documented.** `LogBuffer` was given a
+read-only `LogView`, `RunSnapshot.logs` became the view, the buffer stayed in the closure, and
+rerouting a producer around the redactor became a compile error. The same move applies to
+`createLogBuffer` itself — stop exporting it from the package surface, or have `append` accept an
+already-redacted branded type so that an un-redacted string cannot be passed. Either satisfies the
+invariant structurally; the choice between them is the owner's.
+
+**Owner: story 10.18.** Not urgent, and recorded as not urgent.
+
+**Sizing, stated rather than hidden.** §20, §22, O-15 and O-16 all land on story 10.18, which the
+manifest already sizes L and whose own subject is a hardened deployment. That is a real addition
+and @po should re-check the size at validation rather than inherit it — six consecutive stories in
+this epic moved M → L at validation for exactly this cause, an architect ruling landing after the
+estimate. The alternative considered was spreading them across 10.11, 10.15 and 10.18; it was
+rejected because each additional owner is an additional pin move (§23.2) and an additional false
+red.
+
+### 23.2 Two contract edits in wave 6, in this order
+
+Two of the three rulings amend `openapi.yaml`. Each moves the SHA-256 that
+`confinement.test.ts:149` pins. The ordering is mandated, and @po is asked to record it as the
+wave-6 successor to `FOC-04` and `FOC-05` — the record is @po's; the ordering is this ruling's:
+
+1. **Story 10.18 first** — §20's promotion, §20.4's assertion inversion, §22's description
+   correction, one re-anchor. It is the doc-and-runner-only change and it carries no producer work.
+2. **Story 10.11 second** — §21's `TestDto` properties plus the Java producer, and a second
+   re-anchor read fresh from the file.
+
+The reverse order is forbidden for the reason `FOC-04` gives: it would force a frontend/backend PR
+whose subject is the review surface to re-anchor a runner test **and** to invert an assertion about
+`RunnerEvidence` that belongs to a ruling it is not implementing.
+
+**And the standing rule that prevents a fourth instance of this:** no wave-6 story may assert
+`openapi.yaml` byte-unchanged unless it merges before step 1. A story that wants to state *I made
+no contract edit* after these land should assert it over its **own diff** — the file is absent from
+the change set — which is the claim actually being made, and which no other story's legitimate
+amendment can falsify. That is the narrower control §23.1's closing paragraph argues for, and
+wave 6 is where it stops being free advice.
+
+### 23.3 What was measured, and what was not
+
+**Measured, in this worktree, at `52af70c93`:**
+
+- `shasum -a 256 docs/specs/studio/openapi.yaml` → `cbf07c99…f412e`, identical to `BASE_SHA256` at
+  `confinement.test.ts:149`. `FOC-05`'s premise still holds; story 10.17 merged at `c54df7934`
+  without moving it.
+- Story 10.10's reachability property, re-computed over **every tag** in the document with the
+  story's own `isReachable` and `requiredRequestFields` logic (§21.5's table), plus two
+  simulations: `currentCandidateArtifactHash` empties the `tests` list, and so does
+  `supersededRevisionArtifactHash` (§21.4).
+- Every code fact in §20.1, §22.1 and §23.1, by reading the merged files at the line numbers cited.
+
+**Not measured, and the reason is not a caveat at the end:** **no test suite was run for this
+amendment.** `node_modules` is absent from `studio-runner/` and from `frontend/` in this worktree,
+so neither `npm test` nor `npx vitest run` can start, and no Gradle run was attempted. Every
+before/after figure in this amendment's three §13 rows is therefore a **prediction derived from
+reading the assertions**, not a reading — including the `test/contract.test.ts` 14/14 that §20.8
+predicts. §12's fourth requirement is met by the named owner, who runs the suites over the diff and
+replaces the prediction with the measurement in the same PR. This is the first amendment in this
+document that could not measure its own effect, and it says so here rather than letting a
+confident-looking table imply otherwise.
+
+### 23.4 Open items after this amendment
+
+| Item | Status at `52af70c93` |
+|---|---|
+| **O-6** | Still open, unchanged. Destination policy on the job envelope is 10.18's (SPK-05). Untouched here. |
+| **O-9** | Still open, still landable under §14.7's pre-ruling. Untouched: this amendment declares no `409` and no conflict code. |
+| **O-10** | Still open and now **overdue by a wave**. `400` versus `404` for an unknown, deleted or quarantined draft on `GET`/`PUT`/`DELETE /tests/{id}`. It was deliberately not folded into §16 to keep that measurement unambiguous, and it is deliberately not folded into §21 for the same reason — §21 adds fields to a `200`. It needs its own ruling on its own before/after, and it should have one before the pilot. |
+| **O-11** | **Closed.** The `error_code` CHECK landed with story 10.14 at `ded3d45fb`, on the migration §18.2 re-pointed it to. |
+| **O-12** | Still open, still story 10.11's, and **reinforced** by §21.6: it is what 10.11 should spend its document-reading edit on instead of widening story 10.10's reachability assertion. |
+| **O-13** | **Closed.** Both halves landed with story 10.14 at `5e72fdf2b` — the projection stops writing `Boolean.FALSE`, and the timed-out step's message is synthesized where a terminal `TIMEOUT` meets a step still `RUNNING`. |
+| **O-14** | **Ruled and authorized (§20), not yet landed.** Owner re-pointed from §18.4's formula — which defers forever now that 10.14 has merged and no wave-6 story touches `RunnerEvidence` — to story **10.18**, first in the wave-6 ordering (§23.2). |
+| **O-15** *(new)* | The runner's `ACCEPTED_JOB_KEYS` is not pinned against the frozen `RunJob`; the only assertion over it is a hand-maintained count. The remaining half of `DEF-01`'s cause. Form stated in §23.1. Owner: story **10.18**. |
+| **O-16** *(new)* | `createLogBuffer.append` truncates before redacting and states its redact-first requirement in a comment; one production caller honours it, and the factory is exported from the package surface. Latent, not live. Close it structurally, as story 10.17's AC-22 repair did one level down. Owner: story **10.18**. |
+| **O-17** *(new)* | Story 10.10's AC-11(b) and AC-16(b) are *skipped, never passed* in a **merged** story, and §21 unblocks both. Whether they are re-opened, carried by story 10.11 with the producer, or split into a follow-up is @po's routing decision, not an architect's. Raised here so it is not lost between a closed story and an open one. Owner: **@po**. |
+
+### 23.5 What this amendment does not do
+
+It changes no story's Title, Acceptance Criteria, Scope or Status. Story 10.14's AC-26 is **closed
+by §20's ruling rather than by an edit to the criterion** — condition (iii) is now met, and whether
+the checkbox moves, and whether a criterion recorded *skipped, never passed* in a merged story is
+re-opened or carried forward, is @po's call. Story 10.10's AC-15 is **closed by §21** on the same
+terms, and its AC-11(b)/AC-16(b) routing is recorded as O-17.
+
+It edits no `openapi.yaml`, no `artifact.schema.json`, no backend Java, no frontend source and no
+`studio-runner/` source. Under §19 that is the point: the three authorized edits belong to the two
+named stories, whose diffs are responsible for them and whose gates run over them.
