@@ -9,6 +9,7 @@ import {
 } from '@/types/studio/studioTypes';
 import { MOCK_READABLE_CSIS, mockExecutions, mockTests } from './fixtures';
 import { compileReviewDrafts, conflictResponse } from './compileFixtures';
+import { executeConflictResponse } from './executionFixtures';
 
 /**
  * Studio request handlers for standalone development and Vitest (story 10.1, AC-16).
@@ -247,6 +248,19 @@ export const studioHandlers = [
     const test = readable(allTests()).find((candidate) => candidate.id === params.id);
     if (!test) {
       return badRequest('BAD_REQUEST', `UI Test not found: ${params.id}`);
+    }
+    /*
+     * Story 10.11a — the mock refuses an unconfirmed draft, because the server does.
+     *
+     * Story 10.8's AC-26 makes the server-side readiness gate unconditional, and a mock that
+     * accepts what the server refuses teaches the UI that the client's own opinion is the gate.
+     * That is the exact defect this story removes from the page, so leaving it in the mock would
+     * leave the lesson in place. The lifecycle codes are not folded in here for the reason the
+     * document gives: `COMPILE_REQUIRED` tells an author to confirm a candidate, which is work a
+     * deleted or quarantined draft would refuse too.
+     */
+    if (test.compileStatus !== 'READY') {
+      return HttpResponse.json(executeConflictResponse('COMPILE_REQUIRED'), { status: 409 });
     }
     const key = request.headers.get('Idempotency-Key');
     if (key && idempotency.has(key)) {

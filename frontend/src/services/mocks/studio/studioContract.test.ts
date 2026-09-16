@@ -15,6 +15,20 @@ import {
   COMPILE_CONFLICT_NARRATIVES,
   COMPILE_REJECTION_NARRATIVES,
 } from '@/components/studio/review/conflictNarratives';
+import { EXECUTION_ERROR_CODES, defaultConfiguration } from '@/types/studio/studioTypes';
+import {
+  EXECUTE_CONFLICT_KEYS,
+  EXECUTE_CONFLICT_NARRATIVES,
+  EXECUTION_DISABLED_NARRATIVE,
+  EXECUTION_ERROR_NARRATIVES,
+  QUOTA_EXHAUSTED_NARRATIVE,
+  RUN_ENABLEMENT,
+  RUNNABLE_COMPILE_STATUS,
+  executeRefusalFor,
+  executionErrorNarrative,
+  runEnablementFor,
+} from '@/components/studio/run';
+import { EXECUTION_FIXTURE_MATRIX, executionCorpus } from './executionFixtures';
 
 /**
  * Story 10.1 AC-21 — the mocks are checked against the frozen contract, not against themselves.
@@ -337,5 +351,295 @@ describe('story 10.10: the compile-review fixtures match the amended contract', 
         `${test.id} carries both compileError and compileDiagnostics`,
       ).toBe(true);
     }
+  });
+});
+
+/**
+ * Story 10.11a — the execution vocabularies, read from the document through the **same** binding
+ * (ADR-002 §18.3, O-12).
+ *
+ * §18.3 assigns O-12 here as *"a requirement rather than a note"*: *"generate the union from this
+ * document or assert it against this document."* It also says which mechanism to use — *"install
+ * the document-reading assertion once, and the other should extend it rather than write a second
+ * one"* — so these assertions use the {@link assertSameSet} helper and the `openapi` binding
+ * already parsed at the top of this file. **No second `parseYaml` of this document is added.**
+ * That constraint is a review constraint and not a guard, and it is recorded as such in the story
+ * rather than dressed as a criterion: nothing in this suite can fail because someone added one.
+ *
+ * The expected value is **never** imported from `studioTypes.ts`. An expected value read out of
+ * the module under test is VAC-11, the shape @qa measured on story 10.10 — where blanking seven
+ * required facts left the whole suite green — and AC-5 is the assertion it is most naturally
+ * written into, because the nearest list of eight strings lives in the file being checked.
+ */
+
+/**
+ * The document's error-code vocabulary, as a function of a parsed document.
+ *
+ * Parameterised on purpose. A reader that ignores its argument and returns a literal is the
+ * catalogued *"pinned copy whose provenance nothing checks"*, and the only way to tell the two
+ * apart is to hand it a document that says something different and see whether the answer changes.
+ * `PROV-ERRCODE` below does exactly that.
+ */
+function executionErrorCodesOf(document: any): string[] {
+  const declared: unknown[] = document.components.schemas.ExecutionErrorCode.enum;
+  return declared.filter((value): value is string => typeof value === 'string');
+}
+
+function executionErrorCodeEnum(): string[] {
+  return executionErrorCodesOf(openapi);
+}
+
+describe('story 10.11a: the terminal error vocabulary is asserted against the document (O-12)', () => {
+  it('ExecutionErrorCode matches the runtime carrier in both directions', () => {
+    const declared = executionErrorCodeEnum();
+    expect(declared.length).toBeGreaterThan(0);
+
+    // The carrier, not the type: a TypeScript union is erased at run time, which is precisely why
+    // the drift ADR-002 §15.5 records went unnoticed through two stories.
+    assertSameSet(declared, EXECUTION_ERROR_CODES, 'ExecutionErrorCode');
+  });
+
+  it('every declared code has a rendered narrative, and every narrative a declared code', () => {
+    // A union asserted and unconsumed reproduces §15.5's own diagnosis — the drift was invisible
+    // *because nothing narrowed on it* — one layer up.
+    assertSameSet(
+      executionErrorCodeEnum(),
+      Object.keys(EXECUTION_ERROR_NARRATIVES),
+      'ExecutionErrorCode narratives',
+    );
+
+    const titles = executionErrorCodeEnum().map((code) => executionErrorNarrative(code).title);
+    expect(new Set(titles).size, 'two codes render the same name').toBe(titles.length);
+    for (const title of titles) {
+      expect(title.length).toBeGreaterThan(10);
+    }
+  });
+
+  it('a code outside the document is an error rather than a generic failure', () => {
+    expect(() => executionErrorNarrative('SOMETHING_ELSE')).toThrow(/Unknown ExecutionErrorCode/);
+  });
+
+  it('[PROV-ERRCODE] the expectation is read from the document rather than transcribed', () => {
+    /*
+     * The provenance guard AC-5's fourth falsification names. Replacing the document read with an
+     * in-test literal of the eight values leaves every assertion above green — the expectation and
+     * the carrier would agree because both were written by the same hand — so the only thing that
+     * can tell a reader apart from a literal is whether its answer follows its argument.
+     *
+     * The real document is never edited. A structurally identical copy is, which is the same
+     * instrument AC-1 and AC-4 use for their "a sixth member" falsifications.
+     */
+    const asDeclared = structuredClone(openapi);
+    asDeclared.components.schemas.ExecutionErrorCode.enum = ['ONLY_THIS_ONE', null];
+    expect(
+      executionErrorCodesOf(asDeclared),
+      'the reader ignored the document it was handed, so it is a literal wearing a function',
+    ).toEqual(['ONLY_THIS_ONE']);
+
+    // And it is genuinely reading the file this suite parsed, not a copy of its own.
+    expect(executionErrorCodeEnum()).toEqual(
+      openapi.components.schemas.ExecutionErrorCode.enum.filter(
+        (value: unknown) => typeof value === 'string',
+      ),
+    );
+
+    // The nulls the document declares are not members of the union; they are the absence of one.
+    expect(openapi.components.schemas.ExecutionErrorCode.enum).toContain(null);
+    expect(executionErrorCodeEnum()).not.toContain(null);
+  });
+});
+
+describe('story 10.11a: the execute route’s refusals are read from the document', () => {
+  it("execute's conflict codes match the UI's, in both directions", () => {
+    const declared = conflictCodesOf('/tests/{id}/execute', 'post');
+    expect(declared.length).toBeGreaterThan(0);
+    assertSameSet(declared, EXECUTE_CONFLICT_KEYS, 'executeTest x-conflict-codes');
+  });
+
+  it('every execute refusal names who clears it, and the two definite ones offer no retry', () => {
+    // ADR-002 §14.3 puts `TEST_DELETED` and `TEST_QUARANTINED` on the not-retriable side, and the
+    // `tests` tag's own table is where the remedy owners come from.
+    for (const code of conflictCodesOf('/tests/{id}/execute', 'post')) {
+      const narrative = EXECUTE_CONFLICT_NARRATIVES[code];
+      expect(narrative, `${code} has no narrative`).toBeDefined();
+      expect(narrative.whoClearsIt.trim().length, `${code} does not say who clears it`).toBeGreaterThan(
+        30,
+      );
+    }
+    expect(EXECUTE_CONFLICT_NARRATIVES.TEST_DELETED.callerCanRetry).toBe(false);
+    expect(EXECUTE_CONFLICT_NARRATIVES.TEST_QUARANTINED.callerCanRetry).toBe(false);
+  });
+
+  it('the 429 and 503 narratives exist without borrowing a code the document only exemplifies', () => {
+    // §14.6: an example is not assertable. `DISPATCH_DISABLED` reaches the document only as one,
+    // so it is not a key here — which is what this asserts.
+    expect(Object.keys(EXECUTE_CONFLICT_NARRATIVES)).not.toContain('DISPATCH_DISABLED');
+    expect(executeRefusalFor(429, null)).toBe(QUOTA_EXHAUSTED_NARRATIVE);
+    expect(executeRefusalFor(503, null)).toBe(EXECUTION_DISABLED_NARRATIVE);
+    expect(executeRefusalFor(503, 'DISPATCH_DISABLED')).toBe(EXECUTION_DISABLED_NARRATIVE);
+    expect(EXECUTION_DISABLED_NARRATIVE.scope).toBe('platform');
+    expect(QUOTA_EXHAUSTED_NARRATIVE.scope).toBe('quota');
+  });
+});
+
+describe('story 10.11a: the run gate covers the compile states the document declares', () => {
+  it('every compileStatus maps, and Run is available in exactly one of them', () => {
+    const declared = compileStatusEnum();
+    expect(declared.length).toBeGreaterThan(0);
+
+    assertSameSet(declared, Object.keys(RUN_ENABLEMENT), 'run enablement over compileStatus');
+
+    const runnable = declared.filter((status) => runEnablementFor(status).canRun);
+    expect(runnable, 'Run is available in more or fewer than one declared state').toEqual([
+      RUNNABLE_COMPILE_STATUS,
+    ]);
+  });
+
+  it('a compileStatus outside the document is an error rather than a permissive default', () => {
+    expect(() => runEnablementFor('SOMETHING_ELSE')).toThrow(/Unknown compileStatus/);
+  });
+});
+
+describe('story 10.11a: the execution corpus matches the contract', () => {
+  it('every 10.11a execution fixture validates against the snapshot schema', () => {
+    const validate = componentValidator('ExecutionSnapshot');
+    expect(executionCorpus.length).toBeGreaterThan(10);
+    for (const execution of executionCorpus) {
+      expect(validate(execution), `${execution.executionId}: ${JSON.stringify(validate.errors)}`)
+        .toBe(true);
+    }
+  });
+
+  it('no 10.11a execution fixture carries a field the contract does not declare', () => {
+    const declared = declaredPropertiesOf('ExecutionSnapshot');
+    for (const execution of executionCorpus) {
+      for (const field of Object.keys(execution)) {
+        expect(declared, `${execution.executionId} has undeclared field ${field}`).toContain(field);
+      }
+    }
+  });
+});
+
+/**
+ * Story 10.11a, @qa repair — **VAC-18: a coverage matrix whose required set is an editable
+ * literal.**
+ *
+ * @qa deleted `AWAITING_CONFIRMATION` from `EXECUTION_FIXTURE_MATRIX` and the suite stayed
+ * **green**: the matrix's own `it.each` rows vanish rather than fail, nothing read the total, and
+ * its non-vacuity floor was `>= 20` against an actual 26 — so four required shapes could disappear
+ * without a single assertion noticing. Two of its three families were transcribed literals.
+ *
+ * It is story 10.10's matrix finding one layer further out. There the per-entry predicate was
+ * tautological; here the *required set itself* was editable, which is worse, because a tautological
+ * predicate at least still runs.
+ *
+ * The repair lives here rather than in the matrix's own file, for §18.3's reason: this is where the
+ * parsed document and `assertSameSet` already are, and a second copy of either is the arrangement
+ * that produced INT-4. The ids the document **can** name are derived from its vocabularies; the
+ * ones it cannot are pinned **in this file**, outside the module they check, because an expected
+ * value read out of the thing under test is VAC-11.
+ */
+
+/**
+ * The required shapes no declared vocabulary names.
+ *
+ * Each is a *situation* rather than a member of an enum — a step failure with a skipped tail, a log
+ * array at its cap, a body whose prose contradicts its code — so there is nothing in `openapi.yaml`
+ * to derive them from and a pin is the honest instrument. They are pinned here, in the test, and
+ * never imported from `executionFixtures.ts`.
+ */
+const STANDALONE_REQUIRED_FIXTURE_IDS: readonly string[] = [
+  'FX-ERRCODE-NULL',
+  'FX-STEP-FAIL-SKIPPED-TAIL',
+  'FX-LOGS-TRUNCATED-AT-CAP',
+  'FX-LOGS-COMPLETE',
+  'FX-EXECUTE-409-CONTRADICTORY',
+  'FX-EXECUTE-409-UNDECLARED',
+  'FX-EXECUTE-429',
+  'FX-EXECUTE-503',
+];
+
+describe('story 10.11a: [VAC-18] the AC-22 required set is the document’s, not an editable literal', () => {
+  it('the matrix ids are exactly the ids the document’s vocabularies imply, in both directions', () => {
+    const fromDocument = [
+      ...compileStatusEnum().map((state) => `FX-RUNGATE-STATE-${state}`),
+      ...executionErrorCodeEnum().map((code) => `FX-ERRCODE-${code}`),
+      ...conflictCodesOf('/tests/{id}/execute', 'post').map((code) => `FX-EXECUTE-409-${code}`),
+      ...STANDALONE_REQUIRED_FIXTURE_IDS,
+    ];
+    // Without this the comparison could be empty against empty.
+    expect(fromDocument.length).toBeGreaterThanOrEqual(26);
+
+    assertSameSet(
+      fromDocument,
+      EXECUTION_FIXTURE_MATRIX.map((entry) => entry.id),
+      'EXECUTION_FIXTURE_MATRIX ids',
+    );
+  });
+
+  it('the matrix carries one entry per required id and no duplicates, counted rather than sampled', () => {
+    // The half @qa found missing: nothing read the total. A vanished `it.each` row is now a
+    // count that does not match, not an absence nobody looks for.
+    const ids = EXECUTION_FIXTURE_MATRIX.map((entry) => entry.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids.length).toBe(
+      compileStatusEnum().length +
+        executionErrorCodeEnum().length +
+        conflictCodesOf('/tests/{id}/execute', 'post').length +
+        STANDALONE_REQUIRED_FIXTURE_IDS.length,
+    );
+  });
+});
+
+/**
+ * Story 10.11a, @qa repair — **the timeout the page sends, which nothing guarded.**
+ *
+ * `timeoutSeconds` appeared in **zero** test files. The value the page sent was `30000` for the
+ * whole life of the code: the legacy `TestIR` recorded a millisecond timeout and `toConfiguration`
+ * carried it into a field the contract declares in **seconds**, capped at **120**. @qa checked the
+ * other end and it is worse than a range violation — the request DTO guards only `<= 0`, no upper
+ * bound exists anywhere in `studio/dto/`, and the dispatcher computes `timeoutSeconds * 1000L`,
+ * which makes `30000` an **8 hour 20 minute** runtime budget.
+ *
+ * Retiring the legacy IR from the page's save path fixed it as a side effect. That is a latent
+ * product defect fixed rather than a regression — and it is guarded now, because the fix was
+ * unguarded and a value that was wrong for years can be wrong again.
+ *
+ * The bound is **read from the document**, never transcribed: a contract that raises its cap should
+ * relax this assertion by itself, and a story that lowers the cap should turn it red.
+ */
+describe('story 10.11a: the configured timeout is inside the bound the contract declares', () => {
+  function timeoutBound(): { minimum: number; maximum: number } {
+    const schema = openapi.components.schemas.TestConfiguration.properties.timeoutSeconds;
+    expect(typeof schema.minimum, 'TestConfiguration.timeoutSeconds declares no minimum').toBe(
+      'number',
+    );
+    expect(typeof schema.maximum, 'TestConfiguration.timeoutSeconds declares no maximum').toBe(
+      'number',
+    );
+    return { minimum: schema.minimum, maximum: schema.maximum };
+  }
+
+  it('the declared bound is narrow enough for the old value to violate it', () => {
+    // The negative control. If the document declared no maximum, or one above 30000, every
+    // assertion below would hold for the defect this guard exists to catch.
+    const { minimum, maximum } = timeoutBound();
+    expect(maximum).toBeLessThan(30000);
+    expect(minimum).toBeGreaterThan(0);
+  });
+
+  it('defaultConfiguration() is inside it, and validates against TestConfiguration', () => {
+    const { minimum, maximum } = timeoutBound();
+    const configuration = defaultConfiguration();
+    expect(configuration.timeoutSeconds).toBeGreaterThanOrEqual(minimum);
+    expect(configuration.timeoutSeconds).toBeLessThanOrEqual(maximum);
+
+    const validate = componentValidator('TestConfiguration');
+    expect(validate(configuration), JSON.stringify(validate.errors)).toBe(true);
+  });
+
+  it('the legacy millisecond value would be caught by this schema, so the check discriminates', () => {
+    const validate = componentValidator('TestConfiguration');
+    expect(validate({ ...defaultConfiguration(), timeoutSeconds: 30000 })).toBe(false);
   });
 });
