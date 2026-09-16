@@ -41,3 +41,26 @@ data:
   {{ $key }}: {{ $val | quote }}
   {{- end }}
 {{- end }}
+{{- if .Values.studioRunner.enabled }}
+---
+# The object-store lifecycle declaration (§6.2, ED-03 / SPK-03).
+#
+# **Logical expiry is what the API enforces**, at `videoExpiresAt`, and it renders from the same
+# `objectStore.retention` key as the API's and worker's `STUDIO_EVIDENCE_RETENTION` — one key, two
+# rendered values, compared to each other rather than each to a literal (AC-12).
+#
+# This ConfigMap declares the window the bucket's lifecycle rule must be set to; it does not apply
+# it, and applying it is Platform/SRE's under ED-03. **No claim of exact-time physical deletion is
+# made here or anywhere else in this chart**: whether lifecycle expiry is prompt, whether
+# noncurrent versions and delete markers are collected, and whether a GET on an expired object
+# still serves are all SPK-03's to measure (AC-11, blocked).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.fullname" . }}-studio-object-store
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+data:
+  STUDIO_OBJECT_STORE_LIFECYCLE: {{ .Values.objectStore.retention | quote }}
+  STUDIO_OBJECT_STORE_KEY_PREFIX: {{ .Values.studioRunner.objectStore.keyPrefix | quote }}
+{{- end }}

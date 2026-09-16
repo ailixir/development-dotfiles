@@ -12,13 +12,56 @@
 
 export type ExecutionStatus = 'PENDING' | 'RUNNING' | 'PASSED' | 'FAILED' | 'ERROR';
 
-export type ExecutionErrorCode =
-  | 'TIMEOUT'
-  | 'DISPATCH_FAILED'
-  | 'DISPATCH_UNKNOWN'
-  | 'START_TIMEOUT'
-  | 'STALE'
-  | 'DISPATCH_DISABLED';
+/**
+ * The terminal error vocabulary as a **runtime** value (story 10.11a, AC-5; ADR-002 O-12).
+ *
+ * ADR-002 §18.3: *"generate the union from this document or assert it against this document."*
+ * §15.5 records why the drift went unnoticed for two stories — *"the field arrives as a JSON
+ * string and the union is erased"* — and an erased type is a thing no test can read. So the
+ * vocabulary exists at run time first and the type is derived from it second. A hand-widened
+ * union is then not a silent second copy: it is a `type-check` failure, because
+ * {@link ExecutionErrorCode} is defined as this array's member type and
+ * `ExecutionErrorCodeIsDerivedFromItsCarrier` asserts the two are mutually assignable.
+ *
+ * The **expected** value is never read from here. `studioContract.test.ts` compares this constant
+ * against the non-null members of `components.schemas.ExecutionErrorCode.enum`, parsed from
+ * `docs/specs/studio/openapi.yaml` through the single binding story 10.10 installed. An expected
+ * value imported from the module under test is VAC-11, the shape @qa measured on story 10.10,
+ * and it is the shape this constant is most naturally written into.
+ *
+ * Every member is assigned by the API — never by `studio-runner` — and the document's
+ * `x-assigned-by` is the exhaustive statement of which component assigns which. Growth is a
+ * Class C amendment (ADR-002 §12), and the contract assertion goes **red** on it rather than
+ * narrowing quietly; that is the criterion working, not failing.
+ */
+export const EXECUTION_ERROR_CODES = [
+  'TIMEOUT',
+  'DISPATCH_FAILED',
+  'DISPATCH_UNKNOWN',
+  'START_TIMEOUT',
+  'STALE',
+  'DISPATCH_DISABLED',
+  'AUTHORIZATION_REVOKED',
+  'REFERENCE_UNAVAILABLE',
+] as const;
+
+export type ExecutionErrorCode = (typeof EXECUTION_ERROR_CODES)[number];
+
+/** True only when `A` and `B` are the same type, not merely mutually extending. */
+type TypeEquals<A, B> =
+  (<G>() => G extends A ? 1 : 2) extends <G>() => G extends B ? 1 : 2 ? true : false;
+
+type AssertTrue<T extends true> = T;
+
+/**
+ * The type-level half of AC-5's second obligation. Hand-widening or hand-narrowing
+ * {@link ExecutionErrorCode} while leaving {@link EXECUTION_ERROR_CODES} alone makes this alias
+ * `AssertTrue<false>`, which `tsc --noEmit` refuses. Falsification (iii) in the story's table is
+ * exactly that edit.
+ */
+export type ExecutionErrorCodeIsDerivedFromItsCarrier = AssertTrue<
+  TypeEquals<ExecutionErrorCode, (typeof EXECUTION_ERROR_CODES)[number]>
+>;
 
 export type StepStatus = 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL' | 'SKIPPED';
 

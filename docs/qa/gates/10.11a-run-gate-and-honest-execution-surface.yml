@@ -1,0 +1,566 @@
+schema: 1
+story: '10.11a'
+story_title: Run gate and the honest execution surface
+epic: EPIC-10
+wave: 6
+
+gate: CONCERNS
+rounds: 1
+
+status_reason: >-
+  **ROUND 1 (head `d274b0625`) — CONCERNS. Nothing blocking, and the concerns are real.**
+  Every number this half reports about itself was re-measured rather than read, at both ends, and
+  the baseline was measured in a **fresh detached worktree at `78cc634b2`** rather than inherited:
+  `Test Files 2 failed | 19 passed (21); Tests 1 failed | 275 passed (276)` — reproduced **twice**,
+  to the digit. @dev is right that the draft's inherited *"98 passed"* is another story's record and
+  wrong for this branch. type-check at the base: exactly **2** errors, both `TS2307` on
+  `@put/core-components`, at `ChecksLayout.tsx(6,33)` and `navigationSetup.ts(1,36)`. `npm run lint`
+  at the base: **does not start**, zero files linted. All three reproduce identically at HEAD, and
+  **no lint number is claimed in either direction**, which is @po's standing rule observed.
+
+  **Eight of the twenty mutations were re-applied and every one reproduced exactly, including the
+  sibling counts.** M10 turns `npm run type-check` non-zero on the derivation guard at
+  `studioTypes.ts(63,3)` plus two `TS2741`s, exactly as recorded. **M17b is confirmed in full**: with
+  the pins derived from the module they pin and `STALE`'s browser claim reworded to *"Everything is
+  completely fine and nothing at all went wrong with anything anywhere"*, **198 of 200 stay green and
+  only the provenance assertion reddens** — this reviewer's own 10.10 probe, transposed, with the
+  same answer. M3 reddens **exactly 11 beyond its named test, 188 siblings green**, and the cause is
+  the one @dev named: MSW answering `POST /api/v1/studio/validate-steps` under
+  `onUnhandledRequest: 'error'`, quoted from the run.
+
+  **The seventeenth shape is real and its repair works — and this reviewer measured both halves.**
+  With M6 applied and the per-declared-code `not.toMatch(/no wording for/i)` **removed**, the suite is
+  **15/15 green** while a sixth *declared* code renders the undeclared-code narrative. With the
+  assertion present, M6 is red on exactly that line. @dev found a guard that could not fail by writing
+  the table before running it, and closed it before it shipped. That is the behaviour this epic has
+  been asking for.
+
+  **What holds this at CONCERNS rather than PASS is four things, none of which is a wrong
+  implementation.**
+  **(1) An eighteenth vacuous-guard shape is live in this half's own AC-22 matrix** — deleting one
+  required shape from `EXECUTION_FIXTURE_MATRIX` leaves the suite **green** (198 tests, 197 green, 1
+  pre-existing red). Measured, not reasoned. **(2) The suite is timing-fragile and the reported
+  after-numbers are not reproducible under load**: two full runs at load ~24–27 gave `8 failed | 369
+  passed` and `4 failed | 373 passed` against @dev's `1 failed | 376 passed`, all with the same
+  **377 / 26** totals; every extra failure is a 5000 ms test timeout, and the baseline suite never
+  flaked in two runs at the same load. **(3) M17's collateral attribution is overstated** —
+  `pageRunGate.test.tsx` fails **2 of 3 clean-tree runs** here, so *"the mutated module graph, not
+  flake"* is not supported. **(4) The `timeoutSeconds` fix is real and unguarded.**
+
+  **The `timeoutSeconds` change is a latent product defect fixed, and this reviewer ruled it against
+  the contract and the backend rather than against @dev's reading.** `openapi.yaml`
+  `TestConfiguration.timeoutSeconds` is `{type: integer, minimum: 1, maximum: 120}`, so the value the
+  page used to send — `30000`, from `buildDefaultTestIR`'s `timeout: 30000` carried into a *seconds*
+  field by `toConfiguration`'s `timeoutSeconds: legacy.timeout ?? 30` — was **1000× out of range**.
+  The backend does **not** clamp it: `UITestRequest` rejects only `timeoutSeconds <= 0`, there is no
+  `@Max` anywhere in `studio/dto/`, and `StudioDispatcher.deadlines()` computes
+  `totalRuntimeMs = timeoutSeconds * 1000`, which for `30000` is **30,000,000 ms — 8 h 20 m** of
+  browser runtime budget. The new value, `30`, is `defaultConfiguration()`'s and is the contract's own
+  example. **Defect fixed, not a regression introduced.** It is disclosed rather than buried, which is
+  the right call, and it should be recorded as a defect found. The one weakness is that **no test
+  anywhere asserts the saved payload** — `grep timeoutSeconds` over every `*.test.ts(x)` returns
+  nothing — so the fix has no guard and a merge can undo it silently. That matters more than usual
+  because story 10.11b's page **still carries the legacy path**.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-15T00:00:00Z'
+branch: story/10.11a
+head_sha: d274b0625
+base_sha: 78cc634b2
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.11a
+scope: >-
+  10.11a only — AC-1, AC-2, AC-3(a), AC-3(b) (blocked), AC-4, AC-5, AC-6, AC-18, AC-19, AC-21(a), and
+  10.11a's share of AC-22 – AC-24. 10.11b and 10.11c are not gated here.
+
+waiver:
+  active: false
+
+evidence:
+  baseline_measured_at_base_commit:
+    command: >-
+      git worktree add --detach <scratchpad>/qa1011a-base-<pid> 78cc634b2; cd frontend;
+      npm install --no-audit --no-fund; npm run type-check; npm run lint; npx vitest run (×2)
+    result: THE BASELINE IS MEASURED, AND IT REPRODUCES @dev's TABLE EXACTLY
+    detail: >-
+      `Test Files 2 failed | 19 passed (21); Tests 1 failed | 275 passed (276)`, twice, at load
+      averages 23.6 and 24.9, durations 60.8 s and 48.8 s. The two failing files are
+      `ChecksLayout.a11y.test.tsx` (fails to collect on `@put/core-components`) and
+      `studioEscalation.test.ts` (10.10 AC-15, committed red on exactly `confirmCompile.artifactHash`).
+      type-check: exactly two `TS2307` errors, the named two. lint: exit non-zero, **zero files
+      linted**, *"ESLint couldn't find the config @typescript-eslint/recommended to extend from"*.
+      The draft's inherited "98 passed" is another story's record and does not describe this branch —
+      @dev is right and said so.
+  environment_recipe_is_simpler_than_either_story_claims:
+    command: npm install --no-audit --no-fund, in a fresh worktree with node_modules absent
+    result: THE STANDING NOTE AND @dev's CORRECTION ARE BOTH WRONG — THE WHOLE TREE INSTALLS
+    detail: >-
+      A plain `npm install` in a fresh worktree **succeeds in 12 s**, adds 1014 packages, and leaves
+      `git status --porcelain` **empty** with `package.json` `d7e7eaf7…` and `package-lock.json`
+      `95f66e0d…` — byte-identical to @dev's recorded digests. It installs the three stale packages at
+      their declared versions directly: `msw 2.15.0`, `ajv 8.20.0`, `yaml 2.9.0`. **No copy of
+      `node_modules` and no `--no-save --no-package-lock` pass is needed.** npm creates
+      `node_modules/@put/core-components -> ../../../../put-core-components` as a **dangling symlink**
+      without verifying the target, which is why the install succeeds and the two `TS2307`s and the
+      a11y suite failure persist unchanged. @dev's correction — *"a worktree can install, just not the
+      whole tree"* — is right in its first clause and **wrong in its second**; the whole tree is
+      exactly what installs. This is the recipe the epic should reuse.
+  gates_after:
+    command: npm run type-check; npm run lint; npx vitest run (×2) — in wt/10.11a/frontend
+    result: TYPE-CHECK AND LINT REPRODUCE EXACTLY; THE VITEST FAILURE COUNT DOES NOT
+    detail: >-
+      type-check: the **same two** `TS2307` errors, same files, same lines, neither in any File List
+      file. lint: fails to start identically, zero files linted, reported as **failed**. vitest:
+      **`Test Files … (26); Tests … (377)` in both runs — the totals match @dev exactly, +101 tests
+      and +5 files over the baseline** — but the failure counts were `8 failed | 369 passed` (126 s,
+      load 27.8) and `4 failed | 373 passed` (70.9 s, load ~24), against @dev's `1 failed | 376
+      passed`. No run was short of its total, so this is not a hang. Every extra failure is
+      `Test timed out in 5000ms` or a `findBy*` that expired, in `pageRunGate.test.tsx` (this story's)
+      and in 10.10's `confirmFlow` / `accessibility` / `recompile`. **In isolation those three 10.10
+      files pass**, and the baseline suite did not flake in two runs at the same load. The honest
+      reading is that this half roughly doubles suite wall time and pushes neighbours over the default
+      5 s timeout under contention — a fragility finding, not a functional regression.
+  story_suite_clean_baseline:
+    command: npx vitest run src/components/studio/run src/pages/ChecksStudioPage/pageRunGate.test.tsx src/services/mocks/studio
+    result: 200 TESTS, 199 GREEN, 1 RED — @dev's SIBLING DENOMINATOR IS CORRECT
+    detail: >-
+      The one red is the committed-red 10.10 escalation, red in every mutation row below and never
+      counted as a mutation effect. Every sibling-green figure in the story's table is measured
+      against this denominator and the eight re-runs below agree with it.
+  byte_unchanged_files:
+    command: shasum -a 256, before and after the review, plus git diff --name-only over backend/ studio-runner/ docs/specs/
+    result: EVERY CLAIM HOLDS
+    detail: >-
+      `studioEscalation.test.ts` `f7a8f98adc20b741b2cd8cc7bb23bcef7a982bf5aa8f35756f6da3e5c93ac5ea`
+      **and still red on exactly `confirmCompile.artifactHash`**; `openapi.yaml`
+      `cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e`; `artifact.schema.json`
+      `3b4627a120c55c1bb07d9b620a42eaf8998a40760eb220dceeef7a09a1b1c513` — **both copies**, the spec's
+      and `backend/src/main/resources/studio/`, identical to each other and to the record.
+      `package.json`, `package-lock.json`, `.eslintrc.json`, `vitest.config.ts`, `tsconfig.json` all
+      match. `git diff --name-only 78cc634b2..HEAD -- backend/ studio-runner/ docs/specs/` returns
+      **0 files**. The File List matches `git diff --name-status` exactly: 19 source/test files plus
+      the story.
+  timeout_seconds_ruling:
+    command: read openapi.yaml TestConfiguration; grep timeoutSeconds across backend/src/main/java; read StudioDispatcher.deadlines
+    result: DEFECT FIXED — THE NEW VALUE IS CORRECT AND THE OLD ONE WAS OUT OF CONTRACT BY 1000×
+    detail: >-
+      Contract: `timeoutSeconds: { type: integer, minimum: 1, maximum: 120 }`. Old page value
+      **30000**, produced by `parseSteps.buildDefaultTestIR`'s `timeout: 30000` (milliseconds) flowing
+      through `legacyTestIr.toConfiguration`'s `timeoutSeconds: legacy.timeout ?? 30`. Backend does
+      not clamp: `UITestRequest` guards only `timeoutSeconds <= 0`, no `@Max`/`@Min` exists in
+      `studio/dto/`, and `StudioDispatcher.deadlines()` sets
+      `totalRuntimeMs = configuration.path("timeoutSeconds").asLong(0L) * 1000L` — **30,000,000 ms,
+      8 h 20 m**, sent to the runner as the revision's browser runtime budget (the runner's own
+      `effectiveRuntimeCapMs` is the only thing that would have bounded it, and that is 10.13's clamp,
+      not a validation). New value **30** is `defaultConfiguration()`'s and the contract's own example.
+      **@dev's reading is correct. This is a latent product defect fixed as a side effect of a
+      retirement, and it deserves to be recorded as a defect found.** No test asserts it —
+      `timeoutSeconds` appears in **zero** `*.test.ts(x)` files — so the fix is unguarded.
+  ac_3b_ruling_followed:
+    command: read CodeTab.tsx in full; grep currentCandidateArtifact across frontend/src; git diff for a new escalation test
+    result: FOLLOWED LITERALLY — NO WORKAROUND
+    detail: >-
+      The Code view renders an explicit unavailable state, names the **new** blocker (*"the confirmed
+      revision's is a further additive property, escalated by story 10.11c … and not yet ruled"*), and
+      carries a third slot stating **why the candidate was refused** with §21.7's reasoning. The only
+      two occurrences of `currentCandidateArtifact` in `frontend/src` are in that comment; nothing
+      reads or renders it. No AC-32 escalation was filed here — correct, it is 10.11c's. `CodeTab`
+      now takes **no props at all**, so there is no channel through which generated text could reach
+      it.
+  ac_19_verified_specifically:
+    command: read ExecutionProgressView.timingText and progress.test.tsx; re-apply M16; read the fixture
+    result: IMPLEMENTED, GUARDED, FALSIFIED — AND THE NEGATIVE CONTROL IS REAL
+    detail: >-
+      `timingText` is `value === null ? NOT_ATTEMPTED : \`${label} ${value}ms\`` — no rounding, no
+      re-basing, no defaulting. Four assertions hold it: attempted timings compared **exactly** to the
+      fixture's own values; null slots asserted `toContain(NOT_ATTEMPTED)` **and**
+      `not.toMatch(/\d/)`, so *"no digit at all in the slot"* is literally what is asserted; the
+      `FAILED` run's `SKIPPED` tail asserted to carry `NOT_ATTEMPTED` in both slots; and a negative
+      control asserting **no attempted timing is a whole second**. The fixture's attempted offsets are
+      **137 / 9058 / 16471** ms, confirmed by reading `executionFixtures.ts` — the claim is exact.
+      M16 (`?? 0` on both fields) reddens the two named tests with **197 siblings green**, reproduced
+      here to the digit.
+
+mutations_re_run:
+  denominator: 'the story suite, 200 tests, 199 green + 1 committed-red escalation'
+  count: 8
+  rows:
+    - id: M10
+      mutation: "`ExecutionErrorCode` hand-widened with `| 'HAND_WIDENED'`, the carrier left alone"
+      observed: >-
+        `npm run type-check` goes from 2 errors to 5. The derivation guard fires at
+        `studioTypes.ts(63,3): error TS2344: Type 'false' does not satisfy the constraint 'true'`,
+        plus `TS2741` in `executionErrorNarratives.ts(45,14)` and
+        `pinnedExecutionErrorFacts.ts(43,14)` where the total records lose a key. **Exactly the
+        recorded result.** The type gate is a real gate.
+      verdict: REPRODUCED
+    - id: M17b
+      mutation: >-
+        `pinnedExecutionErrorFacts.ts` rewritten to derive every fact from `EXECUTION_ERROR_NARRATIVES`
+        (slicing each claim so the length floors still pass), **plus** `STALE`'s `browserClaim`
+        replaced wholesale with 'Everything is completely fine and nothing at all went wrong with
+        anything anywhere.'
+      observed: >-
+        `Tests 2 failed | 198 passed (200)` — the provenance assertion *"pinnedExecutionErrorFacts.ts
+        imports neither the narratives nor the component that renders them"* and the pre-existing
+        escalation. **Every fact test stayed green.** This reviewer's 10.10 probe reproduces exactly:
+        the provenance guard is the only thing doing the work, and a header comment would not have
+        been.
+      verdict: REPRODUCED — AND IT IS THE ROW THAT MATTERS MOST
+    - id: M6
+      mutation: "a sixth code appended to the in-test copy of `x-conflict-codes` via `.concat('SIXTH_DECLARED_CODE')`"
+      observed: >-
+        `Tests 1 failed | 14 passed (15)` in `refusals.test.tsx`, red on
+        *"SIXTH_DECLARED_CODE fell through to the undeclared narrative"* at line 85 — the repair
+        assertion, precisely.
+      verdict: REPRODUCED
+    - id: M6-vacuity-probe
+      mutation: >-
+        M6 **plus** deletion of the per-declared-code `not.toMatch(/no wording for/i)` — i.e. the guard
+        as @dev first wrote it
+      observed: >-
+        **`Tests 15 passed (15)`.** A sixth *declared* code rendering the *undeclared*-code narrative
+        clears every length floor and every prose check. @dev's claim that the guard *"would have
+        passed"* is not an estimate; it is what happens. The seventeenth shape — **a fallback branch
+        that satisfies the guard's quality floor while being the wrong branch** — is confirmed, and so
+        is its repair.
+      verdict: CONFIRMED BY DIRECT MEASUREMENT
+    - id: M2
+      mutation: '`AWAITING_CONFIRMATION: RUNNABLE` in `RUN_ENABLEMENT`'
+      observed: >-
+        5 red / 195 green — the AC-1 enumeration, the contract test's *"every compileStatus maps, and
+        Run is available in exactly one of them"*, AC-2's companion half, a page-level test, and the
+        escalation. Sibling count matches the record.
+      verdict: REPRODUCED
+    - id: M3
+      mutation: >-
+        a `validateSteps` call added to `useRunGate` and `grammarValid` restored to the enablement
+        predicate and to `run()`
+      observed: >-
+        `Tests 12 failed | 188 passed (200)` — **188 siblings green, exactly as recorded**. The named
+        discriminating test *"a draft the validator calls invalid still runs when the server says
+        READY"* is red, and so is the page-level one. The collateral cause is quoted from the run:
+        `[MSW] Error: intercepted a request without a matching request handler: • POST
+        /api/v1/studio/validate-steps`. **@dev's characterisation is exact.**
+      verdict: REPRODUCED, INCLUDING THE COLLATERAL ACCOUNT
+    - id: M11
+      mutation: "`executionErrorCodesOf` replaced by an in-test literal of the eight values"
+      observed: >-
+        only `[PROV-ERRCODE] the expectation is read from the document rather than transcribed` red;
+        35 of 36 in-file green. The provenance guard hands the reader a document saying
+        `['ONLY_THIS_ONE', null]` and checks the answer changes — a real provenance check, not a
+        comment.
+      verdict: REPRODUCED
+    - id: M16
+      mutation: '`?? 0` on `step.offsetMs` and `step.durationMs` in `StepTimings`'
+      observed: 'two named AC-19 tests red, **197 siblings green** — the recorded figure to the digit.'
+      verdict: REPRODUCED
+    - id: M20
+      mutation: "`CODE_VIEW_BLOCKER` replaced with 'Not available.'"
+      observed: "`names the blocker rather than rendering an empty state` red, 9 of 10 in-file green."
+      verdict: REPRODUCED
+
+new_vacuous_guard_shape:
+  id: VAC-18
+  name: >-
+    A coverage matrix whose own required set is an editable literal, enumerated with `it.each` —
+    deleting a requirement deletes its tests instead of failing one.
+  measured: true
+  probe: >-
+    `AWAITING_CONFIRMATION` removed from the literal list that builds the `FX-RUNGATE-STATE-*` family
+    in `EXECUTION_FIXTURE_MATRIX`.
+  observed: >-
+    `Tests 1 failed | 197 passed (198)` — **nothing red.** The total drops from 200 to 198 because the
+    two `it.each` rows for that id simply cease to exist, and **no assertion reads the total**. The
+    file's own floor is `expect(EXECUTION_FIXTURE_MATRIX.length).toBeGreaterThanOrEqual(20)` against
+    **26** actual entries, so there is six rows of slack before even that notices; and the document-
+    reading enumerations in `runGate.test.tsx` parse `openapi.yaml` themselves, so they stay green
+    too.
+  why_it_is_new: >-
+    This is not catalogued shape 6 (*a pinned copy whose provenance nothing checks*) applied to an
+    **assertion** — it is that shape applied to the **coverage requirement itself**, one level up, and
+    the failure mode is *silent subtraction* rather than a false green. AC-22 exists to close exactly
+    the hole @po named in 10.10's AC-20 (*"a green suite is indistinguishable from a covered one"*),
+    and the matrix closes it for the *tests* while leaving it open for the *list*. @dev's M18
+    falsified half 2 (a fixture id removed from test titles → red); nothing falsified half 1's **set
+    membership**.
+  where_it_bites_here: >-
+    Two of the three enum-derived families are **transcribed literals, not read from the document**:
+    `['STALE','COMPILING','AWAITING_CONFIRMATION','READY','NEEDS_REVISION']` and
+    `['COMPILE_REQUIRED','RUNTIME_INCOMPATIBLE','IDEMPOTENCY_KEY_REUSED','TEST_DELETED','TEST_QUARANTINED']`
+    — the latter written **twice**, once for the family and once inside `FX-EXECUTE-409-UNDECLARED`'s
+    `satisfies()`. Only `EXECUTION_ERROR_CODES.map(...)` is derived from a carrier that is itself
+    asserted against `openapi.yaml`, which is why that family is immune.
+  remedy: >-
+    One assertion in `executionFixtureMatrix.test.ts`, using the mechanism AC-5 already installed:
+    `assertSameSet` the matrix's `FX-RUNGATE-STATE-*` suffixes against
+    `components.schemas.TestDto.properties.compileStatus.enum`, and its `FX-EXECUTE-409-*` suffixes
+    against `paths['/tests/{id}/execute'].post.responses['409']['x-conflict-codes']`, both directions.
+    Small, and it makes the required set as document-bound as the assertions it guards.
+  severity: medium
+  owner: '@dev, in 10.11b or as a follow-up — not blocking this half'
+
+developer_claims_verified:
+  - claim: 'Baseline 2 failed files / 1 failed test / 275 passed (276), measured not inherited'
+    verdict: VERIFIED — reproduced twice in an independent detached worktree at 78cc634b2
+  - claim: "the draft's inherited '98 passed' is another story's record and wrong for this branch"
+    verdict: VERIFIED — the measured figure is 275/276
+  - claim: 'type-check 2 errors before and after, both TS2307 @put/core-components'
+    verdict: VERIFIED at both ends
+  - claim: 'npm run lint FAILED — does not start, zero files linted, identical after'
+    verdict: VERIFIED at both ends; no lint number claimed, per @po's standing rule
+  - claim: '+101 tests, all passing, no new failure (377 total, 26 files)'
+    verdict: >-
+      PARTIALLY VERIFIED. The **totals are exact** — 377 tests, 26 files, +101, +5 — and no run was
+      short of its count, so nothing hung. The **failure count is not reproducible under load**: two
+      runs gave 8 and 4 failing tests, all timeouts, against the claimed 1. See ENV-TIMING-1.
+  - claim: 'git status empty and five config hashes identical after the environment work'
+    verdict: VERIFIED — all five digests match, tree clean
+  - claim: "a worktree can install, just not the whole tree (`--no-save --no-package-lock` never resolves the `file:` dependency)"
+    verdict: >-
+      WRONG IN ITS SECOND CLAUSE. A plain `npm install` in a fresh worktree succeeds in 12 s, leaves
+      the tree clean and the lockfile byte-identical, and installs all three packages at their
+      declared versions. The `file:` dependency is linked as a **dangling symlink** without
+      verification, which is why nothing fails. The correction is worth recording because it is
+      simpler than both 10.10's recipe and @dev's.
+  - claim: 'studioEscalation.test.ts byte-unchanged at f7a8f98a… and still red'
+    verdict: VERIFIED — digest matches and the test is red on exactly `confirmCompile.artifactHash`
+  - claim: 'openapi.yaml cbf07c99…, artifact.schema.json 3b4627a1…, zero files under backend/ studio-runner/ docs/specs/'
+    verdict: VERIFIED — including that **both** copies of `artifact.schema.json` carry that digest
+  - claim: 'all 20 mutations restored byte-identically, shasum -c all OK'
+    verdict: >-
+      TAKEN ON TRUST for the 12 not re-run; **verified for the 8 re-run**, restored here via
+      `git checkout --` with `git status --porcelain` empty after every row.
+  - claim: "M17b: only the provenance assertion reddens, every fact test stays green, 198 siblings"
+    verdict: VERIFIED — reproduced exactly, including the sibling count
+  - claim: "M3 reddened 11 beyond its named test because the mutated path calls /validate-steps under onUnhandledRequest: 'error'"
+    verdict: VERIFIED — 188 siblings green and the MSW error quoted from the run
+  - claim: "M17 timed out a page test, and the clean tree runs that file 3/3, so it was the mutated module graph rather than flake"
+    verdict: >-
+      NOT SUPPORTED. Three isolated clean-tree runs of `pageRunGate.test.tsx` here gave **fail, fail,
+      pass** at load ~25, each failure a 5000 ms timeout on a *different* test. The file is
+      load-sensitive on a clean tree, so the attribution to the mutated module graph cannot be made
+      from a 3/3 observation. The mutation may well have been the cause; the evidence offered does not
+      establish it. See ENV-TIMING-1.
+  - claim: "AC-19: timings as carried, null never 0 or 0ms, no digit at all, fixture timings 137/9058/16471, M16 reddens two with 197 green"
+    verdict: VERIFIED in every part, by reading the renderer and the fixture and by re-running M16
+  - claim: "AC-3(b) followed literally — candidate not rendered, the Code view names the new blocker, AC-32 not filed here"
+    verdict: VERIFIED — no workaround crept in
+  - claim: "10.16's dependency is still only half satisfied because AC-13 from 10.11b is not on this branch"
+    verdict: VERIFIED and correctly volunteered — `git diff` shows no transport module on this branch
+
+not_a_guard_removals_judged:
+  - item: "The 'no second parser' constraint"
+    verdict: ACCEPTED AS NOT-A-GUARD, and the honest note is stronger than @dev stated
+    detail: >-
+      Nothing in the suite can fail because a second `parseYaml` appeared, so removing it from the
+      count is correct. @dev's disclosure is right in substance and **undercounts**: `parseYaml` of
+      `openapi.yaml` appears in **seven** files, not the three implied — 10.10's `compileStates`,
+      `confirmFlow` and `recompile`; this half's `refusals` and `runGate`; plus the shared binding in
+      `studioContract.test.ts` and `studioEscalation.test.ts`. @dev's argument stands and is the right
+      one: what §18.3 constrains is the single **assertion mechanism**, and there is exactly one —
+      `assertSameSet` over the one binding — which AC-5 uses. **Recommendation to @po:** the epic
+      should reword the constraint as *one assertion mechanism*, because AC-21(a)'s literal "no second
+      parser" is already false on this branch and a future reviewer will read it as a defect.
+  - item: "The byte-unchanged claim on studioEscalation.test.ts"
+    verdict: ACCEPTED AS NOT-A-GUARD
+    detail: >-
+      A claim about a non-edit. SHA-256 is review evidence and nothing in the suite fails if a later
+      story edits that file. Independently verified here. Named rather than counted is exactly how
+      @po treated AC-31's equivalent.
+  - item: "AC-3(a)(iii)'s import scan"
+    verdict: ACCEPTED AS THE WEAKER HALF
+    detail: >-
+      The criterion names it weaker itself. The discriminating assertions are the rendering ones, and
+      the structure now makes the scan nearly redundant in the right direction: `CodeTab` takes **no
+      props**, so there is no channel for generator output to arrive through without an edit that M4
+      and M20 catch. M20 was re-run here and reddens its named test; M4 was **not** re-run and is
+      taken on trust with that structural reading stated.
+
+collateral_characterisations_judged:
+  m3: >-
+    ACCURATE AND VERIFIED. 188 siblings green, and the cause is the MSW unhandled-request error on
+    `POST /api/v1/studio/validate-steps`, quoted from the run rather than inferred. Stating it rather
+    than smoothing it is the right behaviour.
+  m17: >-
+    OVERSTATED. The file times out on a clean tree here 2 runs in 3. The conclusion may be true; the
+    evidence given does not support it, and a 3/3 observation on a quiet machine cannot distinguish a
+    module-graph effect from a load effect in a file whose three tests already run at ~2.7 s against a
+    5 s default timeout.
+
+inferences_judged:
+  - inference: "The deployed API refuses an unconfirmed draft the way the mock now does"
+    verdict: WELL-FOUNDED, CORRECTLY LABELLED
+    detail: >-
+      `ExecutionReadiness`, `ExecutionReadinessService` and `StudioAcceptanceService` all carry
+      `COMPILE_REQUIRED` server-side, so 10.8's property exists in the tree. @dev matched it rather
+      than re-verifying it end to end and said so. The mock change is argued from the right premise:
+      a mock that accepts what the server refuses teaches the UI that the client's opinion is the
+      gate, which is the defect this half removes.
+  - inference: "RUNTIME_INCOMPATIBLE's remedy is lifted from architecture because the code has no row in the tests tag"
+    verdict: VERIFIED TRUE AND CORRECTLY FLAGGED
+    detail: >-
+      The execute `409` description reasons about `COMPILE_REQUIRED`, `TEST_DELETED` and
+      `TEST_QUARANTINED`; `RUNTIME_INCOMPATIBLE` appears only in `x-conflict-codes`, in one example,
+      and in `x-runner-error-codes`. There is **no remedy row for it**. Deriving *"ask for a fresh
+      translation and confirm the candidate that results"* from §4.2's ordinary recompile path is
+      reasonable and is phrased as an available action rather than a promise. Flagging it rather than
+      letting it be discovered is the correct call.
+  - inference: "RETAINED_LOG_FIXTURE_CAP = 200 is the fixture's number, not a contract fact"
+    verdict: CORRECT
+    detail: >-
+      `openapi.yaml` declares `logs` as a bounded retained buffer and `logsTruncated` as a plain
+      boolean; no cap reaches any client. The constant is labelled in the fixture module as the
+      corpus's own, chosen so a client-side window is observable, and AC-18's cap test asserts against
+      that constant rather than against a contract claim. Honest.
+
+conflicts_with_10_11b:
+  severity: HIGH — read before merging the two halves
+  detail: >-
+    `story/10.11b` at `a41d55caf` was cut from the same base and its `ChecksStudioPage.tsx`
+    **retains every path 10.11a retired**: `validation.isValid` as the run gate at line 288 and as the
+    Run button's `disabled` at line 828; `buildDefaultTestIR` + `toTestRequest` on all three save paths
+    (344/457-461, 840-842); `generatePythonFromIR` and the auto-sync effect (353, 1012, 1264); and its
+    **own** `studioApi.executeTest(selectedScenarioData.id)` call at 295. 10.11a moved the execute call
+    into `useRunGate` and deleted all of the above.
+  the_hazard: >-
+    A merge that takes 10.11b's side of the page reverts AC-1, AC-2 and AC-3(a) **and** silently
+    restores `timeoutSeconds: 30000`. A merge that keeps both `executeTest` call sites ships **two**
+    dispatch paths, one of them ungated — the precise defect this half exists to remove.
+  what_must_survive_the_merge: >-
+    (i) `RunControl` owns the gate and the `POST /execute`; the page's role is `beginRun(executionId)`.
+    (ii) `beginRun` must open 10.11b's `subscribeToExecution` where 10.11a leaves the 700 ms interval —
+    10.11a deliberately left it and said so. (iii) `stopPolling` (10.11a's `onStop`) and
+    `closeSubscription` (10.11b's) are the same seam and must become one. (iv) The legacy imports
+    `buildDefaultTestIR`/`toTestRequest`/`generatePythonFromIR` must **not** come back, or AC-3(a)(iii)
+    regresses along with the timeout fix. (v) 10.11b's `:id`-route effect calling `handleScenarioSelect`
+    sits beside 10.11a's `?autorun=1` → `setRunRequest` path in the same scenario-loading region;
+    confirm a deep link does not both select and auto-run twice.
+  the_uncomfortable_part: >-
+    The **only** guard that would catch a page-level revert is `pageRunGate.test.tsx` —
+    `runGate.test.tsx` exercises `RunControl` directly and stays green if the page stops using it — and
+    `pageRunGate.test.tsx` is the flakiest file in the suite. Run it in isolation, more than once, on a
+    quiet machine, after the merge.
+  non_conflicts_confirmed: >-
+    The filename reservation worked: 10.11a created `executionFixtures.ts` and 10.11b created
+    `executionScenarios.ts`, no collision. `studioContract.test.ts` is appended by both in different
+    describe blocks — mechanical only. 10.11b edits `vitest.config.ts` and `src/test/setup.ts`, which
+    10.11a asserts absent from its **own** diff, which is the honest form of that claim.
+
+deferrals_checked:
+  ac_3b: 'SKIPPED, never passed. Cannot turn green from anything in this diff — verified: no reachable candidate render, no new escalation test, contract byte-unchanged.'
+  ac_15b: 'SKIPPED, never passed. Not this half''s; ED-06 / SPK-02, owner 10.18.'
+  ac_20b: 'SKIPPED, never passed. Same SPK-02 record.'
+  ac_21b: 'CLOSED AS RULED by ADR-002 §21.6. This half did not widen the reachability assertion; escalation file byte-unchanged and still red.'
+
+top_issues:
+  - id: ENV-TIMING-1
+    severity: medium
+    finding: >-
+      The suite is timing-fragile and the story's reported after-numbers do not reproduce under load.
+      Two full runs on the branch at load 24–27 gave 8 and 4 failing tests against the recorded 1,
+      totals identical at 377/26, every extra failure a 5000 ms test timeout. The baseline suite did
+      not flake in two runs at the same load, and the affected files pass in isolation.
+      `pageRunGate.test.tsx` is the worst of them — its three tests run at ~2.7 s each against a 5 s
+      default — and it is also the only page-level guard this half has.
+    impact: >-
+      A guard that fails intermittently gets loosened by whoever is unlucky. This one is the sole
+      protection against a 10.11b merge reverting the page.
+    recommendation: >-
+      Give `pageRunGate.test.tsx` an explicit `testTimeout` (or a lighter render harness), and report
+      a machine-load figure beside any suite number in this epic from here on.
+    owner: '@dev'
+    blocking: false
+  - id: VAC-18
+    severity: medium
+    finding: >-
+      An eighteenth vacuous-guard shape, measured: deleting one required shape from
+      `EXECUTION_FIXTURE_MATRIX` leaves the suite green (198 tests, 197 green, 1 pre-existing red).
+      Two of the matrix's three enum families are transcribed literals rather than document reads.
+    impact: 'AC-22 closes the hole for the tests and leaves it open for the list the tests are measured against.'
+    recommendation: >-
+      `assertSameSet` the `FX-RUNGATE-STATE-*` and `FX-EXECUTE-409-*` id suffixes against the document,
+      both directions, using the binding AC-5 already uses.
+    owner: '@dev'
+    blocking: false
+  - id: TIMEOUT-GUARD-1
+    severity: medium
+    finding: >-
+      The `timeoutSeconds` 30000 → 30 correction is a genuine latent-defect fix — the old value was
+      1000× the contract maximum and would have been persisted and multiplied into an 8 h 20 m runtime
+      budget — but **no test asserts the saved payload**.
+    impact: >-
+      An unguarded fix on a file that story 10.11b also edits, and whose 10.11b side still contains the
+      code that produced the bad value.
+    recommendation: >-
+      One assertion on the observed `POST /tests` body — `configuration.timeoutSeconds === 30` and
+      within the contract's `[1,120]` — in whichever half lands second. And record it in the epic as a
+      **defect found**, not as a footnote.
+    owner: '@dev / @po'
+    blocking: false
+  - id: M17-ATTRIBUTION-1
+    severity: low
+    finding: >-
+      The Dev Agent Record attributes M17's page-test timeout to the mutated module graph on the
+      strength of a 3/3 clean-tree run. The file fails 2 of 3 clean-tree runs here.
+    impact: 'A small overclaim in an otherwise unusually honest record; it would mislead the next reader of that row.'
+    recommendation: 'Restate the row as "timed out; the file is load-sensitive and the cause was not isolated".'
+    owner: '@dev'
+    blocking: false
+  - id: DOC-PARSER-1
+    severity: low
+    finding: >-
+      AC-21(a)'s literal wording *"no second parser"* is already false on this branch — seven test
+      files parse `openapi.yaml` — and @dev's own honest note undercounts 10.10's share as two when it
+      is three.
+    impact: 'A future reviewer reads AC-21(a) literally and records a defect that is not one.'
+    recommendation: 'Reword the epic constraint as *one assertion mechanism*, which is what §18.3 actually imposes and what this half satisfies.'
+    owner: '@po'
+    blocking: false
+
+required_before_merge: []
+
+recommended_not_blocking:
+  - 'ENV-TIMING-1 — bound the page test''s timeout before 10.11b merges into it.'
+  - 'VAC-18 — one document-reading assertion over the matrix''s two transcribed families.'
+  - 'TIMEOUT-GUARD-1 — guard the saved `timeoutSeconds`, and record the defect as found.'
+  - 'Adopt `npm install` as the epic''s worktree recipe; retire both the copy-node_modules recipe and the "cannot install" note.'
+
+open_and_not_this_story_s:
+  - '`@put/core-components` is a dangling symlink in every worktree — two `TS2307`s and one uncollectable suite. @devops / 10.19.'
+  - '`npm run lint` cannot start (`.eslintrc.json` needs `plugin:@typescript-eslint/recommended`). Unowned; no story may report this gate as passed.'
+  - '`studioEscalation.test.ts` is committed red and must stay red until ADR-002 is amended. 10.10 AC-15 / 10.11c.'
+  - '10.16''s dependency is half satisfied: AC-19 has landed, AC-13 has not. A wave-7 problem created in wave 6, correctly volunteered by @dev.'
+
+do_not_do:
+  - 'Do not resolve the 10.11b merge by taking either page file wholesale. See conflicts_with_10_11b.'
+  - 'Do not relax `pageRunGate.test.tsx` by deleting assertions; bound its timeout instead.'
+  - 'Do not file AC-32''s escalation here. It is 10.11c''s and @dev was right not to.'
+  - 'Do not render `currentCandidateArtifact` in the Code view. @po ruled it and @dev followed the ruling.'
+
+final_decision:
+  gate: CONCERNS
+  merge: SAFE — with the 10.11b merge protocol above observed
+  rationale: >-
+    Every criterion this half owns is implemented, and the guards behind them are guards: eight
+    mutations were re-applied and every one reproduced the recorded result, sibling counts included,
+    with M10 failing the type gate on its derivation assertion, M17b reddening **only** the provenance
+    assertion while a load-bearing fact was reworded out of all recognition, and M3's 188/12 split
+    reproduced with its MSW cause quoted from the run. The baseline was measured twice in an
+    independent worktree and matches the story's table to the digit, which retires the draft's
+    inherited figure for good. AC-3(b) was obeyed literally rather than approximated, AC-19 is real and
+    load-bearing for 10.16, and the three not-a-guard removals are all correct.
+    Two things in this record are better than a pass would have signalled. @dev **found one of its own
+    guards was not a guard before it shipped**, and this reviewer confirmed by measurement that the
+    unrepaired form is 15/15 green while the wrong branch renders — the seventeenth shape, caught by
+    writing the table before running it. And the `timeoutSeconds` change is **a latent product defect
+    fixed**, ruled here against the contract (`maximum: 120`) and the backend (no clamp;
+    `timeoutSeconds * 1000` → 8 h 20 m), disclosed rather than buried.
+    What keeps this at CONCERNS is that the half leaves three loose ends it could have closed and one
+    it could not. An **eighteenth vacuous shape is live in its own AC-22 matrix** and was found by
+    probing, not by reading — deleting a requirement deletes its tests and nothing goes red. The
+    **suite is timing-fragile**, and the story's own after-numbers are not reproducible on a loaded
+    machine, which matters because the single guard standing between a 10.11b merge and a full revert
+    of this half is the flakiest file in it. The **timeout fix is unguarded**. And **M17's attribution
+    is overstated**, which is the only place this record claims more than it measured.
+    None of that is a wrong implementation and none of it justifies sending the half back. **CONCERNS,
+    merge safe, with the 10.11b protocol read first.**

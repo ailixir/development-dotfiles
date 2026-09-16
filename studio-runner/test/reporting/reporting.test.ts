@@ -13,11 +13,11 @@
  */
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { createLogBuffer, DEFAULT_REPORT_BOUNDS } from '../../src/reporting/bounds.js';
+import { createLogBuffer, DEFAULT_REPORT_BOUNDS, redactLogEntry } from '../../src/reporting/bounds.js';
 import type { HttpOutcome, HttpRequest } from '../../src/reporting/httpClient.js';
 import { createReportClient } from '../../src/reporting/reportClient.js';
 import type { ReportBody } from '../../src/reporting/snapshot.js';
-import { createRedactor, REDACTION_PLACEHOLDER } from '../../src/executor/redaction.js';
+import { createRedactor, NULL_REDACTOR, REDACTION_PLACEHOLDER } from '../../src/executor/redaction.js';
 import { createLogger, createRecordingLogSink } from '../../src/server/logging.js';
 import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
@@ -416,7 +416,11 @@ describe('AC-19 — outbound bounds and the retained-log drop policy', () => {
   it('drops the oldest entries and keeps the newest when the cap is reached', () => {
     const buffer = createLogBuffer(3, 100);
     for (let index = 0; index < 5; index += 1) {
-      buffer.append({ atMs: index, level: 'info', message: `entry-${String(index)}` });
+      // `append` takes a branded already-redacted entry since ADR-002 O-16, and `redactLogEntry`
+      // is the only thing that mints one. The redactor here is the **null** one deliberately:
+      // this test is about the drop policy, and choosing which redactor to apply is the caller's
+      // decision — what the brand removes is the option of applying none.
+      buffer.append(redactLogEntry({ atMs: index, level: 'info', message: `entry-${String(index)}` }, NULL_REDACTOR));
     }
     // Newest retained, oldest dropped. Asserted rather than left implicit.
     expect(buffer.entries().map((entry) => entry.message)).toEqual([
@@ -428,9 +432,29 @@ describe('AC-19 — outbound bounds and the retained-log drop policy', () => {
     expect(buffer.dropped).toBe(2);
   });
 
+  it('refuses an entry that did not come through a redactor, at run time too (ADR-002 O-16)', () => {
+    // The compile-time half of O-16 is the brand on `append`'s parameter and it cannot be
+    // exercised by a test — a test that does not compile is not a test. This is the half that can
+    // be: the caller who defeats the type with `as unknown as` finds the buffer refuses anyway,
+    // which is the shape story 10.17's AC-22 repair established one level up — *fails to compile
+    // **and** throws*.
+    const buffer = createLogBuffer(3, 100);
+    const unbranded = { atMs: 0, level: 'error', message: 'typed hunter2' } as unknown as Parameters<
+      typeof buffer.append
+    >[0];
+    expect(() => {
+      buffer.append(unbranded);
+    }).toThrow(TypeError);
+    // Nothing was retained, so the refusal is a refusal and not a warning.
+    expect(buffer.entries()).toHaveLength(0);
+    // The control: the same entry through `redactLogEntry` is accepted.
+    buffer.append(redactLogEntry({ atMs: 0, level: 'error', message: 'typed hunter2' }, NULL_REDACTOR));
+    expect(buffer.entries()).toHaveLength(1);
+  });
+
   it('truncates an oversized entry so one entry cannot defeat the count cap', () => {
     const buffer = createLogBuffer(10, 8);
-    buffer.append({ atMs: 0, level: 'warn', message: 'x'.repeat(50) });
+    buffer.append(redactLogEntry({ atMs: 0, level: 'warn', message: 'x'.repeat(50) }, NULL_REDACTOR));
     expect(buffer.entries()[0]?.message).toHaveLength(8);
     expect(buffer.truncated).toBe(false);
   });

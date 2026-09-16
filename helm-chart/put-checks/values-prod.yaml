@@ -105,3 +105,35 @@ frontend:
     VITE_ENABLE_STUDIO: "true"
     VITE_ENABLE_REPORTS: "true"
     VITE_DEBUG_MODE: "false"
+
+# ---------------------------------------------------------------------------
+# Studio runner (story 10.18a).
+#
+# **Off in production.** BRD §8 requires one runner pod proven in staging before production is
+# templated at all, and every gate that proof depends on — ED-03, ED-04, ED-05, ED-06 — is open.
+# The values are written so the production shape is reviewable now; turning it on is 10.19's
+# pilot decision, not this story's.
+# ---------------------------------------------------------------------------
+studioRunner:
+  enabled: false
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: "1"
+      memory: 2Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+  devShm:
+    sizeLimit: 2Gi
+  scratch:
+    sizeLimit: 8Gi
+  seccompProfile:
+    type: RuntimeDefault
+  callbackBaseUrl: http://put-checks-api:8080
+  identity:
+    secretName: checks-studio-runner-identity-prod
+  objectStore:
+    credentialsSecret: checks-studio-runner-object-store-prod
+objectStore:
+  credentialsSecret: checks-api-object-store-prod
