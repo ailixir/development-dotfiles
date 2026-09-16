@@ -31,9 +31,8 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { packageRoot } from '../helpers/corpus.js';
-import { dockerAvailable, RUNNER_IMAGE } from './image.js';
+import { imageUnavailableReason, RUNNER_IMAGE } from './image.js';
 
-const DOCKER = dockerAvailable();
 const ATTACK = join(packageRoot, 'test', 'deployment', 'sec2-shim-attack.sh');
 
 interface Run {
@@ -63,19 +62,23 @@ function runAttack(controlled: boolean): Run {
 }
 
 describe('SEC-2 — the shim browser registry attack, run in both directions', () => {
-  it(
-    DOCKER
-      ? `the image ${RUNNER_IMAGE} is present, so the attack below is run rather than described`
-      : `the image ${RUNNER_IMAGE} is ABSENT: SEC-2 is SKIPPED, never passed — build it with ci/stages.md stage 7`,
-    () => {
-      expect(typeof DOCKER).toBe('boolean');
-    },
-  );
+  it(`has ${RUNNER_IMAGE}, or FAILS — SEC-2 is run, and a tier that cannot run says so`, () => {
+    // **This test is the repair of the nineteenth vacuous-guard shape.** It used to read
+    // `expect(typeof DOCKER).toBe('boolean')` — a tautology — with the disclosure in its own name,
+    // and the three tests below were `it.skipIf(!DOCKER)`. QA pointed `STUDIO_RUNNER_IMAGE` at a tag
+    // that does not exist and measured *1 passed / 3 skipped, in 1 ms*: **green**, with the attack
+    // @po named this story's weakest criterion silently not run.
+    //
+    // The bar @po set is that the SUCCESSFUL run must be in the record. A tier that can quietly not
+    // run cannot meet that bar, whatever its record says on the day it was written.
+    const reason = imageUnavailableReason();
+    expect(reason, `SEC-2 cannot be run: ${reason ?? ''}`).toBeNull();
+  });
 
   // Ordered deliberately: the successful form runs FIRST. If it does not succeed, stop — either
   // the image changed or the experiment is wrong, and a control that appears to work against an
   // attack that no longer works is worth nothing.
-  it.skipIf(!DOCKER)('SUCCEEDS without the control: the shim is written and Chromium runs under it', () => {
+  it('SUCCEEDS without the control: the shim is written and Chromium runs under it', () => {
     const run = runAttack(false);
     expect(run.output).toContain('mkdir SUCCEEDED: /ms-playwright/');
     expect(run.output).toContain('mkdir SUCCEEDED: /home/pwuser/');
@@ -96,7 +99,7 @@ describe('SEC-2 — the shim browser registry attack, run in both directions', (
     expect(shimmed).toContain('Seccomp=0 type=--type=renderer');
   }, 240_000);
 
-  it.skipIf(!DOCKER)('is BLOCKED with the control: every write refused, and the reason recorded', () => {
+  it('is BLOCKED with the control: every write refused, and the reason recorded', () => {
     const run = runAttack(true);
     expect(run.output).toContain('ATTACK BLOCKED');
     expect(run.output).not.toContain('SHIM WRITTEN');
@@ -113,7 +116,7 @@ describe('SEC-2 — the shim browser registry attack, run in both directions', (
     expect(run.output).toContain('drwxr-x--- pwuser:pwuser /home/pwuser');
   }, 240_000);
 
-  it.skipIf(!DOCKER)('the control does not work by breaking the browser it protects', () => {
+  it('the control does not work by breaking the browser it protects', () => {
     // "A guard satisfied by a broken implementation" — the ninth shape. A pod that never starts a
     // browser at all would satisfy every assertion above trivially, and the read-only filesystem
     // is exactly the kind of control that could cause it: the first attempt at this chart mounted

@@ -86,6 +86,15 @@ npm test
   `vitest.config.ts` and fail the run themselves — no external check needed.
 - The contract tier (internal routes vs the OpenAPI frozen in 10.1) joins this stage with story
   10.6; nothing extra is needed here today.
+- **The deployment-evidence tier is NOT here — it is stage 9**, and that is a correction rather than
+  a layout choice. Story 10.18a first landed it inside `npm test`, which this stage runs on a plain
+  Node image with neither `helm` nor a built container image; both of its suites were `skipIf`-gated
+  and therefore reported **green while enforcing nothing**. Stage 9 has both prerequisites and the
+  tier now **fails** without them.
+- What *does* stay here: the tier's **wiring guard** (`test/deployment-tier-wiring.test.ts`) and the
+  **deferral record** (`test/deferred.test.ts`). Neither needs a prerequisite, and keeping them here
+  is deliberate — a tier moved out of the default run is a tier that can be quietly deleted, so this
+  stage reddens if stage 9's config, script, stage entry or files disappear.
 
 ### 5. Build
 
@@ -202,8 +211,49 @@ helm template helm-chart/put-checks --set studioRunner.enabled=true
 
 - **Image:** any with Helm.
 - **Produces:** rendered manifests for review.
-- The `studioRunner` chart component is story 10.18; until then this stage has nothing
-  runner-specific to render.
+- The `studioRunner` chart component landed with story 10.18a: the Deployment, the ClusterIP
+  Service and the NetworkPolicy, plus the `studioRunner` block in all four values files. This stage
+  renders and lints them.
+- **This stage proves the chart is well-formed; it proves nothing about what the chart says.** The
+  structural assertions — the security context field by field, the enumerated environment, the
+  derived grace period, the two store principals, the peer set against the runner's own
+  `PERMITTED_DESTINATIONS` — are stage 9's.
+
+### 9. Deployment evidence — the rendered manifest and the SEC-2 attack
+
+```bash
+export STUDIO_RUNNER_IMAGE="${IMAGE_TAG}"   # the tag stage 7 built and pushed
+npm run test:deployment
+```
+
+- **Image:** any with **Helm** and a **container runtime**, with the image stage 7 produced
+  available locally. Both prerequisites are required; see below.
+- **Needs the pinned image: YES.** This is the stage that runs @qa's SEC-2 shim attack *inside* the
+  built image, in both directions.
+- **Produces:** the story 10.18a evidence for AC-1 – AC-12 and **AC-4a part 3**.
+
+**This stage fails closed, and the reason is a finding rather than a preference.** Story 10.18a's
+first version ran this tier in stage 4 with `describe.skipIf(!HELM)` and `it.skipIf(!DOCKER)`. QA
+measured what that bought: `helm` off `PATH` gave *1 passed / 89 skipped*, **green**;
+`STUDIO_RUNNER_IMAGE` pointed at a tag that does not exist gave *1 passed / 3 skipped in 1 ms*,
+**green**. The only surviving assertion was a tautology and the disclosure lived in a test *name*. A
+pipeline reads an exit code, not a name — so in CI as documented, **the criterion @po named the
+story's weakest had no executable enforcement at all**.
+
+So: **there is no `skipIf` in this tier and no opt-out variable.** A missing `helm` reddens every
+chart assertion; a missing or wrong `STUDIO_RUNNER_IMAGE` reddens SEC-2 and the mount-disjointness
+check. If this stage cannot be given its prerequisites, the honest outcome is a **red** stage and a
+recorded decision — never a green one.
+
+- `STUDIO_RUNNER_IMAGE` **must be passed**. It defaults to a local development tag
+  (`put-checks-studio-runner:10.18a-local`) which will not exist on a build agent, and the failure
+  message says so.
+- The tier is excluded from `npm test` (stage 4) on purpose, and that exclusion is itself guarded by
+  `test/deployment-tier-wiring.test.ts`, which runs in stage 4 and reddens if this stage's config,
+  script, stage entry or files go missing.
+- **Under `ED-05` this stage runs against the PUBLIC Playwright base image**, which ADR-001 §8
+  permits for local development only. Running it against `ED-05`'s internal image, in a pod, is
+  story 10.18a's **AC-4b** and is recorded as *skipped, never passed*.
 
 ## Summary
 
@@ -212,12 +262,13 @@ helm template helm-chart/put-checks --set studioRunner.enabled=true
 | 1 | Install + audit | `npm ci`, `npm audit` | no | `node_modules/` |
 | 2 | Static analysis | `npm run type-check`, `npm run lint` | no | — |
 | 3 | Pin consistency | `npm run check:pins` | no | — |
-| 4 | Tests + coverage | `npm test` | no | `coverage/` |
+| 4 | Tests + coverage | `npm test` | no | `coverage/` — plus the stage-9 wiring guard and the deferral record |
 | 5 | Build | `npm run build` | for the deployable artifact | `dist/`, `dist/runtime-versions.json` |
 | 6 | Fixture corpus | `npm run test:fixtures` | **yes — gated by `ED-05`, record as skipped** | — |
 | 6a | Pin consistency in-image | `npm run check:pins -- --require-image` | yes (reads the image's file) | — |
 | 7 | Image build/push | `docker build` / `docker push` | builds it | image tag |
 | 8 | Helm lint/template | `helm lint` / `helm template` | no | rendered manifests |
+| 9 | **Deployment evidence** | `npm run test:deployment` | **yes — and Helm, and `STUDIO_RUNNER_IMAGE`; fails closed without either** | story 10.18a's AC-1 – AC-12 and AC-4a part 3 evidence |
 
 ## Open items owned outside this package
 

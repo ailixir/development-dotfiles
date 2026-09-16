@@ -145,6 +145,10 @@ spec:
             medium: Memory
             sizeLimit: {{ .Values.studioRunner.devShm.sizeLimit }}
         - name: object-store-credentials
+          # ⚠ Coupled to `shareProcessNamespace` above (QA MED-1). A second container in this pod
+          # reads this Secret through /proc/1/root whatever its own mounts say, so the one-container
+          # bound is what keeps the write-only store principal where §6.2 puts it. Asserted in
+          # `test/deployment/chart.test.ts` and falsified against a chart copy carrying a sidecar.
           secret:
             secretName: {{ .Values.studioRunner.objectStore.credentialsSecret }}
             items:

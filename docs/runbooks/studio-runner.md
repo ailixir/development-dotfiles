@@ -170,6 +170,28 @@ children: measured against this image, an orphaned grandchild leaves a zombie wi
 **That this works in-cluster is not yet proven** — a pause container exists only in a real pod, so
 it is SPK-04 question 6 and story 10.12/10.13's inherited deferral.
 
+> ### ⚠ `shareProcessNamespace` has a bound, and it is a security bound
+>
+> **This pod must have exactly one container.** A shared PID namespace makes every container in the
+> pod visible to every other through `/proc`, including `/proc/<pid>/root`. This pod mounts the
+> object-store Secret at `/etc/studio/object-store`, so **a second container would read
+> `/proc/1/root/etc/studio/object-store/secretAccessKey` regardless of its own volume mounts** — and
+> `readOnlyRootFilesystem: true` does not obstruct a read. The write-only store principal §6.2
+> scopes to the runner would then be held by whatever else was put in the pod.
+>
+> **An operator or a platform change may NOT** add a log shipper, a mesh sidecar or an init
+> container to this pod without resolving that exposure first. The chart asserts the bound and the
+> assertion is falsified against a chart copy with a sidecar injected, so the render will tell you;
+> what it cannot tell you is what to do instead. Raised to **SPK-04** and **ED-05**: if the platform
+> mandates an injected sidecar, the options are to stop mounting the Secret in this pod (moving the
+> upload behind the callback API), to drop `shareProcessNamespace` and find another reaping
+> mechanism, or for Security to accept the exposure explicitly. **None of those is a deployment-time
+> decision.**
+>
+> Found by @qa as MED-1: the bound was real from the first render, but it was enforced only by a
+> test helper throwing on a second container. A sidecar would have broken several tests for the
+> wrong reason while quietly handing that sidecar the credential.
+
 **The termination grace period is derived, not written twice.** It is the browser runtime cap plus
 the browser stop, terminal-delivery and object-store windows the pod is actually configured with,
 plus the preStop flip and a configured headroom. **Raising `STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS`

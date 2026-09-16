@@ -183,7 +183,15 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
     //
     // The non-vacuity shape is unchanged and the two assertions still discriminate in opposite
     // directions: the three-key form ends in `]`, so it is **not** a substring of the four-key
-    // form, and a revert of §20 turns both of these red rather than one.
+    // form, and neither contains the other.
+    //
+    // **Corrected after QA (LOW-1).** An earlier version of this comment said a revert of §20
+    // "turns both of these red rather than one". Measured, it does not: `toContain` throws first
+    // and the `not.toContain` below is never evaluated, so the file reports two failures and the
+    // second is the pin, not this line. The sentence was the kind a later reader treats as a
+    // measurement. The `not.toContain` is **not** vacuous for that — QA falsified it on its own,
+    // by planting the three-key literal inside the window while leaving the four-key `required` in
+    // place, and it reddens alone.
     expect(body).toContain('partial:');
     expect(body).toContain('required: [videoKey, manifestKey, state, partial]');
     expect(body).not.toContain('required: [videoKey, manifestKey, state]');

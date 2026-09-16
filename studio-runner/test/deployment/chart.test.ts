@@ -19,7 +19,11 @@
  * Every criterion here names a **render mutation** in its own comment, and each one was run, its
  * red observed, and the sibling count recorded in the story's Dev Agent Record.
  */
-import { describe, expect, it } from 'vitest';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterAll, describe, expect, it } from 'vitest';
 
 import { ACCEPTED_KEYS, PERMITTED_DESTINATIONS } from '../../src/server/config.js';
 import {
@@ -27,7 +31,7 @@ import {
   deploymentNamed,
   envNames,
   envValues,
-  helmAvailable,
+  helmUnavailableReason,
   named,
   one,
   podSpec,
@@ -36,14 +40,14 @@ import {
   renderOutcome,
   runnerDeployment,
   RUNNER_FRAGMENT,
+  sharedNamespaceViolations,
   soleContainer,
   VALUE_SETS,
   valueSetName,
+  CHART_DIR,
 } from './helm.js';
 import type { K8sDocument } from './helm.js';
-import { dockerAvailable, imageFacts } from './image.js';
-
-const HELM = helmAvailable();
+import { imageFacts, imageUnavailableReason } from './image.js';
 
 /**
  * Assembled from parts so this file's own text is not a match for the repo-wide sandbox-flag scan
@@ -56,6 +60,12 @@ const DISABLING_FLAGS: readonly string[] = [
   ['--disable-setuid', '-sandbox'].join(''),
   ['--disable-gpu', '-sandbox'].join(''),
 ];
+
+/** Scratch chart copies made by the MED-1 mutation, removed when the file finishes. */
+const scratchDirs: string[] = [];
+afterAll(() => {
+  for (const directory of scratchDirs) rmSync(directory, { recursive: true, force: true });
+});
 
 /** Credential classes §9.2 says the runner must never hold. Matched against rendered names. */
 const FORBIDDEN_CREDENTIAL_PATTERNS: readonly RegExp[] = [
@@ -72,18 +82,29 @@ const FORBIDDEN_CREDENTIAL_PATTERNS: readonly RegExp[] = [
 ];
 
 describe('story 10.18a — the rendering harness itself', () => {
-  it(
-    HELM
-      ? 'helm is present, so every chart criterion below renders and runs'
-      : 'helm is ABSENT: every chart criterion is SKIPPED, never passed (ci/stages.md stage 8)',
-    () => {
-      // Recorded either way, on the precedent `test/contract.test.ts` set for the frozen document.
-      // A suite that quietly renders nothing is worse than one that says so.
-      expect(typeof HELM).toBe('boolean');
-    },
-  );
+  it('has helm, or FAILS — this tier does not skip when it cannot enforce anything', () => {
+    // **The nineteenth vacuous-guard shape, closed.** This test used to read
+    // `expect(typeof HELM).toBe('boolean')` with the disclosure in its own name, and the eighty-nine
+    // assertions below were `describe.skipIf(!HELM)`. QA took `helm` off PATH and measured the
+    // result: *1 passed / 89 skipped*, **green**. A pipeline reads an exit code, not a test name.
+    //
+    // There is no opt-out variable here on purpose. An opt-out is the same hole with a longer name,
+    // and the one thing this tier must never do is report success while enforcing nothing.
+    const reason = helmUnavailableReason();
+    expect(reason, `the chart criteria cannot be enforced: ${reason ?? ''}`).toBeNull();
+  });
 
-  it.skipIf(!HELM)('discriminates: the same override changes the rendered manifest', () => {
+  it('has the built image, or FAILS — AC-4a part 2 reads its facts out of it', () => {
+    // The mount-disjointness assertion compares the rendered mount paths against the image's own
+    // `PLAYWRIGHT_BROWSERS_PATH` and `HOME`, *read from the image*, precisely so that the ED-05
+    // replacement cannot move the browser registry and leave a hardcoded test green. Without the
+    // image there is nothing to compare against, and that is a failure rather than a skip for the
+    // same reason as above.
+    const reason = imageUnavailableReason();
+    expect(reason, `AC-4a part 2 cannot be enforced: ${reason ?? ''}`).toBeNull();
+  });
+
+  it('discriminates: the same override changes the rendered manifest', () => {
     // T-10.18.1's instruction is to prove the harness discriminates *before* using it. If
     // `--set` did not reach the renderer — a wrong path, a swallowed argument — every mutation
     // below would report "no change" and every criterion in this file would be green and empty.
@@ -94,7 +115,7 @@ describe('story 10.18a — the rendering harness itself', () => {
     expect(envValues(soleContainer(runnerDeployment(base)))['STUDIO_RUNNER_PORT']).not.toBe('9999');
   });
 
-  it.skipIf(!HELM)('reports a failed render as a failure rather than as an empty manifest', () => {
+  it('reports a failed render as a failure rather than as an empty manifest', () => {
     // Several criteria below are satisfied *by* a render failing. A harness that returned an empty
     // document list on failure would make each of them pass for the wrong reason.
     const good = renderOutcome();
@@ -107,7 +128,7 @@ describe('story 10.18a — the rendering harness itself', () => {
   });
 });
 
-describe.skipIf(!HELM)('AC-1 — the studioRunner component renders for all four value sets', () => {
+describe('AC-1 — the studioRunner component renders for all four value sets', () => {
   it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
     '%s renders one Deployment, one ClusterIP Service, no Ingress and no HPA for the runner',
     (_label, valuesFile) => {
@@ -199,7 +220,7 @@ describe.skipIf(!HELM)('AC-1 — the studioRunner component renders for all four
   });
 });
 
-describe.skipIf(!HELM)('AC-2a — the security context §9.3 requires, field by field', () => {
+describe('AC-2a — the security context §9.3 requires, field by field', () => {
   it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
     '%s renders runAsNonRoot, no privilege escalation, all capabilities dropped and a read-only root',
     (_label, valuesFile) => {
@@ -296,7 +317,7 @@ describe.skipIf(!HELM)('AC-2a — the security context §9.3 requires, field by 
   });
 });
 
-describe.skipIf(!HELM)('AC-3a — seccomp is one key, never Unconfined, and no chart path disables the sandbox', () => {
+describe('AC-3a — seccomp is one key, never Unconfined, and no chart path disables the sandbox', () => {
   it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
     '%s renders seccompProfile.type from one key and contains Unconfined nowhere',
     (_label, valuesFile) => {
@@ -364,7 +385,7 @@ describe.skipIf(!HELM)('AC-3a — seccomp is one key, never Unconfined, and no c
   });
 });
 
-describe.skipIf(!HELM)('AC-4a parts 1-2 — SEC-2: the browser path cannot be redirected by the deployment', () => {
+describe('AC-4a parts 1-2 — SEC-2: the browser path cannot be redirected by the deployment', () => {
   it('the runner environment is enumerated, and every rendered key is one the runner accepts', () => {
     // The comparison is against the runner's **own** `ACCEPTED_KEYS`, imported from the production
     // module. A test-local list of expected names would be a second copy of the vocabulary, which
@@ -418,39 +439,37 @@ describe.skipIf(!HELM)('AC-4a parts 1-2 — SEC-2: the browser path cannot be re
     expect(envNames(api)).toContain('PLAYWRIGHT_BROWSERS_PATH');
   });
 
-  it.skipIf(!dockerAvailable())(
-    'no writable mount sits on the image’s browser path or on its HOME',
-    () => {
-      // Read **out of the built image**, not hardcoded: the base image is ED-05's to replace and a
-      // replacement that moved the registry would leave a hardcoded test green and the control
-      // gone.
-      const { browsersPath, home } = imageFacts();
-      expect(browsersPath.startsWith('/')).toBe(true);
-      expect(home.startsWith('/')).toBe(true);
+  it('no writable mount sits on the image’s browser path or on its HOME', () => {
+    // Read **out of the built image**, not hardcoded: the base image is ED-05's to replace and a
+    // replacement that moved the registry would leave a hardcoded test green and the control gone.
+    // `imageFacts()` now calls `requireImage()`, so a missing or wrong image reddens this rather
+    // than skipping it.
+    const { browsersPath, home } = imageFacts();
+    expect(browsersPath.startsWith('/')).toBe(true);
+    expect(home.startsWith('/')).toBe(true);
 
-      for (const valuesFile of VALUE_SETS) {
-        const deployment = runnerDeployment(render({ valuesFile }));
-        const writable = (soleContainer(deployment).volumeMounts ?? []).filter(
-          (mount) => mount.readOnly !== true,
-        );
-        expect(writable.length, 'no writable mount at all: the scratch dir is required').toBeGreaterThan(0);
+    for (const valuesFile of VALUE_SETS) {
+      const deployment = runnerDeployment(render({ valuesFile }));
+      const writable = (soleContainer(deployment).volumeMounts ?? []).filter(
+        (mount) => mount.readOnly !== true,
+      );
+      expect(writable.length, 'no writable mount at all: the scratch dir is required').toBeGreaterThan(0);
 
-        for (const mount of writable) {
-          const path = mount.mountPath ?? '';
-          // Disjoint in both directions: a mount *at* the browser path and a mount at a parent of
-          // it are the same attack, and so is a mount inside $HOME.
-          for (const forbidden of [browsersPath, home]) {
-            expect(
-              isRelated(path, forbidden),
-              `writable mount ${path} is on ${forbidden} (${valueSetName(valuesFile)})`,
-            ).toBe(false);
-          }
+      for (const mount of writable) {
+        const path = mount.mountPath ?? '';
+        // Disjoint in both directions: a mount *at* the browser path and a mount at a parent of it
+        // are the same attack, and so is a mount inside $HOME.
+        for (const forbidden of [browsersPath, home]) {
+          expect(
+            isRelated(path, forbidden),
+            `writable mount ${path} is on ${forbidden} (${valueSetName(valuesFile)})`,
+          ).toBe(false);
         }
       }
-    },
-  );
+    }
+  });
 
-  it.skipIf(!dockerAvailable())('the disjointness check is capable of failing', () => {
+  it('the disjointness check is capable of failing', () => {
     // The control. `isRelated` returning false for everything would make the assertion above green
     // over any mount list at all.
     const { browsersPath, home } = imageFacts();
@@ -468,7 +487,7 @@ function isRelated(left: string, right: string): boolean {
   return a === b || a.startsWith(`${b}/`) || b.startsWith(`${a}/`);
 }
 
-describe.skipIf(!HELM)('AC-6 — drain, readiness and the grace period are one derivation', () => {
+describe('AC-6 — drain, readiness and the grace period are one derivation', () => {
   it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
     '%s derives the grace period from the deadlines the pod actually receives',
     (_label, valuesFile) => {
@@ -533,7 +552,7 @@ describe.skipIf(!HELM)('AC-6 — drain, readiness and the grace period are one d
   });
 });
 
-describe.skipIf(!HELM)('AC-5a — the reaping mechanism is chosen, named, and does not cost the signal', () => {
+describe('AC-5a — the reaping mechanism is chosen, named, and does not cost the signal', () => {
   it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
     '%s shares the process namespace, so the pause container reaps orphaned grandchildren',
     (_label, valuesFile) => {
@@ -545,9 +564,103 @@ describe.skipIf(!HELM)('AC-5a — the reaping mechanism is chosen, named, and do
       // four milliseconds; with a shell-form CMD substituted, `docker stop` waits out its whole
       // timeout and emits neither.
       const pod = podSpec(runnerDeployment(render({ valuesFile })));
-      expect((pod as { shareProcessNamespace?: boolean }).shareProcessNamespace).toBe(true);
+      expect(pod.shareProcessNamespace).toBe(true);
     },
   );
+
+  it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
+    '%s renders exactly one container, which is the bound that makes a shared PID namespace safe',
+    (_label, valuesFile) => {
+      // **QA MED-1.** `shareProcessNamespace: true` was adopted as a reaping control without its
+      // other consequence being weighed: a shared PID namespace exposes `/proc/<pid>/root` between
+      // containers, so a second container in this pod reads
+      // `/proc/1/root/etc/studio/object-store/secretAccessKey` regardless of its own mounts, and a
+      // read-only root filesystem does not obstruct a read.
+      //
+      // The pod was safe — it renders one container — but **only incidentally**: the bound was
+      // enforced by `soleContainer()` calling `one()`, which throws. A log shipper or a mesh
+      // sidecar would have broken several tests for the wrong reason while handing that sidecar
+      // the write-only store credential, and nothing in the chart named the coupling.
+      //
+      // Asserted as a relation between three rendered facts — the shared namespace, the mounted
+      // Secret and the container count — rather than as "there is one container", so it says what
+      // it is for.
+      const pod = podSpec(runnerDeployment(render({ valuesFile })));
+      expect(pod.shareProcessNamespace).toBe(true);
+      expect(
+        (pod.volumes ?? []).filter((volume) => volume.secret !== undefined).length,
+        'no Secret is mounted, so this guard is passing for a reason that is not the bound',
+      ).toBeGreaterThan(0);
+      expect(sharedNamespaceViolations(pod)).toEqual([]);
+    },
+  );
+
+  it('chart mutation MED-1: a sidecar on the runner pod turns the bound red', () => {
+    // The mutation is a **template** change, so it is made to a copy of the chart and rendered from
+    // there: a render mutation must land inside the measurement window, and the production template
+    // must not gain a sidecar to prove a guard can fire.
+    const scratch = mkdtempSync(join(tmpdir(), 'studio-chart-med1-'));
+    scratchDirs.push(scratch);
+    const chart = join(scratch, 'put-checks');
+    cpSync(CHART_DIR, chart, { recursive: true });
+
+    const templatePath = join(chart, 'templates', 'studio-runner-deployment.yaml');
+    const template = readFileSync(templatePath, 'utf8');
+    const anchor = ['      containers:', '        - name: studio-runner'].join('\n');
+    expect(template, 'the sidecar anchor moved; this mutation would inject nothing').toContain(anchor);
+    writeFileSync(
+      templatePath,
+      template.replace(
+        anchor,
+        [
+          '      containers:',
+          '        - name: log-shipper',
+          '          image: registry.citi.com/put/log-shipper:1',
+          '        - name: studio-runner',
+        ].join('\n'),
+      ),
+      'utf8',
+    );
+
+    const mutated = render({ chartDir: chart });
+    const deployment = one(
+      byKind(mutated, 'Deployment').filter((d) =>
+        (d.metadata?.name ?? '').includes(RUNNER_FRAGMENT),
+      ),
+      'runner Deployment',
+    );
+    const pod = podSpec(deployment);
+    expect(pod.containers ?? []).toHaveLength(2);
+    const violations = sharedNamespaceViolations(pod);
+    expect(violations, 'a sidecar was added and the bound did not notice').toHaveLength(1);
+    expect(violations[0]).toContain('/proc/1/root');
+  });
+
+  it('the bound is silent when there is nothing to expose, so it is about the coupling', () => {
+    // The control that keeps the guard from being "assert one container" wearing a security name.
+    // With the shared namespace off, or with no Secret mounted, a second container is a deployment
+    // decision and not this bound's business — and the guard says nothing.
+    const twoContainersNoSharing = {
+      shareProcessNamespace: false,
+      containers: [{ name: 'a' }, { name: 'b' }],
+      volumes: [{ name: 'creds', secret: { secretName: 's' } }],
+    };
+    const twoContainersNoSecret = {
+      shareProcessNamespace: true,
+      containers: [{ name: 'a' }, { name: 'b' }],
+      volumes: [{ name: 'scratch', emptyDir: {} }],
+    };
+    expect(sharedNamespaceViolations(twoContainersNoSharing)).toEqual([]);
+    expect(sharedNamespaceViolations(twoContainersNoSecret)).toEqual([]);
+    // …and it does fire when both are present, which is the case the runner pod is in.
+    expect(
+      sharedNamespaceViolations({
+        shareProcessNamespace: true,
+        containers: [{ name: 'a' }, { name: 'b' }],
+        volumes: [{ name: 'creds', secret: { secretName: 's' } }],
+      }),
+    ).toHaveLength(1);
+  });
 
   it('does not wrap the image’s entry point, which is what keeps SIGTERM direct', () => {
     // An `ENTRYPOINT`/`command` override in the chart is the other way the drain dies: PID 1
@@ -559,7 +672,7 @@ describe.skipIf(!HELM)('AC-5a — the reaping mechanism is chosen, named, and do
   });
 });
 
-describe.skipIf(!HELM)('AC-7 — the runner holds no credential §9.2 forbids, on its own service account', () => {
+describe('AC-7 — the runner holds no credential §9.2 forbids, on its own service account', () => {
   it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
     '%s renders no database, vault, CSI or LLM credential anywhere on the runner pod',
     (_label, valuesFile) => {
@@ -648,7 +761,7 @@ describe.skipIf(!HELM)('AC-7 — the runner holds no credential §9.2 forbids, o
   });
 });
 
-describe.skipIf(!HELM)('AC-8a — default-deny egress with exactly the destination classes the runner declares', () => {
+describe('AC-8a — default-deny egress with exactly the destination classes the runner declares', () => {
   it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
     '%s renders a NetworkPolicy selecting the runner, denying by default',
     (_label, valuesFile) => {
@@ -730,7 +843,7 @@ describe.skipIf(!HELM)('AC-8a — default-deny egress with exactly the destinati
   });
 });
 
-describe.skipIf(!HELM)('AC-10a, AC-12 — two store principals, and one retention key', () => {
+describe('AC-10a, AC-12 — two store principals, and one retention key', () => {
   it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
     '%s gives the runner a different object-store Secret from the API’s',
     (_label, valuesFile) => {
@@ -829,7 +942,7 @@ describe.skipIf(!HELM)('AC-10a, AC-12 — two store principals, and one retentio
   });
 });
 
-describe.skipIf(!HELM)('AC-9a — ADR-002 O-6 is carried, not absorbed', () => {
+describe('AC-9a — ADR-002 O-6 is carried, not absorbed', () => {
   it('adds no destination-policy field to the job envelope from the deployment side either', () => {
     // O-6 is Class B and @architect's: a story may propose but may not land a field on the closed
     // `RunJob`. The deployment could smuggle the same thing in as a policy environment key, so the
@@ -845,7 +958,7 @@ describe.skipIf(!HELM)('AC-9a — ADR-002 O-6 is carried, not absorbed', () => {
   });
 });
 
-describe.skipIf(!HELM)('AC-25 residual — this half’s diff, and what it did not touch', () => {
+describe('AC-25 residual — this half’s diff, and what it did not touch', () => {
   it('names the runner image from values, never a digest pinned in a template', () => {
     const image = soleContainer(runnerDeployment(render())).image ?? '';
     expect(image).toContain('checks-studio-runner');

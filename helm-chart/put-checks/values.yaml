@@ -319,6 +319,20 @@ studioRunner:
   # Process reaping (AC-5a / AC-5b). The pause container becomes PID 1 and reaps orphaned
   # grandchildren; the runner keeps the exec-form CMD, so SIGTERM still reaches Node directly and
   # the drain still runs. Both halves are stated in the Deployment template.
+  #
+  # ⚠ **THIS FIELD COMES WITH A BOUND: THIS POD MUST HAVE EXACTLY ONE CONTAINER.**
+  #
+  # A shared PID namespace makes every container in the pod visible to every other through /proc,
+  # including /proc/<pid>/root. This pod mounts the object-store Secret at
+  # `objectStore.mountPath`, so **any second container would read
+  # /proc/1/root/etc/studio/object-store/secretAccessKey regardless of its own volume mounts**, and
+  # `readOnlyRootFilesystem` does not obstruct a read. The write-only store principal of §6.2 would
+  # then be held by a log shipper or a mesh sidecar that has no business with it.
+  #
+  # Raised by @qa as MED-1: the bound was real but enforced *incidentally*, by a test helper that
+  # throws on a second container. It is now asserted explicitly and falsified against a chart copy
+  # with a sidecar injected. **Adding a container here is a security decision, not a convenience**;
+  # if you need one, take the exposure to SPK-04 and ED-05 first.
   shareProcessNamespace: true
 
   serviceAccount:

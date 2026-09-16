@@ -23,13 +23,41 @@ export interface ImageFacts {
 
 let cached: ImageFacts | null | undefined;
 
-export function dockerAvailable(): boolean {
+/**
+ * Why the image cannot be used, or `null` when it can.
+ *
+ * **Absence is a FAILURE, never a skip.** QA pointed `STUDIO_RUNNER_IMAGE` at a tag that does not
+ * exist and the SEC-2 file reported *1 passed / 3 skipped, in 1 ms*, **green** — with the attack
+ * @po named this story's weakest criterion silently not run. The reason is returned rather than a
+ * boolean so the failure message says which of the two things is missing: `docker` itself, or the
+ * image stage 7 was supposed to build and pass in.
+ */
+export function imageUnavailableReason(): string | null {
+  try {
+    execFileSync('docker', ['version', '--format', '{{.Server.Version}}'], { stdio: 'pipe' });
+  } catch {
+    return (
+      '`docker` is not available. SEC-2 (AC-4a part 3) is @qa\'s shim attack RUN against the built ' +
+      'image in both directions; without a container runtime it is not run at all, and a control ' +
+      'whose removal changes nothing observable is not a control.'
+    );
+  }
   try {
     execFileSync('docker', ['image', 'inspect', RUNNER_IMAGE], { stdio: 'pipe' });
-    return true;
   } catch {
-    return false;
+    return (
+      `the image \`${RUNNER_IMAGE}\` does not exist locally. Build it first (\`ci/stages.md\` stage 7, ` +
+      '`docker build -t <tag> studio-runner/`) and pass the tag as `STUDIO_RUNNER_IMAGE`. This is a ' +
+      'failure and not a skip: a wrong tag used to make this file green in one millisecond.'
+    );
   }
+  return null;
+}
+
+/** Throws unless `docker` and the image are both present. */
+export function requireImage(): void {
+  const reason = imageUnavailableReason();
+  if (reason !== null) throw new Error(`deployment tier prerequisite missing: ${reason}`);
 }
 
 /**
@@ -40,6 +68,7 @@ export function dockerAvailable(): boolean {
  * fact, and one AC-5a asserts on its own terms.
  */
 export function imageFacts(): ImageFacts {
+  requireImage();
   if (cached !== undefined && cached !== null) return cached;
   const raw = execFileSync(
     'docker',

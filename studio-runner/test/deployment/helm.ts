@@ -18,8 +18,13 @@
  *    must fail the render rather than be silently dropped. {@link renderOutcome} returns the
  *    failure with its message so a test can assert on it.
  *
- * `helm` is a stage-8 tool (`studio-runner/ci/stages.md`), so this suite runs where stage 8 runs.
- * Where it is absent the suite records that fact in a test rather than skipping silently.
+ * **Absence of `helm` is a FAILURE here, never a skip.** The first version of this harness used
+ * `describe.skipIf(!HELM)`, and QA measured what that bought: with `helm` off `PATH` the chart file
+ * reported *1 passed / 89 skipped* and was **green**, with the only surviving assertion a tautology
+ * and the disclosure in a test *name*. A pipeline does not read names. `requireHelm()` below throws
+ * with the stage that is supposed to provide the binary, so a tier that cannot run says so by going
+ * red. There is deliberately **no opt-out variable**: an opt-out is the same hole under a longer
+ * name.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -48,13 +53,34 @@ export function valueSetName(valuesFile: string | null): string {
   return valuesFile ?? 'values.yaml';
 }
 
-export function helmAvailable(): boolean {
+/** Why `helm` cannot be used, or `null` when it can. Never a bare boolean: the reason is the test. */
+export function helmUnavailableReason(): string | null {
   try {
     execFileSync('helm', ['version', '--short'], { stdio: 'pipe' });
-    return existsSync(CHART_DIR);
   } catch {
-    return false;
+    return (
+      'the `helm` binary is not on PATH. Every chart criterion of story 10.18a (AC-1 – AC-12) is ' +
+      'asserted on the OUTPUT of `helm template`, so without it this tier enforces nothing. It is ' +
+      'not skipped, because a green run that enforced nothing is what this shape is. Run this tier ' +
+      'where its prerequisites exist: `ci/stages.md` stage 9, or locally with helm installed.'
+    );
   }
+  if (!existsSync(CHART_DIR)) {
+    return `the chart is not at ${CHART_DIR}; the rendered-manifest rule has nothing to render`;
+  }
+  return null;
+}
+
+/**
+ * Throws unless `helm` and the chart are both present.
+ *
+ * Called by every function below that renders, so a missing prerequisite reddens **all 90**
+ * assertions rather than one announcement test — the failure is proportional to what is not being
+ * checked.
+ */
+export function requireHelm(): void {
+  const reason = helmUnavailableReason();
+  if (reason !== null) throw new Error(`deployment tier prerequisite missing: ${reason}`);
 }
 
 export interface K8sDocument {
@@ -78,6 +104,15 @@ export interface RenderOutcome {
 }
 
 export interface RenderOptions {
+  /**
+   * The chart to render. Defaults to the real one.
+   *
+   * Overridden only by MED-1's falsification, which copies the chart to a scratch directory and
+   * injects a sidecar container before rendering — a template mutation that has to land *inside*
+   * the measurement window, and which must not be made to the production template to prove a guard
+   * can fire.
+   */
+  readonly chartDir?: string;
   readonly valuesFile?: string | null;
   /** `--set` overrides. This is the render mutation surface. */
   readonly set?: Readonly<Record<string, string>>;
@@ -91,9 +126,13 @@ export interface RenderOptions {
  * Runs `helm template` and returns the outcome, success or failure, without throwing.
  */
 export function renderOutcome(options: RenderOptions = {}): RenderOutcome {
-  const args = ['template', 'release-name', CHART_DIR];
+  // Fail closed, here rather than in a per-file guard: every assertion in this tier reaches the
+  // renderer through this function, so a missing binary cannot be answered with a skip anywhere.
+  requireHelm();
+  const chartDir = options.chartDir ?? CHART_DIR;
+  const args = ['template', 'release-name', chartDir];
   if (options.valuesFile !== undefined && options.valuesFile !== null) {
-    args.push('-f', join(CHART_DIR, options.valuesFile));
+    args.push('-f', join(chartDir, options.valuesFile));
   }
   if (options.enableRunner !== false) args.push('--set', 'studioRunner.enabled=true');
   for (const [key, value] of Object.entries(options.set ?? {})) {
@@ -184,6 +223,13 @@ export function deploymentNamed(outcome: RenderOutcome, fragment: string): K8sDo
 export interface PodSpec {
   readonly serviceAccountName?: string;
   readonly automountServiceAccountToken?: boolean;
+  /**
+   * Declared rather than cast at each use: since QA MED-1 this field is a *security* fact of the
+   * pod, not an incidental one. It is the runner's reaping mechanism and it is simultaneously what
+   * makes a second container able to read this pod's mounted Secret through `/proc/1/root`.
+   */
+  readonly shareProcessNamespace?: boolean;
+  readonly initContainers?: readonly Container[];
   readonly terminationGracePeriodSeconds?: number;
   readonly securityContext?: Record<string, unknown>;
   readonly containers?: readonly Container[];
@@ -252,6 +298,50 @@ export function envValues(container: Container): Record<string, string> {
 
 export function envNames(container: Container): string[] {
   return (container.env ?? []).map((entry) => entry.name).sort();
+}
+
+/**
+ * Violations of the bound that makes `shareProcessNamespace: true` safe (QA MED-1).
+ *
+ * **The coupling, stated because nothing in the chart said it.** A shared PID namespace makes every
+ * container in the pod visible to every other through `/proc`, including `/proc/<pid>/root` — so a
+ * second container reads `/proc/1/root/etc/studio/object-store/secretAccessKey` regardless of its
+ * own volume mounts, and `readOnlyRootFilesystem` does not obstruct a read. The runner pod carries
+ * `shareProcessNamespace: true` for reaping **and** mounts the object-store Secret, so the only
+ * thing keeping the write-only store credential out of a sidecar's hands is that there is no
+ * sidecar.
+ *
+ * That bound was real but enforced **incidentally**: `soleContainer()` calls `one()`, which throws.
+ * A log shipper or a mesh sidecar would have broken several tests for the wrong reason while
+ * quietly handing that sidecar the credential. This makes the bound explicit, so adding a container
+ * announces itself as a security decision.
+ *
+ * @returns one string per violation; an empty array is the bound holding.
+ */
+export function sharedNamespaceViolations(pod: PodSpec): string[] {
+  const violations: string[] = [];
+  const shared = pod.shareProcessNamespace === true;
+  const mountedSecrets = (pod.volumes ?? [])
+    .map((volume) => volume.secret?.secretName)
+    .filter((name): name is string => typeof name === 'string');
+  if (!shared || mountedSecrets.length === 0) return violations;
+
+  const containers = pod.containers ?? [];
+  if (containers.length !== 1) {
+    violations.push(
+      `shareProcessNamespace: true with ${String(containers.length)} containers and a mounted ` +
+        `Secret (${mountedSecrets.join(', ')}): every extra container can read ` +
+        '/proc/1/root/<mountPath> regardless of its own mounts',
+    );
+  }
+  const initContainers = pod.initContainers ?? [];
+  if (initContainers.length > 0) {
+    violations.push(
+      `shareProcessNamespace: true with ${String(initContainers.length)} initContainers and a ` +
+        'mounted Secret: same exposure, one phase earlier',
+    );
+  }
+  return violations;
 }
 
 /** Every secret name the pod references, through `env`, `envFrom` or a volume. */
