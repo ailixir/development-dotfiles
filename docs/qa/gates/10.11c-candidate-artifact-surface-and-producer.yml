@@ -1,0 +1,380 @@
+schema: 1
+story: '10.11c'
+story_title: The candidate artifact — the contract, the producer and the review surface
+epic: EPIC-10
+wave: 6
+half_of: '10.11'
+criteria_owned: 'AC-25 – AC-32, plus this half''s share of AC-22 – AC-24; FOC-06 step 3 of 3'
+
+gate: CONCERNS
+rounds: 1
+
+status_reason: >-
+  **Every load-bearing claim in this record reproduced under measurement, and the two that were
+  hardest to fake are the two that held up best.** The escalation test's assertion region
+  (`const SPEC_DIR` → EOF) hashes
+  `a3e77163af217dd032ce631c0589b208a6ef69b9f3c78517c83c1b10eb9f68f0` on **both** sides — computed
+  here, on both revisions, not read from the record. The whole-file hashes are `f7a8f98adc…` before
+  and `0010e625bcd…` after, and the diff is confined to the header comment plus one deleted blank
+  line; the three `import` lines above the region are untouched (the hunk opens at line 4). A
+  comment-only edit is exactly the shape that can hide a moved assertion, and this one does not.
+  **FOC-06 step 3 closes correctly.** `docs/specs/studio/openapi.yaml` is
+  `310d3c984b77104898440cae450795cdd56c11ef926f75209fb6d4198dcc0cf7` at `f868c31df` — identical to
+  the `BASE_SHA256` the pin carried on arrival, so the pin was green on arrival and there is **no
+  FOC-06 violation to raise** — and
+  `51850b016cd8a697899a944eab12ddce5456967beecf4f3e011720498bc02efa` at HEAD. `git log` over each
+  path shows `docs/specs/studio/openapi.yaml` and `studio-runner/test/run/confinement.test.ts`
+  were each touched by **exactly one commit, `4157d7f62`** — the same-commit re-anchor property
+  holds, as it did for steps 1 and 2. The pin runs **18/18** at HEAD.
+  **The set-equality coupling is real, and the producer did ship in the same commit.** Dropping
+  `currentCandidateArtifact` from the `UITestDto` record reddens exactly
+  `theFrozenSchemasAndTheJavaTypesShareTheSameFieldNames` with **13 siblings green**, and
+  `4157d7f62` carries the document, the producer, the re-anchor and the escalation comment
+  together. This edit could not have been document-only.
+  **AC-32 is genuinely red now and genuinely self-resolving.** Two independent full frontend runs
+  give the identical 2 failures, both AC-32's. Injecting the confirmed revision's two properties
+  into the document turns the file **4/4 green with the test byte-unchanged** — and it does so
+  under **two different spellings**: @dev's `confirmedArtifact*` and a second,
+  `ratifiedRevisionArtifact*`, invented here specifically to test the claim. The rule counts
+  qualified forms, not a spelling, as recorded.
+  **The non-falsifiable guard @dev found and repaired is exactly as described.** Deleting the
+  in-flight ref from `useCompileReview` reddens 1 test with 134 green against the repaired
+  assertion; restoring the **pre-repair** test files from `ba949777a` with the same mutation still
+  applied leaves the review suite **134/134 green**. @dev's self-reported defect is confirmed
+  independently, and so is the repair.
+  **The negative control genuinely discriminates.** Under the `steps`-derived summary mutation, 7
+  tests redden — all three `FX-ARTIFACT-TRANSLATED-TARGET` cases among them — while
+  `FX-ARTIFACT-AGREEING-CONTROL` is observed **green in the verbose run, by name**. A control that
+  co-reddens proves nothing; this one does not co-redden.
+  **Four concerns hold the gate at CONCERNS rather than PASS.** (1) `npm run lint` **cannot start**
+  — ENV-1, epic-wide, correctly never claimed as passed here. (2) **F-1's premise is correct**:
+  ADR-002 §21.7's "in `needsRevision` those disagree by design" is false against the merged
+  producer, verified in the code, and the criterion it grounds is @architect's to re-rule. (3) A
+  **twenty-first vacuous-guard shape** was found here, in this story's own new producer: the
+  "both or neither" defence in `UITestDto.from` can be deleted and **nothing in the entire
+  `com.citi.put.checks.studio.*` package reddens**. (4) Three **off-by-one under-counts** in the
+  Dev Agent Record's totals, all in the safe direction. None is a defect in shipped behaviour and
+  none blocks the merge.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-16T00:00:00Z'
+branch: story/10.11c
+head_sha: 5551cb2cb
+base_sha: f868c31df
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.11c
+epic_head_at_review: 23c1973e4
+merge_check: >-
+  `git merge-tree --write-tree epic/EPIC-10 story/10.11c` returns a clean tree (exit 0, no
+  conflicted paths). The epic has advanced by exactly one commit since this story's base —
+  `23c1973e4`, @qa's own fix inverting the stale video-route marker assertion — and this story does
+  not touch that file, so the merge takes the epic's fixed version. The split-half hazard that bit
+  10.11a/10.11b was checked for and is **absent** here.
+
+verification_method: >-
+  **Every backend assertion in this gate was run with `--rerun-tasks`, and the reason was
+  reproduced rather than assumed.** Document-reading test classes resolve the contract through
+  `Path.of("..", "docs", "specs", "studio", "openapi.yaml")`, outside the source set, so Gradle does
+  not know the file is an input. Demonstrated directly here: with `TestDto.currentCandidateArtifactHash`
+  renamed in the document — a change that must redden the set-equality test — a plain
+  `./gradlew test --tests StudioContractTest` reports `> Task :test UP-TO-DATE` and **BUILD
+  SUCCESSFUL in 4s**; the **identical tree state** with `--rerun-tasks` reports **BUILD FAILED**
+  with `theFrozenSchemasAndTheJavaTypesShareTheSameFieldNames` red. A plain green against a contract
+  edit means nothing. Declaring the contract a task input belongs to neither this story nor 10.15;
+  it stays with @devops alongside MED-2.
+
+evidence:
+  contract_hashes:
+    before_f868c31df: 310d3c984b77104898440cae450795cdd56c11ef926f75209fb6d4198dcc0cf7
+    after_HEAD: 51850b016cd8a697899a944eab12ddce5456967beecf4f3e011720498bc02efa
+    pin_constant_at_base: 310d3c984b77104898440cae450795cdd56c11ef926f75209fb6d4198dcc0cf7
+    pin_constant_at_head: 51850b016cd8a697899a944eab12ddce5456967beecf4f3e011720498bc02efa
+    green_on_arrival: >-
+      The document and the pin's constant are the **same value** at `f868c31df`, so the pin was
+      green before anything was touched. Verified arithmetically from both blobs, and the pin runs
+      18/18 at HEAD.
+    same_commit_reanchor: >-
+      `git log f868c31df..HEAD -- <path>` returns exactly `4157d7f62` for **both**
+      `docs/specs/studio/openapi.yaml` and `studio-runner/test/run/confinement.test.ts`. One
+      commit, both files. Verified.
+    document_diff_scope: >-
+      Additive apart from one rewritten prose paragraph. Grepping the diff for markers, status
+      codes, `operationId`, `required:` and route keys returns **nothing**; the only 7 removed
+      lines are the `/tests` list-projection description, rewritten to name the two new fields.
+      ADR-002's "Nothing else moved" is accurate.
+
+  escalation_test_ac31:
+    file: frontend/src/services/mocks/studio/studioEscalation.test.ts
+    whole_file_before: f7a8f98adc20b741b2cd8cc7bb23bcef7a982bf5aa8f35756f6da3e5c93ac5ea
+    whole_file_after: 0010e625bcd43b9f40e2d479f75a5a4ad49f84f9c83eb4e4606f34102beca96b
+    assertion_region_before: a3e77163af217dd032ce631c0589b208a6ef69b9f3c78517c83c1b10eb9f68f0
+    assertion_region_after: a3e77163af217dd032ce631c0589b208a6ef69b9f3c78517c83c1b10eb9f68f0
+    region_definition: '`const SPEC_DIR` → EOF; line 36 of 193 before, line 63 of 220 after'
+    finding: >-
+      **Identical.** Computed here on both revisions. The diff hunk opens at line 4, so the three
+      `import` lines above the region are byte-identical too — there is no assertion anywhere
+      outside the hashed region. The edit is genuinely comment-only, and the test is green at HEAD.
+
+  gates_measured:
+    frontend_vitest: >-
+      **34 files (2 failed) / 458 tests (2 failed, 456 passed)** — run **twice**, identical both
+      times. The 2 failures are both AC-32's committed-red escalation. `studioEscalation.test.ts`,
+      the baseline's one failure, is now **green**. The second failing *file* is
+      `ChecksLayout.a11y.test.tsx`, which fails to **collect** on the dangling
+      `@put/core-components` symlink — pre-existing, same root cause as the two TS2307s.
+      **Discrepancy:** the record states 457 / 455. Measured 458 / 456, stably, twice. The run is
+      **above** the reported total, never short, so this is a miscount in the record and not a hang.
+    frontend_type_check: '**2 errors**, both `TS2307 Cannot find module ''@put/core-components''`, at `ChecksLayout.tsx(6,33)` and `navigationSetup.ts(1,36)`. Pre-existing, unchanged.'
+    frontend_lint: '**FAILED — does not start.** `ESLint couldn''t find the config "@typescript-eslint/recommended"`. Zero files linted. Reported FAILED, never as passed.'
+    studio_runner_vitest: '**49 files (1 skipped) / 970 tests (941 passed, 29 skipped)** — exactly the recorded figures. @dev''s note that this is the **default tier only** and not a combined figure is correct: one file (the browser/fixtures tier) is skipped.'
+    studio_runner_pin: '`confinement.test.ts` **18/18** at HEAD.'
+    backend_studio_package_head: '**91 files / 692 tests / 6 failures in 4 classes / 7 skipped**, completed in 4m09s with `--rerun-tasks`.'
+    backend_studio_package_base: '**90 files / 687 tests / 6 failures in 4 classes / 7 skipped**, measured in a throwaway detached worktree at `f868c31df`, completed in 4m21s. Delta: **+1 file, +5 tests, zero new failures**, and the failing test **names** are an identical set.'
+    backend_gradle_check: '**Not run** (MED-2). Narrow `test` invocations all completed — 21–30s for single classes, ~4m for the package — so a backend result **was** obtained here; only `check` remains unrun.'
+    backend_result_obtained: true
+
+  f3_baseline_adjudication: >-
+    **@dev is right and the briefing given to this review was wrong.** The briefing stated the
+    inherited failing set contains none in `studio`. Measured at `f868c31df`, the `studio` package
+    alone carries **six failures across four classes**: `StudioOverloadIT` (1),
+    `CompileRouteContractDivergenceTest` (1), `ExecutionVideoAuthorizationIT` (2) and
+    `ExecutionVideoContractEscalationTest` (2) — two of which are story 10.15's deliberately-red
+    ESC-1/ESC-2. @dev's correction is adopted; the briefing's count is not.
+
+mutations_reapplied:
+  count: 8
+  note: >-
+    Six were required; eight were run, plus two extra controls. Every file was restored from a
+    PID-suffixed byte copy held outside the shared scratchpad and re-verified by `shasum -a 256`,
+    with `git status --short` **empty** after each. The contract document returned to
+    `51850b016c…` and `UITestDto.java` to `acf33658d4…` after their respective passes.
+  entries:
+    - id: M-B1
+      surface: backend
+      guard: AC-26 set equality (item 3)
+      mutation: Drop `currentCandidateArtifact` from the `UITestDto` record and its constructor call
+      observed: '**1 red** — `theFrozenSchemasAndTheJavaTypesShareTheSameFieldNames`, message `[TestDto in openapi.yaml vs UITestDto]`'
+      siblings: '**13 green** (record says 12 — off by one; 14 tests total, 1 red)'
+      rerun_tasks: true
+    - id: M-B2b
+      surface: backend
+      guard: AC-26 candidate vs confirmed
+      mutation: Producer prefers `getConfirmedRevisionId()` when non-null, else the candidate
+      observed: '**1 red of 4** — `theArtifactAndHashBelongToTheCandidateAndNotToTheConfirmedRevision`'
+      siblings: '**3 green**, exactly as recorded. Only the confirmed-then-edited-then-recompiled fixture can see it; driven against a real PostgreSQL.'
+      rerun_tasks: true
+    - id: M-F7
+      surface: frontend
+      guard: AC-29 obligation 1 (item 5)
+      mutation: Delete the in-flight ref early return from `useCompileReview.confirm`
+      observed: '**1 red** — `confirmInFlight.test.tsx` "two activations in one synchronous turn send one request, with no control in the way"'
+      siblings: '**134 green** (135 total), exactly as recorded'
+    - id: M-F7-control
+      surface: frontend
+      guard: 'AC-29 obligation 1 — the **pre-repair** assertion'
+      mutation: 'Same mutation, with `confirmInFlight.test.tsx` and `confirmFlow.test.tsx` restored from `ba949777a`'
+      observed: '**134/134 GREEN — nothing red.**'
+      finding: >-
+        The original guard was genuinely non-falsifiable, for the reason @dev gives: React's
+        synthetic event system consults the `disabled` **prop**, so defeating the DOM attribute and
+        dispatching a `MouseEvent` never reaches the hook. @dev's self-reported defect and its
+        repair at `b730ac59a` are both **independently confirmed**.
+    - id: M-F3
+      surface: frontend
+      guard: AC-28 summary
+      mutation: Summary slot renders `{line}` (the authored sentence) instead of `summaryText(artifactStep)`
+      observed: '**7 red**, all three `FX-ARTIFACT-TRANSLATED-TARGET` cases among them, plus the two `FX-ARTIFACT-ABSENT` diagnostics cases and `FX-ARTIFACT-DIVERGENT`'
+      siblings: '**128 green** (record says 127 — off by one)'
+      negative_control: >-
+        **Verified genuinely green, by name, in the verbose run**: `is green on a corpus whose
+        sentences already read like their operations — the negative control
+        [FX-ARTIFACT-AGREEING-CONTROL]` ✓, alongside the §21.7 agreeing-corpus case ✓. The control
+        does **not** co-redden, so it discriminates. This is the point of having it and it earns
+        its place.
+    - id: M-F9
+      surface: contract + frontend
+      guard: AC-32 self-resolution
+      mutation: Inject `confirmedArtifactHash` / `confirmedArtifact` into `TestDto`
+      observed: '**2/4 red → 4/4 green, test file byte-unchanged** (`git status` clean on the test path throughout)'
+    - id: M-F9b
+      surface: contract + frontend
+      guard: 'AC-32 — **@qa''s own extra probe**'
+      mutation: 'Inject `ratifiedRevisionArtifactHash` / `ratifiedRevisionArtifact` — a spelling invented here, not @dev''s'
+      observed: '**4/4 green**, file untouched'
+      finding: >-
+        Confirms the claim precisely: the rule counts **qualified forms**, not a spelling. Verified
+        under two independent names, one of which @dev never saw.
+    - id: M-F10
+      surface: contract + runner
+      guard: AC-30 the pin
+      mutation: One comment line appended to `openapi.yaml`
+      observed: '**1 red** — the pin, quoting `expected ''fece20d3e5…'' to be ''51850b016c…''`, which also proves the pin is anchored to *this story''s* digest'
+      siblings: '**17 green**, exactly as recorded'
+
+vacuous_guard_hunt:
+  probes_run: 4
+  shapes_cleared:
+    - probe: 'The fixture matrix''s title scanner (`storyTestFiles`) — a control scoped by a naming allowlist, shape #20''s signature'
+      result: >-
+        **Cleared.** `STORY_TEST_DIRECTORIES` reads whole directories with `readdirSync` rather than
+        naming files, so this story's new test files were discovered automatically. The matrix test
+        also carries an explicit anti-vacuity guard (`length >= 20`, `titles > 40`, plus a literal
+        title) with the comment *"Without this, both assertions below could pass by finding
+        nothing to check."* Anticipated and closed.
+    - probe: 'Drop `!hashBlocked` from `confirmEnabled` in `CompileReviewPanel`'
+      result: '**Cleared — falsifiable.** 1 red: `confirmHash.test.tsx` "sends nothing at all when the body came back without a hash [FX-ARTIFACT-ABSENT]", 134 green.'
+    - probe: '`assertThat(pendingOperations()).isEmpty()` — an emptiness assertion over a derived collection cannot distinguish "nothing is marked" from "the scanner stopped working"'
+      result: >-
+        **Cleared.** The concern is explicitly anticipated in the assertion's own `.as(...)` text —
+        *"an isEmpty() assertion is otherwise satisfied by a helper that has stopped working"* — and
+        mitigated by `ExecutionVideoContractTest` pointing the same reader at a scratch copy
+        carrying a marker on a different operation. 10.15's work, and it is sound.
+  twenty_first_shape:
+    id: M-Q1
+    name: 'A defensive invariant documented as closed, with no test able to distinguish it from its absence'
+    location: 'backend/src/main/java/com/citi/put/checks/studio/dto/UITestDto.java — the `from(entity, candidate, withDiagnostics)` factory'
+    the_guard: >-
+      `String candidateArtifactHash = candidateArtifact == null ? null : candidate.getArtifactHash();`
+      — the "both or neither" rule. Its four-line comment states the stake plainly: *"A hash
+      published without the artifact it names would invite a caller to confirm a revision it has no
+      way to review, which is the one thing the confirmation step exists to prevent; the
+      unparseable-column defence below is the only path that can produce that asymmetry, and this
+      is where it is closed."*
+    mutation: 'Rewrite as `candidate == null ? null : candidate.getArtifactHash()` — publish the hash even when the artifact column failed to parse, producing exactly the asymmetry the comment forbids'
+    observed: '**91 files / 692 tests / 6 failures — the identical 6 failures, in the identical 4 classes, as the unmutated HEAD. Zero tests reddened**, across the whole `com.citi.put.checks.studio.*` package, with `--rerun-tasks`.'
+    why_it_is_a_new_shape: >-
+      It is not shape #5 (AC-29's React `disabled` prop), where an assertion existed but could not
+      reach the code. Here **no assertion exists at all**, while the source comment asserts in prose
+      that the asymmetry "is closed" — so the comment is the only evidence the guard works. And it
+      is the mirror of @dev's own `artifactDivergence` disclosure, which is *falsifiable over a
+      state the producer cannot emit*: this one is *unfalsifiable over a state the producer cannot
+      emit*, and only the first of those two was disclosed.
+    severity: low
+    is_a_shipped_defect: false
+    assessment: >-
+      Defence-in-depth only. The artifact column is written solely by this application, so the
+      unparseable state is not currently reachable — which is precisely why @dev's four-line comment
+      calls it *"a defence against a future writer"*. That future writer is the threat model, and
+      the defence has nothing watching it. Not a merge blocker; it belongs in the epic's catalogue
+      as shape **#21** and wants one IT that persists a revision with a blank artifact column and
+      asserts both fields come back null.
+    scope_of_claim: >-
+      Verified across `com.citi.put.checks.studio.*` only. `UITestDto` is a studio type, so coverage
+      from outside that package is implausible, but it was not exhaustively excluded.
+
+findings_adjudicated:
+  - id: F-1
+    claim: '§21.7''s premise is false against the merged producer'
+    verdict: '**UPHELD — @dev is right.** For @architect.'
+    verification: >-
+      Both legs verified in the merged code. **(1)** `CompileStateService.publishInvalid` is the
+      **only** writer of `NEEDS_REVISION` in `backend/src/main/java` (grep returns one assignment,
+      at `:168`), and the same `UPDATE` sets `current_candidate_revision_id = NULL` at `:172`. That
+      state therefore never carries a candidate at all. **(2)** Where a candidate does exist,
+      `publishCandidate`'s conditional `UPDATE` is guarded on `source_revision` being unchanged, and
+      `StudioService.updateTest` sets `setCurrentCandidateRevisionId(null)` whenever
+      `change.anyChanged()`; `ConfigurationChangeClassifier` computes
+      `sourceChanged = !storedSteps.equals(request.steps())`, so **any** step-text edit nulls the
+      candidate. `originalText` and `steps[i]` cannot diverge on a body this backend emits.
+    consequence: >-
+      AC-28's literal fixture — a `needsRevision` draft whose steps and artifact diverge visibly —
+      **is a body this backend cannot produce**. @dev shipped the rendering anyway, labelled it
+      *defensive, not live* in its own source, and carried the criterion's purpose with
+      `translatedTargetDraft`, a fixture that **is** producible and that makes the hazard occur. That
+      is the correct handling: raised, not worked around, and not silently satisfied. The ruling is
+      @architect's; ADR-002 §21.7's sentence needs amending, not the code.
+  - id: F-2
+    claim: 'The stale video-route assertion was fixed by @qa on the integration branch; this story must not re-fix it'
+    verdict: '**CONFIRMED ABSENT from this story''s diff.**'
+    verification: >-
+      `backend/src/test/java/com/citi/put/checks/studio/compile/CompileRouteContractDivergenceTest.java`
+      is **byte-identical** between `f868c31df` and HEAD — `git diff --stat` over that path is
+      empty, and the file is not in `git diff --name-only f868c31df..HEAD`. Not touched, not
+      re-fixed. Noted for completeness: the fix is **not present at this story's base**, so
+      `theOperationIsNoLongerMarkedAsNotYetImplementedAndNoOtherMarkerMoved` is red at both base and
+      HEAD here; it lands via `23c1973e4` on the epic branch, which the merge takes cleanly.
+  - id: F-3
+    claim: 'The review briefing''s inherited-failure count is wrong for `studio`'
+    verdict: '**UPHELD — @dev''s baseline is adopted over the briefing''s.** See `f3_baseline_adjudication`.'
+  - id: F-4
+    claim: '`npm run lint` still cannot start (ENV-1)'
+    verdict: '**CONFIRMED.** Reproduced verbatim. Correctly reported FAILED and never as passed.'
+
+top_issues:
+  - id: ENV-1
+    severity: medium
+    scope: epic-wide, not this story's
+    finding: '`npm run lint` cannot start — the ESLint config extends `@typescript-eslint/recommended`, which is not installed. **Zero files are linted anywhere in this epic.**'
+    disposition: >-
+      Not this story's to fix and correctly not claimed. It is, however, why this gate is CONCERNS
+      and not PASS: a quality gate that has never executed cannot be said to have been met.
+  - id: ADR-21.7-PREMISE
+    severity: medium
+    owner: '@architect'
+    finding: 'ADR-002 §21.7''s "in the `needsRevision` state those disagree by design" is false against the merged producer (F-1, verified).'
+    disposition: 'The rendering and its defensive labelling stay. §21.7''s sentence and AC-28''s literal fixture wording need re-ruling. No code change requested.'
+  - id: SHAPE-21
+    severity: low
+    owner: 'epic catalogue / a follow-up story'
+    finding: 'The "both or neither" defence in `UITestDto.from` is unfalsifiable — deleting it reddens nothing in the whole studio package.'
+    disposition: 'Record as the twenty-first catalogued shape. Wants one IT persisting a revision with a blank/unparseable artifact column, asserting both fields null. Not a merge blocker.'
+  - id: RECORD-COUNTS
+    severity: low
+    finding: >-
+      Three off-by-one **under**-counts in the Dev Agent Record: frontend total 457/455 (measured
+      458/456, twice), M-F3 siblings 127 (measured 128), M-B1 siblings 12 (measured 13).
+    disposition: >-
+      All in the safe direction — measured totals **exceed** the recorded ones, never fall short, so
+      none is a hang and none changes a verdict. Every substantive claim, i.e. **which** tests redden
+      by name, is exact in all three cases. Worth correcting for the epic's arithmetic hygiene; not
+      worth a round trip.
+  - id: MED-2
+    severity: medium
+    scope: epic-wide
+    finding: '`./gradlew check` was not run — it has hung 7 of 7 across this epic.'
+    disposition: >-
+      Correctly declared rather than papered over. **A backend result was obtained here**: narrow
+      `test` runs completed in 21–30s and the full studio package in ~4m, twice, on two commits.
+      *Hung, not green, not red* remains the honest word for `check` alone.
+  - id: GRADLE-CONTRACT-INPUT
+    severity: medium
+    scope: 'epic-wide, @devops — belongs to neither this story nor 10.15'
+    finding: 'The contract document is not a declared Gradle task input, so every document-reading test is stale-green after a contract edit. **Reproduced directly in this review** (see `verification_method`).'
+    disposition: 'Recorded for @devops alongside MED-2. This review used `--rerun-tasks` on every backend invocation.'
+
+ac_coverage:
+  AC-25: 'Verified — the document''s own `getTest` examples are Ajv-validated against the amended `TestDto`, with an explicit non-empty guard so the loop cannot pass by finding nothing.'
+  AC-26: 'Verified by M-B1 (set equality), M-B2b (candidate vs confirmed) and the list-projection case. `CandidateArtifactProjectionIT` 4/4 against a real PostgreSQL.'
+  AC-27: 'Verified — the `!hashBlocked` probe reddens `confirmHash.test.tsx`; no hash is ever computed client-side.'
+  AC-28: 'Verified by M-F3 with its negative control. **Carried with a declared deviation**: the literal fixture is unproducible (F-1); the purpose is carried by `translatedTargetDraft`, and the §21.7 rendering ships labelled defensive.'
+  AC-29: 'Verified by M-F7 **and** by the pre-repair control that proves the original assertion could not fail. The repair is real.'
+  AC-30: 'Verified by M-F10 (the pin, 1 red / 17 green) and by the contract-diff scope grep showing no marker, status, route or `required` list moved.'
+  AC-31: 'Verified by assertion-region hash equality on both sides. Correctly recorded as **review evidence, not a guard** — a claim about a non-edit is not something a suite can fail.'
+  AC-32: 'Verified red-now (twice, independently) and self-resolving under **two** spellings, one of them invented in this review.'
+  AC-3b: 'Remains skipped, never passed, not approximated. Its gate is now AC-32''s escalation rather than AC-15''s, which §21 closed.'
+
+what_must_not_be_undone:
+  - 'The `BASE_SHA256` re-anchor and the document edit must stay in the **same commit**. FOC-06''s whole value is that the pin cannot drift from the document silently.'
+  - '`studioEscalation.test.ts`''s assertion region must stay byte-identical. It is the epic''s standing example of a red that resolved by the gap closing rather than by the test moving, and its evidential value is the hash.'
+  - 'AC-32''s escalation stays **red and unedited** until @architect rules. It must not be converted to `it.fails()` — that inverts an escalation into a tripwire, which is the trap §21 already documents.'
+  - 'The AC-29 obligation-1 assertion must stay **at the hook**. Moving it back to the control re-creates a guard that cannot fail.'
+  - '`FX-ARTIFACT-AGREEING-CONTROL` must stay. Without it, M-F3''s 7 reds cannot be distinguished from a mutation that reddens everything.'
+  - 'The §21.7 divergence rendering keeps its *defensive, not live* label until F-1 is ruled. Deleting the label would turn a disclosed limitation into a silent false claim of coverage.'
+
+final_decision: >-
+  **CONCERNS — merge safe.** This is the most thoroughly self-audited record in the epic and it
+  survived adversarial re-measurement: both contract hashes, the same-commit re-anchor, the
+  assertion-region equality, the set-equality coupling, the escalation's red-and-self-resolution
+  under a name @dev never saw, the repaired guard **and** the proof that its predecessor could not
+  fail, and the negative control that genuinely does not co-redden. Eight mutations re-applied, all
+  restored byte-identically and hash-verified, tree clean at the end. Zero new backend failures
+  against a baseline I measured myself in a separate worktree rather than inheriting — and that
+  measurement **overturns the briefing this review was given** in @dev's favour.
+  It is not a PASS for four reasons, none of which is a defect in shipped behaviour: `npm run lint`
+  has never executed anywhere in this epic; ADR-002 §21.7's premise is false and the criterion
+  resting on it is unresolved; this story's own producer carries a documented invariant that **no
+  test can distinguish from its absence** (shape #21, found here, not disclosed); and the record
+  carries three off-by-one under-counts. The first, second and fourth are owned elsewhere or are
+  clerical. The third is this story's, is low severity and unreachable today, and is the kind of
+  thing this epic exists to catalogue rather than to block on.
+  FOC-06 closes here, correctly, with the pin green on arrival and re-anchored in the same commit
+  as the edit it covers — three for three across the wave.
