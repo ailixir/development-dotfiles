@@ -1521,3 +1521,44 @@ epic owner, not something to resolve by deleting someone's work.
   fix**, and if it is a leak it is @qa/@architect, not a test edit.
 - **MED-2 is now load-bearing, not merely slow** (@devops). It hid DEF-08 for a full wave.
 - The unowned S3 work — epic owner to identify and rehome onto a story branch.
+
+### DEF-09's byte difference, read rather than guessed — not a leak, and a contract divergence instead
+
+The open question above is now answered. A file-writing probe (Gradle swallows test `stdout`, which is
+why the first attempt produced nothing) captured both identityless bodies on a clean worktree at
+`35104ee6e`. Both are `401`, both exactly **110 bytes**, and they differ in one field:
+
+```
+BEFORE: {"error":{"message":"Session required","traceId":"da8a75146ae7428fa3abbcafea7a5683","code":"UNAUTHENTICATED"}}
+AFTER:  {"error":{"message":"Session required","traceId":"eeab98fb98b7453d9682fd6997adb321","code":"UNAUTHENTICATED"}}
+```
+
+**It is a per-request `traceId`. There is no information leak, and the soft deletion is not what
+changes the bytes** — every request changes them. My earlier reading, that the difference was
+state-dependent because it reproduced across runs, was wrong: it reproduces because the generator is
+deterministic *per run*, not because the parent's deletion causes it.
+
+Two real findings replace it.
+
+**(a) The assertion cannot pass, for any response carrying a `traceId`.** `softDeleting…` compares raw
+body bytes across two requests. That is sound for the `200` rows (1 400 000 bytes of video,
+byte-identical) and for the `403` rows (87 bytes, byte-identical), and **unsatisfiable** for the `401`
+row. This is the mirror of a vacuous guard — an assertion with no passing state rather than no failing
+one — and the repair is to normalise the `traceId` out, not to flip `403` to `401` and move on.
+
+**(b) The two refusals on one public route do not share an error envelope.** Byte-for-byte:
+
+| Row | Status | Body |
+|---|---|---|
+| a principal on a different CSI | 403 | `{"error":"STUDIO_FORBIDDEN","message":"You do not have access to this Studio resource"}` |
+| no identity headers at all | 401 | `{"error":{"message":"…","traceId":"…","code":"UNAUTHENTICATED"}}` |
+
+`error` is a **string** in one and an **object** in the other. Before 10.18b the identityless caller was
+bypassed into the Studio handler and never saw the second shape; now it is refused by the security
+filter and never reaches the Studio handler at all. A client parsing `error` as declared will break on
+whichever of the two the document does not describe. **This is @architect's, not a test edit** — and it
+is the same question ESC-1 already raises from the other side, which asks why `getExecutionVideo`
+declares neither `401` nor `403` while its siblings declare both.
+
+Revised carry-forward for DEF-09: @dev repairs (a); (b) joins ESC-1 in @architect's queue as one
+question about this route's refusal surface rather than two.
