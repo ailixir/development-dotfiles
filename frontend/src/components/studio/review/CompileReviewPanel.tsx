@@ -62,12 +62,23 @@ export function CompileReviewPanel({ testId }: CompileReviewPanelProps) {
   const hashBlocked = !hash || !hash.available;
   const confirmable =
     test.compileStatus === 'AWAITING_CONFIRMATION' && test.currentCandidateRevisionId !== null;
-  // Deliberately **not** `&& !confirmInFlight`. A disabled attribute set after a second click has
-  // already fired proves nothing, and a control that goes inert while a request is open hides
-  // whether anything is guarding the second activation at all. The guard is the in-flight ref in
-  // `useCompileReview`, which closes the window in the same synchronous turn as the activation;
-  // this attribute would only decorate it. AC-13 counts requests for that reason.
-  const confirmEnabled = confirmable && !hashBlocked;
+  // `&& !confirmInFlight` — **AD2-1, ruled by @po at story 10.11's wave-6 validation.**
+  //
+  // An earlier version of this line deliberately omitted the term, on the argument that a
+  // `disabled` attribute set after a second click has already fired proves nothing and would only
+  // decorate the in-flight ref in `useCompileReview`. Half of that is right and stays right: the
+  // ref is the guard, it closes the window in the same synchronous turn as the activation, and
+  // `confirmFlow.test.tsx` counts requests against a programmatic activation rather than trusting
+  // this attribute.
+  //
+  // The other half was wrong. **Neither obligation substitutes for the other.** A confirm is an
+  // irreversible conditional transaction over four fields from one read (ADR-002 §21.3); a second
+  // activation while one is open either duplicates a request the server will refuse with
+  // `STALE_CANDIDATE` or races it. The correct affordance for that is *unavailable*, not merely
+  // *busy* — `aria-busy` tells a screen-reader user the region is updating and tells nobody the
+  // control must not be pressed again. `confirmInFlight.test.tsx` guards both halves by name,
+  // because @qa measured that deleting either changed nothing observable.
+  const confirmEnabled = confirmable && !hashBlocked && !review.confirmInFlight;
   const showsStandingLimits =
     test.compileStatus === 'AWAITING_CONFIRMATION' || test.compileStatus === 'NEEDS_REVISION';
 
@@ -171,6 +182,7 @@ export function CompileReviewPanel({ testId }: CompileReviewPanelProps) {
       <StepReviewList
         steps={test.steps}
         stepDiagnostics={test.compileDiagnostics ? test.compileDiagnostics.steps : null}
+        artifact={test.currentCandidateArtifact ?? null}
       />
 
       {review.conflict && (

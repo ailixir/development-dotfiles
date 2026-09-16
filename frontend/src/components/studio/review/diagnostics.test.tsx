@@ -14,6 +14,7 @@ import {
   documentTruncatedDraft,
   misalignedDraft,
   needsRevisionDraft,
+  noCandidateArtifactDraft,
   notExhaustedDraft,
   stepTruncatedDraft,
 } from '@/services/mocks/studio/compileFixtures';
@@ -204,15 +205,24 @@ describe('AC-8: attempts and exhausted render as what they mean', () => {
   });
 });
 
-describe('AC-16a: two slots, both unavailable, neither filled from the English', () => {
-  it('renders the unavailable summary for every step and never the English line inside the slot', async () => {
-    const view = renderPanel(awaitingDraft);
+/**
+ * **Re-pointed by story 10.11c AC-28, not deleted.** Story 10.10 wrote these against a surface
+ * where both slots were unavailable for every draft, because `artifactHash` and the artifact were
+ * reachable from no declared response (AC-15). ADR-002 §21 closed that escalation and the slots
+ * are now filled from `currentCandidateArtifact` — so the fixture moves to the draft that still
+ * has no artifact, and the property 10.10 was actually protecting is kept verbatim: **the slot is
+ * never filled from the English**. What the slots do when an artifact *is* present is
+ * `artifactReview.test.tsx`'s, which is where the discriminating fixture lives.
+ */
+describe('AC-16a: with no artifact, both slots are unavailable and neither is filled from the English', () => {
+  it('renders the unavailable summary for every step and never the English line inside the slot [FX-ARTIFACT-ABSENT]', async () => {
+    const view = renderPanel(noCandidateArtifactDraft);
     await screen.findByTestId('step-review-list');
 
-    for (let index = 0; index < awaitingDraft.steps.length; index += 1) {
+    for (let index = 0; index < noCandidateArtifactDraft.steps.length; index += 1) {
       const slot = await screen.findByTestId(`step-summary-${index}`);
       expect(slot.textContent).toBe(SUMMARY_UNAVAILABLE);
-      expect(slot.textContent).not.toContain(awaitingDraft.steps[index]);
+      expect(slot.textContent).not.toContain(noCandidateArtifactDraft.steps[index]);
     }
 
     const source = await screen.findByTestId('step-source-0');
@@ -220,10 +230,14 @@ describe('AC-16a: two slots, both unavailable, neither filled from the English',
     view.unmount();
   });
 
-  it('names the blocker rather than rendering an empty slot', async () => {
-    renderPanel(awaitingDraft);
+  it('names why rather than rendering an empty slot [FX-ARTIFACT-ABSENT]', async () => {
+    renderPanel(noCandidateArtifactDraft);
     const slot = await screen.findByTestId('step-summary-0');
-    expect(slot.textContent).toMatch(/AC-15/);
+    // No longer "AC-15": that escalation is closed. The reason is now the draft's own state, and
+    // the sentence still has to be a sentence — 10.10's floor against an empty slot dressed up as
+    // an honest one is kept.
+    expect(slot.textContent).toMatch(/no translated candidate/i);
+    expect(slot.textContent).toMatch(/nothing is guessed/i);
     expect(slot.textContent?.trim().length).toBeGreaterThan(40);
   });
 
