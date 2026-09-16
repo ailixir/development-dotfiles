@@ -111,10 +111,10 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   });
 
   /**
-   * The document's SHA-256 after **story 10.15's route landed**, on top of everything that
-   * preceded it.
+   * The document's SHA-256 after **ADR-002 §21 landed with story 10.11c**, on top of everything
+   * that preceded it.
    *
-   * **This is the fourth re-anchor.** What this digest now covers, in the order it happened:
+   * **This is the fifth re-anchor.** What this digest now covers, in the order it happened:
    *
    * 1. ADR-002 sections 14, 15, 16 and 17 — architect rulings, not runner edits: the conflict
    *    responses for a deleted or quarantined draft, the two ratified `ExecutionErrorCode` values,
@@ -144,17 +144,32 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    *    reported as a finding. No status was added or removed: declaring the two missing
    *    authorization statuses and a status for an unreachable store are Class C and are escalated
    *    as ESC-1 and ESC-2, left red rather than taken.
+   * 5. **ADR-002 §21, landed by story 10.11c** — this re-anchor, and `FOC-06` **step 3 of 3**,
+   *    the last of the wave. `TestDto` gains two nullable properties,
+   *    `currentCandidateArtifactHash` and `currentCandidateArtifact`, closing the gap where
+   *    `ConfirmCompileRequest` required a value **no** `tests`-tagged `2xx` response returned.
+   *    Both are nulled in the `GET /tests` list projection on §16.5's precedent, declared there
+   *    rather than discovered; one `getTest` example gains real values and one gains explicit
+   *    nulls, both Ajv-validated against the amended `TestDto` before any suite ran (§18.5).
+   *    **Nothing else moved**: no route, no status, no `required` list, no enum, no marker, and
+   *    **neither copy of `artifact.schema.json`** — §21 references the frozen shape and does not
+   *    alter it. `provenance` and `artifactSchemaVersion` are explicitly **not** added (§21.8).
+   *    The backend producer on `UITestDto` is in the same commit, because
+   *    `StudioContractTest.assertSchemaMatchesRecord` is set equality and neither side can assert
+   *    conformance alone.
    *
    * **The criterion is unchanged and still holds: nothing in story 10.13 edited the contract.**
    * Every byte of difference between this digest and the previous one belongs to another story,
    * and the four commits of 10.13 touch no file under `docs/specs/`.
    *
    * **`FOC-06` ordering, recorded by @po at wave-6 validation.** Three wave-6 stories edit this
-   * document: 10.18 (§20 + §22) → **10.15** (this re-anchor) → 10.11c (§21 + producer). The pin
-   * was verified **green on arrival** at `d1a987663b25d7240fc460f923289aaf22a07145df7d6913114f9f3c1d627c18`
-   * before story 10.15 touched anything — step 1 had landed — so nothing unowned is folded in
-   * here. Had it been red on arrival, the instruction was to report it as a `FOC-06` violation
-   * and stop, not to launder it into this digest.
+   * document: 10.18 (§20 + §22) → 10.15 (§13's Class A content declarations) → **10.11c** (this
+   * re-anchor, §21 + producer). The pin was verified **green on arrival** at
+   * `310d3c984b77104898440cae450795cdd56c11ef926f75209fb6d4198dcc0cf7` — story 10.15's digest,
+   * steps 1 and 2 both landed — by running this very file before story 10.11c touched anything,
+   * so nothing unowned is folded in here. Had it been red on arrival, the instruction was to
+   * report it as a `FOC-06` violation and stop, not to launder it into this digest. The ordering
+   * closes with this story.
    *
    * **Why this one has an owner and the last one did not.** The first re-anchor went unowned
    * across all four amendments — they landed as architect rulings rather than in a story PR, so
@@ -173,7 +188,7 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = '310d3c984b77104898440cae450795cdd56c11ef926f75209fb6d4198dcc0cf7';
+  const BASE_SHA256 = '51850b016cd8a697899a944eab12ddce5456967beecf4f3e011720498bc02efa';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the

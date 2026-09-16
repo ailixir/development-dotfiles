@@ -4,35 +4,62 @@ import path from 'node:path';
 import { parse as parseYaml } from 'yaml';
 
 /**
- * Story 10.10 AC-15 — a Class C escalation, carried as a live contract test and **committed red**.
+ * Story 10.10 AC-15 — a Class C escalation, carried as a live contract test. **Now green, and it
+ * went green with no edit to a single assertion.**
  *
  * ADR-002 §12: *"A story that finds a divergence it may not fix leaves the contract test failing
  * and refers the question."*
  *
- * The divergence: `ConfirmCompileRequest.required` names `artifactHash`, and `artifactHash` is
- * reachable from **no** declared `2xx` response schema of any `tests`-tagged operation. It
- * appears on a request *example*, on `ConfirmCompileRequest` itself, and on the internal
+ * The divergence was: `ConfirmCompileRequest.required` names `artifactHash`, and `artifactHash`
+ * was reachable from **no** declared `2xx` response schema of any `tests`-tagged operation. It
+ * appeared on a request *example*, on `ConfirmCompileRequest` itself, and on the internal
  * `RunJob` — and an example is not a schema (§14.6) while `RunJob` is not a public response. So
- * the client is required to send a value it has no declared way to obtain, which also denies this
- * story the action/target/assertion summary and the expandable source (AC-16b), both of which are
- * derived from validated operations (§4.7).
+ * the client was required to send a value it had no declared way to obtain, which also denied
+ * story 10.10 the action/target/assertion summary and the expandable source (AC-16b), both of
+ * which are derived from validated operations (§4.7).
  *
- * **This file is expected to fail today, and that is the point.** @po filed the escalation on
- * 2026-09-11, classified it Class C, and ratified the property below as correct and re-usable:
- * *every field named in a request body's `required` list is reachable from some declared `2xx`
- * response schema of an operation carrying the same tag.* It is true of every other route in the
- * document. It is written as a plain `it()` rather than `it.fails()` deliberately: `it.fails()`
- * would be **green today and red on the amendment**, which inverts an escalation into a tripwire.
- * As written it goes green the moment the document is amended, with no edit to this file — which
- * is the property that makes it an escalation rather than a `TODO`. The precedent is 10.7's
+ * **Ruled and closed by ADR-002 §21, landed by story 10.11c.** Candidate **A**: `TestDto` gains
+ * nullable `currentCandidateArtifactHash` and `currentCandidateArtifact`, both nulled in the
+ * `GET /tests` list projection. Candidate B — a revision read route — was rejected on
+ * **correctness** rather than cost: `ConfirmCompileRequest` is a conditional transaction whose
+ * four fields must come from one read, and B would let the draft recompile between the two
+ * requests and produce an internally inconsistent body `STALE_CANDIDATE` was never designed to
+ * name (§21.3).
+ *
+ * **This file was byte-unchanged by that story apart from this comment, and it is the property
+ * that made it an escalation rather than a `TODO`.** It was written as a plain `it()` rather than
+ * `it.fails()` deliberately: `it.fails()` would have been green while the divergence stood and red
+ * on the amendment, which inverts an escalation into a tripwire. As written it went 2/3 → 3/3 the
+ * moment the document was amended. The precedent is 10.7's
  * `ExecutionErrorCodeContractEscalationTest`, which went 1/2 → 2/2 untouched when §15 landed.
  *
- * Two candidate shapes were filed with the escalation and **neither was taken**:
- *   A — additive `TestDto` fields: the candidate's `artifactHash` and its `source` artifact.
- *   B — a revision read route, `GET /tests/{id}/revisions/{revisionId}`.
- * @po recorded a non-binding product preference for A. The shape is @architect's.
+ * ---
+ *
+ * **What this file's green does and does not mean — ADR-002 §21.4, recorded here because the next
+ * reader will otherwise take it as acceptance.**
+ *
+ * The rule below is **syntactic**. `isReachable` accepts an exact name or a property whose name
+ * ends with the field's name capitalized, and @architect proved by simulation against the real
+ * document that injecting `supersededRevisionArtifactHash` — the hash of explicitly the **wrong**
+ * revision — empties the unobtainable list **identically** to the correct field.
+ *
+ * So: **this test is a tripwire that *a* qualified hash exists, not a check that the right one
+ * does. Its green is necessary and it is not sufficient.** The correct field was named by ruling
+ * (§21.4), not by this test, and the name `currentCandidateArtifactHash` is normative for exactly
+ * that reason — it is paired with the existing `currentCandidateRevisionId` so the name itself
+ * states which revision it hashes.
+ *
+ * The qualified-suffix half is **not** sloppiness and must not be "tightened" to an exact-name
+ * check: without it this escalation would report `revisionId` as a second, false divergence,
+ * because `revisionId` is genuinely obtainable only through `currentCandidateRevisionId`. The
+ * sibling test below pins that half as live rather than dead code. An escalation that cries about
+ * two things when one is real is an escalation nobody acts on.
+ *
+ * **The question §21 did not settle is escalated separately, not folded in here.** The
+ * **confirmed** revision's artifact and hash are still reachable from no declared response;
+ * §21.3 says that would be *"a third additive property on the same body, not a route"* and nobody
+ * has ruled it. See `confirmedRevisionEscalation.test.ts`, story 10.11c AC-32, committed red.
  */
-
 const SPEC_DIR = path.resolve(__dirname, '../../../../../docs/specs/studio');
 const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8'));
 

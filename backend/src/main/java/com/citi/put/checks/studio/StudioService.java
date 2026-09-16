@@ -19,6 +19,7 @@ import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.entity.UITestExecution;
+import com.citi.put.checks.studio.entity.UITestRevision;
 import com.citi.put.checks.users.UserProvisioningService;
 import java.time.Instant;
 import java.util.List;
@@ -41,6 +42,7 @@ public class StudioService {
 
   private final StudioRepository studioRepository;
   private final UITestExecutionRepository executionRepository;
+  private final UITestRevisionRepository revisionRepository;
   private final CsiRepository csiRepository;
   private final ConfigurationChangeClassifier changeClassifier;
   private final CsiOwnershipEvaluator csiOwnershipEvaluator;
@@ -54,6 +56,7 @@ public class StudioService {
   public StudioService(
       StudioRepository studioRepository,
       UITestExecutionRepository executionRepository,
+      UITestRevisionRepository revisionRepository,
       CsiRepository csiRepository,
       ConfigurationChangeClassifier changeClassifier,
       CsiOwnershipEvaluator csiOwnershipEvaluator,
@@ -64,6 +67,7 @@ public class StudioService {
       UserProvisioningService userProvisioningService) {
     this.studioRepository = studioRepository;
     this.executionRepository = executionRepository;
+    this.revisionRepository = revisionRepository;
     this.csiRepository = csiRepository;
     this.changeClassifier = changeClassifier;
     this.csiOwnershipEvaluator = csiOwnershipEvaluator;
@@ -174,7 +178,7 @@ public class StudioService {
     if (!request.steps().isEmpty()) {
       compilePipeline.enqueueAfterCommit(test.getId(), identity.email());
     }
-    return UITestDto.from(test);
+    return project(test);
   }
 
   /**
@@ -186,7 +190,7 @@ public class StudioService {
   public UITestDto findTestById(UUID id, Authentication auth) {
     UITest test = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
     requireRead(auth, test.getCsiId());
-    return UITestDto.from(test);
+    return project(test);
   }
 
   /** Internal read with no authorization; callers that already authorized use this. */
@@ -195,7 +199,7 @@ public class StudioService {
         studioRepository
             .findById(id)
             .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + id));
-    return UITestDto.from(test);
+    return project(test);
   }
 
   /**
@@ -297,7 +301,7 @@ public class StudioService {
     if (change.anyChanged() && auth != null) {
       compilePipeline.enqueueAfterCommit(id, principalOf(auth));
     }
-    return UITestDto.from(test);
+    return project(test);
   }
 
   /**
@@ -381,6 +385,37 @@ public class StudioService {
         request.configurationRevision(),
         principalOf(auth));
     return findTestById(testId);
+  }
+
+  /**
+   * The single-draft projection, with the candidate revision ADR-002 §21 put on the body.
+   *
+   * <p>The revision is looked up by the id the draft row itself carries, scoped to that draft, and
+   * read beside it rather than on a second request from the client. That is §21.3's ruling: {@code
+   * ConfirmCompileRequest} is a conditional transaction over four fields, and a client assembling
+   * them from two reads could pair a hash from the second with a revision id from the first while a
+   * recompile landed in between — an internally inconsistent body that {@code STALE_CANDIDATE} was
+   * never designed to name.
+   *
+   * <p>The pair is stable for a second reason that is worth stating because it is what makes this
+   * safe on the one path that has no surrounding transaction ({@code confirmCompile}): revisions
+   * are <b>immutable</b>. {@code trg_ui_test_revisions_write_once} rejects any UPDATE other than
+   * confirmation bookkeeping, so once the draft names a candidate, that candidate's artifact and
+   * hash cannot change underneath the read. What can change is <em>which</em> revision the draft
+   * names, and that is read first.
+   *
+   * <p>A draft with no candidate costs no query at all — the absence is read from the draft row.
+   *
+   * @param test the draft row
+   * @return the full representation, with the candidate's artifact and hash or nulls
+   */
+  private UITestDto project(UITest test) {
+    UUID candidateId = test.getCurrentCandidateRevisionId();
+    UITestRevision candidate =
+        candidateId == null
+            ? null
+            : revisionRepository.findByIdAndTestId(candidateId, test.getId()).orElse(null);
+    return UITestDto.from(test, candidate);
   }
 
   private void requireRegisteredCsi(String csiId) {

@@ -113,13 +113,21 @@ paths:
         `csiId` filter is supplied (architecture §9.1). Soft-deleted and quarantined drafts are
         never returned.
 
-        **`compileDiagnostics` is always `null` on this route** and is read from
-        `GET /tests/{id}`. It is the one field of `TestDto` this projection omits, and the reason
-        is its bound: the document is capped per draft at a configured byte limit (§8.5), so a
-        page of drafts in `NEEDS_REVISION` would be a multi-megabyte response carrying per-step
-        reasons no list renders. `compileStatus` — and `compileError`, which is a bounded code —
-        are on this route, so nothing a caller needs in order to know that reasons exist is
-        hidden; only the reasons themselves are one read away (ADR-002 §16.5).
+        **`compileDiagnostics`, `currentCandidateArtifact` and `currentCandidateArtifactHash` are
+        always `null` on this route** and are read from `GET /tests/{id}`. They are the fields of
+        `TestDto` this projection omits, and the reason is the same for all three: the diagnostics
+        document is capped per draft at a configured byte limit (§8.5) and an artifact is capped
+        at a hundred steps of generated source, so a page of drafts would be a multi-megabyte
+        response carrying per-step reasons and executable code no list renders. `compileStatus`,
+        `currentCandidateRevisionId` and `compileError` — the last a bounded code — are on this
+        route, so nothing a caller needs in order to know that reasons or a candidate exist is
+        hidden; only the reasons, the artifact and its hash are one read away (ADR-002 §16.5,
+        §21.2).
+
+        The hash is omitted here rather than kept because it is only meaningful beside the
+        artifact it names and beside the revisions it is confirmed against: confirmation reads
+        `GET /tests/{id}`, whose four fields come from one transaction (§21.3), and a hash carried
+        on a list entry would invite a client to assemble that body out of two reads.
       parameters:
         - { $ref: '#/components/parameters/CsiIdQuery' }
         - { $ref: '#/components/parameters/Page' }
@@ -262,6 +270,18 @@ paths:
                     configurationRevision: 1
                     compileStatus: READY
                     currentCandidateRevisionId: 22222222-2222-2222-2222-222222222222
+                    currentCandidateArtifactHash: 9f2c1d5b7a3e4c6f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7
+                    # The value `confirm`'s request example sends back for this same revision.
+                    # One read in, one conditional transaction out (ADR-002 §21.3).
+                    currentCandidateArtifact:
+                      version: 1
+                      steps:
+                        - stepIndex: 0
+                          originalText: 'Go to "https://www.citi.com"'
+                          code: "await page.goto('https://www.citi.com');"
+                        - stepIndex: 1
+                          originalText: 'Check that the URL contains "dashboard"'
+                          code: 'await expect(page).toHaveURL(/dashboard/);'
                     confirmedRevisionId: 22222222-2222-2222-2222-222222222222
                     compileError: null
                     compileDiagnostics: null
@@ -298,6 +318,11 @@ paths:
                     configurationRevision: 1
                     compileStatus: NEEDS_REVISION
                     currentCandidateRevisionId: null
+                    # No candidate, so no candidate artifact and no hash. Neither is ever
+                    # returned without the revision id that says which revision it belongs to,
+                    # and the hash is never returned without the artifact it names.
+                    currentCandidateArtifactHash: null
+                    currentCandidateArtifact: null
                     confirmedRevisionId: 22222222-2222-2222-2222-222222222222
                     compileError: null
                     compileDiagnostics:
@@ -1366,6 +1391,13 @@ components:
         index-aligned to the `steps` in the *same* response, and describe the `sourceRevision`
         and `configurationRevision` in the same response (ADR-002 §16.3).
 
+        `currentCandidateArtifactHash` and `currentCandidateArtifact` belong to the revision
+        `currentCandidateRevisionId` names and are read in that **same** transaction. That is
+        what makes `ConfirmCompileRequest` a coherent conditional transaction: all four of its
+        fields come from one read of this body, so the revision, the hash, the source revision
+        and the configuration revision the client asserts are a set the draft actually held at
+        one instant (ADR-002 §21.3).
+
         `compileError` and `compileDiagnostics` are **mutually exclusive** and at most one is
         ever non-null: a failed compile (`STALE`) carries a code, an unrunnable one
         (`NEEDS_REVISION`) carries per-step reasons, and every other transition clears both.
@@ -1398,6 +1430,36 @@ components:
           type: string
           enum: [STALE, COMPILING, AWAITING_CONFIRMATION, READY, NEEDS_REVISION]
         currentCandidateRevisionId: { type: string, format: uuid, nullable: true }
+        currentCandidateArtifactHash:
+          type: string
+          minLength: 64
+          maxLength: 64
+          nullable: true
+          description: |
+            The canonical artifact hash of the revision `currentCandidateRevisionId` names, and
+            the field `ConfirmCompileRequest.artifactHash` is read from. Null when there is no
+            candidate.
+
+            The name is qualified deliberately (ADR-002 §21.4): on a body that also carries
+            `confirmedRevisionId`, a bare `artifactHash` would not say which revision it belongs
+            to, and the one thing the confirmation body must never be ambiguous about is which
+            revision the client is asserting. Always null on `GET /tests`.
+        currentCandidateArtifact:
+          type: object
+          nullable: true
+          description: |
+            The candidate revision's immutable validated artifact. Null when there is no
+            candidate, and always null on `GET /tests`.
+
+            Declared opaque on purpose, exactly as `ValidateRequest.artifact` and `RunJob.artifact`
+            are: its normative schema is `docs/specs/studio/artifact.schema.json`, held
+            byte-identical against the backend copy by `ArtifactSchemaDriftTest`. Restating its
+            shape here would create a second place for it to drift.
+
+            This is the **candidate's** artifact and `steps` is the draft's current English. The
+            review surface renders this when it claims to show what was validated; deriving that
+            from `steps` would present the client's reading of the sentence as the validator's
+            reading of the artifact (ADR-002 §21.7, architecture §4.7).
         confirmedRevisionId: { type: string, format: uuid, nullable: true }
         compileError: { $ref: '#/components/schemas/CompileError' }
         compileDiagnostics: { $ref: '#/components/schemas/CompileDiagnostics' }
