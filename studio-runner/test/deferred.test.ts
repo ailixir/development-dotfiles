@@ -170,10 +170,140 @@ describe('10.18a — blocked criteria, recorded as skipped and never passed', ()
     );
 
     it.skip(
-      'AC-13a – AC-16b, AC-18 – AC-23a are STORY 10.18b’s, not deferred: the streaming Ingress, CORS, the ' +
-        'envFrom key-validity check, the three bypass closures, the CSRF finding, the measured backend ' +
-        'baseline and the kill switch. The seam is the pod/edge boundary and @po mandated it. This entry ' +
-        'exists so the count of blocked criteria in THIS half is not inflated by the other half’s scope.',
+      'AC-13a, AC-16a, AC-18, AC-19a, AC-20, AC-21a, AC-22 and AC-23a are STORY 10.18b’s and are IMPLEMENTED, ' +
+        'not deferred: the streaming Ingress, CORS coherence, the envFrom key-validity check (left RED and ' +
+        'escalated, which is what AC-18 asks for), the three bypass closures with their permit companions, ' +
+        'the runbook disclosures, the CSRF finding, the measured backend baseline and the kill switch. This ' +
+        'entry was a forward pointer when 10.18a shipped; it is kept, corrected, so that a reader comparing ' +
+        'the two halves’ skip counts is not left thinking the edge half deferred its own scope.',
+      () => {
+        throw new Error('unreachable: this is a pointer, not a criterion');
+      },
+    );
+  });
+});
+
+/**
+ * Story 10.18b's blocked criteria — **skipped, never passed** (AC-27).
+ *
+ * Six of the edge half's eleven criteria are blocked, every one of them on **`ED-06` / SPK-02**,
+ * which is **OPEN**. That is the expected shape of the half that sits behind a spike nobody has
+ * run: this repository can configure a route and it cannot cross a proxy. Each skip names its
+ * criterion, its gate, its spike question, its owner and the evidence that would close it.
+ *
+ * **No spike was closed by this story.** SPK-02's *Result* line reads `OPEN` and was not touched.
+ * A `b` half that turns green without its gate moving is a defect, not a bonus — and the specific
+ * way it would happen here is somebody deciding that a passing backend SSE test is evidence of SSE
+ * delivery. The SSE assessment forecloses that in as many words: *"a buffered mock-controller
+ * response does not prove SSE delivery."*
+ */
+describe('10.18b — blocked criteria, recorded as skipped and never passed', () => {
+  describe('ED-06 / SPK-02 — the authenticated route through the real ingress', () => {
+    it.skip(
+      'AC-13b [ED-06, SPK-02 question 3, Platform/SRE (ingress)] — TWO TIMED execution.snapshot EVENTS ' +
+        'REACH A REAL BROWSER SEPARATELY, before response closure, through every proxy layer, captured as ' +
+        'a HAR from a real browser on the staging hosts. ' +
+        'The DEPLOYMENT half is done and asserted over the rendered manifest: a separate Ingress carrying ' +
+        'only the two streaming paths, proxy-buffering off, and an idle timeout derived from the stream ' +
+        'lifetime and compared against the rendered heartbeat in the same manifest. What is deferred is ' +
+        'whether any of that survives the wire. A PASSING BACKEND TEST IS NOT EVIDENCE FOR THIS CRITERION ' +
+        'and must not be offered as one — the SSE assessment says so directly: "a buffered mock-controller ' +
+        'response does not prove SSE delivery". Closes when docs/qa/spikes/SPK-02/ carries the HAR and ' +
+        'ED-06 is updated.',
+      () => {
+        throw new Error('unreachable: this criterion is deferred');
+      },
+    );
+
+    it.skip(
+      'AC-14 [ED-06, SPK-02 question 4, Platform/SRE (ingress)] — a 15 s HEARTBEAT KEEPS AN IDLE STREAM ' +
+        'OPEN across the ingress and any platform proxy, and the EFFECTIVE MAXIMUM STREAM LIFETIME is ' +
+        'measured against the intended 60 s. ' +
+        'If the effective maximum is BELOW the configured lifetime, the configured value moves to match the ' +
+        'measurement and the change is recorded — studioSse.lifetimeSeconds is a §8.5 starting value, not a ' +
+        'commitment, and the ingress timeout is derived from it so it moves too. That is the mechanism ' +
+        'working, not a criterion failing. Nothing in this repository can measure a proxy it has never ' +
+        'crossed.',
+      () => {
+        throw new Error('unreachable: this criterion is deferred');
+      },
+    );
+
+    it.skip(
+      'AC-15 [ED-06, SPK-02 question 5, Platform/SRE (ingress) + backend dev] — RECONNECT WITH Last-Event-ID ' +
+        'TO A DIFFERENT API REPLICA restores the current snapshot. The evidence must show the two ' +
+        'connections were served by DIFFERENT PODS: a reconnect that happens to land on the same replica ' +
+        'proves nothing and is the way this criterion gets reported passed without being tested. ' +
+        'Production runs three replicas scaling to six. The design answers this by reading committed state ' +
+        'rather than by affinity, and **NO STICKY-SESSION OR SESSION-AFFINITY SETTING MAY BE INTRODUCED TO ' +
+        'MAKE IT PASS** — story 10.18b introduced none, and the streaming Ingress it added carries no ' +
+        'affinity annotation of any kind. Trading a design property for a deployment workaround would close ' +
+        'this criterion by defeating the thing it exists to check.',
+      () => {
+        throw new Error('unreachable: this criterion is deferred');
+      },
+    );
+
+    it.skip(
+      'AC-16b [ED-06, SPK-02 questions 1-2, Platform/SRE (ingress) + frontend dev] — THE PLATFORM’S ACTUAL ' +
+        'BROWSER-AUTH ROUTE, IN WRITING, COVERING FEDERATED MODE: which route carries the session cookie to ' +
+        'the events and video paths — same-origin gateway path, or cross-origin with withCredentials plus ' +
+        'exact-origin credentialed CORS — and whether it holds in BOTH standalone and federated ' +
+        '(shell-hosted) modes, where the browser’s origin is the PUT platform shell’s and no values file in ' +
+        'this chart can know it; and whether a bearer-only requirement exists anywhere on the path, in which ' +
+        'case SSE needs the header-capable client inside the centralized API service (STORY 10.11’s, not ' +
+        'this one’s) and <video> needs an ambient session regardless. ' +
+        'The DEPLOYMENT half is done: exact-origin credentialed CORS compared against the rendered frontend ' +
+        'host in the same manifest, never a wildcard, and no credential in any URL. ' +
+        'A DEMONSTRATED GATEWAY INCOMPATIBILITY IS A VALID OUTCOME — it selects the documented GET fallback ' +
+        'and changes no execution contract.',
+      () => {
+        throw new Error('unreachable: this criterion is deferred');
+      },
+    );
+
+    it.skip(
+      'AC-21b [ED-06 / SPK-02 question 7, and ED-02; Platform/SRE + Security] — THE CSRF CONTROL THE ' +
+        'PLATFORM ROUTE ACTUALLY PROVIDES, stated in writing by its owner, and whether the application must ' +
+        'add one. ' +
+        'The DECIDABLE half is done (AC-21a): the gap is recorded with the two facts that bound it — the ' +
+        'put_session cookie and SecurityConfig.setAllowCredentials(true) with the MFE and API on different ' +
+        'hosts — in SecurityConfig itself and in the runbook §10 as an open launch prerequisite. This story ' +
+        'deliberately did NOT enable Spring’s CSRF filter or drop CORS credentials: either changes the ' +
+        'public request contract of every existing Checks route, which is not a Studio story’s to land.',
+      () => {
+        throw new Error('unreachable: this criterion is deferred');
+      },
+    );
+  });
+
+  describe('Staging — the deployed stack under load', () => {
+    it.skip(
+      'AC-23b [staging; ED-06/ED-05 and the spikes; Platform/SRE] — KILL SWITCH, DRAIN, RECOVERY AND ' +
+        'BOUNDED OVERLOAD OBSERVED AGAINST THE DEPLOYED STACK, with ordinary REST/check service preserved. ' +
+        'Bounded Studio load must not degrade the ordinary check path — a BRD success metric, not a nicety — ' +
+        'and pod sizing is validated under that load before production templating (BRD §8: "Prove one runner ' +
+        'pod in staging before templating production"). ' +
+        'The kill switch’s behaviour is driven on the production path in both directions in ' +
+        'backend StudioKillSwitchWiringTest, and its deployed wiring is asserted over the rendered manifest; ' +
+        'what is deferred is the stack.',
+      () => {
+        throw new Error('unreachable: this criterion is deferred');
+      },
+    );
+  });
+
+  describe('Not a skip — a pointer to a criterion that is RED on purpose', () => {
+    it.skip(
+      'AC-18 IS NOT DEFERRED AND IS NOT PASSING. It is RED, in ' +
+        'test/deployment/envfrom-keys.test.ts, with fifteen keys per value set named in the failure ' +
+        'message: the chart’s configOverrides mechanism renders dotted ConfigMap keys that envFrom cannot ' +
+        'turn into environment variables, and has therefore been inert since it was written. AC-18 says in ' +
+        'as many words that it is "left red and escalated" — allowlisting the keys would produce a guard ' +
+        'that cannot fail, and converting them is a deployment behaviour change in database and scheduler ' +
+        'subsystems a Studio story does not own. OWNER @devops (Gage); MECHANISM DECISION @architect (Aria). ' +
+        'This entry exists so that a reader seeing the deployment tier red knows which failure is intended ' +
+        'and which would not be.',
       () => {
         throw new Error('unreachable: this is a pointer, not a criterion');
       },
