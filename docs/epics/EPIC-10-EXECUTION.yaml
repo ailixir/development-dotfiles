@@ -265,41 +265,204 @@ stories:
     blocks: ["10.18", "10.19"]
 
   # ── Wave 6 ──
+  #
+  # Size L RETAINED at the parent; SPLIT MANDATED three ways, recorded by @po 2026-09-15 at wave-6
+  # validation. The draft verified the manifest's L honestly and named the one ruling that would push it
+  # past L: "if @architect's AC-15 ruling lands during this wave". It landed, at 84b82eddb, after the draft
+  # was cut at 52af70c93 — and it fired in a DIFFERENT form than the draft predicted. ADR-002 §21 rules
+  # candidate A, exposing the CANDIDATE's artifact hash and artifact, so AC-3(b) (the Code view, which needs
+  # the CONFIRMED revision's) does NOT unblock; §21.3 says the confirmed one is a further additive property.
+  # What the ruling added instead: a Class C document edit, a backend producer bound to it by SET EQUALITY,
+  # story 10.10's two unblocked halves (O-17), and AD2-1. Different work of comparable weight.
+  #
+  # The deciding fact was VERIFIED by @po rather than taken from the ruling:
+  # StudioContractTest.assertSchemaMatchesRecord collects schema property names and Java record component
+  # names into two TreeSets and asserts isEqualTo — set equality, at StudioContractTest.java:416-426. So
+  # TestDto gaining two properties is red until UITestDto gains them IN THE SAME PR, and a producer-only PR
+  # is red the other way. Splitting the producer out (offered by ADR-002 §21.9) is refused for DEF-01's
+  # reason: a closed correspondence cannot be conformed halfway, and the assertion IS the criterion.
+  #
+  # The split, MANDATED (third in the epic, after 10.7 at FOC-03 and alongside 10.18 this wave). The test is
+  # the same each time: different trees, different reviewers, different gates, each half able to assert its
+  # own criteria.
+  #   10.11c — the contract (§21's two nullable TestDto properties), the backend producer on UITestDto in
+  #            the same PR, story 10.10's AC-11(b) and AC-16(b), AD2-1, the escalation-comment update, the
+  #            BASE_SHA256 re-anchor (FOC-06 step 3) and the ADR-002 §13 cell.   [M]
+  #   10.11a — the run gate and the honest execution surface (the drafter's own 'a', unchanged).          [M]
+  #   10.11b — the transport (the drafter's own 'b', unchanged).                                          [M]
+  # The drafter's two letters are PRESERVED so that 10.16's recorded needs ("AC-19 from a, AC-13 from b")
+  # and story 10.10's cross-references do not break. THE LETTERS ARE NAMES, NOT AN ORDER: 10.11c lands
+  # first (FOC-06 step 3, and it unblocks two criteria in a merged story).
+  #
+  # AC-21(b) is CLOSED AS RULED, not deferred: ADR-002 §21.6 declines widening story 10.10's reachability
+  # assertion beyond the `tests` tag, on §21.5's measurement (25/16/12 unreachable required request fields
+  # on internal/runner/api-callback, reproducing @qa's counts). The re-usable form is scoped to CLIENT-FACING
+  # surfaces by construction; machine-to-machine dispatch and report surfaces are outside it, because their
+  # senders compose payloads from state the receiver does not hold.
   - id: "10.11"
-    title: "Run gate and SSE progress"
+    title: "Run gate, SSE progress, and the candidate artifact surface"
     size: L
     wave: 6
     depends_on: ["10.7", "10.8", "10.10"]
     blocks: ["10.16", "10.19"]
+    story_context:
+      # Recorded by @po 2026-09-15 at wave-6 validation so it survives 10.11 being marked Done.
+      split_mandated: "10.11c (contract + producer + review surface) / 10.11a (run gate) / 10.11b (transport). 10.11c lands first."
+      both_frontend_halves_required_in_wave_6: >-
+        Story 10.16 needs AC-19's preserved step timings from 10.11a AND AC-13's evidence-arrival lifecycle
+        from 10.11b; it needs nothing from 10.11c. If only one of a/b lands in wave 6, 10.16's dependency is
+        NOT satisfied and that is a wave-7 problem created in wave 6. Answering the draft's open question 3.
+      inherited_from_10_10:
+        - "10.10 AC-11(b) — artifactHash in the confirm body. Rides 10.11c (its AC-27). 10.10 is NOT re-opened; the criterion stays recorded skipped-never-passed there with a pointer. O-17 routing."
+        - "10.10 AC-16(b) — the artifact-derived action/target/assertion summary and expandable source. Rides 10.11c (its AC-28). Same terms. O-17 routing."
+        - "AD2-1 — the confirm control's in-flight unavailability, its retained request-level guard, and a guard on the affordance itself. Rides 10.11c (its AC-29). @qa measured that deleting aria-busy (CompileReviewPanel.tsx:231) and the in-flight line leaves the whole studio suite green."
+      escalation_filed: >-
+        Class C, filed by 10.11c on day one (its AC-32): the CONFIRMED revision's artifact and hash are
+        reachable from no declared 2xx response. ADR-002 §21.3 invites it ("a third additive property on the
+        same body, not a route"). Story 10.11's AC-3(b) stays blocked on it; rendering the candidate instead
+        is refused, because in `needsRevision` the candidate and the confirmed revision disagree BY DESIGN.
 
-  # SIZE-1 flag, @po 2026-09-11: size UNVERIFIED — estimated pre-ADR-002. Not re-estimated here.
-  # Six consecutive stories have moved M → L at validation, every one citing a ruling that landed
-  # after the estimate. This story carries no ADR-002 open item today, so the pattern does not
-  # predict it and @po declined to invent a number for an undrafted story. Re-check at draft time
-  # by the method the three wave-5 drafts used: size honestly against the criteria the draft
-  # actually needs, and do not compress criteria to defend the manifest's letter.
+  # Size M → L (SIZE-1, seventh consecutive), recorded by @po 2026-09-15 at wave-6 validation.
+  #
+  # MY WAVE-5 REASON FOR DECLINING TO RE-ESTIMATE THIS STORY WAS WRONG ABOUT THE MECHANISM, and the draft's
+  # diagnosis is sharper than the rule I proposed. I wrote: "this story carries no ADR-002 open item today,
+  # so the pattern does not predict it." It carries none — O-6 is 10.18's, O-10 is @architect's,
+  # O-11/O-13/O-14 are 10.14's, O-12 is 10.11's — and it moved M → L anyway.
+  #
+  # The mechanism is not "an open item was assigned". It is "an amendment changed what a whole CLASS of
+  # story costs". Assigning O-n is one way that happens. The other, which my rule is blind to because it
+  # names no story at all, is ADR-002 §12's amendment classes plus §13's log obligation plus FOC-04's
+  # re-anchor rule — STANDING OBLIGATIONS ON ANY STORY TOUCHING THE FROZEN DOCUMENT, none of which existed
+  # when the manifest sized this story, and this is the last story that must touch it.
+  #
+  # RULE AMENDMENT, forwarded to @pm (the manifest is @pm's; story sizes are @po's and this one is amended
+  # here rather than proposed). The wave-5 rule gains clause (b):
+  #   An ADR-002 amendment carries a manifest size re-check IN THE SAME PR for
+  #     (a) every story it assigns a named open item to  — the wave-5 clause, unchanged; AND
+  #     (b) every story whose remaining scope touches an artefact on which the amendment places a NEW
+  #         STANDING OBLIGATION, whether or not the amendment names that story.
+  # Clause (b) would have caught this story. It would also have caught 10.18, which ADR-002 §§20–23 loads
+  # with four items without a size re-check, and whose §23.1 asks for one IN PROSE — an amendment that has
+  # to ask for a re-check in prose is an amendment the rule should have required one from.
+  #
+  # THE SPLIT IS NOT MANDATED, and the contrast with 10.18 is the reasoning. The test is: do the halves have
+  # different reviewers, different gates, and can each assert its own criteria? For 10.18 all three are yes.
+  # Here, (i) and (ii) share one reviewer, one seam, one test-file family and one ED pair — and 10.16 cannot
+  # start until (ii) lands while already sitting in wave 7, so a split forces both halves into wave 6
+  # regardless. Two merges, with a deliberately degraded intermediate state (Accept-Ranges absent), for one
+  # wave's work. The hint stays as a named mitigation with its four never-cut-apart items ratified.
   - id: "10.15"
     title: "Authorized Range video/download endpoint"
-    size: M
+    size: L
     wave: 6
     depends_on: ["10.7", "10.14"]
     blocks: ["10.16", "10.19"]
+    story_context:
+      # Recorded by @po 2026-09-15 at wave-6 validation.
+      contract_ordering: "FOC-06 step 2 of 3. B-8 ('the pin is green on arrival') is superseded: green means green against story 10.18's step-1 re-anchor, not against the digest recorded at draft time."
+      x_implemented_by_correction: >-
+        RULED CLASS A. openapi.yaml:705 carries x-implemented-by: '10.16' on getExecutionVideo (verified);
+        this manifest and the retired epic's index both place the backend route in 10.15 and frontend
+        playback in 10.16. x-implemented-by is a vendor extension carrying a planning attribution — not a
+        route, security scheme, tag, servers entry or status-code semantic; no client behaviour depends on
+        it. A value naming a story that will never implement the route is a defect NOTHING COULD EVER HAVE
+        SATISFIED, which is §12's own Class A language. Lands in 10.15's own PR with a §13 row, reported as
+        a finding rather than laundered. The draft's Class C contingency is discharged.
 
+  # Size L → XL and SPLIT MANDATED (10.18a / 10.18b), recorded by @po 2026-09-15 at wave-6 validation.
+  # The draft sized itself XL, did not defend the L, and made the case rather than compressing the criteria —
+  # which is what SIZE-1 asks for. Every driver checked: five external-dependency `gates` lists name 10.18
+  # (verified: no other story appears in more than three); four staging spikes gate its acceptance and all
+  # four are OPEN; sixteen of twenty-eight criteria blocked; eight inherited blocked halves from five
+  # stories; three artefact families in three languages; and an authentication change with a 23-failure
+  # blast radius.
+  #
+  # THEN ADR-002 §§19–23 landed at 84b82eddb, AFTER the draft was cut at 52af70c93, and assigned four more
+  # items to this story — §20 (O-14), §22, O-15 and O-16 — with §23.1 asking IN PROSE that "@po should
+  # re-check the size at validation rather than inherit it". Re-checked: those four are NOT the size problem
+  # (one `required` line and a description, one description, one test replacing a count, one export change).
+  # All four absorbed, all four landing in 10.18a as its OPENING commits — they are the only spike-free part
+  # of the story and FOC-06 puts them first in the whole wave, so the contract sequencing does not wait on
+  # Platform/SRE. The alternative @architect weighed and rejected (spreading them across 10.11, 10.15 and
+  # 10.18) is upheld as rejected: each extra owner is an extra pin move and an extra false red.
+  #
+  # The split, MANDATED on the same test used for 10.7 and 10.11 — different trees, different reviewers,
+  # different spikes, each half able to assert its own criteria:
+  #   10.18a — AC-29..AC-32 first (the ADR-002 amendments), then AC-1..AC-12: the studioRunner chart
+  #            component, security context, seccomp, SEC-2's deployment control, reaping and drain, the
+  #            service account, the NetworkPolicy, O-6's non-absorption, the storage credential surface.
+  #            Gated by SPK-03/04/05 (ED-03/04/05). Reviewed by Platform/SRE cluster, network and storage.
+  #   10.18b — AC-13a..AC-16b and AC-18..AC-22: the streaming Ingress, CORS, the envFrom key check, the
+  #            three bypass closures, the CSRF finding, the measured baseline. Gated by SPK-02 (ED-06,
+  #            ED-02). Reviewed by the ingress owner and by Security.
+  # AC-23..AC-28 go with whichever half lands second, EXCEPT AC-27 which goes in both, and the runbook
+  # sections belonging to a half are drafted in that half and assembled once.
+  #
+  # FIFTH never-cut-apart item added by @po: AC-29's three parts (the `required` line, the stale
+  # description, and the inversion of confinement.test.ts:172-173) are ONE edit. Landing the `required` line
+  # without the inversion leaves merged story 10.13 red in three places with nobody accountable.
+  #
+  # THE DRAFT'S OVERRUN MITIGATION IS INVERTED. It said the next thing to go is AC-24's runbook; BRD §8 makes
+  # the runbook a launch exit criterion with a named owner, and the draft's own argument for cutting it ("the
+  # only deliverable whose absence is visible rather than silent") is an argument for KEEPING it. Shed AC-32
+  # (O-16) first: latent, not live, one compliant caller, "not urgent" in §23.1's own words. The security
+  # criteria may never be the part deferred — they are the story.
   - id: "10.18"
     title: "Hardened staging deployment and SSE route"
-    size: L
+    size: XL
     wave: 6
     depends_on: ["10.7", "10.13", "10.14", "10.17"]
     blocks: ["10.19"]
+    story_context:
+      # Recorded by @po 2026-09-15 at wave-6 validation.
+      split_mandated: "10.18a (pod-inward, plus the four ADR-002 items first) / 10.18b (edge-inward). No ordering dependency between the halves."
+      contract_ordering: "FOC-06 step 1 of 3. ADR-002 §20 + §22 land as 10.18a's opening commits, before any chart work. 10.15 and 10.11c wait behind this."
+      adr002_items_absorbed:
+        - "§20 (O-14) — RunnerEvidence.partial promoted to required; closes story 10.14's AC-26 by ruling, not by re-opening 10.14. Story 10.18 AC-29."
+        - "§22 — the resolvedVars/resolvedSecrets scrubbing clause, Class B, description text only, same PR so the pin moves once. Story 10.18 AC-30."
+        - "O-15 — the runner's ACCEPTED_JOB_KEYS pinned against the frozen RunJob by set equality; the size===14 count REPLACED, not kept beside it. Closes dependency assumption D-8. Story 10.18 AC-31."
+        - "O-16 — createLogBuffer's truncate-before-redact trap closed structurally. Story 10.18 AC-32. FIRST TO SHED if 10.18a overruns."
+      ed_02_division_confirmed: >-
+        Removing the bypass AS A CODE PATH is out of 10.18's scope; its ABSENCE FROM THE DEPLOYED PROFILE is
+        in. VERIFIED BY @po by reading the file: BffSessionAuthenticationFilter.resolveIdentity consumes a
+        client-supplied X-User-Id header at line 98 and returns that identity BEFORE reaching
+        isCoreServiceBypassed() at line 103; applyTemporaryCsiReadBypass is a third path. SO REMOVING THE
+        HARDCODED `true` CLOSES NOTHING FOR A CLIENT THAT SENDS A HEADER. The ED-02 entry's description
+        below, and this epic's run log, have described ED-02 as a single flag throughout — @po raises that
+        to @pm as a correction @po does not own.
 
   # ── Wave 7 ──
   # SIZE-1 flag, @po 2026-09-11: size UNVERIFIED — estimated pre-ADR-002, same note as 10.15.
+  # @po 2026-09-15: still not re-estimated (the story is undrafted and assigning a number to an undrafted
+  # story is inventing one), BUT clause (b) of the amended SIZE-1 rule now predicts a move: this story
+  # inherits the seek-measurement flake below and depends on BOTH halves of 10.11's mandated split. Re-check
+  # at draft time by the usual method.
   - id: "10.16"
     title: "Evidence state, playback and step seek"
     size: M
     wave: 7
     depends_on: ["10.11", "10.15"]
     blocks: ["10.19"]
+    story_context:
+      # Assigned by @po 2026-09-15 at wave-6 validation, ruling on story 10.15's open question 5.
+      # 10.15 declined to adopt it and recommended 10.16; all three of its grounds are accepted verbatim.
+      seek_measurement_flake_owner: "10.16 (from the ownerless fixtures-tier flake first seen in story 10.17)"
+      seek_measurement_flake: >-
+        studio-runner/test/fixtures-tier/seek-measurement.test.ts failed once during story 10.17 and passed
+        on every run before and after; @qa could not reproduce it, including under heavy Gradle load, and
+        recorded it "taken on trust as pre-existing". It belonged to no story. It goes to 10.16 because 10.16
+        CONSUMES the 500 ms claim, is the next story to touch step seek, and is the only remaining story
+        whose acceptance depends on that number being trustworthy. SPK-06 gates 10.16 and 10.19 and is
+        @architect's, with @qa on phase B.
+        THE INFERENCE 10.15 OFFERED IS NOW VERIFIED, by @po reading the file: MEDIAN_TOLERANCE_MS = 100
+        (line 84), OUTLIER_BOUND_MS = 1500 (line 85), and the only 500 ms in the file belongs to the AC-12b
+        describe at line 298, WHICH IS SKIPPED. Both reported errors — 579.9 ms and 882.6 ms — are above 100
+        and below 1500, so the assertion that failed was the MEDIAN tolerance. The 500 ms figure in the
+        original report was wrong.
+      seek_measurement_constraints_bound_on_10_16:
+        - "Confirm against the real output before re-deriving any bound. Nobody who has written about this failure observed it, @po included."
+        - "MEDIAN_TOLERANCE_MS may NOT be widened to make it pass. Widening a tolerance to silence a flake is 'loosening is never a story's call' one level down, in a test. If the file's own commentary is right — large positive errors from a DETECTOR limitation, a full-viewport repaint not landing in a single encoded frame so the frame finder matches the next scene change — the fix is in the TEST HELPER, not in the runner and not in the bound, and it must be named as a different piece of work."
+        - "State which tier the evidence runs in. This file is in fixtures-tier, which `npm test` does not run; `npm run test:fixtures` does, with its own vitest config. The wave-5 standing rule applies: a strong assertion that is never executed is worse than a weak one."
 
   # ── Wave 8 ──
   - id: "10.19"
@@ -317,7 +480,17 @@ stories:
       # silence once 10.10 is Done.
       inherited_deferrals:
         - "10.10 AC-18(b) — WCAG conformance audit and assistive-technology verification."
-        - "10.10 AC-19(b) — representative nontechnical-user trial (BRD §8 rubber-stamp risk, BRD §10 translation-trust metric); additionally depends on 10.10 AC-16(b), which is blocked on the AC-15 Class C ruling."
+        - "10.10 AC-19(b) — representative nontechnical-user trial (BRD §8 rubber-stamp risk, BRD §10 translation-trust metric). @po 2026-09-15: its dependency on 10.10 AC-16(b) is UNBLOCKED — ADR-002 §21 ruled candidate A and AC-16(b) now rides story 10.11c (O-17 routing). The trial still needs 10.11c to have landed."
+        - "10.18 AC-17 — <video> Range requests through the real ingress with the ambient session (200, 206 with a valid Content-Range, 416, ?download=true attachment, expired/unavailable), captured as HAR from a real browser on the staging hosts. MOVED HERE by @po 2026-09-15: it depends on story 10.15, which is NOT in 10.18's depends_on and is a wave-6 sibling; it is blocked on ED-06/SPK-02 either way; 10.19's depends_on already lists BOTH 10.15 and 10.18; and a real-browser Range request through the real ingress is integrated staging validation by definition. It also duplicated story 10.15's AC-19b, which already reads 'deployment owner 10.18, integrated proof 10.19' — two stories holding one blocked criterion is how a b half gets reported closed twice, or never. Story 10.18 owns the ROUTE CONFIGURATION (its AC-13a, which covers the video path and stays); 10.19 owns the INTEGRATED PROOF. Closes 10.18's dependency assumption D-3 and its open question 4."
+        - "ENV-1(c) — the real missing skip link in ChecksLayout, which the unresolvable @put/core-components import has been masking. @po 2026-09-15: assigned here rather than to 10.16, because 10.19 already holds the WCAG conformance audit (10.10 AC-18b) and a missing skip link is what such an audit exists to find; 10.16 is playback and has no reason to open ChecksLayout. See the ENV-1 ruling in the run log — the import failure and the skip link are two real defects and both accounts of that suite's failure were true."
+        - "ED-03's real Sonic client swap — routed here by @po 2026-09-15, ruling on story 10.18's open question 3. Story 10.18 owns the DEPLOYMENT surface (endpoints, two principals, lifecycle configuration, verification); the CLIENT swap belongs with the upload path, which is story 10.14's and which merged with the fake in place. 10.14 is NOT re-opened — the same standing rule applied to O-17 — and 10.19 already depends on both 10.14 and 10.18 and is where ED-03 acceptance lands."
+      drafting_gate:
+        # Recorded by @po 2026-09-15 at wave-6 validation. A pilot cannot be scheduled against an unowned
+        # prerequisite, and saying so in prose has not moved anything in five waves. This converts it into a
+        # gate on the one story whose whole subject is credentialed staging acceptance.
+        - "STORY 10.19 MAY NOT BE DRAFTED WHILE ED-02's owner reads 'TBD — not assigned in sources'. ED-02 gates this story by id; drafting against an unowned prerequisite would produce a fourth story full of blocked halves pointing at nobody. @po cannot assign work to an organisation no source names — BRD §4 gives Platform/SRE cluster, ingress, egress, sandbox and storage and names NO identity owner, and architecture §9.1 says the prerequisites 'may be delivered outside Epic 10'. The ESCALATION PATH, named: @pm raises ED-02 to Checks-squad engineering management through BRD §8's launch-exit/on-call row, with Security & Compliance (BRD §11) as the accepting party."
+        - "MED-2 (the Testcontainers JDBC liveness bug) must have an owner — @devops, per @qa's own gate — before this story is drafted. 10.19 runs the full integrated suite and a hang THERE is a false pass on the epic's final gate, in the one place nobody re-runs. Mitigation is epic-wide regardless: every story running ./gradlew check records wall-clock elapsed and the test count reached, and A RUN SHORT OF ITS BASELINE TEST COUNT IS A HANG, NEVER A PASS."
+        - "ADR-002 O-10 (400 vs 404 for an unknown, deleted or quarantined draft on GET/PUT/DELETE /tests/{id}) must have its own ADR-002 ruling with its own before/after before this story is drafted. Class C, @architect's, overdue by a wave since §18.4 and restated at §23.4. @po gives it a date rather than a reminder; it is not @po's to rule."
 
 # ─────────────────────────────────────────────────────────────
 # File-ownership conflicts (wave planning must serialize or single-own)
@@ -514,6 +687,79 @@ file_ownership_conflicts:
     source: "ADR-002 §12 (Class B), §17.5, §18.4 O-14; manifest FOC-04's re-anchoring rule; story 10.17 AC-18 and its File List; story 10.14 AC-25/AC-26."
     resolution: "Ordering mandated above. If 10.17 finds the pin red on arrival, that is a FOC-05 violation to raise, not a condition to work around."
 
+  - id: FOC-06
+    path: "docs/specs/studio/openapi.yaml — and studio-runner/test/run/confinement.test.ts, which pins its SHA-256 AND carries a second assertion about RunnerEvidence.required"
+    stories: ["10.18", "10.15", "10.11"]
+    wave: 6
+    recorded_by: "@po 2026-09-15, at wave-6 validation. The ORDERING for two of the three is ADR-002 §23.2's mandate; the RECORD is @po's, as FOC-04 and FOC-05 were, and the third edit is @po's addition."
+    conflict: >-
+      THREE wave-6 stories edit the frozen contract, not two. ADR-002 §23.2 mandated the ordering for two of
+      them and did not know about the third. Every one of the three moves the SHA-256 that
+      confinement.test.ts:149 pins, so each turns a runner test red in a story that did not make that edit —
+      FOC-04's and FOC-05's shape for the third time. The three:
+        (1) Story 10.18 — ADR-002 §20 (RunnerEvidence.partial -> required, closing story 10.14's AC-26) and
+            §22 (the resolvedVars/resolvedSecrets scrubbing clause). Authorized by @architect under §19,
+            which narrows WHO HOLDS THE DIFF and never who decides.
+        (2) Story 10.15 — three Class A content declarations on getExecutionVideo (206, 404, 416 each have a
+            description and NO declared content, which is verbatim §12's own Class A example), the removal
+            of the document's LAST x-not-yet-implemented, and the x-implemented-by: '10.16' -> '10.15'
+            correction (ruled Class A by @po). NOT IN §23.2 AT ALL; added here.
+        (3) Story 10.11c — ADR-002 §21's two nullable TestDto properties PLUS the Java producer on UITestDto
+            in the same PR.
+    the_second_assertion: >-
+      @architect found, and @po VERIFIED by reading the file, that confinement.test.ts carries a SECOND
+      assertion at lines 172-173 which positively asserts that §20's promotion HAS NOT HAPPENED and names its
+      exact post-edit text in a not.toContain. So §20's edit turns story 10.13 — merged, gated PASS, and
+      blameless — red in THREE places: the pin at :160, toContain at :172, not.toContain at :173. Unlike
+      story 10.10's escalation test it does NOT go green on the amendment. The repair is an INVERSION, not a
+      deletion: the assertion's subject is right and only its tense is wrong. It becomes an assertion that
+      the promotion HAS happened, with the same non-vacuity shape, and its comment names ADR-002 §20. This
+      is story 10.18's, in the SAME commit as the required line (its AC-29, and @po's fifth never-cut-apart
+      item for that story).
+    mandated_ordering: >-
+      STEP 1 — story 10.18 lands §20 + §22 and inverts confinement.test.ts:172-173, then re-anchors
+      BASE_SHA256 once for both. It goes first because it is the doc-and-runner-only change carrying no
+      producer work (§23.2), and because it is the only part of 10.18 with no spike gate — so @po requires
+      it as 10.18a's OPENING COMMITS, before the chart-rendering harness, so that the whole wave's contract
+      sequencing does not wait on Platform/SRE, SPK-04 or an in-cluster experiment.
+      STEP 2 — story 10.15 lands its four Class A edits and re-anchors. Its subject IS its own document edit,
+      so its re-anchor is legitimate under the pin's own rule. Its dependency assumption B-8 is superseded:
+      green-on-arrival means green against step 1's re-anchor, not against the digest recorded at draft time.
+      STEP 3 — story 10.11c lands §21's two properties AND the Java producer in ONE PR, and re-anchors last.
+      One PR because StudioContractTest.assertSchemaMatchesRecord is SET EQUALITY over two TreeSets
+      (VERIFIED by @po at StudioContractTest.java:416-426): TestDto gaining two properties is red until
+      UITestDto gains them, and a producer-only PR is red the other way. It goes last because it is the only
+      one needing a producer, and because §21 must already exist.
+      THE REVERSE OF STEP 1 -> STEP 3 IS FORBIDDEN, for FOC-04's reason: it would force a frontend/backend PR
+      whose subject is the review surface to re-anchor a runner test AND to invert an assertion about
+      RunnerEvidence belonging to a ruling it is not implementing.
+      IF ANY STORY FINDS THE PIN RED ON ARRIVAL, that is a FOC-06 violation to raise, not a condition to
+      work around. Folding somebody else's unowned edit into your own re-anchor destroys the only record of
+      who moved the document.
+    standing_rule: >-
+      ADOPTED EPIC-WIDE BY @po, from ADR-002 §23.2's proposal. NO WAVE-6 STORY MAY ASSERT openapi.yaml
+      BYTE-UNCHANGED unless it merges before step 1. The honest claim is "THE FILE IS ABSENT FROM MY DIFF",
+      asserted over the story's own change set — which is what is actually being meant, and which no other
+      story's legitimate amendment can falsify. Applied at validation: story 10.18's AC-25 was REWRITTEN (as
+      drafted it forbade the amendment @architect ordered, which is the contradiction class that produced
+      FOC-04), and story 10.11's "expected unchanged" list was corrected.
+      The wider point, which is §23.1's and is recorded so it is acted on rather than admired: the SHA-256
+      pin is the right control for "this story made no contract edit" and the WRONG one for "the contract is
+      what I expect". It has produced a false red on a blameless story twice and is about to a third time.
+      Property assertions over the document do not have that failure mode, and every one this epic has added
+      went green on its amendment untouched. Story 10.18's AC-31 (O-15) is the first replacement of a count
+      by a property; it is the direction to go.
+    measurement_obligation: >-
+      ADR-002 §23.3 records that no suite was run for the §§19-23 amendment — node_modules was absent from
+      studio-runner/ and frontend/ in the architect's worktree — so EVERY before/after figure in §§19-23 is
+      a PREDICTION derived from reading the assertions, and §19 item 3 makes replacing the prediction with a
+      measurement the OWNING STORY'S obligation. @po checked that the owning stories' criteria actually carry
+      it: story 10.18 AC-29 part 4 and AC-30 (its T-10.18.0d), and story 10.11c AC-30 (its T-10.11.28). Both
+      now require the measurement to be written into the §13 cell, and both require a figure that does NOT
+      reproduce to be reported as a FINDING rather than quietly matched. This is the first amendment in
+      ADR-002 that could not measure its own effect, and it says so itself.
+    source: "ADR-002 §19, §20.4, §21.9, §22.2, §23.1, §23.2, §23.3; FOC-04 and FOC-05 and the re-anchoring rule in confinement.test.ts's own comment; story 10.15 AC-21/AC-23; story 10.11 AC-25/AC-26/AC-30; story 10.18 AC-25/AC-29/AC-30. Verified on branch epic/EPIC-10 at e4a6bf4ed: shasum -a 256 docs/specs/studio/openapi.yaml = cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e = BASE_SHA256 at confinement.test.ts:149, and confinement.test.ts:172-173 carry the two assertions described above."
+
 # ─────────────────────────────────────────────────────────────
 # Integration defects found by reading, not by a green suite
 #
@@ -641,6 +887,26 @@ external_dependencies:
     fallback: "Development identities confined to local/mock operation; fixture-only runs without secrets."
     owner: "TBD — not assigned in sources"
     status: open
+    # @po 2026-09-15, wave-6 validation — RAISED TO @pm, who owns this block. THE DESCRIPTION ABOVE IS
+    # INCOMPLETE AND THE EPIC HAS BEEN ACTING ON IT FOR SIX WAVES. It reads as though the bypass is one
+    # flag. VERIFIED by @po by reading BffSessionAuthenticationFilter.java: there are THREE paths.
+    #   (1) resolveIdentity trusts a client-supplied X-User-Id header at line 98 — with X-User-Email,
+    #       X-User-Roles and X-User-Csi-Ownership parsed straight off the request into a UserIdentity — and
+    #       RETURNS THAT IDENTITY BEFORE it ever reaches (2).
+    #   (2) isCoreServiceBypassed() returns a hardcoded `true` at line 103.
+    #   (3) applyTemporaryCsiReadBypass appends checks-admin to any identity making a GET under /api/v1/csi.
+    # CONSEQUENCE: REMOVING THE HARDCODED `true` CLOSES NOTHING FOR A CLIENT THAT SENDS A HEADER. Path (1)
+    # is exactly the direct-backend impersonation architecture §9.1 requires the trusted gateway to prevent,
+    # and nothing in this repository strips it. Story 10.18's AC-19a closes all three together and treats
+    # them as ONE criterion for that reason; its M13 falsification re-enables each in turn, with the header
+    # path's mutation run WITH THE BYPASS CLOSED so a no-change result is unambiguous.
+    # @po amends stories, not this block. @pm: the description needs a third sentence.
+    # OWNERSHIP: @po cannot name an owner — BRD §4 gives Platform/SRE cluster, ingress, egress, sandbox and
+    # storage and names NO identity owner, and architecture §9.1 says the prerequisites "may be delivered
+    # outside Epic 10 but must be verified through the real ingress". ESCALATION PATH NAMED INSTEAD: @pm
+    # raises this to Checks-squad engineering management through BRD §8's launch-exit/on-call row, with
+    # Security & Compliance (BRD §11) as the accepting party. GATE: story 10.19 may not be drafted while
+    # this owner reads TBD — see 10.19's story_context.drafting_gate.
 
   - id: ED-03
     name: "Sonic write/read credentials and lifecycle behavior"

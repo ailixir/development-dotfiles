@@ -1146,3 +1146,269 @@ The escalation test still fails on exactly one field the UI is required to send
 and the contract does not return. **The epic's first acceptance bullet is not
 claimed** — authoring and review work; confirming is blocked by the contract gap,
 and the story says so rather than claiming the bullet.
+
+---
+
+## Wave 6 — validation (@po, 2026-09-15)
+
+Three drafts validated against the ten-point checklist. **All three GO.** All three were cut at
+`52af70c93`, which **predates @architect's ADR-002 §§19–23 merge at `84b82eddb`** — so every draft
+was written without rulings that bear directly on it, and folding those rulings into the criteria
+was the substance of this validation rather than a footnote to it.
+
+| Story | Verdict | Score | Points lost on |
+|---|---|---|---|
+| 10.11 Run gate, SSE progress, and the candidate artifact surface | **GO** | **9/10** | #4 — AC coverage: three criteria did not survive the landed rulings |
+| 10.15 Authorized Range video/download endpoint | **GO** | **9/10** | #5 — testing instructions: the AC-20 manifest-read hazard and an unstated test tier |
+| 10.18 Hardened staging deployment and SSE route | **GO** | **8/10** | #4 — AC-25 forbade the amendment @architect ordered, and four assigned items had no criterion; #7 — the sibling dependency left open and an inverted overrun mitigation |
+
+Section 8 (CodeRabbit) is **N/A** in all three under the standing epic ruling, and all three say so
+correctly rather than leaving a gap.
+
+### The one thing all three drafts did right, and it is the reason the scores are high
+
+**Every one of them found something by reading that no gate would have found**, and reported it
+rather than working around it: 10.18 found the `X-User-Id` header path, the 8080/8090 port
+disagreement and the dotted-`envFrom`-key inertness (the last labelled as an inference, correctly);
+10.15 found three content-less responses, two missing status declarations and a wrong
+`x-implemented-by`; 10.11 found that the union it was asked to assert has nothing at run time to
+assert *over*. **Six of this epic's cross-story integration defects were found by merging or reading
+and none by a story gate.** This wave, the drafts did the reading.
+
+### Sizing and splitting
+
+**10.18 — XL accepted, split MANDATED.** The recommendation was right and is granted on the test
+used for 10.7 and now for 10.11: different trees, different reviewers, different gates, and each
+half able to assert its own criteria. **10.18a** takes the ADR-002 amendments first (see FOC-06),
+then everything the cluster does to the runner pod, reviewed by Platform/SRE cluster/network/storage
+and gated by SPK-03/04/05. **10.18b** takes everything the edge does to a browser request, reviewed
+by the ingress owner and Security and gated by SPK-02. Two corrections to the draft's own cut: a
+**fifth never-cut-apart item** (AC-29's `required` line, description and `confinement.test.ts`
+inversion are one edit), and **the overrun order is inverted** — shed O-16 first, never the runbook,
+which BRD §8 makes a launch exit criterion and whose visibility-if-missing argues for keeping it.
+
+**10.11 — L retained at the parent, split MANDATED three ways.** The draft's named trigger fired in
+a form it did not predict. §21 rules candidate A, which exposes the **candidate's** hash and
+artifact, so **AC-3(b) does not unblock** — the Code view needs the **confirmed** revision's, and
+§21.3 says that is a further additive property. What the ruling added instead is a contract edit, a
+backend producer, story 10.10's two halves and AD2-1. Cut: **10.11c** (contract, producer, review
+surface) / **10.11a** (run gate) / **10.11b** (transport), the drafter's two letters preserved so
+10.16's and 10.10's cross-references survive. **10.11c lands first.**
+
+**10.15 — L accepted, split NOT mandated, and the rule amendment adopted.** The draft's diagnosis is
+sharper than the rule @po escalated to @pm and it is adopted outright. My wave-5 reason for not
+re-estimating 10.15 was *"it carries no ADR-002 open item, so the pattern does not predict it"* —
+right on its own terms and **wrong about the mechanism**. The mechanism is not *an open item was
+assigned*; it is *an amendment changed what a whole class of story costs*. The rule gains clause
+**(b)**: a re-check is also required for **every story whose remaining scope touches an artefact on
+which the amendment places a new standing obligation**, whether or not it names that story. Clause
+(b) would have caught 10.15 **and** 10.18 — and §23.1 asking for a size re-check *in prose* is the
+evidence that the rule should have required one. Forwarded to @pm; the sizes are amended here.
+
+The split is not mandated because the test that mandates 10.18's fails here: (i) and (ii) share one
+reviewer, one seam and one ED pair, and 10.16's wave-7 position forces both halves into wave 6
+anyway. **The contrast is the reasoning and it is recorded so the mandate does not read as a mood.**
+
+### FOC-06 — three contract edits in wave 6, not two
+
+ADR-002 §23.2 mandated the ordering for two wave-6 contract edits and said the **record** is @po's.
+**There is a third.** Story 10.15's Class A content declarations on `getExecutionVideo` are in
+neither §23.2 nor any story's assumption. Order: **10.18** (§20 + §22) → **10.15** (Class A
+declarations, marker, attribution) → **10.11c** (§21 + producer). Recorded in the manifest.
+
+@architect's second finding is **verified independently**: `confinement.test.ts` carries, fourteen
+lines below the pin, a test that positively asserts §20's promotion **has not happened** and names
+its exact post-edit text in a `not.toContain`. So §20 turns story 10.13 — merged, gated **PASS**,
+and blameless — red in **three** places: `:160`, `:172`, `:173`. Unlike 10.10's escalation test it
+does not go green on the amendment. The repair is an **inversion, not a deletion**: the subject is
+right and only the tense is wrong.
+
+**The standing rule is adopted epic-wide.** No wave-6 story may assert `openapi.yaml`
+**byte-unchanged**; the honest claim is ***the file is absent from my diff***. Applied at
+validation: 10.18's AC-25 was rewritten — **as drafted it forbade the amendment @architect ordered**,
+which is the contradiction class that produced FOC-04 — and 10.11's "expected unchanged" list was
+corrected.
+
+**The wider point, recorded so it is acted on rather than admired.** The SHA-256 pin is the right
+control for *this story made no contract edit* and the wrong one for *the contract is what I
+expect*. It has produced a false red on a blameless story twice and is about to a third time.
+Property assertions over the document do not have that failure mode, and every one this epic has
+added went green on its amendment untouched. **10.18's AC-31 (O-15) is the first replacement of a
+count by a property, and it is the direction to go.**
+
+### The measurement obligation, checked rather than assumed
+
+ADR-002 §23.3 records that **no suite was run for §§19–23** — `node_modules` was absent from
+`studio-runner/` and `frontend/` in the architect's worktree — so every before/after figure in those
+sections is a **prediction derived from reading the assertions**, including the
+`test/contract.test.ts` 14/14 that §20.8 predicts. §19 item 3 makes replacing the prediction the
+**owner's** obligation. **I checked that the owning stories' criteria actually carry it, which was
+the point of asking.** They did not, because they were drafted before the amendment; they do now —
+10.18's AC-29 part 4 and AC-30 (task T-10.18.0d) and 10.11c's AC-30 (task T-10.11.28). Both require
+the measurement in the §13 cell, and both require **a figure that does not reproduce to be reported
+as a finding rather than quietly matched**. That last clause is the whole value: a prediction that
+happens to be right is indistinguishable from a measurement nobody took.
+
+### Scope rulings
+
+**10.11 widens to carry the backend producer — yes.** The deciding fact was **verified, not taken
+from the ruling**: `StudioContractTest.assertSchemaMatchesRecord` collects schema property names and
+Java record component names into two `TreeSet`s and asserts `isEqualTo` — **set equality**, at
+`StudioContractTest.java:416-426`. `TestDto` gaining two properties is red until `UITestDto` gains
+them **in the same PR**, and a producer-only PR is red the other way. Splitting the producer out —
+offered by §21.9 — is refused for **DEF-01's** reason: a closed correspondence cannot be conformed
+halfway, and **the assertion is the criterion**.
+
+**AC-17 moves from 10.18 to 10.19.** It depends on wave-6 sibling 10.15, which is not in 10.18's
+`depends_on`; it is blocked on ED-06 either way; 10.19's `depends_on` already lists both stories; and
+a real-browser Range request through the real ingress is integrated validation by definition. It
+also **duplicated 10.15's AC-19b**, which already reads *"deployment owner 10.18, integrated proof
+10.19"* — two stories holding one blocked criterion is how a `b` half gets reported closed twice, or
+never. 10.18 keeps the **route configuration** (AC-13a); 10.19 gets the **integrated proof**.
+
+**O-17 — 10.10's AC-11(b) and AC-16(b) ride 10.11c. 10.10 is not re-opened.** The standing rule,
+stated once for the epic: **a merged, gated story is never re-opened to close a deferral a later
+ruling unblocked.** Its recorded gate numbers no longer describe the branch, and its Status and QA
+Results would stop describing what shipped. The work travels to the story that owns the enabling
+change — which is what happened to 10.12's AC-6b, 10.13's AC-11b and 10.14's AC-18b/AC-19b, and this
+is the same shape. A follow-up story is refused for DEF-01's reason again: every criterion of it
+would depend on a property another open story is landing in the same wave.
+
+**10.14's AC-26 is closed by ruling, not by edit, and its checkbox does not move.** §20 satisfies
+condition (iii) and §20.7 re-points O-14's owner to 10.18. The criterion stays *skipped, never
+passed* with the owner named — **which is exactly the machinery it was written for, and is why the
+machinery was worth writing.**
+
+### Ownership of work that had none
+
+**ED-02.** The division the 10.18 drafter proposed is **confirmed**: removing the bypass as a code
+path is out of scope; its absence from the deployed profile is in. And the drafter's three-path
+finding is **ratified, verified by reading the file**: `resolveIdentity` consumes a client-supplied
+`X-User-Id` at `BffSessionAuthenticationFilter.java:98` and returns that identity **before** reaching
+`isCoreServiceBypassed()` at 103; `applyTemporaryCsiReadBypass` is a third. **So removing the
+hardcoded `true` closes nothing for a client that sends a header** — and **this run log's own wave-1
+baseline entry, and the manifest's `ED-02` description, have been calling it a single flag for six
+waves.** That is my error compounding, not the drafter's; the manifest correction is raised to @pm
+and this entry is the correction here.
+
+**@po cannot name ED-02's owner and says so.** BRD §4 gives Platform/SRE cluster, ingress, egress,
+sandbox and storage and names **no** identity owner; architecture §9.1 says the prerequisites *"may
+be delivered outside Epic 10"*. The **escalation path** is named instead: @pm raises it to
+Checks-squad engineering management through BRD §8's launch-exit row, with Security & Compliance
+(BRD §11) accepting. **And because saying "a pilot cannot be scheduled against an unowned
+prerequisite" has moved nothing in five waves, it becomes a gate: story 10.19 may not be drafted
+while ED-02's owner reads TBD.** Recorded in the manifest, where it cannot close by silence.
+
+**MED-2 — @devops, deadline before 10.19 drafting.** @qa's gate already said `@devops / epic-level`;
+nothing picked it up, and a suggestion is not an assignment. 10.19 runs the full integrated suite,
+and a hang **there** is a false pass on the epic's final gate in the one place nobody re-runs.
+Because a deadline against an agent is not a control, the mitigation is made **epic-wide**: every
+story running `./gradlew check` records wall-clock elapsed and the test count reached, and **a run
+short of its baseline count is a hang, never a pass.** Added to 10.15's AC-26 and 10.11's gate task
+as well as 10.18's AC-22, so it survives whether or not the fix lands.
+
+**The seek-measurement flake — 10.16.** 10.15's decline is upheld on all three of its grounds and
+its recommendation taken. 10.16 consumes the 500 ms claim, is the next story to touch step seek, and
+is the only remaining story whose acceptance depends on the number being trustworthy; SPK-06 gates
+10.16 and 10.19. **And the drafter's labelled inference is upgraded to verified**: I read the file —
+`MEDIAN_TOLERANCE_MS = 100` (line 84), `OUTLIER_BOUND_MS = 1500` (line 85), and the only 500 ms
+belongs to the `AC-12b` describe at line 298, **which is skipped**. Both reported errors, 579.9 ms
+and 882.6 ms, are above 100 and below 1500 — **so the assertion that failed was the median
+tolerance.** The 500 ms in the brief was wrong, and labelling the correction an inference rather
+than asserting it was the right way to report it. Three constraints are bound on 10.16, the
+load-bearing one being that **`MEDIAN_TOLERANCE_MS` may not be widened to make it pass** — that is
+*loosening is never a story's call* one level down, in a test, and if the file's own detector
+explanation is right the fix is in the test helper and is different work.
+
+**ENV-1 — three things, three owners, because one owner is how two of them get lost.**
+*(a)* The `@put/core-components` symlink is `../../../../put-core-components`, which resolves from
+the main checkout and **not** from any worktree — verified both ways. That is **environment setup,
+not a repository defect**; `node_modules` is gitignored and nobody should "fix" `package.json`.
+**@devops**, as a documented worktree bootstrap step, before wave-7 frontend drafting.
+*(b)* `.eslintrc.json` extends `"@typescript-eslint/recommended"` without the `plugin:` prefix —
+verified — so **ESLint 8 rejects it and zero files are linted**. A real repository defect and **not
+Epic 10's**: **@devops**, raised to @pm as separate work. **The "191 errors and 333 warnings" figure
+this log has been carrying is withdrawn** — there is no run, therefore no count. Binding on Epic 10
+now: **no story may report `npm run lint` as passed.**
+*(c)* The **missing skip link in `ChecksLayout`** is a real accessibility defect that the import
+failure has been masking — both accounts of that suite's failure were true. **10.19**, beside
+10.10's AC-18(b) WCAG conformance audit, which is what such an audit exists to find. Not 10.16:
+playback has no reason to open `ChecksLayout`.
+
+**AD2-1 — ruled, and assigned to 10.11c.** The product question first: **the confirm control should
+be unavailable in flight, and that is not a preference.** A confirm is a conditional transaction
+asserting four fields from one read (§21.3); a second activation in flight either duplicates a
+request the server will refuse with `STALE_CANDIDATE` or races it. But 10.10's criterion forbidding a
+`disabled` prop from **standing in for** the guard is also correct — an attribute is defeated by any
+programmatic activation. **So the answer is both, and neither substitutes for the other**, which is
+the sentence @dev and @qa were each half of. The third obligation is the one @qa measured: deleting
+`aria-busy` (verified at `CompileReviewPanel.tsx:231`) and the in-flight line leaves the whole studio
+suite green — an affordance asserted by nothing. **The rule is @po's and is ruled; the accessible-name
+wording is @ux's and is raised as a non-blocking input**, defaulting to 10.10's AC-16(a) pattern.
+
+**The `x-implemented-by` mis-attribution — Class A.** Verified: `openapi.yaml:705` carries
+`'10.16'`, while the manifest and the retired epic's index both place the backend route in **10.15**.
+`x-implemented-by` is a vendor extension carrying a planning attribution — not a route, a security
+scheme, a tag, `servers` or a status-code semantic, and no client behaviour depends on it. A value
+naming a story that will **never** implement that route is **a defect nothing could ever have
+satisfied**, which is §12's own Class A language. It lands in 10.15's PR with its §13 row, reported
+as a finding. **One guard added**: a both-ways assertion that every `x-implemented-by` names a story
+id present in the manifest, with a scratch-copy control — closing the class rather than the instance.
+It is marked **last-to-cut**, because a criterion that closes a class is worth less than a byte
+assertion when something has to go.
+
+### Record-keeping — it was five stories, not two
+
+Flagged twice as 10.9 and 10.13. **Checked, and it is five:** 10.9 `InProgress`, 10.13 `InProgress`,
+10.10 `InProgress — QA rounds 1 and 2 repaired…`, 10.14 `Ready for Review`, 10.17 `Review`. All five
+merged; all five gated, with verdicts read from `docs/qa/gates/` rather than assumed — 10.9
+**CONCERNS**, 10.10 **PASS**, 10.13 **PASS**, 10.14 **CONCERNS**, 10.17 **PASS**. All five set to
+**Done** with a Change Log row naming the verdict and the merge commit. **No checkbox was moved and
+no criterion re-opened**: every deferral recorded *skipped, never passed* stays exactly as it merged.
+
+### The weakest criteria, named per story
+
+Named because waves 4 and 5 showed this is what makes a brief sharp — both wave-4 stories addressed
+the criteria named rather than discovering them at their gate.
+
+**10.11 — AC-28 is the weakest, displacing the draft's own AC-14(ii).** It is 10.10's AC-16(b),
+carrying the epic's first acceptance bullet, and it sits on **two** catalogued shapes at once: VAC-11
+(the natural test reads the expected summary from the renderer it is testing) and *a canary sized so
+it never reaches the hazard* (a fixture whose `steps` and `currentCandidateArtifact` agree is green
+with no guard at all). **The whole criterion rests on the `needsRevision` fixture where the two
+visibly disagree.** If that fixture is never written, nothing goes red — the test simply does not
+exist, which is my own AC-20 finding on 10.10, verbatim, one criterion later. Then AC-31 (a claim
+about a *non-edit*, named **not-a-guard** rather than counted), AC-27's "from one read", and AC-30's
+document invariants (a pinned copy the moment they are transcribed). The draft's own list is
+accepted unchanged below them.
+
+**10.15 — AC-20 is the weakest, ahead of the draft's own AC-6, for a reason the draft did not have.**
+It called these gate-still-shut assertions a document scan mitigated by a control, which is true. The
+part it missed is **whose** document: they read `EPIC-10-EXECUTION.yaml`, **@pm's file**. A
+legitimate @pm edit reds this story for a reason unrelated to its subject — **FOC-04's false-red
+shape in a new place**, and that shape has now produced a blameless red three times. Keyed on
+`id`/`status` by name, with the file and value in the failure message, and its non-vacuity control
+made **not cuttable**. Then AC-6 (the draft's analysis of it is the best paragraph in the story),
+AC-16's structural half, and — naming my own — the `x-implemented-by` both-ways assertion, which is
+**first to cut** if the story overruns.
+
+**10.18 — AC-4a part 3 confirmed as the weakest and as the criterion this story exists for**, on the
+draft's own test: *"the criterion is @qa's working shim, run twice, succeeding once. If the successful
+run is not in the Dev Agent Record, SEC-2 has not been addressed — it has been described."* Four
+added for the new criteria, the first being **AC-29 part 4** — an obligation to replace a prediction
+with a measurement, where **a prediction that happens to be right is indistinguishable from a
+measurement nobody took**, and nothing in a suite can enforce the difference.
+
+### What I could not settle
+
+- **ED-02's construction owner**, and **ADR-002 O-10** (`400` vs `404`, Class C, overdue by a wave).
+  Both have a named path and a date; neither is mine to rule. @pm and @architect respectively.
+- **AC-3(b)'s gate** — the confirmed revision's artifact and hash. Escalated by 10.11c on day one;
+  @architect's to rule. I fixed the gate note and refused the approximation, and did not choose a
+  shape: 10.10 already filed two candidates and a second proposal from a second story would give
+  @architect three inputs where the process asks for one question.
+- **@ux on AD2-1's wording.** The rule is ruled; the accessible-name text is not mine.
+- **Whether the epic should replace the SHA-256 pin with property assertions.** §23.1 argues for it,
+  O-15 is the first instance, and FOC-04 recorded the same candidacy in wave 4 and deferred it. I
+  have recorded the direction and have not mandated the replacement — doing that inside wave 6 would
+  be scope creep on three stories at once, which is the reason it was deferred the first time.
