@@ -208,8 +208,20 @@ class CompileRouteContractDivergenceTest {
         .isNull();
     assertThat(operationFlag("/tests/{id}/confirm-compile", "x-implemented-by")).isEqualTo("10.9");
     assertThat(videoOperationFlag("x-not-yet-implemented"))
-        .as("the video route is story 10.16's and nothing has implemented it")
-        .isEqualTo(Boolean.TRUE);
+        .as(
+            "the video route landed in story 10.15, so this assertion inverted for the third time"
+                + " in this epic and for the same reason as the two above it. It was blameless-red"
+                + " on the integration branch between 10.15's merge and this fix: 10.15 updated"
+                + " StudioContractTest's exhaustive pending set and did not know this second,"
+                + " narrower copy existed. The full backend gate that would have caught it has not"
+                + " completed since wave 5 (MED-2), so only a story reading the file found it")
+        .isNull();
+    assertThat(videoOperationFlag("x-implemented-by"))
+        .as(
+            "and it is 10.15's, not 10.16's — the contract mis-attributed the backend route to the"
+                + " frontend playback story until 10.15 corrected it. Asserted here so the"
+                + " correction cannot silently revert")
+        .isEqualTo("10.15");
   }
 
   // ── the order of refusal, ADR-002 §14.4 ──────────────────────────────────
