@@ -62,6 +62,10 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.backend.springProfile | quote }}
+            # The same single retention key as the worker and the object-store lifecycle
+            # declaration (§6.2, AC-12).
+            - name: STUDIO_EVIDENCE_RETENTION
+              value: {{ .Values.objectStore.retention | quote }}
             {{- range $key, $val := .Values.backend.env }}
             - name: {{ $key }}
               value: {{ $val | quote }}
@@ -96,6 +100,14 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            # **The read-only store principal**, and a *different* Kubernetes Secret from the
+            # runner's write-only one (§6.2, ED-03): the runner writes only the `studio/` prefix
+            # and holds no Get or List permission; the API and the recovery path read and never
+            # write. Two principals, asserted unequal in the rendered manifest rather than each
+            # matched against a literal (AC-10a).
+            - name: object-store-credentials
+              mountPath: {{ .Values.objectStore.mountPath }}
+              readOnly: true
           lifecycle:
             preStop:
               exec:
@@ -103,6 +115,14 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
+        - name: object-store-credentials
+          secret:
+            secretName: {{ .Values.objectStore.credentialsSecret }}
+            items:
+              {{- range .Values.objectStore.keys }}
+              - key: {{ . }}
+                path: {{ . }}
+              {{- end }}
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -179,6 +199,21 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.worker.springProfile | quote }}
+            {{- if .Values.studioRunner.enabled }}
+            # **Derived from the runner's own Service, never restated.** `application.yml` defaults
+            # this to port 8090 and `studio-runner/src/server/config.ts` defaults its listener to
+            # 8080 — two derivations of one fact in two languages, neither ever deployed. The fix
+            # is not to edit one default into agreement with the other, which would make a third
+            # copy: it is that the chart is the single source and both sides render from
+            # `studioRunner.service.port` (AC-1).
+            - name: STUDIO_RUNNER_BASE_URL
+              value: "http://{{ include "put-checks.studioRunner.fullname" . }}:{{ .Values.studioRunner.service.port }}"
+            {{- end }}
+            # Logical expiry, which is what the API enforces at `videoExpiresAt` (§6.2). The
+            # object-store lifecycle window renders from this same key; physical deletion on the
+            # store is asynchronous and nothing in this chart claims otherwise.
+            - name: STUDIO_EVIDENCE_RETENTION
+              value: {{ .Values.objectStore.retention | quote }}
             {{- range $key, $val := .Values.worker.env }}
             - name: {{ $key }}
               value: {{ $val | quote }}
