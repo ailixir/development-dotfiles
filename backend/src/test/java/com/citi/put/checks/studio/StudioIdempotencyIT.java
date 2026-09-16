@@ -55,6 +55,7 @@ class StudioIdempotencyIT {
   @Autowired private JdbcTemplate jdbc;
   @Autowired private StudioRepository studioRepository;
   @Autowired private UITestExecutionRepository executionRepository;
+  @Autowired private UITestRevisionRepository revisionRepository;
   @Autowired private StudioAcceptanceService acceptanceService;
   @Autowired private CsiRepository csiRepository;
   @Autowired private ConfigurationChangeClassifier changeClassifier;
@@ -184,6 +185,7 @@ class StudioIdempotencyIT {
     return new StudioService(
         studioRepository,
         executionRepository,
+        revisionRepository,
         csiRepository,
         changeClassifier,
         csiOwnershipEvaluator,

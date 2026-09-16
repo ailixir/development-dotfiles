@@ -3,6 +3,7 @@ import {
   type CompileDiagnostic,
   type CompileDiagnostics,
   type CompileStepDiagnostics,
+  type SourceArtifact,
   type TestDto,
 } from '@/types/studio/studioTypes';
 import { DIAGNOSTICS_CAPS, TRUNCATION_MARKER, clampLikeBounder, overCap } from './diagnosticsBounds';
@@ -31,6 +32,49 @@ const BASE_STEPS = [
   'Check that the URL contains "dashboard"',
 ];
 
+const CANDIDATE_HASH = 'c'.repeat(64);
+
+/**
+ * The validated artifact for {@link BASE_STEPS}, as the compiler would have produced it.
+ *
+ * `originalText` is byte-identical to the authored line, which is what
+ * `docs/specs/studio/artifact.schema.json` requires and what the merged producer guarantees: a
+ * candidate can only become current while the draft's `source_revision` is unchanged
+ * (`CompileStateService.publishCandidate`'s conditional `UPDATE`), and any step edit nulls the
+ * candidate (`StudioService.updateTest`).
+ *
+ * **This is the negative control for AC-28**, and it earns that name rather than being labelled
+ * it: the English in {@link BASE_STEPS} already reads like the operation the compiler produced —
+ * *Click "Sign On"* against a button named `Sign On` — so a rendering derived from `steps` instead
+ * of from the artifact would look near enough right on this corpus to stay green. That is why
+ * {@link translatedTargetDraft} exists.
+ */
+const BASE_ARTIFACT: SourceArtifact = {
+  version: 1,
+  steps: [
+    {
+      stepIndex: 0,
+      originalText: BASE_STEPS[0] as string,
+      code: "await page.goto('https://www.citi.com');",
+    },
+    {
+      stepIndex: 1,
+      originalText: BASE_STEPS[1] as string,
+      code: "await page.getByRole('button', { name: 'Sign On' }).click();",
+    },
+    {
+      stepIndex: 2,
+      originalText: BASE_STEPS[2] as string,
+      code: "await page.getByLabel('Password').fill(vars.secret('LOGIN_PW'));",
+    },
+    {
+      stepIndex: 3,
+      originalText: BASE_STEPS[3] as string,
+      code: 'await expect(page).toHaveURL(/dashboard/);',
+    },
+  ],
+};
+
 function draft(id: string, overrides: Partial<TestDto>): TestDto {
   return {
     id,
@@ -57,6 +101,8 @@ function draft(id: string, overrides: Partial<TestDto>): TestDto {
     configurationRevision: 1,
     compileStatus: 'STALE',
     currentCandidateRevisionId: null,
+    currentCandidateArtifactHash: null,
+    currentCandidateArtifact: null,
     confirmedRevisionId: null,
     compileError: null,
     compileDiagnostics: null,
@@ -106,11 +152,15 @@ export const compilingDraft = draft('a0000000-0000-0000-0000-000000000001', {
 export const awaitingDraft = draft('a0000000-0000-0000-0000-000000000002', {
   compileStatus: 'AWAITING_CONFIRMATION',
   currentCandidateRevisionId: '22222222-2222-2222-2222-222222222222',
+  currentCandidateArtifactHash: CANDIDATE_HASH,
+  currentCandidateArtifact: BASE_ARTIFACT,
 });
 
 export const readyDraft = draft('a0000000-0000-0000-0000-000000000003', {
   compileStatus: 'READY',
   currentCandidateRevisionId: '22222222-2222-2222-2222-222222222222',
+  currentCandidateArtifactHash: CANDIDATE_HASH,
+  currentCandidateArtifact: BASE_ARTIFACT,
   confirmedRevisionId: '22222222-2222-2222-2222-222222222222',
 });
 
@@ -306,6 +356,96 @@ export const misalignedDraft = draft('a0000000-0000-0000-0000-00000000000d', {
   }),
 });
 
+// ---------------------------------------------------------------------------------------------
+// Story 10.11c AC-28 — the artifact-derived summary, and the fixtures that can see it fail.
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * The English the author wrote, deliberately sharing **no words** with the operation the compiler
+ * produced from it.
+ *
+ * This is what makes AC-28 falsifiable. The corpus's default steps read almost like their compiled
+ * operations — *Click "Sign On"* against a button named `Sign On` — so a summary rendered from
+ * `steps` instead of from the artifact would look near enough right to stay green on every other
+ * fixture in this file. Here the author asked to *"Sign in with the pilot account"* and the
+ * compiler resolved that to a button labelled **Log On**; a `steps`-derived rendering shows
+ * "pilot account" and never shows "Log On", and the reverse for an artifact-derived one.
+ *
+ * `originalText` is still byte-identical to the authored line, so this is a draft the merged
+ * backend can actually produce: the disagreement being exercised is between the **sentence** and
+ * the **validated operation**, which is the disagreement architecture §4.7 exists to surface, not
+ * between the draft and a stale candidate.
+ */
+const TRANSLATED_STEPS = [
+  'Open the bank\'s home page',
+  'Sign in with the pilot account',
+  'Confirm the account summary loaded',
+];
+
+const TRANSLATED_ARTIFACT: SourceArtifact = {
+  version: 1,
+  steps: [
+    {
+      stepIndex: 0,
+      originalText: TRANSLATED_STEPS[0] as string,
+      code: "await page.goto('https://www.citi.com/personal');",
+    },
+    {
+      stepIndex: 1,
+      originalText: TRANSLATED_STEPS[1] as string,
+      code: "await page.getByRole('button', { name: 'Log On' }).click();",
+    },
+    {
+      stepIndex: 2,
+      originalText: TRANSLATED_STEPS[2] as string,
+      code: "await expect(page.getByTestId('account-summary')).toBeVisible();",
+    },
+  ],
+};
+
+/** The discriminating fixture for AC-28. See {@link TRANSLATED_STEPS}. */
+export const translatedTargetDraft = draft('a0000000-0000-0000-0000-00000000000e', {
+  compileStatus: 'AWAITING_CONFIRMATION',
+  steps: [...TRANSLATED_STEPS],
+  currentCandidateRevisionId: '22222222-2222-2222-2222-2222222222ee',
+  currentCandidateArtifactHash: 'e'.repeat(64),
+  currentCandidateArtifact: TRANSLATED_ARTIFACT,
+  compileDiagnostics: null,
+});
+
+/**
+ * A draft whose artifact and whose current `steps` disagree outright — ADR-002 §21.7's state.
+ *
+ * **Raised as a finding rather than presented as an ordinary fixture: the merged backend cannot
+ * produce this body.** §21.7 says *"in the `needsRevision` state those disagree by design"*, and
+ * two things in the merged producer contradict it. `CompileStateService.publishInvalid` sets
+ * `current_candidate_revision_id = NULL` on every transition to `NEEDS_REVISION`, so that state
+ * never carries a candidate at all; and `publishCandidate`'s conditional `UPDATE` requires the
+ * draft's `source_revision` to be unchanged while `StudioService.updateTest` nulls the candidate on
+ * any step edit, so whenever a candidate *does* exist its `originalText` is the draft's current
+ * `steps`.
+ *
+ * The rendering is kept and fixtured anyway, because the alternative is a surface that would
+ * silently show a stale summary if the ruling's premise ever becomes true — but it is defensive,
+ * not live, and the story records it as an escalation rather than as covered behaviour.
+ */
+export const divergentCandidateDraft = draft('a0000000-0000-0000-0000-00000000000f', {
+  compileStatus: 'NEEDS_REVISION',
+  steps: ['Open the staff intranet', 'Sign out of the pilot account', 'Confirm the login page'],
+  currentCandidateRevisionId: '22222222-2222-2222-2222-2222222222ff',
+  currentCandidateArtifactHash: 'f'.repeat(64),
+  currentCandidateArtifact: TRANSLATED_ARTIFACT,
+  compileDiagnostics: null,
+});
+
+/** A draft in the state that confirms, carrying no candidate values at all. */
+export const noCandidateArtifactDraft = draft('a0000000-0000-0000-0000-00000000000d', {
+  compileStatus: 'AWAITING_CONFIRMATION',
+  currentCandidateRevisionId: '22222222-2222-2222-2222-2222222222dd',
+  currentCandidateArtifactHash: null,
+  currentCandidateArtifact: null,
+});
+
 export const compileReviewDrafts: TestDto[] = [
   compilingDraft,
   awaitingDraft,
@@ -320,6 +460,9 @@ export const compileReviewDrafts: TestDto[] = [
   notExhaustedDraft,
   artifactRejectionDraft,
   misalignedDraft,
+  translatedTargetDraft,
+  divergentCandidateDraft,
+  noCandidateArtifactDraft,
 ];
 
 /** The draft returned by `GET /tests/{id}` for each of the five states, keyed by state. */
@@ -491,6 +634,80 @@ export const COMPILE_FIXTURE_MATRIX: readonly RequiredFixture[] = [
       awaitingDraft.variables.some((variable) => variable.kind === 'secretRef')
         ? null
         : 'no fixture carries a secretRef variable',
+  },
+  {
+    id: 'FX-ARTIFACT-TRANSLATED-TARGET',
+    description:
+      'a candidate artifact whose operation shares no word with the sentence it was compiled from',
+    resolve: () => translatedTargetDraft,
+    satisfies: () => {
+      const artifact = translatedTargetDraft.currentCandidateArtifact;
+      if (!artifact) {
+        return 'the discriminating fixture carries no candidate artifact at all';
+      }
+      if (artifact.steps.length !== translatedTargetDraft.steps.length) {
+        return 'the artifact does not cover every authored line, so some rows cannot discriminate';
+      }
+      // The hazard is a rendering derived from `steps`. It only *shows* on a fixture where the
+      // compiled target is a word the sentence does not contain — otherwise a `steps`-derived
+      // summary and an artifact-derived one read the same and the guard is green with nothing
+      // behind it. So the property this fixture must carry is measured, not asserted by name.
+      const misses = artifact.steps.filter((step, index) => {
+        const sentence = (translatedTargetDraft.steps[index] ?? '').toLowerCase();
+        const targets = [...step.code.matchAll(/'([^']+)'/gu)].map((match) => match[1] ?? '');
+        return !targets.some((target) => target.length > 2 && !sentence.includes(target.toLowerCase()));
+      });
+      return misses.length === 0
+        ? null
+        : `${misses.length} of the artifact's steps name nothing the sentence does not already say`;
+    },
+  },
+  {
+    id: 'FX-ARTIFACT-AGREEING-CONTROL',
+    description: 'the negative control: a corpus whose sentences already read like their operations',
+    resolve: () => awaitingDraft,
+    satisfies: () => {
+      const artifact = awaitingDraft.currentCandidateArtifact;
+      if (!artifact) {
+        return 'the control carries no candidate artifact, so it controls for nothing';
+      }
+      // A control only controls if it really is the agreeing case. Measured the same way as the
+      // fixture above, and required to come out the *other* way on at least one step.
+      const agreeing = artifact.steps.some((step, index) => {
+        const sentence = (awaitingDraft.steps[index] ?? '').toLowerCase();
+        return [...step.code.matchAll(/'([^']+)'/gu)]
+          .map((match) => match[1] ?? '')
+          .some((target) => target.length > 2 && sentence.includes(target.toLowerCase()));
+      });
+      return agreeing ? null : 'no step of the control agrees with its sentence';
+    },
+  },
+  {
+    id: 'FX-ARTIFACT-ABSENT',
+    description: 'a confirmable draft carrying no artifact and no hash',
+    resolve: () => noCandidateArtifactDraft,
+    satisfies: () =>
+      noCandidateArtifactDraft.currentCandidateArtifact == null &&
+      noCandidateArtifactDraft.currentCandidateArtifactHash == null &&
+      noCandidateArtifactDraft.currentCandidateRevisionId !== null
+        ? null
+        : 'the fixture does not carry a candidate with neither artifact nor hash',
+  },
+  {
+    id: 'FX-ARTIFACT-DIVERGENT',
+    description:
+      'ADR-002 §21.7’s state: an artifact whose originalText is not the draft’s current steps',
+    resolve: () => divergentCandidateDraft,
+    satisfies: () => {
+      const artifact = divergentCandidateDraft.currentCandidateArtifact;
+      if (!artifact) {
+        return 'the divergent fixture carries no candidate artifact';
+      }
+      const moved = artifact.steps.findIndex(
+        (step, index) => step.originalText !== divergentCandidateDraft.steps[index],
+      );
+      return moved === -1 ? 'the divergent fixture agrees with its draft' : null;
+    },
   },
   ...['STALE_CANDIDATE', 'TEST_DELETED', 'TEST_QUARANTINED'].map((code) => ({
     id: `FX-CONFLICT-${code}`,

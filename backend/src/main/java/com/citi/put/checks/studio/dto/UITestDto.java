@@ -2,7 +2,9 @@ package com.citi.put.checks.studio.dto;
 
 import com.citi.put.checks.studio.compile.CompileState;
 import com.citi.put.checks.studio.entity.UITest;
+import com.citi.put.checks.studio.entity.UITestRevision;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
@@ -30,6 +32,23 @@ import java.util.UUID;
  *
  * <p>Neither field states or implies that a step the validator accepted does what its author meant.
  * Static validation cannot prove that (§4.1, §4.5).
+ *
+ * <h2>The candidate's artifact and its hash</h2>
+ *
+ * <p>{@code currentCandidateArtifactHash} and {@code currentCandidateArtifact} were added by
+ * ADR-002 §21 and belong to the revision {@code currentCandidateRevisionId} names. They are read in
+ * the <em>same</em> transaction as the draft row, which is what makes {@code ConfirmCompileRequest}
+ * a coherent conditional transaction: all four of its fields come from one read of this body, so
+ * the revision, the hash, the source revision and the configuration revision a client asserts are a
+ * set the draft actually held at one instant (§21.3). Sourcing the hash from a second request would
+ * let the draft recompile in between and produce an internally inconsistent body that {@code
+ * STALE_CANDIDATE} was never designed to name.
+ *
+ * <p>Both are {@code null} when there is no candidate, and both are {@code null} on the list
+ * projection (§21.2, on §16.5's precedent).
+ *
+ * <p>The artifact is the <b>candidate's</b>; {@code steps} is the draft's current English. A review
+ * surface that claims to show what was validated renders the artifact, never {@code steps} (§21.7).
  */
 public record UITestDto(
     UUID id,
@@ -51,6 +70,8 @@ public record UITestDto(
     long configurationRevision,
     CompileState compileStatus,
     UUID currentCandidateRevisionId,
+    String currentCandidateArtifactHash,
+    JsonNode currentCandidateArtifact,
     UUID confirmedRevisionId,
     CompileErrorDto compileError,
     CompileDiagnosticsDto compileDiagnostics) {
@@ -58,31 +79,62 @@ public record UITestDto(
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
   /**
-   * The single-draft projection: everything the row carries, diagnostics included.
+   * The single-draft projection: everything the row carries, diagnostics and candidate included.
+   *
+   * <p>The candidate revision is passed in rather than looked up here so that the caller can read
+   * it in the <em>same</em> transaction as the draft row. That is not a style choice: it is the
+   * whole of ADR-002 §21.3's argument for candidate A over a revision read route.
    *
    * @param entity the draft row
+   * @param candidate the revision {@code entity.getCurrentCandidateRevisionId()} names, read in the
+   *     same transaction, or {@code null} when the draft has no candidate
    * @return the full representation returned by {@code GET /tests/{id}} and the write routes
    */
-  public static UITestDto from(UITest entity) {
-    return from(entity, true);
+  public static UITestDto from(UITest entity, UITestRevision candidate) {
+    return from(entity, candidate, true);
   }
 
   /**
-   * The list projection: {@code compileDiagnostics} is always {@code null} (ADR-002 §16.5).
+   * The list projection: {@code compileDiagnostics}, {@code currentCandidateArtifact} and {@code
+   * currentCandidateArtifactHash} are always {@code null} (ADR-002 §16.5, §21.2).
    *
    * <p>The bound is per draft, so a page of drafts in {@code NEEDS_REVISION} would be a
-   * multi-megabyte response carrying per-step reasons no list renders. {@code compileError} stays,
-   * because it is a bounded code — nothing a caller needs in order to <em>know</em> that reasons
-   * exist is hidden; only the reasons themselves are one read away.
+   * multi-megabyte response carrying per-step reasons and generated source no list renders. {@code
+   * compileStatus}, {@code currentCandidateRevisionId} and the bounded {@code compileError} stay —
+   * nothing a caller needs in order to <em>know</em> that reasons or a candidate exist is hidden;
+   * only the reasons, the artifact and its hash are one read away.
+   *
+   * <p>No candidate is loaded on this path at all. That is the enforcement of the omission rather
+   * than a description of it: this overload has no parameter to pass one through.
    *
    * @param entity the draft row
    * @return the list representation returned by {@code GET /tests}
    */
   public static UITestDto forList(UITest entity) {
-    return from(entity, false);
+    return from(entity, null, false);
   }
 
-  private static UITestDto from(UITest entity, boolean withDiagnostics) {
+  private static UITestDto from(UITest entity, UITestRevision candidate, boolean withDiagnostics) {
+    // The hash and the artifact travel together, and **this method is not what makes that true**.
+    //
+    // An earlier version read the artifact first and then withheld the hash when the artifact came
+    // back null, with a comment saying the asymmetry "is closed" here. @qa deleted that branch and
+    // the entire studio package stayed green — 91 classes, 692 tests, the identical six failures —
+    // because the branch is unreachable. `ui_test_revisions.artifact` is `JSONB NOT NULL` and
+    // `artifact_hash` is `VARCHAR(64) NOT NULL` (V12), both named in the write-once trigger, and a
+    // `jsonb` column cannot hold anything that is not already valid JSON. So `parse` cannot return
+    // null for a revision row, and the withholding could never fire. A comment claiming a property
+    // is closed, over code nothing can exercise, is this epic's twenty-first catalogued shape.
+    //
+    // What is true is that the pairing is a property of the **row**, enforced by the schema, and it
+    // is asserted against the live database rather than restated here:
+    // `CandidateArtifactProjectionIT.theRevisionRowIsWhatGuaranteesTheArtifactAndItsHashTravel-
+    // Together` reads `information_schema` and reddens if either column becomes nullable. That
+    // assertion can fail; this branch could not.
+    JsonNode candidateArtifact =
+        candidate == null ? null : parse(candidate.getArtifact(), JsonNode.class);
+    String candidateArtifactHash = candidate == null ? null : candidate.getArtifactHash();
+
     return new UITestDto(
         entity.getId(),
         entity.getName(),
@@ -107,6 +159,8 @@ public record UITestDto(
         entity.getConfigurationRevision(),
         entity.getCompileStatus(),
         entity.getCurrentCandidateRevisionId(),
+        candidateArtifactHash,
+        candidateArtifact,
         entity.getConfirmedRevisionId(),
         parse(entity.getCompileError(), CompileErrorDto.class),
         withDiagnostics

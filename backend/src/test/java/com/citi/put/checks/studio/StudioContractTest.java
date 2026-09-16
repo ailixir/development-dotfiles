@@ -36,8 +36,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeAll;
@@ -278,6 +280,100 @@ class StudioContractTest {
                 + " with the marker removal, in one ADR-002 section 13 row (Class A, @po wave-6)")
         .isEqualTo("10.15");
     assertThat(pendingOperations()).as("and nothing else lost a marker alongside it").isEmpty();
+  }
+
+  /**
+   * Story 10.11c AC-30 — the document's other invariants, because a byte pin cannot say which bytes
+   * moved.
+   *
+   * <p>This story amends {@code openapi.yaml} under ADR-002 §21 and therefore re-anchors the
+   * runner's {@code BASE_SHA256} in its own PR. A hash says <em>something</em> moved and never
+   * <em>what</em>, so the claim that nothing outside {@code TestDto} moved is asserted here
+   * instead: for every operation the document declares, its response status set and its
+   * implementation marker are what they were before this story ran.
+   *
+   * <h2>Why a hand-maintained second copy, and why it must stay one</h2>
+   *
+   * <p>The required set below is a <b>deliberate second copy</b>, compared both ways, with the
+   * total asserted separately. There is no production vocabulary to derive it from — no Java type
+   * enumerates the document's operations — and deriving it from the document would make this test a
+   * statement that the document equals itself, which is this epic's most-repeated finding.
+   *
+   * <p><b>It must not be "simplified" into a derivation from the thing it checks.</b> If a later
+   * story legitimately adds an operation or a status, the entry is added here, deliberately, in
+   * that story's PR — which is the same rule the pin itself carries one file over.
+   *
+   * <p>The marker half is derived rather than copied, because there a vocabulary does exist: story
+   * 10.15 removed the last {@code x-not-yet-implemented} in the document, so the correct assertion
+   * is that {@link #pendingOperations()} is empty, and it would fail the moment one came back.
+   */
+  @Test
+  void noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties() {
+    Map<String, String> expected = new TreeMap<>();
+    expected.put("DELETE /tests/{id}", "204,400,401,403");
+    expected.put("GET /executions", "200,401");
+    expected.put("GET /executions/{id}", "200,400,401,403");
+    expected.put("GET /executions/{id}/events", "200,401,403");
+    expected.put("GET /executions/{id}/video", "200,206,404,410,416");
+    expected.put("GET /health", "200,401,403");
+    expected.put("GET /ready", "200,401,403,503");
+    expected.put("GET /tests", "200,401");
+    expected.put("GET /tests/{id}", "200,400,401,403");
+    expected.put("POST /internal/studio/executions/{id}/admission", "200,400,401,403,409");
+    expected.put("POST /internal/studio/executions/{id}/progress", "200,400,401,403,409,413");
+    expected.put("POST /tests", "201,400,401,403");
+    expected.put("POST /tests/{id}/compile", "202,400,401,403,409");
+    expected.put("POST /tests/{id}/confirm-compile", "200,400,401,403,409");
+    expected.put("POST /tests/{id}/execute", "202,400,401,403,409,429,503");
+    expected.put("POST /v1/runs", "202,400,401,403,409,429,503");
+    expected.put("POST /v1/validate", "200,400,401,403,413,503");
+    expected.put("PUT /tests/{id}", "200,400,401,403,409");
+
+    Map<String, String> declared = declaredStatusSets();
+
+    // The total, asserted separately. Without it, both comparisons below could agree on a set that
+    // had silently shrunk to nothing on both sides at once.
+    assertThat(declared).as("the document declares a different number of operations").hasSize(18);
+    assertThat(expected).hasSize(18);
+
+    assertThat(declared.keySet())
+        .as("an operation the document declares that this copy does not name")
+        .containsExactlyElementsOf(expected.keySet());
+    assertThat(expected.keySet())
+        .as("an operation this copy names that the document no longer declares")
+        .containsExactlyElementsOf(declared.keySet());
+    assertThat(declared)
+        .as("an operation's response status set moved; this story amends TestDto and nothing else")
+        .isEqualTo(expected);
+
+    assertThat(pendingOperations())
+        .as("story 10.15 removed the last x-not-yet-implemented; none came back here")
+        .isEmpty();
+  }
+
+  /** Every declared operation, keyed {@code METHOD /path}, valued as its sorted status set. */
+  @SuppressWarnings("unchecked")
+  private static Map<String, String> declaredStatusSets() {
+    Map<String, Object> paths = (Map<String, Object>) contract.get("paths");
+    Map<String, String> declared = new TreeMap<>();
+    paths.forEach(
+        (path, item) ->
+            ((Map<String, Object>) item)
+                .forEach(
+                    (method, operation) -> {
+                      if (!(operation instanceof Map)) {
+                        return;
+                      }
+                      Object responses = ((Map<String, Object>) operation).get("responses");
+                      if (!(responses instanceof Map)) {
+                        return;
+                      }
+                      declared.put(
+                          method.toUpperCase(Locale.ROOT) + " " + path,
+                          String.join(
+                              ",", new TreeSet<>(((Map<String, Object>) responses).keySet())));
+                    }));
+    return declared;
   }
 
   @Test
@@ -539,8 +635,7 @@ class StudioContractTest {
                         return;
                       }
                       String prefix = internal ? "" : PUBLIC_BASE;
-                      operations.add(
-                          method.toUpperCase(java.util.Locale.ROOT) + " " + prefix + path);
+                      operations.add(method.toUpperCase(Locale.ROOT) + " " + prefix + path);
                     }));
     return operations;
   }
@@ -560,7 +655,7 @@ class StudioContractTest {
                       }
                       if (Boolean.TRUE.equals(
                           ((Map<String, Object>) operation).get("x-not-yet-implemented"))) {
-                        pending.add(method.toUpperCase(java.util.Locale.ROOT) + " " + path);
+                        pending.add(method.toUpperCase(Locale.ROOT) + " " + path);
                       }
                     }));
     return pending;
@@ -591,7 +686,7 @@ class StudioContractTest {
                 }
                 found.add(
                     new InternalOperation(
-                        method.toUpperCase(java.util.Locale.ROOT) + " " + path,
+                        method.toUpperCase(Locale.ROOT) + " " + path,
                         tags(details),
                         String.valueOf(details.get("x-served-by")),
                         servers));
@@ -639,8 +734,7 @@ class StudioContractTest {
                   .path(path)
                   .fieldNames()
                   .forEachRemaining(
-                      method ->
-                          operations.add(method.toUpperCase(java.util.Locale.ROOT) + " " + path));
+                      method -> operations.add(method.toUpperCase(Locale.ROOT) + " " + path));
             });
     // Routes that exist in the prototype but are not part of the frozen contract: the step
     // validator endpoints are retired by 10.11 and are deliberately not frozen here.

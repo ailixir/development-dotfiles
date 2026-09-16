@@ -225,6 +225,25 @@ export interface TestDto {
   configurationRevision: number;
   compileStatus: CompileStatus;
   currentCandidateRevisionId: string | null;
+  /**
+   * The canonical artifact hash of the revision `currentCandidateRevisionId` names, and the value
+   * `ConfirmCompileRequest.artifactHash` is read from (ADR-002 §21.2). Null when there is no
+   * candidate, and **always null on `GET /tests`** — the list projection drops it alongside
+   * `currentCandidateArtifact` and `compileDiagnostics` (§21.2, on §16.5's precedent).
+   *
+   * Never fabricated, never recomputed client-side, never defaulted. A client-computed hash would
+   * be the client asserting what the server canonicalized, which is the one thing the conditional
+   * transaction exists to check (§21.8).
+   */
+  currentCandidateArtifactHash?: string | null;
+  /**
+   * The candidate revision's immutable validated artifact. Null when there is no candidate, and
+   * always null on `GET /tests`.
+   *
+   * This is the **candidate's**, and `steps` is the draft's current English. Where a surface
+   * claims to show what was validated it renders this, never `steps` (ADR-002 §21.7).
+   */
+  currentCandidateArtifact?: SourceArtifact | null;
   confirmedRevisionId: string | null;
   /**
    * Non-null only with `compileStatus: STALE`. Present on both `GET /tests` and `GET /tests/{id}`

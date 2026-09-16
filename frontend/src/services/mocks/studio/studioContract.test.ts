@@ -317,6 +317,68 @@ describe('story 10.10: the compile vocabularies are read from the document, neve
   });
 });
 
+describe('story 10.11c: ADR-002 §21’s two properties, and the examples that carry them', () => {
+  it('every getTest example validates against the amended TestDto', () => {
+    // §18.5: an example that does not validate is the decorative artefact §14.6 complains about.
+    // This runs over the **document's own** examples rather than over the fixtures, which is the
+    // half AC-25 adds — the fixture half is 10.10's and is below.
+    const validate = componentValidator('TestDto');
+    const examples: Record<string, { value: unknown }> =
+      openapi.paths['/tests/{id}'].get.responses['200'].content['application/json'].examples;
+
+    expect(Object.keys(examples).length, 'getTest declares no examples to validate').toBeGreaterThan(
+      0,
+    );
+    for (const [name, example] of Object.entries(examples)) {
+      expect(validate(example.value), `${name}: ${JSON.stringify(validate.errors)}`).toBe(true);
+    }
+  });
+
+  it('the candidate artifact in the ready example validates against artifact.schema.json', () => {
+    // The document declares the property opaque on purpose — its normative schema is the frozen
+    // file — so the example is the only place the two documents meet, and this is where that join
+    // is checked rather than assumed.
+    const validate = ajv.compile(artifactSchema);
+    const ready: Record<string, unknown> =
+      openapi.paths['/tests/{id}'].get.responses['200'].content['application/json'].examples.ready
+        .value;
+    expect(ready.currentCandidateArtifact, 'the ready example lost its candidate artifact')
+      .toBeTruthy();
+    expect(
+      validate(ready.currentCandidateArtifact),
+      JSON.stringify(validate.errors),
+    ).toBe(true);
+  });
+
+  it('declares both properties on TestDto and neither on the list projection', () => {
+    const declared = declaredPropertiesOf('TestDto');
+    expect(declared).toContain('currentCandidateArtifactHash');
+    expect(declared).toContain('currentCandidateArtifact');
+    // Additive: §21 adds two properties and nothing becomes required.
+    expect(requiredPropertiesOf('TestDto')).not.toContain('currentCandidateArtifactHash');
+    expect(requiredPropertiesOf('TestDto')).not.toContain('currentCandidateArtifact');
+
+    // The list projection's omission is **declared** rather than discovered (§16.5's precedent).
+    // A key-position read of the operation's own description, not a scan of the whole document:
+    // the words appear in the schema descriptions too, and a loose search would find them there.
+    const listDescription: string = openapi.paths['/tests'].get.description;
+    expect(listDescription).toContain('currentCandidateArtifact');
+    expect(listDescription).toContain('currentCandidateArtifactHash');
+    expect(listDescription).toMatch(/always `null` on this route/u);
+  });
+
+  it('the hash the client reads is declared as the value the confirm body sends', () => {
+    // The two halves of the closed loop §21 exists to close. Both are read from the document.
+    const hash = openapi.components.schemas.TestDto.properties.currentCandidateArtifactHash;
+    const sent = openapi.components.schemas.ConfirmCompileRequest.properties.artifactHash;
+    expect(requiredPropertiesOf('ConfirmCompileRequest')).toContain('artifactHash');
+    expect(hash.type).toBe(sent.type);
+    expect(hash.minLength).toBe(sent.minLength);
+    expect(hash.maxLength).toBe(sent.maxLength);
+    expect(hash.nullable, 'the read side is nullable; the write side is required').toBe(true);
+  });
+});
+
 describe('story 10.10: the compile-review fixtures match the amended contract', () => {
   it('every compile-review fixture validates against TestDto', () => {
     const validate = componentValidator('TestDto');

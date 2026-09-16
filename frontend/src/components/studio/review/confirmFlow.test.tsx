@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '@testing-library/react';
@@ -21,22 +21,19 @@ import * as reviewModule from './index';
 /**
  * Story 10.10 — confirmation is exact, or it does not happen (AC-10, AC-11a, AC-12, AC-13).
  *
- * **Why the hash accessor is substituted here, and only here.** `artifactHash` is reachable from
- * no declared response (AC-15), so in production the accessor returns *unavailable* and no
- * confirmation request can leave the client at all. Asserting the body the client sends, the
- * state in which the control is live, and the `409` recovery therefore needs a world in which the
- * ruling has landed. `vi.mock` creates that world inside this module graph only: it adds nothing
- * to the shipped bundle, no environment read, no prop and no export. The production behaviour —
- * the control blocked with the blocker named — is asserted unmocked in `blockedConfirm.test.tsx`.
- * When the contract is amended, this file needs no edit; only the accessor's body changes.
+ * **The hash accessor is no longer substituted here** (story 10.11c AC-27). While `artifactHash`
+ * was reachable from no declared response (AC-15) the accessor returned *unavailable* for every
+ * input, no confirmation request could leave the client at all, and these cases needed a `vi.mock`
+ * to construct a world in which the ruling had landed. ADR-002 §21 landed it: the hash is read
+ * from `TestDto.currentCandidateArtifactHash`, the fixtures carry it, and every case below now
+ * runs against the **production** accessor. The mock is gone rather than left harmlessly in place,
+ * because a stub that returns a constant would keep passing if the accessor stopped reading the
+ * field.
+ *
+ * The value below is read from the fixture rather than declared here, for the same reason.
  */
 
-const HASH = 'a'.repeat(64);
-
-vi.mock('./artifactHash', async () => {
-  const actual = await vi.importActual<typeof import('./artifactHash')>('./artifactHash');
-  return { ...actual, readArtifactHash: () => ({ available: true as const, value: HASH }) };
-});
+const HASH = awaitingDraft.currentCandidateArtifactHash as string;
 
 const SPEC_DIR = path.resolve(__dirname, '../../../../../docs/specs/studio');
 const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8'));
@@ -132,6 +129,24 @@ describe('AC-11a: the request body is exactly the four declared fields, from one
 });
 
 describe('AC-13: a double activation sends one request', () => {
+  /**
+   * **The request-level guard, asserted with the `disabled` attribute deliberately defeated**
+   * (story 10.11c AC-29, obligation 1).
+   *
+   * Story 10.11c makes the control additionally unavailable while a confirm is in flight (AD2-1),
+   * and **this case can no longer see the request-level guard because of it.** Measured: removing
+   * the `disabled` attribute and dispatching a `MouseEvent` does not reach the handler either,
+   * because React's synthetic event system consults the element's `disabled` *prop* rather than
+   * the DOM attribute. With the in-flight ref in `useCompileReview` deleted, this file stayed
+   * fully green.
+   *
+   * So what this case asserts is the **affordance**: a second activation through the UI, with the
+   * attribute defeated, produces no second request. That is worth asserting and it is not the
+   * guard. The guard — the in-flight ref, which closes the window in the same synchronous turn as
+   * the activation — is asserted at the hook in `confirmInFlight.test.tsx`, which is the only
+   * place AD2-1's obligations 1 and 2 can be told apart. Deleting the ref reddens that test and
+   * this one stays green, which is the measurement rather than the intention.
+   */
   it('a second activation while the first is in flight sends nothing and is not queued', async () => {
     const gate = deferred<void>();
     let requests = 0;
@@ -157,10 +172,13 @@ describe('AC-13: a double activation sends one request', () => {
     await user.click(control);
     await waitFor(() => expect(requests).toBe(1));
 
-    // The first request has reached the handler and has NOT settled: the second click lands
+    // The first request has reached the handler and has NOT settled: the second activation lands
     // inside the measurement window rather than after it.
-    await user.click(control);
-    await user.click(control);
+    expect(control, 'AD2-1: the control is unavailable in flight').toBeDisabled();
+    control.removeAttribute('disabled');
+    control.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    control.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await new Promise((settle) => setTimeout(settle, 20));
     expect(requests).toBe(1);
 
     gate.resolve();
