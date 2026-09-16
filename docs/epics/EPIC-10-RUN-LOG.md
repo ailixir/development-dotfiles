@@ -1412,3 +1412,112 @@ measurement nobody took**, and nothing in a suite can enforce the difference.
   O-15 is the first instance, and FOC-04 recorded the same candidacy in wave 4 and deferred it. I
   have recorded the direction and have not mandated the replacement — doing that inside wave 6 would
   be scope creep on three stories at once, which is the reason it was deferred the first time.
+
+---
+
+## Wave 6 — post-merge integration verification (2026-09-16)
+
+Run by @aiox-master on the fully merged `epic/EPIC-10` at `35104ee6e`, after the 10.11c merge
+closed FOC-06. **Two cross-story integration defects, DEF-08 and DEF-09 — the epic's eighth and
+ninth, and again neither was found by a gate.** A third problem is not a defect at all: an
+**unowned writer** was active in the integration worktree during the run.
+
+### What was measured
+
+| Suite | Result | Notes |
+|---|---|---|
+| `studio-runner` default | **941 passed / 29 skipped / 48 files** | matches 10.18b's recorded figure exactly |
+| `studio-runner` fixtures | **89 passed / 10 skipped / 6 files** | includes `seek-measurement`; the ownerless flake did not fire |
+| `studio-runner` deployment | **177 passed / 4 failed** | all four are AC-18's *one* deliberate escalation, repeated per value set |
+| frontend `vitest` | **456 passed / 2 failed / 2 files failed** | 2 = 10.11c's AC-32 escalation, committed red on purpose; 1 file = ENV-1 |
+| frontend `type-check` | **2 errors** | both ENV-1 |
+| backend `studio` package, `--rerun-tasks` | **681 passed / 5 failed / 7 skipped (693)** | 2 escalations + **3 defects** |
+
+**The contract chain holds.** `docs/specs/studio/openapi.yaml` hashes
+`51850b016cd8a697899a944eab12ddce5456967beecf4f3e011720498bc02efa`, the pin at
+`confinement.test.ts:191` carries the same value, and `CompileRouteContractDivergenceTest`
+**passes under `--rerun-tasks`** — so the 10.15 marker repair at `23c1973e4` is verified against
+the real document and not a cached input. That is the first time the Gradle caching defect has
+been actively defeated rather than described.
+
+### DEF-08 — 10.18b broke `StudioOverloadIT`, in the `studio` package, and reported the opposite
+
+`StudioOverloadIT > ordinaryRestTrafficContinuesWhileEveryStudioBoundIsUnderPressure()` fails at
+its **first assertion, before any pressure is applied**: `assertThat(quiet.errors()).as("the
+baseline itself must be clean").isZero()` — expected 0, got **40 of 40**.
+
+`measureOrdinaryTraffic` sends `GET /api/v1/checks?page=0&size=5` with **no identity headers at
+all**. That only ever returned 200 because `isCoreServiceBypassed()` was hardcoded `return true`.
+10.18b made it configuration-driven and default-closed, and `application-test.yml` deliberately
+opens **`identity-headers` only** — which cannot help a caller that sends no headers.
+
+Bisected on a clean detached worktree, one class, `--rerun-tasks` each time:
+
+| Commit | Result |
+|---|---|
+| `754498ca5` — parent of the 10.18b merge | **both tests PASSED** |
+| `a3c599c05` — the 10.18b merge | **1 of 2 FAILED** |
+
+**10.18b's own record states its failing set was "exactly ten across six classes … none in
+`studio` or `security`".** It is in `com.citi.put.checks.studio`. The reason it was not seen is
+recorded in the same story: **the backend `check` hung all three times (MED-2)**, and one run's
+last emitted line was literally this test's name followed by `PASSED` — from a *baseline* run, not
+the branch. A hung run does not have a failing set, and this is the first time MED-2 has
+demonstrably hidden a real regression rather than merely costing time.
+
+### DEF-09 — 10.15's authorization matrix encodes the pre-closure identity behaviour
+
+`ExecutionVideoAuthorizationIT` arrives with 10.15 (`db374ad8f`) and fails twice at the merge:
+
+- `aQuarantinedRowIsDeniedToEveryoneIncludingAdministrators()` — **expected 403, got 401**, on the
+  `no identity headers at all` row.
+- `softDeletingTheParentTestChangesNoAnswerAndNoByte()` — statuses match; the **served bytes** of
+  the same identityless row differ before vs. after the parent's soft deletion
+  (`d042ac08…` → `006a2075…`), **reproducibly across three runs**, so this is a real state-dependent
+  difference in the response and not a timestamp.
+
+`story/10.15` **does not contain the 10.18b merge** (`git merge-base --is-ancestor a3c599c05
+story/10.15` → false), and on that branch `isCoreServiceBypassed()` still reads `return true` at
+line 112. So the identityless caller was bypassed into an *authorization* denial (403); after
+closure it is an *authentication* refusal (401). 10.15's gate ran in a worktree where the closure
+did not exist, and 10.18b merged **before** 10.15 — so neither gate could see the pair.
+
+**The second assertion is the interesting one and is not merely a stale expectation.** It says an
+unauthenticated answer must not change when the parent row is soft-deleted. It now does. Whether
+that is an information leak or a benign message change is **not determined** — I did not read the
+two bodies (a probe was written and the run produced no `PROBE-` output before I reverted it), and
+I am not guessing. **That question is the deliverable, not the 403/401 rename.**
+
+### Not a defect — an unowned writer in the integration worktree
+
+`wt/epic` was **clean at 18:05** and by 18:29 held **33 changed entries** — 28 modified tracked
+files and 13 new untracked ones — written in bursts between **18:15:18 and 18:29:19**, i.e. *during*
+this verification. `HEAD` never moved, no branch contains the work, and no subagent of this session
+was running.
+
+The content is coherent and substantial: **real object storage replacing the `Fake*` stores** —
+`studio/storage/{S3VideoObjectStore,FilesystemVideoObjectStore,MountedAwsCredentials,
+ObjectStoreManifestReader,StudioStorageConfiguration,StudioStorageProperties}`, three tests,
+`studio-runner/src/run/s3ObjectStore.ts`, `@aws-sdk/client-s3` added to `package.json`, a
+`studio.storage.*` block in `application.yml`, helm values across all four sets, and
+`docs/runbooks/studio-integrations.md`.
+
+**Nothing was touched, reverted or committed.** It is preserved read-only in the session scratchpad
+as `UNOWNED-epic-worktree-tracked.patch`, `UNOWNED-epic-worktree-untracked.tgz` and
+`UNOWNED-epic-worktree-status.txt`.
+
+Two consequences. First, **the backend numbers in the table above were measured while those files
+were on disk** — so every backend conclusion here was re-established on a clean detached worktree
+at `wt/verify`, and it is those re-runs that DEF-08 and DEF-09 rest on. Second, **story worktree
+isolation was breached**: feature work belongs on a story branch, and the integration branch's
+worktree is the one place it must never be written. That is an orchestration question for the
+epic owner, not something to resolve by deleting someone's work.
+
+### Carry-forward
+
+- **DEF-08** — @dev. `StudioOverloadIT`'s baseline needs the identity the bypass used to supply,
+  the same repair 10.18b applied to `StudioApiIT` and named in its own record.
+- **DEF-09** — @dev for the 403→401 expectation; **the byte difference needs a reading before a
+  fix**, and if it is a leak it is @qa/@architect, not a test edit.
+- **MED-2 is now load-bearing, not merely slow** (@devops). It hid DEF-08 for a full wave.
+- The unowned S3 work — epic owner to identify and rehome onto a story branch.
