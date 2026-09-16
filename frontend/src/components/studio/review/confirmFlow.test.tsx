@@ -134,14 +134,18 @@ describe('AC-13: a double activation sends one request', () => {
    * (story 10.11c AC-29, obligation 1).
    *
    * Story 10.11c makes the control additionally unavailable while a confirm is in flight (AD2-1),
-   * which would let this case pass without the guard existing at all — a click on a disabled
-   * button never reaches the handler. So the second and third activations remove the attribute
-   * first and dispatch the event directly. That is not an artificial hazard: an attribute is
-   * defeated by any programmatic activation, which is exactly why story 10.10 forbade `disabled`
-   * from *standing in for* the guard, and the two obligations do not substitute for each other.
+   * and **this case can no longer see the request-level guard because of it.** Measured: removing
+   * the `disabled` attribute and dispatching a `MouseEvent` does not reach the handler either,
+   * because React's synthetic event system consults the element's `disabled` *prop* rather than
+   * the DOM attribute. With the in-flight ref in `useCompileReview` deleted, this file stayed
+   * fully green.
    *
-   * The guard is the in-flight ref in `useCompileReview`, which closes the window in the same
-   * synchronous turn as the activation. Deleting it reddens this test and nothing else.
+   * So what this case asserts is the **affordance**: a second activation through the UI, with the
+   * attribute defeated, produces no second request. That is worth asserting and it is not the
+   * guard. The guard — the in-flight ref, which closes the window in the same synchronous turn as
+   * the activation — is asserted at the hook in `confirmInFlight.test.tsx`, which is the only
+   * place AD2-1's obligations 1 and 2 can be told apart. Deleting the ref reddens that test and
+   * this one stays green, which is the measurement rather than the intention.
    */
   it('a second activation while the first is in flight sends nothing and is not queued', async () => {
     const gate = deferred<void>();

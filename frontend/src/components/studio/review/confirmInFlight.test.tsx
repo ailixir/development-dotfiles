@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
@@ -7,6 +7,7 @@ import { resetStudioMocks } from '@/services/mocks/studio/handlers';
 import { awaitingDraft } from '@/services/mocks/studio/compileFixtures';
 import { CompileReviewPanel, CONFIRM_LABEL } from './CompileReviewPanel';
 import { STUDIO_BASE, deferred } from './reviewTestHarness';
+import { useCompileReview } from './useCompileReview';
 
 /**
  * Story 10.11c AC-29 (AD2-1, ruled by @po at story 10.11's wave-6 validation) — the affordance
@@ -17,8 +18,8 @@ import { STUDIO_BASE, deferred } from './reviewTestHarness';
  * asserted by nothing. AD2-1 rules that three obligations are separable and that none substitutes
  * for another —
  *
- *  1. the **request-level guard** stays and stays independently falsifiable, which
- *     `confirmFlow.test.tsx` asserts with the `disabled` attribute deliberately defeated;
+ *  1. the **request-level guard** stays and stays independently falsifiable, asserted below at the
+ *     hook — where no affordance can stand in for it;
  *  2. the control is **additionally unavailable** while a confirm is in flight, because a confirm
  *     is an irreversible conditional transaction over four fields from one read (ADR-002 §21.3)
  *     and a second activation either duplicates a request the server will refuse with
@@ -67,6 +68,58 @@ async function openConfirm() {
   const control = await screen.findByRole('button', { name: CONFIRM_LABEL });
   return { control, gate, requests: () => requests };
 }
+
+describe('AD2-1 obligation 1: the request-level guard, asserted where the attribute cannot hide it', () => {
+  it('two activations in one synchronous turn send one request, with no control in the way', async () => {
+    /**
+     * **Why this is a hook test and not a click.**
+     *
+     * The first draft of this guard removed the `disabled` attribute from the rendered control and
+     * dispatched a `MouseEvent`, on the reasoning that an attribute is defeated by any programmatic
+     * activation. **Measured, that is false for React.** React's synthetic event system checks the
+     * element's `disabled` *prop* before invoking a handler, not the DOM attribute, so removing the
+     * attribute changes nothing and the activation never reaches the hook. Deleting the in-flight
+     * ref from `useCompileReview` left that version of the test green — a guard for a guard that
+     * could not fail, which is this epic's whole catalogue in one line.
+     *
+     * So the guard is asserted where it lives. `confirm()` is called twice in the same synchronous
+     * turn with no affordance in between, which is the window the ref exists to close and the only
+     * place AD2-1's obligations 1 and 2 can be told apart.
+     */
+    const gate = deferred<void>();
+    let requests = 0;
+
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(awaitingDraft)),
+      http.post(`${STUDIO_BASE}/tests/:id/confirm-compile`, async () => {
+        requests += 1;
+        await gate.promise;
+        return HttpResponse.json({ ...awaitingDraft, compileStatus: 'READY' });
+      }),
+    );
+
+    const { result } = renderHook(() => useCompileReview(awaitingDraft.id));
+    await waitFor(() => expect(result.current.test).not.toBeNull());
+
+    act(() => {
+      result.current.confirm();
+      result.current.confirm();
+      result.current.confirm();
+    });
+
+    await waitFor(() => expect(requests).toBe(1));
+    // The window is still open — the handler is blocked on the gate — so a fourth activation is
+    // inside the measurement window rather than after it.
+    act(() => {
+      result.current.confirm();
+    });
+    expect(requests).toBe(1);
+
+    gate.resolve();
+    await waitFor(() => expect(result.current.confirmInFlight).toBe(false));
+    expect(requests).toBe(1);
+  });
+});
 
 describe('AD2-1 obligation 2: the confirm control is unavailable while a confirm is in flight', () => {
   it('the confirm control becomes unavailable for the duration of the request and comes back after', async () => {
