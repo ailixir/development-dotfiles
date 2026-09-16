@@ -4,6 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
+import fs from 'node:fs';
+import path from 'node:path';
+import { parse as parseYaml } from 'yaml';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
 import { readyDraft, draftsByCompileStatus } from '@/services/mocks/studio/compileFixtures';
@@ -32,6 +35,10 @@ import ChecksStudioPage from './ChecksStudioPage';
 
 const STUDIO_BASE = '*/api/v1/studio';
 const API_BASE = '*/api/v1';
+
+const SPEC_DIR = path.resolve(__dirname, '../../../../docs/specs/studio');
+const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8'));
+const TIMEOUT_BOUND = openapi.components.schemas.TestConfiguration.properties.timeoutSeconds;
 
 const observed: { method: string; url: string }[] = [];
 function record({ request }: { request: Request }) {
@@ -193,5 +200,49 @@ describe('AC-3(a): editing a step regenerates nothing', () => {
         line,
       );
     }
+  });
+});
+
+describe('the draft the page sends carries a timeout the contract would accept', () => {
+  it('Save sends a timeoutSeconds inside the declared bound, observed at the mock server', async () => {
+    /*
+     * @qa's finding, and it is the guard the fix did not have: `timeoutSeconds` appeared in **zero**
+     * test files, and the value this page sent was `30000` for the whole life of the code — the
+     * legacy `TestIR` recorded milliseconds and `toConfiguration` carried the number straight into a
+     * field the contract declares in seconds and caps at 120. The backend does not clamp it; its
+     * dispatcher multiplies by 1000, so `30000` is an 8h20m runtime budget.
+     *
+     * Retiring the legacy IR from this page's save path fixed it as a side effect. This asserts the
+     * fix over the **bytes that leave the client**, because that is where the defect lived: a unit
+     * assertion on `defaultConfiguration()` would stay green if the page went back to building its
+     * own configuration, which is exactly what it used to do.
+     *
+     * The bound is read from the document, never transcribed.
+     */
+    expect(typeof TIMEOUT_BOUND.minimum).toBe('number');
+    expect(typeof TIMEOUT_BOUND.maximum).toBe('number');
+    // The negative control: a bound wide enough to admit the old value would guard nothing.
+    expect(TIMEOUT_BOUND.maximum).toBeLessThan(30000);
+
+    const created: Array<Record<string, any>> = [];
+    serveList(readyDraft);
+    studioMockServer.use(
+      http.post(`${STUDIO_BASE}/tests`, async ({ request }) => {
+        const body = (await request.json()) as Record<string, any>;
+        created.push(body);
+        return HttpResponse.json({ ...readyDraft, ...body }, { status: 201 });
+      }),
+    );
+
+    renderPage();
+    await screen.findByRole('button', { name: 'Run Test' });
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(created.length).toBe(1));
+    const configuration = created[0].configuration;
+    expect(configuration, 'the save request carried no configuration at all').toBeDefined();
+    expect(typeof configuration.timeoutSeconds).toBe('number');
+    expect(configuration.timeoutSeconds).toBeGreaterThanOrEqual(TIMEOUT_BOUND.minimum);
+    expect(configuration.timeoutSeconds).toBeLessThanOrEqual(TIMEOUT_BOUND.maximum);
   });
 });

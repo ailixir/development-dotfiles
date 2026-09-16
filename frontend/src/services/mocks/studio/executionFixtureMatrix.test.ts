@@ -111,7 +111,14 @@ const ALL_TITLES = storyTestFiles().flatMap((file) => testTitles(fs.readFileSync
 describe('AC-22: the required execution fixture set is enumerable, and each entry is real', () => {
   it('the matrix is not empty and the title scanner found this story’s tests', () => {
     // Without this, both assertions below could pass by finding nothing to check.
-    expect(EXECUTION_FIXTURE_MATRIX.length).toBeGreaterThanOrEqual(20);
+    //
+    // **The floor is not the guard, and @qa's VAC-18 finding is why it says so.** A `>= 20` floor
+    // under an actual 26 let four required shapes vanish in silence, and deleting one left the
+    // whole suite green because the `it.each` rows below simply stop existing. What holds the
+    // required *set* is `[VAC-18] the matrix ids are exactly the ids the document's vocabularies
+    // imply` in `studioContract.test.ts`, which compares both ways against the parsed document and
+    // counts the total. This line is a sanity check on the scanner, nothing more.
+    expect(EXECUTION_FIXTURE_MATRIX.length).toBeGreaterThanOrEqual(26);
     expect(storyTestFiles().length).toBeGreaterThanOrEqual(6);
     expect(ALL_TITLES.length).toBeGreaterThan(30);
     expect(ALL_TITLES).toContain(

@@ -15,7 +15,7 @@ import {
   COMPILE_CONFLICT_NARRATIVES,
   COMPILE_REJECTION_NARRATIVES,
 } from '@/components/studio/review/conflictNarratives';
-import { EXECUTION_ERROR_CODES } from '@/types/studio/studioTypes';
+import { EXECUTION_ERROR_CODES, defaultConfiguration } from '@/types/studio/studioTypes';
 import {
   EXECUTE_CONFLICT_KEYS,
   EXECUTE_CONFLICT_NARRATIVES,
@@ -28,7 +28,7 @@ import {
   executionErrorNarrative,
   runEnablementFor,
 } from '@/components/studio/run';
-import { executionCorpus } from './executionFixtures';
+import { EXECUTION_FIXTURE_MATRIX, executionCorpus } from './executionFixtures';
 
 /**
  * Story 10.1 AC-21 — the mocks are checked against the frozen contract, not against themselves.
@@ -517,5 +517,129 @@ describe('story 10.11a: the execution corpus matches the contract', () => {
         expect(declared, `${execution.executionId} has undeclared field ${field}`).toContain(field);
       }
     }
+  });
+});
+
+/**
+ * Story 10.11a, @qa repair — **VAC-18: a coverage matrix whose required set is an editable
+ * literal.**
+ *
+ * @qa deleted `AWAITING_CONFIRMATION` from `EXECUTION_FIXTURE_MATRIX` and the suite stayed
+ * **green**: the matrix's own `it.each` rows vanish rather than fail, nothing read the total, and
+ * its non-vacuity floor was `>= 20` against an actual 26 — so four required shapes could disappear
+ * without a single assertion noticing. Two of its three families were transcribed literals.
+ *
+ * It is story 10.10's matrix finding one layer further out. There the per-entry predicate was
+ * tautological; here the *required set itself* was editable, which is worse, because a tautological
+ * predicate at least still runs.
+ *
+ * The repair lives here rather than in the matrix's own file, for §18.3's reason: this is where the
+ * parsed document and `assertSameSet` already are, and a second copy of either is the arrangement
+ * that produced INT-4. The ids the document **can** name are derived from its vocabularies; the
+ * ones it cannot are pinned **in this file**, outside the module they check, because an expected
+ * value read out of the thing under test is VAC-11.
+ */
+
+/**
+ * The required shapes no declared vocabulary names.
+ *
+ * Each is a *situation* rather than a member of an enum — a step failure with a skipped tail, a log
+ * array at its cap, a body whose prose contradicts its code — so there is nothing in `openapi.yaml`
+ * to derive them from and a pin is the honest instrument. They are pinned here, in the test, and
+ * never imported from `executionFixtures.ts`.
+ */
+const STANDALONE_REQUIRED_FIXTURE_IDS: readonly string[] = [
+  'FX-ERRCODE-NULL',
+  'FX-STEP-FAIL-SKIPPED-TAIL',
+  'FX-LOGS-TRUNCATED-AT-CAP',
+  'FX-LOGS-COMPLETE',
+  'FX-EXECUTE-409-CONTRADICTORY',
+  'FX-EXECUTE-409-UNDECLARED',
+  'FX-EXECUTE-429',
+  'FX-EXECUTE-503',
+];
+
+describe('story 10.11a: [VAC-18] the AC-22 required set is the document’s, not an editable literal', () => {
+  it('the matrix ids are exactly the ids the document’s vocabularies imply, in both directions', () => {
+    const fromDocument = [
+      ...compileStatusEnum().map((state) => `FX-RUNGATE-STATE-${state}`),
+      ...executionErrorCodeEnum().map((code) => `FX-ERRCODE-${code}`),
+      ...conflictCodesOf('/tests/{id}/execute', 'post').map((code) => `FX-EXECUTE-409-${code}`),
+      ...STANDALONE_REQUIRED_FIXTURE_IDS,
+    ];
+    // Without this the comparison could be empty against empty.
+    expect(fromDocument.length).toBeGreaterThanOrEqual(26);
+
+    assertSameSet(
+      fromDocument,
+      EXECUTION_FIXTURE_MATRIX.map((entry) => entry.id),
+      'EXECUTION_FIXTURE_MATRIX ids',
+    );
+  });
+
+  it('the matrix carries one entry per required id and no duplicates, counted rather than sampled', () => {
+    // The half @qa found missing: nothing read the total. A vanished `it.each` row is now a
+    // count that does not match, not an absence nobody looks for.
+    const ids = EXECUTION_FIXTURE_MATRIX.map((entry) => entry.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids.length).toBe(
+      compileStatusEnum().length +
+        executionErrorCodeEnum().length +
+        conflictCodesOf('/tests/{id}/execute', 'post').length +
+        STANDALONE_REQUIRED_FIXTURE_IDS.length,
+    );
+  });
+});
+
+/**
+ * Story 10.11a, @qa repair — **the timeout the page sends, which nothing guarded.**
+ *
+ * `timeoutSeconds` appeared in **zero** test files. The value the page sent was `30000` for the
+ * whole life of the code: the legacy `TestIR` recorded a millisecond timeout and `toConfiguration`
+ * carried it into a field the contract declares in **seconds**, capped at **120**. @qa checked the
+ * other end and it is worse than a range violation — the request DTO guards only `<= 0`, no upper
+ * bound exists anywhere in `studio/dto/`, and the dispatcher computes `timeoutSeconds * 1000L`,
+ * which makes `30000` an **8 hour 20 minute** runtime budget.
+ *
+ * Retiring the legacy IR from the page's save path fixed it as a side effect. That is a latent
+ * product defect fixed rather than a regression — and it is guarded now, because the fix was
+ * unguarded and a value that was wrong for years can be wrong again.
+ *
+ * The bound is **read from the document**, never transcribed: a contract that raises its cap should
+ * relax this assertion by itself, and a story that lowers the cap should turn it red.
+ */
+describe('story 10.11a: the configured timeout is inside the bound the contract declares', () => {
+  function timeoutBound(): { minimum: number; maximum: number } {
+    const schema = openapi.components.schemas.TestConfiguration.properties.timeoutSeconds;
+    expect(typeof schema.minimum, 'TestConfiguration.timeoutSeconds declares no minimum').toBe(
+      'number',
+    );
+    expect(typeof schema.maximum, 'TestConfiguration.timeoutSeconds declares no maximum').toBe(
+      'number',
+    );
+    return { minimum: schema.minimum, maximum: schema.maximum };
+  }
+
+  it('the declared bound is narrow enough for the old value to violate it', () => {
+    // The negative control. If the document declared no maximum, or one above 30000, every
+    // assertion below would hold for the defect this guard exists to catch.
+    const { minimum, maximum } = timeoutBound();
+    expect(maximum).toBeLessThan(30000);
+    expect(minimum).toBeGreaterThan(0);
+  });
+
+  it('defaultConfiguration() is inside it, and validates against TestConfiguration', () => {
+    const { minimum, maximum } = timeoutBound();
+    const configuration = defaultConfiguration();
+    expect(configuration.timeoutSeconds).toBeGreaterThanOrEqual(minimum);
+    expect(configuration.timeoutSeconds).toBeLessThanOrEqual(maximum);
+
+    const validate = componentValidator('TestConfiguration');
+    expect(validate(configuration), JSON.stringify(validate.errors)).toBe(true);
+  });
+
+  it('the legacy millisecond value would be caught by this schema, so the check discriminates', () => {
+    const validate = componentValidator('TestConfiguration');
+    expect(validate({ ...defaultConfiguration(), timeoutSeconds: 30000 })).toBe(false);
   });
 });

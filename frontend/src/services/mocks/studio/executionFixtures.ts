@@ -1,4 +1,5 @@
 import { draftsByCompileStatus } from './compileFixtures';
+import { EXECUTE_CONFLICT_NARRATIVES } from '@/components/studio/run/executeRefusals';
 import {
   EXECUTION_ERROR_CODES,
   type ExecutionErrorCode,
@@ -265,6 +266,23 @@ export const DISPATCH_DISABLED_BODY = {
 // The enumerable, self-checking required set (AC-22).
 // ---------------------------------------------------------------------------------------------
 
+/**
+ * **VAC-18, found by @qa on this half's own matrix: a coverage matrix whose required set is an
+ * editable literal.** Deleting `AWAITING_CONFIRMATION` from the list below left the whole suite
+ * green — the `it.each` rows simply vanished, nothing read the total, and the file's own
+ * `>= 20` floor sat under an actual 26, so four entries could disappear in silence. Two of the
+ * three families were transcribed literals rather than reads.
+ *
+ * The repair is in `studioContract.test.ts`, where the parsed document and `assertSameSet` already
+ * live: the id set below is compared **both ways** against the ids the document's own vocabularies
+ * imply. The three families here are now derived from the records those vocabularies are already
+ * asserted against — `draftsByCompileStatus`, `EXECUTION_ERROR_CODES` and
+ * `EXECUTE_CONFLICT_NARRATIVES` — so a deletion here contradicts the document rather than
+ * shrinking the enumeration.
+ *
+ * The shapes the document cannot name are pinned in the test file, outside this module, for the
+ * VAC-11 reason: an expected value read out of the thing it checks is not an expectation.
+ */
 export interface RequiredExecutionFixture {
   /** Quoted verbatim in the title of at least one test that consumes the fixture. */
   readonly id: string;
@@ -300,7 +318,7 @@ export const EXECUTION_FIXTURE_MATRIX: readonly RequiredExecutionFixture[] = [
    * of five drafts would drift from the first the moment either was edited, and the enumeration
    * that consumes them reads the five names from `openapi.yaml` regardless.
    */
-  ...['STALE', 'COMPILING', 'AWAITING_CONFIRMATION', 'READY', 'NEEDS_REVISION'].map((state) => ({
+  ...Object.keys(draftsByCompileStatus).map((state) => ({
     id: `FX-RUNGATE-STATE-${state}`,
     description: `the run gate enumerated over a draft in ${state}`,
     resolve: () => draftsByCompileStatus[state],
@@ -387,14 +405,12 @@ export const EXECUTION_FIXTURE_MATRIX: readonly RequiredExecutionFixture[] = [
         : 'the complete fixture has no logs, so "renders every entry" would hold vacuously';
     },
   },
-  ...['COMPILE_REQUIRED', 'RUNTIME_INCOMPATIBLE', 'IDEMPOTENCY_KEY_REUSED', 'TEST_DELETED', 'TEST_QUARANTINED'].map(
-    (code) => ({
-      id: `FX-EXECUTE-409-${code}`,
-      description: `a 409 ${code} response from execute`,
-      resolve: () => executeConflictResponse(code),
-      satisfies: () => bodyDefect(executeConflictResponse(code), code),
-    }),
-  ),
+  ...Object.keys(EXECUTE_CONFLICT_NARRATIVES).map((code) => ({
+    id: `FX-EXECUTE-409-${code}`,
+    description: `a 409 ${code} response from execute`,
+    resolve: () => executeConflictResponse(code),
+    satisfies: () => bodyDefect(executeConflictResponse(code), code),
+  })),
   {
     id: 'FX-EXECUTE-409-CONTRADICTORY',
     description: 'a 409 whose prose contradicts its code',
