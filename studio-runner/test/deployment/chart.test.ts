@@ -228,10 +228,25 @@ describe.skipIf(!HELM)('AC-2a — the security context §9.3 requires, field by 
       const scratchDir = envValues(soleContainer(deployment))['STUDIO_RUNNER_SCRATCH_DIR'];
       expect(scratchDir).toBeDefined();
 
+      // The emptyDir is mounted at the **parent** and the scratch dir is a plain directory inside
+      // it, which is not a detail: `createFsScratchStore.clearAll()` removes and recreates
+      // `STUDIO_RUNNER_SCRATCH_DIR` on start-up, and removing a *mount point* needs a writable
+      // parent — which `readOnlyRootFilesystem: true` deliberately does not provide. Mounting at
+      // the scratch dir itself killed the built image with `EROFS … rmdir` before it listened.
+      //
+      // Still a comparison between two rendered values and not against a literal: the relation
+      // asserted is "the rendered scratch dir is inside a rendered writable mount".
       const mount = (soleContainer(deployment).volumeMounts ?? []).find(
-        (entry) => entry.mountPath === scratchDir,
+        (entry) =>
+          entry.readOnly !== true &&
+          entry.mountPath !== undefined &&
+          (scratchDir === entry.mountPath || (scratchDir ?? '').startsWith(`${entry.mountPath}/`)),
       );
-      expect(mount, `no volume is mounted at the configured scratch dir ${String(scratchDir)}`).toBeDefined();
+      expect(mount, `no writable volume covers the configured scratch dir ${String(scratchDir)}`).toBeDefined();
+      expect(
+        mount?.mountPath,
+        'the emptyDir is mounted AT the scratch dir, which makes it a mount point the runner cannot clear',
+      ).not.toBe(scratchDir);
 
       const volume = (podSpec(deployment).volumes ?? []).find((v) => v.name === mount?.name);
       expect(volume?.emptyDir, 'the scratch volume is not an emptyDir').toBeDefined();
@@ -515,6 +530,32 @@ describe.skipIf(!HELM)('AC-6 — drain, readiness and the grace period are one d
       args: ['--set-string', 'studioRunner.runnerEnv.STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS=600000'],
     });
     expect(podSpec(runnerDeployment(raised)).terminationGracePeriodSeconds ?? 0).toBe(base + 480);
+  });
+});
+
+describe.skipIf(!HELM)('AC-5a — the reaping mechanism is chosen, named, and does not cost the signal', () => {
+  it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
+    '%s shares the process namespace, so the pause container reaps orphaned grandchildren',
+    (_label, valuesFile) => {
+      // **Which half this is.** AC-5a asks for two properties and says to state which mechanism was
+      // chosen rather than blur them. Reaping is `shareProcessNamespace`, so the *reaping* half
+      // moves to AC-5b (SPK-04 question 6) — a pause container exists only in a real pod. The
+      // signal half is proven here, against the built image, and recorded in the Dev Agent Record:
+      // `docker stop` on the exec-form image emits `runner.draining` and `runner.drained` within
+      // four milliseconds; with a shell-form CMD substituted, `docker stop` waits out its whole
+      // timeout and emits neither.
+      const pod = podSpec(runnerDeployment(render({ valuesFile })));
+      expect((pod as { shareProcessNamespace?: boolean }).shareProcessNamespace).toBe(true);
+    },
+  );
+
+  it('does not wrap the image’s entry point, which is what keeps SIGTERM direct', () => {
+    // An `ENTRYPOINT`/`command` override in the chart is the other way the drain dies: PID 1
+    // becomes a shell that never forwards the signal, and the pod is killed with an admitted
+    // attempt in flight.
+    const container = soleContainer(runnerDeployment(render()));
+    expect(container.command).toBeUndefined();
+    expect(container.args).toBeUndefined();
   });
 });
 

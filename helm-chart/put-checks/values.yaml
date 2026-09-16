@@ -316,6 +316,11 @@ studioRunner:
     # between `application.yml` and `studio-runner/src/server/config.ts` cannot be re-created here.
     port: 8090
 
+  # Process reaping (AC-5a / AC-5b). The pause container becomes PID 1 and reaps orphaned
+  # grandchildren; the runner keeps the exec-form CMD, so SIGTERM still reaches Node directly and
+  # the drain still runs. Both halves are stated in the Deployment template.
+  shareProcessNamespace: true
+
   serviceAccount:
     create: true
     name: ""
@@ -357,10 +362,20 @@ studioRunner:
     capabilities:
       drop: ["ALL"]
 
-  # Per-run scratch. The path is the single source: it renders as the volume mount **and** as
-  # STUDIO_RUNNER_SCRATCH_DIR below, and the two are compared to each other in the assertion.
+  # Per-run scratch. One key, two rendered values, compared to each other in the assertion.
+  #
+  # **The emptyDir is mounted at the PARENT, and the runner's scratch directory is a plain
+  # directory inside it.** That is not cosmetic and it was found by running the built image, not
+  # by reading code: `createFsScratchStore.clearAll()` does `rm(rootPath, { recursive: true })`
+  # followed by `mkdir`, so if `STUDIO_RUNNER_SCRATCH_DIR` *is* the mount point, start-up tries to
+  # remove a mount point whose parent is the read-only root filesystem and the runner dies with
+  # `EROFS: read-only file system, rmdir '/scratch/studio-runner'` before it ever listens. A pod
+  # that never starts would satisfy every "no shim can be written" assertion in this story
+  # trivially — "a guard satisfied by a broken implementation" — so this is load-bearing.
   scratch:
-    path: /scratch/studio-runner
+    mountPath: /scratch
+    # Rendered as `{mountPath}/studio-runner`; see `put-checks.studioRunner.scratchDir`.
+    directory: studio-runner
     sizeLimit: 4Gi
 
   # Chromium needs a real /dev/shm; the container default of 64Mi crashes tabs under load.

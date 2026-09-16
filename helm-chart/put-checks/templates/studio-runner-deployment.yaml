@@ -1,6 +1,6 @@
 {{- if .Values.studioRunner.enabled }}
 {{- $name := include "put-checks.studioRunner.fullname" . }}
-{{- $scratch := .Values.studioRunner.scratch.path }}
+{{- $scratch := include "put-checks.studioRunner.scratchDir" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,6 +27,25 @@ spec:
         {{- include "put-checks.labels" . | nindent 8 }}
         {{- include "put-checks.studioRunner.selectorLabels" . | nindent 8 }}
     spec:
+      # **Process reaping (AC-5a, architecture §9.3, ADR-001 §1.1), and the mechanism is named
+      # rather than blurred.**
+      #
+      # Node as PID 1 reaps only its own known children, so an orphaned grandchild — a Chromium
+      # helper whose parent died — is re-parented to PID 1 and becomes a zombie. Observed against
+      # the built image by reading `/proc/*/status`: with `node` as PID 1 a zombie `sh` accumulates
+      # within three seconds; with an init as PID 1 none does.
+      #
+      # The alternative was an in-image init, and it is declined: the `Dockerfile`'s exec-form CMD
+      # is what makes `SIGTERM` reach the process directly so the drain runs — proven here, and
+      # falsified by substituting a shell form, after which `docker stop` waits out its full
+      # timeout and neither `runner.draining` nor `runner.drained` is emitted — and adding an
+      # ENTRYPOINT wrapper to the image ED-05 is going to replace would be work thrown away.
+      #
+      # `shareProcessNamespace` makes the infrastructure pause container PID 1, and the pause
+      # container reaps. **This moves AC-5a's reaping half to AC-5b**, where SPK-04 question 6
+      # already asks it in-cluster: a pause container exists only in a real pod, so the property
+      # cannot be proven here. Stated, not blurred.
+      shareProcessNamespace: {{ .Values.studioRunner.shareProcessNamespace }}
       serviceAccountName: {{ include "put-checks.studioRunner.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.studioRunner.serviceAccount.automountServiceAccountToken }}
       # One derivation (AC-6): the browser runtime cap plus the stop, upload and delivery margins
@@ -101,7 +120,11 @@ spec:
             # (PLAYWRIGHT_BROWSERS_PATH) and from $HOME (/home/pwuser). That disjointness is what
             # makes readOnlyRootFilesystem a browser-integrity control rather than tidiness.
             - name: scratch
-              mountPath: {{ $scratch }}
+              # Mounted at the **parent** of the runner's scratch directory. Mounting at the
+              # directory itself makes it a mount point, and the runner's start-up `clearAll()`
+              # cannot remove a mount point whose parent is read-only — observed as
+              # `EROFS … rmdir` against the built image, before the server ever listened.
+              mountPath: {{ .Values.studioRunner.scratch.mountPath }}
             - name: dev-shm
               mountPath: /dev/shm
             - name: object-store-credentials

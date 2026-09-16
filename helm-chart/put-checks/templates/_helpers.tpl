@@ -163,3 +163,13 @@ period behind — which kills admitted work mid-run and is strictly worse than n
 {{- $extra := int .Values.studioRunner.drain.extraGraceSeconds -}}
 {{- add $runtime $stop $delivery $upload $preStop $extra -}}
 {{- end }}
+
+{{/*
+The runner's scratch directory: a plain directory **inside** the mounted emptyDir, never the mount
+point itself. See the comment in `values.yaml`; the runner's `clearAll()` removes and recreates
+this path on start-up, and removing a mount point needs a writable parent, which
+`readOnlyRootFilesystem: true` deliberately does not provide.
+*/}}
+{{- define "put-checks.studioRunner.scratchDir" -}}
+{{ printf "%s/%s" (trimSuffix "/" .Values.studioRunner.scratch.mountPath) .Values.studioRunner.scratch.directory }}
+{{- end }}

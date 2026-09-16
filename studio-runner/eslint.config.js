@@ -95,7 +95,7 @@ export default tseslint.config(
     // arguments passed are chart paths and `--set` overrides written in this file, never anything
     // derived from an artifact. Scoped to the two harness files rather than to `test/**`, so the
     // ban stays in force everywhere else in the tier.
-    files: ['test/deployment/helm.ts', 'test/deployment/image.ts'],
+    files: ['test/deployment/helm.ts', 'test/deployment/image.ts', 'test/deployment/sec2.test.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
