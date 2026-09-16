@@ -9,6 +9,7 @@ import com.citi.put.checks.studio.dispatch.StudioDispatchDisabledException;
 import com.citi.put.checks.studio.dispatch.StudioQuotaExceededException;
 import com.citi.put.checks.studio.dispatch.StudioReferenceResolver;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
+import com.citi.put.checks.studio.evidence.ExecutionVideoException;
 import com.citi.put.checks.studio.internal.InternalCallbackException;
 import com.citi.put.checks.studio.sse.WatchedExecutionRegistry;
 import java.util.Map;
@@ -79,6 +80,32 @@ public class ChecksExceptionHandler {
                 StudioAccessDeniedException.CODE,
                 "message",
                 "You do not have access to this Studio resource"));
+  }
+
+  /**
+   * The video route's non-authorization refusals (story 10.15; Architecture §6.2, §6.3).
+   *
+   * <p>Every one of these is reachable only <em>after</em> the caller was authorized to read the
+   * execution, so none of them discloses existence — the forbidden and absent cases are both {@code
+   * StudioAccessDeniedException} above, and they are answered identically.
+   *
+   * <p>The content type is set explicitly, for the same reason the forbidden handler sets it: a
+   * {@code <video>} element sends {@code Accept: video/webm}, and negotiating a JSON error body
+   * against that Accept header would turn an honest {@code 404} or {@code 410} into a {@code 500}.
+   *
+   * <p>{@code Content-Range: bytes} {@code *}{@code /S} rides along on the {@code 416}, where
+   * {@code S} was measured from the object.
+   */
+  @ExceptionHandler(ExecutionVideoException.class)
+  public ResponseEntity<Map<String, String>> handleExecutionVideo(ExecutionVideoException ex) {
+    ResponseEntity.BodyBuilder response =
+        ResponseEntity.status(ex.getStatus())
+            .contentType(org.springframework.http.MediaType.APPLICATION_JSON);
+    if (ex.getContentRange() != null) {
+      response =
+          response.header(org.springframework.http.HttpHeaders.CONTENT_RANGE, ex.getContentRange());
+    }
+    return response.body(Map.of("error", ex.getCode(), "message", ex.getMessage()));
   }
 
   /** The kill switch (AC-11, §8.5). Reads, callbacks and recovery are unaffected. */

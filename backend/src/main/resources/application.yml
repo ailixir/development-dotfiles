@@ -205,6 +205,12 @@ studio:
     runner-base-url: ${STUDIO_RUNNER_BASE_URL:http://put-checks-studio-runner:8090}
     # Deployment configuration, never job-supplied (§8.4, §8.5).
     callback-base-url: ${STUDIO_CALLBACK_BASE_URL:http://put-checks-api:8080}
+    # Where the recordings live (§6.2). Deployment configuration, and never a response value:
+    # the API stores object keys only and hands the browser the protected API path.
+    # No retention value here — `evidence-retention` above is the single source (§8.5).
+    video-store:
+      bucket: ${STUDIO_EVIDENCE_BUCKET:put-checks-studio-evidence}
+      endpoint: ${STUDIO_EVIDENCE_ENDPOINT:https://sonic.invalid}
     quotas:
       per-csi: ${STUDIO_QUOTA_PER_CSI:20}
       global: ${STUDIO_QUOTA_GLOBAL:200}

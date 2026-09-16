@@ -111,11 +111,10 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   });
 
   /**
-   * The document's SHA-256 after **story 10.9's route landed**, on top of the four ADR-002
-   * amendments that preceded it.
+   * The document's SHA-256 after **story 10.15's route landed**, on top of everything that
+   * preceded it.
    *
-   * **This is the second re-anchor, and the difference between the two is the point of
-   * T-10.13.10.** What this digest now covers, in the order it happened:
+   * **This is the fourth re-anchor.** What this digest now covers, in the order it happened:
    *
    * 1. ADR-002 sections 14, 15, 16 and 17 — architect rulings, not runner edits: the conflict
    *    responses for a deleted or quarantined draft, the two ratified `ExecutionErrorCode` values,
@@ -134,10 +133,28 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    *    `artifact.schema.json` are byte-unchanged. Under ADR-002 §19 the ruling stays the
    *    architect's and only the *diff* moves to the owning story's PR, which is why this digest
    *    moves here rather than in an unowned edit — the failure §19 was narrowed to prevent.
+   * 4. **Story 10.15 shipping `GET /executions/{id}/video`** — this re-anchor, and `FOC-06`
+   *    **step 2 of 3**. Four edits, all on `getExecutionVideo` and on nothing else: the `206`
+   *    gains declared `video/webm` content with its `Content-Range` and `Content-Length` headers;
+   *    the `404` gains `application/json` `ErrorResponse` content, which is verbatim ADR-002
+   *    §12's own example of a Class A defect; the `416` gains the same content plus its
+   *    `Content-Range` header; and `x-not-yet-implemented` is removed — it was **the last one in
+   *    the document** — while `x-implemented-by` is corrected from `'10.16'` to `'10.15'`, which
+   *    is a wrong value rather than a stale one, ruled Class A by @po at wave-6 validation and
+   *    reported as a finding. No status was added or removed: declaring the two missing
+   *    authorization statuses and a status for an unreachable store are Class C and are escalated
+   *    as ESC-1 and ESC-2, left red rather than taken.
    *
    * **The criterion is unchanged and still holds: nothing in story 10.13 edited the contract.**
    * Every byte of difference between this digest and the previous one belongs to another story,
    * and the four commits of 10.13 touch no file under `docs/specs/`.
+   *
+   * **`FOC-06` ordering, recorded by @po at wave-6 validation.** Three wave-6 stories edit this
+   * document: 10.18 (§20 + §22) → **10.15** (this re-anchor) → 10.11c (§21 + producer). The pin
+   * was verified **green on arrival** at `d1a987663b25d7240fc460f923289aaf22a07145df7d6913114f9f3c1d627c18`
+   * before story 10.15 touched anything — step 1 had landed — so nothing unowned is folded in
+   * here. Had it been red on arrival, the instruction was to report it as a `FOC-06` violation
+   * and stop, not to launder it into this digest.
    *
    * **Why this one has an owner and the last one did not.** The first re-anchor went unowned
    * across all four amendments — they landed as architect rulings rather than in a story PR, so
@@ -156,7 +173,7 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = 'd1a987663b25d7240fc460f923289aaf22a07145df7d6913114f9f3c1d627c18';
+  const BASE_SHA256 = '310d3c984b77104898440cae450795cdd56c11ef926f75209fb6d4198dcc0cf7';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
