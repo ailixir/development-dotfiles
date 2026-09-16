@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
   CsiApiProperties.class,
   DcProperties.class,
   FeatureFlagProperties.class,
+  IdentityBypassProperties.class,
   RateLimitProperties.class,
   SourceConcurrencyProperties.class,
   StudioExecutionProperties.class

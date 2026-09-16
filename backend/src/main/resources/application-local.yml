@@ -12,6 +12,22 @@ spring:
     password: ${SMTP_PASSWORD:}
 
 checks:
+  # ── ED-02 in the LOCAL profile — one of the three opened (story 10.18b, AC-19a) ───────────────
+  #
+  # `core-service` and `csi-read` stay at their new default of **false**. `identity-headers` is
+  # true here because the local profile's identity mechanism IS a header: `LocalDevAuthFilter`
+  # injects a fixed developer identity, and the integration tests that run under this profile turn
+  # that filter off (`checks.local-dev-auth.enabled=false`) precisely so they can inject their own
+  # caller with `X-User-Id` / `X-User-Roles` and assert authorization ordering. With this closed,
+  # every one of those tests authenticates as nobody and the route under test answers 401 before it
+  # is reached.
+  #
+  # **`local` is a developer profile and is never deployed.** The chart renders `api,dev`,
+  # `api,staging` and `api,prod`, and the rendered manifest closes all three flags in every one of
+  # the four value sets — asserted in `studio-runner/test/deployment/edge.test.ts`.
+  security:
+    bypass:
+      identity-headers: true
   scheduling:
     dispatcher-enabled: true
   reports:

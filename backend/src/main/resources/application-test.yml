@@ -26,3 +26,25 @@ studio:
   secrets:
     vault:
       provider: fake
+
+# ── ED-02 in the TEST profile — one of the three opened, deliberately (story 10.18b, AC-19a) ────
+#
+# `core-service` and `csi-read` are left at their new default of **false**, so the suite observes
+# the closure rather than being insulated from it. That is the point of the change: with the
+# hardcoded `return true` gone, a request with no session cookie now gets a 401, which is what the
+# epic's ED-02 failing tests have been asserting all along.
+#
+# `identity-headers` is **true here and nowhere else**. Twelve integration-test files inject their
+# caller with `X-User-Id` / `X-User-Roles`; that is the suite's identity-injection mechanism, not a
+# production behaviour, and closing it inside a Studio story would conflate ED-02's closure with a
+# suite-wide test-harness migration that no story owns.
+#
+# **This profile is never deployed.** What the deployed profiles do is asserted over the *rendered*
+# manifest (all three false in every one of the four value sets), and the closure itself is driven
+# against the production filter under both values of each property in
+# `BffSessionBypassClosureTest` — refusals with a permit companion each, so a flag that stopped
+# discriminating cannot hide behind a passing test.
+checks:
+  security:
+    bypass:
+      identity-headers: true

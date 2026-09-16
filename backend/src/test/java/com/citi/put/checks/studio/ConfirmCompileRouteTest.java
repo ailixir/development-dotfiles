@@ -7,6 +7,10 @@ import com.citi.put.checks.studio.compile.ConfirmFixtures;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +21,6 @@ import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -236,37 +239,43 @@ class ConfirmCompileRouteTest {
    * day the bypass is removed, so this cannot be forgotten quietly.
    */
   @Test
-  @Disabled("ED-02: the unconditional Core-service bypass makes 401 unreachable on this branch")
-  void anIdentitylessCallerIsUnauthorized() {
-    HttpHeaders anonymous = new HttpHeaders();
-    anonymous.setContentType(MediaType.APPLICATION_JSON);
+  void anIdentitylessCallerIsUnauthorized() throws IOException, InterruptedException {
+    // Driven with the JDK's own HTTP client rather than the shared `restTemplate`.
+    //
+    // `TestRestTemplate`'s default `SimpleClientHttpRequestFactory` streams the request body, and
+    // `HttpURLConnection` answers a 401 on a streamed POST by throwing `HttpRetryException`
+    // ("cannot retry due to server authentication, in streaming mode") instead of returning the
+    // response — so the refusal this test exists to observe would arrive as an I/O error and the
+    // test would fail for a client-side reason while the server did exactly the right thing. The
+    // client is a test-side concern; nothing about the request the server sees changes.
+    HttpResponse<String> response =
+        HttpClient.newHttpClient()
+            .send(
+                HttpRequest.newBuilder(
+                        URI.create(
+                            restTemplate.getRootUri()
+                                + "/api/v1/studio/tests/"
+                                + testId
+                                + "/confirm-compile"))
+                    .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .POST(HttpRequest.BodyPublishers.ofString(exactBody()))
+                    .build(),
+                HttpResponse.BodyHandlers.ofString());
 
-    assertThat(confirmAs(anonymous, testId, exactBody()).getStatusCode().value()).isEqualTo(401);
+    assertThat(response.statusCode()).isEqualTo(401);
   }
 
-  /**
-   * The live half of the gap above: it asserts the bypass is what blocks the {@code 401}, so the
-   * disabled test cannot be closed silently or forgotten quietly.
-   *
-   * <p>This deliberately asserts the <em>current</em> behaviour. When {@code ED-02} lands and the
-   * bypass is removed, this test goes red — which is the signal to delete it and enable {@link
-   * #anIdentitylessCallerIsUnauthorized()}.
-   */
-  @Test
-  void theUnauthenticatedCaseIsNotReachableWhileTheCoreServiceBypassIsOn() {
-    HttpHeaders anonymous = new HttpHeaders();
-    anonymous.setContentType(MediaType.APPLICATION_JSON);
-
-    ResponseEntity<String> response = confirmAs(anonymous, testId, exactBody());
-
-    assertThat(response.getStatusCode().value())
-        .as(
-            "while BffSessionAuthenticationFilter.isCoreServiceBypassed() returns true"
-                + " unconditionally, an identity-less caller is admitted as a platform admin and"
-                + " this route cannot answer 401. When ED-02 removes the bypass this assertion"
-                + " fails and anIdentitylessCallerIsUnauthorized() must be enabled")
-        .isNotEqualTo(401);
-  }
+  // `theUnauthenticatedCaseIsNotReachableWhileTheCoreServiceBypassIsOn()` USED TO LIVE HERE, and
+  // story 10.18b removed it by doing exactly what it asked for.
+  //
+  // It asserted that an identity-less caller was NOT answered 401 — the live half of the gap — and
+  // its own comment said: "When ED-02 lands and the bypass is removed, this test goes red — which
+  // is the signal to delete it and enable anIdentitylessCallerIsUnauthorized()."
+  //
+  // AC-19a closed the bypass in configuration (the code path survives; see IdentityBypassProperties
+  // and runbook §9), the test went red in the measured run, and the disabled half above is now
+  // enabled. That is the handover the two tests were written to perform, taken rather than
+  // deferred. The measured evidence is in story 10.18b's AC-22 failing-class diff.
 
   // ── AC-4: 400 for anything that is not exactly the declared body ──────────
 
