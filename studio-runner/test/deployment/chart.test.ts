@@ -786,7 +786,11 @@ describe.skipIf(!HELM)('AC-10a, AC-12 — two store principals, and one retentio
     },
   );
 
-  it('render mutation M10 and M12: one secret for both, and a retention that moves on one side only', () => {
+  it('render mutation M10, and AC-12’s retention pair: one secret for both, and a moved window', () => {
+    // Named for M10 only. **M12 in this story's falsification table is exact-origin credentialed
+    // CORS, which is story 10.18b's**, and labelling this row M12 would put a tick in a box the
+    // other half has to fill. The retention pair is AC-12's own comparison and carries no M number.
+
     const shared = render({ set: { 'studioRunner.objectStore.credentialsSecret': 'checks-api-object-store' } });
     const runnerSecrets = (podSpec(runnerDeployment(shared)).volumes ?? []).map(
       (v) => v.secret?.secretName,
