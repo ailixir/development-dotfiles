@@ -29,6 +29,17 @@ import org.springframework.stereotype.Component;
  * <p>The inspection methods live on the fake and not on {@link VideoObjectStore}, which is what
  * keeps "read-only by construction" a statement about the production interface rather than about a
  * test double that quietly grew a surface.
+ *
+ * <p><b>On this being an unguarded {@code @Component} in {@code src/main/java}</b> — raised by @qa
+ * as LOW-3 on story 10.15 and <b>declined here deliberately, with the reason recorded rather than
+ * left to inference.</b> {@code FakeResultManifestStore} is identically unguarded, in the same
+ * tree, shipped by story 10.14 and merged; the two fakes are swapped for real Sonic clients by the
+ * same story (10.18, under `ED-03`) and should acquire the same guard in the same change, not two
+ * different ones invented separately. Guessing a profile name here would be invention, and
+ * {@code @ConditionalOnMissingBean} does not apply to a {@code @Component}. What protects the
+ * criterion today is behavioural rather than structural: {@code ExecutionVideoStoreBindingIT}
+ * asserts the <b>injected</b> bean is this class, so AC-18b cannot be reported as cleared by wiring
+ * a real endpoint under this name. <b>10.18: guard both fakes together.</b>
  */
 @Component
 public class FakeVideoObjectStore implements VideoObjectStore {

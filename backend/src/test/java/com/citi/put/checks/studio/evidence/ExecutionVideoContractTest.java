@@ -303,16 +303,29 @@ class ExecutionVideoContractTest {
   }
 
   /**
-   * {@code RunnerEvidence.required} is unchanged, asserted against the <b>Java record</b> that
-   * serializes it — a source independent of the document, and independent of this story's edit.
+   * {@code RunnerEvidence.required} names only things that exist — and <b>deliberately says nothing
+   * about which</b> of them are required.
    *
-   * <p>O-14 was landed by story 10.18a, which promoted {@code partial} to required; this story does
-   * not touch {@code RunnerEvidence} and does not inherit that open item. The four-field form is
-   * <b>read</b> here, from two places, and transcribed in neither.
+   * <p><b>Weakened on purpose, after @qa's LOW-4.</b> The first form of this test asserted set
+   * <em>equality</em> with the Java record's components. That is stronger than AC-23 asks for, over
+   * a schema <b>this story does not own</b>: a later story that legitimately makes one component
+   * optional again would have reddened story 10.15's test while touching nothing of 10.15's
+   * subject. That is `FOC-04`'s shape — the false red that has already cost this epic three
+   * blameless investigations — and the fix is to assert only what cannot legitimately change.
+   *
+   * <p>What cannot legitimately change: a {@code required} entry must name a property the schema
+   * declares <em>and</em> a component the Java record declares. A renamed or misspelled entry is a
+   * defect in any story; a shorter or longer list is a ruling. The membership question belongs to
+   * whoever owns {@code RunnerEvidence} — O-14 was landed by story 10.18a, not by this one — and is
+   * asserted from the other side by the runner's own {@code confinement.test.ts}, which pins §20's
+   * promotion of {@code partial} explicitly.
+   *
+   * <p>Non-vacuity: the list is asserted non-empty, so a reader that found nothing fails instead of
+   * reporting a clean document.
    */
   @Test
   @SuppressWarnings("unchecked")
-  void runnerEvidenceStillRequiresEveryComponentTheJavaRecordDeclares() {
+  void everyRunnerEvidenceRequiredEntryNamesSomethingBothArtefactsDeclare() {
     Map<String, Object> schema =
         (Map<String, Object>)
             ContractDocument.at(document.root(), "components", "schemas", "RunnerEvidence");
@@ -322,10 +335,24 @@ class ExecutionVideoContractTest {
                 com.citi.put.checks.studio.internal.dto.RunnerEvidence.class.getRecordComponents())
             .map(java.lang.reflect.RecordComponent::getName)
             .collect(java.util.stream.Collectors.toCollection(TreeSet::new));
+    Set<String> declaredProperties =
+        new TreeSet<>(((Map<String, Object>) schema.get("properties")).keySet());
+    Set<String> required = new TreeSet<>((List<String>) schema.get("required"));
 
-    assertThat(new TreeSet<>((List<String>) schema.get("required")))
-        .as("this story does not touch RunnerEvidence; O-14 is not its open item")
-        .isEqualTo(fromJava);
+    assertThat(required)
+        .as("RunnerEvidence declares no required fields at all; the checks below would be vacuous")
+        .isNotEmpty();
+    assertThat(declaredProperties)
+        .as(
+            "a RunnerEvidence required entry names no declared property — a rename landed on one "
+                + "side only. WHICH fields are required is not this story's and is not asserted here")
+        .containsAll(required);
+    assertThat(fromJava)
+        .as(
+            "a RunnerEvidence required entry names no component of the Java record that serializes "
+                + "it — the document and the producer disagree about a field's NAME, which is a defect "
+                + "in any story, unlike its optionality, which is a ruling")
+        .containsAll(required);
   }
 
   // ── readers ──────────────────────────────────────────────────────────────

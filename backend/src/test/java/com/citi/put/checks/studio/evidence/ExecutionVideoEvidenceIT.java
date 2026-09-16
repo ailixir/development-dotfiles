@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
+import com.citi.put.checks.studio.dto.VideoEvidence;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -15,6 +16,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -194,6 +197,61 @@ class ExecutionVideoEvidenceIT {
         Arguments.of("EXPIRED", 410));
   }
 
+  /**
+   * The case table above is an editable literal enumerated with {@code @MethodSource}, and a
+   * deleted row <b>deletes its own test</b> rather than failing one — the epic's <b>eighteenth</b>
+   * catalogued vacuous shape, found here by @qa, who removed {@code UNAVAILABLE} and watched the
+   * class report BUILD SUCCESSFUL at 13 passed.
+   *
+   * <p>The remedy is the one this story already built for the Range table, in the form §6.1's
+   * vocabulary makes available: <b>the required set is derived, not transcribed</b>. {@link
+   * VideoEvidence} declares the five states as public constants, so they are read off the
+   * production type by reflection and compared with the table <b>both ways</b>. Deleting a row
+   * fails here; adding a sixth state to {@code VideoEvidence} without answering it fails here too.
+   *
+   * <p>The total is asserted separately, because a set comparison alone is satisfied by a
+   * collection that has silently stopped collecting, and a floor would not be a guard.
+   */
+  @Test
+  void theFiveStateCaseTableCoversEveryStateTheDtoDeclaresAndNoOther() {
+    Set<String> declared = statesDeclaredByTheProductionType();
+    Set<String> covered =
+        evidenceStates()
+            .map(arguments -> String.valueOf(arguments.get()[0]))
+            .collect(java.util.stream.Collectors.toCollection(TreeSet::new));
+
+    assertThat(declared)
+        .as("VideoEvidence declares no state constants at all, so the comparison below is vacuous")
+        .isNotEmpty();
+    assertThat(covered)
+        .as(
+            "the case table and §6.1's vocabulary disagree: a state was dropped from the table, or "
+                + "one was added to VideoEvidence without this route being taught to answer it")
+        .isEqualTo(declared);
+    assertThat(covered)
+        .as("the table's size, read rather than floored — a @MethodSource row deletes its own test")
+        .hasSize(declared.size());
+  }
+
+  /** §6.1's five states, read off the production type rather than transcribed here. */
+  private static Set<String> statesDeclaredByTheProductionType() {
+    Set<String> states = new TreeSet<>();
+    for (java.lang.reflect.Field field : VideoEvidence.class.getDeclaredFields()) {
+      int modifiers = field.getModifiers();
+      if (java.lang.reflect.Modifier.isPublic(modifiers)
+          && java.lang.reflect.Modifier.isStatic(modifiers)
+          && java.lang.reflect.Modifier.isFinal(modifiers)
+          && field.getType() == String.class) {
+        try {
+          states.add(String.valueOf(field.get(null)));
+        } catch (IllegalAccessException e) {
+          throw new AssertionError("could not read " + field.getName(), e);
+        }
+      }
+    }
+    return states;
+  }
+
   @ParameterizedTest(name = "AC-7 — {0} answers {1}")
   @MethodSource("evidenceStates")
   void everyEvidenceStateIsAnsweredAndBothSurfacesAgree(String state, int expectedStatus)
@@ -201,12 +259,32 @@ class ExecutionVideoEvidenceIT {
     applyState(state);
 
     ResponseEntity<byte[]> answer = get(videoPath(false), reader());
-    JsonNode snapshot = snapshot();
+    String published = snapshot().path("video").path("status").asText();
+    int answered = answer.getStatusCode().value();
 
-    assertThat(snapshot.path("video").path("status").asText())
-        .as("the snapshot route and this route must not drift apart about evidence state")
+    // (i) A fixture check, and it is labelled as one. It is NOT a comparison of two surfaces —
+    // @qa measured the old wording printing a cross-surface drift message for a single-surface
+    // mismatch, which is shape 16's sub-form: a message claiming a discriminator its assertion
+    // does not have.
+    assertThat(published)
+        .as(
+            "the fixture set up '%s' but the snapshot publishes '%s', so this case is about a "
+                + "different row than the one it names",
+            state, published)
         .isEqualTo(state);
-    assertThat(answer.getStatusCode().value()).isEqualTo(expectedStatus);
+
+    // (ii) THE cross-surface comparison. The expectation is derived from what the snapshot route
+    // actually published, not from the table — so a route that grew its own second derivation of
+    // evidence state fails here even when the table would still have accepted its answer.
+    assertThat(answered)
+        .as(
+            "the two surfaces disagree: the snapshot publishes '%s', which this route must answer "
+                + "%d for, and it answered %d",
+            published, statusForPublishedState(published), answered)
+        .isEqualTo(statusForPublishedState(published));
+
+    // (iii) …and the table's own column, which is the pinned second copy of that mapping.
+    assertThat(answered).isEqualTo(expectedStatus);
 
     if (expectedStatus == 200) {
       assertThat(answer.getBody()).isEqualTo(object);
@@ -220,6 +298,22 @@ class ExecutionVideoEvidenceIT {
           .as("the 410 code is read from the contract's own expired example, never transcribed")
           .isEqualTo(expiredCodeFromContract());
     }
+  }
+
+  /**
+   * What the route must answer for a state the <b>snapshot published</b> (§6.1, §6.3).
+   *
+   * <p>Keyed on the published value rather than on the case table's parameter, which is what makes
+   * the assertion above a comparison of two surfaces instead of two copies of one expectation.
+   */
+  private static int statusForPublishedState(String publishedState) {
+    if (VideoEvidence.AVAILABLE.equals(publishedState)) {
+      return 200;
+    }
+    if (VideoEvidence.EXPIRED.equals(publishedState)) {
+      return 410;
+    }
+    return 404;
   }
 
   /** The code the frozen document's {@code expired} example carries, read at test time. */

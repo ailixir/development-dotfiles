@@ -12,6 +12,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -152,8 +154,67 @@ class ExecutionVideoAuthorizationIT {
   }
 
   /**
+   * The identity set is pinned <b>both ways</b>, because a {@code @MethodSource} row that is
+   * deleted <b>deletes its own test</b> rather than failing one.
+   *
+   * <p>The epic's <b>eighteenth</b> catalogued vacuous shape, and @qa found it here by deleting
+   * <b>the wrong-CSI identity — AC-1's most load-bearing row</b> — and watching the class report
+   * BUILD SUCCESSFUL at 12 passed. {@link #theMatrixContainsBothAnswers()} did not notice, because
+   * the surviving no-ownership row is also denied and satisfied it.
+   *
+   * <p>Unlike the evidence-state table, this set has <b>no production vocabulary to derive from</b>
+   * — these are fixtures, not a domain enum — so the remedy is the other half of the same rule: a
+   * <b>deliberate second copy</b>, compared both ways, with the total read rather than floored. A
+   * story that legitimately adds or removes an identity edits this list, and that edit <i>is</i>
+   * the record. It must not be "simplified" back into a derivation from {@code identities()}, which
+   * would restore exactly the hole it closes.
+   *
+   * <p>Each name is also checked to be non-blank, so a row that lost its label cannot hide inside
+   * the set comparison.
+   */
+  @Test
+  void theIdentityMatrixIsPinnedBothWaysAndCarriesItsTotal() {
+    Set<String> pinned =
+        new TreeSet<>(
+            List.of(
+                "reader of the execution's CSI",
+                "owner of the execution's CSI",
+                "a principal on a different CSI",
+                "a principal with no ownership at all",
+                "no identity headers at all",
+                "an administrator"));
+
+    Set<String> present =
+        identities()
+            .map(arguments -> String.valueOf(arguments.get()[0]))
+            .collect(java.util.stream.Collectors.toCollection(TreeSet::new));
+
+    assertThat(present)
+        .as(
+            "an identity was dropped from the matrix, or added without this pin being updated. "
+                + "A deleted @MethodSource row deletes its own test, so nothing else here would fail — "
+                + "and the wrong-CSI row is the one AC-1's whole claim rests on")
+        .isEqualTo(pinned);
+    assertThat(present).as("the matrix's size, read rather than floored").hasSize(pinned.size());
+    assertThat(present).allSatisfy(name -> assertThat(name).isNotBlank());
+
+    // …and every pinned identity really is exercised against the route, so the set above is not a
+    // list of strings that nothing drives.
+    identities()
+        .forEach(
+            arguments ->
+                assertThat(get(videoPath(false), (HttpHeaders) arguments.get()[1]).getStatusCode())
+                    .as("%s was pinned but the route did not answer it at all", arguments.get()[0])
+                    .isNotNull());
+  }
+
+  /**
    * The matrix above is comparative, so it would also be satisfied by a route that answered the
    * same thing to everybody. This says it did not.
+   *
+   * <p><b>It is not a coverage guard and must not be mistaken for one.</b> @qa measured it staying
+   * green with the wrong-CSI identity deleted, because the surviving no-ownership row supplies the
+   * {@code 403}. Coverage is {@link #theIdentityMatrixIsPinnedBothWaysAndCarriesItsTotal()}'s job.
    */
   @Test
   void theMatrixContainsBothAnswers() {
