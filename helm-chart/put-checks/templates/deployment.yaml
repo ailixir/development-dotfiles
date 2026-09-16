@@ -66,6 +66,50 @@ spec:
             # declaration (§6.2, AC-12).
             - name: STUDIO_EVIDENCE_RETENTION
               value: {{ .Values.objectStore.retention | quote }}
+            # ── The kill switch and the dispatcher, on the API (story 10.18b, AC-23a) ─────
+            #
+            # The kill switch comes from its own values key. The dispatcher is `false` here as a
+            # LITERAL and not a values key, because the API never dispatches in any configuration:
+            # `StudioDispatcher` is a worker-profile bean, and a values key that appeared to turn
+            # it on would be a control that does nothing — which is worse than no control, because
+            # somebody would rely on it. Written explicitly rather than left to a default because
+            # `application.yml` (`false`) and `Dispatcher.enabledOrDefault()` (`true`) disagree.
+            - name: STUDIO_EXECUTION_ENABLED
+              value: {{ .Values.studioExecution.enabled | quote }}
+            - name: STUDIO_DISPATCHER_ENABLED
+              value: "false"
+            # ── The SSE bounds the edge is configured against (story 10.18b, AC-13a) ──────
+            #
+            # These two are the ONLY values SnapshotBroadcaster reads, and the streaming Ingress's
+            # `proxy-read-timeout` is derived from `studioSse.lifetimeSeconds` — the same key that
+            # renders `STUDIO_SSE_LIFETIME` here. A test compares the rendered annotation against
+            # these rendered values in the SAME manifest, so the proxy bound and the application
+            # bound cannot drift apart unobserved. Raising the heartbeat above the timeout is M11.
+            - name: STUDIO_SSE_HEARTBEAT
+              value: {{ printf "%ds" (int .Values.studioSse.heartbeatSeconds) | quote }}
+            - name: STUDIO_SSE_LIFETIME
+              value: {{ printf "%ds" (int .Values.studioSse.lifetimeSeconds) | quote }}
+            # ── ED-02: the three identity bypasses, closed in the deployed profile (AC-19a) ─────
+            #
+            # ⚠ **THE CODE PATHS STILL EXIST. THEY ARE CLOSED HERE BY CONFIGURATION, NOT REMOVED.**
+            # `BffSessionAuthenticationFilter` carries three ways to obtain an identity the
+            # platform never vouched for: the hardcoded Core-service bypass, the client-supplied
+            # `X-User-Id` header path (which is checked FIRST, so closing the bypass alone closes
+            # nothing for a client that sends a header), and the `/api/v1/csi` read bypass that
+            # appends `checks-admin`. All three now read a property whose default is `false`, and
+            # all three are rendered `false` here so that the value is deliberate and visible in
+            # the manifest rather than inherited from a default somebody may change.
+            #
+            # **No credentialed pilot may run until ED-02 has linked completed tickets.** ED-02's
+            # owner reads "TBD — not assigned in sources"; @po could not name one and raised the
+            # escalation to @pm. The real vault is ALSO still a stub: `SecretsService` returns
+            # `REDACTED`. See `docs/runbooks/studio-runner.md` §9.
+            - name: CHECKS_BYPASS_CORE_SERVICE
+              value: {{ .Values.backend.identityBypass.coreService | quote }}
+            - name: CHECKS_BYPASS_IDENTITY_HEADERS
+              value: {{ .Values.backend.identityBypass.identityHeaders | quote }}
+            - name: CHECKS_BYPASS_CSI_READ
+              value: {{ .Values.backend.identityBypass.csiRead | quote }}
             {{- range $key, $val := .Values.backend.env }}
             - name: {{ $key }}
               value: {{ $val | quote }}
@@ -209,6 +253,19 @@ spec:
             - name: STUDIO_RUNNER_BASE_URL
               value: "http://{{ include "put-checks.studioRunner.fullname" . }}:{{ .Values.studioRunner.service.port }}"
             {{- end }}
+            # ── The kill switch and the dispatcher, on the WORKER (story 10.18b, AC-23a) ──
+            #
+            # Two distinct values keys, because they are two distinct decisions. Engaging the kill
+            # switch must NOT also stop the dispatcher: BRD §9 requires queued undispatched work to
+            # be closed EXPLICITLY when the switch goes off, and `StudioDispatcher.dispatchOnce()`
+            # is what closes it — a worker with the dispatcher off would leave that work queued
+            # until its deadline, which is the opposite of what the switch promises.
+            #
+            # This is the ONLY component with the dispatcher enabled.
+            - name: STUDIO_EXECUTION_ENABLED
+              value: {{ .Values.studioExecution.enabled | quote }}
+            - name: STUDIO_DISPATCHER_ENABLED
+              value: {{ .Values.studioExecution.dispatcherEnabled | quote }}
             # Logical expiry, which is what the API enforces at `videoExpiresAt` (§6.2). The
             # object-store lifecycle window renders from this same key; physical deletion on the
             # store is asynchronous and nothing in this chart claims otherwise.

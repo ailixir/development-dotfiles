@@ -230,7 +230,29 @@ npm run test:deployment
   available locally. Both prerequisites are required; see below.
 - **Needs the pinned image: YES.** This is the stage that runs @qa's SEC-2 shim attack *inside* the
   built image, in both directions.
-- **Produces:** the story 10.18a evidence for AC-1 – AC-12 and **AC-4a part 3**.
+- **Produces:** the story 10.18a evidence for AC-1 – AC-12 and **AC-4a part 3**, and the story
+  10.18b evidence for **AC-13a**, **AC-16a**, **AC-18**, **AC-19a** (rendered half) and **AC-23a**
+  (rendered half).
+
+> #### ⚠ ONE TEST IN THIS STAGE IS RED ON PURPOSE, AND IT MUST STAY RED
+>
+> `test/deployment/envfrom-keys.test.ts` fails with **fifteen keys per value set**, and that failure
+> is story 10.18b's **AC-18 deliverable**, not a broken test. The chart renders `configOverrides`
+> entries as dotted ConfigMap keys consumed through `envFrom`; Kubernetes silently skips any key
+> that is not a valid environment-variable name, so the mechanism has been **inert since it was
+> written** and every dotted setting in it has been one an operator believed they had applied.
+>
+> AC-18 says in as many words that it is *"left red and escalated"*. **Do not allowlist the keys** —
+> that produces a guard that cannot fail, which is the shape this epic has now catalogued nineteen
+> times. **Do not convert them inside a Studio story** — they are database and scheduler settings
+> whose owners have not reviewed the change.
+>
+> **OWNER: @devops (Gage)** carries it to resolution; **MECHANISM: @architect (Aria)** decides
+> between env-name conversion, a mounted config file and `SPRING_APPLICATION_JSON`. Details and the
+> exact key list: `docs/runbooks/studio-runner.md` §11.
+>
+> **Every other test in this stage must be green.** A second red here is a real failure, and the
+> distinction is why this file is in its own tier file rather than mixed into `chart.test.ts`.
 
 **This stage fails closed, and the reason is a finding rather than a preference.** Story 10.18a's
 first version ran this tier in stage 4 with `describe.skipIf(!HELM)` and `it.skipIf(!DOCKER)`. QA
