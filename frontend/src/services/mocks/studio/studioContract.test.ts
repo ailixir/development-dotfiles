@@ -5,6 +5,7 @@ import Ajv2020 from 'ajv/dist/2020';
 import { parse as parseYaml } from 'yaml';
 import { mockArtifact, mockExecutions, mockTests, MOCK_READABLE_CSIS, OTHER_CSI } from './fixtures';
 import { compileReviewDrafts } from './compileFixtures';
+import { ALL_SCENARIO_FRAMES } from './executionScenarios';
 import {
   COMPILE_STATE_NARRATIVES,
   narrativeFor,
@@ -515,6 +516,45 @@ describe('story 10.11a: the execution corpus matches the contract', () => {
     for (const execution of executionCorpus) {
       for (const field of Object.keys(execution)) {
         expect(declared, `${execution.executionId} has undeclared field ${field}`).toContain(field);
+      }
+    }
+  });
+});
+
+/**
+ * Story 10.11b — **AC-17**. Every scripted transport frame is validated against the document's own
+ * `ExecutionSnapshot`, through the harness this file already has. No second Ajv instance and no
+ * second parse of `openapi.yaml`: ADR-002 §18.3 — *"install the document-reading assertion once,
+ * and the other should extend it rather than write a second one."*
+ */
+describe('story 10.11b: the scripted transport frames match the contract', () => {
+  it('every scenario frame validates against ExecutionSnapshot', () => {
+    const validate = componentValidator('ExecutionSnapshot');
+    expect(ALL_SCENARIO_FRAMES.length).toBeGreaterThan(0);
+    for (const frame of ALL_SCENARIO_FRAMES) {
+      expect(
+        validate(frame),
+        `revision ${frame.revision}: ${JSON.stringify(validate.errors)}`,
+      ).toBe(true);
+    }
+  });
+
+  it('every scenario frame carries every required field and nothing the contract does not declare', () => {
+    const required = requiredPropertiesOf('ExecutionSnapshot');
+    const declared = declaredPropertiesOf('ExecutionSnapshot');
+    expect(required.length).toBeGreaterThan(0);
+
+    for (const frame of ALL_SCENARIO_FRAMES) {
+      for (const field of required) {
+        expect(
+          Object.prototype.hasOwnProperty.call(frame, field),
+          `revision ${frame.revision} is missing ${field}`,
+        ).toBe(true);
+      }
+      for (const field of Object.keys(frame)) {
+        expect(declared, `revision ${frame.revision} has undeclared field ${field}`).toContain(
+          field,
+        );
       }
     }
   });
