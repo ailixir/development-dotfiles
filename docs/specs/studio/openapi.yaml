@@ -701,8 +701,7 @@ paths:
       tags: [executions]
       operationId: getExecutionVideo
       summary: Protected video stream
-      x-not-yet-implemented: true
-      x-implemented-by: '10.16'
+      x-implemented-by: '10.15'
       description: |
         Authorized against the execution's immutable CSI. Object storage keys are never exposed;
         `videoPath` on the snapshot is this API path.
@@ -718,8 +717,26 @@ paths:
           content:
             video/webm:
               schema: { type: string, format: binary }
-        '206': { description: Range response }
-        '404': { description: No evidence for this execution }
+        '206':
+          description: Range response
+          headers:
+            Content-Range:
+              schema: { type: string }
+              description: 'Inclusive window and the total, both measured from the stored object: `bytes a-b/S`.'
+            Content-Length:
+              schema: { type: integer, minimum: 0 }
+              description: Bytes in this response, which is the requested window's length and never the object's.
+          content:
+            video/webm:
+              schema: { type: string, format: binary }
+        '404':
+          description: No evidence for this execution
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                noEvidence:
+                  value: { error: VIDEO_UNAVAILABLE, message: 'No evidence for this execution' }
         '410':
           description: Evidence expired
           content:
@@ -728,7 +745,18 @@ paths:
               examples:
                 expired:
                   value: { error: VIDEO_EXPIRED, message: 'The recording for this execution expired on 2026-08-15T10:04:12Z' }
-        '416': { description: Unsatisfiable range }
+        '416':
+          description: Unsatisfiable range
+          headers:
+            Content-Range:
+              schema: { type: string }
+              description: 'The unsatisfied-range form carrying the measured object size: `bytes` `*` `/S`.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                unsatisfiable:
+                  value: { error: RANGE_NOT_SATISFIABLE, message: 'The requested range cannot be served' }
 
   # ────────────────────────────────────────────────────────────────────────────────────────────
   # Internal surface, architecture §8.4, in the order that section tabulates it.

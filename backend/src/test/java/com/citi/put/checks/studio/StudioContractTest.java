@@ -190,14 +190,17 @@ class StudioContractTest {
         .contains("POST " + PUBLIC_BASE + "/tests/{id}/compile");
     assertThat(pendingOperations())
         .as(
-            "story 10.9 ships POST /tests/{id}/confirm-compile, so its marker came off and this"
-                + " set shrank to the video route alone. That is why the expectation changed and"
-                + " not because a marker was quietly cleared: the video route (10.16) is the last"
-                + " declared-but-unserved operation, and the mirror assertion in"
-                + " theConfirmRouteIsShippedAndTheMarkerCameOffForThatOperationOnly proves the"
-                + " confirm route is actually reachable rather than merely unflagged. The SSE"
-                + " stream lost its marker in 10.7, which ships that route (ADR-002 section 13)")
-        .containsExactlyInAnyOrder("GET /executions/{id}/video");
+            "story 10.15 ships GET /executions/{id}/video, which section 13's last row recorded as"
+                + " the ONLY remaining pending operation, so this set is now EMPTY. That is why"
+                + " the expectation changed and not because a marker was quietly cleared: the"
+                + " mirror assertion in"
+                + " theVideoRouteIsShippedAndTheMarkerCameOffForThatOperationOnly proves that"
+                + " route is actually reachable rather than merely unflagged, and"
+                + " ExecutionVideoContractTest points this same reader at a scratch copy carrying"
+                + " a marker on a different operation, because an isEmpty() assertion is otherwise"
+                + " satisfied by a helper that has stopped working. The SSE stream lost its marker"
+                + " in 10.7, the confirm route in 10.9 (ADR-002 section 13)")
+        .isEmpty();
   }
 
   /**
@@ -212,6 +215,10 @@ class StudioContractTest {
    * <p>{@code x-implemented-by} stays: ADR-002 §14.8 item 5 set the precedent on {@code
    * compileTest}, and the marker records <em>who shipped it</em>, not <em>whether it is
    * pending</em>.
+   *
+   * <p><b>Amended by story 10.15.</b> The video-route assertion at the end of this method has been
+   * inverted — that route is now shipped, by 10.15, and its marker is gone. It is amended rather
+   * than deleted: it is still the assertion that stops a story clearing a neighbour's marker.
    */
   @Test
   void theConfirmRouteIsShippedAndTheMarkerCameOffForThatOperationOnly() throws IOException {
@@ -230,10 +237,47 @@ class StudioContractTest {
         .isEqualTo("10.9");
     assertThat(operationFlag("/executions/{id}/video", "x-not-yet-implemented"))
         .as(
-            "the video route is story 10.16's and nothing here implements it; a story that"
-                + " quietly cleared a neighbour's marker would present an unimplemented route as"
-                + " shipped")
-        .isEqualTo(Boolean.TRUE);
+            "the video route's marker came off in story 10.15, which ships GET"
+                + " /executions/{id}/video; the direction of this assertion is INVERTED from what"
+                + " it asserted through wave 5, and the story that inverted it is the story that"
+                + " landed the route. Its own mirror is"
+                + " theVideoRouteIsShippedAndTheMarkerCameOffForThatOperationOnly below")
+        .isNull();
+  }
+
+  /**
+   * Story 10.15 AC-21 — the video route is shipped, and the marker came off for it alone.
+   *
+   * <p>The third in this family, and the last: section 13's final row recorded {@code
+   * pendingOperations()} as {@code GET /executions/{id}/video} alone, so this story empties the set
+   * rather than shrinking it.
+   *
+   * <p>It also carries the correction. {@code x-implemented-by} read {@code '10.16'} — the
+   * <em>frontend</em> playback story — while the epic manifest assigns <i>"Authorized Range
+   * video/download endpoint"</i> to 10.15 and <i>"Evidence state, playback and step seek"</i>
+   * (Frontend) to 10.16, and the retired epic's index table agrees. A vendor extension naming a
+   * story that will never implement the route is a defect nothing could ever have satisfied, which
+   * is ADR-002 §12's own Class A language; @po ruled it Class A at wave-6 validation and it is
+   * recorded as a finding rather than laundered.
+   */
+  @Test
+  void theVideoRouteIsShippedAndTheMarkerCameOffForThatOperationOnly() throws IOException {
+    String route = "GET " + PUBLIC_BASE + "/executions/{id}/video";
+
+    assertThat(implementedStudioOperations())
+        .as(
+            "T-10.15.8 landed GET /executions/{id}/video; an unimplemented route may not be"
+                + " presented as shipped")
+        .contains(route);
+    assertThat(declaredOperations(false))
+        .as("and the document no longer flags it as pending")
+        .contains(route);
+    assertThat(operationFlag("/executions/{id}/video", "x-implemented-by"))
+        .as(
+            "the attribution named 10.16, which is the frontend playback story — corrected here"
+                + " with the marker removal, in one ADR-002 section 13 row (Class A, @po wave-6)")
+        .isEqualTo("10.15");
+    assertThat(pendingOperations()).as("and nothing else lost a marker alongside it").isEmpty();
   }
 
   @Test
