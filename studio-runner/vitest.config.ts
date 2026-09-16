@@ -5,12 +5,25 @@ import { configDefaults, defineConfig } from 'vitest/config';
  *
  * `test/fixtures-tier/**` is excluded here: that tier has its own config and its own CI stage,
  * which is gated by `ED-05` (see `ci/stages.md`).
+ *
+ * `test/deployment/**` is excluded for the same reason and **not** for a more convenient one: its
+ * prerequisites are an external `helm` binary and a built container image, neither of which a plain
+ * Node image has. It has its own config (`vitest.deployment.config.ts`), its own script
+ * (`npm run test:deployment`) and its own stage (`ci/stages.md` stage 9), and — unlike the version
+ * QA reviewed — it **fails** rather than skips when a prerequisite is absent.
+ *
+ * Moving a tier out of the default run is how a tier gets quietly lost, so the move is watched:
+ * `test/deployment-tier-wiring.test.ts` runs *here* and reddens if the config, the script, the
+ * stage entry or any of the tier's files disappears. The deferral record
+ * (`test/deferred.test.ts`) deliberately stays in the default run — it needs no prerequisite, and
+ * the asymmetry QA found was precisely that the blocked halves could not self-arm while the passed
+ * halves silently disarmed.
  */
 export default defineConfig({
   test: {
     environment: 'node',
     include: ['test/**/*.test.ts'],
-    exclude: [...configDefaults.exclude, 'test/fixtures-tier/**'],
+    exclude: [...configDefaults.exclude, 'test/fixtures-tier/**', 'test/deployment/**'],
     coverage: {
       enabled: true,
       provider: 'v8',

@@ -29,8 +29,14 @@ export type {
   JobIdentity,
 } from './envelope.js';
 
-export { boundSteps, byteLength, createLogBuffer, DEFAULT_REPORT_BOUNDS } from './bounds.js';
-export type { LogBuffer, LogEntry, ReportBounds } from './bounds.js';
+// `createLogBuffer` is **deliberately absent from this surface** (ADR-002 O-16, story 10.18a).
+// The factory hands out a truncating buffer, and what made its truncate-before-redact ordering
+// worth closing rather than documenting was that it sat here, on the package's own module surface,
+// one import away from a second producer. `append` now takes a branded already-redacted entry as
+// well, so the deep import is closed too; this line is the surface half of the same closure.
+// `test/server/surface.test.ts` holds it.
+export { boundSteps, byteLength, DEFAULT_REPORT_BOUNDS } from './bounds.js';
+export type { LogBuffer, LogEntry, RedactedLogEntry, ReportBounds } from './bounds.js';
 
 export { createRunSnapshot, serializeBounded } from './snapshot.js';
 export type {

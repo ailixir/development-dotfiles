@@ -1,0 +1,605 @@
+schema: 1
+story: '10.18a'
+story_title: Hardened staging deployment — the pod-inward half, and ADR-002 §§19–23's amendment
+epic: EPIC-10
+wave: 6
+
+gate: CONCERNS
+
+status_reason: >-
+  Every criterion 10.18a claims is met, and the reviewer proved the load-bearing ones by running
+  them rather than by reading them. The contract hash was re-read from the file, not accepted:
+  `shasum -a 256 docs/specs/studio/openapi.yaml` returns
+  d1a987663b25d7240fc460f923289aaf22a07145df7d6913114f9f3c1d627c18, the base at 78cc634b2 returns
+  cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e, and the diff between them is
+  18 insertions / 9 deletions in exactly two hunks. All three `confinement.test.ts` repairs are
+  verified and all three can fail: reverting `required` to the three-key form on the production
+  document gives 2 red / 16 green, exactly the developer's F-29, and the substring reasoning is
+  correct — measured in node, neither form contains the other. The `not.toContain` at :189 is not
+  decoration either: planting the three-key literal inside the assertion window while leaving the
+  four-key `required` in place turns that specific assertion red. FOC-06 step 1 is confirmed
+  landed first by inspection of the trees, not the log: at each of dc0c30089, 3430a898b, d7f527dc3
+  and d43615dc5, `git ls-tree` finds zero studio-runner chart templates and an empty
+  test/deployment/ — 10.15 and 10.11c are unblocked.
+  §23.3's obligation is discharged and the reviewer spot-checked five of its six rows, not three.
+  `test/contract.test.ts` is 14/14 at the base file and 15/15 at HEAD; `StudioContractTest` is
+  12 PASSED, `ArtifactSchemaDriftTest` 3, `CompileRouteContractDivergenceTest` 9, and re-running
+  those three against the pre-edit contract gives the same 24 — so "unchanged" reproduces on both
+  sides of the edit. The 12-not-9 finding is confirmed: it is suite growth, correctly reported
+  rather than matched.
+  SEC-2 was re-run by this reviewer in both directions against put-checks-studio-runner:10.18a-local
+  as pwuser. Without the control the attack SUCCEEDS — both mkdirs succeed, the shim is written and
+  execs the real binary, and the renderer runs at Seccomp=0 while the control launch four seconds
+  earlier in the same container ran at Seccomp=2. With `--read-only` plus the two tmpfs both writes
+  are refused `Read-only file system`, the parents stat as drwxrwxrwx root:root /ms-playwright and
+  drwxr-x--- pwuser:pwuser /home/pwuser, and the mount line reads `ro,relatime` — so neither write
+  failed for a permissions reason and the discriminator is the read-only root alone. The developer's
+  unexpected finding is right and it is the stronger claim. The control also does not break the
+  browser: inside the same read-only run the legitimate launch still reaches Seccomp=2.
+  Seven mutations were re-applied by this reviewer and every one reproduced with the reported
+  sibling count and a hash-verified restore, including both sides of O-15 — F-31b renames videoKey
+  on the document with the key count still fourteen and reddens the one named test, which is the
+  whole argument for replacing a count with a derived comparison.
+  What keeps this off PASS is not a defect in what was measured; it is that almost none of it can
+  be measured again. The chart harness and the SEC-2 gate both discover their prerequisite at
+  import time and convert absence into `skip`. With helm broken on PATH, chart.test.ts reports
+  **1 passed | 89 skipped** and the file is GREEN. With STUDIO_RUNNER_IMAGE pointed at a tag that
+  does not exist, sec2.test.ts reports **1 passed | 3 skipped in 1 ms** and the file is GREEN. The
+  surviving test in each case asserts a tautology and carries the disclosure in its *name*, which
+  is not what a pipeline reads. `studio-runner/ci/stages.md` is untouched by this story: stage 4 is
+  where `npm test` runs and is documented as NOT needing the image, stage 7 builds it and stage 8 is
+  where helm appears, and `STUDIO_RUNNER_IMAGE` occurs nowhere but `test/deployment/image.ts`. As
+  documented, in CI today, AC-1 – AC-12 and AC-4a part 3 have no executable enforcement at all.
+  And one security coupling nobody has stated: the rendered prod pod carries
+  `shareProcessNamespace: true` **and** mounts checks-studio-runner-object-store-prod at
+  /etc/studio/object-store. A shared PID namespace hands any other container in that pod
+  /proc/1/root/etc/studio/object-store/secretAccessKey. It is bounded today only because the pod
+  renders exactly one container — and that bound is enforced incidentally, by a test helper
+  throwing, not by a named assertion. The field was adopted as a *reaping* control; its reaping half
+  is correctly recorded as not falsifiable, but this other half is falsifiable chart-side right now.
+  Backend: no result, and that is the honest outcome. Two full `./gradlew --no-daemon test --rerun`
+  attempts by this reviewer both stalled at **435 results** of a ~874 baseline, at the same class
+  boundary the developer reported twice. MED-2 is 4 of 4 on this branch. The story touches zero
+  backend files, so it has no mechanism to move the baseline, and the static gates and the three
+  contract classes are green — but the backend effect of this half is unverified, and that is a
+  finding about the epic's infrastructure, not about this story.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-15T00:00:00Z'
+branch: story/10.18a
+head_sha: 9aea936be
+base_sha: 78cc634b2
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.18a
+scope: 10.18a only — the pod half plus AC-29 – AC-32. 10.18b is unreviewed and untouched.
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands this reviewer executed. Numbers are what they returned.
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+
+  contract_hash_reread:
+    command: shasum -a 256 docs/specs/studio/openapi.yaml; git show 78cc634b2:... | shasum -a 256
+    result: CONFIRMED, READ NOT ACCEPTED
+    detail: >-
+      HEAD d1a987663b25d7240fc460f923289aaf22a07145df7d6913114f9f3c1d627c18. Base 78cc634b2
+      cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e. `git diff --stat` over that
+      path across all seven commits: 27 lines changed, 18 insertions, 9 deletions, in two hunks —
+      RunJob.resolvedVars/resolvedSecrets descriptions, and RunnerEvidence.required plus the
+      `partial` description. No route, status code, enum, operationId or marker moved.
+
+  confinement_baseline:
+    command: npx vitest run test/run/confinement.test.ts --coverage.enabled=false
+    result: 18 passed (18)
+    detail: The file is green at HEAD with all three repairs in place.
+
+  mutation_F29_revert_required:
+    command: >-
+      revert `required: [videoKey, manifestKey, state, partial]` to the three-key form on
+      docs/specs/studio/openapi.yaml, then re-run confinement.test.ts
+    result: REPRODUCED EXACTLY — 2 failed | 16 passed (18)
+    detail: >-
+      The two reds are the BASE_SHA256 pin at :159 ("expected 'aefec977…' to be 'd1a98766…'") and
+      the promotion assertion at :188. The developer's note is confirmed by measurement: :189 is
+      never evaluated, because :188 throws first — so @architect's "2 red" and @po's "three
+      assertions" are both right and are not in conflict. Restored from a PID-suffixed backup
+      outside the shared scratchpad; sha back to d1a98766…, `git diff --quiet` clean.
+
+  probe_P1_is_the_not_toContain_real:
+    command: >-
+      keep the four-key `required`, plant the literal `required: [videoKey, manifestKey, state]`
+      inside the 2400-byte RunnerEvidence window, re-run the one named test
+    result: THE :189 ASSERTION IS INDEPENDENTLY FALSIFIABLE
+    detail: >-
+      1 failed — "expected … not to contain 'required: [videoKey, manifestKey, sta…'". So the
+      inversion did not produce a decorative second assertion. Substring reasoning checked in node
+      rather than assumed: the three-key form ends in `]` and is NOT a substring of the four-key
+      form, and the four-key form is not a substring of the three-key one either — both directions
+      false, so neither assertion can pass vacuously. Window inspected: 2400 bytes from
+      '    RunnerEvidence:', containing that schema alone.
+
+  foc06_ordering_proved_from_the_trees:
+    command: >-
+      for each of dc0c30089 3430a898b d7f527dc3 d43615dc5 — git show --name-only, and
+      git ls-tree -r helm-chart/put-checks/templates/ | grep -c studio-runner, and
+      git ls-tree -r studio-runner/test/deployment/ | wc -l
+    result: CONFIRMED — AC-29 – AC-32 ARE COMMITS 1–4 AND NO CHART FILE EXISTS AT ANY OF THEM
+    detail: >-
+      All four report 0 studio-runner chart templates and 0 files under test/deployment/. The first
+      chart file appears at commit 5, 7c5d20c3d. FOC-06 step 1 is landed first as required, so
+      story 10.15 (step 2) and story 10.11c (step 3) are unblocked. Commit 1 touches only
+      openapi.yaml and confinement.test.ts; commit 2 only ADR-002; commit 3 only two test files;
+      commit 4 only bounds/index/snapshot and three test files.
+
+  s23_3_figures_spot_checked:
+    command: >-
+      npx vitest run test/contract.test.ts (HEAD and the 78cc634b2 copy of the file); and
+      ./gradlew --no-daemon test --tests StudioContractTest --tests '*ArtifactSchemaDriftTest'
+      --tests '*CompileRouteContractDivergenceTest' --rerun, against both the HEAD contract and the
+      base contract
+    result: FIVE OF SIX ROWS MEASURED — ALL FIVE REPRODUCE
+    detail: >-
+      test/contract.test.ts — base file 14 passed, HEAD 15 passed (AC-31 adds one). Matches.
+      StudioContractTest 12 PASSED, ArtifactSchemaDriftTest 3 PASSED,
+      CompileRouteContractDivergenceTest 9 PASSED — 24 in total with the HEAD contract, and 24 again
+      with docs/specs/studio/openapi.yaml reverted to the base version, so "unchanged" is measured
+      on both sides rather than predicted. confinement.test.ts 18/18 after and 2 red / 16 green with
+      the contract edited only, above. The 12-not-9 finding is CONFIRMED: `StudioContractTest` is 12
+      tests, the §15/§16 rows say 9/9, the §20 cell predicted "unchanged" and therefore holds. The
+      developer reported it rather than matching it, which is the correct disposition.
+
+  sec2_run_1_without_the_control:
+    command: >-
+      docker run --rm -u pwuser -v …/sec2-shim-attack.sh:/attack.sh:ro --entrypoint bash
+      put-checks-studio-runner:10.18a-local /attack.sh
+    result: THE ATTACK SUCCEEDS — REPRODUCED BY THIS REVIEWER
+    detail: >-
+      `mkdir SUCCEEDED: /ms-playwright/chromium_headless_shell-shim` and
+      `mkdir SUCCEEDED: /home/pwuser/chromium_headless_shell-shim`. The shim is written, made
+      executable and actually execs the real binary — the shim log shows SHIM INVOKED and SHIM EXEC,
+      and /proc/PID/cmdline shows six Chromium processes carrying the sandbox-disabling flag.
+      RESULT line: ATTACK SUCCEEDED. The discriminating observable is what the developer says it is
+      and it is not the flag: the control launch in the same container, four seconds earlier, same
+      binary, shows `pid 62: Seccomp=2 type=--type=renderer`; through the shim the renderer is
+      `pid 254: Seccomp=0`. A container that could only ever read 0 would make the attack look
+      successful for the wrong reason, and this one demonstrably reads both.
+
+  sec2_run_2_with_the_control:
+    command: >-
+      the same, plus --read-only --tmpfs /scratch:uid=1001,gid=1001 --tmpfs /dev/shm:size=1g
+    result: THE ATTACK IS BLOCKED — REPRODUCED BY THIS REVIEWER
+    detail: >-
+      Both targets refused at mkdir with "Read-only file system"; script exit 10, RESULT line
+      ATTACK BLOCKED (status 3). The reason each write failed was read rather than assumed:
+      /ms-playwright stats as `drwxrwxrwx root:root` — world-writable — and /home/pwuser as
+      `drwxr-x--- pwuser:pwuser`, owned by the user the container runs as. `findmnt` reports
+      `ro,relatime` for both. NEITHER WRITE FAILED FOR A PERMISSIONS REASON; the mechanism is
+      --read-only alone, which is what the chart renders as readOnlyRootFilesystem: true. And the
+      control does not work by breaking the browser: in the same read-only run, the direct control
+      launch still reaches `pid 62: Seccomp=2 type=--type=renderer`.
+
+  mutation_M1_remove_the_control_from_the_gate:
+    command: >-
+      delete `--read-only` from sec2.test.ts's controlled run, then
+      npx vitest run test/deployment/sec2.test.ts
+    result: REPRODUCED — 1 failed | 3 passed (4)
+    detail: >-
+      The red is exactly "is BLOCKED with the control", on `expected … to contain 'ATTACK BLOCKED'`.
+      Three siblings green, as reported. Restored; sha 079bcc7c556791e3b7f152c046a15a20f709853be95
+      bd1b13a684d94e6716bdd, identical to the digest in the story record.
+
+  mutation_F31a_runner_side:
+    command: add 'targetPolicy' to ACCEPTED_JOB_KEYS (14 → 15), then npx vitest run test/contract.test.ts
+    result: REPRODUCED — 1 failed | 14 passed (15)
+    detail: >-
+      "the runner accepts a different job key set than RunJob declares: expected [ … 12 ] to deeply
+      equal [ … 13 ]". Restore sha ef20aff0cf3fdad420ce6d0f12f4a6b14a286ee0687478590d86d43410aac8e1,
+      matching the record.
+
+  mutation_F31b_document_side_count_unchanged:
+    command: >-
+      rename videoKey → videoKeyRenamed inside components.schemas.RunJob.properties only, verify the
+      key count is still 14, then npx vitest run test/contract.test.ts test/run/canary.test.ts
+    result: REPRODUCED — 1 failed | 28 passed | 8 skipped, AND THE COUNT IS UNCHANGED AT 14
+    detail: >-
+      The property count was read back through the YAML parser before running: 14 keys before and
+      14 after, with videoKeyRenamed in place of videoKey. This is the row that justifies AC-31 —
+      the assertion it replaced (`ACCEPTED_JOB_KEYS.size === 14`) is still true under this mutation
+      and canary.test.ts is green. A count is not a correspondence, measured rather than argued.
+
+  mutation_F31c_the_row_that_proves_too_much:
+    command: rename videoKey on the RUNNER side, then npx vitest run test/contract.test.ts
+    result: CORRECT IN SUBSTANCE, UNDERSTATED IN THE RECORD — 15 skipped, 0 red
+    detail: >-
+      `beforeAll` throws ("expected 400 to be 202") because the harness's own valid job becomes
+      unacceptable to the default-deny set, and the file reports **Tests 15 skipped (15)** — the
+      named test never runs at all. The record says it "reddens the whole file"; measured, it
+      produces no reds. The developer's conclusion is right and is the one that matters: F-31b is
+      the load-bearing control. Logged as LOW-2 so a later reader reconstructing the row does not
+      look for reds that do not exist.
+
+  mutation_F32a_four_import_spellings:
+    command: >-
+      a scratch TypeScript file importing createLogBuffer four ways, then npx tsc --noEmit
+    result: REPRODUCED — ALL FOUR SPELLINGS ERROR
+    detail: >-
+      TS2724 on `../src/index.js` ("has no exported member named 'createLogBuffer'"); TS2339 on the
+      package module surface `../src/reporting/index.js`; TS2345 "not assignable to parameter of
+      type 'RedactedLogEntry'" on both the deep relative import and the dynamic `await import()`.
+      Both halves of the closure are visible: the un-export closes the surface, the brand closes the
+      deep path the un-export leaves open. Scratch files deleted; `git status --short` empty.
+
+  mutation_F32b_restore_the_export:
+    command: put createLogBuffer back on src/reporting/index.ts, then npx vitest run test/server/surface.test.ts
+    result: REPRODUCED — 1 failed | 11 passed (12)
+    detail: >-
+      "keeps createLogBuffer off the package surface (ADR-002 O-16)" — expected the module not to
+      have property "createLogBuffer". Restore sha
+      38b373f7bb9916fbb01b8249feed14e7584d2ee97ee700497f34d56870196511.
+
+  mutation_F32c_remove_the_runtime_brand_check:
+    command: >-
+      delete the `if ((entry as Partial<RedactedLogEntry>)[REDACTED] !== true) throw` block from
+      bounds.ts, then npx vitest run test/reporting/reporting.test.ts test/server/resolved-value-guards.test.ts
+    result: REPRODUCED — 1 failed | 46 passed (47)
+    detail: >-
+      "refuses an entry that did not come through a redactor, at run time too (ADR-002 O-16)" —
+      expected function to throw, but it didn't. 46 siblings across two files, exactly as reported.
+      Restore sha 4eb8bcab2a5bdbb4cabf2e40b1fb0a41aa56ef69458e681e0136952fed877002.
+
+  mutation_M5_reaping_mechanism_class:
+    command: >-
+      docker run --entrypoint node <image> -e "<orphan a grandchild, then read /proc/*/status>",
+      with and without --init
+    result: REPRODUCED — THE HAZARD IS REAL AND A PID-1 REAPER REMOVES IT
+    detail: >-
+      With node as PID 1: `PID1=1 zombies=[15 (sleep)]`. With docker --init: `PID1=7 zombies=[]`.
+      Same class as the developer's `zombies=[14 (sh)]`; the pid and process name differ because the
+      reviewer's probe script differs. This falsifies the *mechanism class*, not the pod property —
+      the split the developer records is correct.
+
+  restore_digests_corroborated_independently:
+    command: shasum -a 256 on each contested file at HEAD, before any mutation was applied
+    result: EVERY DIGEST IN THE STORY RECORD MATCHES THE TREE
+    detail: >-
+      bounds.ts 4eb8bcab…, envelope.ts ef20aff0…, sec2.test.ts 079bcc7c…, openapi.yaml d1a98766…,
+      index.ts 38b373f7…. These are the digests the developer reports as its byte-identical
+      restores, read here from the merged tree before this reviewer touched anything. The restores
+      were genuinely byte-identical. `git status --short` is empty at the end of this review.
+
+  type_check_pre_existence_proved_in_isolation:
+    command: >-
+      git archive 78cc634b2 studio-runner | tar -x into $TMPDIR, symlink node_modules, then
+      ./node_modules/.bin/tsc --noEmit -p tsconfig.json
+    result: THE RED PRE-EXISTS AT THE BASE COMMIT — NOT A REGRESSION
+    detail: >-
+      Identical error in the isolated base copy: test/fixtures-tier/deadline-cleanup.test.ts(550,40)
+      TS2345, "Property 'redactor' is missing … but required in type 'SnapshotOptions'". At HEAD,
+      `npm run type-check` exits 2 with exactly ONE error, the same one. wt/10.18b sits at 78cc634b2
+      but has no node_modules and belongs to another agent, so an isolated archive was used rather
+      than installing into someone else's tree. SnapshotOptions.redactor was made required by
+      story 10.17 at 1ab4fb5e9, which is in the base. Correctly not absorbed.
+
+  runner_gates:
+    command: npm test; npm run lint; npm run build; npm run check:pins; helm lint × 4
+    result: ALL GREEN, DEVELOPER'S NUMBERS REPRODUCED TO THE DIGIT
+    detail: >-
+      npm test — **1015 passed | 22 skipped (1037)**, 48 files passed / 1 skipped (49), coverage
+      thresholds met. lint exit 0, build exit 0, check:pins exit 0. `helm lint put-checks -f <each of
+      values.yaml, values-dev.yaml, values-uat.yaml, values-prod.yaml> --set studioRunner.enabled=true`
+      exit 0 for all four. chart.test.ts alone 90 passed; deferred.test.ts 12 skipped.
+      No flake observed in this reviewer's run.
+
+  rendered_prod_manifest_read_field_by_field:
+    command: helm template … -f values-prod.yaml --set studioRunner.enabled=true, parsed as YAML
+    result: EVERY CHART CRITERION THIS HALF CLAIMS IS TRUE OF THE RENDERED BYTES
+    detail: >-
+      studio-runner objects rendered — NetworkPolicy, ServiceAccount, Service, Deployment. One
+      container, zero initContainers. No Ingress and no HorizontalPodAutoscaler naming the runner.
+      Pod securityContext runAsNonRoot true, runAsUser/runAsGroup 1001, fsGroup 1001,
+      seccompProfile.type RuntimeDefault; container allowPrivilegeEscalation false, capabilities
+      drop [ALL], readOnlyRootFilesystem true. The literal "Unconfined" appears nowhere in the
+      rendered documents. Volumes — scratch emptyDir 8Gi at /scratch, dev-shm emptyDir medium Memory
+      2Gi at /dev/shm, object-store credentials Secret mounted readOnly at /etc/studio/object-store.
+      Limits cpu 2 / memory 4Gi. terminationGracePeriodSeconds 205. NetworkPolicy policyTypes
+      [Ingress, Egress] with three egress rules. The EROFS repair is visible and correct:
+      STUDIO_RUNNER_SCRATCH_DIR renders /scratch/studio-runner while the emptyDir mounts at the
+      parent /scratch, so clearAll() removes a plain directory and not a mount point. Fact 7 is
+      resolved by one key, not a third copy — Service port 8090, container STUDIO_RUNNER_PORT 8090,
+      and the worker's STUDIO_RUNNER_BASE_URL http://put-checks-studio-runner:8090, which
+      application.yml:182 binds through an explicit ${STUDIO_RUNNER_BASE_URL:…} placeholder, so the
+      env-var name does bind. No PLAYWRIGHT_BROWSERS_PATH, no HOME and no credential key in the
+      rendered runner environment.
+
+  deferrals_and_spikes:
+    command: >-
+      grep the skip structure of deferred.test.ts; read the Result lines in studio-staging-spikes.md;
+      git diff 78cc634b2..HEAD over that file, docs/epics/ and docs/qa/; ls docs/qa/spikes/
+    result: NOTHING FABRICATED, NOTHING CLOSED
+    detail: >-
+      Twelve entries, all `it.skip` — unconditional, not `skipIf`, so none can arm itself without a
+      human editing the file; nine criteria plus three pointers. Every Result line in
+      studio-staging-spikes.md still reads OPEN and the file is ABSENT from this story's diff, as are
+      docs/epics/ and docs/qa/. ED-02 through ED-06 all `status: open`. docs/qa/spikes/ contains only
+      SPK-01 — no partial evidence file was written into a spike directory, which was the right call.
+
+  backend_attempt_1:
+    command: ./gradlew --no-daemon test --rerun
+    result: HUNG — NO RESULT
+    detail: >-
+      Stalled at **435 results** of a ~874 baseline. Last line
+      `StudioOverloadIT > ordinaryRestTrafficContinuesWhileEveryStudioBoundIsUnderPressure PASSED`,
+      the same boundary the developer reports for both of its runs. Twelve samples twenty seconds
+      apart all read 435. By @po's epic-wide rule a run short of its baseline is a hang, never a pass.
+
+  backend_attempt_2:
+    command: ./gradlew --no-daemon test --rerun, on a quieter machine
+    result: HUNG AGAIN — SAME BOUNDARY, SAME POOL ORDINAL
+    detail: >-
+      435 again, same last line. MED-2 is now **4 of 4 on this branch** — two by @dev, two by this
+      reviewer — and is not intermittent here.
+
+  backend_static_gates:
+    command: ./gradlew --no-daemon spotlessCheck checkstyleMain checkstyleTest spotbugsMain --rerun-tasks --continue
+    result: BUILD SUCCESSFUL, exit 0, 21s, 14 of 14 tasks executed
+    detail: >-
+      Independently confirms the developer's finding that the inherited "6 spotless violations"
+      baseline is stale. Run with --rerun-tasks, so this is not a cached verdict.
+
+  med2_thread_dumps:
+    command: jcmd <worker pid> Thread.print, on both stalled runs
+    result: THE MECHANISM IS CONFIRMED AND THE DETECTOR ADVICE IS CORRECT, BUT SHOULD BE SHARPENED
+    detail: >-
+      Both of this reviewer's dumps show the CANONICAL surface: `Test worker` BLOCKED (on object
+      monitor), `waiting to lock <0x…> (a org.testcontainers.jdbc.ContainerDatabaseDriver)`, beneath
+      FlywayMigrationInitializer. Exactly one BLOCKED thread in each dump. The holder is a daemon
+      `HikariPool-4 connection adder` — the same pool ordinal in both — at
+      JdbcDatabaseContainer.createConnection:257, `locked <the same monitor>`, and its own state is
+      **TIMED_WAITING (sleeping)**, not BLOCKED. This reviewer did NOT reproduce the developer's
+      RUNNABLE-on-a-socket-read surface and cannot confirm it first-hand, but its mechanism is
+      coherent and the refinement is accepted. The sharper statement the evidence supports: do not
+      key a detector on the worker's thread STATE at all — it was RUNNABLE once and BLOCKED three
+      times, and the HOLDER is TIMED_WAITING in every dump, so a BLOCKED grep misses the holder even
+      when it catches the worker. Key on the invariant present in all four runs — a thread named
+      `HikariPool-N connection adder` with a frame at
+      org.testcontainers.containers.JdbcDatabaseContainer.createConnection AND a
+      `locked <…ContainerDatabaseDriver>` line.
+
+  scope:
+    command: git diff --name-only 78cc634b2..HEAD, partitioned
+    result: CLEAN
+    detail: >-
+      31 files. **Zero** under backend/ and **zero** under frontend/, so this half has no mechanism
+      by which to move the 23-failure ED-02 baseline. src/run/launcher.ts and
+      src/reporting/envelope.ts are absent from the diff — SEC-1 does not regress and O-6 is carried,
+      not absorbed. Both copies of artifact.schema.json are absent from the diff.
+
+# ─────────────────────────────────────────────────────────────────────────────
+developer_claims_verified:
+  - claim: contract hash moved cbf07c99… → d1a98766…
+    verdict: TRUE — re-read with shasum, both ends
+  - claim: all three confinement.test.ts repairs land and stay discriminating
+    verdict: TRUE — F-29 reproduces 2 red / 16 green; the :189 assertion independently falsified by P-1
+  - claim: the three-key form ends in `]` so it is not a substring of the four-key form
+    verdict: TRUE — checked in node, and the converse too; neither contains the other
+  - claim: AC-29 – AC-32 are commits 1–4, before any chart file exists
+    verdict: TRUE — proved from git ls-tree at each of the four commits, not from the log
+  - claim: nothing in §23.3 failed to reproduce
+    verdict: TRUE for the five rows this reviewer measured, including both sides of the edit
+  - claim: StudioContractTest is 12, not the 9/9 of the older §13 rows
+    verdict: TRUE — 12 PASSED, measured. Reported rather than matched, which is the correct handling
+  - claim: the SEC-2 attack succeeds without the control and is blocked with it
+    verdict: TRUE — both runs reproduced by this reviewer against the built image as pwuser
+  - claim: the injected flag is not the discriminator; the seccomp reading is
+    verdict: TRUE, and it is the stronger claim. Same binary, same container, Seccomp=2 direct vs 0 shimmed
+  - claim: neither blocked write failed for a permissions reason
+    verdict: TRUE — /ms-playwright is drwxrwxrwx, /home/pwuser is owned by the container user
+  - claim: the control does not break the browser it protects
+    verdict: TRUE — the legitimate launch reaches Seccomp=2 inside the same read-only container
+  - claim: every restore was byte-identical
+    verdict: TRUE — all five reported digests match the merged tree, read before any mutation
+  - claim: npm run type-check is red and was red before this story
+    verdict: TRUE — exit 2, one error, reproduced in an isolated archive of 78cc634b2
+  - claim: spotlessCheck is green; the inherited 6-violation baseline is stale
+    verdict: TRUE — BUILD SUCCESSFUL with --rerun-tasks
+  - claim: no spike closed, none claimed, all four OPEN
+    verdict: TRUE — Result lines untouched, ED-02..ED-06 open, no new spike directory
+  - claim: the runner suite is 1015 passed / 22 skipped / 49 files
+    verdict: TRUE — reproduced exactly
+  - claim: F-31c "reddens the whole file"
+    verdict: UNDERSTATED — it aborts beforeAll and produces 0 red / 15 skipped. Conclusion unaffected
+  - claim: shareProcessNamespace cannot be falsified by this story
+    verdict: TRUE FOR THE REAPING PROPERTY. A different property of the same field IS falsifiable — see MED-1
+
+# ─────────────────────────────────────────────────────────────────────────────
+top_issues:
+
+  - id: HIGH-1
+    severity: high
+    title: >-
+      The whole deployment-evidence tier fails OPEN — with helm absent the chart suite is
+      1 passed / 89 skipped and GREEN; with a wrong image tag SEC-2 is 1 passed / 3 skipped and
+      GREEN; and ci/stages.md wires neither prerequisite into the stage that runs them
+    detail: >-
+      Measured, not reasoned. `PATH=<dir with a helm that exits 127>:$PATH npx vitest run
+      test/deployment/chart.test.ts` → **Test Files 1 passed | Tests 1 passed | 89 skipped (90)**.
+      `STUDIO_RUNNER_IMAGE=put-checks-studio-runner:tag-that-does-not-exist npx vitest run
+      test/deployment/sec2.test.ts` → **1 passed | 3 skipped (4), in 1 ms**. In each case the single
+      surviving test asserts a tautology (`expect(typeof DOCKER).toBe('boolean')`) and the
+      disclosure lives in the test's NAME, which changes to "helm is ABSENT: every chart criterion
+      is SKIPPED, never passed" / "the image … is ABSENT: SEC-2 is SKIPPED, never passed". A name is
+      not a signal a pipeline reads; a green file is. This matters because
+      `studio-runner/ci/stages.md` is UNTOUCHED by this story: the deployment suite runs in stage 4
+      (`npm test`), which the stage table marks "Needs the pinned image: **no**"; the image is built
+      in stage 7 and helm appears only in stage 8; and `STUDIO_RUNNER_IMAGE` occurs nowhere in the
+      repository except `test/deployment/image.ts:13`, defaulting to a local-only tag
+      `put-checks-studio-runner:10.18a-local`. As documented today, in CI, AC-1 – AC-12 and
+      **AC-4a part 3 — the criterion @po named this story's weakest and the reason the story
+      exists** — have no executable enforcement at all, and the pipeline is green.
+      This does NOT invalidate the evidence: this reviewer reproduced the attack and the renders
+      by hand. It invalidates their durability.
+      **This is a nineteenth vacuous-guard shape** and it is distinct from the eighteen catalogued.
+      It is not the epic's a/b deferral convention, where the criterion is DECLARED blocked with a
+      named gate, spike and owner; here the criteria are declared PASSED while their evidence tier
+      is environment-conditional and fails open. It is not #3 (a hardcoded list that deletes its own
+      coverage) — nothing is hardcoded; the coverage is deleted by the environment. It is not #16 —
+      the body does not assert over a stand-in, it asserts nothing at all.
+      Probe shape to add to the catalogue: **break the prerequisite (point the image tag at nothing,
+      take the external tool off PATH) and re-run; if the file is green, the tier proves nothing
+      where it will actually run.**
+      Remedy, small: make absence FAIL by default with a documented, explicit opt-out — e.g. the
+      announcement test becomes `expect(DOCKER || process.env.STUDIO_RUNNER_SEC2_OPTOUT ===
+      'acknowledged').toBe(true)` — and add helm plus `STUDIO_RUNNER_IMAGE` to `ci/stages.md`'s
+      stage for the deployment tier, or move that tier into a stage that has both.
+    suggested_owner: '@dev, story 10.18b (it assembles ci/stages.md and the runbook anyway)'
+
+  - id: MED-1
+    severity: medium
+    title: >-
+      shareProcessNamespace: true is rendered on a pod that mounts the object-store Secret, and the
+      one-container bound that makes it safe is enforced only by a test helper throwing
+    detail: >-
+      Read off the rendered prod manifest: the runner Deployment carries
+      `shareProcessNamespace: true` AND a volume `object-store-credentials` from Secret
+      `checks-studio-runner-object-store-prod` (keys accessKeyId, secretAccessKey) mounted readOnly
+      at /etc/studio/object-store. A shared PID namespace makes every container in the pod visible to
+      every other through /proc, including `/proc/<pid>/root` — so any second container in that pod
+      reads /proc/1/root/etc/studio/object-store/secretAccessKey regardless of its own volume mounts,
+      and readOnlyRootFilesystem does not obstruct a read. Today the pod renders exactly ONE
+      container and zero initContainers, so nothing is exposed — but that bound is enforced
+      incidentally: `soleContainer()` calls `one(containers, 'container')`, which throws. Adding a
+      log shipper or a mesh sidecar would break several tests for the wrong reason while silently
+      handing that sidecar the store credential, and nothing in the chart or the tests names the
+      coupling.
+      Two things follow for the record. First, the developer's "not falsifiable" entry is CORRECT
+      for the property it names — reaping needs a pause container and cannot be observed outside a
+      pod, and the mechanism-class falsification with `docker --init` is the right substitute
+      (reproduced here: `PID1=1 zombies=[15 (sleep)]` vs `PID1=7 zombies=[]`). Second, the field was
+      nevertheless ADOPTED as a reaping control without its other consequence being assessed, and
+      THAT consequence is falsifiable chart-side right now. So: "not a control" is the right label
+      for the reaping half, and "not only a control" is the half that is missing.
+      Remedy, one assertion: assert the runner Deployment renders exactly one container and no
+      initContainers, named as the bound on shareProcessNamespace, so a sidecar announces itself as
+      a security decision rather than as a helper throwing.
+      Checked and NOT a problem: the browser child inherits only the seven keys in
+      INHERITED_ENV_KEYS, so /proc/<pid>/environ carries no resolved value; and no credential is
+      rendered into the container environment at all.
+    suggested_owner: '@dev, story 10.18b / raise to SPK-04 and ED-05'
+
+  - id: MED-2
+    severity: medium
+    title: The backend gate is unobtainable on this branch — 4 of 4 hangs, so this half's backend effect is unverified
+    detail: >-
+      Two attempts by this reviewer, both stalled at 435 of ~874 at the same class boundary as the
+      developer's two. This is an EPIC finding, not this story's: the story touches zero backend
+      files, static gates are green with --rerun-tasks, and the three contract classes are 24 PASSED
+      against both the old and the new contract. But it must be said plainly rather than in a
+      caveat — **there is no backend `check` result for 10.18a, and this gate does not claim one.**
+      The developer's disposition (report the hang, do not report a number) is exactly right and is
+      endorsed. Ownership is already @devops per the 10.9 gate and @po's wave-6 assignment; nothing
+      about this story changes that. See `med2_thread_dumps` for the detector refinement.
+    suggested_owner: '@devops — epic-level, already assigned, deadline before 10.19 is drafted'
+
+  - id: LOW-1
+    severity: low
+    title: >-
+      The comment at confinement.test.ts says a revert of §20 "turns both of these red rather than
+      one"; measured, only the first is ever evaluated
+    detail: >-
+      Under F-29 the file reports 2 failed tests, and the second is the BASE_SHA256 pin, not the
+      `not.toContain`. `:188` throws before `:189` is reached — which the developer states correctly
+      elsewhere in the record. The assertion is NOT vacuous (P-1 falsifies it independently), so this
+      is a wording fix, not a guard fix. Worth correcting because the sentence is the kind a later
+      reader treats as a measurement.
+    suggested_owner: '@dev'
+
+  - id: LOW-2
+    severity: low
+    title: F-31c's row overstates what the mutation produces — 0 red and 15 skipped, not a red file
+    detail: >-
+      Detailed under `mutation_F31c_the_row_that_proves_too_much`. The record's judgement is right;
+      only the observation is imprecise, and it is imprecise in the safe direction.
+    suggested_owner: '@dev'
+
+  - id: LOW-3
+    severity: low
+    title: The "render mutation MN turns the named test red" tests assert the render, not the named test's failure
+    detail: >-
+      e.g. "render mutation M3: seccompProfile.type set to Unconfined turns the named test red"
+      asserts `profile?.type === 'Unconfined'`. Sound TODAY, because the guard at the same describe
+      reads the identical rendered value, so the guard's failure follows. But the claim in the name
+      is never executed, and it would stop corresponding silently if a guard changed its read path
+      (say, scanning `outcome.raw` instead of the parsed securityContext). Catalogued shape #16
+      applied to a mutation row rather than to a guard. Note, not a defect.
+    suggested_owner: '@dev'
+
+  - id: INFO-1
+    severity: info
+    title: '/ms-playwright being world-writable does not weaken SEC-2''s control — it is what establishes it'
+    detail: >-
+      Assessed as asked. `drwxrwxrwx root:root` means the blocked run cannot be explained by file
+      permissions, so the experiment isolates `--read-only` as the sole discriminator — without the
+      world-writable directory the blocked result would be ambiguous and the control would be
+      unproven. What it does establish is that the control is SINGLE-LAYERED: the read-only root
+      filesystem is the only thing between a non-root process and the browser registry, and there is
+      no defence in depth behind it. Raising it for ED-05 is the right call and the framing in the
+      story is accurate.
+    suggested_owner: 'ED-05 / Platform-SRE'
+
+# ─────────────────────────────────────────────────────────────────────────────
+unreachable_criteria:
+  note: >-
+    Nine of this half's criteria are blocked and are live `it.skip` entries in
+    studio-runner/test/deployment/deferred.test.ts — AC-2b, AC-3b, AC-4b, AC-5b, AC-8b, AC-9b,
+    AC-10b, AC-11 and AC-19b — plus three pointer entries (AC-17 moved to 10.19; 10.14's AC-26
+    discharged by §20; 10.18b's scope) so nothing is counted twice. They are `it.skip`, NOT
+    `it.skipIf`, so none can arm itself from the environment; turning one green requires a human
+    edit and is therefore visible in a diff. The blocked count did not go down. No spike moved.
+    Verified by this reviewer and accepted.
+  contrast_with_HIGH_1: >-
+    Worth stating side by side, because the story gets this right in one place and wrong in another:
+    the DEFERRED criteria use unconditional skips that cannot self-arm, while the PASSING criteria's
+    evidence uses environment-conditional skips that self-DISARM. The discipline exists; it was
+    applied to the halves that are declared blocked and not to the halves that are declared passed.
+
+required_before_merge: []
+
+recommended_not_blocking:
+  - HIGH-1 — make the chart and SEC-2 tiers fail rather than skip when their prerequisite is absent,
+    and wire helm + STUDIO_RUNNER_IMAGE into ci/stages.md. 10.18b assembles that file already.
+  - MED-1 — one assertion binding shareProcessNamespace to a single-container pod; raise the
+    /proc/1/root exposure to SPK-04 and ED-05.
+  - LOW-1, LOW-2, LOW-3 — record corrections only.
+
+do_not_do:
+  - Do not reopen @po's declination of a runtime browser-identity check. The reasoning holds and
+    this review found nothing that changes it.
+  - Do not close SPK-04 on the strength of this evidence. The attack ran against the PUBLIC base
+    image in a container, not against ED-05's image in a pod, and the developer says so.
+  - Do not absorb MED-2 or the deadline-cleanup type error into this story. Both were correctly
+    refused; the type error is proven to pre-exist at 78cc634b2.
+  - Do not let a future half claim AC-4a part 3 or the chart criteria on a green run whose
+    prerequisite was absent — see HIGH-1.
+
+final_decision: >-
+  CONCERNS — mergeable. Every 10.18a criterion is met and the reviewer verified the load-bearing
+  ones by execution: the contract hash both ends, all three confinement repairs plus an independent
+  falsification of the one the developer could only argue for, the FOC-06 ordering from the trees,
+  five of six §23.3 rows on both sides of the edit, the SEC-2 attack in both directions against the
+  built image, seven mutations with matching sibling counts and hash-verified restores, and the
+  rendered prod manifest field by field. No acceptance criterion is unmet, no deferral is faked, no
+  spike is falsely closed, and the scope is clean with zero backend and zero frontend files touched.
+  CONCERNS rather than PASS for three reasons, in order. HIGH-1: the entire evidence tier for the
+  chart criteria and for SEC-2 fails open, measured — helm off PATH gives a green 89-skip file, a
+  wrong image tag gives a green 3-skip file in one millisecond, and ci/stages.md wires neither
+  prerequisite into the stage that runs them, so in CI today the story's strongest criterion has no
+  enforcement. That is a nineteenth vacuous-guard shape and it belongs in the catalogue. MED-1: the
+  rendered pod carries shareProcessNamespace beside a mounted store credential, safe today only by
+  a bound nothing names. MED-2: there is no backend result at all — 4 of 4 hangs at the same class
+  boundary — so this half's backend effect is unverified, which is a statement about the epic's
+  infrastructure and not about this story.
+  The record itself is unusually honest and it held up under checking. Where it differs from
+  measurement it differs in the safe direction, twice, and it volunteered the two findings this
+  review would otherwise have had to discover.

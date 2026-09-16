@@ -80,3 +80,26 @@ frontend:
     VITE_ENABLE_STUDIO: "true"
     VITE_ENABLE_REPORTS: "true"
     VITE_DEBUG_MODE: "true"
+
+# ---------------------------------------------------------------------------
+# Studio runner (story 10.18a). Dev renders it; ED-05's internal image is what staging deploys.
+# ---------------------------------------------------------------------------
+studioRunner:
+  enabled: false
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  devShm:
+    sizeLimit: 512Mi
+  scratch:
+    sizeLimit: 2Gi
+  # SPK-04 has not ruled. `RuntimeDefault` is the starting value everywhere and the only
+  # alternative is a Platform-approved `Localhost` profile — never `Unconfined`, and never a
+  # disabled sandbox.
+  seccompProfile:
+    type: RuntimeDefault

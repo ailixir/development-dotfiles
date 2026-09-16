@@ -91,3 +91,31 @@ frontend:
     VITE_ENABLE_STUDIO: "true"
     VITE_ENABLE_REPORTS: "true"
     VITE_DEBUG_MODE: "false"
+
+# ---------------------------------------------------------------------------
+# Studio runner (story 10.18a). UAT is the staging pilot target of BRD §9 — "prove one runner pod
+# in staging before templating production".
+# ---------------------------------------------------------------------------
+studioRunner:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  devShm:
+    sizeLimit: 1Gi
+  scratch:
+    sizeLimit: 4Gi
+  seccompProfile:
+    type: RuntimeDefault
+  callbackBaseUrl: http://put-checks-api:8080
+  identity:
+    secretName: checks-studio-runner-identity-uat
+  objectStore:
+    credentialsSecret: checks-studio-runner-object-store-uat
+objectStore:
+  credentialsSecret: checks-api-object-store-uat

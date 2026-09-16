@@ -64,6 +64,7 @@ import {
   responseSchema,
   validateAgainstSchema,
 } from './helpers/openapi.js';
+import { ACCEPTED_JOB_KEYS } from '../src/reporting/envelope.js';
 import { get, post, validJob } from './helpers/runner.js';
 
 const CONTRACT_PATH = join(packageRoot, '..', 'docs', 'specs', 'studio', 'openapi.yaml');
@@ -71,6 +72,28 @@ const CONTRACT_PRESENT = existsSync(CONTRACT_PATH);
 
 /** Routes this runner serves (architecture §8.4). */
 const RUNNER_ROUTES = ['/v1/validate', '/v1/runs', '/health', '/ready'] as const;
+
+/**
+ * The key set `components.schemas.RunJob.properties` declares, read from the frozen document.
+ *
+ * Every step throws rather than returning an empty list, because an empty list would make the
+ * set-equality assertion below pass for the wrong reason the day the schema is renamed — which is
+ * the failure mode ADR-002 O-15 exists to close, one level up.
+ */
+function declaredRunJobKeys(document: YamlValue): string[] {
+  const schema = (document as { components?: { schemas?: Record<string, unknown> } }).components
+    ?.schemas?.RunJob;
+  if (schema === undefined || schema === null || typeof schema !== 'object') {
+    throw new Error('components.schemas.RunJob is absent from the frozen contract');
+  }
+  const properties = (schema as { properties?: unknown }).properties;
+  if (properties === undefined || properties === null || typeof properties !== 'object') {
+    throw new Error('components.schemas.RunJob.properties is absent from the frozen contract');
+  }
+  const keys = Object.keys(properties as Record<string, unknown>);
+  if (keys.length === 0) throw new Error('components.schemas.RunJob.properties is empty');
+  return keys;
+}
 
 /** API routes this runner calls as a client. Story 10.7 implements the handlers. */
 const API_ROUTES = [
@@ -320,6 +343,37 @@ describe('AC-1 — internal contract', () => {
     const declared = [...routes.matchAll(/path === '([^']+)'/gu)].map((match) => match[1]);
     expect([...new Set(declared)].sort()).toEqual([...RUNNER_ROUTES].sort());
   });
+
+  it.skipIf(!CONTRACT_PRESENT)(
+    'accepts exactly the job keys the frozen RunJob declares — ADR-002 O-15',
+    () => {
+      // **A count is not a correspondence.** `ACCEPTED_JOB_KEYS` is the runner's inbound
+      // default-deny set and `RunJob` is the API's closed outbound one; until this landed, the
+      // only assertion over the runner's half was `expect(ACCEPTED_JOB_KEYS.size).toBe(14)` in
+      // `test/run/canary.test.ts`, which a rename or a swap on either side leaves green. That
+      // assertion is **replaced** by this one rather than kept beside it: a hand-maintained count
+      // next to a derived comparison is ADR-002 §15.6's arrangement, and this epic has shipped it
+      // seven times.
+      //
+      // @qa named the gap "the remaining half of the DEF-01 cause". DEF-01 was this same drift in
+      // the other direction — the API sent eight of the fourteen required keys plus four the
+      // closed schema forbids, so **every real dispatch was refused `400 JOB_INVALID`** and no
+      // test looked. Story 10.17 closed the API side with `InternalBodyContractConformanceTest`;
+      // this is the runner's counterpart, and it is a **property** assertion over the document
+      // rather than the byte assertion `confinement.test.ts` makes, so a legitimate amendment
+      // elsewhere in the file leaves it green instead of producing a false red on a blameless
+      // story (ADR-002 §23.1).
+      const document: YamlValue = parseYaml(readFileSync(CONTRACT_PATH, 'utf8'));
+      const declared = declaredRunJobKeys(document);
+
+      // Set equality, both directions at once: a key the runner would accept and the document
+      // does not declare is as much a divergence as one the document declares and the runner
+      // would refuse.
+      expect([...declared].sort(), 'the runner accepts a different job key set than RunJob declares').toEqual(
+        [...ACCEPTED_JOB_KEYS].sort(),
+      );
+    },
+  );
 
   it('calls exactly the two API routes architecture §8.4 names', () => {
     const admission = readFileSync(

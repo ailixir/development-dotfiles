@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createRedactor } from '../../src/executor/redaction.js';
 import { createRunSnapshot } from '../../src/reporting/snapshot.js';
 import { DEFAULT_REPORT_BOUNDS } from '../../src/reporting/bounds.js';
-import type { LogBuffer } from '../../src/reporting/bounds.js';
+import type { LogBuffer, RedactedLogEntry } from '../../src/reporting/bounds.js';
 import { validateArtifact } from '../../src/validator/index.js';
 import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
@@ -154,6 +154,12 @@ describe('AC-16a — a secret in a forbidden position is refused before capacity
  * paid three times for two copies of one fact. So the guard is at the boundary — `appendLog` — and
  * it is asserted here on **a planted canary observed on the emitted entry**, not by scanning call
  * sites: a producer that built the same string through an innocently named local would pass a scan.
+ *
+ * **ADR-002 O-16, story 10.18a, closed the other half without reordering anything.** `bounds.ts`
+ * still does not redact; it now *refuses to accept anything that has not been redacted*, because
+ * `append` takes a branded `RedactedLogEntry` that only `redactLogEntry` can mint. @po's ruling is
+ * intact — the redaction responsibility stays at the boundary — and the trap the module could only
+ * describe in a comment is now unreachable from any import path rather than watched from this one.
  */
 describe('AC-22 — every producer reaching the bounded log buffer goes through the run’s redactor', () => {
   function snapshotWith(redactorValues: readonly string[]) {
@@ -243,12 +249,18 @@ describe('AC-22 — every producer reaching the bounded log buffer goes through 
     expect(Object.keys(snapshot.logs).sort()).toEqual(['dropped', 'entries', 'truncated']);
 
     // …and a producer that tries it fails loudly rather than leaking quietly.
+    //
+    // **The cast is doubled since ADR-002 O-16 (story 10.18a), and that is the point.** This line
+    // no longer compiles as it was written: `LogBuffer.append` takes a branded `RedactedLogEntry`
+    // that only `redactLogEntry` mints, so writing the bypass now requires laundering the brand on
+    // purpose. Both guards are exercised here — the type refuses the call, and having forced the
+    // type, the run time refuses it again.
     expect(() => {
       (snapshot.logs as unknown as LogBuffer).append({
         atMs: null,
         level: 'error',
         message: `step 0 FAIL: typed ${SECRET}`,
-      });
+      } as unknown as RedactedLogEntry);
     }).toThrow(TypeError);
 
     // Nothing reached the buffer, so nothing reaches the body.

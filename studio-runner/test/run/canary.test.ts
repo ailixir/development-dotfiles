@@ -711,6 +711,14 @@ describe('Blocked halves — recorded as live skips, never as passes', () => {
     }
     // …and the set is the real one, not an empty stand-in that would satisfy the above.
     expect(ACCEPTED_JOB_KEYS.has('resolvedSecrets')).toBe(true);
-    expect(ACCEPTED_JOB_KEYS.size).toBe(14);
+    // `expect(ACCEPTED_JOB_KEYS.size).toBe(14)` stood here and is **replaced**, not moved beside
+    // a stronger check: a hand-maintained count next to a derived comparison is ADR-002 §15.6's
+    // arrangement. The set is now pinned against `components.schemas.RunJob.properties` read from
+    // the frozen document — set equality, so a rename or a swap on either side reddens where the
+    // count stayed at fourteen and green (ADR-002 O-15, story 10.18a). The named test is
+    // `test/contract.test.ts` > "accepts exactly the job keys the frozen RunJob declares".
+    //
+    // The tripwire above is untouched and is still 10.17's (AC-16b): it asserts over the
+    // production set, not a fixture, and it must stay green until ADR-002 O-6 is ruled.
   });
 });

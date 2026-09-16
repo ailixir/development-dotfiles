@@ -1933,13 +1933,20 @@ components:
           additionalProperties: { type: string }
           description: |
             Ephemeral. Held in runner memory for the run and cleared on every exit path; never
-            written to scratch, a retry buffer, a manifest or a report (§9.2).
+            written to scratch, a retry buffer, a manifest or a report. **Scrubbed, with its
+            tested encoded variants, from every outbound diagnostic before persistence** (§9.2:
+            the runner scrubs *known values*, of which a resolved variable is one — ADR-002 §22).
         resolvedSecrets:
           type: object
           additionalProperties: { type: string }
           description: |
-            Ephemeral, as `resolvedVars`, and additionally scrubbed from every outbound
-            diagnostic together with its tested encoded variants (§9.2).
+            Ephemeral. Held in runner memory for the run and cleared on every exit path; never
+            written to scratch, a retry buffer, a manifest or a report. **Scrubbed, with its
+            tested encoded variants, from every outbound diagnostic before persistence** (§9.2) —
+            the same two clauses as `resolvedVars`, stated identically because the treatment is
+            identical. What is additional to a secret is **vault-use authorization**: secret use is
+            scoped to approved origins and action arguments, and a reference name alone grants no
+            permission (§9.2, ADR-002 §22).
         deadlines: { $ref: '#/components/schemas/JobDeadlines' }
         videoKey:
           type: string
@@ -2205,7 +2212,7 @@ components:
       type: object
       nullable: true
       additionalProperties: false
-      required: [videoKey, manifestKey, state]
+      required: [videoKey, manifestKey, state, partial]
       description: |
         What the runner knows about evidence: whether it stored the objects whose keys the job
         gave it. Deliberately **not** the public `VideoStatus` of §6.1, because two of those
@@ -2239,11 +2246,13 @@ components:
             Only the runner can observe it. The API holds no fact from which it could be inferred,
             and it projects this value onto `VideoEvidence.partial` unchanged.
 
-            **Optional, and absent means `false`.** The merged runner does not emit it yet: the
-            producer is the deadline kill of story 10.13, which is also the first condition that
-            can make it true, and story 10.14 carries it through unchanged when it moves `state`
-            to `STORED`. Meaningful only with `state: PENDING` or `STORED`; `false` otherwise,
-            because a recording that does not exist is not a partial one.
+            **Required, and emitted on every report that carries evidence** (ADR-002 §20,
+            closing O-14). The producer is the deadline kill of story 10.13, merged in wave 4 and
+            also the first condition that can make it true; story 10.14 carries it through
+            unchanged when it moves `state` to `STORED`. It is `null` on `STARTED` and `PROGRESS`,
+            where `evidence` itself is null — never absent from an evidence object. Meaningful
+            only with `state: PENDING` or `STORED`; `false` otherwise, because a recording that
+            does not exist is not a partial one.
 
     RunnerReport:
       type: object

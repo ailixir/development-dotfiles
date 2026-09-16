@@ -281,3 +281,213 @@ frontend:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+
+# ---------------------------------------------------------------------------
+# Studio runner — Node/Playwright browser execution (story 10.18a)
+#
+# ADR-001 §3 and §9; architecture §8.4, §9.2, §9.3. A separate Deployment, never bundled into the
+# backend container: it runs untrusted pages in a real browser and holds none of the platform's
+# credentials.
+#
+# **Disabled by default.** CI stage 8 renders with `--set studioRunner.enabled=true`, and the
+# staging values turn it on deliberately. An off-by-default component cannot be deployed by
+# forgetting to configure it.
+# ---------------------------------------------------------------------------
+studioRunner:
+  enabled: false
+
+  image:
+    # ED-05: the internal Playwright/Chromium image pinned to the runner package version, running
+    # non-root with the Chromium sandbox enabled. The public base image ADR-001 §8 permits is for
+    # local development only and must never be what staging deploys.
+    repository: registry.citi.com/put/checks-studio-runner
+    tag: ""  # defaults to Chart.appVersion
+    pullPolicy: IfNotPresent
+
+  # One pod, one browser (§5.2: POOL_SIZE starts at 1; measure before increasing). No HPA: the
+  # runner refuses work with 429/503 and stays ready, so CPU-based scaling would fight the
+  # capacity gate rather than help it.
+  replicaCount: 1
+
+  service:
+    type: ClusterIP  # never an Ingress: §8.4's internal routes are not publicly exposed
+    # **This port is the single source for the runner's address.** The worker's
+    # `STUDIO_RUNNER_BASE_URL` is rendered from this same key, so the 8080/8090 disagreement
+    # between `application.yml` and `studio-runner/src/server/config.ts` cannot be re-created here.
+    port: 8090
+
+  # Process reaping (AC-5a / AC-5b). The pause container becomes PID 1 and reaps orphaned
+  # grandchildren; the runner keeps the exec-form CMD, so SIGTERM still reaches Node directly and
+  # the drain still runs. Both halves are stated in the Deployment template.
+  #
+  # ⚠ **THIS FIELD COMES WITH A BOUND: THIS POD MUST HAVE EXACTLY ONE CONTAINER.**
+  #
+  # A shared PID namespace makes every container in the pod visible to every other through /proc,
+  # including /proc/<pid>/root. This pod mounts the object-store Secret at
+  # `objectStore.mountPath`, so **any second container would read
+  # /proc/1/root/etc/studio/object-store/secretAccessKey regardless of its own volume mounts**, and
+  # `readOnlyRootFilesystem` does not obstruct a read. The write-only store principal of §6.2 would
+  # then be held by a log shipper or a mesh sidecar that has no business with it.
+  #
+  # Raised by @qa as MED-1: the bound was real but enforced *incidentally*, by a test helper that
+  # throws on a second container. It is now asserted explicitly and falsified against a chart copy
+  # with a sidecar injected. **Adding a container here is a security decision, not a convenience**;
+  # if you need one, take the exposure to SPK-04 and ED-05 first.
+  shareProcessNamespace: true
+
+  serviceAccount:
+    create: true
+    name: ""
+    # The runner calls no Kubernetes API. A mounted token is a credential it has no use for.
+    automountServiceAccountToken: false
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+  # **One key, and never `Unconfined`** (ADR-001 O-4, SPK-04 question 3).
+  #
+  # Deliberately NOT copied from the backend's `RuntimeDefault` by inheritance: whether
+  # `RuntimeDefault` permits the namespace-creating clone/unshare calls Chromium's sandbox needs
+  # without CAP_SYS_ADMIN is **SPK-04's open question**, and if it does not, the answer is a
+  # Platform-approved `Localhost` profile — never a disabled sandbox. There is no fallback that
+  # disables the sandbox.
+  seccompProfile:
+    type: RuntimeDefault
+
+  podSecurityContext:
+    runAsNonRoot: true
+    # pwuser in the Playwright image (uid 1001). Stated rather than inherited so a base-image
+    # change is a values change and not a silent root container.
+    runAsUser: 1001
+    runAsGroup: 1001
+    fsGroup: 1001
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    # SEC-2's deployment control. With the root filesystem read-only and every writable mount
+    # disjoint from the browser registry and from $HOME, there is no path on which a shim
+    # `chrome-headless-shell` can be created.
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop: ["ALL"]
+
+  # Per-run scratch. One key, two rendered values, compared to each other in the assertion.
+  #
+  # **The emptyDir is mounted at the PARENT, and the runner's scratch directory is a plain
+  # directory inside it.** That is not cosmetic and it was found by running the built image, not
+  # by reading code: `createFsScratchStore.clearAll()` does `rm(rootPath, { recursive: true })`
+  # followed by `mkdir`, so if `STUDIO_RUNNER_SCRATCH_DIR` *is* the mount point, start-up tries to
+  # remove a mount point whose parent is the read-only root filesystem and the runner dies with
+  # `EROFS: read-only file system, rmdir '/scratch/studio-runner'` before it ever listens. A pod
+  # that never starts would satisfy every "no shim can be written" assertion in this story
+  # trivially — "a guard satisfied by a broken implementation" — so this is load-bearing.
+  scratch:
+    mountPath: /scratch
+    # Rendered as `{mountPath}/studio-runner`; see `put-checks.studioRunner.scratchDir`.
+    directory: studio-runner
+    sizeLimit: 4Gi
+
+  # Chromium needs a real /dev/shm; the container default of 64Mi crashes tabs under load.
+  devShm:
+    sizeLimit: 1Gi
+
+  drain:
+    # preStop flips readiness before the drain begins, so the endpoint is removed while admitted
+    # work finishes (§5.2, §8.4).
+    preStopSleepSeconds: 5
+    # Headroom above the derived sum of the runner's own deadlines. Lowering this below the sum is
+    # M7's mutation and must redden the grace-period assertion.
+    extraGraceSeconds: 30
+
+  probes:
+    # The paths the runner serves for these two meanings, and this chart must not re-implement
+    # what they mean: a saturated pod answers 503/429 and stays **ready**; a draining pod goes
+    # **not ready**. Pointing readiness at /health is M-red.
+    readinessPath: /ready
+    livenessPath: /health
+    initialDelaySeconds: 10
+    periodSeconds: 5
+
+  # The two identity secrets §9.2 permits, and nothing else. No database URL, no vault address,
+  # no CSI endpoint, no LLM gateway key — the runner holds none of them, and only the deployment
+  # can make that true.
+  identity:
+    secretName: checks-studio-runner-identity
+    serviceIdentityKey: serviceIdentity
+    callbackIdentityKey: callbackIdentity
+
+  # Where the runner posts admission and progress. Deployment configuration, never job-supplied
+  # (§8.4, §8.5).
+  callbackBaseUrl: http://put-checks-api:8080
+
+  objectStore:
+    # **ED-03 / SPK-03.** A *different* Kubernetes Secret from the one the API and worker read
+    # with: the runner principal is write-only under the `studio/` prefix and holds no Get or List
+    # permission (§6.2). The two names are asserted unequal in the rendered manifest.
+    #
+    # Mounted as a file rather than injected as environment: the runner's loader is fail-closed
+    # inside STUDIO_RUNNER_*, and inventing a credential environment name for a client that does
+    # not exist yet would be exactly the signal AC-4a exists to catch. The consuming client is
+    # story 10.19's (ED-03); this is the deployment surface it will read.
+    credentialsSecret: checks-studio-runner-object-store
+    mountPath: /etc/studio/object-store
+    # Write-only. A Get or List credential key appearing here is a scope violation, not a
+    # convenience.
+    keys:
+      - accessKeyId
+      - secretAccessKey
+    # The `studio/{csiId}/{testId}/{executionId}/` prefix of §6.2, fixed deployment-wide and never
+    # rendered per run or per job.
+    keyPrefix: studio/
+
+  networkPolicy:
+    enabled: true
+    # Default-deny egress plus exactly the three destination classes the runner declares in its
+    # own PERMITTED_DESTINATIONS: callback-api, object-store, target-page. A fourth class here
+    # without a fourth there is a divergence the assertion catches.
+    dnsPort: 53
+    objectStorePort: 443
+    # **ED-04 / SPK-05.** The approved target destinations. Empty until the egress spike rules:
+    # an empty list is default-deny for `target-page`, which is the correct failing direction.
+    approvedTargets: []
+
+  # ---------------------------------------------------------------------------
+  # The enumerated environment. Every key here must be one of the runner's own ACCEPTED_KEYS;
+  # anything else **fails the render** (see `put-checks.studioRunner.env`).
+  #
+  # Starting values under §8.5, tuned against staging measurements — not commitments.
+  # ---------------------------------------------------------------------------
+  runnerEnv:
+    STUDIO_RUNNER_POOL_SIZE: "1"
+    STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS: "120000"
+    STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS: "5000"
+    STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS: "30000"
+    STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS: "15000"
+    STUDIO_RUNNER_DRAIN_TIMEOUT_MS: "150000"
+    STUDIO_RUNNER_RECORDING_WIDTH: "1280"
+    STUDIO_RUNNER_RECORDING_HEIGHT: "720"
+
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# ---------------------------------------------------------------------------
+# The object-store principal the API and the recovery path read with — **read-only**, and a
+# different Secret from the runner's write-only one (§6.2, ED-03).
+# ---------------------------------------------------------------------------
+objectStore:
+  credentialsSecret: checks-api-object-store
+  mountPath: /etc/studio/object-store
+  keys:
+    - accessKeyId
+    - secretAccessKey
+  # Logical expiry the API enforces at `videoExpiresAt` **and** the store's lifecycle window, from
+  # one key. Physical deletion on the store is asynchronous and this chart claims no exact-time
+  # deletion anywhere (§6.2).
+  retention: 30d
