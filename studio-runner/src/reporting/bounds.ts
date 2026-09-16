@@ -64,8 +64,49 @@ export interface LogView {
   readonly dropped: number;
 }
 
+/**
+ * The brand. **Deliberately not exported**, so `RedactedLogEntry` cannot be minted anywhere but
+ * {@link redactLogEntry} — which is to say, cannot be minted without passing through a redactor.
+ * A brand a caller can apply itself is a comment with a type annotation.
+ */
+const REDACTED: unique symbol = Symbol('reporting.redacted');
+
+/**
+ * A log entry whose message has already been through a redactor (ADR-002 O-16).
+ *
+ * The brand is present at **run time** as well as in the type, on the precedent story 10.17's
+ * AC-22 repair set one level up: `LogBuffer.append` was made unreachable rather than watched, and
+ * a producer that tries to go around it *"fails to compile **and** throws"*. A type-only brand
+ * would be defeated by one `as`, and this boundary is a redaction boundary.
+ */
+export interface RedactedLogEntry extends LogEntry {
+  readonly [REDACTED]: true;
+}
+
+/**
+ * The only way to produce a {@link RedactedLogEntry}: apply a redactor to the message.
+ *
+ * *Which* redactor is the caller's to choose and cannot be checked here — `RunSnapshot.appendLog`
+ * passes the run's. What this does close is the ordering: a message reaching
+ * {@link LogBuffer.append} has been through a redactor **before** the `slice` below can cut it,
+ * so a known value can no longer be split into two fragments that match no variant
+ * `createRedactor` produces and that reconstruct the value when concatenated.
+ */
+export function redactLogEntry(
+  entry: LogEntry,
+  redactor: { redact(text: string): string },
+): RedactedLogEntry {
+  return { ...entry, message: redactor.redact(entry.message), [REDACTED]: true };
+}
+
 export interface LogBuffer extends LogView {
-  append(entry: LogEntry): void;
+  /**
+   * Appends an **already-redacted** entry. Takes {@link RedactedLogEntry} rather than
+   * {@link LogEntry}, which is what makes the truncate-before-redact trap below unreachable
+   * instead of documented (ADR-002 O-16, story 10.18a). An un-redacted string is a compile error
+   * at every import path, deep or surface.
+   */
+  append(entry: RedactedLogEntry): void;
 }
 
 /**
@@ -86,25 +127,40 @@ export function createLogBuffer(maxEntries: number, maxEntryLength: number): Log
     get dropped(): number {
       return dropped;
     },
-    append(entry: LogEntry): void {
-      // **Truncation precedes redaction in this buffer, and that is on purpose.** Bounding is this
-      // module's job; scrubbing is not, and a second redactor here would be a second copy of a
-      // fact that already has an owner. The requirement that follows is real and is stated rather
-      // than left implicit: **callers are required to redact first**, because a known value cut by
-      // the `slice` below becomes two fragments, and a fragment matches no variant `createRedactor`
-      // produces — so both halves would survive the redaction that happens later on the assembled
-      // body, and concatenating them reconstructs the value.
+    append(entry: RedactedLogEntry): void {
+      // **Truncation precedes redaction in this buffer, and that is still on purpose.** Bounding
+      // is this module's job; scrubbing is not, and a second redactor here would be a second copy
+      // of a fact that already has an owner.
       //
-      // `RunSnapshot.appendLog` is the guard: it is the only caller reachable from a run and it
-      // applies the run's redactor before delegating here. A test enforces that requirement with a
-      // planted canary observed on the emitted entry rather than by scanning call sites, because a
-      // producer that built the same string through an innocently named local would pass a scan
-      // (AC-22, AC-23).
+      // What changed with ADR-002 O-16 is that *"callers are required to redact first"* is no
+      // longer a sentence this module cannot enforce. It was a real trap — a known value cut by
+      // the `slice` below becomes two fragments, neither matching any variant `createRedactor`
+      // produces, both surviving the later redaction of the assembled body, and concatenating them
+      // reconstructs the value. It was **latent rather than live**: one production caller existed
+      // and it redacted first. But `createLogBuffer` sat on the package's module surface, so a
+      // second producer was one import away, and *a header comment is not a guard* (PIN-1).
+      //
+      // The parameter type is now {@link RedactedLogEntry}, which only {@link redactLogEntry} can
+      // produce, so the un-redacted call does not compile from any import path. The run-time check
+      // below covers the JavaScript caller and the `as` cast, on the same reasoning story 10.17's
+      // AC-22 repair used: fails to compile **and** throws.
+      // Read through `Partial` on purpose: to the type system the brand is always present, which
+      // is exactly the caller this check is *not* for. It is for the JavaScript caller and the one
+      // who writes `as unknown as RedactedLogEntry` — the compile error is the guard, and this is
+      // the guard for a caller who has already defeated it.
+      if ((entry as Partial<RedactedLogEntry>)[REDACTED] !== true) {
+        throw new TypeError(
+          'LogBuffer.append requires an entry produced by redactLogEntry (ADR-002 O-16)',
+        );
+      }
       const message =
         entry.message.length <= maxEntryLength
           ? entry.message
           : `${entry.message.slice(0, Math.max(0, maxEntryLength - 1))}…`;
-      entries.push({ ...entry, message });
+      // The brand is dropped on retention rather than carried: it states how the entry arrived,
+      // it is not a field, and rebuilding the entry field by field keeps `entries()` a plain
+      // `LogEntry[]` so nothing downstream can launder a brand back out of the buffer.
+      entries.push({ atMs: entry.atMs, level: entry.level, message });
       while (entries.length > maxEntries) {
         entries.shift();
         dropped += 1;

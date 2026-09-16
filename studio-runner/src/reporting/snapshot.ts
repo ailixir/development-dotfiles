@@ -15,7 +15,7 @@
  */
 import type { StepStatus } from '../executor/adapters/StepReporter.js';
 import type { LogEntry, LogView, ReportBounds } from './bounds.js';
-import { boundSteps, createLogBuffer } from './bounds.js';
+import { boundSteps, createLogBuffer, redactLogEntry } from './bounds.js';
 
 export type ReportKind = 'STARTED' | 'PROGRESS' | 'FINAL';
 
@@ -190,8 +190,10 @@ export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
     },
     appendLog(entry: LogEntry): void {
       // Redact, then let the buffer bound. Every producer reachable from a run passes through
-      // here, so a producer added later cannot skip it (AC-22).
-      logs.append({ ...entry, message: redactor.redact(entry.message) });
+      // here, so a producer added later cannot skip it (AC-22) — and since ADR-002 O-16 the buffer
+      // will not accept anything else: `append` takes a branded `RedactedLogEntry` that only
+      // `redactLogEntry` mints, so the skip is a compile error rather than a watched risk.
+      logs.append(redactLogEntry(entry, redactor));
     },
     build(
       kind: ReportKind,

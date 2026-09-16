@@ -48,6 +48,23 @@ describe('package surface', () => {
     }
   });
 
+  it('keeps createLogBuffer off the package surface (ADR-002 O-16)', () => {
+    // The factory hands out a buffer that truncates before anything redacts. One production caller
+    // exists and it redacts first, so the trap is latent — but it sat **here**, on the package's
+    // own module surface, and a second producer was one import away. A header comment is not a
+    // guard (PIN-1), so the capability is made unreachable instead: off this surface, and
+    // `append` typed to take a branded `RedactedLogEntry` so the deep import is closed too.
+    //
+    // Falsification: put `createLogBuffer` back in the `export {}` list in
+    // `src/reporting/index.ts` and this test alone reddens.
+    expect(reportingSurface).not.toHaveProperty('createLogBuffer');
+    expect(packageSurface).not.toHaveProperty('createLogBuffer');
+    // The control: the rest of the bounds surface is still exported, so this is not green because
+    // the module stopped exporting anything.
+    expect(reportingSurface).toHaveProperty('boundSteps');
+    expect(reportingSurface).toHaveProperty('DEFAULT_REPORT_BOUNDS');
+  });
+
   it('names the three destinations the runner may talk to, and no fourth', () => {
     expect([...PERMITTED_DESTINATIONS]).toEqual(['callback-api', 'object-store', 'target-page']);
   });
