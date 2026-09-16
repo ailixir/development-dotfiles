@@ -123,7 +123,17 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    *    producer. The **first** re-anchor covered these.
    * 2. Story **10.9** shipping `POST /tests/{id}/confirm-compile` for real and removing its
    *    `x-not-yet-implemented: true` marker — one deleted line, verified by reading the diff. The
-   *    route's `x-implemented-by: '10.9'` stays. This re-anchor covers that.
+   *    route's `x-implemented-by: '10.9'` stays. The **second** re-anchor covered that.
+   * 3. **ADR-002 §20 and §22, landed by story 10.18a** — `RunnerEvidence.required` gains
+   *    `partial` (O-14, closing story 10.14's AC-26) and the property's stale "the merged runner
+   *    does not emit it yet" paragraph is corrected; and `RunJob.resolvedVars` /
+   *    `resolvedSecrets` gain the §9.2 scrubbing clause in identical words, because §9.2 says
+   *    *known values* and the document had been written narrower than its own source. **This**
+   *    re-anchor covers those two amendments and nothing else: they are the only edits in
+   *    10.18a's diff to `docs/specs/studio/openapi.yaml`, and both copies of
+   *    `artifact.schema.json` are byte-unchanged. Under ADR-002 §19 the ruling stays the
+   *    architect's and only the *diff* moves to the owning story's PR, which is why this digest
+   *    moves here rather than in an unowned edit — the failure §19 was narrowed to prevent.
    *
    * **The criterion is unchanged and still holds: nothing in story 10.13 edited the contract.**
    * Every byte of difference between this digest and the previous one belongs to another story,
@@ -146,7 +156,7 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = 'cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e';
+  const BASE_SHA256 = 'd1a987663b25d7240fc460f923289aaf22a07145df7d6913114f9f3c1d627c18';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
@@ -160,17 +170,23 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
     expect(actual, 'this story may not edit the contract (ADR-002 §12, Class B)').toBe(BASE_SHA256);
   });
 
-  it('emits the optional RunnerEvidence.partial that ADR-002 §17 already landed, without editing it', () => {
+  it('emits the RunnerEvidence.partial that ADR-002 §20 promoted to required', () => {
     const document = readFileSync(contract, 'utf8');
     const start = document.indexOf('    RunnerEvidence:');
     const body = document.slice(start, start + 2_400);
-    // The field is **already on the document** — §17 landed it as an architect ruling, not as a
-    // runner edit — so story 10.13 implements against it and the SHA-256 above is unchanged by
-    // this story's diff. It stays **optional** on the wire (§17.5) so the merged runner remains
-    // conformant; promoting it to `required` is O-14, deliberately sequenced after the producer.
+    // **Inverted, not deleted, by story 10.18a (ADR-002 §20.4).** As story 10.13 wrote it this
+    // asserted the opposite — `toContain` the three-key form and `not.toContain` the four-key one
+    // — because §17.5 deliberately left the field optional until a producer existed. That was true
+    // when it was written and false the instant O-14 landed, and it went **red** rather than green
+    // on the amendment, accusing a merged and blameless story. The subject was always right: the
+    // runner's evidence schema is worth watching from the runner. Only the tense was wrong.
+    //
+    // The non-vacuity shape is unchanged and the two assertions still discriminate in opposite
+    // directions: the three-key form ends in `]`, so it is **not** a substring of the four-key
+    // form, and a revert of §20 turns both of these red rather than one.
     expect(body).toContain('partial:');
-    expect(body).toContain('required: [videoKey, manifestKey, state]');
-    expect(body).not.toContain('required: [videoKey, manifestKey, state, partial]');
+    expect(body).toContain('required: [videoKey, manifestKey, state, partial]');
+    expect(body).not.toContain('required: [videoKey, manifestKey, state]');
   });
 
   it('keeps every runner-produced body closed, and widens no enum', () => {
