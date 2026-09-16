@@ -103,6 +103,11 @@ import { toTestRequest } from '@/types/studio/legacyTestIr';
 import { isTerminalExecutionStatus } from '@/types/studio/studioTypes';
 import { generatePythonFromIR } from '@/utils/studio/codegen/pythonGenerator';
 import studioApi from '@/services/api/studioApi';
+import {
+  subscribeToExecution,
+  type ExecutionSubscription,
+  type TransportStatus,
+} from '@/services/api/studioTransportWiring';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SecretInput from '@/components/studio/SecretInput';
 import { CompileReviewPanel } from '@/components/studio/review';
@@ -258,14 +263,26 @@ const ChecksStudioPageInner: React.FC = () => {
     }
   }, []);
 
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  /**
+   * Story 10.11b, AC-7/AC-8. The 700 ms `setInterval` that used to live here is gone: every
+   * execution snapshot now arrives through the one transport abstraction in the API service layer,
+   * and this component holds a subscription handle and nothing else. It opens no connection, keeps
+   * no timer, and never reads `GET /executions/{id}` itself — the SSE assessment's rule that *"the
+   * component should not create unmanaged network connections."*
+   */
+  const subscriptionRef = useRef<ExecutionSubscription | null>(null);
   const currentExecutionIdRef = useRef<string | null>(null);
-  const stopPolling = useCallback(() => {
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-      pollingRef.current = null;
+  const [transportStatus, setTransportStatus] = useState<TransportStatus | null>(null);
+  const [accessDenied, setAccessDenied] = useState<number | null>(null);
+  const closeSubscription = useCallback(() => {
+    if (subscriptionRef.current) {
+      subscriptionRef.current.close();
+      subscriptionRef.current = null;
     }
   }, []);
+
+  // AC-13: no subscription outlives the component that asked for it.
+  useEffect(() => () => closeSubscription(), [closeSubscription]);
 
   const handleRunTest = useCallback(async () => {
     if (!validation.isValid || testSteps.length === 0 || !selectedScenarioData?.id) return;
@@ -277,44 +294,47 @@ const ChecksStudioPageInner: React.FC = () => {
       dispatch(setExecutionLogs([{ timestamp: new Date().toISOString(), level: 'info', message: 'Starting UI test execution' } as any]));
       const start = await studioApi.executeTest(selectedScenarioData.id);
       currentExecutionIdRef.current = start.executionId;
-      // start polling
-      stopPolling();
-      pollingRef.current = setInterval(async () => {
-        try {
-          const exec = (await studioApi.getExecution(currentExecutionIdRef.current as string)) as any;
+      closeSubscription();
+      setAccessDenied(null);
+      subscriptionRef.current = subscribeToExecution(start.executionId, {
+        onSnapshot: (exec) => {
           if (Array.isArray(exec.stepResults)) {
-            dispatch(setAllStepResults(exec.stepResults.map((r: any) => ({ stepIndex: r.stepIndex, status: r.status }))));
+            dispatch(setAllStepResults(exec.stepResults.map((r) => ({ stepIndex: r.stepIndex, status: r.status })) as any));
           }
-          const runningIndex = exec.stepResults?.findIndex((r: any) => r.status === 'RUNNING') ?? -1;
-          const passedCount = exec.stepResults?.filter((r: any) => r.status === 'PASS').length ?? 0;
+          const runningIndex = exec.stepResults?.findIndex((r) => r.status === 'RUNNING') ?? -1;
+          const passedCount = exec.stepResults?.filter((r) => r.status === 'PASS').length ?? 0;
           dispatch(setCurrentStepAction(runningIndex >= 0 ? runningIndex : Math.max(0, passedCount - 1)));
-          // logs
           if (Array.isArray(exec.logs)) {
             dispatch(setExecutionLogs(exec.logs as any));
           }
           // videoPath is the protected API path; the pre-10.1 raw videoUrl is read only so that
           // history written before the contract still plays back.
-          const videoSource = exec.videoPath ?? exec.videoUrl;
+          const videoSource = exec.videoPath ?? (exec as any).videoUrl;
           if (videoSource) {
             dispatch(setVideoUrlAction(videoSource));
           }
-          // Terminal statuses are PASSED | FAILED | ERROR; a timeout is ERROR with a code. The two
-          // legacy values are still accepted so old rows stop the poller instead of hanging it.
-          if (isTerminalExecutionStatus(exec.status) || exec.status === 'COMPLETED' || exec.status === 'TIMEOUT') {
+          // The *run* stops being in flight on a terminal outcome. The **stream** does not close
+          // here: §5.4 row 5 keeps it open while evidence is still being produced, and that rule
+          // belongs to the transport (AC-13), not to this component.
+          if (isTerminalExecutionStatus(exec.status)) {
             dispatch(setExecuting(false));
-            stopPolling();
           }
-        } catch (e) {
-          // stop on polling error
+        },
+        onStatus: (status) => setTransportStatus(status),
+        onAccessDenied: ({ status }) => {
+          setAccessDenied(status);
           dispatch(setExecuting(false));
-          stopPolling();
-        }
-      }, 700);
+        },
+        onClosed: () => {
+          subscriptionRef.current = null;
+          dispatch(setExecuting(false));
+        },
+      });
     } catch (e: any) {
       dispatch(setExecuting(false));
       dispatch(setExecutionLogs([{ timestamp: new Date().toISOString(), level: 'error', message: e?.message || 'Failed to start execution' } as any]));
     }
-  }, [validation.isValid, testSteps.length, selectedScenarioData, stopPolling, dispatch]);
+  }, [validation.isValid, testSteps.length, selectedScenarioData, closeSubscription, dispatch]);
 
   // Generate Python code when steps change (autoSync)
   useEffect(() => {
@@ -376,7 +396,11 @@ const ChecksStudioPageInner: React.FC = () => {
   }, [testSteps]);
 
   const handleScenarioSelect = (scenarioId: string) => {
-    stopPolling();
+    // AC-13: a scenario switch performed **while a stream is open** must leave no connection
+    // behind. Counted at the server, not by trusting this line.
+    closeSubscription();
+    setTransportStatus(null);
+    setAccessDenied(null);
     dispatch(setExecuting(false));
     setSelectedScenario(scenarioId);
     const scenario = scenarios?.find(s => s.id === scenarioId);
@@ -388,6 +412,22 @@ const ChecksStudioPageInner: React.FC = () => {
       dispatch(clearLogs());
     }
   };
+
+  /**
+   * Story 10.11b, AC-13 — the scenario switch, made reachable.
+   *
+   * `handleScenarioSelect` already existed and already did the right thing; nothing in the rendered
+   * tree called it, so the route (`/checks/studio/tests/:id`) — which is this app's own way of
+   * choosing a draft — changed without the page noticing. A stream opened for one draft would have
+   * outlived the switch to another, which is precisely the accumulation AC-13 counts at the server.
+   */
+  useEffect(() => {
+    const next = params.id;
+    if (!next || !scenarios || next === selectedScenario) return;
+    if (!scenarios.some((scenario) => scenario.id === next)) return;
+    handleScenarioSelect(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.id, scenarios, selectedScenario]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -441,8 +481,8 @@ const ChecksStudioPageInner: React.FC = () => {
 
   const addTestStep = () => {
     if (newStep.trim()) {
-      // Stop any ongoing polling before mutating steps
-      stopPolling();
+      // Stop any live subscription before mutating steps
+      closeSubscription();
       dispatch(setExecuting(false));
       setTestSteps(prev => [...prev, newStep]);
       setNewStep('');
@@ -450,7 +490,7 @@ const ChecksStudioPageInner: React.FC = () => {
   };
 
   const removeTestStep = (index: number) => {
-    stopPolling();
+    closeSubscription();
     dispatch(setExecuting(false));
     setTestSteps(prev => prev.filter((_, i) => i !== index));
   };
@@ -779,7 +819,7 @@ const ChecksStudioPageInner: React.FC = () => {
                       onClick={() => {
                         if (isRunning) {
                           dispatch(setExecuting(false));
-                          stopPolling();
+                          closeSubscription();
                         } else {
                           handleRunTest();
                         }
@@ -816,6 +856,32 @@ const ChecksStudioPageInner: React.FC = () => {
                     Save
                   </Button>
                 </Stack>
+
+                {/*
+                  * AC-11(i): the transport's own state, labelled as transport. A dropped connection
+                  * is not a failed test, so this region's accessible name is deliberately distinct
+                  * from every `ExecutionStatus` narrative — `studioTransport.node.test.ts` asserts
+                  * that rather than assuming it.
+                  */}
+                {accessDenied !== null && (
+                  <Box sx={{ mt: 2 }}>
+                    <Alert severity="error" role="status" aria-label="Live progress feed access refused">
+                      <AlertTitle>Live progress feed access refused</AlertTitle>
+                      The server refused this browser access to the run&apos;s progress
+                      ({accessDenied}). Nothing further is requested. Ask the CSI owner for access.
+                    </Alert>
+                  </Box>
+                )}
+                {accessDenied === null &&
+                  transportStatus !== null &&
+                  (transportStatus.phase === 'reconnecting' ||
+                    transportStatus.phase === 'falling-back') && (
+                    <Box sx={{ mt: 2 }}>
+                      <Alert severity="info" role="status" aria-label={transportStatus.label}>
+                        {transportStatus.label}
+                      </Alert>
+                    </Box>
+                  )}
 
                 {/* Progress */}
                 {isRunning && (
