@@ -115,6 +115,37 @@ function describeViolations(violations: readonly Violation[]): string {
     .join('\n');
 }
 
+/**
+ * The pre-existing violating keys, **frozen**, and the inventory the AC-18 escalation covers.
+ *
+ * Identical in all four value sets, measured rather than transcribed: 15 occurrences, 13 distinct.
+ * This exists because AC-18's red is permanent, and a permanently red assertion has no observable
+ * states left with which to detect anything — so the detection has to be a comparison against a
+ * baseline rather than an absence.
+ *
+ * **Updating this list is a deliberate act.** Adding an entry means accepting a new setting that
+ * silently never reaches its process; removing one means the escalation is being resolved, and the
+ * removal belongs in the PR that resolves it.
+ */
+const ESCALATED_KEYS: readonly string[] = [
+  'checks.executor.max-concurrency',
+  'checks.executor.source-limits.APPDYNAMICS',
+  'checks.executor.source-limits.GRAFANA',
+  'checks.executor.source-limits.HTTP',
+  'checks.executor.source-limits.ITRS',
+  'checks.executor.source-limits.SPLUNK',
+  'checks.executor.source-limits.TCP',
+  'checks.executor.source-limits.UI_TEST',
+  'checks.scheduling.batch-size',
+  'checks.scheduling.min-interval-seconds',
+  'checks.scheduling.poll-interval-ms',
+  'checks.scheduling.shutdown-timeout-sec',
+  'spring.datasource.hikari.maximum-pool-size',
+];
+
+/** 13 distinct keys, two of which are rendered into both the api and the worker ConfigMap. */
+const ESCALATED_VIOLATION_COUNT = 15;
+
 const ESCALATION = [
   '',
   'AC-18 ESCALATION — this failure is the deliverable, not a bug in this test.',
@@ -153,18 +184,47 @@ describe('AC-18 — every envFrom-consumed key is a valid environment-variable n
     });
   }
 
-  it("this story's OWN rendered keys are all valid — the escalation covers nothing of ours", () => {
-    // The discriminating half. Without this, a reader could not tell whether the red above was
-    // pre-existing or introduced here, and "it was already broken" is the easiest thing in the
-    // world to say about a test one wrote oneself.
-    const ours = /^(STUDIO_SSE_|CHECKS_BYPASS_|STUDIO_RUNNER_|STUDIO_OBJECT_STORE_|STUDIO_EVIDENCE_)/u;
-    for (const valuesFile of VALUE_SETS) {
-      const label = valueSetName(valuesFile);
-      const mine = envFromViolations(render({ valuesFile }), label).filter((v) => ours.test(v.key));
-      expect(mine, `story 10.18b introduced an invalid envFrom key: ${describeViolations(mine)}`)
-        .toEqual([]);
-    }
-  });
+  for (const valuesFile of VALUE_SETS) {
+    const label = valueSetName(valuesFile);
+
+    it(`${label}: the escalated set is EXACTLY the thirteen — nothing new hides inside the red`, () => {
+      // **QA TEST-001, the twentieth catalogued vacuous-guard shape, and it was mine.**
+      //
+      // This assertion used to filter the violations by a naming allowlist —
+      // `/^(STUDIO_SSE_|CHECKS_BYPASS_|STUDIO_RUNNER_|STUDIO_OBJECT_STORE_|STUDIO_EVIDENCE_)/` —
+      // and assert the remainder was empty. It was falsified with a FAVOURABLE mutation: M15 added
+      // `STUDIO_SSE_HEARTBEAT.seconds`, which matches a prefix, so the control fired and looked
+      // like a guard.
+      //
+      // QA ran the unfavourable one. Adding `checks.studio.qa-probe-7255` to
+      // `backend.configOverrides` produced **4 failed / 3 passed — byte-identical to the
+      // unmutated baseline**: the four `toEqual([])` assertions above were already red, each
+      // silently gained a key, and **no number moved**. AC-18's intentional red ABSORBS any new
+      // invalid key that does not happen to carry one of this story's five prefixes. A permanently
+      // red assertion cannot also be a detector, because it has no observable states left.
+      //
+      // The repair is to stop scoping by name and scope by **baseline diff**: the escalated set is
+      // frozen, and equality is asserted both ways. Any key that enters — whoever adds it, whatever
+      // it is called — moves this. Any key that leaves means the escalation is being resolved and
+      // the frozen set must be updated deliberately, in the PR that resolves it.
+      const violations = envFromViolations(render({ valuesFile }), label);
+      const distinct = [...new Set(violations.map((v) => v.key))].sort();
+
+      expect(
+        distinct,
+        'the set of invalid envFrom keys has changed. If a key was ADDED, it is a new setting that ' +
+          'will never reach its process and it must be given a valid environment-variable name — ' +
+          'the AC-18 escalation does not cover it. If a key was REMOVED, update ESCALATED_KEYS in ' +
+          `the PR that removed it.\n${describeViolations(violations)}`,
+      ).toEqual([...ESCALATED_KEYS]);
+
+      // The occurrence count as well as the key set: `checks.scheduling.min-interval-seconds` and
+      // `spring.datasource.hikari.maximum-pool-size` are rendered into BOTH the api and the worker
+      // ConfigMap, so a third consumer of an already-listed key would leave the key set unchanged
+      // and must still move a number.
+      expect(violations.length, describeViolations(violations)).toBe(ESCALATED_VIOLATION_COUNT);
+    });
+  }
 
   it('the check DISCRIMINATES: a conforming ConfigMap produces no violations', () => {
     // The red above must be the chart's, not a broken checker's. `SERVER_PORT` is rendered into
@@ -186,5 +246,21 @@ describe('AC-18 — every envFrom-consumed key is a valid environment-variable n
       'mutated',
     );
     expect(mutated.map((v) => v.key)).toContain('studio.sse.heartbeat');
+  });
+
+  it("QA's UNFAVOURABLE probe moves a number — the key set is not scoped by name", () => {
+    // `checks.studio.qa-probe-7255` carries none of the five prefixes the defective control
+    // matched on, which is exactly why QA chose it: against the old control it changed nothing at
+    // all. Kept in the suite rather than only in the record, so the twentieth shape cannot be
+    // reintroduced by someone who finds the frozen list inconvenient.
+    const mutated = envFromViolations(
+      render({ args: ['--set', 'backend.configOverrides.checks\\.studio\\.qa-probe-7255=1'] }),
+      'qa-probe',
+    );
+    const distinct = [...new Set(mutated.map((v) => v.key))].sort();
+
+    expect(distinct).not.toEqual([...ESCALATED_KEYS]);
+    expect(distinct).toContain('checks.studio.qa-probe-7255');
+    expect(mutated.length).toBe(ESCALATED_VIOLATION_COUNT + 1);
   });
 });

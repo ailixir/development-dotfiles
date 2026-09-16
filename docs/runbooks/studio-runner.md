@@ -411,6 +411,17 @@ default somebody may change.
 **An operator may NOT** set any of the three to `true` in a staging or production values file
 without Security's explicit acceptance. Each one hands an unauthenticated caller an administrator.
 
+**One residual, because this section is otherwise only true about the chart (QA SEC-003).**
+`application.yml` declares `spring.profiles.active: local` as its built-in default, and the `local`
+profile now carries `identity-headers: true`. **A process started with no profile set at all
+therefore trusts identity headers.** That cannot happen through this chart — all four value sets
+render `SPRING_PROFILES_ACTIVE` explicitly on both the API and the worker, unconditionally, and none
+of them names `local` or `test` — and it is strictly better than what it replaced, which was a
+hardcoded `return true` that trusted *everything* in every profile. It is recorded here rather than
+fixed because changing the built-in default profile affects every developer workflow in the
+repository and is not a Studio story's to change. **If you ever run this image without
+`SPRING_PROFILES_ACTIVE`, you are running with header identity trusted.**
+
 **A separate, profile-scoped bypass also exists and is not one of the three.**
 `LocalDevAuthFilter` injects a fixed developer identity, is annotated `@Profile("local")` and is
 governed by `checks.local-dev-auth.enabled`. It cannot load in any deployed profile — the chart
