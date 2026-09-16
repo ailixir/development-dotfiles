@@ -417,14 +417,27 @@ const ChecksStudioPageInner: React.FC = () => {
    * Story 10.11b, AC-13 — the scenario switch, made reachable.
    *
    * `handleScenarioSelect` already existed and already did the right thing; nothing in the rendered
-   * tree called it, so the route (`/checks/studio/tests/:id`) — which is this app's own way of
-   * choosing a draft — changed without the page noticing. A stream opened for one draft would have
-   * outlived the switch to another, which is precisely the accumulation AC-13 counts at the server.
+   * tree called it, so the route (`/checks/studio/:id`, `App.tsx:114`) — which is this app's own way
+   * of choosing a draft — changed without the page noticing. A stream opened for one draft would
+   * have outlived the switch to another, which is precisely the accumulation AC-13 counts at the
+   * server.
+   *
+   * **`SCEN-1`, from @qa's gate.** The trigger is the route **changing**, not the route *differing
+   * from the selection*. Those are not the same predicate: `handleCreateNewScenario` sets
+   * `selectedScenario` to the new draft while the route still carries the old id, and a
+   * "differs from" test fires there and snaps the selection **back**, overwriting `testSteps`.
+   * `lastRouteId` is what makes this a change detector, and it is the whole of the remedy.
    */
+  const lastRouteId = useRef<string | undefined>(params.id);
   useEffect(() => {
     const next = params.id;
-    if (!next || !scenarios || next === selectedScenario) return;
+    if (next === lastRouteId.current) return;
+    if (!next || !scenarios) return;
+    // An id the list does not carry is not consumed: a later reload may bring it, and until then
+    // the route change has not happened as far as this page is concerned.
     if (!scenarios.some((scenario) => scenario.id === next)) return;
+    lastRouteId.current = next;
+    if (next === selectedScenario) return;
     handleScenarioSelect(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, scenarios, selectedScenario]);

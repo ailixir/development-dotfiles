@@ -66,8 +66,14 @@ const draftB: TestDto = {
   ...mockTests[0],
   id: '11111111-1111-1111-1111-11111111bbbb',
   name: 'A second draft',
+  // Deliberately a different length and different text from draftA's three steps, so that a
+  // selection snapping from one to the other is visible on the surface rather than inferred.
+  steps: ['Go to "https://example.invalid/only-step"'],
   compileStatus: 'READY',
 };
+
+/** What `GET /studio/tests` currently lists. Mutable, so a reload can change it mid-test. */
+let listedDrafts: TestDto[] = [draftA, draftB];
 
 let server: StudioTestServer | null = null;
 let connections: StreamConnection[] = [];
@@ -89,6 +95,7 @@ function json(res: import('node:http').ServerResponse, status: number, body: unk
 async function startServer(): Promise<StudioTestServer> {
   connections = [];
   executeCount = 0;
+  listedDrafts = [draftA, draftB];
   return startStudioTestServer({
     onStream: (open) => connections.push(open),
     // Reaching this at all is a defect for AC-8: a healthy stream reads no snapshot route.
@@ -96,10 +103,10 @@ async function startServer(): Promise<StudioTestServer> {
     onOther: (request: RecordedRequest, res) => {
       if (request.method === 'GET' && request.path === '/api/v1/studio/tests') {
         return json(res, 200, {
-          data: [draftA, draftB],
+          data: listedDrafts,
           page: 0,
           size: 20,
-          totalElements: 2,
+          totalElements: listedDrafts.length,
           totalPages: 1,
         });
       }
@@ -358,6 +365,55 @@ describe('AC-13: no subscription accumulates', () => {
       // The page is still mounted: this really was a switch and not a remount.
       expect(rtl.screen.queryByRole('button', { name: /run test/i })).not.toBeNull();
       view.unmount();
+    } finally {
+      rtl.cleanup();
+    }
+  }, 60000);
+});
+
+describe('SCEN-1 (@qa gate): the route effect is a change detector, not a difference detector', () => {
+  it('SCN-TERMINAL-EVIDENCE-SETTLED: a selection set while the route stands still is not snapped back, and its steps survive', async () => {
+    // The state this reproduces is **exactly** the create-scenario state @qa filed: the selection
+    // holds one draft that the list carries, the route holds a *different* draft that the list also
+    // carries, and nothing navigated. `handleCreateNewScenario` produces it by setting
+    // `selectedScenario` to the new id while the route keeps the old one; here the reload control
+    // produces it by bringing the route's draft into a list that did not have it. Same predicate
+    // inputs, and this one is reachable from the rendered surface — the create dialog is not:
+    // `setShowNewScenarioDialog(true)` has no call site in the page.
+    listedDrafts = [draftA];
+    const { rtl, renderAt } = await loadApp(api().baseUrl);
+    try {
+      renderAt(`/studio/tests/${draftB.id}`);
+
+      // The route names draftB, but the list does not carry it, so the page settles on draftA.
+      await rtl.screen.findByText(draftA.name, undefined, { timeout: 10000 });
+      await rtl.screen.findByText(`Test Steps (${draftA.steps.length})`, undefined, {
+        timeout: 10000,
+      });
+
+      // The list changes beneath a route that has not moved.
+      listedDrafts = [draftA, draftB];
+      const reload = await rtl.screen.findByRole('button', { name: /reload scenarios/i });
+      await rtl.act(async () => {
+        reload.click();
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      });
+      await until(
+        () => api().countOf('GET', '/api/v1/studio/tests') >= 2,
+        'the reload to be observed at the server',
+      );
+      await rtl.act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      });
+
+      // Nothing snapped. The selection and the authored steps are the ones the user was looking at.
+      expect(rtl.screen.queryByText(draftB.name)).toBeNull();
+      expect(rtl.screen.queryByText(draftA.name)).not.toBeNull();
+      expect(
+        rtl.screen.queryByText(`Test Steps (${draftA.steps.length})`),
+        'the step list was overwritten by the route’s draft',
+      ).not.toBeNull();
+      expect(rtl.screen.queryByText(`Test Steps (${draftB.steps.length})`)).toBeNull();
     } finally {
       rtl.cleanup();
     }
