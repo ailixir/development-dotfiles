@@ -115,13 +115,25 @@ public record UITestDto(
   }
 
   private static UITestDto from(UITest entity, UITestRevision candidate, boolean withDiagnostics) {
-    // Both or neither. A hash published without the artifact it names would invite a caller to
-    // confirm a revision it has no way to review, which is the one thing the confirmation step
-    // exists to prevent; the unparseable-column defence below is the only path that can produce
-    // that asymmetry, and this is where it is closed.
+    // The hash and the artifact travel together, and **this method is not what makes that true**.
+    //
+    // An earlier version read the artifact first and then withheld the hash when the artifact came
+    // back null, with a comment saying the asymmetry "is closed" here. @qa deleted that branch and
+    // the entire studio package stayed green — 91 classes, 692 tests, the identical six failures —
+    // because the branch is unreachable. `ui_test_revisions.artifact` is `JSONB NOT NULL` and
+    // `artifact_hash` is `VARCHAR(64) NOT NULL` (V12), both named in the write-once trigger, and a
+    // `jsonb` column cannot hold anything that is not already valid JSON. So `parse` cannot return
+    // null for a revision row, and the withholding could never fire. A comment claiming a property
+    // is closed, over code nothing can exercise, is this epic's twenty-first catalogued shape.
+    //
+    // What is true is that the pairing is a property of the **row**, enforced by the schema, and it
+    // is asserted against the live database rather than restated here:
+    // `CandidateArtifactProjectionIT.theRevisionRowIsWhatGuaranteesTheArtifactAndItsHashTravel-
+    // Together` reads `information_schema` and reddens if either column becomes nullable. That
+    // assertion can fail; this branch could not.
     JsonNode candidateArtifact =
         candidate == null ? null : parse(candidate.getArtifact(), JsonNode.class);
-    String candidateArtifactHash = candidateArtifact == null ? null : candidate.getArtifactHash();
+    String candidateArtifactHash = candidate == null ? null : candidate.getArtifactHash();
 
     return new UITestDto(
         entity.getId(),

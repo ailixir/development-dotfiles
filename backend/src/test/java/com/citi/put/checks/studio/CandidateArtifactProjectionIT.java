@@ -192,7 +192,58 @@ class CandidateArtifactProjectionIT {
         .isEqualTo(SECOND_CODE);
   }
 
+  /**
+   * AC-26 — <b>what actually guarantees the hash and the artifact travel together.</b>
+   *
+   * <p>{@code UITestDto.from} used to withhold the hash when the artifact came back null, under a
+   * comment saying the asymmetry was closed there. @qa deleted that branch and the whole studio
+   * package stayed green, because the branch is unreachable: the columns are {@code NOT NULL} and a
+   * {@code jsonb} column cannot hold anything that is not already valid JSON, so the parse cannot
+   * fail for a revision row. A comment asserting a property over code nothing can exercise is this
+   * epic's twenty-first catalogued vacuous shape, and the remedy taken was to move the claim to
+   * where it is true and can be checked rather than to invent a hazard for the branch.
+   *
+   * <p>So the premise is asserted against the <b>live database</b> — {@code information_schema},
+   * not the JPA annotations and not the migration text, both of which are copies of it. Making
+   * either column nullable reddens this and nothing else.
+   *
+   * <p>The third assertion is the non-vacuity control: a column on the same table that <em>is</em>
+   * nullable comes back {@code YES}, so a query that had silently stopped discriminating — an empty
+   * result set, a mis-cased table name — cannot pass this.
+   */
+  @Test
+  void theRevisionRowIsWhatGuaranteesTheArtifactAndItsHashTravelTogether() {
+    assertThat(isNullable("artifact"))
+        .as("ui_test_revisions.artifact is what makes a candidate's artifact always present")
+        .isEqualTo("NO");
+    assertThat(isNullable("artifact_hash"))
+        .as("and its hash, which is why the producer needs no defence of its own")
+        .isEqualTo("NO");
+    assertThat(isNullable("confirmed_by"))
+        .as("the control: this query can return YES, so NO above means something")
+        .isEqualTo("YES");
+    assertThat(dataType("artifact"))
+        .as("jsonb is why the artifact column cannot hold text that fails to parse")
+        .isEqualTo("jsonb");
+  }
+
   // ── helpers ──────────────────────────────────────────────────────────────
+
+  private String isNullable(String column) {
+    return jdbc.queryForObject(
+        "SELECT is_nullable FROM information_schema.columns"
+            + " WHERE table_name = 'ui_test_revisions' AND column_name = ?",
+        String.class,
+        column);
+  }
+
+  private String dataType(String column) {
+    return jdbc.queryForObject(
+        "SELECT data_type FROM information_schema.columns"
+            + " WHERE table_name = 'ui_test_revisions' AND column_name = ?",
+        String.class,
+        column);
+  }
 
   private String persistedHash(UUID revisionId) {
     return jdbc.queryForObject(
