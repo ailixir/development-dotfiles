@@ -195,9 +195,27 @@ class StudioApiIT {
     return restTemplate.exchange(path, HttpMethod.GET, new HttpEntity<>(headers()), String.class);
   }
 
+  /**
+   * The caller these tests run as.
+   *
+   * <p><strong>This used to send no identity at all</strong>, and worked because {@code
+   * BffSessionAuthenticationFilter.isCoreServiceBypassed()} returned a hardcoded {@code true} and
+   * admitted every identity-less request as {@code platform-bypass} with {@code checks-admin} and
+   * {@code platform-admin}. Story 10.18b closed that bypass by configuration (ED-02, AC-19a), so an
+   * identity-less caller is now answered {@code 401} — which is what architecture §9.1 requires and
+   * what seven of this class's assertions were quietly relying on not happening.
+   *
+   * <p>The identity is supplied by header, which the {@code test} profile permits and no deployed
+   * profile does. The owner and CSI match the fixture below, so authorization resolves the same way
+   * the bypass identity did — these tests are about the Studio API, not about who is calling it.
+   */
   private static HttpHeaders headers() {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.set("X-User-Id", "uid-" + OWNER);
+    headers.set("X-User-Email", OWNER);
+    headers.set("X-User-Roles", "checks-admin");
+    headers.set("X-User-Csi-Ownership", CSI_ID + ":owner");
     return headers;
   }
 

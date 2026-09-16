@@ -86,9 +86,61 @@ backend:
 
   env:
     JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError"
-    CHECKS_CORS_ALLOWED_ORIGINS: "http://localhost:3000"
+    # **Exact origins, never `*`, and the first entry is this chart's own frontend host**
+    # (AC-16a). CORS here is credentialed — `SecurityConfig.buildCorsSource` sets
+    # `allowCredentials(true)` — and a wildcard origin with credentials is both rejected by every
+    # browser and a request-forgery surface. The value is asserted against the rendered
+    # `frontend.ingress.host` in the same manifest: changing one without the other is M12's
+    # second mutation and must go red.
+    #
+    # Base `values.yaml` deployed nothing before this story: its frontend host was
+    # `checks.dev.citi.com` while this list held only `http://localhost:3000`, so the browser the
+    # chart deploys could not have called the API it deploys. Corrected here rather than left for
+    # a staging afternoon.
+    #
+    # ⚠ **FEDERATED MODE IS NOT COVERED BY THIS LIST AND CANNOT BE** — ED-06 / SPK-02 questions
+    # 1-2, OPEN. When the MFE runs inside the PUT platform shell, the browser's origin is the
+    # SHELL's, which no values file in this chart knows. Whether the session cookie reaches
+    # `/events` and `/video` at all in that mode, and from which origin, is what SPK-02 must state
+    # in writing before a pilot.
+    CHECKS_CORS_ALLOWED_ORIGINS: "https://checks.dev.citi.com,http://localhost:3000"
     CHECKS_CORE_SERVICE_URL: "http://checks-core:8081"
 
+
+  # ── ED-02: the three identity bypasses, and what this block does NOT do (AC-19a, AC-20) ──────
+  #
+  # ⚠ **THE BYPASS CODE PATHS STILL EXIST IN THE APPLICATION. Setting these to `false` closes
+  # them; it does not remove them.** @po ruled at wave-6 validation that removing them as code is
+  # out of scope — deleting the Core-service bypass moves identity resolution onto
+  # `CoreServiceClient`, and the filter's own comment records why that is unavailable: "while the
+  # target platform does not provide Core services". So the paths survive, default-closed, and
+  # watched by a test pinned to the production symbol.
+  #
+  # **There are THREE of them, not one.** The epic's records — the manifest's `ED-02` description
+  # and the run log's wave-1 baseline entry — have described `ED-02` as a single flag throughout.
+  # That is wrong, and it matters: `BffSessionAuthenticationFilter.resolveIdentity` reads the
+  # client-supplied `X-User-Id` header and returns **before** it ever reaches the Core-service
+  # bypass. Closing `coreService` alone closes nothing at all for a client that sends a header.
+  #
+  #   coreService     — the hardcoded `return true`, now a property
+  #   identityHeaders — X-User-Id / X-User-Email / X-User-Roles / X-User-Csi-Ownership taken off
+  #                     the request. Architecture §9.1 requires a trusted gateway to strip these;
+  #                     **this repository contains no such gateway**, so with this false the pod
+  #                     refuses a direct caller its own identity rather than trusting it.
+  #   csiRead         — `applyTemporaryCsiReadBypass`, which appends `checks-admin` to any
+  #                     identity making a GET under /api/v1/csi.
+  #
+  # **The vault is still a stub too**: `SecretsService` returns `REDACTED`. ED-02's owner reads
+  # "TBD — not assigned in sources" and **no credentialed pilot may run until ED-02 has linked
+  # completed tickets** (ED-02 gate_note, BRD §8). Default-closed everywhere, including this base
+  # file: an environment with no Core service and no trusted gateway gets 401, which §9.1 calls
+  # the correct failure direction. An environment that needs one of these open must set it here,
+  # deliberately and visibly, and record why. See `docs/runbooks/studio-runner.md` §9 for what an
+  # operator may and may not do with these.
+  identityBypass:
+    coreService: false
+    identityHeaders: false
+    csiRead: false
   envFromSecrets: []
   # - secretName: checks-db-credentials
   #   keys:
@@ -491,3 +543,101 @@ objectStore:
   # one key. Physical deletion on the store is asynchronous and this chart claims no exact-time
   # deletion anywhere (§6.2).
   retention: 30d
+
+# ---------------------------------------------------------------------------
+# Studio SSE — the streaming route at the EDGE (story 10.18b, AC-13a)
+# ---------------------------------------------------------------------------
+#
+# **Why this is a separate Ingress object and not two annotations on the API one.**
+# `templates/ingress.yaml` renders the API as a single `path: / pathType: Prefix` rule. nginx
+# annotations are per-Ingress, so a `proxy-buffering: "off"` written there would unbuffer **every
+# REST call in the product** — every list, every create, every health probe — to fix two streaming
+# routes. The streaming paths therefore carry their own Ingress object, and a test renders the
+# chart with `studioSse.ingress.enabled` false and true and asserts the API Ingress document is
+# **byte-identical** between the two. Ordinary REST is served exactly as it was.
+#
+# **One derivation, not two.** The epic's most-repeated defect is one fact written down twice —
+# `application.yml` says 8090 and the runner's `config.ts` says 8080, and neither had ever been
+# deployed. A `proxy-read-timeout` annotation sitting beside a `STUDIO_SSE_HEARTBEAT` env var with
+# nothing joining them is the same defect in the one place where its failure is invisible until a
+# stream dies in staging. So:
+#
+#   - `heartbeatSeconds` and `lifetimeSeconds` render into the API container's
+#     `STUDIO_SSE_HEARTBEAT` / `STUDIO_SSE_LIFETIME`, which are the only values
+#     `SnapshotBroadcaster` reads;
+#   - the ingress idle timeout is **computed** as `lifetimeSeconds + idleTimeoutMarginSeconds`,
+#     so it cannot be left behind when the lifetime moves;
+#   - a test compares the rendered annotation against the rendered env values **in the same
+#     manifest** — never against a constant written in the test, which would be a third copy.
+#
+# Raising `heartbeatSeconds` above the computed timeout is M11's mutation and must redden that
+# comparison. The timeout is deliberately **not** derived from the heartbeat: a derivation that
+# moved with it could never be observed to fail.
+#
+# §8.5 starting values, not commitments. `heartbeatSeconds` and `lifetimeSeconds` are tuned against
+# the staging measurement SPK-02 question 4 makes — **and that measurement has not been taken**.
+# The *effective* maximum stream lifetime through the real ingress and any platform proxy in front
+# of it is unknown (ED-06). If it turns out to be below `lifetimeSeconds`, the configured value
+# moves to match the measurement; that is the mechanism working.
+studioSse:
+  # Heartbeat cadence, seconds. Rendered as `{n}s` into STUDIO_SSE_HEARTBEAT.
+  heartbeatSeconds: 15
+  # Bounded stream lifetime, seconds. Rendered as `{n}s` into STUDIO_SSE_LIFETIME. The browser
+  # reconnects with Last-Event-ID and the snapshot contract restores current state.
+  lifetimeSeconds: 60
+  # Headroom between the bounded lifetime and the upstream idle timeout. The timeout must be
+  # comfortably longer than the lifetime so the *application* closes the stream, not the proxy:
+  # a proxy-closed stream is indistinguishable at the browser from a network fault.
+  idleTimeoutMarginSeconds: 60
+
+  ingress:
+    # Off makes this chart render exactly what it rendered before story 10.18b. That is not a
+    # convenience switch — it is the control half of AC-13a's "ordinary REST is unchanged"
+    # comparison, which renders both ways and diffs the API Ingress.
+    enabled: true
+    # The className, host and TLS come from `backend.ingress`: the streaming paths are the same
+    # API on the same host, and a second copy of the host is a second thing to get wrong.
+    #
+    # ⚠ **UNVERIFIED THROUGH A REAL INGRESS — ED-06 / SPK-02 questions 3 and 4.** Two Ingress
+    # objects for one host are merged by the nginx controller into a single server block;
+    # `proxy-buffering` and the proxy timeouts are location-scoped and should apply only to the
+    # paths below, but *this repository cannot establish that*, and no snippet annotation is used
+    # here because clusters commonly run with `allow-snippet-annotations: false`. Whether
+    # buffering is actually off on the wire is SPK-02's to measure.
+    #
+    # The buffering and timeout annotations are **not** values keys: they are rendered by
+    # `templates/studio-sse-ingress.yaml` from the two duration keys above, so that the bound
+    # between the timeout and the heartbeat has one owner. `extraAnnotations` is for the unrelated
+    # things a cluster may need (auth, tracing); a key that collides with one of the managed
+    # annotations fails the render rather than silently winning or losing.
+    extraAnnotations: {}
+
+# ---------------------------------------------------------------------------
+# Studio execution — the kill switch and the dispatcher (story 10.18b, AC-23a)
+# ---------------------------------------------------------------------------
+#
+# **Two distinct keys, because they are two distinct decisions.** The kill switch answers "may new
+# executions be accepted at all"; the dispatcher flag answers "does this component take queued work
+# off the ledger". Rendering both from one key would mean an operator engaging the kill switch also
+# silently stopped the closure pass that the kill switch exists to trigger — BRD §9 requires that
+# queued undispatched work be **closed explicitly** when the switch goes off, and the dispatcher is
+# what closes it.
+#
+# **The dispatcher is rendered on the worker and nowhere else**, and it is rendered EXPLICITLY on
+# every component rather than left to a default, because the two defaults disagree:
+# `application.yml` renders `${STUDIO_DISPATCHER_ENABLED:false}` while
+# `StudioExecutionProperties.Dispatcher.enabledOrDefault()` returns **true** for an absent value.
+# That divergence is a real finding (recorded in `StudioKillSwitchWiringTest`, owner @architect);
+# a deployment that states the value cannot be caught by it either way.
+studioExecution:
+  # The kill switch (§8.5, BRD §9). TRUE is the running state: a kill switch that defaulted to
+  # "off" would make a configuration mistake indistinguishable from an engaged kill switch, which
+  # is the one failure an operator must be able to tell apart from an outage.
+  enabled: true
+  # Whether the WORKER dispatches queued executions. The API never does, in any configuration —
+  # that is a property of the api profile, not a values choice, so the API's `false` is written in
+  # the Deployment template rather than here.
+  #
+  # ⚠ A deployment with this false queues work and dispatches nothing, **which looks exactly like
+  # an egress problem**. The runbook's stuck-runs section (§5) names it first for that reason.
+  dispatcherEnabled: true

@@ -108,6 +108,29 @@ checks:
       from: ${CHECKS_REPORT_MAIL_FROM:put-checks-noreply@citi.com}
   cors:
     allowed-origins: ${CHECKS_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3002,http://localhost:5173}
+  security:
+    # ── ED-02: the three identity bypasses, ALL DEFAULT-CLOSED (story 10.18b, AC-19a) ──────────
+    #
+    # ⚠ **THE CODE PATHS STILL EXIST. These close them; nothing here removes them.** @po ruled at
+    # wave-6 validation that removal is out of scope — deleting the Core-service bypass moves
+    # identity resolution onto CoreServiceClient, and the filter's own comment records why that is
+    # unavailable: "while the target platform does not provide Core services". So the paths
+    # survive, default-closed, and watched by a test pinned to the production symbol.
+    #
+    # **There are three, and the order among them decides whether closing achieves anything.**
+    # `BffSessionAuthenticationFilter.resolveIdentity` reads the client-supplied `X-User-Id` header
+    # and returns BEFORE it reaches the Core-service bypass, so closing `core-service` alone closes
+    # nothing for a caller that can reach the pod and send a header. Architecture §9.1 assigns
+    # stripping those headers to a trusted gateway; this repository contains no such gateway.
+    #
+    # ⚠ **The vault is also still a stub** — `SecretsService` returns REDACTED — and **no
+    # credentialed pilot may run until ED-02 has linked completed tickets**. ED-02's owner reads
+    # "TBD — not assigned in sources"; the escalation path is @pm → Checks-squad engineering
+    # management (BRD §8), with Security & Compliance accepting.
+    bypass:
+      core-service: ${CHECKS_BYPASS_CORE_SERVICE:false}
+      identity-headers: ${CHECKS_BYPASS_IDENTITY_HEADERS:false}
+      csi-read: ${CHECKS_BYPASS_CSI_READ:false}
   rate-limit:
     read-per-min: 600
     write-per-min: 120

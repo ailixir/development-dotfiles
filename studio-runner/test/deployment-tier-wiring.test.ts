@@ -55,6 +55,10 @@ const REQUIRED_FILES = [
   'chart.test.ts',
   'sec2.test.ts',
   'sec2-shim-attack.sh',
+  // Story 10.18b's edge half. Added here for the same reason the pod half is here: a tier file
+  // that can be deleted without reddening the run everyone executes is a tier file that will be.
+  'edge.test.ts',
+  'envfrom-keys.test.ts',
 ] as const;
 
 describe('the deployment-evidence tier is wired and cannot be lost quietly (QA HIGH-1)', () => {
@@ -65,7 +69,7 @@ describe('the deployment-evidence tier is wired and cannot be lost quietly (QA H
     // …and carries test files at all. An empty directory would satisfy a looser check and would be
     // a tier that runs nothing, which is the failure this whole repair is about.
     const tests = readdirSync(DEPLOYMENT_DIR).filter((entry) => entry.endsWith('.test.ts'));
-    expect(tests.length, 'the deployment tier contains no test files').toBeGreaterThanOrEqual(2);
+    expect(tests.length, 'the deployment tier contains no test files').toBeGreaterThanOrEqual(4);
   });
 
   it('has its own config, its own script, and passWithNoTests unset', () => {

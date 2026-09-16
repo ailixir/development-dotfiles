@@ -1,0 +1,416 @@
+schema: 1
+story: '10.18b'
+story_title: 'Hardened staging deployment and SSE route — the edge half (AC-13a – AC-16b, AC-18 – AC-24, AC-26 – AC-28)'
+gate: CONCERNS
+status_reason: >-
+  The three ED-02 identity bypasses are genuinely closed, default-closed and watched on the
+  production symbol; the `local`-profile opening is correct scoping, not a disabled-auth green.
+  Two MEDIUM guard-quality findings remain: AC-18's discrimination control is a naming allowlist
+  rather than a baseline diff, and a permanently-red stage 9 cannot report a new red.
+reviewer: 'Quinn'
+reviewed_revision: 'commit:379ca554e'
+updated: '2026-09-16T06:05:00Z'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# THE CENTRAL QUESTION — the `application-local.yml` opening
+# ─────────────────────────────────────────────────────────────────────────────
+central_question:
+  question: >-
+    A story whose subject is closing authentication bypasses opened one in a test profile and
+    reports that many tests now pass. Correct scoping, or green-because-auth-is-off?
+  ruling: 'CORRECT SCOPING — and the opposite of the feared shape.'
+  verified:
+    - id: 'which property, which profile'
+      finding: >-
+        `identity-headers` ONLY, in `application-local.yml` and `application-test.yml`.
+        `core-service` and `csi-read` are left at the new default of `false` in both, so the
+        suite OBSERVES the closure rather than being insulated from it. Read from the diff of
+        all three yml files; no other profile file was touched.
+    - id: 'the profile is not deployed'
+      finding: >-
+        All four Helm value sets render an explicit profile and none is `local` or `test` —
+        values.yaml `api,prod`/`worker,prod`, values-dev `api,dev`/`worker,dev`, values-uat
+        `api,staging`/`worker,staging`, values-prod `api,prod`/`worker,prod`. Both Deployments
+        set SPRING_PROFILES_ACTIVE unconditionally (deployment.yaml:63 and :244). No Dockerfile
+        or script sets it elsewhere.
+    - id: 'the rendered manifests close all three'
+      finding: >-
+        `helm template` for each of the four value sets renders exactly 3 `CHECKS_BYPASS_*`
+        keys, all on the API container, all `false`. Counted on the rendered output, not the
+        values source.
+    - id: 'no authorization assertion rides on the open flag — MEASURED, not argued'
+      finding: >-
+        PROBE B. I set `identity-headers: false` in application-local.yml and re-ran
+        ConfirmCompileRouteTest: 8 of 10 tests FAILED, including
+        `aReaderOfTheCsiIsForbiddenRatherThanToldAboutTheCandidate()` (a 403 assertion) which
+        degrades to 401. Closing the flag turns identified callers into anonymous ones and
+        breaks authorization assertions in the FAIL direction. The open flag is therefore the
+        ENABLING condition for a non-vacuous authorization test, never a masking one. The
+        feared shape would require the reverse.
+    - id: 'the watch is immune to the profile'
+      finding: >-
+        `BffSessionBypassClosureTest` is a plain JUnit test with no `@ActiveProfiles` and no
+        Spring context. It constructs the real `BffSessionAuthenticationFilter` with explicit
+        `IdentityBypassProperties` values, so no profile file can reach it.
+  residual: 'SEC-003 below — the application default profile is `local`.'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# THE BASELINE CLAIM — the previously-unreachable test
+# ─────────────────────────────────────────────────────────────────────────────
+baseline_milestone:
+  claim: >-
+    `ConfirmCompileRouteTest.anIdentitylessCallerIsUnauthorized()` — held `@Disabled` by story
+    10.9 with a live sibling that would fire the day ED-02 moved — now passes.
+  verdict: 'CONFIRMED, and it passes for the right reason. This is a real epic milestone.'
+  evidence:
+    - 'Ran ConfirmCompileRouteTest with `--rerun-tasks`: 10 tests, 0 failures, 0 skips. The enabled test passes.'
+    - >-
+      The live sibling `theUnauthenticatedCaseIsNotReachableWhileTheCoreServiceBypassIsOn()` was
+      deleted, which is exactly what its own comment prescribed ("this test goes red — which is
+      the signal to delete it and enable anIdentitylessCallerIsUnauthorized()"). The swap is the
+      handover the pair was written to perform.
+    - >-
+      PROBE A — attribution. I re-applied M13a (`isCoreServiceBypassed()` → `return true`) and
+      re-ran the class: `anIdentitylessCallerIsUnauthorized()` was the SINGLE failure, 1 of 10.
+      The 401 is produced by the Core-service bypass being closed, not by a bypass having moved
+      elsewhere and not by the header path.
+    - >-
+      The client-side change (JDK `HttpClient` instead of `TestRestTemplate`'s
+      `SimpleClientHttpRequestFactory`) is a real constraint: `HttpURLConnection` throws
+      `HttpRetryException` on a 401 to a streamed POST. Nothing about the request the server
+      sees changed. Accepted.
+  twelve_recovered_tests: >-
+    All twelve confirmed green in MY OWN partial run, not only in @dev's —
+    BffFilterUnauthIT.missingCookieReturns401WithJsonBody() PASSED, BffFilter503IT PASSED,
+    RateLimitFilterIT 5/0, ScheduleAuthzIT 2/0, BulkDeleteIT 7/0, IdentityCacheIT PASSED,
+    CsiFetchIT 3/0. The three repaired classes are green too: ConfirmCompileRouteTest 10/0,
+    IdempotencyFilterIT 5/0, StudioApiIT 7/0.
+
+backend_result:
+  obtained: false
+  statement: "HUNG — not green, not red. @dev's account is honest and I reproduced it."
+  my_run: '436 passed / 10 failed, then no output for 240 s. Killed.'
+  failing_set_verified: >-
+    Exactly 10 failures across 6 classes, identical to @dev's list — CheckCrudIT 2,
+    ReportsCrudIT 2, ReportsExecutionIT 2, ReportsPreviewIT 2, ReportsDuplicateIT 1,
+    ReportDeliveryDispatcherIT 1. NONE in `studio` or `security`. None of those classes is in
+    this half's diff (the backend diff is 12 files: 4 config/security main, 3 yml, 5 test).
+  med2_reproduced: >-
+    jstack of the hung worker (pid 37022, elapsed 264 s): `Test worker` BLOCKED (on object
+    monitor) at `ContainerDatabaseDriver.connect` ← `DriverDataSource.getConnection` ←
+    HikariPool; `HikariPool-4 connection adder` TIMED_WAITING (sleeping) at
+    `JdbcDatabaseContainer.createConnection:257`. Same shape as all previous captures. This is
+    the FIFTH hang on this branch. MED-2 confirmed, owner @devops. Do not key a detector on
+    thread state — the lock holder is never BLOCKED.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MUTATION AUDIT — six re-applied by @qa, all confirmed
+# ─────────────────────────────────────────────────────────────────────────────
+mutations_reapplied:
+  - id: M13a
+    mutation: '`isCoreServiceBypassed()` → `return true`'
+    observed: '11 failed / 6 passed of 17 — identical to @dev'
+    asymmetry: >-
+      CONFIRMED. Refusal "closed, a request with no session is 401" RED; permit companion
+      "open, the same request is the platform-bypass admin" GREEN. The Watch row
+      (`isCoreServiceBypassed: closed is 401 and open is 200`) also RED — that is M14, confirmed
+      in the same run.
+  - id: M13b
+    mutation: '`areIdentityHeadersTrusted()` → `return true`'
+    observed: '3 failed / 14 passed of 17 — identical to @dev'
+    asymmetry: >-
+      CONFIRMED. Refusal "closed, a caller cannot supply its own identity" RED; permit
+      companion "open, the headers still resolve" GREEN; the ordering watch RED.
+  - id: M13c
+    mutation: 'the `if (!bypass.csiRead()) return false;` guard deleted'
+    observed: '2 failed / 15 passed of 17 — identical to @dev'
+    asymmetry: >-
+      CONFIRMED. Refusal "closed, a GET under /api/v1/csi does not gain checks-admin" RED; both
+      permit companions GREEN.
+  - id: M16
+    mutation: '`StudioAcceptanceService:165` `if (!properties.enabledOrDefault())` → `if (properties.enabledOrDefault())`'
+    observed: '2 failed / 4 passed — BOTH assertions reversed, exactly as @dev reports'
+    detail: >-
+      "switch OFF: accept() refuses with DISPATCH_DISABLED" RED and "switch ON: accept()
+      proceeds past the switch — INVERTED" RED, while both dispatch-branch tests and both
+      default tests stayed GREEN. The kill switch is a real kill switch.
+  - id: M11a
+    mutation: '`studioSse.heartbeatSeconds: 15 → 600` in values.yaml'
+    observed: '10 failed / 167 passed of 177 (@dev: 10 failed / 165 of 175 — the +2 are the canary controls, which need no prerequisite)'
+  - id: M15
+    mutation: '`STUDIO_SSE_HEARTBEAT.seconds: "15"` added to `backend.configOverrides`'
+    observed: >-
+      5 failed / 172 passed, and the discriminating test "this story's OWN rendered keys are
+      all valid" went RED. The intentional AC-18 red does not absorb a new mistake — PROVIDED
+      the key carries one of the story's five naming prefixes. See TEST-001.
+
+mutation_restoration: >-
+  Every mutation restored via `git checkout --` and verified by `shasum -a 256` against the
+  pre-mutation digest. Final `git status --porcelain` empty; final confirming tier run
+  reproduces the exact baseline 173 passed / 4 failed / 177.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FAIL-CLOSED PROBES — both run by @qa, both confirmed
+# ─────────────────────────────────────────────────────────────────────────────
+fail_closed_probes:
+  - condition: 'both prerequisites present'
+    result: '173 passed / 4 failed / 177, 4 files — the 4 are AC-18'
+  - condition: '`helm` stubbed to `exit 127`, first on PATH'
+    result: '166 failed / 11 passed / 177. ZERO skipped.'
+    note: '@dev measured 166 failed / 9 passed at 175 assertions; 9 + 2 canary controls = 11. Internally coherent.'
+  - condition: '`STUDIO_RUNNER_IMAGE` pointed at a nonexistent tag'
+    result: '11 failed / 166 passed / 177. ZERO skipped.'
+    note: '@dev measured 11 failed / 164 passed at 175. Coherent.'
+
+fail_closed_verdict: >-
+  The tier FAILS CLOSED on the enlarged surface. No `skipIf`, no opt-out variable, no test
+    reported as skipped in any of the three conditions. 10.18a's HIGH-1 bar is met.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INGRESS DERIVATION — the two design choices judged
+# ─────────────────────────────────────────────────────────────────────────────
+ingress_derivation:
+  choice_1:
+    decision: 'the timeout derives from the LIFETIME, never from the heartbeat'
+    ruling: 'SOUND, and necessary rather than merely defensible.'
+    reasoning: >-
+      If the timeout were `heartbeat + margin`, then M11a (heartbeat 15 → 600) would raise the
+      timeout to 630 and `timeout <= heartbeat` could never fire — the guard would be
+      structurally incapable of failing, which is the epic's own catalogued failure. I
+      measured the alternative implicitly: with the lifetime derivation, M11a produces 10 red.
+      The operational requirement (timeout > heartbeat) holds because lifetime 60 + margin 60 =
+      120 >> heartbeat 15, and the comparison is asserted rather than assumed.
+  choice_2:
+    decision: 'deliberately NO template `fail` for heartbeat >= timeout'
+    ruling: 'ACCEPTED, with one recorded residual (OPS-001).'
+    reasoning: >-
+      The argument holds on its own terms: a `fail` would make `render({set:{heartbeatSeconds:
+      600}})` throw, `sseBoundViolations` would never run, and M11a would degrade from "the
+      annotation and the env disagree" to "the template refused" — catalogued shape 8. What the
+      argument does not address is that the SOLE enforcement then lives in stage 9, which this
+      story deliberately leaves permanently red (OPS-001). A template `fail` would make the
+      misconfiguration unshippable regardless of whether the tier ever runs.
+  joining_verified: >-
+    `sseBoundViolations(outcome)` reads `proxy-read-timeout`/`proxy-send-timeout` off the
+    rendered Ingress and `STUDIO_SSE_HEARTBEAT`/`STUDIO_SSE_LIFETIME` off the rendered API
+    container from the SAME `RenderOutcome`. No expected value is written in the test. `--set
+    studioSse.lifetimeSeconds=300` is asserted to move the annotation to 360. No values key for
+    the timeout exists; `extraAnnotations` naming one of the five managed annotations fails the
+    render (asserted via `outcome.ok === false` and an error containing "one owner").
+  ordinary_rest_unchanged:
+    verdict: 'VERIFIED INDEPENDENTLY of the test.'
+    method: >-
+      I rendered values-prod.yaml with `studioSse.ingress.enabled=false` and true and diffed the
+      raw output: document count 15 → 16 (delta exactly one) and the textual diff contains only
+      additions — no `<` line, so no pre-existing document changed in any byte. The test's own
+      form (per-document JSON fingerprint over every document except the streaming Ingress, plus
+      `documents.length === without.length + 1`) is correct and non-vacuous.
+  ac15_no_affinity:
+    verdict: 'VERIFIED. AC-15 was not made passable by session affinity.'
+    method: >-
+      `helm template` for all four value sets, case-insensitive grep for
+      affinity|sticky|upstream-hash-by|session-cookie: 0 hits in each. Same grep over
+      helm-chart/put-checks/templates/: no matches. AC-15 remains an `it.skip` in
+      test/deferred.test.ts.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JUDGEMENT CALLS
+# ─────────────────────────────────────────────────────────────────────────────
+judgements:
+  ac18_shipped_red:
+    ruling: "CORRECT, and @po's ruling is NOT needed — @po already ruled by writing the criterion."
+    basis: >-
+      AC-18's own text: "it is **left red and escalated** with the exact list and a named
+      owner ... grandfathering them into an exception list would produce a guard that cannot
+      fail", sourced to ADR-002 §12's "Leave it red and escalate" rule. @dev's refusal of the
+      allowlist is what the criterion demands, not a judgement call @dev made against it.
+      Naming @devops (owner) and @architect (mechanism) discharges "a named owner"; neither is
+      arbitrary — @devops owns the chart, and env-name conversion vs. a mounted config file vs.
+      SPRING_APPLICATION_JSON is a configuration-architecture choice.
+    caveat: 'The DECISION is right; the GUARD that carries it is defective — see TEST-001.'
+    inference_accepted: >-
+      @dev labels Kubernetes' envFrom key-skipping as documented behaviour, not observed on a
+      cluster, while the RENDERING of the invalid keys is measured. I confirmed the rendering
+      (15 violating keys per value set, 13 distinct) and agree the label is placed correctly.
+  ac23a_scope:
+    ruling: 'CORRECT — and it was never out of scope.'
+    basis: >-
+      The story's @po-MANDATED split hint states: "**AC-23 – AC-28** (kill switch, runbook,
+      contract, falsification record, deferral bookkeeping) go with **whichever half lands
+      second**". 10.18b landed second. The spawn brief's narrower list (AC-13a–AC-16b,
+      AC-18–AC-22) is out of date with the story, not the other way round. @dev's supporting
+      argument (M16 is the kill switch and was assigned to this half; T-10.18.19 carries it)
+      also holds. No scope overrun.
+  escalated_not_fixed:
+    - finding: "the dispatcher's yaml default disagrees with `Dispatcher.enabledOrDefault()`"
+      verified: >-
+        application.yml:216 `enabled: ${STUDIO_DISPATCHER_ENABLED:false}`;
+        StudioExecutionProperties.Dispatcher.enabledOrDefault() returns `enabled == null ||
+        enabled` → TRUE. Genuine. Cannot bite this chart (STUDIO_DISPATCHER_ENABLED is rendered
+        explicitly on every component and the API's `false` is asserted per value set). Correctly
+        escalated to @architect and asserted in BOTH directions by the FINDING test, which I ran
+        green. Not fixing it here is the right call.
+      note: >-
+        The KILL SWITCH's two defaults AGREE (`STUDIO_EXECUTION_ENABLED:true` and the outer
+        `enabledOrDefault()` → true). Only the dispatcher's disagree. @dev's scoping is exact.
+    - finding: 'base values.yaml deployed a frontend that could not call its own API'
+      verified: >-
+        `CHECKS_CORS_ALLOWED_ORIGINS: "http://localhost:3000"` beside a frontend Ingress host of
+        checks.dev.citi.com. Corrected in this half to
+        "https://checks.dev.citi.com,http://localhost:3000". Correct to fix here; it is AC-16a's
+        own subject.
+  blocked_criteria:
+    verdict: 'VERIFIED — none can self-arm, and SPK-02 is untouched.'
+    detail: >-
+      All entries in test/deferred.test.ts are literal `it.skip(...)`. There is no `skipIf` and
+      no environment condition anywhere in the file, so a blocked criterion cannot arm itself.
+      The file runs in the DEFAULT tier, so the 7 new skips appear in every run's totals
+      (927/22/48 → 941/29/49). AC-13b, AC-14, AC-15, AC-16b, AC-21b, AC-23b + 1 pointer = 7.
+      `git diff 754498ca5..HEAD -- docs/architecture/ docs/qa/` is EMPTY: no spike document was
+      touched by any of the four commits, and all six `**Result.** OPEN.` lines in
+      studio-staging-spikes.md are intact, SPK-02's included.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# THE TWENTIETH SHAPE
+# ─────────────────────────────────────────────────────────────────────────────
+twentieth_shape:
+  found: true
+  name: >-
+    A discrimination control scoped by a NAMING ALLOWLIST rather than by a baseline diff — it
+    absorbs any new defect that does not happen to carry the owner's naming prefix, and the
+    pass/fail totals do not move.
+  where: "studio-runner/test/deployment/envfrom-keys.test.ts — the \"this story's OWN rendered keys are all valid\" control"
+  measured: >-
+    The control filters violations by `/^(STUDIO_SSE_|CHECKS_BYPASS_|STUDIO_RUNNER_|
+    STUDIO_OBJECT_STORE_|STUDIO_EVIDENCE_)/`. @dev's M15 adds `STUDIO_SSE_HEARTBEAT.seconds`,
+    which matches, so M15 reddens it — a favourable mutation. I ran the UNfavourable one: I
+    added `checks.studio.qa-probe-7255: "x"` to `backend.configOverrides` and re-ran the file.
+    Result: 4 failed / 3 passed — BYTE-IDENTICAL to the unmutated baseline. The OWN-keys control
+    stayed GREEN, the four expected reds simply each gained one more violating key, and nothing
+    in the totals moved.
+  consequence: >-
+    AC-18's stated protection — "so 'it was already broken' cannot absorb a new mistake" — holds
+    only for keys named like this story's own. A future story adding
+    `checks.studio.anything` is absorbed silently. AC-18's own falsification clause ("add a
+    dotted key to this story's own values → red") is satisfied only in the narrow case.
+  cheap_fix: >-
+    Freeze the violation COUNT (or the exact violating key SET) per value set and assert against
+    it, so any new violating key moves the number regardless of its name. That is the
+    falsifiable form of "left red and escalated".
+  relation_to_ops001: >-
+    The two compound. The count is the only signal a permanently-red stage can carry, and this
+    guard does not carry it.
+
+top_issues:
+  - id: 'TEST-001'
+    severity: medium
+    finding: >-
+      AC-18's discrimination control is a naming allowlist, not a baseline diff. MEASURED: a new
+      invalid dotted key outside the five story prefixes (`checks.studio.qa-probe-7255`) is
+      absorbed with the file reporting exactly the baseline 4 failed / 3 passed. The claim that
+      the intentional red "cannot absorb a new mistake" is true only for prefix-matching keys.
+    suggested_action: >-
+      Freeze the per-value-set violating-key SET (13 distinct keys) and assert equality, so any
+      new invalid key reddens the OWN-keys control regardless of its name. One-line change to
+      the existing helper; no new mechanism. Owner @dev, before 10.19.
+  - id: 'OPS-001'
+    severity: medium
+    finding: >-
+      `ci/stages.md` stage 9 is now PERMANENTLY non-zero by design. Its exit code can therefore
+      no longer report a new red, and the distinguishing instruction ("every other test in this
+      stage must be green") is prose a pipeline cannot read. No CI configuration exists in the
+      repository today (`.github/workflows` absent, no Jenkinsfile, no .gitlab-ci.yml), so
+      nothing is miscalibrated yet — but when @devops wires the pipeline, the natural
+      accommodation for an always-failing stage is to make it non-blocking, which disarms the
+      entire fail-closed tier that 10.18a's HIGH-1 was raised to create. This also becomes the
+      sole enforcement point for AC-13a's heartbeat/timeout bound, since the template carries no
+      `fail` guard.
+    suggested_action: >-
+      Before stage 9 is wired: either fix the envFrom keys (removing the permanent red), or
+      split AC-18's escalation into its own non-blocking stage 9b so stage 9 can return to a
+      green/red signal. Owner @devops, with @architect on the key mechanism. Do NOT resolve it
+      by marking stage 9 `continue-on-error`.
+  - id: 'SEC-003'
+    severity: low
+    finding: >-
+      `application.yml` declares `spring.profiles.active: local` as the built-in default, and
+      `local` now carries `identity-headers: true` plus `LocalDevAuthFilter`
+      (`@Profile("local")` with `matchIfMissing = true`). A backend process started with no
+      SPRING_PROFILES_ACTIVE therefore runs with a header-trusting filter and an injected
+      developer identity. NOT REACHABLE THROUGH THIS CHART — deployment.yaml sets
+      SPRING_PROFILES_ACTIVE unconditionally on both the API (:63) and the worker (:244) from
+      `.Values.{backend,worker}.springProfile`, and all four value sets name a deployed profile.
+      It is also strictly BETTER than the pre-10.18b state, where the hardcoded `return true`
+      made every profile equally open. Recorded because it is the story's own principle ("a
+      configuration key whose default is open is a bypass with a longer name") applying one
+      layer beneath the story, and because runbook §9 states "it cannot load in any deployed
+      profile — the chart renders api,dev / api,staging / api,prod" without saying what happens
+      when the variable is unset.
+    suggested_action: >-
+      Add one sentence to runbook §9 stating that the application's default profile is `local`
+      and that every deployment path must set SPRING_PROFILES_ACTIVE explicitly. Consider making
+      the default profile a non-permissive one in a later story. Owner @dev (doc) / @architect
+      (default-profile choice).
+  - id: 'TEST-002'
+    severity: low
+    finding: >-
+      The rendered-half bypass assertion (`bypassViolations`) reads only the `-api` Deployment.
+      The worker renders NO `CHECKS_BYPASS_*` keys at all — verified: exactly 3 occurrences per
+      value set, all on the API container. The story's own principle that "present matters as
+      much as false" is therefore not applied to the worker. No exposure: the worker has no
+      Ingress in any value set and falls back to the application default of false.
+    suggested_action: >-
+      Render the three keys on the worker too and extend `bypassViolations` to every Spring
+      Boot component, so the audit-from-the-manifest property is uniform.
+  - id: 'TEST-003'
+    severity: low
+    finding: >-
+      In edge.test.ts the credential-in-URL scan shares one module-level `CREDENTIAL_QUERY`
+      constant between the assertion and its canary — correct. The `@RequestParam` controller
+      scan does not: the canary declares
+      `/@RequestParam[^)]*(token|key|session|auth)/iu` as a second literal, so a misspelling of
+      the ASSERTION's copy would leave the canary green. This is the catalogued "pinned copy
+      whose provenance nothing checks" shape, cosmetic here because
+      ExecutionEventsController takes no `@RequestParam` at all.
+    suggested_action: 'Hoist the pattern to a module-level constant, as CREDENTIAL_QUERY already is.'
+  - id: 'DOC-001'
+    severity: low
+    finding: >-
+      Two off-by-one baselines in the Dev Agent Record's mutation preamble: `BffSession*` is
+      **17 passed**, not 18 (3 + 14, counted from the JUnit XML), and `StudioKillSwitchWiring*`
+      is **6 passed**, not 7. Every mutation ROW is internally correct against 17 and 6
+      (11+6=17, 3+14=17, 2+15=17, 2+4=6), so no conclusion changes — but the tier-baseline line
+      a reviewer reconciles against is wrong by one in two places.
+    suggested_action: 'Correct the two figures in the record. No re-measurement needed.'
+
+waiver: { active: false }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT @qa RAN
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  commands_run_by_qa:
+    - 'npm run test:deployment — 173 passed / 4 failed / 177 (baseline, and again after all restores: identical)'
+    - 'npm run test:deployment with `helm` stubbed to exit 127 — 166 failed / 11 passed, 0 skipped'
+    - 'npm run test:deployment with a nonexistent STUDIO_RUNNER_IMAGE — 11 failed / 166 passed, 0 skipped'
+    - 'npm test (default tier) — 941 passed / 29 skipped / 970, 49 files'
+    - 'npm run lint — clean'
+    - 'npm run type-check — 1 error, test/fixtures-tier/deadline-cleanup.test.ts, verified byte-identical to 754498ca5 (empty diffstat)'
+    - 'helm lint × 4 value sets — exit 0 each'
+    - './gradlew test --rerun-tasks --tests *BffSession* --tests *StudioKillSwitchWiringTest — 23 passed'
+    - './gradlew test --rerun-tasks --tests *ConfirmCompileRouteTest — 10 passed, 0 failed, 0 skipped'
+    - './gradlew test --continue (full) — 436 passed / 10 failed then HUNG; jstack captured; killed'
+    - 'six mutations re-applied and restored (M13a, M13b, M13c, M16, M11a, M15)'
+    - 'two attribution probes (A: M13a vs the milestone test; B: identity-headers closed in local)'
+    - "one twentieth-shape probe (a dotted key outside the story's naming prefixes)"
+    - 'independent helm render diff, values-prod, SSE ingress off vs on'
+  not_run:
+    - >-
+      CodeRabbit — the skill is a WSL invocation (`wsl bash -c ... ~/.local/bin/coderabbit`) and
+      this is darwin. Not available; not substituted for.
+    - >-
+      A complete `./gradlew check` — unobtainable on this branch (MED-2). spotbugs was never
+      reached in my run either, for the same reason.
+
+quality_score: 82
+expires: '2026-09-30T00:00:00Z'

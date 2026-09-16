@@ -25,6 +25,32 @@ backend:
     CHECKS_CORS_ALLOWED_ORIGINS: "https://checks.uat.citi.com"
     CHECKS_CORE_SERVICE_URL: "http://checks-core.uat.svc.cluster.local:8081"
 
+
+  # ── ED-02: all three identity bypasses CLOSED in the STAGING profile (AC-19a, AC-20) ─────────
+  #
+  # Restated here rather than inherited from `values.yaml`, so that the profile a pilot is run
+  # against SAYS what it does instead of relying on a default somebody may change.
+  #
+  # ⚠ **THE CODE PATHS STILL EXIST. These flags close them; nothing removes them.** All three live
+  # in `BffSessionAuthenticationFilter` and all three produce an identity the platform never
+  # vouched for. The `X-User-Id` header path is checked FIRST, so closing `coreService` alone
+  # closes nothing for a client that can reach the pod and send a header — architecture §9.1
+  # requires a trusted gateway to strip those headers and this repository contains no such
+  # gateway.
+  #
+  # ⚠ **THE VAULT IS STILL A STUB**: `SecretsService` returns `REDACTED`, and secret-use
+  # authorization runs against a fake provider.
+  #
+  # ⚠ **NO CREDENTIALED PILOT MAY RUN UNTIL ED-02 HAS LINKED COMPLETED TICKETS.** ED-02's owner
+  # reads "TBD — not assigned in sources". @po could not name one and said so; the escalation path
+  # is @pm → Checks-squad engineering management (BRD §8 launch-exit row), with Security &
+  # Compliance (BRD §11) accepting. Story 10.19 may not be drafted while that owner reads TBD.
+  #
+  # See `docs/runbooks/studio-runner.md` §9 for what an operator may and may not do with these.
+  identityBypass:
+    coreService: false
+    identityHeaders: false
+    csiRead: false
   envFromSecrets:
     - secretName: checks-db-credentials-uat
       keys:

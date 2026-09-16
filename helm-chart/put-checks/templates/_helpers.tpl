@@ -173,3 +173,54 @@ this path on start-up, and removing a mount point needs a writable parent, which
 {{- define "put-checks.studioRunner.scratchDir" -}}
 {{ printf "%s/%s" (trimSuffix "/" .Values.studioRunner.scratch.mountPath) .Values.studioRunner.scratch.directory }}
 {{- end }}
+
+{{/*
+Studio SSE edge helpers (story 10.18b; architecture §5.5, SSE assessment).
+
+**The idle timeout is derived, not restated.** `proxy-read-timeout` is the bound that decides
+whether an idle stream survives its heartbeat; `STUDIO_SSE_LIFETIME` is the bound that decides how
+long the application keeps the stream open. They are one fact with two consumers, and this epic's
+most-repeated defect is one fact written down twice. The timeout is therefore computed from the
+lifetime plus a stated margin, so a deployment that lengthens the lifetime cannot leave the proxy
+behind.
+
+It is deliberately **not** computed from the heartbeat. AC-13a's falsification is "raise the
+heartbeat above the timeout and watch the comparison go red"; a timeout that rose with the
+heartbeat could never be observed to fail, which is a guard that cannot fire — the shape this
+epic has catalogued nineteen times.
+
+There is also deliberately **no `fail` guard here** for heartbeat >= timeout. A render that died
+would pre-empt the assertion that is supposed to discriminate, and the test would then be green
+because the render never produced a manifest to check. That is catalogued shape 8, "an assertion
+whose discriminating mechanism is pre-empted by a different guard". The relation is asserted on
+the rendered manifest instead, where a reviewer can watch it fail.
+*/}}
+{{- define "put-checks.studioSse.idleTimeoutSeconds" -}}
+{{- add (int .Values.studioSse.lifetimeSeconds) (int .Values.studioSse.idleTimeoutMarginSeconds) -}}
+{{- end }}
+
+{{/*
+The two browser-facing streaming paths, as nginx regular expressions.
+
+`{id}` is a UUID in the contract; `[^/]+` is deliberately looser than a UUID pattern, because a
+path that failed to match would send a live stream through the buffered default location and the
+symptom would be "SSE sometimes does not work". The looseness is bounded by the segment separator:
+neither expression can match an ordinary REST path, which is asserted by running real URLs against
+the rendered expressions rather than by comparing the expressions to strings.
+*/}}
+{{- define "put-checks.studioSse.eventsPath" -}}
+/api/v1/studio/executions/[^/]+/events
+{{- end }}
+
+{{- define "put-checks.studioSse.videoPath" -}}
+/api/v1/studio/executions/[^/]+/video
+{{- end }}
+
+{{/*
+Annotation names this chart owns on the streaming Ingress. `extraAnnotations` may not name any of
+them: a collision is a second derivation of a bound that has one owner, and silently letting
+either side win is how a timeout ends up disagreeing with the heartbeat it was supposed to exceed.
+*/}}
+{{- define "put-checks.studioSse.managedAnnotations" -}}
+nginx.ingress.kubernetes.io/use-regex nginx.ingress.kubernetes.io/proxy-buffering nginx.ingress.kubernetes.io/proxy-request-buffering nginx.ingress.kubernetes.io/proxy-read-timeout nginx.ingress.kubernetes.io/proxy-send-timeout
+{{- end }}
