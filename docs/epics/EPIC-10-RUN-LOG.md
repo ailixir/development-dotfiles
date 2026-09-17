@@ -1814,3 +1814,83 @@ Scope escalation to @po: the child echoes the applied value on `ready`, which ne
 | `studio-runner/test/reporting/httpClient.test.ts` | dropped (F-3) | their fix |
 | `frontend/src/store/slices/{features,sources}Slice.ts` | none (10.33 deferred) | their guard |
 Rule for every row: re-read hashes from the merged file; re-run both trees' suites on the merged tree.
+
+## Wave 8 — 10.30 and 10.32 gated and merged (2026-09-17)
+
+Both stories are on `epic/EPIC-10-w7`: **10.32** at `ef41314f1`, **10.30** at `72e95cbbd`. Each
+carried a **CONCERNS** gate that @qa judged merge-safe, and in each the concern was that a guard had
+been passing for a reason other than the one it was named for.
+
+### 10.30 — two hazards found after the fix was already green
+
+The O-18 fix itself was never in doubt. What moved twice was the code path around it.
+
+- **DETACH-1** (round 1, `63811e4a3`): the `EntityManager.detach` added to force a re-read silently
+  discards a caller transaction's unflushed writes. The other session's `StudioAuthoringService.update`
+  is exactly such a caller. Replaced by refresh-after-lock.
+- **REFRESH-FLUSH-1** (round 2, `e3bfb7b59`): the test that was supposed to prove the caller's unsaved
+  write survives **passed for the wrong reason** — Hibernate's `AUTO` flush mode happened to flush at
+  the locking query, so the guard never exercised the code it was named for. Proof recorded: with the
+  `flush()` removed, **`AUTO` stays green while `COMMIT` and Hibernate `MANUAL` fail.** The test is now
+  `@ParameterizedTest @EnumSource(CallerFlush.class)` across all three modes and asserts `isDirty()`
+  before the call. Re-gates: `303c17cf6`, `e24892744`.
+
+Four deliberate breakages in total, **two of them written by @qa itself** to check that @dev's new
+guards can fail at all.
+
+**Ambiguity question answered rather than assumed.** A failure of the added `flush()` cannot be
+mistaken for a permission or a conflict answer: every authorization decision happens *before* it and
+both conflict checks *after* it. A database error surfaces as the same server error the caller's own
+commit would have raised a moment later.
+
+**New, and it predates this work — `DIRTY-CALLER-STALE-1` (medium, to @po's backlog).** A caller
+holding an in-memory draft while another save commits first will overwrite it with its stale copy and
+raise nothing. @qa proved the default mode **already loses that save today**, before any of 10.30's
+changes. Not reachable over HTTP. Same root-cause family as `DELETE-RACE-1`.
+
+**DEF-03 bookkeeping:** @qa could not find DEF-03 in the manifest and @po insisted it was recorded.
+Both were right — @po added it on the 10.32 branch, which is invisible from `wt/10.30`. No defect.
+
+### 10.32 — a failure message that had never once rendered
+
+The signed-lead diagnostic added by the story was green in every run **without its failure branch ever
+executing**. Forcing the tolerance to 1 made it render, which is the only way the wording was ever
+checked. `ECHO-1` (`5b81fcdba`) corrected the `ReadyMessage` JSDoc: a present-but-malformed calibration
+echo makes `parseChildMessage` return `null` for the *whole* message, `launcher.ts` drops it silently,
+and `awaitReady` then times out into a `browser-launch` failure — the JSDoc had implied the field was
+merely ignored.
+
+### Post-merge verification of `72e95cbbd` — and a false alarm worth recording
+
+The first full studio-package run on the merged tree returned **712 tests completed, 13 failed**: all
+11 `CompilePipelineIT` tests plus the two deliberate `ESC-1`/`ESC-2`. Every failure had the same shape
+(`expected: "AWAITING_CONFIRMATION" but was: "STALE"`). `CompilePipelineIT` run alone at load 5.96
+passed **13/13 in 21s**.
+
+"It passed alone" is not proof, so the whole package was re-run once load dropped:
+
+```
+load before: 7.98 7.43 7.18
+712 tests completed, 2 failed, 7 skipped   (703 passed)
+ExecutionVideoContractEscalationTest > ESC-2 … FAILED
+ExecutionVideoContractEscalationTest > ESC-1 … FAILED
+```
+
+**Conclusion: contention between parallel Gradle invocations, not a regression.** No code changed
+between the two runs. `ESC-1`/`ESC-2` remain red by design — they are story 10.31's to close.
+
+**Operational rule added:** on this host, concurrent `./gradlew test` runs manufacture timing failures
+in `CompilePipelineIT`. Run backend suites **sequentially**; a package failure under load is not a
+result until it has been reproduced at rest. This sits beside `MED-2` — between the two, an unqualified
+backend "red" or "hang" is never reportable on its own.
+
+### State at the point 10.31 was dispatched
+- Contract `docs/specs/studio/openapi.yaml` = `d55d7737647a49b97e2b505a59364473d0a3695936cc447a005fcb3ed47eb318`.
+- `confinement.test.ts` `BASE_SHA256` equals it — the pin is **green on arrival**, so `FOC-07` step 1
+  is confirmed landed and 10.31 is clear to be step 2. Six re-anchor comment entries exist; 10.31's is
+  the seventh.
+- `wt/10.31` fast-forwarded to `72e95cbbd`, clean. @dev dispatched, instructed to re-read the digest
+  from the merged file, re-run the drafter's hand-kept-status-copy search against the merged tree, and
+  report any story citation whose line number moved under 10.30's edit.
+- **Still blocked:** folding `epic/EPIC-10-w7` into `epic/EPIC-10`. 10.30 and 10.32 touch files the
+  other session has uncommitted in `wt/epic`; the `--ff-only` fold waits until none of them is dirty.
