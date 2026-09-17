@@ -35,7 +35,19 @@
  * It also has a change that belongs to no step, 320.7 ms before step 4's reported start, so any
  * slack above that fails (c). Together they bound the slack to (85.3, 320.7) ms. They do **not**
  * pick 100 within that interval; the helper's doc comment gives the reason for that value.
+ *
+ * ## What the boundary test adds (10.16b QA fix F-1)
+ *
+ * The reason the helper gives is a property: the slack is at least the measurement's own tolerance,
+ * so a step whose repaint lies within tolerance before its reported start can never be matched to a
+ * later change. No captured lead is wider than 85.3 ms, so (b) cannot tell 90 from 100. The last
+ * test places a step just under one tolerance after each transcribed effect and requires the match
+ * to be that effect. The tolerance is read from `seek-measurement.test.ts`, the file that asserts
+ * it, as text; that is a read, not an import and not an edit (AC-16), and it is not the module
+ * under test.
  */
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import { firstChangeAtOrAfter, sceneChanges } from './webm.js';
@@ -44,8 +56,35 @@ import type { WebmFrame } from './webm.js';
 /** `firstChangeAtOrAfter`'s default before story 10.16b. Kept so check (a) stays executable. */
 const UNMODIFIED_SLACK_MS = 60;
 
-/** The measurement's own tolerance (`seek-measurement.test.ts:84`), copied, not imported. */
-const MEDIAN_TOLERANCE_MS = 100;
+/**
+ * The measurement's own tolerance, read out of `seek-measurement.test.ts` rather than copied, so the
+ * boundary test below follows it if it ever changes. Importing it is not possible: the file does not
+ * export it, and AC-16 forbids editing it.
+ */
+function readMedianTolerance(): number {
+  const source = readFileSync(
+    new URL('../fixtures-tier/seek-measurement.test.ts', import.meta.url),
+    'utf8',
+  );
+  const declarations = [...source.matchAll(/^const MEDIAN_TOLERANCE_MS = ([\d_]+);$/gmu)];
+  const literal = declarations.length === 1 ? declarations[0]?.[1] : undefined;
+  if (literal === undefined) {
+    throw new Error(
+      `expected exactly one MEDIAN_TOLERANCE_MS declaration, found ${String(declarations.length)}`,
+    );
+  }
+  return Number(literal.replaceAll('_', ''));
+}
+
+const MEDIAN_TOLERANCE_MS = readMedianTolerance();
+
+/**
+ * How far inside the tolerance the boundary step sits. 0.1 ms is the resolution at which the
+ * fixtures tier prints `reported=`, so it is the closest to the boundary a recorded step can be
+ * written down. It is a literal because nothing in the tree measures a resolution; it is not a
+ * second copy of the tolerance.
+ */
+const PRINTED_RESOLUTION_MS = 0.1;
 
 interface TranscribedStep {
   readonly stepIndex: number;
@@ -238,5 +277,32 @@ describe('AC-17 — the seek frame finder on frames from real AC-15 recordings',
       }
     }
     expect(checked).toBe(6);
+  });
+
+  it('matches a step reported just under one tolerance after a repaint to that repaint', () => {
+    // The tolerance must be the one the measurement asserts, and a real number of milliseconds.
+    expect(MEDIAN_TOLERANCE_MS).toBeGreaterThan(PRINTED_RESOLUTION_MS);
+    let checked = 0;
+    for (const recording of RECORDINGS) {
+      const changes = sceneChanges(recording.frames);
+      for (const step of recording.steps) {
+        // The step's own repaint, stamped as early as a step can still be in tolerance.
+        const reportedMs = step.effectMs + MEDIAN_TOLERANCE_MS - PRINTED_RESOLUTION_MS;
+        const label = `${recording.name} step ${String(step.stepIndex)}, reported ${String(reportedMs)}`;
+        // The step really is at the boundary: a slack two print steps narrower already loses it.
+        // Without this, moving `reportedMs` onto the effect would leave the test green.
+        const narrowerSlackMs = MEDIAN_TOLERANCE_MS - 2 * PRINTED_RESOLUTION_MS;
+        expect(firstChangeAtOrAfter(changes, reportedMs, narrowerSlackMs)?.atMs, label).not.toBe(
+          step.effectMs,
+        );
+        const match = firstChangeAtOrAfter(changes, reportedMs);
+        expect(match?.atMs, label).toBe(step.effectMs);
+        expect(Math.abs((match?.atMs ?? Number.NaN) - reportedMs), label).toBeLessThan(
+          MEDIAN_TOLERANCE_MS,
+        );
+        checked += 1;
+      }
+    }
+    expect(checked).toBe(10);
   });
 });
