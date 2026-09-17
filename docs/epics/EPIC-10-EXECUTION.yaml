@@ -685,6 +685,153 @@ stories:
         O-19 (ADR-003, the backend-wide envelope, and declaring the filter-written 429, 503
         AUTH_TEMPORARILY_UNAVAILABLE and idempotency errors). That is not in this backlog; see 10.19's
         note.
+      po_post_qa_rulings: >-
+        @po 2026-09-17, on gate docs/qa/gates/10.31-video-route-refusal-surface-and-public-401-envelope.yml
+        (CONCERNS, merge-safe; story already merged on epic/EPIC-10-w7 at 466d3996b). STATUS: InReview ->
+        DONE. Nothing routed here is rework. The implementation is correct and stays byte-unchanged by
+        this pass; what was wrong is the AC TEXT, which described the code inaccurately. That distinction
+        is the ruling: an AC is an instrument, and an instrument that predicts a red which cannot happen
+        is broken in the same way a test that cannot fail is broken — an implementer who cannot reproduce
+        the predicted failure has no way to tell a wrong prediction from a missing guard.
+        PO-1 (medium) — AC-2's falsifications (a) and (b) DROP "and the pinned list". Verified here by
+        reading ExecutionVideoContractTest.java:486-493: the pinned comparisons are
+        containsExactlyElementsOf over publicRefs.keySet()/callbackRefs.keySet(), never over their
+        values, so repointing a $ref moves no key and the pin cannot see it. Measured twice by two
+        methods (@dev deleted the sibling assertions, 0 of 17 failed; @qa's Q5a/Q5b ran a throwaway
+        pinned-list-only probe, green under both mutations while the real guard reddened at :430 and
+        :436). AC-2(b)'s "no internal operation" prediction is KEPT and re-labelled UNREACHED, NOT FALSE:
+        it would redden, but AssertJ aborts at the earlier callback comparison. Kept rather than deleted
+        because the two states call for different responses — an unreached prediction is a true statement
+        about the guard and would surface if the assertions were re-ordered; a false one is not.
+        PO-2 (medium) — THE TOTALITY ASSERTION IS RATIFIED, as a sixth bullet of AC-2, with no rework,
+        and a new falsification (e) is added so it is falsifiable from the AC rather than surviving on a
+        reviewer's note. Grounds: an operation tagged `internal` and nothing else belongs to no bucket and
+        is exempt from all three rules — the exact hole the five bullets exist to close, reached by a
+        shape they do not cover (verified by reading the partition logic at :415-424). @qa's Q9 settles
+        it by ADDING such an operation: counts stayed 12/2/4, both pins green by construction, sole red at
+        :424. @dev's own M4 RETAGGED runnerHealth, which the counts also catch, so it proved ordering, not
+        non-redundancy — recorded because this epic prices evidence, not conclusions, and (e) now names
+        the add-case precisely so the distinction is not lost. AUTHORITY: test coverage of an
+        already-authorized declaration is not an edit to openapi.yaml, so ADR-002 §12's Class A/B/C does
+        not engage — the same reasoning this story's Open Question 1 used for AC-7. No declaration added,
+        no other AC changed.
+        PO-3 (low) — AC-8 now says ONE call site. serveExecutionVideo has exactly two references in
+        handlers.ts, its declaration at :132 and its single call at :442, and the file is byte-identical
+        between 82322e084 and the merge base, so a two-call-site version never existed. Checked here at
+        82322e084: the draft's ":419-421" is the SIBLING GET /executions/:id route, which answers
+        badRequest('BAD_REQUEST', ...) and is not this route at all. The material claim — readable()
+        applied before the find, so an unknown id and an unreadable CSI both arrive undefined — holds at
+        that one site. @dev's supporting sentence was itself wrong (the empty diff is 82322e084..72e95cbbd,
+        not 82322e084..HEAD); @qa caught it, the conclusion survives, and the misquote is recorded as
+        backlog rather than silently repaired.
+        PO-4 (low) — AC-6's third falsification now names the case the new assertion actually
+        discriminates: a shape change that PRESERVES the code (a dropped `message`), which reddens
+        ExecutionVideoEvidenceIT:601-606 and no earlier line (@qa's Q11). The draft named a nested body;
+        measured (Q10) that reddens THREE assertions earlier at :587, the pre-existing code-differs check,
+        under a message reading "the two cases must not be collapsed onto one code either" — which
+        misdescribes the fault a reader is looking at. Verified structurally here by reading :583-612: the
+        order is not-404 -> code-differs -> 503 -> code literal -> schema -> control, so the pre-emption is
+        structural, not incidental. The property IS caught; only its diagnosis is wrong. Re-messaging :587
+        or adding an envelope-shape assertion ahead of it belongs to the next story that owns this file —
+        NOT a rework of 10.31, and recorded in the AC so it is not lost.
+        PO-5 (low) — Open Question 2's ruling scope is corrected to THREE OCCURRENCES IN TWO closed gate
+        files: 10.15-...yml:20, :128 and 10.16a-evidence-state-playback-and-step-seek.yml:133, the last
+        never named by the draft. docs/architecture/studio-execution.md:213 is STRUCK — it was never a hit
+        (its §6.3 prose names 200/206/416 and neither 404 nor 410, so the loose regex cannot match);
+        struck rather than reclassified, because "found and judged harmless" and "never found" are
+        different claims and only the second is true. Both searches re-run here to confirm. The ruling
+        itself needed no re-deciding: a closed gate's prose is a record dated when written, and the third
+        hit is the same class as the first two. STILL NO STANDING RULE — annotating gate prose at write
+        time buys a future grep nothing the gate's own `updated:` date does not already give, and taxes
+        every gate for an occasional search. What the growth justifies is recording the inventory, which
+        is GATE-PROSE-1 below.
+        DISAGREEMENT WITH THE GATE, stated rather than rubber-stamped: flagged_items_ruling.item_4 says
+        this is "now a three-file pattern rather than a two-file one". It is not. It is THREE LINES IN TWO
+        FILES; the before state was two lines in ONE file. Re-run here: `grep -rnE
+        "200.*206.*404.*410.*416" docs/qa/gates/` returns exactly those three lines in exactly two files.
+        The count matters because the next story inherits it as the expected inventory. Nothing else in
+        the gate's five routed items was found wrong on re-derivation.
+      po_backlog_from_the_10_31_gate: >-
+        RECORDED BY @po 2026-09-17 so none of these is lost or re-investigated. None gates story 10.31 and
+        none re-opens it. Each carries the severity @qa assigned. NOT FIXED HERE — recorded.
+        REF-DANGLE-1 (MEDIUM, open, the most significant of the eight) — NOTHING IN THE REPOSITORY
+        RESOLVES AN OPENAPI $ref. @qa pointed BOTH sides of AC-5's 403 comparison at
+        '#/components/responses/NoSuchForbidden', a component that does not exist, and the estate stayed
+        green: backend window 98 passed / 0 failed, frontend studio mocks unchanged (only the two
+        pre-existing 10.11c reds), runner contract.test.ts 15/15 (its own resolution runs against
+        STUB_CONTRACT, not the real file). So AC-5's comparison is satisfiable by two strings that are
+        WRONG TOGETHER, and the same hole covers every other $ref in the document — it is not specific to
+        10.31, which is merely the story that made it visible by adding a guard whose whole mechanism is
+        $ref equality. SCOPE, STATED HONESTLY: MEASURED against those three suites; INFERRED for the rest,
+        from there being no $ref resolver anywhere outside the runner's stub-driven test. The inference is
+        the weaker half and is labelled as such. Remedy is one assertion wherever a contract test already
+        loads the document — every $ref under paths resolves to an existing node under components — which
+        closes the whole class. Owner: the first story after Epic 10 that opens a contract test, or
+        story 10.19's conformance pass if its criteria can absorb one assertion.
+        EXAMPLE-UNGUARDED-1 (MEDIUM, open) — the document's examples are validated by NOTHING on an
+        ongoing basis. ADR-002 §18.5 requires every example this epic adds to be validated against its
+        schema; the new sessionRequired example was validated once BY HAND by @dev before any suite ran,
+        and by nothing since. @qa broke it against its own declared PlatformErrorResponse (Q6) and every
+        suite stayed green. This is the run log's catalogued PIN-1 shape ("a pinned copy whose provenance
+        nothing checks") one step further along: here the copy is not even compared. Remedy: a standing
+        test walking every `examples` node and validating each `value` against the schema declared beside
+        it; the networknt/Ajv machinery already exists in both ExecutionVideoEvidenceIT and
+        studioContract.test.ts. @po note on §18.5 — a validation performed once by hand is a
+        measurement, not a control, and the ADR asks for a property that holds, so this is the gap between
+        what §18.5 says and what the repository can enforce, not a failure of this story.
+        EXAMPLE-DRIFT-1 (MEDIUM, open) — an assertion reads a TRANSCRIBED COPY under a message claiming
+        the document as its authority. ExecutionVideoEvidenceIT:596-598 asserts
+        isEqualTo("VIDEO_STORE_UNAVAILABLE") under .as("the declared storeUnavailable example's code,
+        ADR-002 §24.6"). @qa changed that example's code AND message to unrelated text (Q7): 98/0, green.
+        The guard catches production drifting from the test; it cannot catch THE DOCUMENT drifting from
+        production, which is what its message promises. The codebase already does this correctly for the
+        sibling codes — studioContract.test.ts reads 404/410/416's expected code out of
+        examples[...].value.error. Remedy: read the code from ContractDocument, or change the .as(...)
+        message so it stops claiming provenance it does not have. The second is one line and is the
+        minimum; the first is the right fix.
+        MOCK-MESSAGE-1 (LOW, open) — the mock's refusal `error` code is guarded (studioContract.test.ts's
+        expectedCode map); its `message` is guarded by nothing. @qa changed the 403 message to 'A
+        COMPLETELY DIFFERENT MESSAGE' (Q8) and the frontend studio mock suite was unchanged. AC-8 says
+        "byte-for-byte the backend body", so the AC asks for more than the suite enforces. Low because the
+        UI branches on status and reads no refusal body (10.16a AC-11), so nothing downstream depends on
+        it. Remedy: one assertion on the message in studioVideoHandler.test.ts's 403 case.
+        NAMES-1 (LOW, open) — two test method names now contradict their behaviour:
+        theVideoOperationsStatusSetIsUnchanged (the set DID change, by ruling) and
+        noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties (names a different story's
+        change). ACCEPTED AS A FINDING, NOT A DEFECT of 10.31: AC-4 authorized only the literal and the
+        .as(...) failure message, both were corrected and both are now accurate, and a method name is not
+        what a reader sees when a test fails. @dev's judgement to stay inside the AC was the right one.
+        Rename in whichever story next owns those two files.
+        DOC-STALE-1 (LOW, open) — ExecutionVideoException.java:30-32's Javadoc still reads "Undeclared in
+        the frozen contract — ESC-2, escalated to an architect rather than invented (ADR-002 §12 Class
+        C)". ESC-2 is ruled and the status IS declared as of this story, so the comment is now false. It is
+        production source and AC-12 forbade touching it, which is why it was correctly left alone. One-line
+        correction in the next story that opens backend/src/main.
+        SHA-DRIFT-1 (LOW, open) — the story's own Commits table cites 850ac422b for its second commit; the
+        branch carries 18126d029 (the first, 113948325, matches, and the ADR §13 rows cite it correctly).
+        Bookkeeping in the Dev Agent Record, which @dev owns; @po does not edit that section.
+        GATE-PROSE-1 (LOW, informational, open) — @po's own, from PO-5. Three lines in two CLOSED gate
+        files carry a getExecutionVideo status set that is false about the current document:
+        docs/qa/gates/10.15-authorized-range-video-download-endpoint.yml:20 and :128, and
+        docs/qa/gates/10.16a-evidence-state-playback-and-step-seek.yml:133. All three stay UNEDITED under
+        this story's @po ruling 2 (a gate file is a record of a closed gate and is never re-opened, the
+        same rule as a merged story). No standing rule is created. This entry exists so the inventory is
+        not re-derived story by story: that is the complete set as of 2026-09-17, all three are
+        non-executable prose, and a fourth appearing later is a finding to note in the story that finds it.
+        PHANTOM-1 (LOW, CLOSED — recorded precisely so nobody re-opens it) — @dev reported that mutating
+        ExecutionVideoException.STORE_UNAVAILABLE's VALUE broke every request to the route with
+        ResourceAccessException, 13 of 15 including the 200s, and speculated about an undocumented
+        reflective or startup-time consumer. IT IS FALSE. @qa closed it two ways: statically, the constant
+        has exactly two references in the whole repository — its declaration and its single use inside
+        storeUnavailable() — so mutating the value is behaviourally IDENTICAL to mutating the argument at
+        the call site, which @dev's own M8 already did cleanly; empirically (Q4), the identical mutation at
+        rest gives 14 passed / 1 failed, the one red being the code assertion M8 also reaches, with
+        `grep -c ResourceAccessException` over the run log equal to ZERO. It was a host-load artifact, the
+        same class as the epic's other false alarms from concurrent Gradle runs. SEVERITY IS LOW BECAUSE IT
+        TURNED OUT FALSE — a constant with one reference breaking request handling would have been HIGH if
+        true, and that asymmetry is recorded so the low severity is not read as "this was never worth
+        chasing". The residual risk is documentary: an unexplained observation left in the Dev Agent
+        Record becomes a phantom a later story re-investigates at cost. @dev owns that correction.
 
   # Size M rather than S, counted: the key has to cross from the server loader (server/config.ts
   # KEY_SPECS) to where the origin is taken, which is in the child runtime (childRuntime.ts:285, found
@@ -899,6 +1046,38 @@ stories:
         F-5 IS RECORDED AS MATERIALISING, not merely predicted: see stories[10.32].story_context.
         spk06_relation for the 97.5 ms-against-100 ms measurement. SPK-06 stays OPEN and its status is
         still read from the spike register, which @po does not edit.
+      register_additions_from_the_10_31_gate: >-
+        ADDED BY @po 2026-09-17, after ruling the 10.31 gate's five routed items. Same standing as the
+        block above: NO AC re-scope — AC-10 already sources from integration_defects and the run log's
+        findings, so these are items its existing sources now contain, listed by name so none is closed by
+        silence. The full text of each is in
+        stories[10.31].story_context.po_backlog_from_the_10_31_gate.
+        MEDIUM, open: REF-DANGLE-1 (nothing in the repository resolves an OpenAPI $ref — both sides of a
+        comparison can point at a component that does not exist and the estate stays green; measured
+        against the backend window, the frontend studio mocks and the runner contract test, INFERRED
+        beyond those three; owner: the first post-Epic-10 story opening a contract test, or this story's
+        conformance pass if it can absorb one assertion). EXAMPLE-UNGUARDED-1 (the document's examples are
+        validated by nothing on an ongoing basis; ADR-002 §18.5's validation was performed once by hand).
+        EXAMPLE-DRIFT-1 (an assertion reads a transcribed copy under a message naming the document as its
+        authority; the document may drift freely from the shipped body).
+        LOW, open: MOCK-MESSAGE-1 (the mock's refusal `error` is guarded, its `message` is not);
+        NAMES-1 (two test method names contradict their behaviour; accepted as a finding, not a defect —
+        AC-4 authorized only the literal and the failure message, both corrected and both accurate);
+        DOC-STALE-1 (ExecutionVideoException.java:30-32's ESC-2 Javadoc is now false; correctly left
+        untouched because AC-12 forbids production edits); SHA-DRIFT-1 (the 10.31 Commits table cites
+        850ac422b where the branch carries 18126d029 — bookkeeping, @dev owns that section);
+        GATE-PROSE-1 (three lines in two CLOSED gate files carry a getExecutionVideo status set that is
+        false about the current document — 10.15:20, 10.15:128, 10.16a:133; all stay unedited under 10.31's
+        @po ruling 2, no standing rule is created, and the inventory is recorded so it is not re-derived).
+        CLOSED, and recorded so it cannot be re-opened: PHANTOM-1 — an "undocumented reflective consumer"
+        inferred from a mass ResourceAccessException failure. It does not reproduce; the constant has
+        exactly two references and the clean mutation gives 14/1 with ZERO ResourceAccessException. Host-load
+        artifact. Its LOW severity is a consequence of its being FALSE — it would have been HIGH if true —
+        and the register carries that asymmetry so the entry is not read as "never worth chasing".
+        ALSO: DEF-04 (DIRTY-CALLER-STALE-1, MEDIUM, open, backlog) from the 10.30 gate, which the wave-8
+        block above did NOT record. It is routed TOGETHER WITH DEF-03: same root-cause family (a full-row
+        write from a stale snapshot on an entity with neither @Version nor @DynamicUpdate), one remedy
+        closes both, and both answer NO to "before the credentialed pilot?" under the same two conditions.
       # Assigned by @po 2026-09-11 at wave-5 validation, ruling on 10.10's open question 3.
       # No Epic 10 story owned a WCAG conformance audit; 10.10's AC-18(a) proves roles, accessible
       # names and keyboard operability on the rendered tree, and explicitly does NOT make a
@@ -1487,6 +1666,67 @@ integration_defects:
       (b) it is fixed before GA or before any credentialed use beyond the pilot, whichever comes first.
       If the pilot actually observes it, this severity is re-opened rather than confirmed.
     refs: ['backend/src/main/java/com/citi/put/checks/studio/StudioService.java (softDeleteTest)', 'docs/qa/gates/10.30-csi-write-authorization-create-save-delete.yml (DELETE-RACE-1, probes P1/P2 at bbeb89288, R3 at 63811e4a3)']
+
+  - id: DEF-04
+    severity: MEDIUM
+    status: open (backlog, NOT scheduled in Epic 10)
+    found_by: "@qa (Quinn) at the 10.30 review, 2026-09-17, as DIRTY-CALLER-STALE-1 — by a
+      parameterized throwaway probe (StudioFlushProbeTempIT on e3bfb7b59, no production change), not by
+      reading"
+    owner: "@po (Pax) owns the ROUTING and this record. The FIX belongs with DEF-03's: the first story
+      after Epic 10 that re-opens StudioService's write paths, @dev implementing, @qa writing the
+      interleaving proof FIRST (the epic's standing rule since 10.4 — a sequential happy-path test does
+      not count), @architect ruling the primitive if the two disagree. SAME ROOT CAUSE FAMILY AS DEF-03:
+      both are full-row writes from a stale in-memory snapshot on an entity with neither @Version nor
+      @DynamicUpdate, and @qa's suggested remedy (@Version on UITest, or @DynamicUpdate plus a
+      revision-guarded UPDATE) closes BOTH. They are therefore routed together and should be fixed
+      together; splitting them would buy two unproven changes on the same write path instead of one."
+    summary: 'A caller holding a DIRTY managed reference to the draft across the save defeats the
+      STALE_REVISION check outright: a save that committed in between is silently overwritten and no 409
+      is raised. UITest has neither @Version nor @DynamicUpdate, so flushing that dirty reference writes
+      EVERY column from the caller''s pre-lock snapshot — including source_revision — and the refresh
+      that follows then reads back this transaction''s own uncommitted write instead of the winner''s.
+      The revision comparison therefore compares the request against the copy the caller was already
+      holding, which is exactly the lost update findByIdForUpdate + refresh exist to prevent. Both
+      callers are told they succeeded. Measured: one transaction does findById (unlocked, managed) ->
+      writes schedule on the held reference -> a competing updateTest commits on another connection and
+      thread -> updateTest(..., owner) on this thread. AUTO, COMMIT and MANUAL all gave
+      outcome=[no exception] and the loser''s row. 10.30''s own case (a) does not catch it (its caller''s
+      reference is clean) and case (b) does not (there is no competing save).'
+    not_introduced_by_10_30: >-
+      PRE-EXISTING UNDER PRODUCTION'S MODE, and @qa measured that rather than arguing it, which is why
+      this record states it as fact. With 10.30's new flush removed (the shape at 303c17cf6): AUTO still
+      loses the save, while COMMIT and MANUAL answered a correct 409 STALE_REVISION. Production runs
+      AUTO — the locking JPQL query's implicit flush already did the same damage one line earlier — so
+      the hazard predates BOTH of 10.30's fixes. What 10.30 changed is that COMMIT and MANUAL now behave
+      like AUTO. @po: THAT WAS THE RIGHT TRADE and 10.30 is NOT re-opened for it (the standing rule
+      applied to O-17, 10.14 and 10.16a). The two modes that were accidentally correct were correct at
+      the price of silently dropping the caller's write, which is REFRESH-FLUSH-1; uniformity with
+      production is worth more than an accidental 409. The cost is that the hole is now uniform and
+      nothing in the suite covers it.
+    reachability: >-
+      NOT REACHABLE OVER HTTP TODAY, measured. The request's persistence context holds only what the
+      save itself loaded, all clean, so the new flush() emits nothing there — all 24 StudioAuthorizationIT
+      cases and OptimisticSaveIT 3/3 green, package count moved by exactly the +3 new cases. It needs an
+      in-process caller in the SAME transaction that writes to the draft BEFORE calling the save. Nothing
+      in backend/src/main does that, and the inference tree's StudioAuthoringService.update writes only
+      after the save (read at wt/epic, read-only). @po: latent, not live — and recorded rather than left
+      implicit precisely because 10.30's own case (b) establishes "write before the save" as a SUPPORTED
+      shape, so the first caller to use it inherits this silently.
+    before_the_credentialed_pilot: >-
+      NO — ruled by @po 2026-09-17, on the same grounds as DEF-03 and one of its own. The pilot drives
+      the HTTP route, where exposure is nil by measurement; there is no in-process caller in the tree to
+      reach it; no authorization property is weakened (the race changes content, not who may act); and
+      the fix is production write-path code needing a real red-first interleaving proof, which is a
+      story's worth of work and not a merge-window patch. CONDITIONS, both part of the ruling: (a) the
+      pilot's operating note already carries DEF-03's "a delete concurrent with a save is NOT atomic"
+      line — it is extended to say a SAVE concurrent with a save can also lose one, so an observed
+      content reversion is reported against DEF-03/DEF-04 and not as a new defect; and (b) it is fixed
+      before GA or before any credentialed use beyond the pilot, whichever comes first. If the fix for
+      DEF-03 lands as @Version on UITest, this closes with it and the record says so.
+    refs: ['backend/src/main/java/com/citi/put/checks/studio/StudioService.java:300-325',
+           'backend/src/main/java/com/citi/put/checks/studio/entity/UITest.java',
+           'docs/qa/gates/10.30-csi-write-authorization-create-save-delete.yml (DIRTY-CALLER-STALE-1, StudioFlushProbeTempIT on e3bfb7b59; attribution probe with F1 applied)']
 
   - id: DOC-1
     severity: LOW
