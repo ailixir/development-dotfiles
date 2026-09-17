@@ -4,9 +4,25 @@ story_title: Evidence state, playback and step seek — frontend half
 epic: EPIC-10
 wave: 7
 
-gate: CONCERNS
+gate: PASS
+
+gate_history:
+  - { date: '2026-09-16', verdict: CONCERNS, head: a57d4ed17, reason: 'TEST-001 (#12), TEST-002 (#18), REL-001 (ENV-TIMING-1) found by probing' }
+  - { date: '2026-09-16', verdict: PASS, head: 7eac9fb19, reason: 'TEST-001, TEST-002, REL-001, DOC-001 closed and re-probed; remaining items low, epic-level or pre-existing' }
 
 status_reason: >-
+  Re-review of 7eac9fb19 (test-only QA fixes, no production file). The three medium findings are
+  closed, and each was re-probed rather than taken on report. The exact Q11 now reddens 2 tests,
+  and a DRY refactor of the pin is caught. The exact Q12c now reddens 1 test, and a row cannot
+  misstate its kind. pageRunGate's AC-2 passed in the suite after taking 11.97 s, which the old
+  5 s bound would have failed. Residuals recorded, none blocking: TEST-002 is still reopened by a
+  coordinated two-place edit (TEST-002R, low). The "exactly one POST" assertion only sees POSTs
+  that arrive before the first poll succeeds; this predates the fix and is unchanged by it
+  (TEST-005, 10.11a's file). This half's own studioVideoUrl case (i) timed out once in 4 suite
+  runs at load 17 on a cold dynamic import (REL-004, low).
+  The text below, from `reviewed_revision` down to `final_decision`, is the original review of
+  a57d4ed17. Its conclusions for 7eac9fb19 are in the `recheck` block and in `final_decision`.
+  Original status reason:
   Every criterion this half owns is implemented, and its named mutations are real guards: 16
   re-applied mutations all went red (every restore sha256-verified, the restored hashes equal the
   developer's table), AC-11's review repeats clean, and AC-19 is recorded Blocked, never passed.
@@ -18,10 +34,10 @@ status_reason: >-
   by this half, though not caused by it.
 
 reviewer: Quinn (@qa)
-reviewed_revision: 'commit:a57d4ed17'
-updated: '2026-09-17T01:33:36Z'
+reviewed_revision: 'commit:7eac9fb19 (recheck); originally commit:a57d4ed17'
+updated: '2026-09-17T02:03:25Z'
 branch: story/10.16a
-head_sha: a57d4ed17
+head_sha: 7eac9fb19
 base_sha: a02f1d505
 worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.16a
 scope: >-
@@ -300,10 +316,138 @@ do_not_do:
   - 'Do not add a second per-file bootstrap remedy to pageRunGate as a substitute for REL-002.'
   - 'Do not mark AC-19 passed on the strength of AC-8/AC-10/AC-21.'
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Recheck of 7eac9fb19 (2026-09-17). Diff 58d5af52f..7eac9fb19: the story, evidencePanel.test.tsx,
+# new pinnedVideoEvidenceFacts.ts, studioVideoUrl.test.tsx, pageRunGate.test.tsx. No production
+# file. Private harness in $TMPDIR. Each anchor was required to match exactly once, each restore
+# was sha256-verified (RESTORED-OK for every file), and git status was empty after every batch.
+# ─────────────────────────────────────────────────────────────────────────────
+recheck:
+  reviewed: 7eac9fb19
+  story_files_control: '130 passed (130) across the six story test files, no mutation'
+
+  TEST-001:
+    status: CLOSED
+    probes:
+      - 'R1, the exact Q11 (PROCESSING title and statement): 2 red, "PROCESSING: the title and the statement each state the pinned fact" and "PROCESSING: neither slot makes a denied claim…". Previously 161/161 green.'
+      - 'R4, PROCESSING statement replaced by UNAVAILABLE''s: 3 red (both pinned-fact tests, plus studioContract''s distinctness check).'
+      - 'R2, the #13 DRY refactor: the pin imports VIDEO_EVIDENCE_NARRATIVES from ''./videoEvidenceNarratives.js'' and derives the PROCESSING title from it. It resolves, so the file loads. Result: 1 red, the planted-forms control''s exact list of the real file''s imports. The dedicated provenance test stayed GREEN: its name filter strips only .ts/.tsx, so a ".js" specifier gets past it. The exact-list line is the working backstop, and it fails closed on any new import.'
+      - 'R2b, R2 plus the Q11 title: 2 red.'
+      - 'R3, the scanner''s dynamic-import/require pattern deleted: the planted-forms control goes red (1). The control can fail.'
+    provenance_judgement: >-
+      This is a genuine independent statement, and it traces to its sources. "still being produced"
+      and the PROCESSING denials "no recording" and "failed" follow AC-2's own words: "renders the
+      evidence region as still being produced, not as absent or failed". "no usable recording" and
+      "could not be produced"/"failed" follow architecture §6.1's two definitions. "expired" and
+      "retention period" follow the enum and §6.1's retention sentence. "not ready yet" and "play
+      the recording" are less directly traceable: they paraphrase the current wording, not a
+      source. Each pinned phrase is a substring of today's narrative, so a deliberate rewording
+      must edit both files. That is the design, not drift: a mismatch fails loudly and cannot pass
+      silently.
+    residual: 'Low. The provenance test''s own filter misses a ".js" specifier, and one assertion in a sibling test covers the gap. Adding js/jsx to the extension strip would make the named test self-sufficient.'
+
+  TEST-002:
+    status: CLOSED, with a residual (TEST-002R, low)
+    probes:
+      - 'S1, the exact Q12c (delete case (ii) and apply M16): 1 red, "the case table holds exactly AC-6''s two named cases". Previously 145/145 green.'
+      - 'S3, row (ii) keeps its cross-host name but its base becomes http://localhost:3000/api/v1, plus M16: 3 red (the table test and both (ii) rows). A row cannot misstate its kind, because the kind is derived from the base.'
+      - 'S2, the exact Q12c plus deleting the second entry of AC6_REQUIRED_KINDS: 126/126 GREEN.'
+    judgement: >-
+      Yes, AC6_REQUIRED_KINDS is another editable literal (shape #18's required set). Honestly, it
+      buys three things. (1) Deleting a row, which previously took one silent edit, now takes a
+      second edit to a list whose comment forbids it. A reviewer sees that edit in the diff; a
+      test does not. (2) Row kinds are computed from the bases, so a row that keeps its label
+      while pointing at the page origin is caught (S3). (3) The row count is bound. It does not
+      make the matrix machine-provable against AC-6, because AC-6 lives in story prose, not in a
+      parsed artefact. That is proportionate for a two-row table.
+
+  REL-001:
+    status: CLOSED
+    evidence:
+      - 'Run 3 of the full suite (load 13.5): AC-2 took 11969 ms and passed. Under the old 5 s test bound that run would have failed.'
+      - 'All four tests take PAGE_TEST_TIMEOUT_MS = 50 000. Every find*/waitFor takes PAGE_WAIT_MS = 10 000. No assertion was removed: the diff changes only bounds.'
+      - 'P3, a hang placed outside any wait (await new Promise(() => {}) after renderPage): red, "Test timed out in 50000ms", after 59 s. A hang inside a wait reports at 10 s. The 50 s bound delays a real hang by 45 s over the old 5 s; it does not hide one. That is an acceptable price for this file.'
+    exactly_one_post_determination: >-
+      Lengthening the waitFor did NOT weaken the claim, but the claim was already weaker than its
+      name, and it still is. (a) F3e (a second executeTest inside .then) is red under both the new
+      bounds (P1, 18 s: the wait ran its full 10 s) and the old ones (P1o). Both logs point at the
+      waitFor line (new :169, old :149). The following synchronous
+      `expect(executeRequests()).toHaveLength(1)` catches nothing, because it runs in the same tick
+      in which the waitFor has just seen length 1. F3e is caught only because both POSTs land
+      between two polls, so the waitFor never observes exactly one and times out on "got 2".
+      (b) A second POST issued 300 ms after acceptance leaves the AC-2 test GREEN under both bounds.
+      It is caught only by leaking into the NEXT test, "an unconfirmed draft … produces none",
+      whose `observed` was just reset (P2, P2o: that sibling red). Run alone (P2t, -t) or with the
+      sibling skipped (P2z), the file is fully green. That is TEST-005.
+
+  full_suite:
+    expected: '539 passed / 2 failed, plus ChecksLayout.a11y unloadable (ENV-1)'
+    runs:
+      - { run: 1, load_before: '7.62 9.14 10.13', load_after: '17.18', result: '537 / 4', extra: 'studioVideoUrl (i) "constructed playback URL" 5121 ms timeout; confirmFlow AC-10 5204 ms timeout' }
+      - { run: 2, load_before: '15.99 12.65 11.45', result: '539 / 2', pageRunGate_AC2_ms: 3495 }
+      - { run: 3, load_before: '13.52 12.91 11.65', result: '537 / 4', extra: 'accessibility AC-18a and recompile AC-14 (10.10), both "Test timed out in 5000ms"', pageRunGate_AC2_ms: 11969 }
+      - { run: 4, load_before: '10.10 12.70 11.78', result: '539 / 2', pageRunGate_AC2_ms: 4939 }
+    isolation_reruns:
+      - 'studioVideoUrl.test.tsx alone, 3 runs at load 17–18: 12/12 each; tests took 0.37–0.93 s.'
+      - 'accessibility + recompile + confirmFlow alone, 3 runs at load 11: 26/26 each.'
+    notes:
+      - 'Zero "reading ''find''" errors in all 4 logs. studioRunTransport.node.test.tsx (10.11b) failed in none of the 4 runs. Only one suite ran at a time, so this reviewer did not reproduce @dev''s concurrent-suite timeout.'
+      - 'This host ran at load 10–18 against @dev''s 7–10. Every extra failure was a 5 s default timeout in a file that passes alone.'
+    type_check: 'exactly the 2 known TS2307 (ChecksLayout.tsx:6, navigationSetup.ts:1)'
+    lint: 'not re-run; FAILED TO START (ENV-1) per the original review. No lint claim is made.'
+
+  new_findings:
+    - id: TEST-005
+      severity: medium
+      owner: 'orchestrator / @dev (10.11a''s file). Pre-existing; not introduced by 10.16a or by this fix.'
+      finding: >-
+        Shape #16 family: a structural name ("exactly one POST /execute") with a body that proves
+        "one POST by the first poll". The claim holds only up to the moment the waitFor succeeds.
+        A later duplicate escapes the test and is caught only by leakage into the next test, which
+        depends on test order and on the delay falling inside that test's lifetime.
+      suggested_action: >-
+        After the waitFor, wait for a settle point the page exposes after acceptance (or for a
+        fixed quiet window that is longer than any plausible retry), then assert length 1. Also
+        drop the synchronous duplicate expect, or keep it only after the settle point.
+    - id: TEST-002R
+      severity: low
+      finding: 'The S2 residual described above. AC6_REQUIRED_KINDS is an editable literal.'
+      suggested_action: 'Accept as is (proportionate), or have the kinds list quote AC-6''s two case names so the diff reads against the story.'
+    - id: REL-004
+      severity: low
+      owner: '@dev (10.16a''s own file)'
+      finding: >-
+        studioVideoUrl.test.tsx case (i) is the first loadWithBase after vi.resetModules(), and it
+        cold-imports the panel's module graph under the 5 s default. It took 5121 ms and timed out
+        in 1 of 4 suite runs (load rising to 17). In the other runs it took 1151–3206 ms, and it
+        passes alone. It is the same class as REL-001, and this half introduced it. It was not seen
+        in the original 10 runs.
+      suggested_action: 'Give the dynamic-import cases an explicit per-test timeout, the same remedy as REL-001.'
+
+  carried_forward_unchanged:
+    - 'REL-002 / ENV-2 (medium, suite-level, orchestrator/@devops): jsdom origin :3000 bootstrap clobber. The next-server on :3000 (PID 33058) is still listening and was not touched.'
+    - 'TEST-003 (low, #16): Function.length cannot see a defaulted token parameter.'
+    - 'TEST-004 (low): the AC-14(c) guard does not enumerate the handler-built POST /execute snapshot.'
+    - 'REL-003 (low, @architect/@po): the throwing URL builder falls back to the module-level boundary.'
+    - 'MNT-001 (low): the playability predicate is written twice.'
+    - 'REQ-001 (low, inferred): the pre-first-frame Proof-tab text.'
+    - 'ENV-1: dangling @put/core-components symlink in worktrees; lint cannot start.'
+  closed:
+    - 'DOC-001: the AC-21 row is corrected with strikethrough and cites Q17. Verified in the story diff.'
+
 final_decision:
-  gate: CONCERNS
-  merge: SAFE — with the story-document conflict resolved as above and the merged suite re-run
-  rationale: >-
+  gate: PASS
+  merge: SAFE — with the story-document conflict resolved as below and the merged suite re-run
+  rationale_recheck: >-
+    The three findings that held the gate at CONCERNS are closed, and each was re-probed.
+    TEST-002R, TEST-005 and REL-004 remain. TEST-002R is proportionate. TEST-005 predates this
+    half and belongs to 10.11a's file. REL-004 is a low load flake of the same class the epic
+    already carries, and it passes alone. None of them is a missing or unguarded criterion of
+    this half.
+  required_before_merge_recheck:
+    - 'Resolve the docs/stories/10.16.story.md conflict with story/10.16b by keeping both halves'' sections (unchanged from the original review).'
+    - 'Run the merged frontend suite at least 3× with uptime captured. Expect 539 passed / 2 failed. Re-run any extra failure alone 3× before calling it a flake: at load above 10, 5 s timeouts in 10.10''s review files and in studioVideoUrl (i) are expected noise.'
+  rationale_original_a57d4ed17: >-
     The half does what its criteria say, and the guards the criteria name are guards: 16
     mutations re-applied, all red, hashes matching the developer's table, and both directions of
     AC-1 bound against the document. The two decisions the developer made alone trace to the
