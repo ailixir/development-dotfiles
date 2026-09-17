@@ -1,0 +1,759 @@
+schema: 1
+story: '10.19'
+story_title: Integrated staging validation and handover
+epic: EPIC-10
+story_file: docs/stories/10.19.story.md
+
+gate: CONCERNS
+
+status_reason: >-
+  Nothing blocked was faked. This was the highest-value thing to check and it was checked directly:
+  all twelve of ED-01..ED-06 and SPK-01..SPK-06 were re-read from their own sources by this reviewer
+  and every one still reads `status: open` / `**Result.** OPEN.`; AC-1..AC-7 are all unticked and
+  all carry "skipped — blocked"; the five new spike scaffolds each declare OPEN with a blank owner
+  sign-off and the words "no evidence is recorded below and no spike is closed"; and the two
+  criteria the developer reports as NOT DONE are honestly not done in both directions — the WCAG
+  document says "NO SCREEN READER WAS RUN. No transcript exists" and the user-trial record is
+  structurally complete and substantively empty with no invented participant, date or ratio. The
+  only two executable artifacts this story ships cannot satisfy a staging criterion even in
+  principle. All five suite baselines reproduce exactly on this reviewer's own runs: backend
+  709/0/7, frontend 548/2, runner default 984/0/29 fifteen times, fixtures 90/10, deployment 184/4.
+  CONCERNS, not PASS, for three reasons, none of which is a false green. (1) AC-15's guard — the
+  story's only executable guard — has six survivable mutations written by this reviewer, and the
+  load-bearing one is in the exact direction AC-15's own sentence names: the guard reads only the
+  register's front matter, so the register's BODY can state a status that contradicts the manifest
+  and the guard stays green. (2) DISCLOSURE-PIN-1 is worse than the developer graded it: proven by
+  mutation here, making the runbook strictly MORE accurate turns disclosure.test.ts red. That is a
+  guard that penalises a correction, not one that fails to catch a regression. (3) AC-19(c) is red —
+  F-3 is genuinely open again — and its prescribed protocol is defective, though not in the way the
+  developer reported: this reviewer ran the 20-run recipe verbatim and got 2 reds in 20, not 20/20
+  green, while the full tier the developer credits produced 0 reds in 15. The protocol is
+  underpowered and non-deterministic, not blind. CONCERNS is merge-safe: no criterion is claimed
+  that was not met, and every correction owed is routed rather than applied.
+
+reviewer: Quinn (@qa)
+reviewed_revision: 'commit:4b7b7b3b9'
+updated: '2026-09-17T23:10:00Z'
+branch: story/10.19
+head_sha: 4b7b7b3b9
+base_sha: d3700f23d
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.19
+host_load: >-
+  Shared host, 32 users, several agents. 1-minute load ranged 4.94 to 26.4 across this review. The
+  backend run was gated behind a poll loop and started only at load < 5.0 (AC-17's own rule, which
+  this gate was auditing and therefore had to follow). Every runner and frontend figure below is
+  annotated with the load it was taken at, because one frontend flake is load-dependent.
+
+harness: >-
+  Mutations were applied to the real tracked files and restored from the git object store
+  (`git checkout --`), never from a copy held in the shared session scratchpad, because a restore
+  copy in a shared scratchpad can be overwritten by another session. A seven-file
+  `shasum -a 256 -c` baseline was taken before the first mutation and re-verified after every one;
+  all seven read OK after all fourteen mutations. Each mutation script asserts its anchor exists and
+  aborts on "no change", and the harness prints the dirty-file count after applying so a mutation
+  that silently failed to apply cannot be mistaken for a surviving mutation. The F-3 squeeze and the
+  a11y product mutation were the two that touched non-doc files; both were restored and verified
+  (`httpClient.test.ts` is byte-identical at sha256 444a785d…, the working tree is clean).
+
+verified_nothing_blocked_was_faked:
+  how_checked:
+    - >-
+      Re-read `external_dependencies` in docs/epics/EPIC-10-EXECUTION.yaml directly (the block
+      begins at line 1764, not the 1234-1329 the story cites — the citation has drifted, the content
+      has not): six `- id: ED-0N` entries, six `status: open`, and ED-02's
+      `external_ticket: "to be linked — no ticket ID exists yet (2026-09-16)"`.
+    - >-
+      Re-read docs/architecture/studio-staging-spikes.md directly: six `**Result.** OPEN.` lines at
+      48, 72, 95, 118, 141, 166. No spike section reads anything else.
+    - >-
+      Checked AC-1..AC-7 in the story: all seven are `- [ ]` and all seven carry
+      "*(skipped — blocked)*". None is ticked, none is hedged into a partial.
+    - >-
+      Read all five new spike scaffolds: each states `**Status:** OPEN`, each states that nothing is
+      verified and "no evidence is recorded below and no spike is closed", each leaves
+      `**Owner sign-off:**` blank. No scaffold contains a result.
+    - >-
+      Read the AC-11 reserved row: value is "not yet run — Blocked, see AC-1", with the twelve open
+      ids restated. Not blank, not optimistic.
+    - >-
+      Read section 5 of the register: the three BRD §11 sign-offs are each named individually and
+      each annotated "not obtained, not simulated, not marked complete", and the literal disclaimer
+      sentence is present.
+    - >-
+      Inspected the whole 15-file diff for anything that could act as a local stand-in for a staging
+      gate. The only two executable artifacts are a Node docs guard and a jsdom axe harness; neither
+      touches a gateway, an identity, a cluster, an ingress or an object store.
+    - >-
+      Checked the opposite direction — concealment by understatement. The WCAG document's AC-12(b)
+      section reads "STATUS: NOT DONE. NO SCREEN READER WAS RUN", "Screen reader used | none — not
+      run"; the trial record reads "STATUS: NOT YET RUN. AC-13 IS NOT SATISFIED BY THIS FILE" and
+      every field is empty with "Do not pre-fill a planned date". Neither is a result dressed down,
+      and neither is an absence dressed up.
+  conclusion: >-
+    Nothing blocked was faked, simulated, stubbed or partially credited, and the two NOT DONE
+    reports are honest in both directions.
+
+ac_verdicts:
+  AC-1..AC-7:
+    verdict: CORRECTLY RECORDED SKIPPED — NEVER PASSED
+    evidence: twelve gates independently re-read and still open; seven unticked criteria.
+  AC-8:
+    verdict: DONE
+    evidence: >-
+      Five drift corrections present in the runbook. The audit's own novelty claim was
+      independently re-verified: `git show HEAD~1` of the runbook, the architecture, the BRD and the
+      manifest — the AC-8/AC-9 corrections and §12 are genuinely new, not restated.
+    note: raised DISCLOSURE-PIN-1, which this gate escalates (see findings).
+  AC-9:
+    verdict: DONE
+    evidence: >-
+      Runbook §12 at line 570 with four markers ROLLBACK-A-KILL-SWITCH (588),
+      -B-HELM-ROLLBACK (611), -C-FORWARD-ONLY-MIGRATIONS (640), -D-EVIDENCE-UNAFFECTED (663).
+      Independently verified that "rollback" occurred ZERO times at HEAD~1 in all four documents the
+      criterion names. The gap was real and is closed.
+    limit: >-
+      §12 says so itself — a written procedure, never rehearsed against a cluster, because there is
+      no cluster. Correctly self-labelled.
+  AC-10:
+    verdict: DONE
+    evidence: >-
+      Every item AC-10 enumerates is present in the register: O-6, O-9, O-11 (as CLOSED with the V17
+      citation), O-19, O-20, ESC-3, PROD-1, F-2, F-3, MED-2, HIGH-1, MED-1, O-2a — plus the new
+      A11Y-1..A11Y-7, DISCLOSURE-PIN-1 and the DEF-01/DEF-02 tension. Section 5 is literal.
+  AC-11:
+    verdict: DONE
+    evidence: reserved row present, value "not yet run — Blocked, see AC-1", pointer to this gate file.
+  AC-12:
+    verdict: PARTIAL — correctly unticked
+    evidence: >-
+      (a) is a real scan, not a recollection. axe-results.json is genuine axe-core 4.13.0 output
+      carrying real MUI-generated selectors, and its per-surface critical/serious counts match the
+      story's table exactly: button-name 13/13/13/13/13/2/1, aria-prohibited-attr 12/…/2/1,
+      label 4 on all five ChecksStudioPage states, aria-progressbar-name 3 on run-progress only.
+      Seven surfaces. (b) is not done and is not claimed.
+    ticketing_branch_ruling: >-
+      CORRECT. The "zero critical/serious" branch is genuinely unachievable on this tree — all seven
+      surfaces carry some — so the criterion's own ticketing alternative is the applicable branch,
+      not a downgrade of it. Declining to fix nodes in ChecksStudioPage.tsx while another session
+      holds ~200 uncommitted lines in that file is the same second-writer rule this epic applied to
+      httpClient.test.ts and the skip link, applied consistently.
+  AC-13:
+    verdict: NOT DONE — correctly unticked, correctly NOT recorded as blocked
+    evidence: structure filed under AC-15(v)'s markers, every field empty and self-labelled.
+  AC-14:
+    verdict: PARTIALLY SATISFIED BY LANDING — see ruling 4
+  AC-15:
+    verdict: DONE WITH GAPS — see ruling 3 and the mutation table
+  AC-16:
+    verdict: DONE
+    evidence: five scaffolds exist, all OPEN, no spike closed; guard check (ii) covers their absence.
+  AC-17:
+    verdict: DONE
+    evidence: >-
+      `./gradlew check` was not run (MED-2). The narrow --rerun-tasks run was used, and this
+      reviewer repeated it under the same rule: polled the host down to load < 5.0 before starting,
+      BUILD SUCCESSFUL in 5m 18s, 709/0/7 reached — no run stopped short of baseline, no hang.
+    baseline_substitution: CORRECT — see ruling 7.
+  AC-18:
+    verdict: DONE
+    evidence: >-
+      Story header `Depends on` and `Blocks` contain none of 10.20-10.26; guard check (iii) enforces
+      it against the manifest's seven excluded ids and is non-vacuous (the guard fails if zero
+      excluded ids parse).
+  AC-19:
+    verdict: PARTIAL
+    evidence: >-
+      (b) done and reproduced. (a) outstanding by construction — the post-merge repeat cannot precede
+      the merge, and is not claimed. (c) RED: F-3 is open again, and the protocol itself is defective
+      — see ruling 1.
+
+rulings:
+  - id: 1
+    item: F-3, and whether AC-19(c)'s protocol can see it
+    verdict: CONFIRMED IN PART, REFUTED IN PART — the most important item in this gate
+    confirmed:
+      - >-
+        The reverted base is what landed. `git log` for
+        studio-runner/test/reporting/httpClient.test.ts ends at 7357082e3 (the revert), and the file
+        is clean at sha256 444a785d450cf0c44ba331f9f9f91fe5b0dd00672794f3e2f1f6afc5092ae5a0 —
+        byte-identical to the developer's quoted digest. The inference program's fix has not landed.
+      - >-
+        F-3 is genuinely open. The deterministic squeeze reproduces it 3 times out of 3, each run
+        exactly `Tests 1 failed | 5 passed (6)`, each failing exactly
+        "reports a timeout as ambiguous, not as a failure to send" with
+        `expected [] to have a length of 1`. Note this also settles the reading of the developer's
+        "1 failed / 5 passed": it is the test counts within one run, not one red in five runs.
+      - >-
+        The mechanism, read from the source rather than inferred: the responder's `hits.push` fires
+        on the server's `request.on('end')` event, while the client deadline is 25 ms. The assertion
+        therefore depends on the server's event loop draining the request inside 25 ms. It is
+        in-process event-loop latency that reddens it, not CPU starvation.
+    refuted:
+      - >-
+        "AC-19(c)'s prescribed 20-run-under-load protocol returned 20/20 green" does not generalise.
+        This reviewer ran that protocol verbatim — the file alone, 20 runs, 8 node CPU spinners,
+        1-minute load 9.66 to 18.39 — and got 18 green / 2 RED. Runs 13 and 18 both failed on
+        exactly the F-3 test with exactly `expected [] to have a length of 1`. The protocol is NOT
+        blind to the defect it exists to find; it is UNDERPOWERED (~10% per run here, ~5% pooled
+        across both agents' 40 runs). The developer's 20/20 was a sample, not a property.
+      - >-
+        "What reproduces it is the full suite's own parallelism" is not supported. This reviewer ran
+        the full default tier 15 times at loads from 4.94 up to 26.42 and got 0 reds — 984 passed /
+        29 skipped (1013) on all fifteen. The developer's 1-in-5 and this reviewer's 0-in-15 pool to
+        1 in 20, statistically indistinguishable from the file-alone route. Neither natural protocol
+        is the strong reproducer the story and the register both claim the full tier to be.
+    also_found: >-
+      The prescribed protocol has a second trap the story does not mention and that the developer
+      avoided only by care. Running that single file returns EXIT CODE 1 on EVERY run — all 20 of
+      mine, including the 18 green ones — because running one file alone fails the suite's global v8
+      coverage thresholds ("Coverage for lines (0.42%) does not meet global threshold (85%)"). Anyone
+      scripting this protocol on `$?` would read 20 failures; anyone scripting it on "did it exit 0"
+      would never see a green. The developer's note that "each run's count was read, not inferred
+      from a silent exit" is exactly the right care, and it is load-bearing.
+    ruling_on_what_the_protocol_should_be: >-
+      AC-19(c) must stop using "N runs green" as its instrument. A pass criterion that is satisfied
+      ~90-95% of the time per run when the defect is present is not a detector; it manufactures false
+      greens at scale, which is the failure mode this epic has spent nine waves eliminating. The
+      protocol should be: (1) the deterministic squeeze is the pass/fail instrument — it is 100%
+      reproducible in the present direction and would go green only when the race is actually
+      closed; (2) counts are read from the reporter's own summary line, never from the exit code,
+      which for a single-file run is dominated by coverage thresholds; (3) the N-run loop is retained
+      as corroboration only, with the explicit statement that a green N-run sweep is NOT evidence of
+      a fix. This is an edit to an acceptance criterion and therefore @po's — routed, not applied.
+    f3_itself: >-
+      Correctly NOT re-fixed here. This story would be a third writer on that file. F-3 returns to
+      @po as an open finding against the epic line, not as 10.19's regression.
+
+  - id: 2
+    item: DISCLOSURE-PIN-1
+    verdict: CONFIRMED, and escalated above the developer's grading
+    evidence: >-
+      studio-runner/test/disclosure.test.ts:95 pins
+      `{ what: "ED-02's owner is TBD", needles: ['ED-02', /TBD — not assigned in sources/u] }`.
+      The phrase survives in the runbook in exactly two places, at lines 27 and 451, and BOTH are
+      inside retractions: line 27 reads "This line used to say ED-02's owner reads
+      `TBD — not assigned in sources`. **It no longer does.**" and line 451 reads "This item used to
+      read …". Proven by this reviewer's own mutation: replacing both quotations with a paraphrase
+      that states the same history WITHOUT reproducing the withdrawn wording — leaving the runbook
+      strictly MORE accurate — turns disclosure.test.ts RED, `Tests 1 failed | 13 passed (14)`, and
+      the one failure is the test whose name is
+      "says ED-02's owner is unassigned, and names the escalation path instead".
+    severity_ruling: >-
+      HIGH, higher than a vacuous guard. A vacuous guard fails to catch a regression; this guard
+      actively penalises a correction. It is now satisfiable only by continuing to quote a claim the
+      project retracted on 2026-09-16, and its own test name asserts the opposite of the decision the
+      user made. Both needle sets in that test are affected, not just one: the second needle set
+      ("the escalation path": @pm, Security & Compliance, BRD §8) also now survives only inside the
+      parenthetical that records the escalation as OVERTAKEN. The next person to tidy either
+      retraction will be stopped by a red test telling them the documentation is wrong when it is
+      right.
+    routing: >-
+      @po. Correctly not fixed here — AC-8 rules that a finding is a runbook documentation fix and
+      "not a reason to reopen 10.18", and re-scoping 10.18b's AC-20 is not 10.19's to do.
+    counter_evidence_in_the_guard_s_favour: >-
+      Recorded for balance: the same test file caught the developer mid-story, when a re-wrap split
+      "closing that flag alone would have closed" across a blockquote continuation. The pin family is
+      doing real work. It is this one assertion that has gone bad, not the mechanism.
+
+  - id: 3
+    item: AC-15's register-sync guard
+    verdict: DONE WITH REAL GAPS — six mutations of mine survived
+    developer_table_spot_checked: >-
+      Four of the developer's claimed reds were re-run here and all four reproduced with the exact
+      messages quoted in the Dev Agent Record: the changed-owner red, the extra-id (ED-07) red, the
+      M4 disclaimer red, and a spike-direction red. The two anti-vacuity guards are real — renaming
+      the manifest's `external_dependencies` block produced `[vacuity] no external_dependencies
+      parsed`. The guard is non-vacuous on arrival: it reports 6 EDs, 6 spikes, 12 declared ids and
+      7 excluded story ids. The developer's mutation table is honest on every row sampled.
+    the_load_bearing_gap: >-
+      AC-15's own sentence is "a script that fails the day this register and the manifest disagree".
+      The guard compares only the register's FRONT MATTER. The register's BODY — its section-1 table
+      with its own Status column, and its prose — is read for exactly one thing, the literal
+      disclaimer sentence. So the register can assert in its human-readable body that ED-02 is closed,
+      or that all six external dependencies are resolved, while the manifest still says open, and the
+      guard stays green. That is the disagreement the criterion names, and it is unguarded. A human
+      reads the body; the guard reads the front matter; nothing keeps the two halves of the same file
+      in agreement.
+    owner_extension_ruling: >-
+      IN SCOPE and LOAD-BEARING — @po should confirm rather than strike. It is beyond AC-15's literal
+      text, which names only `external_dependencies[].status` and the spikes' `Result.` lines, but
+      the criterion's stated purpose is the ED-02 gap and that gap was an OWNERSHIP gap; a
+      status-only guard would not have caught it. It demonstrably works: changing the manifest's
+      ED-02 owner produced a precise OWNER MISMATCH red. The developer declared it rather than
+      slipping it in, which is the right conduct. One caveat, below: it has no strength floor.
+
+  - id: 4
+    item: AC-14, verify-on-landing
+    verdict: PARTIALLY SATISFIED — the fix has landed, the criterion's test has not
+    verified_in_wt_epic_read_only: >-
+      `<Box component="a" href="#checks-main">Skip to main content</Box>` is the FIRST child of the
+      outer layout Box at :95-101, before PlatformSidebar, `transform: translateY(-150%)` with
+      `'&:focus': { transform: 'translateY(0)' }`. `id="checks-main"` and `tabIndex={-1}` are on the
+      `<main>` Box at :113-115. There is exactly ONE occurrence of the id as an attribute — the
+      orphaned absolutely-positioned div is genuinely deleted, not duplicated.
+    the_divergence_is_real: >-
+      Confirmed by grep across the landed test file: it asserts `getByRole('link', …)`, an href, then
+      `fireEvent.click(skip)` and `expect(getByRole('main')).toHaveFocus()`. There is no
+      `userEvent.tab()` and no tab-order assertion anywhere in the file. AC-14's last sentence names
+      first-`Tab` reachability from page load, before any sidebar item. Those are different
+      properties: inserting any focusable element ahead of the skip link would break AC-14's stated
+      property while leaving the landed click test green.
+    env_1_justification_verified: >-
+      The developer's reason for not writing it here holds. `frontend/node_modules/@put/core-components`
+      is a symlink to `../../../../put-core-components`, which does not exist; the real package is
+      outside every worktree. In this reviewer's own full frontend run,
+      ChecksLayout.a11y.test.tsx reports `(0 test)` and
+      `Error: Failed to resolve import "@put/core-components"`. A keyboard-order test committed here
+      could not be executed by anyone on this branch — that is the false-green shape, not a mitigation.
+    ruling: >-
+      Verify-on-landing IS satisfied for the FIX, which is what the user's 2026-09-16 decision
+      assigned to this story. It is NOT satisfied for the criterion's test. Do not hold 10.19 for it
+      — the file cannot load in any worktree until ENV-1(a) is fixed. Route the missing assertion to
+      @po as a follow-up bound to ENV-1(a)'s resolution, and record that the landed test is weaker
+      than the criterion it is standing in for.
+
+  - id: 5
+    item: AC-12's unachievable "zero critical/serious", and the decision to ticket
+    verdict: CORRECT CALL
+    evidence: >-
+      Verified from axe-results.json that all seven surfaces carry critical or serious findings, so
+      the first branch is unreachable and the criterion's own ticketing branch is the operative one.
+      Not a downgrade.
+    harness_independently_falsified: >-
+      This reviewer wrote its own product mutation, in the direction the developer did not test.
+      Rather than breaking an accessible name, I FIXED one — adding `aria-label="Move up"` directly
+      to the real step-list IconButton, whose name currently lives on the MUI Tooltip's cloned
+      wrapper span. The pin went RED on the SHRANK arm across exactly the five ChecksStudioPage
+      surfaces ("button-name" 13 -> 9, "aria-prohibited-attr" 12 -> 8) and left StudioTestsPage and
+      StudioRunsPage untouched, which is correct — the step list exists only on ChecksStudioPage.
+      The pin is therefore genuinely bidirectional and genuinely keyed on the product, not on a
+      test-local stand-in. It catches an unrecorded FIX as well as a regression.
+    deferral_ruling: >-
+      Not fixing the nodes here is right and consistent. ChecksStudioPage.tsx carries ~200
+      uncommitted lines in wt/epic; landing a fix would make 10.19 a second writer, the same rule
+      that kept it off httpClient.test.ts and the skip link.
+
+  - id: 6
+    item: DEF-01 / DEF-02 manifest-vs-code tension
+    verdict: CONFIRMED — the code state is as the developer reports
+    evidence: >-
+      Manifest: DEF-01 at line 1541 and DEF-02 at line 1591 both read `status: open`, while their own
+      owner fields name the stories that fixed them ("10.17 (ruled by @po …)", "10.14 (AC-10), landed
+      at the head of wave 5"). Code, read directly: HttpRunnerDispatchClient.body() now writes
+      executionId, attemptId, revisionId, artifactHash, artifact, source, configuration, csi,
+      references, resolvedVars, resolvedSecrets, deadlines, videoKey and manifestKey — every one of
+      the ten fields DEF-01's summary lists as missing. RunnerEvidence is
+      `public record RunnerEvidence(String videoKey, String manifestKey, String state, Boolean partial)`
+      — the four-component record with `partial`, where DEF-02's summary describes a three-component
+      one. Both defects are fixed in code and open in the manifest.
+    ruling: >-
+      The developer was right to flag and right not to edit. The manifest is @pm's under the
+      authority matrix. Routed to @pm.
+
+  - id: 7
+    item: AC-17's pre-wave-8 baselines
+    verdict: THE SUBSTITUTION WAS CORRECT
+    reasoning: >-
+      AC-17's own text does not fix the numbers; it says to start from the last recorded post-merge
+      counts and "add the tests that 10.30, 10.31, 10.32 and 10.33 record in their own gates". The
+      figures it prints (backend 684/2/7, frontend 541/2, runner 957/29, fixtures 89/10, deployment
+      177/4) are that starting point, not the answer. The post-merge figures at d3700f23d are the
+      sum, they match the orchestrator's verified table, and they matched this reviewer's own runs on
+      all five tiers exactly. Using them is what the criterion asks for; printing them in the
+      criterion's prose is what has gone stale.
+    routing: >-
+      @po, as a text correction to AC-17 — the literal numbers should either be removed in favour of
+      "the last recorded post-merge counts on the epic line" or refreshed to the d3700f23d figures.
+      A reader copying them today would mis-diagnose five suites, exactly as the developer warns.
+    also: >-
+      All four of the story's wave-8 dependencies have in fact merged; 10.33's merge (85fa14fda) is
+      an ancestor of HEAD. Recorded because 10.33 merged as a DRAFT "held as the acceptance spec for
+      the other session's fix", not as an implementation — so PROD-1 itself is not fixed on this
+      line. That does not affect the local half; it does affect AC-1, which is blocked regardless.
+
+  - id: 8
+    item: the PASSED-line counting discrepancy
+    verdict: RESOLVED — both agents were right, the flag differed
+    mechanism: >-
+      backend/build.gradle.kts:161 declares `testLogging { events("passed", "skipped", "failed") }`.
+      In Gradle that configures the LIFECYCLE-level TestLoggingContainer only. Running with `-i`
+      selects the INFO-level container, whose Gradle default event set is [FAILED, SKIPPED] — PASSED
+      is not in it — and the build script never configures a `testLogging.info` block (verified: the
+      only two testLogging occurrences in the file are the top-level one at 161 and one at 329, with
+      no per-log-level sub-blocks). So `-i` silently drops every PASSED line while changing nothing
+      about what ran.
+    controlled_experiment: >-
+      Same test class, same `--rerun-tasks`, only the flag differing.
+      `./gradlew test --rerun-tasks --tests com.citi.put.checks.studio.ArtifactSchemaDriftTest`
+      emitted 3 PASSED lines. The identical command with `-i` emitted 0 PASSED lines across a 589-line
+      log, with the tests demonstrably executing. That is the whole discrepancy.
+    corroboration: >-
+      This reviewer's own full package run, WITHOUT `-i`, emitted exactly 709 ` PASSED$` lines, 0
+      ` SKIPPED$`… (7 skipped appear in XML; the LIFECYCLE skipped events were emitted as the run
+      progressed and totalled 7). Independent XML aggregation of the same run gave 94 suite files,
+      none zero-length, tests=716 failures=0 errors=0 skipped=7, i.e. 709 passed. The developer's 94
+      XML files and 709 figure match exactly. Three counting methods, one answer.
+    standard_this_epic_should_adopt: >-
+      Aggregate `backend/build/test-results/test/*.xml` and assert the suite-file count is non-zero
+      and no file is zero-length. It is invariant to log level, invariant to `-i`, and independent of
+      Gradle's habit of printing "N tests completed" only on failure. Console-event counting must be
+      corroboration only, because it is silently log-level dependent — as this item proves. Exit code
+      must never be the instrument: ruling 1 shows a single-file run returning 1 on every green run
+      because of coverage thresholds, and `grep -E 'FAILED$'` additionally matches
+      "> Task :test FAILED", which this reviewer hit live while probing a mistyped class name.
+
+qa_own_mutation_table:
+  note: >-
+    Written by this reviewer against AC-15's guard, independent of the developer's fifteen. Applied
+    to the real tracked files; restored with `git checkout --`; the seven-file
+    `shasum -a 256 -c` baseline re-verified after EVERY row and read OK all fourteen times. Q7 is the
+    control that proves the harness can turn the guard red at all.
+  rows:
+    - id: Q1
+      mutation: >-
+        Register BODY section-1 table: ED-02's Status cell `open` -> `closed — gate opened
+        2026-09-17`. Front matter left saying `blocked`.
+      expected_if_guard_complete: RED
+      result: GREEN — SURVIVED
+      why_it_matters: >-
+        This is precisely "the register and the manifest disagree", in the register's own
+        human-readable status column, and the guard cannot see it.
+      restore: all 7 files OK
+    - id: Q2
+      mutation: >-
+        Register BODY prose: "**All six read `status: open`.**" -> "**All six are now RESOLVED and no
+        longer gate this epic.**"
+      expected_if_guard_complete: RED
+      result: GREEN — SURVIVED
+      why_it_matters: A false green stated in words, in the document the guard is named for.
+      restore: all 7 files OK
+    - id: Q3
+      mutation: all six `gate_owner` anchors reduced to a single space `" "`.
+      expected_if_guard_complete: RED
+      result: GREEN — SURVIVED
+      why_it_matters: >-
+        The owner check is a case-insensitive substring test with no strength floor, so the very
+        check the developer added to catch the ED-02 ownership gap can be reduced to a tautology by
+        shortening its anchors, and nothing notices. The check works today (see Q-control v1) but
+        nothing keeps it working.
+      restore: all 7 files OK
+    - id: Q4
+      mutation: delete the `AC-5: [ED-02]` line from `blocked_criteria` entirely.
+      expected_if_guard_complete: RED
+      result: GREEN — SURVIVED
+      why_it_matters: >-
+        The guard checks that every id a criterion names is a declared gate, but never that
+        AC-1..AC-7 are all registered. A blocked criterion can silently stop being registered — which
+        is the "closing by silence" failure AC-15 exists to prevent, one level up.
+      restore: all 7 files OK
+    - id: Q5
+      mutation: >-
+        studio-staging-spikes.md's own summary table and header line -> CLOSED for all six, leaving
+        each `## SPK-0N` section's `**Result.** OPEN.` untouched.
+      expected_if_guard_complete: RED
+      result: GREEN — SURVIVED
+      why_it_matters: >-
+        The source of truth can contradict itself. The guard deliberately reads the section and not
+        the summary table (a documented choice), but nothing checks that the two agree, and a human
+        scanning the register reads the table first.
+      restore: all 7 files OK
+    - id: Q6
+      mutation: >-
+        `AC-7: [ED-02]` -> `AC-7: [ED-01]` in `blocked_criteria`. Both are declared gates; the story
+        blocks AC-7 on ED-02.
+      expected_if_guard_complete: RED
+      result: GREEN — SURVIVED
+      why_it_matters: >-
+        Membership is checked; correctness is not. The register can mis-attribute which gate blocks
+        which criterion, so when ED-01 opens the wrong criterion becomes executable.
+      restore: all 7 files OK
+    - id: Q7
+      mutation: >-
+        CONTROL. `## SPK-02` section `**Result.** OPEN.` -> `CLOSED — ingress verified 2026-09-17.`
+      expected_if_guard_complete: RED
+      result: >-
+        RED — "[register-sync] SPK-02: the register says BLOCKED, but its source of truth now reads
+        \"CLOSED — ingress verified 2026-09-17.\"". Exactly one failure line.
+      why_it_matters: Proves the harness and the guard's primary direction both work.
+      restore: all 7 files OK
+  developer_rows_reproduced:
+    - id: v1
+      mutation: manifest ED-02 owner -> "Checks squad (reassigned)"
+      result: RED — exact OWNER MISMATCH message as quoted in the Dev Agent Record
+    - id: v2
+      mutation: register declares ED-07
+      result: RED — "no such id exists in docs/epics/EPIC-10-EXECUTION.yaml"
+    - id: v3
+      mutation: both copies of the GA disclaimer sentence deleted
+      result: RED — "[i/disclaimer] … does not carry the literal GA-sign-off disclaimer sentence"
+    - id: v4
+      mutation: manifest `external_dependencies:` block renamed
+      result: RED — "[vacuity] no external_dependencies parsed", plus 12 consequent lines
+  summary: >-
+    6 of my 7 probes survived; the 1 control reddened; all 4 developer rows I re-ran reproduced
+    verbatim. The guard is sound in the direction it was built for and blind in three others: the
+    register's own body, the completeness of its criteria list, and the strength of its own anchors.
+
+tiers:
+  backend:
+    command: './gradlew test --rerun-tasks --tests "com.citi.put.checks.studio.*"'
+    result: '709 passed / 0 failed / 7 skipped (716) — BUILD SUCCESSFUL in 5m 18s'
+    baseline: 709 / 0 / 7 — EXACT MATCH
+    load: started at < 5.0 after polling down from 9.03; AC-17's rule followed, not just audited
+    counting: >-
+      709 ` PASSED$` console event lines AND independent XML aggregation (94 suites, 0 zero-length,
+      716/0/0/7). Two methods, same answer.
+  frontend:
+    command: 'npx vitest run'
+    result: '548 passed / 2 failed (550) on 3 of 4 full runs — EXACT MATCH to 541 + 7 new'
+    the_two_reds: >-
+      Both are story 10.11c's deliberate AC-32 reds in confirmedRevisionEscalation.test.ts, verbatim
+      "EXPECTED RED (story 10.11c AC-32, Class C, @architect)".
+    new_finding: >-
+      One of four runs carried a THIRD failure, one test in
+      src/components/studio/review/accessibility.test.tsx, which took 11986 ms in that run. Run alone
+      at load 12.03 it passes 9/9. This is a load-dependent flake in the frontend harness, not a
+      story defect and not one of 10.11c's reds. Recorded as ENV finding FE-FLAKE-1 below rather than
+      folded silently into "548/2".
+    load: 6.15 to 12.01
+  runner_default:
+    command: 'npx vitest run'
+    result: '984 passed / 0 failed / 29 skipped (1013) — FIFTEEN consecutive runs, all identical'
+    baseline: 984 / 0 / 29 — EXACT MATCH
+    load: 4.94 rising to 26.42 across the fifteen
+  runner_fixtures:
+    command: 'npm run test:fixtures'
+    result: '90 passed / 10 skipped (100) — EXACT MATCH'
+    load: 14.18
+  runner_deployment:
+    command: 'npm run test:deployment'
+    result: '184 passed / 4 failed (188) — EXACT MATCH'
+    the_four_reds: >-
+      All four are test/deployment/envfrom-keys.test.ts, "AC-18 … values.yaml / values-dev.yaml /
+      values-uat.yaml / values-prod.yaml: EXPECTED RED — dotted configOverrides keys never reach the
+      process". Deliberate, per runbook §11.
+    load: 7.73
+  guard:
+    command: 'node docs/qa/scripts/verify-staging-registration.mjs'
+    result: 'PASS, exit 0 — 6 EDs, 6 spikes, 12 declared ids, 7 excluded story ids (non-vacuous)'
+  type_check:
+    command: 'npm run type-check'
+    result: >-
+      Exactly 2 errors, both pre-existing TS2307 on @put/core-components
+      (ChecksLayout.tsx:6, navigationSetup.ts:1). ZERO new. ENV-1(a).
+  lint:
+    command: 'npm run lint'
+    result: >-
+      NOT PASSED AND NOT REPORTED AS PASSED. ESLint refuses to start: "couldn't find the config
+      @typescript-eslint/recommended to extend from". Zero files linted. ENV-1(b), @devops's.
+      The developer reported this correctly and this gate repeats it as a failure, not a caveat.
+
+findings:
+  - id: DISCLOSURE-PIN-1
+    severity: HIGH
+    owner: '@po'
+    summary: >-
+      studio-runner/test/disclosure.test.ts pins "ED-02's owner is TBD", retracted 2026-09-16. It now
+      passes only because the runbook's correction quotes the wording it retracts. Proven by
+      mutation: making the runbook strictly more accurate turns the test red. A guard that penalises
+      a correction. Both needle sets in that test are affected, and the test's own name asserts the
+      opposite of the user's decision. Re-scoping 10.18b's AC-20 is @po's call.
+  - id: AC15-BLIND-BODY
+    severity: MEDIUM
+    owner: '@po (criterion) / @dev (implementation, follow-up story)'
+    summary: >-
+      AC-15's guard reads only the register's front matter, so the register's own status table and
+      prose can contradict the manifest with the guard green (Q1, Q2). Recommend the guard parse the
+      section-1 table's Status column and require it to agree with `gate_registration`.
+  - id: AC15-NO-ANCHOR-FLOOR
+    severity: MEDIUM
+    owner: '@dev (follow-up)'
+    summary: >-
+      The owner check is a substring test with no minimum anchor (Q3: all six reducible to " ").
+      Recommend a minimum anchor length and a rule that the anchor must not be a substring of every
+      owner string.
+  - id: AC15-CRITERIA-INCOMPLETE
+    severity: MEDIUM
+    owner: '@dev (follow-up)'
+    summary: >-
+      Nothing requires AC-1..AC-7 to be present in `blocked_criteria` (Q4), and nothing checks that a
+      criterion names the RIGHT ids (Q6). Recommend pinning the seven criterion keys and
+      cross-checking each against the story's own criterion text.
+  - id: SPIKE-REGISTER-SELF-DIVERGENCE
+    severity: LOW
+    owner: '@architect (register owner)'
+    summary: >-
+      The spike register's summary table and its per-spike sections can disagree with nothing
+      noticing (Q5). Recommend the guard also read the summary table and require the two to agree.
+  - id: F-3
+    severity: MEDIUM
+    owner: '@po to route (not 10.19)'
+    summary: >-
+      Open again on the epic line; the reverted base landed. Deterministically reproducible by the
+      squeeze. Not 10.19's regression and not re-fixed here.
+  - id: AC19C-PROTOCOL-UNDERPOWERED
+    severity: MEDIUM
+    owner: '@po (it is an acceptance criterion)'
+    summary: >-
+      AC-19(c)'s "20 runs green" instrument detects the defect it exists to find roughly 5-10% of the
+      time per run, and its exit code is dominated by coverage thresholds. See ruling 1 for the
+      replacement.
+  - id: A11Y-1..A11Y-7
+    severity: >-
+      A11Y-1 and A11Y-3 critical; A11Y-2 and A11Y-4 serious; A11Y-5..A11Y-7 unmeasured
+    owner: as ticketed in the register
+    summary: >-
+      Accepted as raised. The counts are real and traceable to axe-results.json. A11Y-5 (the
+      screen-reader pass) is the outstanding half of AC-12.
+  - id: DEF-01 / DEF-02 manifest status
+    severity: MEDIUM
+    owner: '@pm'
+    summary: >-
+      Both read `status: open` in the manifest and both are fixed in code. Confirmed by reading the
+      dispatch body and the RunnerEvidence record. The manifest is @pm's to correct.
+  - id: AC-14-TEST-WEAKER-THAN-CRITERION
+    severity: LOW
+    owner: '@po'
+    summary: >-
+      The landed test asserts a click; AC-14 names first-Tab reachability. Blocked on ENV-1(a) for
+      anyone, in any worktree. Route as a follow-up bound to ENV-1(a).
+  - id: FE-FLAKE-1
+    severity: LOW
+    owner: '@devops / environment'
+    summary: >-
+      src/components/studio/review/accessibility.test.tsx failed once in four full frontend runs
+      (11986 ms in that run) and passes 9/9 alone at load 12. Load-dependent, consistent with the
+      FOC-08 10 s bootstrap-settle coupling. Recorded so a future run of 547/3 is recognised as this
+      and not as a new red.
+  - id: AXE-HARNESS-WRITES-TRACKED-FILE
+    severity: LOW
+    owner: '@dev (follow-up)'
+    summary: >-
+      frontend/src/test/a11y/studioWcagAudit.test.tsx writes docs/qa/accessibility/axe-results.json
+      in afterAll, so running the frontend suite mutates a committed artifact. It is idempotent while
+      the product is unchanged, so it is harmless today, but any product change dirties the tree from
+      a test run. Consider writing to a build directory and committing a copy deliberately.
+  - id: STORY-LINE-CITATION-DRIFT
+    severity: INFO
+    owner: '@po'
+    summary: >-
+      The story cites `EPIC-10-EXECUTION.yaml:1234-1329` for external_dependencies; the block now
+      begins at 1764. Content unchanged. Same class of drift the developer found in ADR-002 §28.5's
+      openapi.yaml line numbers.
+
+routed_to_po:
+  - AC-19(c)'s protocol must be rewritten — the squeeze becomes the instrument, counts never exit codes (ruling 1).
+  - AC-17's printed baseline figures are stale; remove or refresh them (ruling 7).
+  - DISCLOSURE-PIN-1 — 10.18b's AC-20 pins a retracted claim; re-scope it (ruling 2).
+  - AC-15's owner extension — confirm rather than strike, and require an anchor strength floor (ruling 3).
+  - AC-14's first-Tab assertion — accept as a follow-up bound to ENV-1(a), do not hold 10.19 (ruling 4).
+  - F-3 returns to @po for routing; it is not 10.19's to fix.
+  - AC-15's blind spots (Q1..Q6) — decide whether they are a follow-up story or a 10.19 amendment.
+
+routed_to_pm:
+  - DEF-01 and DEF-02 read `status: open` in the manifest while both are fixed in code (ruling 6).
+  - >-
+    10.33 merged as a draft held as an acceptance spec, not as an implementation, so PROD-1 is not
+    fixed on this line even though the story's dependency is satisfied.
+  - >-
+    The AC-18 question is still open and still unresolved: whether 10.20-10.26 join this manifest,
+    and whether their uncommitted object-store work is ever what AC-1 adopts.
+
+backlog:
+  - id: BL-10.19-1
+    severity: MEDIUM
+    item: Extend verify-staging-registration.mjs to read the register's body status column (Q1, Q2).
+  - id: BL-10.19-2
+    severity: MEDIUM
+    item: Anchor strength floor and blocked_criteria completeness/correctness checks (Q3, Q4, Q6).
+  - id: BL-10.19-3
+    severity: LOW
+    item: Guard the spike register's summary table against its own sections (Q5).
+  - id: BL-10.19-4
+    severity: HIGH
+    item: Re-scope 10.18b AC-20's ED-02 owner pin so a correction does not redden it.
+  - id: BL-10.19-5
+    severity: MEDIUM
+    item: Fix F-3 on the epic line, once the second-writer conflict on httpClient.test.ts is resolved.
+  - id: BL-10.19-6
+    severity: MEDIUM
+    item: AC-12(b) screen-reader pass (A11Y-5) — @ux-design-expert with @qa recording.
+  - id: BL-10.19-7
+    severity: MEDIUM
+    item: AC-13 user trial — @pm owns recruitment; @ux-design-expert runs; @qa scores.
+  - id: BL-10.19-8
+    severity: LOW
+    item: AC-14's first-Tab test, bound to ENV-1(a)'s resolution by @devops.
+  - id: BL-10.19-9
+    severity: LOW
+    item: axe harness should not write a tracked file from afterAll.
+
+completeness_of_epic_10:
+  can_10_19_be_considered_complete_as_far_as_possible: >-
+    YES for the half that does not need a staging cluster, and the story is correctly NOT marked
+    Done. Eight criteria (AC-8, AC-9, AC-10, AC-11, AC-15, AC-16, AC-17, AC-18) are delivered and
+    independently verified here. The story's own Definition of done forbids Done while any criterion
+    is blocked or unexecuted, and it has correctly stopped at Ready for Review.
+  precisely_what_remains:
+    blocked_on_parties_outside_this_epic:
+      - AC-1, AC-2 — all twelve ids.
+      - AC-3 — ED-04, ED-05, SPK-04, SPK-05 (Platform/SRE).
+      - AC-4 — ED-06, SPK-02, SPK-06 (Platform/SRE ingress; @architect).
+      - AC-5, AC-7 — ED-02 (PUT Core platform; external ticket does not exist yet).
+      - AC-6 — ED-02, ED-03, ED-05.
+    not_blocked_merely_unfinished:
+      - AC-12(b) — the screen-reader pass. Unstaffed, not gated.
+      - AC-13 — the user trial. Unstaffed, not gated. The weakest criterion, named as such in advance.
+      - AC-14 — the first-Tab assertion. Blocked on ENV-1(a), which is @devops's, not Platform/SRE's.
+      - AC-19(a) — the post-merge repeat, outstanding by construction until this story merges.
+      - AC-19(c) — red. F-3 is open on the epic line.
+  epic_level: >-
+    Epic 10 is complete as far as it can be without a staging cluster, an identity integration and
+    six spikes it does not own. What this story adds that the epic did not have is the thing that
+    makes that statement checkable by someone who was not here: a register that names every open
+    item with an owner, a rollback procedure, five evidence hooks, and a guard that fails when the
+    register drifts from the manifest — with the six blind spots this gate documents.
+
+evidence_limits:
+  - >-
+    AC-1..AC-7 cannot be positively verified by anyone, here or elsewhere, while their gates are
+    open. This gate verifies only that they were not faked — which is the whole of what is
+    verifiable today.
+  - >-
+    AC-13's structure check is a PRESENCE check and the script says so in its own output. It would
+    pass just as happily over invented content. Only a human reading the file can tell. I read it:
+    it is empty and says so.
+  - >-
+    The screen-reader pass cannot be verified as absent beyond confirming that no transcript exists
+    and the document says none was run.
+  - >-
+    I could not prove F-3's true natural failure rate. Pooling both agents' samples gives 3 reds in
+    60 natural runs (2/20 file-alone by me, 0/20 file-alone by @dev, 0/15 full-tier by me, 1/5
+    full-tier by @dev). That is enough to establish the protocol is underpowered and NOT enough to
+    say which natural route is the better reproducer. The squeeze is the only instrument I would
+    trust.
+  - >-
+    I did not re-verify the runbook's §1-§6, §8, §10, §11 "found NOT drifted" claims line by line
+    against the merged system. I verified the five corrections that were made, and independently
+    verified the AC-9 novelty claim. The negative claim is the developer's.
+  - >-
+    I did not read the contents of wt/epic's uncommitted backend work beyond ChecksLayout.tsx and the
+    a11y test file, and I confirmed only its shape: 241 dirty paths and an untracked
+    V18__studio_inference_capture.sql, exactly as the developer's correction to the run log states
+    (the run log's 263 paths and V19 are stale). Whether the compile breakage still holds there is
+    undetermined, as the developer also says.
+  - >-
+    `./gradlew check` was not run, by design. MED-2 hangs it and a hang is never a pass.
+
+recommended_status: >-
+  CONCERNS — merge safe. The local half is genuinely delivered, nothing blocked was faked, and every
+  suite matches baseline exactly. The concerns are one HIGH finding that belongs to 10.18b
+  (DISCLOSURE-PIN-1), six documented blind spots in this story's own guard, and a defective
+  acceptance-criterion protocol — all routed, none requiring rework in this story before merge.
+
+before_merge:
+  - >-
+    None blocking. Optionally correct the register's F-3 section (6.1) and the story's AC-19(c)
+    narrative, both of which state that the 20-run recipe "does not reproduce this race" and that the
+    full tier does. This gate's evidence is the other way round in both halves; the honest statement
+    is that neither natural protocol is a reliable detector and only the squeeze is.
