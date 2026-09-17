@@ -332,3 +332,69 @@ assertion-removed row are each caught by two rules.
     `pageRunGate` alone (0 → 3) and not traced across the whole suite.
 - **Not done.** The stand-in reproduction only moved jsdom's origin. The real `:3000` process was
   never touched.
+
+---
+
+## QA Results (@qa, Quinn — gated 2026-09-17 00:05 local, commit `95bd63114`)
+
+**Gate: PASS.** Details are in `docs/qa/gates/carry-forward-2026-09-16.yml`. All five findings are
+closed, and this reviewer verified each closure by mutation. The diff is test-only, and nothing
+blocks the merge.
+
+**Harness.** A private `mktemp` directory under `$TMPDIR`. Each mutation required its anchor to
+occur exactly once, and every restore was sha256-verified (`RESTORED-OK`). Afterwards `git status`
+was empty and all 7 tracked hashes matched. The ENV-2 rows ran against this reviewer's own stand-in
+on `:3931` (every path `307 → /login`, and `/login` answers after 9 s). No request went to `:3000`,
+and PID 33058 was left untouched.
+
+| Finding | Result | Mutations run by @qa (new rows marked *) |
+|---|---|---|
+| TEST-005 | closed | T300 **red** in AC-2 alone; T5000 **red**; *TEND (a re-run requested when the stream closes, so the duplicate lands at the settle point) **red**; T8000 green (the stated residual, reproduced) |
+| REL-004 | closed | none; judged from the diff (only timeout arguments change). The cold case took 1958 ms and 1647 ms in-suite |
+| ENV-2 / REL-002 | closed | control 10/10, 0 hits; E1 **3 red**, `reading 'find'`; M1 (= E2) **1 red**, 6 hits escaped; *M2 (setup answers 200 HTML) **1 red**; *M4 (setup does not import the store) **3 red**, `reading 'find'`; *M3 (setup server never closed) **16 red** across the suite |
+| F-3 | closed | H1 **red** (same sha as @dev); H4 **red**; *H10 (+1 ms) red, but only as a generic 5 s timeout; *H9 (timer captured at module load) green, i.e. the test silently reverts to real time |
+| F-7 | closed | S7, S8 and S10 each **fail to load** (all three were green at `4ffc4020c`) |
+
+**Rulings.**
+- **TEST-005.** The residual is acceptable. The test now observes the activation's whole causal
+  chain, and no finite window catches an arbitrary delay. A rename is optional.
+- **REL-004.** The bound is justified. A timeout cannot turn a failing assertion green.
+- **ENV-2.** The setup cannot hide a regression that tests used to catch, because no test ever
+  exercised a successful import-time bootstrap. `bootstrapIsolation.test.ts` is a real guard: it
+  reddened under E1, M1, M2 and M4, and the suite caught M3. Closing the server does not interfere:
+  two full runs gave 541/2. Leaving it open does interfere (M3).
+- **F-3.** The test still exercises the production client. Only `setTimeout` and `clearTimeout` are
+  faked, and H1 proves the outcome classification.
+
+**Constraint for story 10.32.** Measured with seven edits, K1–K7.
+- **What still passes.** The drafted AC-7 (a helper appended to the median message, the name not
+  mentioned) is green. So is an F-4 comment rewrite, even one that names the constant, and a
+  trailing comment on the assertion line that does not name it.
+- **What `webm.test.ts` refuses to load.**
+  - interpolating `MEDIAN_TOLERANCE_MS` into the message;
+  - a trailing comment that names it;
+  - wrapping `.toBeLessThan(MEDIAN_TOLERANCE_MS);` over several lines;
+  - any added string containing `/*`.
+- **The rule for 10.32.** Outside comments, the name appears exactly twice: the declaration and the
+  one-line assertion. If 10.32 needs more, it changes `medianToleranceIn` rule 3 in the same commit,
+  and the F-7 block must still go red for S7, S8 and S10.
+- **Stale text in the 10.32 draft.** It says F-7 "has not landed" and names `readMedianTolerance()`,
+  and its webm baseline says 6 tests where there are now 16.
+
+**New, not this branch's.** PROD-1 (low). The two fulfilled reducers assign an unchecked payload, so a
+200 non-JSON body leaves `data` undefined and the page throws. By inference, an expired session
+redirected to an HTML login page produces the same shape in production. Route it to the backlog.
+
+**Suites run by @qa.**
+
+| Suite | Load | Result |
+|---|---|---|
+| frontend `npx vitest run` #1 | 7.9 → 13.0 | 541 passed / 2 failed (AC-32 EXPECTED RED); ENV-1 file unloadable; 58 s |
+| frontend #2 | 13.0 → 17.6 | 541 / 2; 76 s |
+| runner `npm test` #1 / #2 | 14.2 / 13.8 | 957 passed / 29 skipped each |
+| runner `npm run test:fixtures` | 14.8 | 89 passed / 10 skipped (an earlier run's totals were not captured; no claim is made for it) |
+| frontend `type-check` | — | the 2 known TS2307 |
+| runner `type-check` / `lint` | — | the 1 known TS2345 / exit 0 |
+| frontend `lint` | — | not run, ENV-1; no claim |
+
+**Before merge.** Nothing is required. Recommended: carry the 10.32 constraint into that story.
