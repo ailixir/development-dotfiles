@@ -21,6 +21,8 @@ import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.entity.UITestExecution;
 import com.citi.put.checks.studio.entity.UITestRevision;
 import com.citi.put.checks.users.UserProvisioningService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +53,16 @@ public class StudioService {
   private final CompilePipeline compilePipeline;
   private final CompileStateService compileStateService;
   private final UserProvisioningService userProvisioningService;
+
+  /**
+   * Used for one thing: to let go of the draft the authorized save read through the visibility
+   * restriction before it takes the row lock (ADR-002 §27.2, steps 2 and 4). Hibernate hands an
+   * entity it already holds back to a later query unchanged, even a locking one, so without this
+   * the locked read would compare the request's revisions against the <em>unlocked</em> copy and
+   * two concurrent saves could both win. {@code ProgressReportService} clears its session for the
+   * same reason.
+   */
+  @PersistenceContext private EntityManager entityManager;
 
   @SuppressWarnings("checkstyle:ParameterNumber")
   public StudioService(
@@ -101,14 +113,22 @@ public class StudioService {
   }
 
   /**
-   * Owners and explicitly authorized administrators may compile and confirm (§9.1).
+   * Owners and explicitly authorized administrators may create, save, delete, compile and confirm
+   * (§9.1; ADR-002 §27.2). Architecture §9.1 draws no line between those five, so this is the one
+   * place {@code canWrite} is asked for any of them.
    *
    * <p>A {@code null} CSI is refused rather than treated as unrestricted. That is the answer for a
    * quarantined row whose {@code csi_id} is {@code NULL} — the other half of V12's CHECK — because
    * no principal can be authorized against a CSI that is not there. ADR-002 §14.4 states the
    * consequence: such a row is recoverable by administrator action, not by a status code.
+   *
+   * <p>Which CSI is passed in is the caller's decision, and it differs on purpose. Compile and
+   * confirm read it <em>through</em> a withheld draft ({@link
+   * StudioRepository#findCsiIdIncludingWithheld}), because they must answer {@code 409} for one.
+   * Save and delete read it through the visibility restriction, because a withheld draft is hidden
+   * from them, not in conflict (ADR-002 §14.5, §27.2).
    */
-  private void requireCompile(Authentication auth, String csiId) {
+  private void requireWrite(Authentication auth, String csiId) {
     if (csiId == null || !csiOwnershipEvaluator.canWrite(auth, csiId)) {
       throw new StudioAccessDeniedException();
     }
@@ -142,11 +162,16 @@ public class StudioService {
   /**
    * Creates a draft. The CSI is required, must be registered, and can never be changed afterwards
    * (Architecture §9.1; V12 CHECK {@code ck_ui_tests_csi_registered}).
+   *
+   * <p>Only an owner or an explicitly authorized administrator of that CSI may create on it
+   * (ADR-002 §27.2). The registered-CSI check runs first: its {@code 400} is the same whoever asks,
+   * so it discloses nothing, and the write check follows before any side effect.
    */
   @Transactional
   public UITestDto createTest(UITestRequest request, Authentication auth) {
     UserIdentity identity = extractIdentity(auth);
     requireRegisteredCsi(request.csiId());
+    requireWrite(auth, request.csiId());
     // The draft records its author, and `created_by` REFERENCES users(email) (V1). The mirror row
     // that satisfies it is written by story 1.6's asynchronous listener, which is racing this very
     // request: an author whose mirror has not landed yet is a foreign key violation and a 500 on
@@ -235,10 +260,22 @@ public class StudioService {
    * therefore has nothing to compile; enqueueing there would drive a confirmed draft to {@code
    * COMPILING} and spend a gateway call to rediscover the artifact it already holds.
    *
+   * <p><b>With a caller, the order of refusal is ADR-002 §27.2's</b>: (1) the required revisions,
+   * which do not depend on the stored row; (2) the draft read through the visibility restriction —
+   * absent, soft-deleted and quarantined are all {@code 403}; (3) {@code canWrite} on that draft's
+   * CSI; (4) the locked read, where a draft that disappeared since step 2 is also {@code 403}; (5)
+   * only then {@code 409 STALE_REVISION} and {@code 409 CSI_IMMUTABLE}. The read is never {@link
+   * StudioRepository#findCsiIdIncludingWithheld}: an owner of a withheld draft who passed
+   * authorization would otherwise see it through the status code (ADR-002 §14.5).
+   *
+   * <p>Without a caller — the internal overload above — steps 2 and 3 do not run and an absent
+   * draft is still {@code IllegalArgumentException("UI Test not found: …")}, exactly as before.
+   *
    * @param id the draft to save
    * @param request the new draft state
    * @param auth the caller, or {@code null} on the internal path
    * @return the saved draft
+   * @throws StudioAccessDeniedException the caller may not write this draft, or it is not visible
    */
   @Transactional
   public UITestDto updateTest(UUID id, UITestRequest request, Authentication auth) {
@@ -246,10 +283,19 @@ public class StudioService {
       throw new IllegalArgumentException(
           "sourceRevision and configurationRevision are required on update");
     }
+    if (auth != null) {
+      UITest visible = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
+      requireWrite(auth, visible.getCsiId());
+      entityManager.detach(visible);
+    }
     UITest test =
         studioRepository
             .findByIdForUpdate(id)
-            .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + id));
+            .orElseThrow(
+                () ->
+                    auth != null
+                        ? new StudioAccessDeniedException()
+                        : new IllegalArgumentException("UI Test not found: " + id));
 
     if (request.sourceRevision() != test.getSourceRevision()
         || request.configurationRevision() != test.getConfigurationRevision()) {
@@ -332,7 +378,7 @@ public class StudioService {
    */
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public CompileAcceptedDto compileTest(UUID testId, Authentication auth) {
-    requireCompile(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
+    requireWrite(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
     CompileRequest request = compilePipeline.compile(testId, principalOf(auth));
     return new CompileAcceptedDto(
         request.requestId(),
@@ -376,7 +422,7 @@ public class StudioService {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public UITestDto confirmCompile(
       UUID testId, ConfirmCompileRequestDto request, Authentication auth) {
-    requireCompile(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
+    requireWrite(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
     compileStateService.confirm(
         testId,
         request.revisionId(),
@@ -427,12 +473,32 @@ public class StudioService {
     }
   }
 
+  /** Internal soft delete with no authorization; callers that already authorized use this. */
   @Transactional
   public void softDeleteTest(UUID id) {
     UITest test =
         studioRepository
             .findById(id)
             .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + id));
+    test.setDeletedAt(Instant.now());
+  }
+
+  /**
+   * Soft-deletes a draft for a caller who may write its CSI (ADR-002 §27.2).
+   *
+   * <p>The draft is read through the visibility restriction, so an unknown id, an already
+   * soft-deleted draft and a quarantined draft are all {@code 403} with nothing written — the same
+   * answer as a draft on a CSI the caller may not write. The row that was authorized is the managed
+   * row that is changed; there is no revision to compare, so no second read is needed.
+   *
+   * @param id the draft to delete
+   * @param auth the caller
+   * @throws StudioAccessDeniedException the caller may not write this draft, or it is not visible
+   */
+  @Transactional
+  public void softDeleteTest(UUID id, Authentication auth) {
+    UITest test = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
+    requireWrite(auth, test.getCsiId());
     test.setDeletedAt(Instant.now());
   }
 
