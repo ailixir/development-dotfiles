@@ -1,0 +1,314 @@
+schema: 1
+story: '10.16a'
+story_title: Evidence state, playback and step seek — frontend half
+epic: EPIC-10
+wave: 7
+
+gate: CONCERNS
+
+status_reason: >-
+  Every criterion this half owns is implemented, and its named mutations are real guards: 16
+  re-applied mutations all went red (every restore sha256-verified, the restored hashes equal the
+  developer's table), AC-11's review repeats clean, and AC-19 is recorded Blocked, never passed.
+  It stays off PASS for four reasons. Three guards could not fail when probed: PROCESSING's
+  wording can say "no recording exists" with 161/161 tests green (shape #12), and the cross-host
+  row of AC-6's case table can be deleted together with a same-origin bug and 145/145 stay green
+  (shape #18). The third, AC-7's "take videoPath and nothing else" test, cannot see a defaulted
+  parameter (shape #16). Separately, the pre-existing pageRunGate flake is made measurably worse
+  by this half, though not caused by it.
+
+reviewer: Quinn (@qa)
+reviewed_revision: 'commit:a57d4ed17'
+updated: '2026-09-17T01:33:36Z'
+branch: story/10.16a
+head_sha: a57d4ed17
+base_sha: a02f1d505
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.16a
+scope: >-
+  10.16a only: AC-1..AC-14, AC-19 (Blocked), AC-20, AC-21. 10.16b (AC-15..AC-18, story/10.16b)
+  is not gated here.
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands this reviewer ran. Numbers are what they returned.
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+
+  diff_and_contract:
+    result: CONFIRMED
+    detail: >-
+      git diff --stat a02f1d505..a57d4ed17 lists 21 files: 20 under frontend/src/ plus the story.
+      backend/, studio-runner/ and docs/specs/ are absent. openapi.yaml sha256
+      51850b016cd8a697899a944eab12ddce5456967beecf4f3e011720498bc02efa at HEAD, and the same
+      value after the Q8 document mutation was restored. package.json d7e7eaf7…, package-lock.json
+      95f66e0d…, unchanged. Tree clean before and after every probe.
+
+  vitest_full_suite:
+    result: 'HEAD 525 passed / 2 failed in 9 of 10 runs; 1 of 10 had 3 extra failures, all load'
+    detail: >-
+      Base measured in an independent `git archive a02f1d505` extraction (node_modules symlinked,
+      same lockfile): 456/2 in 4 of 4 runs. The 2 failures on both sides are the known
+      ChecksLayout.a11y import failure (ENV-1) and the two EXPECTED RED tests in
+      confirmedRevisionEscalation.test.ts. HEAD, 10 full runs:
+      525/2 ×8. Run 3 was 524/3 at load 22.8 (SplunkPrototypePage 20 s timeout, a file this story
+      does not touch). Run 4 was 522/5 at load 40.3 (pageRunGate AC-2 missing text, pageRunGate
+      Save 5 s timeout, SplunkPrototypePage timeout). Zero "reading 'find'" errors in any of the
+      14 logs. Uptime was captured beside every run.
+
+  pageRunGate_determination:
+    result: 'PRE-EXISTING latent defect, AGGRAVATED (not introduced) by 10.16a; this failure is timing, not the :3000 listener'
+    detail: >-
+      (1) The failure is timing. The failed run's DOM dump is a fully rendered page. The log has
+      zero "reading 'find'" errors, and the :3000 clobber throws inside a selector, which would
+      have unmounted the tree and logged that error. The test waits for the verdict with
+      findAllByText's default 1000 ms. The verdict needs a 250 ms debounce, then
+      POST /validate-steps, then a render of a heavy page. Shrinking that wait to 100 ms (probe
+      T1) reproduces the identical message deterministically, 1 red / 3 green.
+      (2) 10.16a aggravates it through suite composition, not through the page. In 4 interleaved
+      base/head full-suite pairs at matched load (12.6–15.8), the AC-2 test took
+      2225/2739/2628/2457 ms on base and 3813/3748/3941/4165 ms on HEAD, +1.4 s every time.
+      Run alone, 4 interleaved pairs, it took 1060–1168 ms on base and 1087–1178 ms on HEAD,
+      which is no difference. So the page code is not slower. The half adds 5 test files and 69
+      tests, including the page-level pageEvidence.test.tsx (4.0–8.1 s per run), and that extra
+      concurrent jsdom work pushes this test toward its 1 s inner wait and 5 s timeout.
+      Counts: HEAD failed 2 of 14 full runs (orchestrator 1/4, this reviewer 1/10). Base failed
+      0 of 10 (orchestrator 0/6 on w7, this reviewer 0/4). The sample is small, but the duration
+      shift is consistent in all 8 pairs.
+      (3) It is pre-existing and already recorded. 10.11a's gate filed it as ENV-TIMING-1
+      ("bound the page test's timeout") and listed "do not relax pageRunGate by deleting
+      assertions; bound its timeout instead". Nobody applied that.
+      (4) The :3000 exposure (ENV-2) is real and is a separate mechanism. A temporary probe test
+      (deleted afterwards) showed that with jsdom's origin at localhost:3000, the import-time
+      bootstrap leaves sources = {fetched: true, error: null, data: undefined} within about
+      160 ms: next-server (PID 33058, untouched) answers 307 → /login → 200 text/html. With the
+      origin moved to a closed port (localhost:3999, via an untracked config overlay), the same
+      bootstrap fails open to the 7-entry list. If that undefined lands after a test's
+      beforeEach, the next selector throws "reading 'find'". Throttled stress (taskpolicy -b, 3
+      concurrent copies ×2, each origin) gave 0 failures on either origin, so this reviewer did
+      not observe the clobber mid-test. The mechanism is verified; that it happens mid-test in
+      practice rests on the developer's 2-of-2 observation.
+      A test whose outcome depends on an unrelated local process is a suite isolation defect
+      (store/index.ts fetches at import, and jsdom's default origin is a commonly used dev port).
+      It is not 10.16a's, 10.16a does not make it worse, and its own new page test carries a
+      sound local remedy. It does not block this half.
+
+  type_check:
+    result: '2 errors, the same two TS2307 (ENV-1); zero new'
+
+  lint:
+    result: 'FAILED TO START — exit 2, zero files linted (ENV-1). No lint claim is made.'
+
+  ac11_review_repeated:
+    result: CONFIRMED CLEAN
+    detail: >-
+      Every production reference to videoPath or the video route is in
+      components/studio/evidence (the URL builder and the panel's gate) or in the page's
+      hasPlayableRecording predicate. None goes through apiClient, fetch or axios.
+      services/api/ is unchanged. The changed production files contain no localStorage,
+      sessionStorage, document.cookie or token read on this path (the page's localStorage hits
+      are the pre-existing steps/coach persistence). The panel never reads a response body,
+      never reads MediaError.code, and names no 401/403 anywhere.
+
+  def09_esc1_not_touched:
+    result: CONFIRMED
+    detail: >-
+      The mock serves only {200, 206, 404, 410, 416}. An unreadable CSI gets the declared 404. The
+      refusal codes are asserted against the document's examples (VIDEO_UNAVAILABLE, VIDEO_EXPIRED,
+      RANGE_NOT_SATISFIABLE), which are read from openapi.yaml, not from the handler. No 401/403
+      shape is invented and no refusal body is parsed by product code.
+
+  ac14_fixture_premise:
+    result: CONFIRMED at the base commit
+    detail: >-
+      A temporary probe at a02f1d505 over mockExecutions + executionCorpus + ALL_SCENARIO_FRAMES
+      (39 snapshots) found 0 PASSED+AVAILABLE+partial:true and 0 ERROR/TIMEOUT+AVAILABLE+partial:false.
+      So both AC-3 fixtures are new combinations. The only contradicting snapshot was
+      TERMINAL_EVIDENCE_FAILED (…44aa, FAILED+partial:true), which this half corrects.
+
+  split_half_merge:
+    result: 'ONE CONFLICT — docs/stories/10.16.story.md only'
+    detail: >-
+      git merge-tree story/10.16a story/10.16b conflicts only in the story document. 10.16b touches
+      studio-runner/test/helpers/webm{,.test}.ts and the story; no code file is shared, and
+      neither half retains anything the other removes.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Mutations re-applied by this reviewer (private harness in $TMPDIR, anchor asserted once per
+# edit, sha256 restore verified per file, git status empty after each batch).
+# ─────────────────────────────────────────────────────────────────────────────
+mutations:
+  reproduced_red:
+    - 'M14 (AC-6) src={videoPath}: red in studioVideoUrl only for case (ii); also red in evidencePanel''s absolute-src assertion. 2/36.'
+    - 'M16 (AC-6) apiOrigin = window.location.origin: red on case (ii) only, 2/147 across all story tests.'
+    - 'M34 (AC-21) page seek = index × 10 (step 1 → 10 s): pageEvidence "seeks to 1.51, not 10" red, 1/3.'
+    - 'M35 (AC-21) legacy <video src=…sample-ui-test.mp4> beside the panel: 4/0.'
+    - 'M35 variant (probe) second media element via React.createElement, which evades the source scan: runtime "exactly one <video>" still red, 2/2.'
+    - 'M7 (AC-3) partial = status !== PASSED: cases (i) and (ii) both red, 2/25.'
+    - 'M8 (AC-3) partial = errorCode === TIMEOUT: cases (i) and (ii) both red, 2/25.'
+    - 'M26 (AC-12) onError never wired: (a) and (b) both red, 2/25.'
+    - 'AC-1, record +QUEUED key: assertSameSet red, 1/53.'
+    - 'AC-1, record −EXPIRED (M1 variant): 7/74.'
+    - 'AC-1, DOCUMENT +QUEUED in VideoStatus.enum: assertSameSet red, 3/51. Both directions are bound.'
+    - 'M28 (AC-13) past-the-end range → ignored: 3/61, including the Ajv refusal test and the declared-status test.'
+    - 'M28 variant: the original check-order bug the developer found and fixed: 3/61.'
+    - 'M22 (AC-9) null offset → seek to 0: 3/7.'
+    - 'AUTO-DECISION guards: seek offered without a playable recording → red, 1/3. Seek no longer switches to Proof → red, 1/3.'
+    - '#18 control: delete UNAVAILABLE from evidencePanel''s NON_AVAILABLE → red via the size-5 check, 1/23.'
+  vacuity_probes_green:
+    - 'Q11 (shape #12): PROCESSING title → "No recording exists for this run", statement → "This run did not produce a recording, and none will appear here." 161/161 green.'
+    - 'Q12c (shape #18): delete case (ii) from studioVideoUrl.test CASES and apply M16: 145/145 green.'
+    - 'Q10 (shape #16): studioVideoUrl(videoPath, token = localStorage.getItem("access_token")) appending ?access_token when set: 161/161 green, because Function.length ignores defaulted parameters.'
+    - 'Q16: handler-built accepted snapshot changed to FAILED + partial:true: 161/161 green; the "no fixture anywhere" guard enumerates three corpora, not this one.'
+    - 'Q17: a re-added `useAppSelector((s: any) => s.studio.videoUrl)` in the page: type-check still exactly 2 TS2307. The source scan (M36) is the only guard.'
+  labelled_not_coverage_confirmed:
+    - 'AC-9''s handler re-check under `disabled` is explicitly "not claimed as guarded". Correct.'
+    - 'M36 is labelled "source scan only" in the table. It is counted in the 39, but the label is honest.'
+
+top_issues:
+  - id: TEST-001
+    severity: medium
+    finding: >-
+      Shape #12. AC-2's hazard is PROCESSING rendering as absent or failed. Every AC-2/AC-20
+      assertion imports its expected text from VIDEO_EVIDENCE_NARRATIVES, and the contract file only
+      checks that the wordings are distinct and longer than 10 characters. Rewriting PROCESSING to
+      say no recording exists left 161/161 green. The shipped wording is correct today.
+    suggested_action: >-
+      Pin one independent literal per state (e.g. PROCESSING /still being produced|not ready/i,
+      FAILED /could not be produced|failed/i, UNAVAILABLE /no usable recording/i, EXPIRED
+      /expired/i), and forbid the wrong-state words (PROCESSING must not match /no recording|
+      failed|expired/i). Add the #13 provenance assertion so the pin file never imports the
+      narratives module. Owner @dev.
+  - id: TEST-002
+    severity: medium
+    finding: >-
+      Shape #18. AC-6's two-base matrix (CASES in studioVideoUrl.test.tsx) guards nothing about its
+      own rows. Deleting the cross-host row and applying M16 (resolve against the page origin) left
+      145/145 green. The cross-host row is the only thing that tells the two cases apart, which is
+      the point of AC-6.
+    suggested_action: >-
+      Assert on CASES itself: one path-only base and one absolute base whose origin differs from
+      window.location.origin, e.g. expect(CASES.some(c => new URL(c.base, location.href).origin !==
+      location.origin)).toBe(true). Owner @dev.
+  - id: REL-001
+    severity: medium
+    finding: >-
+      pageRunGate.test.tsx (10.11a) AC-2 is timing-fragile: a 1 s findAllByText on a heavy page
+      render, inside a 5 s default timeout. The defect was already recorded as ENV-TIMING-1 and never
+      fixed. 10.16a aggravates it by about +1.4 s in-suite (8 of 8 matched pairs), and it failed 2 of
+      14 HEAD full runs against 0 of 10 base. Not introduced by this half; the page is not slower.
+    suggested_action: >-
+      On the epic branch, not in this half: give that wait and the test explicit bounds
+      ({timeout: 5000} on the find, and a per-test timeout). Do not delete assertions. Owner
+      orchestrator / @dev (10.11a's file).
+  - id: REL-002
+    severity: medium
+    finding: >-
+      ENV-2, suite-wide and pre-existing. store/index.ts fetches sources and features at import,
+      before MSW listens, against jsdom's origin http://localhost:3000. On a host where anything
+      answers there, both slices end up fulfilled with data undefined (verified), and a late landing
+      crashes whichever page test is running. Only pageEvidence.test.tsx is protected.
+    suggested_action: >-
+      One suite-level fix instead of per-file remedies: pin jsdom's url in vitest.config.ts
+      (environmentOptions.jsdom.url) to an origin nothing serves, or make the import-time bootstrap
+      inert under test. Owner orchestrator / @devops. Not 10.16a's.
+  - id: TEST-003
+    severity: low
+    finding: >-
+      Shape #16. The test "the builders take videoPath and nothing else" asserts Function.length ===
+      1, which a defaulted token parameter reading localStorage passes (161/161 green). AC-7 assigns
+      the no-token-source half to review, and that review is clean today, so the gap is the test's
+      name overclaiming.
+    suggested_action: >-
+      Seed localStorage/sessionStorage/document.cookie with an access_token before the key-set
+      tests, which makes part of the review item executable, or rename the test to what it checks.
+  - id: TEST-004
+    severity: low
+    finding: >-
+      AC-14(c)'s guard "no fixture anywhere says partial: true without AVAILABLE/PROCESSING"
+      enumerates mockExecutions, executionCorpus and ALL_SCENARIO_FRAMES. The snapshot handlers.ts
+      builds on POST /execute is not covered (Q16 green).
+    suggested_action: 'Narrow the name, or include the handler-built snapshot (e.g. by exercising POST /execute once).'
+  - id: DOC-001
+    severity: low
+    finding: >-
+      The Dev Agent Record says deleting studioSlice.videoUrl makes a re-introduced read "a type
+      error as well as a test failure". It does not: the page reads the store through
+      `(s: any)` selectors, and type-check stays at the 2 baseline errors (Q17). The source scan is
+      the only guard, which the mutation table itself says correctly.
+    suggested_action: 'Correct the sentence in the AC-21 row.'
+  - id: REL-003
+    severity: low
+    finding: >-
+      studioVideoUrl throws during render on a videoPath that is not a rooted, query-free path
+      (developer's open question). The nearest boundary is the module-level ErrorBoundary
+      (App.tsx / ChecksModule.tsx), so a non-conforming server would replace the whole Studio page,
+      not just the evidence panel. A conforming server cannot reach this (contract regex, D-3), and
+      the loud-failure choice mirrors AC-1's mandated throwing lookup.
+    suggested_action: >-
+      Not blocking. If a softer failure is wanted, wrap VideoEvidencePanel in a local boundary that
+      renders a non-diagnostic "cannot show this recording" state. Decision @architect / @po.
+  - id: MNT-001
+    severity: low
+    finding: >-
+      AC-4's gate (AVAILABLE && videoPath !== null) exists twice: in VideoEvidencePanel and in the
+      page's hasPlayableRecording. If they drift, seek controls appear with no player; seekToOffset
+      then does nothing, so the failure is harmless but confusing.
+    suggested_action: 'Export one predicate from components/studio/evidence and use it in both places.'
+  - id: REQ-001
+    severity: low
+    finding: >-
+      (Inferred from code, not rendered.) The Proof tab's in-flight "Recording…" indicator was
+      retired with the legacy region. Between Run and the first frame, beginRun sets the snapshot to
+      null, so the panel says "No run is on screen yet", which is untrue for that window.
+    suggested_action: 'Optional wording/indicator tweak, or leave it for 10.19''s UX pass. Owner @dev / @ux.'
+
+decisions_checked_against_sources:
+  - 'Deleting studioSlice.videoUrl/setVideoUrl: AC-21 explicitly makes this @dev''s call. The only other videoUrl is StudioRunsPage''s own type. ACCEPTED.'
+  - 'Seek switches to the Proof tab: not in any AC. It is the minimum needed for §6.4''s "clicking a step seeks" to be observable, given that the page puts the controls and the player on different tabs, and it is guarded (Q15). ACCEPTED, noted for 10.19''s UX pass.'
+  - 'Seek controls only with a playable recording: consistent with AC-4''s gate and AC-8''s wording, and not "silently unclickable" (AC-20) because the control is absent, not inert. Guarded (Q14). ACCEPTED.'
+
+ac19:
+  state: 'BLOCKED on SPK-06 phase B — recorded SKIPPED, NEVER PASSED'
+  detail: 'No skip added; seek-measurement.test.ts absent from this diff. This half has jsdom evidence only.'
+
+required_before_merge:
+  - >-
+    Resolve the docs/stories/10.16.story.md conflict with story/10.16b by keeping both halves'
+    Dev Agent Record and QA Results sections and taking the later Status and Change Log rows.
+    Do not resolve by taking either file wholesale.
+  - >-
+    After merging, run the full frontend suite at least 3 times with uptime captured, and require
+    525 passed / 2 failed (10.16b adds no frontend test), with only the 2 known failures.
+    Re-run any extra failure in isolation 3× before calling it a flake.
+
+recommended_not_blocking:
+  - 'TEST-001 and TEST-002 — two small test additions; both cheap enough to land with the half.'
+  - 'REL-001 — bound pageRunGate''s wait (ENV-TIMING-1, now twice recorded).'
+  - 'REL-002 — one suite-level jsdom origin fix instead of per-file remedies.'
+  - 'TEST-003, TEST-004, DOC-001, MNT-001 — low.'
+
+open_and_not_this_story_s:
+  - 'ENV-1: dangling @put/core-components symlink in worktrees (2 TS2307, ChecksLayout.a11y uncollectable); lint cannot start.'
+  - 'ESC-1 / DEF-09(b): @architect. If ruled to declare 401/403, the handler needs a one-line change, and the contract test''s `not.toContain(''401''/''403'')` lines will go red on purpose.'
+  - 'confirmedRevisionEscalation.test.ts EXPECTED RED (10.11c AC-32).'
+  - 'Next-server on :3000 (PID 33058) is not ours and was not touched.'
+
+do_not_do:
+  - 'Do not "fix" pageRunGate by deleting its verdict assertion; bound the wait.'
+  - 'Do not add a second per-file bootstrap remedy to pageRunGate as a substitute for REL-002.'
+  - 'Do not mark AC-19 passed on the strength of AC-8/AC-10/AC-21.'
+
+final_decision:
+  gate: CONCERNS
+  merge: SAFE — with the story-document conflict resolved as above and the merged suite re-run
+  rationale: >-
+    The half does what its criteria say, and the guards the criteria name are guards: 16
+    mutations re-applied, all red, hashes matching the developer's table, and both directions of
+    AC-1 bound against the document. The two decisions the developer made alone trace to the
+    criteria, and the third is harmless and guarded. AC-11 holds on review, and nothing parses a
+    refusal body or invents a 401/403. What holds this at CONCERNS is two medium test gaps found by
+    probing rather than reading (#12 on AC-2's meaning, #18 on AC-6's matrix) and one low naming
+    overclaim (#16). Separately, a pre-existing flake is made measurably worse by this half's
+    added suite work, and its fix belongs to the epic, not to this half.
