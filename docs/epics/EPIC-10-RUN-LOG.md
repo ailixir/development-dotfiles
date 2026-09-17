@@ -1615,3 +1615,89 @@ the bypass as live (out of scope, left).
 - AC-19 Blocked on SPK-06 phase B. ESC-1 + DEF-09(b) recorded as a non-blocking watch.
 - For @pm: SIZE-1 triggers only on ADR amendments, but scope also arrives through @po `story_context`
   rulings; proposed that such rulings carry a size re-check in the same PR.
+
+---
+
+## Wave 7 — closed on `epic/EPIC-10-w7` (2026-09-16/17)
+
+**Story 10.16 is implemented and both halves are QA PASS and merged. It is not Done: AC-19 stays
+Blocked on SPK-06 phase B.** No cross-story integration defect was found at either merge — the first
+wave that can say so, and the first where the post-merge check was a required step rather than a
+suspicion.
+
+| Unit | Gate | Merge | Notes |
+|---|---|---|---|
+| 10.16b (runner test helper, S) | CONCERNS → **PASS** at `a3c8cdb83` | `f2e9c791c` | F-1 fixed by a boundary test |
+| 10.16a (frontend, L) | CONCERNS → **PASS** at `e4020454d` | `f96f3cbde` | TEST-001/002, REL-001, DOC-001 fixed |
+
+### 10.16b — the seek flake, observed before it was explained
+Reproduced **2 of 10** fixtures-tier runs, both on the **median** assertion (380.0 / 454.2 ms) — so
+@po's withdrawal of its own "median failed" inference was right to be a withdrawal and not a
+correction: it happened to be the median, and nobody had known. Mechanism measured on captured
+recordings: every repaint is stamped *before* the step's reported start; all 14 mis-attributed steps
+led by 60.0–85.3 ms, exactly past the helper's 60 ms `slackMs`. The file's own hypothesis (a repaint
+split across frames) caused **none** of them. Fix: `slackMs` 60 → 100 in `test/helpers/webm.ts`;
+`MEDIAN_TOLERANCE_MS`/`OUTLIER_BOUND_MS` and `seek-measurement.test.ts` untouched (hash unchanged).
+@qa reproduced it independently (2 of 8) and ruled **correction, not loosening** on 19 recordings
+shifted −600…+600 ms: slack 60 falsely failed in-tolerance runners in every recording; slack 100
+never did; false passes exist under both only at ~one step late. F-1 (the slack ≥ tolerance rule
+lived only in prose — shape #21) closed by a boundary test that reddens at slack 90 and 99
+(orchestrator re-ran both). It reads the tolerance as source text; @qa's 13 probes ruled that
+**better** than a literal, with F-7 (low): it reads the declaration, not the value the assertion
+uses. Open: F-2 recordings live only in a temp dir (@po), F-3 an ownerless `httpClient` timeout race
+(@po), F-4 stale cause comments in `seek-measurement.test.ts` (@po, before 10.19), **F-5 true medians
+now 63–70 ms against a 100 ms bound — calibrate under SPK-06, never widen (@architect)**.
+
+### 10.16a — evidence state, playback, step seek
+AC-1…14, 20, 21 done; 39 mutations red; AC-11 a recorded review, not a guard; AC-19 skipped, never
+passed. AC-21 retired the page's `stepIndex * 10` seek and the legacy `<video>`. QA-fix pass closed
+two medium gaps (a narrative could state the wrong fact with 161 tests green — shape #12; a required
+URL case could be deleted silently — shape #18) and bounded `pageRunGate`'s waits.
+**`pageRunGate` (10.11a's file) is ENV-TIMING-1, pre-existing and aggravated by 10.16a's added test
+files** (2.2–2.7 s → 3.7–4.2 s under load; 0/10 → 2/14 failures) — not the `:3000` listener.
+New, from the recheck: **TEST-005 (medium, 10.11a's file)** — "exactly one `POST /execute`" is weaker
+than its name: a second POST 300 ms after acceptance passes AC-2 and only reddens the *next* test by
+leaking into its request list. **REL-004 (low)**: `studioVideoUrl` case (i) can hit the 5 s default
+under load. Carried: **ENV-2 (medium, suite-level)** — the store fetches at import time, before MSW
+listens, and a local process on `:3000` answers `307 → /login`; plus five low items.
+
+### Post-merge verification on the clean `w7` tree (required step)
+| Suite | Result |
+|---|---|
+| backend `studio.*`, `--rerun-tasks` | 684 / 2 / 7 (ESC-1, ESC-2) — backend unchanged since, byte-for-byte |
+| runner default | 947 passed / 29 skipped |
+| runner fixtures ×2 | 89 / 10 skipped, both |
+| runner deployment | 177 / 4 (AC-18's escalation ×4) |
+| frontend ×3 (load 5.5 / 11.9 / 13.2) | **539 / 2** each (AC-32 ×2) + ENV-1's unloadable file |
+| frontend type-check | the 2 known TS2307 |
+| contract | `51850b01…c02efa`, unchanged |
+
+The story-file conflict was resolved keeping both halves (`f96f3cbde`); `frontend/` on `w7` is
+identical to `story/10.16a` and `studio-runner/` to `story/10.16b`.
+
+### The unowned work in `wt/epic` is a parallel Epic-10 workstream, and it edits the frozen contract
+Still untouched. It has grown from 44 to **116 entries** and is no longer only storage. Read-only
+inventory:
+- **Seven new story files, `10.20`–`10.26`**, none in the manifest this log tracks.
+- A **"studio-inference"** set: `docs/architecture/studio-inference-{contract-v1,execution-log,implementation-plan,review-2026-09-16,ux}.md`,
+  `docs/qa/studio-inference-{evaluation-spec,story-readiness}.md`, `docs/runbooks/studio-inference-rollout.md`,
+  `docs/specs/studio/inference.openapi.yaml`, `docs/specs/studio/inference-proposal.schema.json`.
+- **`docs/specs/studio/openapi.yaml` modified (+5 lines): its hash there is
+  `09720ae2c30b7a39d58f9b56f18154ea0629a473a33091c46766aa5c94aa1e7e`, not the pinned `51850b01…`.**
+  An edit to the frozen document is an ADR-002 amendment, which FOC-06 sequences and @architect
+  classifies; nothing in this log or the manifest records one. `confinement.test.ts` (which carries
+  the pin) is also modified there.
+- 38 modified and 14 new backend source files; runner `src/`, `test/`, `fixtures/`; helm values;
+  `studio-execution.md` and `studio-runner.md` modified.
+
+**Why this matters for integration:** folding `-w7` back into `epic/EPIC-10`, or that work into
+either, is now a merge of two lines that disagree about the frozen contract. It cannot be resolved by
+recency; it needs the owner, @architect (amendment class), @po (seven stories outside the validated
+backlog) and @pm (the manifest). **Nothing merges across that line until they have.**
+
+### Where the epic stands
+- Waves 1–7 implemented. 10.16 not Done only for AC-19 (SPK-06 phase B, @qa staging).
+- **Wave 8 (10.19) still may not be drafted** while ED-02's owner reads "TBD" (@po ruling).
+- For @architect: ESC-1 + DEF-09(b) as one question; F-5; O-10; the contract edit above.
+- For @qa: the SSE-pressure-held question and the stray 404 run from the DEF-08 repair; TEST-005.
+- For @devops: MED-2, the Gradle input declaration, ENV-1, ENV-2.
