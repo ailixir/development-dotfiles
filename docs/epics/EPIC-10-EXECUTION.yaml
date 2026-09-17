@@ -601,6 +601,16 @@ stories:
         THIS STORY DOES NOT WAIT FOR THAT PROGRAM (§27.3). Whichever lands second adopts §27.2's visible
         read and does NOT add a second check. Nothing merges across that line until the reconciliation
         the run log requires.
+      validation: >-
+        @po 2026-09-16, GO 8/10, size M confirmed. AC-1 now requires refusals red and controls green
+        against today's code; the draft asked for all red, which no run could meet. New AC-18 is a
+        Mockito unit test for what HTTP cannot see: never findCsiIdIncludingWithheld, and step 4's
+        empty locked read answering 403. The draft's falsification, which expected AC-4/AC-5 to go red
+        when the write check is removed, is replaced by nine mutations, M1–M9. Once step 4 answers 403,
+        the forbidden read gives the same HTTP answer as the visible one. AC-16 no longer edits
+        ADR-002 §28.5, a dated snapshot. FINDING, routed to @architect: the MSW mock answers 400 for an
+        unknown or unreadable draft on GET/PUT /tests/:id and always 204 on DELETE. §27 does not rule
+        on the mock. If it is ruled in, the work rides 10.31.
       when: >-
         Before the credentialed pilot. In this manifest that means before story 10.19 enters InProgress,
         and before any staging run that uses real identities. NOT a drafting gate on 10.19: the drafting
@@ -614,7 +624,9 @@ stories:
     title: "Video route refusal surface and the public 401 envelope declaration (ADR-002 §24, §25)"
     size: M
     wave: 8
-    depends_on: ["10.15", "10.16"]
+    # "10.30" added by @po at validation 2026-09-16. FOC-07 step 2 requires the pin to be green on
+    # arrival after 10.30's re-anchor, and an owned prerequisite is depends_on, not prose.
+    depends_on: ["10.15", "10.16", "10.30"]
     blocks: ["10.19"]
     story_context:
       # Recorded by @po 2026-09-16, routing ADR-002 §24/§25 (ESC-1, ESC-2, DEF-09(b)) — §28.3's "unit".
@@ -655,6 +667,20 @@ stories:
         including the frontend and runner suites that §28.4 did not run. A figure that does not reproduce
         §28.4's simulation is a finding.
       pin: "FOC-07 step 2. Re-read the digest from the file as merged after 10.30. Never transcribe one."
+      validation: >-
+        @po 2026-09-16, GO 8/10, size M confirmed. AC-2's partition test was wrong as drafted. It keyed
+        on "path starts with /internal/studio/", but four runner operations (/v1/validate, /v1/runs,
+        /health, /ready) declare 401 via RunnerUnauthenticated on paths that do not. The rule would
+        have been red against the correct document, with 16 members instead of 12. It now partitions
+        on the document's own `internal` tag: 12 public operations use SessionUnauthorized; the 2
+        api-callback operations use Unauthorized; the 4 runner operations use RunnerUnauthenticated,
+        unchanged. AC-7 (the captured 401/403 body test) is RULED IN SCOPE: it is test coverage of an
+        authorized declaration, needs no Class ruling, and is the only thing that makes
+        PlatformErrorResponse a checked claim. AC-10's falsification contradicted its own
+        green-on-arrival rule and is corrected. AC-11 keeps two §13 rows, landed in place, following
+        the 10.18a precedent; the draft merged them into one. The CodeRabbit section is removed (the
+        epic ruling). The 10.30 finding on the /tests/:id mock rides here only if @architect rules
+        §27.2 extends to the mock.
       out_of_scope: >-
         O-19 (ADR-003, the backend-wide envelope, and declaring the filter-written 429, 503
         AUTH_TEMPORARILY_UNAVAILABLE and idempotency errors). That is not in this backlog; see 10.19's
@@ -706,6 +732,41 @@ stories:
       spk06_relation: >-
         SPK-06 phase B can MEASURE without this story, but it can only CORRECT with it. Story 10.16's
         AC-19 stays Blocked on phase B either way.
+      chart_allowlist: >-
+        Found at @po validation 2026-09-16. The chart has its OWN closed key list,
+        `put-checks.studioRunner.acceptedEnvKeys` in templates/_helpers.tpl, and it fails the render
+        for any runnerEnv key missing from that list. §26.4(a)'s "and to the chart values" therefore
+        means two edits: the new key goes into that list, and into values.yaml's runnerEnv as "0" with
+        a comment saying it is uncalibrated and SPK-06-owned. The draft chose to add neither, so its
+        own --set-string=90 falsification could never render, and no deployment could ever apply a
+        measured value. The uncommitted inference tree rewrites the SAME single line of
+        acceptedEnvKeys, which is a guaranteed textual conflict; FOC-07 now lists the file.
+      escalation_esc3: >-
+        ESC-3, raised by @po 2026-09-16 to @architect (the ADR assigns the O-number). This is
+        INFERRED from reading timeline.ts, launcher.ts:500-505 and openapi.yaml RunnerStepResult; it is
+        not measured. Adding a positive constant to the ZERO has two consequences §26 does not
+        address. (1) Any run-clock reading taken within that many ms after recording-context
+        readiness becomes NEGATIVE. The document declares `minimum: 0` and says "readings are
+        non-negative by construction: nothing the runner observes precedes the origin". (2)
+        browserStartedAt is still the wall instant at readiness, so the §11 pairing of wall and zero
+        moves apart by the constant, and the API's `at = browserStartedAt + atMs` becomes early by
+        the same amount. Neither matters at the shipped default of 0, so 10.32's implementation is
+        NOT blocked. APPLYING ANY NON-ZERO VALUE is blocked until @architect rules on both; this is
+        a third condition next to §26.3 item 4's two, carried in 10.32's AC-6.
+      validation: >-
+        @po 2026-09-16, GO 7/10, size M confirmed but at the top of M. Two additions push it there: the
+        chart allowlist, and eight more launcher construction sites. The required option field breaks
+        test/run/launcher.test.ts, test/helpers/childDriver.ts, and four fixtures-tier files
+        (deadline-cleanup x4, real-chromium x2, no-browser-on-refusal, realRunner), not "the one call
+        site the fixtures tier shares". Every fixtures-tier site passes a literal 0. Also corrected:
+        AC-1's `min: -1` mutation could not fail, because parseInteger's digit regex rejects "-1" first;
+        it is replaced by a `fallback` mutation. AC-2's second mutation predicted the wrong observation.
+        AC-5's source quote ("proof it is 0 ... unless deliberately set") appears nowhere in this
+        manifest and is removed. The "F-7 has not landed" claim is stale: fix/carry-forward landed F-7
+        at 660874ef5. Its parse requires exactly one `.toBeLessThan(MEDIAN_TOLERANCE_MS);` and exactly
+        two non-comment mentions of the name, and AC-7/AC-8 now carry both constraints. Re-size to L if
+        ESC-3's ruling changes takeRunOrigin's contract (for example, browserStartedAt shifting too)
+        before 10.32 starts.
 
   # ── Wave 9 ── (was wave 8; moved by @po 2026-09-16 because 10.30–10.32 must land before it)
   - id: "10.19"
@@ -1042,7 +1103,7 @@ file_ownership_conflicts:
     source: "ADR-002 §19, §20.4, §21.9, §22.2, §23.1, §23.2, §23.3; FOC-04 and FOC-05 and the re-anchoring rule in confinement.test.ts's own comment; story 10.15 AC-21/AC-23; story 10.11 AC-25/AC-26/AC-30; story 10.18 AC-25/AC-29/AC-30. Verified on branch epic/EPIC-10 at e4a6bf4ed: shasum -a 256 docs/specs/studio/openapi.yaml = cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e = BASE_SHA256 at confinement.test.ts:149, and confinement.test.ts:172-173 carry the two assertions described above."
 
   - id: FOC-07
-    path: "docs/specs/studio/openapi.yaml and studio-runner/test/run/confinement.test.ts (the pin). Also, against the uncommitted studio-inference tree only: backend/.../studio/StudioService.java, studio-runner/src/server/config.ts, helm-chart/put-checks/values*.yaml"
+    path: "docs/specs/studio/openapi.yaml and studio-runner/test/run/confinement.test.ts (the pin). Also, against the uncommitted studio-inference tree only: backend/.../studio/StudioService.java, studio-runner/src/server/config.ts, helm-chart/put-checks/values*.yaml, helm-chart/put-checks/templates/_helpers.tpl (the acceptedEnvKeys line; added by @po at validation 2026-09-16). Between 10.30 and 10.31 only: ADR-002 §13's three adjacent 2026-09-16 rows"
     stories: ["10.30", "10.31", "10.32"]
     wave: 8
     recorded_by: "@po 2026-09-16, routing ADR-002 §28.1–§28.2. The order between 10.30 and 10.31 is @po's choice of §28.2's two-PR plan."
