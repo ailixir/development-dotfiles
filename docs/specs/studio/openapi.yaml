@@ -138,7 +138,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TestPage' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
     post:
       tags: [tests]
       operationId: createTest
@@ -224,7 +224,7 @@ paths:
                   value:
                     error: INVALID_CONFIGURATION
                     message: "browser 'firefox' is not supported; the canonical engine is 'chromium'"
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
   /tests/{id}:
@@ -349,7 +349,7 @@ paths:
                       attempts: 3
                       exhausted: true
         '400': { $ref: '#/components/responses/BadRequest' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
     put:
       tags: [tests]
@@ -395,7 +395,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/TestDto' }
         '400': { $ref: '#/components/responses/BadRequest' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409':
           description: |
@@ -432,7 +432,7 @@ paths:
       responses:
         '204': { description: Deleted }
         '400': { $ref: '#/components/responses/BadRequest' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
   /tests/{id}/compile:
@@ -482,7 +482,7 @@ paths:
                   value: { error: SOURCE_TOO_MANY_STEPS, message: 'This test has 61 steps; the maximum is 60. Split it into smaller tests before compiling.' }
                 inlineCredential:
                   value: { error: INLINE_CREDENTIAL, message: 'Step 4 looks like it contains a credential; use a vault reference instead.' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409':
           description: |
@@ -532,7 +532,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/TestDto' }
         '400': { $ref: '#/components/responses/BadRequest' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409':
           description: |
@@ -590,7 +590,7 @@ paths:
                     executionId: 44444444-4444-4444-4444-444444444444
                     status: PENDING
         '400': { $ref: '#/components/responses/BadRequest' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409':
           description: |
@@ -654,7 +654,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ExecutionPage' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
 
   /executions/{id}:
     get:
@@ -701,7 +701,7 @@ paths:
                   summary: Pre-10.1 history — no fabricated confirmation metadata
                   value: { $ref: '#/components/examples/SnapshotLegacyRow/value' }
         '400': { $ref: '#/components/responses/BadRequest' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
   /executions/{id}/events:
@@ -735,7 +735,7 @@ paths:
                     event: execution.snapshot
                     data: {"executionId":"44444444-4444-4444-4444-444444444444","revision":17,"status":"RUNNING","streamComplete":false}
 
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
   /executions/{id}/video:
@@ -747,6 +747,17 @@ paths:
       description: |
         Authorized against the execution's immutable CSI. Object storage keys are never exposed;
         `videoPath` on the snapshot is this API path.
+
+        **Refusal order (ADR-002 §24).** Authentication, then authorization, then evidence state,
+        then the store. `401` and `403` are decided before anything about the recording is read,
+        so an unknown execution id and an execution on a CSI the caller may not read both answer
+        `403 STUDIO_FORBIDDEN`, exactly as `getExecution` does. `404`, `410`, `416` and `503` are
+        reachable only after authorization and disclose nothing to a caller who could not read
+        the snapshot.
+
+        Branch on the status, never on the body. A `<video>` element and a download navigation
+        expose neither, and the `401` body is the platform envelope, not `ErrorResponse`
+        (ADR-002 §25).
       parameters:
         - { $ref: '#/components/parameters/ExecutionId' }
         - name: download
@@ -771,6 +782,8 @@ paths:
           content:
             video/webm:
               schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404':
           description: No evidence for this execution
           content:
@@ -799,6 +812,19 @@ paths:
               examples:
                 unsatisfiable:
                   value: { error: RANGE_NOT_SATISFIABLE, message: 'The requested range cannot be served' }
+        '503':
+          description: |
+            The evidence store could not be reached, so the recording's disposition is unknown.
+            Deliberately not `404`, which would state a fact about the run that the API has not
+            observed. Transient: a later request may succeed. The body names nothing about the
+            store — no bucket, endpoint or key. A `503` written by the platform authentication
+            layer before authorization carries that layer's envelope instead (ADR-002 §25).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                storeUnavailable:
+                  value: { error: VIDEO_STORE_UNAVAILABLE, message: "The evidence store could not be reached; the recording's disposition is unknown" }
 
   # ────────────────────────────────────────────────────────────────────────────────────────────
   # Internal surface, architecture §8.4, in the order that section tabulates it.
@@ -1311,6 +1337,20 @@ components:
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
+    SessionUnauthorized:
+      description: |
+        No authenticated user session on a public route. Answered by the platform authentication
+        filter on every `/api/**` path before any Studio code runs, so the body is
+        `PlatformErrorResponse` and **not** `ErrorResponse`: `error` is an object here and a
+        string on every Studio refusal. Branch on the status. Unifying the two envelopes is
+        outside this document (ADR-002 §25). The two internal callbacks keep `Unauthorized`,
+        whose producer is the service-identity filter and whose body is `ErrorResponse`.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/PlatformErrorResponse' }
+          examples:
+            sessionRequired:
+              value: { error: { code: UNAUTHENTICATED, message: Session required, traceId: 4bf92f3577b34da6a3ce929d0e0e4736 } }
     Forbidden:
       description: The identity may not act on this CSI
       content:
@@ -1336,6 +1376,23 @@ components:
       properties:
         error: { type: string }
         message: { type: string }
+
+    PlatformErrorResponse:
+      description: |
+        The envelope the application's servlet filters write — authentication, rate limiting and
+        idempotency — as opposed to a Studio handler's `ErrorResponse`. Backend spec §6.1
+        (`CON-API-03`) and story 1.5 AC-5. `traceId` differs on every request and is absent from
+        some filters' bodies.
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            traceId: { type: string }
 
     Viewport:
       type: object
