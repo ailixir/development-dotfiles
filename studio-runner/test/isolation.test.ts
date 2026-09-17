@@ -213,3 +213,46 @@ describe('AC-22c — the configuration surface rejects what it does not enumerat
     );
   });
 });
+
+/**
+ * Story 10.32 AC-1 — the seek-origin calibration key (ADR-002 §26.3 item 3, §26.4(a)).
+ *
+ * The production symbol is `KEY_SPECS.SEEK_ORIGIN_CALIBRATION_MS`. Its load-bearing value is the
+ * default: unset must read `0`, because this story sets no calibration. The rejection cases cover
+ * the shared `parseInteger` (its `^\d+$` rule refuses a sign before `min` is consulted), so they
+ * are recorded as covering the parser, not this row.
+ */
+describe('story 10.32 AC-1 — STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS', () => {
+  const KEY = `${CONFIG_PREFIX}SEEK_ORIGIN_CALIBRATION_MS`;
+  const validEnv = (): Record<string, string> => ({
+    [`${CONFIG_PREFIX}SERVICE_IDENTITY`]: 'inbound-stub-token',
+    [`${CONFIG_PREFIX}CALLBACK_IDENTITY`]: 'outbound-stub-token',
+    [`${CONFIG_PREFIX}CALLBACK_BASE_URL`]: 'https://api.internal.example',
+  });
+
+  it('is an enumerated key of the fail-closed namespace', () => {
+    expect(ACCEPTED_KEYS).toContain(KEY);
+  });
+
+  it('reads 0 when the deployment does not set it', () => {
+    expect(loadConfig(validEnv()).seekOriginCalibrationMs).toBe(0);
+  });
+
+  it('reads a configured non-negative integer', () => {
+    expect(loadConfig({ ...validEnv(), [KEY]: '50' }).seekOriginCalibrationMs).toBe(50);
+    expect(loadConfig({ ...validEnv(), [KEY]: '0' }).seekOriginCalibrationMs).toBe(0);
+  });
+
+  it.each(['-50', '-1', 'abc', '12.5'])(
+    'refuses to start on %j rather than defaulting, and names the key',
+    (raw) => {
+      try {
+        loadConfig({ ...validEnv(), [KEY]: raw });
+        expect.unreachable(`loadConfig accepted ${raw}`);
+      } catch (error) {
+        expect(error).toBeInstanceOf(ConfigurationError);
+        expect((error as ConfigurationError).problems.join('\n')).toContain(KEY);
+      }
+    },
+  );
+});

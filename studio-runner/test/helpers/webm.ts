@@ -199,3 +199,26 @@ export function firstChangeAtOrAfter(
 ): WebmFrame | null {
   return changes.find((change) => change.atMs >= offsetMs - slackMs) ?? null;
 }
+
+/**
+ * The last scene change at or before a step's reported offset, with no slack (story 10.32 AC-7).
+ *
+ * **Diagnostic only.** It never decides pass or fail. It exists so that a failing seek measurement
+ * can print each step's *signed* lead, `change - reported` (ADR-002 §26.3 item 6, §26.4(b)). A step
+ * whose repaint was stamped further before its start than {@link firstChangeAtOrAfter}'s slack is
+ * matched forward, to a change hundreds of milliseconds later, and reads as a large positive
+ * error. Its lead against this change is the small negative number it really is.
+ *
+ * @returns the frame, or `null` when no change precedes the offset (never the case for the
+ * fixture's steps, whose recordings all start with a change at `0`).
+ */
+export function lastChangeAtOrBefore(
+  changes: readonly WebmFrame[],
+  offsetMs: number,
+): WebmFrame | null {
+  let found: WebmFrame | null = null;
+  for (const change of changes) {
+    if (change.atMs <= offsetMs) found = change;
+  }
+  return found;
+}

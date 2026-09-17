@@ -125,6 +125,7 @@ describe('MED-2 — the production path supplies no test seam', () => {
     'launchTimeoutMs',
     'maxFailureMessageLength',
     'recording',
+    'seekOriginCalibrationMs',
     'stepTimeoutMs',
     'stopTimeoutMs',
   ];
@@ -154,6 +155,19 @@ describe('MED-2 — the production path supplies no test seam', () => {
     expect(options.launchTimeoutMs).toBe(config.browserLaunchTimeoutMs);
     expect(options.stopTimeoutMs).toBe(config.browserStopTimeoutMs);
     expect(options.maxFailureMessageLength).toBe(config.maxReportLogEntryLength);
+    expect(options.seekOriginCalibrationMs).toBe(config.seekOriginCalibrationMs);
+  });
+
+  it('hands the configured seek-origin calibration to the launcher, not a default (story 10.32 AC-3)', () => {
+    // At the default both sides are 0, so the assertion above cannot tell "passed through" from
+    // "hard-coded 0". A configured value can.
+    launcherOptions.length = 0;
+    const config = loadConfig({
+      ...productionEnv(),
+      [`${CONFIG_PREFIX}SEEK_ORIGIN_CALIBRATION_MS`]: '37',
+    });
+    createConfiguredLauncher(config);
+    expect(launcherOptions[0]?.seekOriginCalibrationMs).toBe(37);
   });
 
   /**

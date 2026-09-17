@@ -66,6 +66,8 @@ export function createConfiguredLauncher(config: RunnerConfig): BrowserLauncher 
     launchTimeoutMs: config.browserLaunchTimeoutMs,
     stopTimeoutMs: config.browserStopTimeoutMs,
     maxFailureMessageLength: config.maxReportLogEntryLength,
+    // ADR-002 §26.3: applied in the child's `takeRunOrigin`, carried there by the launch message.
+    seekOriginCalibrationMs: config.seekOriginCalibrationMs,
   };
   return createChildBrowserLauncher(options);
 }

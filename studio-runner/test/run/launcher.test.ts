@@ -24,6 +24,7 @@ import {
   createChildOwnedAdapter,
   isCodeLoadingEnvKey,
 } from '../../src/run/launcher.js';
+import { parseLaunchMessage } from '../../src/run/protocol.js';
 import { SCRATCH_SUBDIRECTORIES } from '../../src/run/scratchLayout.js';
 import type { BrowserSession, LaunchOptions } from '../../src/server/adapters.js';
 import { packageRoot } from '../helpers/corpus.js';
@@ -47,6 +48,7 @@ afterEach(() => {
 function launcherWith(spawner: FakeSpawner, overrides: Record<string, unknown> = {}) {
   return createChildBrowserLauncher({
     recording: { width: 1280, height: 720 },
+    seekOriginCalibrationMs: 0,
     stepTimeoutMs: 30_000,
     launchTimeoutMs: 50,
     maxFailureMessageLength: 400,
@@ -286,6 +288,21 @@ describe('AC-1, AC-20 — launch resolving means Chromium started', () => {
     expect(session.run?.origin.clock).toBeNull();
   });
 
+  it('carries the calibration the child reported applying onto the session origin (story 10.32 AC-4)', async () => {
+    const spawner = createFakeSpawner();
+    const pending = launcherWith(spawner).launch(options(scratchPath()));
+    const spawned = spawner.children[0];
+    if (spawned === undefined) throw new Error('the launcher spawned nothing');
+    spawned.emit({
+      kind: 'ready',
+      browserStartedAt: '2026-09-11T10:00:00.000Z',
+      startedAtMs: 0,
+      calibrationOffsetMs: 7,
+    });
+    const session = await pending;
+    expect(session.run?.origin.calibrationOffsetMs).toBe(7);
+  });
+
   it('sends the launch message with the explicitly configured recording geometry', async () => {
     const spawner = createFakeSpawner();
     const path = scratchPath();
@@ -294,9 +311,20 @@ describe('AC-1, AC-20 — launch resolving means Chromium started', () => {
       kind: 'launch',
       browser: 'chromium',
       recording: { width: 1280, height: 720 },
+      seekOriginCalibrationMs: 0,
       scratchPath: path,
       totalRuntimeMs: 120_000,
     });
+  });
+
+  it('sends a launch message the child’s own parser accepts, carrying the calibration (story 10.32 AC-3)', async () => {
+    // The message production sends, read by the parser the child applies. Removing the key from
+    // `ACCEPTED_LAUNCH_KEYS` while still sending it makes this an `unknownKey` refusal.
+    const spawner = createFakeSpawner();
+    const { child } = await launched(spawner, scratchPath());
+    const parsed = parseLaunchMessage(child.sent[0]);
+    expect(parsed.ok ? [] : parsed.problems).toEqual([]);
+    expect(parsed.ok && parsed.message.seekOriginCalibrationMs).toBe(0);
   });
 
   it('fails the launch when the child never reports a start', async () => {

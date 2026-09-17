@@ -523,6 +523,10 @@ studioRunner:
     STUDIO_RUNNER_DRAIN_TIMEOUT_MS: "150000"
     STUDIO_RUNNER_RECORDING_WIDTH: "1280"
     STUDIO_RUNNER_RECORDING_HEIGHT: "720"
+    # Uncalibrated (ADR-002 §26.3). NOT a measurement: a non-zero value comes only from SPK-06
+    # phase B, measured per image and recorded in docs/qa/spikes/SPK-06/, under §26.3 item 4 and
+    # ESC-3. Never a laptop value. No values-*.yaml overrides it.
+    STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS: "0"
 
   podAnnotations: {}
   nodeSelector: {}

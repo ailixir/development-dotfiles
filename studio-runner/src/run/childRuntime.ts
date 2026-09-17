@@ -282,13 +282,16 @@ export async function launchInChild(
   });
 
   // ── The origin. One instant, observed twice, at recording-context readiness (AC-10, AC-11). ──
-  const origin = takeRunOrigin(dependencies.originSource);
+  // The calibration is added to the zero, not to any reading (ADR-002 §26.3 item 2, story 10.32).
+  const origin = takeRunOrigin(dependencies.originSource, message.seekOriginCalibrationMs);
   state.clock = origin.clock;
   channel.send({
     kind: 'ready',
     browserStartedAt: origin.browserStartedAt.toISOString(),
     // A reading of the run clock, computed from the sample that defined the zero — not a literal.
     startedAtMs: origin.startedAtMs,
+    // What was applied, echoed for the fixtures tier's pin (story 10.32 AC-4). Never on the API.
+    calibrationOffsetMs: origin.calibrationOffsetMs,
   });
   return true;
 }
