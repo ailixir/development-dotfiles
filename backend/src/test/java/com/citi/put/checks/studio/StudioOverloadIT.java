@@ -105,11 +105,26 @@ class StudioOverloadIT {
   private UUID testId;
 
   @BeforeEach
-  void setUp() {
+  void setUp() throws InterruptedException {
+    // A stream an earlier test closed is closed on the client side only. The pod releases it when
+    // a heartbeat write fails. Until then the earlier test's dead sockets fill this pod's bound,
+    // and this class's pressure test got SSE_POD_LIMIT on its own first stream when it ran second.
+    // Wait for the release, so the streams at the bound are the ones each test opens itself.
+    long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45);
+    while (registry.openStreamCount() > 0 && System.nanoTime() < deadline) {
+      Thread.sleep(100);
+    }
+    assertThat(registry.openStreamCount())
+        .as("streams left open by an earlier test must be released before this one starts")
+        .isZero();
     fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
+    // The whole ledger, not only this CSI's rows. The global pending quota counts every non-DONE
+    // row on any CSI, so another class's leftovers fill it. ExecutionVideoAuthorizationIT leaves
+    // one DISPATCHING row per test, 14 in all. When that class ran first, every accept here was
+    // refused and both tests failed before any Studio bound was reached.
+    jdbc.update("DELETE FROM studio_dispatch_ledger");
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
     testId =
         fixtures
@@ -121,6 +136,11 @@ class StudioOverloadIT {
   void ordinaryRestTrafficContinuesWhileEveryStudioBoundIsUnderPressure() throws Exception {
     Measurement quiet = measureOrdinaryTraffic(40);
     assertThat(quiet.errors()).as("the baseline itself must be clean").isZero();
+    // "Not an error" is not the same claim as "served": a baseline that is quietly refused or
+    // redirected measures the latency of a refusal, and every comparison below would be against it.
+    assertThat(quiet.served())
+        .as("every baseline request must actually be served (2xx), not merely not counted as error")
+        .isEqualTo(quiet.samples());
 
     List<SseTestClient> readers = new ArrayList<>();
     List<HttpResponse<InputStream>> stalled = new ArrayList<>();
@@ -139,12 +159,20 @@ class StudioOverloadIT {
       // 2. Open the pod's full stream budget, four of them deliberately stalled.
       for (int index = 0; index < 4 && index < accepted.size(); index++) {
         SseTestClient reader = new SseTestClient();
-        reader.open(eventsUrl(accepted.get(index)), identityHeaders());
+        HttpResponse<InputStream> opened =
+            reader.open(eventsUrl(accepted.get(index)), identityHeaders());
         readers.add(reader);
+        assertThat(opened.statusCode())
+            .as("a reading stream must really be open, or it exerts no pressure")
+            .isEqualTo(200);
       }
       for (int index = 0; index < 4 && index < accepted.size(); index++) {
         // A stalled slow consumer: the socket is open and nothing ever reads it.
-        stalled.add(openAndNeverRead(eventsUrl(accepted.get(index))));
+        HttpResponse<InputStream> opened = openAndNeverRead(eventsUrl(accepted.get(index)));
+        stalled.add(opened);
+        assertThat(opened.statusCode())
+            .as("a stalled stream must really be open, or it exerts no pressure")
+            .isEqualTo(200);
       }
       assertThat(registry.openStreamCount()).isPositive();
 
@@ -180,6 +208,9 @@ class StudioOverloadIT {
       assertThat(underPressure.errors())
           .as("ordinary REST traffic must not fail while Studio is at its bounds")
           .isZero();
+      assertThat(underPressure.served())
+          .as("and every ordinary request under pressure must actually be served (2xx)")
+          .isEqualTo(underPressure.samples());
       double budget = Math.max(quiet.meanMs() * LATENCY_BUDGET_MULTIPLIER, LATENCY_FLOOR_MS);
       assertThat(underPressure.meanMs())
           .as(
@@ -245,7 +276,7 @@ class StudioOverloadIT {
 
   // ── helpers ──────────────────────────────────────────────────────────────
 
-  private record Measurement(double meanMs, long maxMs, int errors, int samples) {}
+  private record Measurement(double meanMs, long maxMs, int errors, int served, int samples) {}
 
   /**
    * Ordinary REST traffic: a plain authenticated list request that has nothing to do with Studio,
@@ -254,18 +285,21 @@ class StudioOverloadIT {
   private Measurement measureOrdinaryTraffic(int samples) throws Exception {
     List<Long> latencies = new ArrayList<>();
     int errors = 0;
+    int served = 0;
     for (int index = 0; index < samples; index++) {
       long started = System.nanoTime();
-      HttpRequest request =
+      HttpRequest.Builder request =
           HttpRequest.newBuilder(
                   URI.create("http://localhost:" + port + "/api/v1/checks?page=0&size=5"))
-              .timeout(Duration.ofSeconds(5))
-              .GET()
-              .build();
+              .timeout(Duration.ofSeconds(5));
+      ordinaryTrafficIdentity().forEach(request::header);
       try {
-        HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response =
+            http.send(request.GET().build(), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
           errors++;
+        } else if (response.statusCode() >= 200 && response.statusCode() < 300) {
+          served++;
         }
       } catch (Exception e) {
         errors++;
@@ -274,7 +308,36 @@ class StudioOverloadIT {
     }
     double mean = latencies.stream().mapToLong(Long::longValue).average().orElse(0);
     long max = latencies.stream().mapToLong(Long::longValue).max().orElse(0);
-    return new Measurement(mean, max, errors, samples);
+    return new Measurement(mean, max, errors, served, samples);
+  }
+
+  /**
+   * The caller the ordinary traffic runs as.
+   *
+   * <p><strong>This used to be no identity at all</strong>, and the requests were served only
+   * because {@code BffSessionAuthenticationFilter.isCoreServiceBypassed()} returned a hardcoded
+   * {@code true} and admitted every identity-less request as {@code platform-bypass} with {@code
+   * checks-admin}. Story 10.18b closed that bypass by configuration (ED-02, AC-19a), so all 40
+   * baseline requests were answered {@code 401} and the test failed before any pressure was applied
+   * (DEF-08, {@code docs/epics/EPIC-10-RUN-LOG.md}, "Wave 6 — post-merge integration
+   * verification").
+   *
+   * <p>The repair is the one 10.18b applied to {@code StudioApiIT}: the identity is supplied by
+   * header, which the {@code test} profile permits and no deployed profile does, and it is this
+   * class's own owner and CSI with the {@code checks-admin} role the bypass identity carried. No
+   * bypass is reopened. This test is about ordinary traffic surviving Studio pressure, not about
+   * who is calling.
+   */
+  private static Map<String, String> ordinaryTrafficIdentity() {
+    return Map.of(
+        "X-User-Id",
+        "uid-" + OWNER,
+        "X-User-Email",
+        OWNER,
+        "X-User-Roles",
+        "checks-admin",
+        "X-User-Csi-Ownership",
+        CSI_ID + ":owner");
   }
 
   private List<UUID> fillPendingQuota(AtomicInteger rejections) {
