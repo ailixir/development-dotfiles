@@ -67,7 +67,39 @@ const CASES = [
   },
 ] as const;
 
+/**
+ * AC-6 names two cases, and these are they. The list is declared apart from `CASES` on purpose.
+ *
+ * `it.each` rows disappear when they are deleted instead of failing (shape #18). @qa deleted case
+ * (ii) from `CASES`, applied the page-origin bug, and every test stayed green: case (ii) is the only
+ * row that tells the right origin from the page's. So each row's kind is **derived from its base**,
+ * not from its name, and the derived kinds are compared with this list in both directions. The
+ * number of rows is checked as well.
+ *
+ * Do not "simplify" this by deriving the list from `CASES`. That refactor reopens the hole.
+ */
+const AC6_REQUIRED_KINDS = ['path-only base, page origin', 'absolute base, another host'] as const;
+
+function kindOf(base: string): string {
+  const absolute = /^[a-z][a-z0-9+.-]*:\/\//iu.test(base);
+  const sameOrigin = new URL(base, window.location.href).origin === window.location.origin;
+  if (!absolute && sameOrigin) return 'path-only base, page origin';
+  if (absolute && !sameOrigin) return 'absolute base, another host';
+  return `unclassified (absolute=${absolute}, sameOrigin=${sameOrigin})`;
+}
+
 describe('AC-6: the URL is the API origin followed by videoPath, verbatim', () => {
+  it('the case table holds exactly AC-6’s two named cases, judged by their bases (TEST-002)', () => {
+    const kinds = CASES.map((row) => kindOf(row.base));
+    expect([...new Set(kinds)].sort()).toEqual([...AC6_REQUIRED_KINDS].sort());
+    expect(CASES).toHaveLength(AC6_REQUIRED_KINDS.length);
+    // A row's expected origin is the origin its base really resolves to. So a row cannot keep a
+    // cross-host label while testing the page origin, and it cannot do the opposite either.
+    for (const row of CASES) {
+      expect(row.expectedOrigin(), row.name).toBe(new URL(row.base, window.location.href).origin);
+    }
+  });
+
   it('the fixture path already carries the base, which is what makes concatenation wrong', () => {
     expect(VIDEO_PATH.startsWith(`${PATH_ONLY_BASE}/`)).toBe(true);
     // The two origins differ, so a relative src cannot satisfy both cases.

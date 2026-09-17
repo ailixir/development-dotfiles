@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import fs from 'node:fs';
+import path from 'node:path';
 import type { ExecutionSnapshot, VideoStatus } from '@/types/studio/studioTypes';
 import { mockExecutions } from '@/services/mocks/studio/fixtures';
 import {
@@ -16,6 +18,10 @@ import {
   PLAYBACK_FAILED_MESSAGE,
   VIDEO_EVIDENCE_NARRATIVES,
 } from './videoEvidenceNarratives';
+import {
+  MIN_PINNED_VIDEO_PHRASE_LENGTH,
+  PINNED_VIDEO_EVIDENCE_FACTS,
+} from './pinnedVideoEvidenceFacts';
 
 /**
  * Story 10.16a — the evidence panel: AC-2, AC-3, AC-4, AC-5, AC-12, and AC-20's accessible names.
@@ -123,6 +129,138 @@ describe('AC-2: PROCESSING, FAILED and UNAVAILABLE are three messages, whatever 
     ).toBeInTheDocument();
   });
 });
+
+describe('AC-2: each state says its own fact, checked against an independent pin (TEST-001)', () => {
+  /*
+   * The assertions above prove that the panel renders *the narrative module's* wording for each
+   * state. They cannot prove that the wording is *true*. @qa rewrote PROCESSING to "No recording
+   * exists for this run" and everything stayed green. Here, the rendered title and statement are
+   * compared with `pinnedVideoEvidenceFacts.ts`, a second copy that nothing derives. The last two
+   * tests in this block check that the pin has not been derived after all.
+   */
+  const ALL_STATES = Object.keys(PINNED_VIDEO_EVIDENCE_FACTS) as VideoStatus[];
+
+  /** Each state as the panel renders it with no server wording, so the generic statement shows. */
+  function renderedSlots(status: VideoStatus): { title: string; statement: string } {
+    const base = fixtureWith(status);
+    const view = renderPanel({ ...base, video: { ...base.video, error: null } });
+    const slots = {
+      title: view.getByRole('region').getAttribute('aria-label') ?? '',
+      statement: view.getByTestId('video-evidence-statement').textContent ?? '',
+    };
+    expect(view.getByTestId('video-evidence-title')).toHaveTextContent(slots.title);
+    view.unmount();
+    return slots;
+  }
+
+  it('pins exactly the five states the panel narrates, with no phrase short enough to be vacuous', () => {
+    expect(new Set(ALL_STATES)).toEqual(new Set(Object.keys(VIDEO_EVIDENCE_NARRATIVES)));
+    expect(ALL_STATES).toHaveLength(5);
+    for (const status of ALL_STATES) {
+      const { titlePhrase, statementPhrase, deniedClaims } = PINNED_VIDEO_EVIDENCE_FACTS[status];
+      for (const phrase of [titlePhrase, statementPhrase, ...deniedClaims]) {
+        expect(phrase.trim().length, `${status}: "${phrase}"`).toBeGreaterThanOrEqual(
+          MIN_PINNED_VIDEO_PHRASE_LENGTH,
+        );
+      }
+      expect(deniedClaims.length, `${status} denies nothing`).toBeGreaterThan(0);
+    }
+  });
+
+  it.each(ALL_STATES)('%s: the title and the statement each state the pinned fact', (status) => {
+    const { title, statement } = renderedSlots(status);
+    const pinned = PINNED_VIDEO_EVIDENCE_FACTS[status];
+    expect(title.toLowerCase(), `${status} title`).toContain(pinned.titlePhrase.toLowerCase());
+    expect(statement.toLowerCase(), `${status} statement`).toContain(
+      pinned.statementPhrase.toLowerCase(),
+    );
+  });
+
+  it.each(ALL_STATES)(
+    '%s: neither slot makes a denied claim or another state’s required claim',
+    (status) => {
+      const { title, statement } = renderedSlots(status);
+      const own = PINNED_VIDEO_EVIDENCE_FACTS[status];
+      const forbidden = [
+        ...own.deniedClaims,
+        ...ALL_STATES.filter((other) => other !== status).flatMap((other) => [
+          PINNED_VIDEO_EVIDENCE_FACTS[other].titlePhrase,
+          PINNED_VIDEO_EVIDENCE_FACTS[other].statementPhrase,
+        ]),
+      ]
+        .map((phrase) => phrase.toLowerCase())
+        // A phrase this state is itself required to say is not a claim it can be forbidden.
+        .filter(
+          (phrase) =>
+            phrase !== own.titlePhrase.toLowerCase() && phrase !== own.statementPhrase.toLowerCase(),
+        );
+      for (const [slot, text] of [
+        ['title', title],
+        ['statement', statement],
+      ] as const) {
+        const made = forbidden.filter((phrase) => text.toLowerCase().includes(phrase));
+        expect(made, `${status} ${slot} "${text}"`).toEqual([]);
+      }
+    },
+  );
+
+  it('pinnedVideoEvidenceFacts.ts imports neither the narratives, the panel nor the barrel', () => {
+    // The twelfth shape: a header comment on the pin is not a guard. This assertion is.
+    const specifiers = moduleSpecifiers(fs.readFileSync(PIN_FILE, 'utf8'));
+    const derived = specifiers.filter((specifier) =>
+      /(^|[./])(videoEvidenceNarratives|VideoEvidencePanel|evidence|index)$/u.test(
+        specifier.replace(/\.tsx?$/u, ''),
+      ),
+    );
+    expect(derived, 'the pinned facts are read back out of the module they pin').toEqual([]);
+  });
+
+  it('the import scanner sees every specifier form, so its silence means something', () => {
+    const planted = [
+      "import { VIDEO_EVIDENCE_NARRATIVES } from './videoEvidenceNarratives';",
+      'import { VideoEvidencePanel } from "./VideoEvidencePanel";',
+      "const mod = await import('./videoEvidenceNarratives.ts');",
+      "const n = require('@/components/studio/evidence');",
+      'export { VIDEO_EVIDENCE_NARRATIVES } from "./index";',
+      "import './videoEvidenceNarratives';",
+    ].join('\n');
+    const found = moduleSpecifiers(planted);
+    expect(found).toHaveLength(6);
+    const flagged = found.filter((specifier) =>
+      /(^|[./])(videoEvidenceNarratives|VideoEvidencePanel|evidence|index)$/u.test(
+        specifier.replace(/\.tsx?$/u, ''),
+      ),
+    );
+    expect(flagged).toHaveLength(6);
+
+    // And it reads the real file: the pin genuinely imports the contract types module.
+    expect(moduleSpecifiers(fs.readFileSync(PIN_FILE, 'utf8'))).toEqual([
+      '@/types/studio/studioTypes',
+    ]);
+  });
+});
+
+const PIN_FILE = path.join(__dirname, 'pinnedVideoEvidenceFacts.ts');
+
+/**
+ * `import`/`export … from`, bare `import '…'`, dynamic `import(…)` and `require(…)`, any quote.
+ * The same scanner as `run/refusals.test.tsx` and `review/diagnostics.test.tsx`. It is copied rather
+ * than imported, because importing another test file would run that file's tests here.
+ */
+function moduleSpecifiers(source: string): string[] {
+  const patterns = [
+    /(?:^|[^\w$])(?:import|export)\s[^;]*?from\s*(['"`])([^'"`]+)\1/gsu,
+    /(?:^|[^\w$])import\s*(['"`])([^'"`]+)\1/gu,
+    /(?:^|[^\w$])(?:import|require)\s*\(\s*(['"`])([^'"`]+)\1\s*\)/gu,
+  ];
+  const ordered: string[] = [];
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) {
+      ordered.push(match[2]);
+    }
+  }
+  return ordered;
+}
 
 describe('AC-3: partial is a qualifier on an AVAILABLE recording only, read from video.partial', () => {
   it('(i) a PASSED run whose AVAILABLE recording is partial renders the qualifier', () => {
