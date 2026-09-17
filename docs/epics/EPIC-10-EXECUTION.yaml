@@ -257,6 +257,8 @@ stories:
   # redactor hole to close, and four externally gated criteria. @po additionally routed 10.13's
   # MED-2 and MED-3 here at wave-5 validation. The comparable is 10.7 (L); this is smaller than
   # 10.7 and roughly 10.13 with a second language attached.
+  # MED-2 OWNER (@pm 2026-09-16): @devops, decided by the user on 2026-09-16. The fix is NOT scheduled
+  # yet. See 10.19's story_context.drafting_gate for the standing mitigation.
   - id: "10.17"
     title: "Authorized variable/secret plumbing"
     size: L
@@ -535,9 +537,14 @@ stories:
         # LIFTED 2026-09-16 (@pm): ED-02's owner no longer reads TBD — the user assigned it to PUT Core
         # platform (Core BFF) on 2026-09-16. 10.19 may be drafted with its ED-02-dependent criteria Blocked
         # on the linked external ticket (ID: to be linked). Original text below kept for history. This
-        # lifts ONLY this item; the MED-2 and O-10 items that follow are untouched.
+        # comment lifts ONLY the ED-02 item directly below it.
         - "[LIFTED 2026-09-16 — ED-02 owner assigned by the user: PUT Core platform (Core BFF)] STORY 10.19 MAY NOT BE DRAFTED WHILE ED-02's owner reads 'TBD — not assigned in sources'. ED-02 gates this story by id; drafting against an unowned prerequisite would produce a fourth story full of blocked halves pointing at nobody. @po cannot assign work to an organisation no source names — BRD §4 gives Platform/SRE cluster, ingress, egress, sandbox and storage and names NO identity owner, and architecture §9.1 says the prerequisites 'may be delivered outside Epic 10'. The ESCALATION PATH, named: @pm raises ED-02 to Checks-squad engineering management through BRD §8's launch-exit/on-call row, with Security & Compliance (BRD §11) as the accepting party."
-        - "MED-2 (the Testcontainers JDBC liveness bug) must have an owner — @devops, per @qa's own gate — before this story is drafted. 10.19 runs the full integrated suite and a hang THERE is a false pass on the epic's final gate, in the one place nobody re-runs. Mitigation is epic-wide regardless: every story running ./gradlew check records wall-clock elapsed and the test count reached, and A RUN SHORT OF ITS BASELINE TEST COUNT IS A HANG, NEVER A PASS."
+        # LIFTED 2026-09-16 (@pm): MED-2 now has an owner — @devops, decided by the user on 2026-09-16.
+        # The fix itself is NOT scheduled yet. The standing mitigation stays in force: narrow
+        # `./gradlew test --rerun-tasks --tests …` runs; any `./gradlew check` run records wall-clock
+        # elapsed and the test count reached, and a run that hangs is NEVER reported as a pass.
+        # Original text below kept for history. The O-10 item after it is untouched and still gates drafting.
+        - "[LIFTED 2026-09-16 — MED-2 owner assigned by the user: @devops; fix not yet scheduled] MED-2 (the Testcontainers JDBC liveness bug) must have an owner — @devops, per @qa's own gate — before this story is drafted. 10.19 runs the full integrated suite and a hang THERE is a false pass on the epic's final gate, in the one place nobody re-runs. Mitigation is epic-wide regardless: every story running ./gradlew check records wall-clock elapsed and the test count reached, and A RUN SHORT OF ITS BASELINE TEST COUNT IS A HANG, NEVER A PASS."
         - "ADR-002 O-10 (400 vs 404 for an unknown, deleted or quarantined draft on GET/PUT/DELETE /tests/{id}) must have its own ADR-002 ruling with its own before/after before this story is drafted. Class C, @architect's, overdue by a wave since §18.4 and restated at §23.4. @po gives it a date rather than a reminder; it is not @po's to rule."
 
 # ─────────────────────────────────────────────────────────────
