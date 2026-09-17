@@ -1,0 +1,651 @@
+schema: 1
+story: '10.31'
+story_title: Video route refusal surface and the public 401 envelope declaration (ADR-002 §24, §25)
+epic: EPIC-10
+wave: 8
+
+gate: CONCERNS
+
+status_reason: >-
+  Every acceptance criterion's substantive property is implemented and proven. The contract edit is
+  ADR-002 §24.6/§25.4 verbatim; the document's final partition is 12 / 2 / 4 / 0, derived
+  independently by this reviewer with a YAML parser and matching the pinned operationIds exactly;
+  the escalation test's assertion region hashes 708fdbad270a220577dcdaead413d1aa3a49980f31aaab3a018af9e743545f2a
+  on both sides, recomputed here, and ESC-1/ESC-2 are green; the pin was green on arrival at
+  d55d7737… on the merge base and is green at d9f5f2a2… on HEAD; the diff is twelve files and zero
+  production source. The backend studio package reproduces at 716 = 709 passed + 0 failed + 7
+  skipped, measured at rest. Eleven mutations of this reviewer's own were written rather than
+  re-run, and the three that matter most came back well: the new ExecutionVideoRefusalEnvelopeIT
+  captures a REAL filter-written 401 (flattening BffSessionAuthenticationFilter's body reddens both
+  of its tests); the declared status set cannot lose a pre-existing member silently; and @dev's
+  unratified totality assertion is the ONLY guard that catches an added internal-only-tagged
+  operation, which is a stronger case for it than @dev's own falsification made.
+  CONCERNS, not PASS, for three measured guard gaps and a cluster of AC-text defects.
+  REF-DANGLE-1 — pointing BOTH getExecution's and getExecutionVideo's 403 at a component that does
+  not exist leaves 98/0 in the backend window, the frontend mock suite unchanged and the runner's
+  contract test 15/15: AC-5's comparison can be satisfied by two strings that are wrong together,
+  and nothing anywhere resolves a $ref. EXAMPLE-UNGUARDED-1 — the new sessionRequired example can be
+  made to violate its own PlatformErrorResponse schema with the whole window green; §18.5's
+  validation was performed once by hand and nothing re-checks it. EXAMPLE-DRIFT-1 — the
+  storeUnavailable example's code AND message can be changed to anything with the window green,
+  because AC-6 asserts a transcribed literal while its own .as(...) message names the document as
+  the authority. None of the three blocks the merge: all three are coverage the ACs did not require,
+  and each is one line to close. @dev's eight self-flagged items are ruled below; item 7's
+  unexplained mass failure DOES NOT REPRODUCE at rest and is closed as an environment artifact.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-17T17:20:00Z'
+branch: story/10.31
+reviewed_revision: 18126d029
+base_sha: 72e95cbbd
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.31
+contract_sha256_base: d55d7737647a49b97e2b505a59364473d0a3695936cc447a005fcb3ed47eb318
+contract_sha256_head: d9f5f2a2bfac4f51baa2a334b1129236578703acbe5f0d137c98ab54b227af6a
+
+waiver:
+  active: false
+
+ac_verdicts:
+  AC-1:
+    verdict: PASS
+    evidence: >-
+      The three response entries and the two description paragraphs are ADR-002 §24.6's text
+      verbatim (diffed line by line against the story's quoted §24.6 block). Q1, this reviewer's
+      own: deleting the PRE-EXISTING '206' block (not one of the three new ones, which is what @dev
+      mutated) reddens exactly three tests — theVideoOperationsStatusSetIsUnchanged,
+      StudioContractTest's status-set row and theRangeResponseDeclaresItsContentAndItsTwoHeaders.
+      The declared set cannot lose a member silently.
+  AC-2:
+    verdict: PASS (with an AC-text defect routed to @po)
+    evidence: >-
+      Independently derived from the merged YAML with the runner's own parser, not from the test:
+      PUBLIC 12, CALLBACK 2, RUNNER 4, ORPHAN 0, and the twelve operationIds are exactly the pinned
+      list. Eleven $ref replacements in the diff plus getExecutionVideo's new one = the twelve
+      SessionUnauthorized lines grep finds. components.responses.Unauthorized and
+      components.schemas.ErrorResponse are byte-unchanged. Q5a and Q5b (below) reproduce @dev's
+      finding that (a) and (b) do not touch the pinned list — by a different method than @dev used,
+      a throwaway probe class holding ONLY the pinned-list assertions. Q9 shows the totality
+      assertion is non-redundant. The guard is complete; AC-2(a)/(b)'s falsification text is not.
+  AC-3:
+    verdict: PASS
+    evidence: >-
+      Assertion region hashed by this reviewer at both revisions with the identical awk range
+      (`/^class ExecutionVideoContractEscalationTest \{/,0`):
+      708fdbad270a220577dcdaead413d1aa3a49980f31aaab3a018af9e743545f2a at 72e95cbbd and at HEAD.
+      Byte-identical. ExecutionVideoContractEscalationTest 2/2 PASSED in the measured window; it was
+      2 FAILED at the base per the orchestrator's own measurement. Only the class Javadoc moved.
+  AC-4:
+    verdict: PASS (absence claim accepted on stronger evidence than the AC's own grep)
+    evidence: >-
+      The AC's two greps re-run here: the literal form finds only the two 10.15 gate-file lines; the
+      loose form finds the two updated guards, the frontend array and prose. studio-execution.md:213
+      is NOT a hit of either — @dev is right and the draft was wrong. The 10.16a gate hit at :133 is
+      real and is a third closed-gate occurrence the draft did not name. This reviewer then ran a
+      search the AC did not require and that a differently-formatted copy could not escape: every
+      file mentioning both 410 and 416 in any form (backend/src, frontend/src, studio-runner/src,
+      studio-runner/test) is seven files, all accounted for; the symbolic forms
+      (GONE/REQUESTED_RANGE_NOT_SATISFIABLE/RANGE_NOT_SATISFIABLE) are two files, both known. No
+      third executable copy exists. This is the evidence the AC asked for and did not have.
+  AC-5:
+    verdict: CONCERNS
+    evidence: >-
+      The comparison is between two live document reads with explicit not-null premises, and @dev's
+      M6 (a route-local inline 403) reddens it alone. The property the AC names holds. CONCERNS is
+      REF-DANGLE-1: Q2 points BOTH sides at '#/components/responses/NoSuchForbidden' and the backend
+      window is 98 passed / 0 failed, the frontend studio mock suite shows only its two pre-existing
+      10.11c reds, and the runner's contract.test.ts is 15/15. The test's Javadoc anticipates the
+      legitimate-rename case; it does not anticipate the dangling case, and no guard anywhere in the
+      three trees resolves a $ref against components.
+  AC-6:
+    verdict: PASS (with an AC-text defect and a guard gap, both routed)
+    evidence: >-
+      Q11, this reviewer's own and the direct falsification the AC asked for: making the PRODUCER
+      drop `message` from the refusal body (ChecksExceptionHandler:108) reddens
+      anUnreachableStoreAndAnAbsentObjectAreDifferentAnswers at line 606 — the new schema-validity
+      assertion — and nothing else in that method. The assertion is load-bearing in its own right.
+      Q10, the AC's literal third falsification (the producer emitting a NESTED body): it reddens
+      at line 588, the PRE-EXISTING `the two cases must not be collapsed onto one code either`
+      assertion, three assertions before the schema check. So the property is caught, but not by the
+      assertion the AC names, and the failure message misdirects. Separately, EXAMPLE-DRIFT-1:
+      Q7 changes the declared storeUnavailable example's code to VIDEO_STORE_DOWN and its message to
+      unrelated text and the window is 98/0 — line 598 asserts a transcribed copy while its .as(...)
+      says "the declared storeUnavailable example's code, ADR-002 §24.6".
+  AC-7:
+    verdict: PASS
+    evidence: >-
+      Q3, the decisive anti-vacuity probe: flattening BffSessionAuthenticationFilter.writeError from
+      Map.of("error", Map.of("code", …)) to Map.of("error", code, "message", …) reddens BOTH of
+      ExecutionVideoRefusalEnvelopeIT's tests (lines 145 and 182) plus, as collateral,
+      ExecutionVideoAuthorizationIT.softDeletingTheParentTestChangesNoAnswerAndNoByte. The 401 the
+      class validates is the real filter's bytes, not a synthesized body. The cross-rejection
+      assertions are present and are what close §25.3's own doubt. Reading confirms both bodies come
+      from response.getBody() and neither positive assertion runs against a hand-typed literal.
+  AC-8:
+    verdict: CONCERNS
+    evidence: >-
+      One call site, not two: `serveExecutionVideo` is referenced twice in handlers.ts (the
+      declaration at :132 and the call at :442), `readable(allExecutions()).find(...)` is applied
+      before the find at that one site, and handlers.ts is byte-identical between 82322e084 and the
+      merge base, so a two-call-site version never existed. The material claim holds. CONCERNS is
+      MOCK-MESSAGE-1: Q8 changes the 403 message to 'A COMPLETELY DIFFERENT MESSAGE' and the whole
+      frontend studio mock suite is unchanged (only the two pre-existing 10.11c reds). AC-8's
+      "byte-for-byte the backend body" is guarded for `error` and not for `message`.
+  AC-9:
+    verdict: PASS
+    evidence: >-
+      studioContract.test.ts 54/54 and studioVideoHandler.test.ts 10/10 in the full frontend run
+      here. @dev's F1/F2 separation (reverting the mock reddens exactly three tests; reverting only
+      studioVideoHandler's expectation reddens one) was not re-run by this reviewer — the byte-shape
+      vs body-shape distinction was verified by reading the two files instead, and is stated as
+      inferred rather than measured.
+  AC-10:
+    verdict: PASS
+    evidence: >-
+      All three states independently established. (1) Green on arrival: `git show
+      72e95cbbd:docs/specs/studio/openapi.yaml | shasum -a 256` = d55d7737… and the base's
+      BASE_SHA256 at :198 holds exactly that. (3) Green after: HEAD's file hashes d9f5f2a2… and
+      BASE_SHA256 at :217 holds exactly that; confinement.test.ts 18/18 in the full runner run.
+      (2) The red-in-between state is entailed by (1) and (3) and was reproduced by @dev as P1; this
+      reviewer did not re-run it. The comment block's seventh entry is present and describes §24.6 +
+      §25.4 only.
+  AC-11:
+    verdict: PASS
+    evidence: >-
+      Two rows, rewritten in place, both LANDED by 10.31, each carrying measurements including the
+      frontend and runner suites §28.4 could not run. The §28.4 simulated figures (14/15, 13/14) are
+      reported as reproduced rather than copied. The AC-2(a)/(b) finding is written INTO the second
+      row rather than laundered, which is the right handling. The second row's cell says "measured
+      together with the row above", which AC-11 explicitly permits.
+  AC-12:
+    verdict: PASS
+    evidence: >-
+      `git diff --name-status 72e95cbbd HEAD` is twelve files: five backend test files (one new),
+      three frontend files all under services/mocks/studio/, the runner's confinement test, the
+      contract, the ADR and the story. No backend/src/main/**. No frontend/src/** outside
+      services/mocks/studio/. Independently re-run here.
+
+flagged_items_ruling:
+  item_1_ac2_falsification_predictions:
+    ruling: '@dev IS RIGHT. Re-derived independently, by a different method.'
+    detail: >-
+      Rather than re-running @dev's deletion variant, this reviewer built a throwaway class
+      (QaPinProbeTest, created and deleted in-session, tree verified clean afterwards) holding ONLY
+      the four pinned-list assertions and a private copy of unauthenticatedRefs — no value
+      comparisons, no counts, no totality check. Control: probe 1/1 green, ExecutionVideoContractTest
+      17/17 green. Q5a (getTest's 401 -> Unauthorized): the real guard reddens at
+      ExecutionVideoContractTest.java:430, the `publicRefs.values()` comparison; the probe stays
+      GREEN. Q5b (claimAdmission -> SessionUnauthorized): the real guard reddens at :436, the
+      callback comparison; the probe stays GREEN. The pin is over operationIds and a repointed $ref
+      moves no key, exactly as @dev said. Note one nuance @dev did not state: AC-2(b) also predicts
+      the "no internal operation" assertion reddens — it would, but AssertJ aborts at :436 first, so
+      that prediction is unreached rather than false.
+    routing: '@po — AC-2(a) and AC-2(b) must drop "and the pinned list". The guard needs no change.'
+  item_2_totality_assertion_beyond_the_five_bullets:
+    ruling: 'IN SCOPE, LOAD-BEARING, NOT REDUNDANT — and more so than @dev showed.'
+    detail: >-
+      @dev's M4 retagged runnerHealth to [internal], which moves it out of both the public and the
+      runner bucket, so the 12-count and the 4-count would have caught it too; M4 therefore does not
+      prove non-redundancy, only that the assertion fires first. Q9 does prove it: this reviewer
+      ADDED a new path /qa-probe/internal-only with tags [internal], operationId
+      qaInternalOnlyProbe and a 401. Counts stay 12/2/4 and both pinned lists stay green by
+      construction, because the new operation belongs to no bucket. The ONLY red is
+      ExecutionVideoContractTest.java:424 — the totality assertion. Without it this shape is a
+      silent bypass of all three rules. It is a strengthening of a guard, adds no declaration to the
+      document and changes no AC; it sits inside §12's test-coverage space, not its contract space.
+    routing: '@po — ratify as an accepted addition to AC-2 (recommended), with no rework.'
+  item_3_ac8_two_call_sites:
+    ruling: '@dev IS RIGHT on the substance; its stated command is misquoted.'
+    detail: >-
+      One call site, at handlers.ts:442 (429 at 82322e084), plus the function declaration. The
+      material claim — readable() applied before the find, so an unknown id and an unreadable CSI
+      both arrive undefined — holds at that one site and was read here directly. But `git diff
+      82322e084 HEAD -- handlers.ts` is NOT empty; it contains this story's own 20/7 edit. The diff
+      that is empty is 82322e084..72e95cbbd. The conclusion survives; the evidence sentence is wrong.
+    routing: '@po — AC-8 must say one call site. Backlog — Dev Agent Record finding 2 misquotes its own command.'
+  item_4_search_inventory_differences:
+    ruling: 'BOTH CONFIRMED. @po ruling 2 covers both, and nothing load-bearing was left stale.'
+    detail: >-
+      Re-run here. docs/qa/gates/10.16a-evidence-state-playback-and-step-seek.yml:133 is a real hit
+      the draft did not name; it is a closed gate report, same class as the two 10.15 hits, and @po
+      ruling 2 ("a QA gate file is a record of a closed gate ... never re-opened") applies to it word
+      for word. docs/architecture/studio-execution.md:213 is genuinely not a hit: its §6.3 prose
+      names 200, 206 and 416 and neither 404 nor 410, so the loose regex cannot match. Neither is
+      executable and neither is load-bearing. NOTE for the epic, not for this story: three closed
+      gate files now carry a status set that is false about the current document. That is the policy
+      @sm's Open Question 2 raised and @po declined to make a standing rule for; it is now a
+      three-file pattern rather than a two-file one.
+  item_5_ac4_absence_claim:
+    ruling: 'ENOUGH — on evidence beyond what @dev offered.'
+    detail: >-
+      M5a/M5b establish that each named copy is live, but they say nothing about a third copy, so
+      they are not the corroboration the AC needs; @dev's framing ("if a third copy existed and were
+      load-bearing, the document edit alone would have reddened it") is sound but rests on the full
+      package having been green, which is a weak instrument for a copy in an untouched file. This
+      reviewer searched by a property no formatting choice can hide: every file that mentions both
+      410 and 416 in any form, and separately the symbolic HttpStatus spellings. Seven files and two
+      files respectively, all known. The absence claim is now supported by a search the AC's own
+      greps could have missed a copy under.
+  item_6_stale_method_names:
+    ruling: 'ACCEPTABLE HERE — a finding, not a defect of this story.'
+    detail: >-
+      theVideoOperationsStatusSetIsUnchanged is now contradicted by its own behaviour, and
+      noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties names 10.11c's subject. But
+      AC-4 authorizes the literal and the .as(...) message only, both of which WERE corrected, and
+      both corrected messages are accurate and specific (this reviewer read them). A method name is
+      not what a reader sees when a test fails — the .as(...) message is, and that is now right. The
+      right judgement is the one @dev made: rename in whichever story next owns those files, rather
+      than exceed the AC. Recorded as backlog NAMES-1.
+  item_7_store_unavailable_constant_mystery:
+    ruling: 'CLOSED — ENVIRONMENT ARTIFACT. It does not reproduce. There is no hidden consumer.'
+    detail: >-
+      This was the highest-value item and it is a false alarm. Static: STORE_UNAVAILABLE has exactly
+      two references in the whole repository's source — its declaration at
+      ExecutionVideoException.java:33 and its single use at :92 inside storeUnavailable(). No
+      reflective scan, no startup registry, no @Value, nothing. Mutating the constant's VALUE is
+      therefore behaviourally identical to mutating the argument at the call site, which is M8.
+      Empirical (Q4): this reviewer applied the exact mutation (STORE_UNAVAILABLE =
+      "VIDEO_STORE_DOWN") and ran ExecutionVideoEvidenceIT alone at rest (load average 5.6). Result
+      14 passed / 1 failed — anUnreachableStoreAndAnAbsentObjectAreDifferentAnswers at line 598, the
+      code assertion, exactly as M8 predicts — and `grep -c ResourceAccessException` over the run
+      log is ZERO. The 13-of-15 mass failure with "Unexpected end of file from server", including
+      the 200s, did not recur in any form. It is the host-load signature the epic already knows:
+      concurrent Gradle runs manufacture connection-level failures, which is what produced today's
+      false 13-failure alarm on CompilePipelineIT. Restored, sha256 f23cad8c… matching pre-mutation.
+    severity_as_raised: low
+    why_not_higher: >-
+      A finding that a constant with one reference breaks request handling would be HIGH if true. It
+      is not true. The residual risk is documentary: leaving it in the Dev Agent Record as an
+      unexplained observation would make it a phantom that a later story re-investigates. That is
+      the reason it gets a finding at all.
+  item_8_ac6_third_falsification_by_substitution:
+    ruling: 'A SOUND PROXY, but the AC states the wrong catcher — and this reviewer ran the real one.'
+    detail: >-
+      M9 plus the in-test control are logically sufficient: the control (ErrorResponse must reject
+      PLATFORM_ENVELOPE_BODY) is a standing assertion, not a one-off, so a schema loosened into
+      permissiveness reddens every build, and with it the positive assertion becomes meaningful.
+      That composition is valid. But it is still a proxy, so the direct version was run. Q10 makes
+      the PRODUCER emit a nested body: the method reddens at :588, the pre-existing
+      code-differs assertion, NOT at :601-606. AC-6's "reddens the schema-validity assertion alone"
+      is false as worded. Q11 then makes the producer drop `message` while keeping the code string:
+      reddens ONLY at :606. So the new schema assertion is load-bearing, and its discriminating case
+      is a shape change that preserves the code — not the nested-body case the AC names.
+    routing: '@po — AC-6''s third falsification should name the shape-preserving-code case.'
+
+mutations:
+  note: >-
+    Eleven mutations written by this reviewer (Q-series), plus one control. Each applied to the
+    production symbol the guard is named for, inside the measurement window, run at rest, restored
+    with `git checkout --` and verified by sha256 against the pre-mutation digest. Backend window
+    unless stated: `./gradlew test --rerun-tasks --tests 'com.citi.put.checks.studio.evidence.*'
+    --tests 'com.citi.put.checks.studio.StudioContractTest'`, baseline 98 passed / 0 failed / 2
+    skipped. Gradle prints no tally on a green run, so PASSED/FAILED/SKIPPED event lines were
+    counted, with the FAILED pattern anchored to exclude `> Task :test FAILED`.
+  Q1:
+    symbol: "openapi.yaml getExecutionVideo.responses.'206'"
+    how: the whole '206' block deleted (a PRE-EXISTING member, not one of the three new ones)
+    expected: the two hand-kept status-set copies redden
+    observed: >-
+      95 passed / 3 failed. theVideoOperationsStatusSetIsUnchanged,
+      StudioContractTest.noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties and
+      theRangeResponseDeclaresItsContentAndItsTwoHeaders. The set cannot lose a member silently.
+    restored_sha256: d9f5f2a2bfac4f51baa2a334b1129236578703acbe5f0d137c98ab54b227af6a
+  Q2:
+    symbol: "openapi.yaml getExecution.responses.'403'.$ref AND getExecutionVideo.responses.'403'.$ref"
+    how: both repointed to '#/components/responses/NoSuchForbidden', a component that does not exist
+    expected: nothing, if AC-5 compares strings rather than resolving them
+    observed: >-
+      BACKEND 98 passed / 0 failed — fully green. FRONTEND `npx vitest run src/services/mocks/studio`
+      206 passed / 2 failed, the 2 being the pre-existing confirmedRevisionEscalation reds. RUNNER
+      `npx vitest run test/contract.test.ts` 15/15 (its $ref resolution runs against STUB_CONTRACT,
+      not the real file). NOTHING CATCHES IT. Finding REF-DANGLE-1.
+    restored_sha256: d9f5f2a2bfac4f51baa2a334b1129236578703acbe5f0d137c98ab54b227af6a
+  Q3:
+    symbol: BffSessionAuthenticationFilter.writeError (PRODUCTION)
+    how: 'Map.of("error", Map.of("code", code, "message", message, "traceId", traceId)) -> Map.of("error", code, "message", message)'
+    expected: if AC-7 captures the real filter's bytes, both of its tests redden
+    observed: >-
+      95 passed / 3 failed. ExecutionVideoRefusalEnvelopeIT.theTwoRefusalsCarryTheEnvelopesTheir
+      OwnProducersDeclare at :145 (the platformEnvelope validation) and
+      theTwoRefusalBodiesAreNotStructurallyInterchangeable at :182 (the isObject assertion), plus
+      ExecutionVideoAuthorizationIT.softDeletingTheParentTestChangesNoAnswerAndNoByte as collateral.
+      The capture is real.
+    restored_sha256: 316e55bd24f1df49d6e61e4459ae82351fc3b4d9ae9a005bf6b55835603eb6a9
+  Q4:
+    symbol: ExecutionVideoException.STORE_UNAVAILABLE (PRODUCTION, the constant's VALUE — @dev's item 7)
+    how: '"VIDEO_STORE_UNAVAILABLE" -> "VIDEO_STORE_DOWN"; ExecutionVideoEvidenceIT alone, at rest'
+    expected: 'either the reported 13-of-15 ResourceAccessException cascade, or M8''s single code failure'
+    observed: >-
+      14 passed / 1 failed. anUnreachableStoreAndAnAbsentObjectAreDifferentAnswers at :598, the code
+      assertion. `grep -c ResourceAccessException` over the log = 0. The cascade does not reproduce.
+    restored_sha256: f23cad8cd095d8e8797fe301092a1b3098d2511a581f81b68ab4319e8da6636a
+  Q5-control:
+    symbol: none (control for the throwaway QaPinProbeTest)
+    how: probe class run against the unmutated document
+    expected: green, so a later green is not green-because-broken
+    observed: QaPinProbeTest 1/1, ExecutionVideoContractTest 17/17
+    restored_sha256: 'n/a — probe deleted, `git status` clean'
+  Q5a:
+    symbol: "openapi.yaml getTest.responses.'401'.$ref (AC-2 mutation (a))"
+    how: SessionUnauthorized -> Unauthorized
+    expected: 'AC-2(a) says: the public-side comparison AND the pinned list'
+    observed: >-
+      Real guard red at ExecutionVideoContractTest.java:430 (the value comparison); 16 of 17
+      siblings green. Pinned-list-only probe GREEN. The pinned list does not catch it.
+    restored_sha256: d9f5f2a2bfac4f51baa2a334b1129236578703acbe5f0d137c98ab54b227af6a
+  Q5b:
+    symbol: "openapi.yaml claimAdmission.responses.'401'.$ref (AC-2 mutation (b))"
+    how: Unauthorized -> SessionUnauthorized
+    expected: 'AC-2(b) says: the callback comparison, the no-internal assertion AND the pinned list'
+    observed: >-
+      Real guard red at :436 (the callback comparison, which aborts before the no-internal
+      assertion); 16 of 17 siblings green. Pinned-list-only probe GREEN.
+    restored_sha256: d9f5f2a2bfac4f51baa2a334b1129236578703acbe5f0d137c98ab54b227af6a
+  Q6:
+    symbol: openapi.yaml components.responses.SessionUnauthorized.examples.sessionRequired.value
+    how: "{ error: { code: …, message: …, traceId: … } } -> { error: NOT_AN_OBJECT_AT_ALL }, which violates PlatformErrorResponse"
+    expected: something, if §18.5's validation is a standing guard rather than a one-off
+    observed: >-
+      BACKEND 98 passed / 0 failed. FRONTEND studio mock suite 206 passed / 2 pre-existing failed.
+      The new example is validated by nothing. Finding EXAMPLE-UNGUARDED-1.
+    restored_sha256: d9f5f2a2bfac4f51baa2a334b1129236578703acbe5f0d137c98ab54b227af6a
+  Q7:
+    symbol: "openapi.yaml getExecutionVideo.responses.'503'.examples.storeUnavailable.value"
+    how: 'error VIDEO_STORE_UNAVAILABLE -> VIDEO_STORE_DOWN and message -> "totally different message"'
+    expected: something, if AC-6 reads the code from the document as its .as(...) claims
+    observed: >-
+      98 passed / 0 failed. The declared example may drift arbitrarily from the shipped body.
+      ExecutionVideoEvidenceIT:598 asserts a transcribed literal. Finding EXAMPLE-DRIFT-1.
+    restored_sha256: d9f5f2a2bfac4f51baa2a334b1129236578703acbe5f0d137c98ab54b227af6a
+  Q8:
+    symbol: handlers.ts serveExecutionVideo's 403 message
+    how: "'You do not have access to this Studio resource' -> 'A COMPLETELY DIFFERENT MESSAGE'"
+    expected: something, if AC-8's "byte-for-byte the backend body" is guarded
+    observed: >-
+      `npx vitest run src/services/mocks/studio` 206 passed / 2 failed, the 2 pre-existing. The
+      message half of the literal is guarded by nothing. Finding MOCK-MESSAGE-1.
+    restored_sha256: eb3fa3c3a0df8f8381a3b576bd2747f29b92212c7aad28b8da4812f95d340377
+  Q9:
+    symbol: openapi.yaml paths (a new operation, not a retag — the case @dev's M4 does not cover)
+    how: "added /qa-probe/internal-only get, tags [internal], operationId qaInternalOnlyProbe, declaring a 401"
+    expected: 'only the totality assertion; counts stay 12/2/4 and both pins stay green by construction'
+    observed: >-
+      ExecutionVideoContractTest 16 passed / 1 failed, at :424, the totality assertion
+      (`.isEqualTo(new TreeSet<>(allRefs.keySet()))`). @dev's addition is the sole catcher for this
+      shape.
+    restored_sha256: d9f5f2a2bfac4f51baa2a334b1129236578703acbe5f0d137c98ab54b227af6a
+  Q10:
+    symbol: ChecksExceptionHandler.handleExecutionVideo (PRODUCTION) — AC-6's literal third falsification
+    how: 'body -> Map.of("error", Map.of("code", ex.getCode(), "message", ex.getMessage())), i.e. the producer emits a nested body'
+    expected: 'AC-6 says: the schema-validity assertion alone'
+    observed: >-
+      ExecutionVideoEvidenceIT 10 passed / 5 failed. The target method reddens at :588 — the
+      PRE-EXISTING code-differs assertion — never reaching the schema check at :601-606. The AC's
+      named catcher is pre-empted.
+    restored_sha256: 8125c4bc8e9330b6edfa64bf9ed6c28ed5f2c9861ae08b7609d64859b0fb0d13
+  Q11:
+    symbol: ChecksExceptionHandler.handleExecutionVideo (PRODUCTION) — the shape-preserving-code case
+    how: 'body -> Map.of("error", ex.getCode()), dropping `message`, which ErrorResponse requires'
+    expected: only AC-6's new schema-validity assertion
+    observed: >-
+      ExecutionVideoEvidenceIT 10 passed / 5 failed; the target method reddens at :606, the schema
+      assertion, and at no earlier line. The new assertion is load-bearing in its own right.
+    restored_sha256: 8125c4bc8e9330b6edfa64bf9ed6c28ed5f2c9861ae08b7609d64859b0fb0d13
+  restoration_check: >-
+    After the last mutation, `git status --short` is empty and all five mutated files hash to their
+    committed digests — contract d9f5f2a2…, ExecutionVideoException f23cad8c…,
+    BffSessionAuthenticationFilter 316e55bd…, ChecksExceptionHandler 8125c4bc…, handlers.ts
+    eb3fa3c3…. The throwaway QaPinProbeTest.java was deleted.
+
+top_issues:
+  - id: REF-DANGLE-1
+    severity: medium
+    status: open
+    route: backlog (epic-wide, not this story)
+    finding: >-
+      No test in any of the three trees resolves a $ref against components. Pointing both sides of
+      AC-5's comparison at a nonexistent component leaves the backend window, the frontend mock
+      suite and the runner contract test all green. The same hole covers every other $ref in the
+      document, so it is not specific to 10.31 — but 10.31 is the story that adds a guard whose
+      whole mechanism is $ref equality, which makes it visible.
+    recommendation: >-
+      One assertion, anywhere a contract test already loads the document: every $ref string under
+      paths resolves to an existing node under components. One line, catches the whole class.
+  - id: EXAMPLE-UNGUARDED-1
+    severity: medium
+    status: open
+    route: "backlog (and worth @po's attention on §18.5)"
+    finding: >-
+      ADR-002 §18.5 requires every example this epic adds to be validated against its schema. The
+      new sessionRequired example was validated once by hand by @dev before any suite ran, and by
+      nothing since: Q6 breaks it against its own PlatformErrorResponse and every suite stays green.
+      This is the shape the run log catalogues as PIN-1 ("a pinned copy whose provenance nothing
+      checks"), one step further along — here the copy is not even compared.
+    recommendation: >-
+      A standing test that walks every `examples` node in the document and validates each `value`
+      against the schema declared beside it. The networknt/Ajv machinery for it already exists in
+      both ExecutionVideoEvidenceIT and studioContract.test.ts.
+  - id: EXAMPLE-DRIFT-1
+    severity: medium
+    status: open
+    route: backlog
+    finding: >-
+      ExecutionVideoEvidenceIT:596-598 asserts `isEqualTo("VIDEO_STORE_UNAVAILABLE")` — a hand-typed
+      copy — under an .as(...) message reading "the declared storeUnavailable example's code,
+      ADR-002 §24.6". The document's example can be changed to any code and any message with the
+      whole window green (Q7). The guard catches production drifting from the test; it cannot catch
+      the document drifting from production, which is what its message promises. The codebase
+      already does this correctly for the sibling codes: studioContract.test.ts reads 404/410/416's
+      expected code out of `examples[...].value.error`.
+    recommendation: >-
+      Read the expected code from ContractDocument rather than transcribing it, exactly as the
+      frontend does for the other three, or change the .as(...) message so it stops claiming
+      provenance it does not have.
+  - id: MOCK-MESSAGE-1
+    severity: low
+    status: open
+    route: backlog
+    finding: >-
+      AC-8 requires the mock's 403 body to be the backend's byte for byte. The `error` code is
+      asserted (studioContract.test.ts's expectedCode map); the `message` is asserted by nothing and
+      can be any string (Q8). Low because the UI branches on status and reads no refusal body
+      (10.16a AC-11), so nothing downstream depends on it — but the AC says byte-for-byte.
+    recommendation: One assertion on the message in studioVideoHandler.test.ts's 403 case.
+  - id: PHANTOM-1
+    severity: low
+    status: closed
+    finding: >-
+      Dev Agent Record finding 6 records an unexplained mass failure (13 of 15
+      ExecutionVideoEvidenceIT tests, ResourceAccessException, including the 200s) from mutating
+      ExecutionVideoException.STORE_UNAVAILABLE's value, and speculates about an undocumented
+      startup-time consumer.
+    resolution: >-
+      Does not reproduce. Q4 applies the identical mutation at rest and gets 14 passed / 1 failed
+      with zero ResourceAccessException, the single failure being the code assertion M8 also
+      reaches. The constant has exactly two references in the repository (its declaration and its
+      one use). There is no reflective or startup-time consumer. Closed as a host-load artifact of
+      the same class as today's false CompilePipelineIT alarm.
+    recommendation: >-
+      The Dev Agent Record should be corrected so the observation is not inherited as an open
+      mystery by a later story. @dev owns that section; this gate records the disposition.
+  - id: NAMES-1
+    severity: low
+    status: open
+    route: backlog
+    finding: >-
+      theVideoOperationsStatusSetIsUnchanged is contradicted by its own behaviour and
+      noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties names 10.11c's subject.
+      Deliberately not renamed, correctly, because AC-4 authorizes only the literal and the
+      .as(...) message — both of which were corrected and are now accurate.
+    recommendation: Rename in whichever story next owns those two files. Not a rework of 10.31.
+  - id: DOC-STALE-1
+    severity: low
+    status: open
+    route: backlog
+    finding: >-
+      ExecutionVideoException.java:30-32's Javadoc on STORE_UNAVAILABLE still reads "Undeclared in
+      the frozen contract — ESC-2, escalated to an architect rather than invented (ADR-002 §12 Class
+      C)". ESC-2 is ruled and the status IS declared as of this story. It is production source, so
+      AC-12 correctly forbade touching it here.
+    recommendation: One-line comment correction in the next story that opens backend/src/main.
+  - id: SHA-DRIFT-1
+    severity: low
+    status: open
+    route: '@dev (Dev Agent Record only)'
+    finding: >-
+      The story's Commits table names `850ac422b` for the second commit; the commit on the branch is
+      `18126d029` (the first, `113948325`, matches). The ADR §13 rows cite `113948325` and are
+      correct.
+
+routed_to_po:
+  - id: PO-1
+    severity: medium
+    ask: >-
+      AC-2's falsification (a) and (b) each say the mutation "reddens the public-side comparison and
+      the pinned list". Measured twice, by @dev and independently by this reviewer with a
+      pinned-list-only probe, it does not touch the pinned list. Drop that clause from both. AC-2(c)
+      is correct as written and both of its catchers were shown to work independently.
+  - id: PO-2
+    severity: medium
+    ask: >-
+      Ratify @dev's totality assertion as an accepted addition to AC-2. It is the only guard that
+      catches an operation tagged `internal` and nothing else, proved here by adding one (Q9) rather
+      than by retagging an existing one. Recommend ratification, no rework.
+  - id: PO-3
+    severity: low
+    ask: 'AC-8 names two mock call sites. There is one, and there has only ever been one. Correct the AC.'
+  - id: PO-4
+    severity: low
+    ask: >-
+      AC-6's third falsification says a PlatformErrorResponse-shaped body "reddens the
+      schema-validity assertion alone". Measured (Q10), a nested body reddens the pre-existing
+      code-differs assertion first and never reaches the schema check. The case the schema assertion
+      actually discriminates is a shape change that PRESERVES the code — e.g. a dropped `message`
+      (Q11). The AC should name that case instead.
+  - id: PO-5
+    severity: low
+    ask: >-
+      Open Question 2 is now a three-file pattern, not two: docs/qa/gates/10.15-*.yml:20,128 and
+      docs/qa/gates/10.16a-*.yml:133 all carry a status set that is false about the current
+      document. @po declined a standing rule at validation. Worth revisiting once, at epic level,
+      since every future grep for this literal will keep finding them.
+
+evidence:
+  environment:
+    host_load_at_start: 'load averages 6.52 6.52 6.18'
+    host_load_at_full_run: 'load averages 8.42 8.33 7.09 — no concurrent Gradle run; daemons idle at 0% CPU, verified with ps before each run'
+    sequential: 'Every Gradle invocation ran alone. No two overlapped.'
+    rerun_tasks: 'Every backend invocation used --rerun-tasks (the contract is not a declared :test input).'
+    gradle_check: 'NOT RUN — MED-2. A hang is never a pass. spotlessCheck was run instead: BUILD SUCCESSFUL in 1s.'
+  backend:
+    - cmd: "./gradlew test --rerun-tasks --tests 'com.citi.put.checks.studio.*'"
+      result: 'BUILD SUCCESSFUL in 4m 41s. P=709 F=0 S=7 (716). Skips: ExecutionVideoExternallyGatedCriteriaTest x2, ExternallyGatedCriteriaTest x3, ExecutionReadinessTest x1, TargetPolicyGapTest x1 — identical to the reported set.'
+    - cmd: "./gradlew test --rerun-tasks --tests 'com.citi.put.checks.studio.evidence.*' --tests 'com.citi.put.checks.studio.StudioContractTest'"
+      result: >-
+        BUILD SUCCESSFUL in 25s. P=98 F=0 S=2. Per class: ExecutionVideoContractTest 17,
+        ByteRangeRequestTest 16, ExecutionVideoEvidenceIT 15, StudioContractTest 14,
+        ExecutionVideoAuthorizationIT 14, ExecutionVideoRangeIT 9,
+        ExecutionVideoExternallyGatedCriteriaTest 4 (+2 skipped), VideoObjectStoreSurfaceTest 3,
+        ExecutionVideoStoreBindingIT 2, ExecutionVideoRefusalEnvelopeIT 2,
+        ExecutionVideoContractEscalationTest 2.
+    - cmd: './gradlew spotlessCheck'
+      result: 'BUILD SUCCESSFUL in 1s.'
+  plus_four_attribution:
+    claim: 'the +4 over the 712 baseline is ExecutionVideoContractTest 15->17 and ExecutionVideoRefusalEnvelopeIT 0->2'
+    verified: >-
+      Not assumed. @Test method counts at 72e95cbbd vs HEAD, per file: ExecutionVideoContractTest
+      15 -> 17; ExecutionVideoEvidenceIT 10 -> 10; ExecutionVideoContractEscalationTest 2 -> 2;
+      StudioContractTest 14 -> 14; ExecutionVideoRefusalEnvelopeIT new, 2. No other test file in the
+      diff. The measured run then shows exactly those per-class totals. The attribution holds.
+  frontend:
+    - cmd: 'npx vitest run'
+      result: '541 passed / 2 failed (543); 38 files passed / 2 failed (40).'
+      failures: >-
+        confirmedRevisionEscalation.test.ts x2 (story 10.11c's deliberate Class C escalation,
+        unrelated) and ChecksLayout.a11y.test.tsx, which fails at FILE level on the dangling
+        @put/core-components symlink (ENV-1) and contributes no counted test. Identical to the
+        reported before/after figure.
+    - cmd: 'npx vitest run src/services/mocks/studio'
+      result: '206 passed / 2 failed (208) — the same two 10.11c reds. studioContract.test.ts 54/54, studioVideoHandler.test.ts 10/10.'
+    - cmd: 'npm run type-check'
+      result: >-
+        exit 2, EXACTLY the two known TS2307 errors: ChecksLayout.tsx(6,33) and
+        navigationSetup.ts(1,36), both "Cannot find module '@put/core-components'". Pre-existing,
+        ENV-1.
+    - cmd: 'npm run lint'
+      result: >-
+        exit 2, CANNOT START — "ESLint couldn't find the config \"@typescript-eslint/recommended\"
+        to extend from", referenced from frontend/.eslintrc.json. Zero files linted. NOT REPORTED AS
+        PASSED (ENV-1(b)).
+    - note: '`npm test` in frontend/ is bare vitest (watch mode) and never exits; every figure above is from `npx vitest run`.'
+  studio_runner:
+    - cmd: 'npm test'
+      result: '984 passed / 29 skipped (1013); 49 files passed / 1 skipped (50). confinement.test.ts 18/18.'
+    - cmd: 'npm run type-check'
+      result: >-
+        exit 2, ONE error: test/fixtures-tier/deadline-cleanup.test.ts(558,40) TS2345
+        (SnapshotOptions). Pre-existing and documented; not this story's.
+    - cmd: 'npm run lint'
+      result: 'exit 0, clean (its own flat config, unaffected by ENV-1).'
+    - cmd: 'npm run build'
+      result: 'exit 0, clean.'
+    - cmd: 'npm run check:pins'
+      result: 'exit 0, OK. playwright 1.63.0 consistent across package.json, lock, Dockerfile and dist/runtime-versions.json.'
+  independent_derivations:
+    contract_partition: >-
+      Parsed docs/specs/studio/openapi.yaml with the runner's own `yaml` package and bucketed every
+      operation declaring a 401 by the `internal`/`runner`/`api-callback` tags, without reference to
+      the test: PUBLIC 12 (all -> SessionUnauthorized), CALLBACK 2 (both -> Unauthorized), RUNNER 4
+      (all -> RunnerUnauthenticated), ORPHAN 0. The twelve operationIds are exactly
+      PUBLIC_OPERATIONS_DECLARING_UNAUTHENTICATED's members. `grep -c` of the SessionUnauthorized
+      $ref line agrees at 12.
+    untouched_components: >-
+      The diff removes no line of components.responses.Unauthorized or
+      components.schemas.ErrorResponse; both are byte-unchanged, as AC-2 requires.
+    escalation_region: >-
+      Hashed at 72e95cbbd and at HEAD by this reviewer with the same awk range. Identical:
+      708fdbad270a220577dcdaead413d1aa3a49980f31aaab3a018af9e743545f2a.
+    pin: >-
+      `git show 72e95cbbd:docs/specs/studio/openapi.yaml | shasum -a 256` = d55d7737…, equal to the
+      base's BASE_SHA256 at :198 — green on arrival, FOC-07 step 2 properly sequenced. HEAD's file =
+      d9f5f2a2…, equal to BASE_SHA256 at :217.
+    scope: >-
+      `git diff --name-status 72e95cbbd HEAD` = 12 files, zero backend/src/main/**, zero
+      frontend/src/** outside services/mocks/studio/.
+
+not_proven:
+  - >-
+    AC-9's F1/F2 separation (reverting the mock reddens exactly three frontend tests; reverting only
+    studioVideoHandler's expectation reddens one) was NOT re-run by this reviewer. It was verified by
+    reading the two files, which do test different things — byte-shape vs body-shape. Stated as
+    inferred, not measured.
+  - >-
+    AC-10's middle state (pin red after the document edit, before the re-anchor) was NOT re-run. It
+    is entailed by the two states that were measured here, and @dev reproduced it as P1, but this
+    gate did not independently observe it.
+  - >-
+    @dev's M1, M2, M3a-d, M5a, M5b, M6, M8, M9, M10, M11, F1, F2 and P1 were not re-executed. Eleven
+    mutations of this reviewer's own were written instead, which is the discipline this epic asks
+    for; where a Q-mutation overlaps a @dev one (Q5a/Q5b vs M3a/M3b, Q4 vs M8, Q11 vs M9) the two
+    agree.
+  - >-
+    REF-DANGLE-1's scope beyond the three suites actually run: the mutation was run against the
+    backend window, the frontend studio mock directory and the runner's contract.test.ts. It was NOT
+    run against the full frontend suite or the full runner suite, so "nothing anywhere catches a
+    dangling $ref" is measured for those three and inferred (from grepping for OpenAPI parsers and
+    ref-resolution helpers, of which the repository has none outside the runner's stub-driven test)
+    for the rest.
+  - >-
+    `./gradlew check` was not run, here or by @dev. MED-2 says it hangs, the orchestrator instructed
+    that it not be attempted, and a hang is never a pass. Whatever checkstyle/spotbugs/jacoco would
+    have said about the five changed test files is unknown. spotlessCheck alone is clean.
+  - >-
+    The frontend `npm run lint` result is unknown, not passing. The config is broken and zero files
+    were linted. Nothing in this gate may be read as a lint pass for the three changed frontend
+    files.
+
+recommendation: >-
+  MERGE. The story delivers exactly what ADR-002 §24 and §25 authorize, with no production code, a
+  correctly sequenced pin move, and guards that this reviewer tried eleven ways to make pass
+  vacuously and could not — the only mutations that came back green are the three that expose
+  coverage the acceptance criteria never asked for. Route PO-1 through PO-5 to @po; the four
+  backlog items and PHANTOM-1's correction do not gate this story.
