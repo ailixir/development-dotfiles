@@ -130,9 +130,14 @@ public class StudioController {
     return ResponseEntity.ok(studioService.confirmCompile(id, request, auth));
   }
 
+  /**
+   * Soft-deletes a draft. Owners and explicitly authorized administrators of its CSI only; an
+   * unknown, already deleted or quarantined draft is refused exactly like a draft the caller may
+   * not write (ADR-002 §27.2).
+   */
   @DeleteMapping("/tests/{id}")
-  public ResponseEntity<Void> deleteTest(@PathVariable UUID id) {
-    studioService.softDeleteTest(id);
+  public ResponseEntity<Void> deleteTest(@PathVariable UUID id, Authentication auth) {
+    studioService.softDeleteTest(id, auth);
     return ResponseEntity.noContent().build();
   }
 

@@ -234,6 +234,11 @@ paths:
       tags: [tests]
       operationId: getTest
       summary: Read one draft
+      description: |
+        Authorized against the draft's CSI before anything is returned. An unknown id, a
+        soft-deleted or quarantined draft, and a draft on a CSI the caller may not read all answer
+        the same `403 STUDIO_FORBIDDEN` with no resource detail. This route never answers `404`;
+        `400` is reserved for a malformed request (ADR-002 §27).
       responses:
         '200':
           description: The draft
@@ -354,6 +359,11 @@ paths:
         `sourceRevision` and `configurationRevision` are required and carry the optimistic check.
         A mismatch is `409 STALE_REVISION` and changes nothing. A different `csiId` is
         `409 CSI_IMMUTABLE`.
+
+        Only an owner or an explicitly authorized administrator of the draft's CSI may save. An
+        unknown id, a soft-deleted or quarantined draft, and a draft on a CSI the caller may not
+        write all answer the same `403 STUDIO_FORBIDDEN` before any revision is compared, and
+        nothing is written. `400` is reserved for a malformed request (ADR-002 §27).
       requestBody:
         required: true
         content:
@@ -393,8 +403,9 @@ paths:
 
             **No lifecycle code appears here, deliberately.** A soft-deleted or quarantined draft is
             not visible to this route's read at all — the single visibility predicate excludes it —
-            so the save resolves as an unknown test and answers `400`, exactly as it does for an id
-            that never existed. Refusal with `TEST_DELETED`/`TEST_QUARANTINED` belongs to
+            so the save is refused `403 STUDIO_FORBIDDEN`, exactly as it is for an id that never
+            existed or a draft on a CSI the caller may not write (ADR-002 §27).
+            Refusal with `TEST_DELETED`/`TEST_QUARANTINED` belongs to
             compile, confirm-compile and execute, which are the three operations architecture §8.3
             and the quarantine migration name as having to *reject* rather than merely not see
             (ADR-002 §14 sweep).
@@ -411,7 +422,13 @@ paths:
       tags: [tests]
       operationId: deleteTest
       summary: Soft delete a draft
-      description: Rejects new execute/compile; authorized history stays readable.
+      description: |
+        Rejects new execute/compile; authorized history stays readable.
+
+        Only an owner or an explicitly authorized administrator of the draft's CSI may delete. An
+        unknown id, an already soft-deleted or quarantined draft, and a draft on a CSI the caller
+        may not write all answer the same `403 STUDIO_FORBIDDEN`, and nothing is written. `400` is
+        reserved for a malformed request (ADR-002 §27).
       responses:
         '204': { description: Deleted }
         '400': { $ref: '#/components/responses/BadRequest' }
