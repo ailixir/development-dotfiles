@@ -22,6 +22,17 @@ const VIDEO_PATH = available.videoPath!;
 
 const previousBase = process.env.REACT_APP_API_BASE_URL;
 
+/**
+ * REL-004: every test that calls `loadWithBase` gets this bound instead of Vitest's 5 s default.
+ *
+ * After `vi.resetModules()` the first such test imports the panel's whole module graph (MUI
+ * included) from scratch. Run alone at load 7–9 that took about 0.5 s. In @qa's full-suite runs
+ * it took 1151–3206 ms, and once, at load 17, 5121 ms, which timed out. The row that runs first is
+ * the slow one, and under `-t` that can be any row, so every row gets the bound. 30 s is about six
+ * times the slowest measured. Only the time allowed changes: no assertion is removed or loosened.
+ */
+const FRESH_IMPORT_TIMEOUT_MS = 30_000;
+
 afterEach(async () => {
   if (previousBase === undefined) {
     delete process.env.REACT_APP_API_BASE_URL;
@@ -114,14 +125,14 @@ describe('AC-6: the URL is the API origin followed by videoPath, verbatim', () =
     const url = urls.studioVideoUrl(VIDEO_PATH);
     expect(url).toBe(`${expectedOrigin()}${VIDEO_PATH}`);
     expect(url.match(/\/api\/v1/gu)).toHaveLength(1);
-  });
+  }, FRESH_IMPORT_TIMEOUT_MS);
 
   it.each(CASES)('$name: the rendered <video src> and download href', async ({ base, expectedOrigin }) => {
     const { src, href } = await renderedUrls(base);
     expect(src).toBe(`${expectedOrigin()}${VIDEO_PATH}`);
     expect(href).toBe(`${expectedOrigin()}${VIDEO_PATH}?download=true`);
     expect(src.match(/\/api\/v1/gu)).toHaveLength(1);
-  });
+  }, FRESH_IMPORT_TIMEOUT_MS);
 
   it('a videoPath that is not a rooted API path is refused rather than composed', async () => {
     const { urls } = await loadWithBase(PATH_ONLY_BASE);
@@ -133,7 +144,7 @@ describe('AC-6: the URL is the API origin followed by videoPath, verbatim', () =
     ]) {
       expect(() => urls.studioVideoUrl(bad), bad).toThrow(/not a rooted API path/u);
     }
-  });
+  }, FRESH_IMPORT_TIMEOUT_MS);
 });
 
 describe('AC-7: no credential in a query string — playback has no query keys, download has exactly one', () => {
@@ -147,7 +158,7 @@ describe('AC-7: no credential in a query string — playback has no query keys, 
     const download = new URL(urls.studioVideoDownloadUrl(VIDEO_PATH));
     expect([...download.searchParams.keys()]).toEqual(['download']);
     expect(download.searchParams.get('download')).toBe('true');
-  });
+  }, FRESH_IMPORT_TIMEOUT_MS);
 
   it.each(CASES)('$name: the rendered URLs’ query key sets', async ({ base }) => {
     const { src, href } = await renderedUrls(base);
@@ -155,12 +166,12 @@ describe('AC-7: no credential in a query string — playback has no query keys, 
     const download = new URL(href);
     expect([...download.searchParams.keys()]).toEqual(['download']);
     expect(download.searchParams.get('download')).toBe('true');
-  });
+  }, FRESH_IMPORT_TIMEOUT_MS);
 
   it('the builders take videoPath and nothing else', async () => {
     // The "reads no token, storage or session source" half is a review item (Dev Agent Record).
     const { urls } = await loadWithBase(PATH_ONLY_BASE);
     expect(urls.studioVideoUrl.length).toBe(1);
     expect(urls.studioVideoDownloadUrl.length).toBe(1);
-  });
+  }, FRESH_IMPORT_TIMEOUT_MS);
 });
