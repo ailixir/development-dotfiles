@@ -1618,7 +1618,7 @@ the bypass as live (out of scope, left).
 
 ---
 
-## Wave 7 — closed on `epic/EPIC-10-w7` (2026-09-16/17)
+## Wave 7 — closed on `epic/EPIC-10-w7` (2026-09-16)
 
 **Story 10.16 is implemented and both halves are QA PASS and merged. It is not Done: AC-19 stays
 Blocked on SPK-06 phase B.** No cross-story integration defect was found at either merge — the first
@@ -1704,7 +1704,7 @@ backlog) and @pm (the manifest). **Nothing merges across that line until they ha
 
 ---
 
-## Integration note for the studio-inference program (2026-09-17)
+## Integration note for the studio-inference program (2026-09-16)
 
 **To the coordinator of stories 10.20–10.26:** `epic/EPIC-10` was fast-forwarded, by the user's
 decision, from `e1684f8c7` to `b343c232d` — the wave-7 line previously held on `epic/EPIC-10-w7`.
@@ -1734,3 +1734,83 @@ before and after). What arrived:
 Verification of the wave-7 line on a clean tree is in *Wave 7 — closed*, above. It was **not** re-run
 inside `wt/epic`, because your uncommitted changes (38 backend sources among them) make that tree a
 different system.
+
+---
+
+## Wave 8 — unblocked, routed, in flight (2026-09-16/17)
+
+*(The two headings above were misdated 2026-09-17 by the orchestrator and are corrected to
+2026-09-16; the date rolled over to 2026-09-17 during this section.)*
+
+### User decisions recorded in this stretch
+- **Integration:** `epic/EPIC-10-w7` fast-forwards into `epic/EPIC-10` inside `wt/epic`, by
+  `--ff-only`, only when none of the incoming files is dirty there; the other session's working tree is
+  fingerprinted before and after every fold (diff sha256 + `status -uall`) and has been byte-identical
+  every time.
+- **Contract amendment by the other session** (5 prose lines, re-pinned to `09720ae2…`): recording it in
+  ADR-002 §13 is left to that program's 10.20.
+- **ED-02:** owner **PUT Core platform (Core BFF)** for identity *and* vault; the vault stays mocked for now
+  and the user sets up the plumbing; delivered outside Epic 10 as a linked external ticket (ID to be
+  linked). Not traceable to any source document — recorded as the user's decision.
+- **MED-2:** owner **@devops**; fix not scheduled; the narrow `--rerun-tasks` mitigation stays.
+- **F-3:** our QA-gated `httpClient.test.ts` fix was **dropped from the epic line** (`7357082e3`) because
+  the other session carries an equivalent uncommitted fix to the same file; 10.19 AC-19(c) confirms
+  whichever lands.
+- **10.33 (PROD-1): deferred to the other session's fix.** Its uncommitted tree already guards the same
+  two thunks and adds the same test file. 10.33 stays **Draft** as the acceptance spec; when that fix
+  lands, @qa gates it against 10.33's ACs (all four consumers — `ChecksStudioPage`, `CheckTypeSelector`,
+  `AllChecksPage`, `FeatureGate` — and FOC-08). 10.19 stays blocked on that gate.
+- **The other session may own the broader frontend cleanup** it is doing (`.eslintrc.json`, `App.tsx`,
+  `ChecksLayout.a11y.test.tsx`, several slices/components — areas this epic had assigned to ENV-1, 10.19's
+  skip link and 10.33), **but every merge/reconciliation must account for its latest changes.** 10.19
+  verifies what lands rather than re-fixing it.
+
+### @architect rulings (ADR-002 §24–§28, `ed058996c`)
+Video route declares `401`/`403`/`503 VIDEO_STORE_UNAVAILABLE`; the 401 envelope split is backend-wide
+(filters write `{"error":{…}}`, handlers `{"error":"CODE",…}`) — ADR-003/O-19 outside the epic;
+`SessionUnauthorized`/`PlatformErrorResponse` for the public 401s. F-5: no bound moves; calibrate per
+image via SPK-06 phase B; a slower-machine failure stays red as evidence. O-10: `403 STUDIO_FORBIDDEN` for
+unknown/withheld/forbidden drafts, never `404`. **O-18 (high) raised by reading:** POST/PUT/DELETE
+`/tests` had no CSI write authorization.
+
+### Routing (@po) and the new stories
+10.30 (O-18 + §27.6 prose), 10.31 (§24/§25, after 10.30 — FOC-07), 10.32 (O-20 calibration), 10.33
+(PROD-1, deferred as above). Ids start at 10.30 to leave 10.27–10.29 to the other program. All of
+10.19's drafting gates are lifted; 10.19 validated **GO 8/10** — not Done while any staging AC is blocked.
+O-11 turned out closed (10.14 `V17`); O-2a is owned by Platform/SRE.
+
+### O-18 — demonstrated, then fixed
+@qa's failing-first tests (`a8379128d`): **viewer, contributor and stranger each got 200/204 on another
+CSI's draft and the database rows changed**; POST succeeded on a view-only CSI; PUT/DELETE on absent,
+deleted or quarantined drafts answered `400 "UI Test not found"` even to an administrator (existence
+leak). Orchestrator re-ran: 19 passed / 5 failed, exactly the refusals. @dev's fix (`3b245079b`…):
+`requireWrite` on create/save/delete through the visible read; §27.6 prose applied, pin moved to
+`d55d7737…` from the file; studio package 698/2/7. @qa: **CONCERNS** — DETACH-1 (the added
+`EntityManager.detach` silently drops a caller transaction's writes; the other session's
+`StudioAuthoringService.update` is such a caller) → fixed by refresh-after-lock (`63811e4a3`), in
+re-review. Also DELETE-RACE-1 (low, backlog: the authorized delete takes no lock and can revert a
+concurrent save), RECON-1 (the other session's `StudioService.java` merges textually clean but
+authorizes through the withheld read, before the revision check, and leaves delete unchecked — renaming
+its `requireCompile` call is not a reconciliation).
+
+### Carry-forward test fixes — PASS, folded (minus F-3)
+TEST-005, REL-004, ENV-2 (shared `setup.ts` imports the store under a single-purpose MSW server;
+reproduced red→green with a stand-in on another port; the real `:3000` process was never touched), F-7.
+Post-merge on `w7`: frontend 541/2 ×2, runner 957/29, fixtures 89/10. New: PROD-1, FOC-08.
+
+### 10.32 — implemented, in its gate
+`STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS` (default 0, no real value set) rides the launch message to
+`takeRunOrigin`; chart allowlist + `values.yaml "0"`; runner 984/29, fixtures 90/10 ×2, deployment 184/4.
+Scope escalation to @po: the child echoes the applied value on `ready`, which needed an optional field in
+`src/server/adapters.ts`. **Guaranteed reconciliation conflict** on `_helpers.tpl`'s single
+`acceptedEnvKeys` line with the other session (keep both sets).
+
+### Merge-line conflicts now known (for whoever reconciles)
+| File | Ours | Theirs (uncommitted in `wt/epic`) |
+|---|---|---|
+| `docs/specs/studio/openapi.yaml` + `confinement.test.ts` pin | 10.30 prose → `d55d7737…`; 10.31 will move it again | 5 prose lines → `09720ae2…` |
+| `StudioService.java` | 10.30 checks, refresh-after-lock | RECON-1 shapes |
+| `helm-chart/.../_helpers.tpl` | +1 accepted key (10.32) | +4 accepted keys |
+| `studio-runner/test/reporting/httpClient.test.ts` | dropped (F-3) | their fix |
+| `frontend/src/store/slices/{features,sources}Slice.ts` | none (10.33 deferred) | their guard |
+Rule for every row: re-read hashes from the merged file; re-run both trees' suites on the merged tree.
