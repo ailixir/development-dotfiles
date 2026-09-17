@@ -1987,3 +1987,80 @@ resolves; it is a source-set breakage that only appears once both trees are in o
 
 Recorded now because the cost of discovering it during the fold is much higher than the cost of knowing
 it beforehand. It needs an owner decision — it is not a defect in either tree.
+
+## CORRECTION — the gateway "breakage" does not exist (2026-09-17)
+
+**The section immediately above is wrong on its central claim, and is corrected here rather than
+edited, so the error and its cause stay legible.**
+
+I wrote that the other session **deletes** `VertexLlmGatewayClient.java` and `VertexAiClientFactory.java`
+and that four of our test files would therefore fail to compile. @architect checked and found the
+opposite; I then verified it myself, read-only, in `wt/epic`:
+
+```
+ D backend/src/main/java/.../gateway/VertexAiClientFactory.java
+ D backend/src/main/java/.../gateway/VertexLlmGatewayClient.java
+?? backend/src/test/java/.../gateway/VertexAiClientFactory.java
+?? backend/src/test/java/.../gateway/VertexLlmGatewayClient.java
+```
+
+They are **demoted, not deleted** — moved into the test source set byte-identically, with
+`google-cloud-vertexai` moved from `implementation` to `testImplementation`
+(`backend/build.gradle.kts:69`), under their own comment calling them *"test-only historical regression
+fixtures"*. `grep -rl 'com.google.cloud.vertexai' backend/src/main/java` in their tree returns nothing.
+Their `GenAiLlmGatewayClient` implements the same `LlmGatewayClient` interface, and they kept legacy
+constructors on the three widened records. **The four tests compile. There is no breakage to
+reconcile.**
+
+**How I got it wrong:** I read a `git status` truncated to the first 30 of 263 paths, saw the two `D`
+lines, and concluded deletion. The matching `??` additions were further down a list I never looked at.
+A truncated listing is not a listing; the conclusion outran the evidence. The same failure would have
+sent an agent to "fix" four files that were never broken.
+
+**What actually blocks the `--ff-only` fold:** 13 paths, **none of them under `.../gateway/`**. The
+gateway package is not in the incoming set at all (`git diff --stat ff0513385 HEAD` over the gateway
+tree and `build.gradle.kts` is empty).
+
+### The ruling that came out of it — `docs/architecture/gateway-client-seam.md` (`7bed47129`)
+
+@architect answered the general question the user asked rather than only this collision:
+
+> The gateway's behavioural contract belongs to `LlmGatewayClient` and must be pinned by a
+> client-agnostic conformance suite. **A concrete client may be named in a test only when the property
+> under assertion is false of the interface.**
+
+Three tiers: **contract** (parameterised over implementations), **transport** (retry arithmetic counted
+in wire events, SDK auto-retry disablement, endpoint construction, credential sourcing — none of which
+an interface can express), **wiring** (where the selected implementation *is* the subject). Plus the
+clause this incident teaches: **replacing a client does not delete its tests, it demotes them** — a
+conformance suite with one implementation is that implementation's test with extra indirection.
+
+The existing coupling is judged **correct, not a defect**: it is four files deep, all inside the package
+that owns the client, and zero concrete-client references exist anywhere else in the backend. The
+coupling lives in the fixture, not the assertion, which is why the swap was survivable.
+
+Two properties would be genuinely lost to a naive interface rewrite and must stay Tier 2: that the SDK's
+own auto-retries are off (counted in *wire* events, which the client's own counter cannot see inflated),
+and that a custom scheme and port survive the SDK — without which a client silently reaching a real
+Google endpoint passes everything else.
+
+**Sequencing:** touch nothing in `w7` now; at the fold **verify, don't fix** (two greps); extract the
+conformance tier later, in the merged tree, under its own story — a 600-line test refactor during a
+241-path reconciliation is the worst available moment.
+
+**Filed as a note, not an ADR**, and deliberately *not* written into `studio-execution.md` §4.1, because
+that file is dirty in their tree and editing it would create a new fold blocker for a rule that is not
+urgent. **§4.1 still names the Vertex SDK and is now wrong for their tree — flag at the fold.**
+
+### Flagged to the other program, not ruled on
+Their `LlmGatewayClient` gains two `default` methods. The budgeted `propose` checks the budget at entry
+then delegates to the unbudgeted call, so an implementation that forgets to override compiles, passes
+any interface-level suite, and runs an egress call the budget cannot cancel mid-flight — latent, since
+their client enforces cancellation another way, but it makes a cost exposure silent. And
+`compilationSettings()` defaults to a literal claiming `"adapter":"disabled-or-test"`; a method whose
+wrong answer is a correctness fault should be abstract, not defaulted.
+
+### Still unknown
+Their tree is uncommitted. If they delete rather than demote before committing, the breakage I described
+becomes real after all. @architect could not compile their tree (it is read-only to us), so *"the four
+tests pass there"* is **inferred by inspection, not verified**.
