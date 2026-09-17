@@ -4,9 +4,24 @@ story_title: Evidence state, playback and step seek — runner test-helper half 
 epic: EPIC-10
 wave: 7
 
-gate: CONCERNS
+gate: PASS
 
 status_reason: >-
+  RE-REVIEW at 4ffc4020c (2026-09-16): PASS. F-1 is closed, and this reviewer verified that by mutation.
+  The new boundary test places each of the 10 transcribed steps at repaint + tolerance - 0.1 ms and
+  requires the default slack to match that repaint, while a slack 0.2 ms narrower must not. Slack 90
+  and slack 99 each turn exactly that test red. T3 (moving the report onto the effect) turns its contrast
+  assertion red, so the step really does sit at the boundary. The tolerance is now read as text from
+  seek-measurement.test.ts. Sixteen probes, run in place and restored byte-identically, show that the read
+  is not a vacuous guard. It fails closed (a loud collection error) on every change of declaration form
+  tried, and on any second column-0 declaration, including one inside the skipped AC-12b describe. It
+  follows a change of value (120 turns the test red; 80 turns check (b) red, which is honest). It ignores
+  prose. Its residual weakness (F-7) is that it binds to the declaration, not to the value the median
+  assertion actually uses. A documented literal has that weakness too, plus it misses every change of
+  value. So the read is strictly better than the literal it replaced. Suites at 4ffc4020c: 947 passed / 29
+  skipped; fixtures 89 / 10; lint 0. Type-check has the one pre-existing error, outside this diff. F-2
+  through F-6 carry unchanged and none blocks the merge.
+  ORIGINAL REVIEW at 594a3252e: CONCERNS, for the reasons below.
   The fix is a correction, not a loosening, and this reviewer established that by measurement rather
   than by reading the developer's argument. It also reproduced the defect independently. With the
   helper temporarily set back to slack 60, 2 of 8 fixtures-tier runs failed, both on the MEDIAN
@@ -45,7 +60,8 @@ status_reason: >-
 reviewer: Quinn (@qa)
 updated: '2026-09-16T00:00:00Z'
 branch: story/10.16b
-head_sha: 594a3252e
+head_sha: 4ffc4020c
+previous_head_sha: 594a3252e
 base_sha: a02f1d505
 worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.16b
 scope: >-
@@ -251,6 +267,7 @@ findings:
       as text and compare it with the local copy. That is a read, not an edit, so AC-16 still holds.
     owner: '@dev'
     blocking: false
+    status: CLOSED at 4ffc4020c (Q1 and Q1b red, T3 red; see rereview_4ffc4020c)
   - id: F-2
     severity: low
     title: The transcribed recordings live only in an ephemeral scratchpad
@@ -310,26 +327,106 @@ findings:
     owner: '@devops / orchestrator'
     blocking: false
 
+  - id: F-7
+    severity: low
+    title: The tolerance text read binds to the declaration, not to the value the median assertion uses
+    detail: >-
+      S7 (the assertion becomes MEDIAN_TOLERANCE_MS + 50) and S8 (an indented shadowing const 150 in the
+      AC-12a describe) both leave webm.test.ts green while the measurement asserts 150. S10 (a reformat
+      plus a column-0 comment decoy) also survives, but it is contrived. A documented literal would
+      miss all three as well, so this is a residual, not a regression.
+    remedy: >-
+      Optional, small. In readMedianTolerance, also require exactly one occurrence of
+      `.toBeLessThan(MEDIAN_TOLERANCE_MS);` and exactly one match of
+      /^\s*(?:export\s+)?(?:const|let|var)\s+MEDIAN_TOLERANCE_MS\b/gm (any indentation, any
+      form). By inference (not run), that would catch S7, S8 and S10. Otherwise accept the gap: any such edit to
+      seek-measurement.test.ts is itself a widening that the epic's no-widening rule polices in review.
+    owner: '@dev (optional)'
+    blocking: false
+
 acceptance_criteria:
   AC-15: MET — 10 runs recorded with (a)–(d); failing assertion quoted verbatim (median, twice);
     reproduced independently, 2 of 8 at slack 60.
   AC-16: MET — seek-measurement.test.ts absent from the diff; sha256 identical to the base.
   AC-17: MET — fix confined to firstChangeAtOrAfter's default; checks (a)–(c) are executable and
     falsifiable (M1–M4 reproduced); (d) is honestly labelled as diff evidence; data from real
-    recordings, provenance verified by QA. Residual gap F-1.
+    recordings, provenance verified by QA. F-1 closed at 4ffc4020c by the boundary test.
   AC-18: MET — 5 of 5 recorded, before/after rate reported (14/90 → 0/50), no claim that the flake is
     gone; this reviewer adds 2 of 2 (0/20 steps) and the orchestrator 3 of 3.
 
 before_merge:
   required: []
   recommended:
-    - F-1 boundary test (small; the gate would then read PASS on re-review)
-    - F-6 resolve the story-file conflict at merge time
+    - F-6 resolve the story-file conflict at merge time (10.16a/10.16b both edit docs/stories/10.16.story.md)
+    - F-7 optional tightening of the tolerance text read
+  done:
+    - F-1 boundary test (4ffc4020c)
   after_merge_before_10_19:
     - F-4 @po ruling on the stale comments
     - F-5 @architect note against AC-12c / SPK-06
     - F-3 owner for the httpClient race
     - F-2 decision on keeping the recordings
+
+rereview_4ffc4020c:
+  scope: >-
+    Commit 4ffc4020c only (webm.test.ts plus the story record). webm.ts is 771d98448cd1… and
+    seek-measurement.test.ts is a0d3561d…28c9 at HEAD, identical to the base a02f1d505.
+  harness: >-
+    Python in a private mktemp directory under $TMPDIR, not the shared scratchpad. Each run checks that
+    its anchor occurs exactly once, applies the edit, runs `npx vitest run test/helpers/webm.test.ts
+    --coverage.enabled=false`, restores the file from a copy, and asserts its sha256 against the base
+    hash. Every row printed RESTORED-OK. Baseline before the rows: 6 passed.
+  f1_closure:
+    - id: Q1
+      mutation: webm.ts slackMs 100 -> 90
+      observed: '1 failed / 5 passed: the new test, "run 7 step 0, reported 99.9: expected 720 to be +0"'
+    - id: Q1b
+      mutation: slackMs -> 99
+      observed: 1 failed / 5 passed, the new test, same message
+    - id: T3
+      mutation: webm.test.ts reportedMs = step.effectMs (boundary removed)
+      observed: '1 failed: the contrast assertion, "reported 0: expected +0 not to be +0"'
+    - note: >-
+        Not re-run by this reviewer: Q1c (slack 99.95, which survives by design below the 0.1 ms print
+        resolution). The developer's record and the arithmetic agree on it. The orchestrator
+        independently saw 90 and 99 red and 100 green.
+  text_read_probes:
+    target: test/fixtures-tier/seek-measurement.test.ts, mutated in place and restored (AC-16 forbids a committed change, not a probe)
+    rows:
+      - {id: S1, mutation: 'value 100 -> 120', observed: 'RED: new test, "reported 119.9"', reading: follows a widening}
+      - {id: S2, mutation: 'value 100 -> 80', observed: 'RED: (b), "expected 85.3 to be less than 80"', reading: 'follows a tightening; the red is honest, because run 3 step 3 really is out of an 80 ms tolerance'}
+      - {id: S3, mutation: 'const MEDIAN_TOLERANCE_MS: number = 120;', observed: 'collection error, "found 0"', reading: fails closed}
+      - {id: S4, mutation: 'export const … = 120;', observed: 'collection error, "found 0"', reading: fails closed}
+      - {id: S5, mutation: 'value 1_20', observed: RED (reads 120), reading: separators handled}
+      - {id: S6, mutation: 'value 120.0', observed: 'collection error, "found 0"', reading: fails closed}
+      - {id: S13, mutation: 'const WIDER = 150; const MEDIAN_TOLERANCE_MS = WIDER;', observed: 'collection error, "found 0"', reading: fails closed}
+      - {id: S9, mutation: 'column-0 declaration of 500 inside the skipped AC-12b describe', observed: 'collection error, "found 2"', reading: cannot bind to the skipped describe}
+      - {id: S11, mutation: 'real declaration kept, plus a column-0 copy inside a template string', observed: 'collection error, "found 2"', reading: cannot bind to a string}
+      - {id: S12, mutation: '// const MEDIAN_TOLERANCE_MS = 150; line comment added', observed: GREEN, reading: 'correct; prose is ignored and the real value is still 100'}
+      - {id: S7, mutation: 'median assertion changed to toBeLessThan(MEDIAN_TOLERANCE_MS + 50)', observed: GREEN, reading: 'SURVIVES; the read binds to the declaration, not to the assertion (F-7)'}
+      - {id: S8, mutation: 'indented const MEDIAN_TOLERANCE_MS = 150 shadowing it inside the AC-12a describe', observed: GREEN, reading: 'SURVIVES; the measurement asserts 150 and the read returns 100 (F-7)'}
+      - {id: S10, mutation: 'real declaration retyped to 150, plus a column-0 copy of the old one inside a block comment', observed: GREEN, reading: 'SURVIVES; binds to the decoy. Contrived, because it needs a reformat and a decoy together (F-7)'}
+    ruling: >-
+      Not shape #1 and not #14, because the read is a parameter lookup, not evidence of behaviour. The
+      anchored, column-0, exactly-one regex excludes the file's own prose mention (line 52), strings,
+      comments and the skipped describe, and it fails loudly on every refactor tried. It can silently
+      give a wrong answer only when the median assertion stops using the top-level declaration (S7, S8)
+      or when a reformat and a column-0 decoy happen together (S10). A documented literal is blind in all
+      three of those cases and also in S1/S5 (it did not read the file at all; verified from the diff). So
+      the read is strictly better than the literal it replaced. The cost is that a benign reformat of an
+      unrelated file breaks a default-tier test, with a clear message.
+  suites:
+    default_tier: 'npm test x1: Test Files 49 passed | 1 skipped (50); Tests 947 passed | 29 skipped (976); load 11.4'
+    fixtures_tier: 'npm run test:fixtures x1: 6 files passed; 89 passed | 10 skipped (99); SEEK errors -0.8 to -59.5 ms'
+    lint: exit 0
+    type_check: 'one error, the pre-existing deadline-cleanup.test.ts(550,40) TS2345, outside this diff'
+  hygiene: >-
+    All three files match their pre-probe hashes (webm.ts 771d98448cd1, webm.test.ts 2703108a531b,
+    seek-measurement.test.ts a0d3561d8cdc). git status was clean before this gate's commit.
+
+history:
+  - {at: 594a3252e, date: '2026-09-16', gate: CONCERNS, reviewer: Quinn (@qa), note: 'F-1 (shape #21), slack >= tolerance protected only by prose'}
+  - {at: 4ffc4020c, date: '2026-09-16', gate: PASS, reviewer: Quinn (@qa), note: 'F-1 closed by the boundary test (Q1, Q1b and T3 red); text read ruled better than a literal; F-7 added (low, advisory)'}
 
 hygiene: >-
   Every mutation was restored and hash-verified (webm.ts 771d98448cd1…, webm.test.ts 96ec1a940289…).
