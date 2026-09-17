@@ -16,7 +16,6 @@ interface StudioState {
     message?: string;
     timestamp: string;
   }>;
-  videoUrl: string | null;
   currentStep: number;
   testConfiguration: {
     browser: 'chrome' | 'firefox' | 'safari' | 'edge';
@@ -34,7 +33,6 @@ const initialState: StudioState = {
   isExecuting: false,
   executionLogs: [],
   stepResults: [],
-  videoUrl: null,
   currentStep: -1,
   testConfiguration: {
     browser: 'chrome',
@@ -55,7 +53,6 @@ const studioSlice = createSlice({
       state.testSteps = action.payload;
       // Reset results when steps change
       state.stepResults = [];
-      state.videoUrl = null;
       state.currentStep = -1;
     },
 
@@ -121,10 +118,6 @@ const studioSlice = createSlice({
       state.currentStep = action.payload;
     },
 
-    setVideoUrl: (state, action: PayloadAction<string | null>) => {
-      state.videoUrl = action.payload;
-    },
-
     updateConfiguration: (state, action: PayloadAction<Partial<StudioState['testConfiguration']>>) => {
       state.testConfiguration = { ...state.testConfiguration, ...action.payload };
     },
@@ -146,7 +139,6 @@ const studioSlice = createSlice({
       state.isExecuting = false;
       state.executionLogs = [];
       state.stepResults = [];
-      state.videoUrl = null;
       state.currentStep = -1;
       state.testIR = null;
       state.generatedCode = '';
@@ -167,7 +159,6 @@ export const {
   updateStepResult,
   setAllStepResults,
   setCurrentStep,
-  setVideoUrl,
   updateConfiguration,
   setTestIR,
   setGeneratedCode,

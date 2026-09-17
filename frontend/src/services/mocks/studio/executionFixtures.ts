@@ -198,12 +198,58 @@ export const logsCompleteExecution: ExecutionSnapshot = baseSnapshot({
   logsTruncated: false,
 });
 
+// ---------------------------------------------------------------------------------------------
+// Story 10.16a, AC-3 — the two cases in which `partial` disagrees with an outcome-based guess.
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * ADR-002 §17.3: *"A recorder that died on a **passing** run **is** partial."* A `PASSED` run whose
+ * `AVAILABLE` recording says `partial: true`. Deriving `partial` from `status !== 'PASSED'` gets this
+ * wrong. No row in `mockExecutions` carries this combination.
+ */
+export const partialRecordingOnPassedExecution: ExecutionSnapshot = baseSnapshot({
+  executionId: executionId('c0'),
+  video: { status: 'AVAILABLE', error: null, expiresAt: '2026-10-14T10:00:40Z', partial: true },
+});
+
+/**
+ * ADR-002 §17.3: *"A deadline kill whose ordered stop flushed cleanly is **not** partial."* A
+ * `ERROR`/`TIMEOUT` run whose `AVAILABLE` recording says `partial: false`. Deriving `partial` from
+ * `errorCode === 'TIMEOUT'` gets this wrong. `mockExecutions`' only timeout row says `partial: true`.
+ */
+export const cleanlyFlushedTimeoutExecution: ExecutionSnapshot = baseSnapshot({
+  executionId: executionId('c1'),
+  status: 'ERROR',
+  errorCode: 'TIMEOUT',
+  endedAt: '2026-09-14T10:02:02Z',
+  durationMs: 120000,
+  stepResults: [
+    { stepIndex: 0, originalText: STEP_TEXT[0], status: 'PASS', offsetMs: 140, durationMs: 2210, message: null },
+    {
+      stepIndex: 1,
+      originalText: STEP_TEXT[1],
+      status: 'RUNNING',
+      offsetMs: 2350,
+      durationMs: null,
+      message: 'Total browser runtime deadline reached',
+    },
+    { stepIndex: 2, originalText: STEP_TEXT[2], status: 'SKIPPED', offsetMs: null, durationMs: null, message: null },
+    { stepIndex: 3, originalText: STEP_TEXT[3], status: 'SKIPPED', offsetMs: null, durationMs: null, message: null },
+  ],
+  logs: [
+    { at: '2026-09-14T10:02:02Z', level: 'ERROR', message: 'Run ended: TIMEOUT', stepIndex: null },
+  ],
+  video: { status: 'AVAILABLE', error: null, expiresAt: '2026-10-14T10:02:02Z', partial: false },
+});
+
 export const executionCorpus: ExecutionSnapshot[] = [
   ...Object.values(errorCodeExecutions),
   passedExecution,
   failedWithSkippedTailExecution,
   logsTruncatedExecution,
   logsCompleteExecution,
+  partialRecordingOnPassedExecution,
+  cleanlyFlushedTimeoutExecution,
 ];
 
 // ---------------------------------------------------------------------------------------------

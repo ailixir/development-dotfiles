@@ -249,7 +249,12 @@ export const TERMINAL_EVIDENCE_PROCESSING: ExecutionSnapshot = frame(11, {
   streamComplete: false,
 });
 
-/** **AC-13.** Evidence *failure* settles the stream too, and says so without touching the outcome. */
+/**
+ * **AC-13.** Evidence *failure* settles the stream too, and says so without touching the outcome.
+ *
+ * `partial` is `false` here (corrected by story 10.16a, AC-14(c)). ADR-002 §17.3: *"It is `false`
+ * with `FAILED` and `UNAVAILABLE`, because a recording that does not exist is not a partial one."*
+ */
 export const TERMINAL_EVIDENCE_FAILED: ExecutionSnapshot = frame(12, {
   status: 'FAILED',
   startedAt: '2026-09-15T10:00:01Z',
@@ -261,7 +266,7 @@ export const TERMINAL_EVIDENCE_FAILED: ExecutionSnapshot = frame(12, {
     status: 'FAILED',
     error: 'The recording could not be uploaded',
     expiresAt: null,
-    partial: true,
+    partial: false,
   },
   streamComplete: true,
 });

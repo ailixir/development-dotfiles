@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import Ajv2020 from 'ajv/dist/2020';
@@ -30,6 +30,15 @@ import {
   runEnablementFor,
 } from '@/components/studio/run';
 import { EXECUTION_FIXTURE_MATRIX, executionCorpus } from './executionFixtures';
+import {
+  NO_RUN_EVIDENCE_MESSAGE,
+  PARTIAL_RECORDING_QUALIFIER,
+  PLAYBACK_FAILED_MESSAGE,
+  VIDEO_EVIDENCE_NARRATIVES,
+  videoEvidenceNarrative,
+} from '@/components/studio/evidence';
+import { studioMockServer } from './server';
+import { resetStudioMocks } from './handlers';
 
 /**
  * Story 10.1 AC-21 — the mocks are checked against the frozen contract, not against themselves.
@@ -743,5 +752,149 @@ describe('story 10.11a: the configured timeout is inside the bound the contract 
   it('the legacy millisecond value would be caught by this schema, so the check discriminates', () => {
     const validate = componentValidator('TestConfiguration');
     expect(validate({ ...defaultConfiguration(), timeoutSeconds: 30000 })).toBe(false);
+  });
+});
+
+/**
+ * Story 10.16a — **AC-1**. The evidence vocabulary, asserted against the document through the
+ * **same** {@link assertSameSet} and the same parsed `openapi` binding (ADR-002 §18.3: *"the other
+ * should extend it rather than write a second one"*). The expected set is read from
+ * `components.schemas.VideoStatus.enum` and never imported from `studioTypes.ts`.
+ */
+function videoStatusEnum(): string[] {
+  return openapi.components.schemas.VideoStatus.enum;
+}
+
+describe('story 10.16a: every VideoStatus renders a distinct, named state (AC-1)', () => {
+  it('the evidence narratives cover VideoStatus exactly, in both directions', () => {
+    const declared = videoStatusEnum();
+    expect(declared.length).toBeGreaterThan(0);
+    assertSameSet(declared, Object.keys(VIDEO_EVIDENCE_NARRATIVES), 'VideoStatus narratives');
+  });
+
+  it('no two states render the same name, and none renders the same statement', () => {
+    const declared = videoStatusEnum();
+    const titles = declared.map((status) => videoEvidenceNarrative(status).title);
+    expect(new Set(titles).size, 'two states render the same name').toBe(titles.length);
+    const statements = declared.map((status) => videoEvidenceNarrative(status).statement);
+    expect(new Set(statements).size, 'two states render the same statement').toBe(
+      statements.length,
+    );
+    for (const title of titles) {
+      expect(title.length).toBeGreaterThan(10);
+    }
+  });
+
+  it('no fixture anywhere says partial: true without an AVAILABLE or PROCESSING recording (AC-14(c))', () => {
+    // ADR-002 §17.3: "It is `false` with `FAILED` and `UNAVAILABLE`, because a recording that does
+    // not exist is not a partial one." EXPIRED has no playable object either. Over every corpus the
+    // frontend ships, including the scripted transport frames that carried the defect.
+    const everySnapshot = [...mockExecutions, ...executionCorpus, ...ALL_SCENARIO_FRAMES];
+    expect(everySnapshot.some((snapshot) => snapshot.video.status === 'FAILED')).toBe(true);
+    const contradicting = everySnapshot.filter(
+      (snapshot) =>
+        snapshot.video.partial &&
+        snapshot.video.status !== 'AVAILABLE' &&
+        snapshot.video.status !== 'PROCESSING',
+    );
+    expect(
+      contradicting.map((snapshot) => `${snapshot.executionId}@${snapshot.revision}:${snapshot.video.status}`),
+    ).toEqual([]);
+  });
+
+  it('a VideoStatus outside the document is an error rather than a generic panel', () => {
+    expect(() => videoEvidenceNarrative('SOMETHING_ELSE')).toThrow(/Unknown VideoStatus/);
+    // An inherited property name is not a state either.
+    expect(() => videoEvidenceNarrative('toString')).toThrow(/Unknown VideoStatus/);
+  });
+
+  it('the playback-failure, partial and no-run wordings are none of the five states', () => {
+    // AC-12: the media-error message must differ from all five narratives.
+    const wordings = videoStatusEnum().flatMap((status) => {
+      const narrative = videoEvidenceNarrative(status);
+      return [narrative.title, narrative.statement];
+    });
+    for (const extra of [PLAYBACK_FAILED_MESSAGE, PARTIAL_RECORDING_QUALIFIER, NO_RUN_EVIDENCE_MESSAGE]) {
+      expect(wordings).not.toContain(extra);
+    }
+  });
+});
+
+/**
+ * Story 10.16a — **AC-13**, the half that needs the document. The mock video route's refusal bodies
+ * are validated against `ErrorResponse` with **this file's** Ajv harness, and every status the route
+ * produces is one the document declares for `getExecutionVideo`. No second validator is added.
+ *
+ * The statuses are read from the operation's `responses`, never transcribed, so a ruling on ESC-1
+ * that declares `401`/`403` changes this set without anyone editing the test.
+ */
+describe('story 10.16a: the mock video route answers only as the document declares (AC-13)', () => {
+  const ORIGIN = 'http://localhost';
+  const declaredStatuses = (): string[] =>
+    Object.keys(openapi.paths['/executions/{id}/video'].get.responses);
+
+  beforeAll(() => studioMockServer.listen({ onUnhandledRequest: 'error' }));
+  afterEach(() => {
+    studioMockServer.resetHandlers();
+    resetStudioMocks();
+  });
+  afterAll(() => studioMockServer.close());
+
+  async function requestVideo(executionId: string, headers?: Record<string, string>) {
+    return fetch(`${ORIGIN}/api/v1/studio/executions/${executionId}/video`, { headers });
+  }
+
+  it('every refusal body validates against ErrorResponse, and names the declared example code', async () => {
+    const validate = componentValidator('ErrorResponse');
+    const examples = openapi.paths['/executions/{id}/video'].get.responses;
+    const expectedCode: Record<string, string> = {
+      '404': examples['404'].content['application/json'].examples.noEvidence.value.error,
+      '410': examples['410'].content['application/json'].examples.expired.value.error,
+      '416': examples['416'].content['application/json'].examples.unsatisfiable.value.error,
+    };
+
+    const refusals: Response[] = [];
+    for (const execution of mockExecutions) {
+      if (execution.video.status !== 'AVAILABLE') {
+        refusals.push(await requestVideo(execution.executionId));
+      }
+    }
+    const available = mockExecutions.find(
+      (execution) => execution.video.status === 'AVAILABLE' && MOCK_READABLE_CSIS.includes(execution.csiId!),
+    )!;
+    refusals.push(await requestVideo(available.executionId, { Range: 'bytes=100000-' }));
+
+    const seen = new Set<number>();
+    for (const response of refusals) {
+      seen.add(response.status);
+      expect(response.headers.get('content-type')).toMatch(/application\/json/u);
+      const body = await response.json();
+      expect(validate(body), `${response.status}: ${JSON.stringify(validate.errors)}`).toBe(true);
+      expect(body.error).toBe(expectedCode[String(response.status)]);
+    }
+    // All three refusals were actually produced, so none of the checks above held vacuously.
+    expect([...seen].sort()).toEqual([404, 410, 416]);
+  });
+
+  it('every status the route produces over the whole fixture set is declared for getExecutionVideo', async () => {
+    const declared = declaredStatuses();
+    expect(declared).not.toContain('401');
+    expect(declared).not.toContain('403');
+
+    const produced = new Set<string>();
+    for (const execution of mockExecutions) {
+      for (const headers of [undefined, { Range: 'bytes=0-9' }, { Range: 'bytes=100000-' }]) {
+        const response = await requestVideo(execution.executionId, headers);
+        produced.add(String(response.status));
+      }
+    }
+    produced.add(String((await requestVideo('00000000-0000-0000-0000-000000000000')).status));
+
+    // The unreadable CSI's execution is in the set above: it must not surface as an undeclared 403.
+    expect(mockExecutions.some((execution) => execution.csiId === OTHER_CSI)).toBe(true);
+    for (const status of produced) {
+      expect(declared, `the mock produced undeclared status ${status}`).toContain(status);
+    }
+    expect([...produced].sort()).toEqual(['200', '206', '404', '410', '416']);
   });
 });

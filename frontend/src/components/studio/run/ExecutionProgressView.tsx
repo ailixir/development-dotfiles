@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import type { ExecutionSnapshot, StepResult } from '@/types/studio/studioTypes';
 import { executionErrorNarrative } from './executionErrorNarratives';
+import { seekEligibility } from '@/components/studio/evidence/seekEligibility';
 
 /**
  * What a snapshot says, rendered without turning a bounded report into a false one
@@ -43,6 +44,7 @@ export const NOT_ATTEMPTED = 'not attempted';
 export const LOGS_TRUNCATED_STATEMENT =
   'Earlier log lines were dropped before this report reached you: the run produced more than the server retains.';
 export const RERUN_LABEL = 'Run again';
+export const SEEK_LABEL = 'Show in recording';
 export const UNNAMED_ERROR_STATEMENT =
   'The run ended in an error the server could not name, so there is nothing here to explain it. Nothing about the browser can be concluded from this.';
 
@@ -50,6 +52,12 @@ export interface ExecutionProgressViewProps {
   readonly snapshot: ExecutionSnapshot | null;
   /** Offered only where the document clears the condition with *"a new execution"* — AC-6. */
   readonly onRerun?: () => void;
+  /**
+   * Story 10.16a, AC-8 – AC-10. When present, every step gets a seek control. It is called with the
+   * step's `offsetMs` exactly as the snapshot carries it, and never for a step whose `offsetMs` is
+   * null. The caller passes it only when there is a recording to seek.
+   */
+  readonly onSeekStep?: (offsetMs: number) => void;
 }
 
 /**
@@ -74,9 +82,48 @@ const StepTimings: React.FC<{ step: StepResult }> = ({ step }) => (
   </Stack>
 );
 
+/** The seek control's accessible name, per step. The disabled wording reuses {@link NOT_ATTEMPTED}. */
+export function seekControlLabel(step: Pick<StepResult, 'stepIndex' | 'offsetMs'>): string {
+  const eligibility = seekEligibility(step);
+  return eligibility.seekable
+    ? `Jump to step ${step.stepIndex + 1} in the recording`
+    : `Jump to step ${step.stepIndex + 1}: ${NOT_ATTEMPTED}`;
+}
+
+/**
+ * Story 10.16a, AC-9 / AC-20. A step with a null `offsetMs` gets a **disabled** control: out of the
+ * tab order, and named as not attempted rather than silently inert. Its handler also refuses on its
+ * own, so the disabled attribute is not the only thing standing between a skipped step and a seek.
+ */
+const StepSeekControl: React.FC<{ step: StepResult; onSeekStep: (offsetMs: number) => void }> = ({
+  step,
+  onSeekStep,
+}) => {
+  const eligibility = seekEligibility(step);
+  return (
+    <Box>
+      <Button
+        size="small"
+        variant="text"
+        disabled={!eligibility.seekable}
+        aria-label={seekControlLabel(step)}
+        data-testid={`step-seek-${step.stepIndex}`}
+        onClick={() => {
+          if (eligibility.seekable) {
+            onSeekStep(eligibility.offsetMs);
+          }
+        }}
+      >
+        {SEEK_LABEL}
+      </Button>
+    </Box>
+  );
+};
+
 export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
   snapshot,
   onRerun,
+  onSeekStep,
 }) => {
   if (!snapshot) {
     return (
@@ -147,6 +194,7 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
                 {step.status}
               </Typography>
               <StepTimings step={step} />
+              {onSeekStep && <StepSeekControl step={step} onSeekStep={onSeekStep} />}
               {step.message && (
                 <Typography variant="caption" data-testid={`step-message-${step.stepIndex}`}>
                   {step.message}

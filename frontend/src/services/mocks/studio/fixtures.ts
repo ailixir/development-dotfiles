@@ -481,3 +481,15 @@ export const mockExecutions: ExecutionSnapshot[] = [
     streamComplete: true,
   },
 ];
+
+/**
+ * The bytes `GET /executions/{id}/video` serves in the mock (story 10.16a, AC-13).
+ *
+ * Small and in memory. It opens with the EBML magic number a WebM file starts with, and the rest is
+ * filler: nothing here is a playable recording, and nothing claims to be. The handler computes every
+ * length from this array at request time, so no length is transcribed anywhere.
+ */
+export const MOCK_VIDEO_BYTES: Uint8Array = Uint8Array.from(
+  { length: 64 },
+  (_, index) => [0x1a, 0x45, 0xdf, 0xa3][index] ?? index,
+);

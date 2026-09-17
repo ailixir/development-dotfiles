@@ -40,6 +40,26 @@ const SPEC_DIR = path.resolve(__dirname, '../../../../docs/specs/studio');
 const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8'));
 const TIMEOUT_BOUND = openapi.components.schemas.TestConfiguration.properties.timeoutSeconds;
 
+/*
+ * ENV-TIMING-1 (10.11a's gate, repeated as REL-001 on 10.16a's): the waits in this file are bounded
+ * explicitly, not by Testing Library's 1 s and Vitest's 5 s defaults.
+ *
+ * The editor's verdict arrives after a 250 ms debounce, then `POST /validate-steps`, then a render
+ * of the whole page. Run alone, the AC-2 test takes about 1.1 s. In the full suite, @qa measured
+ * 2.2–2.7 s on 10.16a's base and 3.7–4.2 s on its head at load 12–16. At load 40 the 1 s wait for
+ * the verdict ran out, even though the page it dumped was fully rendered. The bounds below are sized
+ * from those numbers: each wait gets more than twice the slowest whole-test duration measured, and
+ * each test gets room for every wait it makes.
+ *
+ * Only the time allowed changes. Every assertion is still made. These waits end on the first
+ * success, so a green run takes no longer than before. A longer bound only delays the report of a
+ * real failure.
+ */
+const PAGE_WAIT_MS = 10_000;
+const pageWait = { timeout: PAGE_WAIT_MS } as const;
+/** The most bounded waits any test below makes is four, plus clicks and typing. */
+const PAGE_TEST_TIMEOUT_MS = 5 * PAGE_WAIT_MS;
+
 const observed: { method: string; url: string }[] = [];
 function record({ request }: { request: Request }) {
   observed.push({ method: request.method, url: request.url });
@@ -139,37 +159,37 @@ describe('AC-2: the page’s own Run control is governed by the server and not b
     serveList(readyDraft);
     renderPage();
 
-    const control = await screen.findByRole('button', { name: 'Run Test' });
+    const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
     // The editor's own verdict is on screen and says the steps are not recognised …
-    const verdicts = await screen.findAllByText(/this editor does not recognise/i);
+    const verdicts = await screen.findAllByText(/this editor does not recognise/i, {}, pageWait);
     expect(verdicts.length).toBeGreaterThan(0);
-    await waitFor(() => expect(control).not.toBeDisabled());
+    await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
 
     await userEvent.click(control);
-    await waitFor(() => expect(executeRequests()).toHaveLength(1));
+    await waitFor(() => expect(executeRequests()).toHaveLength(1), pageWait);
     expect(executeRequests()).toHaveLength(1);
-  });
+  }, PAGE_TEST_TIMEOUT_MS);
 
   it('an unconfirmed draft the editor is silent about produces none', async () => {
     serveList(draftsByCompileStatus.AWAITING_CONFIRMATION);
     renderPage();
 
-    const control = await screen.findByRole('button', { name: 'Run Test' });
-    await screen.findByTestId('run-blocked-reason');
+    const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
+    await screen.findByTestId('run-blocked-reason', {}, pageWait);
     await userEvent.click(control, { pointerEventsCheck: 0 });
 
     expect(control).toBeDisabled();
     expect(executeRequests()).toHaveLength(0);
-  });
+  }, PAGE_TEST_TIMEOUT_MS);
 });
 
 describe('AC-3(a): editing a step regenerates nothing', () => {
   it('adding a step leaves the Code view showing its unavailable state, not generated source', async () => {
     serveList(readyDraft);
     renderPage();
-    await screen.findByRole('button', { name: 'Run Test' });
+    await screen.findByRole('button', { name: 'Run Test' }, pageWait);
 
-    const editor = await screen.findByPlaceholderText('Add new test step...');
+    const editor = await screen.findByPlaceholderText('Add new test step...', {}, pageWait);
     const NEW_STEP = 'Click "Continue"';
     await userEvent.type(editor, NEW_STEP);
     // The add affordance is an icon button with no accessible name of its own; this is the page
@@ -178,11 +198,14 @@ describe('AC-3(a): editing a step regenerates nothing', () => {
     expect(addButton).not.toBeNull();
     await userEvent.click(addButton as HTMLButtonElement);
     // Steps render as editable inputs, so the added step is a value rather than text.
-    await waitFor(() => expect(screen.getAllByDisplayValue(NEW_STEP).length).toBeGreaterThan(0));
+    await waitFor(
+      () => expect(screen.getAllByDisplayValue(NEW_STEP).length).toBeGreaterThan(0),
+      pageWait,
+    );
 
     // Observed by rendering, not by reading the effect: the Code tab is opened and looked at.
     await userEvent.click(screen.getByRole('tab', { name: 'Code' }));
-    const codeView = await screen.findByTestId('code-view-unavailable-title');
+    const codeView = await screen.findByTestId('code-view-unavailable-title', {}, pageWait);
     expect(codeView).toBeInTheDocument();
 
     const generated = generatePythonFromIR(
@@ -200,7 +223,7 @@ describe('AC-3(a): editing a step regenerates nothing', () => {
         line,
       );
     }
-  });
+  }, PAGE_TEST_TIMEOUT_MS);
 });
 
 describe('the draft the page sends carries a timeout the contract would accept', () => {
@@ -235,14 +258,14 @@ describe('the draft the page sends carries a timeout the contract would accept',
     );
 
     renderPage();
-    await screen.findByRole('button', { name: 'Run Test' });
+    await screen.findByRole('button', { name: 'Run Test' }, pageWait);
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    await waitFor(() => expect(created.length).toBe(1));
+    await waitFor(() => expect(created.length).toBe(1), pageWait);
     const configuration = created[0].configuration;
     expect(configuration, 'the save request carried no configuration at all').toBeDefined();
     expect(typeof configuration.timeoutSeconds).toBe('number');
     expect(configuration.timeoutSeconds).toBeGreaterThanOrEqual(TIMEOUT_BOUND.minimum);
     expect(configuration.timeoutSeconds).toBeLessThanOrEqual(TIMEOUT_BOUND.maximum);
-  });
+  }, PAGE_TEST_TIMEOUT_MS);
 });
