@@ -129,8 +129,18 @@ export interface ReadyMessage {
   readonly startedAtMs: number;
   /**
    * The calibration the child applied to the origin (story 10.32 AC-4), echoed so a real run can
-   * assert what it ran with rather than what it asked for. Optional so a parent never refuses a
-   * start over it; when present it must be a number.
+   * assert what it ran with rather than what it asked for.
+   *
+   * Optional in one sense only: its **absence** is fine. A `ready` without the key parses and the
+   * launch proceeds. A key that is **present and not a number** is not tolerated — the `ready` case
+   * in {@link parseChildMessage} returns `null` for the *whole* message, the launcher's inbox drops
+   * it silently, and `awaitReady` then times out into a `browser-launch` failure. A malformed echo
+   * therefore costs the launch; do not read this field as fail-open.
+   *
+   * Whether the parent should instead ignore a malformed echo and keep the `ready` is ECHO-1's
+   * behaviour half (10.32 QA gate): it changes {@link parseChildMessage}'s default-deny posture for
+   * one field, so it is routed as a follow-up with its own red-first proof and deliberately not done
+   * here. Today's behaviour is documented, not endorsed.
    */
   readonly calibrationOffsetMs?: number | undefined;
 }
