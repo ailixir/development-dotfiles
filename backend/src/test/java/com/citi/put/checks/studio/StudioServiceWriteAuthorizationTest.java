@@ -47,13 +47,15 @@ import org.springframework.test.util.ReflectionTestUtils;
  * method from coming back. Each case in (a) therefore also asserts the visible read <em>was</em>
  * made, so a method that reads nothing at all cannot satisfy it either.
  *
- * <p><strong>One case beyond AC-18, and why.</strong> The visible read and the locked read happen
- * in one transaction, and Hibernate hands the already-loaded draft back to the locking query
- * <em>unrefreshed</em> (measured with a throwaway probe while this story was implemented: visible
- * revision 1, row at 6, locked read returned 1 and the same instance). So the service detaches the
- * visible copy first. Without that, two concurrent saves could both pass the revision check. {@code
- * OptimisticSaveIT} watches the behaviour but only as a race; the in-order case below is the
- * deterministic half, and like (a) it is a guard on the shape of the source.
+ * <p><strong>Two cases beyond AC-18, and why.</strong> The first pins AC-8 step 3's "that draft's
+ * CSI": authorizing the CSI named in the request body instead reddens no HTTP test, as the case
+ * explains. The second: the visible read and the locked read happen in one transaction, and
+ * Hibernate hands the already-loaded draft back to the locking query <em>unrefreshed</em> (measured
+ * with a throwaway probe while this story was implemented: visible revision 1, row at 6, locked
+ * read returned 1 and the same instance). So the service detaches the visible copy first. Without
+ * that, two concurrent saves could both pass the revision check. {@code OptimisticSaveIT} watches
+ * the behaviour but only as a race; the in-order case below is the deterministic half, and like (a)
+ * it is a guard on the shape of the source.
  */
 class StudioServiceWriteAuthorizationTest {
 
@@ -143,6 +145,26 @@ class StudioServiceWriteAuthorizationTest {
     assertThatThrownBy(() -> service.updateTest(id, save(1L, 1L), owner()))
         .isInstanceOf(StudioAccessDeniedException.class);
     verify(tests).findByIdForUpdate(id);
+  }
+
+  @Test
+  @DisplayName("AC-8 step 3: the CSI authorized is the stored draft's, never the request body's")
+  void theSaveIsAuthorizedAgainstTheDraftsCsiNotTheRequestsCsi() {
+    // No HTTP test can see this. AC-2's callers own nothing, so they are refused whichever CSI is
+    // checked; and a caller who owns the CSI named in the body would reach 409 CSI_IMMUTABLE and
+    // write nothing — a wrong status and an existence oracle rather than a write.
+    UUID id = UUID.randomUUID();
+    when(tests.findById(id)).thenReturn(Optional.of(draft()));
+    when(tests.findByIdForUpdate(id)).thenReturn(Optional.of(draft()));
+    Authentication ownerOfAnotherCsi =
+        StudioExecutionFixtures.identity("unit-other-owner@citi.com", "60459", "owner");
+    UITestRequest namingTheirOwnCsi =
+        new UITestRequest(
+            "Unit draft", null, "60459", "Production", List.of("Go home"), List.of(), null, 1L, 1L);
+
+    assertThatThrownBy(() -> service.updateTest(id, namingTheirOwnCsi, ownerOfAnotherCsi))
+        .isInstanceOf(StudioAccessDeniedException.class);
+    verify(tests, never()).findByIdForUpdate(any());
   }
 
   @Test
