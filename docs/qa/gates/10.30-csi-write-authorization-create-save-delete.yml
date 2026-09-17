@@ -1,0 +1,216 @@
+schema: 1
+story: '10.30'
+story_title: CSI write authorization on Studio test create, save and delete (ADR-002 O-18, §27)
+epic: EPIC-10
+wave: 8
+
+gate: CONCERNS
+
+status_reason: >-
+  O-18 is closed. The mutations prove it, not the green run: M2, M3, M4, M7, M9 and M10, applied by
+  this reviewer to the committed StudioService, each went red exactly where the story predicts, and
+  everything the story says must stay green stayed green. The whole studio package reproduces
+  @dev's 707 = 698 passed + 2 failed + 7 skipped, and the two failures are ESC-1 and ESC-2. §27.6's
+  four blocks are byte-verbatim in the contract, the parsed status sets are unchanged, and the pin
+  equals the file. The verdict is CONCERNS rather than PASS because of the `EntityManager.detach`
+  that @dev added outside the story. It is correct on this branch: measured, it is what makes
+  concurrent saves serialize. But it unmanages any entity a transactional caller already holds.
+  The studio-inference tree's `StudioAuthoringService.update` has exactly that shape, and a textual
+  merge of the two trees has zero conflicts. A probe on this branch showed that caller's
+  later writes being silently dropped. A refresh after the lock keeps every property the detach
+  buys without that hazard, also measured. A second, pre-existing lost update on
+  delete-versus-save is now on the authorized HTTP path.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-17T00:00:00Z'
+branch: story/10.30
+reviewed_revision: bbeb89288
+failing_first_commit: a8379128d
+base_sha: eb4505a04
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.30
+
+waiver:
+  active: false
+
+top_issues:
+  - id: DETACH-1
+    severity: medium
+    finding: >-
+      `updateTest(…, auth)` detaches whatever `findById` returns. In a caller's transaction that
+      is the caller's own managed instance, so the caller's reference goes stale and everything
+      it writes afterwards is silently lost.
+    evidence: >-
+      Throwaway probe P4, on this branch with no production change. Inside one
+      TransactionTemplate, the probe called `findByIdForUpdate` (the shape of
+      `StudioAuthoringService.lock`), then `updateTest(id, …, admin)`, then `held.setDescription(…)`
+      and `flush`. Result: `em.contains(held) = false`, `held.name` still read "Original" after the
+      save, and the row's description stayed null, so the caller's write was lost. No caller on
+      this branch does this: OSIV is off, and `CompilePipelineIT`/`GatewayDisabledIT` are not
+      transactional. The inference tree's `StudioAuthoringService.update` (wt/epic, uncommitted,
+      read only) does exactly this: `lock` → `studio.updateTest(id, …, auth, false, true)` →
+      `setAuthoring(test, …)` → `test.getSourceRevision() > source` on the same reference.
+    suggested_fix: >-
+      Drop the detach. After the locked read, when `auth != null`, call
+      `entityManager.refresh(test)`. The row lock is already held, so the refresh reads the
+      latest committed row and keeps the entity's identity. Measured as a temporary mutation
+      (restored, sha256-verified): P3 still `409 STALE_REVISION`, P4 caller entity stays managed
+      and its write persists, `OptimisticSaveIT` 3/3 and `StudioAuthorizationIT` 24/24 (one run;
+      the race is probabilistic and P3 is its deterministic half). The unit case
+      `theVisibleCopyIsDetachedBeforeTheLockedRead` must change with it.
+    owner: '@dev (a 10.30 follow-up before merge), or as a mandatory FOC-07 reconciliation step'
+    refs: [backend/src/main/java/com/citi/put/checks/studio/StudioService.java:286-289]
+  - id: DELETE-RACE-1
+    severity: low
+    finding: >-
+      `softDeleteTest(id, auth)` takes no lock, and Hibernate writes every column (there is no
+      `@DynamicUpdate` or `@Version`). A save that commits between the delete's read and its
+      flush is overwritten from the delete's stale snapshot. Both callers get a success
+      response.
+    evidence: >-
+      Probe P1 (a widened window): the delete read the row, a save committed name "Saved",
+      steps "Saved step" and source_revision 2, then the delete committed. The row ended as name
+      "Original", source_revision 1 and deleted_at set. Probe P2 (the natural order): the save
+      held the lock, the delete blocked behind it ("done while save holds lock? false") and then
+      overwrote the save the same way. It was not introduced here: `softDeleteTest(UUID)` has the
+      same shape, and the story's Implementation Notes prescribe "no second query". It is now
+      the shape of the authorized HTTP route. The row is hidden once deleted, so the impact is
+      content silently reverted in a draft nobody can read. By reading only (not probed): the
+      same full-row write would also clear a concurrent `quarantined_at`.
+    suggested_fix: >-
+      Lock the delete: visible `findById` → `requireWrite` → `findByIdForUpdate` (empty → 403) →
+      set `deleted_at`. Alternatively, write `deleted_at` with a targeted UPDATE guarded by the
+      visibility predicate.
+    owner: '@po to backlog (not a 10.30 AC)'
+  - id: RECON-1
+    severity: medium
+    finding: >-
+      The FOC-07 reconciliation with the inference tree has zero textual conflicts. Only a
+      compile error stops it.
+    evidence: >-
+      `git merge-file` of wt/epic's uncommitted StudioService.java onto this branch, with the
+      common base blob d8c6dc0c5, reported 0 conflicts. The merged file calls both checks:
+      `requireCompile(auth, request.csiId())` BEFORE `requireRegisteredCsi` and `requireWrite`
+      after it in `createTest`, and a `findCsiIdIncludingWithheld` authorization BEFORE the
+      revisions check plus this branch's visible read in `updateTest`. `requireCompile` no longer
+      exists, so it does not compile. The obvious "fix" of that error (rename it to
+      `requireWrite`) would compile. By this branch's mutations, it would redden AC-9 (M6
+      shape) and AC-7 (M9 shape). The withheld read (M7 shape) would redden only
+      `StudioServiceWriteAuthorizationTest`, and no HTTP test.
+    owner: FOC-07 reconciliation (run log; @architect, @po, @pm)
+  - id: REBASE-1
+    severity: low
+    finding: >-
+      The epic head moved after @dev's rebase-equivalence argument. The argument still holds
+      for every file this story touches.
+    evidence: >-
+      `epic/EPIC-10` is now 7357082e3 (the carry-forward), not 1a5ed2822. `git diff --stat
+      eb4505a04 epic/EPIC-10` touches only docs/qa, 10.31/10.32 stories, four frontend test files
+      and `studio-runner/test/helpers/webm.test.ts`: nothing under backend/, docs/specs/,
+      docs/architecture/ or confinement.test.ts. `git merge-tree --write-tree HEAD epic/EPIC-10`
+      is clean (exit 0). Runner counts after the merge will differ from 947/29 because of
+      webm.test.ts. That difference is not this story's.
+    owner: whoever merges
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Rulings the orchestrator and @dev asked for
+# ─────────────────────────────────────────────────────────────────────────────
+rulings:
+  detach:
+    verdict: >-
+      Correct on this branch and necessary, but the wrong primitive for the long term (see
+      DETACH-1).
+    concurrency: >-
+      Save versus save: after the detach, `findByIdForUpdate` is a fresh `SELECT … FOR UPDATE`.
+      Under READ COMMITTED, the second saver blocks and then reads the committed revision, so it
+      gets 409. Measured two ways. M10 (no detach) gave `OptimisticSaveIT` `[200, 200]`. Probe
+      P3, where the context already held a revision-1 copy and another save committed revision 2,
+      answered `409 STALE_REVISION` with the detach and succeeded, overwriting, without it (M10
+      run). A request that lands between the detach and the lock is exactly the case the lock
+      read handles: a concurrent save gives a fresh revision (409), and a concurrent delete or
+      quarantine gives an empty restricted read (403, AC-8 step 4). The CSI cannot change in
+      that window because no application path writes `csi_id` after create. Note that this is
+      API-enforced, not a DB trigger (V12 only has the CHECK).
+    symptom_or_fix: >-
+      It is a symptom of §27.2's mandated double read (visible, then locked). The double read is
+      the ruling, so the fix belongs at the second read. Refreshing after the lock treats the
+      symptom without releasing the caller's instance, which the detach does.
+  ac6_same_draft:
+    verdict: >-
+      "Same fixture" is accepted. It is the only reading that satisfies both AC-1 and AC-6:
+      AC-1 requires AC-6 green before the fix, and before the fix AC-2's rows are already mutated,
+      so the owner's DELETE on them answers 400. The rows are seeded by the same
+      `seedWritableDraft`, on the same CSI, with the same path and id shape. An optional
+      tightening after this story: running the owner on AC-2's own rows is now possible, because
+      they stay unchanged.
+  ac18a_read_path:
+    verdict: >-
+      Read and confirmed. `updateTest(…, auth)` makes exactly two ui_tests reads, `findById`
+      (visible) and `findByIdForUpdate` (JPQL on the `@SQLRestriction` entity). It makes no
+      native or scalar CSI read, and `project()` reads the revision by candidate id and test
+      id. `softDeleteTest(id, auth)` makes one read, `findById`. That `findById` honours the
+      restriction is proven over HTTP, not assumed. Under M4, AC-4 went red for the soft-deleted
+      and quarantined cases too, so the visible read returned empty for them. If it had not, the
+      restricted locked read would have kept them 403. AC-5 is green on the unmutated code, and
+      `findById` is the delete path's only read.
+  internal_overloads:
+    verdict: >-
+      Unchanged, and proven. `main` has no caller of `updateTest(UUID, UITestRequest)` or
+      `softDeleteTest(UUID)`: the only callers are in tests, and the controller now calls the
+      authenticated forms. `git diff --stat eb4505a04 HEAD -- backend/src/test` shows only
+      StudioAuthorizationIT and the new unit test. All the AC-10 callers are inside the green
+      package run. Unit cases (c) pin the exception type and message.
+    note: >-
+      Probe P3b (informational, pre-existing): the internal overload also returns a stale managed
+      copy to the lock when its caller already holds the row. No caller does that today.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands this reviewer ran. Numbers are what they returned.
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  tree: 'HEAD bbeb89288; StudioService 78a0c1fd…, StudioController 98f46410… (match @dev); StudioAuthorizationIT unchanged since a8379128d (git diff --quiet)'
+  mutations_reapplied:
+    harness: 'mktemp dir outside the shared scratchpad, anchor-count assertion per edit, sha256 restore check after each; all printed RESTORED-OK 78a0c1fd…'
+    classes_per_row: 'StudioAuthorizationIT + StudioServiceWriteAuthorizationTest + OptimisticSaveIT = 34 tests (M10: +1 probe)'
+    M2: 'red: AC-2 PUT (12 soft failures, viewer/contributor/stranger × status/code/columns/row), unit (a)-save, unit step-3. 31 passed. AC-4, AC-6, AC-2 DELETE, AC-3 green'
+    M3: 'red: AC-2 DELETE (12 soft failures, all three identities), unit (a)-delete. 32 passed. AC-5, AC-6, AC-2 PUT, AC-3 green'
+    M4: 'red: AC-4 (unknown, soft-deleted, quarantined all 400 + two byte-identity checks), unit (a)-save. 32 passed'
+    M7: 'red: unit (a)-save, (b), detach-order only. All 24 HTTP + 3 OptimisticSaveIT green — the measured reason AC-18 exists'
+    M9: "red: AC-7 only (`expected: 400 but was: 403`, STUDIO_FORBIDDEN body). 33 passed"
+    M10: 'red: OptimisticSaveIT concurrent save (`[200, 200]`), unit detach-order; probe P3 flipped from 409 to SUCCEEDED (deterministic). 33 passed'
+    not_rerun: 'M1, M5, M6, M8, M2b, M2c, M7b, M11 — @dev''s records only'
+  package_run: >-
+    `./gradlew test --rerun-tasks --tests 'com.citi.put.checks.studio.*'`: 707 tests completed,
+    2 failed, 7 skipped. The console lines were read: 698 PASSED + 2 FAILED + 7 SKIPPED = 707.
+    The two failures are `ExecutionVideoContractEscalationTest` ESC-1 and ESC-2. 381 s wall
+    clock, ran to its full count, no MED-2 stall.
+  style: '`spotlessCheck checkstyleTest checkstyleMain --rerun-tasks`: BUILD SUCCESSFUL'
+  contract: >-
+    A node script found each of §27.6's four fenced blocks verbatim in openapi.yaml. The parsed
+    tree with every `description` removed is identical to a8379128d's. Status sets: GET
+    200,400,401,403; PUT 200,400,401,403,409; DELETE 204,400,401,403; POST 201,400,401,403. The
+    file's sha256 is d55d7737…eb318, equal to `BASE_SHA256`. The ADR-002 diff is the one §13 row
+    only, and §28.5 is untouched.
+  runner: >-
+    `npx vitest run test/run/confinement.test.ts --coverage.enabled=false` gave 18/18, exit 0.
+    With coverage on, a single-file run exits 1 on the global thresholds, as @dev reported. With
+    one extra byte appended to the contract, the run gave 17/18 and only the pin went red;
+    restored to d55d7737…. `npm test` gave 49 files passed + 1 skipped, 947 passed / 29
+    skipped, exit 0.
+  probes: 'ZzQa1030RaceProbeTempTest (P1–P4, P3b) — written, run, deleted with its build outputs; git status empty afterwards'
+  not_run: 'frontend (untouched by the diff); `./gradlew check` (MED-2); CodeRabbit (skip_if_not_installed, epic ruling)'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FOC-07 reconciliation constraints (for the run log; read-only observation of wt/epic)
+# ─────────────────────────────────────────────────────────────────────────────
+reconciliation_constraints:
+  - '`createTest` (all overloads): `requireRegisteredCsi` first, then exactly one `requireWrite`. Drop the inference tree''s `requireCompile(auth, csiId)` before it; its inline blank check may stay ahead of both (AC-9).'
+  - '`updateTest` (every overload with a caller): revisions check first, then the visible read and `requireWrite` on that draft''s CSI, then the locked read with empty → 403. Never `findCsiIdIncludingWithheld` (AC-7, AC-8). Delete the inference tree''s leading withheld-read authorization.'
+  - '`StudioAuthoringService.update` calls `updateTest` with a caller inside its own transaction on an entity it already holds, so DETACH-1 must be resolved (refresh-after-lock) before or during the merge. Otherwise its authoring metadata is silently lost.'
+  - '`softDeleteTest`: keep this branch''s `softDeleteTest(id, auth)` and the controller''s `Authentication` parameter; the inference tree leaves delete unchecked.'
+  - '`StudioAuthoringService.compile` authorizes through `findCsiIdIncludingWithheld`, which is the compile/confirm precedent and allowed. Its `create` authorizes itself and then calls `createTest(…, auth, …)`, so after the merge it is checked twice. That is harmless, but it is a second check, which FOC-07 says not to add.'
+  - 'After the merge, re-run StudioAuthorizationIT, StudioServiceWriteAuthorizationTest, OptimisticSaveIT and the inference tree''s own authoring suites on the merged tree. None of them can see the merge from its own branch.'
+
+before_merge:
+  - 'Resolve DETACH-1 (refresh-after-lock plus the unit case), or record it as a blocking FOC-07 step.'
+  - 'Backlog DELETE-RACE-1.'
+  - 'Merge 10.30 before 10.31 (FOC-07 step 1 of 2), then re-run the package and `npm test` on the merged epic tree.'
