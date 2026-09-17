@@ -111,10 +111,10 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   });
 
   /**
-   * The document's SHA-256 after **ADR-002 §21 landed with story 10.11c**, on top of everything
+   * The document's SHA-256 after **ADR-002 §27.6 landed with story 10.30**, on top of everything
    * that preceded it.
    *
-   * **This is the fifth re-anchor.** What this digest now covers, in the order it happened:
+   * **This is the sixth re-anchor.** What this digest now covers, in the order it happened:
    *
    * 1. ADR-002 sections 14, 15, 16 and 17 — architect rulings, not runner edits: the conflict
    *    responses for a deleted or quarantined draft, the two ratified `ExecutionErrorCode` values,
@@ -157,6 +157,13 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    *    The backend producer on `UITestDto` is in the same commit, because
    *    `StudioContractTest.assertSchemaMatchesRecord` is set equality and neither side can assert
    *    conformance alone.
+   * 6. **ADR-002 §27.6, landed by story 10.30** — this re-anchor, and `FOC-07` **step 1 of 2**.
+   *    Prose only, on `getTest`, `updateTest` and `deleteTest`: an unknown id, a soft-deleted or
+   *    quarantined draft, and a draft on a CSI the caller may not read (GET) or write (PUT,
+   *    DELETE) all answer the same `403 STUDIO_FORBIDDEN`, and `updateTest`'s `409` description no
+   *    longer says such a save answers `400`. **No status was added or removed** on any
+   *    operation. The prose ships in the same PR as its producer, the CSI write checks on create,
+   *    save and delete (O-18), because ADR-002 §28.2 forbids landing either without the other.
    *
    * **The criterion is unchanged and still holds: nothing in story 10.13 edited the contract.**
    * Every byte of difference between this digest and the previous one belongs to another story,
@@ -188,7 +195,7 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = '51850b016cd8a697899a944eab12ddce5456967beecf4f3e011720498bc02efa';
+  const BASE_SHA256 = 'd55d7737647a49b97e2b505a59364473d0a3695936cc447a005fcb3ed47eb318';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
