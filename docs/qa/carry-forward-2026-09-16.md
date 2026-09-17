@@ -1,4 +1,4 @@
-# Epic 10 carry-forward test findings (2026-09-17)
+# Epic 10 carry-forward test findings (2026-09-16)
 
 **Scope.** Five test findings carried out of wave 7: TEST-005, REL-004, ENV-2/REL-002, F-3 and F-7.
 Sources: `docs/qa/gates/10.16a-evidence-state-playback-and-step-seek.yml`,
