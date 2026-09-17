@@ -848,6 +848,10 @@ describe('story 10.16a: the mock video route answers only as the document declar
     const validate = componentValidator('ErrorResponse');
     const examples = openapi.paths['/executions/{id}/video'].get.responses;
     const expectedCode: Record<string, string> = {
+      // `components.responses.Forbidden` carries no `examples` key, so there is nothing in the
+      // document to read this one from. It is story 10.31's own literal, taken from the backend's
+      // `StudioAccessDeniedException.CODE`, and the mock is asserted against it here.
+      '403': 'STUDIO_FORBIDDEN',
       '404': examples['404'].content['application/json'].examples.noEvidence.value.error,
       '410': examples['410'].content['application/json'].examples.expired.value.error,
       '416': examples['416'].content['application/json'].examples.unsatisfiable.value.error,
@@ -872,14 +876,14 @@ describe('story 10.16a: the mock video route answers only as the document declar
       expect(validate(body), `${response.status}: ${JSON.stringify(validate.errors)}`).toBe(true);
       expect(body.error).toBe(expectedCode[String(response.status)]);
     }
-    // All three refusals were actually produced, so none of the checks above held vacuously.
-    expect([...seen].sort()).toEqual([404, 410, 416]);
+    // All four refusals were actually produced, so none of the checks above held vacuously. The
+    // 403 joined this set when ADR-002 §24.3's ruling landed (story 10.31): the OTHER_CSI
+    // execution is filtered out by `readable()` before the handler sees it.
+    expect([...seen].sort()).toEqual([403, 404, 410, 416]);
   });
 
   it('every status the route produces over the whole fixture set is declared for getExecutionVideo', async () => {
     const declared = declaredStatuses();
-    expect(declared).not.toContain('401');
-    expect(declared).not.toContain('403');
 
     const produced = new Set<string>();
     for (const execution of mockExecutions) {
@@ -890,11 +894,14 @@ describe('story 10.16a: the mock video route answers only as the document declar
     }
     produced.add(String((await requestVideo('00000000-0000-0000-0000-000000000000')).status));
 
-    // The unreadable CSI's execution is in the set above: it must not surface as an undeclared 403.
+    // The unreadable CSI's execution is in the set above, and after ADR-002 §24.3's ruling it is
+    // answered 403 — which the document now declares, so it is checked rather than excluded.
     expect(mockExecutions.some((execution) => execution.csiId === OTHER_CSI)).toBe(true);
     for (const status of produced) {
       expect(declared, `the mock produced undeclared status ${status}`).toContain(status);
     }
-    expect([...produced].sort()).toEqual(['200', '206', '404', '410', '416']);
+    // Exact equality, so the two statuses the mock cannot observe — an absent session (401) and an
+    // unreachable evidence store (503) — are excluded by this line rather than by a comment.
+    expect([...produced].sort()).toEqual(['200', '206', '403', '404', '410', '416']);
   });
 });

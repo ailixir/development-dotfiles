@@ -314,7 +314,7 @@ class StudioContractTest {
     expected.put("GET /executions", "200,401");
     expected.put("GET /executions/{id}", "200,400,401,403");
     expected.put("GET /executions/{id}/events", "200,401,403");
-    expected.put("GET /executions/{id}/video", "200,206,404,410,416");
+    expected.put("GET /executions/{id}/video", "200,206,401,403,404,410,416,503");
     expected.put("GET /health", "200,401,403");
     expected.put("GET /ready", "200,401,403,503");
     expected.put("GET /tests", "200,401");
@@ -343,7 +343,11 @@ class StudioContractTest {
         .as("an operation this copy names that the document no longer declares")
         .containsExactlyElementsOf(declared.keySet());
     assertThat(declared)
-        .as("an operation's response status set moved; this story amends TestDto and nothing else")
+        .as(
+            "an operation's response status set moved. The ONLY movement story 10.31 authorizes "
+                + "is GET /executions/{id}/video gaining 401, 403 and 503 by ADR-002 §24's ruling "
+                + "(ESC-1, ESC-2). Every other row is unchanged, and a row that moves without a "
+                + "ruling is the drift this copy exists to catch")
         .isEqualTo(expected);
 
     assertThat(pendingOperations())

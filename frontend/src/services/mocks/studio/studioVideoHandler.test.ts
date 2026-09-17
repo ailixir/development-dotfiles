@@ -119,10 +119,10 @@ describe('the mock video route serves bytes as the document declares (AC-13)', (
     }
   });
 
-  it('serves no 401 or 403: another CSI’s execution is the declared 404, never its bytes', async () => {
+  it('another CSI’s execution is the declared 403, never its bytes', async () => {
     const foreign = mockExecutions.find((execution) => execution.csiId === OTHER_CSI)!;
     const response = await requestVideo(foreign.executionId);
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(403);
     expect(response.headers.get('content-type')).toMatch(/application\/json/u);
   });
 });

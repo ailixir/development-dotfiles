@@ -111,10 +111,10 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   });
 
   /**
-   * The document's SHA-256 after **ADR-002 §27.6 landed with story 10.30**, on top of everything
-   * that preceded it.
+   * The document's SHA-256 after **ADR-002 §24.6 and §25.4 landed with story 10.31**, on top of
+   * everything that preceded it.
    *
-   * **This is the sixth re-anchor.** What this digest now covers, in the order it happened:
+   * **This is the seventh re-anchor.** What this digest now covers, in the order it happened:
    *
    * 1. ADR-002 sections 14, 15, 16 and 17 — architect rulings, not runner edits: the conflict
    *    responses for a deleted or quarantined draft, the two ratified `ExecutionErrorCode` values,
@@ -164,6 +164,25 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    *    longer says such a save answers `400`. **No status was added or removed** on any
    *    operation. The prose ships in the same PR as its producer, the CSI write checks on create,
    *    save and delete (O-18), because ADR-002 §28.2 forbids landing either without the other.
+   * 7. **ADR-002 §24.6 and §25.4, landed by story 10.31** — this re-anchor, and `FOC-07`
+   *    **step 2 of 2**. Two amendments, one commit, one pin move, because §28 requires the pin to
+   *    move once for both. §24.6 closes **ESC-1** and **ESC-2**: `getExecutionVideo` declares
+   *    `401` (`$ref` `SessionUnauthorized`) and `403` (`$ref` `Forbidden`) by the same components
+   *    its sibling execution routes use, and a `503` with `ErrorResponse` content and a
+   *    `storeUnavailable` example carrying `VIDEO_STORE_UNAVAILABLE`; its description gains the
+   *    refusal order and the "branch on the status, never on the body" paragraph. §25.4 adds
+   *    `components.responses.SessionUnauthorized` and `components.schemas.PlatformErrorResponse`
+   *    and re-points the **eleven** public operations that already declared a `401` at the new
+   *    component, so the document names the envelope its own authentication filter actually sends
+   *    — `error` is an object there and a string on every Studio refusal. The document's final
+   *    state is **twelve** public operations on `SessionUnauthorized` (the eleven plus
+   *    `getExecutionVideo`, which had no `401` to replace), **two** internal callbacks still on
+   *    `Unauthorized` — correct for them, because their producer is the service-identity filter —
+   *    and **four** runner operations still on `RunnerUnauthenticated`, untouched.
+   *    `components.responses.Unauthorized` and `components.schemas.ErrorResponse` are **not**
+   *    edited. **No production code changed anywhere**: the document catches up with what the
+   *    producers already send (§24.2). Which envelope the application standardises on is O-19 /
+   *    ADR-003, outside Epic 10, and is deliberately not decided here.
    *
    * **The criterion is unchanged and still holds: nothing in story 10.13 edited the contract.**
    * Every byte of difference between this digest and the previous one belongs to another story,
@@ -195,7 +214,7 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = 'd55d7737647a49b97e2b505a59364473d0a3695936cc447a005fcb3ed47eb318';
+  const BASE_SHA256 = 'd9f5f2a2bfac4f51baa2a334b1129236578703acbe5f0d137c98ab54b227af6a';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
