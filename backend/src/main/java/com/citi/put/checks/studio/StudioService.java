@@ -55,12 +55,12 @@ public class StudioService {
   private final UserProvisioningService userProvisioningService;
 
   /**
-   * Used for one thing: to let go of the draft the authorized save read through the visibility
-   * restriction before it takes the row lock (ADR-002 §27.2, steps 2 and 4). Hibernate hands an
-   * entity it already holds back to a later query unchanged, even a locking one, so without this
-   * the locked read would compare the request's revisions against the <em>unlocked</em> copy and
-   * two concurrent saves could both win. {@code ProgressReportService} clears its session for the
-   * same reason.
+   * Used for one thing: to refresh the draft the authorized save has just locked (ADR-002 §27.2,
+   * steps 2 and 4). Hibernate hands an entity it already holds back to a later query unchanged,
+   * even a locking one, so without this the locked read would compare the request's revisions
+   * against the copy the visibility read loaded before the lock, and two concurrent saves could
+   * both win. It refreshes rather than detaching that copy, because a detach would also unmanage an
+   * instance the caller's own transaction holds (story 10.30 QA finding DETACH-1).
    */
   @PersistenceContext private EntityManager entityManager;
 
@@ -286,7 +286,6 @@ public class StudioService {
     if (auth != null) {
       UITest visible = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
       requireWrite(auth, visible.getCsiId());
-      entityManager.detach(visible);
     }
     UITest test =
         studioRepository
@@ -296,6 +295,16 @@ public class StudioService {
                     auth != null
                         ? new StudioAccessDeniedException()
                         : new IllegalArgumentException("UI Test not found: " + id));
+    if (auth != null) {
+      // The visible read above put this draft in the persistence context, and Hibernate hands a
+      // managed entity back to the locking query unrefreshed: without this, a save that committed
+      // between the two reads is invisible to the revision check and gets overwritten. The row lock
+      // is held, so the refresh reads its latest committed state. It keeps the instance managed:
+      // a caller that already holds this draft in its own transaction keeps writing through it
+      // (story 10.30 QA finding DETACH-1). Its own earlier writes were flushed by the locking
+      // query.
+      entityManager.refresh(test);
+    }
 
     if (request.sourceRevision() != test.getSourceRevision()
         || request.configurationRevision() != test.getConfigurationRevision()) {

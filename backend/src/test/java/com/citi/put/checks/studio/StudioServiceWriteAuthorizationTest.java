@@ -52,11 +52,13 @@ import org.springframework.test.util.ReflectionTestUtils;
  * body omits it, as the case explains. The second: the visible read and the locked read happen in
  * one transaction, and Hibernate hands the already-loaded draft back to the locking query
  * <em>unrefreshed</em> (measured with a throwaway probe while this story was implemented: visible
- * revision 1, row at 6, locked read returned 1 and the same instance). So the service detaches the
- * visible copy first. Without that, two concurrent saves could both pass the revision check. {@code
- * OptimisticSaveIT} watches the behaviour, as a race (without the detach it went red in 4 of 4 runs
- * at story 10.30); the in-order case below is the deterministic half, and like (a) it is a guard on
- * the shape of the source.
+ * revision 1, row at 6, locked read returned 1 and the same instance). So the service refreshes the
+ * locked copy after the lock. Without that, two concurrent saves could both pass the revision
+ * check. It refreshes rather than detaching the visible copy first, because a detach also unmanages
+ * an instance the caller's own transaction holds and silently drops that caller's later writes (QA
+ * finding DETACH-1). {@code OptimisticSaveIT} watches the race, and {@code
+ * StudioSaveInCallerTransactionIT} watches both properties deterministically; the in-order case
+ * below, like (a), is a guard on the shape of the source.
  */
 class StudioServiceWriteAuthorizationTest {
 
@@ -172,8 +174,8 @@ class StudioServiceWriteAuthorizationTest {
   }
 
   @Test
-  @DisplayName("the authorized copy is let go before the lock, so the lock reads the row afresh")
-  void theVisibleCopyIsDetachedBeforeTheLockedRead() {
+  @DisplayName("the locked copy is refreshed after the lock, and nothing is detached")
+  void theLockedCopyIsRefreshedAfterTheLockedRead() {
     UUID id = UUID.randomUUID();
     UITest visible = draft();
     UITest locked = draft();
@@ -185,8 +187,9 @@ class StudioServiceWriteAuthorizationTest {
 
     InOrder order = inOrder(tests, entityManager);
     order.verify(tests).findById(id);
-    order.verify(entityManager).detach(visible);
     order.verify(tests).findByIdForUpdate(id);
+    order.verify(entityManager).refresh(locked);
+    verify(entityManager, never()).detach(any());
   }
 
   // ── (c) AC-10: the internal overloads keep their behaviour exactly ───────────────────────────
