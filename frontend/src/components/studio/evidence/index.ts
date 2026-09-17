@@ -10,5 +10,6 @@ export {
 } from './videoEvidenceNarratives';
 export type { VideoEvidenceNarrative } from './videoEvidenceNarratives';
 export { studioVideoUrl, studioVideoDownloadUrl } from './studioVideoUrl';
-export { seekEligibility, currentTimeForOffset, useVideoSeek } from './seekEligibility';
+export { seekEligibility, currentTimeForOffset } from './seekEligibility';
+export { useVideoSeek } from './useVideoSeek';
 export type { SeekEligibility } from './seekEligibility';

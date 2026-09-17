@@ -7,7 +7,7 @@ import { passedExecution } from '@/services/mocks/studio/executionFixtures';
 import { mockExecutions } from '@/services/mocks/studio/fixtures';
 import { ExecutionProgressView, NOT_ATTEMPTED } from '@/components/studio/run';
 import { VideoEvidencePanel } from './VideoEvidencePanel';
-import { useVideoSeek } from './seekEligibility';
+import { useVideoSeek } from './useVideoSeek';
 
 /**
  * Story 10.16a — step seek: AC-8, AC-9, AC-10, and AC-20's keyboard operability.

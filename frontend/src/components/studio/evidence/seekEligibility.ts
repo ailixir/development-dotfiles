@@ -1,4 +1,3 @@
-import { useCallback, useRef, type MutableRefObject } from 'react';
 import type { StepResult } from '@/types/studio/studioTypes';
 
 /**
@@ -27,23 +26,4 @@ export function seekEligibility(step: Pick<StepResult, 'offsetMs'>): SeekEligibi
 /** `HTMLMediaElement.currentTime` is in seconds; `offsetMs` is in milliseconds. That is the whole conversion. */
 export function currentTimeForOffset(offsetMs: number): number {
   return offsetMs / 1000;
-}
-
-/**
- * The bridge between a step's seek control and the one `<video>` on the page.
- *
- * The page and the tests use this same hook, so the tests exercise the code the page runs.
- */
-export function useVideoSeek(): {
-  readonly videoRef: MutableRefObject<HTMLVideoElement | null>;
-  readonly seekToOffset: (offsetMs: number) => void;
-} {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const seekToOffset = useCallback((offsetMs: number) => {
-    const video = videoRef.current;
-    if (video) {
-      video.currentTime = currentTimeForOffset(offsetMs);
-    }
-  }, []);
-  return { videoRef, seekToOffset };
 }
