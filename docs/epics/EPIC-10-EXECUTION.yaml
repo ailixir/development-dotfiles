@@ -532,11 +532,11 @@ stories:
         # Recorded by @po 2026-09-15 at wave-6 validation. A pilot cannot be scheduled against an unowned
         # prerequisite, and saying so in prose has not moved anything in five waves. This converts it into a
         # gate on the one story whose whole subject is credentialed staging acceptance.
-        # LIFTED 2026-09-17 (@pm): ED-02's owner no longer reads TBD — the user assigned it to PUT Core
-        # platform (Core BFF) on 2026-09-17. 10.19 may be drafted with its ED-02-dependent criteria Blocked
+        # LIFTED 2026-09-16 (@pm): ED-02's owner no longer reads TBD — the user assigned it to PUT Core
+        # platform (Core BFF) on 2026-09-16. 10.19 may be drafted with its ED-02-dependent criteria Blocked
         # on the linked external ticket (ID: to be linked). Original text below kept for history. This
         # lifts ONLY this item; the MED-2 and O-10 items that follow are untouched.
-        - "[LIFTED 2026-09-17 — ED-02 owner assigned by the user: PUT Core platform (Core BFF)] STORY 10.19 MAY NOT BE DRAFTED WHILE ED-02's owner reads 'TBD — not assigned in sources'. ED-02 gates this story by id; drafting against an unowned prerequisite would produce a fourth story full of blocked halves pointing at nobody. @po cannot assign work to an organisation no source names — BRD §4 gives Platform/SRE cluster, ingress, egress, sandbox and storage and names NO identity owner, and architecture §9.1 says the prerequisites 'may be delivered outside Epic 10'. The ESCALATION PATH, named: @pm raises ED-02 to Checks-squad engineering management through BRD §8's launch-exit/on-call row, with Security & Compliance (BRD §11) as the accepting party."
+        - "[LIFTED 2026-09-16 — ED-02 owner assigned by the user: PUT Core platform (Core BFF)] STORY 10.19 MAY NOT BE DRAFTED WHILE ED-02's owner reads 'TBD — not assigned in sources'. ED-02 gates this story by id; drafting against an unowned prerequisite would produce a fourth story full of blocked halves pointing at nobody. @po cannot assign work to an organisation no source names — BRD §4 gives Platform/SRE cluster, ingress, egress, sandbox and storage and names NO identity owner, and architecture §9.1 says the prerequisites 'may be delivered outside Epic 10'. The ESCALATION PATH, named: @pm raises ED-02 to Checks-squad engineering management through BRD §8's launch-exit/on-call row, with Security & Compliance (BRD §11) as the accepting party."
         - "MED-2 (the Testcontainers JDBC liveness bug) must have an owner — @devops, per @qa's own gate — before this story is drafted. 10.19 runs the full integrated suite and a hang THERE is a false pass on the epic's final gate, in the one place nobody re-runs. Mitigation is epic-wide regardless: every story running ./gradlew check records wall-clock elapsed and the test count reached, and A RUN SHORT OF ITS BASELINE TEST COUNT IS A HANG, NEVER A PASS."
         - "ADR-002 O-10 (400 vs 404 for an unknown, deleted or quarantined draft on GET/PUT/DELETE /tests/{id}) must have its own ADR-002 ruling with its own before/after before this story is drafted. Class C, @architect's, overdue by a wave since §18.4 and restated at §23.4. @po gives it a date rather than a reminder; it is not @po's to rule."
 
@@ -936,13 +936,13 @@ external_dependencies:
     owner: "PUT Core platform (Core BFF) — trusted identity gateway AND vault integration with secret-use authorization"
     owner_decision:
       decided_by: "user (project owner), given directly to the orchestrator"
-      decided_on: "2026-09-17"
+      decided_on: "2026-09-16"
       recorded_by: "@pm (Morgan)"
-      traceability: "Article IV: NOT traceable to the BRD or the architecture — BRD §4 names no identity owner. This owner rests solely on the user's decision of 2026-09-17."
+      traceability: "Article IV: NOT traceable to the BRD or the architecture — BRD §4 names no identity owner. This owner rests solely on the user's decision of 2026-09-16."
       identity: "Trusted identity gateway (strips/replaces client identity headers, fails closed) — owned by PUT Core platform (the Core BFF)."
       vault: "Same owner as identity (PUT Core platform). STAYS MOCKED for now — the SecretsService REDACTED/plaintext stub remains; the user will set up the vault plumbing personally, soon."
       delivery: "Outside Epic 10, as a linked external ticket (per gate_note)."
-    external_ticket: "to be linked — no ticket ID exists yet (2026-09-17)"
+    external_ticket: "to be linked — no ticket ID exists yet (2026-09-16)"
     status: open
     # @po 2026-09-15, wave-6 validation — RAISED TO @pm, who owns this block. THE DESCRIPTION ABOVE IS
     # INCOMPLETE AND THE EPIC HAS BEEN ACTING ON IT FOR SIX WAVES. It reads as though the bypass is one
@@ -964,7 +964,7 @@ external_dependencies:
     # raises this to Checks-squad engineering management through BRD §8's launch-exit/on-call row, with
     # Security & Compliance (BRD §11) as the accepting party. GATE: story 10.19 may not be drafted while
     # this owner reads TBD — see 10.19's story_context.drafting_gate.
-    # @pm 2026-09-17 — RESOLVED BY THE USER, not by escalation: owner assigned (see owner / owner_decision
+    # @pm 2026-09-16 — RESOLVED BY THE USER, not by escalation: owner assigned (see owner / owner_decision
     # above); the third sentence @po asked for is now in the description, verified against
     # BffSessionAuthenticationFilter.java, IdentityBypassProperties.java and application*.yml. Note the
     # filter's own comments number the paths differently (core-service = "path 1", headers = "path 2");
