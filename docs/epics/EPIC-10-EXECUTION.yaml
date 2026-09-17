@@ -437,13 +437,57 @@ stories:
   # story is inventing one), BUT clause (b) of the amended SIZE-1 rule now predicts a move: this story
   # inherits the seek-measurement flake below and depends on BOTH halves of 10.11's mandated split. Re-check
   # at draft time by the usual method.
+  #
+  # Size M → L (SIZE-1, eighth consecutive) and SPLIT MANDATED (10.16a / 10.16b), recorded by @po
+  # 2026-09-16 at wave-7 validation (GO 9/10).
+  #
+  # CLAUSE (b) FIRES — BUT NOT FOR THE REASON THE COMMENT ABOVE GIVES. The flake reached this story by a
+  # @po validation ruling, not an ADR-002 amendment, and depending on both halves of 10.11 is a
+  # dependency, not a standing obligation. Neither triggers clause (b). The drafter was also wrong,
+  # because it read clause (b) as "touches the frozen document". Clause (b) says "an artefact on which
+  # the amendment places a NEW STANDING OBLIGATION". Two amendments later than this entry's M do that to
+  # artefacts 10.16 touches: ADR-002 §18.3 (frontend vocabularies are asserted against the document,
+  # in studioContract.test.ts, and "the other should extend it rather than write a second one") and
+  # §17.4 (`partial` "never derived from outcome … by either component"). AC-1 and AC-3 are those
+  # obligations.
+  # CANDIDATE CLAUSE (c) ("drafting finds work the estimate did not count") DECLINED: it cannot be
+  # checked in an amendment's PR. FORWARDED to @pm instead: SIZE-1 keys only on ADR-002 amendments, but
+  # scope also reaches sized stories through @po `story_context` rulings (this story's flake). Proposal:
+  # any ruling that adds scope to a sized story carries a size re-check in the same PR. The rule is
+  # @pm's; it is not amended here.
+  #
+  # SPLIT, on the epic's test (different trees, reviewers and gates, and each half asserts its own
+  # criteria; all yes). Size is not part of that test, so the drafter's "too small to split" does not
+  # decide it.
+  #   10.16a (L) — frontend: AC-1…AC-14, AC-19, AC-20, AC-21.
+  #   10.16b (S) — studio-runner/test/helpers only: AC-15…AC-18.
+  # No landing order; the halves share no file; 10.19 needs both.
   - id: "10.16"
     title: "Evidence state, playback and step seek"
-    size: M
+    size: L
     wave: 7
     depends_on: ["10.11", "10.15"]
     blocks: ["10.19"]
     story_context:
+      # Recorded by @po 2026-09-16 at wave-7 validation.
+      split: "MANDATED — 10.16a (frontend evidence/playback/seek + legacy retirement, L) and 10.16b (seek-measurement flake, test helper only, S). Separate branches, PRs and gates; no landing order; 10.19 depends on both."
+      legacy_player_retirement: >-
+        OWNED BY 10.16a (AC-21), found at validation and previously unowned. ChecksStudioPage.tsx still
+        has a synthetic `stepIndex * 10` seek (lines 461-468), which architecture §6.4 forbids by name
+        ("No synthetic index-times-ten mapping remains"). It also has a legacy <video> with a
+        '/assets/videos/sample-ui-test.mp4' fallback (the file does not exist) and plays videoPath as a
+        RELATIVE src, which is wrong for cross-host deployments. Its source is `(exec as any).videoUrl`,
+        which is not part of the contract. The draft said nothing rendered video. "Composition only"
+        would have left two players on the page.
+      esc1_def09b_watch: "NON-BLOCKING. 10.16 never parses getExecutionVideo's body (AC-11), and its MSW refusal bodies are Ajv-validated against the document rather than transcribed (AC-13), so an @architect ruling on ESC-1/DEF-09(b) flows through without re-opening a criterion."
+      seek_measurement_flake_correction: >-
+        @po CORRECTS ITS OWN WAVE-6 TEXT BELOW. "The assertion that failed was the MEDIAN tolerance" does
+        not follow from the evidence. The run has five steps, and the median is errors[2], the third
+        smallest, so it exceeds 100 ms only when THREE steps do. The two reported outliers (579.9, 882.6)
+        cannot move it. Which assertion failed is UNKNOWN. The candidates include a median failure with an
+        unreported third outlier, and `seekingToTheEnd > ASSERTION_TIMEOUT_MS * 0.5` (1000 ms). 10.16b
+        AC-15 records the failing message verbatim before anything changes, and a helper fix is made
+        only if a mis-attribution is actually observed.
       # Assigned by @po 2026-09-15 at wave-6 validation, ruling on story 10.15's open question 5.
       # 10.15 declined to adopt it and recommended 10.16; all three of its grounds are accepted verbatim.
       seek_measurement_flake_owner: "10.16 (from the ownerless fixtures-tier flake first seen in story 10.17)"
