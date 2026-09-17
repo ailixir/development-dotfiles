@@ -1,0 +1,434 @@
+schema: 1
+story: '10.16b'
+story_title: Evidence state, playback and step seek — runner test-helper half (seek-measurement flake)
+epic: EPIC-10
+wave: 7
+
+gate: PASS
+
+status_reason: >-
+  RE-REVIEW at 4ffc4020c (2026-09-16): PASS. F-1 is closed, and this reviewer verified that by mutation.
+  The new boundary test places each of the 10 transcribed steps at repaint + tolerance - 0.1 ms and
+  requires the default slack to match that repaint, while a slack 0.2 ms narrower must not. Slack 90
+  and slack 99 each turn exactly that test red. T3 (moving the report onto the effect) turns its contrast
+  assertion red, so the step really does sit at the boundary. The tolerance is now read as text from
+  seek-measurement.test.ts. Sixteen probes, run in place and restored byte-identically, show that the read
+  is not a vacuous guard. It fails closed (a loud collection error) on every change of declaration form
+  tried, and on any second column-0 declaration, including one inside the skipped AC-12b describe. It
+  follows a change of value (120 turns the test red; 80 turns check (b) red, which is honest). It ignores
+  prose. Its residual weakness (F-7) is that it binds to the declaration, not to the value the median
+  assertion actually uses. A documented literal has that weakness too, plus it misses every change of
+  value. So the read is strictly better than the literal it replaced. Suites at 4ffc4020c: 947 passed / 29
+  skipped; fixtures 89 / 10; lint 0. Type-check has the one pre-existing error, outside this diff. F-2
+  through F-6 carry unchanged and none blocks the merge.
+  ORIGINAL REVIEW at 594a3252e: CONCERNS, for the reasons below.
+  The fix is a correction, not a loosening, and this reviewer established that by measurement rather
+  than by reading the developer's argument. It also reproduced the defect independently. With the
+  helper temporarily set back to slack 60, 2 of 8 fixtures-tier runs failed, both on the MEDIAN
+  assertion ("median seek error was 284.9ms", "…453.8ms"). 13 of 75 steps were above 100 ms, and every
+  one of the 13 had its repaint stamped 60.7–75.1 ms before the reported start: above the old slack,
+  below the new one. That is the developer's mechanism (14 of 90, 60.0–85.3 ms) seen by a second
+  observer. Replaying slack 100 on these recordings, which the developer never saw, puts every step
+  within 75.1 ms and drops the two failing medians to 62.3 and 66.2 ms.
+  Correction vs loosening, settled on real frames. Every inner-run recording (2 of the developer's, 17
+  of this reviewer's) was run again with each reported offset shifted by d = -600..+600 ms, which
+  simulates a runner that reports late or early. Each shift was scored against the verdict the true
+  error gives. Slack 60 wrongly fails every recording somewhere in d ≈ -6..+81 ms; slack 100 wrongly
+  fails none of them anywhere. Both slacks wrongly pass a runner about one step cadence late
+  (d ≥ ~546 ms), where each step aliases onto the next step's repaint. That hazard is built into
+  matching by time and was not introduced here; slack 100 extends it by 3–8 ms in 2 of 19
+  recordings. One early-shift band (qb-6/2, d -127..-119) is identical under both values. So no
+  runner whose median error is ≥ 100 ms (shifts below one cadence) passes under 100 and failed under
+  60. What 60 enforced beyond the documented tolerance was an undeclared one-sided bound, applied at
+  random. MEDIAN_TOLERANCE_MS and OUTLIER_BOUND_MS are untouched, and seek-measurement.test.ts is
+  byte-identical to the base (a0d3561d…28c9 at both).
+  Why 100 and not another value in (85.3, 320.7): the data does not pick it, but the property does.
+  Slack ≥ tolerance is exactly the condition under which no in-tolerance step can be mis-attributed,
+  and 100 is the smallest value that satisfies it. Anything larger only widens the window for a
+  backwards match to a spurious change (bounded by (c) at 320.7, confirmed: 320 green, 321 red).
+  Provenance is verified, not merely asserted. Both recordings cited in webm.test.ts still exist in
+  the developer's capture directory. They hash to the cited sha256 values, they are real VP8 WebM
+  files written by Playwright's muxer (Lavf61.1.100), and readWebmFrames over each returns a list
+  identical to the transcribed literal (140 and 141 frames). The run logs beside them print the
+  cited SEEK rows and the cited failure message verbatim.
+  What keeps this off PASS is one instance of catalogued shape #21: the property the fix rests on,
+  "slack equals tolerance, so an in-tolerance step can never be mis-attributed", lives only in the
+  doc comment. Setting the default to 90 leaves webm.test.ts green (5/5), and every other test in
+  the repository would stay green too, because no captured lead exceeds 85.3 ms. The flake would
+  come back for leads in (90, 100) and nothing would say so.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-16T00:00:00Z'
+branch: story/10.16b
+head_sha: 4ffc4020c
+previous_head_sha: 594a3252e
+base_sha: a02f1d505
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.16b
+scope: >-
+  AC-15…AC-18 only (story 10.16, half b). 10.16a is gated separately and was not reviewed here.
+  Backend and frontend: not touched by the diff, not run.
+
+waiver:
+  active: false
+
+environment:
+  node: v23.10.0 (.nvmrc says 22; engines allows >=22.11 <25). No Node 22 is installed on this host
+    (/opt/homebrew/bin/node only), so all evidence, the developer's and this reviewer's, is Node 23
+    only. Inferred as immaterial to the leads, which come from Chromium's recorder and a 40 ms frame
+    quantum, but not measured.
+  chromium: pinned revision 1243 (already installed)
+  load_average: 7–43 during the default-tier runs, 9–25 during the fixtures runs; other agents
+    shared the host.
+  capture_method: >-
+    Same as the developer's (E-2): a per-run TMPDIR plus an out-of-tree hard-link process, run from a
+    private mktemp directory (not the shared scratchpad). The command was the literal
+    `npm run test:fixtures`.
+
+evidence:
+
+  diff_scope:
+    command: git diff --stat a02f1d505..HEAD; git show --stat 2220f503a 594a3252e
+    result: CONFIRMED
+    detail: >-
+      Three files: docs/stories/10.16.story.md, studio-runner/test/helpers/webm.ts,
+      studio-runner/test/helpers/webm.test.ts. The implementation commit touches only the two helper
+      files. Nothing under studio-runner/src, frontend, backend or docs/specs.
+
+  ac16_seek_measurement_absent:
+    command: >-
+      shasum -a 256 test/fixtures-tier/seek-measurement.test.ts;
+      git show a02f1d505:studio-runner/test/fixtures-tier/seek-measurement.test.ts | shasum -a 256
+    result: CONFIRMED — a0d3561d8cdcce50521521f20a2495760c3e58d7f5e1e5f8aa91498a82d328c9 on both
+    detail: MEDIAN_TOLERANCE_MS = 100 (line 84) and OUTLIER_BOUND_MS = 1_500 (line 85) unchanged.
+
+  before_state_reproduction:
+    command: >-
+      webm.ts slackMs 100 -> 60 (anchor-checked; restored and hash-verified 771d9844…c219 by a trap),
+      then `npm run test:fixtures` x8 with capture
+    result: REPRODUCED — 2 of 8 runs failed, both on the median
+    detail: >-
+      qb-3 "median seek error was 284.9ms across 5 steps" (expected 284.8872500000002 to be less
+      than 100); qb-4 "median seek error was 453.8ms across 5 steps" (453.8081669999997). The other 6
+      runs were green (89 passed / 10 skipped). Steps with |error| > 100 ms: 13 of 75 (17.3 %).
+      Developer: 14 of 90 (15.6 %), 2 of 10 runs. Combined before-state: 4 of 18 runs, 27 of 165
+      steps. Repaint lead of every mis-attributed step (this reviewer): 60.7, 61.6, 62.3, 66.0,
+      66.2, 66.4, 66.9, 68.1, 69.2, 70.3, 72.0, 74.7, 75.1 ms, all above the old slack. One run
+      (qb-8) had two captured files that both reproduce its SEEK table, so it was excluded from the
+      lead and replay analysis; its steps were all under 100 ms and are counted.
+
+  out_of_sample_replay:
+    command: helper replayed over this reviewer's own captured recordings (scratch, outside the tree)
+    result: CONFIRMED — the fix handles recordings the developer never saw
+    detail: >-
+      Slack 100 on all 13 identifiable before-state inner runs: max |error| 75.1 ms, zero steps above
+      100. The two failing medians become 62.3 and 66.2 ms. In the other direction, after-state run
+      qa-1 inner 1 (green at slack 100, lead 73.4 ms on step 2) replays under slack 60 with a median
+      of 457.2 ms, so it would have failed under the old helper.
+
+  after_state_runs:
+    command: npm run test:fixtures x2 at HEAD, with capture
+    result: 2 of 2 green (89 passed / 10 skipped); 0 of 20 steps above 100 ms; medians 62.8, 26.4,
+      29.0, 22.9 ms
+    detail: >-
+      With the developer's 5 of 5 and the orchestrator's 3 of 3, that makes 10 of 10 green after the
+      fix. This is evidence that the flake did not recur, not proof that it cannot. The 62.8 ms
+      median is the E-3 margin seen again.
+
+  shift_sweep_correction_vs_loosening:
+    command: >-
+      For each recording, reported offsets shifted by d in [-600, 600] ms; verdict (all < 1500 and
+      median < 100) under slack 60 and 100, compared with the verdict from the true error (effect
+      frame minus shifted report)
+    result: CORRECTION
+    detail: >-
+      False fails: slack 60 in all 19 recordings (bands 40 ms wide between d = -6 and d = +81); slack
+      100 in none. False passes: at d ≥ 542–598 ms under both slacks (one-cadence aliasing); slack
+      100 starts 3–8 ms earlier in 2 recordings (AC15_RUN7: 542 vs 549; qa-1/1: 547 vs 555) and
+      matches slack 60 exactly in the rest. qb-6/2 has an identical early band (-127..-119) under
+      both. Inference, labelled: "true effect" is the change the slack-100 matcher returns, which is
+      within 75.1 ms before the report on every recording, so the definition is not circular in any
+      case that matters here.
+
+  provenance_of_transcribed_frames:
+    command: >-
+      shasum -a 256 on the developer's captured files; readWebmFrames over each compared with the
+      literal parsed out of webm.test.ts; strings/xxd header
+    result: VERIFIED BY QA — NOT CHECKABLE FROM THE TREE
+    detail: >-
+      runs/before-7/cap/0057-…page@b59fd107….webm = b79cd105…e563, 1,699,987 bytes, 140 frames,
+      IDENTICAL to AC15_RUN7. runs/before-3/cap/0002-…page@865d4dd3….webm = b0fea7db…78a1c,
+      1,522,457 bytes, 141 frames, IDENTICAL to AC15_RUN3. EBML/webm header, V_VP8, Lavf61.1.100.
+      Their out.txt files print the cited SEEK rows and "expected 454.1913749999999 to be less than
+      100". The files sit in a session scratchpad under /private/tmp and will disappear. The sha256
+      in the provenance string is compared with nothing in the repository (the #4/#13 family), so
+      today's verification is the durable evidence. Internal cross-checks do exist: check (a)
+      reproduces the printed errors to 0.05 ms, and the change-list pin catches a single tampered
+      frame (Q5).
+
+  mutations:
+    harness: >-
+      python, anchor asserted before each edit, run
+      `npx vitest run test/helpers/webm.test.ts --coverage.enabled=false`, restore, sha256 asserted
+      (webm.ts 771d98448cd1, webm.test.ts 96ec1a940289) after every row
+    rows:
+      - id: M1 (re-run)
+        mutation: slackMs 100 -> 60
+        observed: 1 failed / 4 passed — (b) "AC-15 run 7, inner run 1 step 2 expected 2120 to be 1400"
+        matches_record: true
+      - id: M2 (re-run)
+        mutation: slackMs -> 80
+        observed: 1 failed — (b) "AC-15 run 3, inner run 2 step 3 expected 2600 to be 2120"
+        matches_record: true
+      - id: M3 (re-run)
+        mutation: slackMs -> 400
+        observed: 1 failed — (c) "AC-15 run 3, inner run 2 step 4 expected 2600 to be 2880"
+        matches_record: true
+      - id: M4 (re-run)
+        mutation: groupWithinMs 80 -> 800
+        observed: 4 failed / 1 passed — change-list pin, (a), (b), (c); (c) "step 1 expected undefined to be 720"
+        matches_record: true
+      - id: Q1
+        mutation: slackMs -> 90 (below the tolerance the doc comment says it equals)
+        observed: "5 passed — SURVIVES. Shape #21 instance (see findings F-1)."
+      - id: Q2
+        mutation: slackMs -> 320
+        observed: 5 passed (inside the stated bound)
+      - id: Q3
+        mutation: slackMs -> 321
+        observed: 1 failed — (c) run 3 step 4. The 320.7 upper bound is exact as documented.
+      - id: Q4
+        mutation: "delete AC15_RUN3 step-4 row (shape #18 probe)"
+        observed: 2 failed — the population pin and (c) "expected 5 to be 6". The matrix is guarded.
+      - id: Q5
+        mutation: tamper one transcribed frame (run 7, 1400 ms, 222483 -> 1000 bytes)
+        observed: 2 failed — change-list pin and (b)
+      - id: Q6
+        mutation: matching rule ignores slack (atMs >= offsetMs)
+        observed: 2 failed — (b) and (c)
+    check_d_label: >-
+      CONFIRMED as not coverage. The file header ("That is shown by the story's git diff, not asserted
+      here") and the Dev Agent Record ("diff evidence, not an executable assertion") both say so.
+
+  e4_httpclient_timeout:
+    command: >-
+      npm test x10 warm cache; x5 with node_modules/.vite/vitest cleared; x6 base-content/HEAD pairs,
+      interleaved, cold cache; httpClient.test.ts alone x10, then x10 under a 22-process CPU burn
+      (cache backed up and restored)
+    result: NOT ATTRIBUTABLE TO THIS DIFF
+    detail: >-
+      HEAD: 1 failure in 21 full runs (cold run 1, load 25.8), "reports a timeout as ambiguous, not as
+      a failure to send", the same message the developer saw. Base content (base webm.ts, no
+      webm.test.ts), interleaved: 0 of 6. Isolated: 0 of 20, including under burn. Developer: 2 of 10
+      on HEAD, 0 of 8 on base. Pooled: HEAD 3/31, base 0/14. Too few to separate, and the pooled runs
+      were under different loads. Mechanism (inferred): the test gives the client a 25 ms deadline
+      and then asserts the server recorded the hit, so the server's accept-and-parse can lose that
+      race under load. webm.test.ts is synchronous array work that finishes in milliseconds and
+      touches no socket or timer. Its only plausible effect is to change vitest's file schedule, and
+      cold-cache runs on base content did not fail.
+
+  default_tier:
+    command: npm test (x21 on HEAD)
+    result: 946 passed / 29 skipped (975) on 20 of 21; 1 of 21 with the E-4 failure
+    detail: Base content measures 941 / 29 (970); +5 = webm.test.ts. Coverage thresholds met.
+
+  lint_and_typecheck:
+    command: npm run lint; npm run type-check
+    result: lint exit 0. type-check 1 error, test/fixtures-tier/deadline-cleanup.test.ts(550,40) TS2345
+    detail: >-
+      The erroring file is not in this diff and does not import the helper, so the error is
+      independent of this story. Type-check is NOT clean; its pre-existence rests on the developer's
+      base measurement plus that diff fact.
+
+  split_merge_hazard:
+    command: git merge-tree --write-tree story/10.16a story/10.16b; the same against epic/EPIC-10
+    result: CONFLICT in docs/stories/10.16.story.md only; code sets disjoint; clean against the epic
+    detail: >-
+      Both halves edit the Status row, Change Log, Dev Agent Record, File List and QA Results of the
+      same story file. It is documentation only, and whichever half merges second must resolve it.
+      No code interaction: 10.16a touches only frontend/.
+
+findings:
+  - id: F-1
+    severity: medium
+    shape: '#21 (a documented invariant only prose protects)'
+    title: '"slack equals tolerance" is the fix''s whole justification and nothing asserts it'
+    detail: >-
+      The doc comment says the 100 ms default equals MEDIAN_TOLERANCE_MS, "so the helper can no
+      longer turn an in-tolerance step into an out-of-tolerance number". Q1 (default 90) leaves
+      webm.test.ts green, because the widest captured lead is 85.3 ms. The flake would come back for
+      leads in (90, 100) with every test green. webm.test.ts's own MEDIAN_TOLERANCE_MS is a copy with
+      no provenance check ("copied, not imported"; the real one cannot be imported without editing
+      the AC-16 file).
+    remedy: >-
+      Add one test in webm.test.ts on a real transcribed recording. Place a reported offset just
+      under one tolerance after a known effect (for example AC15_RUN7 effect 1400, report 1499.9),
+      and assert that the default-slack match is that effect. Q1 then turns red, and M3/Q3 still
+      guard the upper side. Optionally also read MEDIAN_TOLERANCE_MS out of seek-measurement.test.ts
+      as text and compare it with the local copy. That is a read, not an edit, so AC-16 still holds.
+    owner: '@dev'
+    blocking: false
+    status: CLOSED at 4ffc4020c (Q1 and Q1b red, T3 red; see rereview_4ffc4020c)
+  - id: F-2
+    severity: low
+    title: The transcribed recordings live only in an ephemeral scratchpad
+    detail: >-
+      Verified today (see provenance_of_transcribed_frames). Once /private/tmp is cleaned, the sha256
+      values in the provenance strings can no longer be checked by anyone.
+    remedy: >-
+      Keep the two files (about 3.2 MB in total) somewhere durable outside the tree, and record where,
+      or accept this gate's verification as the durable record. @po decides.
+    owner: '@po'
+    blocking: false
+  - id: F-3
+    severity: low
+    title: E-4, httpClient timeout race, owner unassigned
+    detail: See e4_httpclient_timeout. Not caused by this diff as far as can be measured; a
+      default-tier flake with no owner.
+    remedy: >-
+      Assign it to the owner of test/reporting (10.6's surface). Two candidate fixes: have the server
+      acknowledge that it received the request before the client's deadline starts, or widen the
+      client deadline together with a server-side hold. @po or @sm decides.
+    owner: '@po'
+    blocking: false
+  - id: F-4
+    severity: low
+    title: E-1, seek-measurement.test.ts comments now contradict measured evidence
+    detail: >-
+      Lines 43-48 and 72-75 attribute mis-attribution to a missed or split repaint. In 27 of 27
+      mis-attributions across two observers, the repaint was found and the slack was the cause. A
+      maintainer who believes the comment would reach for groupWithinMs, which M4 shows is the
+      harmful direction. AC-16 correctly forbids the edit in this half.
+    remedy: >-
+      @po rules on a comment-only amendment before 10.19, stated in FOC-06 form, for example in the
+      10.19 conformance pass.
+    owner: '@po'
+    blocking: false
+  - id: F-5
+    severity: low
+    title: E-3, the median margin is real and narrower than the old numbers suggested
+    detail: >-
+      With attribution correct, the median is up to 62.8 ms (this reviewer) and 70 ms (developer);
+      the widest single lead is 75.1 ms and 85.3 ms respectively. On a slower host (the pinned CI
+      image, ED-05) the lead can grow past 100 ms and the assertion will then fail correctly. That
+      does not threaten the no-widening rule in principle: the designed remedy is the AC-12c
+      runner-side calibration in src/run/timeline.ts, owned by SPK-06 phase B, not a wider constant.
+      In practice it will create pressure to widen. A lead past 100 ms also shows up as a +400–650 ms
+      "mis-attribution" number rather than the true about -110 ms, which misleads diagnosis.
+    remedy: >-
+      @architect notes it against AC-12c/SPK-06 before 10.19. Anyone who meets a legitimate red
+      reports the lead (SEEK table plus capture) and does not touch MEDIAN_TOLERANCE_MS.
+    owner: '@architect'
+    blocking: false
+  - id: F-6
+    severity: low
+    title: Story-file conflict between the two halves
+    detail: See split_merge_hazard.
+    remedy: The second half to merge resolves docs/stories/10.16.story.md by keeping both halves' sections.
+    owner: '@devops / orchestrator'
+    blocking: false
+
+  - id: F-7
+    severity: low
+    title: The tolerance text read binds to the declaration, not to the value the median assertion uses
+    detail: >-
+      S7 (the assertion becomes MEDIAN_TOLERANCE_MS + 50) and S8 (an indented shadowing const 150 in the
+      AC-12a describe) both leave webm.test.ts green while the measurement asserts 150. S10 (a reformat
+      plus a column-0 comment decoy) also survives, but it is contrived. A documented literal would
+      miss all three as well, so this is a residual, not a regression.
+    remedy: >-
+      Optional, small. In readMedianTolerance, also require exactly one occurrence of
+      `.toBeLessThan(MEDIAN_TOLERANCE_MS);` and exactly one match of
+      /^\s*(?:export\s+)?(?:const|let|var)\s+MEDIAN_TOLERANCE_MS\b/gm (any indentation, any
+      form). By inference (not run), that would catch S7, S8 and S10. Otherwise accept the gap: any such edit to
+      seek-measurement.test.ts is itself a widening that the epic's no-widening rule polices in review.
+    owner: '@dev (optional)'
+    blocking: false
+
+acceptance_criteria:
+  AC-15: MET — 10 runs recorded with (a)–(d); failing assertion quoted verbatim (median, twice);
+    reproduced independently, 2 of 8 at slack 60.
+  AC-16: MET — seek-measurement.test.ts absent from the diff; sha256 identical to the base.
+  AC-17: MET — fix confined to firstChangeAtOrAfter's default; checks (a)–(c) are executable and
+    falsifiable (M1–M4 reproduced); (d) is honestly labelled as diff evidence; data from real
+    recordings, provenance verified by QA. F-1 closed at 4ffc4020c by the boundary test.
+  AC-18: MET — 5 of 5 recorded, before/after rate reported (14/90 → 0/50), no claim that the flake is
+    gone; this reviewer adds 2 of 2 (0/20 steps) and the orchestrator 3 of 3.
+
+before_merge:
+  required: []
+  recommended:
+    - F-6 resolve the story-file conflict at merge time (10.16a/10.16b both edit docs/stories/10.16.story.md)
+    - F-7 optional tightening of the tolerance text read
+  done:
+    - F-1 boundary test (4ffc4020c)
+  after_merge_before_10_19:
+    - F-4 @po ruling on the stale comments
+    - F-5 @architect note against AC-12c / SPK-06
+    - F-3 owner for the httpClient race
+    - F-2 decision on keeping the recordings
+
+rereview_4ffc4020c:
+  scope: >-
+    Commit 4ffc4020c only (webm.test.ts plus the story record). webm.ts is 771d98448cd1… and
+    seek-measurement.test.ts is a0d3561d…28c9 at HEAD, identical to the base a02f1d505.
+  harness: >-
+    Python in a private mktemp directory under $TMPDIR, not the shared scratchpad. Each run checks that
+    its anchor occurs exactly once, applies the edit, runs `npx vitest run test/helpers/webm.test.ts
+    --coverage.enabled=false`, restores the file from a copy, and asserts its sha256 against the base
+    hash. Every row printed RESTORED-OK. Baseline before the rows: 6 passed.
+  f1_closure:
+    - id: Q1
+      mutation: webm.ts slackMs 100 -> 90
+      observed: '1 failed / 5 passed: the new test, "run 7 step 0, reported 99.9: expected 720 to be +0"'
+    - id: Q1b
+      mutation: slackMs -> 99
+      observed: 1 failed / 5 passed, the new test, same message
+    - id: T3
+      mutation: webm.test.ts reportedMs = step.effectMs (boundary removed)
+      observed: '1 failed: the contrast assertion, "reported 0: expected +0 not to be +0"'
+    - note: >-
+        Not re-run by this reviewer: Q1c (slack 99.95, which survives by design below the 0.1 ms print
+        resolution). The developer's record and the arithmetic agree on it. The orchestrator
+        independently saw 90 and 99 red and 100 green.
+  text_read_probes:
+    target: test/fixtures-tier/seek-measurement.test.ts, mutated in place and restored (AC-16 forbids a committed change, not a probe)
+    rows:
+      - {id: S1, mutation: 'value 100 -> 120', observed: 'RED: new test, "reported 119.9"', reading: follows a widening}
+      - {id: S2, mutation: 'value 100 -> 80', observed: 'RED: (b), "expected 85.3 to be less than 80"', reading: 'follows a tightening; the red is honest, because run 3 step 3 really is out of an 80 ms tolerance'}
+      - {id: S3, mutation: 'const MEDIAN_TOLERANCE_MS: number = 120;', observed: 'collection error, "found 0"', reading: fails closed}
+      - {id: S4, mutation: 'export const … = 120;', observed: 'collection error, "found 0"', reading: fails closed}
+      - {id: S5, mutation: 'value 1_20', observed: RED (reads 120), reading: separators handled}
+      - {id: S6, mutation: 'value 120.0', observed: 'collection error, "found 0"', reading: fails closed}
+      - {id: S13, mutation: 'const WIDER = 150; const MEDIAN_TOLERANCE_MS = WIDER;', observed: 'collection error, "found 0"', reading: fails closed}
+      - {id: S9, mutation: 'column-0 declaration of 500 inside the skipped AC-12b describe', observed: 'collection error, "found 2"', reading: cannot bind to the skipped describe}
+      - {id: S11, mutation: 'real declaration kept, plus a column-0 copy inside a template string', observed: 'collection error, "found 2"', reading: cannot bind to a string}
+      - {id: S12, mutation: '// const MEDIAN_TOLERANCE_MS = 150; line comment added', observed: GREEN, reading: 'correct; prose is ignored and the real value is still 100'}
+      - {id: S7, mutation: 'median assertion changed to toBeLessThan(MEDIAN_TOLERANCE_MS + 50)', observed: GREEN, reading: 'SURVIVES; the read binds to the declaration, not to the assertion (F-7)'}
+      - {id: S8, mutation: 'indented const MEDIAN_TOLERANCE_MS = 150 shadowing it inside the AC-12a describe', observed: GREEN, reading: 'SURVIVES; the measurement asserts 150 and the read returns 100 (F-7)'}
+      - {id: S10, mutation: 'real declaration retyped to 150, plus a column-0 copy of the old one inside a block comment', observed: GREEN, reading: 'SURVIVES; binds to the decoy. Contrived, because it needs a reformat and a decoy together (F-7)'}
+    ruling: >-
+      Not shape #1 and not #14, because the read is a parameter lookup, not evidence of behaviour. The
+      anchored, column-0, exactly-one regex excludes the file's own prose mention (line 52), strings,
+      comments and the skipped describe, and it fails loudly on every refactor tried. It can silently
+      give a wrong answer only when the median assertion stops using the top-level declaration (S7, S8)
+      or when a reformat and a column-0 decoy happen together (S10). A documented literal is blind in all
+      three of those cases and also in S1/S5 (it did not read the file at all; verified from the diff). So
+      the read is strictly better than the literal it replaced. The cost is that a benign reformat of an
+      unrelated file breaks a default-tier test, with a clear message.
+  suites:
+    default_tier: 'npm test x1: Test Files 49 passed | 1 skipped (50); Tests 947 passed | 29 skipped (976); load 11.4'
+    fixtures_tier: 'npm run test:fixtures x1: 6 files passed; 89 passed | 10 skipped (99); SEEK errors -0.8 to -59.5 ms'
+    lint: exit 0
+    type_check: 'one error, the pre-existing deadline-cleanup.test.ts(550,40) TS2345, outside this diff'
+  hygiene: >-
+    All three files match their pre-probe hashes (webm.ts 771d98448cd1, webm.test.ts 2703108a531b,
+    seek-measurement.test.ts a0d3561d8cdc). git status was clean before this gate's commit.
+
+history:
+  - {at: 594a3252e, date: '2026-09-16', gate: CONCERNS, reviewer: Quinn (@qa), note: 'F-1 (shape #21), slack >= tolerance protected only by prose'}
+  - {at: 4ffc4020c, date: '2026-09-16', gate: PASS, reviewer: Quinn (@qa), note: 'F-1 closed by the boundary test (Q1, Q1b and T3 red); text read ruled better than a literal; F-7 added (low, advisory)'}
+
+hygiene: >-
+  Every mutation was restored and hash-verified (webm.ts 771d98448cd1…, webm.test.ts 96ec1a940289…).
+  The vitest results cache was backed up and restored. The CPU burners were killed, 0 remaining. The
+  work tree was clean before this gate's own commit.

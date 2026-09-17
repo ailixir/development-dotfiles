@@ -164,19 +164,38 @@ export function sceneChanges(
  * This is the measurement's matching rule, and it is worth stating plainly because a different
  * rule would make the result mean something different. A step's visible effect can only appear
  * **after** the step starts — the step is what causes it — so the answer is the first change from
- * the reported offset onward, with one frame interval of slack for a repaint that reached the
- * encoder a fraction early.
+ * the reported offset onward, with slack for a repaint whose frame is *stamped* earlier than the
+ * step's reported start.
  *
  * Matching by *position* instead (the n-th change for the n-th step) would be wrong whenever the
  * encoder emits a periodic keyframe, which it does: one spurious change would shift every later
  * step and turn a correct runner into a failing measurement.
+ *
+ * ## Why the slack is 100 ms, not one frame interval (story 10.16b)
+ *
+ * On the recording's timeline a repaint is stamped **before** the step's reported start, not
+ * after it: ten fixtures-tier runs (90 steps) put the nearest change at 0.8–85.3 ms before the
+ * reported offset. That lead is the readiness-to-first-frame gap AC-12c leaves to staging, plus
+ * the 40 ms frame quantum, plus a burst being stamped at its first frame. The slack used to be
+ * 60 ms. Every step whose lead exceeded it — 14 of 90, leads 60.0–85.3 ms — was matched to the
+ * **next** change instead, hundreds of milliseconds later. Two of those ten runs failed the
+ * median tolerance that way. Nothing was wrong with the detector: every repaint was found.
+ *
+ * 100 ms makes the matching window equal to the tolerance the measurement asserts
+ * (`MEDIAN_TOLERANCE_MS`). A step whose effect lies within tolerance before its reported start is
+ * attributed to that effect. A step beyond it is out of tolerance whichever change it is matched
+ * to. So the helper can no longer turn an in-tolerance step into an out-of-tolerance number.
+ *
+ * **Do not widen it past the next spurious change.** The encoder emits changes that belong to no
+ * step, and one recording in `webm.test.ts` has such a change 320.7 ms before a step's reported
+ * start. A slack that reaches it matches a correct step *backwards*.
  *
  * @returns the frame, or `null` when no change follows the step at all.
  */
 export function firstChangeAtOrAfter(
   changes: readonly WebmFrame[],
   offsetMs: number,
-  slackMs = 60,
+  slackMs = 100,
 ): WebmFrame | null {
   return changes.find((change) => change.atMs >= offsetMs - slackMs) ?? null;
 }
