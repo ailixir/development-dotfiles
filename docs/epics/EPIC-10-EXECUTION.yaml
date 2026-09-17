@@ -358,7 +358,7 @@ stories:
     size: L
     wave: 6
     depends_on: ["10.7", "10.14"]
-    blocks: ["10.16", "10.19"]
+    blocks: ["10.16", "10.19", "10.31"]
     story_context:
       # Recorded by @po 2026-09-15 at wave-6 validation.
       contract_ordering: "FOC-06 step 2 of 3. B-8 ('the pin is green on arrival') is superseded: green means green against story 10.18's step-1 re-anchor, not against the digest recorded at draft time."
@@ -469,7 +469,7 @@ stories:
     size: L
     wave: 7
     depends_on: ["10.11", "10.15"]
-    blocks: ["10.19"]
+    blocks: ["10.19", "10.31", "10.32"]
     story_context:
       # Recorded by @po 2026-09-16 at wave-7 validation.
       split: "MANDATED — 10.16a (frontend evidence/playback/seek + legacy retirement, L) and 10.16b (seek-measurement flake, test helper only, S). Separate branches, PRs and gates; no landing order; 10.19 depends on both."
@@ -515,12 +515,204 @@ stories:
         - "MEDIAN_TOLERANCE_MS may NOT be widened to make it pass. Widening a tolerance to silence a flake is 'loosening is never a story's call' one level down, in a test. If the file's own commentary is right — large positive errors from a DETECTOR limitation, a full-viewport repaint not landing in a single encoded frame so the frame finder matches the next scene change — the fix is in the TEST HELPER, not in the runner and not in the bound, and it must be named as a different piece of work."
         - "State which tier the evidence runs in. This file is in fixtures-tier, which `npm test` does not run; `npm run test:fixtures` does, with its own vitest config. The wave-5 standing rule applies: a strong assertion that is never executed is worse than a weak one."
 
-  # ── Wave 8 ──
+  # ── Wave 8 ── the ADR-002 §24–§28 follow-ups, routed by @po 2026-09-16 ──
+  #
+  # NUMBERING. 10.20–10.26 are held by the studio-inference program's UNCOMMITTED story files in
+  # wt/epic (verified by listing; its own log, docs/architecture/studio-inference-execution-log.md:5,
+  # declares that range and reserves 10.19 for this manifest). Those files are not on any branch, so a
+  # next-integer choice (10.27) collides the first time that program drafts one more story, and nothing
+  # it reads would stop it. @po therefore takes a DECADE BLOCK rather than a next integer: Epic-10
+  # manifest follow-ups are numbered from 10.30; 10.27–10.29 are left unallocated as headroom inside
+  # that program's decade. Verified 2026-09-16: no file, branch or document in either tree names
+  # 10.27–10.39 as a story (the only textual hit, 10.16.story.md:664, is a load average). This does NOT
+  # make a collision impossible, since an uncommitted drafter can write any number, so the block is
+  # flagged to @pm and to that program's coordinator in the same commit's report. Ids are names, not an
+  # order: 10.30 lands before 10.19.
+  #
+  # PLAN. @architect offered one PR or two (ADR-002 §28.2). @po CHOOSES TWO, and makes them two STORIES,
+  # using the epic's split test (different trees, reviewers and gates, and can each half assert its own
+  # criteria?). O-18 + §27 is a backend authorization fix reviewed by Security, with behaviour tests
+  # that fail first. §24 + §25 is a document catch-up for shipped behaviour, plus hand-kept test literals,
+  # a runner pin and a frontend mock, reviewed by the contract and frontend owners. No closed
+  # correspondence spans the cut: §27 changes no status set (§27.5), and the only shared artefact is
+  # the SHA-256 pin, which is serialized (FOC-07), not a correspondence. The deciding reason is that
+  # under the one-PR plan a HIGH security fix waits for a frontend mock change. Cost accepted: two pin
+  # moves, each re-read from the file.
+  # O-20 is a third story. It is runner-only, shares no file with the other two, and no open story owns
+  # timeline.ts (10.16b is merged and is not re-opened, per the O-17 standing rule).
+
+  # Size M: three write checks behind one visible read, a controller signature change on DELETE, at least
+  # seven new integration cases plus the non-vacuity control, §27.6's prose, one pin re-anchor, and a
+  # measured §13 row replacing §28.4's simulation. Counted, not inherited.
+  - id: "10.30"
+    title: "CSI write authorization on Studio test create, save and delete (ADR-002 O-18, §27)"
+    size: M
+    wave: 8
+    depends_on: []
+    blocks: ["10.19"]
+    story_context:
+      # Recorded by @po 2026-09-16, routing ADR-002 §27.3 (O-18, high).
+      finding_status: >-
+        ESTABLISHED BY READING, NOT BY A REQUEST. @architect read it (ADR-002 §27.1) and the orchestrator
+        re-read StudioService.createTest/updateTest (no write check), StudioController.deleteTest (calls
+        softDeleteTest(id) without the caller) and confirmed no @PreAuthorize in the studio package. @po
+        did not re-read the Java. It was masked until 10.18b closed the core-service bypass, because until
+        then every request was an admin. THE STORY'S FIRST COMMIT IS THE DEMONSTRATION. If @qa's red test
+        comes out green against today's code, that is a finding to return to @architect, not a pass, and
+        the fix is not written until the finding has been re-read.
+      order: >-
+        @qa FIRST: §27.5's behaviour tests in their own commit, red against today's code. The security
+        assertion is that PUT and DELETE by a principal WITHOUT write on the draft's CSI answer 403 and
+        leave the row byte-unchanged (revisions, deleted_at, compile state). Also: POST with a registered
+        csiId the principal may not write answers 403 and creates no row; PUT and DELETE on an unknown,
+        a soft-deleted and a quarantined draft as an ADMINISTRATOR answer 403 in all six cases with
+        identical bodies; and, in the same commit, the non-vacuity control (an identity that CAN write
+        gets 200/204 on the same draft). THEN @dev writes the fix. The red run is recorded verbatim in the
+        story before any production line changes.
+      scope: >-
+        ADR-002 §27.2 exactly: the refusal order (request-shape checks, then the draft read THROUGH THE
+        VISIBILITY RESTRICTION, then canRead/canWrite on that draft's CSI, then PUT's locked read, then
+        the 409s), 403 STUDIO_FORBIDDEN with no resource detail, never 404, 400 only for a malformed
+        request. The read is the visible one and NEVER findCsiIdIncludingWithheld, which stays compile's
+        (§14.4). POST checks canWrite on the request's csiId AFTER the registered-CSI check. Service-level
+        overloads that take no Authentication are internal and stay unchanged (§27.5).
+      contract_prose_same_pr: >-
+        MANDATORY. ADR-002 §27.6's exact text (getTest description; updateTest description and its 409
+        sentence; deleteTest description) ships in THIS story's PR. Landing the prose without the fix, or
+        the fix without the prose, is forbidden (§27.3, §28.2). The owner replaces §13's "AUTHORIZED, NOT
+        YET LANDED" row with a MEASURED before/after, run on this branch. §28.4's figures are a simulation
+        on a scratch copy. A figure that does not reproduce is a finding, not a number to match.
+      pin: >-
+        FOC-07 step 1. Re-anchor confinement.test.ts BASE_SHA256 by re-reading shasum -a 256 from the file
+        as merged. Never transcribe a digest from ADR-002, from 10.31, or from the inference program. The
+        FOC-06 standing rule applies: no criterion asserts openapi.yaml byte-unchanged.
+      falsification: >-
+        Each of the three added checks is removed in turn, and each removal must redden its own case and
+        no sibling. A mutation that leaves the suite green means that check has no test. The epic's
+        wave-4 rule applies: a mutation proof that cannot fail is not a proof.
+      not_reopened: >-
+        Story 10.7's AC-4a says "Every Studio route enforces identity and CSI permission" and its list
+        covers the reads and execute only. 10.7 is merged and is NOT re-opened. This story records the
+        pointer; the gap closes here.
+      inference_program_overlap: >-
+        The uncommitted wt/epic tree modifies StudioService.java (52 changed lines, read with git diff --stat, not changed)
+        and, per ADR-002 §27.3, adds requireCompile to createTest/updateTest while reading updateTest's CSI
+        through findCsiIdIncludingWithheld, which contradicts §27.2, and leaves softDeleteTest unchanged.
+        THIS STORY DOES NOT WAIT FOR THAT PROGRAM (§27.3). Whichever lands second adopts §27.2's visible
+        read and does NOT add a second check. Nothing merges across that line until the reconciliation
+        the run log requires.
+      when: >-
+        Before the credentialed pilot. In this manifest that means before story 10.19 enters InProgress,
+        and before any staging run that uses real identities. NOT a drafting gate on 10.19: the drafting
+        gate exists for UNOWNED prerequisites (ED-02's shape), and this one now has an owner.
+
+  # Size M: two authorized document edits landing as one pin move, two hand-kept backend literals, an
+  # escalation test's Javadoc, one strengthened IT, one new $ref-equality test, a frontend mock and two
+  # frontend assertions, and two measured §13 rows, including the frontend and runner suites that
+  # @architect could not run (§28.4). Three trees, no production code.
+  - id: "10.31"
+    title: "Video route refusal surface and the public 401 envelope declaration (ADR-002 §24, §25)"
+    size: M
+    wave: 8
+    depends_on: ["10.15", "10.16"]
+    blocks: ["10.19"]
+    story_context:
+      # Recorded by @po 2026-09-16, routing ADR-002 §24/§25 (ESC-1, ESC-2, DEF-09(b)) — §28.3's "unit".
+      scope: >-
+        §24.6 and §25.4's exact text, in ONE commit so the pin moves once for both (§13: "lands with §25's
+        row"). getExecutionVideo declares 401 ($ref SessionUnauthorized), 403 ($ref Forbidden) and 503
+        (ErrorResponse, storeUnavailable). The eleven PUBLIC 401s point at SessionUnauthorized, and the two
+        internal callbacks keep Unauthorized. SessionUnauthorized's example is Ajv-validated against
+        PlatformErrorResponse before any suite runs (§25.4). NO PRODUCTION CODE CHANGES: the document
+        catches up with what the producers already send.
+      expected_flips_by_design: >-
+        GREEN WITH THE TEST UNCHANGED: ExecutionVideoContractEscalationTest ESC-1 and ESC-2. Only the class
+        Javadoc ("DELIBERATELY RED") is edited, and the assertion region is shown unchanged (a hash of
+        the region, 10.11c's method). RED BY DESIGN, updated deliberately in this PR:
+        ExecutionVideoContractTest.theVideoOperationsStatusSetIsUnchanged;
+        StudioContractTest.noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties;
+        confinement.test.ts BASE_SHA256; frontend studioContract.test.ts ("every status the route produces
+        ... is declared": remove the two not.toContain lines, and the literal gains '403');
+        studioVideoHandler.test.ts:122-125 (becomes "another CSI's execution is the declared 403, never
+        its bytes"). @architect listed two backend literals. The drafter GREPS for every other hand-kept
+        status copy of this operation before writing "no other list" (wave-7 rule: grep before
+        asserting absence). A red outside this list is a finding, not something to fix silently.
+      frontend: >-
+        ADR-002 §24.5. The MSW serveExecutionVideo answers 403 STUDIO_FORBIDDEN (byte-for-byte the backend
+        body) for an unknown id and an unreadable CSI, and its doc comment is rewritten. It serves NO 401
+        and NO 503. 10.16a's production code does not change, and 10.16a is NOT re-opened (O-17 standing
+        rule): its mock and tests change here.
+      backend_tests: >-
+        Strengthen ExecutionVideoEvidenceIT.anUnreachableStoreAndAnAbsentObjectAreDifferentAnswers to
+        assert 503, VIDEO_STORE_UNAVAILABLE and ErrorResponse validity, keeping its not-404 assertion. Add
+        the §24.7 $ref-equality test (the video route's 401/403 $refs COMPARED with getExecution's, not
+        with a literal), with a falsification: a route-local copy reddens it.
+      closes: >-
+        ESC-1 and ESC-2 (story 10.15 AC-22) and DEF-09(b), by ruling. 10.15 is merged and NOT re-opened;
+        the criterion's pointer lands here.
+      measurement: >-
+        Both §13 "AUTHORIZED, NOT YET LANDED" rows are replaced with MEASURED figures from this branch,
+        including the frontend and runner suites that §28.4 did not run. A figure that does not reproduce
+        §28.4's simulation is a finding.
+      pin: "FOC-07 step 2. Re-read the digest from the file as merged after 10.30. Never transcribe one."
+      out_of_scope: >-
+        O-19 (ADR-003, the backend-wide envelope, and declaring the filter-written 429, 503
+        AUTH_TEMPORARILY_UNAVAILABLE and idempotency errors). That is not in this backlog; see 10.19's
+        note.
+
+  # Size M rather than S, counted: the key has to cross from the server loader (server/config.ts
+  # KEY_SPECS) to where the origin is taken, which is in the child runtime (childRuntime.ts:285, found
+  # by grep; the plumbing is INFERRED from those two locations, not traced). Also chart values plus the
+  # deployment-tier assertion, the shift and zero-identity tests, the fixtures-tier-at-zero assertion,
+  # a failure message, and a comment correction.
+  - id: "10.32"
+    title: "Runner seek calibration setting and seek-measurement diagnostics (ADR-002 O-20, §26)"
+    size: M
+    wave: 8
+    depends_on: ["10.16"]
+    blocks: ["10.19"]
+    story_context:
+      # Recorded by @po 2026-09-16, routing ADR-002 §26.4 (O-20). One story and one owner for (a), (b) and
+      # (c): §26.4 requires (b)+(c) to be one edit, and (a) is the same tree with no other open owner.
+      a_calibration_setting: >-
+        A per-image runner configuration key, default 0, applied inside takeRunOrigin
+        (studio-runner/src/run/timeline.ts). It goes in the loader's enumerated, fail-closed namespace and
+        in the chart values (10.18's AC-7 discipline). Tests: a non-zero value shifts every reading by
+        exactly that amount, and 0 gives byte-identical output to today. The fixtures tier ALWAYS runs at
+        0, which is asserted, not assumed (§26.3 item 5). No wire field, no API change, and no contract
+        change (§26.4(a), §11.7). THIS STORY SETS NO VALUE: the value comes from SPK-06 phase B on the
+        pinned image, recorded in docs/qa/spikes/SPK-06/, and is applied only under §26.3 item 4's two
+        conditions. A laptop-derived value is forbidden.
+      b_diagnostic: >-
+        When the median assertion fails, the message also gives each step's SIGNED distance to the nearest
+        EARLIER change, so a lead past the slack reads as about -110 ms and not +450 ms. The message
+        changes, not a bound.
+      c_f4_comment_correction: >-
+        APPROVED BY @po (ADR-002 §26.5 routes the authorization here). Comments at :43-48 and :72-75 of
+        seek-measurement.test.ts are rewritten to §26.5's content: a systematic lead past the helper's
+        slack, most likely the readiness-to-first-frame gap, NOT a repaint split across frames; the old
+        60 ms slack as the cause of the listed errors; the 1500 ms outlier reasoning naming the slack; and
+        AC-12c as the owner of calibration. CONDITIONS on the approval: the column-0 line
+        `const MEDIAN_TOLERANCE_MS = 100;` stays BYTE-IDENTICAL, because webm.test.ts parses it as text and
+        fails to load otherwise; OUTLIER_BOUND_MS and webm.ts slackMs keep their values; the story shows
+        webm.test.ts loading and its boundary test green after the edit; and the diff touches no line
+        declaring a bound. F-7 (tightening that parse) is optional in the same change, as §26.4 allows.
+        If taken, it must keep F-1's boundary test red at slack 90 and 99.
+      forbidden: "Widening MEDIAN_TOLERANCE_MS, OUTLIER_BOUND_MS or slackMs; skipping the file; retrying until green; excluding a host (§26.3 items 1 and 6)."
+      inference_program_overlap: >-
+        The uncommitted wt/epic tree modifies studio-runner/src/server/config.ts (adds four OBJECT_STORE_*
+        rows to the same KEY_SPECS table) and helm-chart/put-checks/values*.yaml (read with git diff,
+        not changed). The overlap is textual adjacency, not the same key. FOC-07 applies.
+      spk06_relation: >-
+        SPK-06 phase B can MEASURE without this story, but it can only CORRECT with it. Story 10.16's
+        AC-19 stays Blocked on phase B either way.
+
+  # ── Wave 9 ── (was wave 8; moved by @po 2026-09-16 because 10.30–10.32 must land before it)
   - id: "10.19"
     title: "Integrated staging validation and handover"
     size: L
-    wave: 8
-    depends_on: ["10.1", "10.2", "10.3", "10.4", "10.5", "10.6", "10.7", "10.8", "10.9", "10.10", "10.11", "10.12", "10.13", "10.14", "10.15", "10.16", "10.17", "10.18"]
+    wave: 9
+    depends_on: ["10.1", "10.2", "10.3", "10.4", "10.5", "10.6", "10.7", "10.8", "10.9", "10.10", "10.11", "10.12", "10.13", "10.14", "10.15", "10.16", "10.17", "10.18", "10.30", "10.31", "10.32"]
     blocks: []
     story_context:
       # Assigned by @po 2026-09-11 at wave-5 validation, ruling on 10.10's open question 3.
@@ -553,7 +745,33 @@ stories:
         # @architect 2026-09-16: O-10 RULED in ADR-002 §27 — 403 STUDIO_FORBIDDEN on GET/PUT/DELETE /tests/{id}
         # for unknown, withheld and not-permitted drafts. Prose is authorized and lands with O-18's fix.
         # The ruling found O-18 (high): POST/PUT/DELETE /tests have no CSI write authorization (§27.3).
-        - "ADR-002 O-10 (400 vs 404 for an unknown, deleted or quarantined draft on GET/PUT/DELETE /tests/{id}) must have its own ADR-002 ruling with its own before/after before this story is drafted. Class C, @architect's, overdue by a wave since §18.4 and restated at §23.4. @po gives it a date rather than a reminder; it is not @po's to rule."
+        # LIFTED 2026-09-16 (@po, who set it). The gate asked for a RULING, because a pilot story cannot
+        # write criteria against a refusal status nobody has decided. ADR-002 §27 is O-10's own ruling (403
+        # STUDIO_FORBIDDEN for unknown, withheld and not-permitted drafts; never 404; 400 only for malformed
+        # requests), and it carries its own before/after: §28.4's simulation, labelled as one. The gate is
+        # satisfied as a DRAFTING gate. The MEASURED before/after is not waived; it moves to its owner,
+        # story 10.30, whose criteria must replace the simulation (see 10.30's contract_prose_same_pr).
+        # Original text below kept for history.
+        - "[LIFTED 2026-09-16 — O-10 ruled in ADR-002 §27; measured before/after owed by story 10.30] ADR-002 O-10 (400 vs 404 for an unknown, deleted or quarantined draft on GET/PUT/DELETE /tests/{id}) must have its own ADR-002 ruling with its own before/after before this story is drafted. Class C, @architect's, overdue by a wave since §18.4 and restated at §23.4. @po gives it a date rather than a reminder; it is not @po's to rule."
+      # @po 2026-09-16 — NO ACTIVE DRAFTING GATE REMAINS. 10.19 MAY BE DRAFTED, on these conditions:
+      #   (1) ED-02-dependent criteria are drafted Blocked on the external ticket (@pm's lift, above).
+      #   (2) The draft asserts the RULED statuses: 403 on the /tests/{id} family (§27) and 401/403/503
+      #       on the video route (§24). It does not assert today's 400s.
+      #   (3) MED-2's standing mitigation is a criterion: record wall-clock time and the test count reached,
+      #       and treat a short run as a hang.
+      #   (4) Implementation (InProgress) waits for 10.30, 10.31 and 10.32 to merge. That is depends_on,
+      #       not a gate.
+      o18_is_a_dependency_not_a_drafting_gate: >-
+        @po 2026-09-16. ED-02 became a drafting gate because it had NO OWNER: a draft would have been full
+        of blocked halves pointing at nobody, and saying so in prose had moved nothing in five waves. O-18
+        has an owner as of this entry (story 10.30), an order (@qa red first, then @dev) and a ruled
+        target behaviour (§27.2), so 10.19's drafter can write its criteria today. What O-18 forbids is
+        RUNNING a credentialed pilot against unauthorized write routes. That is an implementation
+        precondition, and it is expressed as depends_on "10.30". If 10.30 has no assignee when 10.19 is
+        ready to start, that becomes an escalation to @pm, not a reason to draft later.
+      not_in_this_backlog:
+        - "O-19 (ADR-002 §25.2) — ADR-003, the backend-wide API error envelope. @architect decides with @pm (CON-API-03) and the frontend consumer; @pm and @po place its implementation OUTSIDE Epic 10. Not a dependency of 10.19: no Studio client parses a 401 body (§25.3, by reading). Recorded here so 10.19's drafter does not absorb it."
+        - "Stories 10.20–10.26 (the studio-inference program, uncommitted in wt/epic). NOT in this manifest and NOT absorbed by @po: they were drafted outside the validated backlog, the manifest is @pm's, and the run log bars merging across that line until the program's owner, @architect, @po and @pm have reconciled. FLAGGED TO @pm: whether they join this manifest, get their own, or stay outside; whether 10.19 depends on any of them (@po's position: no, because 10.19 is this manifest's release and must not wait on an unvalidated program); and that ids 10.30+ are now claimed here (see the Wave 8 numbering note). @po's validation (\"Pax readiness\", per that program's own log) happens when they are submitted, not by adoption."
 
 # ─────────────────────────────────────────────────────────────
 # File-ownership conflicts (wave planning must serialize or single-own)
@@ -822,6 +1040,28 @@ file_ownership_conflicts:
       reproduce to be reported as a FINDING rather than quietly matched. This is the first amendment in
       ADR-002 that could not measure its own effect, and it says so itself.
     source: "ADR-002 §19, §20.4, §21.9, §22.2, §23.1, §23.2, §23.3; FOC-04 and FOC-05 and the re-anchoring rule in confinement.test.ts's own comment; story 10.15 AC-21/AC-23; story 10.11 AC-25/AC-26/AC-30; story 10.18 AC-25/AC-29/AC-30. Verified on branch epic/EPIC-10 at e4a6bf4ed: shasum -a 256 docs/specs/studio/openapi.yaml = cbf07c99de363d18783690e99cdf115242e8b7c1387da7c433658ad27b6f412e = BASE_SHA256 at confinement.test.ts:149, and confinement.test.ts:172-173 carry the two assertions described above."
+
+  - id: FOC-07
+    path: "docs/specs/studio/openapi.yaml and studio-runner/test/run/confinement.test.ts (the pin). Also, against the uncommitted studio-inference tree only: backend/.../studio/StudioService.java, studio-runner/src/server/config.ts, helm-chart/put-checks/values*.yaml"
+    stories: ["10.30", "10.31", "10.32"]
+    wave: 8
+    recorded_by: "@po 2026-09-16, routing ADR-002 §28.1–§28.2. The order between 10.30 and 10.31 is @po's choice of §28.2's two-PR plan."
+    conflict: >-
+      10.30 (§27.6 prose) and 10.31 (§24.6 + §25.4) each move the SHA-256 that confinement.test.ts pins.
+      The studio-inference program's uncommitted 10.20 moves it too (openapi.yaml +5 lines in
+      info.description, re-pinned there to 09720ae2…; ADR-002 §28.1, run log). None of the three overlap
+      textually. They conflict only on the pin. Outside the manifest, that program's tree also edits
+      StudioService.java (10.30's file), and config.ts and the chart values (10.32's files).
+    mandated_ordering: >-
+      STEP 1: 10.30 (the security fix, which is urgent). STEP 2: 10.31. Each re-anchors by re-reading
+      shasum -a 256 from the file as merged, and nobody copies a digest from ADR-002, from the other story
+      or from 10.20. 10.32 does not touch the document and is unordered against both. Whichever of these
+      stories and the inference program's 10.20 lands later re-reads the pin (§28.1 item 1). If a story
+      finds the pin red on arrival, that is a FOC-07 violation to raise, not something to fold into its own
+      re-anchor. 10.30 does not wait for the inference program (§27.3). Whichever of 10.30 and that
+      program's StudioService change lands second adopts §27.2's visible read and adds no second check.
+      Nothing merges across the wt/epic line until the reconciliation the run log requires.
+    source: "ADR-002 §27.3, §28.1, §28.2; run log 'Integration note for the studio-inference program'; git diff --stat in wt/epic read on 2026-09-16 (read only, nothing changed there)."
 
 # ─────────────────────────────────────────────────────────────
 # Integration defects found by reading, not by a green suite
