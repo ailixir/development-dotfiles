@@ -7,7 +7,7 @@ import {
   type TestDto,
   type TestRequest,
 } from '@/types/studio/studioTypes';
-import { MOCK_READABLE_CSIS, mockExecutions, mockTests } from './fixtures';
+import { MOCK_READABLE_CSIS, MOCK_VIDEO_BYTES, mockExecutions, mockTests } from './fixtures';
 import { compileReviewDrafts, conflictResponse } from './compileFixtures';
 import { executeConflictResponse } from './executionFixtures';
 
@@ -70,6 +70,109 @@ function conflict(code: string) {
   return HttpResponse.json(conflictResponse(code), { status: 409 });
 }
 const allExecutions = (): ExecutionSnapshot[] => [...acceptedExecutions, ...mockExecutions];
+
+/**
+ * `GET /executions/{id}/video` (story 10.16a, AC-13).
+ *
+ * It answers with exactly the statuses `openapi.yaml` declares for `getExecutionVideo`:
+ * `200`, `206`, `404`, `410` and `416`. It serves **no `401` and no `403`**, because the document
+ * declares neither (ESC-1, still with @architect). An execution this principal cannot read is
+ * therefore answered with the declared `404`, which is the only declared refusal that fits
+ * "nothing here for you".
+ *
+ * Which answer is given is keyed off the execution's own `video.status` (and `video.expiresAt`), in
+ * this one place. Every length is computed from {@link MOCK_VIDEO_BYTES} at request time.
+ *
+ * jsdom never loads media, so no `<video>` in the test suite reaches this handler. It exists for its
+ * own tests and for manual use in standalone mode.
+ */
+type ByteRange = { kind: 'none' } | { kind: 'unsatisfiable' } | { kind: 'window'; first: number; last: number };
+
+/** One `bytes=` range, per RFC 9110 §14.1.2. Anything else is ignored and the full body is served. */
+function parseByteRange(header: string | null, size: number): ByteRange {
+  const match = header === null ? null : /^bytes=(\d*)-(\d*)$/u.exec(header.trim());
+  if (match === null) {
+    return { kind: 'none' };
+  }
+  const [, firstText, lastText] = match;
+  if (firstText === '' && lastText === '') {
+    return { kind: 'none' };
+  }
+  if (firstText === '') {
+    const suffix = Number(lastText);
+    if (suffix === 0 || size === 0) {
+      return { kind: 'unsatisfiable' };
+    }
+    return { kind: 'window', first: Math.max(0, size - suffix), last: size - 1 };
+  }
+  const first = Number(firstText);
+  if (lastText !== '' && Number(lastText) < first) {
+    // An invalid range is ignored, not refused (RFC 9110 §14.2).
+    return { kind: 'none' };
+  }
+  if (first >= size) {
+    return { kind: 'unsatisfiable' };
+  }
+  const last = lastText === '' ? size - 1 : Math.min(Number(lastText), size - 1);
+  return { kind: 'window', first, last };
+}
+
+function videoRefusal(status: 404 | 410 | 416, error: string, message: string, headers?: HeadersInit) {
+  return HttpResponse.json({ error, message }, { status, headers });
+}
+
+function serveExecutionVideo(execution: ExecutionSnapshot | undefined, request: Request) {
+  if (execution === undefined) {
+    return videoRefusal(404, 'VIDEO_UNAVAILABLE', 'No evidence for this execution');
+  }
+  const { video } = execution;
+  if (video.status === 'EXPIRED') {
+    return videoRefusal(
+      410,
+      'VIDEO_EXPIRED',
+      video.expiresAt !== null
+        ? `The recording for this execution expired on ${video.expiresAt}`
+        : 'The recording for this execution has expired',
+    );
+  }
+  if (video.status !== 'AVAILABLE') {
+    return videoRefusal(404, 'VIDEO_UNAVAILABLE', 'No evidence for this execution');
+  }
+
+  const size = MOCK_VIDEO_BYTES.length;
+  const headers: Record<string, string> = {
+    'Content-Type': 'video/webm',
+    'Accept-Ranges': 'bytes',
+  };
+  if (new URL(request.url).searchParams.get('download') === 'true') {
+    headers['Content-Disposition'] = `attachment; filename="execution-${execution.executionId}.webm"`;
+  }
+
+  const range = parseByteRange(request.headers.get('Range'), size);
+  if (range.kind === 'unsatisfiable') {
+    return videoRefusal(
+      416,
+      'RANGE_NOT_SATISFIABLE',
+      'The requested range cannot be served',
+      { 'Content-Range': `bytes */${size}` },
+    );
+  }
+  if (range.kind === 'window') {
+    const body = MOCK_VIDEO_BYTES.slice(range.first, range.last + 1);
+    return new HttpResponse(body, {
+      status: 206,
+      headers: {
+        ...headers,
+        'Content-Range': `bytes ${range.first}-${range.last}/${size}`,
+        'Content-Length': String(body.length),
+      },
+    });
+  }
+  return new HttpResponse(MOCK_VIDEO_BYTES.slice(), {
+    status: 200,
+    headers: { ...headers, 'Content-Length': String(size) },
+  });
+}
 
 export const studioHandlers = [
   http.get(`${BASE}/tests`, ({ request }) => {
@@ -321,6 +424,13 @@ export const studioHandlers = [
     }
     return HttpResponse.json(execution);
   }),
+
+  http.get(`${BASE}/executions/:id/video`, ({ params, request }) =>
+    serveExecutionVideo(
+      readable(allExecutions()).find((candidate) => candidate.executionId === params.id),
+      request,
+    ),
+  ),
 
   http.get(`${BASE}/executions`, ({ request }) => {
     const url = new URL(request.url);

@@ -6,6 +6,8 @@ export {
   LOGS_TRUNCATED_STATEMENT,
   RERUN_LABEL,
   UNNAMED_ERROR_STATEMENT,
+  SEEK_LABEL,
+  seekControlLabel,
 } from './ExecutionProgressView';
 export type { ExecutionProgressViewProps } from './ExecutionProgressView';
 export {

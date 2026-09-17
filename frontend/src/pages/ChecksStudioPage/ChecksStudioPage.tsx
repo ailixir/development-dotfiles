@@ -95,7 +95,7 @@ import { useDispatch } from 'react-redux';
 import { useAppSelector } from '@/store';
 import { selectIsSourceEnabled } from '@store/slices/sourcesSlice';
 import { selectIsFeatureEnabled } from '@store/slices/featuresSlice';
-import { setExecutionLogs, setAllStepResults, setExecuting, setCurrentStep as setCurrentStepAction, setVideoUrl as setVideoUrlAction, clearLogs, updateConfiguration } from '@store/slices/studioSlice';
+import { setExecutionLogs, setAllStepResults, setExecuting, setCurrentStep as setCurrentStepAction, clearLogs, updateConfiguration } from '@store/slices/studioSlice';
 import {
   defaultConfiguration,
   isTerminalExecutionStatus,
@@ -112,6 +112,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SecretInput from '@/components/studio/SecretInput';
 import { CompileReviewPanel } from '@/components/studio/review';
 import { ExecutionProgressView, RunControl } from '@/components/studio/run';
+import { VideoEvidencePanel, useVideoSeek } from '@/components/studio/evidence';
 
 type Scenario = {
   id: string;
@@ -149,10 +150,13 @@ const ChecksStudioPageInner: React.FC = () => {
     message: l.message,
     type: l.level === 'error' ? 'error' : 'info',
   })), [reduxLogs]);
-  const showVideoPlayer = !!useAppSelector((s: any) => s.studio.videoUrl);
-  const videoUrl = useAppSelector((s: any) => s.studio.videoUrl);
-  const [videoCurrentTime, setVideoCurrentTime] = useState(0);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  /**
+   * Story 10.16a, AC-21 — the one playback path. The media element is `VideoEvidencePanel`'s, and a
+   * step seek sets its `currentTime` to that step's `offsetMs / 1000` through this bridge. The
+   * legacy player, its missing-file fallback, the store-held playback source and the index-derived
+   * seek are retired (architecture §6.4: *"No synthetic index-times-ten mapping remains."*).
+   */
+  const { videoRef, seekToOffset } = useVideoSeek();
   const stepResultsArr = useAppSelector((s: any) => s.studio.stepResults) as Array<{ stepIndex: number; status: 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL' }>;
   const stepResultsMap = useMemo(() => {
     const map: Record<number, 'passed' | 'failed' | 'pending'> = {};
@@ -306,7 +310,6 @@ const ChecksStudioPageInner: React.FC = () => {
   const beginRun = useCallback((executionId: string) => {
     dispatch(setExecuting(true));
     dispatch(setCurrentStepAction(0));
-    dispatch(setVideoUrlAction(null as any));
     dispatch(clearLogs());
     dispatch(setExecutionLogs([{ timestamp: new Date().toISOString(), level: 'info', message: 'Starting UI test execution' } as any]));
     setSnapshot(null);
@@ -324,12 +327,6 @@ const ChecksStudioPageInner: React.FC = () => {
         dispatch(setCurrentStepAction(runningIndex >= 0 ? runningIndex : Math.max(0, passedCount - 1)));
         if (Array.isArray(exec.logs)) {
           dispatch(setExecutionLogs(exec.logs as any));
-        }
-        // videoPath is the protected API path; the pre-10.1 raw videoUrl is read only so that
-        // history written before the contract still plays back.
-        const videoSource = exec.videoPath ?? (exec as any).videoUrl;
-        if (videoSource) {
-          dispatch(setVideoUrlAction(videoSource));
         }
         // The *run* stops being in flight on a terminal outcome. The **stream** does not close
         // here: §5.4 row 5 keeps it open while evidence is still being produced, and that rule
@@ -409,7 +406,6 @@ const ChecksStudioPageInner: React.FC = () => {
     const scenario = scenarios?.find(s => s.id === scenarioId);
     if (scenario) {
       setTestSteps(scenario.steps || []);
-      dispatch(setVideoUrlAction(null as any));
       dispatch(setCurrentStepAction(0));
       dispatch(setAllStepResults([] as any));
       dispatch(clearLogs());
@@ -458,15 +454,17 @@ const ChecksStudioPageInner: React.FC = () => {
     }
   };
 
-  const handleStepClick = (stepIndex: number) => {
-    if (showVideoPlayer && !isRunning) {
-      // Simulate jumping to step timestamp in video
-      const t = stepIndex * 10;
-      setVideoCurrentTime(t);
-      try { videoRef.current && (videoRef.current.currentTime = t); } catch {}
-      dispatch(setCurrentStepAction(stepIndex));
-    }
-  };
+  /** The recording can be sought only when the panel has mounted one (AC-4's gate, AC-8). */
+  const hasPlayableRecording =
+    snapshot !== null && snapshot.video.status === 'AVAILABLE' && snapshot.videoPath !== null;
+  const handleSeekStep = useCallback(
+    (offsetMs: number) => {
+      seekToOffset(offsetMs);
+      // The player lives on the Proof tab; show it so the reader sees the moment they asked for.
+      setRightTab(2);
+    },
+    [seekToOffset],
+  );
 
   /**
    * A draft, expressed in the frozen contract's own shape (story 10.11a, AC-3a).
@@ -674,7 +672,6 @@ const ChecksStudioPageInner: React.FC = () => {
                     const stepResult = stepResultsMap[index];
                     const isCurrentStep = index === currentStep;
                     const isPastStep = index < currentStep;
-                    const isClickable = showVideoPlayer && !isRunning;
                     const validationEntry = validation.results.find((r) => r.stepIndex === index);
                     const isInvalid = validationEntry ? !validationEntry.isValid : false;
                     
@@ -692,13 +689,7 @@ const ChecksStudioPageInner: React.FC = () => {
                                    stepResult === 'passed' ? alpha(theme.palette.success.main, 0.05) :
                                    stepResult === 'failed' ? alpha(theme.palette.error.main, 0.05) : isInvalid ? alpha(theme.palette.error.main, 0.03) : 'transparent',
                           transition: 'all 0.3s ease',
-                          cursor: isClickable ? 'pointer' : 'default',
-                          '&:hover': isClickable ? {
-                            bgcolor: alpha(theme.palette.primary.main, 0.05),
-                            boxShadow: 1
-                          } : {}
                         }}
-                        onClick={() => isClickable && handleStepClick(index)}
                       >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 1 }}>
                           <Avatar sx={{ 
@@ -743,7 +734,7 @@ const ChecksStudioPageInner: React.FC = () => {
                               }}
                             />
                           }
-                          secondary={isInvalid ? (validationEntry?.suggestion || 'Invalid step') : isClickable ? 'Click to jump to this step in video' : undefined}
+                          secondary={isInvalid ? (validationEntry?.suggestion || 'Invalid step') : undefined}
                           secondaryTypographyProps={{
                             variant: 'caption',
                             sx: { color: 'text.secondary' }
@@ -974,6 +965,7 @@ const ChecksStudioPageInner: React.FC = () => {
                   <ExecutionProgressView
                     snapshot={snapshot}
                     onRerun={() => setRunRequest((token) => token + 1)}
+                    onSeekStep={hasPlayableRecording ? handleSeekStep : undefined}
                   />
                 </Box>
 
@@ -1047,29 +1039,13 @@ const ChecksStudioPageInner: React.FC = () => {
 
               {/* Proof Tab */}
               <Box sx={{ mt: 2, display: rightTab === 2 ? 'block' : 'none' }}>
-                <Paper 
-                  variant="outlined" 
-                  sx={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'grey.900', color: 'white', position: 'relative', overflow: 'hidden' }}
-                >
-                  {isRunning && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'primary.light' }}>
-                      <CircularProgress size={16} sx={{ color: 'primary.light' }} />
-                      <Typography variant="body2">Recording…</Typography>
-                    </Box>
-                  )}
-                  {!isRunning && showVideoPlayer ? (
-                    <video 
-                      ref={videoRef}
-                      src={videoUrl || '/assets/videos/sample-ui-test.mp4'} 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      controls 
-                      preload="metadata"
-                      onTimeUpdate={(e) => setVideoCurrentTime((e.target as HTMLVideoElement).currentTime)}
-                    />
-                  ) : null}
-                  {!isRunning && !showVideoPlayer && (
-                    <Typography variant="body2" color="grey.300">Visual proof will appear after run</Typography>
-                  )}
+                {/*
+                  Story 10.16a — the run's evidence state, and the page's only media element (AC-2, AC-4,
+                  AC-21). It renders from the snapshot's `video` and `videoPath`, never from the
+                  check outcome and never from the store.
+                */}
+                <Paper variant="outlined" sx={{ p: 2 }}>
+                  <VideoEvidencePanel ref={videoRef} snapshot={snapshot} />
                 </Paper>
               </Box>
 
