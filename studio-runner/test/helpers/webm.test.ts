@@ -56,27 +56,59 @@ import type { WebmFrame } from './webm.js';
 /** `firstChangeAtOrAfter`'s default before story 10.16b. Kept so check (a) stays executable. */
 const UNMODIFIED_SLACK_MS = 60;
 
+const SEEK_MEASUREMENT_URL = new URL('../fixtures-tier/seek-measurement.test.ts', import.meta.url);
+
+/** Block comments and whole-line `//` comments, which is every comment form that file uses. */
+function withoutComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//gu, '').replace(/^\s*\/\/.*$/gmu, '');
+}
+
 /**
  * The measurement's own tolerance, read out of `seek-measurement.test.ts` rather than copied, so the
  * boundary test below follows it if it ever changes. Importing it is not possible: the file does not
  * export it, and AC-16 forbids editing it.
+ *
+ * F-7 (10.16b gate): reading the declaration alone is not enough. The value read must also be the
+ * value the median assertion compares against. With comments removed, the source must hold:
+ *
+ * 1. exactly one top-level `const MEDIAN_TOLERANCE_MS = <integer>;` (the value read);
+ * 2. exactly one `.toBeLessThan(MEDIAN_TOLERANCE_MS);`, so the assertion compares against the name
+ *    itself and not against an expression built from it;
+ * 3. exactly two occurrences of the name: that declaration and that assertion. Any other
+ *    declaration, at any indentation and in any form (`const`, `let`, `var`, destructured, a
+ *    parameter), adds one, and so does any second use. This rule is also what counts
+ *    declarations at any indentation, as the gate suggested. A separate declaration count could
+ *    never fail without this rule failing too, so there is none.
+ *
+ * Anything else fails loudly. The `F-7` describe block at the end plants each form this refuses.
  */
-function readMedianTolerance(): number {
-  const source = readFileSync(
-    new URL('../fixtures-tier/seek-measurement.test.ts', import.meta.url),
-    'utf8',
-  );
-  const declarations = [...source.matchAll(/^const MEDIAN_TOLERANCE_MS = ([\d_]+);$/gmu)];
-  const literal = declarations.length === 1 ? declarations[0]?.[1] : undefined;
-  if (literal === undefined) {
-    throw new Error(
-      `expected exactly one MEDIAN_TOLERANCE_MS declaration, found ${String(declarations.length)}`,
+function medianToleranceIn(source: string): number {
+  const code = withoutComments(source);
+  const values = [...code.matchAll(/^const MEDIAN_TOLERANCE_MS = ([\d_]+);$/gmu)];
+  const assertions = code.split('.toBeLessThan(MEDIAN_TOLERANCE_MS);').length - 1;
+  const mentions = code.match(/\bMEDIAN_TOLERANCE_MS\b/gu) ?? [];
+  const problems: string[] = [];
+  if (values.length !== 1) {
+    problems.push(
+      `exactly one top-level "const MEDIAN_TOLERANCE_MS = <integer>;", found ${String(values.length)}`,
     );
+  }
+  if (assertions !== 1) {
+    problems.push(`exactly one ".toBeLessThan(MEDIAN_TOLERANCE_MS);", found ${String(assertions)}`);
+  }
+  if (mentions.length !== 2) {
+    const found = String(mentions.length);
+    problems.push(`the name twice outside comments (declaration, assertion), found ${found}`);
+  }
+  const literal = values[0]?.[1];
+  if (problems.length > 0 || literal === undefined) {
+    throw new Error(`MEDIAN_TOLERANCE_MS cannot be read safely; expected ${problems.join('; ')}`);
   }
   return Number(literal.replaceAll('_', ''));
 }
 
-const MEDIAN_TOLERANCE_MS = readMedianTolerance();
+const SEEK_MEASUREMENT_SOURCE = readFileSync(SEEK_MEASUREMENT_URL, 'utf8');
+const MEDIAN_TOLERANCE_MS = medianToleranceIn(SEEK_MEASUREMENT_SOURCE);
 
 /**
  * How far inside the tolerance the boundary step sits. 0.1 ms is the resolution at which the
@@ -304,5 +336,62 @@ describe('AC-17 — the seek frame finder on frames from real AC-15 recordings',
       }
     }
     expect(checked).toBe(10);
+  });
+});
+
+describe('F-7 — the tolerance read refuses every form that would decouple it from the assertion', () => {
+  /** Applies one exact edit to the real file's text; the anchor must occur exactly once. */
+  const edited = (source: string, anchor: string | RegExp, replacement: string): string => {
+    const count =
+      typeof anchor === 'string'
+        ? source.split(anchor).length - 1
+        : [...source.matchAll(new RegExp(anchor.source, `${anchor.flags}g`))].length;
+    expect(count, `anchor ${String(anchor)}`).toBe(1);
+    return source.replace(anchor, replacement);
+  };
+  const DECLARATION = /^const MEDIAN_TOLERANCE_MS = [\d_]+;$/mu;
+  const ASSERTION = '.toBeLessThan(MEDIAN_TOLERANCE_MS);';
+  const real = SEEK_MEASUREMENT_SOURCE;
+
+  it.each([
+    [
+      'S7: the assertion compares against an expression',
+      edited(real, ASSERTION, '.toBeLessThan(MEDIAN_TOLERANCE_MS + 50);'),
+    ],
+    [
+      'S8: an indented const shadows it in an inner scope',
+      `${real}\ndescribe('x', () => {\n  const MEDIAN_TOLERANCE_MS = 150;\n});\n`,
+    ],
+    [
+      'S10: the declaration is reformatted and a column-0 copy sits in a block comment',
+      `${edited(real, DECLARATION, 'const MEDIAN_TOLERANCE_MS: number = 150;')}\n/*\nconst MEDIAN_TOLERANCE_MS = 100;\n*/\n`,
+    ],
+    [
+      'S7 with the exact assertion text left behind in a comment',
+      `${edited(real, ASSERTION, '.toBeLessThan(MEDIAN_TOLERANCE_MS + 50);')}\n// expect(x).toBeLessThan(MEDIAN_TOLERANCE_MS);\n`,
+    ],
+    [
+      'a destructured shadow',
+      `${real}\nconst { MEDIAN_TOLERANCE_MS = 150 } = {} as { MEDIAN_TOLERANCE_MS?: number };\n`,
+    ],
+    [
+      'a parameter shadow',
+      `${real}\nconst widened = (MEDIAN_TOLERANCE_MS = 150): number => MEDIAN_TOLERANCE_MS;\n`,
+    ],
+    [
+      'a column-0 copy inside a template string',
+      `${real}\nconst text = \`\nconst MEDIAN_TOLERANCE_MS = 500;\n\`;\n`,
+    ],
+    ['a let declaration beside the const', `${real}\nlet MEDIAN_TOLERANCE_MS = 150;\n`],
+    ['the assertion removed', edited(real, ASSERTION, '.toBeLessThan(OUTLIER_BOUND_MS);')],
+  ])('refuses %s', (_name, planted) => {
+    expect(() => medianToleranceIn(planted)).toThrow(/cannot be read safely/u);
+  });
+
+  it('follows a changed value and ignores a line comment, on otherwise real text', () => {
+    const retyped = edited(real, DECLARATION, 'const MEDIAN_TOLERANCE_MS = 1_20;');
+    expect(medianToleranceIn(retyped)).toBe(120);
+    const commented = `${real}\n// const MEDIAN_TOLERANCE_MS = 150;\n`;
+    expect(medianToleranceIn(commented)).toBe(MEDIAN_TOLERANCE_MS);
   });
 });
