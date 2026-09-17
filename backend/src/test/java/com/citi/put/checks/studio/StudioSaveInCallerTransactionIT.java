@@ -7,6 +7,7 @@ import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.entity.UITest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +18,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.assertj.core.api.SoftAssertions;
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -49,6 +54,17 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  *       after the save lands. Detaching the visible copy, the shape this story first shipped,
  *       silently drops both.
  * </ul>
+ *
+ * <p>Case (b) runs once per caller flush mode, because the two dispositions of the pre-save write
+ * are not the same property (QA finding REFRESH-FLUSH-1). The refresh reads the row and discards
+ * whatever is still pending against the entity; under the default {@code AUTO} the locking JPQL
+ * query inside the save flushes the caller's write for it, so an {@code AUTO}-only case would stay
+ * green with the service's own flush removed and prove nothing about the refresh. Under {@code
+ * COMMIT} and Hibernate's {@code MANUAL} no query flushes, so the write is still pending when the
+ * refresh runs and only the service's flush can save it. Each case records {@code
+ * Session.isDirty()} immediately before calling the save and asserts it, so a body that lost its
+ * pending write to an earlier flush reports that instead of passing quietly. {@code AUTO} is kept
+ * because it is what production runs.
  *
  * <p>Every observation made inside a transaction is recorded and asserted only after it ends, so a
  * red run reports the database's final state, not just the first mismatch.
@@ -117,25 +133,36 @@ class StudioSaveInCallerTransactionIT {
     softly.assertAll();
   }
 
-  @Test
-  void aCallerHoldingTheDraftKeepsWhatItWritesBeforeAndAfterTheSave() {
+  @ParameterizedTest(name = "caller flush mode {0}")
+  @EnumSource(CallerFlush.class)
+  void aCallerHoldingTheDraftKeepsWhatItWritesBeforeAndAfterTheSave(CallerFlush flushMode) {
+    AtomicBoolean pendingWhenTheSaveWasCalled = new AtomicBoolean();
     AtomicBoolean managedAfterSave = new AtomicBoolean();
     AtomicLong revisionSeenThroughReference = new AtomicLong();
 
     transactions.executeWithoutResult(
         status -> {
+          flushMode.applyTo(entityManager);
           // StudioAuthoringService.lock's shape: the caller takes the row and keeps the reference.
           UITest held = studioRepository.findByIdForUpdate(draft).orElseThrow();
           held.setSchedule("{\"written\":\"before the save\"}");
+          pendingWhenTheSaveWasCalled.set(entityManager.unwrap(Session.class).isDirty());
 
           studioService.updateTest(draft, save("Saved step", "from the save"), owner());
 
           managedAfterSave.set(entityManager.contains(held));
           revisionSeenThroughReference.set(held.getSourceRevision());
           held.setDescription("from the caller, after the save");
+          // MANUAL does not flush at commit either, so the caller ends its own unit of work. For
+          // AUTO and COMMIT the commit would have done it: this only makes the three bodies one.
+          entityManager.flush();
         });
 
     SoftAssertions softly = new SoftAssertions();
+    softly
+        .assertThat(pendingWhenTheSaveWasCalled.get())
+        .as("the caller's write was still pending when the save was called")
+        .isTrue();
     softly.assertThat(managedAfterSave.get()).as("caller's reference still managed").isTrue();
     softly
         .assertThat(revisionSeenThroughReference.get())
@@ -156,6 +183,25 @@ class StudioSaveInCallerTransactionIT {
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────
+
+  /** The flush modes a caller's persistence context can be in when it calls the save. */
+  private enum CallerFlush {
+    /** Production's default. The save's locking JPQL query flushes the caller's pending write. */
+    AUTO,
+    /** JPA's {@code COMMIT}: no query flushes, so the write is still pending at the refresh. */
+    COMMIT,
+    /** Hibernate's {@code MANUAL}: not even the commit flushes; the caller flushes explicitly. */
+    MANUAL;
+
+    void applyTo(EntityManager entityManager) {
+      switch (this) {
+        case AUTO -> entityManager.setFlushMode(FlushModeType.AUTO);
+        case COMMIT -> entityManager.setFlushMode(FlushModeType.COMMIT);
+        case MANUAL -> entityManager.unwrap(Session.class).setHibernateFlushMode(FlushMode.MANUAL);
+        default -> throw new IllegalStateException("unhandled flush mode " + this);
+      }
+    }
+  }
 
   private void commitElsewhere(UITestRequest request) {
     try {

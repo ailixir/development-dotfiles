@@ -60,7 +60,9 @@ public class StudioService {
    * even a locking one, so without this the locked read would compare the request's revisions
    * against the copy the visibility read loaded before the lock, and two concurrent saves could
    * both win. It refreshes rather than detaching that copy, because a detach would also unmanage an
-   * instance the caller's own transaction holds (story 10.30 QA finding DETACH-1).
+   * instance the caller's own transaction holds (story 10.30 QA finding DETACH-1), and it flushes
+   * before refreshing, because a refresh discards whatever that caller has left pending (QA finding
+   * REFRESH-FLUSH-1).
    */
   @PersistenceContext private EntityManager entityManager;
 
@@ -301,8 +303,13 @@ public class StudioService {
       // between the two reads is invisible to the revision check and gets overwritten. The row lock
       // is held, so the refresh reads its latest committed state. It keeps the instance managed:
       // a caller that already holds this draft in its own transaction keeps writing through it
-      // (story 10.30 QA finding DETACH-1). Its own earlier writes were flushed by the locking
-      // query.
+      // (story 10.30 QA finding DETACH-1). The flush is what keeps that caller's writes made
+      // *before* this call: a refresh reads the row and discards whatever is still pending against
+      // it. Under Hibernate's default AUTO flush mode the locking query above happens to have
+      // flushed them already, but under FlushModeType.COMMIT or Hibernate's MANUAL nothing has, and
+      // they would be dropped with no error and a successful save (QA finding REFRESH-FLUSH-1).
+      // Flushing here, after the locking read, writes them while this transaction holds the row.
+      entityManager.flush();
       entityManager.refresh(test);
     }
 

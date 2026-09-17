@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.citi.put.checks.csi.CsiRepository;
@@ -56,9 +57,11 @@ import org.springframework.test.util.ReflectionTestUtils;
  * locked copy after the lock. Without that, two concurrent saves could both pass the revision
  * check. It refreshes rather than detaching the visible copy first, because a detach also unmanages
  * an instance the caller's own transaction holds and silently drops that caller's later writes (QA
- * finding DETACH-1). {@code OptimisticSaveIT} watches the race, and {@code
- * StudioSaveInCallerTransactionIT} watches both properties deterministically; the in-order case
- * below, like (a), is a guard on the shape of the source.
+ * finding DETACH-1), and it flushes first, because a refresh discards that caller's
+ * <em>pending</em> writes (QA finding REFRESH-FLUSH-1). {@code OptimisticSaveIT} watches the race,
+ * and {@code StudioSaveInCallerTransactionIT} watches all three properties deterministically, the
+ * last of them once per caller flush mode; the in-order case below, like (a), is a guard on the
+ * shape of the source.
  */
 class StudioServiceWriteAuthorizationTest {
 
@@ -174,7 +177,7 @@ class StudioServiceWriteAuthorizationTest {
   }
 
   @Test
-  @DisplayName("the locked copy is refreshed after the lock, and nothing is detached")
+  @DisplayName("the locked copy is flushed then refreshed after the lock, and nothing is detached")
   void theLockedCopyIsRefreshedAfterTheLockedRead() {
     UUID id = UUID.randomUUID();
     UITest visible = draft();
@@ -188,8 +191,24 @@ class StudioServiceWriteAuthorizationTest {
     InOrder order = inOrder(tests, entityManager);
     order.verify(tests).findById(id);
     order.verify(tests).findByIdForUpdate(id);
+    // The flush belongs between the lock and the refresh: before it, so the refresh cannot discard
+    // a caller's pending write; after the lock, so it writes under the row lock (REFRESH-FLUSH-1).
+    order.verify(entityManager).flush();
     order.verify(entityManager).refresh(locked);
     verify(entityManager, never()).detach(any());
+  }
+
+  @Test
+  @DisplayName("(c) the internal save touches the persistence context not at all")
+  void theInternalSaveNeverTouchesThePersistenceContext() {
+    UUID id = UUID.randomUUID();
+    when(tests.findByIdForUpdate(id)).thenReturn(Optional.of(draft()));
+
+    assertThatThrownBy(() -> service.updateTest(id, save(99L, 99L)))
+        .isInstanceOf(StudioConflictException.class);
+
+    verify(tests, never()).findById(any());
+    verifyNoInteractions(entityManager);
   }
 
   // ── (c) AC-10: the internal overloads keep their behaviour exactly ───────────────────────────
