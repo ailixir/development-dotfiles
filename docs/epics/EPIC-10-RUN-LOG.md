@@ -1894,3 +1894,96 @@ backend "red" or "hang" is never reportable on its own.
   report any story citation whose line number moved under 10.30's edit.
 - **Still blocked:** folding `epic/EPIC-10-w7` into `epic/EPIC-10`. 10.30 and 10.32 touch files the
   other session has uncommitted in `wt/epic`; the `--ff-only` fold waits until none of them is dirty.
+
+## Wave 8 — 10.31 merged, and the two escalations close (2026-09-17)
+
+**10.31 is Done and merged at `466d3996b`.** Gate **CONCERNS — merge safe**. `ESC-1` and `ESC-2`,
+deliberately red since story 10.15, are green: the video route's contract and its behaviour agree for
+the first time in the epic. `FOC-07` step 2 of 2 complete — pin re-anchored to `d9f5f2a2…`, read from
+the merged file.
+
+Verified by the orchestrator independently of @dev and @qa, counting Gradle's per-test event lines
+rather than the JUnit XML: **709 passed / 0 failed / 7 skipped** (716), zero production source changed,
+12 files. Confirmed a second time post-merge at `BUILD SUCCESSFUL in 4m 49s`, same counts.
+
+### `REF-DANGLE-1` (medium) — the finding that outlives the story
+
+@qa pointed **both sides** of the `403` `$ref` comparison at a component that does not exist
+(`NoSuchForbidden`) and the whole estate stayed green: backend 98/0, frontend mocks unchanged, runner
+`contract.test.ts` 15/15. **Nothing in this repository resolves an OpenAPI `$ref`.** The document can
+reference a non-existent component and no test notices.
+
+This bounds what 10.31's new comparison guard is worth: it is real against the hazard it was written
+for (a route-local copy) and blind to a dangling target, because it compares two *strings*. Scope
+honestly stated — measured against the backend window, the frontend studio mocks and the runner's
+contract test; **inferred** elsewhere from there being no `$ref` resolver outside a stub-driven runner
+test.
+
+Same family, both proven green by mutation: `EXAMPLE-UNGUARDED-1` (the document's examples are
+validated by nothing on an ongoing basis — an example was broken against its own declared schema, 98/0)
+and `EXAMPLE-DRIFT-1` (an assertion reads a transcribed copy under a message claiming it comes from the
+document).
+
+### `PHANTOM-1` — closed, and recorded so it is not re-opened
+
+@dev reported that changing a constant's *value* broke every request to the route with
+`ResourceAccessException`, including the `200`s, with no other reference to that constant anywhere —
+suggesting an undocumented reflective or startup-time consumer. @qa closed it: the constant has exactly
+**two** references (declaration and its single use), so mutating the value is behaviourally identical
+to mutating the argument, and the clean mutation reproduces at rest with **zero**
+`ResourceAccessException`. An environment artifact. Low severity **because it turned out false** — it
+would have been high if true.
+
+### Each agent caught the one before it
+
+- @dev found **two ACs predicting a failure that cannot happen** (AC-2(a)/(b): the pin is over
+  operationIds, so repointing a `$ref` moves no key) and **an AC describing code that never existed**
+  (AC-8's two mock call sites).
+- @qa re-derived both by a different method, and showed @dev's own falsification of the added totality
+  assertion proved only *ordering* — it retagged an existing operation, which the counts also catch.
+  @qa instead **added** an operation: counts and both pins stayed green and the new assertion was the
+  sole catcher. That is why it was ratified rather than questioned.
+- @po re-derived @qa's rulings and **found @qa wrong once**: the stale-status-text pattern is *three
+  lines in two files*, not three files, and the prior state was two lines in one file. It matters
+  because the next story inherits it as the expected inventory. @po also sharpened AC-8 — the draft's
+  second range was not a miscount of this route, it was **a different route**, answering a different
+  error.
+- @po struck the file the draft listed that the search never found, rather than reclassifying it:
+  *"found and judged harmless"* and *"never found"* are different claims and only the second is true.
+
+### `DEF-04` — `DIRTY-CALLER-STALE-1` routed with `DEF-03`
+@po merged the new stale-overwrite finding with the existing delete race: same root cause, both closed
+by a `@Version` column on `UITest`. Deferred past the pilot under the same two conditions as DEF-03,
+with DEF-03's operating note extended to cover save-vs-save.
+
+### Environment — a third EOF-family failure, and the rule earns its place twice
+
+The first post-merge run failed `AbandonedCompileSweepIT > initializationError`: the embedded Postgres
+refused the connection while Spring built the test context (`EOFException` on the PG stream). Nothing
+to do with the test's subject. Run alone: **7/7 in 17s, at higher load (6.96) than when it failed
+(5.42)**, and the arithmetic reconciles exactly — 702 + 7 = 709, the pre-merge figure.
+
+That is **three EOF-family failures on this host today**: the `CompilePipelineIT` contention, @dev's
+`ResourceAccessException` during mutation (`PHANTOM-1`), and this Postgres startup drop. Consistent
+with a host that intermittently drops local connections under sustained parallel test load. The
+standing rule — *run backend suites sequentially; a failure under load is not a result until reproduced
+at rest* — has now paid for itself twice in one day. It sits beside `MED-2`.
+
+## Reconciliation — the fold is now blocked much harder than before (2026-09-17)
+
+Read-only inspection of `wt/epic` (never written to): the other session's tree carries **263 dirty
+paths**, up from the handful catalogued at the wave-8 open. It is no longer a line-level overlap.
+
+**The hard conflict: they are replacing the gateway client.**
+`VertexLlmGatewayClient.java` and `VertexAiClientFactory.java` are **deleted** in their tree, and a new
+`GenAiLlmGatewayClient.java` appears alongside `BoundedCredentialProvider`, `BudgetedAuthTransport`,
+`CompileBudget`, `InferenceCaptureStore`, an `incremental/` package, a `storage/` package and a
+`V19__studio_inference_candidate_identity.sql` cutover migration.
+
+**Four of our test files reference the two deleted classes** — `VertexLlmGatewayClientTest.java`,
+`GatewayAuditTest.java`, `GatewayTestSupport.java`, `StudioGatewayConfigTest.java`. When their work
+lands, those do not fail: **they do not compile.** This is not a merge-text conflict that `ort`
+resolves; it is a source-set breakage that only appears once both trees are in one place.
+
+Recorded now because the cost of discovering it during the fold is much higher than the cost of knowing
+it beforehand. It needs an owner decision — it is not a defect in either tree.
