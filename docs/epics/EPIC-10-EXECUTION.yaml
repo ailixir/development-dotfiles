@@ -768,12 +768,63 @@ stories:
         ESC-3's ruling changes takeRunOrigin's contract (for example, browserStartedAt shifting too)
         before 10.32 starts.
 
+  # ── Wave 8 (added by @po 2026-09-17) ── PROD-1, from @qa's carry-forward gate ──
+  - id: "10.33"
+    title: "Refuse malformed store-bootstrap payloads (PROD-1)"
+    size: S
+    wave: 8
+    # No unmerged prerequisite. The two reducers and their thunks are pre-Epic-10 frontend code that
+    # Epic 10's Studio page reads. Wave 8 so that it lands with 10.30-10.32, ahead of 10.19's pilot.
+    depends_on: []
+    blocks: ["10.19"]
+    story_context:
+      # Routed by @po 2026-09-17, from docs/qa/gates/carry-forward-2026-09-16.yml ("New, not this
+      # branch's: PROD-1 (low)"). Ids: 10.33 is the next free id in the decade block. Before claiming it,
+      # @po checked that no story file with that id exists in any wt/* worktree, that no branch carries it,
+      # and that this manifest does not mention it.
+      finding: >-
+        VERIFIED BY READING at 7357082e3. fetchSources returns `response.sources` and fetchFeatures returns
+        the response object, and neither checks the shape. The fulfilled reducers then assign the payload
+        as it is: sourcesSlice.ts:34 `state.data = action.payload`, and featuresSlice.ts:56-57
+        `state.sources = …; state.features = …`. A 200 whose body is not the expected JSON (for example an
+        HTML page) therefore leaves those arrays undefined, and the Studio page's selectors throw
+        `reading 'find'`. MEASURED, in the test harness only: @dev and @qa reproduced exactly that crash
+        against a local stand-in that answers every path with 307 → /login, and /login with 200 text/html
+        (docs/qa/carry-forward-2026-09-16.md, ENV-2 table). INFERRED, NOT TESTED: an expired session behind
+        the real gateway, redirected to an HTML login page, produces the same shape in production.
+      severity_and_order: >-
+        Low severity, but it must land BEFORE THE CREDENTIALED PILOT, and it blocks 10.19. Real sessions
+        can first expire in 10.19's pilot. 10.19 AC-2 requires every failure state to be "visible in the
+        UI and truthful", and a white-screen crash is neither.
+      target_behaviour: >-
+        A fulfilled response whose shape is wrong is handled as a FAILURE. It ends in the same state the
+        rejected path reaches today: the fail-open defaults, error set, fetched true, loading false. It
+        must never leave an array undefined. A well-formed 200 is stored as it is today. Where the check
+        lives (the thunk or the reducer) is @dev's choice. The outcome is not.
+      red_first: >-
+        @qa writes the failing tests first, split into two states (the wave-8 rule).
+        REFUSALS, red against today's code: a 200 text/html body on /checks/sources and on /features,
+        each asserting the slice ends on its defaults with error set, and the Studio page renders without
+        throwing. CONTROLS, green today: a well-formed 200 is stored unchanged, and a 404 still fails open.
+        A red control means a broken fixture, not a finding.
+      harness_constraint: >-
+        SEE FOC-08. frontend/src/test/setup.ts waits up to 10 s for BOTH bootstrap fetches to settle, with
+        fetched true and loading false. This story edits exactly the code that wait observes. Any outcome
+        that leaves fetched false fails every jsdom test file after 10 s. src/test/bootstrapIsolation.test.ts
+        must stay green unchanged, unless setup.ts changes in the same commit.
+      out_of_scope: >-
+        Session-expiry UX (re-authentication, a redirect to login). That belongs with the Core BFF /
+        ED-02, not here. The other pre-Epic-10 slices are not audited either. If @dev finds the same
+        pattern elsewhere, it is reported and not widened into this story.
+      executor: "@dev (Dex) after @qa's failing tests; quality gate @qa. Frontend only; npm (frontend's package-lock.json convention)."
+
   # ── Wave 9 ── (was wave 8; moved by @po 2026-09-16 because 10.30–10.32 must land before it)
   - id: "10.19"
     title: "Integrated staging validation and handover"
     size: L
     wave: 9
-    depends_on: ["10.1", "10.2", "10.3", "10.4", "10.5", "10.6", "10.7", "10.8", "10.9", "10.10", "10.11", "10.12", "10.13", "10.14", "10.15", "10.16", "10.17", "10.18", "10.30", "10.31", "10.32"]
+    depends_on: ["10.1", "10.2", "10.3", "10.4", "10.5", "10.6", "10.7", "10.8", "10.9", "10.10", "10.11", "10.12", "10.13", "10.14", "10.15", "10.16", "10.17", "10.18", "10.30", "10.31", "10.32", "10.33"]
+    # "10.33" added by @po at validation 2026-09-17 (PROD-1 must land before the credentialed pilot).
     blocks: []
     story_context:
       # Assigned by @po 2026-09-11 at wave-5 validation, ruling on 10.10's open question 3.
@@ -830,6 +881,37 @@ stories:
         RUNNING a credentialed pilot against unauthorized write routes. That is an implementation
         precondition, and it is expressed as depends_on "10.30". If 10.30 has no assignee when 10.19 is
         ready to start, that becomes an escalation to @pm, not a reason to draft later.
+      po_validation_2026_09_17: >-
+        @po, GO 8/10, Status Draft → Ready. Validated on story/10.19 after epic/EPIC-10 (7357082e3) was
+        merged in with a merge commit; a fast-forward was impossible because the draft was cut from
+        1a5ed2822. All twelve gates were re-read and are open: ED-01..06 status open; SPK-01..06
+        "Result. OPEN", SPK-01 included. The owners are as the ED blocks above state.
+        DRAFTER CLAIMS FOUND FALSE:
+          - O-11 "genuinely unowned". It is CLOSED, by 10.14's V17 at ded3d45fb (ADR-002 §23.4).
+          - O-2a "unowned". studio-runner/ci/stages.md:301 names Platform/SRE with @architect, and @po
+            confirms that owner. 10.19 owns only the in-image verification (AC-3).
+          - 10.30 has "no @dev/@qa commit". story/10.30 has had them since 00:04 and 00:15, before the
+            draft's 00:17 commit.
+          - AC-15 "run in CI". No CI definition exists in this repository.
+          - Falsification rows M4, M5, M7 and M8 named checks that nothing created. They now rest on the
+            AC-15 script, and M6 is a @qa review item.
+        ADDED to the story:
+          - 10.33 in depends_on;
+          - AC-19(a), post-merge verification on a clean worktree at the merge commit;
+          - AC-19(c), F-3 (next entry);
+          - AC-17's baseline counts, defined;
+          - AC-13 owners: @ux-design-expert runs the trial, @qa scores it, @pm owns staffing;
+          - a Definition of done: the story is not Done while any AC-1..7 is Blocked, unless a 10.34+
+            follow-up carries it (the 10.16/AC-19 precedent).
+        Weakest criterion: AC-13. Left open for @po/@pm: 10.19's relation to 10.20–10.26 (AC-18).
+      f3_on_the_epic_line: >-
+        @po 2026-09-17. The carry-forward F-3 fix to studio-runner/test/reporting/httpClient.test.ts was
+        reverted on this line at 7357082e3, because the studio-inference program carries an equivalent
+        uncommitted fix to the same file (user decision). F-3 is therefore open on epic/EPIC-10 until that
+        program's commit lands. 10.19's integrated run (AC-19(c)) must record which version of the file
+        is present, and must confirm the test is fixed there: 20 runs of the file alone under load, plus
+        the 100 ms deterministic squeeze. If the base file is still there, F-3 goes back to @po as open.
+        10.19 does not fix it silently, because that would make it a third writer on the file.
       not_in_this_backlog:
         - "O-19 (ADR-002 §25.2) — ADR-003, the backend-wide API error envelope. @architect decides with @pm (CON-API-03) and the frontend consumer; @pm and @po place its implementation OUTSIDE Epic 10. Not a dependency of 10.19: no Studio client parses a 401 body (§25.3, by reading). Recorded here so 10.19's drafter does not absorb it."
         - "Stories 10.20–10.26 (the studio-inference program, uncommitted in wt/epic). NOT in this manifest and NOT absorbed by @po: they were drafted outside the validated backlog, the manifest is @pm's, and the run log bars merging across that line until the program's owner, @architect, @po and @pm have reconciled. FLAGGED TO @pm: whether they join this manifest, get their own, or stay outside; whether 10.19 depends on any of them (@po's position: no, because 10.19 is this manifest's release and must not wait on an unvalidated program); and that ids 10.30+ are now claimed here (see the Wave 8 numbering note). @po's validation (\"Pax readiness\", per that program's own log) happens when they are submitted, not by adoption."
@@ -1123,6 +1205,29 @@ file_ownership_conflicts:
       program's StudioService change lands second adopts §27.2's visible read and adds no second check.
       Nothing merges across the wt/epic line until the reconciliation the run log requires.
     source: "ADR-002 §27.3, §28.1, §28.2; run log 'Integration note for the studio-inference program'; git diff --stat in wt/epic read on 2026-09-16 (read only, nothing changed there)."
+
+  - id: FOC-08
+    path: "frontend/src/test/setup.ts ↔ frontend/src/store/index.ts, frontend/src/store/slices/sourcesSlice.ts, frontend/src/store/slices/featuresSlice.ts (and src/test/bootstrapIsolation.test.ts)"
+    stories: ["10.33", "10.19", "any later story that edits frontend store bootstrap code"]
+    wave: 8
+    recorded_by: "@po 2026-09-17, from the carry-forward merge (2ba3f95c1, ENV-2 fix c09d59e67, QA PASS)."
+    conflict: >-
+      This is a STANDING COUPLING between the test harness and product code, not a textual overlap.
+      setup.ts imports the store while an in-process MSW server answers /checks/sources and /features
+      with 404. It then waits up to BOOTSTRAP_SETTLE_TIMEOUT_MS (10 s) until BOTH slices report
+      fetched true and loading false. Three kinds of product change break that wait:
+        - making the store bootstrap lazy (no dispatch on import);
+        - dropping or renaming either of the two fetches, or moving their paths;
+        - adding an outcome that leaves fetched false.
+      Any of these makes EVERY jsdom test file fail after 10 s with "ENV-2: the store's import-time
+      bootstrap did not settle".
+    mandated_ordering: >-
+      Such a change updates setup.ts, and bootstrapIsolation.test.ts where its recorded paths change,
+      IN THE SAME COMMIT. A story that finds the whole frontend suite red with that message has hit
+      this rule and must not raise the timeout. A file that calls vi.resetModules() and re-imports the
+      store is not covered by setup.ts; that is a known gap, and only studioRunTransport.node.test.tsx
+      does it today.
+    source: "frontend/src/test/setup.ts:8-106 (read at 7357082e3); docs/qa/carry-forward-2026-09-16.md (ENV-2); docs/qa/gates/carry-forward-2026-09-16.yml."
 
 # ─────────────────────────────────────────────────────────────
 # Integration defects found by reading, not by a green suite
