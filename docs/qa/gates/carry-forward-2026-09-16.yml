@@ -1,0 +1,210 @@
+schema: 1
+story: 'carry-forward-2026-09-16'
+story_title: Epic 10 carry-forward test fixes (TEST-005, REL-004, ENV-2/REL-002, F-3, F-7)
+epic: EPIC-10
+record: docs/qa/carry-forward-2026-09-16.md
+
+gate: PASS
+
+status_reason: >-
+  All five carried findings are closed, and each closure was verified by mutation, not by reading.
+  The diff is test-only: 7 test/setup files plus the record. No production file, config file or
+  lockfile changed, and openapi.yaml and seek-measurement.test.ts are byte-identical to the base.
+  The developer's mutation table reproduces where it was re-run. Two mutated hashes are identical
+  to the developer's: S7 d10c5059d868 and H1 93d92050c5ae. M1 is identical to the developer's E2,
+  a7fb0c0593de. This reviewer added probes the record does not contain:
+    - a duplicate POST issued at the settle point itself (TEND): red;
+    - a duplicate at 5 s: red;
+    - the setup server left open for the whole suite (M3): 16 red, so close() is load-bearing;
+    - the setup server answering 200 HTML in-process (M2): red;
+    - seven 10.32-shaped edits to seek-measurement.test.ts.
+  Suites match the orchestrator and the record. Frontend: 541 passed / 2 failed, twice, and the only
+  failures are the two AC-32 EXPECTED RED tests. Runner: 957 passed / 29 skipped, twice. Fixtures:
+  89 passed / 10 skipped. Nothing blocks the merge. The items below are constraints to carry and one
+  pre-existing product observation that ENV-2's flake used to expose.
+
+reviewer: Quinn (@qa)
+reviewed_revision: 'commit:95bd63114'
+updated: '2026-09-17T04:05:00Z'
+branch: fix/carry-forward
+head_sha: 95bd63114
+base_sha: f1d7968df
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/fix-carry
+harness: >-
+  Python, in a private mktemp directory under $TMPDIR, not in the shared scratchpad. Each mutation
+  requires its anchor to occur exactly once, and the harness aborts on "no change". It restores
+  every file from a copy and asserts sha256. Every row printed RESTORED-OK. One row aborted by
+  design: E1's first anchor matched twice, so it was re-anchored. After all batches, git status was
+  empty and all 7 tracked hashes matched base.sha.
+  The ENV-2 rows ran with jsdom's origin moved to http://localhost:3931 (an untracked overlay
+  config), against this reviewer's own stand-in: every path answers 307 -> /login, and /login
+  answers 200 text/html after 9 s. The stand-in was stopped afterwards. No request was sent to
+  :3000, and PID 33058 was still listening there, untouched.
+
+findings_closed:
+  TEST-005:
+    status: CLOSED
+    evidence:
+      - 'T300, a second POST 300 ms after acceptance, with only AC-2 selected (-t "exactly one"): RED in AC-2 itself, "expected [...] to have a length of 1 but got 2".'
+      - 'T5000, a second POST 5 s after acceptance: RED, same message.'
+      - 'TEND (added by @qa), ChecksStudioPage onClosed requests a re-run (setRunRequest), so the duplicate is issued at the settle point: RED, same message. The settle point does not race a duplicate caused by the run ending.'
+      - 'T8000, the residual: GREEN, reproduced.'
+    residual_ruling: >-
+      Acceptable, no rename required. Every "exactly one" test is bounded by how long it observes.
+      This one now observes the whole causal chain of the activation (acceptance, then Stop, then
+      the transport gives up, then Run Test), and its comment says so. A POST 8 s later, with the
+      page idle, is an unprompted request, not a retry of this activation. No finite window catches
+      an arbitrary delay. If anyone wants the name to match the claim exactly, "...exactly one POST
+      /execute from the page for the whole run it starts" is the accurate form. Optional.
+    timing: >-
+      AC-2 alone took 11.5 s and 10.9 s wall (load 12). In the full suite it took 15.1 s and 16.8 s,
+      against a 60 s test bound and a 20 s run-end bound. The run-end window is set by the
+      transport's real 1 s poll cadence and give-up rule, so load mostly stretches the render
+      before the click, which PAGE_WAIT_MS already bounds. Not timing-fragile at the load measured
+      (7.9-17.6). The cost is about 5 s of suite time.
+  REL-004:
+    status: CLOSED
+    ruling: >-
+      Justified, not masking. The diff changes only timeout arguments, and no assertion changed
+      (verified from the diff). A timeout bound cannot turn a failing assertion green. It can only
+      absorb a slowdown of up to 30 s. The cold case measured 1958 ms and 1647 ms in this
+      reviewer's two suite runs, and 5121 ms in the 10.16a recheck. The bound belongs on every row
+      because under -t any row can be the cold one. The developer's R-6 and R-35 rows show that
+      the bound is real in both directions. Not re-run here.
+  ENV-2_REL-002:
+    status: CLOSED
+    evidence:
+      - 'Control at the stand-in origin: bootstrapIsolation + pageRunGate + pageEvidence 10/10, 0 stand-in hits.'
+      - 'E1, the fix disabled: 3 red (isolation x2, "did not run its bootstrap isolation" and "expected true to be false"; pageRunGate "reading ''find''", 5 occurrences in the log). 12 hits, 6 of them /login. Before/after reproduced.'
+      - 'M1, listen() after the store import (the developer''s E2): 1 red, isolation "expected [ ...(2) ] to deeply equal []". 6 hits: the requests escaped and were recorded as unhandled.'
+      - 'M2 (added by @qa), the setup server answers 200 text/html, simulating the clobber in-process: 1 red, isolation, because error is not a 404 string. 0 hits.'
+      - 'M4 (added by @qa), the store not imported by the setup, with the server listening around nothing: 3 red (isolation x2, pageRunGate "reading ''find''"). 10 hits, 4 of them /login. This is the pre-fix failure reproduced.'
+      - 'M3 (added by @qa), the setup server never closed, whole suite at the real origin: 16 failed / 527 passed, across 9 failed files, with studio files that depend on their own server failing. So leaving it open interferes, and closing it is what prevents that. With close() in place, two full runs are 541/2, so closing does not interfere either.'
+    guard_ruling: >-
+      bootstrapIsolation.test.ts is a real guard. It reddened under four of the five setup
+      mutations (E1, M1, M2, M4). The fifth, M3, is caught by the suite rather than by this file,
+      which is acceptable because M3's failure is loud.
+    can_it_hide_a_product_regression: >-
+      Not a regression that tests used to catch. Before this change no test exercised a successful
+      import-time bootstrap: a closed port rejected it, and :3000 clobbered it. The failure modes
+      the store can newly develop are caught, as the rows above show:
+        - a changed bootstrap path is recorded as unhandled (M1 shows the recording works);
+        - a removed fail-open default reddens isolation's data.map line;
+        - a bootstrap that stops settling fails every jsdom file after 10 s, loudly.
+      The last point doubles as a maintenance constraint: a legitimate product change that makes
+      the bootstrap lazy, or drops one of the two fetches, must update setup.ts in the same commit.
+      What the setup does remove from test view is the late-landing race itself. See PROD-1: the
+      race is a product robustness defect, not only a suite defect.
+  F-3:
+    status: CLOSED
+    evidence:
+      - 'H1, an aborted signal reported as transport, with -t "timeout as ambiguous": RED, "expected { kind: ''transport'' ... } to deeply equal { kind: ''timeout'' }". The mutated sha equals the developer''s.'
+      - 'H4, abort before the send: RED, "timed out after 3000 ms waiting for the server to receive the request".'
+      - 'Control: httpClient.test.ts 6/6.'
+    ruling: >-
+      It still tests the production client, not the fake. Only setTimeout and clearTimeout are
+      faked. fetch, the socket, AbortController and the client's catch branch are all real. H1
+      proves that the outcome classification is the production one. H2 (the developer's) and H10
+      prove that the timer being advanced is the production deadline.
+    notes:
+      - 'H10 (added by @qa), the deadline drifts +1 ms: RED, but only as a generic "Test timed out in 5000ms". The test pins the deadline to exactly timeoutMs, which is defensible as a specification, but the failure message is not diagnostic. Low; optional message improvement.'
+      - 'H9 (added by @qa), production captures setTimeout at module load: GREEN, 40 ms. The fake no longer controls the timer, so the test silently reverts to the old real-time race. It is not a false pass, because the claim still holds, but determinism would depend on production looking up the global setTimeout at send time. Low; noted, no action.'
+  F-7:
+    status: CLOSED
+    evidence:
+      - 'S7, assertion + 50: fails to load, "exactly one \".toBeLessThan(MEDIAN_TOLERANCE_MS);\", found 0". Mutated sha d10c5059d868, the same as the developer''s.'
+      - 'S8, an indented const 150 in the AC-12a describe: fails to load, "the name twice ... found 3".'
+      - 'S10, the declaration reformatted to 150 over two lines plus a column-0 copy in a block comment: fails to load, "exactly one top-level ... found 0".'
+      - 'All three survived at 4ffc4020c (10.16b gate). All three now fail loudly. The restores were verified (a0d3561d8cdc).'
+
+constraint_for_10_32:
+  summary: >-
+    Measured against seven plausible 10.32 edits (K1-K7) to seek-measurement.test.ts. The read never
+    returned a wrong value. It either stays green or refuses to load. Story 10.32 must plan for the
+    refusals.
+  probes:
+    - {id: K1, edit: 'AC-7 as drafted: a new signedLeads(...) helper appended to the median message with "+", name not mentioned', result: 'GREEN 16/16'}
+    - {id: K4, edit: 'F-4 block-comment rewrite that names MEDIAN_TOLERANCE_MS', result: 'GREEN (comments are stripped)'}
+    - {id: K5, edit: 'trailing "// ..." comment on the assertion line, no name', result: GREEN}
+    - {id: K2, edit: 'median message interpolates ${String(MEDIAN_TOLERANCE_MS)}', result: 'FAILS TO LOAD, name found 3'}
+    - {id: K6, edit: 'trailing comment on the assertion line that names the constant', result: 'FAILS TO LOAD, name found 3'}
+    - {id: K3, edit: 'assertion wrapped as .toBeLessThan(\n MEDIAN_TOLERANCE_MS,\n)', result: 'FAILS TO LOAD, assertion found 0'}
+    - {id: K7, edit: 'a new message string containing "/*" (e.g. a glob)', result: 'FAILS TO LOAD, found 0 and 1 (the comment strip swallows code up to the next "*/")'}
+  rules_10_32_must_respect: >-
+    Outside comments, seek-measurement.test.ts must contain the identifier MEDIAN_TOLERANCE_MS
+    exactly twice: the column-0 declaration and the literal `.toBeLessThan(MEDIAN_TOLERANCE_MS);`
+    on one line.
+      - No mention of it in the new message string or in any interpolation.
+      - No mention in a trailing comment on a code line.
+      - No wrapped assertion.
+      - No "/*" or "*/" inside any string, template or regex literal it adds.
+    Each of these fails closed (webm.test.ts refuses to load). None of them passes silently.
+    If 10.32 genuinely needs the tolerance in the message, it must change medianToleranceIn's
+    rule 3 in the same commit, and the F-7 planted-forms block must still go red for S7, S8 and
+    S10.
+  stale_text_in_10_32_draft:
+    - 'Dev Notes and Task 8 say fix/carry-forward "has not yet landed F-7" (verified at a2d3acddc). That is no longer true at 660874ef5 and later. The story already requires a re-check at implementation time; after this branch merges, AC-8 condition 3 is proved against medianToleranceIn.'
+    - 'The AC-8.1 falsification row names readMedianTolerance(), which is now medianToleranceIn(source).'
+    - 'Its webm.test.ts baseline "6 tests green" is now 16.'
+  owner: '@sm / @po (story text); @dev (10.32 implementation)'
+
+new_findings:
+  - id: PROD-1
+    severity: low
+    blocking: false
+    owner: '@po to route (product code, not this branch)'
+    finding: >-
+      The race ENV-2 exposed is also a product robustness defect. fetchFeatures.fulfilled assigns
+      action.payload.sources and .features unchecked, and fetchSources.fulfilled assigns
+      action.payload unchecked (verified by reading featuresSlice.ts:55-57 and
+      sourcesSlice.ts:33-34). A 200 response whose body is not the expected JSON therefore leaves
+      data undefined, and the page's selectors then throw "reading 'find'". The 10.16a gate
+      verified this state against :3000, and M2 here shows the fulfilled path is taken, since
+      error stays null. By inference (not tested against a real deployment), a production session
+      that expires behind an SSO or BFF redirect to an HTML login page is the same shape. The
+      shared setup correctly removes the race from tests, and with it the only place it was ever
+      observed.
+    suggested_action: 'Validate the payload shape in both fulfilled reducers (or in the API layer) and fail open; add a slice unit test with a 200 HTML body.'
+  - id: OBS-1
+    severity: info
+    finding: >-
+      Fixtures tier, this reviewer's first run: one step reported +375.9 ms (run 2 step 3), the
+      known forward mis-attribution shape (10.16b F-5). The display was truncated by the reviewer's
+      own head, so that run's totals were not captured and no result is claimed for it. The second
+      run was 89 passed / 10 skipped, with every |error| under 100 ms.
+
+suites:
+  frontend:
+    runs:
+    - {run: 1, load_before: '7.93 11.20 15.21', load_after: '13.03', result: '541 passed / 2 failed (543); files 38 passed / 2 failed', wall_s: 58, ac2_ms: 15068}
+    - {run: 2, load_before: '13.03 12.50 15.45', load_after: '17.58', result: '541 passed / 2 failed (543)', wall_s: 76, ac2_ms: 16753}
+    failures: 'the two AC-32 EXPECTED RED tests (confirmedRevisionEscalation.test.ts); ChecksLayout.a11y.test.tsx unloadable (ENV-1)'
+    logs: '0 "reading ''find''", 0 "[MSW]" or "ENV-2" in either; 52 "API Error" lines each, as the record states'
+    type_check: 'exactly the 2 known TS2307 (ChecksLayout.tsx:6, navigationSetup.ts:1)'
+    lint: 'NOT RUN, and no claim is made: it fails to start (ENV-1)'
+  runner:
+    runs:
+    - {suite: 'npm test', run: 1, load_before: '14.21', result: '957 passed / 29 skipped (986); 49 files passed, 1 skipped'}
+    - {suite: 'npm test', run: 2, load_before: '13.79', result: '957 passed / 29 skipped (986)'}
+    - {suite: 'npm run test:fixtures', load_before: '14.75', result: '89 passed / 10 skipped (99); 6 files'}
+    lint: 'exit 0'
+    type_check: 'the one known error, deadline-cleanup.test.ts(550,40) TS2345'
+
+diff_check:
+  files: '8 (7 test/setup + the record); no production, config, package or lockfile path'
+  unchanged_verified: 'openapi.yaml 51850b01..., seek-measurement.test.ts a0d3561d... (identical to f1d7968df)'
+
+before_merge:
+  required: []
+  recommended:
+    - 'Record the 10.32 constraint above in story 10.32 (or its Dev Notes) and fix its three stale lines.'
+  after_merge:
+    - 'PROD-1: route to backlog.'
+    - 'Optional: a diagnostic message for F-3 when the deadline does not fire (H10).'
+
+verified_vs_inferred:
+  verified: 'every mutation, suite and hash above was run by this reviewer and its output read'
+  inferred:
+    - 'that an expired production session produces PROD-1''s shape (not tested against a deployment)'
+    - 'that the AC-2 run-end window is set mostly by real transport timers and so is load-insensitive (supported by 10.9-11.5 s alone against 15-17 s in the suite, but not instrumented)'
+  not_rerun: 'the developer''s R-6, R-35, R-3, E3, E4, H2, D1-D3 and the F-3 200/300-sample probe'

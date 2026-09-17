@@ -61,31 +61,14 @@ function serveDraft() {
   );
 }
 
-beforeAll(async () => {
+beforeAll(() => {
   if (!Element.prototype.scrollIntoView) {
     Element.prototype.scrollIntoView = function scrollIntoView() {};
   }
   studioMockServer.listen({ onUnhandledRequest: 'error' });
-  /*
-   * `store/index.ts` dispatches `fetchSources()` and `fetchFeatures()` at import time, before this
-   * server listens, so those two requests go to the real network at jsdom's origin. On a host where
-   * something else answers there, they resolve late with a body that has neither field, and whichever
-   * test is running when they land sees `sources.data`/`features.features` become `undefined`.
-   * Waiting for both to settle here, before `beforeEach` sets the values this file needs, removes
-   * that race from this file. It changes nothing about the page.
-   */
-  await waitFor(
-    () => {
-      const state = store.getState() as unknown as {
-        sources: { fetched: boolean; loading: boolean };
-        features: { fetched: boolean; loading: boolean };
-      };
-      expect(state.sources.fetched && !state.sources.loading).toBe(true);
-      expect(state.features.fetched && !state.features.loading).toBe(true);
-    },
-    { timeout: 15000 },
-  );
-}, 20000);
+  // The store's import-time bootstrap is settled in-process by the shared setup (ENV-2, see
+  // `src/test/setup.ts`), so this file no longer waits for it here.
+});
 beforeEach(() => {
   window.localStorage.clear();
   studioMockServer.use(...bootstrapHandlers);

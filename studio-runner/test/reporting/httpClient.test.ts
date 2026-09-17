@@ -10,7 +10,7 @@ import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createFetchHttpClient } from '../../src/reporting/httpClient.js';
 import type { HttpRequest } from '../../src/reporting/httpClient.js';
@@ -57,8 +57,27 @@ function listen(
 }
 
 afterEach(async () => {
+  // The F-3 test fakes `setTimeout`. If it times out, its own `finally` never runs.
+  vi.useRealTimers();
   for (const responder of responders.splice(0)) await responder.close();
 });
+
+/**
+ * Polls on `setImmediate` and measures with `performance.now()`, so it keeps working while
+ * `setTimeout` is faked. Fails with its own message inside Vitest's 5 s test timeout. The slowest
+ * arrival the F-3 probe measured was about 54 ms, at load 85, so 3 s is ample.
+ */
+async function untilRealTime(condition: () => boolean, what: string, boundMs = 3_000) {
+  const started = performance.now();
+  while (!condition()) {
+    if (performance.now() - started > boundMs) {
+      throw new Error(`timed out after ${String(boundMs)} ms waiting for ${what}`);
+    }
+    await new Promise<void>((resolve) => {
+      setImmediate(resolve);
+    });
+  }
+}
 
 function request(port: number, path = '/admission'): HttpRequest {
   return {
@@ -124,15 +143,38 @@ describe('fetch-backed HTTP client', () => {
       // Never responds. The client's deadline is what ends this.
     });
 
-    const outcome = await createFetchHttpClient().send({
-      ...request(responder.port),
-      timeoutMs: 25,
-    });
+    /*
+     * F-3: the deadline fires only once the server holds the whole request.
+     *
+     * With a real 25 ms timer this test failed now and then (1–2 in about 30 default-tier runs).
+     * A probe measured why: in every failure the server had not yet parsed the request when the
+     * client returned `timeout`. Connection setup had outlasted the deadline, and in one case the
+     * request never arrived at all. That is a race between the deadline and the request's
+     * arrival, not a defect in the client, and it is not the case this test is named for.
+     *
+     * So the client's own `setTimeout` is faked, and nothing else. The test waits in real time
+     * until the request has arrived, then moves the fake clock by the client's 25 ms. The code
+     * path is the production one (timer, abort, aborted signal, `timeout`). Only the moment the
+     * timer fires is now chosen by the test.
+     */
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const pending = createFetchHttpClient().send({
+        ...request(responder.port),
+        timeoutMs: 25,
+      });
 
-    expect(outcome).toEqual({ kind: 'timeout' });
-    // The request did reach the server: this is the dangerous case, where admission may have
-    // been granted and the runner will never know (AC-9).
-    expect(responder.hits).toHaveLength(1);
+      await untilRealTime(() => responder.hits.length === 1, 'the server to receive the request');
+      vi.advanceTimersByTime(25);
+      const outcome = await pending;
+
+      expect(outcome).toEqual({ kind: 'timeout' });
+      // The request did reach the server: this is the dangerous case, where admission may have
+      // been granted and the runner will never know (AC-9).
+      expect(responder.hits).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('reports a connection failure as a transport outcome', async () => {

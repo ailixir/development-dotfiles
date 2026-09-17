@@ -59,6 +59,15 @@ const PAGE_WAIT_MS = 10_000;
 const pageWait = { timeout: PAGE_WAIT_MS } as const;
 /** The most bounded waits any test below makes is four, plus clicks and typing. */
 const PAGE_TEST_TIMEOUT_MS = 5 * PAGE_WAIT_MS;
+/**
+ * TEST-005: AC-2 waits for the run it started to end (about 5 s after acceptance when run alone,
+ * set by the transport's own poll interval and give-up rule, so load stretches it only a little).
+ * Four times that is the bound.
+ */
+const RUN_END_WAIT_MS = 20_000;
+const runEndWait = { timeout: RUN_END_WAIT_MS } as const;
+/** AC-2 makes four bounded page waits plus the run-end wait. */
+const AC2_TEST_TIMEOUT_MS = 4 * PAGE_WAIT_MS + RUN_END_WAIT_MS;
 
 const observed: { method: string; url: string }[] = [];
 function record({ request }: { request: Request }) {
@@ -166,9 +175,23 @@ describe('AC-2: the page’s own Run control is governed by the server and not b
     await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
 
     await userEvent.click(control);
-    await waitFor(() => expect(executeRequests()).toHaveLength(1), pageWait);
+    /*
+     * TEST-005: "exactly one" is counted only after everything this one activation causes has
+     * played out. Counting at the first moment the list holds one entry proves only "one by the
+     * first poll": a second POST 300 ms after acceptance used to leave this test green and redden
+     * the next one instead.
+     *
+     * The settle point is the whole run, as the page shows it. First the page acts on the
+     * acceptance: the control becomes Stop. Then that run ends: this file serves 404 on the
+     * snapshot route, so the transport reconnects, falls back to polling, and gives up, and the
+     * control reads Run Test again. Run alone, that end came about 5 s after acceptance, after three
+     * snapshot reads about 1 s apart. That window is far longer than a 300 ms retry or the 700 ms
+     * poller 10.11b removed. A duplicate issued anywhere inside it is in the list below.
+     */
+    await screen.findByRole('button', { name: 'Stop' }, pageWait);
+    await screen.findByRole('button', { name: 'Run Test' }, runEndWait);
     expect(executeRequests()).toHaveLength(1);
-  }, PAGE_TEST_TIMEOUT_MS);
+  }, AC2_TEST_TIMEOUT_MS);
 
   it('an unconfirmed draft the editor is silent about produces none', async () => {
     serveList(draftsByCompileStatus.AWAITING_CONFIRMATION);
