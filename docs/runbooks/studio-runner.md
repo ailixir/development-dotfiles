@@ -2,11 +2,13 @@
 
 | Field | Value |
 |---|---|
-| **Status** | **COMPLETE for V1, and assembled once.** 10.18a drafted the three pod sections; **story 10.18b drafted the edge sections and assembled them here**, as @po's split mandated — a runbook split into two halves is two half-runbooks. All seven subjects AC-24 names are covered: Chromium and the sandbox (§1), egress and approved destinations (§2), evidence expiry (§3), signals/drain/reaping (§4), stuck runs (§5), the kill switch (§6), SSE (§7) and manifest recovery (§8). §§9-11 carry the three open prerequisites this deployment must not be read without |
-| **Accountable owner** | **The Checks squad**, as the on-call owner. BRD §4: the Checks squad *"owns Studio execution, recovery, capacity and the runner runbook"*; **Platform/SRE supports** cluster, ingress, egress, sandbox and storage controls. BRD §8 makes this document a **launch exit criterion** |
+| **Status** | **COMPLETE for V1, and assembled once.** 10.18a drafted the three pod sections; **story 10.18b drafted the edge sections and assembled them here**, as @po's split mandated — a runbook split into two halves is two half-runbooks. All seven subjects AC-24 names are covered: Chromium and the sandbox (§1), egress and approved destinations (§2), evidence expiry (§3), signals/drain/reaping (§4), stuck runs (§5), the kill switch (§6), SSE (§7) and manifest recovery (§8). §§9-11 carry the three open prerequisites this deployment must not be read without. **§12 (rollback) was added by story 10.19 (AC-9); the epic had never written one down.** |
+| **Accountable owner** | **The Checks squad**, as the on-call owner. BRD §4: the Checks squad *"owns Studio execution, recovery, capacity and the runner runbook"*; **Platform/SRE supports** cluster, ingress, egress, sandbox and storage controls. BRD §8 makes this document a **launch exit criterion**. **Re-verified by story 10.19's audit (AC-8b), 2026-09-17: still named and still accurate** — `docs/brd/checks-ui-studio.brd.md:81` and BRD §8's on-call row |
 | **Sections from 10.18a** | §1 Chromium and the sandbox · §2 Egress and approved destinations · §3 Evidence storage and expiry · §4 Signals, drain and reaping |
 | **Sections from 10.18b** | §5 Stuck runs (reapers, ledger states, what an operator may and may not do by hand) · §6 The kill switch · §7 SSE · §8 Manifest recovery · §9 Identity (`ED-02`) · §10 CSRF · §11 Configuration that does not reach the process |
-| **Written by** | @dev (Dex), story 10.18a · 2026-09-15; assembled by @dev (Dex), story 10.18b · 2026-09-16 |
+| **Sections from 10.19** | **§12 Rollback** |
+| **Written by** | @dev (Dex), story 10.18a · 2026-09-15; assembled by @dev (Dex), story 10.18b · 2026-09-16; audited and extended by @dev (Dex), story 10.19 · 2026-09-17 |
+| **Last audited against the merged system** | **2026-09-17**, story 10.19 AC-8, at integration head `d3700f23d` (10.30, 10.31 and 10.32 merged). Drift found and corrected in this pass: `ED-02`'s owner (three places), the lifted 10.19 drafting gate (two places), story 10.30's write authorization (§9.1 new), story 10.31's video-route refusal surface (§7 new). Checked and found **not** drifted: §1–§6, §8, §10, §11 — including §11's "no key 10.18b added is affected" claim, which still holds for story 10.32's `STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS` because it matches the `STUDIO_RUNNER_*` shape §11 already names. Every disclosed limitation below is cross-checked against [`docs/qa/staging-acceptance-register.md`](../qa/staging-acceptance-register.md) (AC-8c) |
 
 > ## Read this before anything else: what is still open
 >
@@ -17,15 +19,25 @@
 >
 > 1. **The production authentication bypass code paths still exist — and there are THREE of them.**
 >    They are closed by *configuration* in the deployed profile, not removed from the code. Story
->    10.18b closed them; removing them is **`ED-02`**'s, and `ED-02`'s **owner reads `TBD — not
->    assigned in sources`**. One of the three is a client-supplied `X-User-Id` header that is
->    checked **before** the flag `ED-02` names, so closing that flag alone would have closed
->    nothing. **Read §9 before deploying this anywhere.** See `ED-02` in
->    `docs/epics/EPIC-10-EXECUTION.yaml`.
+>    10.18b closed them; removing them is **`ED-02`**'s. One of the three is a client-supplied
+>    `X-User-Id` header that is checked **before** the flag `ED-02` names, so
+>    closing that flag alone would have closed nothing.
+>    **Read §9 before deploying this anywhere.** See `ED-02` in `docs/epics/EPIC-10-EXECUTION.yaml`.
+>    **Corrected 2026-09-17 (story 10.19 AC-8).** This line used to say `ED-02`'s owner reads
+>    `TBD — not assigned in sources`. **It no longer does.** By the user's decision of 2026-09-16,
+>    recorded by @pm in the manifest's `owner_decision` block, `ED-02` — identity **and** vault — is
+>    owned by the **PUT Core platform (the Core BFF)**, delivered **outside Epic 10 as a linked
+>    external ticket**. The manifest's own `traceability` field states that this owner is not
+>    traceable to the BRD or the architecture and rests solely on that decision.
+>    **`external_ticket` still reads `"to be linked — no ticket ID exists yet"`, and `status` is
+>    still `open`.** An owner is not a delivery: item 3 below is unchanged.
 > 2. **The vault is still a stub.** `SecretsService` returns `REDACTED`/plaintext. Also `ED-02`.
 > 3. **No credentialed pilot may run until `ED-02` has linked completed tickets.** That is `ED-02`'s
->    own `gate_note`, not this document's opinion. @po has additionally ruled that **story 10.19 may
->    not be drafted while `ED-02`'s owner reads TBD.**
+>    own `gate_note`, not this document's opinion. **Unchanged, and this is the item that matters.**
+>    *(The second half of this line — @po's ruling that story 10.19 may not be **drafted** while
+>    `ED-02`'s owner read TBD — is **spent**, corrected 2026-09-17 by story 10.19's own audit. That
+>    drafting gate was lifted on 2026-09-16 when the owner was assigned; 10.19 is drafted and
+>    validated GO 8/10. The **pilot** gate in the first half of this line is untouched by that.)*
 > 4. **Cookie-authenticated mutations have no CSRF control** (§10), and **the chart's
 >    `configOverrides` mechanism has never reached a process** (§11). Both are recorded findings
 >    with named owners, neither is fixed here, and neither is this story's to fix.
@@ -33,9 +45,16 @@
 >    idle timeout, not the cookie route in federated mode, not cross-replica reconnect. `ED-06` /
 >    **SPK-02**, OPEN.
 >
-> The escalation path, because @po could not name an owner and said so: **@pm** raises `ED-02` to
-> Checks-squad engineering management through BRD §8's launch-exit/on-call row, with **Security &
-> Compliance** (BRD §11) as the accepting party.
+> The escalation path this document was written with — **@pm** raises `ED-02` to Checks-squad
+> engineering management through BRD §8's launch-exit/on-call row, with **Security & Compliance**
+> (BRD §11) as the accepting party — **was overtaken by the user's direct assignment of 2026-09-16**
+> and is recorded here as history rather than as the next step. The next step is the external
+> ticket, which does not exist yet.
+>
+> **Everything open in this deployment is also in one consolidated place:**
+> [`docs/qa/staging-acceptance-register.md`](../qa/staging-acceptance-register.md). If that register
+> and this runbook ever disagree, one of them is wrong and both owners should be told; the register
+> carries the guard that catches it drifting from the manifest, and this runbook does not.
 
 ---
 
@@ -289,6 +308,10 @@ move the other.
 mistake indistinguishable from an engaged kill switch, and an operator needs to be able to tell an
 outage from a decision.
 
+**This switch is also step (a) of a rollback — see [§12](#12-rollback--how-to-take-a-studio-release-back-out).**
+Engaging it *before* `helm rollback` is what stops a rollback from tearing down runner pods that are
+mid-session and orphaning their recordings.
+
 ## 7. SSE — the streaming route, and what a disconnect does *not* mean
 
 *Implements architecture §5.5 and the [SSE viability note](../architecture/studio-sse-viability.md).
@@ -339,6 +362,29 @@ the value you are overriding is the one keeping idle streams alive.
 **No credential ever goes in the URL.** `EventSource` cannot attach a header, and the tempting fix
 is a token query parameter. URLs reach proxy logs, browser history and referrer headers. The route
 takes none, and the chart asserts none is rendered anywhere.
+
+### 7.1 The video route's refusals — what each one means to an operator
+
+*Added by story 10.19's audit (AC-8a), 2026-09-17, because story 10.31 landed this surface after
+this runbook was assembled and edits no runbook of its own. ADR-002 §24 and §25; verified in
+`docs/specs/studio/openapi.yaml` on this tree.*
+
+`GET /api/v1/studio/executions/{id}/video` now **declares** three refusals, and the difference
+between them is the difference between a user problem, an authorization problem and **your**
+problem:
+
+| Status | Meaning | What an operator does |
+|---|---|---|
+| `401` | No usable session. The body is `PlatformErrorResponse` via the shared `SessionUnauthorized` response — **`error` is an object here**, not the string `ErrorResponse` carries. | Nothing. The browser needs a session. |
+| `403 STUDIO_FORBIDDEN` | The caller may not read this execution — **including when the execution does not exist**, exactly as `getExecution` behaves. No resource detail is disclosed, and **this route never answers `404`**. | Nothing, and **do not read a `403` as "the video is missing"**. It is existence-preserving by design. |
+| `503 VIDEO_STORE_UNAVAILABLE` | *"The evidence store could not be reached; the recording's disposition is unknown."* | **This one is yours.** It is not a missing recording and not an expired one — it is the object store being unreachable from the API. Check the API's read-only store credentials (§3, two principals) and the store itself before telling anyone their evidence is gone. |
+
+`410` (logically expired) and `416` (unsatisfiable Range) are the other two declared refusals and
+are ordinary. **The §7 rule above applies to all of them: never fall back around a `401`/`403`** —
+an auth failure on the stream or on the media route is an auth failure, not a transport fault.
+
+**Still unproven through a real proxy, like the rest of §7.** None of these has been observed
+through the real ingress with an ambient session. That is SPK-02 question 6/7 (`ED-06`, OPEN).
 
 ## 8. Manifest recovery
 
@@ -401,12 +447,21 @@ default somebody may change.
    services."*
 2. **The vault is still a stub.** `SecretsService` returns `REDACTED`/plaintext and secret-use
    authorization runs against a fake provider. Also `ED-02`.
-3. **`ED-02`'s owner reads `TBD — not assigned in sources`.** @po could not name one and said so.
-   The escalation path: **@pm** raises it to Checks-squad engineering management through BRD §8's
-   launch-exit/on-call row, with **Security & Compliance** (BRD §11) as the accepting party.
+3. **`ED-02` has an owner now, and still has no ticket.** *(Corrected 2026-09-17 by story 10.19's
+   AC-8 audit. This item used to read "`ED-02`'s owner reads `TBD — not assigned in sources`. @po
+   could not name one and said so", and named an escalation path — **@pm** to Checks-squad
+   engineering management through BRD §8's launch-exit/on-call row, with **Security & Compliance**
+   (BRD §11) accepting. That escalation was overtaken.)* The owner, assigned directly by the user on
+   2026-09-16 and recorded by @pm in the manifest's `owner_decision` block, is the **PUT Core
+   platform (the Core BFF)**, for identity **and** vault, delivered outside Epic 10. The manifest's
+   own `traceability` field states the assignment is not traceable to the BRD or the architecture.
+   **`external_ticket` reads `"to be linked — no ticket ID exists yet"` and `status` reads `open`.**
+   Item 4 is unaffected: an owner is not a delivery.
 4. **No credentialed pilot may run until `ED-02` has linked completed tickets.** That is `ED-02`'s
-   own `gate_note`, not this document's opinion. @po has additionally ruled that **story 10.19 may
-   not be drafted while `ED-02`'s owner reads TBD**.
+   own `gate_note`, not this document's opinion, and it is **unchanged**. *(The second half of this
+   item — @po's ruling that story 10.19 may not be **drafted** while `ED-02`'s owner read TBD — is
+   spent, corrected 2026-09-17. That drafting gate lifted on 2026-09-16 with the assignment above;
+   10.19 is drafted and validated GO 8/10. The pilot gate is untouched by that.)*
 
 **An operator may NOT** set any of the three to `true` in a staging or production values file
 without Security's explicit acceptance. Each one hands an unauthenticated caller an administrator.
@@ -421,6 +476,32 @@ hardcoded `return true` that trusted *everything* in every profile. It is record
 fixed because changing the built-in default profile affects every developer workflow in the
 repository and is not a Studio story's to change. **If you ever run this image without
 `SPRING_PROFILES_ACTIVE`, you are running with header identity trusted.**
+
+### 9.1 What story 10.30 closed — and what it did not
+
+*Added by story 10.19's audit (AC-8a), 2026-09-17. Story 10.30 merged at `72e95cbbd` after this
+runbook was assembled and edits no runbook of its own. ADR-002 §27; verified in
+`docs/specs/studio/openapi.yaml` on this tree.*
+
+**Until 10.30, `POST /tests`, `PUT /tests/{id}` and `DELETE /tests/{id}` had no CSI write
+authorization at all** (`O-18`, raised by @architect while ruling `O-10`). @qa demonstrated it
+before it was fixed: a viewer, a contributor and a stranger each got `200`/`204` on another CSI's
+draft **and the database rows changed**; a `POST` succeeded on a view-only CSI. It is fixed —
+`requireWrite` on create, save and delete, through the visible read.
+
+**The ruled status, which an operator will see in logs and should not misread:** an id that is
+unknown, a draft that is soft-deleted, a draft that is quarantined, and a draft on a CSI the caller
+may not use **all answer the same `403 STUDIO_FORBIDDEN`**, with no resource detail, on
+`GET`/`PUT`/`DELETE /tests/{id}`. Never `400`, never `404`. The four cases are deliberately
+indistinguishable from outside. **A support ticket saying "I get 403 on a test I am sure exists" is
+not evidence that it exists.**
+
+**What this does NOT close.** These checks run against whatever identity
+`BffSessionAuthenticationFilter` resolved — which, with any of the three bypasses above open, is
+whatever the caller wrote in a header. 10.30's own tests run with the `identity-headers` bypass open,
+because that is how the suite injects identities. **An authorization check is only as trustworthy as
+the identity beneath it, and that identity is still `ED-02`'s.** Proving this boundary against a
+real, non-header-injected identity is story 10.19 AC-7, **blocked**.
 
 **A separate, profile-scoped bypass also exists and is not one of the three.**
 `LocalDevAuthFilter` injects a fixed developer identity, is annotated `@Profile("local")` and is
@@ -483,3 +564,136 @@ configuration-architecture choice, not a rename.
 `STUDIO_EXECUTION_ENABLED`, `STUDIO_DISPATCHER_ENABLED` and every `STUDIO_RUNNER_*` key render as
 container `env` entries with conforming names, and that is asserted separately so this escalation
 cannot be read as covering for them.
+
+---
+
+## 12. Rollback — how to take a Studio release back out
+
+*Added by story **10.19** (AC-9), 2026-09-17. **This epic had never written one down**: before this
+section, the string "rollback" did not occur in this runbook, in `docs/architecture/studio-execution.md`,
+in `docs/brd/checks-ui-studio.brd.md` or in `docs/epics/EPIC-10-EXECUTION.yaml` — verified, not
+assumed. The retired epic's own §10.19 acceptance bullet 7 required one.*
+
+**Read this before the first step: a rollback here is not symmetric.** The chart goes back; the
+database does not, and the evidence does not. Sub-parts (c) and (d) exist because an operator who
+assumes symmetry will draw wrong conclusions about what they are looking at afterwards.
+
+**Nothing in this section has been exercised against a deployed cluster.** There is no cluster to
+exercise it against — `ED-05` and `ED-06` are open. Each step below is derived from a mechanism that
+is verified in this repository (the kill switch's behaviour, the chart's object set, Flyway's
+forward-only configuration, the evidence key layout), and the step order is derived from those
+mechanisms. **It is a written procedure, not a rehearsed one**, and the first person to run it should
+say so in the incident record.
+
+<!-- ROLLBACK-A-KILL-SWITCH -->
+### (a) Engage the kill switch first — always, before anything else
+
+`studioExecution.enabled: false` → `STUDIO_EXECUTION_ENABLED` → `studio.execution.enabled`. See §6
+for what it does and how it was proven.
+
+**Why it is step one and not step three.** The kill switch rejects new executions with
+`503 DISPATCH_DISABLED` and closes queued undispatched work explicitly, while **already-admitted runs
+finish and report**. Rolling the chart back without engaging it first tears down runner pods that are
+mid-session: a Chromium process is killed with its recording incomplete, its callback never arrives,
+and the execution is reconciled by a reaper (§5) instead of by its own result. That is an orphaned
+run and a lost recording for every test in flight, and it is entirely avoidable by spending the
+admitted runs' remaining time first.
+
+**Wait for admitted work to drain before step (b).** §4 is the drain contract; §5 tells you how to
+read the ledger while you wait. Reads and recovery stay up throughout — `GET
+/api/v1/studio/executions/{id}` is unaffected by the switch — so users keep their history and their
+existing evidence while Studio stops accepting new work.
+
+**Do not turn the dispatcher off as well.** §6 is explicit: the two keys are separate on purpose, and
+turning the dispatcher off leaves the queued work the kill switch promised to close sitting in the
+ledger until its deadline.
+
+<!-- ROLLBACK-B-HELM-ROLLBACK -->
+### (b) `helm rollback` to the prior chart revision — the mechanism, not a new tool
+
+```
+helm history  <release> -n <namespace>     # identify the revision to return to
+helm rollback <release> <revision> -n <namespace> --wait
+```
+
+This is Helm's own revision mechanism and nothing is being invented for Studio. One release carries
+the whole surface, so one `helm rollback` returns all of it together: the API and worker
+`Deployment`s and their `ConfigMap`s, the runner `Deployment` and `Service`, the API `Ingress` **and
+the separate Studio streaming `Ingress`** (`…-api-studio-stream`, the one carrying buffering-off and
+the derived `proxy-read-timeout` — §7), the runner `NetworkPolicy`, the `ServiceAccount`, the `HPA`
+and the `PDB`. Templates, for an operator checking what is in scope:
+`helm-chart/put-checks/templates/{deployment,configmap,service,ingress,studio-sse-ingress,
+studio-runner-deployment,studio-runner-service,studio-runner-networkpolicy,serviceaccount,hpa,pdb}.yaml`.
+
+**Two things to re-check after the rollback completes, because they are the ones that fail quietly:**
+
+1. **`SPRING_PROFILES_ACTIVE` is still rendered explicitly** on both the API and the worker. §9's
+   recorded residual: a process started with no profile at all falls back to the built-in `local`
+   default, and `local` trusts identity headers. All four value sets render it unconditionally, so
+   this should hold — confirm it rather than assume it.
+2. **All three `CHECKS_BYPASS_*` keys still render `false`.** §9 again. The deployed profile is meant
+   to be auditable from the manifest rather than from a default somebody may change, and a rollback
+   moves you to a manifest you have not read today.
+
+**A rollback does not undo `configOverrides`.** It never applied anything in the first place — §11.
+
+<!-- ROLLBACK-C-FORWARD-ONLY-MIGRATIONS -->
+### (c) The database does **not** roll back — every Studio schema change is forward-only
+
+Architecture §8.1: *"Add forward-only migrations."* Studio's own migrations are `V12` through `V17`
+(`backend/src/main/resources/db/migration/`), and there is no down-migration for any of them because
+Flyway is not configured to have one and the architecture does not ask for one.
+
+**Say this in plain words so nobody has to infer it: a chart rollback moves the application
+backwards and leaves the schema where it is.** The consequences an operator should expect:
+
+- **Confirmed executions, drafts and revisions created by the rolled-back version remain in the
+  database and remain readable.** They do not disappear, and they must not be deleted to "match" the
+  older application. Execution history carries an immutable revision reference (§8.1); deleting rows
+  to tidy a rollback destroys evidence somebody may be relying on.
+- **The older application must tolerate the newer schema.** Forward-only migrations are additive in
+  this repository, so this normally holds. It is still the thing to check first if the rolled-back
+  pods will not start: read the startup logs for a mapping or constraint failure before suspecting
+  the chart.
+- **If a specific migration must actually be undone**, that is a **new forward migration**, written,
+  reviewed and shipped through the normal cycle — not a hand-edited database and not a Flyway
+  `undo`. There is no emergency exception to this; a hand-repaired schema is a schema nobody can
+  reason about afterwards.
+
+<!-- ROLLBACK-D-EVIDENCE-UNAFFECTED -->
+### (d) Stored video and manifests are unaffected by a chart rollback
+
+Evidence lives in the object store under `studio/{csiId}/{testId}/{executionId}/` — **addressed by
+key, not by chart revision**. Nothing in a `helm rollback` reaches it, deletes it or rewrites it.
+Recordings and result manifests written by the rolled-back version stay exactly where they were and
+stay readable through the video route, subject to the same authorization as before.
+
+**Logical expiry keeps running regardless.** §3: the API enforces expiry at `videoExpiresAt` from
+`studio.execution.evidence-retention`, and the object store's lifecycle window renders from the same
+values key. The **30-day** retention window is unaffected by a rollback — it is stamped per
+execution, it does not pause, and it does not restart. An execution recorded shortly before the
+rollback expires on its original schedule.
+
+**Two cautions that follow from this.**
+
+- **Rolling the chart back to a revision with a different `evidence-retention` value changes what the
+  API serves**, because logical expiry is evaluated from the configured window. Evidence does not
+  vanish, but it may stop being served earlier or later than the person who ordered the rollback
+  expects. Check the value in the revision you are returning to.
+- **Physical deletion timing is still unmeasured.** §3 and `SPK-03` (`ED-03`, OPEN): this runbook
+  makes no claim of exact-time physical deletion, and a rollback changes nothing about that. If asked
+  "is the video gone", the true answer remains *the API stops serving it at the window; when the
+  bytes are removed has not been measured.*
+
+<!-- ROLLBACK-END -->
+
+### After the rollback
+
+Leave the kill switch engaged until you have decided Studio should accept work again, then turn it
+back on deliberately. §6: the switch defaults to ON precisely so that an operator can tell an outage
+from a decision — and re-enabling it is a decision, not cleanup.
+
+Record what happened in the open-items register
+([`docs/qa/staging-acceptance-register.md`](../qa/staging-acceptance-register.md)) if the rollback
+exposed something this runbook does not describe. That register is the handover document; this
+runbook is the operating one.
