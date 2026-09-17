@@ -337,6 +337,9 @@ An architect amending the contract still never edits a story's Title, Acceptance
 | 2026-09-12 (landed 2026-09-16) | **LANDED** by story 10.11c at `4157d7f62`. `TestDto` gains nullable `currentCandidateArtifactHash` and nullable `currentCandidateArtifact` (the frozen `artifact.schema.json` shape), both nulled in the `GET /tests` list projection on §16.5's precedent — closing the gap where `ConfirmCompileRequest` requires a value that **no** `tests`-tagged `2xx` response returns (§21). Closes story 10.10's **AC-15** escalation and unblocks its AC-11(b) and AC-16(b), both of which landed in the same story by @po's O-17 routing. Candidate **B** (a revision read route) rejected on **correctness**, not on cost. **Nothing else moved:** no route, no status, no `required` list, no enum, no marker, neither copy of `artifact.schema.json`; `provenance` and `artifactSchemaVersion` deliberately not added (§21.8). One declaration was added beyond the two property names and is reported rather than buried: the hash carries `minLength`/`maxLength` 64, mirroring `ConfirmCompileRequest.artifactHash`, because a read declaration looser than the write declaration of the identical value would let an example validate on one side and fail on the other — asserted in `studioContract.test.ts` | C | Ruled by @architect, this amendment; **landed by story 10.11c**, which carries the backend producer in the same commit — @po widened the scope rather than splitting the producer out (§21.9) | **MEASURED by @dev, story 10.11c**, with the **final** test files, by restoring the pre-edit document (`310d3c984b77104898440cae450795cdd56c11ef926f75209fb6d4198dcc0cf7`) and re-running. Both predictions reproduce. **`studioEscalation.test.ts` 2/3 → 3/3 with the file byte-unchanged** — verified before it was touched, and only its comment changed afterwards; the assertion region hashes `a3e77163…` before and after. **`StudioContractTest` 13/14 → 14/14**: the one red before is `theFrozenSchemasAndTheJavaTypesShareTheSameFieldNames`, which is set equality and is why this edit cannot be document-only — the count is 14 rather than the 12 of the §20 row because this story adds one test (`noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties`, AC-30's in-test document invariants). `ArtifactSchemaDriftTest` **3/3 before and after**. New `CandidateArtifactProjectionIT` **4/4 before and after** — it drives the producer against a real PostgreSQL and reads the persisted row, so the document does not enter it. `CompileRouteContractDivergenceTest` **8/9 before and after**: the one red is **pre-existing and not this story's** — `:212` still asserts `x-not-yet-implemented: true` on `getExecutionVideo`, which story 10.15 removed, and it is red against the pre-edit document too. Runner `test/contract.test.ts` **15/15 before and after**; `confinement.test.ts` **17/18 before → 18/18 after** the `BASE_SHA256` re-anchor to `51850b016cd8a697899a944eab12ddce5456967beecf4f3e011720498bc02efa` (`FOC-06` **step 3 of 3**, the last of the wave; the pin was verified green on arrival at 10.15's digest by running the file before anything was touched). Full runner suite **941 passed / 29 skipped / 49 files, unchanged**. Backend `com.citi.put.checks.studio.*` measured on both sides in separate worktrees: baseline `f868c31df` **90 files / 687 tests / 7 skipped / 6 failures in 4 classes**, after **91 / 692 / 7 / 6 in the same 4 classes** — no new failure. Falsification: dropping one component from `UITestDto` reddens the set-equality test alone, 13 siblings green; a producer preferring the confirmed revision when there is one reddens exactly one of the new IT's four cases; a list projection that passes the candidate through reddens exactly one other; one further byte of the document reddens the pin alone, 17 siblings green; a status code added to one operation reddens AC-30's inventory alone. All restored byte-identically, hash-verified |
 | 2026-09-12 (landed 2026-09-15) | **LANDED** by story 10.18a at `dc0c30089`. `RunJob.resolvedVars` gains the scrubbing clause in its own right, and `resolvedSecrets`'s *"additionally scrubbed"* is corrected: both are scrubbed with their tested encoded variants, and what is additional to a secret is vault-use authorization, not redaction (§22). **The document was the divergent side, not the code** — architecture §9.2 says *"Runner scrubs known values"*, and `knownValuesOf` has always returned both maps | B | Ruled by @architect, this amendment; **landed by story 10.18** in the same PR as the O-14 row above, so the pin moves once for both (§23.2) | Description text only; no schema shape, no `required` list and no enum changes. **MEASURED by @dev, story 10.18a, at `dc0c30089`**, in the same PR as the O-14 row above and against the same pin move: `test/contract.test.ts` 14/14, `StudioContractTest` 12/12, `ArtifactSchemaDriftTest` 3/3, `CompileRouteContractDivergenceTest` 9/9, full runner suite 918 passed / 10 skipped — **all before and after, every suite unchanged as predicted**. A prediction of *nothing changed* is satisfied by not looking, which is why it was measured rather than repeated. Recorded here rather than left to prose because §12's third rule cuts the other way too — a *strengthening* is still a meaning change on a closed body |
 | 2026-09-16 | **LANDED** by story 10.15. Four edits, all on `getExecutionVideo` and on nothing else. **Three Class A content declarations:** the `206` gains declared `video/webm` content with its `Content-Range` and `Content-Length` headers; the `404` gains `application/json` `ErrorResponse` content with a `noEvidence` example — *a response with a description and no content* is verbatim §12's own example of a Class A defect, and this was that response; the `416` gains the same content with an `unsatisfiable` example plus its `Content-Range` header, which RFC 9110 requires in the `bytes` `*` `/S` form. **And the marker:** `x-not-yet-implemented` removed — **it was the last one in the document**, exactly as §13's row of 2026-09-11 predicted (*"`pendingOperations()` is `GET /executions/{id}/video` alone"*) — with `x-implemented-by` **corrected from `'10.16'` to `'10.15'`**. That correction is **reported as a finding, not laundered**: `'10.16'` is the *frontend* playback story, while the epic manifest assigns *"Authorized Range video/download endpoint"* to 10.15 and *"Evidence state, playback and step seek"* (Frontend) to 10.16, and the retired epic's index table agrees. A vendor extension naming a story that will never implement the route is **a defect nothing could ever have satisfied**, which is §12's own Class A language. **No status was added or removed** — the response set is still exactly `{200, 206, 404, 410, 416}`; declaring the missing `401`/`403` and a status for an unreachable store are Class C and are escalated as ESC-1/ESC-2, left red rather than taken | A — three content-less responses on a public operation, plus a vendor-extension value that is wrong rather than stale. The `x-implemented-by` correction was **ruled Class A by @po at wave-6 validation**: it is none of §12 Class C's categories (not a route, a security scheme, a tag, `servers` or a status-code semantic), no client behaviour depends on it, and no conforming implementation is affected by its value | @dev, story 10.15 | **MEASURED by @dev on this branch**, with the final test files, by restoring the pre-edit document (`d1a987663b25d7240fc460f923289aaf22a07145df7d6913114f9f3c1d627c18`) and re-running. **Before: `ExecutionVideoContractTest` 6/15, `StudioContractTest` 9/13, `ExecutionVideoContractEscalationTest` 0/2. After: 15/15, 13/13, 0/2** — the escalation test is red before and after, on purpose, and goes green with no change to it when ESC-1 and ESC-2 are ruled. `StudioContractTest` gained one test (`theVideoRouteIsShippedAndTheMarkerCameOffForThatOperationOnly`) and two existing assertions were **amended, not deleted**: `pendingOperations()` is now `isEmpty()`, and the video-route marker assertion is inverted from `isEqualTo(TRUE)` to `isNull()`. Runner `confinement.test.ts` **18/18** after the `BASE_SHA256` re-anchor to `310d3c984b77104898440cae450795cdd56c11ef926f75209fb6d4198dcc0cf7` (`FOC-06` **step 2 of 3**; the pin was verified green on arrival at 10.18a's digest before anything was touched, so nothing unowned is folded in). Falsification: a marker restored on `getExecution` reddens six assertions across the two contract tests; `x-implemented-by: '99.9'` reddens both the instance guard and the both-ways class guard; one further byte of the document reddens the pin alone, 17 siblings staying green. All restored byte-identically, hash-verified |
+| 2026-09-17 | **AUTHORIZED, NOT YET LANDED** (§19). `getExecutionVideo` declares **`401`** (`$ref` `SessionUnauthorized`, §25), **`403`** (`$ref` `Forbidden`) and **`503`** (`ErrorResponse`, `storeUnavailable` example, code `VIDEO_STORE_UNAVAILABLE`), and its description states the refusal order. Closes **ESC-1** and **ESC-2** (story 10.15 AC-22). Exact text in §24.6. Nothing else on the operation moves | C | Ruled by @architect, §24. **Owner: to be named by @po** (§28.3); lands with §25's row, one pin move | **SIMULATED, not landed** — on a scratch copy of `backend/` and `docs/` at `f1d7968df`, never on the tree (§28.4). Real tree before: `ExecutionVideoContractEscalationTest` **0/2**, `ExecutionVideoContractTest` **15/15**, `StudioContractTest` **14/14**. Copy after: **2/2** with no change to the test, **14/15**, **13/14**. The two new reds are the deliberate hand-kept status copies, which the owner updates in the same PR: `theVideoOperationsStatusSetIsUnchanged` and `noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties`. `CompileRouteContractDivergenceTest` 9/9 before and after. Frontend and runner **not run** (`node_modules` absent). By reading: `confinement.test.ts` pin goes red, and two frontend assertions go red (§24.5) |
+| 2026-09-17 | **AUTHORIZED, NOT YET LANDED** (§19). A new response component, **`SessionUnauthorized`**, with body **`PlatformErrorResponse`** (new schema, `error: {code, message, traceId?}`), a `sessionRequired` example and a description saying the two envelopes differ. **The eleven public operations that declare `401` point at it.** The two internal callbacks keep `Unauthorized`/`ErrorResponse`, which matches their producer (`ServiceIdentityAuthenticationFilter`, flat). **The status sets do not change. The code does not change: the document catches up with what the producers send.** Exact text in §25.4 | C — the `401` body on every public operation | Ruled by @architect, §25. **Owner: the same PR as the row above** | Simulated together with the row above. It adds no red of its own (the two reds are both status-set copies). By reading, no test validates a `401` body against the document |
+| 2026-09-17 | **AUTHORIZED, NOT YET LANDED** (§19). Prose only on `getTest`, `updateTest` and `deleteTest`. An unknown, soft-deleted or quarantined draft, and a draft the caller may not read (GET) or write (PUT/DELETE), all answer **`403 STUDIO_FORBIDDEN`**. `updateTest`'s `409` description loses its "answers `400`" sentence. Closes **O-10**. Exact text in §27.6. **This document edit must ship with its producer**: PUT and DELETE have no CSI write authorization today (O-18) | C — status-code semantics on three public operations. No status is added or removed | Ruled by @architect, §27. **Owner: the story @po names for O-18**, in the same PR as the authorization fix | Simulated on the same copy with the rows above: **no additional red** in any of the four backend classes. The behaviour tests §27.5 lists are new and were **not written or run** by this amendment |
 
 The two `@dev, story 10.7` rows above are one story's amendment, recorded against §12's four
 requirements (this amendment's own record is in §15.10):
@@ -2001,3 +2004,624 @@ terms, and its AC-11(b)/AC-16(b) routing is recorded as O-17.
 It edits no `openapi.yaml`, no `artifact.schema.json`, no backend Java, no frontend source and no
 `studio-runner/` source. Under §19 that is the point: the three authorized edits belong to the two
 named stories, whose diffs are responsible for them and whose gates run over them.
+
+---
+
+# Amendment, 2026-09-17 (seventh) — the video route's refusals, the envelope behind them, a seek margin, and O-10
+
+Added on `arch/epic10-rulings`, branched from `epic/EPIC-10` at `f1d7968df`. Three questions were
+in the queue. Wave 7's run log calls them *"ESC-1 + DEF-09(b) as one question; F-5; O-10"*. They
+are answered together because two of them touch `openapi.yaml`, and a separate program has an
+uncommitted edit to the same file (§28).
+
+**This amendment edits no contract.** Under §19 it rules on the edits, marks them `AUTHORIZED, NOT
+YET LANDED` in §13, and leaves the diffs to the owners it names. One thing surfaced while
+answering O-10 that was not asked: a missing authorization check on three write routes. It is
+recorded as O-18 (§27.3). It is the most urgent item in this amendment.
+
+## 24. INT-11 — `getExecutionVideo`'s refusal surface (closes ESC-1 and ESC-2)
+
+### 24.1 The facts, read at `f1d7968df`
+
+| Fact | Evidence |
+|---|---|
+| The operation declares `200`, `206`, `404`, `410`, `416`. `getExecution` and `streamExecution` both declare `401` and `403`, and both use `$ref` to `components.responses.Unauthorized` and `Forbidden`. | `openapi.yaml:643-791` |
+| The route's first action is `studioService.findExecutionById(executionId, auth)`, the snapshot route's own authorized read. An unknown id and a CSI the caller may not read both throw `StudioAccessDeniedException`, which becomes `403 {"error":"STUDIO_FORBIDDEN","message":"You do not have access to this Studio resource"}`. | `ExecutionVideoService.java:95`, `StudioService.java` `findExecutionById(UUID, Authentication)`, `ChecksExceptionHandler.java:67-83` |
+| `404`, `410`, `416` and the unreachable-store answer are all raised *after* that read. | `ExecutionVideoService.read` |
+| An unreachable store is answered `503` with `VIDEO_STORE_UNAVAILABLE` and a message that names no bucket, endpoint or key. The cause is logged and never sent. | `ExecutionVideoException.storeUnavailable()`, `ExecutionVideoService.unreachable` |
+| A caller with no identity never reaches the handler. `BffSessionAuthenticationFilter` answers `401` for every `/api/**` path, with a body whose `error` is an object (§25). | `BffSessionAuthenticationFilter.java:75,101,248-256` |
+| `ExecutionVideoEvidenceIT.anUnreachableStoreAndAnAbsentObjectAreDifferentAnswers` checks only that the answer is *not* `404` and has a different code. It does not name `503`, because the status was never ruled. | `ExecutionVideoEvidenceIT.java:541-563` |
+
+### 24.2 Ruling
+
+**`getExecutionVideo` declares `401`, `403` and `503`.** `401` and `403` use `$ref` to the same
+components as the sibling routes: `SessionUnauthorized` (after §25's edit, which the sibling
+routes get in the same PR) and `Forbidden`. `503` uses `ErrorResponse`, with one example carrying
+`VIDEO_STORE_UNAVAILABLE`. The operation description states the refusal order: authentication,
+then authorization, then evidence state, then the store. It also says that `404`, `410`, `416` and
+`503` can only happen after authorization.
+
+This declares behaviour that is already shipped and tested. It chooses nothing new, apart from the
+`503` that ESC-2 asked for.
+
+### 24.3 Why `401`/`403` by `$ref`, and why there is no `404` for "not yours"
+
+Architecture §9.1 names videos and downloads among the resources readers may view for their CSI
+and nobody else may. §6.3 says the route "checks the execution's immutable CSI". Story 10.7 AC-4a
+fixed the wire form for every per-id Studio read: one `403` for "forbidden" and "absent" alike.
+The route already does exactly this, because it reuses the snapshot route's read. So the
+declaration has to be the siblings' own, by `$ref`. A route-local copy would drift on the first
+edit to either.
+
+`404` stays declared, and the description now says what it means: *the caller may read this
+execution, and it has nothing to serve*. That is safe because it is only reachable after
+authorization. Using `404` for an unknown id as well would be the existence oracle that AC-4a
+exists to prevent. The MSW mock currently makes exactly that choice (§24.5), because until now
+`404` was the only declared refusal.
+
+### 24.4 Why `503` for an unreachable store
+
+| Option | Verdict |
+|---|---|
+| **`503 Service Unavailable`** | **Ruled.** The condition is transient and belongs to the server: this service cannot serve the resource right now, and a later request may succeed. The document already uses `503` for exactly that on `executeTest` and on two runner routes. The code has shipped it since 10.15. |
+| `404` | Rejected. 10.15 AC-17 already says why: it states a fact about the run (*no evidence*) that the API has not observed. A client would show "no recording" for a recording that may exist. |
+| `500` | Rejected. It is unclassified. A client cannot tell "try again" from "this is broken", and the difference is the whole point of ESC-2. |
+| `502` / `504` | Rejected. `502` means the upstream answered with something invalid, which is not what "could not be reached" means. `504` covers only the timeout case. Splitting the two would put store internals on a public route. One status covers every unreachable-store cause, and the log keeps the detail. |
+| `200` with an empty body, or a `Retry-After` made mandatory | Rejected. The first is a false success. The second is invented, since the code sends no `Retry-After` and no source requires one. A later story may add the header, but that would be a new declaration, not something implied here. |
+
+The `503` description also says that a `503` written by the platform authentication layer before
+authorization has that layer's envelope, not `ErrorResponse` (§25, O-19). So one status on this
+route can carry two bodies depending on where it was written. The description says so rather than
+leaving clients to find out.
+
+### 24.5 What changes for story 10.16a
+
+**Its production code does not change.** AC-11 (never read, branch on or render this route's
+body) is still right, and after §25 it matters more: whatever parses the `401` body gets a
+different shape from every other refusal. A `<video>` element and a download navigation expose
+neither the status nor the body. AC-12's single generic message is still the only honest UI.
+
+**Its mock and two of its tests do change. Both break by design, and both are false reds in a
+merged story that did nothing wrong** (the shape behind `FOC-04`/`FOC-05`):
+
+1. `frontend/src/services/mocks/studio/handlers.ts` `serveExecutionVideo` answers `404` for an
+   unknown id and for an execution on an unreadable CSI. Under this ruling both should be
+   `403 {"error":"STUDIO_FORBIDDEN","message":"You do not have access to this Studio resource"}`,
+   matching the backend byte for byte, and the doc comment saying the mock "serves no `401` and no
+   `403`" gets rewritten. The mock serves **no `401`**: the envelope question (§25) is not
+   settled for Epic 10, and MSW has no notion of an absent session. It needs **no `503`** either,
+   since nothing in the frontend can observe it.
+2. `studioContract.test.ts`, *"every status the route produces over the whole fixture set is
+   declared"*: `expect(declared).not.toContain('401')` and `…('403')` go red when the document
+   changes. After the mock change, the literal `['200','206','404','410','416']` becomes
+   `['200','206','403','404','410','416']`. The file's own comment already expected this (*"a
+   ruling on ESC-1 that declares `401`/`403` changes this set"*). It changes the *declared* set
+   without an edit. The two negative assertions still need removing by hand.
+3. `studioVideoHandler.test.ts:122-125`, *"serves no 401 or 403: another CSI's execution is the
+   declared 404"*, goes red after the mock change. It becomes *"another CSI's execution is the
+   declared 403, never its bytes"*.
+
+Ajv validation of the mock's refusal bodies against `ErrorResponse` stays as it is, and the new
+`403` body passes it.
+
+### 24.6 The authorized edit, exact text
+
+In `paths./executions/{id}/video.get.description`, after the existing two lines:
+
+```yaml
+        **Refusal order (ADR-002 §24).** Authentication, then authorization, then evidence state,
+        then the store. `401` and `403` are decided before anything about the recording is read,
+        so an unknown execution id and an execution on a CSI the caller may not read both answer
+        `403 STUDIO_FORBIDDEN`, exactly as `getExecution` does. `404`, `410`, `416` and `503` are
+        reachable only after authorization and disclose nothing to a caller who could not read
+        the snapshot.
+
+        Branch on the status, never on the body. A `<video>` element and a download navigation
+        expose neither, and the `401` body is the platform envelope, not `ErrorResponse`
+        (ADR-002 §25).
+```
+
+Between `'206'` and `'404'`:
+
+```yaml
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+```
+
+After `'416'`:
+
+```yaml
+        '503':
+          description: |
+            The evidence store could not be reached, so the recording's disposition is unknown.
+            Deliberately not `404`, which would state a fact about the run that the API has not
+            observed. Transient: a later request may succeed. The body names nothing about the
+            store — no bucket, endpoint or key. A `503` written by the platform authentication
+            layer before authorization carries that layer's envelope instead (ADR-002 §25).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                storeUnavailable:
+                  value: { error: VIDEO_STORE_UNAVAILABLE, message: "The evidence store could not be reached; the recording's disposition is unknown" }
+```
+
+### 24.7 Tests: what flips, what the owner changes, what is new
+
+| Test | Effect | Owner's action |
+|---|---|---|
+| `ExecutionVideoContractEscalationTest` (both) | red → **green, test unchanged** (simulated) | Update the class Javadoc, which says "DELIBERATELY RED". Keeping it as a permanent conformance test is worthwhile; dropping `Escalation` from the name is optional housekeeping, as §15.8 item 1 said for its sibling. |
+| `ExecutionVideoContractTest.theVideoOperationsStatusSetIsUnchanged` | green → **red** (simulated) | A deliberate hand-kept copy. The owner updates the literal to `200, 206, 401, 403, 404, 410, 416, 503` and the reason text. |
+| `StudioContractTest.noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties` | green → **red** (simulated) | Same. The video row becomes `200,206,401,403,404,410,416,503`. The file itself says to update such entries "deliberately, in that story's PR". |
+| `confinement.test.ts` `BASE_SHA256` | green → **red** (by reading) | Re-anchor by re-reading `shasum -a 256` from the file. Never transcribe the digest (§20.7 item 3, and §28 for the ordering with 10.20). |
+| Frontend: the two assertions in §24.5 | green → **red** (by reading; not run) | As §24.5 says. |
+| `ExecutionVideoEvidenceIT.anUnreachableStoreAndAnAbsentObjectAreDifferentAnswers` | stays green | **Strengthen it:** now that the status is ruled, assert `503`, the code `VIDEO_STORE_UNAVAILABLE`, and that the body validates as `ErrorResponse`. Keep the not-`404` assertion next to them. |
+| **New**, `ExecutionVideoContractTest` | — | Check that `401` and `403` on the video route have the **same `$ref`** as on `getExecution`, by comparing the two, not against a literal. A route-local copy then fails. |
+| `ExecutionVideoAuthorizationIT` | unaffected | Its `401` row already expects the filter's envelope and normalises `traceId` (DEF-09(a)). |
+
+## 25. The `401` envelope is not the video route's problem — it is backend-wide
+
+### 25.1 The facts, read at `f1d7968df`
+
+| Fact | Evidence |
+|---|---|
+| `BffSessionAuthenticationFilter` runs on **every** `/api/**` request. It writes `401 {"error":{"code":"UNAUTHENTICATED","message":"Session required","traceId":"…"}}` and `503 {"error":{"code":"AUTH_TEMPORARILY_UNAVAILABLE",…}}` with `Retry-After: 5`. | `BffSessionAuthenticationFilter.java:75-106,248-270` |
+| `RateLimitFilter` (`429 RATE_LIMITED`) and `IdempotencyFilter` use the same nested shape. The idempotency body has no `traceId`. | `RateLimitFilter.java:152-154`, `IdempotencyFilter.java:197-198` |
+| `ChecksExceptionHandler` writes the **flat** shape `{"error":"<CODE>","message":"…"}` for every controller in the application, Studio and non-Studio. | `ChecksExceptionHandler.java` |
+| The backend specification says the nested shape is the error envelope, *"uniform across all endpoints"*. Story 1.5 AC-5 fixes the `401` bytes in that shape. | `docs/specs/backend/spec.md` §6.1 (`CON-API-03`); `docs/stories/1.5.story.md:44` |
+| The Studio contract (story 10.1) declares `components.responses.Unauthorized` with the flat `ErrorResponse`. **Thirteen** operations use it: the **eleven** public ones, plus the two internal callbacks. | `openapi.yaml:1292-1296`; `$ref`s at lines 141 … 721, 1006 and 1155 |
+| The internal callbacks' `401`/`403` come from a different filter, `ServiceIdentityAuthenticationFilter`, which writes the **flat** shape `{"error":"SERVICE_IDENTITY_REQUIRED","message":"A valid service identity is required"}`. So `Unauthorized` is **correct** for those two operations and wrong for the eleven public ones. | `ServiceIdentityAuthenticationFilter.java:94-101`; `StudioInternalSecurityConfig.java:93-106` |
+| Before story 10.18b closed the bypass, no `401` could be produced anywhere, so the declaration was never tested. The first real `401` is the one DEF-09(b) read. | run log, *DEF-08* and *DEF-09* |
+| The studio-inference program's uncommitted `inference.openapi.yaml` points its `401` at the same flat `ErrorResponse`. (Read-only, in `wt/epic`.) | `inference.openapi.yaml:40-45` |
+
+### 25.2 Ruling — backend-wide, and not decidable in this ADR
+
+**The divergence is not local to the route.** Every public Studio operation that declares `401`
+declares a body its only producer has never sent. The cause is not Studio code. The application
+has **two error envelopes by layer**: servlet filters write the nested one, which the backend spec
+calls the standard, and controller advice writes the flat one, which the frozen Studio contract
+declared. ESC-1 exposed it on one route only because that route was the first to be tested with
+no identity.
+
+**Which envelope wins is a backend-wide architecture decision, not an Epic 10 one.**
+Standardising on nested changes every Studio refusal body the MFE parses, plus every non-Studio
+controller's body. Standardising on flat changes a filter whose bytes story 1.5 fixed, and which
+the shell's `put:auth:unauthorized` path depends on. Either way the change reaches beyond the
+Studio contract and should not be made inside it.
+
+**Ownership:** the decision belongs to **@architect**, as its own record (**ADR-003 — API error
+envelope**). It needs **@pm**, who owns `docs/specs/backend/spec.md` and `CON-API-03`, and sign-off
+from the frontend consumer. **@pm and @po** place the implementation in a backlog outside Epic 10.
+It is recorded as **O-19** so it stays visible. It does not block Epic 10: no Studio client parses
+a `401` body (§25.3).
+
+### 25.3 What Epic 10 does meanwhile — make the document tell the truth
+
+**The public `401` declares the envelope its filter actually sends.** A new response component,
+`SessionUnauthorized`, carries a new schema, `PlatformErrorResponse`, and all eleven public
+operations point their `401` at it. `Unauthorized` itself is **not** changed, because its other
+two users, the internal callbacks, get exactly the flat body it declares. Changing the shared
+component would have fixed eleven declarations and broken two; that was this amendment's first
+draft, and the simulation in §28.4 was re-run after the correction. `ErrorResponse` stays for every
+Studio refusal. `SessionUnauthorized`'s description says in plain words that the two envelopes
+differ and that clients should branch on status.
+
+This is right whichever way ADR-003 goes. If nested wins, `PlatformErrorResponse` becomes the one
+schema. If flat wins, the filter changes and the eleven `$ref`s go back to `Unauthorized` in the
+same PR. Until then, the document stops stating something false. It costs one component and no
+behaviour change. By reading, no suite validates a `401` body against the document: the transport
+tests stub their own `401` bodies, and `apiClient`'s interceptor branches on
+`error.response?.status` (`apiClient.ts:69`). That the interceptor never parses the body is
+**inferred** from the lines read, not proven.
+
+Not done here: declaring the filter-written `429 RATE_LIMITED`, the `503
+AUTH_TEMPORARILY_UNAVAILABLE` and the idempotency errors on every operation that can emit them.
+That would add statuses to eleven operations mid-epic, for a layer ADR-003 is about to rule on.
+Recorded as part of **O-19**.
+
+### 25.4 The authorized edit, exact text
+
+In the public half of `paths` (above the *Internal surface* banner), replace each of the eleven
+`'401': { $ref: '#/components/responses/Unauthorized' }` with
+`'401': { $ref: '#/components/responses/SessionUnauthorized' }`. Leave the two under
+`/internal/studio/...` unchanged. Then add, directly after `components.responses.Unauthorized`,
+which also stays unchanged:
+
+```yaml
+    SessionUnauthorized:
+      description: |
+        No authenticated user session on a public route. Answered by the platform authentication
+        filter on every `/api/**` path before any Studio code runs, so the body is
+        `PlatformErrorResponse` and **not** `ErrorResponse`: `error` is an object here and a
+        string on every Studio refusal. Branch on the status. Unifying the two envelopes is
+        outside this document (ADR-002 §25). The two internal callbacks keep `Unauthorized`,
+        whose producer is the service-identity filter and whose body is `ErrorResponse`.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/PlatformErrorResponse' }
+          examples:
+            sessionRequired:
+              value: { error: { code: UNAUTHENTICATED, message: Session required, traceId: 4bf92f3577b34da6a3ce929d0e0e4736 } }
+```
+
+Add, directly after `components.schemas.ErrorResponse`:
+
+```yaml
+    PlatformErrorResponse:
+      description: |
+        The envelope the application's servlet filters write — authentication, rate limiting and
+        idempotency — as opposed to a Studio handler's `ErrorResponse`. Backend spec §6.1
+        (`CON-API-03`) and story 1.5 AC-5. `traceId` differs on every request and is absent from
+        some filters' bodies.
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            traceId: { type: string }
+```
+
+`traceId` is optional because `IdempotencyFilter` omits it. The schema stays open, like
+`ErrorResponse`, because it describes a layer this ADR does not govern. The owner validates the
+example against the schema with Ajv before running the suites (§18.5's rule).
+
+## 26. F-5 — the seek margin, and F-4
+
+### 26.1 The facts
+
+Read from the 10.16b gate and from `seek-measurement.test.ts`. **The measurements are @dev's and
+@qa's. This amendment ran no fixtures-tier test.**
+
+- Once attribution is correct, the per-run median error is 62.8 ms (@qa) and up to 70 ms (@dev),
+  against `MEDIAN_TOLERANCE_MS = 100` (`:84`). The largest single lead is 75.1 ms (@qa) and
+  85.3 ms (@dev).
+- **The lead always has the same sign.** In every mis-attribution both observers recorded (27 of
+  27), the repaint's frame timestamp is *earlier* than the step's reported start. The helper finds
+  the repaint only because `slackMs` (100) is at least the tolerance, and F-1's boundary test in
+  `webm.test.ts` now guards that.
+- A lead above 100 ms would make the matcher skip the repaint and match the next change about one
+  cadence later. The failure would then report **+400 to +650 ms instead of the true −110 ms or so**
+  (F-5's own text), which points diagnosis the wrong way.
+- The file's cause comments at `:43-48` and `:72-75` blame a repaint split across frames or a
+  missed match. That explained none of the 27 cases (F-4).
+
+### 26.2 What the margin is — an inference, labelled
+
+A repaint happens *after* its step starts, since the click comes after `startedAtMs` is read. Yet
+the recording shows it *earlier*. So the recording's timeline starts **later** than the run clock's
+zero, by at least the lead. That is exactly the gap §11.6 item 3 predicted: *"context readiness is
+a proxy for the recorder's first frames, not the same instant"*. **The 63-85 ms margin is most
+likely the readiness-to-first-frame gap (AC-12c's subject), seen on developer machines. It is a
+systematic offset, not noise.** This is inferred from the sign and the size of the lead. A laptop
+cannot measure it cleanly (`:26-30` is still right about that), and no decoder was used.
+
+### 26.3 Ruling
+
+1. **`MEDIAN_TOLERANCE_MS` stays 100. `slackMs` stays at or above it. Neither is widened, for any
+   reason.** @po's standing constraint is upheld. A later calibration may justify *tightening*.
+   Nothing justifies widening.
+2. **The remedy is calibration, in the runner, where §11.2 and §11.6 already put it.** A measured
+   constant is added to the origin inside `takeRunOrigin` (`studio-runner/src/run/timeline.ts`),
+   so the zero is recording-context readiness plus the gap. It never goes on the wire, never into
+   the API (§11.7 item 1 forbids that) and never into the test.
+3. **The constant is per image and comes from configuration.** It is a runner setting with default
+   `0`, and its value comes from **SPK-06 phase B**, measured on the pinned image in staging (the
+   AC-12c evidence), recorded in `docs/qa/spikes/SPK-06/` with the measurements behind it. It is
+   configuration and not a literal because the gap depends on the host, which is F-5's own
+   finding. A literal would be right on one machine and wrong on every other.
+4. **When to apply it.** Add the constant only if the staging gap (a) has the same sign on every
+   measured step and (b) has a median larger than its run-to-run spread. Only then does
+   subtracting it reduce error instead of just shifting it. Otherwise apply nothing and use
+   SPK-06's fallback: report the measured tolerance and state the calibration limit.
+5. **The fixtures tier always runs with the constant at `0`.** It then keeps measuring the raw gap
+   on whatever host runs it, which is the signal F-5 is about. A laptop value must never be put
+   into the constant, because `:26-30` is right that a laptop cannot separate the gap from its own
+   scheduling noise.
+6. **A genuine failure on a slower host stays red.** Nobody widens a bound, skips the file,
+   retries until green, or excludes the host. Whoever sees it files the `SEEK` table, the captured
+   recording, the **signed distance from each reported start to the nearest earlier change**, and
+   the host description, as SPK-06 evidence (phase A data point: *the gap depends on the host*).
+   If that host is a gating CI image (ED-05), the fix is item 3's constant, measured for that
+   image and recorded, not a change to the bound. A calibration corrects the reported value and
+   leaves the tolerance just as strict. A tolerance change moves the bar. Only the first is allowed.
+
+### 26.4 Before 10.19 — three changes, none of them to a bound
+
+- **(a) The calibration setting.** A runner configuration key (default `0`) applied in
+  `takeRunOrigin`, with a test that a non-zero value shifts every reading by exactly that amount
+  and that `0` produces byte-identical output to today. Without it, SPK-06 phase B can only
+  measure and report, not correct. The key must be added to the runner loader's enumerated,
+  fail-closed namespace and to the chart values (10.18's AC-7 discipline). **No contract change.**
+  §11.6 item 3 already said so, and this confirms it.
+- **(b) The diagnostic.** When the median assertion fails, the message should also include each
+  step's signed distance to the nearest *earlier* change, so a lead past the slack reads as about
+  −110 ms and not +450 ms. This changes a message, not a bound.
+- **(c) F-4's comment correction** (§26.5).
+
+(b) and (c) both edit `seek-measurement.test.ts`. They should be one edit by one owner, and it must
+keep the column-0 line `const MEDIAN_TOLERANCE_MS = 100;` byte-identical, because `webm.test.ts`
+parses that declaration and fails to load otherwise (integration note, item 1). F-7's optional
+tightening of that parse belongs in the same change if anyone takes it. **Owners:** @po routes (a)
+and (b)+(c). 10.19 cannot be drafted yet (its drafting gate), so the likely home is a small named
+runner follow-up, or 10.19's own conformance pass if its gate clears first. Recorded as **O-20**.
+
+### 26.5 F-4 — who authorizes it, and what it should say
+
+**The edit is @po's to authorize, not mine.** It is prose in a test file that belongs to a merged
+story, so it is a story-scope change, and @qa's gate already routed it to @po in `FOC-06` form. What
+I rule on is **what the corrected comment should say**. The evidence replaces the file's hypothesis:
+
+- `:43-48`: mis-attribution happened when a repaint was **stamped more than the helper's slack
+  before the reported start**, a systematic lead most likely equal to the readiness-to-first-frame
+  gap (§26.2). It did not happen because a repaint was split across frames. The two-bound design
+  stays, for the same reason as before: a median that one mis-attribution cannot move, plus an
+  outlier bound that catches a process-origin reading.
+- `:72-75`: the listed +137 … +657.7 ms errors came from the old 60 ms slack skipping a repaint
+  that *was* in the recording. The 1500 ms outlier bound still holds numerically (one skipped
+  cadence plus one more), and its reasoning should now name the slack, not the detector.
+- Say that the systematic part is AC-12c's to calibrate (§26.3), and that a lead above the slack
+  shows up as a large positive error.
+
+### 26.6 Alternatives rejected
+
+| Option | Why not |
+|---|---|
+| Raise `MEDIAN_TOLERANCE_MS` | Loosening a test's bar to silence a real, measured offset. @po's constraint, and §12's third rule one level down. |
+| Raise `slackMs` to leave headroom | The lead would still count in full against the median, so it buys nothing against F-5. It can also only rise to 320.7 ms before it matches a spurious change backwards (`webm.ts`). |
+| Derive the constant from laptop runs now | `:26-30` already rules this out. It would also bake one host's gap into a value used everywhere. |
+| Calibrate each run by painting a marker at the origin | It alters the page under test. Fine on the fixture, but not on a customer application, and §6.4's target is about real applications. |
+| Correct it in the API or on the wire | §11.2 and §11.5 already rejected both. |
+| Skip the fixtures tier on slow hosts, or retry until green | Both hide the one number SPK-06 needs. |
+
+## 27. O-10 — ruled, and what the reading found
+
+### 27.1 The facts, read at `f1d7968df` — O-10's premise is now out of date
+
+| Route | Unknown id | Soft-deleted / quarantined | Draft on a CSI the caller may not use | Evidence |
+|---|---|---|---|---|
+| `GET /tests/{id}` | **403** `STUDIO_FORBIDDEN` | **403** | **403** | `StudioService.findTestById(UUID, Authentication)` reads through `@SQLRestriction("deleted_at IS NULL AND quarantined_at IS NULL")` and throws `StudioAccessDeniedException`. `StudioVisibilityIT` asserts `403` for quarantined and for soft-deleted, *"403, not 400"*. |
+| `PUT /tests/{id}` | **400** `BAD_REQUEST` *"UI Test not found: {id}"* | **400** | **No check.** The save goes through. | `updateTest(UUID, UITestRequest, Authentication)` uses `auth` only to attribute the compile it queues. No `requireRead`/`requireCompile` call. `StudioController.updateTest` has no annotation. |
+| `DELETE /tests/{id}` | **400** | **400** | **No check.** The draft is soft-deleted, `204`. | `StudioController.deleteTest(@PathVariable UUID id)` takes **no** `Authentication`. `softDeleteTest(UUID)` has no check. |
+| `POST /tests` | — | — | **No check.** The draft is created under any *registered* CSI. | `createTest` calls `extractIdentity` and `requireRegisteredCsi` only. |
+
+`SecurityConfig` requires `.authenticated()` on `/api/**`, and `@EnableMethodSecurity` is on.
+`StudioController` has no `@PreAuthorize` (@po checked this in 10.7's validation record, and it is
+still true). `CsiOwnershipEvaluator.canWrite` exists and is called from `compileTest`,
+`confirmCompile` and, via `canExecute`, from `executeTest`, **and from nowhere on create, save or
+delete**. Story 10.7 AC-4a says *"Every Studio route enforces identity and CSI permission"*, but
+its list covers the reads and `execute` only.
+
+**So O-10's recorded premise is wrong twice.** GET already answers `403`. And *"No security defect
+either way: both forms are existence-preserving"* is false for PUT and DELETE. They reveal whether
+a draft exists (`400` for absent, `200`/`409`/`204` for present), and they also **let any
+authenticated principal edit or soft-delete a draft on a CSI they do not own**.
+
+**What was verified and what was not.** Every row above comes from reading the merged code. **No
+request was sent** and no probe was written. The finding is therefore established by reading, and
+@qa should confirm it with a failing integration test (§27.5) before anything else lands.
+
+### 27.2 Ruling
+
+**On `GET`, `PUT` and `DELETE /tests/{id}`: an unknown id, a soft-deleted draft, a quarantined
+draft, and a draft whose CSI the caller may not read (GET) or write (PUT, DELETE) all get the same
+answer, `403 STUDIO_FORBIDDEN`, with no resource detail. These routes never answer `404`. `400` is
+only for a malformed request.**
+
+The refusal order follows §14.4's rule: authorization before anything that depends on the stored
+row.
+
+1. Checks on the request shape that do not depend on stored state may come first: path-UUID
+   syntax, the body schema, the required revisions. Their answer is the same whether the draft
+   exists or not, so they reveal nothing.
+2. Then the draft is read **through the visibility restriction**. If it is absent, answer `403`.
+3. Then `canRead` (GET) or `canWrite` (PUT, DELETE) on **that draft's** CSI. If it fails, answer
+   `403`.
+4. Then, for PUT, the locked read. A draft that disappeared in between also gets `403`, never
+   `400`.
+5. Only after that come the revision and CSI conflicts, `409 STALE_REVISION` and
+   `409 CSI_IMMUTABLE`.
+
+**The read in step 2 must be the visible one, not `findCsiIdIncludingWithheld`.** That method is
+right for compile, where §14.4 has to read withheld drafts to produce `409 TEST_QUARANTINED`. For
+save and delete, §14.5 already ruled that a withheld draft is *hidden*, not *in conflict*. If an
+owner of a withheld draft passed authorization and then got `400`, the draft would be visible
+through its status code.
+
+`POST /tests` must also check `canWrite` on the request's `csiId` (§9.1: owners *create*), after
+the registered-CSI check. That check's `400` does not depend on who is asking, so it reveals
+nothing about a particular draft.
+
+### 27.3 O-18 — the security finding, recorded with an owner
+
+**O-18 (high; before the credentialed pilot): `POST /tests`, `PUT /tests/{id}` and
+`DELETE /tests/{id}` have no CSI write authorization.** Architecture §9.1: *"Owners (or explicitly
+authorized platform administrators) may create/edit/compile/confirm/execute. Enforce permission
+checks on the server."* The three missing checks sit next to three routes that do have them, and
+the same evaluator is already imported.
+
+- **Owner: @po routes it to @dev** as a named story or a named fix PR, ahead of anything else
+  here. @qa writes the failing test first.
+- **It does not wait on the studio-inference program.** That program's uncommitted tree in
+  `wt/epic` (read-only) adds `requireCompile` to `createTest` and `updateTest`. However, `updateTest`
+  reads the CSI through `findCsiIdIncludingWithheld`, which contradicts §27.2, and `softDeleteTest`
+  is left unchanged. The run log says nothing merges across that line until its owner, @po and @pm
+  have reconciled it. Whichever lands second must adopt §27.2's read and must not add a second check.
+- **§27.6's contract prose lands in the same PR as the fix.** On its own, the prose would declare
+  behaviour the code does not have.
+
+### 27.4 Alternatives rejected
+
+| Option | Why not |
+|---|---|
+| **`404` for absent, `403` for forbidden** | The two statuses together reveal existence. `StudioAccessDeniedException`'s Javadoc and 10.7 AC-4a both forbid that. |
+| **`404` for everything, including forbidden** | A consistent choice some APIs make, but it contradicts the `403` already shipped and declared on `getTest`, `getExecution`, `streamExecution`, `compileTest`, `confirmCompile`, `executeTest` and now `getExecutionVideo`. It would add a status to three operations and change a refusal on six, for no gain in secrecy. |
+| **Keep `400`** | `400` means the request is malformed, and a well-formed UUID is not. On PUT and DELETE it currently comes with an existence oracle and no authorization. |
+| **`409 TEST_DELETED`/`TEST_QUARANTINED` on PUT/DELETE** | §14.5 already ruled against this. Save and delete hide withheld drafts; only compile, confirm and execute reject them. A lifecycle code here would also have to come after authorization with a read that includes withheld drafts, which is exactly the inconsistency §27.2 removes. |
+| **`410 Gone` for soft-deleted** | Tells anyone who can reach the route that a deleted draft existed. |
+
+### 27.5 Tests
+
+- **No status set changes.** `getTest`, `updateTest` and `deleteTest` already declare `403`, and
+  `400` stays declared for malformed requests. `StudioContractTest`'s inventory therefore stays
+  green. This was simulated together with §24 and §25 (§28.4): the prose edit added no red.
+- **New, and they must fail first against today's code** (@qa, then @dev):
+  - PUT and DELETE as a principal **without** write on the draft's CSI → `403`, and the row is
+    **byte-unchanged** (revisions, `deleted_at`, compile state). This is the security assertion.
+    Today it fails with `200`/`204`.
+  - POST with a registered `csiId` the principal may not write → `403`, and no row is created.
+  - PUT and DELETE on an unknown id, a soft-deleted draft and a quarantined draft, as an
+    **administrator** → `403` in all six cases, with identical bodies. Today these are `400`.
+  - A non-vacuity control in the same commit: an identity that *can* write gets `200`/`204` on
+    the same draft, so the `403`s above cannot pass just because every request is refused.
+- **Existing tests at risk, by reading:** those that PUT/DELETE through HTTP as the local profile's
+  `checks-admin` identity (`OptimisticSaveIT`, `CsiImmutabilityIT`, `StudioVisibilityIT`) stay
+  green, since an administrator passes `canWrite`. `OptimisticSaveIT:113`'s `400` for a body with
+  no revisions stays green under rule 1. Service-level callers that pass no `Authentication`
+  (`updateTest(UUID, UITestRequest)`) are internal and must stay unchanged. **Predicted, not run.**
+
+### 27.6 The authorized edit, exact text
+
+`paths./tests/{id}.get`, add after `summary`:
+
+```yaml
+      description: |
+        Authorized against the draft's CSI before anything is returned. An unknown id, a
+        soft-deleted or quarantined draft, and a draft on a CSI the caller may not read all answer
+        the same `403 STUDIO_FORBIDDEN` with no resource detail. This route never answers `404`;
+        `400` is reserved for a malformed request (ADR-002 §27).
+```
+
+`paths./tests/{id}.put.description`, append:
+
+```yaml
+
+        Only an owner or an explicitly authorized administrator of the draft's CSI may save. An
+        unknown id, a soft-deleted or quarantined draft, and a draft on a CSI the caller may not
+        write all answer the same `403 STUDIO_FORBIDDEN` before any revision is compared, and
+        nothing is written. `400` is reserved for a malformed request (ADR-002 §27).
+```
+
+`paths./tests/{id}.put.responses.409.description`: replace *"so the save resolves as an unknown
+test and answers `400`, exactly as it does for an id that never existed."* with:
+
+```yaml
+            so the save is refused `403 STUDIO_FORBIDDEN`, exactly as it is for an id that never
+            existed or a draft on a CSI the caller may not write (ADR-002 §27).
+```
+
+`paths./tests/{id}.delete.description`, replace with:
+
+```yaml
+      description: |
+        Rejects new execute/compile; authorized history stays readable.
+
+        Only an owner or an explicitly authorized administrator of the draft's CSI may delete. An
+        unknown id, an already soft-deleted or quarantined draft, and a draft on a CSI the caller
+        may not write all answer the same `403 STUDIO_FORBIDDEN`, and nothing is written. `400` is
+        reserved for a malformed request (ADR-002 §27).
+```
+
+`POST /tests` needs no prose change. It already declares `403`, and its description does not
+mention authorization.
+
+## 28. Sequencing, ownership, and what was measured
+
+### 28.1 The studio-inference program (10.20) and the same file
+
+The program's uncommitted tree in `wt/epic` edits `openapi.yaml` in **five added lines inside
+`info.description`** and re-pins `confinement.test.ts` to `09720ae2…` (read with `git diff`, not
+changed). The edits authorized here are in `paths./tests/{id}`, `paths./executions/{id}/video` and
+`components`. **The two do not overlap textually.** They still conflict on one thing, the SHA-256
+pin, so:
+
+1. **Whichever of 10.20 and the §24/§25/§27 PRs lands second re-reads the digest from the file as
+   merged** and re-anchors `BASE_SHA256`. Nobody copies a digest from this ADR, from 10.20, or from
+   the other PR.
+2. **Neither lands on a line that contains the other** until the reconciliation the run log
+   requires has happened (*"Nothing merges across that line"*). 10.20 records its own §13 row (the
+   user's decision).
+3. **For 10.20's coordinator, before 10.20 closes:**
+   - `inference.openapi.yaml` points its public `401` at `ErrorResponse`. After §25 it should
+     point at `components/responses/SessionUnauthorized` (body `PlatformErrorResponse`).
+   - It declares `404` *"Authorized test/request not found"* on `/tests/{id}`, `/compile` and
+     `/confirm-compile`. §27 rules `403` for an unknown or withheld draft on the `/tests/{id}`
+     family. A `404` that is only reachable after authorization, for a sub-resource such as a
+     `compileRequestId` under a draft the caller may read, is compatible. A `404` for the draft
+     itself is not.
+   - Its `updateTest` authorization read is covered by §27.3.
+
+### 28.2 Order among the three edits here
+
+§24 and §25 are document-only plus test and mock follow-ups, for behaviour already shipped.
+§27's prose needs O-18's production fix. **Two acceptable plans. @po chooses:**
+
+- **One PR** (all three edits, one pin move, O-18's fix included). Fewest pin moves, but the
+  security fix waits for the frontend mock change.
+- **Two PRs:** O-18's fix with §27's prose first, because it is the urgent one, then §24 and §25.
+  Two pin moves, each re-read from the file.
+
+**Not acceptable:** landing §27's prose before the fix, or the fix without the prose (the document
+would still say `400`).
+
+### 28.3 Owners
+
+| Work | Owner |
+|---|---|
+| O-18 fix + §27 prose + §27.5 tests | @po names the story; @qa writes the failing test first; @dev |
+| §24 + §25 document edits, the two backend literal updates, the strengthened AC-17 assertion, the `$ref`-equality test | @po names the unit. It spans backend tests, the document, the runner pin and the frontend mock, like §21, so it may be one follow-up story |
+| §24.5 frontend mock and test updates | the same unit (merged 10.16a is not re-opened, per the O-17 standing rule) |
+| ADR-003, the API error envelope (O-19) | @architect decides, with @pm (`CON-API-03`) and the frontend consumer; @pm/@po place the implementation outside Epic 10 |
+| O-20 (the calibration setting, the diagnostic, F-4's text) | @po routes; the substance is ruled in §26 |
+| SPK-06 phase B, AC-12c measurement and the folding decision (§26.3 item 4) | @qa runs it; @architect signs the record as register owner |
+
+### 28.4 What was measured, and what was not
+
+**Measured, on `arch/epic10-rulings` at `f1d7968df`,** `./gradlew test --offline` for three
+classes, contract `51850b01…c02efa`: `StudioContractTest` **14/14**,
+`ExecutionVideoContractEscalationTest` **0/2** (both ESC tests red, as filed),
+`ExecutionVideoContractTest` **15/15**.
+
+**Simulated, not landed.** The tree's `backend/` and `docs/` were copied into the session
+scratchpad, §24.6 and §25.4 were applied to the copy's `openapi.yaml` (digest
+`b52e0e59…62277b`), and the same classes plus `CompileRouteContractDivergenceTest` were run: **2/2,
+14/15, 13/14, 9/9**. The two reds are exactly the two hand-kept status copies in §24.7. §27.6 was
+then applied on top (digest `b524ab8d…0302dc`) and the result was identical: **no additional red**.
+A first draft of §25, which changed the shared `Unauthorized` in place, gave the same figures. It
+was withdrawn on reading `ServiceIdentityAuthenticationFilter` (§25.1), not because of a test: no
+test reads a `401` body shape. That gap is the reason the draft could have landed.
+`CompileRouteContractDivergenceTest` on the unmodified copy: **9/9**. The copies are digests of a
+scratch file, **not** values for anyone to pin. The owner re-reads the real file.
+
+**Not run:** the frontend suite and the runner suite (`node_modules` is absent in this worktree),
+any fixtures-tier seek run, and every behaviour test in §27.5. Every frontend and runner effect in
+§24.7 and §27.5 is **predicted by reading the assertions**. The O-18 finding is **established by
+reading the code, not by a request**.
+
+### 28.5 Open items after this amendment
+
+| Item | Status at `f1d7968df` |
+|---|---|
+| **O-6** | Unchanged; 10.18's (SPK-05). |
+| **O-9** | Still open. The three internal `409`s still declare no `x-conflict-codes` (`openapi.yaml:917,1013,1163`). §14.7's pre-ruling stands. |
+| **O-10** | **Ruled (§27).** Prose authorized; it lands with O-18's fix. The line in 10.19's drafting gate is now satisfied as far as a *ruling* goes. Its before/after is §28.4's simulation, and the owner's measurement replaces it. |
+| **O-12** | By reading, landed: `studioContract.test.ts:456-465` checks `ExecutionErrorCode` against the document in both directions. |
+| **O-14** | Landed (§13, 10.18a). |
+| **O-15** | By reading, landed: `test/contract.test.ts:360-375` checks `ACCEPTED_JOB_KEYS` against `RunJob` for set equality. |
+| **O-16** | By reading, landed: `createLogBuffer` is no longer exported (`src/reporting/index.ts:32`). |
+| **O-17** | Routed by @po (§13's 10.11c row). |
+| **O-18** *(new, high)* | `POST /tests`, `PUT /tests/{id}` and `DELETE /tests/{id}` have no CSI write authorization (§27.3). Before the credentialed pilot. Owner: @po → @dev, with @qa's failing test first. |
+| **O-19** *(new)* | The application has two error envelopes, split by layer. ADR-003 is needed (§25.2). This also covers the filter-written `429`, `503 AUTH_TEMPORARILY_UNAVAILABLE` and idempotency errors, which no Studio operation declares. Owner: @architect with @pm. Does not block Epic 10. |
+| **O-20** *(new)* | Before 10.19: the runner's calibration setting (default `0`), the signed-lead diagnostic, and F-4's corrected comments (§26.4, §26.5). Owner: @po routes. |
+| **ESC-1 / ESC-2 / DEF-09(b)** | **Ruled (§24, §25).** Edits authorized; red until the owner lands them. |
+| **F-5** | **Ruled (§26).** No bound moves. |
+
+### 28.6 What this amendment does not do
+
+It changes no story's Title, Acceptance Criteria, Scope or Status. It edits no `openapi.yaml`, no
+`artifact.schema.json`, no backend Java, no frontend source, no `studio-runner/` source, no test and
+no run log. It does not change the SPK-06 register. §26.3's calibration method belongs in that
+register's *Shapes* line, and the register owner should add it when SPK-06 phase B is scheduled.

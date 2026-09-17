@@ -479,6 +479,11 @@ stories:
         RELATIVE src, which is wrong for cross-host deployments. Its source is `(exec as any).videoUrl`,
         which is not part of the contract. The draft said nothing rendered video. "Composition only"
         would have left two players on the page.
+      # @architect 2026-09-17: ESC-1/ESC-2/DEF-09(b) RULED in ADR-002 §24-§25. The route will declare 401
+      # (SessionUnauthorized), 403 and 503. The 401 envelope split is backend-wide (O-19, ADR-003), not
+      # route-local. The edits are authorized and not yet landed. 10.16a's code is unchanged; its MSW mock
+      # (unreadable/unknown id -> 403) and two frontend assertions change with the landing PR (§24.5).
+      # F-5 RULED in §26: no bound moves; calibration is runner-side, per-image config (O-20).
       esc1_def09b_watch: "NON-BLOCKING. 10.16 never parses getExecutionVideo's body (AC-11), and its MSW refusal bodies are Ajv-validated against the document rather than transcribed (AC-13), so an @architect ruling on ESC-1/DEF-09(b) flows through without re-opening a criterion."
       seek_measurement_flake_correction: >-
         @po CORRECTS ITS OWN WAVE-6 TEXT BELOW. "The assertion that failed was the MEDIAN tolerance" does
@@ -534,6 +539,9 @@ stories:
         # gate on the one story whose whole subject is credentialed staging acceptance.
         - "STORY 10.19 MAY NOT BE DRAFTED WHILE ED-02's owner reads 'TBD — not assigned in sources'. ED-02 gates this story by id; drafting against an unowned prerequisite would produce a fourth story full of blocked halves pointing at nobody. @po cannot assign work to an organisation no source names — BRD §4 gives Platform/SRE cluster, ingress, egress, sandbox and storage and names NO identity owner, and architecture §9.1 says the prerequisites 'may be delivered outside Epic 10'. The ESCALATION PATH, named: @pm raises ED-02 to Checks-squad engineering management through BRD §8's launch-exit/on-call row, with Security & Compliance (BRD §11) as the accepting party."
         - "MED-2 (the Testcontainers JDBC liveness bug) must have an owner — @devops, per @qa's own gate — before this story is drafted. 10.19 runs the full integrated suite and a hang THERE is a false pass on the epic's final gate, in the one place nobody re-runs. Mitigation is epic-wide regardless: every story running ./gradlew check records wall-clock elapsed and the test count reached, and A RUN SHORT OF ITS BASELINE TEST COUNT IS A HANG, NEVER A PASS."
+        # @architect 2026-09-17: O-10 RULED in ADR-002 §27 — 403 STUDIO_FORBIDDEN on GET/PUT/DELETE /tests/{id}
+        # for unknown, withheld and not-permitted drafts. Prose is authorized and lands with O-18's fix.
+        # The ruling found O-18 (high): POST/PUT/DELETE /tests have no CSI write authorization (§27.3).
         - "ADR-002 O-10 (400 vs 404 for an unknown, deleted or quarantined draft on GET/PUT/DELETE /tests/{id}) must have its own ADR-002 ruling with its own before/after before this story is drafted. Class C, @architect's, overdue by a wave since §18.4 and restated at §23.4. @po gives it a date rather than a reminder; it is not @po's to rule."
 
 # ─────────────────────────────────────────────────────────────
