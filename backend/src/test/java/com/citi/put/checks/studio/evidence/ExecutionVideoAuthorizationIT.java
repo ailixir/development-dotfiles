@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,6 +61,9 @@ class ExecutionVideoAuthorizationIT {
   private static final String READER = "video-reader@citi.com";
   private static final String STRANGER = "video-stranger@citi.com";
   private static final int OBJECT_SIZE = 1_400_000;
+
+  /** What the security filter's per-request {@code error.traceId} is replaced with. */
+  private static final String TRACE_ID_TOKEN = "\"traceId\":\"<per-request>\"";
 
   @Autowired private TestRestTemplate restTemplate;
   @Autowired private ObjectMapper objectMapper;
@@ -271,61 +275,140 @@ class ExecutionVideoAuthorizationIT {
     assertThat(after.getBody()).isEqualTo(before.getBody());
   }
 
-  /** AC-1: a quarantined row is unreadable by everyone, administrators included. */
+  /**
+   * AC-1: a quarantined row is unreadable by everyone, administrators included.
+   *
+   * <p><b>The identityless row proves nothing about quarantine any more.</b> Story 10.18b closed
+   * ED-02's core-service bypass, so a request with no identity is refused {@code 401} by the
+   * security filter before the Studio handler runs. It never reaches the quarantine decision. Its
+   * expectation is {@code 401} for that reason, and only for a row that really carries no identity
+   * (DEF-09, {@code docs/epics/EPIC-10-RUN-LOG.md}). The claim in this test's name rests on the
+   * <b>administrator</b> row. It is served before the quarantine and refused {@code 403} on both
+   * verbs after it, and both halves are asserted here.
+   */
   @Test
   void aQuarantinedRowIsDeniedToEveryoneIncludingAdministrators() {
+    List<HttpHeaders> administrators =
+        identities()
+            .map(arguments -> (HttpHeaders) arguments.get()[1])
+            .filter(ExecutionVideoAuthorizationIT::isAdministrator)
+            .toList();
+    assertThat(administrators)
+        .as("the administrator row carries this test's claim, so it must be in the matrix")
+        .hasSize(1);
+    assertThat(
+            identities()
+                .map(arguments -> (HttpHeaders) arguments.get()[1])
+                .filter(ExecutionVideoAuthorizationIT::isIdentityless))
+        .as("the 401 expectation is an exemption for exactly one identityless row, not a pattern")
+        .hasSize(1);
+    for (boolean download : new boolean[] {false, true}) {
+      assertThat(get(videoPath(download), administrators.get(0)).getStatusCode().value())
+          .as(
+              "the control: before quarantine the administrator is served, so the 403 below is "
+                  + "the quarantine's and not a refusal the administrator would get anyway")
+          .isEqualTo(200);
+    }
+
     jdbc.update("UPDATE ui_test_executions SET csi_id = NULL WHERE id = ?", executionId);
 
+    AtomicInteger administratorRefusals = new AtomicInteger();
     identities()
         .forEach(
             arguments -> {
               HttpHeaders identity = (HttpHeaders) arguments.get()[1];
+              boolean identityless = isIdentityless(identity);
+              int expected = identityless ? 401 : 403;
+              String reason =
+                  identityless
+                      ? "%s: no identity at all is an authentication refusal (401) from the "
+                          + "security filter since 10.18b closed ED-02's bypass. It never reaches "
+                          + "the quarantine decision, so it says nothing about quarantine"
+                      : "%s: a null-CSI row must be refused (403), and by the snapshot route's "
+                          + "own answer";
               ResponseEntity<byte[]> snapshot =
                   get("/api/v1/studio/executions/" + executionId, identity);
               for (boolean download : new boolean[] {false, true}) {
                 ResponseEntity<byte[]> answer = get(videoPath(download), identity);
                 assertThat(answer.getStatusCode().value())
-                    .as(
-                        "%s: a null-CSI row must be refused, and by the snapshot route's own answer",
-                        arguments.get()[0])
-                    .isEqualTo(403)
+                    .as(reason, arguments.get()[0])
+                    .isEqualTo(expected)
                     .isEqualTo(snapshot.getStatusCode().value());
+                if (isAdministrator(identity)) {
+                  administratorRefusals.incrementAndGet();
+                }
               }
             });
+    assertThat(administratorRefusals.get())
+        .as("the administrator was refused the quarantined row on both verbs")
+        .isEqualTo(2);
   }
 
   // ── AC-2: soft deletion moves nothing ────────────────────────────────────
 
+  /**
+   * AC-2. The bodies are compared per request, and one of them carries a per-request {@code
+   * traceId}. The identityless row's {@code 401} comes from the security filter, and its envelope
+   * holds a fresh {@code error.traceId} on every request. A raw comparison of that body can never
+   * pass, whatever the soft deletion does (DEF-09(a), {@code docs/epics/EPIC-10-RUN-LOG.md},
+   * "DEF-09's byte difference, read rather than guessed"). So exactly that one value is replaced
+   * before hashing, and every other byte is still compared. Video bodies and JSON bodies without a
+   * traceId are hashed raw. The normalisation is also counted, so an envelope that stops carrying a
+   * traceId shows up here instead of turning the normaliser into a silent no-op.
+   *
+   * <p>That {@code 401} envelope ({@code error} is an object) is not the Studio refusal envelope
+   * ({@code error} is a string). This test does not settle that. It is DEF-09(b), and @architect
+   * owns it together with ESC-1.
+   */
   @Test
   void softDeletingTheParentTestChangesNoAnswerAndNoByte() {
     List<Integer> before = new ArrayList<>();
-    List<String> beforeBodies = new ArrayList<>();
+    List<Fingerprint> beforeBodies = new ArrayList<>();
     identities()
         .forEach(
             arguments -> {
               ResponseEntity<byte[]> answer =
                   get(videoPath(false), (HttpHeaders) arguments.get()[1]);
               before.add(answer.getStatusCode().value());
-              beforeBodies.add(digest(answer.getBody()));
+              beforeBodies.add(fingerprint(answer));
             });
 
     jdbc.update("UPDATE ui_tests SET deleted_at = NOW() WHERE id = ?", testId);
 
     List<Integer> after = new ArrayList<>();
-    List<String> afterBodies = new ArrayList<>();
+    List<Fingerprint> afterBodies = new ArrayList<>();
     identities()
         .forEach(
             arguments -> {
               ResponseEntity<byte[]> answer =
                   get(videoPath(false), (HttpHeaders) arguments.get()[1]);
               after.add(answer.getStatusCode().value());
-              afterBodies.add(digest(answer.getBody()));
+              afterBodies.add(fingerprint(answer));
             });
 
     assertThat(after)
         .as("§6.3: historical access survives the parent's soft deletion")
         .isEqualTo(before);
-    assertThat(afterBodies).as("and the served bytes are unchanged").isEqualTo(beforeBodies);
+    assertThat(before)
+        .as("the matrix still exercises a served row, a refused row and the identityless row")
+        .contains(200, 403, 401);
+    for (int row = 0; row < before.size(); row++) {
+      int normalised = before.get(row) == 401 ? 1 : 0;
+      assertThat(beforeBodies.get(row).tracesNormalised())
+          .as(
+              "row %d (status %d): the per-request traceId is normalised out of exactly the 401 "
+                  + "body, and nothing is normalised anywhere else",
+              row, before.get(row))
+          .isEqualTo(normalised);
+      assertThat(afterBodies.get(row).tracesNormalised())
+          .as("row %d (status %d), after the soft deletion", row, after.get(row))
+          .isEqualTo(normalised);
+    }
+    assertThat(afterBodies)
+        .as(
+            "and the served bytes are unchanged (video raw; JSON raw apart from the per-request "
+                + "traceId)")
+        .isEqualTo(beforeBodies);
     assertThat(
             get(
                     "/api/v1/studio/tests/" + testId,
@@ -424,6 +507,61 @@ class ExecutionVideoAuthorizationIT {
     } catch (Exception e) {
       return "<not json>";
     }
+  }
+
+  private static boolean isIdentityless(HttpHeaders identity) {
+    return !identity.containsKey("X-User-Id");
+  }
+
+  private static boolean isAdministrator(HttpHeaders identity) {
+    String roles = identity.getFirst("X-User-Roles");
+    return roles != null && List.of(roles.split(",")).contains("checks-admin");
+  }
+
+  /**
+   * A body's digest, and how many per-request trace ids were replaced before it was taken.
+   *
+   * @param digest SHA-256 of the body, raw apart from the replacement counted next to it
+   * @param tracesNormalised how many {@code error.traceId} values were replaced (0 or 1)
+   */
+  private record Fingerprint(String digest, int tracesNormalised) {}
+
+  /**
+   * Hashes a response body. The only change made first is to replace the security filter's
+   * per-request {@code error.traceId} value with a fixed token. The replacement is done on the raw
+   * text and must match exactly once. Nothing is re-serialised, so every other byte of the body is
+   * still compared. A body that is not JSON (the video) is hashed untouched.
+   */
+  private Fingerprint fingerprint(ResponseEntity<byte[]> response) {
+    byte[] body = response.getBody();
+    MediaType type = response.getHeaders().getContentType();
+    if (body == null || type == null || !type.isCompatibleWith(MediaType.APPLICATION_JSON)) {
+      return new Fingerprint(digest(body), 0);
+    }
+    String text = new String(body, StandardCharsets.UTF_8);
+    JsonNode traceId;
+    try {
+      traceId = objectMapper.readTree(text).path("error").path("traceId");
+    } catch (Exception e) {
+      return new Fingerprint(digest(body), 0);
+    }
+    if (!traceId.isTextual()) {
+      return new Fingerprint(digest(body), 0);
+    }
+    String literal;
+    try {
+      literal = "\"traceId\":" + objectMapper.writeValueAsString(traceId.asText());
+    } catch (Exception e) {
+      throw new AssertionError(e);
+    }
+    int first = text.indexOf(literal);
+    assertThat(first).as("the traceId must appear verbatim in the body: %s", text).isNotNegative();
+    assertThat(text.indexOf(literal, first + 1))
+        .as("the traceId literal must appear exactly once, or the replacement is ambiguous")
+        .isNegative();
+    String normalised =
+        text.substring(0, first) + TRACE_ID_TOKEN + text.substring(first + literal.length());
+    return new Fingerprint(digest(normalised.getBytes(StandardCharsets.UTF_8)), 1);
   }
 
   private static String digest(byte[] body) {
