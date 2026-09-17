@@ -104,6 +104,7 @@ function launchMessage(overrides: Record<string, unknown> = {}): Record<string, 
     browser: 'chromium',
     viewport: { width: 1280, height: 720 },
     recording: { width: 1280, height: 720 },
+    seekOriginCalibrationMs: 0,
     scratchPath: '/scratch/run-1',
     totalRuntimeMs: 120_000,
     ...overrides,
@@ -165,6 +166,27 @@ describe('AC-10 — the origin is taken at recording readiness, and reported onc
     expect(Number.isNaN(Date.parse(ready?.browserStartedAt ?? ''))).toBe(false);
     // Ready comes first, so `BrowserLauncher.launch` resolving means Chromium started (AC-20).
     expect(driver.sent[0]?.kind).toBe('ready');
+  });
+
+  it('applies the launch message’s calibration to the origin, and echoes it (story 10.32 AC-3)', async () => {
+    // Zero read at 1_000, every later read at 1_300: uncalibrated readings are 300, so at N = 50
+    // they are 250. Dropping the calibration at the call site makes them 300 again.
+    const readings = [1_000];
+    const originSource = {
+      monotonicNow: (): number => readings.shift() ?? 1_300,
+      wallNow: (): Date => new Date(1_700_000_000_000),
+    };
+    const driver = createDriver({ originSource });
+    driver.send(launchMessage({ seekOriginCalibrationMs: 50 }));
+    await driver.launched();
+    expect(driver.ready()?.calibrationOffsetMs).toBe(50);
+    expect(driver.ready()?.startedAtMs).toBe(0);
+
+    driver.send(executeMessage());
+    await driver.settled();
+    const starts = driver.sent.filter((message) => message.kind === 'step-started');
+    expect(starts.length).toBeGreaterThan(0);
+    for (const message of starts) expect(message.startedAtMs).toBe(250);
   });
 
   it('takes the origin after the browser exists, not before', async () => {

@@ -101,6 +101,7 @@ export function createChildDriver(
 
   const launcher = createChildBrowserLauncher({
     recording: { width: 1280, height: 720 },
+    seekOriginCalibrationMs: 0,
     stepTimeoutMs: 30_000,
     launchTimeoutMs: 60,
     maxFailureMessageLength: 400,

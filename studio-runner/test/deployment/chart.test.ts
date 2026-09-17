@@ -46,7 +46,7 @@ import {
   valueSetName,
   CHART_DIR,
 } from './helm.js';
-import type { K8sDocument } from './helm.js';
+import type { K8sDocument, RenderOutcome } from './helm.js';
 import { imageFacts, imageUnavailableReason } from './image.js';
 
 /**
@@ -955,6 +955,74 @@ describe('AC-9a — ADR-002 O-6 is carried, not absorbed', () => {
     // The runner's own gate-shut tripwire is re-run unchanged in `test/run/canary.test.ts`; this
     // is its deployment-side companion, not a replacement for it.
     expect([...PERMITTED_DESTINATIONS]).toHaveLength(3);
+  });
+});
+
+/**
+ * Story 10.32 AC-5 — the seek-origin calibration key reaches the pod, as `"0"`, in every value set
+ * (ADR-002 §26.3 item 3, §26.4(a)).
+ *
+ * The chart has its own closed key list (`put-checks.studioRunner.acceptedEnvKeys`), and a
+ * `runnerEnv` key it does not name fails the render. So the key has to be on that list for any
+ * deployment to set it, and `values.yaml` carries it as an explicit, uncalibrated `"0"`. Every
+ * assertion reads the rendered manifest. None reads a values file.
+ */
+const SEEK_CALIBRATION_KEY = 'STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS';
+
+/** The value the runner container is rendered with. Shared, so the falsification applies the same read. */
+function renderedCalibration(outcome: RenderOutcome): string | undefined {
+  return envValues(soleContainer(runnerDeployment(outcome)))[SEEK_CALIBRATION_KEY];
+}
+
+/** The AC-5 criterion itself: present, and exactly `"0"`. Absent does not pass. */
+function expectUncalibrated(outcome: RenderOutcome, label: string): void {
+  expect(renderedCalibration(outcome), label).toBe('0');
+}
+
+describe('story 10.32 AC-5 — the seek-origin calibration renders as exactly "0"', () => {
+  it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
+    '%s: the runner container carries the key with the value "0"',
+    (name, valuesFile) => {
+      expectUncalibrated(render({ valuesFile }), name);
+    },
+  );
+
+  it('falsification (i): a deliberate override renders, and the criterion rejects it', () => {
+    const overridden = render({
+      args: ['--set-string', `studioRunner.runnerEnv.${SEEK_CALIBRATION_KEY}=90`],
+    });
+    // The override reached the renderer, so the rejection below is about the value, not a no-op.
+    expect(renderedCalibration(overridden)).toBe('90');
+    expect(() => {
+      expectUncalibrated(overridden, 'override');
+    }).toThrow();
+  });
+
+  it('falsification (ii): off the chart’s accepted list, the key fails the render in every value set', () => {
+    // A template mutation, made on a scratch copy so it lands inside the measurement window and
+    // the production template stays untouched (the MED-1 method above).
+    const scratch = mkdtempSync(join(tmpdir(), 'studio-chart-seek-calibration-'));
+    scratchDirs.push(scratch);
+    const chart = join(scratch, 'put-checks');
+    cpSync(CHART_DIR, chart, { recursive: true });
+    const helpersPath = join(chart, 'templates', '_helpers.tpl');
+    const helpers = readFileSync(helpersPath, 'utf8');
+    const entry = ` ${SEEK_CALIBRATION_KEY}`;
+    expect(helpers.split(entry), 'the key is not on the accepted list exactly once').toHaveLength(2);
+    writeFileSync(helpersPath, helpers.replace(entry, ''), 'utf8');
+
+    for (const valuesFile of VALUE_SETS) {
+      const outcome = renderOutcome({ chartDir: chart, valuesFile });
+      expect(outcome.ok, `${valueSetName(valuesFile)} rendered without the key on the list`).toBe(false);
+      expect(outcome.error).toContain(SEEK_CALIBRATION_KEY);
+      expect(outcome.error).toContain('not an accepted');
+    }
+  });
+
+  it('is a key the runner’s own loader accepts', () => {
+    // The drift check for every rendered key is `every rendered key is one the runner accepts`
+    // above. This names the one key this story adds.
+    expect(ACCEPTED_KEYS).toContain(SEEK_CALIBRATION_KEY);
   });
 });
 

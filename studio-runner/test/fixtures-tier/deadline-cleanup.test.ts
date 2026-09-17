@@ -172,6 +172,8 @@ async function hungRealRun(options: { readonly stopTimeoutMs: number }): Promise
 
   const launcher = createChildBrowserLauncher({
     recording: { width: 640, height: 360 },
+    // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0 (story 10.32).
+    seekOriginCalibrationMs: 0,
     // Long, so the *step* timeout is not what ends this run. The run is ended by the parent.
     stepTimeoutMs: 120_000,
     launchTimeoutMs: 60_000,
@@ -262,6 +264,8 @@ describe('AC-11a — the process tree is gone, established by looking for it', (
     const spawner = observingSpawner();
     const launcher = createChildBrowserLauncher({
       recording: { width: 640, height: 360 },
+      // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0 (story 10.32).
+      seekOriginCalibrationMs: 0,
       stepTimeoutMs: 30_000,
       launchTimeoutMs: 60_000,
       maxFailureMessageLength: 400,
@@ -385,6 +389,8 @@ describe('AC-13 — the next run succeeds after a killed one', () => {
     scratches.push(scratchPath);
     const launcher = createChildBrowserLauncher({
       recording: { width: 640, height: 360 },
+      // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0 (story 10.32).
+      seekOriginCalibrationMs: 0,
       stepTimeoutMs: 30_000,
       launchTimeoutMs: 60_000,
       maxFailureMessageLength: 400,
@@ -419,6 +425,8 @@ describe('AC-7a — the canary through a real Chromium, on a killed run', () => 
 
     const launcher = createChildBrowserLauncher({
       recording: { width: 640, height: 360 },
+      // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0 (story 10.32).
+      seekOriginCalibrationMs: 0,
       stepTimeoutMs: 120_000,
       launchTimeoutMs: 60_000,
       maxFailureMessageLength: 400,

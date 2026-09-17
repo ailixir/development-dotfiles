@@ -34,6 +34,14 @@ export interface SessionOrigin {
    * its own scale and the parent passes them through without re-basing (ADR-002 §11.5).
    */
   readonly clock: Clock | null;
+  /**
+   * The seek-origin calibration the child reported applying (story 10.32 AC-4).
+   *
+   * Only a child-owned session carries it. Nothing on the reporting path reads it and it never
+   * reaches the API (ADR-002 §26.3 item 2). It exists so the fixtures tier can assert the value a
+   * real run used.
+   */
+  readonly calibrationOffsetMs?: number | undefined;
 }
 
 /** Everything the session needs to run the job, as data. No source text, ever (AC-3). */

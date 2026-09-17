@@ -70,9 +70,9 @@ export interface RecordingSize {
 /**
  * Parent → child, first: start the browser.
  *
- * It carries exactly what `LaunchOptions` carries plus the explicit recording geometry — and no
- * steps and no values, because the browser has to be up and the origin taken **before** the run
- * request is even formed. That split is what lets `BrowserLauncher.launch` keep its 10.6 shape
+ * It carries exactly what `LaunchOptions` carries plus the explicit recording geometry and the
+ * seek-origin calibration — and no steps and no values, because the browser has to be up and the
+ * origin taken **before** the run request is even formed. That split is what lets `BrowserLauncher.launch` keep its 10.6 shape
  * and still mean "Chromium has actually started" when it resolves (AC-1, AC-20).
  */
 export interface LaunchMessage {
@@ -83,6 +83,12 @@ export interface LaunchMessage {
   readonly viewport: RecordingSize;
   /** Explicitly configured, never an implicit Playwright default (AC-7). */
   readonly recording: RecordingSize;
+  /**
+   * Added to the run origin's zero in the child (ADR-002 §26.3, story 10.32). Non-negative; `0`
+   * unless SPK-06 phase B measured a value for this image. Data, because the child does not
+   * inherit the runner's configuration environment.
+   */
+  readonly seekOriginCalibrationMs: number;
   /** The per-run scratch directory. The only thing the browser may write to (AC-22). */
   readonly scratchPath: string;
   /** Passed through; 10.13 enforces it. This story structures the child so it can. */
@@ -121,6 +127,12 @@ export interface ReadyMessage {
   readonly browserStartedAt: string;
   /** The first reading of the run clock. `0` by construction, and a reading, not a literal. */
   readonly startedAtMs: number;
+  /**
+   * The calibration the child applied to the origin (story 10.32 AC-4), echoed so a real run can
+   * assert what it ran with rather than what it asked for. Optional so a parent never refuses a
+   * start over it; when present it must be a number.
+   */
+  readonly calibrationOffsetMs?: number | undefined;
 }
 
 export interface StepStartedMessage {
@@ -204,6 +216,7 @@ const ACCEPTED_LAUNCH_KEYS: readonly string[] = [
   'browser',
   'viewport',
   'recording',
+  'seekOriginCalibrationMs',
   'scratchPath',
   'totalRuntimeMs',
 ];
@@ -309,6 +322,10 @@ export function parseLaunchMessage(value: unknown): ParseResult<LaunchMessage> {
   if (!isPositiveNumber(record.totalRuntimeMs)) {
     problems.push({ code: PROTOCOL_CODES.invalidField, field: 'totalRuntimeMs' });
   }
+  // `0` is the common case, so `isPositiveNumber` would refuse the value production sends.
+  if (!isNonNegativeNumber(record.seekOriginCalibrationMs)) {
+    problems.push({ code: PROTOCOL_CODES.invalidField, field: 'seekOriginCalibrationMs' });
+  }
 
   if (problems.length > 0) return { ok: false, problems };
   return { ok: true, message: record as unknown as LaunchMessage };
@@ -370,12 +387,18 @@ function isPositiveNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value > 0;
 }
 
+function isNonNegativeNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
 /** Reads a child→parent message. Returns `null` for anything this parent does not recognise. */
 export function parseChildMessage(value: unknown): ChildMessage | null {
   if (!isRecord(value)) return null;
   switch (value.kind) {
     case 'ready':
-      return typeof value.browserStartedAt === 'string' && typeof value.startedAtMs === 'number'
+      return typeof value.browserStartedAt === 'string' &&
+        typeof value.startedAtMs === 'number' &&
+        (value.calibrationOffsetMs === undefined || typeof value.calibrationOffsetMs === 'number')
         ? (value as unknown as ReadyMessage)
         : null;
     case 'step-started':

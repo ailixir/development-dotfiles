@@ -50,7 +50,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { firstChangeAtOrAfter, sceneChanges } from './webm.js';
+import { firstChangeAtOrAfter, lastChangeAtOrBefore, sceneChanges } from './webm.js';
 import type { WebmFrame } from './webm.js';
 
 /** `firstChangeAtOrAfter`'s default before story 10.16b. Kept so check (a) stays executable. */
@@ -336,6 +336,40 @@ describe('AC-17 — the seek frame finder on frames from real AC-15 recordings',
       }
     }
     expect(checked).toBe(10);
+  });
+});
+
+/**
+ * Story 10.32 AC-7 — the signed lead the median failure message now prints.
+ *
+ * Every expected value is a literal read by hand off `changesMs` and `reportedMs` above, never
+ * produced by `lastChangeAtOrBefore` or a sibling helper (shape #11). The step 4 case is the run
+ * whose failure printed `+454.2ms`: the old forward match landed on 3360, and the change actually
+ * at or before the step is 2840, a lead of about −65.8 ms.
+ */
+describe('story 10.32 AC-7 — the nearest earlier change, for a signed lead', () => {
+  it('reads AC-15 run 7 step 4 as a small negative lead, not the printed +454.2 ms', () => {
+    const changes = sceneChanges(AC15_RUN7.frames);
+    const earlier = lastChangeAtOrBefore(changes, 2905.808625);
+    expect(earlier?.atMs).toBe(2840);
+    expect((earlier?.atMs ?? Number.NaN) - 2905.808625).toBeCloseTo(-65.808625, 6);
+    // The forward match under the old slack is the number the failure used to print.
+    expect(firstChangeAtOrAfter(changes, 2905.808625, UNMODIFIED_SLACK_MS)?.atMs).toBe(3360);
+  });
+
+  it('reads step 0 of both recordings against the recording’s own first frame', () => {
+    for (const recording of [AC15_RUN7, AC15_RUN3]) {
+      const earlier = lastChangeAtOrBefore(sceneChanges(recording.frames), 1.2);
+      expect(earlier?.atMs, recording.name).toBe(0);
+      expect((earlier?.atMs ?? Number.NaN) - 1.2, recording.name).toBeCloseTo(-1.2, 6);
+    }
+  });
+
+  it('takes a change exactly at the offset, and reports none before the first change', () => {
+    const changes = sceneChanges(AC15_RUN7.frames);
+    expect(lastChangeAtOrBefore(changes, 720)?.atMs).toBe(720);
+    expect(lastChangeAtOrBefore(changes, -1)).toBeNull();
+    expect(lastChangeAtOrBefore([], 100)).toBeNull();
   });
 });
 

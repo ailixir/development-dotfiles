@@ -51,6 +51,8 @@ const CANARY = 'fixtures-correspondence-canary-4b7e';
 function realLauncher(): ReturnType<typeof createChildBrowserLauncher> {
   return createChildBrowserLauncher({
     recording: { width: 640, height: 360 },
+    // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0 (story 10.32).
+    seekOriginCalibrationMs: 0,
     stepTimeoutMs: 30_000,
     launchTimeoutMs: 60_000,
     maxFailureMessageLength: 400,

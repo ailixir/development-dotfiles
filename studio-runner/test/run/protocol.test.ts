@@ -28,6 +28,7 @@ function validLaunch(overrides: Record<string, unknown> = {}): Record<string, un
     browser: 'chromium',
     viewport: { width: 1280, height: 720 },
     recording: { width: 1280, height: 720 },
+    seekOriginCalibrationMs: 0,
     scratchPath: '/scratch/run-1',
     totalRuntimeMs: 120_000,
     ...overrides,
@@ -64,6 +65,51 @@ describe('the boundary accepts the validated operation list, as data', () => {
     expect(parsed.message.steps[0]?.operations).toHaveLength(1);
     expect(parsed.message.secrets.PW).toBe('canary');
   });
+});
+
+/**
+ * Story 10.32 AC-3 — the seek-origin calibration crosses the boundary as validated data.
+ *
+ * `0` is what production sends, so it must validate (`isPositiveNumber` would refuse it). The
+ * `unknownKey` case is the guard on `ACCEPTED_LAUNCH_KEYS`: removing the key from that list while
+ * production still sends it reddens the first test here.
+ */
+describe('story 10.32 AC-3 — seekOriginCalibrationMs on the launch message', () => {
+  it('accepts the calibration production sends, 0, with no unknown-key problem', () => {
+    const parsed = parseLaunchMessage(validLaunch({ seekOriginCalibrationMs: 0 }));
+    expect(parsed.ok ? [] : parsed.problems).toEqual([]);
+    expect(parsed.ok && parsed.message.seekOriginCalibrationMs).toBe(0);
+  });
+
+  it('accepts a positive calibration', () => {
+    const parsed = parseLaunchMessage(validLaunch({ seekOriginCalibrationMs: 85 }));
+    expect(parsed.ok && parsed.message.seekOriginCalibrationMs).toBe(85);
+  });
+
+  it('refuses a launch message without it', () => {
+    const message = validLaunch();
+    delete message.seekOriginCalibrationMs;
+    const parsed = parseLaunchMessage(message);
+    expect(parsed.ok).toBe(false);
+    if (parsed.ok) return;
+    expect(parsed.problems).toContainEqual({
+      code: PROTOCOL_CODES.invalidField,
+      field: 'seekOriginCalibrationMs',
+    });
+  });
+
+  it.each([-1, -0.5, Number.NaN, Number.POSITIVE_INFINITY, '0', null])(
+    'refuses a calibration of %s',
+    (value) => {
+      const parsed = parseLaunchMessage(validLaunch({ seekOriginCalibrationMs: value }));
+      expect(parsed.ok).toBe(false);
+      if (parsed.ok) return;
+      expect(parsed.problems).toContainEqual({
+        code: PROTOCOL_CODES.invalidField,
+        field: 'seekOriginCalibrationMs',
+      });
+    },
+  );
 });
 
 describe('AC-3 — a message carrying a source field is refused', () => {
@@ -172,6 +218,14 @@ describe('the parent reads only what it recognises', () => {
     expect(
       parseChildMessage({ kind: 'ready', browserStartedAt: '2026-09-11T10:00:00.000Z', startedAtMs: 0 }),
     ).not.toBeNull();
+    expect(
+      parseChildMessage({
+        kind: 'ready',
+        browserStartedAt: '2026-09-11T10:00:00.000Z',
+        startedAtMs: 0,
+        calibrationOffsetMs: 0,
+      }),
+    ).not.toBeNull();
     expect(parseChildMessage({ kind: 'step-started', stepIndex: 0, startedAtMs: 1.5 })).not.toBeNull();
     expect(parseChildMessage({ kind: 'step-finished', stepIndex: 0, status: 'PASS' })).not.toBeNull();
     expect(parseChildMessage({ kind: 'result', ok: true })).not.toBeNull();
@@ -179,6 +233,14 @@ describe('the parent reads only what it recognises', () => {
 
   it('drops anything else rather than guessing at it', () => {
     expect(parseChildMessage({ kind: 'ready', browserStartedAt: 7, startedAtMs: 0 })).toBeNull();
+    expect(
+      parseChildMessage({
+        kind: 'ready',
+        browserStartedAt: '2026-09-11T10:00:00.000Z',
+        startedAtMs: 0,
+        calibrationOffsetMs: '0',
+      }),
+    ).toBeNull();
     expect(parseChildMessage({ kind: 'step-started', stepIndex: 'x', startedAtMs: 0 })).toBeNull();
     expect(parseChildMessage({ kind: 'step-finished', stepIndex: 0 })).toBeNull();
     expect(parseChildMessage({ kind: 'result' })).toBeNull();

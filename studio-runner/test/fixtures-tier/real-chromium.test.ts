@@ -360,6 +360,8 @@ describe('AC-20 — admission → real Chromium launch → STARTED (closes 10.6 
     return createHarness({
       launcher: createChildBrowserLauncher({
         recording: { width: 1280, height: 720 },
+        // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0 (story 10.32).
+        seekOriginCalibrationMs: 0,
         stepTimeoutMs: 10_000,
         launchTimeoutMs: 45_000,
         maxFailureMessageLength: 400,
@@ -446,6 +448,8 @@ describe('AC-20 — admission → real Chromium launch → STARTED (closes 10.6 
     const runner = createHarness({
       launcher: createChildBrowserLauncher({
         recording: { width: 1280, height: 720 },
+        // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0 (story 10.32).
+        seekOriginCalibrationMs: 0,
         stepTimeoutMs: 10_000,
         launchTimeoutMs: 45_000,
         maxFailureMessageLength: 400,

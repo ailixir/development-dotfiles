@@ -34,18 +34,24 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Operation } from '../../src/executor/operations.js';
 import { startPageServer } from '../helpers/pageServer.js';
 import type { PageServer } from '../helpers/pageServer.js';
-import { firstChangeAtOrAfter, readWebmFrames, sceneChanges } from '../helpers/webm.js';
+import { firstChangeAtOrAfter, lastChangeAtOrBefore, readWebmFrames, sceneChanges } from '../helpers/webm.js';
 import { runReal } from './realRunner.js';
 
 /**
  * The two bounds this test enforces, and why there are two.
  *
  * The *measurement* is the per-step error, and it is reported in full. The *assertion* has to
- * survive a detector that occasionally mis-attributes one step out of ten: a full-viewport repaint
- * does not always land in a single encoded frame, and when it does not, the automated frame finder
- * can pick the next scene change instead — hundreds of milliseconds later. That is a limitation of
- * reading the container rather than decoding it, not a property of the runner, and an assertion
- * that pretended otherwise would be flaky rather than strict.
+ * survive a detector that can still mis-attribute a step. Story 10.16b found that every
+ * mis-attribution happened when a repaint was stamped more than the helper's slack **before** the
+ * reported start: a systematic lead, most likely the readiness-to-first-frame gap AC-12c leaves to
+ * staging (ADR-002 §26.2). It never happened because a repaint was split across frames or missed
+ * outright. A lead past the slack is matched to the *next* change instead, hundreds of
+ * milliseconds later, so it shows up here as a large *positive* error rather than the small
+ * negative one it is. Calibrating that systematic part is AC-12c's, in the runner (§26.3), never a
+ * wider bound. Reading the container rather than decoding it is what limits the matcher; the
+ * runner is not at fault, and an assertion that pretended otherwise would be flaky, not strict.
+ * The two-bound design stays for the same reason as before: a median that one mis-attribution
+ * cannot move, plus an outlier bound that catches a process-origin reading.
  *
  * So:
  *
@@ -69,10 +75,11 @@ import { runReal } from './realRunner.js';
  * populations with nothing in between.
  *
  * - **Attributed correctly** — |error| from 0.8 ms to 59.3 ms. Forty-three of the fifty.
- * - **Mis-attributed** — the detector missed a repaint and matched the *next* scene change:
+ * - **Mis-attributed** — the old 60 ms slack let a repaint stamped before the reported start slip
+ *   past it, so the matcher took the *next* scene change instead of the one that was there:
  *   +137.0, +137.5, +374.0, +416.9 and +657.7 here, +376.4 and +650.4 in QA's run. Every one is
- *   positive and every one lands on a later change in the ~720 ms cadence, which is the signature
- *   of a missed match rather than of a timing error.
+ *   positive and every one lands on a later change in the ~720 ms cadence. That is the signature
+ *   of a slack too narrow for the lead, not of a detector missing a repaint that was never recorded.
  *
  * 1500 ms sits above the worst mis-attribution ever recorded (657.7 ms — a clean one-step skip,
  * 2222.3 ms reported against a change at 2880.0 ms) *plus a further full cadence* (720 ms), so a
@@ -257,7 +264,19 @@ describe('AC-12a — step-seek accuracy against a local fixture page', () => {
           const median = errors[Math.floor(errors.length / 2)] ?? Number.NaN;
           expect(
             median,
-            `median seek error was ${median.toFixed(1)}ms across ${String(errors.length)} steps`,
+            `median seek error was ${median.toFixed(1)}ms across ${String(errors.length)} steps; ` +
+              // Story 10.32 AC-7: each step's signed distance to the nearest earlier change, so a
+              // lead past the slack reads as a small negative number (ADR-002 §26.3 item 6).
+              measured
+                .map((step) => {
+                  const earlier = lastChangeAtOrBefore(changes, step.reportedMs);
+                  const lead =
+                    earlier === null
+                      ? 'no earlier change'
+                      : `signed lead ${(earlier.atMs - step.reportedMs).toFixed(1)}ms`;
+                  return `step ${String(step.stepIndex)}: ${lead}`;
+                })
+                .join(', '),
           ).toBeLessThan(MEDIAN_TOLERANCE_MS);
 
           // §6.4, asserted rather than described: the **assertion** step seeks to its start, not
