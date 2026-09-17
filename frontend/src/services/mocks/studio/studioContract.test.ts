@@ -785,6 +785,23 @@ describe('story 10.16a: every VideoStatus renders a distinct, named state (AC-1)
     }
   });
 
+  it('no fixture anywhere says partial: true without an AVAILABLE or PROCESSING recording (AC-14(c))', () => {
+    // ADR-002 §17.3: "It is `false` with `FAILED` and `UNAVAILABLE`, because a recording that does
+    // not exist is not a partial one." EXPIRED has no playable object either. Over every corpus the
+    // frontend ships, including the scripted transport frames that carried the defect.
+    const everySnapshot = [...mockExecutions, ...executionCorpus, ...ALL_SCENARIO_FRAMES];
+    expect(everySnapshot.some((snapshot) => snapshot.video.status === 'FAILED')).toBe(true);
+    const contradicting = everySnapshot.filter(
+      (snapshot) =>
+        snapshot.video.partial &&
+        snapshot.video.status !== 'AVAILABLE' &&
+        snapshot.video.status !== 'PROCESSING',
+    );
+    expect(
+      contradicting.map((snapshot) => `${snapshot.executionId}@${snapshot.revision}:${snapshot.video.status}`),
+    ).toEqual([]);
+  });
+
   it('a VideoStatus outside the document is an error rather than a generic panel', () => {
     expect(() => videoEvidenceNarrative('SOMETHING_ELSE')).toThrow(/Unknown VideoStatus/);
     // An inherited property name is not a state either.
