@@ -1562,3 +1562,56 @@ declares neither `401` nor `403` while its siblings declare both.
 
 Revised carry-forward for DEF-09: @dev repairs (a); (b) joins ESC-1 in @architect's queue as one
 question about this route's refusal surface rather than two.
+
+---
+
+## Wave 7 — opened (2026-09-16)
+
+### Integration moves to `epic/EPIC-10-w7`
+`epic/EPIC-10` is checked out only in `wt/epic`, which holds the unowned S3/object-storage work
+recorded above. **By the user's decision**, wave 7 integrates on `epic/EPIC-10-w7` (worktree `wt/w7`,
+from `e1684f8c7`); `wt/epic` stays untouched, and folding `-w7` back into `epic/EPIC-10` waits until
+that work's owner is identified. **Also by the user's decision:** narrow `--rerun-tasks` runs on a
+clean worktree are a **required** post-merge step (MED-2 is not escalated as blocking).
+
+### DEF-08 and DEF-09(a) — repaired, merged (`0152beba4`, merge `ded628b78`)
+Test-only, two files. `StudioOverloadIT`'s ordinary traffic carries the identity 10.18b gave
+`StudioApiIT` (no bypass reopened), and both measurements require all 40 requests served 2xx.
+`ExecutionVideoAuthorizationIT`: the identityless row expects 401 and says it proves nothing about
+quarantine (the administrator row carries that claim, 200 before / 403 after); body comparison
+replaces the literal `"traceId":"…"` with a token, asserted to occur **exactly once** on the 401 row
+and **zero** times elsewhere; video and 403 bodies are still hashed raw. DEF-09(b) untouched (@architect).
+
+**@dev found two more class-order defects in `StudioOverloadIT` while proving the pressure half still
+pressed:** client-closed SSE streams stay registered until a heartbeat write fails, so a second test's
+first stream got `429 SSE_POD_LIMIT` unchecked (now drained and asserted in `setUp`, each of 8 opens
+must be 200); and `ExecutionVideoAuthorizationIT` leaves 14 `DISPATCHING` rows that exhaust the global
+pending quota (now cleared ledger-wide, as `StudioCsiScopingIT` does). Nine mutations, all red where
+expected, all restored byte-identically.
+
+**Verified by the orchestrator:** diff is the two test files only; contract hash unchanged; the two
+classes **16 / 0 / 0**; merged `w7` backend is byte-identical to the fix tree, and the whole studio
+package on the clean `w7` tree with `--rerun-tasks` is **684 passed / 2 failed / 7 skipped (693)**,
+the two being ESC-1/ESC-2 exactly — down from 5 failures at wave-6 close.
+
+**Open, for @qa:** (1) an exact assertion that 8 SSE streams stay held under pressure saw **2** in one
+package run although all 8 opened 200 — withdrawn to avoid a flake, so "pressure is held for the whole
+measurement" is **unproven**; (2) one unexplained run where `ExecutionVideoAuthorizationIT` got 404 on
+every route; the rerun was clean. The class Javadoc of `ExecutionVideoAuthorizationIT` still describes
+the bypass as live (out of scope, left).
+
+### Story 10.16 — drafted, validated GO 9/10, split (merge `015f58c0f`)
+@sm drafted 20 ACs; @po validated **GO 9/10** (7/10 as drafted) and ruled:
+- **Size M → L** (eighth in a row) under SIZE-1 clause (b), via ADR-002 §18.3 and §17.4 — correcting
+  both the drafter's narrow reading and @po's own wave-6 comment, which had the right outcome for the
+  wrong reason.
+- **Split mandated:** 10.16a frontend (L) = AC-1…14, 19, 20, 21; 10.16b runner test helper (S) =
+  AC-15…18. No landing order; both before 10.19.
+- **AC-21 added:** an unowned `stepIndex * 10` seek (forbidden by architecture §6.4) and a legacy
+  player with an `.mp4` fallback in `ChecksStudioPage.tsx:461-468`.
+- Two drafted guards withdrawn because jsdom never loads media and they could not fail.
+- **@po withdrew its own earlier inference** that the seek flake failed the median bound: with five
+  steps the two reported outliers cannot move the median; which assertion failed is **unknown**.
+- AC-19 Blocked on SPK-06 phase B. ESC-1 + DEF-09(b) recorded as a non-blocking watch.
+- For @pm: SIZE-1 triggers only on ADR amendments, but scope also arrives through @po `story_context`
+  rulings; proposed that such rulings carry a size re-check in the same PR.
