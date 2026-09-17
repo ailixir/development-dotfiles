@@ -1701,3 +1701,36 @@ backlog) and @pm (the manifest). **Nothing merges across that line until they ha
 - For @architect: ESC-1 + DEF-09(b) as one question; F-5; O-10; the contract edit above.
 - For @qa: the SSE-pressure-held question and the stray 404 run from the DEF-08 repair; TEST-005.
 - For @devops: MED-2, the Gradle input declaration, ENV-1, ENV-2.
+
+---
+
+## Integration note for the studio-inference program (2026-09-17)
+
+**To the coordinator of stories 10.20–10.26:** `epic/EPIC-10` was fast-forwarded, by the user's
+decision, from `e1684f8c7` to `b343c232d` — the wave-7 line previously held on `epic/EPIC-10-w7`.
+It changes **31 files, none of which were among your uncommitted changes** in `wt/epic`; your working
+tree was left byte-identical (`git diff` sha256 `457162fe…` and all 146 `status -uall` entries,
+before and after). What arrived:
+- **DEF-08/DEF-09(a) repairs** (`StudioOverloadIT`, `ExecutionVideoAuthorizationIT`, test-only) —
+  10.18b's bypass closure had broken both. The class-order fixes in `StudioOverloadIT` mean it now
+  clears the whole dispatch ledger in `setUp` and waits for the SSE registry to drain.
+- **Story 10.16** (both halves QA PASS): frontend evidence panel, playback and step seek under
+  `frontend/src/components/studio/evidence/`, the page's legacy seek retired; and
+  `studio-runner/test/helpers/webm.ts` `slackMs` 60 → 100 with a boundary test in
+  `webm.test.ts` that reads `MEDIAN_TOLERANCE_MS` from `seek-measurement.test.ts` as text.
+- Story, gate and run-log documents.
+
+**Two things that now meet your work:**
+1. **`webm.test.ts` parses `seek-measurement.test.ts`** and fails to load unless it finds exactly one
+   top-level `const MEDIAN_TOLERANCE_MS = <number>;`. If you edit that file, keep that declaration's
+   form.
+2. **The contract pin.** Your tree re-pins `confinement.test.ts` to `09720ae2…` for the prose-only
+   10.20 amendment. Nothing on this line edits `openapi.yaml` or that pin, so there is no textual
+   conflict; recording the amendment in ADR-002 §13 is left to your 10.20 (user decision). The two
+   escalations still red on this line (ESC-1, and DEF-09(b)'s refusal-envelope split on
+   `getExecutionVideo`) are @architect questions that would edit the same document — please sequence
+   with them if 10.20 touches that route.
+
+Verification of the wave-7 line on a clean tree is in *Wave 7 — closed*, above. It was **not** re-run
+inside `wt/epic`, because your uncommitted changes (38 backend sources among them) make that tree a
+different system.
