@@ -2064,3 +2064,107 @@ wrong answer is a correctness fault should be abstract, not defaulted.
 Their tree is uncommitted. If they delete rather than demote before committing, the breakage I described
 becomes real after all. @architect could not compile their tree (it is read-only to us), so *"the four
 tests pass there"* is **inferred by inspection, not verified**.
+
+## Wave 9 — 10.19 gated and merged; the epic's local half is closed (2026-09-17)
+
+**10.19 merged at `833b45da4`**, gate **CONCERNS — merge safe** (`effaf1ce3`). The epic's last story.
+Not Done, correctly: its own definition of done forbids Done while any criterion is unexecuted.
+
+Delivered and independently verified: the runbook audit (5 drift corrections), the rollback procedure
+(new — zero occurrences of "rollback" existed in any of the four docs beforehand, verified at `HEAD~1`),
+the consolidated staging-acceptance register, the acceptance-linking mechanism, the register-sync guard,
+the `SPK-02`…`SPK-06` scaffolds, MED-2's mitigation applied to every suite run, and the
+non-absorption of stories 10.20–10.26.
+
+Every suite matched baseline exactly: backend **709/0/7**, frontend **548/2**, runner **984/29**,
+fixtures **90/10**, deployment **184/4**.
+
+### Nothing blocked was faked — checked in both directions
+
+@qa verified the seven blocked criteria are recorded *skipped, never passed* and that no local stand-in
+satisfies any of them: the only executables in the 15-file diff are a docs guard and a jsdom axe
+harness. It then checked the **opposite** direction — that the story does not conceal work it *did* do —
+and found the artifacts state their own emptiness plainly: *"NO SCREEN READER WAS RUN"*, *"Screen reader
+used | none — not run"*, *"Do not pre-fill a planned date"*. Honest both ways.
+
+### CORRECTION — the F-3 protocol is underpowered, not blind
+
+I reported, on @dev's finding, that AC-19(c)'s prescribed 20-run protocol **could not see** the F-3
+flake. That is wrong, and I repeated it twice.
+
+@qa ran the recipe verbatim under load 9.7→18.4 and got **18 green / 2 RED** — runs 13 and 18, both the
+same test (`reports a timeout as ambiguous`). Conversely the tier @dev credits gave **0 reds in 15 runs**
+at loads to 26.42. Pooled across both agents: **3 reds in 60 natural runs, ~5% either route.** The
+protocol detects the defect; it is simply too weak to be relied on, and @dev drew a categorical
+conclusion from a single 20/20 sample.
+
+@qa also found what neither of us had: **the protocol returns exit code 1 on every run, green ones
+included** (coverage thresholds, not test failure). `$?` is unusable on it, which makes @dev's decision
+to read counts rather than exit codes load-bearing care rather than style.
+
+Mechanism, read from source: `hits.push` fires on the server's `request.on('end')` against a 25 ms
+client deadline — **in-process event-loop latency, not CPU starvation**, which is why external spinners
+barely move it. **Ruling:** the narrow squeeze becomes the pass/fail instrument (100% reproducible,
+`1 failed | 5 passed` every time); counts, never exit codes; an N-run sweep is corroboration and never
+evidence of a fix. Routed to @po — it is AC text.
+
+### `DISCLOSURE-PIN-1` escalated to HIGH — a guard that penalises a correction
+
+`studio-runner/test/disclosure.test.ts` pins the phrase *"`ED-02`'s owner is unassigned"*. Both
+surviving occurrences of that phrase now sit **inside retractions** (`studio-runner.md:27` *"It no
+longer does"*; `:451` *"This item used to read"*). @qa removed the two quotations, leaving the runbook
+**strictly more accurate** — and the test went **red**, the single failure being the test whose own name
+asserts the opposite of the user's 2026-09-16 decision. This is worse than a vacuous guard: it is a
+guard that fails the document for becoming correct.
+
+### `AC-15`'s guard — six of @qa's seven probes survived
+
+@dev wrote 15+ falsifications and every one reddened. @qa wrote seven and **six stayed green**, because
+@dev probed the direction the guard covers and @qa probed the direction it does not:
+
+**the guard reads only the register's YAML front matter, so the register's *body* can contradict the
+manifest freely.** Surviving: flipping `ED-02` to `closed` in the body table; rewriting the body prose
+from *"all six read open"* to *"all six RESOLVED"*; blanking all six gate-owner anchors; deleting a
+`blocked_criteria` entry; flipping the spike summary table to CLOSED with the sections untouched; and
+repointing `AC-7` from `ED-02` to `ED-01`. The control (a real spike section flipped) went red, naming
+the spike and the direction — the guard is not vacuous, it is *narrow*.
+
+The **owner extension @dev added beyond the criterion** is confirmed in scope and load-bearing. Both
+routed to @po with a strength floor.
+
+This is the epic's clearest illustration of why the author's own falsifications are not sufficient: they
+are drawn from the same mental model as the guard.
+
+### The counting discrepancy — resolved, both agents were right
+
+@dev's log emitted no `PASSED` lines; mine did. Cause, established by controlled experiment on the same
+class with the same flags: `testLogging { events(...) }` configures Gradle's **LIFECYCLE** container,
+while `-i` selects the **INFO** container, whose default is `[FAILED, SKIPPED]` and which no
+`testLogging.info` block overrides. **3 PASSED without `-i`, 0 with `-i`**, tests executing in both.
+
+**Standing rule: aggregate JUnit XML**, which is invariant to log level and to Gradle's
+print-a-tally-only-on-failure habit — with the existing caveat that zero-length XML files have occurred
+in this repo, so corroborate on skipped/failed counts. Supersedes the event-line method the run log
+recorded earlier today.
+
+### Also confirmed
+- **`DEF-01` and `DEF-02` read `open` in the manifest but are fixed in code** — the dispatch body writes
+  all ten previously-missing keys and `RunnerEvidence` carries `partial`. Verified independently by
+  @dev, by @qa and by me. Stale bookkeeping, routed to @pm.
+- **`AC-14`** (the skip link) is satisfied for the fix, already landed in the other tree, but **not for
+  the test**: the landed assertion is a click, and `userEvent.tab()` appears nowhere. The property AC-14
+  names — first-`Tab` reachability — is unproven. Not held against 10.19; ENV-1(a) makes it unwritable
+  here.
+- **`AC-12`'s ticketing branch** was the right call: all seven surfaces carry critical/serious findings.
+  @qa falsified the harness in the direction @dev did not — it *fixed* a real control and watched the
+  pin redden on the shrink arm across exactly the five affected surfaces.
+- New env finding **`FE-FLAKE-1`**: `accessibility.test.tsx` failed once in four full runs, passes 9/9
+  alone. Logged so a future `547/3` is recognised rather than investigated.
+
+### Epic state at this point
+`epic/EPIC-10-w7` is **30 commits ahead** of `epic/EPIC-10`. The `--ff-only` fold is blocked by **13
+paths**, all dirty in the other session's tree. Twelve external gates remain open, **none of them ours**:
+`ED-01` still has no owner at all, and `ED-02`'s external ticket is still unlinked.
+
+**The local half of Epic 10 is closed. The capability is unvalidated, and no work in this repository can
+change that.**
