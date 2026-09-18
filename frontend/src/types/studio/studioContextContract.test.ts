@@ -1,0 +1,184 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
+import type { AuthoringV2Request, LiteralInput } from './studioTypes';
+import {
+  adaptLegacyStudioAuthoring,
+  isAuthoringV2Request,
+  validateStudioAuthoring,
+  type AuthoringValidationCategory,
+} from './legacyStudioAuthoringAdapter';
+
+const EXAMPLE_DIR = path.resolve(__dirname, '../../../../docs/specs/studio/examples');
+
+interface ValidCase {
+  name: string;
+  legacy?: { steps: string[] };
+  request?: unknown;
+  expected?: { steps: Array<{ id: string; text: string }> };
+  transition?: Record<string, unknown>;
+}
+
+interface InvalidCase {
+  name: string;
+  request: unknown;
+  expectedCategories: AuthoringValidationCategory[];
+}
+
+const validCases = (
+  JSON.parse(fs.readFileSync(path.join(EXAMPLE_DIR, 'context-authoring-valid.json'), 'utf8')) as {
+    cases: ValidCase[];
+  }
+).cases;
+const invalidCases = (
+  JSON.parse(fs.readFileSync(path.join(EXAMPLE_DIR, 'context-authoring-invalid.json'), 'utf8')) as {
+    cases: InvalidCase[];
+  }
+).cases;
+
+function validCase(name: string): ValidCase {
+  const fixture = validCases.find((candidate) => candidate.name === name);
+  if (!fixture) throw new Error(`Missing shared fixture ${name}`);
+  return fixture;
+}
+
+describe('Story 10.34 shared authoring contract fixtures', () => {
+  it('enumerates the required valid and invalid corpus', () => {
+    expect(validCases.map(({ name }) => name)).toEqual([
+      'legacy-empty-context',
+      'global-and-step-context',
+      'reorder-retains-identities',
+      'copy-creates-fresh-identity',
+      'delete-removes-only-deleted-metadata',
+      'exact-literals',
+      'login-then-protected-navigation',
+    ]);
+    expect(invalidCases.map(({ name }) => name)).toEqual([
+      'missing-step-id',
+      'duplicate-step-id',
+      'mixed-legacy-v2-steps',
+      'orphan-evidence-step-id',
+      'unsupported-v2-field',
+      'secret-reference-in-global-context',
+      'secret-reference-as-contextual-default',
+      'author-claims-observed-provenance',
+    ]);
+  });
+
+  it.each(validCases.filter(({ request }) => request !== undefined))(
+    'accepts valid fixture $name',
+    ({ request }) => {
+      expect(validateStudioAuthoring(request)).toEqual([]);
+      expect(isAuthoringV2Request(request)).toBe(true);
+    },
+  );
+
+  it.each(invalidCases)('rejects invalid fixture $name with its declared category', (fixture) => {
+    const categories = validateStudioAuthoring(fixture.request).map(({ category }) => category);
+    for (const expected of fixture.expectedCategories) expect(categories).toContain(expected);
+    expect(isAuthoringV2Request(fixture.request)).toBe(false);
+  });
+
+  it('adapts the shared legacy fixture with exact text and fixture-specified stable IDs', () => {
+    const fixture = validCase('legacy-empty-context');
+    if (!fixture.legacy || !fixture.expected) throw new Error('Incomplete legacy fixture');
+    let index = 0;
+    const adapted = adaptLegacyStudioAuthoring(
+      fixture.legacy,
+      () => fixture.expected!.steps[index++].id,
+    );
+
+    expect(adapted).toEqual(fixture.expected);
+    expect(adapted.steps.every((step) => !('context' in step))).toBe(true);
+  });
+
+  it('preserves empty, Unicode, quoted, backslash, newline and surrounding-space literals', () => {
+    const request = validCase('exact-literals').request as AuthoringV2Request;
+    const roundTripped = JSON.parse(JSON.stringify(request)) as AuthoringV2Request;
+    const literals = roundTripped.steps.flatMap((step) =>
+      (step.context?.entries ?? []).filter((entry): entry is LiteralInput => entry.kind === 'literal'),
+    );
+
+    expect(literals.map(({ value }) => value)).toEqual([
+      '',
+      '  Café 東京 "quoted" C:\\tmp\\file\nsecond line !@#$%^&*()  ',
+    ]);
+  });
+
+  it('encodes identity transitions independently of array position', () => {
+    const reorder = validCase('reorder-retains-identities');
+    const copy = validCase('copy-creates-fresh-identity');
+    const deletion = validCase('delete-removes-only-deleted-metadata');
+
+    expect(reorder.transition?.afterStepIds).toEqual(
+      (reorder.request as AuthoringV2Request).steps.map(({ id }) => id),
+    );
+    expect(copy.transition?.sourceStepId).not.toBe(copy.transition?.copiedStepId);
+    expect((deletion.request as AuthoringV2Request).steps.map(({ id }) => id)).toEqual(
+      deletion.transition?.retainedStepIds,
+    );
+    expect((deletion.request as AuthoringV2Request).steps.map(({ id }) => id)).not.toContain(
+      deletion.transition?.deletedStepId,
+    );
+  });
+
+  it('keeps author-submitted evidence supplied while server-held provenance can represent observed', () => {
+    const accepted = validCase('global-and-step-context').request as AuthoringV2Request;
+    expect(accepted.globalContext?.evidenceReferences?.map(({ source }) => source)).toEqual([
+      'supplied',
+    ]);
+
+    const falseClaim = invalidCases.find(
+      ({ name }) => name === 'author-claims-observed-provenance',
+    );
+    expect(validateStudioAuthoring(falseClaim?.request)).toContainEqual({
+      category: 'FALSE_OBSERVED_PROVENANCE',
+      path: '$.steps[0].context.evidenceReferences[0].source',
+    });
+  });
+
+  it('keeps stable identities, opaque credentials and state-specific evidence across login navigation', () => {
+    const request = validCase('login-then-protected-navigation').request as AuthoringV2Request;
+    const stepIds = request.steps.map(({ id }) => id);
+
+    expect(stepIds).toEqual([
+      '00000000-0000-4000-8000-000000000070',
+      '00000000-0000-4000-8000-000000000071',
+      '00000000-0000-4000-8000-000000000072',
+      '00000000-0000-4000-8000-000000000073',
+      '00000000-0000-4000-8000-000000000074',
+      '00000000-0000-4000-8000-000000000075',
+    ]);
+    expect(new Set(stepIds).size).toBe(stepIds.length);
+
+    const passwordStep = request.steps.find(({ id }) => id.endsWith('71'));
+    const passwordReferences = (passwordStep?.context?.entries ?? []).filter(
+      (entry) => entry.kind === 'secretRef',
+    );
+    expect(passwordReferences).toEqual([
+      { kind: 'secretRef', referenceId: 'vault://studio/protected-page-password' },
+    ]);
+    expect(passwordReferences.every((reference) => !('value' in reference))).toBe(true);
+    expect(passwordStep?.context?.entries?.some((entry) => entry.kind === 'literal')).toBe(false);
+
+    const evidenceBindings = request.steps.flatMap((step) =>
+      (step.context?.evidenceReferences ?? []).map((evidence) => {
+        expect(evidence.stepId).toBe(step.id);
+        expect(evidence.source).toBe('supplied');
+        return { stepId: evidence.stepId, route: evidence.route, state: evidence.state };
+      }),
+    );
+    expect(evidenceBindings).toEqual([
+      { stepId: stepIds[0], route: '/login', state: 'anonymous-login' },
+      { stepId: stepIds[1], route: '/login', state: 'anonymous-login' },
+      { stepId: stepIds[2], route: '/login', state: 'credentials-entered' },
+      { stepId: stepIds[3], route: '/home', state: 'authenticated-home' },
+      { stepId: stepIds[4], route: '/home', state: 'authenticated-home' },
+      {
+        stepId: stepIds[5],
+        route: '/reports/protected',
+        state: 'authenticated-protected',
+      },
+    ]);
+  });
+});

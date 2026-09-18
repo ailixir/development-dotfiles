@@ -1,0 +1,372 @@
+{
+  "contractVersion": 2,
+  "cases": [
+    {
+      "name": "legacy-empty-context",
+      "legacy": {
+        "steps": [
+          "  Open Café ☕  ",
+          "Type \"A\\B\"\nnext line"
+        ]
+      },
+      "expected": {
+        "authoringSchemaVersion": 2,
+        "steps": [
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "text": "  Open Café ☕  "
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "text": "Type \"A\\B\"\nnext line"
+          }
+        ]
+      },
+      "invariants": ["text-byte-for-byte", "stable-id-assigned-once", "empty-context"]
+    },
+    {
+      "name": "global-and-step-context",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "globalContext": {
+          "entries": [
+            {"kind": "text", "value": "Customer search is in the authenticated header."},
+            {
+              "kind": "targetHint",
+              "strategy": "role",
+              "value": "searchbox",
+              "scope": "banner",
+              "exact": true
+            },
+            {
+              "kind": "default",
+              "name": "searchTerm",
+              "value": {"kind": "variableRef", "referenceId": "SEARCH_DEFAULT"}
+            }
+          ],
+          "evidenceReferences": [
+            {
+              "id": "10000000-0000-4000-8000-000000000001",
+              "revision": 3,
+              "source": "supplied",
+              "csiId": "60406",
+              "environment": "Production",
+              "route": "/customers",
+              "state": "authenticated-header",
+              "stepId": "00000000-0000-4000-8000-000000000010",
+              "capturedAt": "2026-09-18T12:00:00Z",
+              "completeness": "partial",
+              "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "id": "00000000-0000-4000-8000-000000000010",
+            "text": "Search for \"quarter-end exposure\"",
+            "context": {
+              "entries": [
+                {"kind": "text", "value": "Use the customer search, not global navigation."},
+                {"kind": "literal", "value": "quarter-end exposure"},
+                {"kind": "targetHint", "strategy": "label", "value": "Customer Search"}
+              ],
+              "evidenceReferences": [
+                {
+                  "id": "10000000-0000-4000-8000-000000000001",
+                  "revision": 3,
+                  "source": "supplied",
+                  "csiId": "60406",
+                  "environment": "Production",
+                  "route": "/customers",
+                  "state": "authenticated-header",
+                  "stepId": "00000000-0000-4000-8000-000000000010",
+                  "capturedAt": "2026-09-18T12:00:00Z",
+                  "completeness": "partial",
+                  "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                }
+              ]
+            }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000011",
+            "text": "Enter the authorized password",
+            "context": {
+              "entries": [
+                {"kind": "secretRef", "referenceId": "vault://studio/customer-password"}
+              ]
+            }
+          }
+        ]
+      },
+      "expectedPrecedence": ["policy", "explicitStep", "stepContext", "globalContext"],
+      "revisionInputs": [
+        "globalContext",
+        "stepContexts",
+        "nonsecretReferencedValues",
+        "selectedEvidenceReferences"
+      ]
+    },
+    {
+      "name": "reorder-retains-identities",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "steps": [
+          {"id": "00000000-0000-4000-8000-000000000022", "text": "Second"},
+          {"id": "00000000-0000-4000-8000-000000000021", "text": "First"}
+        ]
+      },
+      "transition": {
+        "operation": "reorder",
+        "beforeStepIds": [
+          "00000000-0000-4000-8000-000000000021",
+          "00000000-0000-4000-8000-000000000022"
+        ],
+        "afterStepIds": [
+          "00000000-0000-4000-8000-000000000022",
+          "00000000-0000-4000-8000-000000000021"
+        ]
+      }
+    },
+    {
+      "name": "copy-creates-fresh-identity",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "steps": [
+          {"id": "00000000-0000-4000-8000-000000000031", "text": "Click Search"},
+          {"id": "00000000-0000-4000-8000-000000000032", "text": "Click Search"}
+        ]
+      },
+      "transition": {
+        "operation": "copy",
+        "sourceStepId": "00000000-0000-4000-8000-000000000031",
+        "copiedStepId": "00000000-0000-4000-8000-000000000032"
+      }
+    },
+    {
+      "name": "delete-removes-only-deleted-metadata",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "steps": [
+          {
+            "id": "00000000-0000-4000-8000-000000000042",
+            "text": "Retained step",
+            "context": {"entries": [{"kind": "text", "value": "retained metadata"}]}
+          }
+        ]
+      },
+      "transition": {
+        "operation": "delete",
+        "deletedStepId": "00000000-0000-4000-8000-000000000041",
+        "retainedStepIds": ["00000000-0000-4000-8000-000000000042"]
+      }
+    },
+    {
+      "name": "exact-literals",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "steps": [
+          {
+            "id": "00000000-0000-4000-8000-000000000051",
+            "text": "Fill the notes field",
+            "context": {"entries": [{"kind": "literal", "value": ""}]}
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000052",
+            "text": "Fill the notes field exactly",
+            "context": {
+              "entries": [
+                {"kind": "literal", "value": "  Café 東京 \"quoted\" C:\\tmp\\file\nsecond line !@#$%^&*()  "}
+              ]
+            }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000053",
+            "text": "Fill from a nonsecret reference",
+            "context": {"entries": [{"kind": "variableRef", "referenceId": "CUSTOMER_QUERY"}]}
+          }
+        ]
+      },
+      "invariants": ["literal-exact", "no-trim", "no-escape-rewrite", "reference-remains-opaque"]
+    },
+    {
+      "name": "login-then-protected-navigation",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "globalContext": {
+          "entries": [
+            {"kind": "text", "value": "Authenticate before opening the protected reports page."}
+          ]
+        },
+        "steps": [
+          {
+            "id": "00000000-0000-4000-8000-000000000070",
+            "text": "Enter the authorized username",
+            "context": {
+              "entries": [
+                {"kind": "variableRef", "referenceId": "LOGIN_USERNAME"},
+                {"kind": "targetHint", "strategy": "label", "value": "Username", "exact": true}
+              ],
+              "evidenceReferences": [
+                {
+                  "id": "10000000-0000-4000-8000-000000000070",
+                  "revision": 1,
+                  "source": "supplied",
+                  "csiId": "60406",
+                  "environment": "Production",
+                  "route": "/login",
+                  "state": "anonymous-login",
+                  "stepId": "00000000-0000-4000-8000-000000000070",
+                  "capturedAt": "2026-09-18T14:00:00Z",
+                  "completeness": "partial",
+                  "hash": "7070707070707070707070707070707070707070707070707070707070707070"
+                }
+              ]
+            }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000071",
+            "text": "Enter the authorized password",
+            "context": {
+              "entries": [
+                {"kind": "secretRef", "referenceId": "vault://studio/protected-page-password"},
+                {"kind": "targetHint", "strategy": "label", "value": "Password", "exact": true}
+              ],
+              "evidenceReferences": [
+                {
+                  "id": "10000000-0000-4000-8000-000000000071",
+                  "revision": 1,
+                  "source": "supplied",
+                  "csiId": "60406",
+                  "environment": "Production",
+                  "route": "/login",
+                  "state": "anonymous-login",
+                  "stepId": "00000000-0000-4000-8000-000000000071",
+                  "capturedAt": "2026-09-18T14:00:00Z",
+                  "completeness": "partial",
+                  "hash": "7171717171717171717171717171717171717171717171717171717171717171"
+                }
+              ]
+            }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000072",
+            "text": "Submit the login form",
+            "context": {
+              "entries": [
+                {"kind": "targetHint", "strategy": "role", "value": "button", "scope": "Sign in", "exact": true}
+              ],
+              "evidenceReferences": [
+                {
+                  "id": "10000000-0000-4000-8000-000000000072",
+                  "revision": 1,
+                  "source": "supplied",
+                  "csiId": "60406",
+                  "environment": "Production",
+                  "route": "/login",
+                  "state": "credentials-entered",
+                  "stepId": "00000000-0000-4000-8000-000000000072",
+                  "capturedAt": "2026-09-18T14:00:00Z",
+                  "completeness": "partial",
+                  "hash": "7272727272727272727272727272727272727272727272727272727272727272"
+                }
+              ]
+            }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000073",
+            "text": "Verify the authenticated home page is shown",
+            "context": {
+              "entries": [
+                {"kind": "targetHint", "strategy": "role", "value": "heading", "scope": "Welcome", "exact": true}
+              ],
+              "evidenceReferences": [
+                {
+                  "id": "10000000-0000-4000-8000-000000000073",
+                  "revision": 2,
+                  "source": "supplied",
+                  "csiId": "60406",
+                  "environment": "Production",
+                  "route": "/home",
+                  "state": "authenticated-home",
+                  "stepId": "00000000-0000-4000-8000-000000000073",
+                  "capturedAt": "2026-09-18T14:05:00Z",
+                  "completeness": "partial",
+                  "hash": "7373737373737373737373737373737373737373737373737373737373737373"
+                }
+              ]
+            }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000074",
+            "text": "Navigate to the protected reports page",
+            "context": {
+              "entries": [
+                {"kind": "targetHint", "strategy": "text", "value": "Protected reports", "exact": true}
+              ],
+              "evidenceReferences": [
+                {
+                  "id": "10000000-0000-4000-8000-000000000074",
+                  "revision": 2,
+                  "source": "supplied",
+                  "csiId": "60406",
+                  "environment": "Production",
+                  "route": "/home",
+                  "state": "authenticated-home",
+                  "stepId": "00000000-0000-4000-8000-000000000074",
+                  "capturedAt": "2026-09-18T14:05:00Z",
+                  "completeness": "partial",
+                  "hash": "7474747474747474747474747474747474747474747474747474747474747474"
+                }
+              ]
+            }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000075",
+            "text": "Verify the protected reports page is shown",
+            "context": {
+              "entries": [
+                {"kind": "targetHint", "strategy": "role", "value": "heading", "scope": "Protected reports", "exact": true}
+              ],
+              "evidenceReferences": [
+                {
+                  "id": "10000000-0000-4000-8000-000000000075",
+                  "revision": 4,
+                  "source": "supplied",
+                  "csiId": "60406",
+                  "environment": "Production",
+                  "route": "/reports/protected",
+                  "state": "authenticated-protected",
+                  "stepId": "00000000-0000-4000-8000-000000000075",
+                  "capturedAt": "2026-09-18T14:10:00Z",
+                  "completeness": "partial",
+                  "hash": "7575757575757575757575757575757575757575757575757575757575757575"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "learnProposal": {
+        "contractOnly": true,
+        "mode": "page-aware-per-step-state",
+        "stateSequence": [
+          {"stepId": "00000000-0000-4000-8000-000000000070", "route": "/login", "state": "anonymous-login"},
+          {"stepId": "00000000-0000-4000-8000-000000000071", "route": "/login", "state": "anonymous-login"},
+          {"stepId": "00000000-0000-4000-8000-000000000072", "route": "/login", "state": "credentials-entered"},
+          {"stepId": "00000000-0000-4000-8000-000000000073", "route": "/home", "state": "authenticated-home"},
+          {"stepId": "00000000-0000-4000-8000-000000000074", "route": "/home", "state": "authenticated-home"},
+          {"stepId": "00000000-0000-4000-8000-000000000075", "route": "/reports/protected", "state": "authenticated-protected"}
+        ],
+        "normalExecution": "confirmed-artifact-llm-free"
+      },
+      "invariants": [
+        "stable-step-identities",
+        "password-remains-secret-reference",
+        "supplied-evidence-only",
+        "evidence-step-id-match",
+        "state-specific-evidence",
+        "normal-execution-llm-free"
+      ]
+    }
+  ]
+}

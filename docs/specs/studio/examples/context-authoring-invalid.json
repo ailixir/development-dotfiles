@@ -1,0 +1,129 @@
+{
+  "contractVersion": 2,
+  "cases": [
+    {
+      "name": "missing-step-id",
+      "request": {"authoringSchemaVersion": 2, "steps": [{"text": "Click Search"}]},
+      "expectedCategories": ["MISSING_STEP_ID"]
+    },
+    {
+      "name": "duplicate-step-id",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "steps": [
+          {"id": "00000000-0000-4000-8000-000000000061", "text": "First"},
+          {"id": "00000000-0000-4000-8000-000000000061", "text": "Second"}
+        ]
+      },
+      "expectedCategories": ["DUPLICATE_STEP_ID"]
+    },
+    {
+      "name": "mixed-legacy-v2-steps",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "steps": [
+          "Legacy string",
+          {"id": "00000000-0000-4000-8000-000000000062", "text": "V2 object"}
+        ]
+      },
+      "expectedCategories": ["MIXED_STEP_SHAPES"]
+    },
+    {
+      "name": "orphan-evidence-step-id",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "globalContext": {
+          "evidenceReferences": [
+            {
+              "id": "10000000-0000-4000-8000-000000000063",
+              "revision": 1,
+              "source": "supplied",
+              "csiId": "60406",
+              "environment": "Production",
+              "route": "/",
+              "state": "landing",
+              "stepId": "00000000-0000-4000-8000-000000009999",
+              "capturedAt": "2026-09-18T12:00:00Z",
+              "completeness": "unknown",
+              "hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            }
+          ]
+        },
+        "steps": [{"id": "00000000-0000-4000-8000-000000000063", "text": "Open the page"}]
+      },
+      "expectedCategories": ["ORPHAN_STEP_ID"]
+    },
+    {
+      "name": "unsupported-v2-field",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "steps": [{"id": "00000000-0000-4000-8000-000000000064", "text": "Open the page"}],
+        "rawObservedDom": "<button>do not trust me</button>"
+      },
+      "expectedCategories": ["UNSUPPORTED_FIELD"]
+    },
+    {
+      "name": "secret-reference-in-global-context",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "globalContext": {
+          "entries": [{"kind": "secretRef", "referenceId": "vault://studio/password"}]
+        },
+        "steps": [{"id": "00000000-0000-4000-8000-000000000065", "text": "Open the page"}]
+      },
+      "expectedCategories": ["INVALID_SECRET_PLACEMENT"]
+    },
+    {
+      "name": "secret-reference-as-contextual-default",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "steps": [
+          {
+            "id": "00000000-0000-4000-8000-000000000066",
+            "text": "Fill Password",
+            "context": {
+              "entries": [
+                {
+                  "kind": "default",
+                  "name": "password",
+                  "value": {"kind": "secretRef", "referenceId": "vault://studio/password"}
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expectedCategories": ["INVALID_REFERENCE_PLACEMENT"]
+    },
+    {
+      "name": "author-claims-observed-provenance",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "steps": [
+          {
+            "id": "00000000-0000-4000-8000-000000000067",
+            "text": "Click Sign On",
+            "context": {
+              "evidenceReferences": [
+                {
+                  "id": "10000000-0000-4000-8000-000000000067",
+                  "revision": 1,
+                  "source": "observed",
+                  "csiId": "60406",
+                  "environment": "Production",
+                  "route": "/login",
+                  "state": "anonymous",
+                  "stepId": "00000000-0000-4000-8000-000000000067",
+                  "capturedAt": "2026-09-18T12:00:00Z",
+                  "completeness": "complete",
+                  "hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expectedCategories": ["FALSE_OBSERVED_PROVENANCE"]
+    }
+  ]
+}

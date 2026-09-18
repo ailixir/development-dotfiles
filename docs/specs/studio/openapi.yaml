@@ -54,6 +54,33 @@ info:
     Routes marked `x-not-yet-implemented: true` are declared here so that dependent stories build
     against one frozen shape. Story 10.1 ships the contract, the schema and the snapshot DTO;
     dispatch (10.7), compilation (10.8) and confirmation (10.9) ship the behaviour.
+
+    **Authoring context v2.** `AuthoringV2Request` is the frozen context-aware authoring body.
+    It keeps stable step identity separate from array position, preserves `text` exactly and
+    carries optional test-wide and step-local context. `LegacyAuthoringRequest` remains the input
+    to the documented adapter: each ordered string is copied byte-for-byte into v2 `text`, an ID
+    is assigned once at migration/save (never derived from array position), and both context
+    scopes start empty. Mixed legacy/v2 arrays and duplicate or missing IDs are rejected. Reorder
+    and edit retain IDs; insertion creates an ID; copy creates a fresh ID; deletion removes only
+    the deleted step and its metadata.
+
+    Explicit step intent/value takes precedence over step context, which takes precedence over
+    global context; authorization, origin, secret-use and accepted-language policy always remains
+    authoritative. A contradiction that precedence cannot resolve is published as a diagnostic,
+    never silently substituted. Global context, step context, referenced nonsecret values and
+    selected evidence references are execution-affecting revision inputs. A stale compile may not
+    publish over a newer input identity, and any such edit requires a new candidate and explicit
+    confirmation; persistence and state transitions are owned by later stories.
+
+    Ordinary Compile remains browser-free. Run executes only an exactly confirmed artifact and is
+    LLM-free. This contract adds no learning/capture endpoint or browser action. An author may
+    select a `supplied` evidence reference only; `observed` provenance is minted by a future trusted
+    capture boundary and cannot be asserted by an imported or user-authored request. A future
+    Learn flow is page-aware at each changing step state: login-page evidence does not prove the
+    authenticated page, and authenticated-page evidence does not prove the protected destination.
+    Learn may use the applicable state to propose each step for review; after confirmation, normal
+    execution runs the immutable artifact without an LLM. These are contract boundaries, not a
+    claim that this story implements live observation or Learn behaviour.
 servers:
   # Public, browser-facing base only. Every `internal`-tagged path item overrides this with its
   # own `servers` entry; none of them is served under `/api/v1/studio` (architecture §8.4).
@@ -1358,6 +1385,359 @@ components:
           nullable: true
           description: Present for `secretRef` only. A reference; a resolved secret is never carried on this contract.
 
+    LegacyAuthoringRequest:
+      type: object
+      additionalProperties: false
+      required: [steps]
+      description: |
+        The pre-v2 ordered authoring source. The adapter copies every string byte-for-byte into
+        `AuthoringStep.text`, assigns a stable UUID once at migration/save and supplies no context.
+        IDs must never be derived from array position, because reorder must not change identity.
+      properties:
+        steps:
+          type: array
+          maxItems: 100
+          items: { type: string, maxLength: 500 }
+
+    AuthoringV2Request:
+      type: object
+      additionalProperties: false
+      required: [authoringSchemaVersion, steps]
+      description: |
+        Canonical context-aware authoring source. The array is presentation order; `id` is
+        identity. `globalContext` and each step's `context` are optional and semantically empty
+        when absent. Unknown fields, mixed string/object steps, missing IDs and duplicate IDs are
+        invalid. `x-unique-by` is a machine-readable cross-item invariant implemented by both
+        pure-model validators because OpenAPI 3.0 `uniqueItems` cannot compare one object field.
+      properties:
+        authoringSchemaVersion: { type: integer, enum: [2] }
+        globalContext: { $ref: '#/components/schemas/GlobalAuthoringContext' }
+        steps:
+          type: array
+          maxItems: 100
+          x-unique-by: id
+          items: { $ref: '#/components/schemas/AuthoringStep' }
+
+    AuthoringV2Response:
+      type: object
+      additionalProperties: false
+      required: [authoringSchemaVersion, steps]
+      description: |
+        Round-tripped v2 authoring source plus optional immutable-revision and review projections.
+        The source fields retain the same exact values and identity invariants as the request.
+      properties:
+        authoringSchemaVersion: { type: integer, enum: [2] }
+        globalContext: { $ref: '#/components/schemas/GlobalAuthoringContext' }
+        steps:
+          type: array
+          maxItems: 100
+          x-unique-by: id
+          items: { $ref: '#/components/schemas/AuthoringStep' }
+        revisionInputs: { $ref: '#/components/schemas/AuthoringRevisionInputs' }
+        review:
+          type: array
+          items: { $ref: '#/components/schemas/ResolvedStepReview' }
+
+    AuthoringStep:
+      type: object
+      additionalProperties: false
+      required: [id, text]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Stable identity. Retained on edit/reorder; fresh on insertion/copy.
+        text:
+          type: string
+          maxLength: 500
+          description: Exact authored source, including empty, Unicode and whitespace values.
+        context: { $ref: '#/components/schemas/StepAuthoringContext' }
+
+    GlobalAuthoringContext:
+      type: object
+      additionalProperties: false
+      properties:
+        entries:
+          type: array
+          items:
+            oneOf:
+              - { $ref: '#/components/schemas/ContextText' }
+              - { $ref: '#/components/schemas/TargetHint' }
+              - { $ref: '#/components/schemas/ContextualDefault' }
+            discriminator:
+              propertyName: kind
+        evidenceReferences:
+          type: array
+          items: { $ref: '#/components/schemas/AuthoringEvidenceReference' }
+
+    StepAuthoringContext:
+      type: object
+      additionalProperties: false
+      properties:
+        entries:
+          type: array
+          items:
+            oneOf:
+              - { $ref: '#/components/schemas/ContextText' }
+              - { $ref: '#/components/schemas/LiteralInput' }
+              - { $ref: '#/components/schemas/VariableReference' }
+              - { $ref: '#/components/schemas/SecretReference' }
+              - { $ref: '#/components/schemas/TargetHint' }
+              - { $ref: '#/components/schemas/ContextualDefault' }
+            discriminator:
+              propertyName: kind
+        evidenceReferences:
+          type: array
+          items: { $ref: '#/components/schemas/AuthoringEvidenceReference' }
+
+    ContextText:
+      type: object
+      additionalProperties: false
+      required: [kind, value]
+      properties:
+        kind: { type: string, enum: [text] }
+        value: { type: string }
+
+    LiteralInput:
+      type: object
+      additionalProperties: false
+      required: [kind, value]
+      description: Explicit step input. `value` is exact and may be empty.
+      properties:
+        kind: { type: string, enum: [literal] }
+        value: { type: string }
+
+    VariableReference:
+      type: object
+      additionalProperties: false
+      required: [kind, referenceId]
+      description: Opaque nonsecret value reference; the referenced value is a revision input.
+      properties:
+        kind: { type: string, enum: [variableRef] }
+        referenceId: { type: string, minLength: 1 }
+
+    SecretReference:
+      type: object
+      additionalProperties: false
+      required: [kind, referenceId]
+      description: Opaque secret reference permitted only as explicit step input.
+      properties:
+        kind: { type: string, enum: [secretRef] }
+        referenceId: { type: string, minLength: 1 }
+
+    TargetHint:
+      type: object
+      additionalProperties: false
+      required: [kind, strategy, value]
+      properties:
+        kind: { type: string, enum: [targetHint] }
+        strategy: { type: string, enum: [role, label, testId, text] }
+        value: { type: string, minLength: 1 }
+        scope: { type: string }
+        exact: { type: boolean, default: false }
+
+    ContextualDefault:
+      type: object
+      additionalProperties: false
+      required: [kind, name, value]
+      description: A nonsecret contextual default; explicit current-step input wins.
+      properties:
+        kind: { type: string, enum: [default] }
+        name: { type: string, minLength: 1 }
+        value:
+          oneOf:
+            - { $ref: '#/components/schemas/DefaultLiteralValue' }
+            - { $ref: '#/components/schemas/DefaultVariableValue' }
+          discriminator:
+            propertyName: kind
+
+    DefaultLiteralValue:
+      type: object
+      additionalProperties: false
+      required: [kind, value]
+      properties:
+        kind: { type: string, enum: [literal] }
+        value: { type: string }
+
+    DefaultVariableValue:
+      type: object
+      additionalProperties: false
+      required: [kind, referenceId]
+      properties:
+        kind: { type: string, enum: [variableRef] }
+        referenceId: { type: string, minLength: 1 }
+
+    AuthoringEvidenceReference:
+      type: object
+      additionalProperties: false
+      required: [id, revision, source, csiId, environment, route, state, stepId, capturedAt, completeness, hash]
+      description: |
+        Evidence an author may select. `source` is deliberately restricted to `supplied`:
+        imported/user-authored data cannot claim trusted observed provenance.
+      properties:
+        id: { type: string, format: uuid }
+        revision: { type: integer, format: int64, minimum: 1 }
+        source: { type: string, enum: [supplied] }
+        csiId: { type: string, maxLength: 20 }
+        environment: { type: string, maxLength: 50 }
+        route: { type: string, minLength: 1 }
+        state: { type: string, minLength: 1 }
+        stepId:
+          type: string
+          format: uuid
+          x-reference-target: AuthoringV2Request.steps.id
+        capturedAt: { type: string, format: date-time }
+        completeness: { type: string, enum: [complete, partial, unknown] }
+        hash: { type: string, pattern: '^[a-f0-9]{64}$' }
+
+    EvidenceReference:
+      type: object
+      additionalProperties: false
+      required: [id, revision, source, csiId, environment, route, state, stepId, capturedAt, completeness, hash]
+      description: Server-held reference. Only a trusted capture boundary may mint `observed`.
+      properties:
+        id: { type: string, format: uuid }
+        revision: { type: integer, format: int64, minimum: 1 }
+        source: { type: string, enum: [supplied, observed] }
+        csiId: { type: string, maxLength: 20 }
+        environment: { type: string, maxLength: 50 }
+        route: { type: string, minLength: 1 }
+        state: { type: string, minLength: 1 }
+        stepId: { type: string, format: uuid }
+        capturedAt: { type: string, format: date-time }
+        completeness: { type: string, enum: [complete, partial, unknown] }
+        hash: { type: string, pattern: '^[a-f0-9]{64}$' }
+
+    AuthoringRevisionInputs:
+      type: object
+      additionalProperties: false
+      required: [contextDigest, globalContext, stepContexts, nonsecretReferencedValues, selectedEvidenceReferences]
+      description: |
+        The four execution-affecting context inputs included in configuration/context identity.
+        Hashes bind exact canonical values without publishing referenced values. `contextDigest`
+        covers the ordered stable step IDs/text plus all four collections. A change makes a
+        candidate stale and requires matching recompile/reconfirmation.
+      x-execution-affecting:
+        [globalContext, stepContexts, nonsecretReferencedValues, selectedEvidenceReferences]
+      properties:
+        contextDigest: { type: string, pattern: '^[a-f0-9]{64}$' }
+        globalContext: { type: string, pattern: '^[a-f0-9]{64}$' }
+        stepContexts:
+          type: array
+          x-unique-by: stepId
+          items:
+            type: object
+            additionalProperties: false
+            required: [stepId, hash]
+            properties:
+              stepId: { type: string, format: uuid }
+              hash: { type: string, pattern: '^[a-f0-9]{64}$' }
+        nonsecretReferencedValues:
+          type: array
+          x-unique-by: referenceId
+          items:
+            type: object
+            additionalProperties: false
+            required: [referenceId, valueHash]
+            properties:
+              referenceId: { type: string, minLength: 1 }
+              valueHash: { type: string, pattern: '^[a-f0-9]{64}$' }
+        selectedEvidenceReferences:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, revision, hash]
+            properties:
+              id: { type: string, format: uuid }
+              revision: { type: integer, format: int64, minimum: 1 }
+              hash: { type: string, pattern: '^[a-f0-9]{64}$' }
+
+    ResolvedStepReview:
+      type: object
+      additionalProperties: false
+      required: [stepId, operation, target, input, contextProvenance, diagnostics]
+      properties:
+        stepId: { type: string, format: uuid }
+        operation: { $ref: '#/components/schemas/ResolvedOperation' }
+        target: { $ref: '#/components/schemas/ResolvedTarget' }
+        input: { $ref: '#/components/schemas/ResolvedInput' }
+        contextProvenance:
+          type: array
+          items: { $ref: '#/components/schemas/ContextProvenance' }
+        assertions:
+          type: array
+          items: { type: string }
+        diagnostics:
+          type: array
+          items: { $ref: '#/components/schemas/AuthoringDiagnostic' }
+
+    ResolvedOperation:
+      type: object
+      nullable: true
+      additionalProperties: false
+      required: [kind]
+      properties:
+        kind: { type: string, enum: [navigate, click, fill, press, select, check, assert] }
+
+    ResolvedTarget:
+      type: object
+      nullable: true
+      additionalProperties: false
+      required: [strategy, value]
+      properties:
+        strategy: { type: string, enum: [role, label, testId, text, url] }
+        value: { type: string }
+        exact: { type: boolean, default: false }
+        evidenceReferenceId: { type: string, format: uuid, nullable: true }
+
+    ResolvedInput:
+      nullable: true
+      oneOf:
+        - { $ref: '#/components/schemas/ResolvedLiteralInput' }
+        - { $ref: '#/components/schemas/ResolvedReferenceInput' }
+      discriminator:
+        propertyName: kind
+
+    ResolvedLiteralInput:
+      type: object
+      additionalProperties: false
+      required: [kind, value]
+      properties:
+        kind: { type: string, enum: [literal] }
+        value: { type: string }
+
+    ResolvedReferenceInput:
+      type: object
+      additionalProperties: false
+      required: [kind, referenceId]
+      properties:
+        kind: { type: string, enum: [variableRef, secretRef] }
+        referenceId: { type: string, minLength: 1 }
+
+    ContextProvenance:
+      type: object
+      additionalProperties: false
+      required: [field, scope, sourceKind]
+      properties:
+        field: { type: string, minLength: 1 }
+        scope: { type: string, enum: [explicitStep, stepContext, globalContext, policy, evidence] }
+        sourceKind: { type: string, enum: [user, supplied, observed, policy] }
+        sourceId: { type: string, nullable: true }
+
+    AuthoringDiagnostic:
+      type: object
+      additionalProperties: false
+      required: [category, stepId, field, message]
+      properties:
+        category:
+          type: string
+          enum: [missingContext, conflictingValue, ambiguousTarget, incompatibleEvidence,
+                 staleEvidence, literalMismatch, unsupportedOperation]
+        stepId: { type: string, format: uuid, nullable: true }
+        field: { type: string, nullable: true }
+        message: { type: string }
+
     TestRequest:
       type: object
       required: [name, environment, steps, configuration]
@@ -1365,6 +1745,11 @@ components:
         Clients never submit executable code. The server generates the artifact from `steps`.
         `csiId` is required on create, immutable afterwards. `sourceRevision`/`configurationRevision`
         are required on update and ignored on create.
+
+        This remains the live v1 route body while context persistence is implemented by a later
+        story. `x-authoring-v2-request` points to the frozen successor component; consumers may
+        build pure models against it but must not infer that the current controller accepts it.
+      x-authoring-v2-request: '#/components/schemas/AuthoringV2Request'
       properties:
         name: { type: string, maxLength: 255 }
         description: { type: string, nullable: true }
@@ -1401,6 +1786,11 @@ components:
         `compileError` and `compileDiagnostics` are **mutually exclusive** and at most one is
         ever non-null: a failed compile (`STALE`) carries a code, an unrunnable one
         (`NEEDS_REVISION`) carries per-step reasons, and every other transition clears both.
+
+        This remains the live v1 response projection. `x-authoring-v2-response` points to the
+        frozen context-aware successor without claiming that persistence/controller wiring ships
+        in this contract-only story.
+      x-authoring-v2-response: '#/components/schemas/AuthoringV2Response'
       properties:
         id: { type: string, format: uuid }
         name: { type: string }
