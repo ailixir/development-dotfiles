@@ -72,7 +72,7 @@ import org.springframework.test.context.DynamicPropertySource;
  *
  * <h2>What it is, exactly</h2>
  *
- * <p>Four ordered legs, each of which crosses the seam in a direction that matters:
+ * <p>Five ordered legs, each of which crosses the seam in a direction that matters:
  *
  * <ol>
  *   <li><b>Leg 0 — the attribution baseline.</b> The harness probes the runner itself, with and
@@ -91,6 +91,9 @@ import org.springframework.test.context.DynamicPropertySource;
  *   <li><b>Leg 3 — runner back to API.</b> The runner's admission and its terminal report arrive at
  *       the API's internal routes over HTTP, under the callback identity, and the API either
  *       accepts them or refuses them. This is DEF-02's path.
+ *   <li><b>Leg 4 — a whole run, to a verdict.</b> A trivial test against a page this JVM serves on
+ *       loopback must end {@code PASSED}, with its ledger row {@code DONE}. Leg 3 accepts any state
+ *       past {@code PENDING}; this leg is what fails when every run errors.
  * </ol>
  *
  * <h2>Rules this harness obeys</h2>
@@ -490,6 +493,139 @@ class StudioCoRunIT {
     assertThat(snapshot.revisionId())
         .as("the accepted report must be bound to the revision that was dispatched")
         .isEqualTo(confirmedRevisionId(testId));
+  }
+
+  // ── Leg 4: a whole run, to a verdict ──────────────────────────────────────
+
+  /**
+   * A trivial test against a page the harness serves reaches {@code PASSED}, and its ledger row
+   * reaches {@code DONE} (Studio v1 WP2).
+   *
+   * <p>Leg 3 deliberately accepts any state past {@code PENDING}: it proves that one report crossed
+   * the seam, and a run that ends {@code ERROR} still proves that. It cannot tell a working
+   * execution path from one where every run errors, which is the shape a developer would actually
+   * notice. This leg closes that gap: the target page is served from this JVM on loopback, so the
+   * only way to a verdict other than {@code PASSED} is the product — a browser that did not launch,
+   * a step the executor could not run, a terminal report the API refused, or a ledger that never
+   * settled.
+   *
+   * <p>The artifact is assembled from two codes of the runner's own corpus ({@code
+   * navigation-goto.json}'s {@code page.goto} with the URL replaced, and {@link #CORPUS_EXAMPLE}'s
+   * click) and still goes through the real compile pipeline and the real {@code /v1/validate}, so a
+   * harness that wrote an unacceptable artifact is red at the compile step, not at the verdict.
+   */
+  @Test
+  @Order(4)
+  void aTrivialPassingTestRunsToPassedAndItsLedgerSettlesDone() throws IOException {
+    try (FixturePage page = FixturePage.start()) {
+      String gotoLine = "Go to " + page.url();
+      String clickLine = source.get(0);
+      List<String> passingSource = List.of(gotoLine, clickLine);
+      UUID passingTest = fixtures.seedTest("Co-run passing test", CSI_ID, OWNER, passingSource);
+      gateway.answerWith(passingArtifact(page.url(), gotoLine, clickLine));
+
+      pipeline.compile(passingTest, OWNER);
+      awaitCompileStatusIn(passingTest, Set.of("AWAITING_CONFIRMATION", "NEEDS_REVISION", "STALE"));
+      if (!"AWAITING_CONFIRMATION".equals(compileStatus(passingTest))) {
+        throw new CoRunFailure(
+            "co-run harness or studio-runner (POST /v1/validate)",
+            "the passing test did not become confirmable — compile_status is "
+                + compileStatus(passingTest),
+            "compile_error=" + compileError(passingTest));
+      }
+      UUID candidate = candidateRevisionId(passingTest);
+      states.confirm(
+          passingTest,
+          candidate,
+          artifactHash(candidate),
+          sourceRevision(passingTest),
+          configurationRevision(passingTest),
+          OWNER);
+
+      // The runner admits one run at a time (pool size 1), and leg 3's run may still hold the
+      // slot: its click has no page to act on and waits out the step timeout. Dispatching now
+      // would be a 429 that the driven dispatcher never retries, so wait for that run to settle.
+      if (dispatchedExecutionId != null) {
+        awaitSettled(dispatchedExecutionId);
+      }
+
+      UUID executionId = studioService.executeTest(passingTest, owner, null).executionId();
+      long mark = runner.logMark();
+      int dispatched = dispatcher.dispatchOnce();
+      ExecutionSnapshotDto snapshot = awaitSettled(executionId);
+      String ledgerState = ledgerState(executionId);
+
+      if (dispatched != 1 || !"PASSED".equals(snapshot.status()) || !"DONE".equals(ledgerState)) {
+        throw new CoRunFailure(
+            "the execution path (dispatch, runner, or the API's terminal report handling)",
+            "a trivial test against a reachable page did not settle PASSED/DONE — execution "
+                + snapshot.status()
+                + "/"
+                + snapshot.errorCode()
+                + ", ledger "
+                + ledgerState
+                + ", dispatched "
+                + dispatched,
+            "fixture page requests="
+                + page.requests()
+                + ", steps="
+                + describeSteps(snapshot)
+                + "; what the runner recorded during the run:\n"
+                + quoted(runner.logSince(mark)));
+      }
+
+      assertThat(page.requests())
+          .as("the browser must actually have loaded the fixture page")
+          .isPositive();
+      assertThat(snapshot.stepResults())
+          .as("both steps ran and passed")
+          .extracting(com.citi.put.checks.studio.dto.StepResult::status)
+          .containsExactly("PASS", "PASS");
+      assertThat(snapshot.endedAt()).as("a settled execution has an end").isNotNull();
+    }
+  }
+
+  private String passingArtifact(String url, String gotoLine, String clickLine) throws IOException {
+    JsonNode click = MAPPER.readTree(artifact).path("steps").get(0).path("code");
+    com.fasterxml.jackson.databind.node.ObjectNode root = MAPPER.createObjectNode();
+    root.put("version", 1);
+    com.fasterxml.jackson.databind.node.ArrayNode steps = root.putArray("steps");
+    steps
+        .addObject()
+        .put("stepIndex", 0)
+        .put("originalText", gotoLine)
+        .put("code", "await page.goto('" + url + "');");
+    steps
+        .addObject()
+        .put("stepIndex", 1)
+        .put("originalText", clickLine)
+        .put("code", click.asText());
+    return root.toString();
+  }
+
+  /** Waits until the execution is terminal AND its ledger row is {@code DONE}, or 90 s pass. */
+  private ExecutionSnapshotDto awaitSettled(UUID executionId) {
+    Set<String> terminal = Set.of("PASSED", "FAILED", "ERROR");
+    long deadline = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+    ExecutionSnapshotDto snapshot = studioService.findExecutionById(executionId, owner);
+    while (System.nanoTime() < deadline) {
+      snapshot = studioService.findExecutionById(executionId, owner);
+      if (terminal.contains(snapshot.status()) && "DONE".equals(ledgerState(executionId))) {
+        return snapshot;
+      }
+      pause();
+    }
+    return snapshot;
+  }
+
+  private static String describeSteps(ExecutionSnapshotDto snapshot) {
+    if (snapshot.stepResults() == null || snapshot.stepResults().isEmpty()) {
+      return "(none)";
+    }
+    return snapshot.stepResults().stream()
+        .map(step -> step.stepIndex() + ":" + step.status() + " " + step.message())
+        .toList()
+        .toString();
   }
 
   // ── helpers ────────────────────────────────────────────────────────────

@@ -8,7 +8,8 @@
 #
 # It does NOT yet cover the media route's ranged read: the API's object store is still the
 # in-memory fake, and there is nothing to read until a dispatch is admitted and a browser
-# records something. See StudioCoRunIT for the four legs it does cover.
+# records something. See StudioCoRunIT for the five legs it does cover; leg 4 runs a real
+# Chromium against a loopback page and requires PASSED with the ledger row DONE.
 #
 # WHY THIS EXISTS
 #
