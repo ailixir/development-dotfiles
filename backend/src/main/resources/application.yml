@@ -305,16 +305,21 @@ studio:
     # It buys a truthful authoring display, NOT a recovered capability: readiness never reads
     # compile_status, so a stranded row blocks nothing and POST /execute is accepted before and
     # after a sweep.
-    sweep:
-      enabled: ${STUDIO_COMPILE_SWEEP_ENABLED:true}
+    #
+    # Studio v1 WP9 (decision D11): sweep-to-STALE IS the v1 recovery for a compile whose replica
+    # died, so an author learns of it within threshold + one interval. Both were shortened for that
+    # (600s -> 300s, 60s -> 15s). The frontend's COMPILING watch window is derived from these two
+    # defaults and compilePollBounds.test.ts fails if they drift apart.
+    abandonment:
+      enabled: ${STUDIO_COMPILE_ABANDONMENT_ENABLED:true}
       # Must strictly exceed pipeline.attempt-budget, validated at startup, so a healthy in-flight
       # compile can never be swept out from under itself.
-      threshold: ${STUDIO_COMPILE_SWEEP_THRESHOLD:600s}
+      threshold: ${STUDIO_COMPILE_ABANDONMENT_THRESHOLD:300s}
       # The run stops at the cap and the next scheduled run continues; never an unbounded UPDATE.
-      batch-size: ${STUDIO_COMPILE_SWEEP_BATCH:200}
+      batch-size: ${STUDIO_COMPILE_ABANDONMENT_BATCH:200}
       # One key, read by both the schedule annotation and the bound validation — not two
       # representations of one value (§8.5).
-      interval-ms: ${STUDIO_COMPILE_SWEEP_INTERVAL_MS:60000}
+      interval-ms: ${STUDIO_COMPILE_ABANDONMENT_INTERVAL_MS:15000}
     # Enforced before beginCompile: over-limit is a 400 and no compile state changes (AC-6).
     authoring:
       # Must never be looser than the runner's DEFAULT_BOUNDS.maxSteps, or a draft could be

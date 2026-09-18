@@ -29,7 +29,7 @@ export const PINNED_STATE_TITLES: Readonly<Record<string, string>> = {
   AWAITING_CONFIRMATION: 'Waiting for your confirmation',
   READY: 'Confirmed and runnable',
   NEEDS_REVISION: 'Some steps could not be made runnable',
-  STALE: 'Translation did not finish — not something you did',
+  STALE: 'Translation was interrupted — not something you did',
 };
 
 /**
@@ -69,8 +69,10 @@ export const AC2_REQUIRED_FACTS: Readonly<
   STALE: {
     // The `CompileError` description's four clauses: saved and unchanged, the confirmed revision
     // still runs, it is not the author's fault, and an explicit recompile is the whole remedy.
-    whatIsTrue: [/saved and unchanged/i, /still runs/i, /not in your steps/i],
-    whatYouCanDo: [/ask for the translation again/i, /whole remedy/i],
+    // Studio v1 WP9 adds the fact D11 makes load-bearing: the translation was interrupted, and
+    // the remedy is named as a recompile.
+    whatIsTrue: [/saved and unchanged/i, /still runs/i, /not in your steps/i, /translation was interrupted/i],
+    whatYouCanDo: [/ask for the translation again/i, /whole remedy/i, /recompile/i],
     whatIsBlocked: [/no candidate to confirm until a translation finishes/i, /nothing you wrote has been lost/i],
   },
 };

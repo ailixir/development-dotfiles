@@ -2,9 +2,11 @@ package com.citi.put.checks.studio.dispatch;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -115,6 +117,85 @@ public class StudioDispatchLedgerStatements {
         Timestamp.from(leaseExpiresAt),
         executionId,
         Timestamp.from(now));
+  }
+
+  /**
+   * Selects and claims the oldest claimable queued rows in <b>one</b> statement (Studio v1 WP8).
+   *
+   * <p>This is the dispatcher's pass-time claim. It replaces "read a queued batch, then {@link
+   * #claim} each id" — a shape in which two dispatchers read the same batch and every row one of
+   * them lost cost the other a round trip that updated nothing. Here the selection takes {@code FOR
+   * UPDATE SKIP LOCKED}, so a concurrent dispatcher's selection passes over a row this statement is
+   * claiming instead of queueing behind it, and the statement returns only rows it actually moved.
+   * There is no id to lose a race on afterwards.
+   *
+   * <p>What does not change is the claim itself: {@code QUEUED} plus an expired-or-absent lease is
+   * still the whole predicate, re-stated in the outer {@code WHERE} so it is re-evaluated against
+   * the committed row once the lock is held; the lease owner and expiry written are the same; the
+   * back-edges ({@link #releaseClaim}, {@link #returnAfterDefiniteRefusal}) are untouched.
+   *
+   * <p>The selection is a CTE, not {@code WHERE execution_id IN (SELECT ... LIMIT ?)}. PostgreSQL
+   * may re-evaluate an uncorrelated {@code IN} subquery per outer row, and the {@code LIMIT} then
+   * bounds each evaluation rather than the statement — measured on this codebase by {@link
+   * com.citi.put.checks.studio.compile.CompileStateService#sweepAbandoned}'s story. A CTE is
+   * evaluated once, so {@code limit} is a bound on how many rows this statement claims.
+   *
+   * @param owner the claiming dispatcher's lease owner
+   * @param leaseExpiresAt the lease written onto every claimed row
+   * @param now the instant a lease must have expired by for its row to be claimable
+   * @param limit the most rows this statement may claim
+   * @param excluded rows this statement must not claim even when claimable — the dispatcher passes
+   *     the rows it has already attempted in the current pass, so a row a {@code 429} returned to
+   *     the queue waits for the next pass exactly as it did when the pass worked from a fixed batch
+   * @return the claimed execution ids, oldest acceptance first; empty when nothing was claimable
+   */
+  public List<UUID> claimQueued(
+      String owner, Instant leaseExpiresAt, Instant now, int limit, Collection<UUID> excluded) {
+    if (limit <= 0) {
+      throw new IllegalArgumentException("claimQueued needs a positive limit, not " + limit);
+    }
+    List<Map.Entry<UUID, Timestamp>> claimed =
+        jdbc.query(
+            """
+            WITH claimable AS (
+                SELECT execution_id
+                  FROM studio_dispatch_ledger
+                 WHERE state = 'QUEUED'
+                   AND (lease_expires_at IS NULL OR lease_expires_at <= ?)
+                   AND execution_id <> ALL (CAST(? AS uuid[]))
+                 ORDER BY execution_accepted_at
+                 LIMIT ?
+                   FOR UPDATE SKIP LOCKED
+            )
+            UPDATE studio_dispatch_ledger l
+               SET state = 'CLAIMED', lease_owner = ?, lease_expires_at = ?, updated_at = now()
+              FROM claimable c
+             WHERE l.execution_id = c.execution_id
+               AND l.state = 'QUEUED'
+               AND (l.lease_expires_at IS NULL OR l.lease_expires_at <= ?)
+            RETURNING l.execution_id, l.execution_accepted_at
+            """,
+            (rs, rowNum) ->
+                Map.entry(
+                    rs.getObject("execution_id", UUID.class),
+                    rs.getTimestamp("execution_accepted_at")),
+            Timestamp.from(now),
+            uuidArrayLiteral(excluded),
+            limit,
+            owner,
+            Timestamp.from(leaseExpiresAt),
+            Timestamp.from(now));
+    // RETURNING carries no order of its own; the CTE's order is restored here.
+    return claimed.stream().sorted(Map.Entry.comparingByValue()).map(Map.Entry::getKey).toList();
+  }
+
+  /** A PostgreSQL array literal of ids we generated ourselves; UUID text needs no escaping. */
+  private static String uuidArrayLiteral(Collection<UUID> ids) {
+    StringJoiner literal = new StringJoiner(",", "{", "}");
+    if (ids != null) {
+      ids.forEach(id -> literal.add(id.toString()));
+    }
+    return literal.toString();
   }
 
   /**
