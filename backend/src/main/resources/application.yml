@@ -28,7 +28,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
+        # No prometheus here. This is what the API pods serve, on the port the public Ingress routes
+        # to, and SecurityConfig permits /actuator/** without a session. The scrape endpoint is a
+        # worker-only exposure (application-worker.yml), on a ClusterIP Service with no Ingress.
+        include: health,info
       base-path: /actuator
   endpoint:
     health:
