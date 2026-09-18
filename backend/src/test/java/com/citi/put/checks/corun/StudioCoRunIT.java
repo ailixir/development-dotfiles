@@ -150,7 +150,6 @@ class StudioCoRunIT {
   static void coRunWiring(DynamicPropertyRegistry registry) {
     registry.add("studio.runner.base-url", ENVIRONMENT::runnerBaseUrl);
     registry.add("studio.runner.service-identity-token", ENVIRONMENT::runnerServiceToken);
-    registry.add("studio.execution.runner-base-url", ENVIRONMENT::runnerBaseUrl);
     registry.add("studio.execution.callback-base-url", ENVIRONMENT::apiBaseUrl);
     registry.add("studio.execution.callback.service-token", ENVIRONMENT::callbackServiceToken);
     // Driven, never scheduled: the harness calls dispatchOnce() itself so that a red leg names a

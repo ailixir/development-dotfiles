@@ -32,6 +32,9 @@ public record StudioRunnerProperties(
   /** Path of the browser-free validation route on the runner's own socket. */
   public static final String VALIDATE_PATH = "/v1/validate";
 
+  /** Path of the run admission route the dispatcher posts a {@code RunJob} to. */
+  public static final String RUNS_PATH = "/v1/runs";
+
   /**
    * Whether the runner is configured at all. A deployment without a runner URL compiles nothing
    * silently: the pipeline reports {@code VALIDATOR_UNAVAILABLE} and the draft stays retryable,
@@ -74,7 +77,29 @@ public record StudioRunnerProperties(
    * @return {@code baseUrl} + {@value #VALIDATE_PATH}
    */
   public String validateUrl() {
-    String trimmed = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
-    return trimmed + VALIDATE_PATH;
+    return trimmedBaseUrl() + VALIDATE_PATH;
+  }
+
+  /**
+   * The full run admission endpoint.
+   *
+   * @return {@code baseUrl} + {@value #RUNS_PATH}
+   */
+  public String runsUrl() {
+    return trimmedBaseUrl() + RUNS_PATH;
+  }
+
+  /**
+   * Whether a usable service identity is configured. Both runner routes declare {@code
+   * serviceIdentity}, so a caller without one is refused by the runner before it reads the body.
+   *
+   * @return true when the token is present and not blank
+   */
+  public boolean hasServiceIdentity() {
+    return serviceIdentityToken != null && !serviceIdentityToken.isBlank();
+  }
+
+  private String trimmedBaseUrl() {
+    return baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
   }
 }

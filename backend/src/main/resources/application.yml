@@ -202,7 +202,6 @@ studio:
     run-deadline: ${STUDIO_RUN_DEADLINE:600s}
     admission-timeout: ${STUDIO_ADMISSION_TIMEOUT:10s}
     evidence-retention: ${STUDIO_EVIDENCE_RETENTION:30d}
-    runner-base-url: ${STUDIO_RUNNER_BASE_URL:http://put-checks-studio-runner:8090}
     # Deployment configuration, never job-supplied (§8.4, §8.5).
     callback-base-url: ${STUDIO_CALLBACK_BASE_URL:http://put-checks-api:8080}
     # Where the recordings live (§6.2). Deployment configuration, and never a response value:
@@ -329,7 +328,9 @@ studio:
   # The studio-runner Service. The base URL is deployment configuration and never job- or
   # user-supplied (§8.4, §8.5). Empty by default: without it the pipeline reports
   # VALIDATOR_UNAVAILABLE and the draft stays retryable, rather than publishing an unvalidated
-  # candidate.
+  # candidate. Both runner routes (POST /v1/validate and the worker's POST /v1/runs) read this
+  # one block and present the same bearer; without base-url or service-identity-token the
+  # dispatcher sends nothing and closes the execution DISPATCH_FAILED (DEF-05).
   runner:
     base-url: ${STUDIO_RUNNER_BASE_URL:}
     service-identity-token: ${STUDIO_RUNNER_SERVICE_TOKEN:}

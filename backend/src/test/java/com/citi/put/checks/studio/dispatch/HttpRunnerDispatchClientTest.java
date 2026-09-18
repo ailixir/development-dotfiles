@@ -2,10 +2,12 @@ package com.citi.put.checks.studio.dispatch;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.citi.put.checks.studio.StudioExecutionProperties;
+import com.citi.put.checks.studio.compile.validator.StudioRunnerProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -51,7 +53,11 @@ class HttpRunnerDispatchClientTest {
             new ObjectMapper(),
             new StudioExecutionProperties(
                 true, null, null, null, Duration.ofMillis(500), null, null, null, null, null, null),
-            "http://localhost:" + wireMock.port());
+            new StudioRunnerProperties(
+                "http://localhost:" + wireMock.port(),
+                "test-runner-token",
+                Duration.ofSeconds(5),
+                Duration.ofSeconds(2)));
   }
 
   @Test
@@ -83,6 +89,74 @@ class HttpRunnerDispatchClientTest {
         "429",
         aResponse().withStatus(429).withHeader("Retry-After", "3"),
         DispatchOutcome.Kind.DEFINITE_REFUSAL);
+  }
+
+  /**
+   * DEF-05: {@code POST /v1/runs} declares {@code serviceIdentity}, so the dispatch presents the
+   * same bearer the {@code /v1/validate} client presents. Asserted on the request the socket
+   * actually received, not on what the client meant to send.
+   */
+  @Test
+  void theDispatchPresentsTheRunnerServiceIdentityAsABearer() {
+    wireMock.resetAll();
+    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(202)));
+
+    assertThat(client.send(job()).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
+
+    var requests = wireMock.findAll(postRequestedFor(urlPathEqualTo("/v1/runs")));
+    assertThat(requests).hasSize(1);
+    assertThat(requests.get(0).getHeaders().getHeader("Authorization").values())
+        .containsExactly("Bearer test-runner-token");
+  }
+
+  /**
+   * Story 10.35 AC-5 (i): no runner base URL. The refusal is terminal and names the missing key,
+   * and nothing is sent — there is no address to send to, and the classification must not fall
+   * through to the {@code IOException} branch's {@code AMBIGUOUS}.
+   */
+  @Test
+  void anUnconfiguredRunnerIsATerminalNamedRefusalAndSendsNothing() {
+    wireMock.resetAll();
+    for (String baseUrl : java.util.Arrays.asList(null, "", "   ")) {
+      DispatchOutcome outcome = clientFor(baseUrl, "test-runner-token").send(job());
+
+      assertThat(outcome.kind())
+          .as("base URL %s", baseUrl)
+          .isEqualTo(DispatchOutcome.Kind.DEFINITE_REFUSAL);
+      assertThat(outcome.retryable()).as("base URL %s", baseUrl).isFalse();
+      assertThat(outcome.detail())
+          .as("base URL %s", baseUrl)
+          .isEqualTo(HttpRunnerDispatchClient.RUNNER_NOT_CONFIGURED);
+    }
+    assertThat(wireMock.getAllServeEvents()).isEmpty();
+  }
+
+  /**
+   * Story 10.35 AC-5 (ii): a configured base URL but no identity. Two targets: the live stub, where
+   * "sent nothing" is the serve-event count, and a closed local port, where a real connection
+   * attempt would have produced {@code AMBIGUOUS "connection loss"} instead of this refusal.
+   */
+  @Test
+  void aMissingServiceIdentityIsATerminalNamedRefusalAndSendsNothing() throws Exception {
+    wireMock.resetAll();
+    String closedPort;
+    try (java.net.ServerSocket socket = new java.net.ServerSocket(0)) {
+      closedPort = "http://localhost:" + socket.getLocalPort();
+    }
+    for (String baseUrl : List.of(wireMock.baseUrl(), closedPort)) {
+      for (String token : java.util.Arrays.asList(null, "", "  ")) {
+        DispatchOutcome outcome = clientFor(baseUrl, token).send(job());
+
+        assertThat(outcome.kind())
+            .as("%s with token '%s'", baseUrl, token)
+            .isEqualTo(DispatchOutcome.Kind.DEFINITE_REFUSAL);
+        assertThat(outcome.retryable()).as("%s with token '%s'", baseUrl, token).isFalse();
+        assertThat(outcome.detail())
+            .as("%s with token '%s'", baseUrl, token)
+            .isEqualTo(HttpRunnerDispatchClient.SERVICE_IDENTITY_NOT_CONFIGURED);
+      }
+    }
+    assertThat(wireMock.getAllServeEvents()).isEmpty();
   }
 
   @Test
@@ -125,6 +199,14 @@ class HttpRunnerDispatchClientTest {
                 .size())
         .as("exactly one request left the process for '%s'", label)
         .isEqualTo(1);
+  }
+
+  private static HttpRunnerDispatchClient clientFor(String baseUrl, String token) {
+    return new HttpRunnerDispatchClient(
+        new ObjectMapper(),
+        new StudioExecutionProperties(
+            true, null, null, null, Duration.ofMillis(500), null, null, null, null, null, null),
+        new StudioRunnerProperties(baseUrl, token, Duration.ofSeconds(5), Duration.ofSeconds(2)));
   }
 
   private static RunJob job() {
