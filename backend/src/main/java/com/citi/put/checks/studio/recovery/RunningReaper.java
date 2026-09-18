@@ -130,9 +130,13 @@ public class RunningReaper {
     if (reconciler.reconcile(executionId)) {
       return 1;
     }
-    int closed = statements.closeWithError(executionId, code, now);
+    int closed = statements.closeByReaper(executionId, code, now);
     if (closed == 1) {
-      LOGGER.info("Studio execution {} closed by the running reaper as {}", executionId, code);
+      LOGGER.info(
+          "Studio execution {} closed by the running reaper as {} (CANCELLED if a cancel was"
+              + " recorded)",
+          executionId,
+          code);
     }
     return closed;
   }
