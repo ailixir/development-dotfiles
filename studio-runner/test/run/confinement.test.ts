@@ -198,6 +198,13 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    *    (`GET /internal/studio/executions/{id}/control`, closed `ExecutionControl`), a required
    *    `cancelRequested` on the closed `ProgressAck`, and prose on `runnerCancelRun`'s `404` and
    *    `cancelExecution`'s table. No runner-produced body moved.
+   * 10. **ADR-002 §29.5, landed by Studio v1 WP11** — this re-anchor, in the same commit as its
+   *    producer (`stopAwareReporter` in `src/server/runCoordinator.ts`). Description text only, on
+   *    three fields and one operation: `RunnerStepState.failure` is no longer null on every
+   *    non-`FAIL` step — the step a cancel interrupted is `SKIPPED` with the fixed stop text — and
+   *    `RunnerStepState.startedAtMs` and `StepResult` say that step keeps its start reading;
+   *    `runnerCancelRun` names the chart's grace and the `SKIPPED` step. No schema shape, no
+   *    `required` list, no enum and no status moved.
    *
    * **The criterion is unchanged and still holds: nothing in story 10.13 edited the contract.**
    * Every byte of difference between this digest and the previous one belongs to another story,
@@ -229,7 +236,7 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = '1f8d36842a627a403279ab9eeb7eba1896abb18659d24701b4324c4c3dac61ee';
+  const BASE_SHA256 = '8cd3248e41aa7541b47e958d131e5ad2e71c20870c38b727367faaf8e12613fd';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the

@@ -270,7 +270,11 @@ export interface TestDto {
   compileDiagnostics?: CompileDiagnostics | null;
 }
 
-/** One entry per original step. Skipped or unstarted steps carry null timings. */
+/**
+ * One entry per original step. Skipped or unstarted steps carry null timings — except the step a
+ * cancel interrupted, which is `SKIPPED` with the start it had and the runner's stop text in
+ * `message` (openapi `StepResult`, ADR-002 §29.5).
+ */
 export interface StepResult {
   stepIndex: number;
   originalText: string;

@@ -61,7 +61,12 @@
  * `cancelRequested` on every progress acknowledgement. All three signals take the same path.
  */
 import { createRedactor } from '../executor/redaction.js';
-import type { ExecutableStep, ValueResolver } from '../executor/index.js';
+import type {
+  ExecutableStep,
+  StepFinishedEvent,
+  StepReporter,
+  ValueResolver,
+} from '../executor/index.js';
 import { executeSteps } from '../executor/index.js';
 import { RUNNER_VERSIONS, isCompatible } from '../compat/index.js';
 import type { ArtifactProvenance, RuntimeVersions } from '../compat/index.js';
@@ -135,6 +140,57 @@ export const FINISHED_RUNS_REMEMBERED = 256;
  * A constant, like `MAX_CHILD_OUTPUT_LINES`: it is a latency promise, not a deployment knob.
  */
 export const CONTROL_POLL_INTERVAL_MS = 2_000;
+
+/**
+ * What a step the cancel interrupted says about itself (Studio v1 decision D1).
+ *
+ * Fixed and value-free: it names no step text, no URL, no locator and no Playwright error. Measured
+ * before D1 on a real Chromium, the interrupted step was reported `FAIL` with whatever Playwright
+ * said when its context closed underneath it — `page.goto: net::ERR_ABORTED at <the URL>` for a
+ * navigation, and `expected the locator to be visible within 120000ms` for an assertion. The first
+ * echoes a page address into the report; the second is an assertion verdict the run never reached.
+ */
+export const STOPPED_STEP_MESSAGE = 'The run was stopped before this step finished.';
+
+/**
+ * The step reporter a cancel cannot turn into a verdict (Studio v1 decision D1, ADR-002 §29.2).
+ *
+ * Once the run is being stopped **for a cancel**, the step in flight fails for the stop's reason,
+ * not its own: the child closes the context and the pending Playwright call rejects. So a `FAIL`
+ * that arrives after the cancel's stop was ordered is reported `SKIPPED` with
+ * {@link STOPPED_STEP_MESSAGE}, keeping the timings it has — it did start, and the recording covers
+ * that start. Steps that never started are untouched: the executor already reports them `SKIPPED`
+ * with null timings and no message, and a step nobody reported stays absent (the API fills it).
+ *
+ * `open()` lists the steps that started and never finished, for the path on which the child was
+ * killed before it could say anything about the step (the grace ran out).
+ *
+ * Scoped to `cancel` on purpose: a deadline or a drain kill is a different condition with its own
+ * rules (§18.1 has the API name a `TIMEOUT` step still `RUNNING`), and D1 does not decide those.
+ */
+function stopAwareReporter(
+  reporter: StepReporter,
+  stoppedForCancel: () => boolean,
+): StepReporter & { open(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[] } {
+  const open = new Map<number, number>();
+  return {
+    stepStarted(event): void {
+      open.set(event.stepIndex, event.startedAtMs);
+      reporter.stepStarted(event);
+    },
+    stepFinished(event: StepFinishedEvent): void {
+      open.delete(event.stepIndex);
+      reporter.stepFinished(
+        event.status === 'FAIL' && stoppedForCancel()
+          ? { ...event, status: 'SKIPPED', failure: STOPPED_STEP_MESSAGE }
+          : event,
+      );
+    },
+    open(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[] {
+      return [...open].map(([stepIndex, startedAtMs]) => ({ stepIndex, startedAtMs }));
+    },
+  };
+}
 
 /** One admitted run's cancel handle. Registered at admission, dropped when its outcome is known. */
 interface RunControl {
@@ -486,6 +542,13 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       },
     });
     const reporter = createRunReporter({ snapshot, client });
+    /**
+     * Why the parent ended this run, once it did; the first reason wins, as in the launcher. An
+     * object rather than a `let`, for the reason `kills` is a list: it is written inside `endRun`,
+     * and a closure assignment is invisible to the type-checker's narrowing at the read below.
+     */
+    const stopped: { reason: SessionKillReason | null } = { reason: null };
+    const stepReporter = stopAwareReporter(reporter, () => stopped.reason === 'cancel');
 
     /**
      * The child's stdout and stderr, redacted by **this run's** redactor (AC-8).
@@ -646,6 +709,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
          */
         const endRun = (reason: SessionKillReason): void => {
           if (kills.length > 0) return;
+          stopped.reason = reason;
           // The entry is written before the signal, so a report built from a snapshot taken
           // mid-kill already names the cause (AC-3, ADR-002 §17.7 item 1).
           snapshot.appendLog({
@@ -698,9 +762,9 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
               steps,
               variables: job.resolvedVars,
               secrets: job.resolvedSecrets,
-              reporter,
+              reporter: stepReporter,
             })
-          : await executeInProcess(session, steps, resolver, reporter, origin);
+          : await executeInProcess(session, steps, resolver, stepReporter, origin);
       } finally {
         deadline?.cancel();
         await session.close();
@@ -768,6 +832,27 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // Progress deliveries settle before the terminal report is built, so FINAL always carries
       // the highest sequence number of the attempt.
       await reporter.settled();
+
+      // D1, the kill half: a cancel whose grace ran out left the child no chance to report the
+      // step it was in, so the step is still `RUNNING`. It was stopped, not judged — say so on the
+      // FINAL, with the start reading it has and no finish it does not.
+      if (stopped.reason === 'cancel') {
+        for (const step of stepReporter.open()) {
+          snapshot.stepFinished({
+            stepIndex: step.stepIndex,
+            status: 'SKIPPED',
+            startedAtMs: step.startedAtMs,
+            finishedAtMs: null,
+            durationMs: null,
+            failure: STOPPED_STEP_MESSAGE,
+          });
+          snapshot.appendLog({
+            atMs: null,
+            level: 'info',
+            message: `step ${String(step.stepIndex)} SKIPPED: ${STOPPED_STEP_MESSAGE}`,
+          });
+        }
+      }
 
       // ── The evidence phase, and it is **before** the scratch clear (story 10.14 AC-3). ─────
       //
@@ -938,7 +1023,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     session: BrowserSession,
     steps: readonly ExecutableStep[],
     resolver: ValueResolver,
-    reporter: ReturnType<typeof createRunReporter>,
+    reporter: StepReporter,
     origin: SessionOrigin,
   ): Promise<SessionRunResult> {
     if (origin.clock === null) {

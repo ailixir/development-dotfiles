@@ -1051,9 +1051,10 @@ paths:
         `executionId` of the admitted run. No body.
 
         The runner reuses its total-runtime deadline's stop path: it asks the browser to stop,
-        allows a bounded grace (`STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS`, default 5 s) for the
-        context to close and the recording to finalize, then kills the whole process tree. A run
-        cancelled before its browser started never starts one. Either way the run delivers its
+        allows a bounded grace (`STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS`, default 5 s; the chart
+        deploys 15 s, ADR-002 §29.3) for the context to close and the recording to finalize, then
+        kills the whole process tree. A run cancelled before its browser started never starts one.
+        The step in flight is reported `SKIPPED` with a fixed stop text, never `FAIL` (§29.5). Either way the run delivers its
         `FINAL` report with `outcome.result: ERROR` and `outcome.errorCode: CANCELLED`, and with
         whatever evidence it achieved.
 
@@ -1777,7 +1778,10 @@ components:
     StepResult:
       type: object
       required: [stepIndex, originalText, status]
-      description: One entry per original step. Skipped or unstarted steps carry null timings.
+      description: |
+        One entry per original step. Skipped or unstarted steps carry null timings — except the
+        step a cancel interrupted, which is `SKIPPED` with the start it had (`offsetMs`) and the
+        runner's fixed stop text in `message` (ADR-002 §29.5).
       properties:
         stepIndex: { type: integer, minimum: 0 }
         originalText: { type: string }
@@ -2457,7 +2461,8 @@ components:
           minimum: 0
           description: |
             Offset of the step start from the recording origin. Null for a step that never started
-            (`SKIPPED`). Fractional: the run clock is fractional and the raw difference crosses the
+            (`SKIPPED`). A step a cancel interrupted is also `SKIPPED`, but it did start and keeps
+            this reading (ADR-002 §29.5). Fractional: the run clock is fractional and the raw difference crosses the
             wire unrounded. Rounding belongs to whoever **persists** `offsetMs`, which is the API;
             a runner that rounded here would spend precision the seek budget may later want, and
             rounding in both components would compound two errors over one measurement.
@@ -2471,7 +2476,11 @@ components:
         failure:
           type: string
           nullable: true
-          description: Redacted failure text (§9.2). Null unless the status is `FAIL`.
+          description: |
+            Redacted failure text (§9.2). Null unless the status is `FAIL`, with one exception: the
+            step a cancel interrupted is `SKIPPED` and carries the fixed, value-free text
+            `The run was stopped before this step finished.` — never the error the closing browser
+            raised in the step, which is not a verdict on it (ADR-002 §29.5).
 
     RunnerLogEntry:
       type: object
