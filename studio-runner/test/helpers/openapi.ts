@@ -60,7 +60,17 @@ export function parseYaml(text: string): YamlValue {
 
 // ── Schema conformance ────────────────────────────────────────────────────────────────────────
 
-function resolveRef(document: YamlValue, node: YamlValue): YamlValue {
+/**
+ * Follows a chain of local `$ref`s from `node` to the node it names.
+ *
+ * Throws on a non-local pointer, a circular chain, and — the reason `contract-integrity.test.ts`
+ * walks it over the whole document — a pointer that names nothing, with the message
+ * `` `$ref does not resolve: ${pointer}` ``.
+ *
+ * Exported for that walk. It stays the *same* function the conformance checker below calls, so
+ * the walk proves the resolver the checker actually uses, not a copy of it.
+ */
+export function resolveRef(document: YamlValue, node: YamlValue): YamlValue {
   let current = node;
   const seen = new Set<string>();
   while (isMapping(current) && typeof current.$ref === 'string') {
