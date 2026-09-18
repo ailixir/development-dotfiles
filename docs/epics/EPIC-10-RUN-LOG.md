@@ -2403,3 +2403,70 @@ the `DEF-01`/`DEF-02` kind, because the fix is not in this repository's history 
 
 **The local half of Epic 10 is closed.** What remains is twelve external gates, none owned by this team,
 two of them owned by nobody at all.
+
+## The fold, decided case by case — and why it still cannot happen (2026-09-17)
+
+Asked to merge every branch and worktree, the survey returned a result that changes the shape of the
+problem: **every one of the repository's 43 branches is already merged into `epic/EPIC-10-w7`.**
+`git branch --no-merged` is empty. There was never any outstanding branch work. The integration branch
+*is* the merge. Only the fold remains, and `epic/EPIC-10` is a strict ancestor with **zero divergence**.
+
+An independent per-file analysis (`ef6a2e61d`, worktree `wt/fold-prep`, merged here) then took the 17
+blocked paths one at a time, by real three-way merge against the live tree, re-checked three times over
+twelve minutes to guard against the shelf-life problem.
+
+### The 17 are not 17
+
+| Class | Count | Meaning |
+|---|---|---|
+| Auto-mergeable | **11** | Different regions; git resolves them |
+| Mechanical | **4** | A known, written resolution (runbook §11/§12, the `acceptedEnvKeys` union at 36, the contract pin, a cosmetic test row) |
+| Needs a named authority | **2** | `openapi.yaml`'s 503 schema and ADR-002's reconciling sentence — **@architect** |
+
+The file-level rule was right to block, and wrong about the scale. **But the important finding inverts
+the intuition:**
+
+### The dangerous file is the one git merges cleanly
+
+`StudioService.java` reports **rc 0** — no textual conflict at all — and the merged result **does not
+compile**: their side calls `requireCompile` five times, which story 10.30 renamed to `requireWrite`.
+That is the loud failure. The quiet one is worse, and I verified every element of it myself:
+
+- **Ours:** `requireWrite` (`:133`), `softDeleteTest(UUID, Authentication)` (`:515`), and
+  `StudioController.deleteTest(@PathVariable UUID id, Authentication auth)` (`:139`).
+- **Theirs:** `softDeleteTest(UUID)` only (`:491`), and — because their `StudioController.java` is *not*
+  dirty — their tree runs the base controller: `deleteTest(@PathVariable UUID id)` calling
+  `studioService.softDeleteTest(id)`. **DELETE is unauthorized in their tree.** Their new
+  `StudioAuthoringService` authorizes only its own routes.
+
+Their `updateTest` also authorizes **through the withheld read, before the revision check** — the
+`RECON-1` shape, now confirmed in their working file rather than inferred.
+
+**So a textual merge that takes their `StudioService.java` silently reopens `O-18` on delete, with zero
+compile errors.** Only `StudioServiceWriteAuthorizationTest` and `StudioAuthorizationIT:423` would catch
+it, and only if run. This is the single highest-stakes decision in the reconciliation, and git's own
+verdict on that file is actively misleading.
+
+**Ruling:** ours governs authorization in full; their overloads are additive and are kept; their two
+`requireCompile` calls are deleted on merge.
+
+### What was built instead of a merge
+
+`tools/epic10-fold/` — `precheck.sh` (live, read-only, refuses unless foldable), `preview.sh`
+(regenerates the whole table from the live tree, so it can never serve a stale snapshot), `guards.sh`
+(the semantic invariants — **red with 8 failures on a naive textual merge**, green on this tree),
+`pin-contract.sh` (re-anchors `BASE_SHA256` from the merged file, refuses conflict markers, idempotent),
+`fold.sh` (dry-run by default), and `RULINGS.md` carrying the per-file table and the exact sequence.
+
+Two paths are written down: one if their tree becomes clean, one — the expected case — once their work is
+committed, including the instruction to **open `StudioService.java` even though git reports no conflict.**
+
+### The conclusion is unchanged, and now it is earned
+**Nothing can be folded today.** Not because a conservative rule says so, but because their work is
+uncommitted and therefore unmergeable, and because two of the seventeen need a ruling no automation can
+make. What changed is that the reconciliation is now decided rather than pending: when they commit, the
+work is a recipe rather than an investigation.
+
+**Not verified, stated plainly:** their `write503` behaviour (the basis of their `oneOf` schema claim);
+whether a merged `StudioService.java` passes spotless; anything in the other 246 dirty paths. No backend
+or vitest suite was run for this analysis — every "would fail" claim about a test is read from source.
