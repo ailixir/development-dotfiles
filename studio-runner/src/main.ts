@@ -21,8 +21,8 @@
 import { fileURLToPath } from 'node:url';
 
 import { currentRuntimeVersions } from './compat/index.js';
-import { createChildBrowserLauncher } from './run/index.js';
-import type { ChildLauncherOptions } from './run/index.js';
+import { canEnumerateProcessTree, createChildBrowserLauncher, readProcessTable } from './run/index.js';
+import type { ChildLauncherOptions, ProcessRow } from './run/index.js';
 import type { BrowserLauncher } from './server/adapters.js';
 import { createApplication } from './server/application.js';
 import type { RunnerApplication } from './server/application.js';
@@ -84,7 +84,22 @@ export interface MainOptions {
    * the compiled entry points; a parameter only so a test can point it at a known record.
    */
   readonly runtimeVersionsFile?: string | undefined;
+  /**
+   * Reads the process table. Injected only so a test can stand in for an image without `ps`;
+   * production always reads the real one (`src/run/tree.ts`).
+   */
+  readonly processTable?: (() => readonly ProcessRow[]) | undefined;
 }
+
+/**
+ * What the runner says when it cannot enumerate a process tree (Studio v1 WP16), and the exit code
+ * it leaves with (`EX_UNAVAILABLE`). Value-free: it names the tool, never the environment.
+ */
+export const PROCESS_TABLE_UNREADABLE =
+  'process table unreadable: `ps -A -o pid=,ppid=` did not list this process. The runner stops a ' +
+  'cancelled or timed-out browser by enumerating its process tree, and without `ps` (procps) it ' +
+  'would signal the fork alone and orphan Chromium. Refusing to start.';
+export const PROCESS_TABLE_EXIT_CODE = 69;
 
 export interface MainResult {
   readonly started: boolean;
@@ -102,6 +117,14 @@ export async function main(options: MainOptions): Promise<MainResult> {
     if (!(error instanceof ConfigurationError)) throw error;
     for (const problem of error.problems) options.write(`configuration rejected: ${problem}`);
     options.setExitCode(78); // EX_CONFIG
+    return { started: false };
+  }
+
+  // **The in-image `ps` guard** (Studio v1 WP16). Checked before anything listens, so a pod on an
+  // image that lost `procps` never becomes ready rather than serving runs it cannot stop.
+  if (!canEnumerateProcessTree((options.processTable ?? readProcessTable)())) {
+    options.write(PROCESS_TABLE_UNREADABLE);
+    options.setExitCode(PROCESS_TABLE_EXIT_CODE);
     return { started: false };
   }
 

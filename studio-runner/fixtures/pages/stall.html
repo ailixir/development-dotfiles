@@ -1,0 +1,36 @@
+<!doctype html>
+<!--
+  Controlled fixture page for Studio v1 WP11: a run that is stalled mid-step with the page loaded.
+
+  The page renders and then never shows the element the step waits for, so an
+  `expect(...).toBeVisible()` with a long timeout sits inside Playwright's locator polling until
+  something outside the step ends it. That is the second of the two cancel fixtures: the black-hole
+  route stalls a navigation, this one stalls an assertion, and `context.close()` has to interrupt
+  a different kind of pending call in each.
+
+  A visible clock keeps the recorder producing frames while the step waits, so the recording a
+  cancel leaves behind has content to finalize.
+
+  Deliberately NOT in `fixtures/reference/manifest.json`: that manifest is the pinned syntax
+  reference, compared exactly by `src/compat`, and adding a page to it would bump
+  SYNTAX_REFERENCE_VERSION and make every confirmed artifact incompatible. A test page is not a
+  language change.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Checks — Stall</title>
+  </head>
+  <body>
+    <h1 role="heading" aria-level="1">Waiting</h1>
+    <p id="clock">0</p>
+    <!-- There is no element with data-testid="never-appears", and nothing ever adds one. -->
+    <script>
+      const clock = document.getElementById('clock');
+      const started = performance.now();
+      setInterval(() => {
+        clock.textContent = String(Math.round(performance.now() - started));
+      }, 100);
+    </script>
+  </body>
+</html>

@@ -21,6 +21,7 @@ import type { ReportBody } from '../../src/reporting/snapshot.js';
 import {
   CONTROL_POLL_INTERVAL_MS,
   FINISHED_RUNS_REMEMBERED,
+  STOPPED_STEP_MESSAGE,
 } from '../../src/server/runCoordinator.js';
 import { createFsScratchStore } from '../../src/server/scratch.js';
 import { createChildDriver } from '../helpers/childDriver.js';
@@ -361,5 +362,74 @@ describe('the owning runner pulls the cancel, whatever pod the DELETE reached', 
     expect(final.outcome?.result).toBe('ERROR');
     expect(final.outcome?.errorCode).toBe('CANCELLED');
     expect(other.http.reportRequests).toHaveLength(0);
+  }, 20_000);
+});
+
+// ── Decision D1: the step a cancel interrupted is SKIPPED, never FAIL ─────────────────────────
+
+/** What a real child reported for the interrupted step before D1 (measured in the fixtures tier). */
+const CLOSED_UNDER_IT = 'Error: page.goto: net::ERR_ABORTED at http://127.0.0.1:4321/never';
+
+function stepZero(body: ReportBody): ReportBody['steps'][number] | undefined {
+  return body.steps.find((step) => step.stepIndex === 0);
+}
+
+describe('D1 — the step a cancel interrupted is reported SKIPPED with the stop text', () => {
+  it('rewrites the FAIL the closing context caused, on the PROGRESS and on the FINAL', async () => {
+    const { runner } = await hangOne({ hangOnStep: 0, onStop: 'flush', onStopFailsStep: CLOSED_UNDER_IT });
+
+    expect((await del(runner.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN)).status).toBe(202);
+    await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
+
+    const final = finalReport(runner);
+    expect(final.outcome?.errorCode).toBe('CANCELLED');
+    expect(stepZero(final)).toEqual({
+      stepIndex: 0,
+      status: 'SKIPPED',
+      // It started and it ended; both readings are the child's and they stay.
+      startedAtMs: 12,
+      finishedAtMs: 40,
+      durationMs: 28,
+      failure: STOPPED_STEP_MESSAGE,
+    });
+    // Neither the closing browser's error nor its URL reaches any report, PROGRESS included.
+    for (const request of runner.http.reportRequests) {
+      expect(request.body).not.toContain('ERR_ABORTED');
+      expect(request.body).not.toContain('"FAIL"');
+    }
+  }, 20_000);
+
+  it('turns a step still RUNNING when the grace ran out into SKIPPED on the FINAL, with no finish', async () => {
+    const { driver, runner } = await hangOne({ hangOnStep: 0, onStop: 'ignore' });
+
+    expect((await del(runner.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN)).status).toBe(202);
+    await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
+
+    expect(driver.child().killed).toBeGreaterThan(0);
+    expect(stepZero(finalReport(runner))).toEqual({
+      stepIndex: 0,
+      status: 'SKIPPED',
+      startedAtMs: 12,
+      finishedAtMs: null,
+      durationMs: null,
+      failure: STOPPED_STEP_MESSAGE,
+    });
+  }, 20_000);
+
+  it('is the cancel’s rule only: a deadline kill leaves the step as the child reported it', async () => {
+    // §18.1 has the API name a TIMEOUT step still RUNNING; D1 decides nothing about deadlines.
+    const flushed = await hangOne({ hangOnStep: 0, onStop: 'flush', onStopFailsStep: CLOSED_UNDER_IT });
+    flushed.runner.scheduler.advance(120_000);
+    await within(() => flushed.runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
+    expect(finalReport(flushed.runner).outcome?.errorCode).toBe('TIMEOUT');
+    expect(stepZero(finalReport(flushed.runner))?.status).toBe('FAIL');
+    await flushed.runner.stop();
+    harness = null;
+
+    const killed = await hangOne({ hangOnStep: 0, onStop: 'ignore' });
+    killed.runner.scheduler.advance(120_000);
+    await within(() => killed.runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
+    expect(finalReport(killed.runner).outcome?.errorCode).toBe('TIMEOUT');
+    expect(stepZero(finalReport(killed.runner))?.status).toBe('RUNNING');
   }, 20_000);
 });

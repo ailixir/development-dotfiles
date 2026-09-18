@@ -66,6 +66,24 @@ export function readProcessTable(): readonly ProcessRow[] {
 }
 
 /**
+ * Whether the process table can be read well enough to find this process in it (Studio v1 WP16).
+ *
+ * {@link signalProcessTree} kills a browser tree **by enumeration**, and {@link readProcessTable}
+ * answers `[]` rather than throwing when `ps` is missing or fails. So an image without `procps`
+ * would not fail anywhere: every kill would quietly become "signal the fork", which is exactly the
+ * orphaned-Chromium failure the enumeration exists to prevent — and it would surface only as
+ * leaked browsers in production. `ps` is present in the pinned base image today; an image swap
+ * (`ED-05`) that dropped it is what this makes loud. Finding the caller's own pid is the check,
+ * because an empty or unparsable listing and a listing of some other namespace both fail it.
+ */
+export function canEnumerateProcessTree(
+  table: readonly ProcessRow[] = readProcessTable(),
+  self: number = process.pid,
+): boolean {
+  return table.some((row) => row.pid === self);
+}
+
+/**
  * Every pid descended from `pid`, transitively, excluding `pid` itself.
  *
  * Breadth-first over a snapshot of the table, with a visited set, so a re-parented process that

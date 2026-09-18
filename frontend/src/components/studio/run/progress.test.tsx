@@ -155,3 +155,38 @@ describe('Studio v1 gaps: a log line with no reading', () => {
     expect(screen.getByTestId('log-line-1').textContent).toBe('INFO run finished');
   });
 });
+
+describe('Studio v1 D1: the step a cancel interrupted', () => {
+  // The shape the runner now sends and the API projects verbatim (openapi `StepResult`, ADR-002
+  // §29.5): the interrupted step is SKIPPED, keeps the start it had, and carries the runner's fixed
+  // stop text; a step that never started stays as it was. Built from a fixture rather than from the
+  // runner's constant, which this package cannot import.
+  const STOPPED = 'The run was stopped before this step finished.';
+  const cancelledMidStep = {
+    ...failedWithSkippedTailExecution,
+    status: 'ERROR' as const,
+    errorCode: 'CANCELLED' as const,
+    stepResults: failedWithSkippedTailExecution.stepResults.map((step) =>
+      step.stepIndex === 1
+        ? { ...step, status: 'SKIPPED' as const, offsetMs: 1234, durationMs: 567, message: STOPPED }
+        : step.stepIndex > 1
+          ? { ...step, status: 'PENDING' as const, offsetMs: null, durationMs: null, message: null }
+          : step,
+    ),
+  };
+
+  it('renders SKIPPED with the stop text and the start it had, and offers the seek', () => {
+    render(<ExecutionProgressView snapshot={cancelledMidStep} onSeekStep={() => undefined} />);
+
+    expect(screen.getByTestId('execution-cancelled')).toBeTruthy();
+    expect(screen.getByTestId('step-status-1').textContent).toBe('SKIPPED');
+    expect(screen.getByTestId('step-message-1').textContent).toBe(STOPPED);
+    expect(screen.getByTestId('step-offset-1').textContent).toContain('1234ms');
+    expect(screen.getByTestId('step-seek-1').hasAttribute('disabled')).toBe(false);
+    // The step after it never started: no timing, no seek, no message.
+    expect(screen.getByTestId('step-offset-2').textContent).toContain(NOT_ATTEMPTED);
+    expect(screen.getByTestId('step-seek-2').hasAttribute('disabled')).toBe(true);
+    expect(screen.queryByTestId('step-message-2')).toBeNull();
+    expect(screen.queryByText('FAIL')).toBeNull();
+  });
+});
