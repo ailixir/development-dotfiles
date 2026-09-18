@@ -6,21 +6,28 @@ import com.citi.put.checks.checks.CheckController;
 import com.citi.put.checks.csi.CsiController;
 import com.citi.put.checks.reports.ReportsController;
 import com.citi.put.checks.scheduling.CronDispatcher;
+import com.citi.put.checks.scheduling.partitioning.PartitionHealthIndicator;
 import com.citi.put.checks.scheduling.partitioning.PartitionScheduler;
 import com.citi.put.checks.scheduling.partitioning.RetentionPruner;
 import com.citi.put.checks.studio.dispatch.StudioDispatchMetrics;
 import com.citi.put.checks.studio.dispatch.StudioDispatchScheduler;
 import com.citi.put.checks.studio.recovery.StudioRecoveryScheduler;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
+import java.time.YearMonth;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 // Spring Boot test contexts turn metrics export off unless asked; without this the Prometheus
@@ -32,6 +39,8 @@ class ApiProfileIT {
 
   @Autowired ApplicationContext context;
   @Autowired TestRestTemplate restTemplate;
+  @Autowired JdbcTemplate jdbc;
+  @Autowired PartitionHealthIndicator partitionHealth;
 
   @Test
   void restControllersLoaded() {
@@ -48,6 +57,27 @@ class ApiProfileIT {
   @Test
   void partitionSchedulerNotLoaded() {
     assertBeanAbsent(PartitionScheduler.class);
+  }
+
+  /**
+   * Studio v1 gaps: the scheduler is absent here, but partition creation is not. An API pod used to
+   * start with whatever partitions a worker had made, so on a fresh database its health was DOWN
+   * and the runs it accepted landed in DEFAULT.
+   */
+  @Test
+  void partitionsAreBootstrappedOnTheApiToo() {
+    YearMonth now = YearMonth.now(ZoneOffset.UTC);
+    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy_MM");
+    for (String table : List.of("execution_results", "ui_test_executions", "report_executions")) {
+      for (int i = 0; i <= 2; i++) {
+        String partition = table + "_" + now.plusMonths(i).format(fmt);
+        assertThat(
+                jdbc.queryForObject("SELECT to_regclass(?) IS NOT NULL", Boolean.class, partition))
+            .as("partition %s exists on an API-only start", partition)
+            .isTrue();
+      }
+    }
+    assertThat(partitionHealth.health().getStatus()).isNotEqualTo(Status.DOWN);
   }
 
   @Test
