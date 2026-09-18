@@ -174,6 +174,11 @@ tasks.withType<Test>().configureEach {
     // is "Connection refused" in tests that pass in isolation and fail in the suite. Raising the
     // cache keeps the contexts — and therefore the container — alive for the fork's lifetime.
     systemProperty("spring.test.context.cache.maxSize", "64")
+
+    // The Studio recording route is exercised against the in-memory FakeVideoObjectStore. Outside
+    // tests the provider defaults to `none`, and snapshots report recordings UNAVAILABLE instead
+    // of offering a player the route can only answer with 404 (application.yml).
+    systemProperty("studio.execution.video-store.provider", "in-memory")
 }
 
 spotless {
