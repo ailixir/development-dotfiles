@@ -66,6 +66,7 @@ import { useAppSelector } from '@/store';
 import { selectIsSourceEnabled } from '@store/slices/sourcesSlice';
 import { selectIsFeatureEnabled } from '@store/slices/featuresSlice';
 import { setExecutionLogs, setAllStepResults, setExecuting, setCurrentStep as setCurrentStepAction, clearLogs } from '@store/slices/studioSlice';
+import { formatLogTime, toStudioLogLines } from '@/utils/studio/logTime';
 import {
   CANONICAL_BROWSER,
   defaultConfiguration,
@@ -149,7 +150,7 @@ const ChecksStudioPageInner: React.FC = () => {
   const [newStep, setNewStep] = useState('');
   const reduxLogs = useAppSelector((s: any) => s.studio.executionLogs);
   const executionLogs = useMemo(() => (reduxLogs || []).map((l: any) => ({
-    timestamp: new Date(l.timestamp).toLocaleTimeString(),
+    timestamp: formatLogTime(l.timestamp),
     message: l.message,
     type: l.level === 'error' ? 'error' : 'info',
   })), [reduxLogs]);
@@ -331,7 +332,7 @@ const ChecksStudioPageInner: React.FC = () => {
         const passedCount = exec.stepResults?.filter((r) => r.status === 'PASS').length ?? 0;
         dispatch(setCurrentStepAction(runningIndex >= 0 ? runningIndex : Math.max(0, passedCount - 1)));
         if (Array.isArray(exec.logs)) {
-          dispatch(setExecutionLogs(exec.logs as any));
+          dispatch(setExecutionLogs(toStudioLogLines(exec.logs)));
         }
         // The *run* stops being in flight on a terminal outcome. The **stream** does not close
         // here: §5.4 row 5 keeps it open while evidence is still being produced, and that rule

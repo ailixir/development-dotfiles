@@ -255,7 +255,8 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
             component="div"
             data-testid={`log-line-${index}`}
           >
-            {`${entry.at} ${entry.level} ${entry.message}`}
+            {/* `at` is nullable by contract; a line without a reading shows no time, not "null". */}
+            {[entry.at, entry.level, entry.message].filter((part) => part !== null).join(' ')}
           </Typography>
         ))}
       </Box>

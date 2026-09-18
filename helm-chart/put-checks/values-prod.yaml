@@ -179,7 +179,6 @@ studioRunner:
     sizeLimit: 8Gi
   seccompProfile:
     type: RuntimeDefault
-  callbackBaseUrl: http://put-checks-api:8080
   identity:
     secretName: checks-studio-runner-identity-prod
   objectStore:

@@ -8,6 +8,7 @@ import com.citi.put.checks.studio.dto.RuntimeVersions;
 import com.citi.put.checks.studio.dto.StepResult;
 import com.citi.put.checks.studio.dto.VideoEvidence;
 import com.citi.put.checks.studio.entity.UITestExecution;
+import com.citi.put.checks.studio.evidence.VideoStoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,17 +39,30 @@ public class ExecutionSnapshotMapper {
   private static final TypeReference<List<ExecutionLogEntry>> LOG_ENTRIES =
       new TypeReference<List<ExecutionLogEntry>>() {};
 
+  /**
+   * {@code video.error} for a recording the runner stored where this API cannot read it. Shown
+   * verbatim by the MFE for {@code UNAVAILABLE}.
+   */
+  static final String NO_RECORDING_STORE =
+      "Recording unavailable: this deployment has no recording store the API can read.";
+
   private final ObjectMapper objectMapper;
   private final Clock clock;
+  private final boolean servesRecordings;
 
   @Autowired
-  public ExecutionSnapshotMapper(ObjectMapper objectMapper) {
-    this(objectMapper, Clock.systemUTC());
+  public ExecutionSnapshotMapper(ObjectMapper objectMapper, VideoStoreProperties videoStore) {
+    this(objectMapper, Clock.systemUTC(), videoStore.servesRecordings());
   }
 
   ExecutionSnapshotMapper(ObjectMapper objectMapper, Clock clock) {
+    this(objectMapper, clock, true);
+  }
+
+  ExecutionSnapshotMapper(ObjectMapper objectMapper, Clock clock, boolean servesRecordings) {
     this.objectMapper = objectMapper;
     this.clock = clock;
+    this.servesRecordings = servesRecordings;
   }
 
   public ExecutionSnapshotDto toSnapshot(UITestExecution execution) {
@@ -85,6 +99,11 @@ public class ExecutionSnapshotMapper {
    * UNAVAILABLE} once it is over — which is exactly what legacy history is: finished, with no
    * usable recording. An available recording whose expiry has passed reads as {@code EXPIRED}
    * regardless of whether the object store has physically removed it yet.
+   *
+   * <p>An available recording this API has no store to read from is {@code UNAVAILABLE}: the runner
+   * did record it, but no request for it can succeed, and a player for a route that can only answer
+   * 404 is the dishonest state (Studio v1 gaps). The persisted row is not changed, so the recording
+   * becomes servable the moment a real store is configured.
    */
   private VideoEvidence videoEvidence(UITestExecution execution, String status) {
     String persisted = execution.getVideoStatus();
@@ -101,6 +120,9 @@ public class ExecutionSnapshotMapper {
         && !expiresAt.isAfter(clock.instant())) {
       return new VideoEvidence(
           VideoEvidence.EXPIRED, execution.getVideoError(), expiresAt, partial);
+    }
+    if (VideoEvidence.AVAILABLE.equals(persisted) && !servesRecordings) {
+      return new VideoEvidence(VideoEvidence.UNAVAILABLE, NO_RECORDING_STORE, null, false);
     }
     return new VideoEvidence(persisted, execution.getVideoError(), expiresAt, partial);
   }

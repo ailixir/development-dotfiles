@@ -281,7 +281,8 @@ export interface StepResult {
 }
 
 export interface ExecutionLogEntry {
-  at: string;
+  /** Null where the runner held no reading (openapi `ExecutionLogEntry`). */
+  at: string | null;
   level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
   message: string;
   stepIndex?: number | null;

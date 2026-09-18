@@ -380,3 +380,60 @@ describe('Stop', () => {
     expect(requests('POST', /\/executions\/[^/]+\/cancel$/)).toHaveLength(1);
   }, TEST_TIMEOUT_MS);
 });
+
+describe('Live logs', () => {
+  it('show each line at its local time, and a line with no reading without one', async () => {
+    const EXECUTION_ID = '88888888-8888-8888-8888-888888888888';
+    setExecutionTransportSeam({ primary: createPollTransport, fallback: null });
+    serveDraft(readyDraft);
+    const at = '2026-09-18T10:00:02Z';
+    const finished: ExecutionSnapshot = {
+      executionId: EXECUTION_ID,
+      testId: readyDraft.id,
+      csiId: readyDraft.csiId,
+      revisionId: readyDraft.confirmedRevisionId,
+      status: 'PASSED',
+      errorCode: null,
+      acceptedAt: '2026-09-18T10:00:00Z',
+      startedAt: '2026-09-18T10:00:01Z',
+      endedAt: '2026-09-18T10:00:05Z',
+      durationMs: 4000,
+      stepResults: readyDraft.steps.map((originalText, stepIndex) => ({
+        stepIndex,
+        originalText,
+        status: 'PASS',
+        offsetMs: null,
+        durationMs: null,
+        message: null,
+      })),
+      // The runner's closing line carries no reading, so the API publishes `at: null`.
+      logs: [
+        { at, level: 'INFO', message: 'browser started' },
+        { at: null, level: 'INFO', message: 'run finished' },
+      ],
+      logsTruncated: false,
+      video: { status: 'UNAVAILABLE', error: null, expiresAt: null, partial: false },
+      videoPath: null,
+      runtime: { playwright: null, chromium: null, validator: null, executor: null, image: null },
+      revision: 1,
+      streamComplete: true,
+    };
+    studioMockServer.use(
+      http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
+        HttpResponse.json({ executionId: EXECUTION_ID, status: 'PENDING' }, { status: 202 }),
+      ),
+      http.get(`${STUDIO_BASE}/executions/:id`, () => HttpResponse.json(finished)),
+    );
+
+    renderPage();
+    const run = await screen.findByRole('button', { name: 'Run Test' }, WAIT);
+    await waitFor(() => expect(run).not.toBeDisabled(), WAIT);
+    await userEvent.click(run);
+
+    await screen.findByText(new Date(at).toLocaleTimeString(), {}, WAIT);
+    const text = document.body.textContent ?? '';
+    expect(text).not.toContain('Invalid Date');
+    expect(text).not.toMatch(/null INFO/u);
+    expect(screen.getAllByText('run finished').length).toBeGreaterThan(0);
+  }, TEST_TIMEOUT_MS);
+});

@@ -213,6 +213,10 @@ studio:
     video-store:
       bucket: ${STUDIO_EVIDENCE_BUCKET:put-checks-studio-evidence}
       endpoint: ${STUDIO_EVIDENCE_ENDPOINT:https://sonic.invalid}
+      # `none` until a real object-store client exists (ED-03): recordings are then reported
+      # UNAVAILABLE rather than offered on a route that can only 404. `in-memory` is the test fake,
+      # set by the Gradle test task (build.gradle.kts), never by a deployment.
+      provider: ${STUDIO_EVIDENCE_PROVIDER:none}
     quotas:
       per-csi: ${STUDIO_QUOTA_PER_CSI:20}
       global: ${STUDIO_QUOTA_GLOBAL:200}

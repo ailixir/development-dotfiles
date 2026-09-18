@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -19,6 +20,13 @@ public class PartitionManager {
 
   private static final Set<String> ALLOWED_TABLES =
       Set.of("execution_results", "ui_test_executions", "report_executions");
+
+  /** The range-partition key of each managed table (V1, V7). */
+  private static final Map<String, String> PARTITION_KEYS =
+      Map.of(
+          "execution_results", "started_at",
+          "ui_test_executions", "started_at",
+          "report_executions", "executed_at");
 
   private final JdbcTemplate jdbc;
   private final String parentTable;
@@ -49,6 +57,12 @@ public class PartitionManager {
     }
   }
 
+  /**
+   * Ensures the monthly partitions for the current UTC month and the next {@code lookaheadMonths}.
+   *
+   * <p>Returns the names of every partition that exists for that window once the call is done,
+   * whether it created them or found them.
+   */
   public List<String> ensurePartitions(int lookaheadMonths) {
     if (!isPartitionedTable()) {
       LOG.debug(
@@ -57,35 +71,110 @@ public class PartitionManager {
     }
 
     YearMonth current = YearMonth.now(ZoneOffset.UTC);
-    List<String> created = new ArrayList<>();
+    List<String> ensured = new ArrayList<>();
 
     for (int i = 0; i <= lookaheadMonths; i++) {
       YearMonth month = current.plusMonths(i);
-      String partitionName = parentTable + "_" + month.format(PARTITION_FMT);
-      String rangeStart = month.atDay(1).format(SQL_DATE_FMT);
-      String rangeEnd = month.plusMonths(1).atDay(1).format(SQL_DATE_FMT);
-
-      String ddl =
-          "CREATE TABLE IF NOT EXISTS "
-              + partitionName
-              + " PARTITION OF "
-              + parentTable
-              + " FOR VALUES FROM ('"
-              + rangeStart
-              + "') TO ('"
-              + rangeEnd
-              + "')";
-
+      String partitionName = partitionName(month);
       try {
-        jdbc.execute(ddl);
-        created.add(partitionName);
-        LOG.info("partition_created table={} range=[{}, {})", partitionName, rangeStart, rangeEnd);
+        ensurePartition(month);
+        ensured.add(partitionName);
       } catch (Exception e) {
         LOG.error("Failed to create partition {}: {}", partitionName, e.getMessage());
       }
     }
 
+    return ensured;
+  }
+
+  /**
+   * Creates the partition for {@code month} unless it already exists, moving any rows for that
+   * month out of the DEFAULT partition into it.
+   *
+   * <p><b>Why the move.</b> A bare {@code CREATE TABLE … PARTITION OF … FOR VALUES …} fails while
+   * the DEFAULT partition holds a row inside the new range ("updated partition constraint for
+   * default partition would be violated"). Any insert that lands before the month's partition
+   * exists — the dev seed (Flyway runs before any bootstrap), an API pod accepting a run before a
+   * worker has bootstrapped, a missed monthly run — therefore used to make the month permanently
+   * uncreatable, and the partition health indicator DOWN for good.
+   *
+   * <p>One {@code DO} block is one statement and so one transaction: the rows are moved aside out
+   * of DEFAULT (a single {@code DELETE … RETURNING}), the partition is created and the rows are
+   * re-inserted through the parent, or none of it happens. {@code CREATE … PARTITION OF} locks and
+   * rescans DEFAULT, so a row for the month committed in between fails the block rather than being
+   * stranded. A transaction-scoped advisory lock per parent table serialises concurrent callers
+   * (every pod bootstraps), and the existence check is repeated under it.
+   *
+   * @return {@code true} when the partition was absent before the call and exists after it
+   */
+  boolean ensurePartition(YearMonth month) {
+    String partitionName = partitionName(month);
+    if (listPartitions().contains(partitionName)) {
+      return false;
+    }
+    String rangeStart = month.atDay(1).format(SQL_DATE_FMT);
+    String rangeEnd = month.plusMonths(1).atDay(1).format(SQL_DATE_FMT);
+    String defaultPartition = parentTable + "_default";
+    String partitionKey = PARTITION_KEYS.get(parentTable);
+    String staging = "partition_move_" + partitionName;
+
+    // Every interpolated value is a whitelisted table name, a name derived from it, or a date this
+    // class formatted; inside the block they are quoted again with %I / %L.
+    String block =
+        """
+        DO $partition$
+        DECLARE
+          cols  text;
+          moved bigint := 0;
+        BEGIN
+          PERFORM pg_advisory_xact_lock(hashtext('checks-partition:' || '%1$s'));
+          IF to_regclass('%2$s') IS NOT NULL THEN
+            RETURN;
+          END IF;
+          IF to_regclass('%3$s') IS NOT NULL THEN
+            SELECT string_agg(quote_ident(attname), ', ' ORDER BY attnum) INTO cols
+              FROM pg_attribute
+             WHERE attrelid = '%1$s'::regclass AND attnum > 0 AND NOT attisdropped;
+            EXECUTE format('CREATE TEMP TABLE %%I ON COMMIT DROP AS SELECT %%s FROM %%I WHERE false',
+                           '%6$s', cols, '%3$s');
+            -- One statement, so a row committed to DEFAULT between a copy and a delete cannot be
+            -- deleted without having been copied.
+            EXECUTE format('WITH moved AS (DELETE FROM %%I WHERE %%I >= %%L AND %%I < %%L'
+                           || ' RETURNING %%s) INSERT INTO %%I SELECT * FROM moved',
+                           '%3$s', '%7$s', '%4$s', '%7$s', '%5$s', cols, '%6$s');
+            GET DIAGNOSTICS moved = ROW_COUNT;
+          END IF;
+          EXECUTE format('CREATE TABLE %%I PARTITION OF %%I FOR VALUES FROM (%%L) TO (%%L)',
+                         '%2$s', '%1$s', '%4$s', '%5$s');
+          IF moved > 0 THEN
+            EXECUTE format('INSERT INTO %%I (%%s) SELECT %%s FROM %%I', '%1$s', cols, cols, '%6$s');
+            RAISE NOTICE 'partition %% created with %% row(s) moved from %%', '%2$s', moved, '%3$s';
+          END IF;
+        END
+        $partition$
+        """
+            .formatted(
+                parentTable,
+                partitionName,
+                defaultPartition,
+                rangeStart,
+                rangeEnd,
+                staging,
+                partitionKey);
+
+    jdbc.execute(block);
+    boolean created = listPartitions().contains(partitionName);
+    LOG.info(
+        "partition_created table={} range=[{}, {}) present={}",
+        partitionName,
+        rangeStart,
+        rangeEnd,
+        created);
     return created;
+  }
+
+  private String partitionName(YearMonth month) {
+    return parentTable + "_" + month.format(PARTITION_FMT);
   }
 
   public PartitionHealthStatus checkHealth(int lookaheadDays) {

@@ -24,20 +24,86 @@ warn() { printf "${YELLOW}[!]${NC} %s\n" "$*"; }
 err()  { printf "${RED}[✗]${NC} %s\n" "$*"; }
 
 # ── Cleanup on exit ────────────────────────────────────────────────
+#
+# Only what this script started is stopped, and all of it is.
+#
+# `set -m` gives every background job its own process group, so a group signal reaches the whole
+# tree a job spawned (npx → node vite, the Gradle client, the watcher) and nothing outside it. Two
+# processes need more than that:
+#   - the bootRun JVM is forked by the Gradle *daemon*, not by the client this script started, so
+#     it is outside every group here. It is found by the backend port once it listens, and only
+#     when its command line runs this checkout's backend classes (BACKEND_APP_PID below);
+#   - the studio-runner gets SIGTERM on its own PID, not its group: it drains, and the drain is what
+#     ends the browser trees it forked (Chromium leads its own groups).
+# The Gradle daemon itself is shared and was not necessarily started here, so it is left alone.
+set -m
+BACKEND_APP_PID=""
+CLEANED_UP=false
+
+# Waits up to $2 seconds for the process (or, with a leading "-", the group) $1 to go, then KILLs it.
+stop_and_wait() {
+  local target=$1 seconds=$2 i
+  for ((i = 0; i < seconds * 4; i++)); do
+    kill -0 -- "$target" 2>/dev/null || return 0
+    sleep 0.25
+  done
+  kill -KILL -- "$target" 2>/dev/null || true
+}
+
+stop_group() {
+  local pid=$1 label=$2
+  [ -n "$pid" ] || return 0
+  kill -0 -- "-$pid" 2>/dev/null || return 0
+  log "Stopping ${label}…"
+  kill -TERM -- "-$pid" 2>/dev/null || true
+  stop_and_wait "-$pid" 10
+}
+
+# The PID listening on the backend port, if it is this checkout's bootRun JVM.
+backend_app_pid() {
+  local pid
+  for pid in $(lsof -tiTCP:"$BACKEND_PORT" -sTCP:LISTEN 2>/dev/null); do
+    if ps -o command= -p "$pid" 2>/dev/null | grep -qF "$ROOT_DIR/backend/build"; then
+      echo "$pid"
+      return 0
+    fi
+  done
+  return 0
+}
+
 cleanup() {
+  [ "$CLEANED_UP" = true ] && return 0
+  CLEANED_UP=true
+  # Nothing below may abort the rest: one child that already exited must not leave the others up.
+  # Job control is off again so the shell does not narrate each job it is about to reap.
+  set +e +m
   log "Shutting down…"
-  [ -n "$FRONTEND_PID" ]         && kill "$FRONTEND_PID"         2>/dev/null && wait "$FRONTEND_PID"         2>/dev/null
-  # SIGTERM, not SIGKILL: the runner drains, and its drain is what ends the browser tree it forked.
-  [ -n "$RUNNER_PID" ]           && kill "$RUNNER_PID"           2>/dev/null && wait "$RUNNER_PID"           2>/dev/null
-  [ -n "$BACKEND_WATCHER_PID" ]  && kill "$BACKEND_WATCHER_PID"  2>/dev/null && wait "$BACKEND_WATCHER_PID"  2>/dev/null
-  [ -n "$BACKEND_PID" ]          && kill "$BACKEND_PID"           2>/dev/null && wait "$BACKEND_PID"          2>/dev/null
+  stop_group "$FRONTEND_PID" "frontend"
+  if [ -n "$RUNNER_PID" ] && kill -0 "$RUNNER_PID" 2>/dev/null; then
+    log "Stopping studio-runner (drain)…"
+    kill -TERM "$RUNNER_PID" 2>/dev/null
+    stop_and_wait "$RUNNER_PID" 30
+  fi
+  stop_group "$BACKEND_WATCHER_PID" "file watcher"
+  if [ -n "$BACKEND_PID" ] && [ -z "$BACKEND_APP_PID" ]; then
+    BACKEND_APP_PID="$(backend_app_pid)"
+  fi
+  stop_group "$BACKEND_PID" "Gradle bootRun client"
+  if [ -n "$BACKEND_APP_PID" ] && kill -0 "$BACKEND_APP_PID" 2>/dev/null; then
+    log "Stopping backend JVM (PID $BACKEND_APP_PID)…"
+    kill -TERM "$BACKEND_APP_PID" 2>/dev/null
+    stop_and_wait "$BACKEND_APP_PID" 30
+  fi
   if [ -n "$GRADLE_WRAPPER_BACKUP" ] && [ -f "$GRADLE_WRAPPER_BACKUP" ]; then
     mv "$GRADLE_WRAPPER_BACKUP" "$GRADLE_WRAPPER_PROPERTIES"
     log "Restored Gradle wrapper configuration"
   fi
   log "Done."
 }
-trap cleanup EXIT INT TERM
+# INT and TERM exit, and the EXIT trap does the work once, whichever way the script ends.
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 # ── Usage ──────────────────────────────────────────────────────────
 usage() {
@@ -246,8 +312,8 @@ kill_port() {
 }
 
 if [ "$BACKEND" = true ]; then
-  # Stop any leftover Gradle bootRun daemons before port cleanup
-  (cd "$ROOT_DIR/backend" && ./gradlew --stop 2>/dev/null) || true
+  # No `gradlew --stop` here: it stops every daemon of this Gradle version, including other builds'.
+  # A backend this script left behind is on BACKEND_PORT, which kill_port clears.
   kill_port "$BACKEND_PORT"
 fi
 if [ "$FRONTEND" = true ]; then
@@ -344,6 +410,7 @@ if [ "$BACKEND" = true ] && [ "$FRONTEND" = true ]; then
   for i in $(seq 1 30); do
     if curl -sf "http://localhost:${BACKEND_PORT}/actuator/health" &>/dev/null; then
       ok "Backend healthy"
+      BACKEND_APP_PID="$(backend_app_pid)"
       break
     fi
     if ! kill -0 "$BACKEND_PID" 2>/dev/null; then

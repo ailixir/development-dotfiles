@@ -137,3 +137,21 @@ describe('AC-18: retained logs are rendered with their bound stated', () => {
     );
   });
 });
+
+describe('Studio v1 gaps: a log line with no reading', () => {
+  it('renders without a time rather than as "null"', () => {
+    const snapshot = {
+      ...logsCompleteExecution,
+      logs: [
+        { at: '2026-09-18T06:00:00Z', level: 'INFO' as const, message: 'browser started' },
+        { at: null, level: 'INFO' as const, message: 'run finished' },
+      ],
+    };
+    render(<ExecutionProgressView snapshot={snapshot} />);
+
+    expect(screen.getByTestId('log-line-0').textContent).toBe(
+      '2026-09-18T06:00:00Z INFO browser started',
+    );
+    expect(screen.getByTestId('log-line-1').textContent).toBe('INFO run finished');
+  });
+});
