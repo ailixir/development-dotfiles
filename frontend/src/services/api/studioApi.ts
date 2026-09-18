@@ -65,6 +65,15 @@ export const studioApi = {
   getExecution: async (id: string): Promise<ExecutionSnapshot> =>
     apiClient.get(`/studio/executions/${id}`),
 
+  /**
+   * Asks the server to stop a run. `202` carries the execution's current snapshot: the request was
+   * accepted, not that the run has ended. The run ends later with `status: ERROR` and
+   * `errorCode: CANCELLED`, and that terminal snapshot arrives through the live transport like any
+   * other. `409` means the run was already terminal.
+   */
+  cancelExecution: async (id: string): Promise<ExecutionSnapshot> =>
+    apiClient.post(`/studio/executions/${id}/cancel`, undefined),
+
   listExecutions: async (params?: ListExecutionsParams): Promise<ExecutionPage> =>
     apiClient.get('/studio/executions', { params }),
 

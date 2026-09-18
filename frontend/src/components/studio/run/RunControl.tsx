@@ -25,6 +25,7 @@ import { useRunGate } from './useRunGate';
  */
 export const RUN_LABEL = 'Run Test';
 export const STOP_LABEL = 'Stop';
+export const STOPPING_LABEL = 'Stopping…';
 
 export interface RunControlProps {
   /** The draft to run. Null while no scenario is selected. */
@@ -32,6 +33,12 @@ export interface RunControlProps {
   /** Whether a run is already on screen. The page owns this until story 10.11b lands. */
   readonly isRunning?: boolean;
   readonly onStop?: () => void;
+  /**
+   * True from the moment Stop asked the server to cancel until the run's terminal snapshot arrives.
+   * Stop only asks: the run is not over until the server says so, so the control says "Stopping…"
+   * and cannot be pressed again in that window.
+   */
+  readonly isStopping?: boolean;
   readonly onAccepted?: (executionId: string) => void;
   /** Rendered beside the control when the draft has no steps to run. */
   readonly hasSteps?: boolean;
@@ -56,6 +63,7 @@ export const RunControl: React.FC<RunControlProps> = ({
   testId,
   isRunning = false,
   onStop,
+  isStopping = false,
   onAccepted,
   hasSteps = true,
   runRequest = 0,
@@ -79,10 +87,10 @@ export const RunControl: React.FC<RunControlProps> = ({
         startIcon={isRunning ? <Stop /> : <PlayArrow />}
         color={isRunning ? 'error' : 'success'}
         onClick={() => (isRunning ? onStop?.() : gate.run())}
-        disabled={isRunning ? false : !runnable}
+        disabled={isRunning ? isStopping : !runnable}
         sx={{ minWidth: 140 }}
       >
-        {isRunning ? STOP_LABEL : RUN_LABEL}
+        {isRunning ? (isStopping ? STOPPING_LABEL : STOP_LABEL) : RUN_LABEL}
       </Button>
 
       {!isRunning && blocked && !gate.enablement?.canRun && (

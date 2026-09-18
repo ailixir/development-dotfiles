@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import type { ExecutionSnapshot, StepResult } from '@/types/studio/studioTypes';
 import { executionErrorNarrative } from './executionErrorNarratives';
+import { executionStatusLabel, isCancelledOutcome } from './executionStatus';
 import { seekEligibility } from '@/components/studio/evidence/seekEligibility';
 
 /**
@@ -45,6 +46,8 @@ export const LOGS_TRUNCATED_STATEMENT =
   'Earlier log lines were dropped before this report reached you: the run produced more than the server retains.';
 export const RERUN_LABEL = 'Run again';
 export const SEEK_LABEL = 'Show in recording';
+export const CANCELLED_STATEMENT =
+  'This run was stopped on request. Steps that had not finished were not completed, and any recording is whatever was captured before the stop.';
 export const UNNAMED_ERROR_STATEMENT =
   'The run ended in an error the server could not name, so there is nothing here to explain it. Nothing about the browser can be concluded from this.';
 
@@ -139,13 +142,33 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
   // status renders nothing at all — §8.2 puts a step locator or assertion timeout at `FAIL`/
   // `FAILED` with no code, and inventing a region for it would name a cause the server did not.
   const code = snapshot.errorCode;
-  const narrative = code !== null ? executionErrorNarrative(code) : null;
+  // A cancelled run is named, not explained as a failure: the person who pressed Stop caused it.
+  // It is checked first because `CANCELLED` is not yet in the contract's enum (see
+  // `CANCELLED_ERROR_CODE`), and the narrative lookup throws on a code the enum does not declare.
+  const cancelled = isCancelledOutcome(snapshot.status, code);
+  const narrative = code !== null && !cancelled ? executionErrorNarrative(code) : null;
 
   return (
     <Box data-testid="execution-progress">
       <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-        <Chip size="small" label={snapshot.status} data-testid="execution-status" />
+        <Chip
+          size="small"
+          label={executionStatusLabel(snapshot.status, code)}
+          data-testid="execution-status"
+        />
       </Stack>
+
+      {cancelled && (
+        <Alert
+          severity="info"
+          role="status"
+          aria-label="Run cancelled"
+          data-testid="execution-cancelled"
+          sx={{ mb: 2 }}
+        >
+          <Typography variant="body2">{CANCELLED_STATEMENT}</Typography>
+        </Alert>
+      )}
 
       {snapshot.status === 'ERROR' && code === null && (
         <Alert severity="error" sx={{ mb: 2 }} data-testid="execution-error-unnamed">

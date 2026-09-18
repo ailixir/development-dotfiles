@@ -270,13 +270,14 @@ describe('the draft the page sends carries a timeout the contract would accept',
     // The negative control: a bound wide enough to admit the old value would guard nothing.
     expect(TIMEOUT_BOUND.maximum).toBeLessThan(30000);
 
-    const created: Array<Record<string, any>> = [];
+    // Studio v1 (D9): Save is `PUT /tests/{id}` on the open draft, never a create.
+    const saved: Array<Record<string, any>> = [];
     serveList(readyDraft);
     studioMockServer.use(
-      http.post(`${STUDIO_BASE}/tests`, async ({ request }) => {
+      http.put(`${STUDIO_BASE}/tests/:id`, async ({ request }) => {
         const body = (await request.json()) as Record<string, any>;
-        created.push(body);
-        return HttpResponse.json({ ...readyDraft, ...body }, { status: 201 });
+        saved.push(body);
+        return HttpResponse.json({ ...readyDraft, ...body });
       }),
     );
 
@@ -284,8 +285,8 @@ describe('the draft the page sends carries a timeout the contract would accept',
     await screen.findByRole('button', { name: 'Run Test' }, pageWait);
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    await waitFor(() => expect(created.length).toBe(1), pageWait);
-    const configuration = created[0].configuration;
+    await waitFor(() => expect(saved.length).toBe(1), pageWait);
+    const configuration = saved[0].configuration;
     expect(configuration, 'the save request carried no configuration at all').toBeDefined();
     expect(typeof configuration.timeoutSeconds).toBe('number');
     expect(configuration.timeoutSeconds).toBeGreaterThanOrEqual(TIMEOUT_BOUND.minimum);
