@@ -244,14 +244,24 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.worker.springProfile | quote }}
             {{- if .Values.studioRunner.enabled }}
-            # **Derived from the runner's own Service, never restated.** `application.yml` defaults
-            # this to port 8090 and `studio-runner/src/server/config.ts` defaults its listener to
-            # 8080 — two derivations of one fact in two languages, neither ever deployed. The fix
-            # is not to edit one default into agreement with the other, which would make a third
-            # copy: it is that the chart is the single source and both sides render from
+            # **Derived from the runner's own Service, never restated.** `application.yml` has no
+            # default for this (`STUDIO_RUNNER_BASE_URL` falls back to empty, and an empty base URL
+            # closes every dispatch DISPATCH_FAILED), while `studio-runner/src/server/config.ts`
+            # defaults its listener to 8080. The chart is therefore the single source of the
+            # address: both the worker's URL and the runner's listener render from
             # `studioRunner.service.port` (AC-1).
             - name: STUDIO_RUNNER_BASE_URL
               value: "http://{{ include "put-checks.studioRunner.fullname" . }}:{{ .Values.studioRunner.service.port }}"
+            # **The bearer the worker presents on POST /v1/runs (DEF-05, Studio v1 WP2).** Without
+            # it `HttpRunnerDispatchClient` refuses every dispatch before sending. It is read from
+            # the SAME Secret and key the runner reads its inbound `STUDIO_RUNNER_SERVICE_IDENTITY`
+            # from (`studioRunner.identity.*`), so the two sides cannot be configured apart, and the
+            # value never appears in values or in the manifest.
+            - name: STUDIO_RUNNER_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.studioRunner.identity.secretName }}
+                  key: {{ .Values.studioRunner.identity.serviceIdentityKey }}
             {{- end }}
             # ── The kill switch and the dispatcher, on the WORKER (story 10.18b, AC-23a) ──
             #

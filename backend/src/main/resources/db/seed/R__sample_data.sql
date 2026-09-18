@@ -331,6 +331,10 @@ ON CONFLICT (id) DO NOTHING;
 --     Chromium is the only engine V1 executes (V14 ck_ui_tests_browser).
 --     `schedule` is NULL: no scheduler path executes a UI test, so a
 --     stored schedule would describe a capability that does not exist.
+--     `steps` are authored English lines — the only shape the Studio
+--     API reads (LegacyStudioAdapter). The structured {step, action,
+--     target} objects an earlier revision stored made GET
+--     /api/v1/studio/tests answer 400 INVALID_STEPS under `--seed`.
 -- ═══════════════════════════════════════════════════════════════
 
 INSERT INTO ui_tests (id, name, csi_id, description, environment, browser, viewport_width, viewport_height, timeout_seconds, wait_strategy, steps, variables, created_by, status, schedule, created_at, updated_at) VALUES
@@ -338,7 +342,7 @@ INSERT INTO ui_tests (id, name, csi_id, description, environment, browser, viewp
    'PUT Shell Login Flow', '178672',
    'Verifies the SSO login flow from the PUT platform shell through to the dashboard', 'Production',
    'chromium', 1920, 1080, 30, 'networkidle',
-   '[{"step":1,"action":"navigate","target":"https://put.internal.citi.com/login"},{"step":2,"action":"type","target":"#username","value":"{USERNAME}"},{"step":3,"action":"type","target":"#password","value":"{PASSWORD}"},{"step":4,"action":"click","target":"button[type=submit]"},{"step":5,"action":"assert_url_contains","value":"dashboard"}]'::jsonb,
+   '["Go to https://put.internal.citi.com/login","Type <var USERNAME> into the username field","Type <var PASSWORD> into the password field","Click the Submit button","Check that the URL contains dashboard"]'::jsonb,
    '[{"name":"USERNAME","value":"testuser"},{"name":"PASSWORD","value":"***"}]'::jsonb,
    'bruno.buger@citi.com', 'ACTIVE', NULL,
    NOW() - INTERVAL '30 days', NOW()),
@@ -347,7 +351,7 @@ INSERT INTO ui_tests (id, name, csi_id, description, environment, browser, viewp
    'Dashboard Load Test', '396705',
    'Verifies dashboard loads all widgets within timeout', 'Production',
    'chromium', 1920, 1080, 45, 'networkidle',
-   '[{"step":1,"action":"navigate","target":"https://devportal.internal.citi.com/dashboard"},{"step":2,"action":"wait_for","target":".metrics-widget","timeout":10000},{"step":3,"action":"assert_visible","target":".widget-count"},{"step":4,"action":"screenshot","target":"dashboard-loaded"}]'::jsonb,
+   '["Go to https://devportal.internal.citi.com/dashboard","Wait for the metrics widget to be visible","Check that the widget count is visible"]'::jsonb,
    '[]'::jsonb,
    'lisa.wang@citi.com', 'ACTIVE', NULL,
    NOW() - INTERVAL '25 days', NOW()),
@@ -356,7 +360,7 @@ INSERT INTO ui_tests (id, name, csi_id, description, environment, browser, viewp
    'API Health Check UI', '285614',
    'Navigates to API status page and verifies all endpoints listed', 'Production',
    'chromium', 1920, 1080, 30, 'networkidle',
-   '[{"step":1,"action":"navigate","target":"https://tse.internal.citi.com/status"},{"step":2,"action":"wait_for","target":"table.endpoints"},{"step":3,"action":"assert_count","target":"table.endpoints tbody tr","min":5},{"step":4,"action":"screenshot","target":"api-status-page"}]'::jsonb,
+   '["Go to https://tse.internal.citi.com/status","Wait for the endpoints table to be visible","Check that the endpoints table lists at least 5 rows"]'::jsonb,
    '[]'::jsonb,
    'daniel.estevez@citi.com', 'PAUSED', NULL,
    NOW() - INTERVAL '20 days', NOW())
@@ -368,6 +372,22 @@ UPDATE ui_tests SET schedule = NULL
               'b8c9d0e1-0001-4000-8000-000000000002',
               'b8c9d0e1-0001-4000-8000-000000000003')
    AND schedule IS NOT NULL;
+
+-- …and structured steps the Studio API refuses to read. Rewritten only while they are still
+-- the old shape (an object without originalText), so an author's later edit is never replaced.
+UPDATE ui_tests t
+   SET steps = v.steps
+  FROM (VALUES
+    ('b8c9d0e1-0001-4000-8000-000000000001'::uuid,
+     '["Go to https://put.internal.citi.com/login","Type <var USERNAME> into the username field","Type <var PASSWORD> into the password field","Click the Submit button","Check that the URL contains dashboard"]'::jsonb),
+    ('b8c9d0e1-0001-4000-8000-000000000002'::uuid,
+     '["Go to https://devportal.internal.citi.com/dashboard","Wait for the metrics widget to be visible","Check that the widget count is visible"]'::jsonb),
+    ('b8c9d0e1-0001-4000-8000-000000000003'::uuid,
+     '["Go to https://tse.internal.citi.com/status","Wait for the endpoints table to be visible","Check that the endpoints table lists at least 5 rows"]'::jsonb)
+  ) AS v(id, steps)
+ WHERE t.id = v.id
+   AND jsonb_typeof(t.steps -> 0) = 'object'
+   AND NOT (t.steps -> 0 ? 'originalText');
 
 -- ═══════════════════════════════════════════════════════════════
 -- 12. UI Test Executions (6 rows — 2 per test)

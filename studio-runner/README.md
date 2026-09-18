@@ -191,6 +191,33 @@ npm run test:fixtures      # the real-browser tier
 written against a structural page/locator surface and is exercised against a hand-written page, and
 the child runtime is exercised against a fake browser factory.
 
+### Running it against the local backend (Studio v1 WP2)
+
+Verified 2026-09-18. From the repository root, `./dev.sh` builds this package, starts it on
+`127.0.0.1:8090` and starts the backend so that the two agree on both credentials. The runner's
+environment is **enumerated**, not inherited (`env -i`), because the loader refuses any unknown
+`STUDIO_RUNNER_*` key and the backend's own `STUDIO_RUNNER_BASE_URL`/`STUDIO_RUNNER_SERVICE_TOKEN` are
+exactly such keys. To start it by hand beside a backend on `:8080`:
+
+```bash
+npm run build
+env -i PATH="$PATH" HOME="$HOME" TMPDIR="$WORK" \
+  STUDIO_RUNNER_HOST=127.0.0.1 STUDIO_RUNNER_PORT=8090 STUDIO_RUNNER_POOL_SIZE=1 \
+  STUDIO_RUNNER_SERVICE_IDENTITY="$STUDIO_RUNNER_SERVICE_TOKEN" \
+  STUDIO_RUNNER_CALLBACK_IDENTITY="$STUDIO_CALLBACK_SERVICE_TOKEN" \
+  STUDIO_RUNNER_CALLBACK_BASE_URL=http://127.0.0.1:8080 \
+  STUDIO_RUNNER_SCRATCH_DIR="$WORK/scratch" STUDIO_RUNNER_OBJECT_STORE_DIR="$WORK/objects" \
+  node dist/main.js
+```
+
+`$WORK` is any directory you own; the scratch root must be a **child** of it, because the runner
+removes its scratch root on exit. The backend side is `STUDIO_RUNNER_BASE_URL=http://127.0.0.1:8090`
+plus the same two tokens (see `backend/README.md`, "Checks Studio end to end on a laptop"). The
+recording lands in `$WORK/objects`; the API cannot serve it yet, so playback is unavailable locally.
+
+`../tools/corun.sh` is the automated form: `StudioCoRunIT` starts this process the same way and its
+leg 4 requires a real run against a loopback page to end `PASSED` with the ledger row `DONE`.
+
 ### Secrets and the video — a disclosed limitation
 
 Architecture §9.2 is explicit and this story does not change it: **a secret typed into a visible

@@ -400,8 +400,9 @@ studioRunner:
   service:
     type: ClusterIP  # never an Ingress: §8.4's internal routes are not publicly exposed
     # **This port is the single source for the runner's address.** The worker's
-    # `STUDIO_RUNNER_BASE_URL` is rendered from this same key, so the 8080/8090 disagreement
-    # between `application.yml` and `studio-runner/src/server/config.ts` cannot be re-created here.
+    # `STUDIO_RUNNER_BASE_URL` is rendered from this same key, so the old 8080/8090 disagreement
+    # (`application.yml` once defaulted the URL to 8090; it now has no default at all, and
+    # `studio-runner/src/server/config.ts` listens on 8080) cannot be re-created here.
     port: 8090
 
   # Process reaping (AC-5a / AC-5b). The pause container becomes PID 1 and reaps orphaned
@@ -504,6 +505,10 @@ studioRunner:
   # The two identity secrets §9.2 permits, and nothing else. No database URL, no vault address,
   # no CSI endpoint, no LLM gateway key — the runner holds none of them, and only the deployment
   # can make that true.
+  #
+  # `serviceIdentityKey` is also what the WORKER reads its outbound bearer from
+  # (`STUDIO_RUNNER_SERVICE_TOKEN`, templates/deployment.yaml): one Secret key for both ends of
+  # POST /v1/runs. The worker is given that key only, never `callbackIdentityKey`.
   identity:
     secretName: checks-studio-runner-identity
     serviceIdentityKey: serviceIdentity

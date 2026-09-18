@@ -46,7 +46,7 @@ import {
   valueSetName,
   CHART_DIR,
 } from './helm.js';
-import type { K8sDocument, RenderOutcome } from './helm.js';
+import type { Container, K8sDocument, RenderOutcome } from './helm.js';
 import { imageFacts, imageUnavailableReason } from './image.js';
 
 /**
@@ -1038,6 +1038,71 @@ describe('AC-25 residual — this half’s diff, and what it did not touch', () 
   it('renders the runner disabled by default, so it cannot be deployed by forgetting to configure it', () => {
     const outcome = render({ enableRunner: false });
     expect(named(outcome, RUNNER_FRAGMENT)).toEqual([]);
+  });
+});
+
+/**
+ * Studio v1 WP2 — the worker presents the bearer the runner requires on `POST /v1/runs`.
+ *
+ * Before this, the worker Deployment rendered `STUDIO_RUNNER_BASE_URL` and nothing else, so
+ * `HttpRunnerDispatchClient` refused every dispatch with `SERVICE_IDENTITY_NOT_CONFIGURED` and a
+ * chart-deployed pair could never run. The criterion is a **comparison inside one rendered
+ * manifest**: the worker's secret reference must equal the runner's inbound one, name and key. A
+ * comparison against the literal `serviceIdentity` would be a second copy of the fact.
+ */
+function secretRefOf(container: Container, name: string): { name?: string; key?: string } | undefined {
+  return (container.env ?? []).find((entry) => entry.name === name)?.valueFrom?.secretKeyRef;
+}
+
+describe('Studio v1 WP2 — the worker reads its runner bearer from the runner’s own identity Secret', () => {
+  it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
+    '%s renders STUDIO_RUNNER_SERVICE_TOKEN from the same secret key as STUDIO_RUNNER_SERVICE_IDENTITY, never inline',
+    (_label, valuesFile) => {
+      const outcome = render({ valuesFile });
+      const worker = soleContainer(deploymentNamed(outcome, '-worker'));
+      const runner = soleContainer(runnerDeployment(outcome));
+
+      const entry = (worker.env ?? []).find((e) => e.name === 'STUDIO_RUNNER_SERVICE_TOKEN');
+      expect(entry, 'the worker carries no runner bearer, so every dispatch is refused').toBeDefined();
+      expect(entry?.value, 'the bearer must never be inlined into the manifest').toBeUndefined();
+
+      const workerRef = secretRefOf(worker, 'STUDIO_RUNNER_SERVICE_TOKEN');
+      const runnerRef = secretRefOf(runner, 'STUDIO_RUNNER_SERVICE_IDENTITY');
+      expect(runnerRef?.name, 'the runner reads its inbound identity from a Secret').toBeDefined();
+      expect(workerRef).toEqual(runnerRef);
+
+      // The worker is given the dispatch bearer only — never the runner's callback identity.
+      const callbackRef = secretRefOf(runner, 'STUDIO_RUNNER_CALLBACK_IDENTITY');
+      const workerKeys = (worker.env ?? [])
+        .map((e) => e.valueFrom?.secretKeyRef)
+        .filter((ref) => ref?.name === callbackRef?.name)
+        .map((ref) => ref?.key);
+      expect(workerKeys).not.toContain(callbackRef?.key);
+    },
+  );
+
+  it('render mutation: moving the identity Secret name and key moves both ends together', () => {
+    const outcome = render({
+      set: {
+        'studioRunner.identity.secretName': 'moved-identity',
+        'studioRunner.identity.serviceIdentityKey': 'movedKey',
+      },
+    });
+    const workerRef = secretRefOf(
+      soleContainer(deploymentNamed(outcome, '-worker')),
+      'STUDIO_RUNNER_SERVICE_TOKEN',
+    );
+    const runnerRef = secretRefOf(
+      soleContainer(runnerDeployment(outcome)),
+      'STUDIO_RUNNER_SERVICE_IDENTITY',
+    );
+    expect(runnerRef).toEqual({ name: 'moved-identity', key: 'movedKey' });
+    expect(workerRef).toEqual(runnerRef);
+  });
+
+  it('renders no runner bearer on the worker when the runner is disabled', () => {
+    const worker = soleContainer(deploymentNamed(render({ enableRunner: false }), '-worker'));
+    expect(envNames(worker)).not.toContain('STUDIO_RUNNER_SERVICE_TOKEN');
   });
 });
 
