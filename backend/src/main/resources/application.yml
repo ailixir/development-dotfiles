@@ -224,6 +224,22 @@ studio:
     recovery:
       # Both reapers and finalization reconciliation, worker profile only (§5.4).
       poll-interval-ms: ${STUDIO_RECOVERY_POLL_MS:5000}
+    # How long the running reaper waits before closing a cancel the runner never finished (Studio
+    # v1 WP16, ADR-002 §29). Each value mirrors a runner bound and reads the runner's OWN env name,
+    # so rendering the runner's values into this process configures both sides from one fact. The
+    # margin is derived as poll + 2 x report-timeout + stop-grace + report-timeout + evidence-window
+    # + delivery-window + slack (92s with these values) unless STUDIO_CANCEL_MARGIN is set, and a
+    # margin shorter than that worst case is refused at startup: it would close rows under a live
+    # runner and refuse its FINAL. Bare numbers are milliseconds.
+    cancel:
+      # The runner's CONTROL_POLL_INTERVAL_MS, a constant in runCoordinator.ts, not a setting.
+      control-poll-interval: 2s
+      report-timeout: ${STUDIO_RUNNER_ADMISSION_TIMEOUT_MS:10000}
+      stop-grace: ${STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS:5000}
+      evidence-window: ${STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS:15000}
+      delivery-window: ${STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS:30000}
+      slack: ${STUDIO_CANCEL_MARGIN_SLACK:10s}
+      margin: ${STUDIO_CANCEL_MARGIN:}
     dispatcher:
       enabled: ${STUDIO_DISPATCHER_ENABLED:false}
       threads: ${STUDIO_DISPATCHER_THREADS:4}

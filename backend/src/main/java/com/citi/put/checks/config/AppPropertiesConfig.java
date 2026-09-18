@@ -3,6 +3,7 @@ package com.citi.put.checks.config;
 import com.citi.put.checks.csi.CsiApiProperties;
 import com.citi.put.checks.dc.DcProperties;
 import com.citi.put.checks.studio.StudioExecutionProperties;
+import com.citi.put.checks.studio.recovery.RunnerCancelBudget;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
   IdentityBypassProperties.class,
   RateLimitProperties.class,
   SourceConcurrencyProperties.class,
-  StudioExecutionProperties.class
+  StudioExecutionProperties.class,
+  RunnerCancelBudget.class
 })
 public class AppPropertiesConfig {}

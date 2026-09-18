@@ -5,6 +5,7 @@ import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.dto.VideoEvidence;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -19,10 +20,11 @@ import org.springframework.stereotype.Component;
  * since Studio v1 WP4, which adds the first:
  *
  * <ol>
- *   <li>A recorded cancel still dispatched once the start-deadline margin has passed since it was
- *       requested — reconcile, else {@code ERROR / CANCELLED}. This is the cancel the runner never
- *       finished: the relay did not reach the pod holding the run, or the run's {@code FINAL} never
- *       arrived.
+ *   <li>A recorded cancel still dispatched once the cancel margin has passed since it was requested
+ *       — reconcile, else {@code ERROR / CANCELLED}. This is the cancel the runner never finished:
+ *       the pod holding the run is gone, or the run's {@code FINAL} never arrived. The margin is
+ *       {@link RunnerCancelBudget#effectiveMargin()}, which covers a healthy runner's whole cancel
+ *       path (Studio v1 WP16), so this condition is a backstop and never races a live runner.
  *   <li>{@code ADMITTED} past {@code start_deadline_at} — reconcile, else {@code ERROR /
  *       START_TIMEOUT}.
  *   <li>{@code RUNNING} past {@code run_deadline_at} — reconcile the manifest, else {@code ERROR /
@@ -51,25 +53,39 @@ public class RunningReaper {
   private final StudioDispatchLedgerStatements statements;
   private final FinalizationReconciler reconciler;
   private final StudioExecutionProperties properties;
+  private final Duration cancelMargin;
   private final Clock clock;
 
   @Autowired
   public RunningReaper(
       StudioDispatchLedgerStatements statements,
       FinalizationReconciler reconciler,
-      StudioExecutionProperties properties) {
-    this(statements, reconciler, properties, Clock.systemUTC());
+      StudioExecutionProperties properties,
+      RunnerCancelBudget cancelBudget) {
+    this(statements, reconciler, properties, cancelBudget, Clock.systemUTC());
   }
 
   RunningReaper(
       StudioDispatchLedgerStatements statements,
       FinalizationReconciler reconciler,
       StudioExecutionProperties properties,
+      RunnerCancelBudget cancelBudget,
       Clock clock) {
     this.statements = statements;
     this.reconciler = reconciler;
     this.properties = properties;
+    this.cancelMargin = cancelBudget.effectiveMargin();
     this.clock = clock;
+    LOGGER.info(
+        "Studio running reaper: an unfinished cancel is closed {} after it was requested (a"
+            + " healthy runner's worst case is {})",
+        cancelMargin,
+        cancelBudget.worstCase());
+  }
+
+  /** How long after a cancel was requested this reaper may close it. */
+  public Duration cancelMargin() {
+    return cancelMargin;
   }
 
   /** One bounded pass. Returns how many rows it changed. */
@@ -79,11 +95,11 @@ public class RunningReaper {
     int changed = 0;
 
     // A cancel nobody finished: the runner never delivered a FINAL for it within the margin
-    // (ADR-002 §29). The margin is the start deadline — as long as an admitted run is given to
-    // show a browser start, and several times the runner's 5 s stop grace plus its evidence and
-    // delivery. Checked first, so a cancelled row is closed as what it is rather than as the
-    // START_TIMEOUT or STALE the conditions below would otherwise name it.
-    Instant requestedBy = now.minus(properties.startDeadlineOrDefault());
+    // (ADR-002 §29). The margin covers the runner's own worst case — observe, stop, settle,
+    // evidence, delivery — so a slow but live runner is never closed under (Studio v1 WP16).
+    // Checked first, so a cancelled row past its margin is closed as what it is rather than as
+    // the START_TIMEOUT or STALE the conditions below would otherwise name it.
+    Instant requestedBy = now.minus(cancelMargin);
     for (UUID executionId : statements.findUnfinishedCancels(requestedBy, batch)) {
       changed += closeUnlessReconciled(executionId, ExecutionErrorCode.CANCELLED, now);
     }
