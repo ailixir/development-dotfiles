@@ -2676,11 +2676,43 @@ The contract gains two operations and one code (the §13 row above lists them).
 ### 29.3 Known limits, stated rather than hidden
 
 - **Evidence** is whatever the runner already produces on the kill path; no storage was added.
-- **Latency is bounded by the poll, not by the relay**: about one interval (2 s) plus one callback
+- **Latency is bounded by the poll, not by the relay**: at most one interval (2 s) plus one callback
   round trip, whatever the pod count. If the API is unreachable from the runner for longer than
   the start-deadline margin, the reaper closes the cancel and the browser runs to its own deadline.
 - **In-process sessions** (the unit tier's fakes) cannot be stopped mid-step; production sessions
   always run in a child and can.
+
+**Measured, Studio v1 WP11** (`studio-runner/test/fixtures-tier/cancel-real-chromium.test.ts`, real
+pinned Chromium in a real child, real fork, real scratch, a local object store; developer laptop,
+1280x720 recording; wall clock). These replace the prose bounds above where they are sharper:
+
+| What | Measured |
+|---|---|
+| Recorded cancel → owner observes it by the real 2 s poll (no `DELETE`) | 1 608 ms and 1 635 ms (two runs, one read each) |
+| `DELETE` on the owner → `stop` sent to the child | 1–3 ms |
+| Ordered stop → child exit, step stalled 2 s | navigation hung on a black hole: 122–139 ms (n=5, median 130); locator wait: 63–87 ms (n=5, median 66) |
+| Ordered stop → child exit, navigation hung for longer | ~1.2 s at 30 s (n=2), ~2.3 s at 60 s (n=2), 4.1–4.6 s at 115 s (n=3); one 115 s run **overran 5 s** when the step's own timeout fired during the close. A locator wait stays under 0.1 s at 100 s. |
+| Stop → `FINAL` handed to transport, ordered stop honoured | 45–150 ms |
+| Grace exceeded (browser `SIGSTOP`ped): `stop` → tree signal | at the grace, +1 ms (5 001 ms at 5 s; the grace now deploys at 15 s) |
+
+**The grace was raised on that measurement (decision D3).** Closing a context whose navigation is
+still pending grows by roughly 38 ms per second the navigation has hung, and a navigation may hang
+for the whole runtime cap (a `goto` `timeout` is not clamped below it). So the 5 s of decision D4 is
+not enough for the worst case even on a fast laptop, and a pod has at most 2 CPUs. The chart now
+deploys `STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS: "15000"`, about three times the laptop worst case;
+the runner's own fallback stays 5 s, and `terminationGracePeriodSeconds` is derived from the chart
+value, so it follows. **Staging should confirm the bound on a real pod.** The same grace serves the
+total-runtime deadline kill, which by construction happens at the longest possible hang.
+
+**Evidence on a cancel, observed.** An ordered stop that completed stored a whole recording
+(`STORED`, `partial: false`) on every run. When the grace ran out the suspended recorder had left a
+0-byte file, reported `FAILED`, `partial: false`; a readable prefix would have been `partial: true`.
+
+**Reaper margin, not changed here.** The worst case of a cancel is now poll (2 s) + grace (15 s) +
+evidence window (15 s) + the first delivery attempt, which can exceed the 30 s `start-deadline` the
+running reaper uses for cancels (§29.2 item 8). The outcome is `CANCELLED` either way; the row can
+lose the runner's evidence if the reaper wins. That margin belongs to the backend cancel
+configuration (plan WP12 / WP16.2) and is flagged rather than moved.
 
 ### 29.4 Amendment, same day — the multi-pod gap closed by pulling
 

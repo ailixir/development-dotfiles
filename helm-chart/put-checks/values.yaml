@@ -565,7 +565,15 @@ studioRunner:
   runnerEnv:
     STUDIO_RUNNER_POOL_SIZE: "1"
     STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS: "120000"
-    STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS: "5000"
+    # The ordered stop's grace: context close + webm finalization before the tree is killed. Raised
+    # from the runner's 5 s fallback by Studio v1 WP11 (decision D3), on measurement (developer
+    # laptop, 1280x720): closing a context whose navigation is still hung grows with how long it
+    # has hung — ~1.2 s at 30 s, ~2.3 s at 60 s, 4.1-4.6 s at 115 s — and one 115 s sample overran
+    # 5 s when the step's own timeout fired during the close. A navigation may hang for the whole
+    # runtime cap, so 5 s is not enough. 15 s is about three times the laptop worst case, for a pod
+    # limited to 2 CPUs; staging should confirm it (ADR-002 §29.3). A locator wait closes in <0.1 s.
+    # terminationGracePeriodSeconds is derived from this value and follows it.
+    STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS: "15000"
     STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS: "30000"
     STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS: "15000"
     STUDIO_RUNNER_DRAIN_TIMEOUT_MS: "150000"
