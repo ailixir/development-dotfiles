@@ -98,10 +98,12 @@ public class PartitionManager {
    * worker has bootstrapped, a missed monthly run — therefore used to make the month permanently
    * uncreatable, and the partition health indicator DOWN for good.
    *
-   * <p>One {@code DO} block is one statement and so one transaction: the rows are copied aside,
-   * deleted from DEFAULT, the partition is created and the rows are re-inserted through the parent,
-   * or none of it happens. A transaction-scoped advisory lock per parent table serialises
-   * concurrent callers (every pod bootstraps), and the existence check is repeated under it.
+   * <p>One {@code DO} block is one statement and so one transaction: the rows are moved aside out
+   * of DEFAULT (a single {@code DELETE … RETURNING}), the partition is created and the rows are
+   * re-inserted through the parent, or none of it happens. {@code CREATE … PARTITION OF} locks and
+   * rescans DEFAULT, so a row for the month committed in between fails the block rather than being
+   * stranded. A transaction-scoped advisory lock per parent table serialises concurrent callers
+   * (every pod bootstraps), and the existence check is repeated under it.
    *
    * @return {@code true} when the partition was absent before the call and exists after it
    */
@@ -133,11 +135,13 @@ public class PartitionManager {
             SELECT string_agg(quote_ident(attname), ', ' ORDER BY attnum) INTO cols
               FROM pg_attribute
              WHERE attrelid = '%1$s'::regclass AND attnum > 0 AND NOT attisdropped;
-            EXECUTE format('CREATE TEMP TABLE %%I ON COMMIT DROP AS SELECT %%s FROM %%I'
-                           || ' WHERE %%I >= %%L AND %%I < %%L',
-                           '%6$s', cols, '%3$s', '%7$s', '%4$s', '%7$s', '%5$s');
-            EXECUTE format('DELETE FROM %%I WHERE %%I >= %%L AND %%I < %%L',
-                           '%3$s', '%7$s', '%4$s', '%7$s', '%5$s');
+            EXECUTE format('CREATE TEMP TABLE %%I ON COMMIT DROP AS SELECT %%s FROM %%I WHERE false',
+                           '%6$s', cols, '%3$s');
+            -- One statement, so a row committed to DEFAULT between a copy and a delete cannot be
+            -- deleted without having been copied.
+            EXECUTE format('WITH moved AS (DELETE FROM %%I WHERE %%I >= %%L AND %%I < %%L'
+                           || ' RETURNING %%s) INSERT INTO %%I SELECT * FROM moved',
+                           '%3$s', '%7$s', '%4$s', '%7$s', '%5$s', cols, '%6$s');
             GET DIAGNOSTICS moved = ROW_COUNT;
           END IF;
           EXECUTE format('CREATE TABLE %%I PARTITION OF %%I FOR VALUES FROM (%%L) TO (%%L)',
