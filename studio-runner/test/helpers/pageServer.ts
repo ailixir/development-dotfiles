@@ -130,12 +130,13 @@ export function startPageServer(): Promise<PageServer> {
 /**
  * Pages this story adds that the pinned corpus does not reference.
  *
- * `popup.html` drives AC-15 and `timeline.html` drives AC-12a. They are deliberately **not** in
+ * `popup.html` drives AC-15, `timeline.html` drives AC-12a and `stall.html` holds a run mid-step
+ * for the Studio v1 WP11 cancel tier. They are deliberately **not** in
  * `fixtures/reference/manifest.json`: that manifest is the pinned syntax reference, compared
  * exactly by `src/compat`, and adding a page to it would bump `SYNTAX_REFERENCE_VERSION` and make
  * every confirmed artifact incompatible. A test page is not a language change.
  */
 function extraPage(pathname: string): string | null {
   const name = pathname.replace(/^\//u, '');
-  return name === 'popup.html' || name === 'timeline.html' ? name : null;
+  return name === 'popup.html' || name === 'timeline.html' || name === 'stall.html' ? name : null;
 }

@@ -6,6 +6,7 @@
  * timing-dependent, and the suite runs in milliseconds without ever sleeping for real.
  */
 import type { BrowserLauncher, ScratchStore } from '../../src/server/adapters.js';
+import type { DeadlineTimers } from '../../src/run/deadline.js';
 import type { RunOrigin } from '../../src/run/timeline.js';
 import type { RunnerConfig } from '../../src/server/config.js';
 import { CONFIG_PREFIX, loadConfig } from '../../src/server/config.js';
@@ -67,6 +68,14 @@ export interface HarnessOptions {
   readonly scheduler?: FakeScheduler;
   /** The control read's own timers (ADR-002 §29). Never advanced unless a test does it. */
   readonly controlScheduler?: FakeScheduler;
+  /**
+   * Real timers for the control read, in place of the fake `controlScheduler` (Studio v1 WP11).
+   *
+   * The fixtures tier's cancel tests measure the **real** 2 s poll, which a scheduler nobody
+   * advances can never show. When this is supplied the app polls on it, and the harness's
+   * `controlScheduler` is a detached fake that the app never sees — advancing it does nothing.
+   */
+  readonly controlTimers?: DeadlineTimers;
   /** Substitutes the object store; story 10.14's ordering and failure-path tests pass their own. */
   readonly objectStore?: ObjectStoreClient;
   /** Substitutes the uploader's filesystem port, so whole-file reads can be counted (AC-5). */
@@ -181,7 +190,7 @@ export function createHarness(options: HarnessOptions = {}): Harness {
     pool: options.pool,
     now: options.now ?? scheduler.now,
     timers: scheduler,
-    controlTimers: controlScheduler,
+    controlTimers: options.controlTimers ?? controlScheduler,
     // Fixed wall clock so a FINAL body is byte-comparable without a fake timer library.
     wallClock: () => new Date('2026-09-11T10:00:00.000Z'),
     sleep: (ms: number) => {
