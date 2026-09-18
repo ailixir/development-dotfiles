@@ -21,17 +21,13 @@ import {
   LinearProgress,
   Alert,
   AlertTitle,
-  Fab,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
-  Switch,
-  FormControlLabel,
   Tooltip,
   Badge,
   useTheme,
@@ -41,10 +37,6 @@ import {
   Snackbar,
   Tabs,
   Tab,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Skeleton,
   Table,
   TableHead,
   TableBody,
@@ -52,39 +44,17 @@ import {
   TableCell,
 } from '@mui/material';
 import {
-  Pause,
   Add,
   Delete,
-  Edit,
   Science,
-  VideoLibrary,
   Code,
   CheckCircle,
   Error,
-  Warning,
-  Timer,
-  Visibility,
-  VisibilityOff,
   Save,
-  Share,
-  Download,
-  Upload,
   Settings,
-  BugReport,
-  Speed,
-  Memory,
-  WebAsset,
-  Mouse,
-  Keyboard,
-  TouchApp,
-  CameraAlt,
-  Schedule,
-  AutoMode,
   ListAlt,
   PlaylistAdd,
-  Clear,
   Refresh,
-  ExpandMore,
   KeyboardArrowUp,
   KeyboardArrowDown,
   HelpOutline,
@@ -95,11 +65,14 @@ import { useDispatch } from 'react-redux';
 import { useAppSelector } from '@/store';
 import { selectIsSourceEnabled } from '@store/slices/sourcesSlice';
 import { selectIsFeatureEnabled } from '@store/slices/featuresSlice';
-import { setExecutionLogs, setAllStepResults, setExecuting, setCurrentStep as setCurrentStepAction, clearLogs, updateConfiguration } from '@store/slices/studioSlice';
+import { setExecutionLogs, setAllStepResults, setExecuting, setCurrentStep as setCurrentStepAction, clearLogs } from '@store/slices/studioSlice';
 import {
+  CANONICAL_BROWSER,
   defaultConfiguration,
   isTerminalExecutionStatus,
   type ExecutionSnapshot,
+  type StudioVariable,
+  type TestDto,
   type TestRequest,
 } from '@/types/studio/studioTypes';
 import studioApi from '@/services/api/studioApi';
@@ -108,23 +81,54 @@ import {
   type ExecutionSubscription,
   type TransportStatus,
 } from '@/services/api/studioTransportWiring';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import SecretInput from '@/components/studio/SecretInput';
 import { CompileReviewPanel } from '@/components/studio/review';
-import { ExecutionProgressView, RunControl } from '@/components/studio/run';
+import {
+  ExecutionProgressView,
+  RunControl,
+  executionStatusLabel,
+  executionStatusTone,
+} from '@/components/studio/run';
 import { VideoEvidencePanel, useVideoSeek } from '@/components/studio/evidence';
 
-type Scenario = {
+/** One row of the Variables dialog. `secret` rows hold a reference id, never a secret value. */
+type EditableVariable = {
   id: string;
   name: string;
-  description: string;
-  csiId: string;
-  steps: string[];
-  status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED' | string;
-  createdAt?: string;
-  updatedAt?: string;
-  configuration?: any;
+  type: 'plain' | 'secret';
+  value?: string;
+  secretId?: string;
 };
+
+function toEditableVariables(variables: StudioVariable[] | null | undefined): EditableVariable[] {
+  return (variables ?? []).map((variable, index) => ({
+    id: `var_${index}_${variable.name}`,
+    name: variable.name,
+    type: variable.kind === 'secretRef' ? 'secret' : 'plain',
+    value: variable.kind === 'plain' ? variable.value ?? '' : undefined,
+    secretId: variable.kind === 'secretRef' ? variable.secretId ?? undefined : undefined,
+  }));
+}
+
+/** The contract's typed variables. A `secretRef` carries its reference only. */
+function toContractVariables(rows: EditableVariable[]): StudioVariable[] {
+  return rows
+    .filter((row) => row.name.trim() !== '')
+    .map((row) =>
+      row.type === 'secret'
+        ? { name: row.name.trim(), kind: 'secretRef', secretId: row.secretId ?? null }
+        : { name: row.name.trim(), kind: 'plain', value: row.value ?? '' },
+    );
+}
+
+export const SAVE_CONFLICT_TITLE = 'This test changed after you opened it';
+export const SAVE_CONFLICT_STATEMENT =
+  'A newer version of this test was saved (in another tab, or by someone else) after this page loaded it. Nothing was saved. Reload to get the latest version. Edits on this page that are not saved will be replaced.';
+export const SAVE_REFUSED_TITLE = 'The server refused the save';
+export const RELOAD_TEST_LABEL = 'Reload test';
+
+type SaveOutcome = 'saved' | 'conflict' | 'error';
 
 const StudioUnavailable: React.FC = () => (
   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', textAlign: 'center', p: 4 }}>
@@ -135,7 +139,7 @@ const StudioUnavailable: React.FC = () => (
 
 const ChecksStudioPageInner: React.FC = () => {
   const theme = useTheme();
-  const [scenarios, setScenarios] = useState<Scenario[] | null>(null);
+  const [scenarios, setScenarios] = useState<TestDto[] | null>(null);
   const [scenariosError, setScenariosError] = useState<string | null>(null);
   const [scenariosLoading, setScenariosLoading] = useState<boolean>(true);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
@@ -143,7 +147,6 @@ const ChecksStudioPageInner: React.FC = () => {
   const currentStep = Math.max(0, useAppSelector((s: any) => s.studio.currentStep));
   const [testSteps, setTestSteps] = useState<string[]>([]);
   const [newStep, setNewStep] = useState('');
-  const [showNewScenarioDialog, setShowNewScenarioDialog] = useState(false);
   const reduxLogs = useAppSelector((s: any) => s.studio.executionLogs);
   const executionLogs = useMemo(() => (reduxLogs || []).map((l: any) => ({
     timestamp: new Date(l.timestamp).toLocaleTimeString(),
@@ -170,15 +173,17 @@ const ChecksStudioPageInner: React.FC = () => {
   const [snapshot, setSnapshot] = useState<ExecutionSnapshot | null>(null);
   /** Programmatic run requests: `?autorun=1` and the terminal-error surface's re-run. */
   const [runRequest, setRunRequest] = useState(0);
-  const [autosave, setAutosave] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [saveSnack, setSaveSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
-  const [helpOpen, setHelpOpen] = useState(false);
+  /** A `409` from `PUT /tests/{id}`. Cleared by a successful save or by reloading the test. */
+  const [saveConflict, setSaveConflict] = useState<{ code: string; message: string } | null>(null);
+  /** Stop asked the server to cancel, and the run's terminal snapshot has not arrived yet. */
+  const [isStopping, setIsStopping] = useState(false);
+  const [stopError, setStopError] = useState<string | null>(null);
   // Removed legacy interval-based simulator in favor of API polling
   const [validation,
     setValidation] = useState<{ results: Array<{ stepIndex: number; isValid: boolean; suggestion: string | null }>; isValid: boolean; loading: boolean; error?: string }>
     ({ results: [], isValid: true, loading: false });
-  const config = useAppSelector((s: any) => s.studio.testConfiguration);
-  const [variablesList, setVariablesList] = useState<Array<{ id: string; name: string; type: 'plain' | 'secret'; value?: string; secretId?: string }>>([]);
+  const [variablesList, setVariablesList] = useState<EditableVariable[]>([]);
   const [rightTab, setRightTab] = useState(0);
   const [coachStep, setCoachStep] = useState<number>(() => {
     try {
@@ -200,47 +205,46 @@ const ChecksStudioPageInner: React.FC = () => {
   useEffect(() => {
     if (coachStep === 2 && !isRunning && (stepResultsArr || []).length > 0) setCoachStep(99);
   }, [coachStep, isRunning, stepResultsArr]);
-  const [newScenarioForm, setNewScenarioForm] = useState({
-    name: '',
-    environment: 'Development',
-    csiId: '',
-    description: ''
-  });
-  
   const location = useLocation();
   const params = useParams();
-  const navigate = useNavigate();
   const selectedScenarioData = scenarios?.find(s => s.id === selectedScenario) || null;
   const dispatch = useDispatch();
-  
-  // Calculate metrics (simple derived)
-  const totalScenarios = scenarios?.length || 0;
-  const passedScenarios = 0;
-  const failedScenarios = 0;
-  const successRate = totalScenarios ? Math.round((passedScenarios / totalScenarios) * 100) : 0;
 
-  // Load scenarios from API (MSW-backed)
+  /** Puts a draft the server returned into the editor. The server's copy is the only draft. */
+  const loadDraftIntoEditor = useCallback((test: TestDto) => {
+    setTestSteps(test.steps || []);
+    setVariablesList(toEditableVariables(test.variables));
+  }, []);
+
+  const replaceScenario = useCallback((updated: TestDto) => {
+    setScenarios((previous) =>
+      previous ? previous.map((test) => (test.id === updated.id ? updated : test)) : [updated],
+    );
+  }, []);
+
+  // Load the drafts from `GET /studio/tests`. This is the real API, or MSW when the standalone dev
+  // server runs with `VITE_ENABLE_MSW=true` (see `MswGate`).
   useEffect(() => {
     let mounted = true;
     (async () => {
       setScenariosLoading(true);
       setScenariosError(null);
       try {
-        const res = (await studioApi.listTests()) as any;
+        const res = await studioApi.listTests();
         if (!mounted) return;
-        const list = res.data || res;
+        const list = res.data;
         setScenarios(list);
         const urlId = params.id;
         const query = new URLSearchParams(location.search);
         const autorun = query.get('autorun') === '1';
         let chosen = list?.[0];
         if (urlId) {
-          const byId = list?.find((t: any) => t.id === urlId);
+          const byId = list?.find((t) => t.id === urlId);
           if (byId) chosen = byId;
         }
         if (chosen) {
           setSelectedScenario(chosen.id);
-          setTestSteps(chosen.steps || []);
+          loadDraftIntoEditor(chosen);
           if (autorun) {
             // Routed through `RunControl`, so the deep link is governed by the same server
             // readiness predicate as the button and cannot start a run the server would refuse.
@@ -262,9 +266,8 @@ const ChecksStudioPageInner: React.FC = () => {
     setScenariosLoading(true);
     setScenariosError(null);
     try {
-      const res = (await studioApi.listTests()) as any;
-      const list = res.data || res;
-      setScenarios(list);
+      const res = await studioApi.listTests();
+      setScenarios(res.data);
     } catch (e: any) {
       setScenariosError(e?.message || 'Failed to load scenarios');
     } finally {
@@ -316,6 +319,8 @@ const ChecksStudioPageInner: React.FC = () => {
     currentExecutionIdRef.current = executionId;
     closeSubscription();
     setAccessDenied(null);
+    setIsStopping(false);
+    setStopError(null);
     subscriptionRef.current = subscribeToExecution(executionId, {
       onSnapshot: (exec) => {
         setSnapshot(exec);
@@ -333,16 +338,19 @@ const ChecksStudioPageInner: React.FC = () => {
         // belongs to the transport (AC-13), not to this component.
         if (isTerminalExecutionStatus(exec.status)) {
           dispatch(setExecuting(false));
+          setIsStopping(false);
         }
       },
       onStatus: (status) => setTransportStatus(status),
       onAccessDenied: ({ status }) => {
         setAccessDenied(status);
         dispatch(setExecuting(false));
+        setIsStopping(false);
       },
       onClosed: () => {
         subscriptionRef.current = null;
         dispatch(setExecuting(false));
+        setIsStopping(false);
       },
     });
   }, [closeSubscription, dispatch]);
@@ -355,29 +363,15 @@ const ChecksStudioPageInner: React.FC = () => {
    * is one flag away from being a live one again.
    */
 
-  // Hydrate steps from localStorage (once)
+  /*
+   * No draft content is kept in the browser. Steps and variables live in the test on the server,
+   * and they are saved with `PUT /tests/{id}` under the draft's revisions. The global
+   * `studio:steps` and `studio:variables` copies were removed: a copy from another test could
+   * override the test opened by URL, and variables were written but never read back. Only the
+   * onboarding coach's position is kept locally, because it is not test content.
+   */
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('studio:steps');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.every((s: any) => typeof s === 'string')) {
-          // Avoid redundant state updates
-          if (JSON.stringify(parsed) !== JSON.stringify(testSteps)) {
-            setTestSteps(parsed as string[]);
-          }
-        }
-      }
-    } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Persist steps to localStorage
-  useEffect(() => {
-    localStorage.setItem('studio:steps', JSON.stringify(testSteps));
-  }, [testSteps]);
-  useEffect(() => {
-    try { localStorage.setItem('studio:coachStep', String(coachStep)); } catch {}
+    try { localStorage.setItem('studio:coachStep', String(coachStep)); } catch { /* storage unavailable: the coach just restarts */ }
   }, [coachStep]);
 
   // Debounced validation on steps change
@@ -401,11 +395,14 @@ const ChecksStudioPageInner: React.FC = () => {
     closeSubscription();
     setTransportStatus(null);
     setAccessDenied(null);
+    setIsStopping(false);
+    setStopError(null);
+    setSaveConflict(null);
     dispatch(setExecuting(false));
     setSelectedScenario(scenarioId);
     const scenario = scenarios?.find(s => s.id === scenarioId);
     if (scenario) {
-      setTestSteps(scenario.steps || []);
+      loadDraftIntoEditor(scenario);
       dispatch(setCurrentStepAction(0));
       dispatch(setAllStepResults([] as any));
       dispatch(clearLogs());
@@ -422,10 +419,10 @@ const ChecksStudioPageInner: React.FC = () => {
    * server.
    *
    * **`SCEN-1`, from @qa's gate.** The trigger is the route **changing**, not the route *differing
-   * from the selection*. Those are not the same predicate: `handleCreateNewScenario` sets
-   * `selectedScenario` to the new draft while the route still carries the old id, and a
-   * "differs from" test fires there and snaps the selection **back**, overwriting `testSteps`.
-   * `lastRouteId` is what makes this a change detector, and it is the whole of the remedy.
+   * from the selection*. Those are not the same predicate: a reload of the list can leave the
+   * selection on one draft while the route still carries another id, and a "differs from" test
+   * fires there and snaps the selection **back**, overwriting `testSteps`. `lastRouteId` is what
+   * makes this a change detector, and it is the whole of the remedy.
    */
   const lastRouteId = useRef<string | undefined>(params.id);
   useEffect(() => {
@@ -441,19 +438,6 @@ const ChecksStudioPageInner: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, scenarios, selectedScenario]);
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'COMPLETED':
-        return <CheckCircle sx={{ fontSize: 14 }} />;
-      case 'RUNNING':
-        return <CircularProgress size={14} />;
-      case 'FAILED':
-        return <Error sx={{ fontSize: 14 }} />;
-      default:
-        return <Schedule sx={{ fontSize: 14 }} />;
-    }
-  };
-
   /** The recording can be sought only when the panel has mounted one (AC-4's gate, AC-8). */
   const hasPlayableRecording =
     snapshot !== null && snapshot.video.status === 'AVAILABLE' && snapshot.videoPath !== null;
@@ -467,54 +451,90 @@ const ChecksStudioPageInner: React.FC = () => {
   );
 
   /**
-   * A draft, expressed in the frozen contract's own shape (story 10.11a, AC-3a).
+   * Saves the open draft with `PUT /tests/{id}` (Studio v1, D9).
    *
-   * This used to go through `buildDefaultTestIR` — the legacy English-grammar parser — and then
-   * back out through `toTestRequest`. The parser's output was never read on this path: every
-   * caller overrode `steps` with the author's own lines, so the parse was work whose only result
-   * was that this module imported the retired grammar path. `legacyTestIr`'s own comment says the
-   * editor builds a `TestIR` only *"while the grammar and Python paths are retired by 10.11"*.
-   * They are retired here. The module and its parser are **not deleted** — that is a separate
-   * change with separate callers to check — they are simply no longer on this page's path.
+   * Save never creates a test: a draft is created once, on the Tests page, and every later save
+   * updates that one row. The request carries the `sourceRevision` and `configurationRevision` this
+   * page last read, so the server refuses a save made over a newer version with `409
+   * STALE_REVISION` instead of overwriting it. The CSI is the draft's own and is never defaulted:
+   * the server keeps a draft's CSI fixed after creation. The browser is always the canonical
+   * engine, whatever an older draft recorded.
    */
-  const draftRequest = useCallback(
-    (overrides: Partial<TestRequest> & { name: string }): TestRequest => ({
-      name: overrides.name,
-      description: overrides.description ?? null,
-      csiId: overrides.csiId ?? null,
-      environment: overrides.environment ?? 'Development',
-      steps: overrides.steps ?? [],
-      variables: overrides.variables ?? [],
-      configuration: overrides.configuration ?? defaultConfiguration(),
-      sourceRevision: null,
-      configurationRevision: null,
-    }),
-    [],
-  );
-
-  const handleCreateNewScenario = async () => {
+  const saveDraft = useCallback(async (): Promise<SaveOutcome> => {
+    const test = selectedScenarioData;
+    if (!test) return 'error';
+    const body: TestRequest = {
+      name: test.name,
+      description: test.description ?? null,
+      csiId: test.csiId,
+      environment: test.environment,
+      steps: testSteps,
+      variables: toContractVariables(variablesList),
+      configuration: { ...defaultConfiguration(), ...test.configuration, browser: CANONICAL_BROWSER },
+      sourceRevision: test.sourceRevision,
+      configurationRevision: test.configurationRevision,
+    };
+    setIsSaving(true);
     try {
-      const created = await studioApi.createTest(
-        draftRequest({
-          name: newScenarioForm.name || 'Untitled Test',
-          csiId: newScenarioForm.csiId,
-          description: newScenarioForm.description,
-          environment: newScenarioForm.environment,
-        }),
-      );
-      setSaveSnack({ open: true, message: 'Scenario created', severity: 'success' });
-      setShowNewScenarioDialog(false);
-      setNewScenarioForm({ name: '', environment: 'Development', csiId: '', description: '' });
-      // reload and select new scenario if id present
-      await reloadScenarios();
-      if ((created as any).id) {
-        setSelectedScenario((created as any).id);
-        setTestSteps((created as any).steps || []);
+      const updated = await studioApi.updateTest(test.id, body);
+      replaceScenario(updated);
+      setSaveConflict(null);
+      setSaveSnack({ open: true, message: 'Test saved', severity: 'success' });
+      return 'saved';
+    } catch (error: unknown) {
+      const failure = error as {
+        response?: { status?: number; data?: { error?: string; message?: string } };
+        message?: string;
+      };
+      if (failure.response?.status === 409) {
+        setSaveConflict({
+          code: failure.response.data?.error ?? '',
+          message: failure.response.data?.message ?? '',
+        });
+        return 'conflict';
       }
-    } catch (e: any) {
-      setSaveSnack({ open: true, message: e?.message || 'Failed to create scenario', severity: 'error' });
+      setSaveSnack({ open: true, message: failure.message || 'Failed to save', severity: 'error' });
+      return 'error';
+    } finally {
+      setIsSaving(false);
     }
-  };
+  }, [replaceScenario, selectedScenarioData, testSteps, variablesList]);
+
+  /** The conflict's way out: read the draft again and put the server's version in the editor. */
+  const reloadSelectedTest = useCallback(async () => {
+    const id = selectedScenarioData?.id;
+    if (!id) return;
+    try {
+      const fresh = await studioApi.getTest(id);
+      replaceScenario(fresh);
+      loadDraftIntoEditor(fresh);
+      setSaveConflict(null);
+    } catch (error: unknown) {
+      const message = (error as { message?: string })?.message;
+      setSaveSnack({ open: true, message: message || 'Failed to reload the test', severity: 'error' });
+    }
+  }, [loadDraftIntoEditor, replaceScenario, selectedScenarioData?.id]);
+
+  /**
+   * Stop asks the server to cancel the run, and nothing more. The run is over only when its
+   * terminal snapshot arrives (`ERROR` with `errorCode: CANCELLED`, or whatever outcome it reached
+   * first), so the live transport stays open and the control reads "Stopping…" until then. A `409`
+   * means the run had already ended; its terminal snapshot is on its way through the same transport.
+   */
+  const handleStop = useCallback(async () => {
+    const executionId = currentExecutionIdRef.current;
+    if (!executionId || isStopping) return;
+    setIsStopping(true);
+    setStopError(null);
+    try {
+      await studioApi.cancelExecution(executionId);
+    } catch (error: unknown) {
+      const failure = error as { response?: { status?: number }; message?: string };
+      if (failure.response?.status === 409) return;
+      setIsStopping(false);
+      setStopError(failure.message || 'The run could not be stopped');
+    }
+  }, [isStopping]);
 
   const addTestStep = () => {
     if (newStep.trim()) {
@@ -530,15 +550,6 @@ const ChecksStudioPageInner: React.FC = () => {
     closeSubscription();
     dispatch(setExecuting(false));
     setTestSteps(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'COMPLETED': return 'success';
-      case 'RUNNING': return 'info';
-      case 'FAILED': return 'error';
-      default: return 'default';
-    }
   };
 
   return (
@@ -577,7 +588,7 @@ const ChecksStudioPageInner: React.FC = () => {
                 onClick={() => {
                   setForceCoach(true);
                   setCoachStep(0);
-                  try { localStorage.removeItem('studio:coachStep'); } catch {}
+                  try { localStorage.removeItem('studio:coachStep'); } catch { /* storage unavailable */ }
                 }}
                 aria-label="Show guide"
               >
@@ -610,14 +621,22 @@ const ChecksStudioPageInner: React.FC = () => {
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{selectedScenarioData.name}</Typography>
                       <Stack direction="row" spacing={1} alignItems="center">
-                        <Chip label={(selectedScenarioData.status || 'DRAFT').charAt(0) + (selectedScenarioData.status || 'DRAFT').slice(1).toLowerCase()} size="small" color={getStatusColor(selectedScenarioData.status || '') as any} icon={getStatusIcon(selectedScenarioData.status || '')} sx={{ fontSize: 11 }} />
+                        <Chip
+                          label={selectedScenarioData.lastRunStatus ? `Last run: ${executionStatusLabel(selectedScenarioData.lastRunStatus)}` : 'Never run'}
+                          size="small"
+                          color={selectedScenarioData.lastRunStatus ? executionStatusTone(selectedScenarioData.lastRunStatus) : 'default'}
+                          data-testid="test-last-run-status"
+                          sx={{ fontSize: 11 }}
+                        />
                         <Button size="small" variant="text" onClick={() => { window.location.href = '/checks/studio/tests'; }}>Change…</Button>
                       </Stack>
                     </Stack>
                     {selectedScenarioData.description && (
                       <Typography variant="caption" color="text.secondary">{selectedScenarioData.description}</Typography>
                     )}
-                    <Typography variant="caption" color="text.secondary">Updated: {new Date(selectedScenarioData.updatedAt || selectedScenarioData.createdAt || Date.now()).toLocaleString()}</Typography>
+                    {(selectedScenarioData.updatedAt || selectedScenarioData.createdAt) && (
+                      <Typography variant="caption" color="text.secondary">Updated: {new Date((selectedScenarioData.updatedAt || selectedScenarioData.createdAt) as string).toLocaleString()}</Typography>
+                    )}
                   </Stack>
                 ) : (
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -631,7 +650,7 @@ const ChecksStudioPageInner: React.FC = () => {
               <Box sx={{ p: 2 }}>
                 {/* Onboarding coach - Step 0 */}
                 {/* Lightweight onboarding to guide the flow */}
-                {/* Persisted via localStorage */}
+                {/* The coach position (not test content) is kept in localStorage */}
                 {coachStep === 0 && (
                   <OnboardingCoach step={0} onNext={() => setCoachStep(1)} onDismiss={() => setCoachStep(99)} />
                 )}
@@ -651,7 +670,7 @@ const ChecksStudioPageInner: React.FC = () => {
                   <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
                     <Typography variant="body2" fontWeight={600}>Add your first step</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Examples: Go to "https://put.internal.citi.com" <br />• Click "Sign On" <br />• Type "&lt;var USERNAME&gt;" in the "User ID" field <br />• Wait for "Welcome" (use tokens: &lt;var NAME&gt;, &lt;secret SECRET_ID&gt;)
+                      Examples: Go to &quot;https://put.internal.citi.com&quot; <br />• Click &quot;Sign On&quot; <br />• Type &quot;&lt;var USERNAME&gt;&quot; in the &quot;User ID&quot; field <br />• Wait for &quot;Welcome&quot; (use tokens: &lt;var NAME&gt;, &lt;secret SECRET_ID&gt;)
                     </Typography>
                   </Paper>
                 )}
@@ -671,7 +690,6 @@ const ChecksStudioPageInner: React.FC = () => {
                   {testSteps.map((step, index) => {
                     const stepResult = stepResultsMap[index];
                     const isCurrentStep = index === currentStep;
-                    const isPastStep = index < currentStep;
                     const validationEntry = validation.results.find((r) => r.stepIndex === index);
                     const isInvalid = validationEntry ? !validationEntry.isValid : false;
                     
@@ -850,36 +868,47 @@ const ChecksStudioPageInner: React.FC = () => {
                     hasSteps={testSteps.length > 0}
                     runRequest={runRequest}
                     onAccepted={beginRun}
-                    onStop={() => {
-                      dispatch(setExecuting(false));
-                      closeSubscription();
-                    }}
+                    onStop={handleStop}
+                    isStopping={isStopping}
                   />
                   <Button
                     variant="outlined"
                     startIcon={<Save />}
-                    disabled={isRunning || isSaving}
-                    onClick={async () => {
-                      try {
-                        setIsSaving(true);
-                        await studioApi.createTest(
-                          draftRequest({
-                            name: selectedScenarioData?.name || 'Untitled Test',
-                            csiId: selectedScenarioData?.csiId || 'CSI-00000',
-                            steps: testSteps,
-                          }),
-                        );
-                        setSaveSnack({ open: true, message: 'Scenario saved', severity: 'success' });
-                      } catch (e: any) {
-                        setSaveSnack({ open: true, message: e?.message || 'Failed to save', severity: 'error' });
-                      } finally {
-                        setIsSaving(false);
-                      }
-                    }}
+                    disabled={isRunning || isSaving || !selectedScenarioData}
+                    onClick={() => { void saveDraft(); }}
                   >
                     Save
                   </Button>
                 </Stack>
+
+                {saveConflict !== null && (
+                  <Box sx={{ mt: 2 }}>
+                    <Alert
+                      severity="warning"
+                      role="alert"
+                      data-testid="save-conflict"
+                      action={
+                        <Button color="inherit" size="small" onClick={() => { void reloadSelectedTest(); }}>
+                          {RELOAD_TEST_LABEL}
+                        </Button>
+                      }
+                    >
+                      <AlertTitle>
+                        {saveConflict.code === 'STALE_REVISION' ? SAVE_CONFLICT_TITLE : SAVE_REFUSED_TITLE}
+                      </AlertTitle>
+                      {saveConflict.code === 'STALE_REVISION'
+                        ? SAVE_CONFLICT_STATEMENT
+                        : saveConflict.message || 'The save conflicts with the test as the server holds it.'}
+                    </Alert>
+                  </Box>
+                )}
+                {stopError !== null && (
+                  <Box sx={{ mt: 2 }}>
+                    <Alert severity="error" role="alert" data-testid="stop-error">
+                      {stopError}
+                    </Alert>
+                  </Box>
+                )}
 
                 {/*
                   * AC-11(i): the transport's own state, labelled as transport. A dropped connection
@@ -937,7 +966,11 @@ const ChecksStudioPageInner: React.FC = () => {
               */}
               {selectedScenarioData?.id && (
                 <Box sx={{ mb: 2 }}>
-                  <CompileReviewPanel testId={selectedScenarioData.id} />
+                  {/* Keyed by revision: a save changes the draft on the server, so the review re-reads it. */}
+                  <CompileReviewPanel
+                    key={`${selectedScenarioData.id}:${selectedScenarioData.sourceRevision}:${selectedScenarioData.configurationRevision}`}
+                    testId={selectedScenarioData.id}
+                  />
                 </Box>
               )}
 
@@ -1057,97 +1090,6 @@ const ChecksStudioPageInner: React.FC = () => {
         {/* Right Panel removed: Proof is integrated as a tab */}
       </Grid>
 
-      {/* Enhanced New Scenario Dialog */}
-      <Dialog open={showNewScenarioDialog} onClose={() => setShowNewScenarioDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Avatar sx={{ bgcolor: 'primary.main' }}>
-            <Science />
-          </Avatar>
-          <Box>
-            <Typography variant="h6">Create New UI Test Scenario</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Build no-code browser automation with plain English commands
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2 }}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Scenario Name"
-                  value={newScenarioForm.name}
-                  onChange={(e) => setNewScenarioForm(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Trading Platform Login Validation"
-                  required
-                />
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Environment</InputLabel>
-                  <Select 
-                    value={newScenarioForm.environment}
-                    onChange={(e) => setNewScenarioForm(prev => ({ ...prev, environment: e.target.value }))}
-                    label="Environment"
-                  >
-                    <MenuItem value="Development">Development</MenuItem>
-                    <MenuItem value="Staging">Staging</MenuItem>
-                    <MenuItem value="UAT">UAT</MenuItem>
-                    <MenuItem value="Production">Production</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="CSI ID"
-                  value={newScenarioForm.csiId}
-                  onChange={(e) => setNewScenarioForm(prev => ({ ...prev, csiId: e.target.value }))}
-                  placeholder="123456"
-                  required
-                />
-              </Grid>
-              
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  label="Description"
-                  value={newScenarioForm.description}
-                  onChange={(e) => setNewScenarioForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Describe what this scenario validates and its business purpose"
-                />
-              </Grid>
-              
-              <Grid item xs={12}>
-                <Alert severity="info">
-                  <AlertTitle>Next Steps</AlertTitle>
-                  After creating the scenario, you'll be able to add test steps using plain English commands like:
-                  <br />• "Go to https://put.internal.citi.com"
-                  <br />• "Click the Login button"
-                  <br />• "Wait for Welcome message to appear"
-                </Alert>
-              </Grid>
-            </Grid>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowNewScenarioDialog(false)}>Cancel</Button>
-          <Button 
-            variant="contained" 
-            onClick={handleCreateNewScenario}
-            disabled={!newScenarioForm.name || !newScenarioForm.csiId}
-            startIcon={<Save />}
-          >
-            Create Scenario
-          </Button>
-        </DialogActions>
-      </Dialog>
-
       {/* Global CSS for animations - Using MUI's GlobalStyles */}
       <GlobalStyles
         styles={{
@@ -1165,27 +1107,14 @@ const ChecksStudioPageInner: React.FC = () => {
         message={saveSnack.message}
       />
 
-      <Dialog open={helpOpen} onClose={() => setHelpOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Keyboard Shortcuts</DialogTitle>
-        <DialogContent>
-          <Stack spacing={1} mt={1}>
-            <Typography variant="body2">Cmd/Ctrl+S — Save draft locally</Typography>
-            <Typography variant="body2">R — Run test</Typography>
-            <Typography variant="body2">. — Stop run</Typography>
-            <Typography variant="body2">? — Open this help</Typography>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setHelpOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-
       {/* Variables Dialog */}
       <Dialog open={variablesOpen} onClose={() => setVariablesOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Variables</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             Configure variables referenced in your steps using &lt;var NAME&gt; or &lt;secret SECRET_ID&gt;.
+            Variables are saved with the test, together with its steps. A secret is stored as a
+            reference only; its value never reaches this page.
           </Typography>
           <Paper variant="outlined" sx={{ p: 1 }}>
             <Table size="small">
@@ -1255,12 +1184,19 @@ const ChecksStudioPageInner: React.FC = () => {
           </Paper>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setVariablesOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => {
-            // Persisted only. There is no client-side code generation left to refresh (AC-3a).
-            try { localStorage.setItem('studio:variables', JSON.stringify(variablesList)); } catch {}
-            setVariablesOpen(false);
-          }}>Save</Button>
+          <Button onClick={() => setVariablesOpen(false)}>Close</Button>
+          <Button
+            variant="contained"
+            disabled={isSaving || isRunning || !selectedScenarioData}
+            onClick={async () => {
+              // One save path: the whole draft goes through `PUT /tests/{id}`. A conflict closes
+              // the dialog so the page's conflict message and its Reload action are visible.
+              const outcome = await saveDraft();
+              if (outcome !== 'error') setVariablesOpen(false);
+            }}
+          >
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
 

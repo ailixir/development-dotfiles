@@ -63,6 +63,17 @@ export type ExecutionErrorCodeIsDerivedFromItsCarrier = AssertTrue<
   TypeEquals<ExecutionErrorCode, (typeof EXECUTION_ERROR_CODES)[number]>
 >;
 
+/**
+ * The code a cancelled run ends with: `status: ERROR`, `errorCode: CANCELLED`.
+ *
+ * It is kept **outside** {@link EXECUTION_ERROR_CODES} on purpose. That carrier is compared with
+ * `components.schemas.ExecutionErrorCode.enum` in `openapi.yaml` by `studioContract.test.ts`, and
+ * the enum is amended by the backend cancel work, not by this frontend change. When the amendment
+ * lands, that test goes red until `CANCELLED` is moved into the carrier and given a narrative. The
+ * failure is intended: it makes the merge fold the two copies into one.
+ */
+export const CANCELLED_ERROR_CODE = 'CANCELLED' as const;
+
 export type StepStatus = 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL' | 'SKIPPED';
 
 /** Evidence state, deliberately independent of the check outcome (architecture §6.1). */
@@ -302,7 +313,7 @@ export interface ExecutionSnapshot {
   /** Null for legacy history: those runs never had a confirmed revision. */
   revisionId: string | null;
   status: ExecutionStatus;
-  errorCode: ExecutionErrorCode | null;
+  errorCode: ExecutionErrorCode | typeof CANCELLED_ERROR_CODE | null;
   /** Immutable acceptance instant; also the history partition key. */
   acceptedAt: string;
   /** Browser start. Null until the runner reports one. */
@@ -356,6 +367,10 @@ export interface SourceArtifact {
   steps: ArtifactStep[];
 }
 
+/**
+ * The terminal outcomes, in one place. Every Studio surface that decides whether a run has ended
+ * (the Studio page, the Tests page, the Runs page) reads this set rather than keeping its own.
+ */
 export const TERMINAL_EXECUTION_STATUSES: readonly ExecutionStatus[] = [
   'PASSED',
   'FAILED',

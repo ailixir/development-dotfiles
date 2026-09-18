@@ -17,12 +17,6 @@ interface StudioState {
     timestamp: string;
   }>;
   currentStep: number;
-  testConfiguration: {
-    browser: 'chrome' | 'firefox' | 'safari' | 'edge';
-    viewport: { width: number; height: number };
-    timeout: number;
-    waitStrategy: 'none' | 'networkidle' | 'domcontentloaded';
-  };
   testIR: TestIR | null;
   generatedCode: string;
   autoSyncCode: boolean;
@@ -34,12 +28,6 @@ const initialState: StudioState = {
   executionLogs: [],
   stepResults: [],
   currentStep: -1,
-  testConfiguration: {
-    browser: 'chrome',
-    viewport: { width: 1920, height: 1080 },
-    timeout: 30000,
-    waitStrategy: 'networkidle',
-  },
   testIR: null,
   generatedCode: '',
   autoSyncCode: true,
@@ -118,10 +106,6 @@ const studioSlice = createSlice({
       state.currentStep = action.payload;
     },
 
-    updateConfiguration: (state, action: PayloadAction<Partial<StudioState['testConfiguration']>>) => {
-      state.testConfiguration = { ...state.testConfiguration, ...action.payload };
-    },
-
     setTestIR: (state, action: PayloadAction<TestIR | null>) => {
       state.testIR = action.payload;
     },
@@ -159,7 +143,6 @@ export const {
   updateStepResult,
   setAllStepResults,
   setCurrentStep,
-  updateConfiguration,
   setTestIR,
   setGeneratedCode,
   setAutoSyncCode,

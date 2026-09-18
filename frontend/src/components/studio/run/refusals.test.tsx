@@ -224,7 +224,7 @@ describe('AC-6: a terminal ERROR says what happened to the browser and who can c
     render(<ExecutionProgressView snapshot={passedExecution} />);
     expect(screen.queryByTestId('execution-error')).toBeNull();
     expect(screen.queryByTestId('execution-error-unnamed')).toBeNull();
-    expect(screen.getByTestId('execution-status').textContent).toBe('PASSED');
+    expect(screen.getByTestId('execution-status').textContent).toBe('Passed');
   });
 
   it('a step timeout is a FAIL with no code, never TIMEOUT [FX-STEP-FAIL-SKIPPED-TAIL]', () => {
@@ -232,7 +232,7 @@ describe('AC-6: a terminal ERROR says what happened to the browser and who can c
     // out, so a surface that read the prose would reach for the TIMEOUT narrative.
     render(<ExecutionProgressView snapshot={failedWithSkippedTailExecution} />);
     expect(screen.queryByTestId('execution-error')).toBeNull();
-    expect(screen.getByTestId('execution-status').textContent).toBe('FAILED');
+    expect(screen.getByTestId('execution-status').textContent).toBe('Failed');
     expect(screen.getByTestId('step-status-2').textContent).toBe('FAIL');
     const rendered = document.body.textContent ?? '';
     expect(rendered).not.toContain('The run hit its total time cap');
