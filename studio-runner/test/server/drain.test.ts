@@ -189,6 +189,44 @@ describe('src/main.ts — process entry point', () => {
     await result.application?.drain();
   });
 
+  it('refuses to start where the process table cannot be read, before it listens (WP16)', async () => {
+    // An image that lost `ps`: `readProcessTable` answers `[]`, and every tree kill would have
+    // quietly become a kill of the fork alone.
+    const lines: string[] = [];
+    let exitCode: number | null = null;
+    const result = await main({
+      env: validEnv(),
+      onSignal: () => {
+        throw new Error('a refused start must not wire the drain');
+      },
+      write: (line) => lines.push(line),
+      setExitCode: (code) => {
+        exitCode = code;
+      },
+      launcher: createFakeBrowserLauncher(),
+      runtimeVersionsFile: runtimeVersionsFile(),
+      processTable: () => [],
+    });
+
+    expect(result).toEqual({ started: false });
+    expect(exitCode).toBe(mainModule.PROCESS_TABLE_EXIT_CODE);
+    expect(lines).toEqual([mainModule.PROCESS_TABLE_UNREADABLE]);
+  });
+
+  it('starts when the process table lists this process', async () => {
+    const result = await main({
+      env: validEnv(),
+      onSignal: () => undefined,
+      write: () => undefined,
+      setExitCode: () => undefined,
+      launcher: createFakeBrowserLauncher(),
+      runtimeVersionsFile: runtimeVersionsFile(),
+      processTable: () => [{ pid: process.pid, ppid: process.ppid }],
+    });
+    expect(result.started).toBe(true);
+    await result.application?.drain();
+  });
+
   it('does not launder a programming fault into a configuration exit code', async () => {
     // `loadConfig` contracts to throw only ConfigurationError. An environment whose own key
     // enumeration throws produces something else, and `main` must let it propagate rather than
