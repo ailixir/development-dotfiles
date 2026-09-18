@@ -117,6 +117,30 @@ checks:
     admin-multiplier: 10
     max-buckets: 10000
 
+studio:
+  compile:
+    gateway:
+      enabled: ${STUDIO_GATEWAY_ENABLED:false}
+      endpoint: ${STUDIO_GATEWAY_ENDPOINT:}
+      project: ${STUDIO_GATEWAY_PROJECT:}
+      location: ${STUDIO_GATEWAY_LOCATION:us-central1}
+      model: ${STUDIO_GATEWAY_MODEL:gemini-3.8-flash}
+      credentials:
+        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
+        service-account-key-file: ${STUDIO_GATEWAY_CREDENTIALS_KEY_FILE:}
+        api-key: ${STUDIO_GATEWAY_API_KEY:}
+      request-timeout: ${STUDIO_GATEWAY_REQUEST_TIMEOUT:60s}
+      max-concurrency: ${STUDIO_GATEWAY_MAX_CONCURRENCY:4}
+      max-input-bytes: ${STUDIO_GATEWAY_MAX_INPUT_BYTES:262144}
+      max-output-bytes: ${STUDIO_GATEWAY_MAX_OUTPUT_BYTES:262144}
+      structured-output: ${STUDIO_GATEWAY_STRUCTURED_OUTPUT:true}
+      temperature: ${STUDIO_GATEWAY_TEMPERATURE:0}
+      retry:
+        max-retries: ${STUDIO_GATEWAY_MAX_RETRIES:2}
+        initial-backoff: ${STUDIO_GATEWAY_INITIAL_BACKOFF:250ms}
+        backoff-multiplier: ${STUDIO_GATEWAY_BACKOFF_MULTIPLIER:2.0}
+        jitter-factor: ${STUDIO_GATEWAY_JITTER_FACTOR:0.5}
+
 resilience4j:
   circuitbreaker:
     instances:

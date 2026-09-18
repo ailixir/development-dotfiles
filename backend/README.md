@@ -81,6 +81,28 @@ Starts the app with Zonky embedded Postgres pre-populated with realistic sample 
 
 Use for development, frontend integration, and stakeholder presentations.
 
+### Vertex AI Gemini Flash
+
+Studio uses the Google Gen AI Java SDK in Vertex AI mode. The default model is
+`gemini-3.8-flash`; both the model and SDK are pinned in source and can be overridden by deployment
+configuration.
+
+For local API-key authentication through the Gemini Developer API, keep the key outside the
+repository. ADC and service-account modes use Vertex AI for deployed environments:
+
+```bash
+export STUDIO_GATEWAY_ENABLED=true
+export STUDIO_GATEWAY_CREDENTIALS_MODE=api-key
+export STUDIO_GATEWAY_API_KEY='<your Google Cloud API key>'
+./gradlew bootRun --args='--spring.profiles.active=local,dev'
+```
+
+The key remains in backend process configuration. The status endpoint
+`GET /api/v1/studio/ai/status` reports the provider, model and credential mode without exposing the
+key. Deployed environments can instead use `application-default` with
+`STUDIO_GATEWAY_PROJECT` and `STUDIO_GATEWAY_LOCATION`, or `service-account-file` with
+`STUDIO_GATEWAY_CREDENTIALS_KEY_FILE`.
+
 ---
 
 ## Quality gates

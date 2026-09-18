@@ -100,9 +100,12 @@ import { selectIsFeatureEnabled } from '@store/slices/featuresSlice';
 import { setAutoSyncCode, setGeneratedCode, setTestIR, setExecutionLogs, setAllStepResults, setExecuting, setCurrentStep as setCurrentStepAction, setVideoUrl as setVideoUrlAction, clearLogs, updateConfiguration } from '@store/slices/studioSlice';
 import { buildDefaultTestIR } from '@/utils/studio/ir/parseSteps';
 import { generatePythonFromIR } from '@/utils/studio/codegen/pythonGenerator';
+import { normalizeStoredSteps } from '@/utils/studio/normalizeStoredSteps';
 import studioApi from '@/services/api/studioApi';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SecretInput from '@/components/studio/SecretInput';
+import StudioProofVideo from '@/components/studio/StudioProofVideo';
+import { normalizeExecutionLogs, normalizeStepResults } from '@/utils/studio/executionView';
 
 type Scenario = {
   id: string;
@@ -135,10 +138,10 @@ const ChecksStudioPageInner: React.FC = () => {
   const [newStep, setNewStep] = useState('');
   const [showNewScenarioDialog, setShowNewScenarioDialog] = useState(false);
   const reduxLogs = useAppSelector((s: any) => s.studio.executionLogs);
-  const executionLogs = useMemo(() => (reduxLogs || []).map((l: any) => ({
+  const executionLogs = useMemo(() => normalizeExecutionLogs(reduxLogs).map((l) => ({
     timestamp: new Date(l.timestamp).toLocaleTimeString(),
     message: l.message,
-    type: l.level === 'error' ? 'error' : 'info',
+    type: l.level,
   })), [reduxLogs]);
   const showVideoPlayer = !!useAppSelector((s: any) => s.studio.videoUrl);
   const videoUrl = useAppSelector((s: any) => s.studio.videoUrl);
@@ -172,6 +175,12 @@ const ChecksStudioPageInner: React.FC = () => {
   const [forceCoach, setForceCoach] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [variablesOpen, setVariablesOpen] = useState(false);
+  const [latestExecutionStatus, setLatestExecutionStatus] = useState<string | null>(null);
+  const [proofPoster, setProofPoster] = useState<string | undefined>();
+  const [aiStatus, setAiStatus] = useState<{ enabled: boolean; model: string; provider: string } | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [generatedByAi, setGeneratedByAi] = useState(false);
 
   // Subtle auto-advance for onboarding
   useEffect(() => {
@@ -212,7 +221,10 @@ const ChecksStudioPageInner: React.FC = () => {
       try {
         const res = (await studioApi.listTests()) as any;
         if (!mounted) return;
-        const list = res.data || res;
+        const list = (res.data || res).map((scenario: Scenario) => ({
+          ...scenario,
+          steps: normalizeStoredSteps(scenario.steps),
+        }));
         setScenarios(list);
         const urlId = params.id;
         const query = new URLSearchParams(location.search);
@@ -246,7 +258,10 @@ const ChecksStudioPageInner: React.FC = () => {
     setScenariosError(null);
     try {
       const res = (await studioApi.listTests()) as any;
-      const list = res.data || res;
+      const list = (res.data || res).map((scenario: Scenario) => ({
+        ...scenario,
+        steps: normalizeStoredSteps(scenario.steps),
+      }));
       setScenarios(list);
     } catch (e: any) {
       setScenariosError(e?.message || 'Failed to load scenarios');
@@ -264,6 +279,62 @@ const ChecksStudioPageInner: React.FC = () => {
     }
   }, []);
 
+  const applyExecution = useCallback((execution: any) => {
+    const stepResults = normalizeStepResults(execution.stepResults);
+    const logs = normalizeExecutionLogs(execution.logs);
+    setProofPoster(execution.screenshotUrls?.[0]);
+    dispatch(setAllStepResults(stepResults));
+    dispatch(setExecutionLogs(logs));
+    if (execution.videoUrl) dispatch(setVideoUrlAction(execution.videoUrl));
+    const runningIndex = stepResults.findIndex((result) => result.status === 'RUNNING');
+    const passedCount = stepResults.filter((result) => result.status === 'PASS').length;
+    dispatch(setCurrentStepAction(runningIndex >= 0 ? runningIndex : Math.max(0, passedCount - 1)));
+    setLatestExecutionStatus(execution.status || null);
+    return ['COMPLETED', 'PASSED', 'FAILED', 'ERROR', 'TIMEOUT'].includes(execution.status);
+  }, [dispatch]);
+
+  const loadLatestExecution = useCallback(async (testId: string) => {
+    try {
+      const response = (await studioApi.listExecutions({ testId, size: 1 })) as any;
+      const latest = response.data?.[0];
+      if (latest) applyExecution(latest);
+    } catch {
+      // Scenario editing remains available if prior execution history cannot be loaded.
+    }
+  }, [applyExecution]);
+
+  useEffect(() => {
+    if (selectedScenario && !isRunning) loadLatestExecution(selectedScenario);
+  }, [selectedScenario, isRunning, loadLatestExecution]);
+
+  useEffect(() => {
+    studioApi.getAiStatus()
+      .then((status) => setAiStatus({ enabled: status.enabled, model: status.model, provider: status.provider === 'vertex-ai' ? 'Vertex AI' : 'Gemini API (dev)' }))
+      .catch(() => setAiStatus({ enabled: false, model: 'gemini-3.8-flash', provider: 'Vertex AI' }));
+  }, []);
+
+  const generateWithGemini = useCallback(async () => {
+    if (!selectedScenarioData?.id) return;
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const response = await studioApi.compileWithGemini(selectedScenarioData.id);
+      if (!response.artifactJson) throw new globalThis.Error(response.failureReason || 'Gemini returned no artifact');
+      const artifact = JSON.parse(response.artifactJson) as { steps?: Array<{ stepIndex: number; originalText: string; code: string }> };
+      const source = (artifact.steps || [])
+        .sort((a, b) => a.stepIndex - b.stepIndex)
+        .map((step) => `// ${step.originalText}\n${step.code}`)
+        .join('\n\n');
+      dispatch(setGeneratedCode(source));
+      dispatch(setAutoSyncCode(false));
+      setGeneratedByAi(true);
+    } catch (error: any) {
+      setAiError(error?.response?.data?.failureReason || error?.message || 'Gemini generation failed');
+    } finally {
+      setAiLoading(false);
+    }
+  }, [selectedScenarioData?.id, dispatch]);
+
   const handleRunTest = useCallback(async () => {
     if (!validation.isValid || testSteps.length === 0 || !selectedScenarioData?.id) return;
     try {
@@ -274,28 +345,20 @@ const ChecksStudioPageInner: React.FC = () => {
       dispatch(setExecutionLogs([{ timestamp: new Date().toISOString(), level: 'info', message: 'Starting UI test execution' } as any]));
       const start = await studioApi.executeTest(selectedScenarioData.id);
       currentExecutionIdRef.current = start.executionId;
-      // start polling
       stopPolling();
+      const refreshExecution = async () => {
+        const exec = (await studioApi.getExecution(currentExecutionIdRef.current as string)) as any;
+        const finished = applyExecution(exec);
+        if (finished) {
+          dispatch(setExecuting(false));
+          stopPolling();
+        }
+        return finished;
+      };
+      if (await refreshExecution()) return;
       pollingRef.current = setInterval(async () => {
         try {
-          const exec = (await studioApi.getExecution(currentExecutionIdRef.current as string)) as any;
-          if (Array.isArray(exec.stepResults)) {
-            dispatch(setAllStepResults(exec.stepResults.map((r: any) => ({ stepIndex: r.stepIndex, status: r.status }))));
-          }
-          const runningIndex = exec.stepResults?.findIndex((r: any) => r.status === 'RUNNING') ?? -1;
-          const passedCount = exec.stepResults?.filter((r: any) => r.status === 'PASS').length ?? 0;
-          dispatch(setCurrentStepAction(runningIndex >= 0 ? runningIndex : Math.max(0, passedCount - 1)));
-          // logs
-          if (Array.isArray(exec.logs)) {
-            dispatch(setExecutionLogs(exec.logs as any));
-          }
-          if (exec.videoUrl) {
-            dispatch(setVideoUrlAction(exec.videoUrl));
-          }
-          if (exec.status === 'COMPLETED' || exec.status === 'FAILED' || exec.status === 'TIMEOUT') {
-            dispatch(setExecuting(false));
-            stopPolling();
-          }
+          await refreshExecution();
         } catch (e) {
           // stop on polling error
           dispatch(setExecuting(false));
@@ -306,7 +369,7 @@ const ChecksStudioPageInner: React.FC = () => {
       dispatch(setExecuting(false));
       dispatch(setExecutionLogs([{ timestamp: new Date().toISOString(), level: 'error', message: e?.message || 'Failed to start execution' } as any]));
     }
-  }, [validation.isValid, testSteps.length, selectedScenarioData, stopPolling, dispatch]);
+  }, [validation.isValid, testSteps.length, selectedScenarioData, stopPolling, applyExecution, dispatch]);
 
   // Generate Python code when steps change (autoSync)
   useEffect(() => {
@@ -374,6 +437,7 @@ const ChecksStudioPageInner: React.FC = () => {
     const scenario = scenarios?.find(s => s.id === scenarioId);
     if (scenario) {
       setTestSteps(scenario.steps || []);
+      setLatestExecutionStatus(null);
       dispatch(setVideoUrlAction(null as any));
       dispatch(setCurrentStepAction(0));
       dispatch(setAllStepResults([] as any));
@@ -394,15 +458,6 @@ const ChecksStudioPageInner: React.FC = () => {
     }
   };
 
-  const handleStepClick = (stepIndex: number) => {
-    if (showVideoPlayer && !isRunning) {
-      // Simulate jumping to step timestamp in video
-      const t = stepIndex * 10;
-      setVideoCurrentTime(t);
-      try { videoRef.current && (videoRef.current.currentTime = t); } catch {}
-      dispatch(setCurrentStepAction(stepIndex));
-    }
-  };
 
   const handleCreateNewScenario = async () => {
     try {
@@ -578,7 +633,6 @@ const ChecksStudioPageInner: React.FC = () => {
                     const stepResult = stepResultsMap[index];
                     const isCurrentStep = index === currentStep;
                     const isPastStep = index < currentStep;
-                    const isClickable = showVideoPlayer && !isRunning;
                     const validationEntry = validation.results.find((r) => r.stepIndex === index);
                     const isInvalid = validationEntry ? !validationEntry.isValid : false;
                     
@@ -596,13 +650,8 @@ const ChecksStudioPageInner: React.FC = () => {
                                    stepResult === 'passed' ? alpha(theme.palette.success.main, 0.05) :
                                    stepResult === 'failed' ? alpha(theme.palette.error.main, 0.05) : isInvalid ? alpha(theme.palette.error.main, 0.03) : 'transparent',
                           transition: 'all 0.3s ease',
-                          cursor: isClickable ? 'pointer' : 'default',
-                          '&:hover': isClickable ? {
-                            bgcolor: alpha(theme.palette.primary.main, 0.05),
-                            boxShadow: 1
-                          } : {}
+                          cursor: 'default',
                         }}
-                        onClick={() => isClickable && handleStepClick(index)}
                       >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 1 }}>
                           <Avatar sx={{ 
@@ -626,6 +675,9 @@ const ChecksStudioPageInner: React.FC = () => {
                             <TextField
                               variant="standard"
                               fullWidth
+                              multiline
+                              disabled={isRunning}
+                              inputProps={{ 'aria-label': `Step ${index + 1}` }}
                               value={step}
                               onChange={(e) => {
                                 const next = [...testSteps];
@@ -647,7 +699,7 @@ const ChecksStudioPageInner: React.FC = () => {
                               }}
                             />
                           }
-                          secondary={isInvalid ? (validationEntry?.suggestion || 'Invalid step') : isClickable ? 'Click to jump to this step in video' : undefined}
+                          secondary={isInvalid ? (validationEntry?.suggestion || 'Invalid step') : undefined}
                           secondaryTypographyProps={{
                             variant: 'caption',
                             sx: { color: 'text.secondary' }
@@ -734,7 +786,7 @@ const ChecksStudioPageInner: React.FC = () => {
             <CardHeader
               avatar={<Settings sx={{ color: 'warning.main' }} />}
               title="Control Tower"
-              subheader="Test execution & monitoring"
+              subheader={latestExecutionStatus ? `Latest run: ${latestExecutionStatus.toLowerCase()}` : 'Test execution & monitoring'}
               action={
                 <Stack direction="row" spacing={1}>
                   <Tooltip title="Reload scenarios">
@@ -819,9 +871,9 @@ const ChecksStudioPageInner: React.FC = () => {
               <Divider sx={{ mb: 2 }} />
 
               <Tabs value={rightTab} onChange={(_, v) => setRightTab(v)} sx={{ mb: 1 }}>
-                <Tab label="Logs" />
+                <Tab label={`Logs${executionLogs.length ? ` (${executionLogs.length})` : ''}`} />
                 <Tab label="Code" />
-                <Tab label="Proof" />
+                <Tab label={showVideoPlayer ? 'Proof available' : 'Proof'} />
               </Tabs>
 
               {/* Execution Logs */}
@@ -831,7 +883,7 @@ const ChecksStudioPageInner: React.FC = () => {
                 )}
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Code sx={{ fontSize: 18 }} />
-                  Live Execution Logs
+                  Execution logs
                 </Typography>
                 
                 <Paper 
@@ -852,13 +904,15 @@ const ChecksStudioPageInner: React.FC = () => {
                   {validation.error && (
                     <Box sx={{ mb: 0.5, color: 'error.light' }}>Validation error: {validation.error}</Box>
                   )}
-                   {executionLogs.map((log: { timestamp: string; message: string; type: 'info' | 'error' | 'success' }, index: number) => (
+                   {executionLogs.map((log, index) => (
                     <Box key={index} sx={{ mb: 0.5, display: 'flex', gap: 1 }}>
                       <Typography 
                         component="span" 
                         sx={{ 
                           color: 'grey.400',
                           minWidth: 60,
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0,
                           fontFamily: 'monospace',
                           fontSize: 'inherit'
                         }}
@@ -868,8 +922,9 @@ const ChecksStudioPageInner: React.FC = () => {
                       <Typography 
                         component="span"
                         sx={{ 
-                          color: log.type === 'success' ? 'success.light' : 
-                                 log.type === 'error' ? 'error.light' : 'white',
+                          color: log.type === 'success' ? 'success.light' :
+                                 log.type === 'error' ? 'error.light' :
+                                 log.type === 'warning' ? 'warning.light' : 'white',
                           fontFamily: 'monospace',
                           fontSize: 'inherit'
                         }}
@@ -909,36 +964,36 @@ const ChecksStudioPageInner: React.FC = () => {
                      )) as any;
                     dispatch(setTestIR(ir));
                     dispatch(setGeneratedCode(generatePythonFromIR(ir)));
+                    setGeneratedByAi(false);
                   }}
+                  onGenerateAi={generateWithGemini}
+                  aiEnabled={Boolean(aiStatus?.enabled)}
+                  aiLoading={aiLoading}
+                  aiModel={aiStatus?.model || 'gemini-3.8-flash'}
+                  aiProvider={aiStatus?.provider}
+                  aiError={aiError}
+                  languageLabel={generatedByAi ? 'Generated TypeScript (Playwright) · Gemini Flash' : 'Generated Python (Playwright)'}
                 />
               </Box>
 
               {/* Proof Tab */}
               <Box sx={{ mt: 2, display: rightTab === 2 ? 'block' : 'none' }}>
-                <Paper 
-                  variant="outlined" 
-                  sx={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'grey.900', color: 'white', position: 'relative', overflow: 'hidden' }}
-                >
-                  {isRunning && (
+                {isRunning ? (
+                  <Paper variant="outlined" sx={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'grey.900', color: 'white' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'primary.light' }}>
                       <CircularProgress size={16} sx={{ color: 'primary.light' }} />
                       <Typography variant="body2">Recording…</Typography>
                     </Box>
-                  )}
-                  {!isRunning && showVideoPlayer ? (
-                    <video 
-                      ref={videoRef}
-                      src={videoUrl || '/assets/videos/sample-ui-test.mp4'} 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      controls 
-                      preload="metadata"
-                      onTimeUpdate={(e) => setVideoCurrentTime((e.target as HTMLVideoElement).currentTime)}
-                    />
-                  ) : null}
-                  {!isRunning && !showVideoPlayer && (
-                    <Typography variant="body2" color="grey.300">Visual proof will appear after run</Typography>
-                  )}
-                </Paper>
+                  </Paper>
+                ) : (
+                  <StudioProofVideo
+                    videoRef={videoRef}
+                    videoUrl={videoUrl}
+                    posterUrl={proofPoster}
+                    title={selectedScenarioData?.name || 'Studio test'}
+                    onTimeUpdate={setVideoCurrentTime}
+                  />
+                )}
               </Box>
 
               {/* Variables inline panel removed in favor of Variables dialog */}

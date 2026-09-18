@@ -1,0 +1,16 @@
+- [Epic 10 gate policy — non-green baseline](project_epic10_gate_policy.md) — backend has ~23 pre-existing auth/BFF/rate-limit IT failures; judge stories on their own surface, CONCERNS still merges
+- [QA review verification depth](feedback_qa_review_verification_depth.md) — throwaway-test proofs, `--rerun-tasks` (the contract is not a Gradle input, so plain green is meaningless), measure your own baseline
+- [Migration ITs build from scratch](project_epic10_migration_test_blindspot.md) — V-migration backfills/conversions match zero rows in CI; probe with a two-stage Flyway run before trusting green
+- [studio-runner env allowlist](project_studio_runner_env_allowlist.md) — two classes of key on the browser child's inherit list defeat the sandbox with no source diff; one closed, one open
+- [Studio suite shares one container](project_studio_suite_shared_container.md) — full-suite failure counts are order-dependent; one dead context fails 15 tests on one port
+- [Epic 10 vacuous-guard shapes](project_epic10_vacuous_guard_shapes.md) — 21 guards that could not fail, shift-sweep probe, waitFor "exactly N" window, .js specifier bypass
+- [Frontend env worktree trap](project_frontend_env_worktree_trap.md) — npm install recipe, lint dead, per-base baselines, load-fragile suite, :3000 bootstrap clobber, git-archive/taskpolicy attribution
+- [Shared scratchpad breaks mutation harnesses](feedback_mutation_harness_isolation.md) — never keep restore copies or mutation scripts in the shared scratchpad; another agent overwrites them silently
+- [PG15 partitioned-constraint behaviour](project_pg15_partitioned_constraint.md) — NOT VALID on a partitioned parent is accepted and recurses; VALIDATE names the relation, not the row
+- [Red escalation tests that went green](project_epic10_red_escalation_disposition.md) — three checks before accepting green; hash the *assertion region*, not the file; 10.11c's AC-32 is the open one
+- [Backend Testcontainers driver stall](project_backend_testcontainers_stall.md) — can hang deterministically (4/4 on one branch); detect on the HikariPool adder holding the driver monitor, never on thread state
+- [Split-half merge hazard](project_epic10_split_half_merge_hazard.md) — `git merge-tree` at split-story gates; plus the one-line `_helpers.tpl` key list + count comment that no suite can fail on
+- [10.32 text-read constraint](project_10_32_text_read_constraint.md) — two code mentions of MEDIAN_TOLERANCE_MS or webm.test.ts won't load; and a failure message is dead code until you force the bound
+- [FOC-07 detach reconciliation](project_foc07_detach_reconciliation.md) — 10.30 must flush-then-refresh after the lock, never detach; four falsifications; a dirty caller still defeats STALE_REVISION
+- [Contract-document guard gaps](project_contract_document_guard_gaps.md) — no $ref resolves, no example is validated, and "the declared example's code" assertions hold transcribed literals
+- [Test-count reading traps](project_test_count_reading_traps.md) — `-i` suppresses Gradle PASSED lines; a single-file runner vitest run exits 1 on coverage even when green

@@ -1,0 +1,22 @@
+handoff:
+  from_agent: "pm"
+  to_agent: "architect"
+  last_command: "create-epic"
+  consumed: true
+  story_context:
+    story_id: "EPIC-10"
+    story_path: "docs/epics/EPIC-10-EXECUTION.yaml"
+    story_status: "planning"
+    current_task: "Wave-1 prerequisites: studio-runner scaffolding ADR + staging spike register"
+    branch: "brunobuger/ui-studio"
+  decisions:
+    - "Epic 10 waves corrected to 8 (10.12 depends only on 10.6 -> W3); validated no wave violations"
+    - "Sizes re-estimated fresh: 9 L / 10 M; 10.7 flagged as split candidate"
+    - "FOC-01: 10.1 and 10.4 share backend/src/main/resources/db/migration; 10.4 migration must precede 10.1 revision-reference migration"
+    - "Six external dependencies ED-01..ED-06 recorded; all converge on 10.18/10.19, several gate earlier pilot acceptance"
+    - "docs/stories/10.studio-execution.epic.md is deleted in working tree; read from HEAD 9425e7e7d"
+  files_modified:
+    - "docs/epics/EPIC-10-EXECUTION.yaml"
+  blockers:
+    - "Epic 10 source file deleted in working tree (unintentional?)"
+  next_action: "Produce studio-runner scaffolding ADR under docs/architecture/ and open the §10 staging spikes (question, closing evidence, owner, gated stories)"

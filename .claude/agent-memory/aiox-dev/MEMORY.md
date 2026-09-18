@@ -1,0 +1,45 @@
+- [Backend check baseline is red](project_backend_check_baseline.md) — 23 failing ITs + 6 spotless violations predate Epic 10; diff against the base commit before blaming your change
+- [Vertex SDK vs R2D2 constraints](project_vertex_sdk_r2d2.md) — endpoint/:443, retry disabling, and the deprecated generative-model surface in google-cloud-vertexai 1.52.0
+- [studio-runner Node pin conflict](project_studio_runner_node_pin.md) — .nvmrc 22 is authoritative; the pinned Playwright image ships Node 24, so CI stage 6a fails on purpose until ED-05
+- [Proving browser behaviour without Playwright](project_browser_proof_without_playwright.md) — no PW browsers installed; use playwright-core + system Chrome and let the page issue the fetch
+- [Epic 10 falsification standard](project_epic10_falsification_standard.md) — a test is not a guard until you break the property and watch it go red
+- [Studio contract vs runner report body](project_studio_contract_vs_runner_body.md) — ADR-002 settled all four divergences; contract test is green now, runner bodies are closed schemas
+- [Fixture→real schema can widen a boundary](project_fixture_schema_widening.md) — swapping a transcribed fixture for the frozen contract can silently loosen defensive parsing; diff the keywords
+- [Two contexts, one test database](project_two_context_one_database.md) — the second Spring context silently gets its own DB unless you override the profile AND the datasource URL on the command line
+- [Suite-only test failures](project_test_container_and_context_isolation.md) — tc container dies on eviction; dispatcher scans, global quota and SSE registry leak across classes
+- [Provisional seam fixtures go stale](project_provisional_seam_fixtures.md) — deleting a provisional interface impl turns its fixture literals into 78 red tests; fix the fixture, not the predicate
+- [Auth bypasses: `local` profile and ED-02](project_local_profile_auth_bypass.md) — LocalDevAuthFilter, plus an unconditional Core bypass that makes `401` unreachable on every route
+- [Playwright process groups](project_playwright_process_groups.md) — Chromium and ffmpeg lead their own groups; one group signal to the fork never reaches the browser
+- [`LIMIT` in a subquery is not a batch bound](project_postgres_limit_in_subquery.md) — `UPDATE ... WHERE id IN (SELECT ... LIMIT n)` updated 5 rows with a batch of 2; use a CTE
+- [Frontend baseline environment](project_frontend_baseline_environment.md) — `npm install` just works; lint can't start; ENV-2 now fixed in shared setup (how to reproduce it)
+- [Vacuous guard shapes](project_vacuous_guard_shapes.md) — the catalogued ways an Epic 10 guard turned out unable to fail; check a new assertion against it before calling it a guard
+- [PG15 `NOT VALID` on a partitioned parent](project_postgres_partitioned_not_valid.md) — accepted and enforced immediately, but `VALIDATE` names the partition, not the offending row
+- [Proving "no process started"](project_process_table_observation.md) — stable two-read snapshot, real scratch store, driven scheduler; else the negative is green for the wrong reason
+- [Which runner redaction layer is load-bearing](project_runner_redaction_layers.md) — the relay is what the canaries exercise; logging.ts's redaction reddens exactly one test, and only over the full suite
+- [Mutate the symbol the test name names](feedback_structural_guard_mutation.md) — "enumerates"/"is the only"/"carries no" tests survive sibling mutations; close the bypass instead of watching it
+- [No EventSource in the test environment](project_frontend_eventsource_environment.md) — jsdom has none, Node's is flagged, and the two Event classes collide when you mix them
+- [ChecksStudioPage's dead affordances](project_studio_page_dead_affordances.md) — handlers with no call site in JSX; check reachability before planning to click through to one
+- [MED-2 has two surfaces](project_med2_two_surfaces.md) — deterministic at StudioVisibilityIT on EPIC-10; one surface is a RUNNABLE worker, so grepping for BLOCKED misses it
+- [Runner scratch must not be the mount point](project_runner_scratch_mount_point.md) — clearAll() rmdirs it and a read-only root says EROFS; mount the parent
+- [Merging two parallel halves of one story](project_epic10_parallel_half_merge.md) — resolve hunk by hunk against @qa's ownership rule; the later half retains everything the earlier one retired
+- [Merged suite delta arithmetic](project_epic10_merge_delta_arithmetic.md) — merged = base + each half's additions; if it doesn't close exactly, a describe block was dropped
+- [Skip asymmetry is the tell](feedback_skip_asymmetry.md) — env-conditional skips on "passed" work fail open; break the prerequisite and re-run before believing a tier
+- [Contract attribution surface](project_contract_attribution_surface.md) — only ten operations carry `x-implemented-by`; "every shipped operation carries one" is false on this document
+- [Helm configOverrides never reaches a process](project_chart_envfrom_dotted_keys.md) — dotted ConfigMap keys via envFrom are dropped silently; the AC-18 check is red on purpose
+- [Falsify from the unfavourable side](feedback_falsify_from_the_unfavourable_side.md) — pick the mutation your guard's scoping makes it least likely to catch; a favourable one proves nothing
+- [React's `disabled` prop blocks synthetic clicks](project_react_disabled_prop_guard.md) — removing the attribute and dispatching never reaches the handler; that guard shape is vacuous
+- [A mutation table is tree-specific](feedback_mutation_table_is_tree_specific.md) — re-run the whole table after the last test file lands; sibling counts go stale by one every time a test is added
+- [Keeping fixtures-tier recordings](project_fixtures_tier_recording_capture.md) — TMPDIR override + hard-link poller survives outcome.clear(); no test edit, command stays literal
+- [An empty run is not a result](feedback_empty_run_is_not_a_result.md) — zsh doesn't word-split `$F`; `-t` is a regex; check each row's executed count
+- [Locked read returns the stale instance](project_hibernate_locked_read_stale.md) — flush then refresh AFTER the lock; detach drops a caller's writes, and a refresh drops unflushed ones unless you flush
+- [Parent `run.origin` is not the child's RunOrigin](project_parent_session_origin_is_not_run_origin.md) — only `ready`'s fields reach the parent; a new RunOrigin field needs an echo
+- [Comment claims are audited](feedback_comment_claims_are_audited.md) — an overstated "optional/fail-open" JSDoc is a gate finding; fix the comment now, route the behaviour change
+- [A keyset pin is not a value pin](project_keyset_pin_vs_value_pin.md) — repointing a `$ref` moves no operationId; only the value comparison catches it, and the AC predicted otherwise
+- [The `internal` tag is the partition](project_openapi_internal_tag_partition.md) — 12/2/4, four runner ops are internal off `/internal/`; a partition without a totality assertion has a bypass
+- [Gradle prints no tally when green](project_gradle_tally_line_only_on_failure.md) — `N tests completed` only on failure; aggregate the JUnit XML for counts and verbatim failure messages
+- [`frontend/` `npm test` is watch mode](project_frontend_vitest_watch_mode.md) — bare `vitest`, never exits; use `npx vitest run`. The runner's does exit.
+- [F-3 reproduces under the suite, not under load](project_f3_reproduces_under_suite_not_load.md) — the prescribed 20-runs-under-load recipe passes 20/20; the narrow squeeze reddens it every time
+- [Runbook prose is pinned by a runner test](project_runbook_prose_is_pinned_by_a_runner_test.md) — a line re-wrap reddens `disclosure.test.ts`; the ED-02 owner pin was re-scoped 2026-09-17
+- [The values files still say ED-02 is unowned](project_disclosure_pin_values_files_stale.md) — live falsehood in values-uat/prod since 2026-09-16; the pin that held it was scoped out, correction unrouted
+- [axe-core in jsdom](project_axe_in_jsdom_limits.md) — contrast/target-size unanswerable, ChecksLayout unscannable, 5 s default too short; pin counts and fail on shrink too
+- [Untracked-file restore trap](project_untracked_file_restore_trap.md) — `git checkout --` no-ops on a `??` file; a mutation stays applied and poisons every later row

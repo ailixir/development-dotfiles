@@ -89,10 +89,6 @@ public class StudioController {
       @RequestParam(required = false) UUID testId,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
-    if (testId == null) {
-      return ResponseEntity.badRequest()
-          .body(Map.of("error", "testId query parameter is required"));
-    }
     Page<UITestExecutionDto> result = studioService.listExecutions(testId, page, size);
     return ResponseEntity.ok(toExecutionEnvelope(result));
   }

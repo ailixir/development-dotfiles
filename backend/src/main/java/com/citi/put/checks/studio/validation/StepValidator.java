@@ -11,10 +11,12 @@ public class StepValidator {
       List.of(
           "go to",
           "navigate to",
+          "search for",
           "click",
           "type",
           "wait for",
           "check that",
+          "check if",
           "check url contains",
           "scroll",
           "hover",

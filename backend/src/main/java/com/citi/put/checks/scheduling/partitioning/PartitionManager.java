@@ -20,6 +20,12 @@ public class PartitionManager {
   private static final Set<String> ALLOWED_TABLES =
       Set.of("execution_results", "ui_test_executions", "report_executions");
 
+  private static final java.util.Map<String, String> PARTITION_COLUMNS =
+      java.util.Map.of(
+          "execution_results", "started_at",
+          "ui_test_executions", "started_at",
+          "report_executions", "executed_at");
+
   private final JdbcTemplate jdbc;
   private final String parentTable;
 
@@ -77,7 +83,11 @@ public class PartitionManager {
               + "')";
 
       try {
-        jdbc.execute(ddl);
+        if (defaultPartitionHasRowsInRange(rangeStart, rangeEnd)) {
+          moveDefaultPartitionRows(partitionName, rangeStart, rangeEnd, ddl);
+        } else {
+          jdbc.execute(ddl);
+        }
         created.add(partitionName);
         LOG.info("partition_created table={} range=[{}, {})", partitionName, rangeStart, rangeEnd);
       } catch (Exception e) {
@@ -86,6 +96,67 @@ public class PartitionManager {
     }
 
     return created;
+  }
+
+  private boolean defaultPartitionHasRowsInRange(String rangeStart, String rangeEnd) {
+    String defaultPartition = parentTable + "_default";
+    String partitionColumn = PARTITION_COLUMNS.get(parentTable);
+    try {
+      Long count =
+          jdbc.queryForObject(
+              "SELECT COUNT(*) FROM "
+                  + defaultPartition
+                  + " WHERE "
+                  + partitionColumn
+                  + " >= ?::timestamptz AND "
+                  + partitionColumn
+                  + " < ?::timestamptz",
+              Long.class,
+              rangeStart,
+              rangeEnd);
+      return count != null && count > 0;
+    } catch (Exception ignored) {
+      return false;
+    }
+  }
+
+  private void moveDefaultPartitionRows(
+      String partitionName, String rangeStart, String rangeEnd, String createPartitionDdl) {
+    String defaultPartition = parentTable + "_default";
+    String partitionColumn = PARTITION_COLUMNS.get(parentTable);
+    boolean detached = false;
+    try {
+      jdbc.execute("ALTER TABLE " + parentTable + " DETACH PARTITION " + defaultPartition);
+      detached = true;
+      jdbc.execute(createPartitionDdl);
+      jdbc.update(
+          "INSERT INTO "
+              + partitionName
+              + " SELECT * FROM "
+              + defaultPartition
+              + " WHERE "
+              + partitionColumn
+              + " >= ?::timestamptz AND "
+              + partitionColumn
+              + " < ?::timestamptz",
+          rangeStart,
+          rangeEnd);
+      jdbc.update(
+          "DELETE FROM "
+              + defaultPartition
+              + " WHERE "
+              + partitionColumn
+              + " >= ?::timestamptz AND "
+              + partitionColumn
+              + " < ?::timestamptz",
+          rangeStart,
+          rangeEnd);
+    } finally {
+      if (detached) {
+        jdbc.execute(
+            "ALTER TABLE " + parentTable + " ATTACH PARTITION " + defaultPartition + " DEFAULT");
+      }
+    }
   }
 
   public PartitionHealthStatus checkHealth(int lookaheadDays) {

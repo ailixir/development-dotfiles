@@ -9,6 +9,7 @@ import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.entity.UITestExecution;
 import java.time.Instant;
 import java.util.UUID;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,11 +25,15 @@ public class StudioService {
 
   private final StudioRepository studioRepository;
   private final UITestExecutionRepository executionRepository;
+  private final ObjectProvider<LocalStudioExecutionRunner> localExecutionRunner;
 
   public StudioService(
-      StudioRepository studioRepository, UITestExecutionRepository executionRepository) {
+      StudioRepository studioRepository,
+      UITestExecutionRepository executionRepository,
+      ObjectProvider<LocalStudioExecutionRunner> localExecutionRunner) {
     this.studioRepository = studioRepository;
     this.executionRepository = executionRepository;
+    this.localExecutionRunner = localExecutionRunner;
   }
 
   public Page<UITestDto> listTests(String csiId, int page, int size) {
@@ -100,6 +105,11 @@ public class StudioService {
             .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + testId));
     UITestExecution execution = new UITestExecution(testId, "PENDING", Instant.now());
     execution = executionRepository.save(execution);
+    LocalStudioExecutionRunner runner = localExecutionRunner.getIfAvailable();
+    if (runner != null) {
+      executionRepository.flush();
+      runner.run(execution.getId(), test);
+    }
     return UITestExecutionDto.from(execution);
   }
 
@@ -114,7 +124,11 @@ public class StudioService {
   public Page<UITestExecutionDto> listExecutions(UUID testId, int page, int size) {
     Pageable pageable =
         PageRequest.of(page, Math.min(size, 100), Sort.by("createdAt").descending());
-    return executionRepository.findByTestId(testId, pageable).map(UITestExecutionDto::from);
+    Page<UITestExecution> executions =
+        testId == null
+            ? executionRepository.findAll(pageable)
+            : executionRepository.findByTestId(testId, pageable);
+    return executions.map(UITestExecutionDto::from);
   }
 
   private UserIdentity extractIdentity(Authentication auth) {

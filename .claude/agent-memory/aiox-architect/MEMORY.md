@@ -1,0 +1,1 @@
+- [EPIC-10 worktree topology](project_epic10_worktree_topology.md) — parallel worktrees under `wt/`; work only in the one the spawn names, treat others as read-only snapshots, don't edit docs dirty elsewhere

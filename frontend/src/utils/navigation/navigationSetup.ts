@@ -1,4 +1,4 @@
-import { navigationRegistry } from '@put/core-components';
+import { navigationRegistry } from '@/components/platform/navigationRegistry';
 import { store } from '@/store';
 
 // Register the checks module navigation

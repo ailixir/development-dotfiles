@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://put.citi.com/schemas/studio/artifact.schema.json",
+  "title": "Checks Studio source artifact",
+  "description": "Compiled Playwright source artifact for a Studio UI test revision. Architecture \"Checks UI Studio\" v2.1 §4.4. Exactly one entry per source line, index aligned, with identical originalText. This document is the single source of truth; backend/src/main/resources/studio/artifact.schema.json is a byte-identical build fixture guarded by ArtifactSchemaDriftTest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "steps"],
+  "properties": {
+    "version": {
+      "description": "Artifact schema version. V1 emits 1.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "steps": {
+      "description": "Ordered compiled steps. Index aligned with the authored source lines: steps[i].stepIndex === i.",
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/artifactStep" }
+    }
+  },
+  "$defs": {
+    "artifactStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stepIndex", "originalText", "code"],
+      "properties": {
+        "stepIndex": {
+          "description": "Zero-based position of the authored source line this step was compiled from.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "originalText": {
+          "description": "The authored English line, byte-identical to the source. Never rewritten by the compiler.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "code": {
+          "description": "Generated Playwright TypeScript for this step. Restricted to the §4.5 permitted language; the runner revalidates before execution.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": 1,
+      "steps": [
+        {
+          "stepIndex": 0,
+          "originalText": "Go to \"https://www.citi.com\"",
+          "code": "await page.goto('https://www.citi.com');"
+        },
+        {
+          "stepIndex": 1,
+          "originalText": "Type \"<secret LOGIN_PW>\" in the \"Password\" field",
+          "code": "await page.getByLabel('Password').fill(vars.secret('LOGIN_PW'));"
+        },
+        {
+          "stepIndex": 2,
+          "originalText": "Check that the URL contains \"dashboard\"",
+          "code": "await expect(page).toHaveURL(/dashboard/);"
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "steps": []
+    }
+  ]
+}
+

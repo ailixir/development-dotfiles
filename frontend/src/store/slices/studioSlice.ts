@@ -6,7 +6,7 @@ interface StudioState {
   isExecuting: boolean;
   executionLogs: Array<{
     timestamp: string;
-    level: 'info' | 'warning' | 'error';
+    level: 'info' | 'warning' | 'error' | 'success';
     message: string;
     stepIndex?: number;
   }>;
@@ -177,5 +177,4 @@ export const {
 } = studioSlice.actions;
 
 export default studioSlice.reducer;
-
 

@@ -35,6 +35,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("io.github.resilience4j:resilience4j-spring-boot3:2.2.0")
     implementation("com.github.ben-manes.caffeine:caffeine")
+    implementation("com.google.genai:google-genai:1.72.0")
+    implementation("com.networknt:json-schema-validator:1.4.0")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
@@ -53,7 +55,6 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.assertj:assertj-core")
-    testImplementation("com.networknt:json-schema-validator:1.4.0")
     testImplementation("io.zonky.test:embedded-database-spring-test:2.5.1")
     testImplementation("org.testcontainers:postgresql:1.20.2")
     testImplementation("org.testcontainers:junit-jupiter:1.20.2")

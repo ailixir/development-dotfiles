@@ -1,0 +1,43 @@
+epic_state:
+  epicId: EPIC-10
+  execution_plan: docs/epics/EPIC-10-EXECUTION.yaml
+  mode: yolo
+  started_at: "2026-09-11"
+  updated_at: "2026-09-11"
+  status: active
+  integration_branch: epic/EPIC-10
+  base_commit: 910de104d
+  worktree_root: /Users/brunobuger/orca/workspaces/put-checks/wt
+  run_log: docs/epics/EPIC-10-RUN-LOG.md
+  current_wave: 5
+  total_waves: 8
+  waves:
+    1:
+      name: "Contracts, validator, reference, revisions, gateway"
+      status: complete
+      rounds:
+        A: ["10.2", "10.4", "10.5"]
+        B: ["10.1", "10.3"]
+      stories:
+        "10.2": {status: merged, head: bc5d5db4a, branch: story/10.2, executor: aiox-dev, quality_gate: aiox-qa}
+        "10.4": {status: merged, head: 0033e61ff, branch: story/10.4, executor: aiox-dev, quality_gate: aiox-qa}
+        "10.5": {status: merged, head: 5f51e65c0, branch: story/10.5, executor: aiox-dev, quality_gate: aiox-qa}
+        "10.1": {status: merged, branch: story/10.1, executor: aiox-dev, quality_gate: aiox-qa}
+        "10.3": {status: merged, branch: story/10.3, executor: aiox-dev, quality_gate: aiox-qa}
+    2: {name: "Runner control plane", status: pending, stories: {"10.6": {status: merged}}}
+    3: {name: "Backend lifecycle, compile pipeline, browser fixture", status: pending, stories: {"10.7": {status: merged}, "10.8": {status: merged}, "10.12": {status: merged}}}
+    4: {name: "Repair and deadline enforcement", status: complete, stories: {"10.9": {status: merged, branch: story/10.9, head: 882022184, executor: aiox-dev, quality_gate: aiox-qa, verdict: CONCERNS}, "10.13": {status: merged, branch: story/10.13, head: 368d72d8c, executor: aiox-dev, quality_gate: aiox-qa, verdict: PASS}}}
+    5: {name: "Review, manifest, secrets", status: drafted, stories: {"10.10": {status: drafted, executor: aiox-sm, size_call: L}, "10.14": {status: drafted, executor: aiox-sm, size_call: L}, "10.17": {status: drafted, executor: aiox-sm, size_call: L}}}
+    6: {name: "Run gate, media route, hardened deployment", status: pending, stories: {"10.11": {status: pending}, "10.15": {status: pending}, "10.18": {status: pending}}}
+    7: {name: "Evidence playback", status: pending, stories: {"10.16": {status: pending}}}
+    8: {name: "Integrated staging validation", status: pending, stories: {"10.19": {status: pending}}}
+  gate_verdicts: {}
+  notes:
+    - "FOC-01 honored by round split: 10.4 lands V12 before 10.1 adds V13/V14."
+    - "FOC-02 honored by round split: 10.2 lands the studio-runner scaffold before 10.3."
+    - "FOC-04 mandated order: 10.9 removes the confirm-compile marker first; 10.13 re-anchors the runner SHA pin after, via T-10.13.10."
+    - "Wave 5 drafting is pipelined against wave-4 development; drafts cite ADR-002 sections, not in-flight 10.9/10.13 symbols. @po re-checks the recorded dependency assumptions after wave 4 merges."
+    - "FOC-04 discharged: 10.9 merged first (contract 815aae9b -> cbf07c99), 10.13 re-anchored via T-10.13.10 and merged behind it."
+    - "DEF-01 open, unowned: the API dispatch body does not conform to the closed RunJob schema; every real dispatch fails. @sm placed it in 10.17 AC-2 and asked @po to rule, since it is arguably 10.7 unfinished business."
+    - "BUILD-1 for @po: story 10.9 AC-23 requires a green build from clean, which no correct implementation can satisfy while ED-02 stands. @qa proposes rewording for the rest of the epic."
+    - "All three wave-5 drafts self-sized L against the manifest M, each because an architect ruling landed after the estimate. Fourth, fifth and sixth consecutive instance."

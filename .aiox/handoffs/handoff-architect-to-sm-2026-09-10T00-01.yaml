@@ -1,0 +1,27 @@
+handoff:
+  from_agent: "architect"
+  to_agent: "sm"
+  last_command: "create-brownfield-architecture"
+  consumed: true
+  story_context:
+    story_id: "EPIC-10"
+    story_path: "docs/epics/EPIC-10-EXECUTION.yaml"
+    story_status: "planning"
+    current_task: "Draft wave-1 stories 10.1, 10.2, 10.3, 10.4, 10.5"
+    branch: "brunobuger/ui-studio"
+  decisions:
+    - "studio-runner/ is a standalone npm package (npm, exact pins, ESM/NodeNext/tsc, Vitest tiers) per docs/architecture/ADR-001-studio-runner-scaffolding.md; user confirmed npm over pnpm"
+    - "Playwright package + browser image pinned together; CI check in 10.3 asserts package.json == lockfile == Dockerfile ARG == runtime-versions.json"
+    - "FOC-01: 10.4 ui_test_revisions migration must be versioned before 10.1's revision-reference migration; both stay in wave 1"
+    - "Epic 10 markdown retired (left deleted); per-story scope/acceptance text = git show 9425e7e7d:docs/stories/10.studio-execution.epic.md"
+    - "Six staging spikes SPK-01..06 open in docs/architecture/studio-staging-spikes.md; they gate staging acceptance, not development; SPK-01 constrains 10.5 (do not rely on structured output)"
+  files_modified:
+    - "docs/epics/EPIC-10-EXECUTION.yaml"
+    - "docs/architecture/ADR-001-studio-runner-scaffolding.md"
+    - "docs/architecture/studio-staging-spikes.md"
+    - "docs/architecture/studio-execution.md (Epic 10 links repointed, uncommitted)"
+    - "docs/brd/checks-ui-studio.brd.md (Epic 10 link repointed, uncommitted)"
+    - "docs/architecture/studio-execution-review.md (Epic 10 link note, uncommitted)"
+  blockers:
+    - "Pipeline placement for checks-studio-runner image is @devops-owned and unresolved (ADR O-1); does not block story drafting"
+  next_action: "Draft stories 10.1-10.5 from EPIC-10-EXECUTION.yaml + ADR-001 + architecture v2.1; source acceptance text from commit 9425e7e7d; resolve FOC-01 in 10.1/10.4 drafts"

@@ -12,6 +12,10 @@ spring:
     password: ${SMTP_PASSWORD:}
 
 checks:
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:3002,http://localhost:5173,http://127.0.0.1:5173
+  sources:
+    UI_TEST: true
   scheduling:
     dispatcher-enabled: true
   reports:
@@ -25,3 +29,12 @@ management:
   endpoint:
     health:
       show-details: always
+
+studio:
+  compile:
+    gateway:
+      enabled: ${STUDIO_GATEWAY_ENABLED:false}
+      credentials:
+        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:api-key}
+  pool:
+    size: 1

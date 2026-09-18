@@ -1,0 +1,27 @@
+handoff:
+  from_agent: "sm"
+  to_agent: "po"
+  last_command: "draft"
+  consumed: true
+  story_context:
+    story_id: "10.1-10.5"
+    story_path: "docs/stories/10.{1,2,3,4,5}.story.md"
+    story_status: "Draft"
+    current_task: "Wave-1 stories drafted; awaiting *validate-story-draft"
+    branch: "brunobuger/ui-studio"
+  decisions:
+    - "Migration numbering: 10.4 owns V12 (ui_test_revisions + compile state); 10.1 owns V13 (dispatch ledger) and V14 (execution history v2) — FOC-01 serialized"
+    - "10.2 T-10.2.0 creates the studio-runner/ scaffold per ADR-001; 10.3 builds on it (FOC-02 flagged, not yet in manifest)"
+    - "Frozen contract location proposed: docs/specs/studio/{openapi.yaml,artifact.schema.json} (ADR-001 O-3, confirm at validation)"
+    - "MSW is not installed in frontend/; 10.1 AC-16 proposes reintroducing msw for Studio routes — PO decision"
+    - "10.5 fixture/stub acceptance can complete before SPK-01; pilot-use acceptance (AC-16) is gated by ED-01"
+  files_modified:
+    - "docs/stories/10.1.story.md"
+    - "docs/stories/10.2.story.md"
+    - "docs/stories/10.3.story.md"
+    - "docs/stories/10.4.story.md"
+    - "docs/stories/10.5.story.md"
+  blockers:
+    - "FOC-02 (studio-runner package root shared by 10.2/10.3) needs @pm to record in EPIC-10-EXECUTION.yaml"
+    - "CLAUDE.md mock-first section is stale (MSW absent, services/mocks/ path missing) — owner TBD"
+  next_action: "@po *validate-story-draft for 10.1..10.5 (10-point checklist); @pm to add FOC-02 to the manifest"

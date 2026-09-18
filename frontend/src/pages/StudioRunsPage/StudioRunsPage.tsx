@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, Grid, Chip, Stack, Skeleton, IconButton, Tooltip, LinearProgress, Alert } from '@mui/material';
-import { Refresh, PlayArrow, Movie } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { Alert, Accordion, AccordionDetails, AccordionSummary, Box, Card, CardContent, Chip, Grid, IconButton, LinearProgress, Skeleton, Stack, Tooltip, Typography } from '@mui/material';
+import { ExpandMore, Movie, Refresh } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 import studioApi from '@/services/api/studioApi';
 import { useAppSelector } from '@/store';
+import StudioProofVideo from '@/components/studio/StudioProofVideo';
+import { normalizeExecutionLogs, type StudioExecutionLog } from '@/utils/studio/executionView';
 
-type Status = 'RUNNING' | 'COMPLETED' | 'FAILED' | 'TIMEOUT';
+type Status = 'PENDING' | 'RUNNING' | 'COMPLETED' | 'PASSED' | 'FAILED' | 'ERROR' | 'TIMEOUT';
 interface RunItem {
   id: string;
   testId: string;
@@ -16,19 +18,29 @@ interface RunItem {
   endTime?: string;
   duration?: number;
   videoUrl?: string;
+  posterUrl?: string;
+  logs: StudioExecutionLog[];
 }
 
-const colorFor = (status: string) => (status === 'COMPLETED' ? 'success' : status === 'RUNNING' ? 'info' : status === 'FAILED' ? 'error' : 'default');
+const colorFor = (status: Status) =>
+  status === 'PASSED' || status === 'COMPLETED'
+    ? 'success'
+    : status === 'RUNNING'
+      ? 'info'
+      : status === 'FAILED' || status === 'ERROR'
+        ? 'error'
+        : 'default';
 
 const StudioRunsPage: React.FC = () => {
   const [runs, setRuns] = useState<RunItem[]>([]);
   const [allRuns, setAllRuns] = useState<RunItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
   const searchContext = useAppSelector(state => state.dashboard.searchContext);
 
   const load = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = (await studioApi.listExecutions()) as any;
       const runsData = res.data || [];
@@ -39,17 +51,28 @@ const StudioRunsPage: React.FC = () => {
       const testMap = new Map(tests.map((t: any) => [t.id, t]));
       
       // Enrich runs with test data including csiId
-      const enrichedRuns = runsData.map((run: any) => {
+      const enrichedRuns: RunItem[] = runsData.map((run: any) => {
         const test = testMap.get(run.testId) as any;
         return {
-          ...run,
+          id: run.id,
+          testId: run.testId,
+          status: run.status,
+          startTime: run.startedAt,
+          endTime: run.endedAt,
+          duration: run.durationMs,
+          videoUrl: run.videoUrl,
+          posterUrl: run.screenshotUrls?.[0],
+          logs: normalizeExecutionLogs(run.logs),
           csiId: test?.csiId,
-          testName: test?.name
+          testName: test?.name,
         };
       });
       
+      enrichedRuns.sort((a, b) => Date.parse(b.startTime) - Date.parse(a.startTime));
       setAllRuns(enrichedRuns);
       setRuns(enrichedRuns);
+    } catch {
+      setError('Could not load runs. Use Refresh to try again.');
     } finally {
       setLoading(false);
     }
@@ -75,7 +98,7 @@ const StudioRunsPage: React.FC = () => {
         </Typography>
         <Tooltip title="Refresh">
           <span>
-            <IconButton onClick={load} disabled={loading}>
+            <IconButton onClick={load} disabled={loading} aria-label="Refresh runs">
               <Refresh />
             </IconButton>
           </span>
@@ -94,9 +117,11 @@ const StudioRunsPage: React.FC = () => {
           </Stack>
         </Alert>
       )}
-      <Grid container spacing={2}>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {!loading && !error && runs.length === 0 && <Alert severity="info">No runs found for this scope. Open a test in Studio to start a run.</Alert>}
+      <Grid container spacing={2} alignItems="flex-start">
         {(loading ? [...Array(6)].map((_, i) => ({ id: `s${i}` })) : runs).map((r: any) => (
-          <Grid key={r.id} item xs={12} md={6} lg={4}>
+          <Grid key={r.id} item xs={12} lg={6}>
             <Card variant="outlined" sx={{ display: 'flex' }}>
               <CardContent sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
                 <Stack spacing={1} sx={{ flexGrow: 1 }}>
@@ -108,20 +133,23 @@ const StudioRunsPage: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
                         <Typography 
                           variant="subtitle1" 
                           fontWeight={600}
-                          onClick={() => navigate(`/checks/studio/${r.testId}`)}
+                          component={Link}
+                          to={`/checks/studio/${r.testId}`}
                           sx={{ 
                             cursor: 'pointer',
                             color: 'primary.main',
+                            textDecoration: 'none',
+                            overflowWrap: 'anywhere',
                             '&:hover': { textDecoration: 'underline' }
                           }}
                         >
                           {r.testName || r.testId}
                         </Typography>
-                        <Chip label={r.status.charAt(0) + r.status.slice(1).toLowerCase()} color={colorFor(r.status) as any} size="small" />
+                        <Chip sx={{ flexShrink: 0 }} label={r.status === 'COMPLETED' ? 'Passed' : r.status.charAt(0) + r.status.slice(1).toLowerCase()} color={colorFor(r.status)} size="small" />
                       </Stack>
                       <Typography variant="caption" color="text.secondary">
                         Started: {new Date(r.startTime).toLocaleString()} • Duration: {r.duration ? `${Math.round(r.duration/1000)}s` : (r.status === 'RUNNING' ? 'in progress' : '—')}
@@ -129,20 +157,33 @@ const StudioRunsPage: React.FC = () => {
                       {r.status === 'RUNNING' ? (
                         <LinearProgress variant="indeterminate" sx={{ height: 6, borderRadius: 2 }} />
                       ) : (
-                        <Box sx={{
-                          minHeight: 120,
-                          flexGrow: 1,
-                          bgcolor: 'grey.900',
-                          color: 'grey.300',
-                          borderRadius: 1,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.9rem',
-                        }}>
-                          {r.videoUrl ? 'Video available' : 'No video'}
-                        </Box>
+                        <StudioProofVideo
+                          videoUrl={r.videoUrl}
+                          posterUrl={r.posterUrl}
+                          title={r.testName || 'Studio test'}
+                          height={220}
+                          emptyMessage="No video was captured for this run."
+                          errorMessage="Video unavailable. The recording may have expired or its storage is unreachable."
+                        />
                       )}
+                      <Accordion disableGutters elevation={0} sx={{ '&::before': { display: 'none' } }}>
+                        <AccordionSummary expandIcon={<ExpandMore />} aria-controls={`${r.id}-logs`}>
+                          <Typography variant="body2" fontWeight={600}>
+                            Execution logs ({r.logs.length})
+                          </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails id={`${r.id}-logs`}>
+                          <Box sx={{ maxHeight: 180, overflow: 'auto', bgcolor: 'grey.900', color: 'grey.100', borderRadius: 1, p: 1.5, fontFamily: 'monospace' }}>
+                            {r.logs.length ? r.logs.map((log: StudioExecutionLog, index: number) => (
+                              <Typography key={`${log.timestamp}-${index}`} component="div" variant="caption" sx={{ color: log.level === 'error' ? 'error.light' : log.level === 'success' ? 'success.light' : 'inherit', fontFamily: 'inherit' }}>
+                                {new Date(log.timestamp).toLocaleTimeString()} — {log.message}
+                              </Typography>
+                            )) : (
+                              <Typography variant="caption" color="grey.400">No execution logs were recorded.</Typography>
+                            )}
+                          </Box>
+                        </AccordionDetails>
+                      </Accordion>
                     </>
                   )}
                 </Stack>
@@ -156,5 +197,3 @@ const StudioRunsPage: React.FC = () => {
 };
 
 export default StudioRunsPage;
-
-

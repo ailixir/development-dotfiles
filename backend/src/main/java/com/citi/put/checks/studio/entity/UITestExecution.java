@@ -116,6 +116,10 @@ public class UITestExecution {
     return screenshotUrls;
   }
 
+  public void setScreenshotUrls(String[] screenshotUrls) {
+    this.screenshotUrls = screenshotUrls;
+  }
+
   public String getLogs() {
     return logs;
   }

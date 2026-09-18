@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Box, Stack, TextField, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Stack, useTheme, useMediaQuery } from '@mui/material';
 import CommandPalette from '@/components/home/CommandPalette';
 import HelpDialog from './HelpDialog';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PlatformSidebar } from '@put/core-components';
+import { PlatformSidebar } from '@/components/platform/PlatformSidebar';
 import { useLayout } from '../LayoutProvider';
 import { registerChecksNavigation, getCurrentPageId } from '../../../utils/navigation/navigationSetup';
 import GlobalSearch from '@/components/home/GlobalSearch';
@@ -66,11 +66,6 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
       e.preventDefault();
       navigate('/checks/create');
     }
-    if (e.key.toLowerCase() === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-      // simple Go home
-      e.preventDefault();
-      navigate('/checks');
-    }
     // Reduced motion preference: no-op shortcut but show how we'd adapt animations if needed
   }, []);
 
@@ -92,6 +87,24 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Box
+        component="a"
+        href="#checks-main"
+        sx={{
+          position: 'fixed',
+          left: 16,
+          top: -48,
+          zIndex: 1300,
+          px: 2,
+          py: 1,
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+          borderRadius: 1,
+          '&:focus': { top: 16 },
+        }}
+      >
+        Skip to main content
+      </Box>
       {shouldShowSidebar && (
         <PlatformSidebar
           key={`checks-sidebar-${currentPage}`}

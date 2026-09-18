@@ -1,0 +1,28 @@
+handoff:
+  from_agent: "po"
+  to_agent: "dev"
+  last_command: "validate-story-draft"
+  consumed: false
+  story_context:
+    story_id: "10.1-10.5"
+    story_path: "docs/stories/10.{1,2,3,4,5}.story.md"
+    story_status: "Ready"
+    current_task: "Wave 1 ready for implementation; FOC-01 and FOC-02 serialize migrations and the runner scaffold"
+    branch: "brunobuger/ui-studio"
+  decisions:
+    - "All five wave-1 stories GO: 10.1 9/10, 10.2 9/10, 10.3 8/10 (conditional on T-10.2.0 first), 10.4 9/10, 10.5 9/10"
+    - "10.4 AC-3: quarantine (quarantined_at) instead of soft-delete for null/unknown-CSI tests; no authored test is lost"
+    - "10.2 AC-9: secret references accepted only as the fill value argument in V1"
+    - "10.3 AC-6 split: 6a fake-adapter fixture tier now; 6b real Chromium verified in 10.12"
+    - "10.1: MSW reintroduced for Studio routes; contract lives at docs/specs/studio/ (ADR-001 O-3 closed)"
+  files_modified:
+    - "docs/stories/10.1.story.md"
+    - "docs/stories/10.2.story.md"
+    - "docs/stories/10.3.story.md"
+    - "docs/stories/10.4.story.md"
+    - "docs/stories/10.5.story.md"
+    - "docs/epics/EPIC-10-EXECUTION.yaml (FOC-02 added)"
+  blockers:
+    - "Stories and manifest change are uncommitted (user did not request a commit)"
+    - "Recommended start order: 10.4 (V12) and 10.2 T-10.2.0 first; then 10.1b and 10.3; 10.1a and 10.5 any time"
+  next_action: "@dev *develop per story (or wave-execute for wave 1) honoring FOC-01/FOC-02 ordering"
