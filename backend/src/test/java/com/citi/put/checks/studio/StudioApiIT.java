@@ -161,6 +161,35 @@ class StudioApiIT {
   }
 
   @Test
+  void variableValidationChecksTheDraftsReferencesAgainstItsDeclarations() throws Exception {
+    // Studio v1 WP6 (ADD-7): the route used to answer `valid: true` for every draft.
+    jdbc.update(
+        "UPDATE ui_tests SET steps = ?::jsonb, variables = ?::jsonb WHERE id = ?",
+        "[\"Go to \\\"<var BASE_URL>\\\"\", \"Type \\\"<var USRENAME>\\\" in the \\\"User\\\" field\"]",
+        "[{\"name\":\"BASE_URL\",\"kind\":\"plain\",\"value\":\"\"}]",
+        testId);
+
+    JsonNode refused =
+        objectMapper.readTree(
+            post("/api/v1/studio/tests/" + testId + "/validate-variables", "{}").getBody());
+    assertThat(refused.path("isValid").asBoolean()).isFalse();
+    assertThat(refused.path("valid").asBoolean()).isFalse();
+    assertThat(refused.path("undeclared").toString()).isEqualTo("[\"<var USRENAME>\"]");
+    assertThat(refused.path("unvalued").toString()).isEqualTo("[\"BASE_URL\"]");
+    assertThat(refused.path("missing").toString()).isEqualTo("[\"<var USRENAME>\",\"BASE_URL\"]");
+
+    ResponseEntity<String> supplied =
+        post(
+            "/api/v1/studio/tests/" + testId + "/validate-variables",
+            "{\"variables\":{\"BASE_URL\":\"https://example.test\"}}");
+    JsonNode body = objectMapper.readTree(supplied.getBody());
+    assertThat(body.path("unvalued").toString()).isEqualTo("[]");
+    assertThat(body.path("isValid").asBoolean()).isFalse();
+    // Presence only: a supplied value is never echoed back.
+    assertThat(supplied.getBody()).doesNotContain("example.test");
+  }
+
+  @Test
   void stepValidationStillAnswersForTheEditor() throws Exception {
     ResponseEntity<String> response =
         post("/api/v1/studio/validate-steps", "{\"steps\":[\"Go to the home page\"]}");

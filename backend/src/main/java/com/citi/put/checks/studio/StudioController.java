@@ -7,8 +7,10 @@ import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.validation.StepValidator;
+import com.citi.put.checks.studio.validation.VariableReferenceValidator;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -176,12 +178,40 @@ public class StudioController {
     return ResponseEntity.ok(toExecutionEnvelope(result));
   }
 
+  /**
+   * Checks the draft's {@code <var NAME>} / {@code <secret ID>} references against its declared
+   * variables, with optional caller-supplied plain values ({@code {"variables": {NAME: value}}}).
+   * Read authorization is the test read's. Supplied values are checked for presence only and are
+   * never echoed. {@code valid} is kept alongside {@code isValid} for existing callers.
+   */
   @PostMapping("/tests/{id}/validate-variables")
   public ResponseEntity<Map<String, Object>> validateVariables(
-      @PathVariable UUID id, Authentication auth) {
+      @PathVariable UUID id,
+      @RequestBody(required = false) Map<String, Object> body,
+      Authentication auth) {
     UITestDto test = studioService.findTestById(id, auth);
-    boolean hasVariables = !test.variables().isEmpty();
-    return ResponseEntity.ok(Map.of("valid", true, "hasVariables", hasVariables, "testId", id));
+    VariableReferenceValidator.Result result =
+        VariableReferenceValidator.validate(test.steps(), test.variables(), suppliedValues(body));
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("testId", id);
+    response.put("isValid", result.isValid());
+    response.put("valid", result.isValid());
+    response.put("hasVariables", !test.variables().isEmpty());
+    response.put("missing", result.missing());
+    response.put("undeclared", result.undeclared());
+    response.put("unvalued", result.unvalued());
+    response.put("conflicting", result.conflicting());
+    response.put("unused", result.unused());
+    return ResponseEntity.ok(response);
+  }
+
+  private static Map<String, ?> suppliedValues(Map<String, Object> body) {
+    if (body == null || !(body.get("variables") instanceof Map<?, ?> variables)) {
+      return Map.of();
+    }
+    Map<String, Object> supplied = new LinkedHashMap<>();
+    variables.forEach((name, value) -> supplied.put(String.valueOf(name), value));
+    return supplied;
   }
 
   @PostMapping("/validate-steps")
