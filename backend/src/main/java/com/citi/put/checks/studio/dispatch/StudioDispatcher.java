@@ -10,8 +10,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,9 @@ import org.springframework.transaction.support.TransactionTemplate;
  * <ol>
  *   <li><b>Claim.</b> One conditional {@code UPDATE} whose {@code WHERE} carries {@code state =
  *       'QUEUED'} and an expired-or-absent lease. Two dispatchers racing one row produce exactly
- *       one {@code 1}.
+ *       one {@code 1}. A pass selects and claims in that same statement ({@link
+ *       StudioDispatchLedgerStatements#claimQueued}, {@code FOR UPDATE SKIP LOCKED}), so two
+ *       dispatchers draining one backlog take different rows instead of racing for the same ones.
  *   <li><b>Recheck and resolve, immediately before the send and after the claim.</b> Authorization
  *       and reference availability are re-verified and reference values are resolved then and only
  *       then. Values are ephemeral: they live inside a try-with-resources and are erased on every
@@ -132,9 +136,26 @@ public class StudioDispatcher {
     if (!properties.enabledOrDefault()) {
       return closeUndispatchedWork();
     }
+    StudioExecutionProperties.Dispatcher budget = properties.dispatcherOrDefault();
+    int batchSize = budget.batchSizeOrDefault();
+    Set<UUID> attempted = new HashSet<>();
     int dispatched = 0;
-    for (UUID executionId : queuedBatch()) {
-      if (dispatch(executionId)) {
+    // One row per claim, immediately before its own dispatch: the lease clock of each row starts
+    // when that row is taken, exactly as it did when the pass claimed ids one by one. Claiming the
+    // whole batch up front would start every lease at the top of the pass, and a slow send ahead
+    // of a row could expire that row's lease before it was ever attempted.
+    for (int taken = 0; taken < batchSize; taken++) {
+      Instant now = clock.instant();
+      Instant leaseExpiresAt = now.plus(budget.leaseOrDefault());
+      List<UUID> claimed =
+          transactions.execute(
+              status -> statements.claimQueued(instanceId, leaseExpiresAt, now, 1, attempted));
+      if (claimed == null || claimed.isEmpty()) {
+        break;
+      }
+      UUID executionId = claimed.get(0);
+      attempted.add(executionId);
+      if (dispatchClaimed(executionId, now)) {
         dispatched++;
       }
     }
@@ -173,7 +194,7 @@ public class StudioDispatcher {
     return closed;
   }
 
-  /** Dispatches one execution. Returns true when a send left the process. */
+  /** Claims and dispatches one named execution. Returns true when a send left the process. */
   public boolean dispatch(UUID executionId) {
     Instant now = clock.instant();
     Instant leaseExpiresAt = now.plus(properties.dispatcherOrDefault().leaseOrDefault());
@@ -184,7 +205,14 @@ public class StudioDispatcher {
     if (claimed == null || claimed != 1) {
       return false;
     }
+    return dispatchClaimed(executionId, now);
+  }
 
+  /**
+   * Everything after the claim, for a row this dispatcher has just claimed at {@code now}. Returns
+   * true when a send left the process.
+   */
+  private boolean dispatchClaimed(UUID executionId, Instant now) {
     Map<String, Object> row = statements.find(executionId).orElse(null);
     if (row == null) {
       return false;
@@ -314,21 +342,6 @@ public class StudioDispatcher {
 
   private void close(UUID executionId, String errorCode, Instant now) {
     transactions.execute(status -> statements.closeWithError(executionId, errorCode, now));
-  }
-
-  private List<UUID> queuedBatch() {
-    Instant now = clock.instant();
-    return jdbc.queryForList(
-        """
-        SELECT execution_id FROM studio_dispatch_ledger
-         WHERE state = 'QUEUED'
-           AND (lease_expires_at IS NULL OR lease_expires_at <= ?)
-         ORDER BY execution_accepted_at
-         LIMIT ?
-        """,
-        UUID.class,
-        Timestamp.from(now),
-        properties.dispatcherOrDefault().batchSizeOrDefault());
   }
 
   /**

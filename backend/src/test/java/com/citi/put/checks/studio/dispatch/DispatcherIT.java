@@ -201,6 +201,154 @@ class DispatcherIT {
     assertThat(runner.sendCount()).isZero();
   }
 
+  // ── Studio v1 WP8: the pass selects and claims in one SKIP LOCKED statement ─
+
+  @Test
+  void aPassClaimSkipsARowAnotherTransactionHoldsInsteadOfWaitingForIt() throws Exception {
+    UUID younger = executeAnother("Skip-locked draft");
+    List<UUID> others = queuedExcept(List.of(executionId, younger));
+    CountDownLatch locked = new CountDownLatch(1);
+    CountDownLatch release = new CountDownLatch(1);
+
+    // Another transaction holds the older row's lock, as a concurrent claimer mid-statement would.
+    CompletableFuture<Void> holder =
+        CompletableFuture.runAsync(
+            () ->
+                transactions.executeWithoutResult(
+                    status -> {
+                      jdbc.queryForList(
+                          "SELECT execution_id FROM studio_dispatch_ledger"
+                              + " WHERE execution_id = ? FOR UPDATE",
+                          executionId);
+                      locked.countDown();
+                      awaitQuietly(release);
+                    }));
+    try {
+      assertThat(locked.await(30, TimeUnit.SECONDS)).isTrue();
+      Instant now = Instant.now();
+      List<UUID> claimed =
+          CompletableFuture.supplyAsync(
+                  () ->
+                      transactions.execute(
+                          status ->
+                              statements.claimQueued(
+                                  "dispatcher-skip", now.plusSeconds(60), now, 1, others)))
+              .get(10, TimeUnit.SECONDS);
+
+      assertThat(claimed)
+          .as("the locked oldest row is passed over, not waited on, and the next one is taken")
+          .containsExactly(younger);
+    } finally {
+      release.countDown();
+      holder.get(30, TimeUnit.SECONDS);
+    }
+    assertThat(ledger().get("state")).isEqualTo("QUEUED");
+    assertThat(ledger().get("lease_owner")).isNull();
+  }
+
+  @Test
+  void aPassClaimIsBoundedByItsLimitAndTakesTheOldestClaimableRowsFirst() {
+    UUID second = executeAnother("Bounded draft 2");
+    UUID third = executeAnother("Bounded draft 3");
+    List<UUID> others = queuedExcept(List.of(executionId, second, third));
+    Instant now = Instant.now();
+
+    List<UUID> claimed =
+        transactions.execute(
+            status ->
+                statements.claimQueued("dispatcher-bound", now.plusSeconds(60), now, 2, others));
+
+    assertThat(claimed)
+        .as("the returned count is the bound, oldest acceptance first")
+        .containsExactly(executionId, second);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT COUNT(*) FROM studio_dispatch_ledger WHERE lease_owner = ?",
+                Integer.class,
+                "dispatcher-bound"))
+        .as("and the statement moved exactly the rows it returned")
+        .isEqualTo(2);
+    assertThat(ledger().get("state")).isEqualTo("CLAIMED");
+    assertThat(statements.find(third).orElseThrow().get("state")).isEqualTo("QUEUED");
+  }
+
+  @Test
+  void aPassNeverClaimsALiveLeaseOrARowItWasToldToExclude() {
+    List<UUID> others = queuedExcept(List.of(executionId));
+    Instant now = Instant.now();
+    jdbc.update(
+        "UPDATE studio_dispatch_ledger SET lease_expires_at = ? WHERE execution_id = ?",
+        Timestamp.from(now.plusSeconds(600)),
+        executionId);
+
+    assertThat(statements.claimQueued("dispatcher-a", now.plusSeconds(60), now, 5, others))
+        .as("a live lease is not claimable, exactly as for the single-row claim")
+        .isEmpty();
+
+    jdbc.update(
+        "UPDATE studio_dispatch_ledger SET lease_expires_at = ? WHERE execution_id = ?",
+        Timestamp.from(now.minusSeconds(1)),
+        executionId);
+    List<UUID> withSelf = new java.util.ArrayList<>(others);
+    withSelf.add(executionId);
+    assertThat(statements.claimQueued("dispatcher-a", now.plusSeconds(60), now, 5, withSelf))
+        .as("an excluded row is not claimed")
+        .isEmpty();
+    assertThat(statements.claimQueued("dispatcher-a", now.plusSeconds(60), now, 5, others))
+        .containsExactly(executionId);
+    assertThat(ledger().get("lease_owner")).isEqualTo("dispatcher-a");
+  }
+
+  @Test
+  void aRowA429ReturnedToTheQueueIsNotReclaimedWithinTheSamePass() {
+    runner.willAnswer(DispatchOutcome.refusedRetryable(Duration.ofSeconds(1)));
+
+    dispatcher.dispatchOnce();
+
+    assertThat(sendsFor(executionId))
+        .as("one send per pass, as when the pass worked from a batch read once at its start")
+        .isEqualTo(1);
+    assertThat(ledger().get("state")).isEqualTo("QUEUED");
+    assertThat(ledger().get("attempt_id")).isNull();
+  }
+
+  @Test
+  void twoDispatchersDrainingOneBacklogClaimAndDispatchEachRowExactlyOnce() throws Exception {
+    List<UUID> backlog = new java.util.ArrayList<>(List.of(executionId));
+    for (int i = 0; i < 7; i++) {
+      backlog.add(executeAnother("Backlog draft " + i));
+    }
+    CountingStatements counting = new CountingStatements(jdbc);
+    SlowRecordingClient client = new SlowRecordingClient();
+    StudioDispatcher first = secondInstance(counting, client, "dispatcher-wp8-a");
+    StudioDispatcher second = secondInstance(counting, client, "dispatcher-wp8-b");
+    CountDownLatch start = new CountDownLatch(1);
+
+    CompletableFuture<Void> a = CompletableFuture.runAsync(() -> drain(first, start, backlog));
+    CompletableFuture<Void> b = CompletableFuture.runAsync(() -> drain(second, start, backlog));
+    start.countDown();
+    CompletableFuture.allOf(a, b).get(120, TimeUnit.SECONDS);
+
+    assertThat(counting.claimMisses())
+        .as("no claim statement lost a race: the pass never selects a row it then fails to claim")
+        .isZero();
+    for (UUID execution : backlog) {
+      assertThat(client.sendsFor(execution))
+          .as("execution %s left the process exactly once", execution)
+          .isEqualTo(1);
+      assertThat(counting.claimsOf(execution))
+          .as("and was claimed exactly once across both dispatchers", execution)
+          .isEqualTo(1);
+      Map<String, Object> row = statements.find(execution).orElseThrow();
+      assertThat(row.get("state")).isEqualTo("DISPATCHING");
+      assertThat(row.get("lease_owner")).isIn("dispatcher-wp8-a", "dispatcher-wp8-b");
+    }
+    assertThat(counting.claimedBy("dispatcher-wp8-a"))
+        .as("both dispatchers really drained the backlog concurrently")
+        .isPositive();
+    assertThat(counting.claimedBy("dispatcher-wp8-b")).isPositive();
+  }
+
   // ── AC-14: the attempt is committed before the send ──────────────────────
 
   @Test
@@ -453,6 +601,154 @@ class DispatcherIT {
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────
+
+  @Autowired private com.citi.put.checks.studio.UITestRevisionRepository revisionRepository;
+  @Autowired private DispatchAuthorization dispatchAuthorization;
+  @Autowired private StudioReferenceResolver referenceResolver;
+  @Autowired private com.citi.put.checks.studio.StudioExecutionProperties executionProperties;
+  @Autowired private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
+  /** A second, independent dispatcher: its own lease owner, sharing only the database. */
+  private StudioDispatcher secondInstance(
+      StudioDispatchLedgerStatements ledgerStatements,
+      RunnerDispatchClient client,
+      String instanceId) {
+    return new StudioDispatcher(
+        ledgerStatements,
+        revisionRepository,
+        dispatchAuthorization,
+        referenceResolver,
+        client,
+        executionProperties,
+        objectMapper,
+        jdbc,
+        transactions,
+        instanceId,
+        java.time.Clock.systemUTC());
+  }
+
+  /** Runs passes until none of {@code backlog} is still queued. */
+  private void drain(StudioDispatcher dispatcher, CountDownLatch start, List<UUID> backlog) {
+    awaitQuietly(start);
+    for (int pass = 0; pass < 50; pass++) {
+      dispatcher.dispatchOnce();
+      Integer queued =
+          jdbc.queryForObject(
+              "SELECT COUNT(*) FROM studio_dispatch_ledger"
+                  + " WHERE state = 'QUEUED' AND execution_id = ANY (CAST(? AS uuid[]))",
+              Integer.class,
+              "{" + String.join(",", backlog.stream().map(UUID::toString).toList()) + "}");
+      if (queued != null && queued == 0) {
+        return;
+      }
+    }
+    throw new IllegalStateException("the backlog was not drained in 50 passes");
+  }
+
+  private UUID executeAnother(String name) {
+    UUID another =
+        fixtures.seedRunnableTest(name, CSI_ID, OWNER, List.of("Go to the home page")).testId();
+    return studioService.executeTest(another, owner, null).executionId();
+  }
+
+  /**
+   * Queued rows other test classes left behind. The claim is deployment-global by design, so a test
+   * that asserts which row a claim takes excludes these rather than depending on class order.
+   */
+  private List<UUID> queuedExcept(List<UUID> mine) {
+    return jdbc
+        .queryForList(
+            "SELECT execution_id FROM studio_dispatch_ledger WHERE state = 'QUEUED'", UUID.class)
+        .stream()
+        .filter(id -> !mine.contains(id))
+        .toList();
+  }
+
+  private static void awaitQuietly(CountDownLatch latch) {
+    try {
+      if (!latch.await(30, TimeUnit.SECONDS)) {
+        throw new IllegalStateException("latch was never released");
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new IllegalStateException(e);
+    }
+  }
+
+  /** Counts what each claim statement returned, per owner and per execution. */
+  static final class CountingStatements extends StudioDispatchLedgerStatements {
+
+    private final Map<UUID, java.util.concurrent.atomic.AtomicInteger> perExecution =
+        new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, java.util.concurrent.atomic.AtomicInteger> perOwner =
+        new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.concurrent.atomic.AtomicInteger misses =
+        new java.util.concurrent.atomic.AtomicInteger();
+
+    CountingStatements(JdbcTemplate jdbc) {
+      super(jdbc);
+    }
+
+    @Override
+    public List<UUID> claimQueued(
+        String owner,
+        Instant leaseExpiresAt,
+        Instant now,
+        int limit,
+        java.util.Collection<UUID> excluded) {
+      List<UUID> claimed = super.claimQueued(owner, leaseExpiresAt, now, limit, excluded);
+      claimed.forEach(
+          id ->
+              perExecution
+                  .computeIfAbsent(id, k -> new java.util.concurrent.atomic.AtomicInteger())
+                  .incrementAndGet());
+      perOwner
+          .computeIfAbsent(owner, k -> new java.util.concurrent.atomic.AtomicInteger())
+          .addAndGet(claimed.size());
+      return claimed;
+    }
+
+    /** A single-row claim that updated nothing is the round trip WP8 exists to remove. */
+    @Override
+    public int claim(UUID executionId, String owner, Instant leaseExpiresAt, Instant now) {
+      int claimed = super.claim(executionId, owner, leaseExpiresAt, now);
+      if (claimed == 0) {
+        misses.incrementAndGet();
+      }
+      return claimed;
+    }
+
+    int claimsOf(UUID executionId) {
+      java.util.concurrent.atomic.AtomicInteger count = perExecution.get(executionId);
+      return count == null ? 0 : count.get();
+    }
+
+    int claimedBy(String owner) {
+      java.util.concurrent.atomic.AtomicInteger count = perOwner.get(owner);
+      return count == null ? 0 : count.get();
+    }
+
+    int claimMisses() {
+      return misses.get();
+    }
+  }
+
+  /** Accepts every job, slowly enough that two dispatchers' passes genuinely overlap. */
+  static final class SlowRecordingClient implements RunnerDispatchClient {
+
+    private final List<RunJob> sent = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    @Override
+    public DispatchOutcome send(RunJob job) {
+      sent.add(job);
+      sleep(100);
+      return DispatchOutcome.accepted();
+    }
+
+    long sendsFor(UUID executionId) {
+      return sent.stream().filter(job -> executionId.equals(job.executionId())).count();
+    }
+  }
 
   /** How many sends left the process for one execution — never the deployment-global count. */
   private long sendsFor(UUID execution) {
