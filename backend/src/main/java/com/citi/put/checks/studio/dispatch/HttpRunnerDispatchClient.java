@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -59,6 +60,7 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
   private final ObjectMapper objectMapper;
   private final StudioExecutionProperties properties;
   private final StudioRunnerProperties runner;
+  private StudioDispatchMetrics metrics;
 
   public HttpRunnerDispatchClient(
       ObjectMapper objectMapper,
@@ -72,6 +74,12 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
             .followRedirects(HttpClient.Redirect.NEVER)
             .connectTimeout(properties.admissionTimeoutOrDefault())
             .build();
+  }
+
+  /** WP7: counts runner {@code 429}s. Absent off the worker profile, where nothing dispatches. */
+  @Autowired(required = false)
+  void setMetrics(StudioDispatchMetrics metrics) {
+    this.metrics = metrics;
   }
 
   /** Visible so that a test can assert the redirect policy rather than trust this Javadoc. */
@@ -113,6 +121,9 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       return DispatchOutcome.ambiguous("interrupted");
+    }
+    if (response.statusCode() == 429 && metrics != null) {
+      metrics.recordRefusal();
     }
     return classify(
         response.statusCode(), response.headers().firstValue("Retry-After").orElse(null));

@@ -356,10 +356,46 @@ studioRunner:
     tag: ""  # defaults to Chart.appVersion
     pullPolicy: IfNotPresent
 
-  # One pod, one browser (§5.2: POOL_SIZE starts at 1; measure before increasing). No HPA: the
-  # runner refuses work with 429/503 and stays ready, so CPU-based scaling would fight the
-  # capacity gate rather than help it.
-  replicaCount: 1
+  # One pod, one browser (§5.2: POOL_SIZE starts at 1; measure before increasing). Scale PODS, not
+  # the pool. No CPU-based HPA, ever: the runner refuses work with 429/503 and stays ready, so
+  # CPU-based scaling would fight the capacity gate rather than help it.
+  #
+  # Studio v1 decision D3: a static two pods for the pilot. Ignored while `autoscaling.enabled` is
+  # true, when the ScaledObject owns the replica count and the Deployment renders none.
+  replicaCount: 2
+
+  # KEDA scaling on the dispatch backlog (Studio v1 WP7, decision D3). **Off by default**, because
+  # whether KEDA is installed in the target cluster is not known. When on, the chart renders a
+  # `keda.sh/v1alpha1` ScaledObject and nothing else: KEDA creates the HPA itself, driven by the
+  # external metric below, never by CPU.
+  autoscaling:
+    enabled: false
+    # Never 0. With no runner pod a dispatch is a connection failure, which the dispatcher treats
+    # as ambiguous and leaves to the reapers, so scale-to-zero would turn idle into slow failure.
+    minReplicaCount: 2
+    maxReplicaCount: 4
+    pollingIntervalSeconds: 15
+    # Must be >= the runner's run deadline (`runnerEnv.STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS`); the
+    # render fails otherwise. Rendered twice from this one key: as KEDA's `cooldownPeriod` (which
+    # KEDA applies only to scale-to-zero) and as the HPA scale-down stabilization window (which is
+    # what delays a scale-in while minReplicaCount > 0). A pod that is scaled in mid-run still gets
+    # SIGTERM and drains within terminationGracePeriodSeconds.
+    cooldownPeriodSeconds: 300
+    # Target backlog per pod: about one queued run per runner pod.
+    targetBacklogPerPod: "1"
+    prometheus:
+      # Required when enabled; no default, because the cluster's Prometheus address is not known.
+      serverAddress: ""
+      # The worker exports the backlog, and every worker replica exports the same global count,
+      # so the replicas are collapsed with `max` per state before the states are summed. If the
+      # Prometheus is shared between releases, add the scrape config's namespace/job label here.
+      query: 'sum(max by (state) (studio_dispatch_backlog{state=~"QUEUED|CLAIMED"}))'
+
+  # Voluntary evictions (node drains) take at most one runner pod at a time. `maxUnavailable`
+  # rather than `minAvailable`, so that a single-replica override cannot block a drain outright.
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: 1
 
   service:
     type: ClusterIP  # never an Ingress: §8.4's internal routes are not publicly exposed

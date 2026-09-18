@@ -26,6 +26,9 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    // The Prometheus scrape format for /actuator/prometheus. The worker exposes it on its
+    // cluster-internal port only; the Studio runner autoscaler reads studio_dispatch_backlog from it.
+    implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")

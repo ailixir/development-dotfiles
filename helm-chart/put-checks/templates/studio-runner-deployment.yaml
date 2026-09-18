@@ -9,10 +9,14 @@ metadata:
     {{- include "put-checks.labels" . | nindent 4 }}
     {{- include "put-checks.studioRunner.selectorLabels" . | nindent 4 }}
 spec:
-  # No HorizontalPodAutoscaler anywhere for this component: a saturated runner answers 429/503 and
-  # stays ready, so CPU-driven scaling would fight the capacity gate instead of relieving it
-  # (§5.2, §8.4).
+  # No CPU-based HorizontalPodAutoscaler anywhere for this component: a saturated runner answers
+  # 429/503 and stays ready, so CPU-driven scaling would fight the capacity gate instead of
+  # relieving it (§5.2, §8.4). The only scaler is the backlog-driven ScaledObject
+  # (studio-runner-scaledobject.yaml), and while it is on it owns the count, so none renders here:
+  # a rendered count would be reapplied by every upgrade and fight the scaler.
+  {{- if not .Values.studioRunner.autoscaling.enabled }}
   replicas: {{ .Values.studioRunner.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "put-checks.studioRunner.selectorLabels" . | nindent 6 }}

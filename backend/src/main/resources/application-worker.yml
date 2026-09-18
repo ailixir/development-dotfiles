@@ -22,6 +22,8 @@ studio:
     dispatcher:
       enabled: true
 
+# /actuator/prometheus is exposed here and only here: the worker has no Ingress, and it is where the
+# Studio runner scaling signal (studio_dispatch_backlog, studio_dispatch_refusals_total) lives.
 management:
   server:
     port: 8081
