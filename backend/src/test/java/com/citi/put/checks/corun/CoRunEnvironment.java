@@ -116,13 +116,11 @@ final class CoRunEnvironment {
   /**
    * The runner's object store root: a real directory on this machine, not a stub.
    *
-   * <p><b>Only the runner writes here, and nothing in this harness reads it yet.</b> The API's
-   * injected {@code VideoObjectStore} is still {@code FakeVideoObjectStore}, so the media route's
-   * ranged read is not among this harness's legs. A filesystem-backed reader on the API side is a
-   * small piece of work, but it is only worth having once a dispatch is admitted and a browser
-   * actually records something, and neither has happened yet. The directory is configured anyway
-   * because the runner's evidence phase is part of the path a dispatched run takes, and pointing it
-   * at a real location is what makes that phase behave the way a deployment's would.
+   * <p><b>Only the runner writes here; the API never reads it.</b> The API's video store provider
+   * is {@code none} under this harness, so the media route's ranged read is not among its legs. The
+   * cancel legs (Studio v1 WP12) do read it, from the harness side: a cancelled run whose {@code
+   * FINAL} says {@code STORED} must have left a non-empty object at its video key here, which is
+   * how "the evidence on the row is honest" is checked without the API's reader.
    */
   Path objectStoreDir() {
     return workDir.resolve("objects");

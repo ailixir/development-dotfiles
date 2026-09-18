@@ -199,7 +199,15 @@ class CancelIT {
     runningReaper.reapOnce();
     assertThat(snapshot().status()).as("still inside the margin").isEqualTo("RUNNING");
 
+    // Studio v1 WP16: the pre-WP16 margin (the start deadline) is well inside a live runner's
+    // cancel path, so a cancel that old must still be the runner's to finish.
     backdateCancel(properties.startDeadlineOrDefault().plusSeconds(1).toSeconds());
+    runningReaper.reapOnce();
+    assertThat(snapshot().status())
+        .as("a cancel older than the start deadline but inside the cancel margin is not reaped")
+        .isEqualTo("RUNNING");
+
+    backdateCancel(runningReaper.cancelMargin().plusSeconds(1).toSeconds());
     runningReaper.reapOnce();
 
     assertThat(snapshot().status()).isEqualTo("ERROR");
