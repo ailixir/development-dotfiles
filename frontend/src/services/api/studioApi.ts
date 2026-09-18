@@ -93,7 +93,18 @@ export const studioApi = {
   validateVariables: async (
     id: string,
     variables: Record<string, unknown>,
-  ): Promise<{ valid: boolean; hasVariables: boolean; testId: string }> =>
+  ): Promise<{
+    testId: string;
+    isValid: boolean;
+    valid: boolean;
+    hasVariables: boolean;
+    /** `undeclared` then `unvalued`; `unused` is informational only. */
+    missing: string[];
+    undeclared: string[];
+    unvalued: string[];
+    conflicting: string[];
+    unused: string[];
+  }> =>
     apiClient.post(`/studio/tests/${id}/validate-variables`, { variables }),
 };
 

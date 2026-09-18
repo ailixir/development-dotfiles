@@ -2,7 +2,8 @@
 -- Dev-only sample data for development and presentations.
 -- Loaded exclusively by the "dev" Spring profile via spring.flyway.locations.
 --
--- Idempotency: all INSERTs use ON CONFLICT DO NOTHING.
+-- Idempotency: INSERTs use ON CONFLICT DO NOTHING, except ui_test_executions
+--              (partition key in the PK) which uses NOT EXISTS on the id.
 -- Trigger: execution_results INSERT fires update_check_status_from_execution,
 --          propagating the final status to each check automatically.
 --
@@ -327,6 +328,9 @@ ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════
 -- 11. UI Tests (3 rows)
+--     Chromium is the only engine V1 executes (V14 ck_ui_tests_browser).
+--     `schedule` is NULL: no scheduler path executes a UI test, so a
+--     stored schedule would describe a capability that does not exist.
 -- ═══════════════════════════════════════════════════════════════
 
 INSERT INTO ui_tests (id, name, csi_id, description, environment, browser, viewport_width, viewport_height, timeout_seconds, wait_strategy, steps, variables, created_by, status, schedule, created_at, updated_at) VALUES
@@ -336,8 +340,7 @@ INSERT INTO ui_tests (id, name, csi_id, description, environment, browser, viewp
    'chromium', 1920, 1080, 30, 'networkidle',
    '[{"step":1,"action":"navigate","target":"https://put.internal.citi.com/login"},{"step":2,"action":"type","target":"#username","value":"{USERNAME}"},{"step":3,"action":"type","target":"#password","value":"{PASSWORD}"},{"step":4,"action":"click","target":"button[type=submit]"},{"step":5,"action":"assert_url_contains","value":"dashboard"}]'::jsonb,
    '[{"name":"USERNAME","value":"testuser"},{"name":"PASSWORD","value":"***"}]'::jsonb,
-   'bruno.buger@citi.com', 'ACTIVE',
-   '{"frequency":"daily","time":"06:00","timezone":"America/New_York"}'::jsonb,
+   'bruno.buger@citi.com', 'ACTIVE', NULL,
    NOW() - INTERVAL '30 days', NOW()),
 
   ('b8c9d0e1-0001-4000-8000-000000000002',
@@ -346,61 +349,83 @@ INSERT INTO ui_tests (id, name, csi_id, description, environment, browser, viewp
    'chromium', 1920, 1080, 45, 'networkidle',
    '[{"step":1,"action":"navigate","target":"https://devportal.internal.citi.com/dashboard"},{"step":2,"action":"wait_for","target":".metrics-widget","timeout":10000},{"step":3,"action":"assert_visible","target":".widget-count"},{"step":4,"action":"screenshot","target":"dashboard-loaded"}]'::jsonb,
    '[]'::jsonb,
-   'lisa.wang@citi.com', 'ACTIVE',
-   '{"frequency":"daily","time":"07:00","timezone":"America/New_York"}'::jsonb,
+   'lisa.wang@citi.com', 'ACTIVE', NULL,
    NOW() - INTERVAL '25 days', NOW()),
 
   ('b8c9d0e1-0001-4000-8000-000000000003',
    'API Health Check UI', '285614',
    'Navigates to API status page and verifies all endpoints listed', 'Production',
-   'firefox', 1920, 1080, 30, 'networkidle',
+   'chromium', 1920, 1080, 30, 'networkidle',
    '[{"step":1,"action":"navigate","target":"https://tse.internal.citi.com/status"},{"step":2,"action":"wait_for","target":"table.endpoints"},{"step":3,"action":"assert_count","target":"table.endpoints tbody tr","min":5},{"step":4,"action":"screenshot","target":"api-status-page"}]'::jsonb,
    '[]'::jsonb,
    'daniel.estevez@citi.com', 'PAUSED', NULL,
    NOW() - INTERVAL '20 days', NOW())
 ON CONFLICT (id) DO NOTHING;
 
+-- Databases seeded by an earlier revision of this file hold a schedule nothing executes.
+UPDATE ui_tests SET schedule = NULL
+ WHERE id IN ('b8c9d0e1-0001-4000-8000-000000000001',
+              'b8c9d0e1-0001-4000-8000-000000000002',
+              'b8c9d0e1-0001-4000-8000-000000000003')
+   AND schedule IS NOT NULL;
+
 -- ═══════════════════════════════════════════════════════════════
 -- 12. UI Test Executions (6 rows — 2 per test)
+--     No video or screenshot was ever recorded for these runs, so
+--     none is claimed: video_status UNAVAILABLE, video_key/video_url
+--     and screenshot_urls NULL. Each row carries its test's CSI and a
+--     DONE ledger locator, without which V14 quarantines it from
+--     every user-facing query.
+--     ui_test_executions is keyed by (id, started_at) and started_at
+--     is NOW()-relative, so ON CONFLICT cannot make this idempotent;
+--     NOT EXISTS on the id does.
 -- ═══════════════════════════════════════════════════════════════
 
-INSERT INTO ui_test_executions (id, ui_test_id, status, started_at, ended_at, duration_ms, video_url, screenshot_urls, logs) VALUES
-  ('c9d0e1f2-0001-4000-8000-000000000001', 'b8c9d0e1-0001-4000-8000-000000000001',
-   'PASSED', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day' + INTERVAL '18 seconds', 18200,
-   'https://storage.internal.citi.com/videos/login-flow-2026-04-26.webm',
-   ARRAY['https://storage.internal.citi.com/screenshots/login-flow-step5.png'],
-   'Step 1: Navigate OK (320ms) | Step 2: Type OK | Step 3: Type OK | Step 4: Click OK | Step 5: Assert URL contains "dashboard" — PASSED'),
+INSERT INTO ui_test_executions (id, ui_test_id, csi_id, status, started_at, ended_at, duration_ms, logs, video_status)
+SELECT v.id, v.ui_test_id, t.csi_id, v.status, v.started_at, v.started_at + v.duration_ms * INTERVAL '1 millisecond', v.duration_ms,
+       jsonb_build_array(jsonb_build_object(
+         'at', to_char(v.started_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+         'level', CASE WHEN v.status = 'PASSED' THEN 'INFO' ELSE 'ERROR' END,
+         'message', v.message,
+         'stepIndex', NULL)),
+       'UNAVAILABLE'
+  FROM (VALUES
+    ('c9d0e1f2-0001-4000-8000-000000000001'::uuid, 'b8c9d0e1-0001-4000-8000-000000000001'::uuid,
+     'PASSED', NOW() - INTERVAL '1 day', 18200,
+     'Step 1: Navigate OK (320ms) | Step 2: Type OK | Step 3: Type OK | Step 4: Click OK | Step 5: Assert URL contains "dashboard" — PASSED'),
+    ('c9d0e1f2-0001-4000-8000-000000000002'::uuid, 'b8c9d0e1-0001-4000-8000-000000000001'::uuid,
+     'PASSED', NOW() - INTERVAL '2 days', 17400,
+     'Step 1: Navigate OK (280ms) | Step 2: Type OK | Step 3: Type OK | Step 4: Click OK | Step 5: Assert URL — PASSED'),
+    ('c9d0e1f2-0001-4000-8000-000000000003'::uuid, 'b8c9d0e1-0001-4000-8000-000000000002'::uuid,
+     'PASSED', NOW() - INTERVAL '1 day', 8100,
+     'Step 1: Navigate OK | Step 2: Wait for .metrics-widget OK (2.1s) | Step 3: Assert visible OK | Step 4: Screenshot OK'),
+    ('c9d0e1f2-0001-4000-8000-000000000004'::uuid, 'b8c9d0e1-0001-4000-8000-000000000002'::uuid,
+     'FAILED', NOW() - INTERVAL '3 days', 45000,
+     'Step 1: Navigate OK | Step 2: Wait for .metrics-widget TIMEOUT after 10000ms — FAILED'),
+    ('c9d0e1f2-0001-4000-8000-000000000005'::uuid, 'b8c9d0e1-0001-4000-8000-000000000003'::uuid,
+     'PASSED', NOW() - INTERVAL '5 days', 12300,
+     'Step 1: Navigate OK | Step 2: Wait for table OK (1.8s) | Step 3: Assert count >= 5 OK (found 8) | Step 4: Screenshot OK'),
+    ('c9d0e1f2-0001-4000-8000-000000000006'::uuid, 'b8c9d0e1-0001-4000-8000-000000000003'::uuid,
+     'FAILED', NOW() - INTERVAL '8 days', 31000,
+     'Step 1: Navigate OK | Step 2: Wait for table TIMEOUT after 30000ms — FAILED')
+  ) AS v(id, ui_test_id, status, started_at, duration_ms, message)
+  JOIN ui_tests t ON t.id = v.ui_test_id
+ WHERE NOT EXISTS (SELECT 1 FROM ui_test_executions e WHERE e.id = v.id);
 
-  ('c9d0e1f2-0001-4000-8000-000000000002', 'b8c9d0e1-0001-4000-8000-000000000001',
-   'PASSED', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days' + INTERVAL '17 seconds', 17400,
-   'https://storage.internal.citi.com/videos/login-flow-2026-04-25.webm',
-   ARRAY['https://storage.internal.citi.com/screenshots/login-flow-step5-prev.png'],
-   'Step 1: Navigate OK (280ms) | Step 2: Type OK | Step 3: Type OK | Step 4: Click OK | Step 5: Assert URL — PASSED'),
+-- Databases seeded by an earlier revision of this file hold object-store URLs that never existed.
+UPDATE ui_test_executions
+   SET video_url = NULL, screenshot_urls = NULL, video_key = NULL, video_status = 'UNAVAILABLE'
+ WHERE id::text LIKE 'c9d0e1f2-0001-4000-8000-%'
+   AND (video_url IS NOT NULL OR screenshot_urls IS NOT NULL OR video_key IS NOT NULL
+        OR video_status IS DISTINCT FROM 'UNAVAILABLE');
 
-  ('c9d0e1f2-0001-4000-8000-000000000003', 'b8c9d0e1-0001-4000-8000-000000000002',
-   'PASSED', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day' + INTERVAL '8 seconds', 8100,
-   'https://storage.internal.citi.com/videos/dashboard-load-2026-04-26.webm',
-   ARRAY['https://storage.internal.citi.com/screenshots/dashboard-loaded.png'],
-   'Step 1: Navigate OK | Step 2: Wait for .metrics-widget OK (2.1s) | Step 3: Assert visible OK | Step 4: Screenshot OK'),
-
-  ('c9d0e1f2-0001-4000-8000-000000000004', 'b8c9d0e1-0001-4000-8000-000000000002',
-   'FAILED', NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days' + INTERVAL '45 seconds', 45000,
-   'https://storage.internal.citi.com/videos/dashboard-load-2026-04-24.webm',
-   ARRAY['https://storage.internal.citi.com/screenshots/dashboard-timeout.png'],
-   'Step 1: Navigate OK | Step 2: Wait for .metrics-widget TIMEOUT after 10000ms — FAILED'),
-
-  ('c9d0e1f2-0001-4000-8000-000000000005', 'b8c9d0e1-0001-4000-8000-000000000003',
-   'PASSED', NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days' + INTERVAL '12 seconds', 12300,
-   'https://storage.internal.citi.com/videos/api-health-2026-04-22.webm',
-   ARRAY['https://storage.internal.citi.com/screenshots/api-status-page.png'],
-   'Step 1: Navigate OK | Step 2: Wait for table OK (1.8s) | Step 3: Assert count >= 5 OK (found 8) | Step 4: Screenshot OK'),
-
-  ('c9d0e1f2-0001-4000-8000-000000000006', 'b8c9d0e1-0001-4000-8000-000000000003',
-   'FAILED', NOW() - INTERVAL '8 days', NOW() - INTERVAL '8 days' + INTERVAL '31 seconds', 31000,
-   'https://storage.internal.citi.com/videos/api-health-2026-04-19.webm',
-   ARRAY['https://storage.internal.citi.com/screenshots/api-status-error.png'],
-   'Step 1: Navigate OK | Step 2: Wait for table TIMEOUT after 30000ms — FAILED')
-ON CONFLICT DO NOTHING;
+-- Partition locators (V14 §7): every single-execution read resolves through the ledger first.
+INSERT INTO studio_dispatch_ledger (execution_id, execution_accepted_at, test_id, csi_id, state, created_at, updated_at)
+SELECT e.id, e.started_at, e.ui_test_id, e.csi_id, 'DONE', e.started_at, e.started_at
+  FROM ui_test_executions e
+ WHERE e.id::text LIKE 'c9d0e1f2-0001-4000-8000-%'
+   AND e.csi_id IS NOT NULL
+ON CONFLICT (execution_id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════
 -- 13. Execution Results (~450 rows via generate_series)
