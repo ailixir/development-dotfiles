@@ -48,8 +48,12 @@ final class RunnerProcess implements AutoCloseable {
   /** How long a stopping runner is given to exit on its own before it is killed. */
   private static final Duration STOP_GRACE = Duration.ofSeconds(10);
 
-  /** Lines of the runner's own output kept in memory for failure messages. */
-  private static final int LOG_TAIL = 60;
+  /**
+   * Lines of the runner's own output kept in memory. Large enough that {@link #logSince(long)}
+   * holds a whole leg: the cancel legs assert on specific lines, and a tail that had already
+   * rotated them out would turn a present line into a missing one.
+   */
+  private static final int LOG_TAIL = 2_000;
 
   private final Process process;
   private final CoRunEnvironment environment;
@@ -96,6 +100,10 @@ final class RunnerProcess implements AutoCloseable {
     env.put("STUDIO_RUNNER_CALLBACK_BASE_URL", apiBaseUrl);
     env.put("STUDIO_RUNNER_SCRATCH_DIR", environment.scratchDir().toString());
     env.put("STUDIO_RUNNER_OBJECT_STORE_DIR", environment.objectStoreDir().toString());
+    // The ceiling a job's step timeout is clamped to (default 30 s). Raised so the cancel legs'
+    // stalling test, which asks for 120 s, keeps its browser mid-step until the cancel ends it. A
+    // job asking for less still gets what it asked for, so every other leg is unchanged.
+    env.put("STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS", "120000");
 
     Process started;
     try {
@@ -120,6 +128,63 @@ final class RunnerProcess implements AutoCloseable {
 
   boolean alive() {
     return process.isAlive();
+  }
+
+  /**
+   * The runner's descendants right now: the Node child it forked for a run, the browser and its
+   * helpers, and the recorder (Studio v1 WP12).
+   *
+   * <p><b>A snapshot, never a teardown walk.</b> Playwright starts Chromium and {@code ffmpeg} in
+   * process groups of their own, and once the fork is dead an orphaned browser is re-parented and
+   * disappears from any walk that starts here. A leg therefore snapshots these while the run is
+   * alive and later rechecks each pid on its own with {@link #isAlive(long)}; a post-hoc walk would
+   * report "nothing left" precisely when something was.
+   */
+  List<Descendant> descendants() {
+    return process
+        .descendants()
+        .map(handle -> new Descendant(handle.pid(), handle.info().command().orElse("?")))
+        .toList();
+  }
+
+  /** Whether a previously observed pid is still a live process. */
+  static boolean isAlive(long pid) {
+    return ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false);
+  }
+
+  /**
+   * Kills each pid still alive, and returns the ones that were.
+   *
+   * <p>For a failed leg's teardown: the pids come from a snapshot, so this reaches an orphaned
+   * browser that {@link #close()}'s descendant walk can no longer see.
+   */
+  static List<Long> destroyForcibly(java.util.Collection<Long> pids) {
+    List<Long> survivors = new java.util.ArrayList<>();
+    for (long pid : pids) {
+      ProcessHandle.of(pid)
+          .filter(ProcessHandle::isAlive)
+          .ifPresent(
+              handle -> {
+                survivors.add(pid);
+                handle.destroyForcibly();
+              });
+    }
+    return survivors;
+  }
+
+  /** One descendant process: its pid and the executable it was started from. */
+  record Descendant(long pid, String command) {
+
+    /** Chromium, a Chromium helper or the headless shell. */
+    boolean isBrowser() {
+      String name = command.toLowerCase(java.util.Locale.ROOT);
+      return name.contains("chrom");
+    }
+
+    @Override
+    public String toString() {
+      return pid + " " + command.substring(command.lastIndexOf('/') + 1);
+    }
   }
 
   /** The tail of the runner's own output, newest last, for failure messages. */
