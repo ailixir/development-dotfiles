@@ -14,7 +14,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Runs the dispatcher, and only on the worker profile (AC-12, §5.4).
+ * Runs the dispatcher on the worker profile (AC-12, §5.4), and in the single-process {@code local}
+ * developer profile unless {@code api} is also active (Studio v1 WP2).
+ *
+ * <p>{@code local} is never deployed: the chart renders {@code api,<env>} and {@code worker,<env>}.
+ * A developer's {@code bootRun} is both halves in one JVM, and without this it would accept a run
+ * that nothing ever dispatched. {@code local & !api} keeps the {@code local,api} combination the
+ * profile tests use as faithful to an API pod.
  *
  * <p>The dispatcher itself is an ordinary bean so that it can be driven directly by a test; what is
  * worker-only is the <em>schedule</em>. An API-profile context therefore has no {@code
@@ -25,7 +31,7 @@ import org.springframework.stereotype.Component;
  * check executor (AC-38): a saturated dispatcher can consume its own threads and nothing else's.
  */
 @Component
-@Profile("worker")
+@Profile({"worker", "local & !api"})
 @ConditionalOnProperty(
     prefix = "studio.execution.dispatcher",
     name = "enabled",

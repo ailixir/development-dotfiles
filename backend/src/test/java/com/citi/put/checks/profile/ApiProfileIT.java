@@ -9,6 +9,8 @@ import com.citi.put.checks.scheduling.CronDispatcher;
 import com.citi.put.checks.scheduling.partitioning.PartitionScheduler;
 import com.citi.put.checks.scheduling.partitioning.RetentionPruner;
 import com.citi.put.checks.studio.dispatch.StudioDispatchMetrics;
+import com.citi.put.checks.studio.dispatch.StudioDispatchScheduler;
+import com.citi.put.checks.studio.recovery.StudioRecoveryScheduler;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -72,6 +74,13 @@ class ApiProfileIT {
   @Test
   void studioDispatchMetricsNotLoaded() {
     assertBeanAbsent(StudioDispatchMetrics.class);
+  }
+
+  /** Studio v1 WP2: the local schedules are gated `local & !api`, so an API context has neither. */
+  @Test
+  void studioDispatchAndRecoverySchedulesNotLoaded() {
+    assertBeanAbsent(StudioDispatchScheduler.class);
+    assertBeanAbsent(StudioRecoveryScheduler.class);
   }
 
   private void assertBeanAbsent(Class<?> beanType) {

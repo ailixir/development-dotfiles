@@ -2,6 +2,7 @@ package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -108,6 +109,45 @@ class StudioSeedIT {
                 + "%'");
 
     assertThat(rows).hasSize(3).containsOnly("chromium|<null>");
+  }
+
+  /**
+   * Studio v1 WP2: every seeded draft must be readable by the Studio API. An earlier revision
+   * stored structured {step, action, target} objects, which LegacyStudioAdapter refuses, so GET
+   * /api/v1/studio/tests answered 400 INVALID_STEPS for the whole list under {@code --seed}.
+   */
+  @Test
+  void seededStepsAreReadableByTheStudioApi() throws SQLException {
+    List<String> steps =
+        strings("SELECT steps::text FROM ui_tests WHERE id::text LIKE '" + SEED_TEST_PREFIX + "%'");
+
+    assertThat(steps).hasSize(3);
+    for (String json : steps) {
+      assertThat(LegacyStudioAdapter.parseSteps(json)).as(json).isNotEmpty();
+    }
+  }
+
+  /** A database seeded by the earlier revision is repaired when the seed re-runs. */
+  @Test
+  void reapplyingTheSeedRepairsTheEarlierStructuredSteps() throws SQLException, IOException {
+    String legacy =
+        "[{\"step\":1,\"action\":\"navigate\",\"target\":\"https://tse.internal.citi.com/status\"}]";
+    try (Connection connection = connect();
+        Statement statement = connection.createStatement()) {
+      statement.execute(
+          "UPDATE ui_tests SET steps = '"
+              + legacy
+              + "'::jsonb WHERE id = 'b8c9d0e1-0001-4000-8000-000000000003'");
+      statement.execute(readSeed());
+    }
+
+    String repaired =
+        strings(
+                "SELECT steps::text FROM ui_tests WHERE id = 'b8c9d0e1-0001-4000-8000-000000000003'")
+            .get(0);
+    assertThat(LegacyStudioAdapter.parseSteps(repaired))
+        .first()
+        .isEqualTo("Go to https://tse.internal.citi.com/status");
   }
 
   @Test

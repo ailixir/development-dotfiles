@@ -186,7 +186,8 @@ class DispatcherIT {
   @Test
   void theDispatchSchedulerExistsOnlyOnTheWorkerProfile() {
     assertThat(applicationContext.getBeanNamesForType(StudioDispatchScheduler.class))
-        .as("the dispatcher runs on the worker profile only (§5.4)")
+        .as(
+            "no dispatch schedule under the test profile: worker, or local without api, only (§5.4)")
         .isEmpty();
   }
 
