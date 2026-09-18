@@ -10,6 +10,7 @@ import com.citi.put.checks.studio.compile.CompileState;
 import com.citi.put.checks.studio.compile.CompileStateService;
 import com.citi.put.checks.studio.compile.ConfigurationChangeClassifier;
 import com.citi.put.checks.studio.dispatch.StudioAcceptanceService;
+import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.dto.CompileAcceptedDto;
 import com.citi.put.checks.studio.dto.ConfirmCompileRequestDto;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
@@ -53,6 +54,7 @@ public class StudioService {
   private final CompilePipeline compilePipeline;
   private final CompileStateService compileStateService;
   private final UserProvisioningService userProvisioningService;
+  private final StudioDispatchLedgerStatements ledgerStatements;
 
   /**
    * Used for one thing: to refresh the draft the authorized save has just locked (ADR-002 §27.2,
@@ -78,7 +80,8 @@ public class StudioService {
       StudioAcceptanceService acceptanceService,
       CompilePipeline compilePipeline,
       CompileStateService compileStateService,
-      UserProvisioningService userProvisioningService) {
+      UserProvisioningService userProvisioningService,
+      StudioDispatchLedgerStatements ledgerStatements) {
     this.studioRepository = studioRepository;
     this.executionRepository = executionRepository;
     this.revisionRepository = revisionRepository;
@@ -90,6 +93,7 @@ public class StudioService {
     this.compilePipeline = compilePipeline;
     this.compileStateService = compileStateService;
     this.userProvisioningService = userProvisioningService;
+    this.ledgerStatements = ledgerStatements;
   }
 
   // ── server-side authorization (AC-4a, §9.1) ──────────────────────────────
@@ -547,6 +551,60 @@ public class StudioService {
           acceptanceService.resolveIdempotencyRace(
               testId, race.getPrincipal(), race.getIdempotencyKey());
     }
+    return findExecutionById(executionId);
+  }
+
+  /** {@code 409} code: the execution already has its outcome, so there is nothing to cancel. */
+  public static final String EXECUTION_TERMINAL = "EXECUTION_TERMINAL";
+
+  /** {@code 409} code: a cancel was already recorded for this execution. */
+  public static final String CANCEL_ALREADY_REQUESTED = "CANCEL_ALREADY_REQUESTED";
+
+  /**
+   * Cancels an execution (Studio v1 WP4, ADR-002 §29) and returns its snapshot as committed.
+   *
+   * <p>Authorization comes first and is the write check on the <b>execution's own immutable
+   * CSI</b>, exactly as reads are keyed (AC-4a): an unknown id and a CSI the caller may not write
+   * answer the same {@code 403}. Then one compare-and-set on the ledger decides everything: queued
+   * work is closed {@code ERROR / CANCELLED} at once and never reaches a runner; dispatched work
+   * has the request recorded and ends when the runner or the running reaper ends it. A statement
+   * that matched nothing is a {@code 409} — the outcome is already known, or a cancel was already
+   * asked for.
+   *
+   * <p>{@code NOT_SUPPORTED} because this class is {@code readOnly = true} by default and the
+   * snapshot returned must be read after the statement commits, not from a persistence context that
+   * loaded the row before it.
+   */
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
+  public ExecutionSnapshotDto cancelExecution(UUID executionId, Authentication auth) {
+    UITestExecution execution =
+        executionRepository
+            .findByExecutionId(executionId)
+            .orElseThrow(StudioAccessDeniedException::new);
+    requireWrite(auth, execution.getCsiId());
+    String principal = principalOf(auth);
+
+    if (ledgerStatements.requestCancel(executionId, principal, Instant.now()).isEmpty()) {
+      // Zero rows is the verdict; this only names it. A row whose outcome is known — terminal, or
+      // FINALIZING its evidence — is EXECUTION_TERMINAL even when a cancel is what ended it.
+      String status = LegacyStudioAdapter.normalizeStatus(execution.getStatus());
+      boolean outcomeKnown =
+          ExecutionStatus.isTerminal(status)
+              || ledgerStatements
+                  .find(executionId)
+                  .map(
+                      row ->
+                          Set.of("FINALIZING", "DONE").contains(String.valueOf(row.get("state"))))
+                  .orElse(true);
+      throw outcomeKnown
+          ? new StudioConflictException(
+              EXECUTION_TERMINAL, "This execution has already reached its outcome")
+          : new StudioConflictException(
+              CANCEL_ALREADY_REQUESTED, "A cancel was already requested for this execution");
+    }
+    // The statement wrote through JDBC; the persistence context bound to this method still holds
+    // the row as it was read for authorization. Clear it so the snapshot is the committed one.
+    entityManager.clear();
     return findExecutionById(executionId);
   }
 

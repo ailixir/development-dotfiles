@@ -167,6 +167,19 @@ public class StudioController {
     return ResponseEntity.ok(studioService.findExecutionById(id, auth));
   }
 
+  /**
+   * Cancels an execution (Studio v1 WP4). {@code 202} with the snapshot as committed: already
+   * {@code ERROR / CANCELLED} for queued work, still running for dispatched work, whose terminal
+   * snapshot follows on the ordinary read and stream. {@code 409} when the outcome is already known
+   * or a cancel was already asked for; {@code 403} for an unknown id and for a CSI the caller may
+   * not write, alike.
+   */
+  @PostMapping("/executions/{id}/cancel")
+  public ResponseEntity<ExecutionSnapshotDto> cancelExecution(
+      @PathVariable UUID id, Authentication auth) {
+    return ResponseEntity.accepted().body(studioService.cancelExecution(id, auth));
+  }
+
   /** {@code testId} is optional; every result is scoped by the execution's own CSI (AC-14). */
   @GetMapping("/executions")
   public ResponseEntity<Map<String, Object>> listExecutions(

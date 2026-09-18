@@ -143,7 +143,11 @@ public class ProgressReportService {
             report,
             originalSteps(execution),
             properties.evidenceRetentionOrDefault(),
-            clock.instant());
+            clock.instant(),
+            // Write-once and never cleared, so reading it ahead of the statement cannot be
+            // contradicted by it; and a runner can only have been told to cancel after the request
+            // committed (ADR-002 §29).
+            statements.isCancelRequested(pathExecutionId));
 
     long sequence = report.runnerSequence();
     int applied = applyByKind(report, projected, sequence);

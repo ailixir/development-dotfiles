@@ -60,6 +60,19 @@ class ErrorCodeConstraintMigrationIT {
   private static final String CSI_ID = "60002";
   private static final String CONSTRAINT = "ck_ui_test_executions_error_code";
 
+  /**
+   * The vocabulary V17 constrains: the API's, less the codes a later migration added.
+   *
+   * <p>Read from {@link ExecutionErrorCode#values()} and narrowed, never transcribed. {@code
+   * CANCELLED} arrived with V20 (Studio v1 WP4), so no row can hold it before V20 applies; seeding
+   * one at V16 would be seeding data V17 rightly refuses. V20's own list is compared with the enum
+   * by {@link ErrorCodeVocabularyTest}.
+   */
+  private static final java.util.Set<String> V17_VOCABULARY =
+      ExecutionErrorCode.values().stream()
+          .filter(code -> !ExecutionErrorCode.CANCELLED.equals(code))
+          .collect(java.util.stream.Collectors.toUnmodifiableSet());
+
   /** Only a restored dump or a manual repair can produce one (§15.5). */
   private static final String OUT_OF_VOCABULARY = "RESTORED_FROM_DUMP";
 
@@ -145,7 +158,7 @@ class ErrorCodeConstraintMigrationIT {
   @Test
   @Order(3)
   void refusesAnUndeclaredValueOnANewWriteAndAcceptsEveryDeclaredOne() throws SQLException {
-    for (String code : new TreeSet<>(ExecutionErrorCode.values())) {
+    for (String code : new TreeSet<>(V17_VOCABULARY)) {
       execute(
           cleanUrl,
           insertExecution(
@@ -195,7 +208,7 @@ class ErrorCodeConstraintMigrationIT {
             dirtyUrl,
             "SELECT error_code FROM ui_test_executions WHERE error_code IS NOT NULL"
                 + " AND error_code NOT IN ("
-                + quoted(ExecutionErrorCode.values())
+                + quoted(V17_VOCABULARY)
                 + ")");
     assertThat(offending).containsExactly(OUT_OF_VOCABULARY);
   }
@@ -280,7 +293,7 @@ class ErrorCodeConstraintMigrationIT {
 
     // A named partition: nulls plus half the vocabulary.
     execute(url, insertExecution(testId, UUID.randomUUID(), "2026-06-15 10:00:00+00", "NULL"));
-    List<String> codes = new ArrayList<>(new TreeSet<>(ExecutionErrorCode.values()));
+    List<String> codes = new ArrayList<>(new TreeSet<>(V17_VOCABULARY));
     for (int index = 0; index < codes.size(); index++) {
       String partition = index % 2 == 0 ? "2026-06-15 10:00:00+00" : "2027-03-15 10:00:00+00";
       execute(
@@ -326,7 +339,7 @@ class ErrorCodeConstraintMigrationIT {
         "ALTER TABLE ui_test_executions ADD CONSTRAINT "
             + CONSTRAINT
             + " CHECK (error_code IS NULL OR error_code IN ("
-            + quoted(ExecutionErrorCode.values())
+            + quoted(V17_VOCABULARY)
             + ")) NOT VALID");
   }
 

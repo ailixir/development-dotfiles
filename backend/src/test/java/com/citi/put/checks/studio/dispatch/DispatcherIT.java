@@ -748,6 +748,11 @@ class DispatcherIT {
     long sendsFor(UUID executionId) {
       return sent.stream().filter(job -> executionId.equals(job.executionId())).count();
     }
+
+    @Override
+    public CancelOutcome cancel(UUID executionId) {
+      return CancelOutcome.ACKNOWLEDGED;
+    }
   }
 
   /** How many sends left the process for one execution — never the deployment-global count. */

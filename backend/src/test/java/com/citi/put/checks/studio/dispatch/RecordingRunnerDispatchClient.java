@@ -17,6 +17,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RecordingRunnerDispatchClient implements RunnerDispatchClient {
 
   private final List<RunJob> sent = new CopyOnWriteArrayList<>();
+  private final List<java.util.UUID> cancelled = new CopyOnWriteArrayList<>();
+  private final AtomicReference<CancelOutcome> nextCancelOutcome =
+      new AtomicReference<>(CancelOutcome.ACKNOWLEDGED);
   private final AtomicReference<DispatchOutcome> nextOutcome =
       new AtomicReference<>(DispatchOutcome.accepted());
   private volatile CountDownLatch blockUntil;
@@ -37,6 +40,21 @@ public class RecordingRunnerDispatchClient implements RunnerDispatchClient {
       }
     }
     return nextOutcome.get();
+  }
+
+  @Override
+  public CancelOutcome cancel(java.util.UUID executionId) {
+    cancelled.add(executionId);
+    return nextCancelOutcome.get();
+  }
+
+  public void willAnswerCancel(CancelOutcome outcome) {
+    nextCancelOutcome.set(outcome);
+  }
+
+  /** How many cancels were relayed for one execution — never a deployment-global count. */
+  public long cancelsFor(java.util.UUID executionId) {
+    return cancelled.stream().filter(executionId::equals).count();
   }
 
   public void willAnswer(DispatchOutcome outcome) {
@@ -66,7 +84,9 @@ public class RecordingRunnerDispatchClient implements RunnerDispatchClient {
 
   public void reset() {
     sent.clear();
+    cancelled.clear();
     unblock();
     nextOutcome.set(DispatchOutcome.accepted());
+    nextCancelOutcome.set(CancelOutcome.ACKNOWLEDGED);
   }
 }

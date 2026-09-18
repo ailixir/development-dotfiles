@@ -90,6 +90,17 @@ public record StudioRunnerProperties(
   }
 
   /**
+   * One admitted run's endpoint, the target of {@code DELETE /v1/runs/{executionId}} (Studio v1
+   * WP4). Built from {@link #runsUrl()} so the two run routes cannot be configured apart.
+   *
+   * @param executionId the execution whose run is addressed
+   * @return {@code baseUrl} + {@value #RUNS_PATH} + {@code /} + the execution id
+   */
+  public String runUrl(java.util.UUID executionId) {
+    return runsUrl() + "/" + executionId;
+  }
+
+  /**
    * Whether a usable service identity is configured. Both runner routes declare {@code
    * serviceIdentity}, so a caller without one is refused by the runner before it reads the body.
    *

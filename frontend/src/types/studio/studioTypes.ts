@@ -43,6 +43,7 @@ export const EXECUTION_ERROR_CODES = [
   'DISPATCH_DISABLED',
   'AUTHORIZATION_REVOKED',
   'REFERENCE_UNAVAILABLE',
+  'CANCELLED',
 ] as const;
 
 export type ExecutionErrorCode = (typeof EXECUTION_ERROR_CODES)[number];
@@ -66,13 +67,13 @@ export type ExecutionErrorCodeIsDerivedFromItsCarrier = AssertTrue<
 /**
  * The code a cancelled run ends with: `status: ERROR`, `errorCode: CANCELLED`.
  *
- * It is kept **outside** {@link EXECUTION_ERROR_CODES} on purpose. That carrier is compared with
- * `components.schemas.ExecutionErrorCode.enum` in `openapi.yaml` by `studioContract.test.ts`, and
- * the enum is amended by the backend cancel work, not by this frontend change. When the amendment
- * lands, that test goes red until `CANCELLED` is moved into the carrier and given a narrative. The
- * failure is intended: it makes the merge fold the two copies into one.
+ * A member of {@link EXECUTION_ERROR_CODES} since Studio v1 WP4 amended the contract's enum
+ * (ADR-002 §29). WP5 kept it outside the carrier while the enum did not declare it, so that
+ * `studioContract.test.ts` would go red on the amendment and force this fold; the fold is done, and
+ * this name stays only because the Stop flow and its tests read it. `satisfies` keeps it a member:
+ * dropping `CANCELLED` from the carrier fails the type-check here.
  */
-export const CANCELLED_ERROR_CODE = 'CANCELLED' as const;
+export const CANCELLED_ERROR_CODE = 'CANCELLED' as const satisfies ExecutionErrorCode;
 
 export type StepStatus = 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL' | 'SKIPPED';
 
@@ -313,7 +314,7 @@ export interface ExecutionSnapshot {
   /** Null for legacy history: those runs never had a confirmed revision. */
   revisionId: string | null;
   status: ExecutionStatus;
-  errorCode: ExecutionErrorCode | typeof CANCELLED_ERROR_CODE | null;
+  errorCode: ExecutionErrorCode | null;
   /** Immutable acceptance instant; also the history partition key. */
   acceptedAt: string;
   /** Browser start. Null until the runner reports one. */

@@ -110,6 +110,60 @@ class HttpRunnerDispatchClientTest {
   }
 
   /**
+   * Studio v1 WP4: the cancel relay is {@code DELETE /v1/runs/{executionId}} with the same bearer
+   * as the dispatch, sent exactly once, with no body.
+   */
+  @Test
+  void theCancelRelayIsOneDeleteCarryingTheSameBearer() {
+    wireMock.resetAll();
+    java.util.UUID executionId = java.util.UUID.randomUUID();
+    String path = "/v1/runs/" + executionId;
+    wireMock.stubFor(
+        com.github.tomakehurst.wiremock.client.WireMock.delete(urlPathEqualTo(path))
+            .willReturn(aResponse().withStatus(202)));
+
+    assertThat(client.cancel(executionId))
+        .isEqualTo(RunnerDispatchClient.CancelOutcome.ACKNOWLEDGED);
+
+    var requests =
+        wireMock.findAll(
+            com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor(
+                urlPathEqualTo(path)));
+    assertThat(requests).hasSize(1);
+    assertThat(requests.get(0).getHeaders().getHeader("Authorization").values())
+        .containsExactly("Bearer test-runner-token");
+    assertThat(requests.get(0).getBody()).isEmpty();
+    assertThat(wireMock.getAllServeEvents()).as("nothing else left the process").hasSize(1);
+  }
+
+  @Test
+  void theCancelClassificationSettlesOnlyOn202And409() {
+    assertThat(HttpRunnerDispatchClient.classifyCancel(202))
+        .isEqualTo(RunnerDispatchClient.CancelOutcome.ACKNOWLEDGED);
+    assertThat(HttpRunnerDispatchClient.classifyCancel(409))
+        .isEqualTo(RunnerDispatchClient.CancelOutcome.ALREADY_FINISHED);
+    assertThat(HttpRunnerDispatchClient.classifyCancel(404))
+        .isEqualTo(RunnerDispatchClient.CancelOutcome.NOT_FOUND);
+    for (int status : List.of(200, 204, 301, 400, 401, 403, 429, 500, 503)) {
+      assertThat(HttpRunnerDispatchClient.classifyCancel(status))
+          .as("status %s", status)
+          .isEqualTo(RunnerDispatchClient.CancelOutcome.FAILED);
+    }
+    assertThat(RunnerDispatchClient.CancelOutcome.ACKNOWLEDGED.settled()).isTrue();
+    assertThat(RunnerDispatchClient.CancelOutcome.ALREADY_FINISHED.settled()).isTrue();
+    assertThat(RunnerDispatchClient.CancelOutcome.NOT_FOUND.settled()).isFalse();
+    assertThat(RunnerDispatchClient.CancelOutcome.FAILED.settled()).isFalse();
+  }
+
+  @Test
+  void aCancelWithoutAServiceIdentitySendsNothing() {
+    wireMock.resetAll();
+    assertThat(clientFor(wireMock.baseUrl(), " ").cancel(java.util.UUID.randomUUID()))
+        .isEqualTo(RunnerDispatchClient.CancelOutcome.FAILED);
+    assertThat(wireMock.getAllServeEvents()).isEmpty();
+  }
+
+  /**
    * Story 10.35 AC-5 (i): no runner base URL. The refusal is terminal and names the missing key,
    * and nothing is sent — there is no address to send to, and the classification must not fall
    * through to the {@code IOException} branch's {@code AMBIGUOUS}.

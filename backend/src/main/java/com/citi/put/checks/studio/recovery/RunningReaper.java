@@ -15,9 +15,14 @@ import org.springframework.stereotype.Component;
 /**
  * The running reaper (AC-30, §5.4 rows 2–4).
  *
- * <p>Three conditions, each reconciled against the manifest before any verdict is written:
+ * <p>Three conditions, each reconciled against the manifest before any verdict is written — four
+ * since Studio v1 WP4, which adds the first:
  *
  * <ol>
+ *   <li>A recorded cancel still dispatched once the start-deadline margin has passed since it was
+ *       requested — reconcile, else {@code ERROR / CANCELLED}. This is the cancel the runner never
+ *       finished: the relay did not reach the pod holding the run, or the run's {@code FINAL} never
+ *       arrived.
  *   <li>{@code ADMITTED} past {@code start_deadline_at} — reconcile, else {@code ERROR /
  *       START_TIMEOUT}.
  *   <li>{@code RUNNING} past {@code run_deadline_at} — reconcile the manifest, else {@code ERROR /
@@ -73,6 +78,15 @@ public class RunningReaper {
     int batch = properties.dispatcherOrDefault().batchSizeOrDefault();
     int changed = 0;
 
+    // A cancel nobody finished: the runner never delivered a FINAL for it within the margin
+    // (ADR-002 §29). The margin is the start deadline — as long as an admitted run is given to
+    // show a browser start, and several times the runner's 5 s stop grace plus its evidence and
+    // delivery. Checked first, so a cancelled row is closed as what it is rather than as the
+    // START_TIMEOUT or STALE the conditions below would otherwise name it.
+    Instant requestedBy = now.minus(properties.startDeadlineOrDefault());
+    for (UUID executionId : statements.findUnfinishedCancels(requestedBy, batch)) {
+      changed += closeUnlessReconciled(executionId, ExecutionErrorCode.CANCELLED, now);
+    }
     for (UUID executionId : statements.findPastStartDeadline(now, batch)) {
       changed += closeUnlessReconciled(executionId, ExecutionErrorCode.START_TIMEOUT, now);
     }
