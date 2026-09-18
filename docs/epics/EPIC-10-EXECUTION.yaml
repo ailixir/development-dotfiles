@@ -17,7 +17,27 @@
 epic_id: EPIC-10
 milestone: M5
 title: "Checks Studio Execution (MVP) — exact-revision confirmation, isolated Chromium execution, SSE progress, private video evidence"
-status: planning
+# @po 2026-09-17 (closure plan step 0.5). Was `planning`, which stopped being true at wave 1 and
+# stayed wrong for nine waves. The declared enum for this field in this repository is
+# `planning | in_progress | completed | paused` (EPIC-01/02/03/04 carry it as a trailing comment).
+# **No value in that enum says what is actually true**, which is that the epic has two halves that
+# finish at different times: the local half is delivered and gated, and the external half has not
+# started and cannot start inside this repository. `completed` would be a false claim and `paused`
+# would blame this line for a wait that belongs to twelve external gates. `in_progress` is the only
+# member of the enum that is true, so it is set here rather than an invented value — and the precise
+# state is carried in `status_detail` below, which is @po's proposed wording and not an enum.
+# @pm owns the enum; if @pm prefers a different value or a different field name, change it there.
+status: in_progress
+# Proposed wording, @po 2026-09-17 — free text, read by nothing (the only machine reader of this
+# manifest is docs/qa/scripts/verify-staging-registration.mjs, which reads `external_dependencies`).
+status_detail: >-
+  Local half delivered: 23 stories drafted, every implemented story QA-gated and merged on
+  epic/EPIC-10-w7. Staging half not started and not startable from this repository: ED-01…ED-06 and
+  SPK-01…SPK-06 all read open, story 10.19's AC-1…AC-7 and story 10.16's AC-19 are recorded skipped,
+  never passed, and the --ff-only fold into epic/EPIC-10 is blocked on paths dirty in a parallel
+  program's uncommitted tree. Definition-of-done item 1 ("all stories reach Done") is unsatisfiable
+  as the backlog stands — see the open question on a successor story (10.34) in
+  docs/epics/EPIC-10-CLOSURE-PLAN.md step 0.6, which is a user decision and has not been taken.
 created_at: "2026-09-10"
 created_by: "@pm (Morgan)"
 
@@ -1540,7 +1560,38 @@ file_ownership_conflicts:
 integration_defects:
   - id: DEF-01
     severity: HIGH
-    status: open
+    # @po 2026-09-17 (closure plan step 0.2). Was `open`. It has been fixed in code since wave 5 and
+    # the field never moved; story 10.19's AC-10 register reads this block by name, so a stale
+    # `open` here propagates into the epic's final open-items record.
+    status: fixed
+    fixed_by: >-
+      Story 10.17. The general conformance control landed first and RED, in its own commit, exactly
+      as control_timing_ruling below required: `4c7abee4c` (T-10.17.2a,
+      "test(studio): assert every internal body against its frozen schema — RED"). The fix followed
+      at `e72724eed` (T-10.17.2b, "feat(studio): typed references, a conforming job body and
+      authorized secret use"); the story merged at `c54df7934`. All three are reachable from
+      `epic/EPIC-10-w7` (verified `git merge-base --is-ancestor`).
+    fix_verification: >-
+      Verified four times, independently, by reading the merged code rather than by re-running a
+      suite: by @dev and by @qa during story 10.19, by the orchestrator at the wave-9 close
+      ("Also confirmed" in the run log), and by @po on 2026-09-17 at closure-plan step 0.2.
+      @po read three things in this worktree: (1)
+      `backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java`
+      `body()` now writes every one of the fourteen contract keys — executionId, attemptId,
+      revisionId, artifactHash, artifact, source, configuration, csi, references, resolvedVars,
+      resolvedSecrets, deadlines, videoKey, manifestKey — and writes neither `testId`, `csiId`,
+      `environment` nor `callbackBaseUrl`, the four keys the closed body refused; (2) `RunJob.java`
+      is a fourteen-component record whose Javadoc describes the defect in the past tense
+      ("Until story 10.17 this record carried eight fields of which four … were not properties of
+      the closed body at all"); (3)
+      `backend/src/test/java/com/citi/put/checks/studio/dispatch/InternalBodyContractConformanceTest.java`
+      exists. CORRECTION to the closure plan's own figure: RunJob is **fourteen** components, not
+      twelve — counted in the record declaration.
+    # NOT verified by @po: no test was executed. The backend suite was deliberately not run
+    # (another agent holds Gradle on this host and concurrent Gradle manufactures failures here —
+    # see the backend host-contention rule). The claim above is "the merged source has the shape the
+    # defect says it lacked", which is what the defect was about; it is not "the dispatch succeeds
+    # end to end". Nothing in this repository has ever run the API and the runner together.
     found_by: "@sm (River) while drafting 10.17, 2026-09-11; every element re-verified by @po at validation"
     owner: "10.17 (ruled by @po 2026-09-11)"
     summary: >-
@@ -1590,7 +1641,25 @@ integration_defects:
 
   - id: DEF-02
     severity: HIGH
-    status: open
+    # @po 2026-09-17 (closure plan step 0.2). Was `open`, for the same reason as DEF-01 above.
+    status: fixed
+    fixed_by: >-
+      Story 10.14 AC-10, as its own standalone commit at the head of wave 5 exactly as
+      mandated_ordering below required: `00b9e105d` ("fix(studio): accept evidence.partial on the
+      internal progress callback"); the story merged at `ba9e56064`. Both reachable from
+      `epic/EPIC-10-w7` (verified `git merge-base --is-ancestor`).
+    fix_verification: >-
+      Verified four times, independently, by reading the merged code: by @dev and by @qa during
+      story 10.19, by the orchestrator at the wave-9 close, and by @po on 2026-09-17. @po read
+      `backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunnerEvidence.java`: it is
+      `record RunnerEvidence(String videoKey, String manifestKey, String state, Boolean partial)`,
+      four components, still `@JsonIgnoreProperties(ignoreUnknown = false)` — so the strictness that
+      caused the refusal is intact and it is the record that widened, which is the correct fix. Its
+      Javadoc states the defect in the past tense and names DEF-02.
+    # NOT verified by @po: no test was executed, for the reason recorded on DEF-01. The
+    # correction_to_adr below (ADR-002 §17.7 describes behaviour the code does not have) is a
+    # separate item and is NOT closed by this status change — ADR-002 is dirty in the parallel
+    # tree and must not be edited from this line.
     found_by: "@sm (River) while drafting 10.14, 2026-09-11 (raised as its open question 1); both halves verified by @po at validation"
     owner: "10.14 (AC-10), landed at the head of wave 5"
     summary: >-
