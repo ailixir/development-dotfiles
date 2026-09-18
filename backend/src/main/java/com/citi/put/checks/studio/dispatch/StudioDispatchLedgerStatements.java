@@ -801,11 +801,30 @@ public class StudioDispatchLedgerStatements {
    * query happened to select the row.
    */
   public int closeWithError(UUID executionId, String errorCode, Instant endedAt) {
+    return close(executionId, errorCode, endedAt, false);
+  }
+
+  /**
+   * {@link #closeWithError}, for the reapers: a row whose cancel has been recorded is closed {@code
+   * ERROR / CANCELLED} whatever {@code errorCode} the reaper would otherwise name it (Studio v1
+   * WP16). The user asked for the run to stop, and it stopped; a {@code START_TIMEOUT}, {@code
+   * STALE} or {@code DISPATCH_UNKNOWN} on a row the user cancelled would report a fault nobody saw.
+   *
+   * <p>The choice is made inside the statement, against the row it has locked, so a cancel recorded
+   * between the reaper's selection and its close still decides the code. A separate read would
+   * leave exactly that window open.
+   */
+  public int closeByReaper(UUID executionId, String errorCode, Instant endedAt) {
+    return close(executionId, errorCode, endedAt, true);
+  }
+
+  private int close(
+      UUID executionId, String errorCode, Instant endedAt, boolean cancelledIfRequested) {
     Integer applied =
         jdbc.queryForObject(
             """
             WITH owner AS (
-              SELECT execution_id, execution_accepted_at, state
+              SELECT execution_id, execution_accepted_at, state, cancel_requested_at
                 FROM studio_dispatch_ledger
                WHERE execution_id = ?
                  AND state <> 'DONE'
@@ -814,7 +833,10 @@ public class StudioDispatchLedgerStatements {
             history AS (
               UPDATE ui_test_executions e
                  SET status = 'ERROR',
-                     error_code = ?,
+                     error_code = CASE
+                                    WHEN ? AND o.cancel_requested_at IS NOT NULL THEN 'CANCELLED'
+                                    ELSE CAST(? AS varchar)
+                                  END,
                      ended_at = COALESCE(e.ended_at, CAST(? AS timestamptz)),
                      snapshot_revision = e.snapshot_revision + 1
                 FROM owner o
@@ -839,6 +861,7 @@ public class StudioDispatchLedgerStatements {
             """,
             Integer.class,
             executionId,
+            cancelledIfRequested,
             errorCode,
             Timestamp.from(endedAt));
     return applied == null ? 0 : applied;
@@ -994,7 +1017,13 @@ public class StudioDispatchLedgerStatements {
         limit);
   }
 
-  /** Admitted rows past their start deadline — the index V13 built for exactly this (AC-30). */
+  /**
+   * Admitted rows past their start deadline — the index V13 built for exactly this (AC-30).
+   *
+   * <p>A row with a recorded cancel is excluded (Studio v1 WP16): {@link #findUnfinishedCancels}
+   * owns it, on the cancel budget's margin rather than the start deadline, so the start deadline
+   * can neither close it before a healthy runner has finished stopping nor name it START_TIMEOUT.
+   */
   public List<UUID> findPastStartDeadline(Instant now, int limit) {
     return jdbc.queryForList(
         """
@@ -1002,6 +1031,7 @@ public class StudioDispatchLedgerStatements {
          WHERE state = 'ADMITTED'
            AND start_deadline_at IS NOT NULL
            AND start_deadline_at <= ?
+           AND cancel_requested_at IS NULL
          ORDER BY start_deadline_at
          LIMIT ?
         """,
@@ -1010,7 +1040,10 @@ public class StudioDispatchLedgerStatements {
         limit);
   }
 
-  /** Running rows past their total runtime deadline (AC-30). Heartbeats never move this. */
+  /**
+   * Running rows past their total runtime deadline (AC-30). Heartbeats never move this. A row with
+   * a recorded cancel is excluded for the same reason as {@link #findPastStartDeadline}.
+   */
   public List<UUID> findPastRunDeadline(Instant now, int limit) {
     return jdbc.queryForList(
         """
@@ -1018,6 +1051,7 @@ public class StudioDispatchLedgerStatements {
          WHERE state = 'RUNNING'
            AND run_deadline_at IS NOT NULL
            AND run_deadline_at <= ?
+           AND cancel_requested_at IS NULL
          ORDER BY run_deadline_at
          LIMIT ?
         """,

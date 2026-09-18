@@ -139,6 +139,86 @@ class RecoveryIT {
     assertThat(runner.sendCount()).as("never a second dispatch").isEqualTo(1);
   }
 
+  // ── Studio v1 WP16: a recorded cancel decides the outcome, on the cancel budget ──
+
+  /**
+   * A cancel on a row still waiting for its browser: the start deadline passes long before a
+   * healthy runner's cancel path is over, and must neither close the row early nor name it
+   * START_TIMEOUT. The cancel margin, and only the cancel margin, closes it — as CANCELLED.
+   */
+  @Test
+  void aCancelledAdmittedRowPastItsStartDeadlineWaitsForTheCancelMarginAndEndsCancelled() {
+    UUID attemptId = dispatchOnce();
+    admit(attemptId, UUID.randomUUID());
+    studioService.cancelExecution(executionId, owner);
+    expire("start_deadline_at");
+
+    runningReaper.reapOnce();
+    assertThat(ledger().get("state"))
+        .as("the start deadline must not pre-empt the cancel budget")
+        .isEqualTo("ADMITTED");
+    assertThat(snapshot().status()).isEqualTo("PENDING");
+
+    backdateCancel(runningReaper.cancelMargin().minusSeconds(5));
+    runningReaper.reapOnce();
+    assertThat(ledger().get("state")).as("still inside the margin").isEqualTo("ADMITTED");
+
+    backdateCancel(runningReaper.cancelMargin().plusSeconds(1));
+    runningReaper.reapOnce();
+    assertThat(snapshot().status()).isEqualTo("ERROR");
+    assertThat(snapshot().errorCode()).isEqualTo(ExecutionErrorCode.CANCELLED);
+    assertThat(ledger().get("state")).isEqualTo("DONE");
+    assertThat(runner.sendCount()).as("never a second dispatch").isEqualTo(1);
+  }
+
+  /** The same for a running row past its run deadline: never STALE once a cancel was recorded. */
+  @Test
+  void aCancelledRunningRowPastItsRunDeadlineWaitsForTheCancelMarginAndEndsCancelled() {
+    UUID attemptId = dispatchOnce();
+    UUID admissionId = UUID.randomUUID();
+    admit(attemptId, admissionId);
+    progressService.apply(executionId, started(attemptId, admissionId, 1));
+    studioService.cancelExecution(executionId, owner);
+    expire("run_deadline_at");
+
+    runningReaper.reapOnce();
+    assertThat(ledger().get("state")).isEqualTo("RUNNING");
+
+    backdateCancel(runningReaper.cancelMargin().plusSeconds(1));
+    runningReaper.reapOnce();
+    assertThat(snapshot().status()).isEqualTo("ERROR");
+    assertThat(snapshot().errorCode()).isEqualTo(ExecutionErrorCode.CANCELLED);
+  }
+
+  /**
+   * Whichever reaper path closes a cancelled row, the outcome is CANCELLED: the pending reaper's
+   * DISPATCH_UNKNOWN, and a reaper close that selected the row before the cancel was recorded.
+   */
+  @Test
+  void everyReaperCloseOfACancelledRowIsCancelledWhateverCodeThePathWouldName() {
+    dispatchOnce();
+    studioService.cancelExecution(executionId, owner);
+    expire("pending_deadline_at");
+
+    pendingReaper.reapOnce();
+
+    assertThat(snapshot().status()).isEqualTo("ERROR");
+    assertThat(snapshot().errorCode())
+        .as("not DISPATCH_UNKNOWN: the user cancelled it")
+        .isEqualTo(ExecutionErrorCode.CANCELLED);
+
+    // The statement decides against the row it locks, so a START_TIMEOUT close that raced the
+    // cancel still records CANCELLED; the kill switch's and the dispatcher's close keep their code.
+    UUID other = studioService.executeTest(testId, owner, null).executionId();
+    UUID otherAttempt = dispatchOnce(other);
+    admit(other, otherAttempt, UUID.randomUUID());
+    studioService.cancelExecution(other, owner);
+    assertThat(statements.closeByReaper(other, ExecutionErrorCode.START_TIMEOUT, Instant.now()))
+        .isEqualTo(1);
+    assertThat(studioService.findExecutionById(other, owner).errorCode())
+        .isEqualTo(ExecutionErrorCode.CANCELLED);
+  }
+
   @Test
   void restartDuringExecutionPastTheRunDeadlineIsStaleAndNeverASecondDispatchOrAReplay() {
     UUID attemptId = dispatchOnce();
@@ -849,6 +929,13 @@ class RecoveryIT {
     jdbc.update(
         "UPDATE studio_dispatch_ledger SET " + column + " = ? WHERE execution_id = ?",
         Timestamp.from(Instant.now().minusSeconds(1)),
+        executionId);
+  }
+
+  private void backdateCancel(java.time.Duration age) {
+    jdbc.update(
+        "UPDATE studio_dispatch_ledger SET cancel_requested_at = ? WHERE execution_id = ?",
+        Timestamp.from(Instant.now().minus(age)),
         executionId);
   }
 

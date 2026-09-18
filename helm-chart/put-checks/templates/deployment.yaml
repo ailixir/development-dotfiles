@@ -293,6 +293,21 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.studioRunner.identity.secretName }}
                   key: {{ .Values.studioRunner.identity.serviceIdentityKey }}
+            # **The runner's cancel-path bounds, from the runner's own values keys (Studio v1
+            # WP16).** The running reaper here waits `RunnerCancelBudget.effectiveMargin()` before
+            # closing a cancel the runner never finished, and that margin is derived from these
+            # four bounds. Rendered from `studioRunner.runnerEnv` — the map the runner Deployment
+            # renders its environment from — so the worker derives its margin from the values the
+            # deployed runner actually runs with, never from defaults. A key the runner does not
+            # receive is not rendered here either: both then fall back to the same default, which
+            # `RunnerCancelBudgetTest` pins against the runner's `config.ts`.
+            {{- $runnerEnv := .Values.studioRunner.runnerEnv | default dict }}
+            {{- range $key := list "STUDIO_RUNNER_ADMISSION_TIMEOUT_MS" "STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS" "STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS" "STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS" }}
+            {{- if hasKey $runnerEnv $key }}
+            - name: {{ $key }}
+              value: {{ get $runnerEnv $key | quote }}
+            {{- end }}
+            {{- end }}
             {{- end }}
             # ── The kill switch and the dispatcher, on the WORKER (story 10.18b, AC-23a) ──
             #
