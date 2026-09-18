@@ -13,8 +13,10 @@ import { EXECUTION_ERROR_CODES, type ExecutionErrorCode } from '@/types/studio/s
  * per-code table in `components.schemas.ExecutionErrorCode.description`, reworded for a reader and
  * not for a machine. The two facts are separated because they are the two axes the document itself
  * says the codes divide on: *"what a caller may conclude about the browser, and … who can clear the
- * condition"*. None is a synonym for another, so none of the eight may be collapsed into
- * "something went wrong".
+ * condition"*. None is a synonym for another, so none of them may be collapsed into
+ * "something went wrong". `CANCELLED` (ADR-002 §29) is the one a person caused on purpose; it is
+ * rendered as a statement rather than as a failure, and offers no re-run because nothing about the
+ * run needs clearing.
  *
  * **`offersRerun` is a rule, not a convenience.** Exactly three codes — `DISPATCH_FAILED`,
  * `START_TIMEOUT` and `STALE` — are cleared by *"a new execution"* in the document's own words, so
@@ -98,6 +100,14 @@ export const EXECUTION_ERROR_NARRATIVES: Readonly<
       'Whoever administers entitlements clears this by restoring that access, out of band. Retrying cannot.',
     offersRerun: false,
   },
+  CANCELLED: {
+    title: 'The run was stopped on request',
+    browserClaim:
+      'Someone pressed Stop. If a browser had started it was asked to stop, given a few seconds to close and save its recording, and then ended; steps that had not finished were not completed, and any recording is whatever was captured before the stop.',
+    remedyOwner:
+      'Nothing needs clearing: this is the outcome that was asked for. Start the test again whenever you want a complete run.',
+    offersRerun: false,
+  },
   REFERENCE_UNAVAILABLE: {
     title: 'A variable or secret the run needs stopped resolving',
     browserClaim:
@@ -120,7 +130,7 @@ export function executionErrorNarrative(code: string): ExecutionErrorNarrative {
   const narrative = (EXECUTION_ERROR_NARRATIVES as Record<string, ExecutionErrorNarrative>)[code];
   if (!narrative) {
     throw new Error(
-      `Unknown ExecutionErrorCode "${code}": the eight values of ADR-002 §15 are the whole set, ` +
+      `Unknown ExecutionErrorCode "${code}": the values ADR-002 §15 and §29 declare are the whole set, ` +
         'and rendering an unknown one as a generic failure would hide what happened to the browser.',
     );
   }

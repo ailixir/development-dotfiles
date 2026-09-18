@@ -13,6 +13,7 @@ import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,6 +128,48 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
     }
     return classify(
         response.statusCode(), response.headers().firstValue("Retry-After").orElse(null));
+  }
+
+  /**
+   * {@code DELETE /v1/runs/{executionId}} with the same base URL and the same bearer as {@link
+   * #send} (Studio v1 WP4). No body, no redirect followed, no automatic retry: the dispatcher's
+   * next pass is the retry, and it happens only for an outcome that did not {@linkplain
+   * CancelOutcome#settled() settle}.
+   */
+  @Override
+  public CancelOutcome cancel(UUID executionId) {
+    String misconfiguration = misconfiguration();
+    if (misconfiguration != null) {
+      LOGGER.warn("Cancel of execution {} not relayed: {}", executionId, misconfiguration);
+      return CancelOutcome.FAILED;
+    }
+    HttpRequest request =
+        HttpRequest.newBuilder(URI.create(runner.runUrl(executionId)))
+            .timeout(properties.admissionTimeoutOrDefault())
+            .header("Authorization", "Bearer " + runner.serviceIdentityToken())
+            .DELETE()
+            .build();
+    int status;
+    try {
+      status = httpClient.send(request, HttpResponse.BodyHandlers.discarding()).statusCode();
+    } catch (IOException e) {
+      LOGGER.warn("Cancel of execution {} not relayed: {}", executionId, e.getClass().getName());
+      return CancelOutcome.FAILED;
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return CancelOutcome.FAILED;
+    }
+    return classifyCancel(status);
+  }
+
+  /** The cancel classification table, extracted like {@link #classify} so a test can drive it. */
+  public static CancelOutcome classifyCancel(int status) {
+    return switch (status) {
+      case 202 -> CancelOutcome.ACKNOWLEDGED;
+      case 409 -> CancelOutcome.ALREADY_FINISHED;
+      case 404 -> CancelOutcome.NOT_FOUND;
+      default -> CancelOutcome.FAILED;
+    };
   }
 
   private String misconfiguration() {

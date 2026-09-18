@@ -89,7 +89,9 @@ class ExecutionVideoContractTest {
               "listExecutions",
               "getExecution",
               "streamExecution",
-              "getExecutionVideo"));
+              "getExecutionVideo",
+              // Studio v1 WP4 (ADR-002 §29), the thirteenth, added deliberately.
+              "cancelExecution"));
 
   /**
    * The two internal callbacks, whose {@code 401} comes from {@code
@@ -447,11 +449,11 @@ class ExecutionVideoContractTest {
     // Each total on its own. A set comparison alone is satisfied by two collections that stopped
     // collecting together, and a correctly-added thirteenth public operation passes every
     // comparison above.
-    assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(12);
+    assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(13);
     assertThat(callbackRefs)
         .as("the number of internal callbacks declaring a 401 moved")
         .hasSize(2);
-    assertThat(runnerRefs).as("the number of runner operations declaring a 401 moved").hasSize(4);
+    assertThat(runnerRefs).as("the number of runner operations declaring a 401 moved").hasSize(5);
 
     // The pinned second copies, both ways.
     assertThat(publicRefs.keySet())

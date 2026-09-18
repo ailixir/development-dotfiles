@@ -2,6 +2,7 @@ package com.citi.put.checks.studio.internal;
 
 import com.citi.put.checks.studio.StudioExecutionProperties;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
+import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
 import com.citi.put.checks.studio.internal.dto.AdmissionResponse;
 import java.sql.Timestamp;
@@ -56,9 +57,15 @@ public class AdmissionCasService {
   /**
    * Grants, re-acknowledges or refuses an admission.
    *
+   * <p>The one refusal that writes: a cancel recorded before the admission arrived (Studio v1 WP4).
+   * The CAS refused it; the refusal then closes the execution {@code ERROR / CANCELLED} and answers
+   * {@code EXECUTION_SETTLED}, which is true by the time the runner reads it. The close is why the
+   * transaction does not roll back on the refusal's exception — every other refusal path writes
+   * nothing, so there is nothing else a commit could keep.
+   *
    * @throws InternalCallbackException {@code 409} for every refusal, including an unknown execution
    */
-  @Transactional
+  @Transactional(noRollbackFor = InternalCallbackException.class)
   public AdmissionResponse claim(UUID pathExecutionId, AdmissionRequest request) {
     validate(pathExecutionId, request);
     Instant now = clock.instant();
@@ -142,6 +149,13 @@ public class AdmissionCasService {
     Object admissionId = row.get("admission_id");
     Instant pendingDeadline = instant(row.get("pending_deadline_at"));
 
+    if (!"DONE".equals(state) && row.get("cancel_requested_at") != null) {
+      // Cancelled between the send and this admission. The browser has not started and now never
+      // will; the execution ends here rather than waiting for a reaper (ADR-002 §29).
+      statements.closeWithError(executionId, ExecutionErrorCode.CANCELLED, now);
+      return InternalCallbackException.conflict(
+          InternalCallbackCodes.EXECUTION_SETTLED, "This execution was cancelled before admission");
+    }
     if ("DONE".equals(state)) {
       return InternalCallbackException.conflict(
           InternalCallbackCodes.EXECUTION_SETTLED, "This execution is already settled");

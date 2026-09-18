@@ -174,7 +174,7 @@ describe('AC-6: a terminal ERROR says what happened to the browser and who can c
     }
   });
 
-  it('renders the browser claim and the remedy owner for FX-ERRCODE-TIMEOUT, FX-ERRCODE-DISPATCH_FAILED, FX-ERRCODE-DISPATCH_UNKNOWN, FX-ERRCODE-START_TIMEOUT, FX-ERRCODE-STALE, FX-ERRCODE-DISPATCH_DISABLED, FX-ERRCODE-AUTHORIZATION_REVOKED, FX-ERRCODE-REFERENCE_UNAVAILABLE', () => {
+  it('renders the browser claim and the remedy owner for FX-ERRCODE-TIMEOUT, FX-ERRCODE-DISPATCH_FAILED, FX-ERRCODE-DISPATCH_UNKNOWN, FX-ERRCODE-START_TIMEOUT, FX-ERRCODE-STALE, FX-ERRCODE-DISPATCH_DISABLED, FX-ERRCODE-AUTHORIZATION_REVOKED, FX-ERRCODE-REFERENCE_UNAVAILABLE, FX-ERRCODE-CANCELLED', () => {
     for (const code of EXECUTION_ERROR_CODES) {
       const facts = PINNED_EXECUTION_ERROR_FACTS[code];
       const view = render(<ExecutionProgressView snapshot={errorCodeExecutions[code]} />);
@@ -192,7 +192,7 @@ describe('AC-6: a terminal ERROR says what happened to the browser and who can c
     }
   });
 
-  it('offers a re-run only where the document clears the code with a new execution — FX-ERRCODE-DISPATCH_FAILED, FX-ERRCODE-START_TIMEOUT, FX-ERRCODE-STALE, FX-ERRCODE-TIMEOUT, FX-ERRCODE-DISPATCH_DISABLED, FX-ERRCODE-AUTHORIZATION_REVOKED, FX-ERRCODE-REFERENCE_UNAVAILABLE', () => {
+  it('offers a re-run only where the document clears the code with a new execution — FX-ERRCODE-DISPATCH_FAILED, FX-ERRCODE-START_TIMEOUT, FX-ERRCODE-STALE, FX-ERRCODE-TIMEOUT, FX-ERRCODE-DISPATCH_DISABLED, FX-ERRCODE-AUTHORIZATION_REVOKED, FX-ERRCODE-REFERENCE_UNAVAILABLE, FX-ERRCODE-CANCELLED', () => {
     const offering: string[] = [];
     for (const code of EXECUTION_ERROR_CODES) {
       const view = render(
@@ -218,6 +218,20 @@ describe('AC-6: a terminal ERROR says what happened to the browser and who can c
     );
     expect(screen.queryByRole('button', { name: RERUN_LABEL })).toBeNull();
     expect(screen.getByTestId('execution-error-browser').textContent).toMatch(/unknown/i);
+  });
+
+  it('CANCELLED is named "Cancelled" in a status region, never an error alert, and offers no re-run [FX-ERRCODE-CANCELLED]', () => {
+    // Studio v1 WP4 (ADR-002 §29): the person who pressed Stop caused this outcome, so it is not
+    // explained as a failure — but its two facts still render, in the same slots as every code's.
+    render(<ExecutionProgressView snapshot={errorCodeExecutions.CANCELLED} onRerun={() => {}} />);
+    expect(screen.getByTestId('execution-status').textContent).toBe('Cancelled');
+    expect(screen.getByTestId('execution-cancelled')).toHaveAttribute('role', 'status');
+    expect(screen.queryByTestId('execution-error')).toBeNull();
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByTestId('execution-error-browser').textContent).toContain(
+      PINNED_EXECUTION_ERROR_FACTS.CANCELLED.browserPhrase,
+    );
+    expect(screen.queryByRole('button', { name: RERUN_LABEL })).toBeNull();
   });
 
   it('a null code on a non-ERROR status renders no error region at all [FX-ERRCODE-NULL]', () => {

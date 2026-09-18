@@ -606,6 +606,7 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
 const KILL_FAILURE_KINDS: Readonly<Record<SessionKillReason, string>> = {
   'total-runtime': 'total-timeout',
   drain: 'run-fault',
+  cancel: 'cancelled',
 };
 
 /** What a killed run says about itself. Bounded and value-free, so it is safe to report. */
@@ -614,10 +615,14 @@ const KILL_MESSAGES: Readonly<Record<SessionKillReason, string>> = {
     'The total browser runtime deadline was reached and the browser process tree was stopped.',
   drain:
     'The runner drained while this run was still in flight; the browser process tree was stopped.',
+  cancel: 'The run was cancelled and the browser process tree was stopped.',
 };
 
 /** Exported for the tests that assert the exact text on the serialized `FINAL` body. */
 export const TOTAL_TIMEOUT_MESSAGE = KILL_MESSAGES['total-runtime'];
+
+/** Exported for the tests that assert the cancel's text on the serialized `FINAL` body. */
+export const CANCELLED_MESSAGE = KILL_MESSAGES.cancel;
 
 /**
  * Lines of child output one run may relay before the rest are dropped and counted (AC-8).

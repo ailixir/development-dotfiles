@@ -6,7 +6,6 @@ export {
   LOGS_TRUNCATED_STATEMENT,
   RERUN_LABEL,
   UNNAMED_ERROR_STATEMENT,
-  CANCELLED_STATEMENT,
   SEEK_LABEL,
   seekControlLabel,
 } from './ExecutionProgressView';

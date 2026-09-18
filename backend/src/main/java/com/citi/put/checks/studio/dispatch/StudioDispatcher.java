@@ -131,8 +131,15 @@ public class StudioDispatcher {
     return instanceId;
   }
 
-  /** One pass. Returns how many rows it dispatched. */
+  /**
+   * One pass. Returns how many rows it dispatched.
+   *
+   * <p>The pass begins by relaying recorded cancels (Studio v1 WP4), whatever the kill switch says:
+   * the switch stops new browser work, and a cancel only ever stops browser work that already
+   * exists.
+   */
   public int dispatchOnce() {
+    relayCancels();
     if (!properties.enabledOrDefault()) {
       return closeUndispatchedWork();
     }
@@ -192,6 +199,42 @@ public class StudioDispatcher {
       }
     }
     return closed;
+  }
+
+  /**
+   * Relays every recorded cancel whose run a runner holds and has not yet acknowledged (Studio v1
+   * WP4, ADR-002 §29). Returns how many the runner acknowledged in this pass.
+   *
+   * <p>One {@code DELETE /v1/runs/{id}} per row per pass. An acknowledged relay — {@code 202}, or
+   * {@code 409} for a run that had already finished — is recorded so no later pass repeats it. An
+   * unacknowledged one is left for the next pass, because a {@code 404} can mean the request
+   * reached a runner pod that does not hold the run; the running reaper bounds how long that goes
+   * on by closing the cancel itself.
+   *
+   * <p>The relay never writes an outcome. The run ends when the runner's {@code FINAL} report lands
+   * through the ordinary report path, or when the reaper closes it.
+   */
+  public int relayCancels() {
+    int acknowledged = 0;
+    for (UUID executionId :
+        statements.findCancelsToRelay(properties.dispatcherOrDefault().batchSizeOrDefault())) {
+      RunnerDispatchClient.CancelOutcome outcome = runnerClient.cancel(executionId);
+      if (outcome != null && outcome.settled()) {
+        Integer marked =
+            transactions.execute(
+                status -> statements.markCancelRelayed(executionId, clock.instant()));
+        if (marked != null && marked == 1) {
+          acknowledged++;
+        }
+      } else {
+        LOGGER.info(
+            "Studio cancel of execution {} not acknowledged by the runner ({}); the next pass "
+                + "retries it",
+            executionId,
+            outcome);
+      }
+    }
+    return acknowledged;
   }
 
   /** Claims and dispatches one named execution. Returns true when a send left the process. */

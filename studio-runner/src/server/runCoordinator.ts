@@ -36,8 +36,23 @@
  * The run executes detached from the request. Scratch is created, the browser is launched,
  * `STARTED` is reported *after* the launch resolves, steps flow through the 10.2 `StepReporter`
  * seam, and the terminal report is delivered with byte-identical bounded retry. Every exit path —
- * success, failure, throw, drain — clears scratch, wipes the resolved values and releases the
- * slot.
+ * success, failure, throw, drain, cancel — clears scratch, wipes the resolved values and releases
+ * the slot.
+ *
+ * ## Cancel (`DELETE /v1/runs/{id}`, Studio v1 WP4)
+ *
+ * A cancel is the deadline's stop for a different reason: the parent orders the stop, the child
+ * gets `browserStopTimeoutMs` (default 5 s) to close its context and finalize the recording, and
+ * then the process tree is killed. The outcome is `ERROR` / `CANCELLED` and the evidence is
+ * whatever the recorder achieved. A run cancelled before its browser started never starts one.
+ *
+ * | The run is | `DELETE` answers | What happens |
+ * |---|---|---|
+ * | admitted, browser not yet running | `202 CANCELLING` | no browser is launched, or the one just launched is stopped before any step |
+ * | running | `202 CANCELLING` | ordered stop, bounded grace, process tree |
+ * | already stopping for a cancel | `202 CANCELLING` | nothing new is ordered |
+ * | past its outcome (evidence, delivery) or recently finished | `409 RUN_FINISHED` | nothing |
+ * | unknown to this runner | `404 RUN_NOT_FOUND` | nothing |
  */
 import { createRedactor } from '../executor/redaction.js';
 import type { ExecutableStep, ValueResolver } from '../executor/index.js';
@@ -94,6 +109,25 @@ export interface RunDecision {
   readonly retryAfterSeconds?: number;
   /** Key names and codes only; never a job value (AC-20). */
   readonly detail?: readonly { readonly code: string; readonly field: string }[];
+}
+
+/** The answer to `DELETE /v1/runs/{id}` (ADR-002 §29). */
+export interface CancelDecision {
+  readonly status: 202 | 404 | 409;
+  readonly code: 'CANCELLING' | 'RUN_NOT_FOUND' | 'RUN_FINISHED';
+}
+
+/**
+ * How many finished runs are remembered so a late cancel can answer `409` rather than `404`.
+ * Bounded: a runner serves one browser at a time, and the API relays a cancel within seconds.
+ */
+export const FINISHED_RUNS_REMEMBERED = 256;
+
+/** One admitted run's cancel handle. Registered at admission, dropped when its outcome is known. */
+interface RunControl {
+  cancelled: boolean;
+  /** Present while a started session can be stopped; the same `endRun` the deadline uses. */
+  end: ((reason: SessionKillReason) => void) | null;
 }
 
 export interface RunCoordinatorOptions {
@@ -186,6 +220,11 @@ export interface RunCoordinator {
    * bounded by `launchTimeoutMs`.
    */
   terminateInFlight(): number;
+  /**
+   * `DELETE /v1/runs/{id}` (Studio v1 WP4, ADR-002 §29). Synchronous: it records the request and
+   * orders the stop if a session exists; the run's own path delivers the `FINAL` report.
+   */
+  cancel(executionId: string): CancelDecision;
   readonly inFlight: number;
 }
 
@@ -308,12 +347,34 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
   const inFlight = new Set<Promise<void>>();
   /** One entry per run that has a killable session; removed when the run leaves (AC-15). */
   const terminators = new Set<(reason: SessionKillReason) => void>();
+  /** Admitted runs whose outcome is not yet known, by execution id (ADR-002 §29). */
+  const controls = new Map<string, RunControl>();
+  /** Recently finished execution ids, oldest first, bounded by {@link FINISHED_RUNS_REMEMBERED}. */
+  const finished = new Set<string>();
+
+  function rememberFinished(executionId: string): void {
+    finished.delete(executionId);
+    finished.add(executionId);
+    while (finished.size > FINISHED_RUNS_REMEMBERED) {
+      const oldest = finished.values().next().value;
+      if (oldest === undefined) break;
+      finished.delete(oldest);
+    }
+  }
+
+  /** Throws the cancel's failure when the run was cancelled before it had a session to stop. */
+  function refuseIfCancelled(control: RunControl, stage: string): void {
+    if (control.cancelled) {
+      throw new RunFailure('cancelled', `The run was cancelled ${stage}; no browser step ran.`);
+    }
+  }
 
   async function execute(
     job: JobEnvelope,
     steps: readonly ExecutableStep[],
     admissionId: string,
     admittedAtMs: number,
+    control: RunControl,
   ): Promise<void> {
     const identity = {
       executionId: job.executionId,
@@ -442,6 +503,9 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         );
       }
 
+      // The last point at which a cancel costs nothing: no browser exists yet (ADR-002 §29).
+      refuseIfCancelled(control, 'before its browser was launched');
+
       let session: BrowserSession;
       try {
         session = await launcher.launch({
@@ -513,13 +577,16 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
               reason === 'total-runtime'
                 ? `The total browser runtime deadline of ${String(runtimeCapMs)}ms was reached; ` +
                   'the browser process tree is being stopped.'
-                : 'The runner drained while this run was still in flight; the browser process ' +
-                  'tree is being stopped.',
+                : reason === 'cancel'
+                  ? 'The run was cancelled; the browser process tree is being stopped.'
+                  : 'The runner drained while this run was still in flight; the browser process ' +
+                    'tree is being stopped.',
           });
           kills.push(runSession.kill(reason));
         };
         terminate = endRun;
         terminators.add(endRun);
+        control.end = endRun;
 
         deadline = createRuntimeDeadline({
           capMs: runtimeCapMs,
@@ -530,6 +597,16 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
           },
         });
         deadline.arm();
+      }
+
+      // A cancel that arrived while the browser was launching: stop it before a step is sent. The
+      // session is closed by the `finally` below exactly as on every other path.
+      if (control.cancelled) {
+        await session.close();
+        throw new RunFailure(
+          'cancelled',
+          'The run was cancelled while its browser was starting; no browser step ran.',
+        );
       }
 
       let result: SessionRunResult;
@@ -594,6 +671,10 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       };
     } finally {
       if (terminate !== null) terminators.delete(terminate);
+      // The outcome is known from here on: a cancel arriving now is answered `409`, never obeyed.
+      control.end = null;
+      controls.delete(job.executionId);
+      rememberFinished(job.executionId);
       // Every exit path reaches here — success, step failure, launch failure, start-deadline
       // refusal, **runtime-deadline kill**, run fault and drain — which is why the kill is made to
       // resolve `execute` rather than to abandon it. A kill that left the awaited promise pending
@@ -802,6 +883,22 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       return inFlight.size;
     },
 
+    cancel(executionId: string): CancelDecision {
+      const control = controls.get(executionId);
+      if (control === undefined) {
+        return finished.has(executionId)
+          ? { status: 409, code: 'RUN_FINISHED' }
+          : { status: 404, code: 'RUN_NOT_FOUND' };
+      }
+      if (!control.cancelled) {
+        control.cancelled = true;
+        logger.info('run.cancel_requested', { executionId });
+        // Idempotent on the run's side too: `endRun` orders one stop, whoever asks.
+        control.end?.('cancel');
+      }
+      return { status: 202, code: 'CANCELLING' };
+    },
+
     terminateInFlight(): number {
       const pending = [...terminators];
       for (const end of pending) end('drain');
@@ -895,7 +992,10 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // admission, which is the instant §5.2's "the runner refuses to launch after the
       // server-issued admission/start deadline" starts counting from.
       const admittedAtMs = options.now();
-      const task = execute(job, steps, identity.admissionId, admittedAtMs)
+      // Registered before the run starts, so a cancel that races the `202` still finds it.
+      const control: RunControl = { cancelled: false, end: null };
+      controls.set(job.executionId, control);
+      const task = execute(job, steps, identity.admissionId, admittedAtMs, control)
         .catch((error: unknown) => {
           logger.error('run.failed', {
             executionId: job.executionId,

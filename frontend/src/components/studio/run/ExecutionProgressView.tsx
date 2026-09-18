@@ -46,8 +46,6 @@ export const LOGS_TRUNCATED_STATEMENT =
   'Earlier log lines were dropped before this report reached you: the run produced more than the server retains.';
 export const RERUN_LABEL = 'Run again';
 export const SEEK_LABEL = 'Show in recording';
-export const CANCELLED_STATEMENT =
-  'This run was stopped on request. Steps that had not finished were not completed, and any recording is whatever was captured before the stop.';
 export const UNNAMED_ERROR_STATEMENT =
   'The run ended in an error the server could not name, so there is nothing here to explain it. Nothing about the browser can be concluded from this.';
 
@@ -143,10 +141,10 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
   // `FAILED` with no code, and inventing a region for it would name a cause the server did not.
   const code = snapshot.errorCode;
   // A cancelled run is named, not explained as a failure: the person who pressed Stop caused it.
-  // It is checked first because `CANCELLED` is not yet in the contract's enum (see
-  // `CANCELLED_ERROR_CODE`), and the narrative lookup throws on a code the enum does not declare.
+  // Its narrative is the contract's like every other code's (ADR-002 §29); only the region differs
+  // — a status, not an alert — so the two facts render in the same slots either way.
   const cancelled = isCancelledOutcome(snapshot.status, code);
-  const narrative = code !== null && !cancelled ? executionErrorNarrative(code) : null;
+  const narrative = code !== null ? executionErrorNarrative(code) : null;
 
   return (
     <Box data-testid="execution-progress">
@@ -158,7 +156,7 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
         />
       </Stack>
 
-      {cancelled && (
+      {cancelled && narrative && (
         <Alert
           severity="info"
           role="status"
@@ -166,7 +164,15 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
           data-testid="execution-cancelled"
           sx={{ mb: 2 }}
         >
-          <Typography variant="body2">{CANCELLED_STATEMENT}</Typography>
+          <AlertTitle data-testid="execution-error-title">{narrative.title}</AlertTitle>
+          <Stack spacing={0.5}>
+            <Typography variant="body2" data-testid="execution-error-browser">
+              {narrative.browserClaim}
+            </Typography>
+            <Typography variant="body2" data-testid="execution-error-remedy">
+              {narrative.remedyOwner}
+            </Typography>
+          </Stack>
         </Alert>
       )}
 
@@ -176,7 +182,7 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
         </Alert>
       )}
 
-      {narrative && (
+      {narrative && !cancelled && (
         <Alert
           severity="error"
           role="alert"
