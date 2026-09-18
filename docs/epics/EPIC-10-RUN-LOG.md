@@ -2253,3 +2253,70 @@ files are ` M` in `wt/epic`), or older still is **not yet determined**.
 Legs 2 and 3 cannot pass until identity is fixed, so **`DEF-02`'s path remains unexercised by running**;
 the video ranged read has no leg (the injected store is still a fake, and there is nothing to read until a
 dispatch is admitted); and **no browser has ever launched on this host** in any leg.
+
+## Phase 1 merged; DEF-05 deferred to the other program (2026-09-17)
+
+All four Phase-0/1 branches merged into `epic/EPIC-10-w7`, now **41 commits ahead** of `epic/EPIC-10`:
+`chore/p0-record` (record truing), `fix/p1-quality` (the `$ref` walk and the re-scoped disclosure pin),
+`feat/p1-corun` (the harness), `story/10.34` (the staging-acceptance successor story). Three clean merges,
+no conflicts.
+
+### `DEF-05` — the other program is already fixing it
+
+Checked before drafting a fix, on the rule that has now saved duplicate work three times (`F-3`, `10.33`,
+and this). `HttpRunnerDispatchClient.java` is ` M` in `wt/epic`, **+11/−6**, and their edit is the fix:
+
+```java
+.header("Authorization", "Bearer " + runner.serviceIdentityToken())
+```
+
+plus `StudioRunnerProperties` injected in place of a `@Value`-bound URL string, a pre-flight
+`refusedTerminal("studio runner URL and service identity are required")` when unconfigured or the token is
+blank, and base-URL normalisation.
+
+**User decision: defer implementation to theirs; gate it with our harness.** Story **10.35** is drafted as an
+**acceptance spec only** — the 10.33 / F-3 pattern. We specify what correct means and verify what lands; we
+do not author a second fix in a file they have open.
+
+**Why our harness still matters, and why this is not a wasted finding.** Their fix is **unverified against a
+real runner** — their tree has no co-run, and their `dev.sh --studio` cannot go red. Their fix is in exactly
+the position `DEF-01`'s body fix was in this morning: correct-looking, never exercised. Ours is the only
+thing in either tree that can prove it works. Two programs independently reaching the same defect is also
+the strongest corroboration the harness has: it found, on its first run, something another team had already
+judged real.
+
+**The acceptance criterion that matters most** is not "the dispatch succeeds". It is that **`DEF-01`'s
+defect class becomes observable again**: today a malformed dispatch body produces a response byte-identical
+to the baseline, because identity is refused before the body is parsed. The fix is not accepted until the
+class it unmasks is demonstrably visible.
+
+### The other tree moved under us — three new fold blockers, all benign
+
+`wt/epic` is back to **263** dirty paths (it was 241 when @architect and @sm read it). It has since touched
+three files this phase also edited, taking the fold blockers from **14 to 17**:
+`helm-chart/put-checks/values-uat.yaml`, `values-prod.yaml`, `studio-runner/test/disclosure.test.ts`.
+
+**All three are different-region edits and would merge cleanly.** Theirs changes a `callbackBaseUrl` value
+and an unrelated AC-18 test; ours changes the `ED-02` comment block and different needles. The conservative
+rule in force — *no incoming file may be dirty there* — flags them; the actual conflict risk is low.
+
+Worth recording precisely because I cleared two of those files as "safe" earlier today and the clearance went
+stale within the hour. **A blocker list computed against a live uncommitted tree is a snapshot with a
+shelf life**, and must be recomputed immediately before any fold, never carried.
+
+Convergent, and mildly reassuring: their `disclosure.test.ts` edit is itself disclosure-pin maintenance —
+replacing a stale *"inert since the chart was written"* claim with the corrected mounted-configuration
+mechanism. Both programs are independently maintaining the same guard against the same class of rot.
+
+### The masked `checks.*` / `reports.*` failures — routed to @pm, by user decision
+
+Ten failures, measured on the clean tip and reproduced identically: `CheckCrudIT` ×2, `ReportsCrudIT` ×2,
+`ReportsExecutionIT` ×2, `ReportsPreviewIT` ×2, `ReportsDuplicateIT`, `ReportDeliveryDispatcherIT`
+(`initializationError`). **Outside Epic 10's scope**, and those files are dirty in the other program's tree,
+so investigating here risks duplicating work in flight. Recorded and handed to @pm with ownership
+undetermined — ours, theirs, or older.
+
+**The lesson is the epic's, not @pm's.** Every run in this epic was scoped
+`--tests 'com.citi.put.checks.studio.*'`, a mitigation for `MED-2`'s hanging `check`. That narrowing is why
+ten failing tests went unreported for the epic's entire duration. **The mitigation for one blind spot
+manufactured another** — and it was only found because a harness happened to run a wider suite once.
