@@ -63,6 +63,8 @@ const REQUIRED_FILES = [
   'scaling.test.ts',
   // Studio v1 gaps: the API/worker/runner environment the three pods need to reach each other.
   'backend-env.test.ts',
+  // Studio v1 WP16: the worker receives the same runner timings its cancel budget is derived from.
+  'cancel-budget-env.test.ts',
 ] as const;
 
 describe('the deployment-evidence tier is wired and cannot be lost quietly (QA HIGH-1)', () => {
