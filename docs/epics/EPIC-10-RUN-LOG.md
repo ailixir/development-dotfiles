@@ -2168,3 +2168,88 @@ paths**, all dirty in the other session's tree. Twelve external gates remain ope
 
 **The local half of Epic 10 is closed. The capability is unvalidated, and no work in this repository can
 change that.**
+
+## Phase 1 — the co-run harness finds what nine waves of green tests could not (2026-09-17)
+
+The closure plan's central finding was that **the API and the studio-runner had never run together**, and that the
+epic's two HIGH integration defects were both found by *reading code* because nothing existed that could find
+them by running. A local co-run harness was built to close that gap (`3857bcecb`, `feat/p1-corun`, six new
+files, zero production code changed).
+
+**On its first run it found a new HIGH defect. The API still cannot dispatch a run.**
+
+### `DEF-05` — the dispatch path presents no service identity (HIGH, routed to @po)
+
+```
+component : studio-runner (POST /v1/runs), as reached by HttpRunnerDispatchClient
+refused   : never admitted — no admission_id on the ledger; state DONE, execution ERROR/DISPATCH_FAILED
+runner log: {"event":"request.unauthenticated","path":"/v1/runs","code":"IDENTITY_MISSING"}
+```
+
+Verified independently by the orchestrator, by reading the three sources:
+- `docs/specs/studio/openapi.yaml` declares `security: [serviceIdentity]` on **both** runner routes —
+  `runnerValidateArtifact` (`:849`, security at `:861-862`) and `runnerAdmitRun` (`:903`, security at `:927-928`).
+- `RunnerValidationClient.java:90` complies: `headers.setBearerAuth(properties.serviceIdentityToken())`.
+- **`HttpRunnerDispatchClient` sets no authentication header at all.** A grep for `Bearer`, `Authorization`,
+  `auth` or any `headers.` call over the whole file returns **nothing**. There is no outbound identity
+  property on the dispatch path; `StudioExecutionProperties` carries `callback.serviceToken` (inbound) only.
+
+The proof is structural, not circumstantial: **in one run, against one runner, in one service, leg 1
+(validate) is green and leg 2 (dispatch) is red.**
+
+### Why this was invisible, and why it matters more than the defect itself
+
+`DEF-01` recorded that *"the API has never been able to dispatch a run"*, diagnosed it as a malformed body
+against a closed schema, and fixed it. That fix is real — the body now carries all fourteen required keys.
+**But the identity refusal happens before the body is ever parsed.** Mutation M1a proves it: dropping a
+required key from the dispatch body produces a response **byte-identical to the baseline**.
+
+So DEF-01's entire defect class is **currently unobservable on the dispatch route**, and the fix for it has
+never been exercised and *could not have been*. It becomes observable the moment identity is fixed. The
+harness says so in its own failure message rather than leaving the next reader to discover it.
+
+Nine waves, 709 green tests in the studio package, and the system's primary path has never once worked.
+
+### The harness was itself falsified — including one guard that would have lied
+
+Five mutations, four producing **distinguishable** diagnoses (dead port → *"recorded NOTHING … suspect the
+address"*; gateway refusal → `GATEWAY_TRANSPORT`, validator calls **0**; wrong credential → runner logs
+`IDENTITY_REJECTED`, validator calls **1**; malformed validate body → runner logs nothing). M1a is
+indistinguishable *and that is the finding*, not a harness defect.
+
+**M2 caught a vacuous guard in the harness before it ever ran.** The original leg-2 assertion accepted state
+`DISPATCHING`, which is written *before* the send — so it would have gone **green against a runner at a
+completely wrong address**. Re-anchored on `admission_id IS NOT NULL`, the one column only the runner's own
+CAS can write.
+
+Two guards on the harness itself, both aimed at the failure mode that would make all of this worthless:
+- **G1** — without the enabling flag, Gradle prints `BUILD SUCCESSFUL` and exits **0** with all four tests
+  skipped. The reporter exits **1**: *"An empty run is not a green run."*
+- **G2** — an unbuilt runner fails loudly with the command that fixes it, never as a skip.
+
+### The other program's `dev.sh --studio` does not solve this
+Adopted its wiring (env enumeration, filesystem store, loopback-only, health gate), but it calls a
+`probe.js` that is untracked there and absent here, exports a key our fail-closed loader refuses, and —
+decisively — **is a dev-server launcher, not a harness**: it starts two processes and leaves them for a
+human. It never creates a draft, never dispatches, never asserts, and **cannot go red**.
+
+### A second finding: the narrow test scope has been masking failures the whole epic
+
+Track B reported 10 failures in `checks.*` and `reports.*` and argued from `git diff` that they were
+pre-existing rather than measuring it. **Measured on the clean tip `w7`, with no co-run file present:**
+
+```
+89 tests completed, 10 failed   —   CheckCrudIT ×2, ReportsCrudIT ×2, ReportsExecutionIT ×2,
+ReportsPreviewIT ×2, ReportsDuplicateIT, ReportDeliveryDispatcherIT (initializationError)
+```
+
+Identical set. Track B is exonerated — **and the epic is not.** Every run in this epic has been scoped
+`--tests 'com.citi.put.checks.studio.*'`, a mitigation adopted for `MED-2`'s hanging `check`. That narrowing
+is why **ten failing tests outside the studio package have gone unreported for the epic's entire duration**.
+The mitigation for one blind spot manufactured another. Whether they are ours, the other program's (those
+files are ` M` in `wt/epic`), or older still is **not yet determined**.
+
+### Still unproven, stated plainly
+Legs 2 and 3 cannot pass until identity is fixed, so **`DEF-02`'s path remains unexercised by running**;
+the video ranged read has no leg (the injected store is still a fake, and there is nothing to read until a
+dispatch is admitted); and **no browser has ever launched on this host** in any leg.
