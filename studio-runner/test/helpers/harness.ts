@@ -65,6 +65,8 @@ export interface HarnessOptions {
    * exactly `totalRuntimeMs` after the browser start" is an assertion rather than a sleep.
    */
   readonly scheduler?: FakeScheduler;
+  /** The control read's own timers (ADR-002 §29). Never advanced unless a test does it. */
+  readonly controlScheduler?: FakeScheduler;
   /** Substitutes the object store; story 10.14's ordering and failure-path tests pass their own. */
   readonly objectStore?: ObjectStoreClient;
   /** Substitutes the uploader's filesystem port, so whole-file reads can be counted (AC-5). */
@@ -99,6 +101,8 @@ export interface Harness {
   readonly sink: RecordingLogSink;
   /** The clock and timer facility the run is driven on (10.13). */
   readonly scheduler: FakeScheduler;
+  /** The control read's scheduler, separate so the deadline suites never see a poll. */
+  readonly controlScheduler: FakeScheduler;
   /** Advances the injected monotonic clock, firing any deadline that comes due. */
   advance(ms: number): void;
   readonly sleeps: readonly number[];
@@ -165,6 +169,7 @@ export function createHarness(options: HarnessOptions = {}): Harness {
   const evidenceFileSystem = options.evidenceFileSystem ?? FAKE_EVIDENCE_FILE_SYSTEM;
   const sleeps: number[] = [];
   const scheduler = options.scheduler ?? createFakeScheduler();
+  const controlScheduler = options.controlScheduler ?? createFakeScheduler();
   let port = 0;
 
   const app = createApplication(config, {
@@ -176,6 +181,7 @@ export function createHarness(options: HarnessOptions = {}): Harness {
     pool: options.pool,
     now: options.now ?? scheduler.now,
     timers: scheduler,
+    controlTimers: controlScheduler,
     // Fixed wall clock so a FINAL body is byte-comparable without a fake timer library.
     wallClock: () => new Date('2026-09-11T10:00:00.000Z'),
     sleep: (ms: number) => {
@@ -201,6 +207,7 @@ export function createHarness(options: HarnessOptions = {}): Harness {
     log,
     sink,
     scheduler,
+    controlScheduler,
     sleeps,
     advance(ms: number): void {
       scheduler.advance(ms);

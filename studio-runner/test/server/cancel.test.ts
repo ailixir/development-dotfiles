@@ -18,7 +18,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { CANCELLED_MESSAGE } from '../../src/run/launcher.js';
 import type { ReportBody } from '../../src/reporting/snapshot.js';
-import { FINISHED_RUNS_REMEMBERED } from '../../src/server/runCoordinator.js';
+import {
+  CONTROL_POLL_INTERVAL_MS,
+  FINISHED_RUNS_REMEMBERED,
+} from '../../src/server/runCoordinator.js';
 import { createFsScratchStore } from '../../src/server/scratch.js';
 import { createChildDriver } from '../helpers/childDriver.js';
 import type { ChildScript } from '../helpers/childDriver.js';
@@ -35,6 +38,8 @@ const GRACE_MS = 250;
 
 let harness: Harness | null = null;
 const roots: string[] = [];
+/** A second pod, for the multi-pod scenario; stopped alongside the first. */
+let secondPod: Harness | null = null;
 
 function realScratch(): ReturnType<typeof createFsScratchStore> {
   const root = mkdtempSync(join(tmpdir(), 'studio-runner-cancel-'));
@@ -45,6 +50,8 @@ function realScratch(): ReturnType<typeof createFsScratchStore> {
 afterEach(async () => {
   await harness?.stop();
   harness = null;
+  await secondPod?.stop();
+  secondPod = null;
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
 });
 
@@ -83,11 +90,13 @@ function del(port: number, path: string, token: string | null): Promise<Response
 /** Admits one run whose child hangs in its first step, and returns once the run is under way. */
 async function hangOne(
   script: ChildScript,
+  configure: (runner: Harness) => void = () => undefined,
 ): Promise<{ driver: ReturnType<typeof createChildDriver>; runner: Harness }> {
   const scheduler = createFakeScheduler();
   const driver = createChildDriver(script, { stopTimeoutMs: GRACE_MS });
   const runner = createHarness({ launcher: driver.launcher, scheduler, scratch: realScratch() });
   harness = runner;
+  configure(runner);
   await runner.start();
   const admitted = await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
   expect(admitted.status).toBe(202);
@@ -250,4 +259,107 @@ describe('the grace the deployment runs with', () => {
     const runner = createHarness();
     expect(runner.config.browserStopTimeoutMs).toBe(5_000);
   });
+});
+
+// ── The pull half (ADR-002 §29): the pod that holds the run learns the cancel itself ──────────
+
+const CANCEL_ACK = { kind: 'response', status: 200, body: '{"cancelRequested":true}' } as const;
+
+describe('the owning runner pulls the cancel, whatever pod the DELETE reached', () => {
+  it('stops the run when the control read says cancelRequested, on the same path as DELETE', async () => {
+    const { driver, runner } = await hangOne({ hangOnStep: 0, onStop: 'flush' });
+    expect(runner.http.controlRequests).toHaveLength(0);
+
+    runner.http.controlOutcome = CANCEL_ACK;
+    runner.controlScheduler.advance(CONTROL_POLL_INTERVAL_MS);
+    await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
+
+    const read = runner.http.controlRequests[0];
+    expect(read?.url).toBe(
+      `https://api.internal.example/internal/studio/executions/${EXECUTION_ID}/control`,
+    );
+    expect(read?.headers.authorization).toBe(`Bearer ${runner.config.callbackIdentityToken}`);
+    expect(sentKinds(driver)).toContain('stop');
+    expect(finalReport(runner).outcome?.errorCode).toBe('CANCELLED');
+  }, 20_000);
+
+  it('reads every interval while nothing is cancelled, and never before the first interval', async () => {
+    const { runner } = await hangOne({ hangOnStep: 0, onStop: 'flush' });
+
+    runner.controlScheduler.advance(CONTROL_POLL_INTERVAL_MS - 1);
+    expect(runner.http.controlRequests).toHaveLength(0);
+    runner.controlScheduler.advance(1);
+    await within(() => runner.http.controlRequests.length === 1, 5_000);
+    runner.controlScheduler.advance(CONTROL_POLL_INTERVAL_MS);
+    await within(() => runner.http.controlRequests.length === 2, 5_000);
+    expect(runner.app.coordinator.inFlight).toBe(1);
+
+    runner.scheduler.advance(120_000);
+    await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
+  }, 20_000);
+
+  it('stops the run when a progress acknowledgement carries cancelRequested', async () => {
+    // Not `hangOne`: its wait for the armed deadline races the stop this test is about.
+    const driver = createChildDriver({ hangOnStep: 0, onStop: 'flush' }, { stopTimeoutMs: GRACE_MS });
+    const runner = createHarness({ launcher: driver.launcher, scratch: realScratch() });
+    harness = runner;
+    // Every report the API acknowledges says a cancel is recorded: the first one to land stops the
+    // run, with no DELETE and no control read at all.
+    runner.http.reportOutcome = CANCEL_ACK;
+    await runner.start();
+    expect((await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN)).status).toBe(202);
+
+    await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
+
+    expect(runner.http.controlRequests).toHaveLength(0);
+    expect(sentKinds(driver)).toContain('stop');
+    expect(finalReport(runner).outcome?.errorCode).toBe('CANCELLED');
+  }, 20_000);
+
+  it('stops polling once the run has ended', async () => {
+    const { runner } = await hangOne({ hangOnStep: 0, onStop: 'flush' });
+    expect(runner.controlScheduler.pending()).toEqual([CONTROL_POLL_INTERVAL_MS]);
+
+    runner.scheduler.advance(120_000);
+    await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
+
+    expect(runner.controlScheduler.pending()).toEqual([]);
+    runner.controlScheduler.advance(CONTROL_POLL_INTERVAL_MS * 5);
+    await new Promise<void>((resolve) => setTimeout(resolve, 20));
+    expect(runner.http.controlRequests).toHaveLength(0);
+  }, 20_000);
+
+  it('two pods: the DELETE lands on the wrong one (404) and the owner still stops through the poll', async () => {
+    // The API's view, shared by both pods: a cancel is recorded or it is not.
+    let recorded = false;
+    const answer = (): { kind: 'response'; status: 200; body: string } => ({
+      kind: 'response',
+      status: 200,
+      body: JSON.stringify({ cancelRequested: recorded }),
+    });
+    const { driver, runner: owner } = await hangOne({ hangOnStep: 0, onStop: 'flush' }, (pod) => {
+      pod.http.controlOutcome = answer;
+    });
+    const other = createHarness({ scratch: realScratch() });
+    secondPod = other;
+    other.http.controlOutcome = answer;
+    await other.start();
+
+    // The API records the cancel and relays it through the Service, which picks the other pod.
+    recorded = true;
+    const relayed = await del(other.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN);
+    expect(relayed.status).toBe(404);
+    expect(relayed.body.code).toBe('RUN_NOT_FOUND');
+    expect(sentKinds(driver)).not.toContain('stop');
+
+    // Within one interval the owner reads the flag and stops on the same path.
+    owner.controlScheduler.advance(CONTROL_POLL_INTERVAL_MS);
+    await within(() => owner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
+
+    expect(sentKinds(driver)).toContain('stop');
+    const final = finalReport(owner);
+    expect(final.outcome?.result).toBe('ERROR');
+    expect(final.outcome?.errorCode).toBe('CANCELLED');
+    expect(other.http.reportRequests).toHaveLength(0);
+  }, 20_000);
 });
