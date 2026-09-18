@@ -32,6 +32,11 @@ public class InternalCallbackException extends RuntimeException {
     return new InternalCallbackException(HttpStatus.CONFLICT, code, message);
   }
 
+  /** {@code 404}: the read-only {@code control} route, for an id it does not know. */
+  public static InternalCallbackException notFound(String code, String message) {
+    return new InternalCallbackException(HttpStatus.NOT_FOUND, code, message);
+  }
+
   public static InternalCallbackException badRequest(String code, String message) {
     return new InternalCallbackException(HttpStatus.BAD_REQUEST, code, message);
   }

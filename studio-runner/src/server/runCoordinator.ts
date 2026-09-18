@@ -53,6 +53,12 @@
  * | already stopping for a cancel | `202 CANCELLING` | nothing new is ordered |
  * | past its outcome (evidence, delivery) or recently finished | `409 RUN_FINISHED` | nothing |
  * | unknown to this runner | `404 RUN_NOT_FOUND` | nothing |
+ *
+ * **The `DELETE` is only the fast path.** It goes through the runner Service, and with more than
+ * one pod it can land on one that does not hold the run. So the pod that does hold it also *pulls*
+ * the cancel (ADR-002 §29): it reads `GET /internal/studio/executions/{id}/control` every
+ * {@link CONTROL_POLL_INTERVAL_MS} from admission until the outcome is known, and it honours
+ * `cancelRequested` on every progress acknowledgement. All three signals take the same path.
  */
 import { createRedactor } from '../executor/redaction.js';
 import type { ExecutableStep, ValueResolver } from '../executor/index.js';
@@ -87,7 +93,7 @@ import type { HttpClient } from '../reporting/httpClient.js';
 import type { JobEnvelope } from '../reporting/envelope.js';
 import { knownValuesOf, validateEnvelope } from '../reporting/envelope.js';
 import type { ReportBounds } from '../reporting/bounds.js';
-import { createReportClient } from '../reporting/reportClient.js';
+import { ackRequestsCancel, createReportClient } from '../reporting/reportClient.js';
 import { createRunSnapshot } from '../reporting/snapshot.js';
 import type { EvidenceState, RunOutcome, RunSnapshot } from '../reporting/snapshot.js';
 import { createRunReporter } from '../reporting/reportingStepReporter.js';
@@ -122,6 +128,13 @@ export interface CancelDecision {
  * Bounded: a runner serves one browser at a time, and the API relays a cancel within seconds.
  */
 export const FINISHED_RUNS_REMEMBERED = 256;
+
+/**
+ * How often an active run reads its control state (ADR-002 §29). Two seconds keeps a cancel
+ * observed within about three whatever pod holds the run, at one primary-key read per active run.
+ * A constant, like `MAX_CHILD_OUTPUT_LINES`: it is a latency promise, not a deployment knob.
+ */
+export const CONTROL_POLL_INTERVAL_MS = 2_000;
 
 /** One admitted run's cancel handle. Registered at admission, dropped when its outcome is known. */
 interface RunControl {
@@ -184,6 +197,11 @@ export interface RunCoordinatorOptions {
    * `totalRuntimeMs` after the browser start" is an assertion rather than a race.
    */
   readonly timers?: DeadlineTimers | undefined;
+  /**
+   * The timer facility the control read is scheduled on (ADR-002 §29). Separate from `timers` so a
+   * test that drives the runtime deadline exactly is not also driving the poll, and the reverse.
+   */
+  readonly controlTimers?: DeadlineTimers | undefined;
   /**
    * How the run origin is taken when the session does **not** run in its own process.
    *
@@ -362,6 +380,63 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     }
   }
 
+  /** Records a cancel and orders the stop if a session exists. Idempotent; one path for all signals. */
+  function requestStop(executionId: string, control: RunControl, source: string): void {
+    if (control.cancelled) return;
+    control.cancelled = true;
+    logger.info('run.cancel_requested', { executionId, source });
+    control.end?.('cancel');
+  }
+
+  function controlUrl(executionId: string): string {
+    const base = options.callbackBaseUrl.endsWith('/')
+      ? options.callbackBaseUrl.slice(0, -1)
+      : options.callbackBaseUrl;
+    return `${base}/internal/studio/executions/${encodeURIComponent(executionId)}/control`;
+  }
+
+  /**
+   * Reads the run's control state every {@link CONTROL_POLL_INTERVAL_MS} until stopped (ADR-002
+   * §29). One request at a time: the next read is scheduled only after the previous one settled.
+   * A failed read changes nothing and the next one tries again; the API's reaper is the backstop.
+   */
+  function startControlPoll(executionId: string, control: RunControl): () => void {
+    const timers = options.controlTimers ?? SYSTEM_DEADLINE_TIMERS;
+    // An object, not a `let`: the flag is flipped by the returned closure while a read is awaited.
+    const poll = { stopped: false };
+    const isStopped = (): boolean => poll.stopped;
+    let timer: unknown = null;
+    const schedule = (): void => {
+      if (isStopped()) return;
+      timer = timers.set(() => {
+        timer = null;
+        void tick();
+      }, CONTROL_POLL_INTERVAL_MS);
+    };
+    const tick = async (): Promise<void> => {
+      if (isStopped() || control.cancelled) return;
+      const outcome = await options.http.send({
+        url: controlUrl(executionId),
+        method: 'GET',
+        headers: { authorization: `Bearer ${options.callbackIdentityToken}` },
+        body: '',
+        timeoutMs: options.reportTimeoutMs,
+      });
+      if (isStopped()) return;
+      if (outcome.kind === 'response' && outcome.status === 200 && ackRequestsCancel(outcome.body)) {
+        requestStop(executionId, control, 'control');
+        return;
+      }
+      schedule();
+    };
+    schedule();
+    return () => {
+      poll.stopped = true;
+      if (timer !== null) timers.clear(timer);
+      timer = null;
+    };
+  }
+
   /** Throws the cancel's failure when the run was cancelled before it had a session to stop. */
   function refuseIfCancelled(control: RunControl, stage: string): void {
     if (control.cancelled) {
@@ -406,6 +481,9 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       now: options.now,
       sleep: options.sleep,
       random: options.random,
+      onCancelRequested: () => {
+        requestStop(job.executionId, control, 'progress-ack');
+      },
     });
     const reporter = createRunReporter({ snapshot, client });
 
@@ -471,6 +549,10 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
 
     // Scratch is created here — after the CAS succeeded, never before it (AC-6).
     const runScratch = await scratch.create(admissionId);
+
+    // The pull half of cancel starts with the run and ends, in the `finally` below, when its
+    // outcome is known (ADR-002 §29).
+    const stopControlPoll = startControlPoll(job.executionId, control);
 
     try {
       // ── Before any browser process exists (AC-2). ───────────────────────────────────────────
@@ -671,7 +753,9 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       };
     } finally {
       if (terminate !== null) terminators.delete(terminate);
-      // The outcome is known from here on: a cancel arriving now is answered `409`, never obeyed.
+      // The outcome is known from here on: a cancel arriving now is answered `409`, never obeyed,
+      // and the control read stops.
+      stopControlPoll();
       control.end = null;
       controls.delete(job.executionId);
       rememberFinished(job.executionId);
@@ -890,12 +974,8 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
           ? { status: 409, code: 'RUN_FINISHED' }
           : { status: 404, code: 'RUN_NOT_FOUND' };
       }
-      if (!control.cancelled) {
-        control.cancelled = true;
-        logger.info('run.cancel_requested', { executionId });
-        // Idempotent on the run's side too: `endRun` orders one stop, whoever asks.
-        control.end?.('cancel');
-      }
+      // Idempotent on the run's side too: `endRun` orders one stop, whoever asks.
+      requestStop(executionId, control, 'delete');
       return { status: 202, code: 'CANCELLING' };
     },
 

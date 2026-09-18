@@ -53,7 +53,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * once" are counts of what left the process, filtered to the execution under test — never a
  * deployment-global total, which other classes' leftover rows would make meaningless.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = "studio.execution.callback.service-token=" + CancelIT.SERVICE_TOKEN)
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
 class CancelIT {
@@ -62,6 +64,7 @@ class CancelIT {
   private static final String OWNER = "cancel-owner@citi.com";
   private static final String VIEWER = "cancel-viewer@citi.com";
   private static final String RUNNER = "studio-runner-0";
+  static final String SERVICE_TOKEN = "cancel-it-service-identity";
 
   @TestConfiguration
   static class FakeRunner {
@@ -312,7 +315,147 @@ class CancelIT {
         .isEqualTo(StudioService.EXECUTION_TERMINAL);
   }
 
+  // ── the pull half (ADR-002 §29): the owning runner reads the cancel ──────
+
+  @Test
+  void theControlReadNeedsTheServiceIdentityReportsTheFlagAndIs404ForAnUnknownId()
+      throws Exception {
+    String path = "/internal/studio/executions/" + executionId + "/control";
+
+    assertThat(getInternal(path, null).getStatusCode().value()).isEqualTo(401);
+    assertThat(getInternal(path, "wrong-token").getStatusCode().value()).isEqualTo(403);
+
+    ResponseEntity<String> before = getInternal(path, SERVICE_TOKEN);
+    assertThat(before.getStatusCode().value()).isEqualTo(200);
+    JsonNode unset = objectMapper.readTree(before.getBody());
+    assertThat(unset.path("executionId").asText()).isEqualTo(executionId.toString());
+    assertThat(unset.path("cancelRequested").isBoolean()).isTrue();
+    assertThat(unset.path("cancelRequested").asBoolean()).isFalse();
+
+    dispatchOnce();
+    studioService.cancelExecution(executionId, owner);
+    JsonNode set = objectMapper.readTree(getInternal(path, SERVICE_TOKEN).getBody());
+    assertThat(set.path("cancelRequested").asBoolean()).isTrue();
+
+    ResponseEntity<String> unknown =
+        getInternal("/internal/studio/executions/" + UUID.randomUUID() + "/control", SERVICE_TOKEN);
+    assertThat(unknown.getStatusCode().value()).isEqualTo(404);
+    assertThat(objectMapper.readTree(unknown.getBody()).path("error").asText())
+        .isEqualTo(InternalCallbackCodes.EXECUTION_UNKNOWN);
+  }
+
+  @Test
+  void theProgressAcknowledgementCarriesTheFlagOnceACancelIsRecorded() {
+    UUID attemptId = dispatchOnce();
+    UUID admissionId = UUID.randomUUID();
+    admit(attemptId, admissionId);
+
+    assertThat(
+            progressService
+                .apply(executionId, report(RunnerReport.STARTED, attemptId, admissionId, 1))
+                .cancelRequested())
+        .isFalse();
+    studioService.cancelExecution(executionId, owner);
+    assertThat(
+            progressService
+                .apply(executionId, report(RunnerReport.PROGRESS, attemptId, admissionId, 2))
+                .cancelRequested())
+        .isTrue();
+  }
+
+  /**
+   * Two runner pods behind one Service: the relayed DELETE reaches the pod that does not hold the
+   * run and answers 404. That is not an acknowledgement — the relay stays open — and the owning pod
+   * completes the cancel through the pull path: it reads the flag and delivers its FINAL.
+   */
+  @Test
+  void aDeleteThatReachesTheWrongPodIsNotAnAcknowledgementAndThePullCompletesTheCancel() {
+    UUID attemptId = dispatchOnce();
+    UUID admissionId = UUID.randomUUID();
+    admit(attemptId, admissionId);
+    progressService.apply(executionId, report(RunnerReport.STARTED, attemptId, admissionId, 1));
+    studioService.cancelExecution(executionId, owner);
+
+    runner.willAnswerCancel(CancelOutcome.NOT_FOUND);
+    dispatcher.dispatchOnce();
+    assertThat(runner.cancelsFor(executionId)).isEqualTo(1);
+    assertThat(ledger().get("cancel_relayed_at")).as("a 404 acknowledges nothing").isNull();
+    assertThat(snapshot().status()).isEqualTo("RUNNING");
+
+    // The owning pod's poll.
+    assertThat(
+            objectMapper
+                .convertValue(
+                    getInternalJson("/internal/studio/executions/" + executionId + "/control"),
+                    JsonNode.class)
+                .path("cancelRequested")
+                .asBoolean())
+        .isTrue();
+    progressService.apply(
+        executionId,
+        finalReport(attemptId, admissionId, 2, RunOutcome.ERROR, ExecutionErrorCode.CANCELLED));
+
+    assertThat(snapshot().status()).isEqualTo("ERROR");
+    assertThat(snapshot().errorCode()).isEqualTo(ExecutionErrorCode.CANCELLED);
+    assertThat(ledger().get("cancel_relayed_at"))
+        .as("the relay was never acknowledged, and it did not need to be")
+        .isNull();
+  }
+
+  // ── cancelled before the browser reported a start ───────────────────────
+
+  @Test
+  void aFinalWithoutAStartIsAcceptedForARunCancelledBeforeItStarted() {
+    UUID attemptId = dispatchOnce();
+    UUID admissionId = UUID.randomUUID();
+    admit(attemptId, admissionId);
+    studioService.cancelExecution(executionId, owner);
+
+    progressService.apply(
+        executionId,
+        finalReport(attemptId, admissionId, 1, RunOutcome.ERROR, ExecutionErrorCode.CANCELLED));
+
+    assertThat(snapshot().status()).isEqualTo("ERROR");
+    assertThat(snapshot().errorCode()).isEqualTo(ExecutionErrorCode.CANCELLED);
+    assertThat(ledger().get("state")).isIn("FINALIZING", "DONE");
+  }
+
+  @Test
+  void aFinalWithoutAStartIsStillRefusedWhenNobodyCancelled() {
+    UUID attemptId = dispatchOnce();
+    UUID admissionId = UUID.randomUUID();
+    admit(attemptId, admissionId);
+
+    assertThatThrownBy(
+            () ->
+                progressService.apply(
+                    executionId,
+                    finalReport(
+                        attemptId, admissionId, 1, RunOutcome.ERROR, ExecutionErrorCode.CANCELLED)))
+        .isInstanceOf(InternalCallbackException.class)
+        .extracting(e -> ((InternalCallbackException) e).getCode())
+        .isEqualTo(InternalCallbackCodes.TRANSITION_REJECTED);
+    assertThat(ledger().get("state")).isEqualTo("ADMITTED");
+    assertThat(snapshot().status()).isEqualTo("PENDING");
+  }
+
   // ── helpers ──────────────────────────────────────────────────────────────
+
+  private ResponseEntity<String> getInternal(String path, String token) {
+    HttpHeaders headers = new HttpHeaders();
+    if (token != null) {
+      headers.setBearerAuth(token);
+    }
+    return restTemplate.exchange(path, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+  }
+
+  private JsonNode getInternalJson(String path) {
+    try {
+      return objectMapper.readTree(getInternal(path, SERVICE_TOKEN).getBody());
+    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+      throw new IllegalStateException(e);
+    }
+  }
 
   private ResponseEntity<String> post(UUID execution, HttpHeaders headers) {
     return restTemplate.exchange(

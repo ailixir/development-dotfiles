@@ -409,7 +409,8 @@ public class ProgressReportService {
             .findByExecutionId(executionId)
             .map(UITestExecution::getSnapshotRevision)
             .orElse(0L);
-    return new ProgressAck(executionId, sequence, applied, revision);
+    return new ProgressAck(
+        executionId, sequence, applied, revision, statements.isCancelRequested(executionId));
   }
 
   /** The revision's ordered source, which acceptance already wrote one entry per step of. */

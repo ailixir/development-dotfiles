@@ -341,6 +341,7 @@ An architect amending the contract still never edits a story's Title, Acceptance
 | 2026-09-16 (landed 2026-09-17) | **LANDED** by story 10.31 at `113948325`, in the same commit as the row above. A new response component, **`SessionUnauthorized`**, with body **`PlatformErrorResponse`** (new schema, `error: {code, message, traceId?}`), a `sessionRequired` example and a description saying the two envelopes differ. **The eleven public operations that already declared a `401` point at it.** The two internal callbacks keep `Unauthorized`/`ErrorResponse`, which matches their producer (`ServiceIdentityAuthenticationFilter`, flat), and `components.responses.Unauthorized` and `components.schemas.ErrorResponse` are **not** edited. Counting §24.6's own new `401`, the document's final state is **twelve** public operations on `SessionUnauthorized`, **two** callbacks on `Unauthorized` and **four** runner operations on `RunnerUnauthenticated`. **No status set moved on any of the eleven, and no code changed: the document catches up with what the producers send.** O-19 / ADR-003 is deliberately not decided here. Exact text in §25.4, applied verbatim | C — the `401` body on every public operation | Ruled by @architect, §25. Owner: the same PR as the row above | Measured together with the row above — see that cell. It added **no red of its own**, exactly as §28.4 predicted: the two reds were both status-set copies. **§25.3's open statement is now closed by measurement rather than by reading.** The new `ExecutionVideoRefusalEnvelopeIT` drives a real identityless request and a real no-ownership request at `getExecutionVideo` and validates the captured bytes — `{"error":{"message":"Session required","code":"UNAUTHENTICATED","traceId":"…"}}` and `{"error":"STUDIO_FORBIDDEN",…}` — against `PlatformErrorResponse` and `ErrorResponse` read live from the document. Both schemas were shown to **discriminate**: validating the `401` body against `ErrorResponse` fails with `[$.error: object found, string expected, $: required property 'message' not found]`, and the `503` body against `PlatformErrorResponse` with `[$.error: string found, object expected]`. The `sessionRequired` example was Ajv-validated against `PlatformErrorResponse` before any suite ran (§18.5). The tag-partitioned guard was falsified four ways, each restored byte-identically: repointing one of the twelve at `Unauthorized`, repointing `claimAdmission` at `SessionUnauthorized`, adding a correctly-declared thirteenth untagged operation, and removing `internal` from `runnerHealth` — each reddened it and nothing else in the two contract classes. **Reported as a finding:** §25.4's own falsification note expected mutations (a) and (b) to redden *the pinned list* as well; measured, they do not — the pin is over operationIds, and repointing a `$ref` moves no key. The value comparison is what catches them, and with it removed mutation (a) passes. The pinned list and the `12`-count were each shown to catch the thirteenth operation on their own |
 | 2026-09-16 (landed 2026-09-17) | **LANDED** by story 10.30 on `story/10.30`: the fix at `3b245079b`, and the prose, the pin and this row at `160e218bf`. Prose only on `getTest`, `updateTest` and `deleteTest`: §27.6's four blocks, each checked by script to appear verbatim in the document. An unknown, soft-deleted or quarantined draft, and a draft the caller may not read (GET) or write (PUT/DELETE), all answer **`403 STUDIO_FORBIDDEN`**. `updateTest`'s `409` description loses its "answers `400`" sentence; the paragraph's remaining sentence ("Refusal with `TEST_DELETED`/…") now starts its own line, with its words unchanged. Closes **O-10**. **Shipped with its producer (O-18):** `createTest` checks `canWrite` after the registered-CSI check; `updateTest(…, Authentication)` reads the draft through the visibility restriction, checks `canWrite` on that draft's CSI, then takes the lock, and an empty locked read is `403`; a new `softDeleteTest(UUID, Authentication)` does the same without a lock; and `StudioController.deleteTest` now takes `Authentication`. The two internal overloads are unchanged. **A finding, not in §27:** Hibernate 6.5 hands the draft it already holds back to the locking query without refreshing it. A throwaway probe measured it: visible revision 1, row at 6, and the locked read returned 1, the same instance. The visible copy is therefore detached before the lock. Without the detach, `OptimisticSaveIT`'s concurrent-save test failed in **4 of 4** runs | C — status-code semantics on three public operations. **No status is added or removed**: the parsed status sets are GET `200,400,401,403`, PUT `200,400,401,403,409` and DELETE `204,400,401,403` | Ruled by @architect, §27. **Landed by story 10.30** (@dev); @qa's failing-first tests are at `a8379128d` | **MEASURED by @dev, story 10.30.** Backend runs use `--rerun-tasks`. Before is `a8379128d` (contract `51850b01…`); after is this branch (contract `d55d7737…`). `StudioContractTest` **14/14 → 14/14**, `ExecutionVideoContractTest` **15/15 → 15/15**, `CompileRouteContractDivergenceTest` **9/9 → 9/9**, `ExecutionVideoContractEscalationTest` **0/2 → 0/2** (ESC-1/ESC-2 stay red on purpose until §24 lands). §28.4's prediction, *no additional red*, **reproduces**. §28.4's digests came from a copy that also carried §24/§25, so none is comparable to this file's and none was used. §27.5's tests, written first by @qa and unmodified here: `StudioAuthorizationIT` **19/24 → 24/24**. The five that were red are AC-2 PUT, AC-2 DELETE, AC-3, AC-4 and AC-5. The new `StudioServiceWriteAuthorizationTest` (AC-18) is **7/7**. Runner `confinement.test.ts`: **18/18 on arrival** at `51850b01…`; **17/18 with only the document edited** (the pin alone went red); **18/18 after the re-anchor** to `d55d7737647a49b97e2b505a59364473d0a3695936cc447a005fcb3ed47eb318`, re-read from the file with `shasum -a 256` (`FOC-07` **step 1 of 2**). The full runner suite is **947 passed / 29 skipped / 50 files, before and after**. Backend `com.citi.put.checks.studio.*`: before, **700 completed / 686 passed / 7 failed / 7 skipped** (ESC-1, ESC-2 and @qa's five); after, **707 / 698 / 2 (ESC-1, ESC-2) / 7**, in 362 s wall clock. It ran to completion, with no MED-2 stall. The delta is exactly the five flips plus the seven new cases; no test disappeared and the skipped set is identical. Falsification: 14 mutations are recorded in story 10.30. The measured reason AC-18 exists: reading the CSI through `findCsiIdIncludingWithheld` (M7) reddens **no** HTTP test. Neither does authorizing the body's `csiId` with a fallback to the draft's (M2c); only a unit case catches it |
 | 2026-09-18 | **Studio v1 WP4 — cancel (§29).** Public `cancelExecution` (`POST /executions/{id}/cancel`: `202` `ExecutionSnapshot`, `400`, `401` `SessionUnauthorized`, `403`, `409` with `x-conflict-codes [EXECUTION_TERMINAL, CANCEL_ALREADY_REQUESTED]`); runner `runnerCancelRun` (`DELETE /v1/runs/{id}`: `202` closed `RunCancelAccepted`, `401`, `403`, `404`, `409`); `ExecutionErrorCode` gains `CANCELLED` (table row, `x-assigned-by`); `x-runner-error-codes` gains `CANCELLED`; the intersection prose, `RunOutcome.errorCode` and the `RunnerReport` mapping row name `TIMEOUT` **and** `CANCELLED`. No runner-produced body gained or lost a field; no existing status moved. Producers in the same change: backend route, ledger CAS, relay, reaper; runner `DELETE`; frontend carrier and narrative | C — public surface and two routes. Authorized by the Studio v1 plan, WP4 and decision D4, **not** by an architect ruling recorded here first; @architect to ratify or amend | @dev, Studio v1 WP4 | Pins moved deliberately in the same change: `StudioContractTest` 14/14, `ExecutionVideoContractTest` 17/17 (operation count 18 → 20, public `401`s 12 → 13, runner `401`s 4 → 5); runner `confinement`/`errors`/`contract` 49/49 with `BASE_SHA256` re-anchored; frontend `studioContract.test.ts` 54/54 after `CANCELLED` moved into the carrier (3 red before) |
+| 2026-09-18 | **Studio v1 WP4, amended — pull-based cancel (§29.4).** New `readExecutionControl` (`GET /internal/studio/executions/{id}/control`: `200` closed `ExecutionControl`, `400`, `401`, `403`, `404`); `ProgressAck` gains required `cancelRequested`; `runnerCancelRun`'s `404` row says it is not an acknowledgement; `cancelExecution`'s table says the owner learns the cancel itself. Producers in the same change: backend control route and ack flag, `ADMITTED` `FINAL` for a cancelled run; runner control poll and ack handling | C — a new internal route and a field on a closed callback body. Same authority as the row above (plan WP4, coordinator follow-up closing §29.3's multi-pod limit); @architect to ratify | @dev, Studio v1 WP4 | Pins moved deliberately: operation count 20 → 21, internal routes 7 → 8, callback `401`s 2 → 3; runner `BASE_SHA256` re-anchored |
 
 The two `@dev, story 10.7` rows above are one story's amendment, recorded against §12's four
 requirements (this amendment's own record is in §15.10):
@@ -2651,26 +2652,53 @@ The contract gains two operations and one code (the §13 row above lists them).
 3. **The admission CAS refuses a marked row** (`AND cancel_requested_at IS NULL` on `admit`). A
    cancel landing between the send and the admission is refused before any browser starts; the
    refusal closes the execution `ERROR` / `CANCELLED` and answers `EXECUTION_SETTLED`.
-4. **Admitted and running work is relayed**: the dispatcher sends one `DELETE /v1/runs/{id}` per
-   pass, with the dispatch bearer, until the runner answers `202` or `409`
-   (`cancel_relayed_at`). `DISPATCHING` rows are never relayed; no runner holds them.
+4. **Admitted and running work is stopped by the runner that holds it, which pulls the cancel**
+   (amended the same day, §29.4). Two pull signals, no routing: the owning runner reads
+   `GET /internal/studio/executions/{id}/control` every 2 s from admission until its outcome is
+   known, and every progress acknowledgement carries `cancelRequested`. The relayed
+   `DELETE /v1/runs/{id}` stays as the fast path when the Service happens to route it to the owner;
+   it is sent once per dispatcher pass until the runner answers `202` or `409`
+   (`cancel_relayed_at`). A `404` is **not** an acknowledgement. `DISPATCHING` rows are never
+   relayed; no runner holds them.
 5. **The runner reuses the deadline's stop path**: `SessionKillReason` gains `cancel`, mapped to
    failure kind `cancelled` and code `CANCELLED`. The reason is recorded before the signal.
 6. **The API assigns its own `CANCELLED`.** A runner's `CANCELLED` becomes the API's only when the
    ledger records a request (`RunnerOutcomeCodes.errorCodeFor(…, cancelRequested)`); otherwise it
    takes the unmapped path like any other runner code. `cancel_requested_at` is write-once, so
    reading it before the report statement cannot be contradicted by it.
-7. **The running reaper bounds everything else**: a cancel still dispatched once `start-deadline`
+7. **A run cancelled before it reported a start may still report.** The `FINAL` statement accepts
+   `ADMITTED` (edge `ADMITTED → FINALIZING`) only when the ledger records a cancel; every other
+   report still needs `RUNNING`.
+8. **The running reaper bounds everything else**: a cancel still dispatched once `start-deadline`
    has passed since it was requested is closed `ERROR` / `CANCELLED` (manifest reconciliation
    first, as for every reaper verdict).
 
 ### 29.3 Known limits, stated rather than hidden
 
-- **More than one runner pod.** The relay addresses the runner Service, so a `DELETE` may reach a
-  pod that does not hold the run and answer `404`. The relay retries on each pass, and the reaper
-  closes the cancel after the margin, but a browser on the other pod then runs until its own
-  deadline. Addressing the owning pod (`runner_instance_id`) is not in this change.
-- **A `FINAL` for a run cancelled before `STARTED`** is refused by the report statement, which
-  requires `RUNNING`; such a run is closed by the reaper after the margin rather than by its report.
 - **Evidence** is whatever the runner already produces on the kill path; no storage was added.
+- **Latency is bounded by the poll, not by the relay**: about one interval (2 s) plus one callback
+  round trip, whatever the pod count. If the API is unreachable from the runner for longer than
+  the start-deadline margin, the reaper closes the cancel and the browser runs to its own deadline.
+- **In-process sessions** (the unit tier's fakes) cannot be stopped mid-step; production sessions
+  always run in a child and can.
+
+### 29.4 Amendment, same day — the multi-pod gap closed by pulling
+
+The first form of §29 relied on the relayed `DELETE` alone and recorded the multi-pod gap as a
+limit. WP7 made `replicaCount: 2` the default, so a `DELETE` through the Service routinely reaches a
+pod that does not hold the run; the gap was not acceptable for v1. Closed without new topology — no
+headless Service, no pod-IP addressing, no NetworkPolicy change — by making the owning runner pull:
+
+- **`readExecutionControl`** — `GET /internal/studio/executions/{id}/control`, tags `internal`,
+  `api-callback`, same service identity and base as the other two callbacks. `200`
+  `ExecutionControl {executionId, cancelRequested}` (closed), `400`, `401`, `403`, `404
+  EXECUTION_UNKNOWN`. Read-only.
+- **`ProgressAck.cancelRequested`** — required boolean, so a runner mid-step learns the cancel on
+  its next report without waiting for the poll.
+- **Relay semantics tightened in the text**: `404` from the runner is "not this pod", never an
+  acknowledgement; only the owner's `202` or `409` records the relay, and only the owner's `FINAL`
+  (or the reaper) ends the execution.
+- The runner's pull path, the `DELETE` and the drain all end a run through the same `endRun`; the
+  kill reason `cancel` and the code `CANCELLED` are unchanged.
+
 

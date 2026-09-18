@@ -61,6 +61,7 @@ public class StudioDispatchLedgerStatements {
               ('CLAIMED','DISPATCHING'),
               ('DISPATCHING','ADMITTED'),
               ('ADMITTED','RUNNING'),
+              ('ADMITTED','FINALIZING'),
               ('RUNNING','FINALIZING'),
               ('FINALIZING','DONE'),
               ('CLAIMED','QUEUED'),
@@ -463,6 +464,11 @@ public class StudioDispatchLedgerStatements {
    *
    * <p>{@code error_code} is written from the API's own vocabulary only; a runner-supplied code
    * never reaches this parameter (AC-16).
+   *
+   * <p><b>The one {@code ADMITTED} path</b> (Studio v1 WP4, ADR-002 §29): a run cancelled before
+   * its browser reported a start sends its {@code FINAL} without a {@code STARTED}. It is applied
+   * only when the ledger records a cancel, and the edge {@code ADMITTED → FINALIZING} exists in the
+   * matrix for that case alone. Every other report still needs {@code RUNNING}.
    */
   public int applyFinal(
       UUID executionId,
@@ -488,14 +494,15 @@ public class StudioDispatchLedgerStatements {
         jdbc.queryForObject(
             """
             WITH owner AS (
-              SELECT execution_id, execution_accepted_at
+              SELECT execution_id, execution_accepted_at, state
                 FROM studio_dispatch_ledger
                WHERE execution_id = ?
                  AND attempt_id = ?
                  AND admission_id = ?
                  AND runner_instance_id = ?
                  AND last_runner_sequence < ?
-                 AND state = 'RUNNING'
+                 AND (state = 'RUNNING'
+                      OR (state = 'ADMITTED' AND cancel_requested_at IS NOT NULL))
                FOR UPDATE
             ),
             history AS (
@@ -517,7 +524,7 @@ public class StudioDispatchLedgerStatements {
                 FROM owner o
                WHERE e.id = o.execution_id
                  AND e.started_at = o.execution_accepted_at
-                 AND e.status = 'RUNNING'
+                 AND (e.status = 'RUNNING' OR (e.status = 'PENDING' AND o.state = 'ADMITTED'))
               RETURNING e.id
             ),
             ledger AS (

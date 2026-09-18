@@ -99,7 +99,9 @@ class ExecutionVideoContractTest {
    * the same reason as the list above.
    */
   private static final Set<String> CALLBACK_OPERATIONS_DECLARING_UNAUTHENTICATED =
-      new TreeSet<>(List.of("claimAdmission", "reportProgress"));
+      new TreeSet<>(
+          // ADR-002 §29.4 adds the control read, served by the same filter.
+          List.of("claimAdmission", "reportProgress", "readExecutionControl"));
 
   private static ContractDocument document;
   private static String raw;
@@ -452,7 +454,7 @@ class ExecutionVideoContractTest {
     assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(13);
     assertThat(callbackRefs)
         .as("the number of internal callbacks declaring a 401 moved")
-        .hasSize(2);
+        .hasSize(3);
     assertThat(runnerRefs).as("the number of runner operations declaring a 401 moved").hasSize(5);
 
     // The pinned second copies, both ways.

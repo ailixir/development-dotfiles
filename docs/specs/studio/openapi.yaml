@@ -722,7 +722,7 @@ paths:
         |---|---|---|
         | queued, not yet sent to a runner | closed at once; no runner is called and no browser starts | `ERROR` / `CANCELLED`, `streamComplete` per evidence |
         | sent, not yet admitted | the admission is refused; the execution ends `ERROR` / `CANCELLED` when the runner asks | unchanged |
-        | admitted or running | the runner is asked to stop: the browser gets a bounded grace to close and finalize its recording, then its process tree is killed; the runner's final report ends it `ERROR` / `CANCELLED` with whatever evidence exists | unchanged |
+        | admitted or running | the runner holding it stops it — it learns the cancel from the API itself within ~3 s, whichever pod it is on: the browser gets a bounded grace to close and finalize its recording, then its process tree is killed; the runner's final report ends it `ERROR` / `CANCELLED` with whatever evidence exists | unchanged |
 
         A cancel the runner does not finish is closed `ERROR` / `CANCELLED` by the API's running
         reaper after a bounded margin. The terminal snapshot arrives on `GET /executions/{id}` and
@@ -1063,7 +1063,7 @@ paths:
         | Status | Meaning | Worker action |
         |---|---|---|
         | `202` | The run is stopping; its `FINAL` report follows | Record the relay; do not send again |
-        | `404` | This runner holds no such run (never admitted here, or long gone) | Retry on a later pass; the API's running reaper bounds the retries |
+        | `404` | This runner holds no such run — with more than one runner pod, usually because the Service routed the request to another pod | Not an acknowledgement. Retry on a later pass; the owning runner also learns the cancel from `readExecutionControl` and the progress acknowledgement, and the API's running reaper is the backstop |
         | `409` | The run already finished; its report stands | Record the relay; do not send again |
       x-internal: true
       x-served-by: studio-runner
@@ -1164,6 +1164,55 @@ paths:
             runner propagates whatever `error` this body carries into its own `/v1/runs` refusal,
             so closing the set here closes it in two places at once. 10.7 declares it (ADR-002 §14,
             O-9).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /internal/studio/executions/{id}/control:
+    servers:
+      - url: '{apiInternalBaseUrl}'
+        description: |
+          The backend API's internal base, as for the other two callbacks (§8.4, §8.5). Never a
+          public hostname and never exposed through ingress.
+        variables:
+          apiInternalBaseUrl:
+            default: http://put-checks-api:8080
+            description: Deployment configuration (§8.5). Never a public hostname.
+    get:
+      tags: [internal, api-callback]
+      operationId: readExecutionControl
+      summary: Whether the run this runner holds has been cancelled
+      description: |
+        Studio v1 WP4, ADR-002 §29. The pull half of cancel. The runner that holds an admitted run
+        reads this every ~2 s from admission until the run's outcome is known, and on
+        `cancelRequested: true` stops the run through the same path as `DELETE /v1/runs/{id}`.
+        It reaches the owning pod with no routing at all, which is why a cancel does not depend on
+        the relayed `DELETE` landing on the right pod. The progress acknowledgement carries the
+        same flag.
+
+        Read-only: it writes nothing and moves no state. Same service identity as the other two
+        callbacks.
+      x-internal: true
+      x-served-by: api
+      security:
+        - serviceIdentity: []
+      parameters:
+        - { $ref: '#/components/parameters/ExecutionId' }
+      responses:
+        '200':
+          description: The execution's control state
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExecutionControl' }
+        '400':
+          description: The path id is not a UUID
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: No execution with this id (`EXECUTION_UNKNOWN`)
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -2336,10 +2385,10 @@ components:
     ProgressAck:
       type: object
       additionalProperties: false
-      required: [executionId, runnerSequence, applied, revision]
+      required: [executionId, runnerSequence, applied, revision, cancelRequested]
       description: |
         Closed by story 10.7 (ADR-002 O-4). Sent only after the report's transaction has committed
-        (§5.3, §8.4).
+        (§5.3, §8.4). `cancelRequested` added by ADR-002 §29 (Studio v1 WP4).
       properties:
         executionId: { type: string, format: uuid }
         runnerSequence: { type: integer, format: int64 }
@@ -2354,6 +2403,22 @@ components:
           description: |
             The API's own snapshot revision after this report — never `runnerSequence`. The runner
             orders its own reports; the API assigns its own revision (§8.4).
+        cancelRequested:
+          type: boolean
+          description: |
+            True once a cancel is recorded for the execution (ADR-002 §29). The runner stops the
+            run on it exactly as on `DELETE /v1/runs/{id}`; it never returns to false.
+
+    ExecutionControl:
+      type: object
+      additionalProperties: false
+      required: [executionId, cancelRequested]
+      description: The body of `readExecutionControl` (ADR-002 §29).
+      properties:
+        executionId: { type: string, format: uuid }
+        cancelRequested:
+          type: boolean
+          description: True once a cancel is recorded; it never returns to false.
 
     ReportedRuntimeVersions:
       type: object
