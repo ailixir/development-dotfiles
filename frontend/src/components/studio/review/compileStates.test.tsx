@@ -161,6 +161,18 @@ describe('AC-2: each state says what is true, what you may do, and what is block
     expect(text).toMatch(/not in your steps/i);
     expect(text).toMatch(/ask for the translation again/i);
   });
+
+  it('STALE says the translation was interrupted and offers a recompile beside it (Studio v1 WP9)', async () => {
+    await renderState(staleDraft);
+    const region = await screen.findByTestId('compile-state-region');
+    const text = region.textContent ?? '';
+    expect(region.getAttribute('aria-label')).toBe('Translation was interrupted — not something you did');
+    expect(text).toMatch(/translation was interrupted on our side before it finished/i);
+    expect(text).toMatch(/recompile/i);
+    const recompile = await screen.findByTestId('recompile-control');
+    expect(recompile.textContent).toBe('Ask for the translation again');
+    expect(recompile).toBeEnabled();
+  });
 });
 
 describe('AC-3: a confirmed test whose draft moved is flagged, from the body', () => {

@@ -35,7 +35,7 @@ import org.springframework.test.context.ActiveProfiles;
  * <p>The schedule is off so the sweep runs when this test says it does; the statement is what is
  * under test.
  */
-@SpringBootTest(properties = "studio.compile.sweep.enabled=false")
+@SpringBootTest(properties = "studio.compile.abandonment.enabled=false")
 @ActiveProfiles("local")
 class SweepDoesNotDeReadyIT {
 

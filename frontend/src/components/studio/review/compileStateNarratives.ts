@@ -61,11 +61,16 @@ export const COMPILE_STATE_NARRATIVES: Readonly<Record<CompileStatus, CompileSta
     whatIsBlocked:
       'There is no candidate to confirm, so this draft cannot be made runnable until the steps change.',
   },
+  // Studio v1 WP9 (decision D11): a compile whose server went away mid-flight is swept to STALE,
+  // so this is also the sentence an author reads after that. It says "interrupted" because that is
+  // true of every STALE cause — the translation stopped before it finished — and it names the
+  // recompile control, which is the only remedy and is rendered in this state alone.
   STALE: {
-    title: 'Translation did not finish — not something you did',
+    title: 'Translation was interrupted — not something you did',
     whatIsTrue:
-      'Your draft is saved and unchanged. Any revision you confirmed earlier still runs. The translation stopped for a reason on our side, not in your steps.',
-    whatYouCanDo: 'Ask for the translation again. That is the whole remedy.',
+      'Your draft is saved and unchanged. Any revision you confirmed earlier still runs. The translation was interrupted on our side before it finished; the cause is not in your steps.',
+    whatYouCanDo:
+      'Recompile: choose “Ask for the translation again” to start a new translation. That is the whole remedy.',
     whatIsBlocked:
       'There is no candidate to confirm until a translation finishes. Nothing you wrote has been lost.',
   },

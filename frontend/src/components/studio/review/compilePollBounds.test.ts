@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  COMPILE_SWEEP_INTERVAL_MS,
   COMPILE_SWEEP_THRESHOLD_MS,
   COMPILE_WATCH_WINDOW_MS,
   compilePollSchedule,
@@ -26,19 +27,29 @@ const BACKEND_CONFIG = path.resolve(
 
 function sweepThresholdMs(): number {
   const yml = fs.readFileSync(BACKEND_CONFIG, 'utf8');
-  const match = yml.match(/STUDIO_COMPILE_SWEEP_THRESHOLD:(\d+)(ms|s|m)\}/);
+  const match = yml.match(/STUDIO_COMPILE_ABANDONMENT_THRESHOLD:(\d+)(ms|s|m)\}/);
   expect(match, 'the sweep threshold is no longer declared where this test reads it').not.toBeNull();
   const [, amount, unit] = match!;
   const factor = unit === 'ms' ? 1 : unit === 's' ? 1_000 : 60_000;
   return Number(amount) * factor;
 }
 
+function sweepIntervalMs(): number {
+  const yml = fs.readFileSync(BACKEND_CONFIG, 'utf8');
+  const match = yml.match(/STUDIO_COMPILE_ABANDONMENT_INTERVAL_MS:(\d+)\}/);
+  expect(match, 'the sweep interval is no longer declared where this test reads it').not.toBeNull();
+  return Number(match![1]);
+}
+
 describe('AC-23: the COMPILING watch is bounded by a number the server already publishes', () => {
-  it('the watch window equals the shipped abandoned-compile sweep threshold', () => {
+  it('the watch window is the shipped sweep threshold plus one shipped sweep interval', () => {
     const threshold = sweepThresholdMs();
+    const interval = sweepIntervalMs();
     expect(threshold).toBeGreaterThan(0);
+    expect(interval).toBeGreaterThan(0);
     expect(COMPILE_SWEEP_THRESHOLD_MS).toBe(threshold);
-    expect(COMPILE_WATCH_WINDOW_MS).toBe(threshold);
+    expect(COMPILE_SWEEP_INTERVAL_MS).toBe(interval);
+    expect(COMPILE_WATCH_WINDOW_MS).toBe(threshold + interval);
   });
 
   it('the schedule is finite and fits inside the window', () => {

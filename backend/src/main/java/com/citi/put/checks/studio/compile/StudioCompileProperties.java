@@ -25,7 +25,8 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * @param authoring limits enforced before a compile request is begun
  * @param diagnostics caps applied to validator output before it is persisted
  * @param repair the bounded repair loop (story 10.9, architecture &sect;4.3)
- * @param sweep the abandoned-compile sweep (story 10.9, architecture &sect;4.7)
+ * @param abandonment the abandoned-compile sweep (story 10.9, architecture &sect;4.7; bound under
+ *     {@code studio.compile.abandonment} since Studio v1 WP9)
  */
 @ConfigurationProperties(prefix = "studio.compile")
 public record StudioCompileProperties(
@@ -33,7 +34,7 @@ public record StudioCompileProperties(
     @DefaultValue Authoring authoring,
     @DefaultValue Diagnostics diagnostics,
     @DefaultValue Repair repair,
-    @DefaultValue Sweep sweep) {
+    @DefaultValue Abandonment abandonment) {
 
   /**
    * Bounded compile work (AC-17, AC-18).
@@ -71,6 +72,12 @@ public record StudioCompileProperties(
    * never reads {@code compile_status}, a row stranded in {@code COMPILING} blocks nothing — the
    * confirmed revision still executes and {@code POST /execute} is still accepted.
    *
+   * <p>Studio v1 WP9 (decision D11) accepts sweep-to-{@code STALE} as the v1 recovery for a compile
+   * whose replica died, so the time an author waits to learn that is this record's threshold plus
+   * at most one interval. The defaults were shortened for that reason: 300s is the smallest round
+   * value strictly above the 240s attempt budget the startup check requires, and a 15s interval
+   * keeps the added wait small against it while still being one bounded statement per replica.
+   *
    * @param enabled whether the schedule runs; the statement itself is always available
    * @param threshold how long a row may sit in {@code COMPILING} before it is swept; validated at
    *     startup to exceed {@code pipeline.attempt-budget}, so a healthy in-flight compile can never
@@ -80,11 +87,11 @@ public record StudioCompileProperties(
    * @param intervalMs milliseconds between runs, as a plain number so the schedule and this record
    *     read one configuration key rather than two representations of one value
    */
-  public record Sweep(
+  public record Abandonment(
       @DefaultValue("true") boolean enabled,
-      @DefaultValue("600s") Duration threshold,
+      @DefaultValue("300s") Duration threshold,
       @DefaultValue("200") int batchSize,
-      @DefaultValue("60000") long intervalMs) {
+      @DefaultValue("15000") long intervalMs) {
 
     /**
      * The interval as a duration.
@@ -173,10 +180,11 @@ public record StudioCompileProperties(
     }
 
     requireNonNegative(problems, "repair.max-attempts", repair().maxAttempts());
-    requirePositive(problems, "sweep.batch-size", sweep().batchSize());
-    requirePositive(problems, "sweep.interval-ms", sweep().intervalMs());
-    long thresholdMs = sweep().threshold() == null ? 0L : sweep().threshold().toMillis();
-    requirePositive(problems, "sweep.threshold", thresholdMs);
+    requirePositive(problems, "abandonment.batch-size", abandonment().batchSize());
+    requirePositive(problems, "abandonment.interval-ms", abandonment().intervalMs());
+    long thresholdMs =
+        abandonment().threshold() == null ? 0L : abandonment().threshold().toMillis();
+    requirePositive(problems, "abandonment.threshold", thresholdMs);
 
     long validateTimeoutMs =
         runner == null || runner.validateTimeout() == null
@@ -201,7 +209,7 @@ public record StudioCompileProperties(
     }
     if (budgetMs > 0 && thresholdMs > 0 && thresholdMs <= budgetMs) {
       problems.add(
-          "studio.compile.sweep.threshold ("
+          "studio.compile.abandonment.threshold ("
               + thresholdMs
               + "ms) must be strictly greater than studio.compile.pipeline.attempt-budget ("
               + budgetMs
