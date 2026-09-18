@@ -95,6 +95,28 @@ deployment half of the same property.
 {{ include "put-checks.fullname" . }}-studio-runner
 {{- end }}
 
+{{/*
+The runner's in-cluster address, rendered from its own Service name and port. The API
+(POST /v1/validate) and the worker (POST /v1/runs) both use this one derivation (AC-1).
+*/}}
+{{- define "put-checks.studioRunner.baseUrl" -}}
+{{ printf "http://%s:%v" (include "put-checks.studioRunner.fullname" .) .Values.studioRunner.service.port }}
+{{- end }}
+
+{{/*
+Where the runner posts admission and progress: the API's own Service, derived rather than written
+as a literal. The literal `http://put-checks-api:8080` was right only for a release named
+`put-checks`; any other release name pointed every callback at a Service that does not exist.
+`studioRunner.callbackBaseUrl` still overrides it for a deployment that fronts the API differently.
+*/}}
+{{- define "put-checks.studioRunner.callbackBaseUrl" -}}
+{{- if .Values.studioRunner.callbackBaseUrl -}}
+{{ .Values.studioRunner.callbackBaseUrl }}
+{{- else -}}
+{{ printf "http://%s:%v" (include "put-checks.api.fullname" .) .Values.backend.service.port }}
+{{- end -}}
+{{- end }}
+
 {{- define "put-checks.studioRunner.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "put-checks.name" . }}-studio-runner
 app.kubernetes.io/instance: {{ .Release.Name }}

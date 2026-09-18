@@ -141,12 +141,15 @@ backend:
     coreService: false
     identityHeaders: false
     csiRead: false
-  envFromSecrets: []
-  # - secretName: checks-db-credentials
-  #   keys:
-  #     - SPRING_DATASOURCE_URL
-  #     - SPRING_DATASOURCE_USERNAME
-  #     - SPRING_DATASOURCE_PASSWORD
+  # The database connection. `application.yml` carries no datasource URL for the deployed
+  # profiles (prod/staging), so without these the pod cannot start; every value set names its own
+  # Secret, and the values themselves never appear here.
+  envFromSecrets:
+    - secretName: checks-db-credentials
+      keys:
+        - SPRING_DATASOURCE_URL
+        - SPRING_DATASOURCE_USERNAME
+        - SPRING_DATASOURCE_PASSWORD
 
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "20"
@@ -228,12 +231,15 @@ worker:
     JAVA_OPTS: "-Xms512m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError"
     CHECKS_CORE_SERVICE_URL: "http://checks-core:8081"
 
-  envFromSecrets: []
-  # - secretName: checks-db-credentials
-  #   keys:
-  #     - SPRING_DATASOURCE_URL
-  #     - SPRING_DATASOURCE_USERNAME
-  #     - SPRING_DATASOURCE_PASSWORD
+  # The database connection. `application.yml` carries no datasource URL for the deployed
+  # profiles (prod/staging), so without these the pod cannot start; every value set names its own
+  # Secret, and the values themselves never appear here.
+  envFromSecrets:
+    - secretName: checks-db-credentials
+      keys:
+        - SPRING_DATASOURCE_URL
+        - SPRING_DATASOURCE_USERNAME
+        - SPRING_DATASOURCE_PASSWORD
 
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "30"
@@ -515,8 +521,9 @@ studioRunner:
     callbackIdentityKey: callbackIdentity
 
   # Where the runner posts admission and progress. Deployment configuration, never job-supplied
-  # (§8.4, §8.5).
-  callbackBaseUrl: http://put-checks-api:8080
+  # (§8.4, §8.5). Empty means "this release's API Service" (`http://<release>-api:<port>`,
+  # derived in _helpers.tpl); set it only when the runner must reach the API some other way.
+  callbackBaseUrl: ""
 
   objectStore:
     # **ED-03 / SPK-03.** A *different* Kubernetes Secret from the one the API and worker read

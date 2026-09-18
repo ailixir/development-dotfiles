@@ -110,6 +110,31 @@ spec:
               value: {{ .Values.backend.identityBypass.identityHeaders | quote }}
             - name: CHECKS_BYPASS_CSI_READ
               value: {{ .Values.backend.identityBypass.csiRead | quote }}
+            {{- if .Values.studioRunner.enabled }}
+            # ── The API's two runner-facing identities (Studio v1 gaps) ─────────────────────────
+            #
+            # The API talks to the runner in both directions, and without these a chart-deployed
+            # API refused every runner callback (the internal chain refuses all callers when its
+            # token is empty) and reported VALIDATOR_UNAVAILABLE for every compile.
+            #
+            # 1. Inbound: the runner's admission/progress callbacks. The token the API accepts is
+            #    the SAME Secret key the runner presents as STUDIO_RUNNER_CALLBACK_IDENTITY.
+            - name: STUDIO_CALLBACK_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.studioRunner.identity.secretName }}
+                  key: {{ .Values.studioRunner.identity.callbackIdentityKey }}
+            # 2. Outbound: POST /v1/validate from the compile pipeline, which runs on the API
+            #    (StudioController is `!worker`). Same address and bearer as the worker's
+            #    POST /v1/runs, from the same keys, so the three pods cannot be configured apart.
+            - name: STUDIO_RUNNER_BASE_URL
+              value: {{ include "put-checks.studioRunner.baseUrl" . | quote }}
+            - name: STUDIO_RUNNER_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.studioRunner.identity.secretName }}
+                  key: {{ .Values.studioRunner.identity.serviceIdentityKey }}
+            {{- end }}
             {{- range $key, $val := .Values.backend.env }}
             - name: {{ $key }}
               value: {{ $val | quote }}
@@ -243,6 +268,12 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.worker.springProfile | quote }}
+            # **Actuator on the container port the probes use.** `application-worker.yml` sets
+            # `management.server.port: 8081` while the ConfigMap's SERVER_PORT moves the main port
+            # to `worker.service.port`; with the two apart, /actuator/health/* is served only on the
+            # management port and the http-port probes (and the prometheus scrape) find nothing.
+            - name: MANAGEMENT_SERVER_PORT
+              value: {{ .Values.worker.service.port | quote }}
             {{- if .Values.studioRunner.enabled }}
             # **Derived from the runner's own Service, never restated.** `application.yml` has no
             # default for this (`STUDIO_RUNNER_BASE_URL` falls back to empty, and an empty base URL
@@ -251,7 +282,7 @@ spec:
             # address: both the worker's URL and the runner's listener render from
             # `studioRunner.service.port` (AC-1).
             - name: STUDIO_RUNNER_BASE_URL
-              value: "http://{{ include "put-checks.studioRunner.fullname" . }}:{{ .Values.studioRunner.service.port }}"
+              value: {{ include "put-checks.studioRunner.baseUrl" . | quote }}
             # **The bearer the worker presents on POST /v1/runs (DEF-05, Studio v1 WP2).** Without
             # it `HttpRunnerDispatchClient` refuses every dispatch before sending. It is read from
             # the SAME Secret and key the runner reads its inbound `STUDIO_RUNNER_SERVICE_IDENTITY`
