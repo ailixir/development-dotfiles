@@ -1187,6 +1187,63 @@ stories:
         - "O-19 (ADR-002 §25.2) — ADR-003, the backend-wide API error envelope. @architect decides with @pm (CON-API-03) and the frontend consumer; @pm and @po place its implementation OUTSIDE Epic 10. Not a dependency of 10.19: no Studio client parses a 401 body (§25.3, by reading). Recorded here so 10.19's drafter does not absorb it."
         - "Stories 10.20–10.26 (the studio-inference program, uncommitted in wt/epic). NOT in this manifest and NOT absorbed by @po: they were drafted outside the validated backlog, the manifest is @pm's, and the run log bars merging across that line until the program's owner, @architect, @po and @pm have reconciled. FLAGGED TO @pm: whether they join this manifest, get their own, or stay outside; whether 10.19 depends on any of them (@po's position: no, because 10.19 is this manifest's release and must not wait on an unvalidated program); and that ids 10.30+ are now claimed here (see the Wave 8 numbering note). @po's validation (\"Pax readiness\", per that program's own log) happens when they are submitted, not by adoption."
 
+  - id: "10.35"
+    title: "Dispatch service identity (DEF-05) — acceptance spec"
+    size: XS
+    # ADDED BY @po 2026-09-17 (po-close). Until now the manifest mentioned neither DEF-05 nor 10.35;
+    # the story's own header row said so and raised it as its Open question 1. See integration_defects.DEF-05.
+    #
+    # wave: null is deliberate and is NOT "unassigned". This story is post-closure, sequenced by
+    # docs/epics/EPIC-10-CLOSURE-PLAN.md section 8 Phase 2 (after the fold), exactly as story 10.34 is
+    # sequenced by Phase 3 item 3.7. Giving it a numbered wave would assert it can be scheduled inside
+    # the epic's own wave sequence, which is false: its gate cannot run until another program commits.
+    wave: null
+    # depends_on is EMPTY and that is the honest value: no Epic 10 story must land first. The one thing
+    # this story waits on is not a story in this manifest. Recorded as external_blocker rather than
+    # invented as a story id.
+    depends_on: []
+    external_blocker: >-
+      A COMMIT, not a working tree. Every acceptance criterion in 10.35 is blocked until the
+      studio-inference program's dispatch-identity fix is on a branch with a SHA — see
+      integration_defects.DEF-05.fix_owner_external and EPIC-10-CLOSURE-PLAN.md section 8 Phase 2
+      ("Nothing below starts until wt/epic's work is on a branch with a SHA"). Running the co-run
+      harness against that program's live uncommitted tree would be informative and would NOT be
+      authoritative: that tree changed shape three times on 2026-09-17 alone (263 to 241 to 263, and
+      241 again when @po recomputed at 23:19 EDT).
+    blocks: ["10.34"]
+    # @po ruling 2026-09-17: 10.34's Group A (its AC-1, AC-2, AC-4 and AC-6, inherited from 10.19
+    # AC-1/AC-2/AC-4/AC-6) each require a run that was actually DISPATCHED and admitted. While DEF-05
+    # stands, the API cannot dispatch at all, so no amount of staging infrastructure arriving would let
+    # those criteria pass. This is the same shape as 10.33 blocking 10.19, ruled on 2026-09-17: a defect
+    # that makes a pilot criterion unreachable is a blocker of that pilot, not a parallel concern.
+    # 10.34's own "Depends on" row was corrected in the same pass; it previously read
+    # "No further Epic 10 story by id."
+    story_context:
+      shape: >-
+        ACCEPTANCE SPEC ONLY. User decision, recorded at EPIC-10-RUN-LOG.md:2264-2277: defer the
+        implementation to the other program's fix and gate it with this repository's co-run harness.
+        This repository authors no second fix in a file another program has open. The precedent is
+        explicit and twice used — 10.33 (PROD-1) and F-3 — and is restated in
+        EPIC-10-CLOSURE-PLAN.md section 9's drop table.
+      seven_criteria: >-
+        AC-1 leg 2 green with admission_id IS NOT NULL (never a reversion to the weaker DISPATCHING
+        state check that mutation M2 already falsified); AC-2 leg 0 unchanged, the no-weakening guard on
+        the runner's own identity enforcement; AC-3 the criterion that matters most — a malformed
+        dispatch body must produce a refusal DISTINGUISHABLE from the identity refusal and from silence,
+        so that DEF-01's defect class becomes observable again rather than staying byte-identical to the
+        baseline; AC-4 leg 3 reached, not merely red, so DEF-02's path is exercised by running; AC-5 the
+        pre-flight guard proven on a unit test below the harness, because the harness always wires a real
+        runner and a real token by construction; AC-6 diff confinement, reviewed not asserted; AC-7 the
+        two adjacent observability gaps recorded rather than silently resolved or worsened.
+      po_validation: >-
+        GO, 9/10, @po 2026-09-17. Two fixes applied at validation: a Definition of done was added (the
+        story had none, and with every criterion Blocked the same question 10.34 raised was unanswered),
+        and AC-7 was given a failing condition — as drafted it was a pure recording criterion that could
+        not go red, which is this epic's own catalogued vacuous shape. OBS-1 (StudioDispatcher discards
+        DispatchOutcome.detail() on a terminal DEFINITE_REFUSAL) and OBS-2 (CompilePipeline collapses a
+        credential refusal and a body refusal into one VALIDATOR_UNAVAILABLE code) were confirmed ROUTED,
+        not in 10.35's scope, with owners named in the story.
+
 # ─────────────────────────────────────────────────────────────
 # File-ownership conflicts (wave planning must serialize or single-own)
 # ─────────────────────────────────────────────────────────────
@@ -1796,6 +1853,81 @@ integration_defects:
     refs: ['backend/src/main/java/com/citi/put/checks/studio/StudioService.java:300-325',
            'backend/src/main/java/com/citi/put/checks/studio/entity/UITest.java',
            'docs/qa/gates/10.30-csi-write-authorization-create-save-delete.yml (DIRTY-CALLER-STALE-1, StudioFlushProbeTempIT on e3bfb7b59; attribution probe with F1 applied)']
+
+  - id: DEF-05
+    severity: HIGH
+    # ADDED BY @po 2026-09-17 (po-close). EPIC-10-RUN-LOG.md:2181 records the finding as "routed to
+    # @po" and no manifest entry existed until now: `grep -n "DEF-05" docs/epics/EPIC-10-EXECUTION.yaml`
+    # returned nothing. Story 10.19's AC-10 register reads this block by name, so a defect absent here
+    # is a defect absent from the epic's final open-items record.
+    status: open
+    # `open` is literal and is NOT a stale field of the DEF-01/DEF-02 kind that closure-plan step 0.2
+    # had to true up. The fix is not in this repository's history at all. It exists only as an
+    # uncommitted edit in the separate studio-inference program's wt/epic working tree. This field
+    # moves when a commit with a SHA exists, never before.
+    fix_owner_external: >-
+      The studio-inference program (separate, user-authorised), by user decision recorded at
+      EPIC-10-RUN-LOG.md:2264-2277. Its uncommitted wt/epic tree already carries the fix in
+      HttpRunnerDispatchClient.java (+11/-6): an Authorization "Bearer" header built from the runner's
+      service-identity token, StudioRunnerProperties injected in place of the @Value-bound URL string,
+      a pre-flight terminal refusal when the runner URL or the token is unconfigured or blank, and
+      base-URL normalisation. UNLANDED: on no branch, with no SHA. This manifest does not treat an
+      uncommitted working tree as landed, per EPIC-10-CLOSURE-PLAN.md section 8 Phase 2's own
+      precondition ("Nothing below starts until wt/epic's work is on a branch with a SHA").
+    acceptance_owner: >-
+      Story 10.35 (Dispatch service identity, DEF-05) — an ACCEPTANCE SPEC ONLY. This repository
+      specifies what correct means and gates what lands; it does not author a second fix in a file
+      another program has open. Same shape as the 10.33/PROD-1 and F-3 deferrals.
+    found_by: >-
+      The co-run harness (tools/corun.sh plus backend/src/test/java/com/citi/put/checks/corun/StudioCoRunIT.java,
+      merged at 97e25f3ed on feat/p1-corun), on its first run against a real studio-runner process,
+      2026-09-17. Independently re-verified by the orchestrator and again by @sm while drafting 10.35,
+      each time by reading the three sources named in refs, not by transcription.
+    owner: "@po (Pax) — routing and acceptance only. Implementation is external; see fix_owner_external."
+    summary: >-
+      The dispatch path presents no service identity. docs/specs/studio/openapi.yaml declares
+      security: [serviceIdentity] on BOTH runner-served routes — runnerValidateArtifact (operationId :849,
+      security :861-862) and runnerAdmitRun (operationId :903, security :927-928). RunnerValidationClient
+      complies (:86-92, a conditional headers.setBearerAuth). HttpRunnerDispatchClient sets no
+      authentication header on any code path: a grep for Bearer, Authorization, auth or any headers. call
+      over the whole file returns nothing, and the only header it ever sets is Content-Type. There is no
+      outbound identity property reachable from that client at all — StudioExecutionProperties declares
+      none, and StudioRunnerProperties.serviceIdentityToken is wired only into the different bean serving
+      the different route. Observed at runtime, not inferred: the runner logs
+      {"event":"request.unauthenticated","path":"/v1/runs","code":"IDENTITY_MISSING"}, no admission_id
+      reaches studio_dispatch_ledger, the ledger state is DONE and the execution ERROR/DISPATCH_FAILED.
+      The proof is structural rather than circumstantial: in one run, against one runner, in one service,
+      leg 1 (validate, which presents identity) is green and leg 2 (dispatch) is red.
+    consequence_for_def_01: >-
+      This is why the defect matters more than the identity gap itself, and it is the acceptance
+      criterion that matters most in story 10.35. The identity refusal happens BEFORE the dispatch body
+      is ever parsed, so DEF-01's entire defect class is currently UNOBSERVABLE on this route rather than
+      merely untested: mutation M1a (EPIC-10-RUN-LOG.md:2204-2205) dropped a required key from the
+      dispatch body and produced a response byte-identical to the baseline. DEF-01 is recorded `fixed`
+      in this block and that record stands on what it claims — that the merged source has the shape the
+      defect said it lacked — but its own note already says so plainly: "it is not 'the dispatch succeeds
+      end to end'." The fix for DEF-01 has never been exercised and could not have been. It becomes
+      exercisable the moment identity is fixed, which is what 10.35 AC-3 gates.
+    also_unexercised: >-
+      DEF-02's path (the runner reporting an admission and a terminal state back to the API) is
+      unexercised by running, not merely unproven: StudioCoRunIT's leg 3 is blocked behind leg 2 and
+      refuses to assert rather than attempting an assertion it cannot make (EPIC-10-RUN-LOG.md:2253-2255).
+    why_nothing_caught_it: >-
+      Nine waves and 709 green tests in the studio package never ran the API and the studio-runner
+      together. Every per-component suite mocked the counterpart. DEF-01 and DEF-02 were both found by
+      READING code, by @sm and by @qa, because nothing existed that could find them by running; DEF-05
+      was found on the first run of the first thing that could. The same narrow scoping
+      (--tests 'com.citi.put.checks.studio.*', adopted as MED-2's mitigation) independently hid ten
+      failing tests outside the studio package for the epic's whole duration — recorded in the run log
+      and routed to @pm, outside Epic 10's scope.
+    refs: ['docs/epics/EPIC-10-RUN-LOG.md:2172-2255 (the finding), :2257-2280 (the deferral decision)',
+           'docs/specs/studio/openapi.yaml:849,861-862,903,927-928',
+           'backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java',
+           'backend/src/main/java/com/citi/put/checks/studio/compile/validator/RunnerValidationClient.java:86-92',
+           'backend/src/main/java/com/citi/put/checks/studio/compile/validator/StudioRunnerProperties.java:22-24',
+           'backend/src/test/java/com/citi/put/checks/corun/StudioCoRunIT.java (legs Order 0-3)',
+           'tools/corun.sh',
+           'docs/stories/10.35.story.md (the acceptance spec)']
 
   - id: DOC-1
     severity: LOW
