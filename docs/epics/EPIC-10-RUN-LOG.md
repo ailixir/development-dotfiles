@@ -2320,3 +2320,86 @@ undetermined — ours, theirs, or older.
 `--tests 'com.citi.put.checks.studio.*'`, a mitigation for `MED-2`'s hanging `check`. That narrowing is why
 ten failing tests went unreported for the epic's entire duration. **The mitigation for one blind spot
 manufactured another** — and it was only found because a harness happened to run a wider suite once.
+
+## Epic 10 — the local half closes (2026-09-17)
+
+`epic/EPIC-10-w7` is **46 commits ahead** of `epic/EPIC-10`. Post-merge verification of the fully merged
+tip, at rest (load 2.42), aggregating **94 JUnit XML files, none zero-length**:
+
+```
+tests=716 failures=0 errors=0 skipped=7 passed=709   BUILD SUCCESSFUL in 4m 32s
+```
+
+### @po's closing rulings
+
+**10.19's status STANDS, unchanged.** @sm raised that *"local half implemented"* might overstate matters
+given `DEF-05`, and raised it without asserting it. @po audited and ruled **no**: *"local half"* is defined
+by 10.19's own DoD as `AC-8…AC-19`, none of which asserts anything about the dispatch client. `DEF-05` is
+`AC-1`'s subject, and `AC-1` is unticked and marked *skipped — blocked*. Changing it would have been a
+**false correction**, and would have broken the standing `O-17` rule that a merged, gated story is not
+re-opened to absorb a later finding. @qa had reached the same conclusion independently at the gate.
+
+One narrow consequence was real and was **routed rather than absorbed**: `AC-10` requires a register naming
+every open item, and `DEF-05` is absent from it — because the register predates the harness. `AC-10` is not
+falsified; the maintenance goes to 10.34.
+
+**10.34 — GO 8/10**, Draft → Ready. **As submitted it scored 6**; two points were *fixed*, not flagged.
+
+**10.35 — GO 9/10**, Draft → Ready. **As submitted it scored 7.** Three defects fixed:
+- **`AC-7` could not fail.** It asked for a value to be recorded and required nothing of the value —
+  the epic's own catalogued vacuous shape. @po's note: *it does not get an exemption for being small.*
+  It now fails on three explicit conditions.
+- **`AC-3`'s baseline was a recollection** — "byte-identical to the unmutated baseline" was decidable only
+  against a mutation observed on a different tree on a different day. The baseline must now be captured
+  **in the same harness session**, immediately before the mutation.
+- **No Definition of done existed** on a story where every criterion is Blocked. Added, including that the
+  story does not expire into Done if the fix never lands, and that **`AC-3`, not `AC-1`, is the criterion to
+  run if only one can be** — which is what stops a green `AC-1` being read as closing `DEF-05`.
+
+### 10.18's undercount is fifteen, not six — and not an arithmetic error
+
+Both @sm and I reported 10.18 as understating its blocked criteria (@sm counted "at least nine"). @po
+counted directly: **fifteen**. And the diagnosis is sharper than the count: *"six" is exactly the
+`ED-06`/`SPK-02` subset* — the defect is that the row uses a subset as the answer to "what holds this
+story open". 10.34 gained **Group L** (AC-27…AC-33), taking it from 26 to **33 criteria**, three of them
+*mapped* onto existing criteria rather than duplicated.
+
+@po also found two misses of its own, named as its own: 10.14 `AC-19b` had **no** carrier anywhere, and
+`AC-18b` had **two**.
+
+### Corrections to the record, including mine
+
+- **@sm's claim that 10.12 `AC-6b` is "named in no source" is wrong as stated** — 10.18's `AC-2b`/`AC-4b`
+  name it verbatim. @sm's *precise* claim (absent from the brief, the register and 10.19) is true. It was
+  never orphaned; its carrier was one of the nine with no home.
+- **My "263 dirty paths" is wrong** — `wt/epic` read **241** at 23:19 and again at 23:30. Which confirms
+  the shelf-life point rather than undermining it: the number moves in both directions.
+- The run log's "41 commits ahead" was stale within the hour; it is 46.
+- 10.34's *Depends on* said *"No further Epic 10 story by id"* — true when drafted, falsified the same day
+  by `DEF-05`, corrected to `10.35`.
+
+### 10.33 resolved in favour of the decision
+
+Cause confirmed exactly: the file has **one** commit, `e28f1d2e1` at `09:51:28`; the user's defer decision is
+`ff0513385` at `11:52:58` — **two hours and one minute later**, and the file was never revised. Resolved by
+adding the governing decision verbatim and **striking through** the contradicting sentences rather than
+deleting them. `red_first` kept literally in force: the malformed-body tests must be observed **RED** against
+a tree without the guard, *"because a gate that only ever sees green has measured nothing."*
+
+### The definition-of-done ruling that keeps 10.34 from freezing
+
+`AC-24` (the architecture-blocked criterion the user included over @po's dissent) can never complete the way
+the other 32 do. @po ruled the DoD **scoped**, on the ground that Epic 10's own rule already contains the
+disjunct *"or superseded by a named follow-up story that carries it"* — with a transfer condition:
+`AC-24` is discharged only by naming a **carrier id**, since *"whichever story is open when the ruling lands"*
+is not a name, and that is its actual defect. A default carrier is named now so the transfer is executable
+the day @architect rules. The user's inclusion and @po's dissent both stand untouched.
+
+### Manifest
+`DEF-05` recorded HIGH, `status: open` — with an explicit note that this is **literal**, not a stale field of
+the `DEF-01`/`DEF-02` kind, because the fix is not in this repository's history at all. Story `10.35` added,
+`wave: null` (a value, not an omission), `external_blocker` naming a **commit** rather than a working tree,
+`blocks: ["10.34"]`. Parses: 24 stories, `DEF-01…DEF-05`, `DOC-1`.
+
+**The local half of Epic 10 is closed.** What remains is twelve external gates, none owned by this team,
+two of them owned by nobody at all.
