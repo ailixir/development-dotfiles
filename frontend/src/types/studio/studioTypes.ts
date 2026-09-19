@@ -100,7 +100,7 @@ export interface StudioVariable {
   secretId?: string | null;
 }
 
-/** Story 10.34 authoring-context v2 contract. Array position is presentation, never identity. */
+/** Story 10.36 authoring-context v2 contract. Array position is presentation, never identity. */
 export interface LegacyAuthoringRequest {
   steps: string[];
 }

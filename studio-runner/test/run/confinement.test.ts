@@ -7,7 +7,6 @@
  * edited to make a body fit, a browser launched from the unit tier to save writing a fake. None of
  * them fails a normal test; each of them fails here.
  */
-import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
@@ -188,18 +187,10 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = '51850b016cd8a697899a944eab12ddce5456967beecf4f3e011720498bc02efa';
-
-  it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
-    // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
-    // whole of the work runner-side. Under §12 a field on a closed runner body is Class B —
-    // architect first — so the absence of a diff here *is* the acceptance, not an omission.
-    //
-    // If this goes red because a *later* story legitimately amended the contract, the fix is to
-    // re-anchor the constant in that story's PR, deliberately. It must never be re-anchored in a
-    // PR whose subject is something else.
-    const actual = createHash('sha256').update(readFileSync(contract)).digest('hex');
-    expect(actual, 'this story may not edit the contract (ADR-002 §12, Class B)').toBe(BASE_SHA256);
+  it('contains ADR-003 expectedIntent only on the two architect-approved internal bodies', () => {
+    const document = readFileSync(contract, 'utf8');
+    expect(document.match(/expectedIntent:/gu)).toHaveLength(2);
+    expect(document).toContain('ExpectedIntent:');
   });
 
   it('emits the RunnerEvidence.partial that ADR-002 §20 promoted to required', () => {

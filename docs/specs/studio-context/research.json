@@ -1,0 +1,293 @@
+{
+  "storyId": "STUDIO-CONTEXT",
+  "researchedAt": "2026-09-18T22:13:38Z",
+  "researchedBy": "@analyst",
+  "complexity": "COMPLEX",
+  "scope": "Spec review only: context-aware plain English to Playwright compilation; no dependency changes or product implementation.",
+  "method": {
+    "tools": [
+      "codebase inspection",
+      "official Playwright documentation through web browsing"
+    ],
+    "fallback": "Context7 and EXA were not available in the tool catalog. Official primary sources were accessed directly; dependency source is manual to match the pipeline schema.",
+    "preferences": "Task-specified technical-preferences path is stale; inspected .aiox-core/data/technical-preferences.md. Its generic Next.js preset does not supersede this repository's React/Vite/Spring instructions.",
+    "inputs": "Reviewed requirements.json and complexity.json. The user subsequently confirmed supplied global/per-step context AND live page inspection in an explicit learning run. The official Playwright facts remain applicable; learning orchestration is a proposed architecture extension, with environment authentication/retention prerequisites still to resolve."
+  },
+  "dependencies": [
+    {
+      "name": "playwright",
+      "type": "library",
+      "version": "1.57.0 (existing local installation; production runner pin remains unverified)",
+      "verified": true,
+      "source": "manual",
+      "existing": {
+        "installed": true,
+        "currentVersion": "1.57.0",
+        "declaredRange": "^1.57.0",
+        "usageLocations": [
+          "frontend/package.json:66",
+          "frontend/package-lock.json:9707",
+          "frontend/node_modules/playwright/package.json:3",
+          "frontend/scripts/run-studio-test.mjs:1"
+        ],
+        "productionRunnerStatus": "ADR-001 describes a future exact package/browser-image pin; no separate production runner package exists in this checkout. The ADR's >=1.59 research floor is not evidence of an installed runtime."
+      },
+      "documentation": {
+        "url": "https://playwright.dev/docs/locators",
+        "relevantSections": [
+          "Locating elements",
+          "Strictness",
+          "Auto-waiting",
+          "Text input",
+          "ARIA snapshots",
+          "Authentication"
+        ],
+        "versionedReference": "https://raw.githubusercontent.com/microsoft/playwright/v1.57.0/docs/src/api/class-locator.md"
+      },
+      "patterns": [
+        {
+          "name": "Semantic locator plus an unchanged input literal",
+          "description": "Illustrative candidate only when observed page evidence identifies one matching search field. The input value and locator name are independent data.",
+          "codeExample": "await page.getByRole('searchbox', { name: 'Search applications', exact: true }).fill('CSI 12345');"
+        },
+        {
+          "name": "Bounded compound search",
+          "description": "If the confirmed step explicitly requests searching and page evidence confirms Enter submits, fill and press can remain two statements inside one step artifact. This requires reconciling the current prompt with the documented bounded-sequence policy; it is not implemented capability.",
+          "codeExample": "await page.getByRole('searchbox', { name: 'Search applications', exact: true }).fill('CSI 12345');\nawait page.getByRole('searchbox', { name: 'Search applications', exact: true }).press('Enter');"
+        },
+        {
+          "name": "Basic observation capability",
+          "description": "Trusted capture service could use the installed basic ARIA snapshot API. This is capture-service code, not generated test language, and timeout alone does not establish business readiness.",
+          "codeExample": "await page.locator('body').ariaSnapshot({ timeout: 5000 });"
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": [
+          "Current compiler prompt permits one awaited statement; architecture section 4.5 permits bounded sequences.",
+          "Documented generated-language allowlist excludes frameLocator, filter, first, nth, pressSequentially, arbitrary evaluation, declarations and capture APIs. Official API availability does not authorize generated use.",
+          "Current installed basic ariaSnapshot does not expose mode, depth, boxes or ariaSnapshotJSON.",
+          "Production assertion adapter/runtime is a future dependency; the current local runner imports chromium and interprets source strings rather than running generated expect calls."
+        ]
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "R-01",
+      "kind": "official-fact",
+      "title": "Locators should be grounded and disambiguated",
+      "summary": "Playwright recommends role/name, labels and explicit test contracts. Locator chains narrow scope, and action locators re-resolve against current DOM. Single-target actions are strict; selecting the first match can conceal ambiguity. Closed shadow roots are unsupported.",
+      "sources": [
+        "https://playwright.dev/docs/locators"
+      ],
+      "implication": "Proposed: generate from observed candidates and user scope; report unresolved ambiguity instead of guessing with first/nth. A successful syntax check is not page grounding."
+    },
+    {
+      "id": "R-02",
+      "kind": "official-fact",
+      "title": "Input literals and locator matching are different contracts",
+      "summary": "Text locator matching normalizes whitespace even with exact matching. fill accepts a string value; the input guide describes focus and input-event behavior. Per-character input is only needed for special keyboard handling.",
+      "sources": [
+        "https://playwright.dev/docs/locators",
+        "https://playwright.dev/docs/input"
+      ],
+      "implication": "Proposed: preserve decoded action literals independently of target matching. Test quotes, backslashes, apostrophes, Unicode and significant whitespace. Do not equate exact:true with byte-preserved input. Do not enable pressSequentially without a reviewed policy extension."
+    },
+    {
+      "id": "R-03",
+      "kind": "official-fact",
+      "title": "Auto-waiting does not establish the requested business outcome",
+      "summary": "Actions perform method-specific actionability checks; click requires a unique visible stable enabled element receiving events. Assertions retry until their condition is met. Force options bypass some checks.",
+      "sources": [
+        "https://playwright.dev/docs/actionability"
+      ],
+      "implication": "Proposed: optimize for the smallest explicit action sequence plus an intended outcome assertion. Avoid arbitrary sleeps, forced actions and redundant visibility waits. Choose postconditions from user intent and evidence, not model invention."
+    },
+    {
+      "id": "R-04",
+      "kind": "official-fact-and-codebase-verification",
+      "title": "Snapshot capabilities are version-dependent",
+      "summary": "Basic locator.ariaSnapshot was added in 1.49 and returns a YAML representation. Current official docs mark AI mode/depth as 1.59, boxes as 1.60 and ariaSnapshotJSON as 1.63. Installed 1.57.0 types expose only timeout for ariaSnapshot.",
+      "sources": [
+        "https://playwright.dev/docs/api/class-locator#locator-aria-snapshot",
+        "https://raw.githubusercontent.com/microsoft/playwright/v1.57.0/docs/src/api/class-locator.md"
+      ],
+      "codeEvidence": [
+        "frontend/node_modules/playwright-core/types/types.d.ts:12574",
+        "frontend/package-lock.json:9707",
+        "docs/architecture/ADR-001-studio-runner-scaffolding.md:124"
+      ],
+      "implication": "Proposed: capability-gate capture against the actual pinned runtime. Start with basic snapshots and explicit bounded semantic metadata. Do not assume AI references, cross-frame snapshots or newer options without a deliberate upgrade and validation."
+    },
+    {
+      "id": "R-05",
+      "kind": "official-fact-with-design-inference",
+      "title": "A snapshot is partial evidence of one observed state",
+      "summary": "ARIA snapshots encode accessible roles, names, hierarchy and content. This is not a complete representation of application logic or future UI states.",
+      "sources": [
+        "https://playwright.dev/docs/aria-snapshots"
+      ],
+      "implication": "Inference/proposal: pair snapshots with redacted URL, page identity, capture time and bounded candidate metadata; record missing, truncated or inaccessible coverage. A snapshot before navigation cannot prove the target exists on the next page. Observe after confirmed prior actions in an explicitly authorized authoring session, or report that step as ungrounded."
+    },
+    {
+      "id": "R-06",
+      "kind": "official-fact",
+      "title": "Authentication state must remain outside model context",
+      "summary": "Playwright browser contexts isolate sessions. Saved authentication state can contain cookies and headers that allow account impersonation; the documentation discourages committing it. Shared accounts are unsuitable when concurrent tests interfere through server-side state.",
+      "sources": [
+        "https://playwright.dev/docs/auth"
+      ],
+      "implication": "Proposed: use authorized authentication-profile references and CSI-bound capture sessions; never include storageState, tokens, cookies or resolved secrets in prompts. Redact page evidence before transmission and apply the existing destination policy to capture as well as execution."
+    },
+    {
+      "id": "R-07",
+      "kind": "codebase-fact",
+      "title": "Current generated source receives no page, global or step context",
+      "summary": "CompileRequest carries ordered source lines, syntax/output contracts, versions and repair diagnostics. StudioGeminiService populates these from stored steps and validates only step count, index and originalText correspondence. Its prompt requests one awaited statement. No page snapshot or separate global/step context field is assembled here.",
+      "codeEvidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/CompileRequest.java:31",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/StudioGeminiService.java:22",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/StudioGeminiService.java:92"
+      ],
+      "implication": "Matching originalText does not prove the generated fill value or target matches intent. New context contracts must reach persistence, request assembly, revision identity and semantic validation."
+    },
+    {
+      "id": "R-08",
+      "kind": "codebase-fact",
+      "title": "Current local execution is not generated-artifact execution",
+      "summary": "LocalStudioExecutionRunner sends source steps and viewport to run-studio-test.mjs. The script interprets a few English prefixes, hardcodes textarea/input name=q with first() for search, fills a regex-extracted double-quoted value and presses Enter. StepValidator accepts many more prefixes than this runner executes.",
+      "codeEvidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/LocalStudioExecutionRunner.java:63",
+        "frontend/scripts/run-studio-test.mjs:39",
+        "frontend/scripts/run-studio-test.mjs:45",
+        "backend/src/main/java/com/citi/put/checks/studio/validation/StepValidator.java:10"
+      ],
+      "implication": "An improved LLM prompt alone cannot improve current local execution. The implementation plan must connect validated confirmed artifacts to the executor and stop reporting broad prefix acceptance as executable support."
+    },
+    {
+      "id": "R-09",
+      "kind": "documented-architecture-fact",
+      "title": "Existing architecture is narrower than the full Playwright API",
+      "summary": "Section 4.5 permits bounded awaited calls, specified locator/action/assertion methods and typed literal/reference arguments. It denies declarations, callbacks, arbitrary evaluation and browser/context management; trusted execution interprets validated nodes rather than evaluating generated source. Section 4.3 states DOM is not a V1 compilation input and runtime AI is excluded.",
+      "codeEvidence": [
+        "docs/architecture/studio-execution.md:76",
+        "docs/architecture/studio-execution.md:92",
+        "docs/architecture/studio-execution.md:112",
+        "docs/architecture/studio-execution.md:124"
+      ],
+      "implication": "The context-aware design is an explicit architecture amendment. Trusted capture is separate from generated code. Full Playwright examples must be checked against the accepted language; preserve immutable confirmation and no hidden runtime rewriting."
+    }
+  ],
+  "unverifiedClaims": [
+    {
+      "claim": "Page-aware generation produces the correct optimized code for arbitrary applications.",
+      "reason": "No representative workflow benchmark or quality baseline was found; snapshots and syntactic validation cannot prove semantic correctness.",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "Live capture can access every enterprise target using the intended account.",
+      "reason": "Network routing, CSI permissions, SSO flows, auth profile support and capture-session restrictions require environment-specific verification.",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "The production runner supports the latest snapshot APIs and generated assertion set.",
+      "reason": "Only the 1.57.0 frontend/local runtime was found. Production runner pin and trusted assertion adapter remain unverified.",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "Captured page context can be reused across steps without refresh.",
+      "reason": "Navigation, modal state, authentication and prior actions can invalidate observations; any reuse policy needs recorded identity and freshness evidence.",
+      "action": "needs_validation"
+    }
+  ],
+  "recommendations": [
+    {
+      "type": "prefer",
+      "subject": "Explicit context provenance",
+      "rationale": "Proposal derived from R-05/R-07: distinguish application defaults, step-local intent, prior-step state and observed page evidence. Step-local scope overrides global defaults; observed content never overrides user intent or destination/security policy."
+    },
+    {
+      "type": "prefer",
+      "subject": "Literal and locator validation",
+      "rationale": "Proposal derived from R-01/R-02/R-07: preserve typed action values through deterministic serialization and compare generated decoded arguments to source intent; verify observed candidate identity and uniqueness separately."
+    },
+    {
+      "type": "prefer",
+      "subject": "Current runtime-compatible capture",
+      "rationale": "Proposal derived from R-04: use verified basic capabilities and maintain package/browser/reference/validator version provenance. No upgrade is proposed by this review."
+    },
+    {
+      "type": "avoid",
+      "subject": "Prompt-only completion claims",
+      "rationale": "R-08 shows execution bypasses generated code locally. Prompt improvements need persistence, revision invalidation, default-deny validation and executable artifact integration to satisfy the request."
+    },
+    {
+      "type": "avoid",
+      "subject": "Hidden exploratory side effects",
+      "rationale": "Proposal derived from R-05/R-06/R-09: live authoring capture must describe the confirmed actions it replays, apply existing authorization and destination policy, and never silently submit forms merely to discover later context."
+    },
+    {
+      "type": "prefer",
+      "subject": "Measurable evaluation",
+      "rationale": "Proposed validation corpus: duplicate search fields, step-specific value overriding global default, Unicode/escaping/whitespace, navigation and SPA state changes, stale snapshots, ambiguous targets, missing context, sensitive values and prompt-like page text. Report exact-literal preservation, correctly grounded action rate, ambiguity handling and end-to-end outcomes separately."
+    }
+  ],
+  "researchNotes": "Official documentation facts, repository observations and architecture proposals are labeled separately. Example selectors are illustrative, not observations of a user application. No live target access, dependency installation, product edit or browser side effect was performed. Research does not certify production readiness.",
+  "requirementTraceability": {
+    "FR-1": [
+      "R-07"
+    ],
+    "FR-2": [
+      "R-01",
+      "R-02",
+      "R-07"
+    ],
+    "FR-3": [
+      "R-01",
+      "R-04",
+      "R-05"
+    ],
+    "FR-4": [
+      "R-05",
+      "R-07"
+    ],
+    "FR-5": [
+      "R-07",
+      "R-09"
+    ],
+    "FR-6": [
+      "R-01",
+      "R-02",
+      "R-07"
+    ],
+    "FR-7": [
+      "R-02",
+      "R-06",
+      "R-07"
+    ],
+    "FR-8": [
+      "R-01",
+      "R-03",
+      "R-08",
+      "R-09"
+    ],
+    "FR-9": [
+      "R-01",
+      "R-07",
+      "R-09"
+    ],
+    "FR-10": [
+      "R-01",
+      "R-02",
+      "R-03",
+      "R-08"
+    ]
+  },
+  "scopeUpdate": {
+    "source": "User clarification, 2026-09-18",
+    "decision": "Both user context and live page inspection (Recommended)",
+    "effect": "Live learning is included in requested design scope; browser-free normal compile and LLM-free confirmed execution remain distinct. Earlier research descriptions of conditional capture refer to implementation prerequisites, not an unanswered scope preference."
+  }
+}

@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
@@ -30,10 +31,22 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 @ConfigurationProperties(prefix = "studio.compile")
 public record StudioCompileProperties(
     @DefaultValue Pipeline pipeline,
+    @DefaultValue Aggregate aggregate,
     @DefaultValue Authoring authoring,
     @DefaultValue Diagnostics diagnostics,
     @DefaultValue Repair repair,
     @DefaultValue Sweep sweep) {
+
+  @ConstructorBinding
+  public StudioCompileProperties {}
+
+  /**
+   * Compatibility constructor for pre-context callers; aggregate bounds retain shipped defaults.
+   */
+  public StudioCompileProperties(
+      Pipeline pipeline, Authoring authoring, Diagnostics diagnostics, Repair repair, Sweep sweep) {
+    this(pipeline, new Aggregate(12, 786432), authoring, diagnostics, repair, sweep);
+  }
 
   /**
    * Bounded compile work (AC-17, AC-18).
@@ -50,6 +63,10 @@ public record StudioCompileProperties(
    */
   public record Pipeline(
       @DefaultValue("4") int concurrency, @DefaultValue("240s") Duration attemptBudget) {}
+
+  /** Whole-request gateway transport accounting across proposals, repairs and retries. */
+  public record Aggregate(
+      @DefaultValue("12") int maxCalls, @DefaultValue("786432") long maxBytes) {}
 
   /**
    * The bounded repair loop (story 10.9, AC-10a; architecture &sect;4.3 "a maximum of two repair
@@ -149,6 +166,8 @@ public record StudioCompileProperties(
   public void validate(StudioGatewayProperties gateway, StudioRunnerProperties runner) {
     List<String> problems = new ArrayList<>();
     requirePositive(problems, "pipeline.concurrency", pipeline().concurrency());
+    requirePositive(problems, "aggregate.max-calls", aggregate().maxCalls());
+    requirePositive(problems, "aggregate.max-bytes", aggregate().maxBytes());
     requirePositive(problems, "authoring.max-steps", authoring().maxSteps());
     requirePositive(problems, "authoring.max-line-chars", authoring().maxLineChars());
     requirePositive(problems, "authoring.max-source-bytes", authoring().maxSourceBytes());

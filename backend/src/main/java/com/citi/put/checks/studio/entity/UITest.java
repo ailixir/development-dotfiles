@@ -36,6 +36,15 @@ public class UITest {
   @Column(columnDefinition = "jsonb", nullable = false)
   private String steps;
 
+  /** Null identifies an unpromoted legacy row; reads must not synthesize a v2 identity. */
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(columnDefinition = "jsonb")
+  private String authoring;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "authoring_revision_inputs", columnDefinition = "jsonb")
+  private String authoringRevisionInputs;
+
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")
   private String variables;
@@ -179,6 +188,22 @@ public class UITest {
 
   public void setSteps(String steps) {
     this.steps = steps;
+  }
+
+  public String getAuthoring() {
+    return authoring;
+  }
+
+  public void setAuthoring(String authoring) {
+    this.authoring = authoring;
+  }
+
+  public String getAuthoringRevisionInputs() {
+    return authoringRevisionInputs;
+  }
+
+  public void setAuthoringRevisionInputs(String authoringRevisionInputs) {
+    this.authoringRevisionInputs = authoringRevisionInputs;
   }
 
   public String getVariables() {

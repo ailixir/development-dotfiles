@@ -24,6 +24,7 @@ describe('adversarial corpus', () => {
         fixture.source,
         fixture.references,
         fixture.policy,
+        fixture.expectedIntent,
       );
 
       expect(result.ok).toBe(false);
@@ -60,6 +61,7 @@ describe('adversarial corpus', () => {
         fixture.source,
         fixture.references,
         fixture.policy,
+        fixture.expectedIntent,
       );
       for (const step of result.steps) {
         if (step.diagnostics.length > 0) {
@@ -77,6 +79,7 @@ describe('adversarial corpus', () => {
         fixture.source,
         fixture.references,
         fixture.policy,
+        fixture.expectedIntent,
       );
       const diagnostics = [
         ...result.diagnostics,

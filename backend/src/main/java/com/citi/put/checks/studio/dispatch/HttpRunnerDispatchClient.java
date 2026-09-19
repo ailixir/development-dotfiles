@@ -153,6 +153,9 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
     body.put("deadlines", deadlines);
     body.put("videoKey", job.videoKey());
     body.put("manifestKey", job.manifestKey());
+    if (job.expectedIntent() != null) {
+      body.put("expectedIntent", job.expectedIntent());
+    }
     return body;
   }
 }

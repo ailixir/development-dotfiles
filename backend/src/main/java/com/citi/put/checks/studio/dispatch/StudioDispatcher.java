@@ -369,7 +369,24 @@ public class StudioDispatcher {
         text(resolved.secrets()),
         deadlines(revision),
         RunJob.videoKeyFor(csiId, testId, executionId, attemptId),
-        RunJob.manifestKeyFor(csiId, testId, executionId, attemptId));
+        RunJob.manifestKeyFor(csiId, testId, executionId, attemptId),
+        expectedIntent(revision));
+  }
+
+  private JsonNode expectedIntent(UITestRevision revision) {
+    if (revision.getAuthoring() == null) {
+      return revision.getExpectedIntent() == null
+          ? null
+          : document(revision.getExpectedIntent(), "expectedIntent");
+    }
+    if (revision.getExpectedIntent() == null) {
+      throw new IllegalArgumentException("Authoring v2 revision requires recompilation");
+    }
+    JsonNode expected = document(revision.getExpectedIntent(), "expectedIntent");
+    if (!expected.isObject() || expected.path("schemaVersion").asInt(-1) != 1) {
+      throw new IllegalArgumentException("Authoring v2 revision expected intent is corrupt");
+    }
+    return expected;
   }
 
   /**

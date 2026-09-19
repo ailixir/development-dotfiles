@@ -66,12 +66,22 @@ public class RunnerValidationClient {
       List<String> orderedSource,
       Collection<String> variableNames,
       Collection<String> secretNames) {
+    return validate(artifactJson, orderedSource, variableNames, secretNames, null);
+  }
+
+  public ValidationOutcome validate(
+      String artifactJson,
+      List<String> orderedSource,
+      Collection<String> variableNames,
+      Collection<String> secretNames,
+      String expectedIntentJson) {
     if (!properties.isConfigured()) {
       return ValidationOutcome.unavailable("studio.runner.base-url is not configured");
     }
     String body;
     try {
-      body = requestBody(artifactJson, orderedSource, variableNames, secretNames);
+      body =
+          requestBody(artifactJson, orderedSource, variableNames, secretNames, expectedIntentJson);
     } catch (RuntimeException e) {
       return ValidationOutcome.unavailable("candidate artifact is not a JSON document");
     }
@@ -139,6 +149,15 @@ public class RunnerValidationClient {
       List<String> orderedSource,
       Collection<String> variableNames,
       Collection<String> secretNames) {
+    return requestBody(artifactJson, orderedSource, variableNames, secretNames, null);
+  }
+
+  static String requestBody(
+      String artifactJson,
+      List<String> orderedSource,
+      Collection<String> variableNames,
+      Collection<String> secretNames,
+      String expectedIntentJson) {
     ObjectNode root = MAPPER.createObjectNode();
     try {
       root.set("artifact", MAPPER.readTree(artifactJson));
@@ -152,6 +171,13 @@ public class RunnerValidationClient {
     variableNames.forEach(variables::add);
     ArrayNode secrets = references.putArray("secrets");
     secretNames.forEach(secrets::add);
+    if (expectedIntentJson != null) {
+      try {
+        root.set("expectedIntent", MAPPER.readTree(expectedIntentJson));
+      } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        throw new IllegalArgumentException("expected intent is not a JSON document", e);
+      }
+    }
     return root.toString();
   }
 

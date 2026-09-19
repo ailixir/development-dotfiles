@@ -1,0 +1,65 @@
+schema: 1
+story: '10.39'
+story_title: 'Resolve scoped context and assemble bounded compiler intent'
+gate: PASS
+status_reason: 'Stories 10.41 and 10.42 replace subsequence matching at the production boundary with closed runner AST correspondence and versioned immutable-authoring verification. REQ-005 and all Story 10.39 acceptance criteria now pass.'
+reviewer: 'Quinn (Test Architect) / @architect'
+reviewed_revision: 'working-tree-sha256:b77fc47e67ccb3505cc7d1bf79f398326ee925380c1a303c9d7188ae75d4ff89'
+updated: '2026-09-19T03:58:42Z'
+
+top_issues: []
+waiver: { active: false }
+
+quality_score: 100
+
+review_history:
+  - reviewed_revision: 'working-tree-sha256:b3e9dcba698a39f3dc9947bb5cfc11f2cbe3ede9f2cdc69644104a4aec73f214'
+    updated: '2026-09-19T00:30:04Z'
+    gate: FAIL
+    status_reason: 'Ordered-subsequence correspondence accepted additional allowed operations before, between or after the requested sequence.'
+    issue_ids: ['REQ-005']
+evidence:
+  tests_reviewed: 1045
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Closed runner AST comparison rejects operation supersets and full semantic mutations; immutable-authoring verification and secret-canary controls pass.'
+  performance:
+    status: PASS
+    notes: 'Aggregate maxCalls/maxBytes charge retries and repairs and stop subsequent calls after exhaustion.'
+  reliability:
+    status: PASS
+    notes: 'Exact count/order/semantics are enforced before publication and rechecked before acceptance/execution; aggregate repair accounting remains bounded.'
+  maintainability:
+    status: PASS
+    notes: 'The production boundary now delegates semantic correspondence to the runner parser and immutable authenticity to the shared versioned backend derivation.'
+
+recommendations:
+  immediate: []
+  future: []
+
+resolved_issues:
+  - id: 'REQ-001'
+    resolution: 'Production ContextCompileInputs derives nonempty ordered typed intent and blocks unsupported deterministic English before gateway submission.'
+  - id: 'REQ-002'
+    resolution: 'Aggregate maxCalls/maxBytes account for retries and repairs with deterministic exhaustion tests.'
+  - id: 'REQ-003'
+    resolution: 'Production tests load the canonical shared six-step login/protected fixture by name and retain route/state, role and accessibility scope.'
+  - id: 'REQ-004'
+    resolution: 'Correspondence decodes permitted JavaScript string/reference arguments and rejects changed values, actions and accessible names.'
+  - id: 'REQ-005'
+    resolution: 'Production validation sends compiler-derived expectedIntent to the runner, which requires exact typed operation count, order and semantics; immutable versioned intent is reverified before confirmation and acceptance.'
+
+review_evidence:
+  canonical_fixture: 'PASS — the real login-then-protected-navigation JSON case is loaded by name and all six stable steps produce typed intent.'
+  exact_semantics: 'PASS — escaped quotes, backslashes, newlines, Unicode and opaque references compare by decoded value; changed values/actions/names fail.'
+  aggregate_accounting: 'PASS — transport retries repeat input-byte charges, repairs accumulate calls/bytes and exhaustion prevents the next proposal.'
+  exact_sequence: 'PASS — extra operations before, between or after; missing/reordered actions; and wrong key/target/reference/assertion/options all fail runner correspondence.'
+  focused_tests: 'PASS — 34 backend derivation/boundary/migration/assembler/dispatch tests, 145 runner semantic/contract/prelaunch assertions and the real Chromium fixture.'
+  static_checks: 'PASS — Spotless, Checkstyle main/test, SpotBugs main and compilation.'
+  coderabbit: 'Unavailable on Darwin under the documented graceful-degradation rule.'

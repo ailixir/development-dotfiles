@@ -1,4 +1,5 @@
 import apiClient from './apiClient';
+import { createTest, getTest, updateTest } from './studioAuthoringTransport';
 import type {
   CompileAccepted,
   ConfirmCompileRequest,
@@ -7,7 +8,6 @@ import type {
   ExecutionSnapshot,
   TestDto,
   TestPage,
-  TestRequest,
 } from '@/types/studio/studioTypes';
 
 /**
@@ -39,13 +39,9 @@ export const studioApi = {
   listTests: async (params?: ListTestsParams): Promise<TestPage> =>
     apiClient.get('/studio/tests', { params }),
 
-  getTest: async (id: string): Promise<TestDto> => apiClient.get(`/studio/tests/${id}`),
-
-  createTest: async (payload: TestRequest): Promise<TestDto> =>
-    apiClient.post('/studio/tests', payload),
-
-  updateTest: async (id: string, payload: TestRequest): Promise<TestDto> =>
-    apiClient.put(`/studio/tests/${id}`, payload),
+  getTest,
+  createTest,
+  updateTest,
 
   deleteTest: async (id: string): Promise<void> => apiClient.delete(`/studio/tests/${id}`),
 

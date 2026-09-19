@@ -1,11 +1,12 @@
 import type { ReferenceDeclarations, ValidationPolicyInput } from './bounds.js';
 import { resolvePolicy } from './bounds.js';
-import type { Diagnostic } from './diagnostics.js';
+import type { Diagnostic, DiagnosticCode } from './diagnostics.js';
 import { DiagnosticCollector } from './diagnostics.js';
 import { validateArtifactSchema } from './schema.js';
 import { validateStepCode } from './ast.js';
 import type { Operation } from '../executor/operations.js';
 import { VALIDATOR_SCHEMA_VERSION } from '../versions.js';
+import { expectedReferences, operationsCorrespond, parseExpectedIntent } from './expectedIntent.js';
 
 export interface ValidatedStepResult {
   readonly stepIndex: number;
@@ -34,6 +35,7 @@ export function validateArtifact(
   source: readonly string[],
   references: ReferenceDeclarations,
   policy?: ValidationPolicyInput,
+  expectedIntent?: unknown,
 ): ValidationResult {
   const { bounds } = resolvePolicy(policy);
 
@@ -50,13 +52,28 @@ export function validateArtifact(
     stepCollectors,
   );
 
+  const expected = expectedIntent === undefined
+    ? null
+    : parseExpectedIntent(expectedIntent, source.length, bounds.maxArtifactBytes);
+  if (expected !== null && !expected.ok) {
+    artifactCollector.add({
+      code: expected.code as DiagnosticCode,
+      message: expected.path === undefined ? 'Expected intent is invalid.' : `Expected intent is invalid at ${expected.path}.`,
+    });
+  }
+
   const operationsByStep = new Map<number, readonly Operation[]>();
-  if (schema.steps !== null) {
+  if (schema.steps !== null && (expected === null || expected.ok)) {
     for (const step of schema.steps) {
       const collector = stepCollectors[step.stepIndex];
       if (collector === undefined) continue;
-      const operations = validateStepCode(step, references, bounds, collector);
-      if (operations !== null) operationsByStep.set(step.stepIndex, operations);
+      const expectedStep = expected?.ok ? expected.intent.steps[step.stepIndex] : undefined;
+      const refs = expectedStep === undefined ? undefined : expectedReferences(expectedStep.operations);
+      const operations = validateStepCode(step, references, bounds, collector, refs);
+      if (operations !== null && expectedStep !== undefined && !operationsCorrespond(operations, expectedStep.operations, policy?.defaultTimeoutMs)) {
+        collector.add({ code: 'EXPECTED_INTENT_MISMATCH', message: 'Parsed operations do not exactly match expected intent.' });
+      }
+      if (operations !== null && collector.isEmpty) operationsByStep.set(step.stepIndex, operations);
     }
   }
 
@@ -93,3 +110,4 @@ export type {
 export { DIAGNOSTIC_CODES, isDiagnosticCode } from './diagnostics.js';
 export type { Diagnostic, DiagnosticCode } from './diagnostics.js';
 export type { ArtifactStep } from './schema.js';
+export type { ExpectedIntent, ExpectedIntentStep } from './expectedIntent.js';

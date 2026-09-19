@@ -2329,6 +2329,332 @@ components:
           description: The ordered original step lines the artifact claims to compile (§4.4).
           items: { type: string }
         references: { $ref: '#/components/schemas/ReferenceDeclarations' }
+        expectedIntent: { $ref: '#/components/schemas/ExpectedIntent' }
+
+    ExpectedIntent:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, steps]
+      properties:
+        schemaVersion: { type: integer, enum: [1] }
+        steps:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [stepIndex, stepId, operations]
+            properties:
+              stepIndex: { type: integer, minimum: 0 }
+              stepId: { type: string, format: uuid }
+              operations:
+                type: array
+                minItems: 1
+                items: { $ref: '#/components/schemas/ExpectedOperation' }
+
+    ExpectedOperation:
+      oneOf:
+        - { $ref: '#/components/schemas/ExpectedGoto' }
+        - { $ref: '#/components/schemas/ExpectedWaitForUrl' }
+        - { $ref: '#/components/schemas/ExpectedClick' }
+        - { $ref: '#/components/schemas/ExpectedFill' }
+        - { $ref: '#/components/schemas/ExpectedPress' }
+        - { $ref: '#/components/schemas/ExpectedCheck' }
+        - { $ref: '#/components/schemas/ExpectedUncheck' }
+        - { $ref: '#/components/schemas/ExpectedHover' }
+        - { $ref: '#/components/schemas/ExpectedSelectOption' }
+        - { $ref: '#/components/schemas/ExpectedVisible' }
+        - { $ref: '#/components/schemas/ExpectedContainText' }
+        - { $ref: '#/components/schemas/ExpectedValue' }
+        - { $ref: '#/components/schemas/ExpectedUrl' }
+        - { $ref: '#/components/schemas/ExpectedTitle' }
+      discriminator: { propertyName: op }
+
+    ExpectedLiteral:
+      type: object
+      additionalProperties: false
+      required: [kind, value]
+      properties: { kind: { type: string, enum: [literal] }, value: { type: string } }
+    ExpectedVariable:
+      type: object
+      additionalProperties: false
+      required: [kind, name]
+      properties: { kind: { type: string, enum: [variable] }, name: { type: string, minLength: 1 } }
+    ExpectedSecret:
+      type: object
+      additionalProperties: false
+      required: [kind, id]
+      properties: { kind: { type: string, enum: [secret] }, id: { type: string, minLength: 1 } }
+    ExpectedRegex:
+      type: object
+      additionalProperties: false
+      required: [kind, source, flags]
+      properties:
+        kind: { type: string, enum: [regex] }
+        source: { type: string }
+        flags: { type: string }
+    ExpectedTextMatcher:
+      oneOf:
+        - { $ref: '#/components/schemas/ExpectedLiteral' }
+        - { $ref: '#/components/schemas/ExpectedVariable' }
+        - { $ref: '#/components/schemas/ExpectedRegex' }
+      discriminator: { propertyName: kind }
+    ExpectedFillValue:
+      oneOf:
+        - { $ref: '#/components/schemas/ExpectedLiteral' }
+        - { $ref: '#/components/schemas/ExpectedVariable' }
+        - { $ref: '#/components/schemas/ExpectedSecret' }
+      discriminator: { propertyName: kind }
+
+    ExpectedLocator:
+      type: object
+      additionalProperties: false
+      required: [segments]
+      properties:
+        segments:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/ExpectedLocatorSegment' }
+    ExpectedLocatorSegment:
+      oneOf:
+        - { $ref: '#/components/schemas/ExpectedRoleSegment' }
+        - { $ref: '#/components/schemas/ExpectedTextSegment' }
+        - { $ref: '#/components/schemas/ExpectedLabelSegment' }
+        - { $ref: '#/components/schemas/ExpectedPlaceholderSegment' }
+        - { $ref: '#/components/schemas/ExpectedTestIdSegment' }
+        - { $ref: '#/components/schemas/ExpectedCssSegment' }
+      discriminator: { propertyName: kind }
+    ExpectedRoleSegment:
+      type: object
+      additionalProperties: false
+      required: [kind, role]
+      properties:
+        kind: { type: string, enum: [getByRole] }
+        role: { type: string }
+        options: { $ref: '#/components/schemas/ExpectedRoleOptions' }
+    ExpectedTextSegment:
+      type: object
+      additionalProperties: false
+      required: [kind, text]
+      properties:
+        kind: { type: string, enum: [getByText] }
+        text: { $ref: '#/components/schemas/ExpectedTextMatcher' }
+        options: { $ref: '#/components/schemas/ExpectedLocatorTextOptions' }
+    ExpectedLabelSegment:
+      type: object
+      additionalProperties: false
+      required: [kind, text]
+      properties:
+        kind: { type: string, enum: [getByLabel] }
+        text: { $ref: '#/components/schemas/ExpectedTextMatcher' }
+        options: { $ref: '#/components/schemas/ExpectedLocatorTextOptions' }
+    ExpectedPlaceholderSegment:
+      type: object
+      additionalProperties: false
+      required: [kind, text]
+      properties:
+        kind: { type: string, enum: [getByPlaceholder] }
+        text: { $ref: '#/components/schemas/ExpectedTextMatcher' }
+        options: { $ref: '#/components/schemas/ExpectedLocatorTextOptions' }
+    ExpectedTestIdSegment:
+      type: object
+      additionalProperties: false
+      required: [kind, testId]
+      properties:
+        kind: { type: string, enum: [getByTestId] }
+        testId:
+          oneOf:
+            - { $ref: '#/components/schemas/ExpectedLiteral' }
+            - { $ref: '#/components/schemas/ExpectedVariable' }
+    ExpectedCssSegment:
+      type: object
+      additionalProperties: false
+      required: [kind, selector]
+      properties:
+        kind: { type: string, enum: [locator] }
+        selector: { type: string }
+
+    ExpectedLocatorTextOptions:
+      type: object
+      additionalProperties: false
+      properties: { exact: { type: boolean } }
+    ExpectedRoleOptions:
+      type: object
+      additionalProperties: false
+      properties:
+        name: { $ref: '#/components/schemas/ExpectedTextMatcher' }
+        exact: { type: boolean }
+        checked: { type: boolean }
+        disabled: { type: boolean }
+        expanded: { type: boolean }
+        selected: { type: boolean }
+        pressed: { type: boolean }
+        level: { type: integer }
+    ExpectedTimeoutOptions:
+      type: object
+      additionalProperties: false
+      properties: { timeout: { type: integer, minimum: 0 } }
+    ExpectedGotoOptions:
+      type: object
+      additionalProperties: false
+      properties:
+        timeout: { type: integer, minimum: 0 }
+        waitUntil: { type: string, enum: [load, domcontentloaded, networkidle, commit] }
+    ExpectedActionOptions:
+      type: object
+      additionalProperties: false
+      properties:
+        timeout: { type: integer, minimum: 0 }
+        force: { type: boolean }
+        trial: { type: boolean }
+    ExpectedClickOptions:
+      type: object
+      additionalProperties: false
+      properties:
+        timeout: { type: integer, minimum: 0 }
+        force: { type: boolean }
+        trial: { type: boolean }
+        button: { type: string, enum: [left, right, middle] }
+        clickCount: { type: integer, minimum: 1 }
+        delay: { type: integer, minimum: 0 }
+    ExpectedPressOptions:
+      type: object
+      additionalProperties: false
+      properties:
+        timeout: { type: integer, minimum: 0 }
+        delay: { type: integer, minimum: 0 }
+    ExpectedContainTextOptions:
+      type: object
+      additionalProperties: false
+      properties:
+        timeout: { type: integer, minimum: 0 }
+        ignoreCase: { type: boolean }
+        useInnerText: { type: boolean }
+    ExpectedUrlOptions:
+      type: object
+      additionalProperties: false
+      properties:
+        timeout: { type: integer, minimum: 0 }
+        ignoreCase: { type: boolean }
+
+    ExpectedGoto:
+      type: object
+      additionalProperties: false
+      required: [op, url]
+      properties:
+        op: { type: string, enum: [goto] }
+        url:
+          oneOf: [{ $ref: '#/components/schemas/ExpectedLiteral' }, { $ref: '#/components/schemas/ExpectedVariable' }]
+        options: { $ref: '#/components/schemas/ExpectedGotoOptions' }
+    ExpectedWaitForUrl:
+      type: object
+      additionalProperties: false
+      required: [op, url]
+      properties:
+        op: { type: string, enum: [waitForURL] }
+        url: { $ref: '#/components/schemas/ExpectedTextMatcher' }
+        options: { $ref: '#/components/schemas/ExpectedGotoOptions' }
+    ExpectedClick:
+      type: object
+      additionalProperties: false
+      required: [op, locator]
+      properties:
+        op: { type: string, enum: [click] }
+        locator: { $ref: '#/components/schemas/ExpectedLocator' }
+        options: { $ref: '#/components/schemas/ExpectedClickOptions' }
+    ExpectedFill:
+      type: object
+      additionalProperties: false
+      required: [op, locator, value]
+      properties:
+        op: { type: string, enum: [fill] }
+        locator: { $ref: '#/components/schemas/ExpectedLocator' }
+        value: { $ref: '#/components/schemas/ExpectedFillValue' }
+        options: { $ref: '#/components/schemas/ExpectedActionOptions' }
+    ExpectedPress:
+      type: object
+      additionalProperties: false
+      required: [op, locator, key]
+      properties:
+        op: { type: string, enum: [press] }
+        locator: { $ref: '#/components/schemas/ExpectedLocator' }
+        key: { $ref: '#/components/schemas/ExpectedLiteral' }
+        options: { $ref: '#/components/schemas/ExpectedPressOptions' }
+    ExpectedCheck:
+      type: object
+      additionalProperties: false
+      required: [op, locator]
+      properties:
+        op: { type: string, enum: [check] }
+        locator: { $ref: '#/components/schemas/ExpectedLocator' }
+        options: { $ref: '#/components/schemas/ExpectedActionOptions' }
+    ExpectedUncheck:
+      type: object
+      additionalProperties: false
+      required: [op, locator]
+      properties:
+        op: { type: string, enum: [uncheck] }
+        locator: { $ref: '#/components/schemas/ExpectedLocator' }
+        options: { $ref: '#/components/schemas/ExpectedActionOptions' }
+    ExpectedHover:
+      type: object
+      additionalProperties: false
+      required: [op, locator]
+      properties:
+        op: { type: string, enum: [hover] }
+        locator: { $ref: '#/components/schemas/ExpectedLocator' }
+        options: { $ref: '#/components/schemas/ExpectedActionOptions' }
+    ExpectedSelectOption:
+      type: object
+      additionalProperties: false
+      required: [op, locator, value]
+      properties:
+        op: { type: string, enum: [selectOption] }
+        locator: { $ref: '#/components/schemas/ExpectedLocator' }
+        value:
+          oneOf: [{ $ref: '#/components/schemas/ExpectedLiteral' }, { $ref: '#/components/schemas/ExpectedVariable' }]
+        options: { $ref: '#/components/schemas/ExpectedActionOptions' }
+    ExpectedVisible:
+      type: object
+      additionalProperties: false
+      required: [op, locator]
+      properties:
+        op: { type: string, enum: [expectVisible] }
+        locator: { $ref: '#/components/schemas/ExpectedLocator' }
+        options: { $ref: '#/components/schemas/ExpectedTimeoutOptions' }
+    ExpectedContainText:
+      type: object
+      additionalProperties: false
+      required: [op, locator, expected]
+      properties:
+        op: { type: string, enum: [expectContainText] }
+        locator: { $ref: '#/components/schemas/ExpectedLocator' }
+        expected: { $ref: '#/components/schemas/ExpectedTextMatcher' }
+        options: { $ref: '#/components/schemas/ExpectedContainTextOptions' }
+    ExpectedValue:
+      type: object
+      additionalProperties: false
+      required: [op, locator, expected]
+      properties:
+        op: { type: string, enum: [expectValue] }
+        locator: { $ref: '#/components/schemas/ExpectedLocator' }
+        expected: { $ref: '#/components/schemas/ExpectedTextMatcher' }
+        options: { $ref: '#/components/schemas/ExpectedTimeoutOptions' }
+    ExpectedUrl:
+      type: object
+      additionalProperties: false
+      required: [op, expected]
+      properties:
+        op: { type: string, enum: [expectUrl] }
+        expected: { $ref: '#/components/schemas/ExpectedTextMatcher' }
+        options: { $ref: '#/components/schemas/ExpectedUrlOptions' }
+    ExpectedTitle:
+      type: object
+      additionalProperties: false
+      required: [op, expected]
+      properties:
+        op: { type: string, enum: [expectTitle] }
+        expected: { $ref: '#/components/schemas/ExpectedTextMatcher' }
+        options: { $ref: '#/components/schemas/ExpectedTimeoutOptions' }
 
     ValidateResponse:
       type: object
@@ -2436,6 +2762,7 @@ components:
         manifestKey:
           type: string
           description: Server-derived terminal result manifest key (§5.3, §6.2).
+        expectedIntent: { $ref: '#/components/schemas/ExpectedIntent' }
 
     RunAccepted:
       type: object

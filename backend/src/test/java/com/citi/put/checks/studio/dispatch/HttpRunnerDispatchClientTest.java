@@ -86,6 +86,45 @@ class HttpRunnerDispatchClientTest {
   }
 
   @Test
+  void immutableExpectedIntentSnapshotIsSentWithoutAnyResolvedValueInIt() throws Exception {
+    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(202)));
+    RunJob base = job();
+    RunJob withIntent =
+        new RunJob(
+            base.executionId(),
+            base.attemptId(),
+            base.revisionId(),
+            base.artifactHash(),
+            base.artifact(),
+            base.source(),
+            base.configuration(),
+            base.csi(),
+            base.references(),
+            base.resolvedVars(),
+            base.resolvedSecrets(),
+            base.deadlines(),
+            base.videoKey(),
+            base.manifestKey(),
+            new ObjectMapper()
+                .readTree(
+                    "{\"schemaVersion\":1,\"steps\":[{\"stepIndex\":0,"
+                        + "\"stepId\":\"11111111-1111-4111-8111-111111111111\","
+                        + "\"operations\":[{\"op\":\"goto\",\"url\":{\"kind\":\"literal\","
+                        + "\"value\":\"https://example.test/\"}}]}]}"));
+    assertThat(client.send(withIntent).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
+    String body =
+        wireMock
+            .findAll(
+                com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor(
+                    urlPathEqualTo("/v1/runs")))
+            .get(0)
+            .getBodyAsString();
+    assertThat(body).contains("\"expectedIntent\":{\"schemaVersion\":1");
+    assertThat(new ObjectMapper().readTree(body).path("expectedIntent").toString())
+        .doesNotContain("fixture-password", "emea");
+  }
+
+  @Test
   void theClassificationTableHasNoFourthOutcome() {
     assertThat(HttpRunnerDispatchClient.classify(202, null).kind())
         .isEqualTo(DispatchOutcome.Kind.ACCEPTED);

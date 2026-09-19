@@ -22,4 +22,6 @@ public interface UITestRevisionRepository extends JpaRepository<UITestRevision, 
   Page<UITestRevision> findByTestId(UUID testId, Pageable pageable);
 
   Optional<UITestRevision> findByIdAndTestId(UUID id, UUID testId);
+
+  Optional<UITestRevision> findByIdAndTestIdAndCsiId(UUID id, UUID testId, String csiId);
 }

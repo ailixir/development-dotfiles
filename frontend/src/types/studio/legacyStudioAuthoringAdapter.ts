@@ -64,6 +64,7 @@ function validateEvidenceReference(
   value: unknown,
   path: string,
   stepIds: ReadonlySet<string>,
+  ownerStepId: string | undefined,
   errors: AuthoringValidationError[],
 ): value is AuthoringEvidenceReference {
   if (!isRecord(value)) {
@@ -94,6 +95,9 @@ function validateEvidenceReference(
     errors.push({ category: 'INVALID_SHAPE', path: `${path}.stepId` });
     valid = false;
   } else if (!stepIds.has(value.stepId)) {
+    errors.push({ category: 'ORPHAN_STEP_ID', path: `${path}.stepId` });
+    valid = false;
+  } else if (ownerStepId !== undefined && value.stepId !== ownerStepId) {
     errors.push({ category: 'ORPHAN_STEP_ID', path: `${path}.stepId` });
     valid = false;
   }
@@ -181,6 +185,7 @@ function validateContext(
   path: string,
   global: boolean,
   stepIds: ReadonlySet<string>,
+  ownerStepId: string | undefined,
   errors: AuthoringValidationError[],
 ): value is GlobalAuthoringContext | StepAuthoringContext {
   if (!isRecord(value)) {
@@ -228,6 +233,7 @@ function validateContext(
             reference,
             `${path}.evidenceReferences[${index}]`,
             stepIds,
+            ownerStepId,
             errors,
           )
         ) {
@@ -288,11 +294,18 @@ export function validateStudioAuthoring(value: unknown): AuthoringValidationErro
   });
 
   if (value.globalContext !== undefined) {
-    validateContext(value.globalContext, '$.globalContext', true, stepIds, errors);
+    validateContext(value.globalContext, '$.globalContext', true, stepIds, undefined, errors);
   }
   value.steps.forEach((step, index) => {
     if (isRecord(step) && step.context !== undefined) {
-      validateContext(step.context, `$.steps[${index}].context`, false, stepIds, errors);
+      validateContext(
+        step.context,
+        `$.steps[${index}].context`,
+        false,
+        stepIds,
+        typeof step.id === 'string' ? step.id : undefined,
+        errors,
+      );
     }
   });
   return errors;

@@ -418,7 +418,13 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // created" is only true if the refusal happens before the spawn seam is touched, and the
       // child cannot refuse a spawn that has already happened. It is also what keeps AC-3 easy —
       // the artifact source never leaves this process at all.
-      const revalidation = validateArtifact(job.artifact, job.source, job.references);
+      const revalidation = validateArtifact(
+        job.artifact,
+        job.source,
+        job.references,
+        { defaultTimeoutMs: effectiveStepTimeoutMs(job.configuration.timeoutSeconds, options.maxima) },
+        job.expectedIntent,
+      );
       if (!revalidation.ok) {
         throw new RunFailure(
           'artifact-revalidation',
@@ -836,7 +842,13 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       const job = envelope.job;
 
       // ── 2. Artifact. Pure, browser-free, bounded; still before the slot. ──────────────────
-      const validation = validateArtifact(job.artifact, job.source, job.references);
+      const validation = validateArtifact(
+        job.artifact,
+        job.source,
+        job.references,
+        { defaultTimeoutMs: effectiveStepTimeoutMs(job.configuration.timeoutSeconds, options.maxima) },
+        job.expectedIntent,
+      );
       if (!validation.ok) {
         const all = [...validation.diagnostics, ...validation.steps.flatMap((step) => step.diagnostics)];
         return { status: 400, code: 'ARTIFACT_INVALID', detail: boundedCodes(all) };

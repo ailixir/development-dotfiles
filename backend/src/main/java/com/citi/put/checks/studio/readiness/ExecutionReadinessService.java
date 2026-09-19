@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.readiness;
 import com.citi.put.checks.studio.StudioConflictException;
 import com.citi.put.checks.studio.compile.ArtifactCanonicalizer;
 import com.citi.put.checks.studio.compile.CompilePins;
+import com.citi.put.checks.studio.compile.IntentRevisionVerifier;
 import com.citi.put.checks.studio.dispatch.ExecutionReadiness;
 import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import com.citi.put.checks.studio.entity.UITest;
@@ -96,7 +97,13 @@ public class ExecutionReadinessService implements ExecutionReadiness {
              r.source_revision AS revision_source_revision,
              r.configuration_revision AS revision_configuration_revision,
              r.source_hash, r.artifact::text AS revision_artifact, r.artifact_hash,
-             r.artifact_schema_version, r.provenance::text AS revision_provenance
+             r.artifact_schema_version, r.provenance::text AS revision_provenance,
+             r.source::text AS revision_source_document,
+             r.authoring::text AS revision_authoring,
+             r.authoring_revision_inputs::text AS revision_authoring_inputs,
+             r.configuration::text AS revision_configuration,
+             r.expected_intent::text AS revision_expected_intent,
+             r.intent_derivation_version
         FROM ui_tests t
         LEFT JOIN ui_test_revisions r ON r.id = t.confirmed_revision_id
        WHERE t.id = ?
@@ -170,6 +177,25 @@ public class ExecutionReadinessService implements ExecutionReadiness {
               + confirmedRevisionId
               + " was never confirmed by anyone. Review the compiled steps and confirm them before"
               + " running this test.");
+    }
+
+    // ADR-003 — every authoring-v2 revision must carry a readable expected-intent v1 snapshot.
+    // This is deliberately before every dispatch-side effect: acceptance consults this verdict
+    // before creating or claiming a ledger row, resolving values or contacting the runner.
+    if (row.get("revision_authoring") != null
+        && !IntentRevisionVerifier.verify(
+            string(row.get("revision_source_document")),
+            string(row.get("revision_authoring")),
+            string(row.get("revision_authoring_inputs")),
+            string(row.get("revision_csi_id")),
+            string(row.get("revision_configuration")),
+            string(row.get("revision_expected_intent")),
+            string(row.get("intent_derivation_version")),
+            string(row.get("revision_provenance")))) {
+      return ReadinessVerdict.refused(
+          ReadinessVerdict.COMPILE_REQUIRED,
+          "The confirmed authoring-v2 revision has no valid expected-intent snapshot. Recompile"
+              + " and confirm the current steps before running it.");
     }
 
     // Term 4 — the revision pair.
@@ -309,6 +335,10 @@ public class ExecutionReadinessService implements ExecutionReadiness {
         provenance.path("syntaxReferenceVersion").asText(null),
         pin.syntaxReferenceVersion());
     return mismatches;
+  }
+
+  private static String string(Object value) {
+    return value == null ? null : String.valueOf(value);
   }
 
   private static void compare(

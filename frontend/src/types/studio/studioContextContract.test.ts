@@ -42,7 +42,7 @@ function validCase(name: string): ValidCase {
   return fixture;
 }
 
-describe('Story 10.34 shared authoring contract fixtures', () => {
+describe('Story 10.36 shared authoring contract fixtures', () => {
   it('enumerates the required valid and invalid corpus', () => {
     expect(validCases.map(({ name }) => name)).toEqual([
       'legacy-empty-context',
@@ -62,6 +62,7 @@ describe('Story 10.34 shared authoring contract fixtures', () => {
       'secret-reference-in-global-context',
       'secret-reference-as-contextual-default',
       'author-claims-observed-provenance',
+      'step-local-evidence-owned-by-different-existing-step',
     ]);
   });
 
@@ -135,6 +136,25 @@ describe('Story 10.34 shared authoring contract fixtures', () => {
       category: 'FALSE_OBSERVED_PROVENANCE',
       path: '$.steps[0].context.evidenceReferences[0].source',
     });
+  });
+
+  it('rejects cross-step local evidence while allowing global evidence to name any existing step', () => {
+    const fixture = invalidCases.find(
+      ({ name }) => name === 'step-local-evidence-owned-by-different-existing-step',
+    );
+    if (!fixture) throw new Error('Missing shared cross-step evidence fixture');
+
+    expect(validateStudioAuthoring(fixture.request)).toContainEqual({
+      category: 'ORPHAN_STEP_ID',
+      path: '$.steps[0].context.evidenceReferences[0].stepId',
+    });
+
+    const globallyScoped = structuredClone(fixture.request) as AuthoringV2Request;
+    const evidenceReferences = globallyScoped.steps[0].context?.evidenceReferences;
+    globallyScoped.steps[0].context = {};
+    globallyScoped.globalContext = { evidenceReferences };
+
+    expect(validateStudioAuthoring(globallyScoped)).toEqual([]);
   });
 
   it('keeps stable identities, opaque credentials and state-specific evidence across login navigation', () => {

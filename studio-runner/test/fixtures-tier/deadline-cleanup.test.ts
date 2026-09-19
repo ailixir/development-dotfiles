@@ -28,6 +28,8 @@ import { join } from 'node:path';
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
+import { NULL_REDACTOR } from '../../src/executor/redaction.js';
+
 import { createChildBrowserLauncher, createForkSpawner } from '../../src/run/launcher.js';
 import type { ChildProcessHandle, ChildSpawner } from '../../src/run/launcher.js';
 import { WEBM_MAGIC } from '../../src/run/recording.js';
@@ -562,6 +564,7 @@ describe('O-13 — the reported partiality reaches the wire, and the API now pub
       },
       runtimeVersions: {},
       wallClock: () => new Date('2026-09-11T10:00:09Z'),
+      redactor: NULL_REDACTOR,
     });
     snapshot.markBrowserStarted(new Date('2026-09-11T10:00:02Z'));
 

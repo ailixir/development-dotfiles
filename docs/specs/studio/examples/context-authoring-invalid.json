@@ -124,6 +124,40 @@
         ]
       },
       "expectedCategories": ["FALSE_OBSERVED_PROVENANCE"]
+    },
+    {
+      "name": "step-local-evidence-owned-by-different-existing-step",
+      "request": {
+        "authoringSchemaVersion": 2,
+        "steps": [
+          {
+            "id": "00000000-0000-4000-8000-000000000068",
+            "text": "Enter the username",
+            "context": {
+              "evidenceReferences": [
+                {
+                  "id": "10000000-0000-4000-8000-000000000068",
+                  "revision": 1,
+                  "source": "supplied",
+                  "csiId": "60406",
+                  "environment": "Production",
+                  "route": "/login",
+                  "state": "anonymous-login",
+                  "stepId": "00000000-0000-4000-8000-000000000069",
+                  "capturedAt": "2026-09-18T15:00:00Z",
+                  "completeness": "partial",
+                  "hash": "6868686868686868686868686868686868686868686868686868686868686868"
+                }
+              ]
+            }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000069",
+            "text": "Submit the login form"
+          }
+        ]
+      },
+      "expectedCategories": ["ORPHAN_STEP_ID"]
     }
   ]
 }

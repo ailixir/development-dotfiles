@@ -1,0 +1,786 @@
+{
+  "planVersion": 1,
+  "specId": "STUDIO-CONTEXT",
+  "createdAt": "2026-09-18T22:20:30.813029+00:00",
+  "createdBy": "@architect",
+  "status": "pending",
+  "specGate": {
+    "verdict": "APPROVED",
+    "critiquePath": "docs/specs/studio-context/critique.json",
+    "iteration": 2,
+    "score": 4.8,
+    "specVersion": 2,
+    "specSha256": "e898dfe71237bbc08c1bef02db2156b2e7c5d96d198fcc57b59eef8d46022b17",
+    "unresolvedIssues": 0
+  },
+  "implementationStarted": false,
+  "scope": [
+    "supplied global and per-step context",
+    "explicit live page learning",
+    "exact confirmed-artifact execution compatibility"
+  ],
+  "complexity": "COMPLEX",
+  "totalScore": 20,
+  "granularity": "Work-package DAG for a multi-story specification; not executable lifecycle stories. @sm/@po must assign actual stories, then each implementation task is decomposed by service into at most three concrete files with verification.",
+  "inputs": [
+    "requirements.json",
+    "current-state.md",
+    "complexity.json",
+    "research.json",
+    "spec.md"
+  ],
+  "approvalBoundary": "The specification passed QA and this work-package plan is complete as a review deliverable. Implementation has not started. @sm/@po must assign and validate implementation stories; environment and production acceptance gates remain open.",
+  "existingFoundations": [
+    {
+      "id": "BASE-CONTRACTS",
+      "epic10": [
+        "10.1"
+      ],
+      "needed": "Typed API/artifact contract and MSW fixtures; do not equate draft documentation with implemented routes."
+    },
+    {
+      "id": "BASE-REVISIONS",
+      "epic10": [
+        "10.4",
+        "10.8",
+        "10.9"
+      ],
+      "needed": "Durable immutable source/configuration revisions, exact confirmation, stale publication checks and authoritative readiness gate."
+    },
+    {
+      "id": "BASE-RUNNER",
+      "epic10": [
+        "10.2",
+        "10.3",
+        "10.6",
+        "10.12",
+        "10.13"
+      ],
+      "needed": "Restricted source validator/trusted executor, pinned runtime/reference, admission and actual browser execution/deadline cleanup. Current local regex bridge is not this foundation."
+    },
+    {
+      "id": "BASE-DISPATCH",
+      "epic10": [
+        "10.7",
+        "10.11"
+      ],
+      "needed": "Run dispatches only the confirmed artifact; idempotent admission and ambiguous browser outcome behavior."
+    },
+    {
+      "id": "BASE-SECURITY",
+      "epic10": [
+        "10.17",
+        "10.18"
+      ],
+      "needed": "Real CSI identity, authorized references, allowed destinations, isolated runner and platform policy before credentialed pilot."
+    }
+  ],
+  "workPackages": [
+    {
+      "id": "WP-01",
+      "title": "Freeze authoring, evidence and learning contracts",
+      "service": "architecture",
+      "status": "pending",
+      "dependsOn": [],
+      "foundationDependencies": [
+        "BASE-CONTRACTS"
+      ],
+      "requirements": [
+        "FR-1",
+        "FR-3",
+        "FR-4",
+        "FR-5",
+        "FR-8",
+        "FR-11"
+      ],
+      "acceptanceCriteria": [
+        "AC-1",
+        "AC-2",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-14",
+        "AC-18",
+        "AC-19",
+        "AC-20"
+      ],
+      "fileAreas": [
+        "docs/specs/studio/",
+        "docs/architecture/studio-execution.md",
+        "docs/architecture/ADR-001-studio-runner-scaffolding.md"
+      ],
+      "deliverables": [
+        "Authoring schema v2 steps{id,text,context}, globalContext, legacy adapter, artifact v1 metadata mapping.",
+        "Amend no-DOM scope; freeze session/observation/proposal/advance/status/cancel identity and error contracts.",
+        "Define limits as required validated configuration; ordinary compile browser-free and confirmed execute LLM-free."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "Schema examples reject mixed/duplicate/orphan step identities and unsupported fields.",
+          "Contract review proves distinct authoring learning and immutable execution routes."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-2",
+        "NFR-3",
+        "NFR-4"
+      ]
+    },
+    {
+      "id": "WP-02",
+      "title": "Persist context/evidence and revision identities",
+      "service": "database",
+      "status": "pending",
+      "dependsOn": [
+        "WP-01"
+      ],
+      "foundationDependencies": [
+        "BASE-REVISIONS"
+      ],
+      "requirements": [
+        "FR-1",
+        "FR-4",
+        "FR-5",
+        "FR-11"
+      ],
+      "acceptanceCriteria": [
+        "AC-1",
+        "AC-2",
+        "AC-7",
+        "AC-8",
+        "AC-9",
+        "AC-18",
+        "AC-19",
+        "AC-20"
+      ],
+      "fileAreas": [
+        "backend/src/main/resources/db/migration/",
+        "backend/src/main/java/com/citi/put/checks/studio/entity/",
+        "backend/src/test/java/com/citi/put/checks/studio/"
+      ],
+      "deliverables": [
+        "Forward-only migrations for typed authoring context, immutable evidence references and learning/session advance ledger.",
+        "Legacy durable ID adaptation and context-only revision invalidation; session ownership/state generation."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "Testcontainers migration roundtrip retains legacy text and stable IDs.",
+          "Concurrent edits/compile completion cannot republish stale source or context.",
+          "Cross-CSI queries cannot expose evidence/session records."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-2",
+        "NFR-4"
+      ]
+    },
+    {
+      "id": "WP-03",
+      "title": "Resolve scoped context and exact typed intent",
+      "service": "backend",
+      "status": "pending",
+      "dependsOn": [
+        "WP-01",
+        "WP-02"
+      ],
+      "foundationDependencies": [
+        "BASE-REVISIONS"
+      ],
+      "requirements": [
+        "FR-1",
+        "FR-2",
+        "FR-4",
+        "FR-7",
+        "FR-9"
+      ],
+      "acceptanceCriteria": [
+        "AC-1",
+        "AC-3",
+        "AC-4",
+        "AC-7",
+        "AC-11",
+        "AC-12",
+        "AC-15"
+      ],
+      "fileAreas": [
+        "backend/src/main/java/com/citi/put/checks/studio/dto/",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/",
+        "backend/src/test/java/com/citi/put/checks/studio/compile/"
+      ],
+      "deliverables": [
+        "Canonical context snapshot/digest with field provenance and stable predecessor dependencies.",
+        "Explicit action/literal beats defaults; step context specializes global context; unresolved contradictions stop readiness.",
+        "Capture exact typed values/references without trimming/rewriting and distinguish prose ambiguity."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "Unit table tests cover precedence, conflicting target/value, reorder/copy and Unicode/whitespace/quotes/newlines/empty values.",
+          "Source/context edits invalidate candidate and outstanding learning proposal."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-1",
+        "NFR-2",
+        "NFR-4"
+      ]
+    },
+    {
+      "id": "WP-04",
+      "title": "Validate semantic intent and bounded source sequences",
+      "service": "runner",
+      "status": "pending",
+      "dependsOn": [
+        "WP-01",
+        "WP-03"
+      ],
+      "foundationDependencies": [
+        "BASE-RUNNER"
+      ],
+      "requirements": [
+        "FR-2",
+        "FR-7",
+        "FR-8",
+        "FR-9"
+      ],
+      "acceptanceCriteria": [
+        "AC-3",
+        "AC-4",
+        "AC-11",
+        "AC-12",
+        "AC-13",
+        "AC-14",
+        "AC-15"
+      ],
+      "fileAreas": [
+        "studio-runner/src/validator/",
+        "studio-runner/src/executor/",
+        "studio-runner/tests/"
+      ],
+      "deliverables": [
+        "Compare permitted AST call arguments against independently resolved typed intent.",
+        "One source-step entry permits bounded awaited sequences such as explicit fill+submit.",
+        "Require supported unique/scoped locator candidates; never guess first match or dynamically evaluate generated source."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "Adversarial validator tests reject wrong fill values, unsolicited submit, unsafe AST and undeclared secret use.",
+          "Browser fixtures demonstrate correct field, exact input and Enter/button distinction."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-1",
+        "NFR-2"
+      ]
+    },
+    {
+      "id": "WP-05",
+      "title": "Assemble bounded browser-free proposals and diagnostics",
+      "service": "backend",
+      "status": "pending",
+      "dependsOn": [
+        "WP-03",
+        "WP-04"
+      ],
+      "foundationDependencies": [
+        "BASE-REVISIONS"
+      ],
+      "requirements": [
+        "FR-2",
+        "FR-3",
+        "FR-5",
+        "FR-7",
+        "FR-8",
+        "FR-9"
+      ],
+      "acceptanceCriteria": [
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-8",
+        "AC-9",
+        "AC-11",
+        "AC-12",
+        "AC-13",
+        "AC-14",
+        "AC-15",
+        "AC-16"
+      ],
+      "fileAreas": [
+        "backend/src/main/java/com/citi/put/checks/studio/compile/",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/",
+        "backend/src/test/java/com/citi/put/checks/studio/compile/"
+      ],
+      "deliverables": [
+        "Separate untrusted context/evidence from pinned instructions; deterministic relevant-evidence selection.",
+        "Aggregate compile deadline/cost/attempt accounting across proposal and transport retries.",
+        "Publish only matching source/context/evidence revision; per-step unresolved diagnostics block confirmation."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "Mock gateway sees required exact literals and provenance but no secrets/authentication material.",
+          "Oversize/timeout/retry budget tests prove fail-closed bounds and no hidden browser startup.",
+          "Out-of-order completion and context-only edits cannot publish stale candidates."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-1",
+        "NFR-2",
+        "NFR-3"
+      ]
+    },
+    {
+      "id": "WP-06",
+      "title": "Manage scoped evidence provenance and freshness",
+      "service": "backend",
+      "status": "pending",
+      "dependsOn": [
+        "WP-01",
+        "WP-02"
+      ],
+      "foundationDependencies": [
+        "BASE-SECURITY"
+      ],
+      "requirements": [
+        "FR-3",
+        "FR-5",
+        "FR-9",
+        "FR-11"
+      ],
+      "acceptanceCriteria": [
+        "AC-5",
+        "AC-6",
+        "AC-8",
+        "AC-15",
+        "AC-18",
+        "AC-20"
+      ],
+      "fileAreas": [
+        "backend/src/main/java/com/citi/put/checks/studio/",
+        "backend/src/test/java/com/citi/put/checks/studio/",
+        "docs/specs/studio/"
+      ],
+      "deliverables": [
+        "Immutable user-supplied versus observed evidence, route/environment/state applicability and completeness labels.",
+        "Approved sanitization/retention and fail-closed freshness configuration; no inferred state recorded as observed.",
+        "Only trusted runner capture mints observed provenance; imported supplied profiles cannot claim live-observed status."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "Evidence from wrong CSI/environment/route/session state is rejected.",
+          "Stale/truncated observations cannot gain verified status; unknown later page remains unknown.",
+          "Retention and secret-canary checks verify permitted persisted content.",
+          "User-supplied observed flags/provenance are rejected or normalized to supplied."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-1",
+        "NFR-2",
+        "NFR-3"
+      ]
+    },
+    {
+      "id": "WP-07",
+      "title": "Extend trusted runner with isolated authoring sessions",
+      "service": "runner",
+      "status": "pending",
+      "dependsOn": [
+        "WP-01",
+        "WP-04"
+      ],
+      "foundationDependencies": [
+        "BASE-RUNNER",
+        "BASE-SECURITY"
+      ],
+      "requirements": [
+        "FR-3",
+        "FR-7",
+        "FR-8",
+        "FR-9",
+        "FR-11"
+      ],
+      "acceptanceCriteria": [
+        "AC-5",
+        "AC-6",
+        "AC-11",
+        "AC-12",
+        "AC-13",
+        "AC-14",
+        "AC-15",
+        "AC-16",
+        "AC-18",
+        "AC-19",
+        "AC-20"
+      ],
+      "fileAreas": [
+        "studio-runner/src/",
+        "studio-runner/tests/",
+        "studio-runner/config/"
+      ],
+      "deliverables": [
+        "Separate create/observe/validated-advance/status/terminate protocol for a bounded live page.",
+        "Actual pre/post observation capture with version-capability checks and redaction.",
+        "Exact proposal/state-generation admission; actionability/uniqueness recheck; duplicates return recorded result.",
+        "Cancel/idle/total deadline cleanup, bounded authoring capacity and no automatic action replay after unknown outcome."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "Controlled pages show actual changing state per step, including delayed results.",
+          "Duplicate/reordered requests and process loss cannot submit same intended action twice.",
+          "Expiry/cancel/crash close browser/process tree and erase ephemeral credentials.",
+          "Unsupported snapshot options fail explicitly on the pinned runtime."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-1",
+        "NFR-2",
+        "NFR-3"
+      ]
+    },
+    {
+      "id": "WP-08",
+      "title": "Orchestrate scope-authorized per-step learning advances",
+      "service": "backend",
+      "status": "pending",
+      "dependsOn": [
+        "WP-02",
+        "WP-03",
+        "WP-05",
+        "WP-06",
+        "WP-07"
+      ],
+      "foundationDependencies": [
+        "BASE-SECURITY"
+      ],
+      "requirements": [
+        "FR-1",
+        "FR-2",
+        "FR-3",
+        "FR-4",
+        "FR-5",
+        "FR-6",
+        "FR-7",
+        "FR-9",
+        "FR-11"
+      ],
+      "acceptanceCriteria": [
+        "AC-1",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-9",
+        "AC-10",
+        "AC-11",
+        "AC-12",
+        "AC-15",
+        "AC-16",
+        "AC-18",
+        "AC-19",
+        "AC-20"
+      ],
+      "fileAreas": [
+        "backend/src/main/java/com/citi/put/checks/studio/",
+        "backend/src/test/java/com/citi/put/checks/studio/",
+        "docs/specs/studio/"
+      ],
+      "deliverables": [
+        "Session ledger owns principal/CSI/source/context revisions and state generation.",
+        "Observe actual state, propose one step via pure compiler, validate intent/AST/target, match unchanged Start-learning authorization and automatically advance, then capture actual next state.",
+        "Revalidate current policy and proposal identity before advance; stale edits stop advancement.",
+        "Complete learning provides evidence/proposals only; final candidate still requires exact confirmation.",
+        "Accumulate session-local observations and atomically publish context/evidence only against matching start source/context/configuration revisions.",
+        "Backend/worker resolves authorized secret references ephemerally; runner has no vault, CSI-store or LLM credentials.",
+        "Bind behavioral verification to exercised action/code hash and pre/post state; final code/dependency changes clear that verification."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "API integration verifies no advance outside the hash-bound Start-learning scope; unchanged routine steps advance without repeated confirmation.",
+          "Wrong owner, stale edit/state/evidence and exceeded limits reject before browser action.",
+          "Unknown outcomes persist and never auto-retry or replay earlier steps on reconnect.",
+          "Late cancelled/stale/expired session callbacks cannot publish evidence/readiness.",
+          "Final regenerated source is not labeled behaviorally verified from old action hashes."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-1",
+        "NFR-2",
+        "NFR-3"
+      ]
+    },
+    {
+      "id": "WP-09",
+      "title": "Author/review context and synchronize saved drafts",
+      "service": "frontend",
+      "status": "pending",
+      "dependsOn": [
+        "WP-01",
+        "WP-03",
+        "WP-05",
+        "WP-06"
+      ],
+      "foundationDependencies": [
+        "BASE-CONTRACTS",
+        "BASE-REVISIONS",
+        "BASE-DISPATCH"
+      ],
+      "requirements": [
+        "FR-1",
+        "FR-2",
+        "FR-4",
+        "FR-5",
+        "FR-6",
+        "FR-7",
+        "FR-9"
+      ],
+      "acceptanceCriteria": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-7",
+        "AC-8",
+        "AC-9",
+        "AC-10",
+        "AC-11",
+        "AC-12",
+        "AC-15"
+      ],
+      "fileAreas": [
+        "frontend/src/pages/ChecksStudioPage/",
+        "frontend/src/components/studio/",
+        "frontend/src/services/"
+      ],
+      "deliverables": [
+        "MUI global/local context controls and stable reorder/copy handling.",
+        "Save current editor revision before compile; review effective context, exact values, evidence limitations and source.",
+        "Centralized API/MSW contract updates; Run points at confirmed artifact revision, retiring authoritative Python/regex divergence."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "RTL/MSW author-save-load-compile-confirm tests preserve scopes and IDs.",
+          "Slow-save/compile races never preview or confirm wrong selected test revision.",
+          "Browser test verifies readable value/target provenance and exact Run artifact identity."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-1",
+        "NFR-4"
+      ]
+    },
+    {
+      "id": "WP-10",
+      "title": "Expose explicit Learn-page lifecycle in Studio",
+      "service": "frontend",
+      "status": "pending",
+      "dependsOn": [
+        "WP-08",
+        "WP-09"
+      ],
+      "foundationDependencies": [
+        "BASE-CONTRACTS"
+      ],
+      "requirements": [
+        "FR-3",
+        "FR-5",
+        "FR-6",
+        "FR-9",
+        "FR-11"
+      ],
+      "acceptanceCriteria": [
+        "AC-5",
+        "AC-6",
+        "AC-8",
+        "AC-10",
+        "AC-15",
+        "AC-16",
+        "AC-18",
+        "AC-19",
+        "AC-20"
+      ],
+      "fileAreas": [
+        "frontend/src/components/studio/",
+        "frontend/src/services/api/studioApi.ts",
+        "frontend/src/services/mocks/studio/"
+      ],
+      "deliverables": [
+        "Explicit start, live observation/limitations, displayed plan authorization, automatic validated advance, pause/stop and terminal unknown/expired views.",
+        "Disable stale advance after edits; never auto-resubmit a browser action on reconnection.",
+        "Make transition to final compile/review/confirmation explicit."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "MSW lifecycle covers create/observe/advance/cancel/stale/unknown/expired states.",
+          "Controlled browser flow learns different page states and then runs confirmed artifact with no LLM call."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-1",
+        "NFR-4"
+      ]
+    },
+    {
+      "id": "WP-11",
+      "title": "Evaluate translation quality and boundary regressions",
+      "service": "integration",
+      "status": "pending",
+      "dependsOn": [
+        "WP-05",
+        "WP-06",
+        "WP-07",
+        "WP-08",
+        "WP-09",
+        "WP-10"
+      ],
+      "foundationDependencies": [
+        "BASE-DISPATCH"
+      ],
+      "requirements": [
+        "FR-1",
+        "FR-2",
+        "FR-3",
+        "FR-4",
+        "FR-5",
+        "FR-6",
+        "FR-7",
+        "FR-8",
+        "FR-9",
+        "FR-10",
+        "FR-11"
+      ],
+      "acceptanceCriteria": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-9",
+        "AC-10",
+        "AC-11",
+        "AC-12",
+        "AC-13",
+        "AC-14",
+        "AC-15",
+        "AC-16",
+        "AC-17",
+        "AC-18",
+        "AC-19",
+        "AC-20"
+      ],
+      "fileAreas": [
+        "studio-runner/tests/",
+        "frontend/tests/",
+        "docs/specs/studio-context/"
+      ],
+      "deliverables": [
+        "Versioned fixture corpus for wrong/duplicate targets, exact literals, transitions, delayed results, stale context and malicious page instructions.",
+        "Separate deterministic policy tests, mocked-model integration and measured real-model grounded task success/cost.",
+        "Compare baseline versus context-aware proposal on same corpus; record prompt/runtime/model versions."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "All safety/identity/exact-literal cases pass before quality evaluation.",
+          "Record numerator/denominator, run counts, failures, ambiguity rate, latency and model cost for representative workflows.",
+          "No production success threshold claimed until owner-approved targets and measured results exist."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-1",
+        "NFR-2",
+        "NFR-3",
+        "NFR-4"
+      ]
+    },
+    {
+      "id": "WP-12",
+      "title": "Configure staging policy and document operational gates",
+      "service": "infra",
+      "status": "pending",
+      "dependsOn": [
+        "WP-08",
+        "WP-10",
+        "WP-11"
+      ],
+      "foundationDependencies": [
+        "BASE-SECURITY"
+      ],
+      "requirements": [
+        "FR-3",
+        "FR-5",
+        "FR-9",
+        "FR-10",
+        "FR-11"
+      ],
+      "acceptanceCriteria": [
+        "AC-6",
+        "AC-8",
+        "AC-15",
+        "AC-16",
+        "AC-17",
+        "AC-18",
+        "AC-19",
+        "AC-20"
+      ],
+      "fileAreas": [
+        "helm-chart/put-checks/",
+        "docs/architecture/",
+        "docs/specs/studio-context/"
+      ],
+      "deliverables": [
+        "Approved session/idle/action/observation/model budgets, retention and authenticated target environments; fail closed if unset.",
+        "Runbook for cancellation, ambiguous action outcomes, evidence expiry and source/runtime upgrades.",
+        "Integrated staging acceptance reports covering both required paths; no claim of external approval before recorded sign-off."
+      ],
+      "verification": {
+        "status": "not_run",
+        "checks": [
+          "Staging verifies real CSI/origin/vault/ingress policy and browser isolation.",
+          "Quota/deadline/restart drills prove cleanup and no automatic side-effect replay."
+        ]
+      },
+      "nonFunctionalRequirements": [
+        "NFR-2",
+        "NFR-3"
+      ]
+    }
+  ],
+  "validationPerformed": [
+    "Static repository and design review; no application checks or browser/LLM evaluation."
+  ],
+  "deliveryGates": [
+    "Both supplied context and live learning are required to satisfy the selected scope.",
+    "No live learning until positive finite session/idle/action/observation/proposal/transport limits and approved environment policies are configured.",
+    "No production intelligence claims without recorded representative real-model browser fixture results."
+  ],
+  "planningStatus": "complete",
+  "finalizedAt": "2026-09-18T22:23:40.890410+00:00",
+  "planValidation": {
+    "status": "passed",
+    "checks": [
+      "JSON parsing",
+      "Acyclic ordered work-package dependency graph",
+      "All prerequisite references exist",
+      "All 11 FR and 20 AC covered",
+      "All four NFR mapped",
+      "Every work package has verification, file areas and pending status",
+      "QA approval binds unchanged spec SHA-256"
+    ],
+    "productTestsRun": false
+  }
+}

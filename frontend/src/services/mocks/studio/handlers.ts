@@ -1,4 +1,6 @@
 import { http, HttpResponse } from 'msw';
+import { createAuthoringHandlers } from './authoringHandlers';
+import { resetAuthoringMocks } from './authoringState';
 import {
   defaultConfiguration,
   type ConfirmCompileRequest,
@@ -50,6 +52,7 @@ let acceptedExecutions: ExecutionSnapshot[] = [];
 const idempotency = new Map<string, string>();
 
 export function resetStudioMocks(): void {
+  resetAuthoringMocks();
   created = [];
   acceptedExecutions = [];
   idempotency.clear();
@@ -175,6 +178,10 @@ function serveExecutionVideo(execution: ExecutionSnapshot | undefined, request: 
 }
 
 export const studioHandlers = [
+  ...createAuthoringHandlers({
+    get: id => allTests().find(test => test.id === id) ?? reviewDraft(id),
+    put: test => { created = [test, ...created.filter(candidate => candidate.id !== test.id)]; },
+  }),
   http.get(`${BASE}/tests`, ({ request }) => {
     const url = new URL(request.url);
     const csiId = url.searchParams.get('csiId');

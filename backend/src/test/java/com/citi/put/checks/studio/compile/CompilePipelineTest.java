@@ -13,12 +13,14 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import com.citi.put.checks.studio.StudioValidationException;
+import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
 import com.citi.put.checks.studio.compile.gateway.CompileResponse;
 import com.citi.put.checks.studio.compile.gateway.GatewayAuditLogger;
 import com.citi.put.checks.studio.compile.gateway.GatewayErrorCode;
 import com.citi.put.checks.studio.compile.gateway.GatewayOutcome;
 import com.citi.put.checks.studio.compile.gateway.GatewayProvenance;
 import com.citi.put.checks.studio.compile.gateway.LlmGatewayClient;
+import com.citi.put.checks.studio.dto.AuthoringV2Request;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -261,6 +263,49 @@ class CompilePipelineTest {
                 Integer.class,
                 testId))
         .isEqualTo(CompilePins.SUPPORTED_ARTIFACT_VERSION);
+  }
+
+  @Test
+  void authoringV2CompilePersistsTheDerivationVersionInColumnAndProvenance() throws Exception {
+    String first = UUID.randomUUID().toString();
+    String second = UUID.randomUUID().toString();
+    String authoring =
+        "{\"authoringSchemaVersion\":2,\"globalContext\":{\"entries\":[],"
+            + "\"evidenceReferences\":[]},\"steps\":[{\"id\":\""
+            + first
+            + "\",\"text\":\"Go to \\\"https://example.com/login\\\"\","
+            + "\"context\":{\"entries\":[],\"evidenceReferences\":[]}},{\"id\":\""
+            + second
+            + "\",\"text\":\"Click the \\\"Sign in\\\" button\","
+            + "\"context\":{\"entries\":[],\"evidenceReferences\":[]}}]}";
+    String inputs =
+        MAPPER.writeValueAsString(
+            AuthoringRevisionIdentity.create(
+                MAPPER.readValue(authoring, AuthoringV2Request.class), Map.of()));
+    jdbc.update(
+        "UPDATE ui_tests SET authoring=CAST(? AS jsonb),"
+            + " authoring_revision_inputs=CAST(? AS jsonb) WHERE id=?",
+        authoring,
+        inputs,
+        testId);
+
+    pipeline.compile(testId, OWNER);
+    awaitCompileStatus("AWAITING_CONFIRMATION");
+    Map<String, Object> row =
+        jdbc.queryForMap(
+            "SELECT intent_derivation_version,provenance::text provenance,"
+                + "expected_intent::text expected_intent FROM ui_test_revisions WHERE id="
+                + " (SELECT current_candidate_revision_id FROM ui_tests WHERE id=?)",
+            testId);
+    assertThat(row.get("intent_derivation_version")).isEqualTo("1.0.0");
+    assertThat(
+            MAPPER
+                .readTree(String.valueOf(row.get("provenance")))
+                .path("intentDerivationVersion")
+                .asText())
+        .isEqualTo("1.0.0");
+    assertThat(MAPPER.readTree(String.valueOf(row.get("expected_intent"))).path("steps"))
+        .hasSize(2);
   }
 
   @Test

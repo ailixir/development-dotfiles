@@ -1,0 +1,33 @@
+schema: 1
+story: '10.37'
+story_title: 'Persist authoring context and stable revision identity'
+gate: PASS
+status_reason: 'The canonical v2 step-source invariant now prevents ordinary updates from diverging persisted source and typed authoring. All acceptance criteria are covered by the 13-test focused suite and reviewed persistence, revision, migration, authorization, and snapshot paths.'
+reviewer: '@dev (independent quality gate)'
+reviewed_revision: 'working-tree:sha256:341862692bf9493b9128e63c256cebf163f2163a5adb778982a1e3b536227bf9'
+updated: '2026-09-18T23:39:17Z'
+top_issues: []
+waiver: { active: false }
+quality_score: 100
+evidence:
+  tests_reviewed: 13
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    ac_gaps: []
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'CSI-scoped reads and writes, evidence ownership, and supplied-only provenance remain enforced.'
+  performance:
+    status: PASS
+    notes: 'The implementation reuses the bounded row-lock/CAS path and adds no unbounded query or external call.'
+  reliability:
+    status: PASS
+    notes: 'Canonical steps, two-token CAS, immutable snapshots, late-publication rejection, and restart durability are directly covered.'
+  maintainability:
+    status: PASS
+    notes: 'Promoted and legacy update behavior now has an explicit, tested boundary with a stable diagnostic.'
+recommendations:
+  immediate: []
+  future: []

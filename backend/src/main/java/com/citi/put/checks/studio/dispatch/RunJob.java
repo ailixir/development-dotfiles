@@ -68,7 +68,41 @@ public record RunJob(
     Map<String, String> resolvedSecrets,
     JobDeadlines deadlines,
     String videoKey,
-    String manifestKey) {
+    String manifestKey,
+    JsonNode expectedIntent) {
+
+  public RunJob(
+      UUID executionId,
+      UUID attemptId,
+      UUID revisionId,
+      String artifactHash,
+      JsonNode artifact,
+      List<String> source,
+      JsonNode configuration,
+      String csi,
+      ReferenceDeclarations references,
+      Map<String, String> resolvedVars,
+      Map<String, String> resolvedSecrets,
+      JobDeadlines deadlines,
+      String videoKey,
+      String manifestKey) {
+    this(
+        executionId,
+        attemptId,
+        revisionId,
+        artifactHash,
+        artifact,
+        source,
+        configuration,
+        csi,
+        references,
+        resolvedVars,
+        resolvedSecrets,
+        deadlines,
+        videoKey,
+        manifestKey,
+        null);
+  }
 
   /**
    * Server-issued deadlines (§8.5, contract {@code JobDeadlines}).
