@@ -56,7 +56,9 @@ describe('AC-13 — every report carries the full identity and a cumulative snap
     for (const report of all) {
       expect(report.executionId).toBe('exec-1');
       expect(report.attemptId).toBe('attempt-1');
-      expect(report.admissionId).toMatch(/^adm-/u);
+      expect(report.admissionId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u,
+      );
       expect(report.runnerInstanceId).toBe('runner-a');
       expect(report.reportedAt).toBe('2026-09-11T10:00:00.000Z');
       expect(report.runtimeVersions.playwright).toBe('1.63.0');

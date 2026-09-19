@@ -20,6 +20,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  canEnumerateProcessTree,
   descendantsOf,
   isAlive,
   readProcessTable,
@@ -161,5 +162,21 @@ describe('AC-11a — the observation helpers the fixtures tier asserts with', ()
     expect(isAlive(process.pid)).toBe(true);
     // Above the platform maximum, so it can never name a live process.
     expect(isAlive(2 ** 30)).toBe(false);
+  });
+});
+
+describe('Studio v1 WP16 — the tree can only be killed where it can be enumerated', () => {
+  it('holds on this machine, where `ps` lists this process', () => {
+    expect(canEnumerateProcessTree()).toBe(true);
+  });
+
+  it('fails on an image without `ps`, whose table reads as empty', () => {
+    // `readProcessTable` answers `[]` on a missing or failing `ps`: that is the silent case.
+    expect(canEnumerateProcessTree([])).toBe(false);
+  });
+
+  it('fails on a table that does not list the caller, whatever else it lists', () => {
+    expect(canEnumerateProcessTree(PLAYWRIGHT_TREE, 999_999)).toBe(false);
+    expect(canEnumerateProcessTree(PLAYWRIGHT_TREE, 16_343)).toBe(true);
   });
 });

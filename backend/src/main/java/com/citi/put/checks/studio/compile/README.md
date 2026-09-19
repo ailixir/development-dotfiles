@@ -153,9 +153,9 @@ All values live in one configuration source, under `studio.*` in `application.ym
 | Pipeline concurrency | `studio.compile.pipeline.concurrency` | 4, no queue | refuse → `STALE COMPILE_POOL_SATURATED` |
 | Per-request budget | `studio.compile.pipeline.attempt-budget` | 240s | abandon → `STALE COMPILE_BUDGET_EXCEEDED`; late result dropped |
 | Repair attempts | `studio.compile.repair.max-attempts` | 2 | exhaustion → `NEEDS_REVISION` with `exhausted: true` |
-| Sweep threshold | `studio.compile.sweep.threshold` | 600s | older `COMPILING` rows → `STALE COMPILE_BUDGET_EXCEEDED`, retryable |
-| Sweep batch size | `studio.compile.sweep.batch-size` | 200 | the run stops at the cap; the next run continues |
-| Sweep interval | `studio.compile.sweep.interval-ms` | 60000 | one bounded statement per replica per interval, `FOR UPDATE SKIP LOCKED` |
+| Sweep threshold | `studio.compile.abandonment.threshold` | 300s | older `COMPILING` rows → `STALE COMPILE_BUDGET_EXCEEDED`, retryable |
+| Sweep batch size | `studio.compile.abandonment.batch-size` | 200 | the run stops at the cap; the next run continues |
+| Sweep interval | `studio.compile.abandonment.interval-ms` | 15000 | one bounded statement per replica per interval, `FOR UPDATE SKIP LOCKED` |
 | `/v1/validate` timeout | `studio.runner.validate-timeout` | 10s | one call, no retry → `STALE VALIDATOR_UNAVAILABLE` |
 | Gateway input/output bytes | `studio.compile.gateway.max-{input,output}-bytes` | 262144 | `COMPILE_INPUT_TOO_LARGE` / `GATEWAY_OUTPUT_TOO_LARGE` |
 | Gateway request timeout | `studio.compile.gateway.request-timeout` | 60s | `GATEWAY_TIMEOUT` |

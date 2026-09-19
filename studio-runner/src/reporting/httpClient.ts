@@ -19,7 +19,8 @@
 
 export interface HttpRequest {
   readonly url: string;
-  readonly method: 'POST';
+  /** `GET` only for the read-only control route (ADR-002 §29), which sends no body. */
+  readonly method: 'POST' | 'GET';
   readonly headers: Readonly<Record<string, string>>;
   /** Already serialized. The client sends these bytes and no others. */
   readonly body: string;
@@ -54,7 +55,7 @@ export function createFetchHttpClient(): HttpClient {
         const response = await fetch(request.url, {
           method: request.method,
           headers: { ...request.headers },
-          body: request.body,
+          ...(request.method === 'GET' ? {} : { body: request.body }),
           // Never turn a refusal into a second POST somewhere else (AC-9).
           redirect: 'manual',
           signal: controller.signal,

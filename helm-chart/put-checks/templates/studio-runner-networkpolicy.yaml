@@ -26,12 +26,16 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # From the worker pods only. §8.4: the internal routes are not public, and the MFE never talks
-    # to the runner. The API does not dispatch either — the dispatcher runs on the worker profile.
+    # From the worker (POST /v1/runs — the dispatcher runs on the worker profile only) and the API
+    # (POST /v1/validate — the compile pipeline runs on the API). §8.4: the internal routes are not
+    # public, and the MFE never talks to the runner.
     - from:
         - podSelector:
             matchLabels:
               {{- include "put-checks.worker.selectorLabels" . | nindent 14 }}
+        - podSelector:
+            matchLabels:
+              {{- include "put-checks.api.selectorLabels" . | nindent 14 }}
       ports:
         - port: {{ .Values.studioRunner.service.port }}
           protocol: TCP

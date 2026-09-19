@@ -14,6 +14,7 @@ import com.citi.put.checks.scheduling.partitioning.RetentionPruner;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContext;
@@ -22,6 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
+// Spring Boot test contexts turn metrics export off unless asked; without this the Prometheus
+// registry is never built and the scrape endpoint is absent for a reason that is not exposure.
+@AutoConfigureObservability(tracing = false)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"local", "worker"})
 @TestPropertySource(properties = "management.server.port=")
@@ -63,6 +67,21 @@ class WorkerProfileIT {
   void actuatorHealthResponds() {
     ResponseEntity<String> response = restTemplate.getForEntity("/actuator/health", String.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+  }
+
+  /**
+   * Studio v1 WP7: the runner autoscaler's signal is scraped from the worker. Both names are the
+   * ones the chart's KEDA query and any refusal alert are written against.
+   */
+  @Test
+  void prometheusScrapeCarriesTheStudioScalingSignal() {
+    ResponseEntity<String> response =
+        restTemplate.getForEntity("/actuator/prometheus", String.class);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody())
+        .contains("studio_dispatch_backlog{state=\"QUEUED\"}")
+        .contains("studio_dispatch_backlog{state=\"CLAIMED\"}")
+        .contains("studio_dispatch_refusals_total");
   }
 
   @Test

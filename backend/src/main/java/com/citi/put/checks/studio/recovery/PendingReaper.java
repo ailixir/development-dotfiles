@@ -88,10 +88,11 @@ public class PendingReaper {
           attemptWasIssued
               ? ExecutionErrorCode.DISPATCH_UNKNOWN
               : ExecutionErrorCode.DISPATCH_FAILED;
-      int closed = statements.closeWithError(executionId, code, now);
+      int closed = statements.closeByReaper(executionId, code, now);
       if (closed == 1) {
         LOGGER.info(
-            "Studio execution {} closed by the pending reaper as {} past its pending deadline",
+            "Studio execution {} closed by the pending reaper as {} past its pending deadline"
+                + " (CANCELLED if a cancel was recorded)",
             executionId,
             code);
       }

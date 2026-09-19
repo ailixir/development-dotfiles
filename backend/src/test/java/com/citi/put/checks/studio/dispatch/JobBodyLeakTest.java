@@ -12,6 +12,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import com.citi.put.checks.studio.StudioExecutionProperties;
+import com.citi.put.checks.studio.compile.validator.StudioRunnerProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -110,7 +111,11 @@ class JobBodyLeakTest {
             new ObjectMapper(),
             new StudioExecutionProperties(
                 true, null, null, null, Duration.ofMillis(500), null, null, null, null, null, null),
-            "http://localhost:" + wireMock.port());
+            new StudioRunnerProperties(
+                "http://localhost:" + wireMock.port(),
+                "test-runner-token",
+                Duration.ofSeconds(5),
+                Duration.ofSeconds(2)));
   }
 
   @AfterEach

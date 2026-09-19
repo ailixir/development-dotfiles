@@ -405,3 +405,23 @@ describe('AC-20: the evidence region has a distinct accessible name per state', 
     expect(anchor.getAttribute('tabindex')).not.toBe('-1');
   });
 });
+
+describe('Studio v1 gaps: a recording the API has no store for', () => {
+  it('renders the server reason and no player, download or video URL', () => {
+    // The shape ExecutionSnapshotMapper publishes when studio.execution.video-store.provider is
+    // `none`: the runner recorded the run, but GET …/video could only answer 404.
+    const reason = 'Recording unavailable: this deployment has no recording store the API can read.';
+    const snapshot: ExecutionSnapshot = {
+      ...AVAILABLE,
+      video: { status: 'UNAVAILABLE', error: reason, expiresAt: null, partial: false },
+      videoPath: null,
+    };
+
+    const { container } = renderPanel(snapshot);
+
+    expect(screen.getByTestId('video-evidence-statement')).toHaveTextContent(reason);
+    expect(screen.queryByTestId('video-evidence-player')).toBeNull();
+    expect(screen.queryByTestId('video-evidence-download')).toBeNull();
+    expect(urlsIn(container).filter((url) => VIDEO_ROUTE.test(url))).toEqual([]);
+  });
+});

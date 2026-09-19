@@ -8,12 +8,15 @@
  * Two properties make the set worth having, and both are asserted in `test/run/errors.test.ts`
  * rather than left to inspection:
  *
- * **(a) Disjoint from the API's `ExecutionErrorCode`, except for `TIMEOUT`.** Architecture §5.4
+ * **(a) Disjoint from the API's `ExecutionErrorCode`, except for `TIMEOUT` and `CANCELLED`.** Architecture §5.4
  * assigns every other value there to the dispatcher or a reaper; a runner that emitted one would
  * be claiming an observation it cannot make. §8.2 fixes exactly one runner-observable case — a
  * parent-enforced total timeout is `ERROR`/`TIMEOUT` — so `TIMEOUT` is *reserved* here and
  * **emitted by story 10.13**, which owns the enforcement. The test reads the contract's
  * enumeration rather than a copy of it, because 10.7 adds dispatch-time codes in the same wave.
+ * Studio v1 WP4 adds the second shared value, `CANCELLED`, for a run stopped by
+ * `DELETE /v1/runs/{id}` (ADR-002 §29); the API assigns its own copy only against a cancel it
+ * recorded.
  *
  * **(b) Total.** {@link RunFailureKind} enumerates the run's failure conditions and
  * {@link errorCodeFor} switches exhaustively over them, so a new failure kind fails the
@@ -73,6 +76,16 @@ export const RUNNER_ERROR_CODES = {
    */
   TIMEOUT: 'TIMEOUT',
   /**
+   * The run was stopped by `DELETE /v1/runs/{id}` (Studio v1 WP4, ADR-002 §29): ordered stop,
+   * bounded grace, then the process tree — the deadline's own path, for a different reason. Also
+   * the answer for a run cancelled before its browser started, which then never starts one.
+   *
+   * Shared with `ExecutionErrorCode` like `TIMEOUT`, and for the same reason: the condition is one
+   * both sides observe. The API copies nothing; it assigns its own `CANCELLED` only where it
+   * recorded the request.
+   */
+  CANCELLED: 'CANCELLED',
+  /**
    * The run path itself threw where no enumerated condition applies: the scratch directory could
    * not be created, the child exited without a result, the protocol was violated.
    *
@@ -106,6 +119,7 @@ export type RunFailureKind =
   | 'recording'
   | 'step'
   | 'total-timeout'
+  | 'cancelled'
   | 'run-fault';
 
 /** Every failure kind, so a test can assert the mapping is total in both directions. */
@@ -119,6 +133,7 @@ export const RUN_FAILURE_KINDS: readonly RunFailureKind[] = [
   'recording',
   'step',
   'total-timeout',
+  'cancelled',
   'run-fault',
 ];
 
@@ -145,6 +160,8 @@ export function errorCodeFor(kind: RunFailureKind): RunnerErrorCode {
       return RUNNER_ERROR_CODES.STEP_FAILED;
     case 'total-timeout':
       return RUNNER_ERROR_CODES.TIMEOUT;
+    case 'cancelled':
+      return RUNNER_ERROR_CODES.CANCELLED;
     case 'run-fault':
       return RUNNER_ERROR_CODES.RUN_ERROR;
   }

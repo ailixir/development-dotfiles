@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConditionalOnProperty(
-    prefix = "studio.compile.sweep",
+    prefix = "studio.compile.abandonment",
     name = "enabled",
     havingValue = "true",
     matchIfMissing = true)
@@ -58,16 +58,17 @@ public class CompileAbandonmentSweeper {
    *
    * @return how many rows this pass settled
    */
-  @Scheduled(fixedDelayString = "${studio.compile.sweep.interval-ms:60000}")
+  @Scheduled(fixedDelayString = "${studio.compile.abandonment.interval-ms:15000}")
   public int sweepOnce() {
     try {
       int swept =
-          states.sweepAbandoned(properties.sweep().threshold(), properties.sweep().batchSize());
+          states.sweepAbandoned(
+              properties.abandonment().threshold(), properties.abandonment().batchSize());
       if (swept > 0) {
         LOGGER.info(
             "studio.compile.sweep_abandoned swept={} thresholdMs={}",
             swept,
-            properties.sweep().threshold().toMillis());
+            properties.abandonment().threshold().toMillis());
       }
       return swept;
     } catch (RuntimeException e) {

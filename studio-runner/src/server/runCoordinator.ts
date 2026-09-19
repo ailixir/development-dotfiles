@@ -36,11 +36,37 @@
  * The run executes detached from the request. Scratch is created, the browser is launched,
  * `STARTED` is reported *after* the launch resolves, steps flow through the 10.2 `StepReporter`
  * seam, and the terminal report is delivered with byte-identical bounded retry. Every exit path —
- * success, failure, throw, drain — clears scratch, wipes the resolved values and releases the
- * slot.
+ * success, failure, throw, drain, cancel — clears scratch, wipes the resolved values and releases
+ * the slot.
+ *
+ * ## Cancel (`DELETE /v1/runs/{id}`, Studio v1 WP4)
+ *
+ * A cancel is the deadline's stop for a different reason: the parent orders the stop, the child
+ * gets `browserStopTimeoutMs` (default 5 s) to close its context and finalize the recording, and
+ * then the process tree is killed. The outcome is `ERROR` / `CANCELLED` and the evidence is
+ * whatever the recorder achieved. A run cancelled before its browser started never starts one.
+ *
+ * | The run is | `DELETE` answers | What happens |
+ * |---|---|---|
+ * | admitted, browser not yet running | `202 CANCELLING` | no browser is launched, or the one just launched is stopped before any step |
+ * | running | `202 CANCELLING` | ordered stop, bounded grace, process tree |
+ * | already stopping for a cancel | `202 CANCELLING` | nothing new is ordered |
+ * | past its outcome (evidence, delivery) or recently finished | `409 RUN_FINISHED` | nothing |
+ * | unknown to this runner | `404 RUN_NOT_FOUND` | nothing |
+ *
+ * **The `DELETE` is only the fast path.** It goes through the runner Service, and with more than
+ * one pod it can land on one that does not hold the run. So the pod that does hold it also *pulls*
+ * the cancel (ADR-002 §29): it reads `GET /internal/studio/executions/{id}/control` every
+ * {@link CONTROL_POLL_INTERVAL_MS} from admission until the outcome is known, and it honours
+ * `cancelRequested` on every progress acknowledgement. All three signals take the same path.
  */
 import { createRedactor } from '../executor/redaction.js';
-import type { ExecutableStep, ValueResolver } from '../executor/index.js';
+import type {
+  ExecutableStep,
+  StepFinishedEvent,
+  StepReporter,
+  ValueResolver,
+} from '../executor/index.js';
 import { executeSteps } from '../executor/index.js';
 import { RUNNER_VERSIONS, isCompatible } from '../compat/index.js';
 import type { ArtifactProvenance, RuntimeVersions } from '../compat/index.js';
@@ -72,7 +98,7 @@ import type { HttpClient } from '../reporting/httpClient.js';
 import type { JobEnvelope } from '../reporting/envelope.js';
 import { knownValuesOf, validateEnvelope } from '../reporting/envelope.js';
 import type { ReportBounds } from '../reporting/bounds.js';
-import { createReportClient } from '../reporting/reportClient.js';
+import { ackRequestsCancel, createReportClient } from '../reporting/reportClient.js';
 import { createRunSnapshot } from '../reporting/snapshot.js';
 import type { EvidenceState, RunOutcome, RunSnapshot } from '../reporting/snapshot.js';
 import { createRunReporter } from '../reporting/reportingStepReporter.js';
@@ -94,6 +120,83 @@ export interface RunDecision {
   readonly retryAfterSeconds?: number;
   /** Key names and codes only; never a job value (AC-20). */
   readonly detail?: readonly { readonly code: string; readonly field: string }[];
+}
+
+/** The answer to `DELETE /v1/runs/{id}` (ADR-002 §29). */
+export interface CancelDecision {
+  readonly status: 202 | 404 | 409;
+  readonly code: 'CANCELLING' | 'RUN_NOT_FOUND' | 'RUN_FINISHED';
+}
+
+/**
+ * How many finished runs are remembered so a late cancel can answer `409` rather than `404`.
+ * Bounded: a runner serves one browser at a time, and the API relays a cancel within seconds.
+ */
+export const FINISHED_RUNS_REMEMBERED = 256;
+
+/**
+ * How often an active run reads its control state (ADR-002 §29). Two seconds keeps a cancel
+ * observed within about three whatever pod holds the run, at one primary-key read per active run.
+ * A constant, like `MAX_CHILD_OUTPUT_LINES`: it is a latency promise, not a deployment knob.
+ */
+export const CONTROL_POLL_INTERVAL_MS = 2_000;
+
+/**
+ * What a step the cancel interrupted says about itself (Studio v1 decision D1).
+ *
+ * Fixed and value-free: it names no step text, no URL, no locator and no Playwright error. Measured
+ * before D1 on a real Chromium, the interrupted step was reported `FAIL` with whatever Playwright
+ * said when its context closed underneath it — `page.goto: net::ERR_ABORTED at <the URL>` for a
+ * navigation, and `expected the locator to be visible within 120000ms` for an assertion. The first
+ * echoes a page address into the report; the second is an assertion verdict the run never reached.
+ */
+export const STOPPED_STEP_MESSAGE = 'The run was stopped before this step finished.';
+
+/**
+ * The step reporter a cancel cannot turn into a verdict (Studio v1 decision D1, ADR-002 §29.2).
+ *
+ * Once the run is being stopped **for a cancel**, the step in flight fails for the stop's reason,
+ * not its own: the child closes the context and the pending Playwright call rejects. So a `FAIL`
+ * that arrives after the cancel's stop was ordered is reported `SKIPPED` with
+ * {@link STOPPED_STEP_MESSAGE}, keeping the timings it has — it did start, and the recording covers
+ * that start. Steps that never started are untouched: the executor already reports them `SKIPPED`
+ * with null timings and no message, and a step nobody reported stays absent (the API fills it).
+ *
+ * `open()` lists the steps that started and never finished, for the path on which the child was
+ * killed before it could say anything about the step (the grace ran out).
+ *
+ * Scoped to `cancel` on purpose: a deadline or a drain kill is a different condition with its own
+ * rules (§18.1 has the API name a `TIMEOUT` step still `RUNNING`), and D1 does not decide those.
+ */
+function stopAwareReporter(
+  reporter: StepReporter,
+  stoppedForCancel: () => boolean,
+): StepReporter & { open(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[] } {
+  const open = new Map<number, number>();
+  return {
+    stepStarted(event): void {
+      open.set(event.stepIndex, event.startedAtMs);
+      reporter.stepStarted(event);
+    },
+    stepFinished(event: StepFinishedEvent): void {
+      open.delete(event.stepIndex);
+      reporter.stepFinished(
+        event.status === 'FAIL' && stoppedForCancel()
+          ? { ...event, status: 'SKIPPED', failure: STOPPED_STEP_MESSAGE }
+          : event,
+      );
+    },
+    open(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[] {
+      return [...open].map(([stepIndex, startedAtMs]) => ({ stepIndex, startedAtMs }));
+    },
+  };
+}
+
+/** One admitted run's cancel handle. Registered at admission, dropped when its outcome is known. */
+interface RunControl {
+  cancelled: boolean;
+  /** Present while a started session can be stopped; the same `endRun` the deadline uses. */
+  end: ((reason: SessionKillReason) => void) | null;
 }
 
 export interface RunCoordinatorOptions {
@@ -151,6 +254,11 @@ export interface RunCoordinatorOptions {
    */
   readonly timers?: DeadlineTimers | undefined;
   /**
+   * The timer facility the control read is scheduled on (ADR-002 §29). Separate from `timers` so a
+   * test that drives the runtime deadline exactly is not also driving the poll, and the reverse.
+   */
+  readonly controlTimers?: DeadlineTimers | undefined;
+  /**
    * How the run origin is taken when the session does **not** run in its own process.
    *
    * A real session takes it in the child, at recording-context readiness, and hands back the
@@ -186,6 +294,11 @@ export interface RunCoordinator {
    * bounded by `launchTimeoutMs`.
    */
   terminateInFlight(): number;
+  /**
+   * `DELETE /v1/runs/{id}` (Studio v1 WP4, ADR-002 §29). Synchronous: it records the request and
+   * orders the stop if a session exists; the run's own path delivers the `FINAL` report.
+   */
+  cancel(executionId: string): CancelDecision;
   readonly inFlight: number;
 }
 
@@ -308,12 +421,91 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
   const inFlight = new Set<Promise<void>>();
   /** One entry per run that has a killable session; removed when the run leaves (AC-15). */
   const terminators = new Set<(reason: SessionKillReason) => void>();
+  /** Admitted runs whose outcome is not yet known, by execution id (ADR-002 §29). */
+  const controls = new Map<string, RunControl>();
+  /** Recently finished execution ids, oldest first, bounded by {@link FINISHED_RUNS_REMEMBERED}. */
+  const finished = new Set<string>();
+
+  function rememberFinished(executionId: string): void {
+    finished.delete(executionId);
+    finished.add(executionId);
+    while (finished.size > FINISHED_RUNS_REMEMBERED) {
+      const oldest = finished.values().next().value;
+      if (oldest === undefined) break;
+      finished.delete(oldest);
+    }
+  }
+
+  /** Records a cancel and orders the stop if a session exists. Idempotent; one path for all signals. */
+  function requestStop(executionId: string, control: RunControl, source: string): void {
+    if (control.cancelled) return;
+    control.cancelled = true;
+    logger.info('run.cancel_requested', { executionId, source });
+    control.end?.('cancel');
+  }
+
+  function controlUrl(executionId: string): string {
+    const base = options.callbackBaseUrl.endsWith('/')
+      ? options.callbackBaseUrl.slice(0, -1)
+      : options.callbackBaseUrl;
+    return `${base}/internal/studio/executions/${encodeURIComponent(executionId)}/control`;
+  }
+
+  /**
+   * Reads the run's control state every {@link CONTROL_POLL_INTERVAL_MS} until stopped (ADR-002
+   * §29). One request at a time: the next read is scheduled only after the previous one settled.
+   * A failed read changes nothing and the next one tries again; the API's reaper is the backstop.
+   */
+  function startControlPoll(executionId: string, control: RunControl): () => void {
+    const timers = options.controlTimers ?? SYSTEM_DEADLINE_TIMERS;
+    // An object, not a `let`: the flag is flipped by the returned closure while a read is awaited.
+    const poll = { stopped: false };
+    const isStopped = (): boolean => poll.stopped;
+    let timer: unknown = null;
+    const schedule = (): void => {
+      if (isStopped()) return;
+      timer = timers.set(() => {
+        timer = null;
+        void tick();
+      }, CONTROL_POLL_INTERVAL_MS);
+    };
+    const tick = async (): Promise<void> => {
+      if (isStopped() || control.cancelled) return;
+      const outcome = await options.http.send({
+        url: controlUrl(executionId),
+        method: 'GET',
+        headers: { authorization: `Bearer ${options.callbackIdentityToken}` },
+        body: '',
+        timeoutMs: options.reportTimeoutMs,
+      });
+      if (isStopped()) return;
+      if (outcome.kind === 'response' && outcome.status === 200 && ackRequestsCancel(outcome.body)) {
+        requestStop(executionId, control, 'control');
+        return;
+      }
+      schedule();
+    };
+    schedule();
+    return () => {
+      poll.stopped = true;
+      if (timer !== null) timers.clear(timer);
+      timer = null;
+    };
+  }
+
+  /** Throws the cancel's failure when the run was cancelled before it had a session to stop. */
+  function refuseIfCancelled(control: RunControl, stage: string): void {
+    if (control.cancelled) {
+      throw new RunFailure('cancelled', `The run was cancelled ${stage}; no browser step ran.`);
+    }
+  }
 
   async function execute(
     job: JobEnvelope,
     steps: readonly ExecutableStep[],
     admissionId: string,
     admittedAtMs: number,
+    control: RunControl,
   ): Promise<void> {
     const identity = {
       executionId: job.executionId,
@@ -345,8 +537,18 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       now: options.now,
       sleep: options.sleep,
       random: options.random,
+      onCancelRequested: () => {
+        requestStop(job.executionId, control, 'progress-ack');
+      },
     });
     const reporter = createRunReporter({ snapshot, client });
+    /**
+     * Why the parent ended this run, once it did; the first reason wins, as in the launcher. An
+     * object rather than a `let`, for the reason `kills` is a list: it is written inside `endRun`,
+     * and a closure assignment is invisible to the type-checker's narrowing at the read below.
+     */
+    const stopped: { reason: SessionKillReason | null } = { reason: null };
+    const stepReporter = stopAwareReporter(reporter, () => stopped.reason === 'cancel');
 
     /**
      * The child's stdout and stderr, redacted by **this run's** redactor (AC-8).
@@ -411,6 +613,10 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     // Scratch is created here — after the CAS succeeded, never before it (AC-6).
     const runScratch = await scratch.create(admissionId);
 
+    // The pull half of cancel starts with the run and ends, in the `finally` below, when its
+    // outcome is known (ADR-002 §29).
+    const stopControlPoll = startControlPoll(job.executionId, control);
+
     try {
       // ── Before any browser process exists (AC-2). ───────────────────────────────────────────
       //
@@ -447,6 +653,9 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
             'before the run reached the launch point; no browser was started.',
         );
       }
+
+      // The last point at which a cancel costs nothing: no browser exists yet (ADR-002 §29).
+      refuseIfCancelled(control, 'before its browser was launched');
 
       let session: BrowserSession;
       try {
@@ -506,6 +715,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
          */
         const endRun = (reason: SessionKillReason): void => {
           if (kills.length > 0) return;
+          stopped.reason = reason;
           // The entry is written before the signal, so a report built from a snapshot taken
           // mid-kill already names the cause (AC-3, ADR-002 §17.7 item 1).
           snapshot.appendLog({
@@ -519,13 +729,16 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
               reason === 'total-runtime'
                 ? `The total browser runtime deadline of ${String(runtimeCapMs)}ms was reached; ` +
                   'the browser process tree is being stopped.'
-                : 'The runner drained while this run was still in flight; the browser process ' +
-                  'tree is being stopped.',
+                : reason === 'cancel'
+                  ? 'The run was cancelled; the browser process tree is being stopped.'
+                  : 'The runner drained while this run was still in flight; the browser process ' +
+                    'tree is being stopped.',
           });
           kills.push(runSession.kill(reason));
         };
         terminate = endRun;
         terminators.add(endRun);
+        control.end = endRun;
 
         deadline = createRuntimeDeadline({
           capMs: runtimeCapMs,
@@ -538,6 +751,16 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         deadline.arm();
       }
 
+      // A cancel that arrived while the browser was launching: stop it before a step is sent. The
+      // session is closed by the `finally` below exactly as on every other path.
+      if (control.cancelled) {
+        await session.close();
+        throw new RunFailure(
+          'cancelled',
+          'The run was cancelled while its browser was starting; no browser step ran.',
+        );
+      }
+
       let result: SessionRunResult;
       try {
         result = runSession
@@ -545,9 +768,9 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
               steps,
               variables: job.resolvedVars,
               secrets: job.resolvedSecrets,
-              reporter,
+              reporter: stepReporter,
             })
-          : await executeInProcess(session, steps, resolver, reporter, origin);
+          : await executeInProcess(session, steps, resolver, stepReporter, origin);
       } finally {
         deadline?.cancel();
         await session.close();
@@ -600,6 +823,12 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       };
     } finally {
       if (terminate !== null) terminators.delete(terminate);
+      // The outcome is known from here on: a cancel arriving now is answered `409`, never obeyed,
+      // and the control read stops.
+      stopControlPoll();
+      control.end = null;
+      controls.delete(job.executionId);
+      rememberFinished(job.executionId);
       // Every exit path reaches here — success, step failure, launch failure, start-deadline
       // refusal, **runtime-deadline kill**, run fault and drain — which is why the kill is made to
       // resolve `execute` rather than to abandon it. A kill that left the awaited promise pending
@@ -609,6 +838,27 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // Progress deliveries settle before the terminal report is built, so FINAL always carries
       // the highest sequence number of the attempt.
       await reporter.settled();
+
+      // D1, the kill half: a cancel whose grace ran out left the child no chance to report the
+      // step it was in, so the step is still `RUNNING`. It was stopped, not judged — say so on the
+      // FINAL, with the start reading it has and no finish it does not.
+      if (stopped.reason === 'cancel') {
+        for (const step of stepReporter.open()) {
+          snapshot.stepFinished({
+            stepIndex: step.stepIndex,
+            status: 'SKIPPED',
+            startedAtMs: step.startedAtMs,
+            finishedAtMs: null,
+            durationMs: null,
+            failure: STOPPED_STEP_MESSAGE,
+          });
+          snapshot.appendLog({
+            atMs: null,
+            level: 'info',
+            message: `step ${String(step.stepIndex)} SKIPPED: ${STOPPED_STEP_MESSAGE}`,
+          });
+        }
+      }
 
       // ── The evidence phase, and it is **before** the scratch clear (story 10.14 AC-3). ─────
       //
@@ -779,7 +1029,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     session: BrowserSession,
     steps: readonly ExecutableStep[],
     resolver: ValueResolver,
-    reporter: ReturnType<typeof createRunReporter>,
+    reporter: StepReporter,
     origin: SessionOrigin,
   ): Promise<SessionRunResult> {
     if (origin.clock === null) {
@@ -806,6 +1056,18 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
   return {
     get inFlight(): number {
       return inFlight.size;
+    },
+
+    cancel(executionId: string): CancelDecision {
+      const control = controls.get(executionId);
+      if (control === undefined) {
+        return finished.has(executionId)
+          ? { status: 409, code: 'RUN_FINISHED' }
+          : { status: 404, code: 'RUN_NOT_FOUND' };
+      }
+      // Idempotent on the run's side too: `endRun` orders one stop, whoever asks.
+      requestStop(executionId, control, 'delete');
+      return { status: 202, code: 'CANCELLING' };
     },
 
     terminateInFlight(): number {
@@ -907,7 +1169,10 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // admission, which is the instant §5.2's "the runner refuses to launch after the
       // server-issued admission/start deadline" starts counting from.
       const admittedAtMs = options.now();
-      const task = execute(job, steps, identity.admissionId, admittedAtMs)
+      // Registered before the run starts, so a cancel that races the `202` still finds it.
+      const control: RunControl = { cancelled: false, end: null };
+      controls.set(job.executionId, control);
+      const task = execute(job, steps, identity.admissionId, admittedAtMs, control)
         .catch((error: unknown) => {
           logger.error('run.failed', {
             executionId: job.executionId,

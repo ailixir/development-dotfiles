@@ -7,6 +7,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.core.io.Resource;
 
 /**
@@ -57,13 +59,30 @@ public class StudioGatewayConfig {
     return new VertexLlmGatewayClient(properties, studioGatewayVertexAi, parser, auditLogger);
   }
 
+  /**
+   * The client when the gateway is off: {@link DisabledLlmGatewayClient}, or — only under the
+   * {@code local} profile and only when {@code local-passthrough=true} — {@link
+   * LocalPassthroughGatewayClient} (Studio v1 WP2). Asking for the passthrough under any other
+   * profile fails startup rather than falling back, the same fail-closed rule as the fake vault.
+   */
   @Bean
   @ConditionalOnProperty(
       prefix = PREFIX,
       name = "enabled",
       havingValue = "false",
       matchIfMissing = true)
-  public LlmGatewayClient disabledLlmGatewayClient(GatewayAuditLogger auditLogger) {
+  public LlmGatewayClient disabledLlmGatewayClient(
+      GatewayAuditLogger auditLogger, Environment environment) {
+    if (environment.getProperty(PREFIX + ".local-passthrough", Boolean.class, false)) {
+      if (!environment.acceptsProfiles(Profiles.of("local"))) {
+        throw new IllegalStateException(
+            PREFIX
+                + ".local-passthrough=true is only permitted under the local profile; active"
+                + " profiles are "
+                + String.join(",", environment.getActiveProfiles()));
+      }
+      return new LocalPassthroughGatewayClient(auditLogger);
+    }
     return new DisabledLlmGatewayClient(auditLogger);
   }
 }

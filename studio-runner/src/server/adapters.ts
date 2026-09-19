@@ -34,6 +34,14 @@ export interface SessionOrigin {
    * its own scale and the parent passes them through without re-basing (ADR-002 §11.5).
    */
   readonly clock: Clock | null;
+  /**
+   * The seek-origin calibration the child reported applying (story 10.32 AC-4).
+   *
+   * Only a child-owned session carries it. Nothing on the reporting path reads it and it never
+   * reaches the API (ADR-002 §26.3 item 2). It exists so the fixtures tier can assert the value a
+   * real run used.
+   */
+  readonly calibrationOffsetMs?: number | undefined;
 }
 
 /** Everything the session needs to run the job, as data. No source text, ever (AC-3). */
@@ -76,9 +84,10 @@ export interface SessionRecording {
  * leaving while a run is still hung: §9.3 requires admitted work to be drained on `SIGTERM`, and
  * §5.4 requires that a runner never exit holding a browser — but the run did not exceed its
  * budget, so calling it a timeout would be a false statement about the test. It takes the
- * documented residual, `RUN_ERROR`.
+ * documented residual, `RUN_ERROR`. `cancel` is a principal's `DELETE /v1/runs/{id}` (Studio v1
+ * WP4): the same stop, and a third answer, `CANCELLED` — neither a timeout nor a runner fault.
  */
-export type SessionKillReason = 'total-runtime' | 'drain';
+export type SessionKillReason = 'total-runtime' | 'drain' | 'cancel';
 
 /** What the parent observed while stopping a run it had decided to end (AC-5a, AC-16). */
 export interface SessionKillOutcome {

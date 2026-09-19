@@ -6,9 +6,11 @@ import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.StudioAuthoringMapper;
 import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.validation.StepValidator;
+import com.citi.put.checks.studio.validation.VariableReferenceValidator;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -152,9 +154,14 @@ public class StudioController {
     return ResponseEntity.ok(studioService.confirmCompile(id, request, auth));
   }
 
+  /**
+   * Soft-deletes a draft. Owners and explicitly authorized administrators of its CSI only; an
+   * unknown, already deleted or quarantined draft is refused exactly like a draft the caller may
+   * not write (ADR-002 §27.2).
+   */
   @DeleteMapping("/tests/{id}")
-  public ResponseEntity<Void> deleteTest(@PathVariable UUID id) {
-    studioService.softDeleteTest(id);
+  public ResponseEntity<Void> deleteTest(@PathVariable UUID id, Authentication auth) {
+    studioService.softDeleteTest(id, auth);
     return ResponseEntity.noContent().build();
   }
 
@@ -182,6 +189,19 @@ public class StudioController {
     return ResponseEntity.ok(studioService.findExecutionById(id, auth));
   }
 
+  /**
+   * Cancels an execution (Studio v1 WP4). {@code 202} with the snapshot as committed: already
+   * {@code ERROR / CANCELLED} for queued work, still running for dispatched work, whose terminal
+   * snapshot follows on the ordinary read and stream. {@code 409} when the outcome is already known
+   * or a cancel was already asked for; {@code 403} for an unknown id and for a CSI the caller may
+   * not write, alike.
+   */
+  @PostMapping("/executions/{id}/cancel")
+  public ResponseEntity<ExecutionSnapshotDto> cancelExecution(
+      @PathVariable UUID id, Authentication auth) {
+    return ResponseEntity.accepted().body(studioService.cancelExecution(id, auth));
+  }
+
   /** {@code testId} is optional; every result is scoped by the execution's own CSI (AC-14). */
   @GetMapping("/executions")
   public ResponseEntity<Map<String, Object>> listExecutions(
@@ -193,12 +213,40 @@ public class StudioController {
     return ResponseEntity.ok(toExecutionEnvelope(result));
   }
 
+  /**
+   * Checks the draft's {@code <var NAME>} / {@code <secret ID>} references against its declared
+   * variables, with optional caller-supplied plain values ({@code {"variables": {NAME: value}}}).
+   * Read authorization is the test read's. Supplied values are checked for presence only and are
+   * never echoed. {@code valid} is kept alongside {@code isValid} for existing callers.
+   */
   @PostMapping("/tests/{id}/validate-variables")
   public ResponseEntity<Map<String, Object>> validateVariables(
-      @PathVariable UUID id, Authentication auth) {
+      @PathVariable UUID id,
+      @RequestBody(required = false) Map<String, Object> body,
+      Authentication auth) {
     UITestDto test = studioService.findTestById(id, auth);
-    boolean hasVariables = !test.variables().isEmpty();
-    return ResponseEntity.ok(Map.of("valid", true, "hasVariables", hasVariables, "testId", id));
+    VariableReferenceValidator.Result result =
+        VariableReferenceValidator.validate(test.steps(), test.variables(), suppliedValues(body));
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("testId", id);
+    response.put("isValid", result.isValid());
+    response.put("valid", result.isValid());
+    response.put("hasVariables", !test.variables().isEmpty());
+    response.put("missing", result.missing());
+    response.put("undeclared", result.undeclared());
+    response.put("unvalued", result.unvalued());
+    response.put("conflicting", result.conflicting());
+    response.put("unused", result.unused());
+    return ResponseEntity.ok(response);
+  }
+
+  private static Map<String, ?> suppliedValues(Map<String, Object> body) {
+    if (body == null || !(body.get("variables") instanceof Map<?, ?> variables)) {
+      return Map.of();
+    }
+    Map<String, Object> supplied = new LinkedHashMap<>();
+    variables.forEach((name, value) -> supplied.put(String.valueOf(name), value));
+    return supplied;
   }
 
   @PostMapping("/validate-steps")

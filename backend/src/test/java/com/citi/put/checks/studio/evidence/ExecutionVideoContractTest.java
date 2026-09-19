@@ -11,7 +11,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeAll;
@@ -53,6 +55,53 @@ class ExecutionVideoContractTest {
               "reportProgress",
               "runnerHealth",
               "runnerReadiness"));
+
+  /** {@code $ref} targets, spelled once so a typo cannot make two assertions agree by accident. */
+  private static final String SESSION_UNAUTHORIZED = "#/components/responses/SessionUnauthorized";
+
+  private static final String UNAUTHORIZED = "#/components/responses/Unauthorized";
+  private static final String RUNNER_UNAUTHENTICATED =
+      "#/components/responses/RunnerUnauthenticated";
+
+  /**
+   * The public operations whose {@code 401} is written by {@code BffSessionAuthenticationFilter},
+   * pinned as a <b>deliberate second copy</b> — ADR-002 §25.4's eleven, plus {@code
+   * getExecutionVideo}, which §24.6 declares a {@code 401} for in the same commit and which
+   * therefore was never one of the eleven {@code Unauthorized} references to replace.
+   *
+   * <p>Same remedy, and the same reason, as {@link #OPERATIONS_CARRYING_ATTRIBUTION}: there is no
+   * production vocabulary that enumerates the document's operations, so a set derived only from the
+   * document is a statement that the document equals itself. A correctly-tagged thirteenth public
+   * operation passes every derived comparison below and is caught by this list and by the count
+   * alone — which is exactly why neither may be dropped as redundant with the other.
+   */
+  private static final Set<String> PUBLIC_OPERATIONS_DECLARING_UNAUTHENTICATED =
+      new TreeSet<>(
+          List.of(
+              "listTests",
+              "createTest",
+              "getTest",
+              "updateTest",
+              "deleteTest",
+              "compileTest",
+              "confirmCompile",
+              "executeTest",
+              "listExecutions",
+              "getExecution",
+              "streamExecution",
+              "getExecutionVideo",
+              // Studio v1 WP4 (ADR-002 §29), the thirteenth, added deliberately.
+              "cancelExecution"));
+
+  /**
+   * The two internal callbacks, whose {@code 401} comes from {@code
+   * ServiceIdentityAuthenticationFilter} and really is the flat {@code ErrorResponse}. Pinned for
+   * the same reason as the list above.
+   */
+  private static final Set<String> CALLBACK_OPERATIONS_DECLARING_UNAUTHENTICATED =
+      new TreeSet<>(
+          // ADR-002 §29.4 adds the control read, served by the same filter.
+          List.of("claimAdmission", "reportProgress", "readExecutionControl"));
 
   private static ContractDocument document;
   private static String raw;
@@ -268,13 +317,210 @@ class ExecutionVideoContractTest {
     return found;
   }
 
+  /**
+   * A deliberate hand-kept copy of this operation's status set, updated by ruling rather than by
+   * drift.
+   *
+   * <p>Story 10.15 left this at {@code 200, 206, 404, 410, 416} and said so: <i>that story declared
+   * CONTENT on three responses, and adding or removing a STATUS was AC-22's, escalated as ESC-1 and
+   * ESC-2 and not taken there</i>. <b>Story 10.31 does add the three statuses</b>, because the
+   * architect ruled both escalations in ADR-002 §24 — {@code 401} and {@code 403} by §24.2, {@code
+   * 503} by §24.4 — and §24.7's table names this literal as the owner's to update in the same PR.
+   * The copy stays a copy: deriving it from the document would make this a statement that the
+   * document equals itself.
+   */
   @Test
   void theVideoOperationsStatusSetIsUnchanged() {
     assertThat(declaredStatuses())
         .as(
-            "this story declares CONTENT on three responses; adding or removing a STATUS is "
-                + "AC-22's, escalated as ESC-1 and ESC-2 and not taken here")
-        .containsExactlyInAnyOrder("200", "206", "404", "410", "416");
+            "story 10.31 declares 401, 403 and 503 on this operation by ADR-002 §24's ruling, "
+                + "closing ESC-1 and ESC-2; any OTHER movement of this set is undeclared drift")
+        .containsExactlyInAnyOrder("200", "206", "401", "403", "404", "410", "416", "503");
+  }
+
+  // ── story 10.31 AC-5: the refusals are the siblings' own components ───────
+
+  /**
+   * ADR-002 §24.3: the video route's {@code 401} and {@code 403} are <b>the snapshot route's own
+   * components, reached by {@code $ref}</b>, because the route literally reuses the snapshot
+   * route's authorized read. §24.7 says how to check it: <i>"by comparing the two, not against a
+   * literal. A route-local copy then fails."</i>
+   *
+   * <p>Asserted against {@code getExecution} rather than against a spelled-out component name, so a
+   * later story that legitimately renames or re-points <em>both</em> routes' refusals moves this
+   * test with them, while one that re-points only the video route reddens it.
+   */
+  @Test
+  void theVideoRoutesRefusalRefsAreItsSiblingsOwn() {
+    Map<String, Object> video = document.getOperation(ContractDocument.VIDEO_PATH);
+    Map<String, Object> snapshot = document.getOperation("/executions/{id}");
+
+    Object snapshotUnauthenticated = ContractDocument.at(snapshot, "responses", "401", "$ref");
+    Object snapshotForbidden = ContractDocument.at(snapshot, "responses", "403", "$ref");
+
+    assertThat(snapshotUnauthenticated)
+        .as(
+            "the premise: getExecution really does declare its 401 by $ref, so the comparison "
+                + "below is between two real values rather than between two nulls")
+        .isNotNull();
+    assertThat(snapshotForbidden)
+        .as("the premise: getExecution really does declare its 403 by $ref")
+        .isNotNull();
+
+    assertThat(ContractDocument.at(video, "responses", "401", "$ref"))
+        .as(
+            "getExecutionVideo's 401 must be the SAME component getExecution uses (%s). A "
+                + "route-local copy drifts on the first edit to either — ADR-002 §24.3",
+            snapshotUnauthenticated)
+        .isEqualTo(snapshotUnauthenticated);
+    assertThat(ContractDocument.at(video, "responses", "403", "$ref"))
+        .as(
+            "getExecutionVideo's 403 must be the SAME component getExecution uses (%s)",
+            snapshotForbidden)
+        .isEqualTo(snapshotForbidden);
+  }
+
+  // ── story 10.31 AC-2: which 401 envelope each operation declares ──────────
+
+  /**
+   * ADR-002 §25.4 — every operation's {@code 401} points at the component its <b>own producer</b>
+   * writes, partitioned by the document's own {@code internal} tag.
+   *
+   * <p><b>The partition is the tag, never the path.</b> Four runner operations are internal on
+   * paths that do not start with {@code /internal/studio/} — {@code runnerValidateArtifact} ({@code
+   * /v1/validate}), {@code runnerAdmitRun} ({@code /v1/runs}), {@code runnerHealth} ({@code
+   * /health}) and {@code runnerReadiness} ({@code /ready}) — so a path-prefix rule would count
+   * sixteen "public" operations and be false against the correct document. {@code info.description}
+   * defines the partition itself: <i>"Routes tagged `internal` are not exposed through public
+   * ingress … each declares … exactly one of `runner` or `api-callback` next to `internal`."</i>
+   *
+   * <p>Three producers, three components, asserted in both directions:
+   *
+   * <ul>
+   *   <li>untagged-{@code internal} → {@code SessionUnauthorized} ({@code
+   *       BffSessionAuthenticationFilter}, nested {@code error})
+   *   <li>{@code internal}+{@code api-callback} → {@code Unauthorized} ({@code
+   *       ServiceIdentityAuthenticationFilter}, flat {@code error})
+   *   <li>{@code internal}+{@code runner} → {@code RunnerUnauthenticated}. Story 10.31 changes
+   *       nothing here; it is asserted so the partition is complete rather than merely disjoint.
+   * </ul>
+   */
+  @Test
+  void everyOperationsUnauthenticatedResponsePointsAtItsOwnProducersEnvelope() {
+    Map<String, String> publicRefs =
+        unauthenticatedRefs(document, tags -> !tags.contains("internal"));
+    Map<String, String> callbackRefs =
+        unauthenticatedRefs(
+            document, tags -> tags.contains("internal") && tags.contains("api-callback"));
+    Map<String, String> runnerRefs =
+        unauthenticatedRefs(document, tags -> tags.contains("internal") && tags.contains("runner"));
+    Map<String, String> allRefs = unauthenticatedRefs(document, tags -> true);
+
+    // The partition is total: no operation declaring a 401 falls outside the three buckets. Without
+    // this, an operation tagged `internal` and nothing else escapes every assertion below.
+    Set<String> partitioned = new TreeSet<>(publicRefs.keySet());
+    partitioned.addAll(callbackRefs.keySet());
+    partitioned.addAll(runnerRefs.keySet());
+    assertThat(partitioned)
+        .as(
+            "an operation declaring a 401 is in none of the three buckets — its tags name neither "
+                + "`runner` nor `api-callback` beside `internal`, which info.description forbids")
+        .isEqualTo(new TreeSet<>(allRefs.keySet()));
+
+    assertThat(publicRefs.values())
+        .as(
+            "a public operation declares a 401 body its producer never sends (ADR-002 §25.3): %s",
+            publicRefs)
+        .allMatch(SESSION_UNAUTHORIZED::equals);
+    assertThat(callbackRefs.values())
+        .as(
+            "an internal callback's 401 comes from ServiceIdentityAuthenticationFilter and really "
+                + "IS the flat ErrorResponse, so Unauthorized is correct for it and must stay: %s",
+            callbackRefs)
+        .allMatch(UNAUTHORIZED::equals);
+    assertThat(runnerRefs.values())
+        .as("a runner operation's 401 is the runner's own problem envelope: %s", runnerRefs)
+        .allMatch(RUNNER_UNAUTHENTICATED::equals);
+
+    Map<String, String> internalRefs = new TreeMap<>(callbackRefs);
+    internalRefs.putAll(runnerRefs);
+    assertThat(internalRefs.values())
+        .as("no internal operation may point at the public session envelope: %s", internalRefs)
+        .noneMatch(SESSION_UNAUTHORIZED::equals);
+
+    // Each total on its own. A set comparison alone is satisfied by two collections that stopped
+    // collecting together, and a correctly-added thirteenth public operation passes every
+    // comparison above.
+    assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(13);
+    assertThat(callbackRefs)
+        .as("the number of internal callbacks declaring a 401 moved")
+        .hasSize(3);
+    assertThat(runnerRefs).as("the number of runner operations declaring a 401 moved").hasSize(5);
+
+    // The pinned second copies, both ways.
+    assertThat(publicRefs.keySet())
+        .as("a public operation the document declares a 401 for that this pin does not name")
+        .containsExactlyElementsOf(PUBLIC_OPERATIONS_DECLARING_UNAUTHENTICATED);
+    assertThat(PUBLIC_OPERATIONS_DECLARING_UNAUTHENTICATED)
+        .as("an operation this pin names that no longer declares a 401 as a public operation")
+        .containsExactlyElementsOf(publicRefs.keySet());
+    assertThat(callbackRefs.keySet())
+        .as("an internal callback the document declares a 401 for that this pin does not name")
+        .containsExactlyElementsOf(CALLBACK_OPERATIONS_DECLARING_UNAUTHENTICATED);
+    assertThat(CALLBACK_OPERATIONS_DECLARING_UNAUTHENTICATED)
+        .as("an operation this pin names that is no longer an internal callback declaring a 401")
+        .containsExactlyElementsOf(callbackRefs.keySet());
+  }
+
+  /**
+   * Every operation whose tags satisfy {@code tagFilter} and which declares a {@code 401}, keyed by
+   * {@code operationId} and valued as that response's {@code $ref}.
+   *
+   * <p>Statuses are matched by {@code String.valueOf} over the response keys rather than by looking
+   * up the literal {@code "401"}, so an unquoted {@code 401:} — which YAML reads as an integer key
+   * — is still found instead of silently shrinking every set below.
+   */
+  @SuppressWarnings("unchecked")
+  private static Map<String, String> unauthenticatedRefs(
+      ContractDocument source, Predicate<List<String>> tagFilter) {
+    Map<String, String> refs = new TreeMap<>();
+    source
+        .paths()
+        .forEach(
+            (path, item) ->
+                ((Map<String, Object>) item)
+                    .forEach(
+                        (method, operation) -> {
+                          if (!(operation instanceof Map)) {
+                            return;
+                          }
+                          Map<String, Object> declared = (Map<String, Object>) operation;
+                          Object responses = declared.get("responses");
+                          if (!(responses instanceof Map)) {
+                            return;
+                          }
+                          Object unauthenticated = null;
+                          for (Map.Entry<Object, Object> entry :
+                              ((Map<Object, Object>) responses).entrySet()) {
+                            if ("401".equals(String.valueOf(entry.getKey()))) {
+                              unauthenticated = entry.getValue();
+                            }
+                          }
+                          if (unauthenticated == null) {
+                            return;
+                          }
+                          List<String> tags =
+                              declared.get("tags") instanceof List
+                                  ? (List<String>) declared.get("tags")
+                                  : List.of();
+                          if (!tagFilter.test(tags)) {
+                            return;
+                          }
+                          refs.put(
+                              String.valueOf(declared.get("operationId")),
+                              String.valueOf(ContractDocument.at(unauthenticated, "$ref")));
+                        }));
+    return refs;
   }
 
   /**

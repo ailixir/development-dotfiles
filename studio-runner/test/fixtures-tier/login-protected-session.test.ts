@@ -11,7 +11,7 @@ import { post, validJob } from '../helpers/runner.js';
 import { CHILD_MODULE_PATH } from './globalSetup.js';
 import { untilMs } from './realRunner.js';
 
-const SECRET_CANARY = 'secret-canary-10-39-never-retain';
+const SECRET_CANARY = 'secret-canary-10-41-never-retain'; // gitleaks:allow — synthetic test value
 const STEP_IDS = [
   '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222',
   '33333333-3333-4333-8333-333333333333', '44444444-4444-4444-8444-444444444444',
@@ -96,6 +96,7 @@ describe('canonical login and protected page through POST /v1/runs', () => {
     const launcher = createChildBrowserLauncher({
       recording: { width: 1280, height: 720 }, stepTimeoutMs: 15_000,
       launchTimeoutMs: 45_000, maxFailureMessageLength: 400,
+      seekOriginCalibrationMs: 0,
       childModulePath: CHILD_MODULE_PATH, stopTimeoutMs: 5_000,
     });
     const harness = createHarness({ launcher, scratch: createFsScratchStore(scratchRoot) });

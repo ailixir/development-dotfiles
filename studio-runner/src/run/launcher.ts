@@ -124,6 +124,13 @@ export interface ChildLauncherOptions {
   /** Bound on the launch handshake. A child that never reports `ready` is a launch failure. */
   readonly launchTimeoutMs: number;
   readonly maxFailureMessageLength: number;
+  /**
+   * The seek-origin calibration the child adds to the run origin's zero (ADR-002 §26.3, story
+   * 10.32). Required, like `recording` and `stepTimeoutMs`: it is a chosen value, and `0` is a
+   * choice every caller states, not a default filled in here. It travels in the launch message
+   * because the child does not inherit the runner's `STUDIO_RUNNER_*` environment.
+   */
+  readonly seekOriginCalibrationMs: number;
   readonly spawner?: ChildSpawner | undefined;
   readonly childModulePath?: string | undefined;
   /** Grace given to a child asked to stop before it is killed. */
@@ -434,6 +441,7 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
         browser: launchOptions.browser,
         viewport: launchOptions.viewport,
         recording: options.recording,
+        seekOriginCalibrationMs: options.seekOriginCalibrationMs,
         scratchPath: launchOptions.scratchPath,
         // Passed on. The parent enforces it; the child structures itself so it can be stopped.
         totalRuntimeMs: launchOptions.totalRuntimeMs,
@@ -500,6 +508,9 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
           origin: {
             browserStartedAt: new Date(ready.browserStartedAt),
             startedAtMs: ready.startedAtMs,
+            // What the child actually applied, as it reported it. Read by the fixtures tier to
+            // assert its pin (story 10.32 AC-4); nothing on the reporting path consumes it.
+            calibrationOffsetMs: ready.calibrationOffsetMs,
             // The readings are taken on the child's clock and pass through unchanged; the parent
             // never re-derives an origin (ADR-002 §11.5).
             clock: null,
@@ -595,6 +606,7 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
 const KILL_FAILURE_KINDS: Readonly<Record<SessionKillReason, string>> = {
   'total-runtime': 'total-timeout',
   drain: 'run-fault',
+  cancel: 'cancelled',
 };
 
 /** What a killed run says about itself. Bounded and value-free, so it is safe to report. */
@@ -603,10 +615,14 @@ const KILL_MESSAGES: Readonly<Record<SessionKillReason, string>> = {
     'The total browser runtime deadline was reached and the browser process tree was stopped.',
   drain:
     'The runner drained while this run was still in flight; the browser process tree was stopped.',
+  cancel: 'The run was cancelled and the browser process tree was stopped.',
 };
 
 /** Exported for the tests that assert the exact text on the serialized `FINAL` body. */
 export const TOTAL_TIMEOUT_MESSAGE = KILL_MESSAGES['total-runtime'];
+
+/** Exported for the tests that assert the cancel's text on the serialized `FINAL` body. */
+export const CANCELLED_MESSAGE = KILL_MESSAGES.cancel;
 
 /**
  * Lines of child output one run may relay before the rest are dropped and counted (AC-8).
@@ -664,7 +680,12 @@ async function settleRecording(input: {
 }
 
 type ReadyOutcome =
-  | { readonly kind: 'ready'; readonly browserStartedAt: string; readonly startedAtMs: number }
+  | {
+      readonly kind: 'ready';
+      readonly browserStartedAt: string;
+      readonly startedAtMs: number;
+      readonly calibrationOffsetMs: number | undefined;
+    }
   | { readonly kind: 'failed'; readonly failureKind: string; readonly message: string };
 
 interface Inbox {
@@ -764,6 +785,7 @@ function createInbox(child: ChildProcessHandle): Inbox {
           kind: 'ready',
           browserStartedAt: message.browserStartedAt,
           startedAtMs: message.startedAtMs,
+          calibrationOffsetMs: message.calibrationOffsetMs,
         };
         pendingReady ??= outcome;
         onReady?.(outcome);

@@ -1,11 +1,12 @@
 /**
- * The four internal routes (AC-1..AC-5, AC-10, AC-11, architecture §8.4).
+ * The five internal routes (AC-1..AC-5, AC-10, AC-11, architecture §8.4; ADR-002 §29).
  *
  * ```
- * POST /v1/validate   browser-free wrapper over validateArtifact; cannot reserve a slot
- * POST /v1/runs       envelope → slot → admission CAS → 202
- * GET  /health        liveness only; 200 while saturated and while draining
- * GET  /ready         ability to admit safely; false only while draining
+ * POST   /v1/validate    browser-free wrapper over validateArtifact; cannot reserve a slot
+ * POST   /v1/runs        envelope → slot → admission CAS → 202
+ * DELETE /v1/runs/{id}   cancel one admitted run: ordered stop, bounded grace, process tree
+ * GET    /health         liveness only; 200 while saturated and while draining
+ * GET    /ready          ability to admit safely; false only while draining
  * ```
  *
  * **Identity is checked on the request head, before the body is read.** An unauthenticated caller
@@ -102,6 +103,12 @@ export function respond(
   });
   response.end(serialized);
 }
+
+/**
+ * `DELETE /v1/runs/{executionId}`. The id is one path segment and nothing else; anything that is
+ * not a single segment is a route this runner does not serve.
+ */
+const RUN_PATH = /^\/v1\/runs\/([^/]+)$/u;
 
 /** Keys a `/v1/validate` body may carry. Default-deny, like the job envelope. */
 const VALIDATE_KEYS = new Set(['artifact', 'source', 'references', 'expectedIntent']);
@@ -268,6 +275,16 @@ export function createRequestHandler(
       void handleRuns(request, response).catch(() => {
         respond(response, 500, { code: 'INTERNAL_ERROR' });
       });
+      return;
+    }
+
+    const runPath = method === 'DELETE' ? RUN_PATH.exec(path) : null;
+    if (runPath !== null) {
+      // No body is read: the cancel is the path and the identity, both already checked.
+      request.resume();
+      const executionId = decodeURIComponent(runPath[1] ?? '');
+      const decision = coordinator.cancel(executionId);
+      respond(response, decision.status, { code: decision.code });
       return;
     }
 

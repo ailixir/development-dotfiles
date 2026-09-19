@@ -47,10 +47,33 @@ backend:
   # ⚠ **THE VAULT IS STILL A STUB**: `SecretsService` returns `REDACTED`, and secret-use
   # authorization runs against a fake provider.
   #
-  # ⚠ **NO CREDENTIALED PILOT MAY RUN UNTIL ED-02 HAS LINKED COMPLETED TICKETS.** ED-02's owner
-  # reads "TBD — not assigned in sources". @po could not name one and said so; the escalation path
-  # is @pm → Checks-squad engineering management (BRD §8 launch-exit row), with Security &
-  # Compliance (BRD §11) accepting. Story 10.19 may not be drafted while that owner reads TBD.
+  # ⚠ **NO CREDENTIALED PILOT MAY RUN UNTIL ED-02 HAS LINKED COMPLETED TICKETS.** That
+  # prohibition is unchanged and still in force: `ED-02` reads `status: open` and its
+  # `external_ticket` reads "to be linked — no ticket ID exists yet (2026-09-16)".
+  #
+  # ED-02's owner is the **PUT Core platform (Core BFF)** — the trusted identity gateway AND vault
+  # integration with secret-use authorization. Assigned by the project owner on 2026-09-16, recorded
+  # in `docs/epics/EPIC-10-EXECUTION.yaml` under `external_dependencies[ED-02].owner`, whose
+  # `owner_decision` block states plainly that this rests on the user's decision and is NOT
+  # traceable to the BRD. The escalation path is unchanged: @pm → Checks-squad engineering
+  # management (BRD §8 launch-exit row), with Security & Compliance (BRD §11) accepting.
+  #
+  # ⚠ **Two sentences stood here until 2026-09-17 and both were false. They are retracted rather
+  # than deleted**, so a reader who saw them knows they were withdrawn instead of wondering which
+  # version is current.
+  #   (1) This block used to say ED-02's owner reads "TBD — not assigned in sources", and that @po
+  #       could not name one. **It no longer does.** That phrase appears above only as the wording
+  #       being retracted; it stopped being true on 2026-09-16.
+  #   (2) It used to say "Story 10.19 may not be drafted while that owner reads TBD". **That
+  #       drafting gate was lifted.** Story 10.19 was drafted, validated GO 8/10, implemented,
+  #       QA-gated CONCERNS (merge-safe) and merged at `833b45da4`. What 10.19 does not have is its
+  #       seven staging criteria: AC-1…AC-7 are recorded *skipped, never passed*. That is a
+  #       different fact from a drafting gate and does not reinstate one.
+  #
+  # Corrected by @po on 2026-09-17 (closure plan, Phase 0 — record truing). **Only these two claims
+  # were touched.** The three warnings above — that the bypass code paths still exist, that the
+  # vault is still a stub, and the pilot prohibition itself — were **not re-verified by this
+  # change** and are left exactly as they stood. No rendered value in this file was altered.
   #
   # See `docs/runbooks/studio-runner.md` §9 for what an operator may and may not do with these.
   identityBypass:
@@ -142,7 +165,7 @@ frontend:
 # ---------------------------------------------------------------------------
 studioRunner:
   enabled: false
-  replicaCount: 1
+  replicaCount: 2
   resources:
     requests:
       cpu: "1"
@@ -156,7 +179,6 @@ studioRunner:
     sizeLimit: 8Gi
   seccompProfile:
     type: RuntimeDefault
-  callbackBaseUrl: http://put-checks-api:8080
   identity:
     secretName: checks-studio-runner-identity-prod
   objectStore:

@@ -2,7 +2,9 @@ import { http, HttpResponse } from 'msw';
 import { createAuthoringHandlers } from './authoringHandlers';
 import { resetAuthoringMocks } from './authoringState';
 import {
+  CANCELLED_ERROR_CODE,
   defaultConfiguration,
+  isTerminalExecutionStatus,
   type ConfirmCompileRequest,
   type ExecutionSnapshot,
   type Page,
@@ -77,11 +79,19 @@ const allExecutions = (): ExecutionSnapshot[] => [...acceptedExecutions, ...mock
 /**
  * `GET /executions/{id}/video` (story 10.16a, AC-13).
  *
- * It answers with exactly the statuses `openapi.yaml` declares for `getExecutionVideo`:
- * `200`, `206`, `404`, `410` and `416`. It serves **no `401` and no `403`**, because the document
- * declares neither (ESC-1, still with @architect). An execution this principal cannot read is
- * therefore answered with the declared `404`, which is the only declared refusal that fits
- * "nothing here for you".
+ * It answers with statuses `openapi.yaml` declares for `getExecutionVideo`: `200`, `206`, `403`,
+ * `404`, `410` and `416`.
+ *
+ * **An unknown execution id and an execution on a CSI this principal may not read both answer
+ * `403 STUDIO_FORBIDDEN`** — the same body the backend sends, byte for byte — because ADR-002 §24.3
+ * ruled ESC-1: `401` and `403` are decided before anything about the recording is read, and using
+ * `404` for an unknown id would be the existence oracle story 10.7 AC-4a exists to prevent. Until
+ * that ruling landed (story 10.31) this handler answered `404` for both, which §24.5 item 1 names
+ * as exactly the wrong choice.
+ *
+ * It still serves **no `401`**: MSW has no notion of an absent session, and the mock never sees the
+ * platform authentication filter that writes one. It serves **no `503`** either: nothing in the
+ * frontend can observe an unreachable evidence store (ADR-002 §24.5 item 1).
  *
  * Which answer is given is keyed off the execution's own `video.status` (and `video.expiresAt`), in
  * this one place. Every length is computed from {@link MOCK_VIDEO_BYTES} at request time.
@@ -120,13 +130,18 @@ function parseByteRange(header: string | null, size: number): ByteRange {
   return { kind: 'window', first, last };
 }
 
-function videoRefusal(status: 404 | 410 | 416, error: string, message: string, headers?: HeadersInit) {
+function videoRefusal(status: 403 | 404 | 410 | 416, error: string, message: string, headers?: HeadersInit) {
   return HttpResponse.json({ error, message }, { status, headers });
 }
 
 function serveExecutionVideo(execution: ExecutionSnapshot | undefined, request: Request) {
   if (execution === undefined) {
-    return videoRefusal(404, 'VIDEO_UNAVAILABLE', 'No evidence for this execution');
+    // Unknown id and unreadable CSI alike — `readable()` is applied before the `find` at the call
+    // site, so both arrive here as `undefined` and neither may be distinguished from the other.
+    // The body is the backend's own, verified against `ChecksExceptionHandler.handleStudioAccessDenied`
+    // and `StudioAccessDeniedException.CODE`; the document declares no `Forbidden` example to read
+    // one from, so this literal is the mock's own and is checked against the handler in review.
+    return videoRefusal(403, 'STUDIO_FORBIDDEN', 'You do not have access to this Studio resource');
   }
   const { video } = execution;
   if (video.status === 'EXPIRED') {
@@ -420,6 +435,52 @@ export const studioHandlers = [
       ...acceptedExecutions,
     ];
     return HttpResponse.json({ executionId, status: 'PENDING' }, { status: 202 });
+  }),
+
+  /*
+   * `POST /executions/{id}/cancel` (Studio v1 cancel). `202` with the execution's snapshot, or
+   * `409` when the run is already terminal. The mock ends the run at once, which is what the
+   * server does for a run that was never sent to a browser: `ERROR` with `errorCode: CANCELLED`.
+   * A run that is already in a browser ends later on the server. The page waits for the terminal
+   * snapshot either way, so it does not depend on which of the two happened.
+   */
+  http.post(`${BASE}/executions/:id/cancel`, ({ params }) => {
+    const execution = readable(allExecutions()).find(
+      (candidate) => candidate.executionId === params.id,
+    );
+    if (!execution) {
+      return HttpResponse.json(
+        { error: 'STUDIO_FORBIDDEN', message: 'You do not have access to this Studio resource' },
+        { status: 403 },
+      );
+    }
+    if (isTerminalExecutionStatus(execution.status)) {
+      return HttpResponse.json(
+        { error: 'EXECUTION_TERMINAL', message: `Execution ${execution.executionId} has already ended` },
+        { status: 409 },
+      );
+    }
+    const now = new Date().toISOString();
+    const cancelled: ExecutionSnapshot = {
+      ...execution,
+      status: 'ERROR',
+      errorCode: CANCELLED_ERROR_CODE,
+      endedAt: now,
+      stepResults: execution.stepResults.map((step) =>
+        step.status === 'PASS' || step.status === 'FAIL' ? step : { ...step, status: 'SKIPPED' },
+      ),
+      video:
+        execution.video.status === 'PROCESSING'
+          ? { status: 'UNAVAILABLE', error: null, expiresAt: null, partial: false }
+          : execution.video,
+      revision: execution.revision + 1,
+      streamComplete: true,
+    };
+    acceptedExecutions = [
+      cancelled,
+      ...acceptedExecutions.filter((candidate) => candidate.executionId !== cancelled.executionId),
+    ];
+    return HttpResponse.json(cancelled, { status: 202 });
   }),
 
   http.get(`${BASE}/executions/:id`, ({ params }) => {

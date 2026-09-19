@@ -47,6 +47,12 @@ export interface ChildScript {
   readonly hangOnStep?: number | undefined;
   /** What the child does when the parent orders a stop. */
   readonly onStop?: 'flush' | 'ignore' | 'ignore-and-survive-kill' | undefined;
+  /**
+   * On a flushed stop, the hung step first reports `FAIL` with this text — what a real child
+   * reports when the context closes under a pending Playwright call (Studio v1 WP11, measured:
+   * `page.goto: net::ERR_ABORTED at <url>`).
+   */
+  readonly onStopFailsStep?: string | undefined;
   /** The recording the child reports when it flushes. */
   readonly recording?:
     | {
@@ -101,6 +107,7 @@ export function createChildDriver(
 
   const launcher = createChildBrowserLauncher({
     recording: { width: 1280, height: 720 },
+    seekOriginCalibrationMs: 0,
     stepTimeoutMs: 30_000,
     launchTimeoutMs: 60,
     maxFailureMessageLength: 400,
@@ -166,6 +173,17 @@ export function createChildDriver(
               // …and then nothing more. The run hangs until the parent decides otherwise.
             }
             if (kind === 'stop' && script.onStop === 'flush') {
+              if (script.onStopFailsStep !== undefined && script.hangOnStep !== undefined) {
+                child.emit({
+                  kind: 'step-finished',
+                  stepIndex: script.hangOnStep,
+                  status: 'FAIL',
+                  startedAtMs: 12,
+                  finishedAtMs: 40,
+                  durationMs: 28,
+                  failure: script.onStopFailsStep,
+                });
+              }
               // The child honoured the ordered stop: it closed and awaited the recording context,
               // reported what that left, and left. This is AC-16 case (a).
               child.emit({

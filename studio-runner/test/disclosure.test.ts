@@ -90,10 +90,29 @@ describe('AC-20 — the runbook states plainly what is still open', () => {
     ]);
   });
 
-  it("says ED-02's owner is unassigned, and names the escalation path instead", () => {
+  // DISCLOSURE-PIN-1, re-scoped 2026-09-17. This assertion used to require the literal
+  // `TBD — not assigned in sources` and the escalation path that phrase implied. Both claims
+  // **stopped being true on 2026-09-16**, when the user assigned `ED-02` to the PUT Core platform
+  // (the Core BFF); story 10.19's AC-8 audit corrected the runbook, after which the phrase survived
+  // only inside the two retractions that quote it (`:27` "It no longer does", `:451` "This item
+  // used to read"). Measured, not inferred: deleting those two quotations — which leaves the
+  // runbook *more* accurate — turned this file red, and the one failure was this test, whose own
+  // name asserted the opposite of the user's decision. A pin a correction can satisfy only by
+  // quoting what it retracts has stopped measuring its claim; it now penalises being right.
+  //
+  // What AC-20 is actually owed here has not weakened, it has moved: the disclosure must name
+  // **who owns `ED-02`** and must not let an owner be mistaken for a delivery. So this pins the
+  // three facts that are load-bearing **today** — the owner, the missing ticket, and `open` —
+  // each of which is a live sentence of the runbook and none of which is a quotation of a
+  // retraction. It is falsifiable in the right direction: delete the owner, or delete the
+  // "no ticket / still open" half, and this goes red. Rewriting a retraction cannot redden it.
+  it("names ED-02's assigned owner, and says an owner is still not a delivery", () => {
     assertClaims(runbook, RUNBOOK, [
-      { what: "ED-02's owner is TBD", needles: ['ED-02', /TBD — not assigned in sources/u] },
-      { what: 'the escalation path', needles: [/@pm/u, /Security & ?Compliance/u, /BRD §8/u] },
+      { what: "ED-02's owner, assigned 2026-09-16", needles: ['ED-02', /Core BFF/u] },
+      {
+        what: 'that the owner has no linked ticket and the item is still open',
+        needles: [/no ticket ID exists yet/u, /owner is not a delivery/iu],
+      },
     ]);
   });
 
@@ -152,6 +171,19 @@ describe('AC-20 — the STAGING and PROD values say it too, where an operator me
   for (const file of [STAGING_VALUES, PROD_VALUES]) {
     const values = read(file);
 
+    // DISCLOSURE-PIN-1, second surface. This list used to carry a fifth claim, 'the unassigned
+    // owner', pinning the same literal `TBD — not assigned in sources`. In **these** files that
+    // phrase is not a retraction — both values files still assert it as current fact, together
+    // with "Story 10.19 may not be drafted while that owner reads TBD", and **both statements are
+    // false since 2026-09-16** (`values-uat.yaml:44-47`, `values-prod.yaml:50-53`). The pin was
+    // therefore holding a false sentence in place: correcting the files would have reddened this.
+    //
+    // It is **scoped out, not re-pointed**, and deliberately: the accurate statement does not exist
+    // in these files yet, so pinning it would assert a fact about an artefact nobody has corrected.
+    // The scoping that survives is the last needle below — a values file must route its reader to
+    // the runbook, which is where `ED-02`'s ownership is stated and kept current. Correcting the
+    // two comment blocks is routed as a finding, not made here: neither file is this change's to
+    // edit. When they are corrected, re-arm an owner claim over them.
     it(`${file}: states that the code paths survive and the vault is a stub`, () => {
       assertClaims(values, file, [
         { what: 'the code path survives', needles: [/THE CODE PATHS STILL EXIST/u] },
@@ -160,7 +192,6 @@ describe('AC-20 — the STAGING and PROD values say it too, where an operator me
           what: 'the pilot prohibition',
           needles: [/NO CREDENTIALED PILOT MAY RUN UNTIL ED-02 HAS LINKED COMPLETED TICKETS/u],
         },
-        { what: 'the unassigned owner', needles: [/TBD — not assigned in sources/u] },
         { what: 'a pointer to the runbook', needles: [/docs\/runbooks\/studio-runner\.md/u] },
       ]);
     });

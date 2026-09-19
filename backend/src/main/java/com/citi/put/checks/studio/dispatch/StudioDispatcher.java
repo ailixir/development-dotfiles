@@ -10,8 +10,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,9 @@ import org.springframework.transaction.support.TransactionTemplate;
  * <ol>
  *   <li><b>Claim.</b> One conditional {@code UPDATE} whose {@code WHERE} carries {@code state =
  *       'QUEUED'} and an expired-or-absent lease. Two dispatchers racing one row produce exactly
- *       one {@code 1}.
+ *       one {@code 1}. A pass selects and claims in that same statement ({@link
+ *       StudioDispatchLedgerStatements#claimQueued}, {@code FOR UPDATE SKIP LOCKED}), so two
+ *       dispatchers draining one backlog take different rows instead of racing for the same ones.
  *   <li><b>Recheck and resolve, immediately before the send and after the claim.</b> Authorization
  *       and reference availability are re-verified and reference values are resolved then and only
  *       then. Values are ephemeral: they live inside a try-with-resources and are erased on every
@@ -127,14 +131,38 @@ public class StudioDispatcher {
     return instanceId;
   }
 
-  /** One pass. Returns how many rows it dispatched. */
+  /**
+   * One pass. Returns how many rows it dispatched.
+   *
+   * <p>The pass begins by relaying recorded cancels (Studio v1 WP4), whatever the kill switch says:
+   * the switch stops new browser work, and a cancel only ever stops browser work that already
+   * exists.
+   */
   public int dispatchOnce() {
+    relayCancels();
     if (!properties.enabledOrDefault()) {
       return closeUndispatchedWork();
     }
+    StudioExecutionProperties.Dispatcher budget = properties.dispatcherOrDefault();
+    int batchSize = budget.batchSizeOrDefault();
+    Set<UUID> attempted = new HashSet<>();
     int dispatched = 0;
-    for (UUID executionId : queuedBatch()) {
-      if (dispatch(executionId)) {
+    // One row per claim, immediately before its own dispatch: the lease clock of each row starts
+    // when that row is taken, exactly as it did when the pass claimed ids one by one. Claiming the
+    // whole batch up front would start every lease at the top of the pass, and a slow send ahead
+    // of a row could expire that row's lease before it was ever attempted.
+    for (int taken = 0; taken < batchSize; taken++) {
+      Instant now = clock.instant();
+      Instant leaseExpiresAt = now.plus(budget.leaseOrDefault());
+      List<UUID> claimed =
+          transactions.execute(
+              status -> statements.claimQueued(instanceId, leaseExpiresAt, now, 1, attempted));
+      if (claimed == null || claimed.isEmpty()) {
+        break;
+      }
+      UUID executionId = claimed.get(0);
+      attempted.add(executionId);
+      if (dispatchClaimed(executionId, now)) {
         dispatched++;
       }
     }
@@ -173,7 +201,43 @@ public class StudioDispatcher {
     return closed;
   }
 
-  /** Dispatches one execution. Returns true when a send left the process. */
+  /**
+   * Relays every recorded cancel whose run a runner holds and has not yet acknowledged (Studio v1
+   * WP4, ADR-002 §29). Returns how many the runner acknowledged in this pass.
+   *
+   * <p>One {@code DELETE /v1/runs/{id}} per row per pass. An acknowledged relay — {@code 202}, or
+   * {@code 409} for a run that had already finished — is recorded so no later pass repeats it. An
+   * unacknowledged one is left for the next pass, because a {@code 404} can mean the request
+   * reached a runner pod that does not hold the run; the running reaper bounds how long that goes
+   * on by closing the cancel itself.
+   *
+   * <p>The relay never writes an outcome. The run ends when the runner's {@code FINAL} report lands
+   * through the ordinary report path, or when the reaper closes it.
+   */
+  public int relayCancels() {
+    int acknowledged = 0;
+    for (UUID executionId :
+        statements.findCancelsToRelay(properties.dispatcherOrDefault().batchSizeOrDefault())) {
+      RunnerDispatchClient.CancelOutcome outcome = runnerClient.cancel(executionId);
+      if (outcome != null && outcome.settled()) {
+        Integer marked =
+            transactions.execute(
+                status -> statements.markCancelRelayed(executionId, clock.instant()));
+        if (marked != null && marked == 1) {
+          acknowledged++;
+        }
+      } else {
+        LOGGER.info(
+            "Studio cancel of execution {} not acknowledged by the runner ({}); the next pass "
+                + "retries it",
+            executionId,
+            outcome);
+      }
+    }
+    return acknowledged;
+  }
+
+  /** Claims and dispatches one named execution. Returns true when a send left the process. */
   public boolean dispatch(UUID executionId) {
     Instant now = clock.instant();
     Instant leaseExpiresAt = now.plus(properties.dispatcherOrDefault().leaseOrDefault());
@@ -184,7 +248,14 @@ public class StudioDispatcher {
     if (claimed == null || claimed != 1) {
       return false;
     }
+    return dispatchClaimed(executionId, now);
+  }
 
+  /**
+   * Everything after the claim, for a row this dispatcher has just claimed at {@code now}. Returns
+   * true when a send left the process.
+   */
+  private boolean dispatchClaimed(UUID executionId, Instant now) {
     Map<String, Object> row = statements.find(executionId).orElse(null);
     if (row == null) {
       return false;
@@ -314,21 +385,6 @@ public class StudioDispatcher {
 
   private void close(UUID executionId, String errorCode, Instant now) {
     transactions.execute(status -> statements.closeWithError(executionId, errorCode, now));
-  }
-
-  private List<UUID> queuedBatch() {
-    Instant now = clock.instant();
-    return jdbc.queryForList(
-        """
-        SELECT execution_id FROM studio_dispatch_ledger
-         WHERE state = 'QUEUED'
-           AND (lease_expires_at IS NULL OR lease_expires_at <= ?)
-         ORDER BY execution_accepted_at
-         LIMIT ?
-        """,
-        UUID.class,
-        Timestamp.from(now),
-        properties.dispatcherOrDefault().batchSizeOrDefault());
   }
 
   /**

@@ -23,6 +23,8 @@
  * same `attemptId` — that is the one way a single runner could compete with itself for an attempt
  * it may already own (AC-7).
  */
+import { randomUUID } from 'node:crypto';
+
 import type { HttpClient } from './httpClient.js';
 import type { Logger } from '../server/logging.js';
 
@@ -182,10 +184,13 @@ export function createAdmissionClient(options: AdmissionClientOptions): Admissio
  * Called **once** per `POST /v1/runs`. There is deliberately no "regenerate" helper: a second
  * `admissionId` for the same `attemptId` is the failure mode AC-7 names, and the cheapest way to
  * prevent it is to give nobody a function that produces one.
+ *
+ * The contract declares `admissionId` as `format: uuid` (`AdmissionRequest`, `AdmissionResponse`)
+ * and the ledger column is `UUID`, so the API refuses anything else with `400` before the CAS runs.
  */
 export function newAdmissionIdentity(runnerInstanceId: string): AdmissionIdentity {
   return {
     runnerInstanceId,
-    admissionId: `adm-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`,
+    admissionId: randomUUID(),
   };
 }

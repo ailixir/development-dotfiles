@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BACKEND_PID=""
 BACKEND_WATCHER_PID=""
 FRONTEND_PID=""
+RUNNER_PID=""
+RUNNER_WORK_DIR=""
 GRADLE_WRAPPER_PROPERTIES="$ROOT_DIR/backend/gradle/wrapper/gradle-wrapper.properties"
 GRADLE_WRAPPER_BACKUP=""
 
@@ -22,18 +24,86 @@ warn() { printf "${YELLOW}[!]${NC} %s\n" "$*"; }
 err()  { printf "${RED}[✗]${NC} %s\n" "$*"; }
 
 # ── Cleanup on exit ────────────────────────────────────────────────
+#
+# Only what this script started is stopped, and all of it is.
+#
+# `set -m` gives every background job its own process group, so a group signal reaches the whole
+# tree a job spawned (npx → node vite, the Gradle client, the watcher) and nothing outside it. Two
+# processes need more than that:
+#   - the bootRun JVM is forked by the Gradle *daemon*, not by the client this script started, so
+#     it is outside every group here. It is found by the backend port once it listens, and only
+#     when its command line runs this checkout's backend classes (BACKEND_APP_PID below);
+#   - the studio-runner gets SIGTERM on its own PID, not its group: it drains, and the drain is what
+#     ends the browser trees it forked (Chromium leads its own groups).
+# The Gradle daemon itself is shared and was not necessarily started here, so it is left alone.
+set -m
+BACKEND_APP_PID=""
+CLEANED_UP=false
+
+# Waits up to $2 seconds for the process (or, with a leading "-", the group) $1 to go, then KILLs it.
+stop_and_wait() {
+  local target=$1 seconds=$2 i
+  for ((i = 0; i < seconds * 4; i++)); do
+    kill -0 -- "$target" 2>/dev/null || return 0
+    sleep 0.25
+  done
+  kill -KILL -- "$target" 2>/dev/null || true
+}
+
+stop_group() {
+  local pid=$1 label=$2
+  [ -n "$pid" ] || return 0
+  kill -0 -- "-$pid" 2>/dev/null || return 0
+  log "Stopping ${label}…"
+  kill -TERM -- "-$pid" 2>/dev/null || true
+  stop_and_wait "-$pid" 10
+}
+
+# The PID listening on the backend port, if it is this checkout's bootRun JVM.
+backend_app_pid() {
+  local pid
+  for pid in $(lsof -tiTCP:"$BACKEND_PORT" -sTCP:LISTEN 2>/dev/null); do
+    if ps -o command= -p "$pid" 2>/dev/null | grep -qF "$ROOT_DIR/backend/build"; then
+      echo "$pid"
+      return 0
+    fi
+  done
+  return 0
+}
+
 cleanup() {
+  [ "$CLEANED_UP" = true ] && return 0
+  CLEANED_UP=true
+  # Nothing below may abort the rest: one child that already exited must not leave the others up.
+  # Job control is off again so the shell does not narrate each job it is about to reap.
+  set +e +m
   log "Shutting down…"
-  [ -n "$FRONTEND_PID" ]         && kill "$FRONTEND_PID"         2>/dev/null && wait "$FRONTEND_PID"         2>/dev/null
-  [ -n "$BACKEND_WATCHER_PID" ]  && kill "$BACKEND_WATCHER_PID"  2>/dev/null && wait "$BACKEND_WATCHER_PID"  2>/dev/null
-  [ -n "$BACKEND_PID" ]          && kill "$BACKEND_PID"           2>/dev/null && wait "$BACKEND_PID"          2>/dev/null
+  stop_group "$FRONTEND_PID" "frontend"
+  if [ -n "$RUNNER_PID" ] && kill -0 "$RUNNER_PID" 2>/dev/null; then
+    log "Stopping studio-runner (drain)…"
+    kill -TERM "$RUNNER_PID" 2>/dev/null
+    stop_and_wait "$RUNNER_PID" 30
+  fi
+  stop_group "$BACKEND_WATCHER_PID" "file watcher"
+  if [ -n "$BACKEND_PID" ] && [ -z "$BACKEND_APP_PID" ]; then
+    BACKEND_APP_PID="$(backend_app_pid)"
+  fi
+  stop_group "$BACKEND_PID" "Gradle bootRun client"
+  if [ -n "$BACKEND_APP_PID" ] && kill -0 "$BACKEND_APP_PID" 2>/dev/null; then
+    log "Stopping backend JVM (PID $BACKEND_APP_PID)…"
+    kill -TERM "$BACKEND_APP_PID" 2>/dev/null
+    stop_and_wait "$BACKEND_APP_PID" 30
+  fi
   if [ -n "$GRADLE_WRAPPER_BACKUP" ] && [ -f "$GRADLE_WRAPPER_BACKUP" ]; then
     mv "$GRADLE_WRAPPER_BACKUP" "$GRADLE_WRAPPER_PROPERTIES"
     log "Restored Gradle wrapper configuration"
   fi
   log "Done."
 }
-trap cleanup EXIT INT TERM
+# INT and TERM exit, and the EXIT trap does the work once, whichever way the script ends.
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 # ── Usage ──────────────────────────────────────────────────────────
 usage() {
@@ -41,13 +111,17 @@ usage() {
 ${BOLD}Usage:${NC} ./dev.sh [OPTIONS]
 
 Start the full PUT Checks stack locally.
-Frontend proxies /api/v1/* to backend at :8080.
+Frontend proxies /api/v1/* to backend at :8080 (DEV_BACKEND_PORT).
+The backend dispatches Studio runs to a local studio-runner (:8090), which
+runs a real Chromium and reports back.
 
 ${BOLD}Options:${NC}
   --backend-only       Start only the backend (Spring Boot :8080)
   --frontend-only      Start only the frontend (Vite :5173)
   --federated          Use Webpack/Module Federation (:3002) instead of Vite
   --seed               Use dev profile (pre-populated sample data)
+  --no-studio-runner   Do not start the studio-runner (Studio runs then close
+                       ERROR/DISPATCH_FAILED instead of running a browser)
   --skip-checks        Skip prerequisite checks
   -h, --help           Show this help
 
@@ -61,6 +135,14 @@ ${BOLD}Examples:${NC}
 ${BOLD}Environment:${NC}
   GRADLE_DISTRIBUTION_URL       Override Gradle wrapper distribution URL
                                 (e.g. Artifactory mirror)
+  DEV_BACKEND_PORT              backend port (default 8080)
+  DEV_FRONTEND_PORT             Vite standalone port (default 5173)
+  DEV_STUDIO_RUNNER_PORT        studio-runner port (default 8090)
+  STUDIO_RUNNER_SERVICE_TOKEN   bearer the backend presents to the runner
+  STUDIO_CALLBACK_SERVICE_TOKEN bearer the runner presents to the backend
+                                (both generated per session when unset)
+  STUDIO_GATEWAY_ENABLED=true   use the real LLM gateway instead of the local
+                                passthrough (needs the STUDIO_GATEWAY_* settings)
 EOF
   exit 0
 }
@@ -71,6 +153,7 @@ FRONTEND=true
 FEDERATED=false
 SEED=false
 SKIP_CHECKS=false
+STUDIO_RUNNER=true
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -79,6 +162,7 @@ while [[ $# -gt 0 ]]; do
     --federated)     FEDERATED=true; shift ;;
     --seed)          SEED=true;      shift ;;
     --skip-checks)   SKIP_CHECKS=true; shift ;;
+    --no-studio-runner) STUDIO_RUNNER=false; shift ;;
     -h|--help)       usage ;;
     *) err "Unknown option: $1"; usage ;;
   esac
@@ -195,6 +279,15 @@ cat <<'BANNER'
 BANNER
 printf "${NC}"
 
+BACKEND_PORT="${DEV_BACKEND_PORT:-8080}"
+VITE_PORT="${DEV_FRONTEND_PORT:-5173}"
+# The Vite proxy forwards the browser's Origin, and the backend's CORS list (application.yml) only
+# names the default dev ports — a non-default frontend port would get 403 "Invalid CORS request"
+# on every POST.
+if [ "$VITE_PORT" != 5173 ] && [ -z "${CHECKS_CORS_ALLOWED_ORIGINS:-}" ]; then
+  export CHECKS_CORS_ALLOWED_ORIGINS="http://localhost:3000,http://localhost:3002,http://localhost:5173,http://localhost:${VITE_PORT}"
+fi
+
 # ── Kill stale processes on target ports ───────────────────────────
 kill_port() {
   local port=$1
@@ -219,25 +312,89 @@ kill_port() {
 }
 
 if [ "$BACKEND" = true ]; then
-  # Stop any leftover Gradle bootRun daemons before port cleanup
-  (cd "$ROOT_DIR/backend" && ./gradlew --stop 2>/dev/null) || true
-  kill_port 8080
+  # No `gradlew --stop` here: it stops every daemon of this Gradle version, including other builds'.
+  # A backend this script left behind is on BACKEND_PORT, which kill_port clears.
+  kill_port "$BACKEND_PORT"
 fi
 if [ "$FRONTEND" = true ]; then
-  kill_port 5173; kill_port 5174; kill_port 5175
+  if [ "$VITE_PORT" = 5173 ]; then kill_port 5173; kill_port 5174; kill_port 5175; else kill_port "$VITE_PORT"; fi
   if [ "$FEDERATED" = true ]; then kill_port 3002; fi
+fi
+
+# ── Studio runner (the local e2e path, Studio v1 WP2) ──────────────
+# The backend (local profile) is the API and the worker in one JVM: it dispatches accepted runs to
+# the runner over POST /v1/runs with STUDIO_RUNNER_SERVICE_TOKEN, and the runner reports back to
+# /internal/studio/executions/** with STUDIO_CALLBACK_SERVICE_TOKEN. Both sides get the same two
+# values from here. The runner's environment is enumerated (`env -i`), as in the chart and in
+# StudioCoRunIT: its config loader refuses any unknown STUDIO_RUNNER_* key, and the backend's
+# STUDIO_RUNNER_BASE_URL / STUDIO_RUNNER_SERVICE_TOKEN exported below are exactly such keys.
+RUNNER_PORT="${DEV_STUDIO_RUNNER_PORT:-8090}"
+if [ "$BACKEND" = true ] && [ "$STUDIO_RUNNER" = true ]; then
+  RUNNER_DIR="$ROOT_DIR/studio-runner"
+  new_token() { openssl rand -hex 32 2>/dev/null || node -e "process.stdout.write(require('crypto').randomBytes(32).toString('hex'))"; }
+  export STUDIO_RUNNER_SERVICE_TOKEN="${STUDIO_RUNNER_SERVICE_TOKEN:-$(new_token)}"
+  export STUDIO_CALLBACK_SERVICE_TOKEN="${STUDIO_CALLBACK_SERVICE_TOKEN:-$(new_token)}"
+  export STUDIO_RUNNER_BASE_URL="http://127.0.0.1:${RUNNER_PORT}"
+  # The Studio pages are gated on the UI_TEST source, which is off by default (application-local.yml).
+  export CHECKS_SOURCE_UI_TEST="${CHECKS_SOURCE_UI_TEST:-true}"
+  # No R2D2 credentials on a laptop: compile through the passthrough unless the real gateway is on.
+  if [ "${STUDIO_GATEWAY_ENABLED:-false}" != true ]; then
+    export STUDIO_GATEWAY_LOCAL_PASSTHROUGH="${STUDIO_GATEWAY_LOCAL_PASSTHROUGH:-true}"
+  fi
+
+  kill_port "$RUNNER_PORT"
+  if [ ! -d "$RUNNER_DIR/node_modules" ]; then
+    log "Installing studio-runner dependencies (npm ci)…"
+    (cd "$RUNNER_DIR" && npm ci >/dev/null)
+  fi
+  log "Building studio-runner…"
+  (cd "$RUNNER_DIR" && npm run build >/dev/null)
+
+  RUNNER_WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/put-checks-studio-runner.XXXXXX")"
+  mkdir -p "$RUNNER_WORK_DIR/objects"
+  # scratch/ is a CHILD of the work dir on purpose: the runner removes its scratch root on exit.
+  (
+    cd "$RUNNER_DIR" && exec env -i \
+      PATH="$PATH" HOME="$HOME" TMPDIR="$RUNNER_WORK_DIR" \
+      ${PLAYWRIGHT_BROWSERS_PATH:+PLAYWRIGHT_BROWSERS_PATH="$PLAYWRIGHT_BROWSERS_PATH"} \
+      STUDIO_RUNNER_HOST=127.0.0.1 \
+      STUDIO_RUNNER_PORT="$RUNNER_PORT" \
+      STUDIO_RUNNER_POOL_SIZE=1 \
+      STUDIO_RUNNER_SERVICE_IDENTITY="$STUDIO_RUNNER_SERVICE_TOKEN" \
+      STUDIO_RUNNER_CALLBACK_IDENTITY="$STUDIO_CALLBACK_SERVICE_TOKEN" \
+      STUDIO_RUNNER_CALLBACK_BASE_URL="http://127.0.0.1:${BACKEND_PORT}" \
+      STUDIO_RUNNER_SCRATCH_DIR="$RUNNER_WORK_DIR/scratch" \
+      STUDIO_RUNNER_OBJECT_STORE_DIR="$RUNNER_WORK_DIR/objects" \
+      node dist/main.js >"$RUNNER_WORK_DIR/studio-runner.log" 2>&1
+  ) &
+  RUNNER_PID=$!
+  log "studio-runner PID: $RUNNER_PID (log: $RUNNER_WORK_DIR/studio-runner.log)"
+
+  for i in $(seq 1 30); do
+    if curl -sf -H "Authorization: Bearer $STUDIO_RUNNER_SERVICE_TOKEN" \
+        "http://127.0.0.1:${RUNNER_PORT}/health" >/dev/null 2>&1; then
+      ok "studio-runner healthy on :${RUNNER_PORT}"
+      break
+    fi
+    if ! kill -0 "$RUNNER_PID" 2>/dev/null; then
+      err "studio-runner exited during startup — last lines of its log:"
+      tail -20 "$RUNNER_WORK_DIR/studio-runner.log" >&2 || true
+      exit 1
+    fi
+    sleep 1
+  done
 fi
 
 # ── Start Backend ──────────────────────────────────────────────────
 if [ "$BACKEND" = true ]; then
   if [ "$SEED" = true ]; then
     SPRING_PROFILE="local,dev"
-    log "Starting backend (Spring Boot :8080, sample data enabled)…"
+    log "Starting backend (Spring Boot :${BACKEND_PORT}, sample data enabled)…"
   else
     SPRING_PROFILE="local"
-    log "Starting backend (Spring Boot :8080)…"
+    log "Starting backend (Spring Boot :${BACKEND_PORT})…"
   fi
-  (cd "$ROOT_DIR/backend" && ./gradlew bootRun --args="--spring.profiles.active=$SPRING_PROFILE" --console=plain -q) &
+  (cd "$ROOT_DIR/backend" && ./gradlew bootRun --args="--spring.profiles.active=$SPRING_PROFILE --server.port=$BACKEND_PORT" --console=plain -q) &
   BACKEND_PID=$!
   log "Backend PID: $BACKEND_PID"
 
@@ -251,8 +408,9 @@ fi
 if [ "$BACKEND" = true ] && [ "$FRONTEND" = true ]; then
   log "Waiting for backend health…"
   for i in $(seq 1 30); do
-    if curl -sf http://localhost:8080/actuator/health &>/dev/null; then
+    if curl -sf "http://localhost:${BACKEND_PORT}/actuator/health" &>/dev/null; then
       ok "Backend healthy"
+      BACKEND_APP_PID="$(backend_app_pid)"
       break
     fi
     if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
@@ -261,7 +419,7 @@ if [ "$BACKEND" = true ] && [ "$FRONTEND" = true ]; then
     fi
     sleep 2
   done
-  if ! curl -sf http://localhost:8080/actuator/health &>/dev/null; then
+  if ! curl -sf "http://localhost:${BACKEND_PORT}/actuator/health" &>/dev/null; then
     warn "Backend not healthy after 60s — starting frontend anyway"
     warn "API calls will fail until backend is ready"
   fi
@@ -274,9 +432,10 @@ if [ "$FRONTEND" = true ]; then
     (cd "$ROOT_DIR/frontend" && npm run dev) &
     FRONTEND_PORT=3002
   else
-    log "Starting frontend — Vite standalone :5173…"
-    (cd "$ROOT_DIR/frontend" && npm run dev:standalone) &
-    FRONTEND_PORT=5173
+    log "Starting frontend — Vite standalone :${VITE_PORT}…"
+    # vite.config.ts reads VITE_API_URL for the /api proxy target.
+    (cd "$ROOT_DIR/frontend" && VITE_API_URL="http://localhost:${BACKEND_PORT}" npx vite --port "$VITE_PORT") &
+    FRONTEND_PORT="$VITE_PORT"
   fi
   FRONTEND_PID=$!
   log "Frontend PID: $FRONTEND_PID"
@@ -286,17 +445,25 @@ fi
 echo ""
 log "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 if [ "$BACKEND" = true ]; then
-  ok "Backend:    http://localhost:8080"
-  ok "Swagger UI: http://localhost:8080/swagger-ui.html"
-  ok "Health:     http://localhost:8080/actuator/health"
+  ok "Backend:    http://localhost:${BACKEND_PORT}"
+  ok "Swagger UI: http://localhost:${BACKEND_PORT}/swagger-ui.html"
+  ok "Health:     http://localhost:${BACKEND_PORT}/actuator/health"
   ok "Hot-reload: enabled (DevTools + continuous compilation)"
   if [ "$SEED" = true ]; then
     ok "Profile:    dev (3 CSIs, 15 checks, ~450 execution results)"
   fi
+  if [ -n "$RUNNER_PID" ]; then
+    ok "Runner:     http://127.0.0.1:${RUNNER_PORT} (Studio runs dispatch here)"
+    if [ "${STUDIO_GATEWAY_LOCAL_PASSTHROUGH:-false}" = true ]; then
+      ok "Compile:    local passthrough — write Studio steps as Playwright statements"
+    fi
+  else
+    warn "Runner:     not started — Studio runs will close ERROR/DISPATCH_FAILED"
+  fi
 fi
 if [ "$FRONTEND" = true ]; then
   ok "Frontend:   http://localhost:${FRONTEND_PORT}"
-  ok "API proxy:  /api/v1/* -> http://localhost:8080/api/v1/*"
+  ok "API proxy:  /api/v1/* -> http://localhost:${BACKEND_PORT}/api/v1/*"
 fi
 log "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 log "Press Ctrl+C to stop all services"

@@ -17,9 +17,213 @@
 epic_id: EPIC-10
 milestone: M5
 title: "Checks Studio Execution (MVP) — exact-revision confirmation, isolated Chromium execution, SSE progress, private video evidence"
-status: planning
+# ── Status ───────────────────────────────────────────────────
+# @po 2026-09-17 (closure plan step 0.5) moved this field from `planning`, which stopped being true
+# at wave 1 and stayed wrong for nine waves. @po recorded that the declared enum for this field in
+# this repository — `planning | in_progress | completed | paused`, carried as a trailing comment on
+# EPIC-01/02/03/04 — has NO member that says what is true of an epic whose two halves finish at
+# different times, and set the only true member rather than inventing a value, leaving the enum
+# question to @pm.
+#
+# @pm (Morgan) 2026-09-18 — RULING: the value STANDS at `in_progress`, and I decline to extend the
+# enum in this commit.
+#   (1) `completed` would be a false claim. The --ff-only fold is unexecuted, twelve external gates
+#       are open and the capability has never run end to end. The project owner's instruction for
+#       this closure forbids it for exactly those reasons.
+#   (2) `paused` would blame this line for a wait that belongs to other teams. Nothing here is
+#       paused; there is nothing left here to do.
+#   (3) An extension — `delivered-pending-external` is the honest word — is a CROSS-EPIC change.
+#       Six manifests carry the same four-value comment. Introducing a fifth member in the one epic
+#       that needed it, inside the commit that closes that epic, is a framework change smuggled
+#       into a bookkeeping change, and it would silently invalidate any reader or tool written
+#       against the four. It is also not needed to be truthful here: nothing machine-reads this
+#       field. The only machine reader of this manifest is docs/qa/scripts/verify-staging-
+#       registration.mjs, which reads `external_dependencies` only (verified by @po 2026-09-17;
+#       re-verified by @pm 2026-09-18 at :65-68 of that script).
+#   PROPOSAL, recorded and deliberately NOT executed here: either a fifth enum member, or a
+#   two-axis pair (`local_status` / `external_status`) which is the shape this epic actually needs,
+#   applied to every epic template at once and raised to @aiox-master as a framework change. Until
+#   that is ruled, `in_progress` plus the prose below is the truthful arrangement — and the prose,
+#   not the enum, is where a reader must look. A reader who stops at this field has not been lied
+#   to; they have been under-informed, which is the failure mode I chose.
+status: in_progress
+# Free text. @pm 2026-09-18, rewritten from @po's 2026-09-17 proposal, which was correct when
+# written and has since gone out of date in three places: story 10.34 now exists, DEF-05 now exists,
+# and the fold is now decided per file rather than open. Read by nothing; written for a human
+# deciding how far to trust this epic's output.
+status_detail: >-
+  LOCAL HALF CLOSED, EXTERNAL HALF CARRIED. Delivered and merged on epic/EPIC-10-w7: 23 in-epic
+  stories drafted and every implemented one QA-gated and merged, plus two successor stories (10.34,
+  10.35) that are registered and cannot start. Every branch in this repository is already an
+  ancestor of that head — `git branch --no-merged epic/EPIC-10-w7` is empty — and the head is 50
+  commits ahead of epic/EPIC-10 with zero divergence (measured 2026-09-18 00:01 EDT). Backend
+  studio package on the fully merged tip, at rest, aggregated from 94 JUnit XML files none of which
+  is zero-length: 716 tests, 709 passed, 0 failed, 0 errors, 7 skipped. EXTERNAL HALF NOT STARTED
+  AND NOT STARTABLE FROM THIS REPOSITORY: ED-01…ED-06 and SPK-01…SPK-06 all read open, ED-01 has no
+  owner at all and ED-02's external ticket is unlinked; the --ff-only fold into epic/EPIC-10 is
+  decided file by file but unexecutable while a parallel program's work is uncommitted; and the
+  capability has NEVER run end to end against real infrastructure, because that infrastructure does
+  not exist. DEF-05 (HIGH, open) means the API's dispatch path has never once dispatched a run.
+  Definition-of-done item 1 is satisfied by SUCCESSION and not by execution, and items 2 to 6 are
+  not satisfied at all. What this closure claims and what it refuses to claim is written out in
+  full in the `closure` block below; read that before quoting this field.
 created_at: "2026-09-10"
 created_by: "@pm (Morgan)"
+
+# ─────────────────────────────────────────────────────────────
+# Closure — what this epic's closure claims, and what it refuses to claim
+#
+# @pm (Morgan), 2026-09-18, on the project owner's decision: Epic 10 closes for its LOCAL half,
+# with its EXTERNAL half explicitly CARRIED. This block is the manifest's answer to "is this done?"
+# and it is written so the answer cannot be read more favourably than it is. Article IV: every
+# claim below either names the source I read it in, or is labelled as my decision with its reason.
+# NOTHING HERE WAS MEASURED BY RE-RUNNING A SUITE — by instruction, and because another agent may
+# hold Gradle on this host. Figures are RECORDED figures with their provenance named; the git
+# measurements are mine and are stamped.
+# ─────────────────────────────────────────────────────────────
+closure:
+  decided_by: "user (project owner) — closed for the local half, external half explicitly carried"
+  recorded_by: "@pm (Morgan), 2026-09-18 EDT, worktree wt/pm-close on branch chore/pm-epic-close"
+  head: "epic/EPIC-10-w7 — 50 commits ahead of epic/EPIC-10, 0 behind (measured 2026-09-18 00:01 EDT)"
+
+  what_this_closure_claims:
+    - >-
+      BUILT AND MERGED. Every branch in this repository is already an ancestor of epic/EPIC-10-w7:
+      `git branch --no-merged epic/EPIC-10-w7` is empty across 46 local branches (measured
+      2026-09-18 00:01 EDT; the run log's "43 branches" was correct when written and has drifted
+      upward with the closure branches themselves). There was never any outstanding branch work —
+      the integration branch IS the merge. Only the fold remains.
+    - >-
+      GATED. Every implemented story carries a QA gate file under docs/qa/gates/ and merged on that
+      gate's verdict — 26 story ids across 27 files, counted 2026-09-18. The three stories with no
+      gate file (10.33, 10.34, 10.35) are acceptance specs with no implementation, which is their
+      designed shape and not a missing gate. Two stories are deliberately NOT Done — 10.16 on AC-19
+      and 10.19 on AC-1…AC-7 — because a Blocked criterion is never ticked. See
+      definition_of_done_disposition.
+    - >-
+      MEASURED AT REST, ON THE FULLY MERGED TIP. Backend studio package: 716 tests, 709 passed,
+      0 failed, 0 errors, 7 skipped, aggregated from 94 JUnit XML files with none zero-length, at
+      host load 2.42 (EPIC-10-RUN-LOG.md, "Epic 10 — the local half closes"). This is the figure
+      this closure stands on, and it stands on it as a RECORDED figure, not one I re-took.
+    - >-
+      RECORDS TRUED, IN BOTH DIRECTIONS. DEF-01 and DEF-02 read `fixed` with the SHAs that fixed
+      them, after nine waves of reading `open` while the code was already correct; DEF-05 reads
+      `open` and its `open` is LITERAL rather than stale; the retracted gateway-breakage claim is
+      out of the staging-acceptance register; story statuses match what their gates actually ruled;
+      and the fold is decided file by file in tools/epic10-fold/RULINGS.md rather than left as a
+      pending investigation.
+
+  what_this_closure_does_not_claim:
+    - >-
+      NOT SHIPPABLE. What would ship is the merged tree, and the merged tree does not exist. The
+      --ff-only fold into epic/EPIC-10 is blocked on 17 paths that are dirty in a parallel
+      program's UNCOMMITTED tree (recomputed by @pm 2026-09-18 00:01 EDT against both live trees;
+      this manifest is not among them). The per-file reconciliation is decided — 11 auto-mergeable,
+      4 mechanical, 2 needing a named authority (@architect) — and is unexecutable until that
+      program's work is on a branch with a SHA.
+    - >-
+      NOT VALIDATED. The capability has NEVER run end to end against real infrastructure, because
+      that infrastructure does not exist. All twelve external gates are open. ED-01 has no owner at
+      all — its field reads `TBD — not assigned in sources`, verbatim — and ED-02's external ticket
+      is still unlinked. No work in this repository can change either fact.
+    - >-
+      NOT PROVEN TO DISPATCH. DEF-05, HIGH and open: the API's dispatch path presents no service
+      identity, and the runner refuses every dispatch with IDENTITY_MISSING. It was found by the
+      co-run harness on its FIRST run, after nine waves and 709 green studio tests had not found
+      it, because until that harness existed nothing in this repository had ever run the API and
+      the runner together. A fix exists in the other program's UNCOMMITTED tree and is unverified
+      against a real runner. Story 10.35 is its acceptance spec. The consequence recorded under
+      integration_defects.DEF-05 must travel with any quotation of DEF-01's `fixed`: the identity
+      refusal happens BEFORE the dispatch body is parsed, so DEF-01's whole defect class is
+      currently unobservable on that route. `fixed` there means "the merged source has the shape
+      the defect said it lacked". It has never meant "the dispatch succeeds".
+    - >-
+      NOT LINTED. `npm run lint` HAS NEVER RUN in this epic (ENV-1). The frontend .eslintrc.json has
+      been unexecutable since the monorepo reorganisation in 0539d2f1f; correcting the one-line
+      typo was tested in wave 1 and REJECTED for this run because it surfaces 191 errors and 333
+      warnings across pre-existing code. Every frontend story in this epic passed a gate from which
+      linting was absent, and that is a gap in the evidence, not a property of the code.
+    - >-
+      NOT VALIDATED WITH A SCREEN READER AND NOT TRIED BY A NONTECHNICAL USER. Neither was
+      performed. Both are recorded as NOT DONE rather than waived, and the story artefacts state
+      their own emptiness in plain words ("NO SCREEN READER WAS RUN"; "Screen reader used | none —
+      not run"), which @qa verified in both directions at the 10.19 gate. For a capability whose
+      stated philosophy is "from checklist to reality" for nontechnical operators, an untried
+      product is the largest unmeasured risk in this closure and I am naming it as such rather than
+      as a deferred task.
+    - >-
+      NOT A CLEAN BILL FOR THE REST OF THE BACKEND. Ten tests outside the studio package fail on
+      the merged tip and were hidden for the epic's entire duration by studio-only test scoping.
+      They are not Epic 10 defects and they are not dismissed: see post_epic_backlog.PB-1.
+
+  # The carrying relationship. A reader of this manifest ALONE must be able to see that Epic 10's
+  # unfinished work has named successors rather than being abandoned. That is what this is for.
+  succession:
+    rule: >-
+      Epic 10's unfinished work is CARRIED, not abandoned, and the carriers are named by id below.
+      This is the mechanism the epic's own stories name for their own closure, quoted verbatim from
+      10.19.story.md:247 in the Status row of 10.5, 10.6, 10.7, 10.8, 10.9, 10.11, 10.12, 10.13,
+      10.15, 10.16 and 10.18: "The story is Done only when every criterion is either executed and
+      passed, or superseded by a named follow-up story (10.34+, @pm's call) that carries it." This
+      entry is that call, made. A criterion carried here is one that a named story will one day
+      tick; it is not a criterion quietly dropped.
+    carriers:
+      - id: "10.34"
+        title: "Staging acceptance execution"
+        carries: >-
+          EVERY externally-blocked Epic 10 acceptance criterion: 33 criteria inherited by name from
+          12 prior stories, Groups A-L, each carrying its origin id, its blocking gate and its
+          recording location in docs/qa/staging-acceptance-register.md. Group A is 10.19 AC-1…AC-7
+          and Group B is 10.16 AC-19 — precisely the criteria on which those two stories are held
+          not-Done. Group L is 10.18's further blocked criteria, added after @po counted them
+          directly and found fifteen where the story's own row said six.
+        status_at_closure: >-
+          Ready (@po GO 8/10, 2026-09-17). `Ready` here means the registration is complete and
+          correct, NOT that the story is dispatchable: every one of its criteria is Blocked and the
+          story cannot start.
+        blocked_on: "the fold; all twelve external gates; and story 10.35 (see below)"
+      - id: "10.35"
+        title: "Dispatch service identity (DEF-05) — acceptance spec"
+        carries: >-
+          DEF-05, as an ACCEPTANCE SPEC ONLY — this repository specifies what correct means and
+          gates what lands; it does not author a second fix in a file another program has open.
+          Blocks 10.34, because 10.34's Group A criteria each require a run that was actually
+          dispatched and admitted, and while DEF-05 stands the API cannot dispatch at all.
+        status_at_closure: >-
+          Ready (@po GO 9/10, 2026-09-17). Blocked on another program's COMMIT, not on its working
+          tree — a distinction this manifest holds deliberately, because that tree changed shape
+          three times on 2026-09-17 alone.
+    not_carried_by_a_story: >-
+      Two items routed to @pm have NO carrier story, by design, and are recorded as post-epic
+      backlog rather than as Epic 10 work: see post_epic_backlog (PB-1, PB-2). Neither is a
+      condition on this closure and neither is abandoned; each has an owner, a first action and a
+      sequencing reason.
+
+  definition_of_done_disposition:
+    item_1: >-
+      "All stories reach Done via SDC cycle" is satisfied by SUCCESSION, not by execution. Two
+      stories do not reach Done and are not forced to: 10.16 (AC-19, blocked on SPK-06 phase B) and
+      10.19 (AC-1…AC-7, blocked on ED-01…ED-06). Both are carried by 10.34 by name. Without 10.34
+      this item is unsatisfiable and the epic would stay open forever on a technicality —
+      EPIC-10-CLOSURE-PLAN.md section 3(a).
+    items_2_to_6: >-
+      NOT MET, and not meetable in this repository. Items 2 through 6 all describe behaviour in
+      staging or against the integrated stack; item 2 is 10.34's Group A almost verbatim. They are
+      carried by 10.34, and they are the reason `status` is not `completed`.
+    conflict_with_the_framework_default: >-
+      PRESERVED, AND EPIC 10'S OWN RULE GOVERNS. .claude/rules/story-lifecycle.md states, as a
+      CRITICAL rule, that "PASS, CONCERNS, and WAIVED move the story to Done". Story 10.19's own
+      Definition of done is STRICTER: "A Blocked criterion is never ticked, and the story is never
+      closed around it." 10.19's gate verdict was CONCERNS — merge safe — so under the framework
+      default it would have moved to Done with AC-1…AC-7 still recorded skipped, never passed. @po
+      documented this conflict at the close; @pm RATIFIES the stricter rule for Epic 10, with the
+      reason rather than only the ruling: the framework default was written for stories whose
+      criteria are all executable, and a Done resting on seven never-executed criteria is exactly
+      the false claim this closure exists to prevent. This is a deliberate, recorded deviation from
+      .claude/rules/story-lifecycle.md, scoped to Epic 10, and it is why this epic's story statuses
+      will not match a naive lifecycle audit. Anyone auditing against the framework default should
+      read this entry before filing the mismatch as a process violation.
+
 
 # ─────────────────────────────────────────────────────────────
 # Epic goal + definition of done
@@ -685,6 +889,153 @@ stories:
         O-19 (ADR-003, the backend-wide envelope, and declaring the filter-written 429, 503
         AUTH_TEMPORARILY_UNAVAILABLE and idempotency errors). That is not in this backlog; see 10.19's
         note.
+      po_post_qa_rulings: >-
+        @po 2026-09-17, on gate docs/qa/gates/10.31-video-route-refusal-surface-and-public-401-envelope.yml
+        (CONCERNS, merge-safe; story already merged on epic/EPIC-10-w7 at 466d3996b). STATUS: InReview ->
+        DONE. Nothing routed here is rework. The implementation is correct and stays byte-unchanged by
+        this pass; what was wrong is the AC TEXT, which described the code inaccurately. That distinction
+        is the ruling: an AC is an instrument, and an instrument that predicts a red which cannot happen
+        is broken in the same way a test that cannot fail is broken — an implementer who cannot reproduce
+        the predicted failure has no way to tell a wrong prediction from a missing guard.
+        PO-1 (medium) — AC-2's falsifications (a) and (b) DROP "and the pinned list". Verified here by
+        reading ExecutionVideoContractTest.java:486-493: the pinned comparisons are
+        containsExactlyElementsOf over publicRefs.keySet()/callbackRefs.keySet(), never over their
+        values, so repointing a $ref moves no key and the pin cannot see it. Measured twice by two
+        methods (@dev deleted the sibling assertions, 0 of 17 failed; @qa's Q5a/Q5b ran a throwaway
+        pinned-list-only probe, green under both mutations while the real guard reddened at :430 and
+        :436). AC-2(b)'s "no internal operation" prediction is KEPT and re-labelled UNREACHED, NOT FALSE:
+        it would redden, but AssertJ aborts at the earlier callback comparison. Kept rather than deleted
+        because the two states call for different responses — an unreached prediction is a true statement
+        about the guard and would surface if the assertions were re-ordered; a false one is not.
+        PO-2 (medium) — THE TOTALITY ASSERTION IS RATIFIED, as a sixth bullet of AC-2, with no rework,
+        and a new falsification (e) is added so it is falsifiable from the AC rather than surviving on a
+        reviewer's note. Grounds: an operation tagged `internal` and nothing else belongs to no bucket and
+        is exempt from all three rules — the exact hole the five bullets exist to close, reached by a
+        shape they do not cover (verified by reading the partition logic at :415-424). @qa's Q9 settles
+        it by ADDING such an operation: counts stayed 12/2/4, both pins green by construction, sole red at
+        :424. @dev's own M4 RETAGGED runnerHealth, which the counts also catch, so it proved ordering, not
+        non-redundancy — recorded because this epic prices evidence, not conclusions, and (e) now names
+        the add-case precisely so the distinction is not lost. AUTHORITY: test coverage of an
+        already-authorized declaration is not an edit to openapi.yaml, so ADR-002 §12's Class A/B/C does
+        not engage — the same reasoning this story's Open Question 1 used for AC-7. No declaration added,
+        no other AC changed.
+        PO-3 (low) — AC-8 now says ONE call site. serveExecutionVideo has exactly two references in
+        handlers.ts, its declaration at :132 and its single call at :442, and the file is byte-identical
+        between 82322e084 and the merge base, so a two-call-site version never existed. Checked here at
+        82322e084: the draft's ":419-421" is the SIBLING GET /executions/:id route, which answers
+        badRequest('BAD_REQUEST', ...) and is not this route at all. The material claim — readable()
+        applied before the find, so an unknown id and an unreadable CSI both arrive undefined — holds at
+        that one site. @dev's supporting sentence was itself wrong (the empty diff is 82322e084..72e95cbbd,
+        not 82322e084..HEAD); @qa caught it, the conclusion survives, and the misquote is recorded as
+        backlog rather than silently repaired.
+        PO-4 (low) — AC-6's third falsification now names the case the new assertion actually
+        discriminates: a shape change that PRESERVES the code (a dropped `message`), which reddens
+        ExecutionVideoEvidenceIT:601-606 and no earlier line (@qa's Q11). The draft named a nested body;
+        measured (Q10) that reddens THREE assertions earlier at :587, the pre-existing code-differs check,
+        under a message reading "the two cases must not be collapsed onto one code either" — which
+        misdescribes the fault a reader is looking at. Verified structurally here by reading :583-612: the
+        order is not-404 -> code-differs -> 503 -> code literal -> schema -> control, so the pre-emption is
+        structural, not incidental. The property IS caught; only its diagnosis is wrong. Re-messaging :587
+        or adding an envelope-shape assertion ahead of it belongs to the next story that owns this file —
+        NOT a rework of 10.31, and recorded in the AC so it is not lost.
+        PO-5 (low) — Open Question 2's ruling scope is corrected to THREE OCCURRENCES IN TWO closed gate
+        files: 10.15-...yml:20, :128 and 10.16a-evidence-state-playback-and-step-seek.yml:133, the last
+        never named by the draft. docs/architecture/studio-execution.md:213 is STRUCK — it was never a hit
+        (its §6.3 prose names 200/206/416 and neither 404 nor 410, so the loose regex cannot match);
+        struck rather than reclassified, because "found and judged harmless" and "never found" are
+        different claims and only the second is true. Both searches re-run here to confirm. The ruling
+        itself needed no re-deciding: a closed gate's prose is a record dated when written, and the third
+        hit is the same class as the first two. STILL NO STANDING RULE — annotating gate prose at write
+        time buys a future grep nothing the gate's own `updated:` date does not already give, and taxes
+        every gate for an occasional search. What the growth justifies is recording the inventory, which
+        is GATE-PROSE-1 below.
+        DISAGREEMENT WITH THE GATE, stated rather than rubber-stamped: flagged_items_ruling.item_4 says
+        this is "now a three-file pattern rather than a two-file one". It is not. It is THREE LINES IN TWO
+        FILES; the before state was two lines in ONE file. Re-run here: `grep -rnE
+        "200.*206.*404.*410.*416" docs/qa/gates/` returns exactly those three lines in exactly two files.
+        The count matters because the next story inherits it as the expected inventory. Nothing else in
+        the gate's five routed items was found wrong on re-derivation.
+      po_backlog_from_the_10_31_gate: >-
+        RECORDED BY @po 2026-09-17 so none of these is lost or re-investigated. None gates story 10.31 and
+        none re-opens it. Each carries the severity @qa assigned. NOT FIXED HERE — recorded.
+        REF-DANGLE-1 (MEDIUM, open, the most significant of the eight) — NOTHING IN THE REPOSITORY
+        RESOLVES AN OPENAPI $ref. @qa pointed BOTH sides of AC-5's 403 comparison at
+        '#/components/responses/NoSuchForbidden', a component that does not exist, and the estate stayed
+        green: backend window 98 passed / 0 failed, frontend studio mocks unchanged (only the two
+        pre-existing 10.11c reds), runner contract.test.ts 15/15 (its own resolution runs against
+        STUB_CONTRACT, not the real file). So AC-5's comparison is satisfiable by two strings that are
+        WRONG TOGETHER, and the same hole covers every other $ref in the document — it is not specific to
+        10.31, which is merely the story that made it visible by adding a guard whose whole mechanism is
+        $ref equality. SCOPE, STATED HONESTLY: MEASURED against those three suites; INFERRED for the rest,
+        from there being no $ref resolver anywhere outside the runner's stub-driven test. The inference is
+        the weaker half and is labelled as such. Remedy is one assertion wherever a contract test already
+        loads the document — every $ref under paths resolves to an existing node under components — which
+        closes the whole class. Owner: the first story after Epic 10 that opens a contract test, or
+        story 10.19's conformance pass if its criteria can absorb one assertion.
+        EXAMPLE-UNGUARDED-1 (MEDIUM, open) — the document's examples are validated by NOTHING on an
+        ongoing basis. ADR-002 §18.5 requires every example this epic adds to be validated against its
+        schema; the new sessionRequired example was validated once BY HAND by @dev before any suite ran,
+        and by nothing since. @qa broke it against its own declared PlatformErrorResponse (Q6) and every
+        suite stayed green. This is the run log's catalogued PIN-1 shape ("a pinned copy whose provenance
+        nothing checks") one step further along: here the copy is not even compared. Remedy: a standing
+        test walking every `examples` node and validating each `value` against the schema declared beside
+        it; the networknt/Ajv machinery already exists in both ExecutionVideoEvidenceIT and
+        studioContract.test.ts. @po note on §18.5 — a validation performed once by hand is a
+        measurement, not a control, and the ADR asks for a property that holds, so this is the gap between
+        what §18.5 says and what the repository can enforce, not a failure of this story.
+        EXAMPLE-DRIFT-1 (MEDIUM, open) — an assertion reads a TRANSCRIBED COPY under a message claiming
+        the document as its authority. ExecutionVideoEvidenceIT:596-598 asserts
+        isEqualTo("VIDEO_STORE_UNAVAILABLE") under .as("the declared storeUnavailable example's code,
+        ADR-002 §24.6"). @qa changed that example's code AND message to unrelated text (Q7): 98/0, green.
+        The guard catches production drifting from the test; it cannot catch THE DOCUMENT drifting from
+        production, which is what its message promises. The codebase already does this correctly for the
+        sibling codes — studioContract.test.ts reads 404/410/416's expected code out of
+        examples[...].value.error. Remedy: read the code from ContractDocument, or change the .as(...)
+        message so it stops claiming provenance it does not have. The second is one line and is the
+        minimum; the first is the right fix.
+        MOCK-MESSAGE-1 (LOW, open) — the mock's refusal `error` code is guarded (studioContract.test.ts's
+        expectedCode map); its `message` is guarded by nothing. @qa changed the 403 message to 'A
+        COMPLETELY DIFFERENT MESSAGE' (Q8) and the frontend studio mock suite was unchanged. AC-8 says
+        "byte-for-byte the backend body", so the AC asks for more than the suite enforces. Low because the
+        UI branches on status and reads no refusal body (10.16a AC-11), so nothing downstream depends on
+        it. Remedy: one assertion on the message in studioVideoHandler.test.ts's 403 case.
+        NAMES-1 (LOW, open) — two test method names now contradict their behaviour:
+        theVideoOperationsStatusSetIsUnchanged (the set DID change, by ruling) and
+        noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties (names a different story's
+        change). ACCEPTED AS A FINDING, NOT A DEFECT of 10.31: AC-4 authorized only the literal and the
+        .as(...) failure message, both were corrected and both are now accurate, and a method name is not
+        what a reader sees when a test fails. @dev's judgement to stay inside the AC was the right one.
+        Rename in whichever story next owns those two files.
+        DOC-STALE-1 (LOW, open) — ExecutionVideoException.java:30-32's Javadoc still reads "Undeclared in
+        the frozen contract — ESC-2, escalated to an architect rather than invented (ADR-002 §12 Class
+        C)". ESC-2 is ruled and the status IS declared as of this story, so the comment is now false. It is
+        production source and AC-12 forbade touching it, which is why it was correctly left alone. One-line
+        correction in the next story that opens backend/src/main.
+        SHA-DRIFT-1 (LOW, open) — the story's own Commits table cites 850ac422b for its second commit; the
+        branch carries 18126d029 (the first, 113948325, matches, and the ADR §13 rows cite it correctly).
+        Bookkeeping in the Dev Agent Record, which @dev owns; @po does not edit that section.
+        GATE-PROSE-1 (LOW, informational, open) — @po's own, from PO-5. Three lines in two CLOSED gate
+        files carry a getExecutionVideo status set that is false about the current document:
+        docs/qa/gates/10.15-authorized-range-video-download-endpoint.yml:20 and :128, and
+        docs/qa/gates/10.16a-evidence-state-playback-and-step-seek.yml:133. All three stay UNEDITED under
+        this story's @po ruling 2 (a gate file is a record of a closed gate and is never re-opened, the
+        same rule as a merged story). No standing rule is created. This entry exists so the inventory is
+        not re-derived story by story: that is the complete set as of 2026-09-17, all three are
+        non-executable prose, and a fourth appearing later is a finding to note in the story that finds it.
+        PHANTOM-1 (LOW, CLOSED — recorded precisely so nobody re-opens it) — @dev reported that mutating
+        ExecutionVideoException.STORE_UNAVAILABLE's VALUE broke every request to the route with
+        ResourceAccessException, 13 of 15 including the 200s, and speculated about an undocumented
+        reflective or startup-time consumer. IT IS FALSE. @qa closed it two ways: statically, the constant
+        has exactly two references in the whole repository — its declaration and its single use inside
+        storeUnavailable() — so mutating the value is behaviourally IDENTICAL to mutating the argument at
+        the call site, which @dev's own M8 already did cleanly; empirically (Q4), the identical mutation at
+        rest gives 14 passed / 1 failed, the one red being the code assertion M8 also reaches, with
+        `grep -c ResourceAccessException` over the run log equal to ZERO. It was a host-load artifact, the
+        same class as the epic's other false alarms from concurrent Gradle runs. SEVERITY IS LOW BECAUSE IT
+        TURNED OUT FALSE — a constant with one reference breaking request handling would have been HIGH if
+        true, and that asymmetry is recorded so the low severity is not read as "this was never worth
+        chasing". The residual risk is documentary: an unexplained observation left in the Dev Agent
+        Record becomes a phantom a later story re-investigates at cost. @dev owns that correction.
 
   # Size M rather than S, counted: the key has to cross from the server loader (server/config.ts
   # KEY_SPECS) to where the origin is taken, which is in the child runtime (childRuntime.ts:285, found
@@ -732,6 +1083,25 @@ stories:
       spk06_relation: >-
         SPK-06 phase B can MEASURE without this story, but it can only CORRECT with it. Story 10.16's
         AC-19 stays Blocked on phase B either way.
+        ── EVIDENCE ROUTED TO SPK-06 PHASE B by @po 2026-09-17, from the 10.32 gate
+        (observations.seek_margin / measured_medians). F-5 IS MATERIALISING: @qa's fixtures run 1, inner
+        run 1 recorded a MEDIAN |error| of 97.5 ms against the 100 ms bound at host load 27 — 2.5 ms of
+        margin, the smallest ever recorded on this instrument — with a +615.5 ms mis-attribution
+        (reported 2264.5 ms matched to a change at 2880.0 ms). The other three inner runs were 65.1, 60.5
+        and 57.9 ms. @dev's own medians (63.4/48.6/38.1/14.6) were taken at a different load and are not
+        contradicted. WHAT THIS CHANGES BEFORE 10.19: NOTHING. No bound moves (§26.3 items 1 and 6, and
+        this entry's `forbidden` list). No calibration value is set from it: a shared-host or laptop
+        number is forbidden, and only SPK-06 phase B on the pinned image may produce one. 10.32 is not
+        held and 10.19 is not re-scoped. WHAT IT DOES MEAN, recorded so it is not rediscovered under
+        pressure: a LEGITIMATE red on seek-measurement.test.ts before 10.19 is now plausible on a loaded
+        host, and the standing instruction stands — report the lead (SEEK table plus capture) and do not
+        touch MEDIAN_TOLERANCE_MS. With 10.32's AC-7 landed, such a red now prints the true small negative
+        leads instead of a fictitious +615 ms, which is what §26.4(b) existed for. ONE RECOMMENDATION to
+        phase B, routing only and not a ruling on the spike: RECORD HOST LOAD alongside every measurement
+        — this is the first evidence that load is a confound for this tier (97.5 ms at load 27 against
+        57.9-65.1 ms in the other runs). OWNERSHIP UNCHANGED: @qa runs phase B, @architect signs the
+        record (§28.3). The spike register (docs/architecture/studio-staging-spikes.md:143-166) is
+        @architect's and @po did not edit it; this manifest entry and the 10.32 gate are the pointer.
       chart_allowlist: >-
         Found at @po validation 2026-09-16. The chart has its OWN closed key list,
         `put-checks.studioRunner.acceptedEnvKeys` in templates/_helpers.tpl, and it fails the render
@@ -753,6 +1123,17 @@ stories:
         the same amount. Neither matters at the shipped default of 0, so 10.32's implementation is
         NOT blocked. APPLYING ANY NON-ZERO VALUE is blocked until @architect rules on both; this is
         a third condition next to §26.3 item 4's two, carried in 10.32's AC-6.
+        ── ADDED BY @po 2026-09-17, routing CFG-1 from the 10.32 gate (low). A THIRD PIECE OF THE SAME
+        QUESTION, not a new escalation: the key has NO upper bound, which matches house style (no KeySpec
+        in config.ts declares a `max`), and the chart validates key NAMES only — `--set-string …=90` and
+        `…=-50` both render, the loader being the fail-closed layer that refuses "-50" by name. But a
+        mistaken 99999999999999999999 is accepted by BOTH the loader and parseLaunchMessage, and makes
+        every reading hugely negative — the same failure mode ESC-3 already holds open, reached by
+        misconfiguration instead of by a legitimate small constant. @architect's ruling on negative
+        readings should therefore also say whether this key needs a sane ceiling and, if so, whether the
+        ceiling belongs to KeySpec generally or to this row alone. NO BOUND WAS INVENTED IN 10.32, and
+        @po does not invent one here. Evidence: gate 10.32 finding CFG-1, and the loader edge-value probe
+        recorded there.
       validation: >-
         @po 2026-09-16, GO 7/10, size M confirmed but at the top of M. Two additions push it there: the
         chart allowlist, and eight more launcher construction sites. The required option field breaks
@@ -767,6 +1148,32 @@ stories:
         two non-comment mentions of the name, and AC-7/AC-8 now carry both constraints. Re-size to L if
         ESC-3's ruling changes takeRunOrigin's contract (for example, browserStartedAt shifting too)
         before 10.32 starts.
+      po_post_qa_ratification: >-
+        @po 2026-09-17, on gate docs/qa/gates/10.32-seek-origin-calibration-and-signed-lead.yml (CONCERNS).
+        SCOPE-1 RATIFIED AND CLOSED. AC-4 could not be satisfied without the child echoing the applied
+        calibration on its `ready` message, and that mechanism touches FIVE files, not the one @dev
+        escalated: childRuntime.ts, protocol.ts, launcher.ts, adapters.ts, realRunner.ts — plus
+        test/run/childRuntime.test.ts and test/isolation.test.ts. All seven are now in the story's Scope
+        list. Grounds: the echo is the argument takeRunOrigin received (three divergence mutations E1-E3
+        each redden at the unit tier, so a child cannot report what it did not apply); @qa MEASURED that
+        nothing leaves the process (a poisoned value was absent from every request body, log line and run
+        event while a planted control marker was found by the same scanner), so §26.3 item 2's "never on
+        the wire" is measured rather than inferred; and no contract surface moves, so this is not an
+        ADR-002 §12 Class A/B/C amendment. A Scope-list correction, not rework; no AC substance changed.
+        THE DRAFTING LESSON, recorded for reuse: AC-4 priced only the OUTBOUND half of a chain AC-3 had
+        traced file-by-file, and never asked what carried the value BACK. An AC that asserts a value is
+        readable at one end of an IPC boundary owns the whole return path and must enumerate it.
+        ECHO-1 (low): the ReadyMessage JSDoc claims the field is "optional so a parent never refuses a
+        start over it", which is true of an ABSENT field and false of a MALFORMED one — parseChildMessage
+        drops the whole ready message, i.e. costs the launch. THE COMMENT IS CORRECTED BEFORE MERGE
+        (comment-only; lint and type-check only; verified that no test references src/run/protocol.ts by
+        path, so nothing parses it as text the way F-7 parses seek-measurement.test.ts; and _helpers.tpl
+        already forces a human pre-merge pass, so it rides that). The BEHAVIOUR change — parent ignores a
+        malformed echo instead of dropping the message — is a FOLLOW-UP: it alters parseChildMessage's
+        default-deny posture for one field and needs its own red-first proof.
+        DOC-1 (low): AC-8 is NOT amended. See carried_open_items below.
+        READINESS: 10.32 is MERGEABLE. No rework, no AC re-review. Two mechanical pre-merge edits remain
+        for whoever lands second — FOC-07's merged_key_count line and ECHO-1's JSDoc — in one pass.
 
   # ── Wave 8 (added by @po 2026-09-17) ── PROD-1, from @qa's carry-forward gate ──
   - id: "10.33"
@@ -827,6 +1234,54 @@ stories:
     # "10.33" added by @po at validation 2026-09-17 (PROD-1 must land before the credentialed pilot).
     blocks: []
     story_context:
+      register_additions_2026_09_17: >-
+        ADDED BY @po 2026-09-17, from the wave-8 gate routing. AC-10's consolidated open-items register
+        MUST also carry, by name, with these owners and statuses — no AC re-scope, these are items the
+        register's existing sources now contain: DEF-03 (DELETE-RACE-1, low, open, backlog, owner @po for
+        routing; the fix is explicitly NOT in Epic 10, and the "before the credentialed pilot?" answer is
+        NO with two conditions attached — see integration_defects.DEF-03); DOC-1 (low, open, owner @po; a
+        comment-only amendment to seek-measurement.test.ts's outlier-bound paragraph, routed to THIS
+        story's conformance pass in FOC-06 form per the 10.16b gate's F-4 remedy, or to a standalone
+        follow-up if AC-8-style constraints make it unwelcome here); ECHO-1's behaviour half (low, open,
+        owner @po, carried with DOC-1); REFRESH-FLUSH-1 (low, open, owner @dev or the FOC-07
+        reconciliation — see the 10.30 gate); RECON-1 (medium, open, owner the FOC-07 reconciliation, now
+        pointed at from file_ownership_conflicts.FOC-07.recon1_pointer); and MERGE-1 as a MERGE-TIME
+        CONSTRAINT rather than an open defect (file_ownership_conflicts.FOC-07.merged_key_count).
+        F-5 IS RECORDED AS MATERIALISING, not merely predicted: see stories[10.32].story_context.
+        spk06_relation for the 97.5 ms-against-100 ms measurement. SPK-06 stays OPEN and its status is
+        still read from the spike register, which @po does not edit.
+      register_additions_from_the_10_31_gate: >-
+        ADDED BY @po 2026-09-17, after ruling the 10.31 gate's five routed items. Same standing as the
+        block above: NO AC re-scope — AC-10 already sources from integration_defects and the run log's
+        findings, so these are items its existing sources now contain, listed by name so none is closed by
+        silence. The full text of each is in
+        stories[10.31].story_context.po_backlog_from_the_10_31_gate.
+        MEDIUM, open: REF-DANGLE-1 (nothing in the repository resolves an OpenAPI $ref — both sides of a
+        comparison can point at a component that does not exist and the estate stays green; measured
+        against the backend window, the frontend studio mocks and the runner contract test, INFERRED
+        beyond those three; owner: the first post-Epic-10 story opening a contract test, or this story's
+        conformance pass if it can absorb one assertion). EXAMPLE-UNGUARDED-1 (the document's examples are
+        validated by nothing on an ongoing basis; ADR-002 §18.5's validation was performed once by hand).
+        EXAMPLE-DRIFT-1 (an assertion reads a transcribed copy under a message naming the document as its
+        authority; the document may drift freely from the shipped body).
+        LOW, open: MOCK-MESSAGE-1 (the mock's refusal `error` is guarded, its `message` is not);
+        NAMES-1 (two test method names contradict their behaviour; accepted as a finding, not a defect —
+        AC-4 authorized only the literal and the failure message, both corrected and both accurate);
+        DOC-STALE-1 (ExecutionVideoException.java:30-32's ESC-2 Javadoc is now false; correctly left
+        untouched because AC-12 forbids production edits); SHA-DRIFT-1 (the 10.31 Commits table cites
+        850ac422b where the branch carries 18126d029 — bookkeeping, @dev owns that section);
+        GATE-PROSE-1 (three lines in two CLOSED gate files carry a getExecutionVideo status set that is
+        false about the current document — 10.15:20, 10.15:128, 10.16a:133; all stay unedited under 10.31's
+        @po ruling 2, no standing rule is created, and the inventory is recorded so it is not re-derived).
+        CLOSED, and recorded so it cannot be re-opened: PHANTOM-1 — an "undocumented reflective consumer"
+        inferred from a mass ResourceAccessException failure. It does not reproduce; the constant has
+        exactly two references and the clean mutation gives 14/1 with ZERO ResourceAccessException. Host-load
+        artifact. Its LOW severity is a consequence of its being FALSE — it would have been HIGH if true —
+        and the register carries that asymmetry so the entry is not read as "never worth chasing".
+        ALSO: DEF-04 (DIRTY-CALLER-STALE-1, MEDIUM, open, backlog) from the 10.30 gate, which the wave-8
+        block above did NOT record. It is routed TOGETHER WITH DEF-03: same root-cause family (a full-row
+        write from a stale snapshot on an entity with neither @Version nor @DynamicUpdate), one remedy
+        closes both, and both answer NO to "before the credentialed pilot?" under the same two conditions.
       # Assigned by @po 2026-09-11 at wave-5 validation, ruling on 10.10's open question 3.
       # No Epic 10 story owned a WCAG conformance audit; 10.10's AC-18(a) proves roles, accessible
       # names and keyboard operability on the rendered tree, and explicitly does NOT make a
@@ -915,6 +1370,146 @@ stories:
       not_in_this_backlog:
         - "O-19 (ADR-002 §25.2) — ADR-003, the backend-wide API error envelope. @architect decides with @pm (CON-API-03) and the frontend consumer; @pm and @po place its implementation OUTSIDE Epic 10. Not a dependency of 10.19: no Studio client parses a 401 body (§25.3, by reading). Recorded here so 10.19's drafter does not absorb it."
         - "Stories 10.20–10.26 (the studio-inference program, uncommitted in wt/epic). NOT in this manifest and NOT absorbed by @po: they were drafted outside the validated backlog, the manifest is @pm's, and the run log bars merging across that line until the program's owner, @architect, @po and @pm have reconciled. FLAGGED TO @pm: whether they join this manifest, get their own, or stay outside; whether 10.19 depends on any of them (@po's position: no, because 10.19 is this manifest's release and must not wait on an unvalidated program); and that ids 10.30+ are now claimed here (see the Wave 8 numbering note). @po's validation (\"Pax readiness\", per that program's own log) happens when they are submitted, not by adoption."
+
+  - id: "10.34"
+    title: "Staging acceptance execution — Epic 10's externally-blocked criteria, carried"
+    # ADDED BY @pm 2026-09-18 (epic close). THE STORY EXISTED AND THE BACKLOG DID NOT KNOW IT.
+    # docs/stories/10.34.story.md was drafted by @sm on 2026-09-17 (a3d4023ab), merged at 3aee4dff0
+    # and validated GO 8/10 by @po the same day — but before this entry
+    # `grep -n 'id: "10.34"' docs/epics/EPIC-10-EXECUTION.yaml` returned NOTHING. 10.34 appeared only
+    # as a reference inside other entries (status_detail, 10.19's definition-of-done note, and
+    # 10.35's `blocks` and its @po ruling). This manifest is @pm's, so the omission is @pm's, not
+    # @po's and not @sm's — and it is the omission that matters most for this closure: the one story
+    # that carries everything Epic 10 cannot finish was invisible to any reader of the backlog
+    # itself. The same reader would have found 10.35, which @po registered, and concluded that the
+    # staging half had no home.
+    #
+    # size is OMITTED rather than guessed, and the omission is the record: the story's executable
+    # content is zero until an external gate opens — no local code, no diff, no component to
+    # estimate. What it does have is a registration surface (33 criteria from 12 stories), stated in
+    # the story's own Size row. Forcing an S/M/L here would be a number this manifest could not
+    # defend. Compare 10.35's `wave: null`, which is a VALUE and not an omission for the opposite
+    # reason: null there asserts "not schedulable inside the wave sequence", which is a fact.
+    wave: null
+    # depends_on names stories in THIS manifest, and 10.35 is one. The story's other two
+    # dependencies are not stories at all and are recorded as external_blocker rather than invented
+    # as story ids.
+    depends_on: ["10.35"]
+    external_blocker: >-
+      TWO, both outside this repository, and both unmet at closure. (1) THE FOLD — every criterion
+      runs against a merged, deployed tree that does not exist; EPIC-10-CLOSURE-PLAN.md section 8
+      Phase 2's own precondition is "Nothing below starts until wt/epic's work is on a branch with a
+      SHA". (2) ALL TWELVE EXTERNAL GATES — ED-01…ED-06 in this manifest, every one status: open,
+      and SPK-01…SPK-06 in docs/architecture/studio-staging-spikes.md, every one "Result. OPEN".
+      Two of the twelve are not merely open but UNOWNED: ED-01 has no owner at all, and ED-04's
+      application/auth-provider approval owner is unnamed in sources — a second unowned item hiding
+      inside an owned one.
+    blocks: []
+    story_context:
+      shape: >-
+        EXECUTION VEHICLE, NOT A CONSTRUCTION PROJECT. It does not build staging, does not implement
+        the trusted identity gateway, does not stand up the internal Playwright image, does not
+        write the egress policy mechanism and does not rule any open architecture question. It
+        executes criteria other stories already drafted, quoted verbatim with their origin ids, and
+        records each result in docs/qa/staging-acceptance-register.md by id — where the register
+        guard flips an id only when the source flips.
+      why_it_exists: >-
+        EPIC-10-CLOSURE-PLAN.md section 3(a) and step 0.6: without it, definition_of_done item 1
+        ("All stories reach Done via SDC cycle") is unsatisfiable and the epic stays open forever on
+        a technicality. The user was offered a narrower variant, and a variant excluding the
+        architecture-blocked criterion, and chose the full inherited set.
+      inherited_inventory: >-
+        33 acceptance criteria from 12 stories, Groups A-L. A = 10.19 AC-1…AC-7, the credentialed
+        pilot itself. B = 10.16 AC-19, the 500 ms release claim. C = 10.5 AC-16, the R2D2 pilot-use
+        gate. D = 10.8 AC-12b. E = 10.15 AC-19b. F = six criteria from 10.18. G = 10.6 AC-2b.
+        H = 10.7 AC-4b, AC-6b, AC-13b, AC-37b. I = two remaining 10.11 deferrals. J = 10.13 AC-11b.
+        K = 10.12 AC-12c. L = 10.18's further uncarried blocked criteria, added by @po at
+        validation. Groups A and B are exactly the criteria on which stories 10.19 and 10.16 are
+        held not-Done, which is what makes this story the mechanism that closes them.
+      po_validation: >-
+        GO, 8/10, @po 2026-09-17, Draft → Ready. As submitted it scored 6; two points were FIXED at
+        validation rather than flagged. The substantive fix: @po counted story 10.18's blocked
+        criteria directly and found FIFTEEN where 10.18's own row said six — the six being exactly
+        the ED-06/SPK-02 subset, so the defect was a subset being used as the answer to "what holds
+        this story open". Group L carries the difference and the inventory moved from 26 criteria to
+        33, three of them mapped onto existing criteria rather than duplicated. @po also found two
+        misses of its own and named them as its own: 10.14 AC-19b had no carrier anywhere, and
+        AC-18b had two.
+      definition_of_done_ruling: >-
+        @po 2026-09-17. AC-24 — the architecture-blocked criterion the user included over @po's
+        dissent — can never complete the way the other 32 do, so this story's Definition of done is
+        SCOPED rather than absolute, on the ground that Epic 10's own rule already contains the
+        disjunct "or superseded by a named follow-up story that carries it". Transfer condition:
+        AC-24 is discharged only by naming a CARRIER ID, because "whichever story is open when the
+        ruling lands" is not a name, and that vagueness is its actual defect. A default carrier is
+        named now so the transfer is executable the day @architect rules. The user's inclusion and
+        @po's dissent both stand untouched. This ruling is what stops 10.34 from freezing the epic
+        the way the epic would have frozen without 10.34.
+      cite_ids_not_line_numbers: >-
+        @pm 2026-09-18, FLAGGED NOT FIXED (docs/stories/10.34.story.md is @po's surface, not
+        @pm's). That story cites this manifest by LINE NUMBER for ED-01's owner, ED-02's
+        external_ticket and the extent of the external_dependencies block. Those citations were
+        correct when drafted and are already wrong: @po's DEF-05 and 10.35 additions moved them once
+        on 2026-09-17, and this entry moves them again. Nothing is lost — both fields are unchanged
+        in content and findable by id — but the next reader should look up ED-01 and ED-02 by id
+        rather than by line, and future citations into this manifest should do the same.
+
+  - id: "10.35"
+    title: "Dispatch service identity (DEF-05) — acceptance spec"
+    size: XS
+    # ADDED BY @po 2026-09-17 (po-close). Until now the manifest mentioned neither DEF-05 nor 10.35;
+    # the story's own header row said so and raised it as its Open question 1. See integration_defects.DEF-05.
+    #
+    # wave: null is deliberate and is NOT "unassigned". This story is post-closure, sequenced by
+    # docs/epics/EPIC-10-CLOSURE-PLAN.md section 8 Phase 2 (after the fold), exactly as story 10.34 is
+    # sequenced by Phase 3 item 3.7. Giving it a numbered wave would assert it can be scheduled inside
+    # the epic's own wave sequence, which is false: its gate cannot run until another program commits.
+    wave: null
+    # depends_on is EMPTY and that is the honest value: no Epic 10 story must land first. The one thing
+    # this story waits on is not a story in this manifest. Recorded as external_blocker rather than
+    # invented as a story id.
+    depends_on: []
+    external_blocker: >-
+      A COMMIT, not a working tree. Every acceptance criterion in 10.35 is blocked until the
+      studio-inference program's dispatch-identity fix is on a branch with a SHA — see
+      integration_defects.DEF-05.fix_owner_external and EPIC-10-CLOSURE-PLAN.md section 8 Phase 2
+      ("Nothing below starts until wt/epic's work is on a branch with a SHA"). Running the co-run
+      harness against that program's live uncommitted tree would be informative and would NOT be
+      authoritative: that tree changed shape three times on 2026-09-17 alone (263 to 241 to 263, and
+      241 again when @po recomputed at 23:19 EDT).
+    blocks: ["10.34"]
+    # @po ruling 2026-09-17: 10.34's Group A (its AC-1, AC-2, AC-4 and AC-6, inherited from 10.19
+    # AC-1/AC-2/AC-4/AC-6) each require a run that was actually DISPATCHED and admitted. While DEF-05
+    # stands, the API cannot dispatch at all, so no amount of staging infrastructure arriving would let
+    # those criteria pass. This is the same shape as 10.33 blocking 10.19, ruled on 2026-09-17: a defect
+    # that makes a pilot criterion unreachable is a blocker of that pilot, not a parallel concern.
+    # 10.34's own "Depends on" row was corrected in the same pass; it previously read
+    # "No further Epic 10 story by id."
+    story_context:
+      shape: >-
+        ACCEPTANCE SPEC ONLY. User decision, recorded at EPIC-10-RUN-LOG.md:2264-2277: defer the
+        implementation to the other program's fix and gate it with this repository's co-run harness.
+        This repository authors no second fix in a file another program has open. The precedent is
+        explicit and twice used — 10.33 (PROD-1) and F-3 — and is restated in
+        EPIC-10-CLOSURE-PLAN.md section 9's drop table.
+      seven_criteria: >-
+        AC-1 leg 2 green with admission_id IS NOT NULL (never a reversion to the weaker DISPATCHING
+        state check that mutation M2 already falsified); AC-2 leg 0 unchanged, the no-weakening guard on
+        the runner's own identity enforcement; AC-3 the criterion that matters most — a malformed
+        dispatch body must produce a refusal DISTINGUISHABLE from the identity refusal and from silence,
+        so that DEF-01's defect class becomes observable again rather than staying byte-identical to the
+        baseline; AC-4 leg 3 reached, not merely red, so DEF-02's path is exercised by running; AC-5 the
+        pre-flight guard proven on a unit test below the harness, because the harness always wires a real
+        runner and a real token by construction; AC-6 diff confinement, reviewed not asserted; AC-7 the
+        two adjacent observability gaps recorded rather than silently resolved or worsened.
+      po_validation: >-
+        GO, 9/10, @po 2026-09-17. Two fixes applied at validation: a Definition of done was added (the
+        story had none, and with every criterion Blocked the same question 10.34 raised was unanswered),
+        and AC-7 was given a failing condition — as drafted it was a pure recording criterion that could
+        not go red, which is this epic's own catalogued vacuous shape. OBS-1 (StudioDispatcher discards
+        DispatchOutcome.detail() on a terminal DEFINITE_REFUSAL) and OBS-2 (CompilePipeline collapses a
+        credential refusal and a body refusal into one VALIDATOR_UNAVAILABLE code) were confirmed ROUTED,
+        not in 10.35's scope, with owners named in the story.
 
 # ─────────────────────────────────────────────────────────────
 # File-ownership conflicts (wave planning must serialize or single-own)
@@ -1204,7 +1799,44 @@ file_ownership_conflicts:
       re-anchor. 10.30 does not wait for the inference program (§27.3). Whichever of 10.30 and that
       program's StudioService change lands second adopts §27.2's visible read and adds no second check.
       Nothing merges across the wt/epic line until the reconciliation the run log requires.
-    source: "ADR-002 §27.3, §28.1, §28.2; run log 'Integration note for the studio-inference program'; git diff --stat in wt/epic read on 2026-09-16 (read only, nothing changed there)."
+    merged_key_count: >-
+      RECORDED BY @po 2026-09-17, from the 10.32 gate's MERGE-1 (medium). READ THIS BEFORE RESOLVING
+      helm-chart/put-checks/templates/_helpers.tpl. The `put-checks.studioRunner.acceptedEnvKeys` line and
+      its key-count comment CANNOT BE TAKEN FROM EITHER SIDE, and neither side's QA gate can observe the
+      right answer, because neither tree contains both changes. Measured, read-only, in wt/epic at review
+      time: BASE = 27 chart entries / 31 loader keys / comment "thirty-one". STORY 10.32 = 28 / 32 /
+      "thirty-two" (correct for that branch alone). INFERENCE TREE = 31 / 35 / comment still "thirty-one"
+      (ALREADY STALE on its own tree — do not carry it forward as if it were current).
+      THE MERGED FILE MUST BE: 32 entries on the acceptedEnvKeys line (27 base + 4 OBJECT_STORE_* + 1
+      STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS — keep all five additions), and the count comment must read
+      "thirty-six" (31 + 4 + 1). NOTE THE ASYMMETRY THAT MAKES THE NAIVE MERGE WRONG: the comment counts
+      LOADER keys, the list holds the CHART-ACCEPTED subset, so the two numbers are not the same and 32/36
+      is not a typo. THE COUNT IS OBTAINED BY COUNTING KEY_SPECS ROWS IN THE MERGED config.ts AFTER
+      MERGING — never transcribed from either branch, from this manifest, or from either gate (the same
+      discipline FOC-06 and FOC-07 apply to the SHA-256 pin: re-read, never copy). THEN RE-RUN
+      `npm run test:deployment` on the merged tree: 10.32's M8 shows 96 of 104 deployment tests redden
+      when the key is missing from that line, so a wrong merge is loud — but ONLY if the tier is run.
+      A wrong COMMENT is silent; it is caught by nothing but this instruction.
+    recon1_pointer: >-
+      RECORDED BY @po 2026-09-17, so the manifest points at it rather than leaving it inside one gate.
+      RECON-1 (medium, open) — docs/qa/gates/10.30-csi-write-authorization-create-save-delete.yml,
+      top_issues and `reconciliation_constraints` — IS THE AUTHORITATIVE LIST for the StudioService.java
+      half of this FOC entry. Its measured trap: `git merge-file` of wt/epic's uncommitted StudioService.java
+      onto story/10.30, common base blob d8c6dc0c5, reports ZERO textual conflicts. Only a compile error
+      (`requireCompile` no longer exists) stops a silent merge that keeps BOTH trees' checks, and the
+      obvious "fix" of renaming it to `requireWrite` COMPILES while reddening 10.30's AC-9 and AC-7 shapes;
+      the withheld read would redden only StudioServiceWriteAuthorizationTest and no HTTP test. So the
+      merge must be resolved by READING the seven constraints in that gate, not by trusting a clean merge:
+      in summary — createTest = requireRegisteredCsi then exactly one requireWrite, drop requireCompile;
+      updateTest = revisions check, then the VISIBLE read and requireWrite, then the locked read with empty
+      -> 403, and NEVER findCsiIdIncludingWithheld; updateTest with a caller KEEPS entityManager.refresh
+      immediately AFTER findByIdForUpdate and NEVER detaches (both halves measured load-bearing: D1, D2,
+      D3); a caller that writes to the draft BEFORE the save must flush first or lose the write unless the
+      context is in AUTO flush mode (REFRESH-FLUSH-1, low, open); softDeleteTest keeps 10.30's authorized
+      form; StudioAuthoringService.create would then be checked twice, which is harmless but is a second
+      check; and the five named suites are re-run ON THE MERGED TREE, because none of them can see the
+      merge from its own branch. FOC-07's ordering is unchanged: 10.30 first, then 10.31; 10.32 unordered.
+    source: "ADR-002 §27.3, §28.1, §28.2; run log 'Integration note for the studio-inference program'; git diff --stat in wt/epic read on 2026-09-16 (read only, nothing changed there); gate 10.32 MERGE-1 and gate 10.30 RECON-1 / reconciliation_constraints, both read 2026-09-17."
 
   - id: FOC-08
     path: "frontend/src/test/setup.ts ↔ frontend/src/store/index.ts, frontend/src/store/slices/sourcesSlice.ts, frontend/src/store/slices/featuresSlice.ts (and src/test/bootstrapIsolation.test.ts)"
@@ -1233,8 +1865,14 @@ file_ownership_conflicts:
 # Integration defects found by reading, not by a green suite
 #
 # Recorded here rather than only inside the stories that fix them, because a defect that lives in
-# one AC is invisible to everyone who does not already know to look. Both were found at wave-5
-# drafting/validation and both are live on epic/EPIC-10 as of 2026-09-11.
+# one AC is invisible to everyone who does not already know to look. DEF-01 and DEF-02 were found at
+# wave-5 drafting/validation and both were live on epic/EPIC-10 as of 2026-09-11.
+#
+# AMENDED BY @po 2026-09-17: this block is no longer only "found by reading". DEF-03 and DOC-1 were
+# added at wave-8 gate routing. DEF-03 was found by MEASUREMENT (a @qa probe), not by reading, and is
+# recorded here anyway for the reason above and for one more: story 10.19's AC-10 register reads this
+# block by name, so an item recorded anywhere else in this manifest is an item the epic's final
+# open-items register will not carry. Anything routed to the backlog belongs here.
 #
 # The common cause, stated once: the runner validates against docs/specs/studio/openapi.yaml, the
 # backend validates against its own fixtures, and nothing compares the two. Five integration
@@ -1246,7 +1884,38 @@ file_ownership_conflicts:
 integration_defects:
   - id: DEF-01
     severity: HIGH
-    status: open
+    # @po 2026-09-17 (closure plan step 0.2). Was `open`. It has been fixed in code since wave 5 and
+    # the field never moved; story 10.19's AC-10 register reads this block by name, so a stale
+    # `open` here propagates into the epic's final open-items record.
+    status: fixed
+    fixed_by: >-
+      Story 10.17. The general conformance control landed first and RED, in its own commit, exactly
+      as control_timing_ruling below required: `4c7abee4c` (T-10.17.2a,
+      "test(studio): assert every internal body against its frozen schema — RED"). The fix followed
+      at `e72724eed` (T-10.17.2b, "feat(studio): typed references, a conforming job body and
+      authorized secret use"); the story merged at `c54df7934`. All three are reachable from
+      `epic/EPIC-10-w7` (verified `git merge-base --is-ancestor`).
+    fix_verification: >-
+      Verified four times, independently, by reading the merged code rather than by re-running a
+      suite: by @dev and by @qa during story 10.19, by the orchestrator at the wave-9 close
+      ("Also confirmed" in the run log), and by @po on 2026-09-17 at closure-plan step 0.2.
+      @po read three things in this worktree: (1)
+      `backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java`
+      `body()` now writes every one of the fourteen contract keys — executionId, attemptId,
+      revisionId, artifactHash, artifact, source, configuration, csi, references, resolvedVars,
+      resolvedSecrets, deadlines, videoKey, manifestKey — and writes neither `testId`, `csiId`,
+      `environment` nor `callbackBaseUrl`, the four keys the closed body refused; (2) `RunJob.java`
+      is a fourteen-component record whose Javadoc describes the defect in the past tense
+      ("Until story 10.17 this record carried eight fields of which four … were not properties of
+      the closed body at all"); (3)
+      `backend/src/test/java/com/citi/put/checks/studio/dispatch/InternalBodyContractConformanceTest.java`
+      exists. CORRECTION to the closure plan's own figure: RunJob is **fourteen** components, not
+      twelve — counted in the record declaration.
+    # NOT verified by @po: no test was executed. The backend suite was deliberately not run
+    # (another agent holds Gradle on this host and concurrent Gradle manufactures failures here —
+    # see the backend host-contention rule). The claim above is "the merged source has the shape the
+    # defect says it lacked", which is what the defect was about; it is not "the dispatch succeeds
+    # end to end". Nothing in this repository has ever run the API and the runner together.
     found_by: "@sm (River) while drafting 10.17, 2026-09-11; every element re-verified by @po at validation"
     owner: "10.17 (ruled by @po 2026-09-11)"
     summary: >-
@@ -1296,7 +1965,25 @@ integration_defects:
 
   - id: DEF-02
     severity: HIGH
-    status: open
+    # @po 2026-09-17 (closure plan step 0.2). Was `open`, for the same reason as DEF-01 above.
+    status: fixed
+    fixed_by: >-
+      Story 10.14 AC-10, as its own standalone commit at the head of wave 5 exactly as
+      mandated_ordering below required: `00b9e105d` ("fix(studio): accept evidence.partial on the
+      internal progress callback"); the story merged at `ba9e56064`. Both reachable from
+      `epic/EPIC-10-w7` (verified `git merge-base --is-ancestor`).
+    fix_verification: >-
+      Verified four times, independently, by reading the merged code: by @dev and by @qa during
+      story 10.19, by the orchestrator at the wave-9 close, and by @po on 2026-09-17. @po read
+      `backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunnerEvidence.java`: it is
+      `record RunnerEvidence(String videoKey, String manifestKey, String state, Boolean partial)`,
+      four components, still `@JsonIgnoreProperties(ignoreUnknown = false)` — so the strictness that
+      caused the refusal is intact and it is the record that widened, which is the correct fix. Its
+      Javadoc states the defect in the past tense and names DEF-02.
+    # NOT verified by @po: no test was executed, for the reason recorded on DEF-01. The
+    # correction_to_adr below (ADR-002 §17.7 describes behaviour the code does not have) is a
+    # separate item and is NOT closed by this status change — ADR-002 is dirty in the parallel
+    # tree and must not be edited from this line.
     found_by: "@sm (River) while drafting 10.14, 2026-09-11 (raised as its open question 1); both halves verified by @po at validation"
     owner: "10.14 (AC-10), landed at the head of wave 5"
     summary: >-
@@ -1330,6 +2017,315 @@ integration_defects:
       before the change and the 200 after. Until it lands the integrated path is broken rather than
       degraded, and no wave-5 story should be measured against a branch in that state.
     carried_by: "Story 10.14 AC-10, AC-11, AC-24; task T-10.14.1."
+
+  - id: DEF-03
+    severity: LOW
+    status: open (backlog, NOT scheduled in Epic 10)
+    found_by: "@qa (Quinn) at the 10.30 review, 2026-09-17, as DELETE-RACE-1 — by probe, not by reading; re-confirmed on 63811e4a3"
+    owner: >-
+      @po (Pax) owns the ROUTING and this record. The FIX belongs to the first story after Epic 10 that
+      re-opens StudioService's write paths; @dev implements it, @qa writes the interleaving proof FIRST
+      (the epic's standing rule since 10.4: a sequential happy-path test does not count), and @architect
+      rules the primitive if the two disagree — a lock (visible findById -> requireWrite ->
+      findByIdForUpdate, empty -> 403, then set deleted_at) versus a targeted UPDATE guarded by the
+      visibility predicate. Recorded here, in a block story 10.19's AC-10 register reads by name, so it
+      cannot be closed by silence.
+    summary: >-
+      softDeleteTest(id, auth) takes NO lock, and Hibernate writes every column (no @DynamicUpdate, no
+      @Version). A save that commits between the delete's read and its flush is overwritten from the
+      delete's stale snapshot, and BOTH callers are told success. Measured (@qa probe R3, the natural
+      order): a save committed name "Probe draft" / steps ["Saved"] / source_revision 2 while holding the
+      lock; the delete queued behind it; after both committed the row read source_revision=1, the original
+      steps, and deleted_at set — the save reverted, the delete reporting success. By reading only, the
+      same full-row write would also clear a concurrent quarantined_at.
+    not_introduced_by_10_30: >-
+      PRE-EXISTING SHAPE. softDeleteTest(UUID) has always had it; 10.30 put it on an authorized HTTP
+      route. It is not a 10.30 acceptance criterion, and 10.30 is NOT re-opened for it (the standing rule
+      applied to O-17, 10.14 and 10.16a).
+    before_the_credentialed_pilot: >-
+      NO — ruled by @po 2026-09-17. It does NOT block story 10.19 and it is not a wave-8 or wave-9 item.
+      Grounds, in order: (1) the harm is bounded to a draft that is concurrently BEING DELETED, and the
+      row is hidden the moment deleted_at is set, so the reverted content is invisible to everyone
+      afterwards; (2) no authorization property is weakened — the delete is now authorized, which is what
+      10.30 was for, and the race changes content, not who may act; (3) clearing a concurrent
+      quarantined_at on a row that is simultaneously soft-deleted does not resurrect it; (4) the window
+      needs two credentialed sessions on ONE draft inside one transaction, which a small pilot makes
+      unlikely; and (5) the fix is production backend code that needs a real red-first interleaving proof,
+      which is a story's worth of work and not a merge-window patch — and buying it during the pilot
+      window would trade a low, bounded, invisible content loss for an unproven change on the write path
+      the pilot depends on. CONDITIONS ON THIS RULING, both of which are part of it: (a) the pilot's
+      operating note says that a delete concurrent with a save is NOT atomic, so if the pilot observes a
+      draft's content reverting, that is DEF-03 and not a new defect — report it against this id; and
+      (b) it is fixed before GA or before any credentialed use beyond the pilot, whichever comes first.
+      If the pilot actually observes it, this severity is re-opened rather than confirmed.
+    refs: ['backend/src/main/java/com/citi/put/checks/studio/StudioService.java (softDeleteTest)', 'docs/qa/gates/10.30-csi-write-authorization-create-save-delete.yml (DELETE-RACE-1, probes P1/P2 at bbeb89288, R3 at 63811e4a3)']
+
+  - id: DEF-04
+    severity: MEDIUM
+    status: open (backlog, NOT scheduled in Epic 10)
+    found_by: "@qa (Quinn) at the 10.30 review, 2026-09-17, as DIRTY-CALLER-STALE-1 — by a
+      parameterized throwaway probe (StudioFlushProbeTempIT on e3bfb7b59, no production change), not by
+      reading"
+    owner: "@po (Pax) owns the ROUTING and this record. The FIX belongs with DEF-03's: the first story
+      after Epic 10 that re-opens StudioService's write paths, @dev implementing, @qa writing the
+      interleaving proof FIRST (the epic's standing rule since 10.4 — a sequential happy-path test does
+      not count), @architect ruling the primitive if the two disagree. SAME ROOT CAUSE FAMILY AS DEF-03:
+      both are full-row writes from a stale in-memory snapshot on an entity with neither @Version nor
+      @DynamicUpdate, and @qa's suggested remedy (@Version on UITest, or @DynamicUpdate plus a
+      revision-guarded UPDATE) closes BOTH. They are therefore routed together and should be fixed
+      together; splitting them would buy two unproven changes on the same write path instead of one."
+    summary: 'A caller holding a DIRTY managed reference to the draft across the save defeats the
+      STALE_REVISION check outright: a save that committed in between is silently overwritten and no 409
+      is raised. UITest has neither @Version nor @DynamicUpdate, so flushing that dirty reference writes
+      EVERY column from the caller''s pre-lock snapshot — including source_revision — and the refresh
+      that follows then reads back this transaction''s own uncommitted write instead of the winner''s.
+      The revision comparison therefore compares the request against the copy the caller was already
+      holding, which is exactly the lost update findByIdForUpdate + refresh exist to prevent. Both
+      callers are told they succeeded. Measured: one transaction does findById (unlocked, managed) ->
+      writes schedule on the held reference -> a competing updateTest commits on another connection and
+      thread -> updateTest(..., owner) on this thread. AUTO, COMMIT and MANUAL all gave
+      outcome=[no exception] and the loser''s row. 10.30''s own case (a) does not catch it (its caller''s
+      reference is clean) and case (b) does not (there is no competing save).'
+    not_introduced_by_10_30: >-
+      PRE-EXISTING UNDER PRODUCTION'S MODE, and @qa measured that rather than arguing it, which is why
+      this record states it as fact. With 10.30's new flush removed (the shape at 303c17cf6): AUTO still
+      loses the save, while COMMIT and MANUAL answered a correct 409 STALE_REVISION. Production runs
+      AUTO — the locking JPQL query's implicit flush already did the same damage one line earlier — so
+      the hazard predates BOTH of 10.30's fixes. What 10.30 changed is that COMMIT and MANUAL now behave
+      like AUTO. @po: THAT WAS THE RIGHT TRADE and 10.30 is NOT re-opened for it (the standing rule
+      applied to O-17, 10.14 and 10.16a). The two modes that were accidentally correct were correct at
+      the price of silently dropping the caller's write, which is REFRESH-FLUSH-1; uniformity with
+      production is worth more than an accidental 409. The cost is that the hole is now uniform and
+      nothing in the suite covers it.
+    reachability: >-
+      NOT REACHABLE OVER HTTP TODAY, measured. The request's persistence context holds only what the
+      save itself loaded, all clean, so the new flush() emits nothing there — all 24 StudioAuthorizationIT
+      cases and OptimisticSaveIT 3/3 green, package count moved by exactly the +3 new cases. It needs an
+      in-process caller in the SAME transaction that writes to the draft BEFORE calling the save. Nothing
+      in backend/src/main does that, and the inference tree's StudioAuthoringService.update writes only
+      after the save (read at wt/epic, read-only). @po: latent, not live — and recorded rather than left
+      implicit precisely because 10.30's own case (b) establishes "write before the save" as a SUPPORTED
+      shape, so the first caller to use it inherits this silently.
+    before_the_credentialed_pilot: >-
+      NO — ruled by @po 2026-09-17, on the same grounds as DEF-03 and one of its own. The pilot drives
+      the HTTP route, where exposure is nil by measurement; there is no in-process caller in the tree to
+      reach it; no authorization property is weakened (the race changes content, not who may act); and
+      the fix is production write-path code needing a real red-first interleaving proof, which is a
+      story's worth of work and not a merge-window patch. CONDITIONS, both part of the ruling: (a) the
+      pilot's operating note already carries DEF-03's "a delete concurrent with a save is NOT atomic"
+      line — it is extended to say a SAVE concurrent with a save can also lose one, so an observed
+      content reversion is reported against DEF-03/DEF-04 and not as a new defect; and (b) it is fixed
+      before GA or before any credentialed use beyond the pilot, whichever comes first. If the fix for
+      DEF-03 lands as @Version on UITest, this closes with it and the record says so.
+    refs: ['backend/src/main/java/com/citi/put/checks/studio/StudioService.java:300-325',
+           'backend/src/main/java/com/citi/put/checks/studio/entity/UITest.java',
+           'docs/qa/gates/10.30-csi-write-authorization-create-save-delete.yml (DIRTY-CALLER-STALE-1, StudioFlushProbeTempIT on e3bfb7b59; attribution probe with F1 applied)']
+
+  - id: DEF-05
+    severity: HIGH
+    # ADDED BY @po 2026-09-17 (po-close). EPIC-10-RUN-LOG.md:2181 records the finding as "routed to
+    # @po" and no manifest entry existed until now: `grep -n "DEF-05" docs/epics/EPIC-10-EXECUTION.yaml`
+    # returned nothing. Story 10.19's AC-10 register reads this block by name, so a defect absent here
+    # is a defect absent from the epic's final open-items record.
+    status: open
+    # `open` is literal and is NOT a stale field of the DEF-01/DEF-02 kind that closure-plan step 0.2
+    # had to true up. The fix is not in this repository's history at all. It exists only as an
+    # uncommitted edit in the separate studio-inference program's wt/epic working tree. This field
+    # moves when a commit with a SHA exists, never before.
+    fix_owner_external: >-
+      The studio-inference program (separate, user-authorised), by user decision recorded at
+      EPIC-10-RUN-LOG.md:2264-2277. Its uncommitted wt/epic tree already carries the fix in
+      HttpRunnerDispatchClient.java (+11/-6): an Authorization "Bearer" header built from the runner's
+      service-identity token, StudioRunnerProperties injected in place of the @Value-bound URL string,
+      a pre-flight terminal refusal when the runner URL or the token is unconfigured or blank, and
+      base-URL normalisation. UNLANDED: on no branch, with no SHA. This manifest does not treat an
+      uncommitted working tree as landed, per EPIC-10-CLOSURE-PLAN.md section 8 Phase 2's own
+      precondition ("Nothing below starts until wt/epic's work is on a branch with a SHA").
+    acceptance_owner: >-
+      Story 10.35 (Dispatch service identity, DEF-05) — an ACCEPTANCE SPEC ONLY. This repository
+      specifies what correct means and gates what lands; it does not author a second fix in a file
+      another program has open. Same shape as the 10.33/PROD-1 and F-3 deferrals.
+    found_by: >-
+      The co-run harness (tools/corun.sh plus backend/src/test/java/com/citi/put/checks/corun/StudioCoRunIT.java,
+      merged at 97e25f3ed on feat/p1-corun), on its first run against a real studio-runner process,
+      2026-09-17. Independently re-verified by the orchestrator and again by @sm while drafting 10.35,
+      each time by reading the three sources named in refs, not by transcription.
+    owner: "@po (Pax) — routing and acceptance only. Implementation is external; see fix_owner_external."
+    summary: >-
+      The dispatch path presents no service identity. docs/specs/studio/openapi.yaml declares
+      security: [serviceIdentity] on BOTH runner-served routes — runnerValidateArtifact (operationId :849,
+      security :861-862) and runnerAdmitRun (operationId :903, security :927-928). RunnerValidationClient
+      complies (:86-92, a conditional headers.setBearerAuth). HttpRunnerDispatchClient sets no
+      authentication header on any code path: a grep for Bearer, Authorization, auth or any headers. call
+      over the whole file returns nothing, and the only header it ever sets is Content-Type. There is no
+      outbound identity property reachable from that client at all — StudioExecutionProperties declares
+      none, and StudioRunnerProperties.serviceIdentityToken is wired only into the different bean serving
+      the different route. Observed at runtime, not inferred: the runner logs
+      {"event":"request.unauthenticated","path":"/v1/runs","code":"IDENTITY_MISSING"}, no admission_id
+      reaches studio_dispatch_ledger, the ledger state is DONE and the execution ERROR/DISPATCH_FAILED.
+      The proof is structural rather than circumstantial: in one run, against one runner, in one service,
+      leg 1 (validate, which presents identity) is green and leg 2 (dispatch) is red.
+    consequence_for_def_01: >-
+      This is why the defect matters more than the identity gap itself, and it is the acceptance
+      criterion that matters most in story 10.35. The identity refusal happens BEFORE the dispatch body
+      is ever parsed, so DEF-01's entire defect class is currently UNOBSERVABLE on this route rather than
+      merely untested: mutation M1a (EPIC-10-RUN-LOG.md:2204-2205) dropped a required key from the
+      dispatch body and produced a response byte-identical to the baseline. DEF-01 is recorded `fixed`
+      in this block and that record stands on what it claims — that the merged source has the shape the
+      defect said it lacked — but its own note already says so plainly: "it is not 'the dispatch succeeds
+      end to end'." The fix for DEF-01 has never been exercised and could not have been. It becomes
+      exercisable the moment identity is fixed, which is what 10.35 AC-3 gates.
+    also_unexercised: >-
+      DEF-02's path (the runner reporting an admission and a terminal state back to the API) is
+      unexercised by running, not merely unproven: StudioCoRunIT's leg 3 is blocked behind leg 2 and
+      refuses to assert rather than attempting an assertion it cannot make (EPIC-10-RUN-LOG.md:2253-2255).
+    why_nothing_caught_it: >-
+      Nine waves and 709 green tests in the studio package never ran the API and the studio-runner
+      together. Every per-component suite mocked the counterpart. DEF-01 and DEF-02 were both found by
+      READING code, by @sm and by @qa, because nothing existed that could find them by running; DEF-05
+      was found on the first run of the first thing that could. The same narrow scoping
+      (--tests 'com.citi.put.checks.studio.*', adopted as MED-2's mitigation) independently hid ten
+      failing tests outside the studio package for the epic's whole duration — recorded in the run log
+      and routed to @pm, outside Epic 10's scope.
+    refs: ['docs/epics/EPIC-10-RUN-LOG.md:2172-2255 (the finding), :2257-2280 (the deferral decision)',
+           'docs/specs/studio/openapi.yaml:849,861-862,903,927-928',
+           'backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java',
+           'backend/src/main/java/com/citi/put/checks/studio/compile/validator/RunnerValidationClient.java:86-92',
+           'backend/src/main/java/com/citi/put/checks/studio/compile/validator/StudioRunnerProperties.java:22-24',
+           'backend/src/test/java/com/citi/put/checks/corun/StudioCoRunIT.java (legs Order 0-3)',
+           'tools/corun.sh',
+           'docs/stories/10.35.story.md (the acceptance spec)']
+
+  - id: DOC-1
+    severity: LOW
+    status: open (carried; @po's call, deliberately not taken inside 10.32)
+    found_by: "@dev at 10.32 implementation, flagged to @po; confirmed by @qa at the 10.32 gate as DOC-1"
+    owner: "@po (Pax)"
+    summary: >-
+      studio-runner/test/fixtures-tier/seek-measurement.test.ts still says "Tightening further would start
+      to bet against the detector" in the outlier-bound paragraph (about :88). ADR-002 §26.5 ruled that the
+      cause is a systematic lead past the helper's SLACK, not a detector limitation, and story 10.32 landed
+      that correction — but only in the :72-75 block, because AC-8.4 forbids editing any other line of that
+      file. Two paragraphs one screen apart now describe the same phenomenon with different causes.
+    why_not_fixed_in_10_32: >-
+      @po 2026-09-17. AC-8.4 is a CLOSED instrument: it enumerates the only lines the story may touch, and
+      @qa's condition-4 evidence is `git diff -U0` showing exactly five hunks. Widening it after
+      implementation and after review would void that evidence and re-open the one file F-7 parses as
+      TEXT (where a stray `/*`, a wrapped assertion or a third mention of MEDIAN_TOLERANCE_MS stops
+      webm.test.ts from loading) — a real risk for one sentence of prose. A closed body is not conformed
+      halfway. It is NOT a merge condition on 10.32 and it does not re-open 10.16b.
+    routing: >-
+      The 10.16b gate's own F-4 remedy already names the vehicle: "@po rules on a comment-only amendment
+      before 10.19, stated in FOC-06 form, for example in the 10.19 conformance pass." That is where it
+      goes. If 10.19's criteria cannot absorb a comment-only edit, it lands as a standalone follow-up after
+      the epic. Whoever takes it obeys AC-7's F-7 constraints verbatim, because the file is text-parsed.
+      Carried alongside it, same owner, same vehicle: ECHO-1's BEHAVIOUR half from the 10.32 gate — whether
+      parseChildMessage should ignore a malformed ready-echo instead of dropping the whole message and
+      costing the launch. (Its DOCUMENTATION half is corrected before 10.32 merges; see
+      stories[10.32].story_context.po_post_qa_ratification.)
+
+# ─────────────────────────────────────────────────────────────
+# Post-epic backlog owned by @pm
+#
+# Items routed to @pm at the close that are NOT Epic 10 defects and that deliberately carry NO
+# integration_defects id. That block is this epic's record of what ITS OWN gates found in code IT
+# OWNS, and story 10.19's AC-10 register reads it by name; putting a pre-existing gap there would
+# make it look like Epic 10's to fix, which is a second false claim added by the very commit that
+# exists to remove false claims. The precedent is DEF-03/DEF-04, which went to the open-items
+# register rather than into a story for the same reason.
+#
+# These items are NOT conditions on this closure. Each has an owner, a first action and a reason
+# for its sequencing, so that "routed to @pm" is a destination and not the place findings go to die.
+# ─────────────────────────────────────────────────────────────
+post_epic_backlog:
+  - id: PB-1
+    title: "Ten failing tests in checks.* / reports.*, masked for the epic's whole duration"
+    owner: "@pm (Morgan), by user decision 2026-09-17 (EPIC-10-RUN-LOG.md, 'routed to @pm, by user decision')"
+    status: open
+    severity: "UNDETERMINED — see `ownership`. Severity cannot be set before the owner is, and I will not guess it."
+    measured: >-
+      On the clean tip of epic/EPIC-10-w7, with no co-run file present, and reproduced identically
+      by two agents: "89 tests completed, 10 failed" — CheckCrudIT x2, ReportsCrudIT x2,
+      ReportsExecutionIT x2, ReportsPreviewIT x2, ReportsDuplicateIT, and
+      ReportDeliveryDispatcherIT (initializationError). RECORDED, not re-run for this entry: no
+      suite was executed to write this manifest.
+    ownership: >-
+      UNDETERMINED, and recorded as undetermined rather than guessed — ours, the parallel program's,
+      or older than both. Those files are ` M` in the other program's tree, so investigating them
+      here risks duplicating work in flight, and Article IV forbids asserting a cause I have not
+      established. Note the one thing that IS established: an earlier claim that they were
+      pre-existing was argued from `git diff` rather than measured; the measurement above exonerated
+      the track that made it, but exoneration is not attribution.
+    why_it_was_invisible: >-
+      Every run in this epic was scoped --tests 'com.citi.put.checks.studio.*', a mitigation adopted
+      for MED-2's hanging `check` task. That narrowing is why ten failing tests outside the studio
+      package went unreported for the epic's entire duration, and they surfaced only because a
+      harness happened to run a wider suite once. THE MITIGATION FOR ONE BLIND SPOT MANUFACTURED
+      ANOTHER.
+    disposition: >-
+      @pm 2026-09-18. NOT reopened inside Epic 10 and NOT a condition on this closure: the tests are
+      outside the epic's scope and they predate the scoping decision that hid them. SEQUENCED AFTER
+      THE FOLD, for the same reason the fold blocks everything else — the files are dirty there, and
+      "whose are they" is answerable only against a committed tree. FIRST ACTION when the fold
+      lands: run the same set on the merged tree and diff the failing set against the one above.
+      Identical means they are older than both programs and become a standalone remediation story
+      outside Epic 10. Smaller means they were the other program's and are already fixed. LARGER
+      MEANS THE MERGE CAUSED THEM, and that is a stop under closure-plan step 2.8, not a note.
+    epic_lesson_not_backlog_item: >-
+      Recorded here so it is not lost with the item, but it belongs to the epic and to the
+      framework, not to @pm's backlog: a test-scope narrowing adopted as a workaround must carry an
+      expiry or a compensating wide run. This epic had neither for nine waves, and no gate asked.
+
+  - id: PB-2
+    title: "A dispatch failure and a compile failure are indistinguishable to an operator (OBS-1 + OBS-2)"
+    owner: "@pm (Morgan), routed by @po 2026-09-17 at the 10.35 validation (docs/stories/10.35.story.md, Open questions item 3)"
+    status: open
+    severity: MEDIUM
+    one_item_not_two: >-
+      @po ruled that OBS-1 and OBS-2 are ONE item and not two — same defect class, same remedy
+      shape, adjacent code — and deliberately gave them NO integration_defects id. @pm 2026-09-18:
+      I ACCEPT BOTH HALVES OF THAT RULING and I record why, rather than only that. On the merge: the
+      remedy is a single change of habit — carry the cause through to what the operator actually
+      sees — applied at two call sites. Splitting it yields two changes, neither of which fixes the
+      operator's real problem, which is that a 401 and a 400 look the same from the outside. On the
+      absence of a DEF-* id: these are pre-existing observability gaps in code that NO Epic 10 story
+      owns, and integration_defects is read by name by 10.19's AC-10 register as the epic's final
+      open-items record. A DEF-* id would misattribute both their origin and their ownership. I
+      considered and rejected the counter-argument that an id is the only thing that makes a finding
+      survivable — this entry, with an owner and a sequencing rule, is that survivability, and it
+      does not have to be bought by falsifying where the defect came from.
+    obs_1: >-
+      StudioDispatcher.applyOutcome discards DispatchOutcome.detail() on a terminal
+      DEFINITE_REFUSAL. When the refusal is not retryable within the pending deadline it calls
+      close(executionId, ExecutionErrorCode.DISPATCH_FAILED, now) with no warning log and no detail
+      passed through, and closeWithError(UUID, String, Instant) takes exactly three arguments, none
+      of which is detail(). The operator sees DISPATCH_FAILED whether the runner refused the
+      credential or refused the body. Read directly by @sm at drafting and confirmed by @po.
+    obs_2: >-
+      CompilePipeline.java:268 maps every runner-side validate refusal to
+      CompileErrorCode.VALIDATOR_UNAVAILABLE, collapsing a credential refusal and a body refusal
+      into one compile_error on the validate route. StudioCoRunIT's own leg-1 comment (:338-342)
+      spells out the distinction the code throws away: validator calls = 1 with the runner recording
+      an identity refusal means the credential is wrong; validator calls = 1 with the runner
+      recording nothing means the runner was reached and objected to the body.
+    why_it_matters_now: >-
+      DEF-05 is the live demonstration, and it is the reason I am not filing this as cosmetic. The
+      dispatch route refuses on identity before the body is parsed, and the ONLY reason anyone can
+      tell the two causes apart today is that the co-run harness reads the RUNNER's log rather than
+      the API's error code. In staging there will be no runner log to read, and the compound first
+      failure that EPIC-10-CLOSURE-PLAN.md section 7 predicts will present to whoever is on call as
+      a single undifferentiated DISPATCH_FAILED.
+    disposition: >-
+      @pm 2026-09-18. Post-Epic-10 backlog, SEQUENCED WITH O-19 / ADR-003 — the backend-wide API
+      error envelope, already placed outside Epic 10 by @pm and @po — because they share a subject:
+      whether the error envelope can carry a cause at all. Deciding PB-2 first would hard-code a
+      shape ADR-003 may overturn, and would do it in the error surface ADR-003 exists to unify. Held
+      from getting worse in the meantime by story 10.35's AC-7, which @po gave a failing condition
+      at validation precisely so that it can go red rather than merely record a value.
+    refs: ['docs/stories/10.35.story.md — Open questions item 3, and the "Routed, not this story scope" section',
+           'backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java (applyOutcome, closeWithError)',
+           'backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java:268',
+           'backend/src/test/java/com/citi/put/checks/corun/StudioCoRunIT.java:338-342']
 
 # ─────────────────────────────────────────────────────────────
 # External dependencies (Epic 10 "Open external dependencies immediately")

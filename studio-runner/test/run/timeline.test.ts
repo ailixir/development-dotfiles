@@ -103,6 +103,70 @@ describe('AC-10 — the STARTED reading is a reading that happens to be 0', () =
   });
 });
 
+/**
+ * Story 10.32 AC-2 — the calibration moves the zero, and only the zero (ADR-002 §26.3 item 2,
+ * §26.4(a)).
+ *
+ * Both properties drive a calibrated and an uncalibrated origin with the **same** monotonic
+ * sequence and compare the outputs directly. The expected numbers are the worked example's
+ * literals, not values computed by `takeRunOrigin`.
+ */
+describe('story 10.32 AC-2 — the seek-origin calibration', () => {
+  /** A zero read, then a series of readings. Fresh per origin so both see identical samples. */
+  const SEQUENCE = [1_000, 1_300, 1_450.5, 2_000, 2_000.25];
+
+  it('(1) produces the same origin with no calibration argument and with 0', () => {
+    const wall = [1_700_000_000_000];
+    const implicit = takeRunOrigin(countingSource([...SEQUENCE], wall));
+    const explicit = takeRunOrigin(countingSource([...SEQUENCE], wall), 0);
+
+    expect(explicit.monotonicZero).toBe(implicit.monotonicZero);
+    expect(explicit.startedAtMs).toBe(implicit.startedAtMs);
+    expect(explicit.browserStartedAt.toISOString()).toBe(implicit.browserStartedAt.toISOString());
+    expect(explicit.calibrationOffsetMs).toBe(0);
+    expect(implicit.calibrationOffsetMs).toBe(0);
+    const implicitReadings = SEQUENCE.slice(1).map(() => implicit.clock.now());
+    const explicitReadings = SEQUENCE.slice(1).map(() => explicit.clock.now());
+    expect(implicitReadings).toEqual([300, 450.5, 1_000, 1_000.25]);
+    expect(explicitReadings).toEqual(implicitReadings);
+  });
+
+  it('(2) makes every later reading exactly N smaller, never larger', () => {
+    // The worked example: 1_000 then 1_300 reads 300 uncalibrated, and 250 at N = 50.
+    const worked = takeRunOrigin(countingSource([1_000, 1_300], [0]), 50);
+    expect(worked.clock.now()).toBe(250);
+
+    const uncalibrated = takeRunOrigin(countingSource([...SEQUENCE], [0]), 0);
+    const baseline = SEQUENCE.slice(1).map(() => uncalibrated.clock.now());
+    for (const offset of [1, 50, 110, 250]) {
+      const calibrated = takeRunOrigin(countingSource([...SEQUENCE], [0]), offset);
+      const readings = SEQUENCE.slice(1).map(() => calibrated.clock.now());
+      expect(
+        readings.map((reading, index) => (baseline[index] ?? Number.NaN) - reading),
+        `N = ${String(offset)}`,
+      ).toEqual(baseline.map(() => offset));
+      expect(calibrated.calibrationOffsetMs).toBe(offset);
+    }
+  });
+
+  it('keeps startedAtMs at 0 and browserStartedAt unchanged under any N (current behaviour, not an ESC-3 ruling)', () => {
+    // ESC-3 is open with @architect: what a non-zero N should mean for these two is not ruled.
+    // This asserts today's behaviour so a change to it is a visible decision.
+    for (const offset of [0, 50, 250]) {
+      const origin = takeRunOrigin(countingSource([...SEQUENCE], [1_700_000_000_000]), offset);
+      expect(origin.startedAtMs).toBe(0);
+      expect(origin.browserStartedAt.toISOString()).toBe(new Date(1_700_000_000_000).toISOString());
+      expect(origin.monotonicZero).toBe(1_000 + offset);
+    }
+  });
+
+  it('still samples the monotonic clock exactly once when calibrated', () => {
+    const source = countingSource([5_000, 9_999], [0]);
+    takeRunOrigin(source, 50);
+    expect(source.monotonicReads).toEqual([5_000]);
+  });
+});
+
 describe('AC-11.3 — the scale, falsified', () => {
   /**
    * The runner's contract-test validator implements `$ref`/`type`/`required`/`properties`/

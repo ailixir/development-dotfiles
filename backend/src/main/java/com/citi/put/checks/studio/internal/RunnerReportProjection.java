@@ -108,9 +108,27 @@ public final class RunnerReportProjection {
    */
   public static Projected project(
       RunnerReport report, List<StepResult> original, Duration evidenceRetention, Instant now) {
+    return project(report, original, evidenceRetention, now, false);
+  }
+
+  /**
+   * Projects one report, knowing whether a cancel was recorded for the execution (ADR-002 §29).
+   *
+   * @param cancelRequested true when the ledger carries a {@code cancel_requested_at}. It is the
+   *     one fact that lets the runner's {@code CANCELLED} become the API's {@code CANCELLED}; the
+   *     column is written once and never cleared, so a read that saw it set cannot be contradicted
+   *     later by the same execution
+   */
+  public static Projected project(
+      RunnerReport report,
+      List<StepResult> original,
+      Duration evidenceRetention,
+      Instant now,
+      boolean cancelRequested) {
     validate(report);
 
-    List<StepResult> stepResults = projectSteps(report, original, terminalErrorCode(report));
+    String terminalErrorCode = terminalErrorCode(report, cancelRequested);
+    List<StepResult> stepResults = projectSteps(report, original, terminalErrorCode);
     List<ExecutionLogEntry> logs = projectLogs(report);
     RuntimeVersions runtime = projectRuntime(report.runtimeVersions());
 
@@ -121,8 +139,7 @@ public final class RunnerReportProjection {
     Integer durationMs = null;
     if (report.outcome() != null) {
       status = RunnerOutcomeCodes.statusFor(report.outcome().result());
-      errorCode =
-          RunnerOutcomeCodes.errorCodeFor(report.outcome().result(), report.outcome().errorCode());
+      errorCode = terminalErrorCode;
       diagnostic = diagnostic(report);
       endedAt = report.reportedAt();
       durationMs = browserDurationMs(report);
@@ -328,11 +345,12 @@ public final class RunnerReportProjection {
    * predicate is the <b>API's</b> verdict and not a string the runner chose. A runner naming a
    * reaper-assigned code obtains neither the code nor the message.
    */
-  private static String terminalErrorCode(RunnerReport report) {
+  private static String terminalErrorCode(RunnerReport report, boolean cancelRequested) {
     if (report.outcome() == null) {
       return null;
     }
-    return RunnerOutcomeCodes.errorCodeFor(report.outcome().result(), report.outcome().errorCode());
+    return RunnerOutcomeCodes.errorCodeFor(
+        report.outcome().result(), report.outcome().errorCode(), cancelRequested);
   }
 
   /**

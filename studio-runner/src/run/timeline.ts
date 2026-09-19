@@ -26,8 +26,11 @@
  *
  * If AC-12c's staging measurement later shows the readiness-to-first-frame gap is a material
  * fraction of the budget, the correction is folded into {@link takeRunOrigin} — runner-side,
- * beside the other pins — and still needs no contract change. Nothing is folded in today: a
- * laptop cannot measure it (AC-12c is explicitly a staging number).
+ * beside the other pins — and still needs no contract change. Story 10.32 added the place to fold
+ * it in (ADR-002 §26.3 items 2-3): `takeRunOrigin`'s `calibrationOffsetMs`, fed from the runner
+ * setting `STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS`, whose default is `0`. Nothing is folded in
+ * today: a laptop cannot measure the gap (AC-12c is explicitly a staging number), and the fixtures
+ * tier always runs at `0` (§26.3 item 5).
  */
 
 import type { Clock } from '../executor/adapters/StepReporter.js';
@@ -61,8 +64,16 @@ export const systemOriginSource: OriginSource = {
 export interface RunOrigin {
   /** The wall-clock read. Goes on the wire as `browserStartedAt`. */
   readonly browserStartedAt: Date;
-  /** The monotonic read, in the source's own scale. Kept so the pairing is inspectable. */
+  /**
+   * The clock's zero, in the source's own scale: the monotonic read plus
+   * {@link calibrationOffsetMs}. Kept so the pairing is inspectable.
+   */
   readonly monotonicZero: number;
+  /**
+   * The calibration added to the zero (ADR-002 §26.3 item 2), echoed so it is inspectable for the
+   * same reason as {@link monotonicZero}. `0` unless a measured value was configured.
+   */
+  readonly calibrationOffsetMs: number;
   /**
    * The first reading of {@link clock}, computed from the same monotonic sample as the zero.
    *
@@ -82,13 +93,24 @@ export interface RunOrigin {
  * the pairing cannot drift by the cost of a second read. `test/run/timeline.test.ts` asserts
  * `monotonicNow` is called exactly once here, which is how "adjacent" is made falsifiable rather
  * than described.
+ *
+ * **The calibration moves the zero, never a reading** (ADR-002 §26.3 item 2, story 10.32 AC-2).
+ * `calibrationOffsetMs` is added to the monotonic sample, so every later `clock.now()` is exactly
+ * that many milliseconds *smaller* than it would be uncalibrated. `startedAtMs` stays `0` under any
+ * value, because it is the zero minus itself. At `0` the result is identical to an uncalibrated
+ * origin. What a non-zero value means for early readings and for `browserStartedAt` is ESC-3, open
+ * with @architect. Until it is ruled, no non-zero value is configured anywhere.
  */
-export function takeRunOrigin(source: OriginSource = systemOriginSource): RunOrigin {
-  const monotonicZero = source.monotonicNow();
+export function takeRunOrigin(
+  source: OriginSource = systemOriginSource,
+  calibrationOffsetMs = 0,
+): RunOrigin {
+  const monotonicZero = source.monotonicNow() + calibrationOffsetMs;
   const browserStartedAt = source.wallNow();
   return {
     browserStartedAt,
     monotonicZero,
+    calibrationOffsetMs,
     startedAtMs: monotonicZero - monotonicZero,
     clock: { now: () => source.monotonicNow() - monotonicZero },
   };
@@ -111,6 +133,7 @@ export function takeProcessOriginForFalsification(
   return {
     browserStartedAt,
     monotonicZero: 0,
+    calibrationOffsetMs: 0,
     startedAtMs: source.monotonicNow(),
     clock: { now: () => source.monotonicNow() },
   };

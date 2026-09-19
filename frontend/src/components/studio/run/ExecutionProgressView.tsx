@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import type { ExecutionSnapshot, StepResult } from '@/types/studio/studioTypes';
 import { executionErrorNarrative } from './executionErrorNarratives';
+import { executionStatusLabel, isCancelledOutcome } from './executionStatus';
 import { seekEligibility } from '@/components/studio/evidence/seekEligibility';
 
 /**
@@ -139,13 +140,41 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
   // status renders nothing at all — §8.2 puts a step locator or assertion timeout at `FAIL`/
   // `FAILED` with no code, and inventing a region for it would name a cause the server did not.
   const code = snapshot.errorCode;
+  // A cancelled run is named, not explained as a failure: the person who pressed Stop caused it.
+  // Its narrative is the contract's like every other code's (ADR-002 §29); only the region differs
+  // — a status, not an alert — so the two facts render in the same slots either way.
+  const cancelled = isCancelledOutcome(snapshot.status, code);
   const narrative = code !== null ? executionErrorNarrative(code) : null;
 
   return (
     <Box data-testid="execution-progress">
       <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-        <Chip size="small" label={snapshot.status} data-testid="execution-status" />
+        <Chip
+          size="small"
+          label={executionStatusLabel(snapshot.status, code)}
+          data-testid="execution-status"
+        />
       </Stack>
+
+      {cancelled && narrative && (
+        <Alert
+          severity="info"
+          role="status"
+          aria-label="Run cancelled"
+          data-testid="execution-cancelled"
+          sx={{ mb: 2 }}
+        >
+          <AlertTitle data-testid="execution-error-title">{narrative.title}</AlertTitle>
+          <Stack spacing={0.5}>
+            <Typography variant="body2" data-testid="execution-error-browser">
+              {narrative.browserClaim}
+            </Typography>
+            <Typography variant="body2" data-testid="execution-error-remedy">
+              {narrative.remedyOwner}
+            </Typography>
+          </Stack>
+        </Alert>
+      )}
 
       {snapshot.status === 'ERROR' && code === null && (
         <Alert severity="error" sx={{ mb: 2 }} data-testid="execution-error-unnamed">
@@ -153,7 +182,7 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
         </Alert>
       )}
 
-      {narrative && (
+      {narrative && !cancelled && (
         <Alert
           severity="error"
           role="alert"
@@ -226,7 +255,8 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
             component="div"
             data-testid={`log-line-${index}`}
           >
-            {`${entry.at} ${entry.level} ${entry.message}`}
+            {/* `at` is nullable by contract; a line without a reading shows no time, not "null". */}
+            {[entry.at, entry.level, entry.message].filter((part) => part !== null).join(' ')}
           </Typography>
         ))}
       </Box>

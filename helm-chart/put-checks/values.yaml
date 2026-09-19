@@ -141,12 +141,15 @@ backend:
     coreService: false
     identityHeaders: false
     csiRead: false
-  envFromSecrets: []
-  # - secretName: checks-db-credentials
-  #   keys:
-  #     - SPRING_DATASOURCE_URL
-  #     - SPRING_DATASOURCE_USERNAME
-  #     - SPRING_DATASOURCE_PASSWORD
+  # The database connection. `application.yml` carries no datasource URL for the deployed
+  # profiles (prod/staging), so without these the pod cannot start; every value set names its own
+  # Secret, and the values themselves never appear here.
+  envFromSecrets:
+    - secretName: checks-db-credentials
+      keys:
+        - SPRING_DATASOURCE_URL
+        - SPRING_DATASOURCE_USERNAME
+        - SPRING_DATASOURCE_PASSWORD
 
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "20"
@@ -228,12 +231,15 @@ worker:
     JAVA_OPTS: "-Xms512m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError"
     CHECKS_CORE_SERVICE_URL: "http://checks-core:8081"
 
-  envFromSecrets: []
-  # - secretName: checks-db-credentials
-  #   keys:
-  #     - SPRING_DATASOURCE_URL
-  #     - SPRING_DATASOURCE_USERNAME
-  #     - SPRING_DATASOURCE_PASSWORD
+  # The database connection. `application.yml` carries no datasource URL for the deployed
+  # profiles (prod/staging), so without these the pod cannot start; every value set names its own
+  # Secret, and the values themselves never appear here.
+  envFromSecrets:
+    - secretName: checks-db-credentials
+      keys:
+        - SPRING_DATASOURCE_URL
+        - SPRING_DATASOURCE_USERNAME
+        - SPRING_DATASOURCE_PASSWORD
 
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "30"
@@ -356,16 +362,53 @@ studioRunner:
     tag: ""  # defaults to Chart.appVersion
     pullPolicy: IfNotPresent
 
-  # One pod, one browser (§5.2: POOL_SIZE starts at 1; measure before increasing). No HPA: the
-  # runner refuses work with 429/503 and stays ready, so CPU-based scaling would fight the
-  # capacity gate rather than help it.
-  replicaCount: 1
+  # One pod, one browser (§5.2: POOL_SIZE starts at 1; measure before increasing). Scale PODS, not
+  # the pool. No CPU-based HPA, ever: the runner refuses work with 429/503 and stays ready, so
+  # CPU-based scaling would fight the capacity gate rather than help it.
+  #
+  # Studio v1 decision D3: a static two pods for the pilot. Ignored while `autoscaling.enabled` is
+  # true, when the ScaledObject owns the replica count and the Deployment renders none.
+  replicaCount: 2
+
+  # KEDA scaling on the dispatch backlog (Studio v1 WP7, decision D3). **Off by default**, because
+  # whether KEDA is installed in the target cluster is not known. When on, the chart renders a
+  # `keda.sh/v1alpha1` ScaledObject and nothing else: KEDA creates the HPA itself, driven by the
+  # external metric below, never by CPU.
+  autoscaling:
+    enabled: false
+    # Never 0. With no runner pod a dispatch is a connection failure, which the dispatcher treats
+    # as ambiguous and leaves to the reapers, so scale-to-zero would turn idle into slow failure.
+    minReplicaCount: 2
+    maxReplicaCount: 4
+    pollingIntervalSeconds: 15
+    # Must be >= the runner's run deadline (`runnerEnv.STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS`); the
+    # render fails otherwise. Rendered twice from this one key: as KEDA's `cooldownPeriod` (which
+    # KEDA applies only to scale-to-zero) and as the HPA scale-down stabilization window (which is
+    # what delays a scale-in while minReplicaCount > 0). A pod that is scaled in mid-run still gets
+    # SIGTERM and drains within terminationGracePeriodSeconds.
+    cooldownPeriodSeconds: 300
+    # Target backlog per pod: about one queued run per runner pod.
+    targetBacklogPerPod: "1"
+    prometheus:
+      # Required when enabled; no default, because the cluster's Prometheus address is not known.
+      serverAddress: ""
+      # The worker exports the backlog, and every worker replica exports the same global count,
+      # so the replicas are collapsed with `max` per state before the states are summed. If the
+      # Prometheus is shared between releases, add the scrape config's namespace/job label here.
+      query: 'sum(max by (state) (studio_dispatch_backlog{state=~"QUEUED|CLAIMED"}))'
+
+  # Voluntary evictions (node drains) take at most one runner pod at a time. `maxUnavailable`
+  # rather than `minAvailable`, so that a single-replica override cannot block a drain outright.
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: 1
 
   service:
     type: ClusterIP  # never an Ingress: §8.4's internal routes are not publicly exposed
     # **This port is the single source for the runner's address.** The worker's
-    # `STUDIO_RUNNER_BASE_URL` is rendered from this same key, so the 8080/8090 disagreement
-    # between `application.yml` and `studio-runner/src/server/config.ts` cannot be re-created here.
+    # `STUDIO_RUNNER_BASE_URL` is rendered from this same key, so the old 8080/8090 disagreement
+    # (`application.yml` once defaulted the URL to 8090; it now has no default at all, and
+    # `studio-runner/src/server/config.ts` listens on 8080) cannot be re-created here.
     port: 8090
 
   # Process reaping (AC-5a / AC-5b). The pause container becomes PID 1 and reaps orphaned
@@ -468,14 +511,19 @@ studioRunner:
   # The two identity secrets §9.2 permits, and nothing else. No database URL, no vault address,
   # no CSI endpoint, no LLM gateway key — the runner holds none of them, and only the deployment
   # can make that true.
+  #
+  # `serviceIdentityKey` is also what the WORKER reads its outbound bearer from
+  # (`STUDIO_RUNNER_SERVICE_TOKEN`, templates/deployment.yaml): one Secret key for both ends of
+  # POST /v1/runs. The worker is given that key only, never `callbackIdentityKey`.
   identity:
     secretName: checks-studio-runner-identity
     serviceIdentityKey: serviceIdentity
     callbackIdentityKey: callbackIdentity
 
   # Where the runner posts admission and progress. Deployment configuration, never job-supplied
-  # (§8.4, §8.5).
-  callbackBaseUrl: http://put-checks-api:8080
+  # (§8.4, §8.5). Empty means "this release's API Service" (`http://<release>-api:<port>`,
+  # derived in _helpers.tpl); set it only when the runner must reach the API some other way.
+  callbackBaseUrl: ""
 
   objectStore:
     # **ED-03 / SPK-03.** A *different* Kubernetes Secret from the one the API and worker read
@@ -517,12 +565,24 @@ studioRunner:
   runnerEnv:
     STUDIO_RUNNER_POOL_SIZE: "1"
     STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS: "120000"
-    STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS: "5000"
+    # The ordered stop's grace: context close + webm finalization before the tree is killed. Raised
+    # from the runner's 5 s fallback by Studio v1 WP11 (decision D3), on measurement (developer
+    # laptop, 1280x720): closing a context whose navigation is still hung grows with how long it
+    # has hung — ~1.2 s at 30 s, ~2.3 s at 60 s, 4.1-4.6 s at 115 s — and one 115 s sample overran
+    # 5 s when the step's own timeout fired during the close. A navigation may hang for the whole
+    # runtime cap, so 5 s is not enough. 15 s is about three times the laptop worst case, for a pod
+    # limited to 2 CPUs; staging should confirm it (ADR-002 §29.3). A locator wait closes in <0.1 s.
+    # terminationGracePeriodSeconds is derived from this value and follows it.
+    STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS: "15000"
     STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS: "30000"
     STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS: "15000"
     STUDIO_RUNNER_DRAIN_TIMEOUT_MS: "150000"
     STUDIO_RUNNER_RECORDING_WIDTH: "1280"
     STUDIO_RUNNER_RECORDING_HEIGHT: "720"
+    # Uncalibrated (ADR-002 §26.3). NOT a measurement: a non-zero value comes only from SPK-06
+    # phase B, measured per image and recorded in docs/qa/spikes/SPK-06/, under §26.3 item 4 and
+    # ESC-3. Never a laptop value. No values-*.yaml overrides it.
+    STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS: "0"
 
   podAnnotations: {}
   nodeSelector: {}

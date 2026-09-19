@@ -227,6 +227,7 @@ class CompilePipelineIT {
   @Autowired private RecordingVault vault;
   @Autowired private JdbcTemplate jdbc;
   @Autowired private PlatformTransactionManager transactionManager;
+  @Autowired private StudioCompileProperties compileProperties;
 
   private TransactionTemplate transactions;
   private UUID testId;
@@ -636,6 +637,77 @@ class CompilePipelineIT {
   }
 
   // ── helpers ───────────────────────────────────────────────────────────────
+
+  // ── Studio v1 WP9: the compile clock, and a compile abandoned mid-flight ────
+
+  /**
+   * The pipeline itself — not a direct {@code beginCompile} call — records {@code
+   * compile_started_at}, and a compile whose work never returns is recovered by the configured
+   * sweep: {@code STALE}, retryable, no candidate. Decision D11 accepts exactly this for v1.
+   *
+   * <p>"The replica died" is modelled by parking the work inside the gateway: the row is then in
+   * the state a dead replica leaves behind, with nothing in this process able to settle it. The
+   * clock is aged past the configured threshold rather than waited out, and the pass is the
+   * sweeper's own, reading the bound {@code studio.compile.abandonment.*}. Releasing the parked
+   * work afterwards stands in for a replica that was only slow: its late result must not resurrect
+   * the swept row.
+   */
+  @Test
+  void aCompileAbandonedMidFlightIsSweptToStaleWithNoCandidateAndItsLateResultIsDropped()
+      throws Exception {
+    CountDownLatch release = new CountDownLatch(1);
+    CountDownLatch inGateway = new CountDownLatch(1);
+    gateway.blockAll = release;
+    gateway.entered = inGateway;
+    int revisionsBefore = revisionHashes(testId).size();
+    try {
+      Timestamp before = jdbc.queryForObject("SELECT NOW()", Timestamp.class);
+      pipeline.compile(testId, OWNER);
+      assertThat(inGateway.await(30, TimeUnit.SECONDS))
+          .as("the compile work must really be in flight")
+          .isTrue();
+
+      assertThat(compileStatus(testId)).isEqualTo("COMPILING");
+      Timestamp started =
+          jdbc.queryForObject(
+              "SELECT compile_started_at FROM ui_tests WHERE id = ?", Timestamp.class, testId);
+      assertThat(started)
+          .as("the compile pipeline recorded compile_started_at when it began the compile")
+          .isNotNull();
+      assertThat(started.toInstant()).isAfterOrEqualTo(before.toInstant());
+
+      Duration threshold = compileProperties.abandonment().threshold();
+      jdbc.update(
+          "UPDATE ui_tests SET compile_started_at = NOW() - make_interval(secs => ?)"
+              + " WHERE id = ? AND compile_status = 'COMPILING'",
+          (double) threshold.plusSeconds(1).toSeconds(),
+          testId);
+      new CompileAbandonmentSweeper(states, compileProperties).sweepOnce();
+
+      assertThat(compileStatus(testId)).isEqualTo("STALE");
+      assertThat(compileError(testId)).contains(CompileErrorCode.COMPILE_BUDGET_EXCEEDED.name());
+      assertThat(candidateRevisionId(testId)).as("no candidate is fabricated").isNull();
+    } finally {
+      release.countDown();
+    }
+
+    // The parked work now completes and reaches the validator; its publish must find no request.
+    long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+    while (runner.findAll(postRequestedFor(urlEqualTo("/v1/validate"))).isEmpty()
+        && System.nanoTime() < deadline) {
+      Thread.sleep(25L);
+    }
+    assertThat(runner.findAll(postRequestedFor(urlEqualTo("/v1/validate"))))
+        .as("the released work really ran on, so the drop below is observed, not assumed")
+        .isNotEmpty();
+    Thread.sleep(500L);
+
+    assertThat(compileStatus(testId))
+        .as("the late result did not resurrect the row")
+        .isEqualTo("STALE");
+    assertThat(candidateRevisionId(testId)).isNull();
+    assertThat(revisionHashes(testId)).hasSize(revisionsBefore);
+  }
 
   /**
    * Starts one compile and registers its release gate.

@@ -9,6 +9,9 @@ import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.dto.VideoEvidence;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -52,6 +55,14 @@ class ExecutionVideoEvidenceIT {
 
   /** Bigger than every boundary any case here uses, and not equal to any column on the row. */
   private static final int OBJECT_SIZE = 1_310_721;
+
+  /**
+   * The nested envelope the platform's servlet filters write, used only as a <b>control</b>: it is
+   * the shape {@code ErrorResponse} must reject, so a schema that had quietly become permissive
+   * cannot pass AC-6's validity assertion.
+   */
+  private static final String PLATFORM_ENVELOPE_BODY =
+      "{\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"Session required\"}}";
 
   @Autowired private TestRestTemplate restTemplate;
   @Autowired private ObjectMapper objectMapper;
@@ -538,6 +549,21 @@ class ExecutionVideoEvidenceIT {
 
   // ── AC-17: an unreachable store is not an absent object ──────────────────
 
+  /**
+   * Story 10.31 AC-6 — the ruled status, the ruled code, and a body that really is {@code
+   * ErrorResponse}, next to the not-{@code 404} assertion this test was born with.
+   *
+   * <p>ESC-2 is closed: ADR-002 §24.4 rules {@code 503}, rejecting {@code 404}, {@code 500}, {@code
+   * 502} and {@code 504} each on its own grounds, and §24.6 declares it on {@code
+   * getExecutionVideo} with the {@code storeUnavailable} example. So the comparative assertions
+   * that were all this test could honestly make while the status was unruled now sit beside the
+   * absolute ones.
+   *
+   * <p><b>The not-{@code 404} and code-differ assertions are kept exactly as they were.</b> They
+   * are not redundant with the new ones: they state the <em>distinction</em> the route ships (10.15
+   * AC-17), which survives any later re-ruling of which status carries it, whereas the literals
+   * below state today's ruling.
+   */
   @Test
   void anUnreachableStoreAndAnAbsentObjectAreDifferentAnswers() throws IOException {
     store.clear();
@@ -560,6 +586,29 @@ class ExecutionVideoEvidenceIT {
     assertThat(codeOf(unreachable))
         .as("the two cases must not be collapsed onto one code either")
         .isNotEqualTo(absentCode);
+
+    assertThat(unreachable.getStatusCode().value())
+        .as(
+            "ADR-002 §24.4 rules 503 for an unreachable store: the condition is transient and "
+                + "belongs to the server. 500 is unclassified, 502 means the upstream answered "
+                + "with something invalid, 504 covers only the timeout case")
+        .isEqualTo(503);
+    assertThat(codeOf(unreachable))
+        .as("the declared storeUnavailable example's code, ADR-002 §24.6")
+        .isEqualTo("VIDEO_STORE_UNAVAILABLE");
+
+    JsonSchema errorResponse = componentSchema("ErrorResponse");
+    assertThat(errorResponse.validate(bodyOf(unreachable)))
+        .as(
+            "the 503 is written by the Studio handler, so its body is ErrorResponse — `error` a "
+                + "STRING. A 503 written by the platform authentication layer before authorization "
+                + "would carry that layer's envelope instead (ADR-002 §24.4, §25)")
+        .isEmpty();
+    assertThat(errorResponse.validate(objectMapper.readTree(PLATFORM_ENVELOPE_BODY)))
+        .as(
+            "the control: ErrorResponse must be able to REJECT the platform envelope, or the "
+                + "assertion above passes for a schema that accepts anything")
+        .isNotEmpty();
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────
@@ -593,6 +642,29 @@ class ExecutionVideoEvidenceIT {
     } catch (IOException e) {
       throw new AssertionError("the snapshot route did not answer JSON", e);
     }
+  }
+
+  /** The response body, parsed as JSON, exactly as the server returned it. */
+  private JsonNode bodyOf(ResponseEntity<byte[]> response) throws IOException {
+    return objectMapper.readTree(new String(response.getBody(), StandardCharsets.UTF_8));
+  }
+
+  /**
+   * A component schema read <b>live from the frozen document</b> and compiled by {@code networknt},
+   * the same library and the same {@code V202012} factory {@code ArtifactSchemaDriftTest} and
+   * {@code InternalBodyContractConformanceTest} already use in this module.
+   *
+   * <p>Read rather than transcribed, so an amendment to {@code ErrorResponse} reaches this test
+   * without an edit — ADR-002 §18.3.
+   */
+  @SuppressWarnings("unchecked")
+  private JsonSchema componentSchema(String name) throws IOException {
+    Map<String, Object> schema =
+        (Map<String, Object>)
+            ContractDocument.at(ContractDocument.load().root(), "components", "schemas", name);
+    assertThat(schema).as("openapi.yaml declares a %s schema", name).isNotNull();
+    return JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V202012)
+        .getSchema(objectMapper.valueToTree(schema));
   }
 
   private String codeOf(ResponseEntity<byte[]> response) throws IOException {

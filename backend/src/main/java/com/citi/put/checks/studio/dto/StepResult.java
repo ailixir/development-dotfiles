@@ -4,7 +4,9 @@ package com.citi.put.checks.studio.dto;
  * One result entry per original step (Architecture §8.2).
  *
  * <p>Per-step states are {@code PENDING | RUNNING | PASS | FAIL | SKIPPED}. Skipped and unstarted
- * steps carry {@code null} timings — there is no synthetic index-times-ten mapping (§6.4).
+ * steps carry {@code null} timings — there is no synthetic index-times-ten mapping (§6.4). The one
+ * exception is the step a cancel interrupted: the runner reports it {@code SKIPPED} with the start
+ * it had and a fixed stop text, and it is projected verbatim like any other (ADR-002 §29.5).
  *
  * @param offsetMs start offset on the recording timeline, or null if the step was never attempted
  */

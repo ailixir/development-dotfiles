@@ -83,6 +83,60 @@ Use for development, frontend integration, and stakeholder presentations.
 
 ---
 
+## Checks Studio end to end on a laptop
+
+`../dev.sh` starts the backend (`local` profile), a real `studio-runner` and the Vite frontend, and
+wires them together. **Verified 2026-09-18** with `./dev.sh --seed` (on non-default ports, see
+below): a test created in the Studio, confirmed in the UI and started with **Run Test** ran in
+real Chromium and showed `Passed` on the Studio page and on the Runs page.
+
+```bash
+cd studio-runner && npm run browsers:install   # once: the pinned Chromium
+cd .. && ./dev.sh --seed                       # --seed: CSIs to own a test (local alone has none)
+```
+
+What `dev.sh` wires, and why each piece is needed:
+
+| Setting | Value | Without it |
+|---|---|---|
+| `STUDIO_RUNNER_BASE_URL` | `http://127.0.0.1:8090` (`DEV_STUDIO_RUNNER_PORT`) | dispatch closes `ERROR`/`DISPATCH_FAILED` naming `studio.runner.base-url` |
+| `STUDIO_RUNNER_SERVICE_TOKEN` | generated per session; the runner gets the same value as `STUDIO_RUNNER_SERVICE_IDENTITY` | dispatch closes `ERROR`/`DISPATCH_FAILED` naming `studio.runner.service-identity-token` |
+| `STUDIO_CALLBACK_SERVICE_TOKEN` | generated per session; the runner gets it as `STUDIO_RUNNER_CALLBACK_IDENTITY` | the API refuses every runner callback (its callback chain has no token to accept), so nothing the runner reports is recorded |
+| `CHECKS_SOURCE_UI_TEST` | `true` | the Studio pages say "not available in this environment" |
+| `STUDIO_GATEWAY_LOCAL_PASSTHROUGH` | `true` unless `STUDIO_GATEWAY_ENABLED=true` | every compile ends `GATEWAY_UNAVAILABLE`, so nothing is ever runnable |
+
+The `local` profile itself runs the Studio dispatcher and reapers (`studio.execution.dispatcher.enabled`
+defaults to `true` there; the schedulers are gated `worker` or `local & !api`), so one `bootRun` is
+both the API and the worker.
+
+**Compile without an LLM.** A laptop has no R2D2 credentials, so the `local` profile can swap the
+disabled gateway for `LocalPassthroughGatewayClient`: write every step as a Playwright statement and
+it is proposed verbatim, then validated by the real runner, confirmed by you and run for real. An
+English step is refused (the draft shows `GATEWAY_UNAVAILABLE`; the reason is logged at WARN as
+`studio.gateway.failure`). The passthrough refuses to start under any profile other than `local`. For example:
+
+```text
+await page.goto('http://127.0.0.1:5173/');
+await expect(page).toHaveTitle(/Checks/i);
+```
+
+**Ports.** `DEV_BACKEND_PORT`, `DEV_FRONTEND_PORT` and `DEV_STUDIO_RUNNER_PORT` move the three
+listeners (defaults 8080, 5173, 8090). With a non-default frontend port, `dev.sh` adds that origin to
+`CHECKS_CORS_ALLOWED_ORIGINS`, because otherwise every browser POST gets `403 Invalid CORS request`.
+`--no-studio-runner` skips the runner.
+
+**Known local limits.** The recording is uploaded to the runner's filesystem store, but the API's
+video store is still the in-memory fake, so the Runs page says the recording is available and then
+cannot play it (`GET …/video` answers `404`). Under `--seed` the health endpoint reports `DOWN`
+(`missing_partition: ui_test_executions_<month>`) and `dev.sh` starts the frontend after its 60 s
+wait anyway; Studio runs still work.
+
+**The automated version.** `../tools/corun.sh` runs `StudioCoRunIT`: the real API and the real
+runner in one JVM session, five legs, the last of which runs a real Chromium against a page the test
+serves on loopback and requires the execution `PASSED` and its ledger row `DONE`.
+
+---
+
 ## Quality gates
 
 `./gradlew check` runs:

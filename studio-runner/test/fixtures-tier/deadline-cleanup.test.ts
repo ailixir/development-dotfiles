@@ -21,8 +21,6 @@
  * in-image half — PID-1 reaping, `readOnlyRootFilesystem`, `emptyDir` scratch and `/dev/shm` — is
  * AC-11b, and it is recorded below as a **live skip** rather than as a pass.
  */
-import { createServer } from 'node:http';
-import type { Server } from 'node:http';
 import { existsSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -37,6 +35,8 @@ import { SCRATCH_SUBDIRECTORIES } from '../../src/run/scratchLayout.js';
 import { descendantsOf, isAlive } from '../../src/run/tree.js';
 import type { BrowserSession, SessionRunResult } from '../../src/server/adapters.js';
 import { createRunSnapshot } from '../../src/reporting/snapshot.js';
+import { startBlackHole } from '../helpers/blackHole.js';
+import type { BlackHole } from '../helpers/blackHole.js';
 import { startPageServer } from '../helpers/pageServer.js';
 import type { PageServer } from '../helpers/pageServer.js';
 import { CHILD_MODULE_PATH } from './globalSetup.js';
@@ -46,34 +46,19 @@ const CANARY = 'canary-secret-value-7c1e4a';
 
 let server: PageServer;
 /** A loopback route that accepts the connection and then answers nothing, ever. */
-let blackHole: { server: Server; url: string };
+let blackHole: BlackHole;
 const scratches: string[] = [];
 /** Pids this file suspended, so a failed assertion cannot leave stopped browsers on the machine. */
 const suspended: number[] = [];
 
 beforeAll(async () => {
   server = await startPageServer();
-  blackHole = await new Promise((resolve) => {
-    // Not `node:net`: a real HTTP request that is never answered is what makes `page.goto` hang
-    // *inside Chromium* rather than fail fast on a refused connection.
-    const instance = createServer(() => {
-      // Deliberately no `response.end`. The socket stays open and the navigation never settles.
-    });
-    instance.listen(0, '127.0.0.1', () => {
-      const address = instance.address();
-      const port = typeof address === 'object' && address !== null ? address.port : 0;
-      resolve({ server: instance, url: `http://127.0.0.1:${String(port)}/never` });
-    });
-  });
+  blackHole = await startBlackHole();
 });
 
 afterAll(async () => {
   await server.close();
-  await new Promise<void>((resolve) => {
-    blackHole.server.close(() => {
-      resolve();
-    });
-  });
+  await blackHole.close();
 });
 
 afterEach(() => {
@@ -174,6 +159,8 @@ async function hungRealRun(options: { readonly stopTimeoutMs: number }): Promise
 
   const launcher = createChildBrowserLauncher({
     recording: { width: 640, height: 360 },
+    // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0 (story 10.32).
+    seekOriginCalibrationMs: 0,
     // Long, so the *step* timeout is not what ends this run. The run is ended by the parent.
     stepTimeoutMs: 120_000,
     launchTimeoutMs: 60_000,
@@ -264,6 +251,8 @@ describe('AC-11a — the process tree is gone, established by looking for it', (
     const spawner = observingSpawner();
     const launcher = createChildBrowserLauncher({
       recording: { width: 640, height: 360 },
+      // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0 (story 10.32).
+      seekOriginCalibrationMs: 0,
       stepTimeoutMs: 30_000,
       launchTimeoutMs: 60_000,
       maxFailureMessageLength: 400,
@@ -387,6 +376,8 @@ describe('AC-13 — the next run succeeds after a killed one', () => {
     scratches.push(scratchPath);
     const launcher = createChildBrowserLauncher({
       recording: { width: 640, height: 360 },
+      // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0 (story 10.32).
+      seekOriginCalibrationMs: 0,
       stepTimeoutMs: 30_000,
       launchTimeoutMs: 60_000,
       maxFailureMessageLength: 400,
@@ -421,6 +412,8 @@ describe('AC-7a — the canary through a real Chromium, on a killed run', () => 
 
     const launcher = createChildBrowserLauncher({
       recording: { width: 640, height: 360 },
+      // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0 (story 10.32).
+      seekOriginCalibrationMs: 0,
       stepTimeoutMs: 120_000,
       launchTimeoutMs: 60_000,
       maxFailureMessageLength: 400,

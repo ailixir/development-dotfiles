@@ -12,6 +12,7 @@ import com.citi.put.checks.studio.compile.CompileState;
 import com.citi.put.checks.studio.compile.CompileStateService;
 import com.citi.put.checks.studio.compile.ConfigurationChangeClassifier;
 import com.citi.put.checks.studio.dispatch.StudioAcceptanceService;
+import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.dto.AuthoringEvidenceReference;
 import com.citi.put.checks.studio.dto.AuthoringRevisionInputs;
 import com.citi.put.checks.studio.dto.AuthoringStep;
@@ -34,6 +35,8 @@ import com.citi.put.checks.studio.entity.UITestRevision;
 import com.citi.put.checks.users.UserProvisioningService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,6 +73,19 @@ public class StudioService {
   private final CompilePipeline compilePipeline;
   private final CompileStateService compileStateService;
   private final UserProvisioningService userProvisioningService;
+  private final StudioDispatchLedgerStatements ledgerStatements;
+
+  /**
+   * Used for one thing: to refresh the draft the authorized save has just locked (ADR-002 §27.2,
+   * steps 2 and 4). Hibernate hands an entity it already holds back to a later query unchanged,
+   * even a locking one, so without this the locked read would compare the request's revisions
+   * against the copy the visibility read loaded before the lock, and two concurrent saves could
+   * both win. It refreshes rather than detaching that copy, because a detach would also unmanage an
+   * instance the caller's own transaction holds (story 10.30 QA finding DETACH-1), and it flushes
+   * before refreshing, because a refresh discards whatever that caller has left pending (QA finding
+   * REFRESH-FLUSH-1).
+   */
+  @PersistenceContext private EntityManager entityManager;
 
   @SuppressWarnings("checkstyle:ParameterNumber")
   public StudioService(
@@ -83,7 +99,8 @@ public class StudioService {
       StudioAcceptanceService acceptanceService,
       CompilePipeline compilePipeline,
       CompileStateService compileStateService,
-      UserProvisioningService userProvisioningService) {
+      UserProvisioningService userProvisioningService,
+      StudioDispatchLedgerStatements ledgerStatements) {
     this.studioRepository = studioRepository;
     this.executionRepository = executionRepository;
     this.revisionRepository = revisionRepository;
@@ -95,6 +112,7 @@ public class StudioService {
     this.compilePipeline = compilePipeline;
     this.compileStateService = compileStateService;
     this.userProvisioningService = userProvisioningService;
+    this.ledgerStatements = ledgerStatements;
   }
 
   // ── server-side authorization (AC-4a, §9.1) ──────────────────────────────
@@ -120,14 +138,22 @@ public class StudioService {
   }
 
   /**
-   * Owners and explicitly authorized administrators may compile and confirm (§9.1).
+   * Owners and explicitly authorized administrators may create, save, delete, compile and confirm
+   * (§9.1; ADR-002 §27.2). Architecture §9.1 draws no line between those five, so this is the one
+   * place {@code canWrite} is asked for any of them.
    *
    * <p>A {@code null} CSI is refused rather than treated as unrestricted. That is the answer for a
    * quarantined row whose {@code csi_id} is {@code NULL} — the other half of V12's CHECK — because
    * no principal can be authorized against a CSI that is not there. ADR-002 §14.4 states the
    * consequence: such a row is recoverable by administrator action, not by a status code.
+   *
+   * <p>Which CSI is passed in is the caller's decision, and it differs on purpose. Compile and
+   * confirm read it <em>through</em> a withheld draft ({@link
+   * StudioRepository#findCsiIdIncludingWithheld}), because they must answer {@code 409} for one.
+   * Save and delete read it through the visibility restriction, because a withheld draft is hidden
+   * from them, not in conflict (ADR-002 §14.5, §27.2).
    */
-  private void requireCompile(Authentication auth, String csiId) {
+  private void requireWrite(Authentication auth, String csiId) {
     if (csiId == null || !csiOwnershipEvaluator.canWrite(auth, csiId)) {
       throw new StudioAccessDeniedException();
     }
@@ -161,6 +187,10 @@ public class StudioService {
   /**
    * Creates a draft. The CSI is required, must be registered, and can never be changed afterwards
    * (Architecture §9.1; V12 CHECK {@code ck_ui_tests_csi_registered}).
+   *
+   * <p>Only an owner or an explicitly authorized administrator of that CSI may create on it
+   * (ADR-002 §27.2). The registered-CSI check runs first: its {@code 400} is the same whoever asks,
+   * so it discloses nothing, and the write check follows before any side effect.
    */
   @Transactional
   public UITestDto createTest(UITestRequest request, Authentication auth) {
@@ -173,6 +203,7 @@ public class StudioService {
       UITestRequest request, AuthoringV2Request authoring, Authentication auth) {
     UserIdentity identity = extractIdentity(auth);
     requireRegisteredCsi(request.csiId());
+    requireWrite(auth, request.csiId());
     if (authoring != null) {
       validateAuthoring(authoring, request.csiId());
     }
@@ -241,7 +272,7 @@ public class StudioService {
   @Transactional
   public AuthoringDraft createAuthoringDraft(
       UITestRequest metadata, AuthoringV2Request authoring, Authentication auth) {
-    requireCompile(auth, metadata.csiId());
+    requireWrite(auth, metadata.csiId());
     UITestDto created = createTest(metadata, authoring, auth);
     return readAuthoringDraft(created.id(), auth);
   }
@@ -389,10 +420,22 @@ public class StudioService {
    * therefore has nothing to compile; enqueueing there would drive a confirmed draft to {@code
    * COMPILING} and spend a gateway call to rediscover the artifact it already holds.
    *
+   * <p><b>With a caller, the order of refusal is ADR-002 §27.2's</b>: (1) the required revisions,
+   * which do not depend on the stored row; (2) the draft read through the visibility restriction —
+   * absent, soft-deleted and quarantined are all {@code 403}; (3) {@code canWrite} on that draft's
+   * CSI; (4) the locked read, where a draft that disappeared since step 2 is also {@code 403}; (5)
+   * only then {@code 409 STALE_REVISION} and {@code 409 CSI_IMMUTABLE}. The read is never {@link
+   * StudioRepository#findCsiIdIncludingWithheld}: an owner of a withheld draft who passed
+   * authorization would otherwise see it through the status code (ADR-002 §14.5).
+   *
+   * <p>Without a caller — the internal overload above — steps 2 and 3 do not run and an absent
+   * draft is still {@code IllegalArgumentException("UI Test not found: …")}, exactly as before.
+   *
    * @param id the draft to save
    * @param request the new draft state
    * @param auth the caller, or {@code null} on the internal path
    * @return the saved draft
+   * @throws StudioAccessDeniedException the caller may not write this draft, or it is not visible
    */
   @Transactional
   public UITestDto updateTest(UUID id, UITestRequest request, Authentication auth) {
@@ -400,10 +443,33 @@ public class StudioService {
       throw new IllegalArgumentException(
           "sourceRevision and configurationRevision are required on update");
     }
+    if (auth != null) {
+      UITest visible = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
+      requireWrite(auth, visible.getCsiId());
+    }
     UITest test =
         studioRepository
             .findByIdForUpdate(id)
-            .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + id));
+            .orElseThrow(
+                () ->
+                    auth != null
+                        ? new StudioAccessDeniedException()
+                        : new IllegalArgumentException("UI Test not found: " + id));
+    if (auth != null) {
+      // The visible read above put this draft in the persistence context, and Hibernate hands a
+      // managed entity back to the locking query unrefreshed: without this, a save that committed
+      // between the two reads is invisible to the revision check and gets overwritten. The row lock
+      // is held, so the refresh reads its latest committed state. It keeps the instance managed:
+      // a caller that already holds this draft in its own transaction keeps writing through it
+      // (story 10.30 QA finding DETACH-1). The flush is what keeps that caller's writes made
+      // *before* this call: a refresh reads the row and discards whatever is still pending against
+      // it. Under Hibernate's default AUTO flush mode the locking query above happens to have
+      // flushed them already, but under FlushModeType.COMMIT or Hibernate's MANUAL nothing has, and
+      // they would be dropped with no error and a successful save (QA finding REFRESH-FLUSH-1).
+      // Flushing here, after the locking read, writes them while this transaction holds the row.
+      entityManager.flush();
+      entityManager.refresh(test);
+    }
 
     if (request.sourceRevision() != test.getSourceRevision()
         || request.configurationRevision() != test.getConfigurationRevision()) {
@@ -501,7 +567,7 @@ public class StudioService {
    */
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public CompileAcceptedDto compileTest(UUID testId, Authentication auth) {
-    requireCompile(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
+    requireWrite(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
     CompileRequest request = compilePipeline.compile(testId, principalOf(auth));
     return new CompileAcceptedDto(
         request.requestId(),
@@ -545,7 +611,7 @@ public class StudioService {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public UITestDto confirmCompile(
       UUID testId, ConfirmCompileRequestDto request, Authentication auth) {
-    requireCompile(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
+    requireWrite(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
     compileStateService.confirm(
         testId,
         request.revisionId(),
@@ -591,7 +657,7 @@ public class StudioService {
       UUID id, long sourceRevision, long configurationRevision, Authentication auth) {
     UITest test =
         studioRepository.findByIdForUpdate(id).orElseThrow(StudioAccessDeniedException::new);
-    requireCompile(auth, test.getCsiId());
+    requireWrite(auth, test.getCsiId());
     if (sourceRevision != test.getSourceRevision()
         || configurationRevision != test.getConfigurationRevision()) {
       throw new StudioConflictException(
@@ -776,12 +842,32 @@ public class StudioService {
     }
   }
 
+  /** Internal soft delete with no authorization; callers that already authorized use this. */
   @Transactional
   public void softDeleteTest(UUID id) {
     UITest test =
         studioRepository
             .findById(id)
             .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + id));
+    test.setDeletedAt(Instant.now());
+  }
+
+  /**
+   * Soft-deletes a draft for a caller who may write its CSI (ADR-002 §27.2).
+   *
+   * <p>The draft is read through the visibility restriction, so an unknown id, an already
+   * soft-deleted draft and a quarantined draft are all {@code 403} with nothing written — the same
+   * answer as a draft on a CSI the caller may not write. The row that was authorized is the managed
+   * row that is changed; there is no revision to compare, so no second read is needed.
+   *
+   * @param id the draft to delete
+   * @param auth the caller
+   * @throws StudioAccessDeniedException the caller may not write this draft, or it is not visible
+   */
+  @Transactional
+  public void softDeleteTest(UUID id, Authentication auth) {
+    UITest test = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
+    requireWrite(auth, test.getCsiId());
     test.setDeletedAt(Instant.now());
   }
 
@@ -814,6 +900,60 @@ public class StudioService {
           acceptanceService.resolveIdempotencyRace(
               testId, race.getPrincipal(), race.getIdempotencyKey());
     }
+    return findExecutionById(executionId);
+  }
+
+  /** {@code 409} code: the execution already has its outcome, so there is nothing to cancel. */
+  public static final String EXECUTION_TERMINAL = "EXECUTION_TERMINAL";
+
+  /** {@code 409} code: a cancel was already recorded for this execution. */
+  public static final String CANCEL_ALREADY_REQUESTED = "CANCEL_ALREADY_REQUESTED";
+
+  /**
+   * Cancels an execution (Studio v1 WP4, ADR-002 §29) and returns its snapshot as committed.
+   *
+   * <p>Authorization comes first and is the write check on the <b>execution's own immutable
+   * CSI</b>, exactly as reads are keyed (AC-4a): an unknown id and a CSI the caller may not write
+   * answer the same {@code 403}. Then one compare-and-set on the ledger decides everything: queued
+   * work is closed {@code ERROR / CANCELLED} at once and never reaches a runner; dispatched work
+   * has the request recorded and ends when the runner or the running reaper ends it. A statement
+   * that matched nothing is a {@code 409} — the outcome is already known, or a cancel was already
+   * asked for.
+   *
+   * <p>{@code NOT_SUPPORTED} because this class is {@code readOnly = true} by default and the
+   * snapshot returned must be read after the statement commits, not from a persistence context that
+   * loaded the row before it.
+   */
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
+  public ExecutionSnapshotDto cancelExecution(UUID executionId, Authentication auth) {
+    UITestExecution execution =
+        executionRepository
+            .findByExecutionId(executionId)
+            .orElseThrow(StudioAccessDeniedException::new);
+    requireWrite(auth, execution.getCsiId());
+    String principal = principalOf(auth);
+
+    if (ledgerStatements.requestCancel(executionId, principal, Instant.now()).isEmpty()) {
+      // Zero rows is the verdict; this only names it. A row whose outcome is known — terminal, or
+      // FINALIZING its evidence — is EXECUTION_TERMINAL even when a cancel is what ended it.
+      String status = LegacyStudioAdapter.normalizeStatus(execution.getStatus());
+      boolean outcomeKnown =
+          ExecutionStatus.isTerminal(status)
+              || ledgerStatements
+                  .find(executionId)
+                  .map(
+                      row ->
+                          Set.of("FINALIZING", "DONE").contains(String.valueOf(row.get("state"))))
+                  .orElse(true);
+      throw outcomeKnown
+          ? new StudioConflictException(
+              EXECUTION_TERMINAL, "This execution has already reached its outcome")
+          : new StudioConflictException(
+              CANCEL_ALREADY_REQUESTED, "A cancel was already requested for this execution");
+    }
+    // The statement wrote through JDBC; the persistence context bound to this method still holds
+    // the row as it was read for authorization. Clear it so the snapshot is the committed one.
+    entityManager.clear();
     return findExecutionById(executionId);
   }
 

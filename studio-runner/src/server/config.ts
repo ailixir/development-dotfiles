@@ -95,6 +95,30 @@ export interface RunnerConfig {
   /** Grace given to a browser child asked to stop before it is killed. */
   readonly browserStopTimeoutMs: number;
   /**
+   * The seek-origin calibration, in milliseconds (story 10.32, ADR-002 §26.3 items 2-4, O-20).
+   *
+   * Added to the run origin's monotonic zero inside `takeRunOrigin` (`src/run/timeline.ts`), so
+   * every later step reading is this many milliseconds smaller. It corrects the
+   * readiness-to-first-frame gap AC-12c leaves to staging. It never goes into the API contract
+   * (§11.7 item 1) and never into a test bound. The only route to the child is the launch message.
+   *
+   * **The default is `0`, and this story sets no other value.** A non-zero value is per image and
+   * comes only from **SPK-06 phase B** (`docs/architecture/studio-staging-spikes.md`), measured on
+   * the pinned image in staging and recorded, with the measurements behind it, in
+   * `docs/qa/spikes/SPK-06/` (§26.3 item 3). A laptop-derived value is forbidden (§26.3 item 5).
+   *
+   * **When a measured gap may be written here (§26.3 item 4).** Add the constant only if the
+   * staging gap (a) has the same sign on every measured step and (b) has a median larger than its
+   * run-to-run spread. Otherwise apply nothing and use SPK-06's fallback: report the measured
+   * tolerance and state the calibration limit. No code checks this rule. The runner only ever sees
+   * the one configured number, so the decision belongs to SPK-06 phase B and not to a runtime check.
+   *
+   * **No non-zero value may be applied until @architect rules on ESC-3.** Under a non-zero value
+   * a reading taken within this many milliseconds of readiness is negative, against the contract's
+   * `minimum: 0`, and `browserStartedAt` no longer names the instant the zero denotes.
+   */
+  readonly seekOriginCalibrationMs: number;
+  /**
    * The **server limit** on total browser runtime (§5.2, §8.5 starting value 120 s).
    *
    * §5.2: total browser runtime is "configurable within server limits". The job envelope carries
@@ -257,6 +281,15 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
     required: false,
     fallback: 5_000,
     min: 1,
+  },
+  // ADR-002 §26.3 item 3: a per-image setting whose default is `0`. See the field's documentation
+  // for the rule that decides when a measured value may replace it.
+  SEEK_ORIGIN_CALIBRATION_MS: {
+    field: 'seekOriginCalibrationMs',
+    kind: 'integer',
+    required: false,
+    fallback: 0,
+    min: 0,
   },
   // The two server limits a job is clamped to (§5.2 "configurable within server limits", AC-6).
   // They go through `KEY_SPECS` like everything else, so the loader stays fail-closed and there is

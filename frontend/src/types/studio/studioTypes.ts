@@ -43,6 +43,7 @@ export const EXECUTION_ERROR_CODES = [
   'DISPATCH_DISABLED',
   'AUTHORIZATION_REVOKED',
   'REFERENCE_UNAVAILABLE',
+  'CANCELLED',
 ] as const;
 
 export type ExecutionErrorCode = (typeof EXECUTION_ERROR_CODES)[number];
@@ -62,6 +63,17 @@ type AssertTrue<T extends true> = T;
 export type ExecutionErrorCodeIsDerivedFromItsCarrier = AssertTrue<
   TypeEquals<ExecutionErrorCode, (typeof EXECUTION_ERROR_CODES)[number]>
 >;
+
+/**
+ * The code a cancelled run ends with: `status: ERROR`, `errorCode: CANCELLED`.
+ *
+ * A member of {@link EXECUTION_ERROR_CODES} since Studio v1 WP4 amended the contract's enum
+ * (ADR-002 §29). WP5 kept it outside the carrier while the enum did not declare it, so that
+ * `studioContract.test.ts` would go red on the amendment and force this fold; the fold is done, and
+ * this name stays only because the Stop flow and its tests read it. `satisfies` keeps it a member:
+ * dropping `CANCELLED` from the carrier fails the type-check here.
+ */
+export const CANCELLED_ERROR_CODE = 'CANCELLED' as const satisfies ExecutionErrorCode;
 
 export type StepStatus = 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL' | 'SKIPPED';
 
@@ -416,7 +428,11 @@ export interface TestDto {
   compileDiagnostics?: CompileDiagnostics | null;
 }
 
-/** One entry per original step. Skipped or unstarted steps carry null timings. */
+/**
+ * One entry per original step. Skipped or unstarted steps carry null timings — except the step a
+ * cancel interrupted, which is `SKIPPED` with the start it had and the runner's stop text in
+ * `message` (openapi `StepResult`, ADR-002 §29.5).
+ */
 export interface StepResult {
   stepIndex: number;
   originalText: string;
@@ -427,7 +443,8 @@ export interface StepResult {
 }
 
 export interface ExecutionLogEntry {
-  at: string;
+  /** Null where the runner held no reading (openapi `ExecutionLogEntry`). */
+  at: string | null;
   level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
   message: string;
   stepIndex?: number | null;
@@ -514,6 +531,10 @@ export interface SourceArtifact {
   steps: ArtifactStep[];
 }
 
+/**
+ * The terminal outcomes, in one place. Every Studio surface that decides whether a run has ended
+ * (the Studio page, the Tests page, the Runs page) reads this set rather than keeping its own.
+ */
 export const TERMINAL_EXECUTION_STATUSES: readonly ExecutionStatus[] = [
   'PASSED',
   'FAILED',

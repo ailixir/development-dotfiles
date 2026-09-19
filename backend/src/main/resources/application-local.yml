@@ -28,6 +28,11 @@ checks:
   security:
     bypass:
       identity-headers: true
+  # The Studio pages render "not available in this environment" while the UI_TEST source is off,
+  # which it is by default everywhere (application.yml). `dev.sh` turns it on together with the
+  # studio-runner so that "Run Test" is reachable locally (Studio v1 WP2).
+  sources:
+    UI_TEST: ${CHECKS_SOURCE_UI_TEST:false}
   scheduling:
     dispatcher-enabled: true
   reports:
@@ -43,6 +48,17 @@ management:
       show-details: always
 
 studio:
+  # The local e2e path (Studio v1 WP2): one bootRun is both the API and the worker, so the
+  # dispatcher and the reapers run here (their schedulers are gated `worker` or `local & !api`).
+  # The runner side is NOT configured here on purpose: `studio.runner.base-url` and
+  # `studio.runner.service-identity-token` come from STUDIO_RUNNER_BASE_URL and
+  # STUDIO_RUNNER_SERVICE_TOKEN (application.yml, no fallback), and the callback token from
+  # STUDIO_CALLBACK_SERVICE_TOKEN. `dev.sh` exports all three and hands the same
+  # values to the runner. Without them a run is closed ERROR/DISPATCH_FAILED naming the missing
+  # key, rather than left PENDING.
+  execution:
+    dispatcher:
+      enabled: ${STUDIO_DISPATCHER_ENABLED:true}
   # Studio secret resolution (§9.2, story 10.17 AC-9).
   #
   # `provider` has NO default anywhere — not here, not in application.yml, not in code. A
@@ -58,6 +74,11 @@ studio:
       enabled: ${STUDIO_GATEWAY_ENABLED:false}
       credentials:
         mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:none}
+      # With the gateway off, `true` swaps the always-refusing client for LocalPassthroughGateway-
+      # Client: a draft whose every step is already a Playwright statement is proposed verbatim,
+      # and validation, confirmation, dispatch and the run are all the real path. Refused at
+      # startup under any other profile. `dev.sh` turns it on unless STUDIO_GATEWAY_ENABLED=true.
+      local-passthrough: ${STUDIO_GATEWAY_LOCAL_PASSTHROUGH:false}
 
 logging:
   level:

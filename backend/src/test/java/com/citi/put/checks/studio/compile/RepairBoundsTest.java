@@ -109,11 +109,11 @@ class RepairBoundsTest extends AbstractRepairPipelineTest {
     assertThatThrownBy(() -> withThreshold(shipped, budget).validate(gateway, runner))
         .as("a threshold equal to the budget could take a compile that is still running")
         .isInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("sweep.threshold");
+        .hasMessageContaining("abandonment.threshold");
 
     assertThatCode(() -> withThreshold(shipped, budget.plusMillis(1)).validate(gateway, runner))
         .doesNotThrowAnyException();
-    assertThat(properties.sweep().threshold())
+    assertThat(properties.abandonment().threshold())
         .as("and the deployed threshold clears the deployed budget")
         .isGreaterThan(properties.pipeline().attemptBudget());
   }
@@ -263,7 +263,7 @@ class RepairBoundsTest extends AbstractRepairPipelineTest {
         base.authoring(),
         base.diagnostics(),
         base.repair(),
-        base.sweep());
+        base.abandonment());
   }
 
   private static StudioCompileProperties withThreshold(
@@ -273,11 +273,11 @@ class RepairBoundsTest extends AbstractRepairPipelineTest {
         base.authoring(),
         base.diagnostics(),
         base.repair(),
-        new StudioCompileProperties.Sweep(
-            base.sweep().enabled(),
+        new StudioCompileProperties.Abandonment(
+            base.abandonment().enabled(),
             threshold,
-            base.sweep().batchSize(),
-            base.sweep().intervalMs()));
+            base.abandonment().batchSize(),
+            base.abandonment().intervalMs()));
   }
 
   /** The bounds this backend ships, bound from the records' own {@code @DefaultValue}s. */

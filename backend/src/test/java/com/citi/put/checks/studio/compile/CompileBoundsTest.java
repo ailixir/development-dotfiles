@@ -38,7 +38,7 @@ class CompileBoundsTest {
           new StudioCompileProperties.Authoring(100, 1024, 65536),
           new StudioCompileProperties.Diagnostics(10, 400, 120, 4096),
           new StudioCompileProperties.Repair(2),
-          new StudioCompileProperties.Sweep(true, Duration.ofSeconds(600), 200, 60_000L));
+          new StudioCompileProperties.Abandonment(true, Duration.ofSeconds(600), 200, 60_000L));
 
   private final AuthoringLimits limits = new AuthoringLimits(properties);
 
@@ -233,7 +233,7 @@ class CompileBoundsTest {
             properties.authoring(),
             properties.diagnostics(),
             properties.repair(),
-            properties.sweep());
+            properties.abandonment());
 
     assertThatThrownBy(() -> tooShort.validate(gateway, runner))
         .isInstanceOf(IllegalStateException.class)

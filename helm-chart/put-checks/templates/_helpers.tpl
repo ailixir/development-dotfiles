@@ -95,6 +95,28 @@ deployment half of the same property.
 {{ include "put-checks.fullname" . }}-studio-runner
 {{- end }}
 
+{{/*
+The runner's in-cluster address, rendered from its own Service name and port. The API
+(POST /v1/validate) and the worker (POST /v1/runs) both use this one derivation (AC-1).
+*/}}
+{{- define "put-checks.studioRunner.baseUrl" -}}
+{{ printf "http://%s:%v" (include "put-checks.studioRunner.fullname" .) .Values.studioRunner.service.port }}
+{{- end }}
+
+{{/*
+Where the runner posts admission and progress: the API's own Service, derived rather than written
+as a literal. The literal `http://put-checks-api:8080` was right only for a release named
+`put-checks`; any other release name pointed every callback at a Service that does not exist.
+`studioRunner.callbackBaseUrl` still overrides it for a deployment that fronts the API differently.
+*/}}
+{{- define "put-checks.studioRunner.callbackBaseUrl" -}}
+{{- if .Values.studioRunner.callbackBaseUrl -}}
+{{ .Values.studioRunner.callbackBaseUrl }}
+{{- else -}}
+{{ printf "http://%s:%v" (include "put-checks.api.fullname" .) .Values.backend.service.port }}
+{{- end -}}
+{{- end }}
+
 {{- define "put-checks.studioRunner.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "put-checks.name" . }}-studio-runner
 app.kubernetes.io/instance: {{ .Release.Name }}
@@ -119,13 +141,13 @@ and sharing an account with the API is how "nothing" silently becomes "whatever 
 `ACCEPTED_KEYS` loader (`studio-runner/src/server/config.ts`); a rendered name that is not one
 would be a startup failure in the pod, and a values key that is not one fails the render below.
 
-Deliberately a subset: the loader accepts thirty-one keys and the deployment sets the ones a
+Deliberately a subset: the loader accepts thirty-two keys and the deployment sets the ones a
 staging pod needs. What matters is that the list is closed at both ends —
 `PLAYWRIGHT_BROWSERS_PATH` and `HOME` are on neither side, and there is no chart path that emits
 them.
 */}}
 {{- define "put-checks.studioRunner.acceptedEnvKeys" -}}
-STUDIO_RUNNER_PORT STUDIO_RUNNER_HOST STUDIO_RUNNER_POOL_SIZE STUDIO_RUNNER_SCRATCH_DIR STUDIO_RUNNER_OBJECT_STORE_DIR STUDIO_RUNNER_OBJECT_STORE_MAX_ATTEMPTS STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS STUDIO_RUNNER_OBJECT_STORE_BACKOFF_MS STUDIO_RUNNER_ADMISSION_TIMEOUT_MS STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS STUDIO_RUNNER_TERMINAL_DELIVERY_MAX_ATTEMPTS STUDIO_RUNNER_TERMINAL_DELIVERY_BACKOFF_MS STUDIO_RUNNER_VALIDATE_TIMEOUT_MS STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES STUDIO_RUNNER_RETRY_AFTER_SECONDS STUDIO_RUNNER_DRAIN_TIMEOUT_MS STUDIO_RUNNER_RECORDING_WIDTH STUDIO_RUNNER_RECORDING_HEIGHT STUDIO_RUNNER_BROWSER_LAUNCH_TIMEOUT_MS STUDIO_RUNNER_STEP_TIMEOUT_MS STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS STUDIO_RUNNER_MAX_REPORT_STEPS STUDIO_RUNNER_MAX_REPORT_LOG_ENTRIES STUDIO_RUNNER_MAX_REPORT_LOG_ENTRY_LENGTH STUDIO_RUNNER_MAX_REPORT_BODY_BYTES
+STUDIO_RUNNER_PORT STUDIO_RUNNER_HOST STUDIO_RUNNER_POOL_SIZE STUDIO_RUNNER_SCRATCH_DIR STUDIO_RUNNER_OBJECT_STORE_DIR STUDIO_RUNNER_OBJECT_STORE_MAX_ATTEMPTS STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS STUDIO_RUNNER_OBJECT_STORE_BACKOFF_MS STUDIO_RUNNER_ADMISSION_TIMEOUT_MS STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS STUDIO_RUNNER_TERMINAL_DELIVERY_MAX_ATTEMPTS STUDIO_RUNNER_TERMINAL_DELIVERY_BACKOFF_MS STUDIO_RUNNER_VALIDATE_TIMEOUT_MS STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES STUDIO_RUNNER_RETRY_AFTER_SECONDS STUDIO_RUNNER_DRAIN_TIMEOUT_MS STUDIO_RUNNER_RECORDING_WIDTH STUDIO_RUNNER_RECORDING_HEIGHT STUDIO_RUNNER_BROWSER_LAUNCH_TIMEOUT_MS STUDIO_RUNNER_STEP_TIMEOUT_MS STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS STUDIO_RUNNER_MAX_REPORT_STEPS STUDIO_RUNNER_MAX_REPORT_LOG_ENTRIES STUDIO_RUNNER_MAX_REPORT_LOG_ENTRY_LENGTH STUDIO_RUNNER_MAX_REPORT_BODY_BYTES
 {{- end }}
 
 {{/*

@@ -12,8 +12,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +57,8 @@ class StudioAuthorizationIT {
   private static final String OWNER = "authz-owner@citi.com";
   private static final String READER = "authz-reader@citi.com";
   private static final String STRANGER = "authz-stranger@citi.com";
+  private static final String CONTRIBUTOR = "authz-contributor@citi.com";
+  private static final String DRAFT_STEP = "Go to the home page";
   private static final String TOKEN = "test-service-identity-token";
 
   /** AC-20: a failure injected after the handler's work, so the ack ordering is decidable. */
@@ -106,6 +110,7 @@ class StudioAuthorizationIT {
     fixtures.seedUser(OWNER);
     fixtures.seedUser(READER);
     fixtures.seedUser(STRANGER);
+    fixtures.seedUser(CONTRIBUTOR);
     fixtures.seedCsi(CSI_ID, OWNER);
     fixtures.seedCsi(OTHER_CSI_ID, OWNER);
     jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id IN (?, ?)", CSI_ID, OTHER_CSI_ID);
@@ -363,7 +368,441 @@ class StudioAuthorizationIT {
         .isEqualTo("RUNNING");
   }
 
+  // ── Story 10.30 (ADR-002 O-18, §27): write authorization on create, save and delete ──
+  //
+  // Written first, against the code as it stood before the fix (ADR-002 §27.3: "@qa writes the
+  // failing test first"). The refusals below were red on purpose at that commit and the controls
+  // were green; the story's Dev Agent Record and QA Results hold the observed run. Every refusal
+  // asserts the row from the database, never from the response.
+
+  /**
+   * AC-2, {@code PUT} half: three identities without write on the draft's CSI — a viewer, a
+   * contributor (the closest role to a writer: READ_ROLES holds it, WRITE_ROLES does not) and an
+   * identity with no ownership at all — are refused {@code 403}, and the row is byte-unchanged.
+   *
+   * <p>Each identity gets its own draft, seeded identically, so one identity's outcome cannot shape
+   * the next one's. The save body carries the row's current revisions, so a refusal can only be
+   * authorization's and never {@code 409 STALE_REVISION}.
+   */
+  @Test
+  void aReaderOrAStrangerMayNotSaveAndTheDraftIsByteUnchanged() {
+    SoftAssertions softly = new SoftAssertions();
+    for (Caller caller : callersWithoutWrite()) {
+      UUID draft = seedWritableDraft("Save refusal (" + caller.label() + ")");
+      Map<String, Object> before = rowState(draft);
+      String beforeImage = rowImage(draft);
+
+      ResponseEntity<String> refused =
+          put(
+              draft,
+              saveBody(draft, "Renamed by " + caller.label(), "Edited by " + caller.label()),
+              caller.headers());
+
+      softly
+          .assertThat(refused.getStatusCode().value())
+          .as("%s: PUT on a draft whose CSI it may not write (body: %s)", caller, refused.getBody())
+          .isEqualTo(403);
+      softly
+          .assertThat(refused.getBody())
+          .as("%s: the refusal is the one Studio code", caller)
+          .contains(StudioAccessDeniedException.CODE);
+      softly
+          .assertThat(rowState(draft))
+          .as("%s: the five named columns, read from the database", caller)
+          .isEqualTo(before);
+      softly
+          .assertThat(rowImage(draft))
+          .as("%s: the whole row, read from the database", caller)
+          .isEqualTo(beforeImage);
+    }
+    softly.assertAll();
+  }
+
+  /** AC-2, {@code DELETE} half: the same three identities, the same byte-unchanged row. */
+  @Test
+  void aReaderOrAStrangerMayNotDeleteAndTheDraftIsByteUnchanged() {
+    SoftAssertions softly = new SoftAssertions();
+    for (Caller caller : callersWithoutWrite()) {
+      UUID draft = seedWritableDraft("Delete refusal (" + caller.label() + ")");
+      Map<String, Object> before = rowState(draft);
+      String beforeImage = rowImage(draft);
+
+      ResponseEntity<String> refused = delete(draft, caller.headers());
+
+      softly
+          .assertThat(refused.getStatusCode().value())
+          .as(
+              "%s: DELETE on a draft whose CSI it may not write (body: %s)",
+              caller, refused.getBody())
+          .isEqualTo(403);
+      softly
+          .assertThat(refused.getBody())
+          .as("%s: the refusal is the one Studio code", caller)
+          .contains(StudioAccessDeniedException.CODE);
+      softly
+          .assertThat(rowState(draft))
+          .as("%s: deleted_at and the other named columns, read from the database", caller)
+          .isEqualTo(before);
+      softly
+          .assertThat(rowImage(draft))
+          .as("%s: the whole row, read from the database", caller)
+          .isEqualTo(beforeImage);
+    }
+    softly.assertAll();
+  }
+
+  /**
+   * AC-3 and AC-9. One caller owns {@code OTHER_CSI_ID} and only views {@code CSI_ID}.
+   *
+   * <ul>
+   *   <li>AC-3 deny: creating on {@code CSI_ID} (registered, not writable) is {@code 403} and no
+   *       row is created, counted in the database.
+   *   <li>AC-3 control: the same caller creating on {@code OTHER_CSI_ID} is {@code 201}, so the
+   *       deny is not a route that refuses everyone.
+   *   <li>AC-9: the same caller — not an administrator, no write on the id — creating on an
+   *       unregistered CSI is {@code 400}, not {@code 403}: the registered-CSI check runs first.
+   * </ul>
+   */
+  @Test
+  void creatingOnARegisteredCsiTheCallerMayNotWriteIsForbiddenAndCreatesNoRow() {
+    HttpHeaders caller = identity(READER, "", OTHER_CSI_ID + ":owner," + CSI_ID + ":viewer");
+    SoftAssertions softly = new SoftAssertions();
+
+    String deniedName = "Create refusal " + UUID.randomUUID();
+    ResponseEntity<String> denied =
+        post("/api/v1/studio/tests", createBody(deniedName, CSI_ID), caller);
+    softly
+        .assertThat(denied.getStatusCode().value())
+        .as("AC-3: POST on a registered CSI the caller may not write (body: %s)", denied.getBody())
+        .isEqualTo(403);
+    softly.assertThat(denied.getBody()).contains(StudioAccessDeniedException.CODE);
+    softly
+        .assertThat(rowsNamed(deniedName))
+        .as("AC-3: no ui_tests row was created, counted in the database")
+        .isZero();
+
+    String ownName = "Create control " + UUID.randomUUID();
+    ResponseEntity<String> created =
+        post("/api/v1/studio/tests", createBody(ownName, OTHER_CSI_ID), caller);
+    softly
+        .assertThat(created.getStatusCode().value())
+        .as(
+            "AC-3 control: the same caller creates on the CSI it owns (body: %s)",
+            created.getBody())
+        .isEqualTo(201);
+    softly.assertThat(rowsNamed(ownName)).as("AC-3 control: exactly one row").isEqualTo(1);
+
+    String unregistered = "U" + (10_000_000 + (int) (Math.random() * 89_999_999));
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT COUNT(*) FROM csi_systems WHERE id = ?", Integer.class, unregistered))
+        .as("fixture: the id really is unregistered")
+        .isZero();
+    String unregisteredName = "Create unregistered " + UUID.randomUUID();
+    ResponseEntity<String> malformed =
+        post("/api/v1/studio/tests", createBody(unregisteredName, unregistered), caller);
+    softly
+        .assertThat(malformed.getStatusCode().value())
+        .as(
+            "AC-9: a non-administrator's POST on an unregistered CSI is answered by the"
+                + " registered-CSI check, before authorization (body: %s)",
+            malformed.getBody())
+        .isEqualTo(400);
+    softly.assertThat(rowsNamed(unregisteredName)).isZero();
+    softly.assertAll();
+  }
+
+  /**
+   * AC-4: {@code PUT} on an unknown id, a soft-deleted draft and a quarantined draft, as an
+   * administrator, is {@code 403} in all three cases with byte-identical bodies. The administrator
+   * first saves each draft successfully (a name-only save, which moves no revision and enqueues no
+   * compile), so each {@code 403} belongs to the row's state and not to the fixture.
+   */
+  @Test
+  void putOnAnUnknownSoftDeletedOrQuarantinedDraftIsForbiddenEvenToAnAdministrator() {
+    UUID softDeleted = seedWritableDraft("Withheld save (soft-deleted)");
+    UUID quarantined = seedWritableDraft("Withheld save (quarantined)");
+    UUID unknown = UUID.randomUUID();
+
+    for (UUID draft : List.of(softDeleted, quarantined)) {
+      ResponseEntity<String> control =
+          put(draft, saveBody(draft, "Administrator control", DRAFT_STEP), admin());
+      assertThat(control.getStatusCode().value())
+          .as(
+              "control: the administrator reaches the save on this row (body: %s)",
+              control.getBody())
+          .isEqualTo(200);
+      assertThat(revisions(draft))
+          .as("control: the name-only save moved no revision")
+          .isEqualTo(List.of(1L, 1L));
+    }
+    jdbc.update("UPDATE ui_tests SET deleted_at = NOW() WHERE id = ?", softDeleted);
+    jdbc.update("UPDATE ui_tests SET quarantined_at = NOW() WHERE id = ?", quarantined);
+    String softDeletedImage = rowImage(softDeleted);
+    String quarantinedImage = rowImage(quarantined);
+
+    ResponseEntity<String> onUnknown =
+        put(unknown, saveBody(1L, 1L, "Administrator save", "Edited"), admin());
+    ResponseEntity<String> onSoftDeleted =
+        put(softDeleted, saveBody(softDeleted, "Administrator save", "Edited"), admin());
+    ResponseEntity<String> onQuarantined =
+        put(quarantined, saveBody(quarantined, "Administrator save", "Edited"), admin());
+
+    SoftAssertions softly = new SoftAssertions();
+    assertWithheld(softly, "PUT unknown", onUnknown);
+    assertWithheld(softly, "PUT soft-deleted", onSoftDeleted);
+    assertWithheld(softly, "PUT quarantined", onQuarantined);
+    softly
+        .assertThat(onSoftDeleted.getBody())
+        .as("byte-identical bodies: soft-deleted vs unknown")
+        .isEqualTo(onUnknown.getBody());
+    softly
+        .assertThat(onQuarantined.getBody())
+        .as("byte-identical bodies: quarantined vs unknown")
+        .isEqualTo(onUnknown.getBody());
+    softly.assertThat(rowImage(softDeleted)).as("nothing written").isEqualTo(softDeletedImage);
+    softly.assertThat(rowImage(quarantined)).as("nothing written").isEqualTo(quarantinedImage);
+    softly.assertAll();
+  }
+
+  /**
+   * AC-5: {@code DELETE} on the same three states, as the same administrator, is {@code 403} in all
+   * three with byte-identical bodies, and nothing is written.
+   *
+   * <p>The controls: for the soft-deleted case the administrator's own successful {@code DELETE} is
+   * what puts the row into that state, so the second {@code DELETE} is the one under test and must
+   * not bump {@code deleted_at}. For the quarantined case a successful {@code DELETE} would itself
+   * change the state, so the control is the administrator's successful {@code GET} of the same row
+   * through the same visibility-restricted read, taken before the quarantine.
+   */
+  @Test
+  void deleteOnAnUnknownSoftDeletedOrQuarantinedDraftIsForbiddenEvenToAnAdministrator() {
+    UUID softDeleted = seedWritableDraft("Withheld delete (soft-deleted)");
+    UUID quarantined = seedWritableDraft("Withheld delete (quarantined)");
+    UUID unknown = UUID.randomUUID();
+
+    ResponseEntity<String> deleteControl = delete(softDeleted, admin());
+    assertThat(deleteControl.getStatusCode().value())
+        .as(
+            "control: the administrator reaches the delete on this row (body: %s)",
+            deleteControl.getBody())
+        .isEqualTo(204);
+    assertThat(deletedAt(softDeleted)).as("control: and it was deleted").isNotNull();
+
+    ResponseEntity<String> readControl = get("/api/v1/studio/tests/" + quarantined, admin());
+    assertThat(readControl.getStatusCode().value())
+        .as("control: the administrator reaches this row before it is quarantined")
+        .isEqualTo(200);
+    jdbc.update("UPDATE ui_tests SET quarantined_at = NOW() WHERE id = ?", quarantined);
+    String softDeletedImage = rowImage(softDeleted);
+    String quarantinedImage = rowImage(quarantined);
+
+    ResponseEntity<String> onUnknown = delete(unknown, admin());
+    ResponseEntity<String> onSoftDeleted = delete(softDeleted, admin());
+    ResponseEntity<String> onQuarantined = delete(quarantined, admin());
+
+    SoftAssertions softly = new SoftAssertions();
+    assertWithheld(softly, "DELETE unknown", onUnknown);
+    assertWithheld(softly, "DELETE soft-deleted", onSoftDeleted);
+    assertWithheld(softly, "DELETE quarantined", onQuarantined);
+    softly
+        .assertThat(onSoftDeleted.getBody())
+        .as("byte-identical bodies: soft-deleted vs unknown")
+        .isEqualTo(onUnknown.getBody());
+    softly
+        .assertThat(onQuarantined.getBody())
+        .as("byte-identical bodies: quarantined vs unknown")
+        .isEqualTo(onUnknown.getBody());
+    softly
+        .assertThat(rowImage(softDeleted))
+        .as("no second deleted_at bump, nothing else written")
+        .isEqualTo(softDeletedImage);
+    softly.assertThat(rowImage(quarantined)).as("nothing written").isEqualTo(quarantinedImage);
+    softly.assertAll();
+  }
+
+  /**
+   * AC-6, the non-vacuity control (ADR-002 §27.5): the owner saves and deletes a draft seeded
+   * exactly as AC-2's are, so AC-2's {@code 403}s cannot be satisfied by every request failing.
+   */
+  @Test
+  void theOwnerMaySaveAndDeleteTheirOwnDraft() {
+    UUID draft = seedWritableDraft("Owner control");
+
+    ResponseEntity<String> saved =
+        put(draft, saveBody(draft, "Saved by the owner", "Edited by the owner"), owner());
+    assertThat(saved.getStatusCode().value())
+        .as("the owner saves (body: %s)", saved.getBody())
+        .isEqualTo(200);
+    assertThat(revisions(draft).get(0))
+        .as("and the save reached the row: the step edit moved sourceRevision")
+        .isEqualTo(2L);
+
+    ResponseEntity<String> deleted = delete(draft, owner());
+    assertThat(deleted.getStatusCode().value())
+        .as("the owner deletes (body: %s)", deleted.getBody())
+        .isEqualTo(204);
+    assertThat(deletedAt(draft)).as("and the delete reached the row").isNotNull();
+  }
+
+  /**
+   * AC-7: a save with no revisions, sent by an identity with no write on the draft's CSI, is {@code
+   * 400} and not {@code 403} — the request-shape check runs before authorization — and the row is
+   * unchanged.
+   */
+  @Test
+  void aMalformedSaveIsRejectedBeforeAuthorizationEvenForACallerWithNoWriteAccess()
+      throws Exception {
+    UUID draft = seedWritableDraft("Malformed save");
+    String beforeImage = rowImage(draft);
+
+    ResponseEntity<String> refused =
+        put(draft, saveBody(null, null, "No revisions", "Edited"), stranger());
+
+    assertThat(refused.getStatusCode().value()).as("body: %s", refused.getBody()).isEqualTo(400);
+    assertThat(json(refused).path("message").asText()).contains("sourceRevision");
+    assertThat(rowImage(draft)).isEqualTo(beforeImage);
+  }
+
   // ── helpers ──────────────────────────────────────────────────────────────
+
+  /** An identity whose outcome is being asserted, labelled for the failure message. */
+  private record Caller(String label, HttpHeaders headers) {
+    @Override
+    public String toString() {
+      return label;
+    }
+  }
+
+  /** AC-2's three identities: viewer, contributor, and no ownership at all. */
+  private static List<Caller> callersWithoutWrite() {
+    return List.of(
+        new Caller("viewer", reader()),
+        new Caller("contributor", contributor()),
+        new Caller("stranger", stranger()));
+  }
+
+  /**
+   * A draft on {@code CSI_ID} in a state a successful save visibly changes: confirmed, {@code
+   * READY}, with a candidate. A save that moves a revision returns it to {@code STALE} and clears
+   * the candidate (Architecture §4.2).
+   */
+  private UUID seedWritableDraft(String name) {
+    StudioExecutionFixtures.RunnableTest draft =
+        fixtures.seedRunnableTest(name, CSI_ID, OWNER, List.of(DRAFT_STEP));
+    jdbc.update(
+        "UPDATE ui_tests SET compile_status = 'READY', current_candidate_revision_id = ?"
+            + " WHERE id = ?",
+        draft.revisionId(),
+        draft.testId());
+    return draft.testId();
+  }
+
+  /** The five columns AC-2 names, read directly from the database. */
+  private Map<String, Object> rowState(UUID id) {
+    return jdbc.queryForMap(
+        "SELECT source_revision, configuration_revision, deleted_at, compile_status,"
+            + " current_candidate_revision_id FROM ui_tests WHERE id = ?",
+        id);
+  }
+
+  /** The whole row as text, read directly from the database, so "byte-unchanged" is literal. */
+  private String rowImage(UUID id) {
+    return jdbc.queryForObject(
+        "SELECT row_to_json(t)::text FROM ui_tests t WHERE t.id = ?", String.class, id);
+  }
+
+  private List<Long> revisions(UUID id) {
+    return jdbc.queryForObject(
+        "SELECT source_revision, configuration_revision FROM ui_tests WHERE id = ?",
+        (rs, row) -> List.of(rs.getLong(1), rs.getLong(2)),
+        id);
+  }
+
+  private Instant deletedAt(UUID id) {
+    return jdbc.queryForObject(
+        "SELECT deleted_at FROM ui_tests WHERE id = ?",
+        (rs, row) -> {
+          java.sql.Timestamp at = rs.getTimestamp(1);
+          return at == null ? null : at.toInstant();
+        },
+        id);
+  }
+
+  private int rowsNamed(String name) {
+    return jdbc.queryForObject("SELECT COUNT(*) FROM ui_tests WHERE name = ?", Integer.class, name);
+  }
+
+  private static void assertWithheld(
+      SoftAssertions softly, String label, ResponseEntity<String> response) {
+    softly
+        .assertThat(response.getStatusCode().value())
+        .as("%s as an administrator: never 400, never 404 (body: %s)", label, response.getBody())
+        .isEqualTo(403);
+    softly.assertThat(response.getBody()).as(label).contains(StudioAccessDeniedException.CODE);
+  }
+
+  /** A save carrying the row's current revisions, so only authorization can refuse it. */
+  private String saveBody(UUID id, String name, String step) {
+    List<Long> current = revisions(id);
+    return saveBody(current.get(0), current.get(1), name, step);
+  }
+
+  /**
+   * A save in the typed shape, with the seeded draft's configuration, so only the name and the step
+   * text can differ from the stored row. {@code null} revisions are omitted from the body.
+   */
+  private static String saveBody(
+      Long sourceRevision, Long configurationRevision, String name, String step) {
+    StringBuilder body =
+        new StringBuilder("{\"name\":\"")
+            .append(name)
+            .append("\",\"description\":null,\"csiId\":\"")
+            .append(CSI_ID)
+            .append("\",\"environment\":\"Production\",\"steps\":[\"")
+            .append(step)
+            .append("\"],\"variables\":[],")
+            .append("\"configuration\":{\"browser\":\"chromium\",")
+            .append("\"viewport\":{\"width\":1920,\"height\":1080},")
+            .append("\"timeoutSeconds\":30,\"waitStrategy\":\"networkidle\"}");
+    if (sourceRevision != null) {
+      body.append(",\"sourceRevision\":").append(sourceRevision);
+    }
+    if (configurationRevision != null) {
+      body.append(",\"configurationRevision\":").append(configurationRevision);
+    }
+    return body.append('}').toString();
+  }
+
+  /** A create with no steps, so no compile is enqueued by a create that succeeds. */
+  private static String createBody(String name, String csiId) {
+    return "{\"name\":\""
+        + name
+        + "\",\"description\":\"authz\",\"csiId\":\""
+        + csiId
+        + "\",\"environment\":\"Production\",\"steps\":[],\"variables\":[],"
+        + "\"configuration\":{\"browser\":\"chromium\","
+        + "\"viewport\":{\"width\":1920,\"height\":1080},"
+        + "\"timeoutSeconds\":30,\"waitStrategy\":\"networkidle\"}}";
+  }
+
+  private ResponseEntity<String> put(UUID id, String body, HttpHeaders headers) {
+    return restTemplate.exchange(
+        "/api/v1/studio/tests/" + id,
+        HttpMethod.PUT,
+        new HttpEntity<>(body, headers),
+        String.class);
+  }
+
+  private ResponseEntity<String> delete(UUID id, HttpHeaders headers) {
+    return restTemplate.exchange(
+        "/api/v1/studio/tests/" + id, HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
+  }
+
+  private ResponseEntity<String> post(String path, String body, HttpHeaders headers) {
+    return restTemplate.exchange(
+        path, HttpMethod.POST, new HttpEntity<>(body, headers), String.class);
+  }
 
   private UUID dispatch(UUID execution) {
     UUID attempt = UUID.randomUUID();
@@ -462,6 +901,11 @@ class StudioAuthorizationIT {
 
   private static HttpHeaders reader() {
     return identity(READER, "", CSI_ID + ":viewer");
+  }
+
+  /** Story 10.30 AC-2: a reader-tier role that is the closest to a writer, and still not one. */
+  private static HttpHeaders contributor() {
+    return identity(CONTRIBUTOR, "", CSI_ID + ":contributor");
   }
 
   private static HttpHeaders stranger() {

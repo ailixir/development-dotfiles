@@ -31,6 +31,11 @@ export interface RealRunOutcome {
   readonly result: SessionRunResult;
   readonly browserStartedAt: Date;
   readonly startedAtMs: number;
+  /**
+   * The seek-origin calibration the child reported applying (story 10.32 AC-4). `undefined` only
+   * if the child did not report one, which the pinned test treats as a failure.
+   */
+  readonly calibrationOffsetMs: number | undefined;
   /** The instant the launch call was made, for AC-20's measurable-gap assertion. */
   readonly dispatchedAtMs: number;
   /** The instant `launch` resolved, on the same monotonic clock as `dispatchedAtMs`. */
@@ -67,6 +72,10 @@ export async function runReal(options: RealRunOptions): Promise<RealRunOutcome> 
   const scratchPath = createScratch();
   const launcher = createChildBrowserLauncher({
     recording: options.recording ?? { width: 1280, height: 720 },
+    // ADR-002 §26.3 item 5: the fixtures tier always runs with the calibration at 0. Not an option
+    // a test can override (story 10.32 Scope). `seek-calibration-pinned.test.ts` asserts the value
+    // the child reports applying, so a change here is red on a real run.
+    seekOriginCalibrationMs: 0,
     stepTimeoutMs: options.stepTimeoutMs ?? 15_000,
     launchTimeoutMs: 45_000,
     maxFailureMessageLength: 400,
@@ -108,6 +117,7 @@ export async function runReal(options: RealRunOptions): Promise<RealRunOutcome> 
     result,
     browserStartedAt: run.origin.browserStartedAt,
     startedAtMs: run.origin.startedAtMs,
+    calibrationOffsetMs: run.origin.calibrationOffsetMs,
     dispatchedAtMs,
     observedStartMs,
     scratchPath,
