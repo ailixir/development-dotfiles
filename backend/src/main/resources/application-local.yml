@@ -46,6 +46,14 @@ management:
   endpoint:
     health:
       show-details: always
+  health:
+    mail:
+      # `spring.mail.host` above defaults to a public SMTP host. Spring's MailHealthIndicator opens a
+      # real SMTP connection on every /actuator/health call, and JavaMail sets no connect timeout, so
+      # on a machine with no route to that host the health endpoint hangs instead of answering
+      # (WorkerProfileIT, BffFilterHappyPathIT and GatewayHeadersTrustIT time out). Mail delivery is
+      # not what `local` health is for; the deployed profiles keep the indicator.
+      enabled: false
 
 studio:
   # The local e2e path (Studio v1 WP2): one bootRun is both the API and the worker, so the

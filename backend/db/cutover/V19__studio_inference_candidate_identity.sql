@@ -10,12 +10,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- `uq_ui_test_revisions_identity` was a table CONSTRAINT when this file was written. V22 dropped
--- that constraint and re-created the same name as a UNIQUE INDEX (so it could carry
--- COALESCE(expected_intent::text, '')), and V23 re-created it again with the derivation version.
--- The object and this statement's intent are unchanged; the form follows what V22/V23 made it,
--- which is the same `DROP INDEX uq_ui_test_revisions_identity;` V23 itself issues.
-DROP INDEX uq_ui_test_revisions_identity;
+-- `uq_ui_test_revisions_identity` is a table CONSTRAINT on a schema that stops at V18 (V12 created
+-- it that way, and this cutover was written for that state), but V22 dropped that constraint and
+-- re-created the same name as a UNIQUE INDEX (so it could carry COALESCE(expected_intent::text,
+-- '')), and V23 re-created it again with the derivation version. This file is staged by hand, so
+-- it can meet either state: drop whichever form exists, and still fail loudly if neither does.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conrelid = 'ui_test_revisions'::regclass
+          AND conname = 'uq_ui_test_revisions_identity'
+    ) THEN
+        ALTER TABLE ui_test_revisions DROP CONSTRAINT uq_ui_test_revisions_identity;
+    ELSE
+        DROP INDEX uq_ui_test_revisions_identity;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
 
 -- Old historical rows remain untouched; after cutover every new candidate needs an attempt.
 CREATE FUNCTION studio_inference_require_request() RETURNS TRIGGER AS $$
