@@ -87,6 +87,24 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Box
+        component="a"
+        href="#checks-main"
+        sx={{
+          position: 'fixed',
+          left: 16,
+          top: -48,
+          zIndex: 1300,
+          px: 2,
+          py: 1,
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+          borderRadius: 1,
+          '&:focus': { top: 16 },
+        }}
+      >
+        Skip to main content
+      </Box>
       {shouldShowSidebar && (
         <PlatformSidebar
           key={`checks-sidebar-${currentPage}`}
