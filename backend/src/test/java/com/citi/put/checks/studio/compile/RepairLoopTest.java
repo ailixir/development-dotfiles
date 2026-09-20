@@ -2,7 +2,6 @@ package com.citi.put.checks.studio.compile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.citi.put.checks.studio.compile.gateway.GatewayErrorCode;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -165,9 +164,11 @@ class RepairLoopTest extends AbstractRepairPipelineTest {
 
     pipeline.compile(testId, OWNER);
 
-    awaitCompileStatus("STALE");
-    assertThat(storedErrorCode()).isEqualTo(GatewayErrorCode.GATEWAY_PARSE_FAILURE.name());
-    assertThat(gateway.calls()).as("the repair was issued").isEqualTo(2);
+    awaitCompileStatus("NEEDS_REVISION");
+    assertThat(storedErrorCode()).isNull();
+    assertThat(gateway.calls())
+        .as("invalid envelopes consume only the existing repair budget")
+        .isEqualTo(3);
     assertThat(validateCalls())
         .as("but its v2 artifact was never sent to /v1/validate")
         .isEqualTo(1);

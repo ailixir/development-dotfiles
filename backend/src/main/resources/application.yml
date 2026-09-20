@@ -191,6 +191,15 @@ resilience4j:
 # (Story 10.7, architecture §8.5). Every value here is a §8.5 STARTING value tuned against staging
 # measurements (§10), not a commitment, and every bound AC-38 inventories has its name here.
 studio:
+  authoring:
+    v2-enabled: ${STUDIO_AUTHORING_V2_ENABLED:false}
+  storage:
+    provider: ${STUDIO_STORAGE_PROVIDER:disabled}
+    directory: ${STUDIO_STORAGE_DIRECTORY:/tmp/studio-runner-objects}
+    bucket: ${STUDIO_STORAGE_BUCKET:}
+    region: ${STUDIO_STORAGE_REGION:}
+    credentials-directory: ${STUDIO_STORAGE_CREDENTIALS_DIRECTORY:}
+    request-timeout: ${STUDIO_STORAGE_REQUEST_TIMEOUT:10s}
   execution:
     # The kill switch (§8.5). When false: new executes are 503 DISPATCH_DISABLED, queued and
     # claimed work is closed explicitly, admitted work finishes, and reads, callbacks and
@@ -202,11 +211,9 @@ studio:
     run-deadline: ${STUDIO_RUN_DEADLINE:600s}
     admission-timeout: ${STUDIO_ADMISSION_TIMEOUT:10s}
     evidence-retention: ${STUDIO_EVIDENCE_RETENTION:30d}
-    runner-base-url: ${STUDIO_RUNNER_BASE_URL:http://put-checks-studio-runner:8090}
-    # Deployment configuration, never job-supplied (§8.4, §8.5).
-    callback-base-url: ${STUDIO_CALLBACK_BASE_URL:http://put-checks-api:8080}
-    # Where the recordings live (§6.2). Deployment configuration, and never a response value:
-    # the API stores object keys only and hands the browser the protected API path.
+    # Validation and dispatch both use studio.runner below. Callback URL belongs to the runner.
+    # Legacy fake-store metadata used by leak tests; real providers use studio.storage above.
+    # The API stores object keys only and hands the browser the protected API path.
     # No retention value here — `evidence-retention` above is the single source (§8.5).
     video-store:
       bucket: ${STUDIO_EVIDENCE_BUCKET:put-checks-studio-evidence}
@@ -247,6 +254,8 @@ studio:
   # Off by default: a stock build never reaches an LLM. Endpoint/project/location/model/
   # credentials are deployment configuration and carry no default value.
   compile:
+    incremental:
+      enabled: ${STUDIO_INCREMENTAL_ENABLED:false}
     gateway:
       enabled: ${STUDIO_GATEWAY_ENABLED:false}
       endpoint: ${STUDIO_GATEWAY_ENDPOINT:}
@@ -260,6 +269,7 @@ studio:
       max-concurrency: ${STUDIO_GATEWAY_MAX_CONCURRENCY:4}
       max-input-bytes: ${STUDIO_GATEWAY_MAX_INPUT_BYTES:262144}
       max-output-bytes: ${STUDIO_GATEWAY_MAX_OUTPUT_BYTES:262144}
+      max-output-tokens: ${STUDIO_GATEWAY_MAX_OUTPUT_TOKENS:8192}
       structured-output: ${STUDIO_GATEWAY_STRUCTURED_OUTPUT:true}
       temperature: ${STUDIO_GATEWAY_TEMPERATURE:0}
       retry:
@@ -276,17 +286,9 @@ studio:
     pipeline:
       # Fixed pool, NO queue: attempt concurrency+1 is refused, not parked.
       concurrency: ${STUDIO_COMPILE_CONCURRENCY:4}
-      # Total wall-clock for the WHOLE compile request, repairs included (story 10.9 raised this
-      # from 180s and widened its meaning). Two constraints, both checked at startup:
-      #   - strictly greater than gateway.request-timeout, or a slow gateway call would be
-      #     abandoned by this budget before the gateway gave up and the recorded code would name
-      #     the wrong bound;
-      #   - strictly greater than (1 + repair.max-attempts) x (gateway.request-timeout +
-      #     runner.validate-timeout) = 3 x (60s + 10s) = 210s, or a healthy repair loop would be
-      #     abandoned mid-repair by arithmetic nobody checked.
-      # Raising it costs observable pool saturation, not correctness: a worst-case request now
-      # holds one of four pool threads for 240s instead of 180s, and saturation is already routed
-      # to STALE COMPILE_POOL_SATURATED, retryable.
+      # One monotonic deadline covers authentication, inference retries, repairs and validation.
+      # Every call is capped by remaining time; configured retries need not all fit in this bound.
+      # Expiry cancels active transports and prevents publication. Saturation is retryable STALE.
       attempt-budget: ${STUDIO_COMPILE_ATTEMPT_BUDGET:240s}
     # The bounded repair loop (§4.3 "a maximum of two repair attempts"). This is a bound the
     # architecture fixes, not a tuning parameter: at most 3 propose calls and 3 /v1/validate calls
@@ -342,9 +344,9 @@ studio:
   runtime:
     pin:
       artifact-schema-version: 1
-      validator-schema-version: ${STUDIO_RUNTIME_VALIDATOR_SCHEMA_VERSION:1.0.0}
-      syntax-reference-version: ${STUDIO_RUNTIME_SYNTAX_REFERENCE_VERSION:1.0.0}
-      executor-version: ${STUDIO_RUNTIME_EXECUTOR_VERSION:1.0.0}
+      validator-schema-version: ${STUDIO_RUNTIME_VALIDATOR_SCHEMA_VERSION:2.0.0}
+      syntax-reference-version: ${STUDIO_RUNTIME_SYNTAX_REFERENCE_VERSION:2.0.0}
+      executor-version: ${STUDIO_RUNTIME_EXECUTOR_VERSION:2.0.0}
       playwright-version: ${STUDIO_RUNTIME_PLAYWRIGHT_VERSION:1.63.0}
 
 springdoc:

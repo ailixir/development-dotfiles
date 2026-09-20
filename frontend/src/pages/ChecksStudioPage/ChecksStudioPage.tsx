@@ -1,118 +1,93 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Button,
-  IconButton,
-  TextField,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Avatar,
-  Stack,
-  LinearProgress,
-  Alert,
-  AlertTitle,
-  Fab,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Switch,
-  FormControlLabel,
-  Tooltip,
-  Badge,
-  useTheme,
-  alpha,
-  CircularProgress,
-  GlobalStyles,
-  Snackbar,
-  Tabs,
-  Tab,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Skeleton,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-} from '@mui/material';
-import {
-  Pause,
-  Add,
-  Delete,
-  Edit,
-  Science,
-  VideoLibrary,
-  Code,
-  CheckCircle,
-  Error,
-  Warning,
-  Timer,
-  Visibility,
-  VisibilityOff,
-  Save,
-  Share,
-  Download,
-  Upload,
-  Settings,
-  BugReport,
-  Speed,
-  Memory,
-  WebAsset,
-  Mouse,
-  Keyboard,
-  TouchApp,
-  CameraAlt,
-  Schedule,
-  AutoMode,
-  ListAlt,
-  PlaylistAdd,
-  Clear,
-  Refresh,
-  ExpandMore,
-  KeyboardArrowUp,
-  KeyboardArrowDown,
-  HelpOutline,
-} from '@mui/icons-material';
 import CodeTab from '@/components/studio/CodeTab';
 import OnboardingCoach from '@/components/studio/OnboardingCoach';
-import { useDispatch } from 'react-redux';
-import { useAppSelector } from '@/store';
-import { selectIsSourceEnabled } from '@store/slices/sourcesSlice';
-import { selectIsFeatureEnabled } from '@store/slices/featuresSlice';
-import { setExecutionLogs, setAllStepResults, setExecuting, setCurrentStep as setCurrentStepAction, clearLogs, updateConfiguration } from '@store/slices/studioSlice';
-import {
-  defaultConfiguration,
-  isTerminalExecutionStatus,
-  type ExecutionSnapshot,
-  type TestRequest,
-} from '@/types/studio/studioTypes';
+import SecretInput from '@/components/studio/SecretInput';
+import { useVideoSeek, VideoEvidencePanel } from '@/components/studio/evidence';
+import { InferenceStudio } from '@/components/studio/inference/InferenceStudio';
+import { CompileReviewPanel } from '@/components/studio/review';
+import { ExecutionProgressView, RunControl } from '@/components/studio/run';
 import studioApi from '@/services/api/studioApi';
 import {
   subscribeToExecution,
   type ExecutionSubscription,
   type TransportStatus,
 } from '@/services/api/studioTransportWiring';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import SecretInput from '@/components/studio/SecretInput';
-import { CompileReviewPanel } from '@/components/studio/review';
-import { ExecutionProgressView, RunControl } from '@/components/studio/run';
-import { VideoEvidencePanel, useVideoSeek } from '@/components/studio/evidence';
+import { useAppSelector } from '@/store';
+import {
+  defaultConfiguration,
+  isTerminalExecutionStatus,
+  type ExecutionSnapshot,
+  type TestRequest,
+  type TestDto,
+} from '@/types/studio/studioTypes';
+import { STUDIO_AUTHORING_V2 } from '@/utils/constants/appConfig';
+import {
+  Add,
+  CheckCircle,
+  Code,
+  Delete,
+  Error,
+  HelpOutline,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+  ListAlt,
+  PlaylistAdd,
+  Refresh,
+  Save,
+  Schedule,
+  Science,
+  Settings
+} from '@mui/icons-material';
+import {
+  Alert,
+  AlertTitle,
+  alpha,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  GlobalStyles,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  MenuItem,
+  Paper,
+  Select,
+  Snackbar,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography,
+  useTheme
+} from '@mui/material';
+import { selectIsFeatureEnabled } from '@store/slices/featuresSlice';
+import { selectIsSourceEnabled } from '@store/slices/sourcesSlice';
+import { clearLogs, setAllStepResults, setCurrentStep as setCurrentStepAction, setExecuting, setExecutionLogs } from '@store/slices/studioSlice';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useLocation, useParams } from 'react-router-dom';
 
 type Scenario = {
   id: string;
@@ -166,18 +141,17 @@ const ChecksStudioPageInner: React.FC = () => {
     return map;
   }, [stepResultsArr]);
   const [isSaving, setIsSaving] = useState(false);
+  const [sourceReview, setSourceReview] = useState<TestDto | null>(null);
   /** The last snapshot the API returned, rendered by `ExecutionProgressView` (AC-18, AC-19). */
   const [snapshot, setSnapshot] = useState<ExecutionSnapshot | null>(null);
   /** Programmatic run requests: `?autorun=1` and the terminal-error surface's re-run. */
   const [runRequest, setRunRequest] = useState(0);
-  const [autosave, setAutosave] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [saveSnack, setSaveSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
   const [helpOpen, setHelpOpen] = useState(false);
   // Removed legacy interval-based simulator in favor of API polling
   const [validation,
     setValidation] = useState<{ results: Array<{ stepIndex: number; isValid: boolean; suggestion: string | null }>; isValid: boolean; loading: boolean; error?: string }>
     ({ results: [], isValid: true, loading: false });
-  const config = useAppSelector((s: any) => s.studio.testConfiguration);
   const [variablesList, setVariablesList] = useState<Array<{ id: string; name: string; type: 'plain' | 'secret'; value?: string; secretId?: string }>>([]);
   const [rightTab, setRightTab] = useState(0);
   const [coachStep, setCoachStep] = useState<number>(() => {
@@ -209,15 +183,10 @@ const ChecksStudioPageInner: React.FC = () => {
   
   const location = useLocation();
   const params = useParams();
-  const navigate = useNavigate();
   const selectedScenarioData = scenarios?.find(s => s.id === selectedScenario) || null;
   const dispatch = useDispatch();
   
   // Calculate metrics (simple derived)
-  const totalScenarios = scenarios?.length || 0;
-  const passedScenarios = 0;
-  const failedScenarios = 0;
-  const successRate = totalScenarios ? Math.round((passedScenarios / totalScenarios) * 100) : 0;
 
   // Load scenarios from API (MSW-backed)
   useEffect(() => {
@@ -368,7 +337,7 @@ const ChecksStudioPageInner: React.FC = () => {
           }
         }
       }
-    } catch {}
+    } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -377,7 +346,7 @@ const ChecksStudioPageInner: React.FC = () => {
     localStorage.setItem('studio:steps', JSON.stringify(testSteps));
   }, [testSteps]);
   useEffect(() => {
-    try { localStorage.setItem('studio:coachStep', String(coachStep)); } catch {}
+    try { localStorage.setItem('studio:coachStep', String(coachStep)); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
   }, [coachStep]);
 
   // Debounced validation on steps change
@@ -577,7 +546,7 @@ const ChecksStudioPageInner: React.FC = () => {
                 onClick={() => {
                   setForceCoach(true);
                   setCoachStep(0);
-                  try { localStorage.removeItem('studio:coachStep'); } catch {}
+                  try { localStorage.removeItem('studio:coachStep'); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
                 }}
                 aria-label="Show guide"
               >
@@ -651,7 +620,7 @@ const ChecksStudioPageInner: React.FC = () => {
                   <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
                     <Typography variant="body2" fontWeight={600}>Add your first step</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Examples: Go to "https://put.internal.citi.com" <br />• Click "Sign On" <br />• Type "&lt;var USERNAME&gt;" in the "User ID" field <br />• Wait for "Welcome" (use tokens: &lt;var NAME&gt;, &lt;secret SECRET_ID&gt;)
+                      Examples: Go to &quot;https://put.internal.citi.com&quot; <br />• Click &quot;Sign On&quot; <br />• Type &quot;&lt;var USERNAME&gt;&quot; in the &quot;User ID&quot; field <br />• Wait for &quot;Welcome&quot; (use tokens: &lt;var NAME&gt;, &lt;secret SECRET_ID&gt;)
                     </Typography>
                   </Paper>
                 )}
@@ -671,7 +640,6 @@ const ChecksStudioPageInner: React.FC = () => {
                   {testSteps.map((step, index) => {
                     const stepResult = stepResultsMap[index];
                     const isCurrentStep = index === currentStep;
-                    const isPastStep = index < currentStep;
                     const validationEntry = validation.results.find((r) => r.stepIndex === index);
                     const isInvalid = validationEntry ? !validationEntry.isValid : false;
                     
@@ -937,7 +905,7 @@ const ChecksStudioPageInner: React.FC = () => {
               */}
               {selectedScenarioData?.id && (
                 <Box sx={{ mb: 2 }}>
-                  <CompileReviewPanel testId={selectedScenarioData.id} />
+                  <CompileReviewPanel testId={selectedScenarioData.id} onTestChange={setSourceReview} />
                 </Box>
               )}
 
@@ -1034,7 +1002,7 @@ const ChecksStudioPageInner: React.FC = () => {
 
               {/* Code Tab */}
                <Box sx={{ mt: 2, display: rightTab === 1 ? 'block' : 'none' }}>
-                <CodeTab />
+                <CodeTab snapshot={sourceReview?.id === selectedScenario ? sourceReview : null} />
               </Box>
 
               {/* Proof Tab */}
@@ -1126,10 +1094,10 @@ const ChecksStudioPageInner: React.FC = () => {
               <Grid item xs={12}>
                 <Alert severity="info">
                   <AlertTitle>Next Steps</AlertTitle>
-                  After creating the scenario, you'll be able to add test steps using plain English commands like:
-                  <br />• "Go to https://put.internal.citi.com"
-                  <br />• "Click the Login button"
-                  <br />• "Wait for Welcome message to appear"
+                  After creating the scenario, you&apos;ll be able to add test steps using plain English commands like:
+                  <br />• &quot;Go to https://put.internal.citi.com&quot;
+                  <br />• &quot;Click the Login button&quot;
+                  <br />• &quot;Wait for Welcome message to appear&quot;
                 </Alert>
               </Grid>
             </Grid>
@@ -1258,7 +1226,7 @@ const ChecksStudioPageInner: React.FC = () => {
           <Button onClick={() => setVariablesOpen(false)}>Cancel</Button>
           <Button variant="contained" onClick={() => {
             // Persisted only. There is no client-side code generation left to refresh (AC-3a).
-            try { localStorage.setItem('studio:variables', JSON.stringify(variablesList)); } catch {}
+            try { localStorage.setItem('studio:variables', JSON.stringify(variablesList)); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
             setVariablesOpen(false);
           }}>Save</Button>
         </DialogActions>
@@ -1308,7 +1276,7 @@ const ChecksStudioPage: React.FC = () => {
   const uiTestEnabled = useAppSelector(selectIsSourceEnabled('UI_TEST'));
   const studioFeatureEnabled = useAppSelector(selectIsFeatureEnabled('STUDIO'));
   if (!uiTestEnabled || !studioFeatureEnabled) return <StudioUnavailable />;
-  return <ChecksStudioPageInner />;
+  return STUDIO_AUTHORING_V2 ? <InferenceStudio /> : <ChecksStudioPageInner />;
 };
 
 export default ChecksStudioPage;

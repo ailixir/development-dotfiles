@@ -168,7 +168,7 @@ public class StudioAcceptanceService {
 
     UITest test =
         tests
-            .findById(testId)
+            .findByIdForUpdate(testId)
             .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + testId));
     if (test.getDeletedAt() != null) {
       throw new StudioConflictException("TEST_DELETED", "Test " + testId + " has been deleted");
@@ -232,6 +232,7 @@ public class StudioAcceptanceService {
     Instant acceptedAt = clock.instant();
     UITestExecution execution =
         new UITestExecution(testId, ExecutionStatus.PENDING, acceptedAt, test.getCsiId());
+    execution.markFullExecution();
     execution.setPrincipal(principal);
     execution.setEnvironment(test.getEnvironment());
     execution.setRevisionId(revision.getId());

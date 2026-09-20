@@ -140,7 +140,7 @@ async function loadApp(baseUrl: string) {
   const rtl = await import('@testing-library/react');
   const React = await import('react');
   const { Provider } = await import('react-redux');
-  const { MemoryRouter, Route, Routes } = await import('react-router-dom');
+  const { MemoryRouter, Route, Routes, useNavigate } = await import('react-router-dom');
   const { store } = await import('@/store');
   const { default: ChecksStudioPage } = await import('./ChecksStudioPage');
   const transport = await import('@/services/api/studioTransportWiring');
@@ -153,8 +153,7 @@ async function loadApp(baseUrl: string) {
    */
   const nav: { go: ((to: string) => void) | null } = { go: null };
   const NavHandle = () => {
-    const navigate = (require('react-router-dom') as typeof import('react-router-dom')).useNavigate;
-    nav.go = navigate();
+    nav.go = useNavigate();
     return null;
   };
 

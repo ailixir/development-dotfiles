@@ -110,7 +110,11 @@ class JobBodyLeakTest {
             new ObjectMapper(),
             new StudioExecutionProperties(
                 true, null, null, null, Duration.ofMillis(500), null, null, null, null, null, null),
-            "http://localhost:" + wireMock.port());
+            new com.citi.put.checks.studio.compile.validator.StudioRunnerProperties(
+                "http://localhost:" + wireMock.port(),
+                "test-runner-token",
+                Duration.ofSeconds(5),
+                Duration.ofSeconds(2)));
   }
 
   @AfterEach

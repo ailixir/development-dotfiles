@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Box, TextField, MenuItem, Stack, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment } from '@mui/material';
 import apiClient from '@/services/api/apiClient';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, MenuItem, Stack, TextField } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 
 type Scope = 'project' | 'org' | 'user';
 

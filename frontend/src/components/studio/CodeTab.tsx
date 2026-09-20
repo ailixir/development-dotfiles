@@ -1,76 +1,52 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, AlertTitle, Box, Paper, Stack, Typography } from '@mui/material';
+import studioApi from '@/services/api/studioApi';
+import type { TestDto } from '@/types/studio/studioTypes';
 
-/**
- * The Code view, saying what it does not have rather than showing something else
- * (story 10.11a, AC-3a).
- *
- * This tab used to be titled *"Generated Python (Playwright)"* and rendered the output of
- * `@/utils/studio/codegen/pythonGenerator`, regenerated in the browser on every step change. PRD
- * §5.3 retires Python export from the Studio plan; architecture §8.3 retires client Python
- * generation as an authoritative path; architecture §4.4 makes the server's artifact the only
- * executable truth. The page was inviting a reader to review one language and run another.
- *
- * **It renders an explicit unavailable state and it keeps the tab.** @po ruled open question 2:
- * keep the tab, name the blocker. Hiding the tab would make the blocker invisible at exactly the
- * moment its gate changed, and a blocker nobody can see is a blocker nobody moves. It is the same
- * shape story 10.10 landed for its summary slot (its AC-16a) and for the same reason: a fabricated
- * rendering of *"the code that will run"* is worse than an absent one, because it is the precise
- * confusion the confirmation step exists to prevent.
- *
- * **The blocker named is the new one, not the one that has landed.** ADR-002 §21 ruled candidate A
- * and it did **not** unblock this view: §21.2 exposes `currentCandidateArtifactHash` and
- * `currentCandidateArtifact` — the **candidate's** — while this view needs the **confirmed**
- * revision's, which §21.3 records as a *"third additive property on the same body"* that nobody has
- * ruled. Rendering the candidate instead was refused: in `needsRevision` the artifact and the
- * draft's current steps disagree **by design** (§21.7), so a Code view showing the candidate under
- * a heading that claims otherwise shows source the server will not run. Story 10.11c files that
- * Class C escalation (its AC-32); this view does not approximate around it.
- *
- * Nothing on this path imports the generator or the legacy grammar parser, and that is asserted
- * over the module text as the weaker supplement to the rendering assertions — a gate rebuilt
- * through a differently-named local passes a grep, which is the fourth catalogued vacuity shape.
- */
-
-/** The accessible name of the unavailable state. Asserted by AC-3(a). */
 export const CODE_VIEW_UNAVAILABLE_TITLE = 'The source that will run is not available to this page';
+export const CODE_VIEW_BLOCKER = 'This response does not include a readable confirmed revision artifact and hash. ADR-002 §21 separates candidate source from confirmed source; select or reload a test with a retained confirmed revision.';
+export const CODE_VIEW_WHY_NOT_THE_CANDIDATE = 'Substituting the current candidate is refused: it can disagree with the confirmed revision and would show different source.';
+export const CODE_VIEW_WHAT_IS_TRUE = 'The server runs the artifact you confirmed. Current edits need their own compilation and confirmation before they can run.';
 
-/** The blocker, named so it cannot be closed without the gate moving. */
-export const CODE_VIEW_BLOCKER =
-  'The API returns no confirmed revision’s source or artifact from any declared response. ADR-002 §21 added the current candidate’s artifact and hash; the confirmed revision’s is a further additive property, escalated by story 10.11c as a Class C amendment and not yet ruled.';
-
-export const CODE_VIEW_WHY_NOT_THE_CANDIDATE =
-  'Showing the current candidate instead was refused rather than overlooked. A draft that needs revision has a candidate that disagrees with its steps by design, so displaying it under this heading would show source the server will not run.';
-
-export const CODE_VIEW_WHAT_IS_TRUE =
-  'What runs is the artifact the server compiled and you confirmed. This page has never been able to read it, and until this story it showed Python it generated in your browser, which the server neither produced nor runs.';
-
-const CodeTab: React.FC = () => (
-  <Box>
-    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-        Source
-      </Typography>
-    </Stack>
-    <Paper variant="outlined" sx={{ p: 0 }}>
-      <Alert severity="info" role="note" aria-label={CODE_VIEW_UNAVAILABLE_TITLE}>
-        <AlertTitle data-testid="code-view-unavailable-title">
-          {CODE_VIEW_UNAVAILABLE_TITLE}
-        </AlertTitle>
+/** Display only the independently read confirmed pair, never the candidate or a client generator. */
+export function ConfirmedSource({ test }: { test: TestDto | null }) {
+  const readable = test?.confirmedRevisionId && test.confirmedRevisionArtifact &&
+    typeof test.confirmedRevisionArtifactHash === 'string' && /^[0-9a-f]{64}$/.test(test.confirmedRevisionArtifactHash);
+  return <Box>
+    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>Source</Typography>
+    <Paper variant="outlined" sx={{ p: 2 }}>
+      {readable ? <Stack spacing={2}>
+        <Typography>Confirmed revision: {test.confirmedRevisionId}</Typography>
+        {test.compileStatus !== 'READY' && <Alert severity="info">Previously confirmed source. Current changes must be compiled and confirmed before running.</Alert>}
+        {test.confirmedRevisionArtifact!.steps.map(step => <Box key={step.stepIndex}>
+          <Typography>Step {step.stepIndex + 1}: {step.originalText}</Typography>
+          <Box component="pre" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{step.code}</Box>
+        </Box>)}
+      </Stack> : <Alert severity="info" role="note" aria-label={CODE_VIEW_UNAVAILABLE_TITLE}>
+        <AlertTitle data-testid="code-view-unavailable-title">{CODE_VIEW_UNAVAILABLE_TITLE}</AlertTitle>
         <Stack spacing={1}>
-          <Typography variant="body2" data-testid="code-view-what-is-true">
-            {CODE_VIEW_WHAT_IS_TRUE}
-          </Typography>
-          <Typography variant="body2" data-testid="code-view-blocker">
-            {CODE_VIEW_BLOCKER}
-          </Typography>
-          <Typography variant="body2" data-testid="code-view-why-not-candidate">
-            {CODE_VIEW_WHY_NOT_THE_CANDIDATE}
-          </Typography>
+          <Typography variant="body2" data-testid="code-view-what-is-true">{CODE_VIEW_WHAT_IS_TRUE}</Typography>
+          <Typography variant="body2" data-testid="code-view-blocker">{CODE_VIEW_BLOCKER}</Typography>
+          <Typography variant="body2" data-testid="code-view-why-not-candidate">{CODE_VIEW_WHY_NOT_THE_CANDIDATE}</Typography>
         </Stack>
-      </Alert>
+      </Alert>}
     </Paper>
-  </Box>
-);
+  </Box>;
+}
 
-export default CodeTab;
+export default function CodeTab({ testId = null, snapshot }: { testId?: string | null; snapshot?: TestDto | null } = {}) {
+  const [loaded, setLoaded] = useState<{ id: string; test: TestDto } | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    let active = true;
+    setError(false);
+    if (snapshot === undefined && testId) void studioApi.getTest(testId).then(test => {
+      if (active) setLoaded({ id: testId, test });
+    }).catch(() => { if (active) { setLoaded(null); setError(true); } });
+    return () => { active = false; };
+  }, [testId, snapshot]);
+  return <>
+    {error && <Alert severity="error">Confirmed source could not be loaded. Reopen this tab to retry.</Alert>}
+    <ConfirmedSource test={snapshot !== undefined ? snapshot : loaded?.id === testId ? loaded.test : null}/>
+  </>;
+}

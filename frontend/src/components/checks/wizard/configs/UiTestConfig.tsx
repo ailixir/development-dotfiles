@@ -1,25 +1,24 @@
-import React, { useState } from 'react';
-import {
-  Grid,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  Button,
-  Stack,
-  Paper,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  IconButton,
-  Box,
-} from '@mui/material';
-import { Delete } from '@mui/icons-material';
 import SecretInput from '@/components/studio/SecretInput';
+import { Delete } from '@mui/icons-material';
+import {
+  Button,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material';
+import React, { useState } from 'react';
 
 interface UiTestConfigProps {
   formData: any;

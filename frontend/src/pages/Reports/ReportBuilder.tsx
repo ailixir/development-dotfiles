@@ -1,15 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Card, CardContent, CardHeader, Chip, Divider, Grid, IconButton, Paper, Stack, TextField, Tooltip, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, Autocomplete, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
-import { Refresh, Send, Search, Save, Add, CheckCircle, Info, OpenInFull, Schedule, Email, Description, ViewList, ArrowUpward, ArrowDownward, DeleteOutline } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { createReport, fetchReports, generatePreview, addSection, updateSection, removeSection, reorderSections } from '@/store/slices/reportsSlice';
-import { useNavigate, useParams } from 'react-router-dom';
+import RecipientsEditor from '@/components/reports/RecipientsEditor';
+import RuleBuilder from '@/components/reports/RuleBuilder';
+import ScheduleEditor from '@/components/reports/ScheduleEditor';
 import { checksApi } from '@/services/api/checksApi';
 import reportsApi from '@/services/api/reportsApi';
-import RecipientsEditor from '@/components/reports/RecipientsEditor';
-import ScheduleEditor from '@/components/reports/ScheduleEditor';
-import RuleBuilder from '@/components/reports/RuleBuilder';
-import type { ReportSection, ReportSchedule, ManualReportSection } from '@/types/reports/reportTypes';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { createReport, fetchReports, generatePreview } from '@/store/slices/reportsSlice';
+import type { ManualReportSection, ReportSchedule, ReportSection } from '@/types/reports/reportTypes';
+import { Add, ArrowDownward, ArrowUpward, CheckCircle, DeleteOutline, Description, Email, Info, OpenInFull, Refresh, Save, Schedule, Search, Send, ViewList } from '@mui/icons-material';
+import { Alert, Autocomplete, Box, Button, Card, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Grid, IconButton, InputLabel, MenuItem, Paper, Select, Snackbar, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 type CheckSearchOption = { id: string; name: string; csiId: string; csiName: string };
 
@@ -46,7 +46,6 @@ const snapshotReportConfig = (cfg: ReportConfigState) => JSON.stringify({
 
 const ReportBuilder: React.FC = () => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const params = useParams();
   const isEditMode = Boolean(params.id);
   const { previewContent, generatingPreview } = useAppSelector((s) => s.reports);
@@ -80,14 +79,14 @@ const ReportBuilder: React.FC = () => {
           }));
         }
       }
-    } catch {}
+    } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
   }, []);
 
   useEffect(() => {
     const key = 'reports.builderDraft.v2';
     try {
       window.localStorage.setItem(key, JSON.stringify(reportConfig));
-    } catch {}
+    } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
   }, [reportConfig]);
 
   const [draftId, setDraftId] = useState<string | null>(null);
@@ -201,7 +200,7 @@ const ReportBuilder: React.FC = () => {
         if (it && it.id) next[it.id] = { name: it.name, csiId: it.csiId, csiName: it.csiName };
       }
       if (Object.keys(next).length) setCheckMeta((m) => ({ ...m, ...next }));
-    } catch {}
+    } catch { /* Metadata enrichment is optional; keep the authored report configuration. */ }
   };
 
   useEffect(() => {

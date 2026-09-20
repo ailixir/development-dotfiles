@@ -139,10 +139,11 @@ class ExecutionVideoContractTest {
         .isNull();
     assertThat(operation.get("x-implemented-by"))
         .as(
-            "the value was '10.16', which is the FRONTEND playback story; the manifest and the "
-                + "retired epic both place the backend route in 10.15. A vendor extension naming a "
-                + "story that will never implement the route is a defect nothing could ever have "
-                + "satisfied — ruled Class A by @po at wave-6 validation, and reported as a finding")
+            "the value was '10.16', which is the FRONTEND playback story; the manifest and the"
+                + " retired epic both place the backend route in 10.15. A vendor extension naming a"
+                + " story that will never implement the route is a defect nothing could ever have"
+                + " satisfied — ruled Class A by @po at wave-6 validation, and reported as a"
+                + " finding")
         .isEqualTo("10.15");
   }
 
@@ -269,12 +270,13 @@ class ExecutionVideoContractTest {
   }
 
   @Test
-  void theVideoOperationsStatusSetIsUnchanged() {
+  void theVideoOperationsStatusSetMatchesTheApprovedEscalationRuling() {
     assertThat(declaredStatuses())
         .as(
-            "this story declares CONTENT on three responses; adding or removing a STATUS is "
-                + "AC-22's, escalated as ESC-1 and ESC-2 and not taken here")
-        .containsExactlyInAnyOrder("200", "206", "404", "410", "416");
+            "Story 10.27's architect ruling resolves ESC-1/ESC-2 by declaring the existing"
+                + " authentication and unavailable-store responses; no other statuses are"
+                + " authorized")
+        .containsExactlyInAnyOrder("200", "206", "401", "403", "404", "410", "416", "503");
   }
 
   /**
@@ -344,14 +346,15 @@ class ExecutionVideoContractTest {
         .isNotEmpty();
     assertThat(declaredProperties)
         .as(
-            "a RunnerEvidence required entry names no declared property — a rename landed on one "
-                + "side only. WHICH fields are required is not this story's and is not asserted here")
+            "a RunnerEvidence required entry names no declared property — a rename landed on one"
+                + " side only. WHICH fields are required is not this story's and is not asserted"
+                + " here")
         .containsAll(required);
     assertThat(fromJava)
         .as(
-            "a RunnerEvidence required entry names no component of the Java record that serializes "
-                + "it — the document and the producer disagree about a field's NAME, which is a defect "
-                + "in any story, unlike its optionality, which is a ruling")
+            "a RunnerEvidence required entry names no component of the Java record that serializes"
+                + " it — the document and the producer disagree about a field's NAME, which is a"
+                + " defect in any story, unlike its optionality, which is a ruling")
         .containsAll(required);
   }
 

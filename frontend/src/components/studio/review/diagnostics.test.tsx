@@ -1,12 +1,5 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { screen } from '@testing-library/react';
-import fs from 'node:fs';
-import path from 'node:path';
-import { studioMockServer } from '@/services/mocks/studio/server';
-import { resetStudioMocks } from '@/services/mocks/studio/handlers';
 import {
   artifactRejectionDraft,
-  awaitingDraft,
   CLAMPED_EXCERPT,
   CLAMPED_MESSAGE,
   clampedStringsDraft,
@@ -16,12 +9,18 @@ import {
   needsRevisionDraft,
   noCandidateArtifactDraft,
   notExhaustedDraft,
-  stepTruncatedDraft,
+  stepTruncatedDraft
 } from '@/services/mocks/studio/compileFixtures';
 import {
   DIAGNOSTICS_CAPS,
   TRUNCATION_MARKER,
 } from '@/services/mocks/studio/diagnosticsBounds';
+import { resetStudioMocks } from '@/services/mocks/studio/handlers';
+import { studioMockServer } from '@/services/mocks/studio/server';
+import { screen } from '@testing-library/react';
+import fs from 'node:fs';
+import path from 'node:path';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { renderPanel } from './reviewTestHarness';
 import { SOURCE_UNAVAILABLE, SUMMARY_UNAVAILABLE } from './StepReviewList';
 

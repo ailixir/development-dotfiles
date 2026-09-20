@@ -235,10 +235,9 @@ class CompileBoundsTest {
             properties.repair(),
             properties.sweep());
 
-    assertThatThrownBy(() -> tooShort.validate(gateway, runner))
-        .isInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("attempt-budget")
-        .hasMessageContaining("request-timeout");
+    assertThatCode(() -> tooShort.validate(gateway, runner))
+        .as("the shared budget caps each call and need not fit all retries")
+        .doesNotThrowAnyException();
 
     assertThatCode(() -> RunnerPinDriftTest.defaults().validate(gateway, runner))
         .as("the shipped defaults must satisfy their own rule")

@@ -1,4 +1,7 @@
 {{- if .Values.studioRunner.enabled }}
+{{- if ne .Values.objectStore.provider "s3" }}
+{{- fail "Remote Studio deployments require objectStore.provider=s3; filesystem is local only" }}
+{{- end }}
 {{- $name := include "put-checks.studioRunner.fullname" . }}
 {{- $scratch := include "put-checks.studioRunner.scratchDir" . }}
 apiVersion: apps/v1
@@ -83,10 +86,16 @@ spec:
             # same key, compared to each other in the assertion rather than each to a literal.
             - name: STUDIO_RUNNER_SCRATCH_DIR
               value: {{ $scratch | quote }}
-            - name: STUDIO_RUNNER_OBJECT_STORE_DIR
-              value: {{ printf "%s/objects" $scratch | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_PROVIDER
+              value: {{ .Values.objectStore.provider | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_BUCKET
+              value: {{ .Values.objectStore.bucket | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_REGION
+              value: {{ .Values.objectStore.region | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_CREDENTIALS_DIRECTORY
+              value: {{ .Values.studioRunner.objectStore.mountPath | quote }}
             - name: STUDIO_RUNNER_CALLBACK_BASE_URL
-              value: {{ .Values.studioRunner.callbackBaseUrl | quote }}
+              value: {{ default (printf "http://%s:%v" (include "put-checks.api.fullname" .) .Values.backend.service.port) .Values.studioRunner.callbackBaseUrl | quote }}
             - name: STUDIO_RUNNER_SERVICE_IDENTITY
               valueFrom:
                 secretKeyRef:
@@ -102,15 +111,15 @@ spec:
           # which is precisely the open half SEC-2 exploits: the enumerated list above is the only
           # way a variable reaches this container.
           readinessProbe:
-            httpGet:
-              path: {{ .Values.studioRunner.probes.readinessPath }}
-              port: http
+            exec:
+              command: ["node", "dist/probe.js", {{ .Values.studioRunner.probes.readinessPath | quote }}]
+            timeoutSeconds: 3
             initialDelaySeconds: {{ .Values.studioRunner.probes.initialDelaySeconds }}
             periodSeconds: {{ .Values.studioRunner.probes.periodSeconds }}
           livenessProbe:
-            httpGet:
-              path: {{ .Values.studioRunner.probes.livenessPath }}
-              port: http
+            exec:
+              command: ["node", "dist/probe.js", {{ .Values.studioRunner.probes.livenessPath | quote }}]
+            timeoutSeconds: 3
             initialDelaySeconds: {{ .Values.studioRunner.probes.initialDelaySeconds }}
             periodSeconds: {{ .Values.studioRunner.probes.periodSeconds }}
           resources:

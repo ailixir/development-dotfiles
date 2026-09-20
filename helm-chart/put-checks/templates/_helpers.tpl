@@ -125,7 +125,7 @@ staging pod needs. What matters is that the list is closed at both ends —
 them.
 */}}
 {{- define "put-checks.studioRunner.acceptedEnvKeys" -}}
-STUDIO_RUNNER_PORT STUDIO_RUNNER_HOST STUDIO_RUNNER_POOL_SIZE STUDIO_RUNNER_SCRATCH_DIR STUDIO_RUNNER_OBJECT_STORE_DIR STUDIO_RUNNER_OBJECT_STORE_MAX_ATTEMPTS STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS STUDIO_RUNNER_OBJECT_STORE_BACKOFF_MS STUDIO_RUNNER_ADMISSION_TIMEOUT_MS STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS STUDIO_RUNNER_TERMINAL_DELIVERY_MAX_ATTEMPTS STUDIO_RUNNER_TERMINAL_DELIVERY_BACKOFF_MS STUDIO_RUNNER_VALIDATE_TIMEOUT_MS STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES STUDIO_RUNNER_RETRY_AFTER_SECONDS STUDIO_RUNNER_DRAIN_TIMEOUT_MS STUDIO_RUNNER_RECORDING_WIDTH STUDIO_RUNNER_RECORDING_HEIGHT STUDIO_RUNNER_BROWSER_LAUNCH_TIMEOUT_MS STUDIO_RUNNER_STEP_TIMEOUT_MS STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS STUDIO_RUNNER_MAX_REPORT_STEPS STUDIO_RUNNER_MAX_REPORT_LOG_ENTRIES STUDIO_RUNNER_MAX_REPORT_LOG_ENTRY_LENGTH STUDIO_RUNNER_MAX_REPORT_BODY_BYTES
+STUDIO_RUNNER_PORT STUDIO_RUNNER_HOST STUDIO_RUNNER_POOL_SIZE STUDIO_RUNNER_SCRATCH_DIR STUDIO_RUNNER_OBJECT_STORE_DIR STUDIO_RUNNER_OBJECT_STORE_PROVIDER STUDIO_RUNNER_OBJECT_STORE_BUCKET STUDIO_RUNNER_OBJECT_STORE_REGION STUDIO_RUNNER_OBJECT_STORE_CREDENTIALS_DIRECTORY STUDIO_RUNNER_OBJECT_STORE_MAX_ATTEMPTS STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS STUDIO_RUNNER_OBJECT_STORE_BACKOFF_MS STUDIO_RUNNER_ADMISSION_TIMEOUT_MS STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS STUDIO_RUNNER_TERMINAL_DELIVERY_MAX_ATTEMPTS STUDIO_RUNNER_TERMINAL_DELIVERY_BACKOFF_MS STUDIO_RUNNER_VALIDATE_TIMEOUT_MS STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES STUDIO_RUNNER_RETRY_AFTER_SECONDS STUDIO_RUNNER_DRAIN_TIMEOUT_MS STUDIO_RUNNER_RECORDING_WIDTH STUDIO_RUNNER_RECORDING_HEIGHT STUDIO_RUNNER_BROWSER_LAUNCH_TIMEOUT_MS STUDIO_RUNNER_STEP_TIMEOUT_MS STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS STUDIO_RUNNER_MAX_REPORT_STEPS STUDIO_RUNNER_MAX_REPORT_LOG_ENTRIES STUDIO_RUNNER_MAX_REPORT_LOG_ENTRY_LENGTH STUDIO_RUNNER_MAX_REPORT_BODY_BYTES
 {{- end }}
 
 {{/*
@@ -138,6 +138,9 @@ deployment can be repointed with — so the deployment must refuse it loudly.
 {{- define "put-checks.studioRunner.env" -}}
 {{- $accepted := splitList " " (include "put-checks.studioRunner.acceptedEnvKeys" .) -}}
 {{- range $key, $val := .Values.studioRunner.runnerEnv }}
+{{- if has $key (list "STUDIO_RUNNER_PORT" "STUDIO_RUNNER_SCRATCH_DIR" "STUDIO_RUNNER_OBJECT_STORE_DIR" "STUDIO_RUNNER_OBJECT_STORE_PROVIDER" "STUDIO_RUNNER_OBJECT_STORE_BUCKET" "STUDIO_RUNNER_OBJECT_STORE_REGION" "STUDIO_RUNNER_OBJECT_STORE_CREDENTIALS_DIRECTORY") }}
+{{- fail (printf "%s is managed by the chart; use the service, scratch or objectStore values instead" $key) }}
+{{- end }}
 {{- if not (has $key $accepted) }}
 {{- fail (printf "studioRunner.runnerEnv carries %q, which is not an accepted STUDIO_RUNNER_* key. The runner's environment is enumerated, not mapped: no values key may introduce a browser path, a HOME, or any credential the runner must not hold (story 10.18a AC-4a, architecture §9.2/§9.3)." $key) }}
 {{- end }}
@@ -224,3 +227,77 @@ either side win is how a timeout ends up disagreeing with the heartbeat it was s
 {{- define "put-checks.studioSse.managedAnnotations" -}}
 nginx.ingress.kubernetes.io/use-regex nginx.ingress.kubernetes.io/proxy-buffering nginx.ingress.kubernetes.io/proxy-request-buffering nginx.ingress.kubernetes.io/proxy-read-timeout nginx.ingress.kubernetes.io/proxy-send-timeout
 {{- end }}
+
+{{/* One service URL and the same two identity keys on both sides of the connection. */}}
+{{- define "put-checks.studio.backendEnv" -}}
+{{- if .Values.studioRunner.enabled }}
+- name: STUDIO_RUNNER_BASE_URL
+  value: "http://{{ include "put-checks.studioRunner.fullname" . }}:{{ .Values.studioRunner.service.port }}"
+- name: STUDIO_RUNNER_SERVICE_TOKEN
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.studioRunner.identity.secretName }}
+      key: {{ .Values.studioRunner.identity.serviceIdentityKey }}
+- name: STUDIO_CALLBACK_SERVICE_TOKEN
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.studioRunner.identity.secretName }}
+      key: {{ .Values.studioRunner.identity.callbackIdentityKey }}
+- name: STUDIO_STORAGE_PROVIDER
+  value: {{ .Values.objectStore.provider | quote }}
+- name: STUDIO_STORAGE_BUCKET
+  value: {{ .Values.objectStore.bucket | quote }}
+- name: STUDIO_STORAGE_REGION
+  value: {{ .Values.objectStore.region | quote }}
+- name: STUDIO_STORAGE_CREDENTIALS_DIRECTORY
+  value: {{ .Values.objectStore.mountPath | quote }}
+{{- end }}
+{{- end }}
+
+{{/* The mounted Spring source is mandatory and cannot be replaced by an env/secret entry. */}}
+{{- define "put-checks.springConfig.validate" -}}
+{{- include "put-checks.springConfig.validateProperties" (dict "values" .configOverrides "path" "") -}}
+{{- if regexMatch "(^|,)\\s*(local|test)\\s*(,|$)" (lower .springProfile) -}}
+{{- fail "local and test profiles are not deployable; select the component's remote springProfile" -}}
+{{- end -}}
+{{- range $key, $_ := .env -}}
+{{- include "put-checks.springConfig.validateEnvironmentKey" $key -}}
+{{- end -}}
+{{- range .envFromSecrets -}}
+{{- range .keys -}}
+{{- include "put-checks.springConfig.validateEnvironmentKey" . -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/* Environment selectors are reserved too: they can bypass the validated mounted source. */}}
+{{- define "put-checks.springConfig.validateEnvironmentKey" -}}
+{{- $normalized := regexReplaceAll "[^a-z0-9]" (lower .) "" -}}
+{{- if or (hasPrefix "springprofiles" $normalized) (has $normalized (list "springapplicationjson" "springconfigimport" "springconfiglocation" "springconfigadditionallocation")) -}}
+{{- fail (printf "%s is managed by the chart; use dedicated profile values or configOverrides" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/* Additional config outranks packaged ${ENV_ALIAS:default} placeholders. Keep chart-owned
+     controls on their dedicated values/Secret path, including nested/relaxed key spellings. */}}
+{{- define "put-checks.springConfig.validateProperties" -}}
+{{- $protected := list
+  "springprofilesactive" "springconfigimport" "springconfiglocation" "springconfigadditionallocation"
+  "checkscorsallowedorigins" "checkscoreservicebaseurl"
+  "checkssecuritybypasscoreservice" "checkssecuritybypassidentityheaders" "checkssecuritybypasscsiread"
+  "studioexecutionenabled" "studioexecutiondispatcherenabled" "studioexecutionevidenceretention"
+  "studioexecutioncallbackservicetoken" "studioexecutionsseheartbeat" "studioexecutionsselifetime"
+  "studiorunnerbaseurl" "studiorunnerserviceidentitytoken"
+  "studiostorageprovider" "studiostoragebucket" "studiostorageregion" "studiostoragecredentialsdirectory"
+-}}
+{{- range $key, $value := .values -}}
+{{- $path := printf "%s.%s" $.path $key | trimPrefix "." -}}
+{{- $normalized := regexReplaceAll "[^a-z0-9]" (lower $path) "" -}}
+{{- if or (has $normalized $protected) (hasPrefix "springprofiles" $normalized) (eq $normalized "springapplicationjson") -}}
+{{- fail (printf "configOverrides property %s is managed by the chart; use its dedicated values or Secret references" $path) -}}
+{{- end -}}
+{{- if kindIs "map" $value -}}
+{{- include "put-checks.springConfig.validateProperties" (dict "values" $value "path" $path) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

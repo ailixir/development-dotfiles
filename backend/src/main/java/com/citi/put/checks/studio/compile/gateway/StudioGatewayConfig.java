@@ -1,6 +1,5 @@
 package com.citi.put.checks.studio.compile.gateway;
 
-import com.google.cloud.vertexai.VertexAI;
 import java.io.IOException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -39,22 +38,15 @@ public class StudioGatewayConfig {
     return new GatewayResponseParser(schema);
   }
 
-  /** Fails startup with one message listing every missing value when the gateway is on (AC-2). */
+  /** Enabled production path uses the maintained SDK; no legacy fallback. */
   @Bean(destroyMethod = "close")
   @ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true")
-  public VertexAI studioGatewayVertexAi(StudioGatewayProperties properties) throws IOException {
-    properties.validateForEnabled();
-    return VertexAiClientFactory.create(properties);
-  }
-
-  @Bean
-  @ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true")
-  public LlmGatewayClient vertexLlmGatewayClient(
+  public GenAiLlmGatewayClient vertexLlmGatewayClient(
       StudioGatewayProperties properties,
-      VertexAI studioGatewayVertexAi,
       GatewayResponseParser parser,
-      GatewayAuditLogger auditLogger) {
-    return new VertexLlmGatewayClient(properties, studioGatewayVertexAi, parser, auditLogger);
+      GatewayAuditLogger auditLogger)
+      throws IOException {
+    return new GenAiLlmGatewayClient(properties, parser, auditLogger);
   }
 
   @Bean

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 // We need to test the mapper functions directly.
 // Since they're module-private, we'll import the module and test through the API surface.

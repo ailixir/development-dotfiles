@@ -46,7 +46,45 @@ public record StudioGatewayProperties(
     @DefaultValue("true") boolean structuredOutput,
     @DefaultValue("0") double temperature,
     @DefaultValue TransportRetry retry,
-    @DefaultValue("classpath:studio/artifact.schema.json") String artifactSchema) {
+    @DefaultValue("classpath:studio/artifact.schema.json") String artifactSchema,
+    @DefaultValue("8192") int maxOutputTokens) {
+
+  @org.springframework.boot.context.properties.bind.ConstructorBinding
+  public StudioGatewayProperties {}
+
+  @SuppressWarnings("checkstyle:ParameterNumber")
+  public StudioGatewayProperties(
+      boolean enabled,
+      String endpoint,
+      String project,
+      String location,
+      String model,
+      Credentials credentials,
+      Duration requestTimeout,
+      int maxConcurrency,
+      int maxInputBytes,
+      int maxOutputBytes,
+      boolean structuredOutput,
+      double temperature,
+      TransportRetry retry,
+      String artifactSchema) {
+    this(
+        enabled,
+        endpoint,
+        project,
+        location,
+        model,
+        credentials,
+        requestTimeout,
+        maxConcurrency,
+        maxInputBytes,
+        maxOutputBytes,
+        structuredOutput,
+        temperature,
+        retry,
+        artifactSchema,
+        8192);
+  }
 
   /** Credential sourcing modes. A raw key or user token is never accepted as a property value. */
   public static final String MODE_APPLICATION_DEFAULT = "application-default";
@@ -96,6 +134,21 @@ public record StudioGatewayProperties(
     }
     List<String> problems = new ArrayList<>();
     requireText(problems, "endpoint", endpoint);
+    if (!isBlank(endpoint)) {
+      try {
+        java.net.URI uri = java.net.URI.create(endpoint);
+        if (uri.getHost() == null
+            || uri.getUserInfo() != null
+            || uri.getQuery() != null
+            || uri.getFragment() != null
+            || !Set.of("https", "http").contains(uri.getScheme() == null ? "" : uri.getScheme())) {
+          problems.add(
+              "endpoint must be an absolute HTTP(S) URL without credentials, query or fragment");
+        }
+      } catch (IllegalArgumentException invalid) {
+        problems.add("endpoint must be an absolute HTTP(S) URL");
+      }
+    }
     requireText(problems, "project", project);
     requireText(problems, "location", location);
     requireText(problems, "model", model);
@@ -111,16 +164,45 @@ public record StudioGatewayProperties(
               + MODE_SERVICE_ACCOUNT_FILE);
     }
 
+    if (MODE_NONE.equalsIgnoreCase(mode) && !isBlank(endpoint)) {
+      try {
+        String host = java.net.URI.create(endpoint).getHost();
+        if (!Set.of("localhost", "127.0.0.1", "[::1]", "::1").contains(host == null ? "" : host)) {
+          problems.add("credentials.mode=none requires a loopback stub endpoint");
+        }
+      } catch (IllegalArgumentException invalid) {
+        problems.add("endpoint must be an absolute URL");
+      }
+    }
+
     requirePositive(
         problems, "request-timeout", requestTimeout == null ? 0 : requestTimeout.toMillis());
     requirePositive(problems, "max-concurrency", maxConcurrency);
     requirePositive(problems, "max-input-bytes", maxInputBytes);
     requirePositive(problems, "max-output-bytes", maxOutputBytes);
-    if (temperature < 0) {
+    requirePositive(problems, "max-output-tokens", maxOutputTokens);
+    if (!structuredOutput) {
+      problems.add("structured-output must be true");
+    }
+    if (!Double.isFinite(temperature) || temperature < 0) {
       problems.add("temperature must be >= 0 but was " + temperature);
     }
-    if (retry == null || retry.maxRetries() < 0) {
-      problems.add("retry.max-retries must be >= 0");
+    if (retry == null || retry.maxRetries() < 0 || retry.maxRetries() > 2) {
+      problems.add("retry.max-retries must be between 0 and 2");
+    }
+    if (retry != null) {
+      requirePositive(
+          problems,
+          "retry.initial-backoff",
+          retry.initialBackoff() == null ? 0 : retry.initialBackoff().toMillis());
+      if (!Double.isFinite(retry.backoffMultiplier()) || retry.backoffMultiplier() < 1) {
+        problems.add("retry.backoff-multiplier must be finite and >= 1");
+      }
+      if (!Double.isFinite(retry.jitterFactor())
+          || retry.jitterFactor() < 0
+          || retry.jitterFactor() > 1) {
+        problems.add("retry.jitter-factor must be between 0 and 1");
+      }
     }
 
     if (!problems.isEmpty()) {

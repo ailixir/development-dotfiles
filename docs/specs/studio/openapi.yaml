@@ -5,6 +5,11 @@ info:
   description: |
     Frozen contract for the Checks Studio UI-testing surface (story 10.1).
 
+    Compiler amendment 2026-09-16: `docs/architecture/studio-inference-contract-v1.md`
+    and sibling `inference.openapi.yaml` declare not-yet-implemented v2 authoring and
+    corrected compiler behavior. Existing v1/internal shapes remain defined here;
+    the separate inference proposal schema is never an executable runner artifact.
+
     Normative source: `docs/architecture/studio-execution.md` v2.1 — §4.4 (source artifact),
     §5 (execution and snapshot), §5.5 (SSE parity), §6.1 (evidence state), §8.2 (status
     vocabulary), §8.3 (public API and legacy adapters), §8.4 (internal contracts), and
@@ -113,7 +118,8 @@ paths:
         `csiId` filter is supplied (architecture §9.1). Soft-deleted and quarantined drafts are
         never returned.
 
-        **`compileDiagnostics`, `currentCandidateArtifact` and `currentCandidateArtifactHash` are
+        **`compileDiagnostics`, `currentCandidateArtifact`, `currentCandidateArtifactHash`,
+        `confirmedRevisionArtifact` and `confirmedRevisionArtifactHash` are
         always `null` on this route** and are read from `GET /tests/{id}`. They are the fields of
         `TestDto` this projection omits, and the reason is the same for all three: the diagnostics
         document is capped per draft at a configured byte limit (§8.5) and an artifact is capped
@@ -730,6 +736,16 @@ paths:
       description: |
         Authorized against the execution's immutable CSI. Object storage keys are never exposed;
         `videoPath` on the snapshot is this API path.
+
+        Refusal order (ADR-002 §§24, 25, 30): session authentication, execution/CSI authorization,
+        evidence state, then object storage. An unknown execution and an unreadable CSI both
+        answer `403 STUDIO_FORBIDDEN`, before any recording details are read. `404`, `410`,
+        `416`, and the store's `503 VIDEO_STORE_UNAVAILABLE` occur only after authorization.
+        An authentication-service `503` can instead occur before Studio authorization.
+
+        Authentication errors use the nested platform envelope; Studio refusals use flat
+        `ErrorResponse`. Clients use the HTTP status for behavior. Native video/download
+        navigation does not expose an error body to the UI; it must not infer a specific cause.
       parameters:
         - { $ref: '#/components/parameters/ExecutionId' }
         - name: download
@@ -754,6 +770,8 @@ paths:
           content:
             video/webm:
               schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404':
           description: No evidence for this execution
           content:
@@ -782,6 +800,32 @@ paths:
               examples:
                 unsatisfiable:
                   value: { error: RANGE_NOT_SATISFIABLE, message: 'The requested range cannot be served' }
+        '503':
+          description: |
+            VIDEO_STORE_UNAVAILABLE means the authorized request could not reach object storage;
+            the recording's disposition is unknown. It is not missing evidence (404), and the
+            body exposes no bucket, endpoint, or object key. The authentication filter can also
+            answer 503 AUTH_TEMPORARILY_UNAVAILABLE before authorization, using the nested
+            platform envelope. These are distinct producers of the same status (ADR-002 §30).
+          headers:
+            Retry-After:
+              description: Present with value 5 on the authentication-service failure only; the store failure does not promise this header.
+              schema: { type: integer, enum: [5] }
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - { $ref: '#/components/schemas/ErrorResponse' }
+                  - { $ref: '#/components/schemas/PlatformErrorResponse' }
+              examples:
+                storeUnavailable:
+                  value: { error: VIDEO_STORE_UNAVAILABLE, message: "The evidence store could not be reached; the recording's disposition is unknown" }
+                authenticationUnavailable:
+                  value:
+                    error:
+                      code: AUTH_TEMPORARILY_UNAVAILABLE
+                      message: Authentication service temporarily unavailable
+                      traceId: 4bf92f3577b34da6a3ce929d0e0e4736
 
   # ────────────────────────────────────────────────────────────────────────────────────────────
   # Internal surface, architecture §8.4, in the order that section tabulates it.
@@ -1294,6 +1338,22 @@ components:
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
+    SessionUnauthorized:
+      description: |
+        No authenticated user session. The BFF authentication filter answers before Studio
+        authorization, using nested PlatformErrorResponse rather than flat ErrorResponse.
+        The service-identity callbacks retain Unauthorized and their existing flat envelope.
+        See ADR-002 §§25, 30; this declaration does not standardize the two backend envelopes.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/PlatformErrorResponse' }
+          examples:
+            sessionRequired:
+              value:
+                error:
+                  code: UNAUTHENTICATED
+                  message: Session required
+                  traceId: 4bf92f3577b34da6a3ce929d0e0e4736
     Forbidden:
       description: The identity may not act on this CSI
       content:
@@ -1319,6 +1379,22 @@ components:
       properties:
         error: { type: string }
         message: { type: string }
+
+    PlatformErrorResponse:
+      description: |
+        Nested envelope written by servlet authentication/rate-limit/idempotency filters,
+        distinct from the flat Studio controller ErrorResponse. Authentication includes
+        traceId; other filter producers can omit it. No resource or storage details belong here.
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            traceId: { type: string }
 
     Viewport:
       type: object
@@ -1461,6 +1537,27 @@ components:
             from `steps` would present the client's reading of the sentence as the validator's
             reading of the artifact (ADR-002 §21.7, architecture §4.7).
         confirmedRevisionId: { type: string, format: uuid, nullable: true }
+        confirmedRevisionArtifactHash:
+          type: string
+          minLength: 64
+          maxLength: 64
+          pattern: '^[0-9a-f]{64}$'
+          nullable: true
+          description: |
+            Canonical artifact hash of exactly confirmedRevisionId, read with the draft and its
+            confirmed revision in one transaction (ADR-002 section 29). Independent of the current
+            candidate. Null when no readable retained confirmed revision exists; always null on
+            GET /tests. Never synthesized from draft steps or substituted from the candidate.
+        confirmedRevisionArtifact:
+          type: object
+          nullable: true
+          description: |
+            Immutable validated artifact of exactly confirmedRevisionId, read in the same transaction
+            as confirmedRevisionArtifactHash. Its normative schema is artifact.schema.json, as for
+            currentCandidateArtifact. Null when no readable retained confirmed revision exists;
+            always null on GET /tests. Edits and failed compiles do not replace this artifact with
+            candidate source. A stale draft cannot execute merely because historical source exists.
+
         compileError: { $ref: '#/components/schemas/CompileError' }
         compileDiagnostics: { $ref: '#/components/schemas/CompileDiagnostics' }
 

@@ -1,6 +1,6 @@
 {
   "name": "option-check-uncheck-hover",
-  "description": "Every permitted check, uncheck and hover option: force, trial, timeout.",
+  "description": "Every permitted check, uncheck and hover option: force, timeout.",
   "source": [
     "Tick \"Remember me\"",
     "Untick \"Marketing\"",
@@ -20,17 +20,17 @@
       {
         "stepIndex": 0,
         "originalText": "Tick \"Remember me\"",
-        "code": "await page.getByLabel('Remember me').check({ force: true, trial: false, timeout: 5000 });"
+        "code": "await page.getByLabel('Remember me').check({ force: true, timeout: 5000 });"
       },
       {
         "stepIndex": 1,
         "originalText": "Untick \"Marketing\"",
-        "code": "await page.getByLabel('Marketing').uncheck({ trial: false, timeout: 5000 });"
+        "code": "await page.getByLabel('Marketing').uncheck({ timeout: 5000 });"
       },
       {
         "stepIndex": 2,
         "originalText": "Hover over the \"Account\" button",
-        "code": "await page.getByRole('button', { name: 'Account' }).hover({ force: true, trial: true });"
+        "code": "await page.getByRole('button', { name: 'Account' }).hover({ force: true });"
       }
     ]
   },
@@ -67,7 +67,6 @@
         },
         {
           "force": true,
-          "trial": false,
           "timeout": 5000
         }
       ]
@@ -103,7 +102,6 @@
           ]
         },
         {
-          "trial": false,
           "timeout": 5000
         }
       ]
@@ -145,8 +143,7 @@
           ]
         },
         {
-          "force": true,
-          "trial": true
+          "force": true
         }
       ]
     }

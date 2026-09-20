@@ -1,5 +1,8 @@
 # Studio runner — operations runbook (V1)
 
+Current integration setup: [local filesystem and remote AWS S3](studio-integrations.md).
+That guide supersedes the earlier Sonic/fake-store setup notes below; cloud provisioning remains deferred.
+
 | Field | Value |
 |---|---|
 | **Status** | **COMPLETE for V1, and assembled once.** 10.18a drafted the three pod sections; **story 10.18b drafted the edge sections and assembled them here**, as @po's split mandated — a runbook split into two halves is two half-runbooks. All seven subjects AC-24 names are covered: Chromium and the sandbox (§1), egress and approved destinations (§2), evidence expiry (§3), signals/drain/reaping (§4), stuck runs (§5), the kill switch (§6), SSE (§7) and manifest recovery (§8). §§9-11 carry the three open prerequisites this deployment must not be read without |
@@ -454,32 +457,41 @@ class of change ADR-002 §12 reserves for a ruling.
 route and of the CSRF control that route provides, and whether the application must add one.
 `ED-06`, OPEN.
 
-## 11. Configuration that does not reach the process — an open escalation
+## 11. Spring configuration delivery
 
-*Story 10.18b, AC-18.*
+Story 10.27 resolves the AC-18 escalation from story 10.18b. Backend and worker
+`configOverrides` now render into separate `*-properties` ConfigMaps containing
+`application.yaml`, mounted read-only at `/etc/put-checks/config`. The containers load the
+mandatory file `/etc/put-checks/config/application.yaml` through `SPRING_CONFIG_ADDITIONAL_LOCATION`; the chart reserves this selector
+against replacement through generic `env` or `envFromSecrets` values.
 
-**`configOverrides` has been inert since the chart was written.** `templates/configmap.yaml`
-renders each `configOverrides` entry as a ConfigMap **key**, and the containers consume the
-ConfigMap through `envFrom: configMapRef`. Kubernetes skips any key that is not a valid environment
-variable name and reports it as an `InvalidVariableNames` event on the pod — the pod starts, and the
-setting never arrives. Every dotted key in `configOverrides` is a setting somebody believed they had
-applied.
+Dotted property names, hyphens, nested values, and case-sensitive map entries are preserved.
+The original `*-config` ConfigMaps still supply valid environment entries such as `SERVER_PORT`.
+Frontend configuration and secret environment references keep their existing delivery mechanism.
 
-**Fifteen keys per value set, thirteen distinct**, across the API and worker ConfigMaps:
-`spring.datasource.hikari.maximum-pool-size`, `checks.scheduling.{batch-size,
-min-interval-seconds, poll-interval-ms, shutdown-timeout-sec}`, `checks.executor.max-concurrency`,
-and `checks.executor.source-limits.{HTTP, TCP, SPLUNK, GRAFANA, ITRS, APPDYNAMICS, UI_TEST}`.
+Spring loads the mounted file in addition to its packaged defaults. Canonically named Spring
+environment properties take precedence over this file. A custom `${ENV_ALIAS:default}` placeholder
+in packaged configuration is different: an override of its containing property can replace the
+placeholder. The chart rejects overrides of its managed identity bypasses, CORS origins/Core service URL, execution/dispatcher
+switches, evidence retention, SSE bounds, runner/callback identity, and storage wiring, as well as
+profile/configuration imports. Use the dedicated chart values or Secret references for these
+controls (`env` for the CORS/Core service URLs). For other aliased properties, configure the alias through `env`/`envFromSecrets` and
+avoid also setting its property in `configOverrides`.
 
-**The check is left RED, deliberately** (`studio-runner/test/deployment/envfrom-keys.test.ts`).
-Allowlisting the existing keys would produce a guard that cannot fail; converting them changes
-deployment behaviour in database and scheduler subsystems that a Studio story does not own and whose
-owners have not reviewed the change.
+Changing `configOverrides` changes the existing pod checksum and rolls the workload.
+Use `configOverrides` for non-secret Spring properties; keep credentials in Secret references.
 
-**OWNER: @devops (Gage)** carries it to resolution. **MECHANISM: @architect (Aria)** — env-name
-conversion, a mounted application config file, or `SPRING_APPLICATION_JSON` is a
-configuration-architecture choice, not a rename.
+This activates the previously ineffective database pool, scheduler, and executor overrides.
+Review the rendered values for the target environment before rollout: for example, production
+worker concurrency is 250, its pool size is 30, and scheduling batch size is 500. Values are
+operator configuration, not newly measured capacity recommendations.
 
-**No key story 10.18b added is affected**: `STUDIO_SSE_*`, `CHECKS_BYPASS_*`,
-`STUDIO_EXECUTION_ENABLED`, `STUDIO_DISPATCHER_ENABLED` and every `STUDIO_RUNNER_*` key render as
-container `env` entries with conforming names, and that is asserted separately so this escalation
-cannot be read as covering for them.
+`studio-runner/test/deployment/envfrom-keys.test.ts` now requires every envFrom-consumed key to
+conform and verifies each mounted property against the effective chart values in all four value
+sets. Dotted-property mutations must survive delivery; an invalid frontend envFrom key must still
+trigger the detector. There is no expected-red exception or key allowlist.
+
+**OWNER: @devops. MECHANISM: @architect.** Profile activation (including include/default/groups),
+configuration import/location selectors, and JSON property injection cannot bypass the chart-owned
+profile/source through generic environment or secret entries. Dedicated remote profiles also reject
+`local` and `test`. The same rules apply to flat, nested and relaxed property spellings.

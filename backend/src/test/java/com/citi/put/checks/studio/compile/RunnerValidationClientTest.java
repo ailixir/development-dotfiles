@@ -17,10 +17,13 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
@@ -73,7 +76,8 @@ class RunnerValidationClientTest {
                     .withHeader("content-type", "application/json")
                     .withBody(
                         "{\"ok\":true,\"validatorSchemaVersion\":\"1.0.0\",\"diagnostics\":[],"
-                            + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]}]}")));
+                            + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]},"
+                            + "{\"stepIndex\":1,\"ok\":true,\"diagnostics\":[]}]}")));
 
     ValidationOutcome outcome =
         client(Duration.ofSeconds(5))
@@ -172,7 +176,8 @@ class RunnerValidationClientTest {
                             + "\"message\":\"count\",\"node\":null,\"excerpt\":null}],"
                             + "\"steps\":[{\"stepIndex\":0,\"ok\":false,\"diagnostics\":"
                             + "[{\"code\":\"DENIED_NODE\",\"stepIndex\":0,\"message\":\"nope\","
-                            + "\"node\":\"ForStatement\",\"excerpt\":\"for(;;)\"}]}]}")));
+                            + "\"node\":\"ForStatement\",\"excerpt\":\"for(;;)\"}]},"
+                            + "{\"stepIndex\":1,\"ok\":false,\"diagnostics\":[]}]}")));
 
     ValidationOutcome outcome =
         client(Duration.ofSeconds(5)).validate(ARTIFACT, SOURCE, List.of(), List.of());
@@ -184,8 +189,106 @@ class RunnerValidationClientTest {
     assertThat(outcome.diagnostics().get(0).stepIndex())
         .as("artifact-level diagnostics belong to no step")
         .isNull();
-    assertThat(outcome.steps()).hasSize(1);
+    assertThat(outcome.steps()).hasSize(2);
     assertThat(outcome.steps().get(0).diagnostics().get(0).node()).isEqualTo("ForStatement");
+  }
+
+  @ParameterizedTest
+  @MethodSource("malformedVerdicts")
+  void malformedOrContradictoryVerdictsCannotAuthorizePublication(String body) {
+    runner.stubFor(
+        post(urlEqualTo("/v1/validate")).willReturn(aResponse().withStatus(200).withBody(body)));
+    ValidationOutcome outcome =
+        client(Duration.ofSeconds(5)).validate(ARTIFACT, SOURCE, List.of(), List.of());
+    assertThat(outcome.available()).isFalse();
+    runner.verify(1, postRequestedFor(urlEqualTo("/v1/validate")));
+  }
+
+  @Test
+  void sharedBudgetCancelsSlowValidationAndForbidsCallsAfterExpiry() throws Exception {
+    runner.stubFor(
+        post(urlEqualTo("/v1/validate")).willReturn(okVerdict(true).withFixedDelay(2_000)));
+    RunnerValidationClient client = client(Duration.ofSeconds(5));
+    CompileBudget budget = new CompileBudget(Duration.ofMillis(150));
+    long started = System.nanoTime();
+    assertThat(client.validate(ARTIFACT, SOURCE, List.of(), List.of(), budget).available())
+        .isFalse();
+    assertThat(Duration.ofNanos(System.nanoTime() - started)).isLessThan(Duration.ofSeconds(1));
+    Thread.sleep(160);
+    long calls = client.callCount();
+    assertThatThrownBy(() -> client.validate(ARTIFACT, SOURCE, List.of(), List.of(), budget))
+        .isInstanceOf(java.util.concurrent.CancellationException.class);
+    assertThat(client.callCount()).isEqualTo(calls);
+  }
+
+  @Test
+  void cancellationReleasesAnActiveValidatorBeforeItsPerCallTimeout() throws Exception {
+    runner.stubFor(
+        post(urlEqualTo("/v1/validate")).willReturn(okVerdict(true).withFixedDelay(2_000)));
+    CompileBudget budget = new CompileBudget(Duration.ofSeconds(5));
+    try (var worker = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+      var result =
+          worker.submit(
+              () ->
+                  client(Duration.ofSeconds(5))
+                      .validate(ARTIFACT, SOURCE, List.of(), List.of(), budget));
+      long until = System.nanoTime() + Duration.ofSeconds(2).toNanos();
+      while (runner.getAllServeEvents().isEmpty() && System.nanoTime() < until) {
+        Thread.sleep(5);
+      }
+      budget.cancel();
+      assertThat(result.get(1, java.util.concurrent.TimeUnit.SECONDS).available()).isFalse();
+    }
+  }
+
+  @Test
+  void oversizedVerdictIsRejectedByBothTransports() {
+    runner.stubFor(
+        post(urlEqualTo("/v1/validate"))
+            .willReturn(aResponse().withStatus(200).withBody(" ".repeat(1_048_577))));
+    RunnerValidationClient client = client(Duration.ofSeconds(5));
+    assertThat(client.validate(ARTIFACT, SOURCE, List.of(), List.of()).available()).isFalse();
+    assertThat(
+            client
+                .validate(
+                    ARTIFACT,
+                    SOURCE,
+                    List.of(),
+                    List.of(),
+                    new CompileBudget(Duration.ofSeconds(5)))
+                .available())
+        .isFalse();
+  }
+
+  private static Stream<String> malformedVerdicts() {
+    String valid =
+        """
+        {"ok":true,"validatorSchemaVersion":"1.0.0","diagnostics":[],"steps":[
+          {"stepIndex":0,"ok":true,"diagnostics":[]},
+          {"stepIndex":1,"ok":true,"diagnostics":[]}]}
+        """;
+    return Stream.of(
+        valid + " {}",
+        valid + " false",
+        "null",
+        "",
+        "{}",
+        "{\"ok\":true}",
+        valid.replace("\"validatorSchemaVersion\":\"1.0.0\",", ""),
+        valid.replace("1.0.0", "2.0.0"),
+        valid.replace("\"ok\":true", "\"ok\":\"true\""),
+        valid.replaceFirst("true", "false"),
+        valid.replace("\"stepIndex\":1", "\"stepIndex\":0"),
+        valid.replace("\"stepIndex\":1", "\"stepIndex\":1.5"),
+        valid.replace("\"stepIndex\":1", "\"stepIndex\":4294967297"),
+        valid.replace("\"stepIndex\":1", "\"stepIndex\":1,\"extra\":true"),
+        valid.replaceFirst("\\{", "{\"ok\":false,"),
+        valid.replaceFirst("\\{", "{\"unknown\":true,"),
+        valid.replace("\"stepIndex\":1,\"ok\":true", "\"stepIndex\":1,\"ok\":false"),
+        valid.replace("\"diagnostics\":[]", "\"diagnostics\":null"),
+        valid.replace("\"diagnostics\":[]", "\"diagnostics\":[{\"code\":\"BAD\"}]"),
+        valid.replace(",\n  {\"stepIndex\":1,\"ok\":true,\"diagnostics\":[]}", ""),
+        valid.replace("\"stepIndex\":1", "\"stepIndex\":2"));
   }
 
   // ── the base URL is deployment configuration ──────────────────────────────

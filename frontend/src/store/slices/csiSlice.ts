@@ -86,7 +86,7 @@ export const fetchCSIMetrics = createAsyncThunk(
             totalExecutions: 0,
             successRate: 0,
           };
-        } catch {}
+        } catch { /* Optional CSI metadata enrichment must not discard the successful base response. */ }
       })
     );
     return { data: results, lastUpdated: new Date().toISOString() };

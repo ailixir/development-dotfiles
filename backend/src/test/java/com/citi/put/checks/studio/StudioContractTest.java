@@ -288,9 +288,10 @@ class StudioContractTest {
    *
    * <p>This story amends {@code openapi.yaml} under ADR-002 §21 and therefore re-anchors the
    * runner's {@code BASE_SHA256} in its own PR. A hash says <em>something</em> moved and never
-   * <em>what</em>, so the claim that nothing outside {@code TestDto} moved is asserted here
-   * instead: for every operation the document declares, its response status set and its
-   * implementation marker are what they were before this story ran.
+   * <em>what</em>, so every operation retains an independently enumerated response status set and
+   * implementation marker below. ADR-002 §30 subsequently amends the video status set to include
+   * implemented authentication and unavailable-store responses; that reviewed change is recorded
+   * explicitly in this copy.
    *
    * <h2>Why a hand-maintained second copy, and why it must stay one</h2>
    *
@@ -308,13 +309,14 @@ class StudioContractTest {
    * is that {@link #pendingOperations()} is empty, and it would fail the moment one came back.
    */
   @Test
-  void noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties() {
+  void declaredOperationStatusSetsAndMarkersMatchTheReviewedContract() {
     Map<String, String> expected = new TreeMap<>();
     expected.put("DELETE /tests/{id}", "204,400,401,403");
     expected.put("GET /executions", "200,401");
     expected.put("GET /executions/{id}", "200,400,401,403");
     expected.put("GET /executions/{id}/events", "200,401,403");
-    expected.put("GET /executions/{id}/video", "200,206,404,410,416");
+    // ADR-002 §30 declares the already implemented video authentication/store responses.
+    expected.put("GET /executions/{id}/video", "200,206,401,403,404,410,416,503");
     expected.put("GET /health", "200,401,403");
     expected.put("GET /ready", "200,401,403,503");
     expected.put("GET /tests", "200,401");
@@ -343,7 +345,7 @@ class StudioContractTest {
         .as("an operation this copy names that the document no longer declares")
         .containsExactlyElementsOf(declared.keySet());
     assertThat(declared)
-        .as("an operation's response status set moved; this story amends TestDto and nothing else")
+        .as("an operation's response status set moved outside the reviewed contract amendments")
         .isEqualTo(expected);
 
     assertThat(pendingOperations())

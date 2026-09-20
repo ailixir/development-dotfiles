@@ -8,14 +8,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Runs both reapers, and only on the worker profile (§5.4).
+ * Runs both reapers, and on the worker profile or an explicitly enabled local process (§5.4).
  *
  * <p>As with the dispatcher, the reapers themselves are ordinary beans so a test can drive a single
  * bounded pass deterministically; what is worker-only is the schedule. An API pod therefore holds
  * no reaper schedule at all.
  */
 @Component
-@Profile("worker")
+@Profile({"worker", "local"})
 @ConditionalOnProperty(
     prefix = "studio.execution.dispatcher",
     name = "enabled",

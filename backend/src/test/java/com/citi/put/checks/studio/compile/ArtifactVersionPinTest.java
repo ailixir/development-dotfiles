@@ -122,8 +122,14 @@ class ArtifactVersionPinTest {
             "the pipeline must re-assert the pin on whatever artifact it is handed: a stub, a"
                 + " future second client or a changed parser must not be able to slip a V2"
                 + " document past it")
-        .contains("isSupportedArtifactVersion");
-    assertThat(source.indexOf("isSupportedArtifactVersion(artifactJson)"))
+        .contains("IncrementalAssembler.assemble");
+    String assembler =
+        Files.readString(
+            Path.of(
+                "src/main/java/com/citi/put/checks/studio/compile/incremental",
+                "IncrementalAssembler.java"));
+    assertThat(assembler).contains("CompilePins.SUPPORTED_ARTIFACT_VERSION");
+    assertThat(source.indexOf("IncrementalAssembler.assemble"))
         .as("the re-assertion must happen before the validator is called")
         .isLessThan(source.indexOf("validationClient.validate("));
   }

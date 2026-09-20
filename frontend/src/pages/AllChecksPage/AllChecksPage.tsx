@@ -1,78 +1,69 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import EmptyState from '@/components/shared/States/EmptyState';
+import ErrorState from '@/components/shared/States/ErrorState';
+import { checksApi } from '@/services/api/checksApi';
+import { addNotification } from '@/store/slices/uiSlice';
 import {
+  Add,
+  Api,
+  AutoGraph,
+  BugReport,
+  Checklist,
+  Delete,
+  Edit,
+  FilterList,
+  MoreVert,
+  PlayArrow,
+  Schedule,
+  Science,
+  Search,
+  Security,
+  Storage
+} from '@mui/icons-material';
+import {
+  Alert,
   Box,
-  Typography,
-  Paper,
+  Button,
   Card,
   CardContent,
-  Grid,
-  TextField,
-  InputAdornment,
+  Checkbox,
   Chip,
-  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
   IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
   Menu,
   MenuItem,
-  Tooltip,
+  Paper,
+  Select,
+  Snackbar,
   Stack,
-  LinearProgress,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
   TablePagination,
-  FormControl,
-  InputLabel,
-  Select,
-  useTheme,
-  alpha,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Snackbar,
-  CircularProgress,
-  Checkbox,
+  TableRow,
+  TextField,
   Toolbar,
+  Typography,
+  useTheme
 } from '@mui/material';
-import {
-  Search,
-  FilterList,
-  Add,
-  MoreVert,
-  CheckCircle,
-  Error,
-  Warning,
-  Schedule,
-  PlayArrow,
-  Pause,
-  Delete,
-  Edit,
-  Visibility,
-  Api,
-  Storage,
-  AutoGraph,
-  Security,
-  BugReport,
-  Science,
-  Refresh,
-  Checklist,
-} from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@store/index';
-import { fetchChecks, executeCheck, deleteCheck, pauseCheck, resumeCheck } from '@store/slices/checksSlice';
-import { addNotification } from '@/store/slices/uiSlice';
+import { deleteCheck, executeCheck, fetchChecks, pauseCheck, resumeCheck } from '@store/slices/checksSlice';
 import { selectSources } from '@store/slices/sourcesSlice';
-import EmptyState from '@/components/shared/States/EmptyState';
-import ErrorState from '@/components/shared/States/ErrorState';
-import LoadingState from '@/components/shared/States/LoadingState';
-import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
-import { checksApi } from '@/services/api/checksApi';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 // Visual skeleton: scope is now shown globally in ScopeBar; this page gets a left FiltersRail
-import FiltersRail from './FiltersRail';
 import ScheduleDialog from '@components/scheduling/ScheduleDialog';
+import FiltersRail from './FiltersRail';
 
 const AllChecksPage: React.FC = () => {
   const theme = useTheme();
@@ -85,10 +76,9 @@ const AllChecksPage: React.FC = () => {
     return s ? s.enabled : true;
   };
   
-  const { data: checks, loading, error, executingChecks, schedulingChecks } = useAppSelector(state => state.checks);
+  const { data: checks, loading, error, executingChecks } = useAppSelector(state => state.checks);
   const { selectedCSI, tags: { selected: selectedTags, filterMode } } = useAppSelector(state => state.csi);
   const searchContext = useAppSelector(state => state.dashboard.searchContext);
-  const location = useLocation();
   
   // Local state
   const [searchQuery, setSearchQuery] = useState('');
@@ -136,7 +126,7 @@ const AllChecksPage: React.FC = () => {
           if (prefs?.statusFilter !== undefined) setStatusFilter(prefs.statusFilter);
           if (prefs?.typeFilter !== undefined) setTypeFilter(prefs.typeFilter);
         }
-      } catch {}
+      } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
       setPersisted(true);
     }
   }, [persisted]);
@@ -144,7 +134,7 @@ const AllChecksPage: React.FC = () => {
   useEffect(() => {
     try {
       localStorage.setItem('checks:catalog:prefs', JSON.stringify({ rowsPerPage, searchQuery, statusFilter, typeFilter }));
-    } catch {}
+    } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
   }, [rowsPerPage, searchQuery, statusFilter, typeFilter]);
 
   // Filter and search logic
@@ -318,35 +308,8 @@ const AllChecksPage: React.FC = () => {
     handleMenuClose();
   };
 
-  const handlePauseCheck = async (checkId: string) => {
-    try {
-      await dispatch(pauseCheck(checkId)).unwrap();
-      dispatch(addNotification({ type: 'success', title: 'Schedule', message: 'Check paused successfully' }));
-    } catch (error) {
-      dispatch(addNotification({ type: 'error', title: 'Schedule', message: 'Failed to pause check' }));
-    }
-    handleMenuClose();
-  };
 
-  const handleResumeCheck = async (checkId: string) => {
-    try {
-      await dispatch(resumeCheck(checkId)).unwrap();
-      dispatch(addNotification({ type: 'success', title: 'Schedule', message: 'Check resumed successfully' }));
-    } catch (error) {
-      dispatch(addNotification({ type: 'error', title: 'Schedule', message: 'Failed to resume check' }));
-    }
-    handleMenuClose();
-  };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'PASSING': return <CheckCircle sx={{ color: theme.palette.success.main }} />;
-      case 'FAILING': return <Error sx={{ color: theme.palette.error.main }} />;
-      case 'WARNING': return <Warning sx={{ color: theme.palette.warning.main }} />;
-      case 'PENDING': return <Schedule sx={{ color: theme.palette.info.main }} />;
-      default: return <Schedule sx={{ color: theme.palette.grey[500] }} />;
-    }
-  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {

@@ -51,7 +51,34 @@ class HttpRunnerDispatchClientTest {
             new ObjectMapper(),
             new StudioExecutionProperties(
                 true, null, null, null, Duration.ofMillis(500), null, null, null, null, null, null),
-            "http://localhost:" + wireMock.port());
+            new com.citi.put.checks.studio.compile.validator.StudioRunnerProperties(
+                "http://localhost:" + wireMock.port(),
+                "test-runner-token",
+                Duration.ofSeconds(5),
+                Duration.ofSeconds(2)));
+  }
+
+  @Test
+  void dispatchCarriesTheRunnerIdentityAndMissingIdentitySendsNothing() {
+    wireMock.stubFor(
+        post(urlPathEqualTo("/v1/runs"))
+            .withHeader(
+                "Authorization",
+                com.github.tomakehurst.wiremock.client.WireMock.equalTo("Bearer test-runner-token"))
+            .willReturn(aResponse().withStatus(202)));
+    assertThat(client.send(RunJobFixtures.conformingJob()).kind())
+        .isEqualTo(DispatchOutcome.Kind.ACCEPTED);
+    wireMock.resetRequests();
+    var missingIdentity =
+        new HttpRunnerDispatchClient(
+            new ObjectMapper(),
+            new StudioExecutionProperties(
+                true, null, null, null, Duration.ofSeconds(2), null, null, null, null, null, null),
+            new com.citi.put.checks.studio.compile.validator.StudioRunnerProperties(
+                wireMock.baseUrl(), "", Duration.ofSeconds(2), Duration.ofSeconds(2)));
+    assertThat(missingIdentity.send(RunJobFixtures.conformingJob()).kind())
+        .isEqualTo(DispatchOutcome.Kind.DEFINITE_REFUSAL);
+    assertThat(wireMock.getAllServeEvents()).isEmpty();
   }
 
   @Test

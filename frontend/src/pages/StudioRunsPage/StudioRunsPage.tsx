@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, Grid, Chip, Stack, Skeleton, IconButton, Tooltip, LinearProgress, Alert } from '@mui/material';
-import { Refresh, PlayArrow, Movie } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import studioApi from '@/services/api/studioApi';
 import { useAppSelector } from '@/store';
+import { Movie, Refresh } from '@mui/icons-material';
+import { Alert, Box, Card, CardContent, Chip, Grid, IconButton, LinearProgress, Skeleton, Stack, Tooltip, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type Status = 'RUNNING' | 'COMPLETED' | 'FAILED' | 'TIMEOUT';
 interface RunItem {

@@ -20,6 +20,11 @@ final class GatewayPayloadSerializer {
   static String serialize(CompileRequest request) {
     StringBuilder payload = new StringBuilder();
     payload.append(request.outputContract()).append(SEPARATOR);
+    payload.append("Required envelope kind: ").append(request.proposalKind()).append('\n');
+    payload
+        .append("Writable step IDs in exact response order: ")
+        .append(request.writableStepIds())
+        .append(SEPARATOR);
     payload.append(request.syntaxReference()).append(SEPARATOR);
     for (String line : request.fencedSourceLines()) {
       payload.append(line).append('\n');

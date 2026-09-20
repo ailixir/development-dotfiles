@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Card, CardContent, Chip, Divider, Grid, IconButton, InputAdornment, MenuItem, Pagination, Paper, Select, Stack, TextField, Tooltip, Typography, Skeleton, CircularProgress, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel } from '@mui/material';
-import { Add, Delete, PlayArrow, Refresh, Search, Science } from '@mui/icons-material';
 import studioApi from '@/services/api/studioApi';
-import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/store';
+import { Add, Delete, PlayArrow, Science, Search } from '@mui/icons-material';
+import { Alert, Box, Button, Card, CardContent, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Grid, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Paper, Select, Skeleton, Snackbar, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface UITestItem {
   id: string;
@@ -27,7 +27,7 @@ const StudioTestsPage: React.FC = () => {
   const navigate = useNavigate();
   const searchContext = useAppSelector(state => state.dashboard.searchContext);
   const [running, setRunning] = useState<Record<string, boolean>>({});
-  const [lastOutcome, setLastOutcome] = useState<Record<string, 'SUCCESS' | 'FAILED' | 'TIMEOUT'>>({});
+  const [, setLastOutcome] = useState<Record<string, 'SUCCESS' | 'FAILED' | 'TIMEOUT'>>({});
   const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error'; id?: string }>({ open: false, message: '', severity: 'success' });
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -150,7 +150,7 @@ const StudioTestsPage: React.FC = () => {
                                       setSnack({ open: true, message: `${t.name}: ${exec.status === 'COMPLETED' ? 'SUCCESS' : 'FAILED'}`, severity: exec.status === 'COMPLETED' ? 'success' : 'error', id: t.id });
                                       return;
                                     }
-                                  } catch {}
+                                  } catch { /* Keep the current list; polling or a later user action can retry the request. */ }
                                   if (Date.now() - startedAt < 6500) {
                                     setTimeout(poll, 500);
                                   } else {
@@ -168,7 +168,7 @@ const StudioTestsPage: React.FC = () => {
                         </span>
                       </Tooltip>
                       <Tooltip title="Delete">
-                        <span><IconButton size="small" disabled={loading || !!running[t.id]} onClick={async () => { try { await studioApi.deleteTest(t.id); await load(); } catch {} }}><Delete fontSize="small" /></IconButton></span>
+                        <span><IconButton size="small" disabled={loading || !!running[t.id]} onClick={async () => { try { await studioApi.deleteTest(t.id); await load(); } catch { /* Keep the current list; polling or a later user action can retry the request. */ } }}><Delete fontSize="small" /></IconButton></span>
                       </Tooltip>
                     </Stack>
                   </Stack>

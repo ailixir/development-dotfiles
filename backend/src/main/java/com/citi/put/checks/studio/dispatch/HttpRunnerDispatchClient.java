@@ -1,6 +1,7 @@
 package com.citi.put.checks.studio.dispatch;
 
 import com.citi.put.checks.studio.StudioExecutionProperties;
+import com.citi.put.checks.studio.compile.validator.StudioRunnerProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -12,7 +13,6 @@ import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -38,16 +38,15 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
   private final HttpClient httpClient;
   private final ObjectMapper objectMapper;
   private final StudioExecutionProperties properties;
-  private final String runnerBaseUrl;
+  private final StudioRunnerProperties runner;
 
   public HttpRunnerDispatchClient(
       ObjectMapper objectMapper,
       StudioExecutionProperties properties,
-      @Value("${studio.execution.runner-base-url:http://put-checks-studio-runner:8090}")
-          String runnerBaseUrl) {
+      StudioRunnerProperties runner) {
     this.objectMapper = objectMapper;
     this.properties = properties;
-    this.runnerBaseUrl = runnerBaseUrl;
+    this.runner = runner;
     this.httpClient =
         HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NEVER)
@@ -62,12 +61,18 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
 
   @Override
   public DispatchOutcome send(RunJob job) {
+    if (!runner.isConfigured()
+        || runner.serviceIdentityToken() == null
+        || runner.serviceIdentityToken().isBlank()) {
+      return DispatchOutcome.refusedTerminal("studio runner URL and service identity are required");
+    }
     HttpRequest request;
     try {
       request =
-          HttpRequest.newBuilder(URI.create(runnerBaseUrl + "/v1/runs"))
+          HttpRequest.newBuilder(URI.create(runner.baseUrl().replaceAll("/+$", "") + "/v1/runs"))
               .timeout(properties.admissionTimeoutOrDefault())
               .header("Content-Type", "application/json")
+              .header("Authorization", "Bearer " + runner.serviceIdentityToken())
               .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body(job))))
               .build();
     } catch (JsonProcessingException e) {

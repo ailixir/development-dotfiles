@@ -80,7 +80,7 @@ class RepairExhaustionTest extends AbstractRepairPipelineTest {
   void theAttemptCountIsAMeasurementAndNotAConstant() {
     var outcome =
         com.citi.put.checks.studio.compile.validator.ValidationOutcome.verdict(
-            false, "1.0.0", java.util.List.of(), java.util.List.of());
+            false, "2.0.0", java.util.List.of(), java.util.List.of());
 
     assertThat(bounder.bound(outcome, 2, 1, false))
         .contains("\"attempts\":1")
@@ -113,6 +113,8 @@ class RepairExhaustionTest extends AbstractRepairPipelineTest {
             .mapToObj(index -> "Go to \"https://example.com/page-" + index + "\"")
             .toList();
     UUID large = seedAnotherDraft(manySteps);
+    gateway.reset(artifactFor(manySteps, "await page.goto('https://example.com');"));
+    // Stay within the transport cap while exceeding every persisted diagnostics cap.
     stubValidatorAlways(hostileVerdict(stepCount));
 
     pipeline.compile(large, OWNER);
@@ -202,22 +204,22 @@ class RepairExhaustionTest extends AbstractRepairPipelineTest {
   private static String hostileVerdict(int stepCount) {
     StringBuilder body =
         new StringBuilder(
-            "{\"ok\":false,\"validatorSchemaVersion\":\"1.0.0\",\"diagnostics\":[],\"steps\":[");
+            "{\"ok\":false,\"validatorSchemaVersion\":\"2.0.0\",\"diagnostics\":[],\"steps\":[");
     for (int step = 0; step < stepCount; step++) {
       if (step > 0) {
         body.append(',');
       }
       body.append("{\"stepIndex\":").append(step).append(",\"ok\":false,\"diagnostics\":[");
-      for (int d = 0; d < 50; d++) {
+      for (int d = 0; d < 12; d++) {
         if (d > 0) {
           body.append(',');
         }
         body.append("{\"code\":\"DENIED_NODE\",\"stepIndex\":")
             .append(step)
             .append(",\"message\":\"")
-            .append("m".repeat(2_000))
+            .append("m".repeat(600))
             .append("\",\"node\":\"CallExpression\",\"excerpt\":\"")
-            .append("e".repeat(2_000))
+            .append("e".repeat(200))
             .append("\"}");
       }
       body.append("]}");

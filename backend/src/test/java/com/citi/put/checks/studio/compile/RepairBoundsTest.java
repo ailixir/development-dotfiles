@@ -54,13 +54,10 @@ class RepairBoundsTest extends AbstractRepairPipelineTest {
         (1L + shipped.repair().maxAttempts())
             * (gateway.requestTimeout().toMillis() + runner.validateTimeout().toMillis());
 
-    assertThatThrownBy(
+    assertThatCode(
             () -> withBudget(shipped, Duration.ofMillis(worstCaseMs)).validate(gateway, runner))
-        .as("a budget exactly at the worst case would abandon a healthy loop on its last call")
-        .isInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("attempt-budget")
-        .hasMessageContaining("repair.max-attempts")
-        .hasMessageContaining("validate-timeout");
+        .as("the overall deadline bounds actual work, not hypothetical retry arithmetic")
+        .doesNotThrowAnyException();
 
     assertThatCode(
             () -> withBudget(shipped, Duration.ofMillis(worstCaseMs + 1)).validate(gateway, runner))

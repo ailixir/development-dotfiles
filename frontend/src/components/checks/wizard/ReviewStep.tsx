@@ -1,29 +1,29 @@
-import React from 'react';
+import { formatNextCronRun, parseCron } from '@/utils/cronNextRun';
 import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Chip,
-  Avatar,
-  Stack,
-  Button,
-  Alert,
-  useTheme,
-  alpha,
-} from '@mui/material';
-import {
+  Cable,
+  DesktopWindows,
   Edit,
   Http,
-  Cable,
   ManageSearch,
   ShowChart,
-  DesktopWindows,
-  Speed,
   SmartDisplay,
+  Speed,
 } from '@mui/icons-material';
+import {
+  Alert,
+  alpha,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Grid,
+  Paper,
+  Stack,
+  Typography,
+  useTheme,
+} from '@mui/material';
+import React from 'react';
 import { checkTypeCategories } from './CheckTypeSelector';
-import { formatNextCronRun, parseCron } from '@/utils/cronNextRun';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -215,7 +215,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   schedule,
   csiEntities,
   availableUITests,
-  editId,
   onEditStep,
 }) => {
   const theme = useTheme();

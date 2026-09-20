@@ -1,5 +1,5 @@
 {
-  "syntaxReferenceVersion": "1.0.0",
+  "syntaxReferenceVersion": "2.0.0",
   "pages": {
     "home.html": "https://example.com/",
     "login.html": "https://example.com/login",
@@ -356,7 +356,7 @@
     {
       "file": "option-check-uncheck-hover.json",
       "name": "option-check-uncheck-hover",
-      "description": "Every permitted check, uncheck and hover option: force, trial, timeout.",
+      "description": "Every permitted check, uncheck and hover option: force, timeout.",
       "page": "forms.html",
       "methods": [
         "check",
@@ -368,19 +368,16 @@
       "optionKeys": [
         "check.force",
         "check.timeout",
-        "check.trial",
         "getByRole.name",
         "hover.force",
-        "hover.trial",
-        "uncheck.timeout",
-        "uncheck.trial"
+        "uncheck.timeout"
       ],
       "referenceKinds": []
     },
     {
       "file": "option-click-full.json",
       "name": "option-click-full",
-      "description": "Every permitted click option: button, clickCount, delay, force, trial, timeout.",
+      "description": "Every permitted click option: button, clickCount, delay, force, timeout.",
       "page": "forms.html",
       "methods": [
         "click",
@@ -392,7 +389,6 @@
         "click.delay",
         "click.force",
         "click.timeout",
-        "click.trial",
         "getByRole.name"
       ],
       "referenceKinds": []

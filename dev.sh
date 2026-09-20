@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BACKEND_PID=""
 BACKEND_WATCHER_PID=""
 FRONTEND_PID=""
+STUDIO_RUNNER_PID=""
 GRADLE_WRAPPER_PROPERTIES="$ROOT_DIR/backend/gradle/wrapper/gradle-wrapper.properties"
 GRADLE_WRAPPER_BACKUP=""
 
@@ -24,6 +25,7 @@ err()  { printf "${RED}[✗]${NC} %s\n" "$*"; }
 # ── Cleanup on exit ────────────────────────────────────────────────
 cleanup() {
   log "Shutting down…"
+  [ -n "$STUDIO_RUNNER_PID" ] && kill "$STUDIO_RUNNER_PID" 2>/dev/null && wait "$STUDIO_RUNNER_PID" 2>/dev/null
   [ -n "$FRONTEND_PID" ]         && kill "$FRONTEND_PID"         2>/dev/null && wait "$FRONTEND_PID"         2>/dev/null
   [ -n "$BACKEND_WATCHER_PID" ]  && kill "$BACKEND_WATCHER_PID"  2>/dev/null && wait "$BACKEND_WATCHER_PID"  2>/dev/null
   [ -n "$BACKEND_PID" ]          && kill "$BACKEND_PID"           2>/dev/null && wait "$BACKEND_PID"          2>/dev/null
@@ -48,6 +50,7 @@ ${BOLD}Options:${NC}
   --frontend-only      Start only the frontend (Vite :5173)
   --federated          Use Webpack/Module Federation (:3002) instead of Vite
   --seed               Use dev profile (pre-populated sample data)
+  --studio             Start Studio runner and enable local dispatch with filesystem evidence
   --skip-checks        Skip prerequisite checks
   -h, --help           Show this help
 
@@ -71,6 +74,7 @@ FRONTEND=true
 FEDERATED=false
 SEED=false
 SKIP_CHECKS=false
+STUDIO=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -78,11 +82,17 @@ while [[ $# -gt 0 ]]; do
     --frontend-only) BACKEND=false;  shift ;;
     --federated)     FEDERATED=true; shift ;;
     --seed)          SEED=true;      shift ;;
+    --studio)        STUDIO=true;    shift ;;
     --skip-checks)   SKIP_CHECKS=true; shift ;;
     -h|--help)       usage ;;
     *) err "Unknown option: $1"; usage ;;
   esac
 done
+
+if [ "$STUDIO" = true ] && [ "$BACKEND" != true ]; then
+  err "--studio requires the local backend (do not combine with --frontend-only)"
+  exit 1
+fi
 
 # ── Prerequisite checks ────────────────────────────────────────��──
 check_prereqs() {
@@ -99,11 +109,19 @@ check_prereqs() {
     fi
   fi
 
-  if [ "$FRONTEND" = true ]; then
+  if [ "$FRONTEND" = true ] || [ "$STUDIO" = true ]; then
     if ! command -v node &>/dev/null; then
       err "Node.js not found. Install: brew install node"
       failed=true
     fi
+  fi
+
+  if [ "$STUDIO" = true ] && [ ! -d "$ROOT_DIR/studio-runner/node_modules" ]; then
+    err "Studio dependencies missing. Run: cd studio-runner && npm ci && npm run browsers:install"
+    failed=true
+  fi
+
+  if [ "$FRONTEND" = true ]; then
     if [ ! -d "$ROOT_DIR/frontend/node_modules" ]; then
       warn "frontend/node_modules missing — running npm install…"
       (cd "$ROOT_DIR/frontend" && npm install)
@@ -226,6 +244,50 @@ fi
 if [ "$FRONTEND" = true ]; then
   kill_port 5173; kill_port 5174; kill_port 5175
   if [ "$FEDERATED" = true ]; then kill_port 3002; fi
+fi
+
+# Studio runs beside the local API against the same database and evidence directory.
+if [ "$STUDIO" = true ]; then
+  STUDIO_LOCAL_PORT="${STUDIO_LOCAL_PORT:-8082}"
+  if lsof -ti:"$STUDIO_LOCAL_PORT" &>/dev/null; then
+    err "Studio runner port $STUDIO_LOCAL_PORT is already in use"
+    exit 1
+  fi
+  export STUDIO_RUNNER_BASE_URL="http://127.0.0.1:$STUDIO_LOCAL_PORT"
+  export STUDIO_RUNNER_SERVICE_TOKEN="${STUDIO_RUNNER_SERVICE_TOKEN:-$(openssl rand -hex 32)}"
+  export STUDIO_CALLBACK_SERVICE_TOKEN="${STUDIO_CALLBACK_SERVICE_TOKEN:-$(openssl rand -hex 32)}"
+  export STUDIO_STORAGE_PROVIDER=filesystem
+  export STUDIO_STORAGE_DIRECTORY="${STUDIO_STORAGE_DIRECTORY:-$HOME/.local/state/put-checks/studio-objects}"
+  export STUDIO_DISPATCHER_ENABLED=true
+  mkdir -p "$STUDIO_STORAGE_DIRECTORY"
+  (cd "$ROOT_DIR/studio-runner" && npm run build)
+  # Enumerate the runner environment: API/Vertex/vault credentials must never be inherited.
+  (cd "$ROOT_DIR/studio-runner" && exec env -i \
+    PATH="$PATH" HOME="$HOME" TMPDIR="${TMPDIR:-/tmp}" \
+    STUDIO_RUNNER_HOST=127.0.0.1 STUDIO_RUNNER_PORT="$STUDIO_LOCAL_PORT" \
+    STUDIO_RUNNER_SERVICE_IDENTITY="$STUDIO_RUNNER_SERVICE_TOKEN" \
+    STUDIO_RUNNER_CALLBACK_IDENTITY="$STUDIO_CALLBACK_SERVICE_TOKEN" \
+    STUDIO_RUNNER_CALLBACK_BASE_URL=http://127.0.0.1:8080 \
+    STUDIO_RUNNER_SCRATCH_DIR="${TMPDIR:-/tmp}/put-checks-studio-scratch" \
+    STUDIO_RUNNER_OBJECT_STORE_PROVIDER=filesystem \
+    STUDIO_RUNNER_OBJECT_STORE_DIR="$STUDIO_STORAGE_DIRECTORY" \
+    node dist/main.js) &
+  STUDIO_RUNNER_PID=$!
+  for i in $(seq 1 20); do
+    if (cd "$ROOT_DIR/studio-runner" && STUDIO_RUNNER_PORT="$STUDIO_LOCAL_PORT" \
+      STUDIO_RUNNER_SERVICE_IDENTITY="$STUDIO_RUNNER_SERVICE_TOKEN" node dist/probe.js /health); then break; fi
+    if ! kill -0 "$STUDIO_RUNNER_PID" 2>/dev/null; then
+      err "Studio runner exited during startup"
+      exit 1
+    fi
+    sleep 0.25
+  done
+  if ! (cd "$ROOT_DIR/studio-runner" && STUDIO_RUNNER_PORT="$STUDIO_LOCAL_PORT" \
+      STUDIO_RUNNER_SERVICE_IDENTITY="$STUDIO_RUNNER_SERVICE_TOKEN" node dist/probe.js /health); then
+    err "Studio runner did not become healthy"
+    exit 1
+  fi
+  log "Studio runner: $STUDIO_RUNNER_BASE_URL; evidence: $STUDIO_STORAGE_DIRECTORY"
 fi
 
 # ── Start Backend ──────────────────────────────────────────────────

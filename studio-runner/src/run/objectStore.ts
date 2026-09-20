@@ -61,6 +61,8 @@ export interface PutObjectRequest {
    * cannot be called with a key the job did not supply because no code path here builds one.
    */
   readonly key: string;
+  /** Deadline shared by video and manifest upload. */
+  readonly signal?: AbortSignal;
   readonly body: ObjectBody;
   readonly contentType: string;
 }
@@ -101,10 +103,8 @@ export interface LocalObjectStoreOptions {
   /**
    * Filesystem root the local compatible store writes under.
    *
-   * `ED-03` (Sonic) is open: the real endpoint, its credentials and its lifecycle rules are story
-   * 10.18's and 10.19's. Until then this is the compatible store the epic's `ED-03` fallback
-   * names, and it is a real implementation rather than a stub — it streams, it is idempotent on
-   * the same key and it fails the way a bucket fails.
+   * Local development shares this directory with the API and worker. Remote deployments use
+   * the AWS S3 adapter instead. Keep this directory outside disposable runner scratch.
    */
   readonly root: string;
 }
@@ -135,9 +135,9 @@ export function createLocalObjectStore(options: LocalObjectStoreOptions): Object
       const staging = `${target}.partial`;
       try {
         if (request.body.kind === 'bytes') {
-          await writeFile(staging, request.body.data);
+          await writeFile(staging, request.body.data, { signal: request.signal });
         } else {
-          await pipeline(createReadStream(request.body.path), createWriteStream(staging));
+          await pipeline(createReadStream(request.body.path), createWriteStream(staging), { signal: request.signal });
         }
         await rename(staging, target);
       } catch (error) {

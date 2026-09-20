@@ -6,7 +6,7 @@ async function bootstrap() {
     if (typeof initSharing === 'function') {
       await initSharing('default');
     }
-  } catch {}
+  } catch { /* Environment initialization is optional; continue with the configured defaults. */ }
 
   const [ReactNS, ReactDomNS, RouterNS, ModuleNS] = await Promise.all([
     import('react'),

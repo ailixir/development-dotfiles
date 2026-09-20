@@ -145,7 +145,33 @@ public class StudioService {
    */
   @Transactional
   public UITestDto createTest(UITestRequest request, Authentication auth) {
+    return createTest(request, auth, true);
+  }
+
+  /** Saves versioned drafts without implicitly issuing a model call. */
+  @Transactional
+  public UITestDto createTest(UITestRequest request, Authentication auth, boolean enqueueCompile) {
+    return createTest(
+        request,
+        auth,
+        enqueueCompile,
+        test -> {
+          /* Legacy save has no versioned metadata initializer. */
+        });
+  }
+
+  /** Initializes versioned metadata before the entity's first INSERT. */
+  @Transactional
+  public UITestDto createTest(
+      UITestRequest request,
+      Authentication auth,
+      boolean enqueueCompile,
+      java.util.function.Consumer<UITest> initialize) {
     UserIdentity identity = extractIdentity(auth);
+    if (request.csiId() == null || request.csiId().isBlank()) {
+      throw new IllegalArgumentException("csiId is required");
+    }
+    requireCompile(auth, request.csiId());
     requireRegisteredCsi(request.csiId());
     // The draft records its author, and `created_by` REFERENCES users(email) (V1). The mirror row
     // that satisfies it is written by story 1.6's asynchronous listener, which is racing this very
@@ -167,6 +193,7 @@ public class StudioService {
             identity.email());
     test.setTimeoutSeconds(request.configuration().timeoutSeconds());
     test.setWaitStrategy(request.configuration().waitStrategy());
+    initialize.accept(test);
     test = studioRepository.save(test);
     // §8.3 — "persist draft and enqueue compile without waiting for gateway" (AC-2). The enqueue
     // is registered as an after-commit synchronisation, so the row is committed and readable from
@@ -175,7 +202,7 @@ public class StudioService {
     //
     // A draft created with no steps has no source to compile; enqueueing one would spend a gateway
     // call to be told so. It is left for the author's first save, which is a source change.
-    if (!request.steps().isEmpty()) {
+    if (enqueueCompile && !request.steps().isEmpty()) {
       compilePipeline.enqueueAfterCommit(test.getId(), identity.email());
     }
     return project(test);
@@ -242,6 +269,20 @@ public class StudioService {
    */
   @Transactional
   public UITestDto updateTest(UUID id, UITestRequest request, Authentication auth) {
+    return updateTest(id, request, auth, true, false);
+  }
+
+  /** Versioned authoring holds the same row lock and supplies structured metadata atomically. */
+  @Transactional
+  public UITestDto updateTest(
+      UUID id,
+      UITestRequest request,
+      Authentication auth,
+      boolean enqueueCompile,
+      boolean preserveAuthoring) {
+    if (auth != null) {
+      requireCompile(auth, studioRepository.findCsiIdIncludingWithheld(id).orElse(null));
+    }
     if (request.sourceRevision() == null || request.configurationRevision() == null) {
       throw new IllegalArgumentException(
           "sourceRevision and configurationRevision are required on update");
@@ -283,7 +324,15 @@ public class StudioService {
     test.setWaitStrategy(request.configuration().waitStrategy());
     test.setEnvironment(request.environment());
 
-    if (change.sourceChanged()) {
+    boolean invalidateAuthoring =
+        !preserveAuthoring && change.anyChanged() && test.getAuthoringSnapshot() != null;
+    if (invalidateAuthoring) {
+      test.setAuthoringSnapshot(null);
+      test.setAuthoringHash(null);
+      test.setScopeReviewedBy(null);
+      test.setScopeReviewedAt(null);
+    }
+    if (change.sourceChanged() || invalidateAuthoring) {
       test.setSourceRevision(test.getSourceRevision() + 1);
     }
     if (change.configurationChanged()) {
@@ -298,7 +347,7 @@ public class StudioService {
       test.setCompileError(null);
     }
     test.setUpdatedAt(Instant.now());
-    if (change.anyChanged() && auth != null) {
+    if (enqueueCompile && change.anyChanged() && auth != null) {
       compilePipeline.enqueueAfterCommit(id, principalOf(auth));
     }
     return project(test);
@@ -415,7 +464,18 @@ public class StudioService {
         candidateId == null
             ? null
             : revisionRepository.findByIdAndTestId(candidateId, test.getId()).orElse(null);
-    return UITestDto.from(test, candidate);
+    UUID confirmedId = test.getConfirmedRevisionId();
+    UITestRevision confirmed =
+        confirmedId == null
+            ? null
+            : revisionRepository
+                .findByIdAndTestId(confirmedId, test.getId())
+                .filter(revision -> java.util.Objects.equals(revision.getCsiId(), test.getCsiId()))
+                .filter(
+                    revision ->
+                        revision.getConfirmedAt() != null && revision.getConfirmedBy() != null)
+                .orElse(null);
+    return UITestDto.from(test, candidate, confirmed);
   }
 
   private void requireRegisteredCsi(String csiId) {

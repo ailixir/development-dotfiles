@@ -321,6 +321,7 @@ An architect amending the contract still never edits a story's Title, Acceptance
 
 | Date | Change | Class | By | Contract test |
 |---|---|---|---|---|
+| 2026-09-17 | Land video 401/403/503 declarations from §§24/25, truthful nested session envelope, and both shipped 503 producer shapes (§30). No application behavior changed | C | @architect, story 10.27 | ESC-1/ESC-2 assertions unchanged; owner reruns contract/status fixtures and re-anchors digest |
 | 2026-09-11 | All six §8.4 routes declared, per-path `servers`, `runner`/`api-callback` tags, `x-served-by`, `serviceIdentity` (§3) | C | @architect, ADR-002 | 576/2/2 → 577/2/1 |
 | 2026-09-11 | `logs[].at` (`date-time`) → `atMs` run-timeline offset (§4) | B | @architect, ADR-002 | as above |
 | 2026-09-11 | 409 description un-truncated, spurious null-valued key removed (§5) | A | @architect, ADR-002 | as above |
@@ -2625,3 +2626,71 @@ It changes no story's Title, Acceptance Criteria, Scope or Status. It edits no `
 `artifact.schema.json`, no backend Java, no frontend source, no `studio-runner/` source, no test and
 no run log. It does not change the SPK-06 register. §26.3's calibration method belongs in that
 register's *Shapes* line, and the register owner should add it when SPK-06 phase B is scheduled.
+
+
+## 29. Readable confirmed source — story 10.27 (2026-09-16)
+
+Aria's bounded contract decision, authorized by the user request to resolve remaining failures:
+add `confirmedRevisionArtifact` and `confirmedRevisionArtifactHash` to TestDto. This resolves the
+10.11c AC-32 escalation without altering either assertion or confusing the candidate with the
+confirmed revision. The existing tests surface remains the owner; no new route is introduced.
+
+Both nullable fields refer only to `confirmedRevisionId`. The artifact uses the existing normative
+`artifact.schema.json`; the hash is the persisted canonical lowercase 64-character hash, never
+recomputed by a client. Detail/mutation reads fetch the draft and its independently joined confirmed
+revision in the same transaction. Null means no readable retained confirmed revision is available.
+List projections set both fields to null, preserving their bounded summary role. The v2 TestView
+inherits these same TestDto fields. Existing clients tolerate the additive optional properties.
+
+Source and configuration edits, compilation failure and publication of another candidate preserve
+the previous confirmed pair. Confirmation changes the pointer and pair together. A stale draft
+may show this source as previously confirmed but remains unable to execute until the current
+candidate is confirmed. CSI authorization and retention rules apply before exposing any bytes.
+Never substitute currentCandidateArtifact when the confirmed pair is missing or the IDs differ.
+
+Frontend Code view renders only this confirmed pair and labels stale source as historical. It
+continues to show an unavailable state when the pair is absent; it never invokes client code
+creation. A distinct confirmed/candidate fixture and missing-confirmed negative control verify
+that candidate source cannot accidentally satisfy this contract. Backend integration tests must
+exercise the actual independent join through edits and confirmation, not a DTO with fabricated
+matching pointers. This amendment is implementation authority, not a release or QA approval.
+
+## 30. Video error responses landed — story 10.27 (2026-09-17)
+
+This bounded amendment implements the video refusal decision already recorded in §§24/25.
+`GET /executions/{id}/video` now declares `401`, `403`, and `503` in addition to its existing
+`200`, `206`, `404`, `410`, and `416`. The ESC-1 and ESC-2 status assertions are unchanged.
+
+The declarations follow the actual producers, inspected in this checkout:
+
+| Producer | Status/body | Timing |
+| --- | --- | --- |
+| `BffSessionAuthenticationFilter.writeError` | 401, nested `{error:{code:UNAUTHENTICATED,message:"Session required",traceId}}` | Before Studio authorization |
+| `ChecksExceptionHandler.handleStudioAccessDenied` | 403, flat `{error:STUDIO_FORBIDDEN,message:"You do not have access to this Studio resource"}` | Unknown execution and unreadable CSI are indistinguishable; before evidence access |
+| `ExecutionVideoException.storeUnavailable` through `handleExecutionVideo` | 503, flat `{error:VIDEO_STORE_UNAVAILABLE,message:"The evidence store could not be reached; the recording's disposition is unknown"}` | After execution/CSI authorization |
+| `BffSessionAuthenticationFilter.write503` | 503, nested `{error:{code:AUTH_TEMPORARILY_UNAVAILABLE,message:"Authentication service temporarily unavailable",traceId}}`, `Retry-After: 5` | Before Studio authorization |
+
+Video 401 references the new `SessionUnauthorized`/`PlatformErrorResponse`; 403 references the
+existing flat `Forbidden`/`ErrorResponse`. The old `Unauthorized` component is preserved, because
+internal service-identity callbacks actually use its flat envelope. This video-only landing does
+not claim that §25's remaining public-route reference migration has also happened; that wider
+contract correction and O-19's backend-wide envelope choice remain separate work.
+
+Unlike §24.6's earlier proposed 503 schema, the landed schema declares `oneOf` flat ErrorResponse
+and nested PlatformErrorResponse. Prose alone cannot make an otherwise schema-invalid shipped
+authentication response truthful. The two alternatives are unambiguous because `error` is a
+string in one and an object in the other. Retry-After is optional and documented only for the
+authentication-service producer; no retry header is invented for storage failures. Likewise,
+only the **storage** 503 requires prior Studio authorization; it would be false to assert that
+every 503 on this path occurs after it.
+
+404 continues to mean no evidence for an execution the caller may read; 410 means expired,
+and 416 preserves its measured `Content-Range`. Nothing changes authorization, storage behavior,
+Range semantics, error handling, runner-produced bodies, or the video UI's inability to inspect
+native media/download error bodies. No application rewrite is required for this ruling.
+
+The owner deliberately updates hand-maintained old video-status fixtures and the contract digest
+after all amendments are settled, as already authorized in §24.7. Neither escalation assertion is
+weakened. This author ran YAML/reference/example validation only; Gradle, frontend behavior tests,
+and the final pinned digest belong to the coordinating story execution. Their eventual results
+must be reported separately from this architectural decision.

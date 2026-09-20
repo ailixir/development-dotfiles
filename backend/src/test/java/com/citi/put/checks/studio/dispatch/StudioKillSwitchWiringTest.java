@@ -63,7 +63,7 @@ class StudioKillSwitchWiringTest {
     StudioDispatchLedgerRepository ledger = mock(StudioDispatchLedgerRepository.class);
     when(ledger.findByPrincipalAndIdempotencyKey(anyString(), anyString()))
         .thenReturn(Optional.empty());
-    when(tests.findById(any())).thenReturn(Optional.empty());
+    when(tests.findByIdForUpdate(any())).thenReturn(Optional.empty());
     StudioAcceptanceService service =
         new StudioAcceptanceService(
             tests,
@@ -90,7 +90,7 @@ class StudioKillSwitchWiringTest {
     // The refusal is the FIRST thing that happens. A kill switch that engaged after readiness
     // evaluation and quota accounting would still refuse, and would still consume the resources
     // the switch exists to stop consuming.
-    verify(fixture.tests(), never()).findById(any());
+    verify(fixture.tests(), never()).findByIdForUpdate(any());
   }
 
   @Test
@@ -104,7 +104,7 @@ class StudioKillSwitchWiringTest {
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("UI Test not found");
 
-    verify(fixture.tests()).findById(any());
+    verify(fixture.tests()).findByIdForUpdate(any());
   }
 
   // ── Dispatch: queued work is CLOSED rather than dispatched, and reads/recovery stay up ──────

@@ -61,7 +61,7 @@ final class ReadinessFixtures {
         jdbc,
         testId,
         steps,
-        provenance(CompilePins.SYNTAX_REFERENCE_VERSION, "1.0.0"),
+        provenance(CompilePins.SYNTAX_REFERENCE_VERSION, "2.0.0"),
         CompilePins.SUPPORTED_ARTIFACT_VERSION);
   }
 
@@ -132,7 +132,7 @@ final class ReadinessFixtures {
     provenance.put("syntaxReferenceVersion", syntaxReferenceVersion);
     provenance.put("validatorSchemaVersion", validatorSchemaVersion);
     provenance.put("languagePolicyVersion", validatorSchemaVersion);
-    provenance.put("executorVersion", "1.0.0");
+    provenance.put("executorVersion", "2.0.0");
     provenance.put("playwrightVersion", "1.63.0");
     provenance.put("artifactSchemaVersion", CompilePins.SUPPORTED_ARTIFACT_VERSION);
     return provenance.toString();

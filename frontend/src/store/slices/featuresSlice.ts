@@ -39,6 +39,11 @@ const initialState: FeaturesState = {
 
 export const fetchFeatures = createAsyncThunk('features/fetch', async () => {
   const response: FeaturesResponse = await featuresApi.getFeatures();
+  if (!Array.isArray(response?.sources) || !Array.isArray(response?.features)
+    || response.sources.some(source => !source || typeof source.type !== 'string' || typeof source.enabled !== 'boolean' || typeof source.label !== 'string')
+    || response.features.some(feature => !feature || typeof feature.key !== 'string' || typeof feature.enabled !== 'boolean' || typeof feature.label !== 'string')) {
+    throw new Error('Invalid feature flags response');
+  }
   return response;
 });
 

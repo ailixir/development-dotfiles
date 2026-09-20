@@ -14,7 +14,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Runs the dispatcher, and only on the worker profile (AC-12, §5.4).
+ * Runs the dispatcher, and on the worker profile or an explicitly enabled local process (AC-12,
+ * §5.4).
  *
  * <p>The dispatcher itself is an ordinary bean so that it can be driven directly by a test; what is
  * worker-only is the <em>schedule</em>. An API-profile context therefore has no {@code
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Component;
  * check executor (AC-38): a saturated dispatcher can consume its own threads and nothing else's.
  */
 @Component
-@Profile("worker")
+@Profile({"worker", "local"})
 @ConditionalOnProperty(
     prefix = "studio.execution.dispatcher",
     name = "enabled",

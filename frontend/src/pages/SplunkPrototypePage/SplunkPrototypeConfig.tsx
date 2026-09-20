@@ -1,4 +1,12 @@
-import React from 'react';
+import {
+  Add,
+  Close,
+  ManageSearch,
+  OpenInNew,
+  PlayArrow,
+  ShowChart,
+  TableRows,
+} from '@mui/icons-material';
 import {
   Alert,
   Autocomplete,
@@ -19,15 +27,9 @@ import {
   alpha,
   useTheme,
 } from '@mui/material';
-import {
-  Add,
-  Close,
-  ManageSearch,
-  OpenInNew,
-  PlayArrow,
-  ShowChart,
-  TableRows,
-} from '@mui/icons-material';
+import React from 'react';
+import { applyExample, columnRange, deriveFacts, seedRule, seedThreshold } from './evaluatePreview';
+import ResultTable from './ResultTable';
 import {
   OPERATORS,
   QUERY_EXAMPLES,
@@ -38,8 +40,6 @@ import {
   type SplunkCapability,
   type SplunkPrototypeForm,
 } from './types';
-import { applyExample, columnRange, deriveFacts, seedRule, seedThreshold } from './evaluatePreview';
-import ResultTable from './ResultTable';
 
 const CAPABILITY_HINT: Record<SplunkCapability, string> = {
   LOGS: 'The rows the query returns are events. The check compares how many came back.',
@@ -392,7 +392,7 @@ const MetricsConditions: React.FC<{
   onAddRule: (column: string) => void;
   onUpdateRule: (id: string, patch: Partial<MetricRule>) => void;
   onRemoveRule: (id: string) => void;
-}> = ({ form, result, evaluation, onPatch, onAddRule, onUpdateRule, onRemoveRule }) => {
+}> = ({ form, result, onPatch, onAddRule, onUpdateRule, onRemoveRule }) => {
   const multiRow = result.rows.length > 1;
   const noNumeric = result.numericColumns.length === 0;
 

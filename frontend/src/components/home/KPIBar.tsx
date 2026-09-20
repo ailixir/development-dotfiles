@@ -1,7 +1,7 @@
+import { CheckCircle, Error, HealthAndSafety, VolumeOff, Warning } from '@mui/icons-material';
+import { Alert, Box, Chip, Grid, Skeleton, Stack, Typography, alpha, useTheme } from '@mui/material';
 import React from 'react';
-import { Box, Chip, Grid, Stack, Typography, alpha, useTheme, Skeleton, Alert, Button } from '@mui/material';
 import type { DashboardSummary } from '../../types/dashboard/dashboardTypes';
-import { CheckCircle, Error, Warning, VolumeOff, HealthAndSafety } from '@mui/icons-material';
 import SectionBox from './SectionBox';
 
 interface KPIBarProps {

@@ -241,7 +241,7 @@ class DiagnosticsExposureEscalationTest {
       }
       steps.add(new ValidationOutcome.StepVerdict(index, false, diagnostics));
     }
-    return ValidationOutcome.verdict(false, "1.0.0", List.of(), steps);
+    return ValidationOutcome.verdict(false, "2.0.0", List.of(), steps);
   }
 
   private static boolean anyStepTruncated(JsonNode document) {

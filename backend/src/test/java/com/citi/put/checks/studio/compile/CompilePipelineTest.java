@@ -113,7 +113,7 @@ class CompilePipelineTest {
         com.citi.put.checks.studio.compile.gateway.CompileRequest request) {
       calls.incrementAndGet();
       seenRequestIds.add(request.compileRequestId());
-      return script.get().apply(request);
+      return ProposalFixtures.fromArtifact(request, script.get().apply(request));
     }
 
     void answer(
@@ -205,6 +205,139 @@ class CompilePipelineTest {
   }
 
   @Test
+  void unsupportedStepRejectsWholeCandidateWithoutValidationOrRepair() throws Exception {
+    gateway.answer(
+        request -> {
+          var envelope = MAPPER.createObjectNode().put("version", 1).put("kind", "FULL");
+          var steps = envelope.putArray("steps");
+          steps
+              .addObject()
+              .put("stepId", request.writableStepIds().get(0).toString())
+              .put("status", "GENERATED")
+              .put("code", "await page.goto('https://example.com');");
+          steps
+              .addObject()
+              .put("stepId", request.writableStepIds().get(1).toString())
+              .put("status", "UNSUPPORTED")
+              .put("reason", "UNSUPPORTED_CAPABILITY")
+              .put("message", "This step requires a second browser page.");
+          return ok(envelope.toString());
+        });
+    pipeline.compile(testId, OWNER);
+    awaitCompileStatus("NEEDS_REVISION");
+    assertThat(gateway.calls()).isEqualTo(1);
+    runner.verify(0, postRequestedFor(urlEqualTo("/v1/validate")));
+    assertThat(revisionCount(testId)).isZero();
+    var diagnostics = MAPPER.readTree(column("compile_diagnostics", String.class));
+    assertThat(diagnostics.path("validatorSchemaVersion").asText()).isEqualTo("not-run");
+    assertThat(diagnostics.path("steps").get(0).path("ok").asBoolean()).isFalse();
+    assertThat(diagnostics.path("steps").get(1).path("ok").asBoolean()).isFalse();
+  }
+
+  @Test
+  void saturatedExecutorPersistsTerminalRefusalWithKnownZeroWork() throws Exception {
+    var entered = new java.util.concurrent.CountDownLatch(4);
+    var release = new java.util.concurrent.CountDownLatch(1);
+    gateway.answer(
+        request -> {
+          entered.countDown();
+          try {
+            release.await(10, java.util.concurrent.TimeUnit.SECONDS);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+          }
+          return ok(artifactFor(STEPS));
+        });
+    List<UUID> running = new java.util.ArrayList<>();
+    try {
+      for (int i = 0; i < 4; i++) {
+        UUID other = seedTest(STEPS);
+        running.add(other);
+        pipeline.compile(other, OWNER);
+      }
+      assertThat(entered.await(5, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+      var refused = pipeline.compile(testId, OWNER);
+      var outcome =
+          MAPPER.readTree(
+              jdbc.queryForObject(
+                  "SELECT outcome::text FROM ui_test_compile_outcomes WHERE request_id=?",
+                  String.class,
+                  refused.requestId()));
+      assertThat(outcome.path("state").asText()).isEqualTo("FAILED");
+      assertThat(outcome.path("errorCode").asText()).isEqualTo("COMPILE_POOL_SATURATED");
+      assertThat(outcome.path("usage").path("proposalCount").asInt(-1)).isZero();
+      assertThat(outcome.path("usage").path("transportAttemptCount").asInt(-1)).isZero();
+    } finally {
+      release.countDown();
+      for (UUID other : running) {
+        awaitCompileStatus(other, "AWAITING_CONFIRMATION");
+      }
+    }
+  }
+
+  @Test
+  void deletionDuringInferenceDiscardsAttemptWithoutPublishingOrChangingDeletedDraft()
+      throws Exception {
+    gateway.answer(
+        request -> {
+          jdbc.update("UPDATE ui_tests SET deleted_at=NOW() WHERE id=?", testId);
+          return ok(artifactFor(STEPS));
+        });
+    var request = pipeline.compile(testId, OWNER);
+    long end = System.nanoTime() + java.time.Duration.ofSeconds(5).toNanos();
+    while (jdbc.queryForObject(
+                "SELECT count(*) FROM ui_test_compile_outcomes WHERE request_id=?",
+                Integer.class,
+                request.requestId())
+            == 0
+        && System.nanoTime() < end) {
+      Thread.sleep(10);
+    }
+    var outcome =
+        MAPPER.readTree(
+            jdbc.queryForObject(
+                "SELECT outcome::text FROM ui_test_compile_outcomes WHERE request_id=?",
+                String.class,
+                request.requestId()));
+    assertThat(outcome.path("state").asText()).isEqualTo("DISCARDED");
+    assertThat(revisionCount(testId)).isZero();
+    assertThat(column("compile_status", String.class)).isEqualTo("COMPILING");
+  }
+
+  @Test
+  void terminalAttemptRecordsUnknownUsageAsNullAndCannotBeRewritten() throws Exception {
+    var request = pipeline.compile(testId, OWNER);
+    awaitCompileStatus("AWAITING_CONFIRMATION");
+    long end = System.nanoTime() + java.time.Duration.ofSeconds(5).toNanos();
+    while (jdbc.queryForObject(
+                "SELECT count(*) FROM ui_test_compile_outcomes WHERE request_id=?",
+                Integer.class,
+                request.requestId())
+            == 0
+        && System.nanoTime() < end) {
+      Thread.sleep(10);
+    }
+    String original =
+        jdbc.queryForObject(
+            "SELECT outcome::text FROM ui_test_compile_outcomes WHERE request_id=?",
+            String.class,
+            request.requestId());
+    var outcome = MAPPER.readTree(original);
+    assertThat(outcome.path("state").asText()).isEqualTo("CANDIDATE");
+    assertThat(outcome.path("usage").path("proposalCount").asInt()).isEqualTo(1);
+    assertThat(outcome.path("usage").path("usageAvailable").asBoolean()).isFalse();
+    assertThat(outcome.path("usage").path("inputTokens").isNull()).isTrue();
+    states.recordOutcome(request.requestId(), "FAILED", "UNEXPECTED", null, "{}");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT outcome::text FROM ui_test_compile_outcomes WHERE request_id=?",
+                String.class,
+                request.requestId()))
+        .isEqualTo(original);
+  }
+
+  @Test
   void arecompileOfAnAlreadyConfirmedTestLeavesTheConfirmedRevisionAlone() {
     pipeline.compile(testId, OWNER);
     awaitCompileStatus("AWAITING_CONFIRMATION");
@@ -245,11 +378,11 @@ class CompilePipelineTest {
     assertThat(provenance.path("promptVersion").asText()).isEqualTo(CompilePins.PROMPT_VERSION);
     assertThat(provenance.path("syntaxReferenceVersion").asText())
         .isEqualTo(CompilePins.SYNTAX_REFERENCE_VERSION);
-    assertThat(provenance.path("languagePolicyVersion").asText()).isEqualTo("1.0.0");
+    assertThat(provenance.path("languagePolicyVersion").asText()).isEqualTo("2.0.0");
     assertThat(provenance.path("validatorSchemaVersion").asText())
         .as("the version the validator reported it actually ran, not the one we hoped for")
-        .isEqualTo("1.0.0");
-    assertThat(provenance.path("executorVersion").asText()).isEqualTo("1.0.0");
+        .isEqualTo("2.0.0");
+    assertThat(provenance.path("executorVersion").asText()).isEqualTo("2.0.0");
     assertThat(provenance.path("playwrightVersion").asText()).isEqualTo("1.63.0");
     assertThat(provenance.path("artifactSchemaVersion").asInt())
         .isEqualTo(CompilePins.SUPPORTED_ARTIFACT_VERSION);
@@ -358,8 +491,8 @@ class CompilePipelineTest {
 
     pipeline.compile(testId, OWNER);
 
-    awaitCompileStatus("STALE");
-    assertCompileErrorIsExactly(testId, "GATEWAY_PARSE_FAILURE");
+    awaitCompileStatus("NEEDS_REVISION");
+    assertThat(column("compile_error", String.class)).isNull();
     runner.verify(0, postRequestedFor(urlEqualTo("/v1/validate")));
     assertThat(revisionCount(testId))
         .as("a V2 artifact is never written as a candidate revision")
@@ -426,7 +559,7 @@ class CompilePipelineTest {
   }
 
   @Test
-  void insertOrReuseRevisionResolvesAnIdenticalArtifactAfterTheGatewayAnsweredAndIsNotACache() {
+  void expansionSchemaRetainsLegacyContentIdentityUntilPublisherCutover() {
     pipeline.compile(testId, OWNER);
     awaitCompileStatus("AWAITING_CONFIRMATION");
     UUID first = column("current_candidate_revision_id", UUID.class);
@@ -436,7 +569,7 @@ class CompilePipelineTest {
     UUID second = column("current_candidate_revision_id", UUID.class);
 
     assertThat(second)
-        .as("identical artifact identity resolves to the same row rather than duplicating it")
+        .as("V18 keeps legacy content identity until the explicit V19 publisher cutover")
         .isEqualTo(first);
     assertThat(revisionCount(testId)).isEqualTo(1);
     assertThat(gateway.calls())
@@ -528,6 +661,14 @@ class CompilePipelineTest {
         "[{\"name\":\"USERNAME\",\"kind\":\"plain\",\"value\":\"" + RESOLVED_VALUE_CANARY + "\"}]",
         id);
     gateway.answer(request -> ok(artifactWithCanaryCode(sourceOf(request))));
+    runner.stubFor(
+        post(urlEqualTo("/v1/validate"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withBody(
+                        "{\"ok\":true,\"validatorSchemaVersion\":\"2.0.0\",\"diagnostics\":[],"
+                            + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]}]}")));
 
     pipeline.compile(id, OWNER);
     awaitCompileStatus(id, "AWAITING_CONFIRMATION");
@@ -721,7 +862,7 @@ class CompilePipelineTest {
                     .withStatus(200)
                     .withHeader("content-type", "application/json")
                     .withBody(
-                        "{\"ok\":false,\"validatorSchemaVersion\":\"1.0.0\",\"diagnostics\":[],"
+                        "{\"ok\":false,\"validatorSchemaVersion\":\"2.0.0\",\"diagnostics\":[],"
                             + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]},"
                             + "{\"stepIndex\":1,\"ok\":false,\"diagnostics\":"
                             + "[{\"code\":\"DENIED_NODE\",\"stepIndex\":1,\"message\":\"no\","
@@ -777,7 +918,7 @@ class CompilePipelineTest {
                     .withBody(
                         "{\"ok\":"
                             + ok
-                            + ",\"validatorSchemaVersion\":\"1.0.0\",\"diagnostics\":[],"
+                            + ",\"validatorSchemaVersion\":\"2.0.0\",\"diagnostics\":[],"
                             + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]},"
                             + "{\"stepIndex\":1,\"ok\":true,\"diagnostics\":[]}]}")));
   }
@@ -791,7 +932,7 @@ class CompilePipelineTest {
                     .withStatus(200)
                     .withHeader("content-type", "application/json")
                     .withBody(
-                        "{\"ok\":false,\"validatorSchemaVersion\":\"1.0.0\","
+                        "{\"ok\":false,\"validatorSchemaVersion\":\"2.0.0\","
                             + "\"diagnostics\":[{\"code\":\"ARTIFACT_STEP_COUNT\","
                             + "\"stepIndex\":null,\"message\":\"step count\",\"node\":null,"
                             + "\"excerpt\":null}],"
