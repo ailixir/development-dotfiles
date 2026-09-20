@@ -148,9 +148,12 @@ class SseCrossReplicaIT {
       assertThat(replicaB.bean(WatchedExecutionRegistry.class))
           .as("replica B keeps its own watched set")
           .isNotSameAs(registryOnA);
-      assertThat(replicaB.bean(DataSource.class).getConnection().getMetaData().getURL())
-          .as("and the two replicas share exactly one database")
-          .isEqualTo(dataSource.getConnection().getMetaData().getURL());
+      try (var connectionA = dataSource.getConnection();
+          var connectionB = replicaB.bean(DataSource.class).getConnection()) {
+        assertThat(connectionB.getMetaData().getURL())
+            .as("and the two replicas share exactly one database")
+            .isEqualTo(connectionA.getMetaData().getURL());
+      }
     }
   }
 

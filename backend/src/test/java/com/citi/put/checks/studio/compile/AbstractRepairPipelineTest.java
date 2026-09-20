@@ -133,7 +133,7 @@ abstract class AbstractRepairPipelineTest {
   }
 
   protected static String validVerdict() {
-    return "{\"ok\":true,\"validatorSchemaVersion\":\"1.0.0\",\"diagnostics\":[],"
+    return "{\"ok\":true,\"validatorSchemaVersion\":\"2.0.0\",\"diagnostics\":[],"
         + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]},"
         + "{\"stepIndex\":1,\"ok\":true,\"diagnostics\":[]}]}";
   }
@@ -143,7 +143,7 @@ abstract class AbstractRepairPipelineTest {
   }
 
   protected static String invalidVerdict(String message, String excerpt) {
-    return "{\"ok\":false,\"validatorSchemaVersion\":\"1.0.0\","
+    return "{\"ok\":false,\"validatorSchemaVersion\":\"2.0.0\","
         + "\"diagnostics\":[{\"code\":\"ARTIFACT_STEP_COUNT\",\"stepIndex\":null,"
         + "\"message\":\"step count\",\"node\":null,\"excerpt\":null}],"
         + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]},"

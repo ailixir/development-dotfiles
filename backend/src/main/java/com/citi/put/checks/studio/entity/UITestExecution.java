@@ -65,6 +65,10 @@ public class UITestExecution {
   @Column(name = "csi_id", length = 20)
   private String csiId;
 
+  /** Truthful scope marker; legacy history remains null and is ineligible for reuse. */
+  @Column(name = "execution_scope", updatable = false)
+  private String executionScope;
+
   @Column(length = 255)
   private String principal;
 
@@ -207,6 +211,14 @@ public class UITestExecution {
 
   public String getCsiId() {
     return csiId;
+  }
+
+  public String getExecutionScope() {
+    return executionScope;
+  }
+
+  public void markFullExecution() {
+    executionScope = "FULL";
   }
 
   public String getPrincipal() {

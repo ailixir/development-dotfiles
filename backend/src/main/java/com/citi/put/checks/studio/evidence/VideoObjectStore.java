@@ -32,8 +32,8 @@ import java.util.Optional;
  * that a bucket was down. {@code ResultManifestStore.isAvailable} states the same rule for the
  * manifest side and {@code ObjectStoreUnavailableError} states its mirror in the runner.
  *
- * <p>Real Sonic endpoints, credentials and lifecycle behaviour are `ED-03`, owned by story 10.18
- * and proven in 10.19. This story ships the seam and {@link FakeVideoObjectStore}.
+ * <p>Runtime implementations use local filesystem or AWS S3 storage. Credentials and bucket
+ * lifecycle provisioning remain external setup (ED-03). {@link FakeVideoObjectStore} is test-only.
  */
 public interface VideoObjectStore {
 

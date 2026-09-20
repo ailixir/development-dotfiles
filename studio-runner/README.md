@@ -1,5 +1,7 @@
 # studio-runner
 
+For local startup and API/worker/runner wiring, see [Studio integration setup](../docs/runbooks/studio-integrations.md).
+
 Validation and execution component of the Checks UI Studio (architecture
 [§3](../docs/architecture/studio-execution.md#3-system-architecture), §4.5, §5.2). It is the only
 component that ever launches Chromium, and the only one that reads an LLM-proposed artifact.

@@ -523,8 +523,8 @@ describe('AC-6 — drain, readiness and the grace period are one derivation', ()
       // runner serves for those meanings.
       const deployment = runnerDeployment(render({ valuesFile }));
       const container = soleContainer(deployment);
-      expect(container.readinessProbe?.httpGet?.path).toBe('/ready');
-      expect(container.livenessProbe?.httpGet?.path).toBe('/health');
+      expect(container.readinessProbe?.exec?.command).toEqual(['node', 'dist/probe.js', '/ready']);
+      expect(container.livenessProbe?.exec?.command).toEqual(['node', 'dist/probe.js', '/health']);
       expect(container.lifecycle?.['preStop']).toBeDefined();
     },
   );

@@ -141,13 +141,13 @@ and sharing an account with the API is how "nothing" silently becomes "whatever 
 `ACCEPTED_KEYS` loader (`studio-runner/src/server/config.ts`); a rendered name that is not one
 would be a startup failure in the pod, and a values key that is not one fails the render below.
 
-Deliberately a subset: the loader accepts thirty-two keys and the deployment sets the ones a
+Deliberately a subset: the loader accepts thirty-six keys and the deployment sets the ones a
 staging pod needs. What matters is that the list is closed at both ends —
 `PLAYWRIGHT_BROWSERS_PATH` and `HOME` are on neither side, and there is no chart path that emits
 them.
 */}}
 {{- define "put-checks.studioRunner.acceptedEnvKeys" -}}
-STUDIO_RUNNER_PORT STUDIO_RUNNER_HOST STUDIO_RUNNER_POOL_SIZE STUDIO_RUNNER_SCRATCH_DIR STUDIO_RUNNER_OBJECT_STORE_DIR STUDIO_RUNNER_OBJECT_STORE_MAX_ATTEMPTS STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS STUDIO_RUNNER_OBJECT_STORE_BACKOFF_MS STUDIO_RUNNER_ADMISSION_TIMEOUT_MS STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS STUDIO_RUNNER_TERMINAL_DELIVERY_MAX_ATTEMPTS STUDIO_RUNNER_TERMINAL_DELIVERY_BACKOFF_MS STUDIO_RUNNER_VALIDATE_TIMEOUT_MS STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES STUDIO_RUNNER_RETRY_AFTER_SECONDS STUDIO_RUNNER_DRAIN_TIMEOUT_MS STUDIO_RUNNER_RECORDING_WIDTH STUDIO_RUNNER_RECORDING_HEIGHT STUDIO_RUNNER_BROWSER_LAUNCH_TIMEOUT_MS STUDIO_RUNNER_STEP_TIMEOUT_MS STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS STUDIO_RUNNER_MAX_REPORT_STEPS STUDIO_RUNNER_MAX_REPORT_LOG_ENTRIES STUDIO_RUNNER_MAX_REPORT_LOG_ENTRY_LENGTH STUDIO_RUNNER_MAX_REPORT_BODY_BYTES
+STUDIO_RUNNER_PORT STUDIO_RUNNER_HOST STUDIO_RUNNER_POOL_SIZE STUDIO_RUNNER_SCRATCH_DIR STUDIO_RUNNER_OBJECT_STORE_DIR STUDIO_RUNNER_OBJECT_STORE_MAX_ATTEMPTS STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS STUDIO_RUNNER_OBJECT_STORE_BACKOFF_MS STUDIO_RUNNER_ADMISSION_TIMEOUT_MS STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS STUDIO_RUNNER_TERMINAL_DELIVERY_MAX_ATTEMPTS STUDIO_RUNNER_TERMINAL_DELIVERY_BACKOFF_MS STUDIO_RUNNER_VALIDATE_TIMEOUT_MS STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES STUDIO_RUNNER_RETRY_AFTER_SECONDS STUDIO_RUNNER_DRAIN_TIMEOUT_MS STUDIO_RUNNER_RECORDING_WIDTH STUDIO_RUNNER_RECORDING_HEIGHT STUDIO_RUNNER_BROWSER_LAUNCH_TIMEOUT_MS STUDIO_RUNNER_STEP_TIMEOUT_MS STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS STUDIO_RUNNER_MAX_REPORT_STEPS STUDIO_RUNNER_MAX_REPORT_LOG_ENTRIES STUDIO_RUNNER_MAX_REPORT_LOG_ENTRY_LENGTH STUDIO_RUNNER_MAX_REPORT_BODY_BYTES STUDIO_RUNNER_OBJECT_STORE_PROVIDER STUDIO_RUNNER_OBJECT_STORE_BUCKET STUDIO_RUNNER_OBJECT_STORE_REGION STUDIO_RUNNER_OBJECT_STORE_CREDENTIALS_DIRECTORY
 {{- end }}
 
 {{/*
@@ -160,6 +160,9 @@ deployment can be repointed with — so the deployment must refuse it loudly.
 {{- define "put-checks.studioRunner.env" -}}
 {{- $accepted := splitList " " (include "put-checks.studioRunner.acceptedEnvKeys" .) -}}
 {{- range $key, $val := .Values.studioRunner.runnerEnv }}
+{{- if has $key (list "STUDIO_RUNNER_PORT" "STUDIO_RUNNER_SCRATCH_DIR" "STUDIO_RUNNER_OBJECT_STORE_DIR" "STUDIO_RUNNER_OBJECT_STORE_PROVIDER" "STUDIO_RUNNER_OBJECT_STORE_BUCKET" "STUDIO_RUNNER_OBJECT_STORE_REGION" "STUDIO_RUNNER_OBJECT_STORE_CREDENTIALS_DIRECTORY") }}
+{{- fail (printf "%s is managed by the chart; use the service, scratch or objectStore values instead" $key) }}
+{{- end }}
 {{- if not (has $key $accepted) }}
 {{- fail (printf "studioRunner.runnerEnv carries %q, which is not an accepted STUDIO_RUNNER_* key. The runner's environment is enumerated, not mapped: no values key may introduce a browser path, a HOME, or any credential the runner must not hold (story 10.18a AC-4a, architecture §9.2/§9.3)." $key) }}
 {{- end }}
@@ -246,3 +249,75 @@ either side win is how a timeout ends up disagreeing with the heartbeat it was s
 {{- define "put-checks.studioSse.managedAnnotations" -}}
 nginx.ingress.kubernetes.io/use-regex nginx.ingress.kubernetes.io/proxy-buffering nginx.ingress.kubernetes.io/proxy-request-buffering nginx.ingress.kubernetes.io/proxy-read-timeout nginx.ingress.kubernetes.io/proxy-send-timeout
 {{- end }}
+
+{{/*
+The Studio object-store properties the API and the worker both bind (`studio.storage.*`).
+
+MERGE NOTE (Epic 10 fold): the wt/epic version of this helper also emitted STUDIO_RUNNER_BASE_URL,
+STUDIO_RUNNER_SERVICE_TOKEN and STUDIO_CALLBACK_SERVICE_TOKEN into BOTH Deployments. The API and
+worker templates already render those three themselves, with the reasoning for who gets which, so
+the helper duplicated three env names per container and — because it is included by the worker too
+— handed the worker the runner's CALLBACK identity key. `test/deployment/chart.test.ts` asserts the
+worker is given the dispatch bearer only and never that key, so only the storage entries are left
+here; the identities stay where each Deployment explains them.
+*/}}
+{{- define "put-checks.studio.backendEnv" -}}
+{{- if .Values.studioRunner.enabled }}
+- name: STUDIO_STORAGE_PROVIDER
+  value: {{ .Values.objectStore.provider | quote }}
+- name: STUDIO_STORAGE_BUCKET
+  value: {{ .Values.objectStore.bucket | quote }}
+- name: STUDIO_STORAGE_REGION
+  value: {{ .Values.objectStore.region | quote }}
+- name: STUDIO_STORAGE_CREDENTIALS_DIRECTORY
+  value: {{ .Values.objectStore.mountPath | quote }}
+{{- end }}
+{{- end }}
+
+{{/* The mounted Spring source is mandatory and cannot be replaced by an env/secret entry. */}}
+{{- define "put-checks.springConfig.validate" -}}
+{{- include "put-checks.springConfig.validateProperties" (dict "values" .configOverrides "path" "") -}}
+{{- if regexMatch "(^|,)\\s*(local|test)\\s*(,|$)" (lower .springProfile) -}}
+{{- fail "local and test profiles are not deployable; select the component's remote springProfile" -}}
+{{- end -}}
+{{- range $key, $_ := .env -}}
+{{- include "put-checks.springConfig.validateEnvironmentKey" $key -}}
+{{- end -}}
+{{- range .envFromSecrets -}}
+{{- range .keys -}}
+{{- include "put-checks.springConfig.validateEnvironmentKey" . -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/* Environment selectors are reserved too: they can bypass the validated mounted source. */}}
+{{- define "put-checks.springConfig.validateEnvironmentKey" -}}
+{{- $normalized := regexReplaceAll "[^a-z0-9]" (lower .) "" -}}
+{{- if or (hasPrefix "springprofiles" $normalized) (has $normalized (list "springapplicationjson" "springconfigimport" "springconfiglocation" "springconfigadditionallocation")) -}}
+{{- fail (printf "%s is managed by the chart; use dedicated profile values or configOverrides" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/* Additional config outranks packaged ${ENV_ALIAS:default} placeholders. Keep chart-owned
+     controls on their dedicated values/Secret path, including nested/relaxed key spellings. */}}
+{{- define "put-checks.springConfig.validateProperties" -}}
+{{- $protected := list
+  "springprofilesactive" "springconfigimport" "springconfiglocation" "springconfigadditionallocation"
+  "checkscorsallowedorigins" "checkscoreservicebaseurl"
+  "checkssecuritybypasscoreservice" "checkssecuritybypassidentityheaders" "checkssecuritybypasscsiread"
+  "studioexecutionenabled" "studioexecutiondispatcherenabled" "studioexecutionevidenceretention"
+  "studioexecutioncallbackservicetoken" "studioexecutionsseheartbeat" "studioexecutionsselifetime"
+  "studiorunnerbaseurl" "studiorunnerserviceidentitytoken"
+  "studiostorageprovider" "studiostoragebucket" "studiostorageregion" "studiostoragecredentialsdirectory"
+-}}
+{{- range $key, $value := .values -}}
+{{- $path := printf "%s.%s" $.path $key | trimPrefix "." -}}
+{{- $normalized := regexReplaceAll "[^a-z0-9]" (lower $path) "" -}}
+{{- if or (has $normalized $protected) (hasPrefix "springprofiles" $normalized) (eq $normalized "springapplicationjson") -}}
+{{- fail (printf "configOverrides property %s is managed by the chart; use its dedicated values or Secret references" $path) -}}
+{{- end -}}
+{{- if kindIs "map" $value -}}
+{{- include "put-checks.springConfig.validateProperties" (dict "values" $value "path" $path) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

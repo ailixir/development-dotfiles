@@ -188,10 +188,11 @@ class ExecutionVideoContractTest {
         .isNull();
     assertThat(operation.get("x-implemented-by"))
         .as(
-            "the value was '10.16', which is the FRONTEND playback story; the manifest and the "
-                + "retired epic both place the backend route in 10.15. A vendor extension naming a "
-                + "story that will never implement the route is a defect nothing could ever have "
-                + "satisfied — ruled Class A by @po at wave-6 validation, and reported as a finding")
+            "the value was '10.16', which is the FRONTEND playback story; the manifest and the"
+                + " retired epic both place the backend route in 10.15. A vendor extension naming a"
+                + " story that will never implement the route is a defect nothing could ever have"
+                + " satisfied — ruled Class A by @po at wave-6 validation, and reported as a"
+                + " finding")
         .isEqualTo("10.15");
   }
 
@@ -330,7 +331,7 @@ class ExecutionVideoContractTest {
    * document equals itself.
    */
   @Test
-  void theVideoOperationsStatusSetIsUnchanged() {
+  void theVideoOperationsStatusSetMatchesTheApprovedEscalationRuling() {
     assertThat(declaredStatuses())
         .as(
             "story 10.31 declares 401, 403 and 503 on this operation by ADR-002 §24's ruling, "
@@ -590,14 +591,15 @@ class ExecutionVideoContractTest {
         .isNotEmpty();
     assertThat(declaredProperties)
         .as(
-            "a RunnerEvidence required entry names no declared property — a rename landed on one "
-                + "side only. WHICH fields are required is not this story's and is not asserted here")
+            "a RunnerEvidence required entry names no declared property — a rename landed on one"
+                + " side only. WHICH fields are required is not this story's and is not asserted"
+                + " here")
         .containsAll(required);
     assertThat(fromJava)
         .as(
-            "a RunnerEvidence required entry names no component of the Java record that serializes "
-                + "it — the document and the producer disagree about a field's NAME, which is a defect "
-                + "in any story, unlike its optionality, which is a ruling")
+            "a RunnerEvidence required entry names no component of the Java record that serializes"
+                + " it — the document and the producer disagree about a field's NAME, which is a"
+                + " defect in any story, unlike its optionality, which is a ruling")
         .containsAll(required);
   }
 

@@ -22,6 +22,23 @@ import org.junit.jupiter.api.Test;
 class GatewayFailureClassifierTest {
 
   @Test
+  void interruptedIoWithoutTimeoutRemainsATransportFailure() {
+    var interrupted = new java.io.InterruptedIOException("partial transfer interrupted");
+    assertThat(GatewayFailureClassifier.outcomeFor(interrupted))
+        .isEqualTo(GatewayOutcome.TRANSPORT);
+    assertThat(GatewayFailureClassifier.isRetryableTransport(interrupted)).isFalse();
+  }
+
+  @Test
+  void okhttpCallDeadlineIsATimeoutEvenBeforeTheCompileTimerFires() {
+    java.io.IOException wrapped =
+        new java.io.IOException(
+            "credential refresh failed", new java.io.InterruptedIOException("timeout"));
+    assertThat(GatewayFailureClassifier.outcomeFor(wrapped)).isEqualTo(GatewayOutcome.TIMEOUT);
+    assertThat(GatewayFailureClassifier.isRetryableTransport(wrapped)).isFalse();
+  }
+
+  @Test
   void unavailableAndResourceExhaustedAreRetried() {
     assertThat(
             GatewayFailureClassifier.isRetryableTransport(

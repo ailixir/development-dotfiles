@@ -45,6 +45,32 @@ import { packageRoot } from './helpers/corpus.js';
  * unaudited packages inside the browser-facing process to save writing a `switch`.
  */
 const ALLOWED_PRODUCTION_PACKAGES: Readonly<Record<string, string>> = {
+  '@aws-sdk/checksums': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/client-s3': 'Remote evidence upload to AWS S3; the runner adapter exposes only PutObject.',
+  '@aws-sdk/core': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-env': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-http': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-ini': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-login': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-node': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-process': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-sso': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-web-identity': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/middleware-sdk-s3': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/nested-clients': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/signature-v4-multi-region': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/token-providers': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/types': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/xml-builder': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws/lambda-invoke-store': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/core': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/credential-provider-imds': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/fetch-http-handler': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/node-http-handler': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/signature-v4': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/types': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  'bowser': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  'tslib': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
   playwright: 'ADR-001 §4.2 — the pinned browser library; the whole point of the component.',
   'playwright-core':
     "playwright's own engine, pulled in transitively at the same exact version by the same pin.",
@@ -114,7 +140,7 @@ describe('AC-22a — allowlist over the resolved production dependency closure',
     // ADR-001 §5 permitted this story one HTTP server library. It took none.
     const serverSource = readFileSync(join(packageRoot, 'src', 'server', 'server.ts'), 'utf8');
     expect(serverSource).toContain("from 'node:http'");
-    expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual(['playwright', 'typescript']);
+    expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual(['@aws-sdk/client-s3', 'playwright', 'typescript']);
   });
 
   it('holds no credential for a database, vault, CSI or LLM gateway anywhere in the closure', () => {

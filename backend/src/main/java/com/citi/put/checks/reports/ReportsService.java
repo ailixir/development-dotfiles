@@ -12,6 +12,7 @@ import com.citi.put.checks.reports.section.ReportSection;
 import com.citi.put.checks.reports.section.SectionResolver;
 import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.UserIdentity;
+import com.citi.put.checks.users.UserProvisioningService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +44,7 @@ public class ReportsService {
   private final ReportRenderer reportRenderer;
   private final ReportScheduleResolver scheduleResolver;
   private final ReportDeliveryService deliveryService;
+  private final UserProvisioningService userProvisioningService;
 
   public ReportsService(
       ReportsRepository reportsRepository,
@@ -50,13 +52,15 @@ public class ReportsService {
       SectionResolver sectionResolver,
       ReportRenderer reportRenderer,
       ReportScheduleResolver scheduleResolver,
-      ReportDeliveryService deliveryService) {
+      ReportDeliveryService deliveryService,
+      UserProvisioningService userProvisioningService) {
     this.reportsRepository = reportsRepository;
     this.executionRepository = executionRepository;
     this.sectionResolver = sectionResolver;
     this.reportRenderer = reportRenderer;
     this.scheduleResolver = scheduleResolver;
     this.deliveryService = deliveryService;
+    this.userProvisioningService = userProvisioningService;
   }
 
   public Page<ReportDto> list(String status, int page, int size) {
@@ -68,6 +72,7 @@ public class ReportsService {
   @Transactional
   public ReportDto create(ReportRequest request, Authentication auth) {
     UserIdentity identity = extractIdentity(auth);
+    userProvisioningService.ensureMirrored(identity);
     Report report =
         new Report(
             request.name(),
@@ -132,6 +137,7 @@ public class ReportsService {
   public ReportDto duplicate(UUID id, Authentication auth) {
     UserIdentity identity = extractIdentity(auth);
     Report original = findEntity(id);
+    userProvisioningService.ensureMirrored(identity);
     Report copy =
         new Report(
             original.getName() + " (Copy)",

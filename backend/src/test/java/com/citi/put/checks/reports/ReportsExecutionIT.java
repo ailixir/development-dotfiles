@@ -31,7 +31,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+      "checks.local-dev-auth.enabled=false",
+      "checks.security.bypass.identity-headers=false"
+    })
 @ActiveProfiles("local")
 class ReportsExecutionIT {
 
@@ -46,13 +51,13 @@ class ReportsExecutionIT {
   @DynamicPropertySource
   static void configureProperties(DynamicPropertyRegistry registry) {
     wireMock.start();
-    greenMail = new GreenMail(new ServerSetup(3026, "localhost", ServerSetup.PROTOCOL_SMTP));
+    greenMail = new GreenMail(new ServerSetup(0, "127.0.0.1", ServerSetup.PROTOCOL_SMTP));
     greenMail.start();
     greenMail.getManagers().getUserManager().setAuthRequired(false);
 
     registry.add("checks.core-service.base-url", wireMock::baseUrl);
-    registry.add("spring.mail.host", () -> "localhost");
-    registry.add("spring.mail.port", () -> "3026");
+    registry.add("spring.mail.host", () -> "127.0.0.1");
+    registry.add("spring.mail.port", () -> greenMail.getSmtp().getPort());
     registry.add("spring.mail.username", () -> "");
     registry.add("spring.mail.password", () -> "");
   }
@@ -66,22 +71,23 @@ class ReportsExecutionIT {
   }
 
   @BeforeEach
-  void setUp() {
+  void setUp() throws Exception {
     wireMock.resetAll();
+    greenMail.purgeEmailFromAllMailboxes();
     seedUser("exec-test@citi.com");
     wireMock.stubFor(
         get(urlEqualTo("/api/v1/users/me"))
             .willReturn(
                 okJson(
                     """
-        {
-          "user_id": "exec-user",
-          "email": "exec-test@citi.com",
-          "name": "Exec Tester",
-          "roles": ["checks-operator"],
-          "csi_ownership": [{"csi_id": "30001", "role": "owner"}]
-        }
-        """)));
+                    {
+                      "user_id": "exec-user",
+                      "email": "exec-test@citi.com",
+                      "name": "Exec Tester",
+                      "roles": ["checks-operator"],
+                      "csi_ownership": [{"csi_id": "30001", "role": "owner"}]
+                    }
+                    """)));
   }
 
   @Test

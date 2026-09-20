@@ -161,6 +161,7 @@ studioRunner:
     sizeLimit: 4Gi
   seccompProfile:
     type: RuntimeDefault
+  callbackBaseUrl: ""
   identity:
     secretName: checks-studio-runner-identity-uat
   objectStore:

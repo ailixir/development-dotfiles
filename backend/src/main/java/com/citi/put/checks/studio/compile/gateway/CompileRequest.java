@@ -39,7 +39,44 @@ public record CompileRequest(
     String syntaxReferenceVersion,
     String outputContract,
     String promptVersion,
-    String repairDiagnostics) {
+    String repairDiagnostics,
+    String proposalKind,
+    List<UUID> writableStepIds) {
+
+  @SuppressWarnings("checkstyle:ParameterNumber")
+  public CompileRequest(
+      UUID testId,
+      String csiId,
+      String principal,
+      String compileRequestId,
+      int attempt,
+      List<String> fencedSourceLines,
+      String syntaxReference,
+      String syntaxReferenceVersion,
+      String outputContract,
+      String promptVersion,
+      String repairDiagnostics) {
+    this(
+        testId,
+        csiId,
+        principal,
+        compileRequestId,
+        attempt,
+        fencedSourceLines,
+        syntaxReference,
+        syntaxReferenceVersion,
+        outputContract,
+        promptVersion,
+        repairDiagnostics,
+        "FULL",
+        java.util.stream.IntStream.range(0, fencedSourceLines.size())
+            .mapToObj(
+                i ->
+                    UUID.nameUUIDFromBytes(
+                        (compileRequestId + ":" + i)
+                            .getBytes(java.nio.charset.StandardCharsets.UTF_8)))
+            .toList());
+  }
 
   /**
    * A first-attempt request, carrying no repair diagnostics.
@@ -95,5 +132,12 @@ public record CompileRequest(
       throw new IllegalArgumentException("attempt must be >= 1 but was " + attempt);
     }
     fencedSourceLines = List.copyOf(fencedSourceLines);
+    writableStepIds = List.copyOf(writableStepIds);
+    if (!List.of("FULL", "PATCH").contains(proposalKind)
+        || writableStepIds.isEmpty()
+        || writableStepIds.size() > 100
+        || new java.util.HashSet<>(writableStepIds).size() != writableStepIds.size()) {
+      throw new IllegalArgumentException("invalid frozen proposal plan");
+    }
   }
 }

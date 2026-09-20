@@ -1,6 +1,6 @@
 {
   "name": "option-click-full",
-  "description": "Every permitted click option: button, clickCount, delay, force, trial, timeout.",
+  "description": "Every permitted click option: button, clickCount, delay, force, timeout.",
   "source": [
     "Double-click the \"Save\" button"
   ],
@@ -18,7 +18,7 @@
       {
         "stepIndex": 0,
         "originalText": "Double-click the \"Save\" button",
-        "code": "await page.getByRole('button', { name: 'Save' }).click({ button: 'left', clickCount: 2, delay: 100, force: true, trial: false, timeout: 15000 });"
+        "code": "await page.getByRole('button', { name: 'Save' }).click({ button: 'left', clickCount: 2, delay: 100, force: true, timeout: 15000 });"
       }
     ]
   },
@@ -64,7 +64,6 @@
           "clickCount": 2,
           "delay": 100,
           "force": true,
-          "trial": false,
           "timeout": 15000
         }
       ]

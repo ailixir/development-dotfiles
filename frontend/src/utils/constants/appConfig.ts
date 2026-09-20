@@ -3,6 +3,7 @@ import { AppConfig } from '../../types/common/commonTypes';
 type RuntimeChecksConfig = {
   apiBaseUrl?: string;
   debugMode?: boolean;
+  studioAuthoringV2?: boolean;
 };
 
 declare global {
@@ -29,15 +30,10 @@ const getStringEnv = (key: string, fallback?: string): string | undefined => {
       const p = (process as any).env[key];
       if (typeof p === 'string' && p.length > 0) return p;
     }
-  } catch {}
+  } catch { /* Environment initialization is optional; continue with the configured defaults. */ }
   return fallback;
 };
 
-const getBoolEnv = (key: string, defaultTrue = true): boolean => {
-  const raw = getStringEnv(key);
-  if (raw === undefined) return defaultTrue;
-  return !(raw === 'false' || raw === '0');
-};
 
 // DefinePlugin replaces literal process.env.X references at build time;
 // dynamic access (process.env[key]) is NOT replaced, so we read it directly.
@@ -55,6 +51,10 @@ export const APP_CONFIG: AppConfig = {
   version: '1.0.0',
   buildDate: new Date().toISOString(),
 };
+
+/** Deployment-controlled; enabling the UI requires the compatible v2 API and schema cutover. */
+export const STUDIO_AUTHORING_V2 = typeof window !== 'undefined'
+  && window.__CHECKS_CONFIG__?.studioAuthoringV2 === true;
 
 export const API_ENDPOINTS = {
   // Check sources (feature flags)

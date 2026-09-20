@@ -43,6 +43,16 @@ public class GatewayAuditLogger {
     fields.put("inputBytes", response.inputBytes());
     fields.put("outputBytes", response.outputBytes());
     fields.put("retries", response.retries());
+    if (response.provenance() != null) {
+      GatewayProvenance provenance = response.provenance();
+      fields.put("sdkVersion", provenance.sdkVersion());
+      fields.put("temperature", provenance.temperature());
+      fields.put("maxOutputTokens", provenance.maxOutputTokens());
+      fields.put("finishReason", provenance.finishReason());
+      fields.put("usageAvailable", provenance.usageAvailable());
+      fields.put("inputTokens", provenance.inputTokens());
+      fields.put("outputTokens", provenance.outputTokens());
+    }
 
     StringJoiner line = new StringJoiner(" ", "studio.gateway.call ", "");
     fields.forEach((key, value) -> line.add(key + "=" + value));

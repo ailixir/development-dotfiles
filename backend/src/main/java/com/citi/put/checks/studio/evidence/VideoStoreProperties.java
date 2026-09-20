@@ -3,7 +3,8 @@ package com.citi.put.checks.studio.evidence;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Where the recordings live (§6.2, §8.5).
+ * Legacy deployment-shaped metadata for the fake-store leak tests. Runtime storage settings are
+ * declared in {@code studio.storage}.
  *
  * <p>Two values and no third: a bucket and an endpoint. Neither may ever appear on the wire — §6.2
  * says the API stores object keys only and exposes the protected API path to the browser — which is

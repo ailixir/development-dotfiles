@@ -5,14 +5,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
  * The `ED-03` stand-in this story owns (story 10.15 AC-18a).
  *
- * <p>In-memory, holding whatever a test puts in it. The real Sonic client that replaces it is
- * `ED-03`'s, owned by story 10.18 and proven in 10.19; AC-18b is recorded <b>skipped, never
- * passed</b> for exactly that reason.
+ * <p>In-memory test fixture. Local runtime uses filesystem storage and remote runtime uses S3,
+ * selected by {@code studio.storage.provider}. External bucket/IAM verification remains ED-03.
  *
  * <p>Two properties it has that a {@code Map<String, byte[]>} would not, and both are criteria:
  *
@@ -30,18 +31,11 @@ import org.springframework.stereotype.Component;
  * keeps "read-only by construction" a statement about the production interface rather than about a
  * test double that quietly grew a surface.
  *
- * <p><b>On this being an unguarded {@code @Component} in {@code src/main/java}</b> — raised by @qa
- * as LOW-3 on story 10.15 and <b>declined here deliberately, with the reason recorded rather than
- * left to inference.</b> {@code FakeResultManifestStore} is identically unguarded, in the same
- * tree, shipped by story 10.14 and merged; the two fakes are swapped for real Sonic clients by the
- * same story (10.18, under `ED-03`) and should acquire the same guard in the same change, not two
- * different ones invented separately. Guessing a profile name here would be invention, and
- * {@code @ConditionalOnMissingBean} does not apply to a {@code @Component}. What protects the
- * criterion today is behavioural rather than structural: {@code ExecutionVideoStoreBindingIT}
- * asserts the <b>injected</b> bean is this class, so AC-18b cannot be reported as cleared by wiring
- * a real endpoint under this name. <b>10.18: guard both fakes together.</b>
+ * <p>Only selected under the test profile with studio.storage.provider=fake.
  */
 @Component
+@Profile("test")
+@ConditionalOnProperty(name = "studio.storage.provider", havingValue = "fake")
 public class FakeVideoObjectStore implements VideoObjectStore {
 
   private final Map<String, byte[]> objects = new ConcurrentHashMap<>();

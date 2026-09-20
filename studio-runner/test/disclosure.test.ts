@@ -146,9 +146,9 @@ describe('AC-20 — the runbook states plainly what is still open', () => {
     ]);
   });
 
-  it('records the envFrom escalation with its owner (AC-18)', () => {
+  it('records the corrected Spring configuration delivery and its owner (AC-18)', () => {
     assertClaims(runbook, RUNBOOK, [
-      { what: 'the inert mechanism', needles: [/inert since the chart was written/iu] },
+      { what: 'the mounted configuration mechanism', needles: ['SPRING_CONFIG_ADDITIONAL_LOCATION', '/etc/put-checks/config/application.yaml', /read.only/iu] },
       { what: 'the owner', needles: [/OWNER: @devops/u, /MECHANISM: @architect/u] },
     ]);
   });

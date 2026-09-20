@@ -1,12 +1,17 @@
 package com.citi.put.checks.studio.compile.validator;
 
+import com.citi.put.checks.studio.compile.CompileBudget;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,16 +45,39 @@ import org.springframework.web.client.RestClient;
 public class RunnerValidationClient {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RunnerValidationClient.class);
-  private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final ObjectMapper MAPPER =
+      new ObjectMapper()
+          .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+          .enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
   private static final int MAX_REASON_LENGTH = 200;
+  private static final int MAX_RESPONSE_BYTES = 1_048_576;
 
   private final RestClient restClient;
   private final StudioRunnerProperties properties;
+  private final String expectedValidatorVersion;
+  private final java.net.http.HttpClient boundedHttpClient;
   private final AtomicLong calls = new AtomicLong();
 
   public RunnerValidationClient(RestClient restClient, StudioRunnerProperties properties) {
+    this(restClient, properties, "1.0.0");
+  }
+
+  public RunnerValidationClient(
+      RestClient restClient, StudioRunnerProperties properties, String expectedValidatorVersion) {
     this.restClient = restClient;
     this.properties = properties;
+    this.expectedValidatorVersion = Objects.requireNonNull(expectedValidatorVersion);
+    this.boundedHttpClient =
+        java.net.http.HttpClient.newBuilder()
+            .connectTimeout(
+                properties.connectTimeout() == null
+                    ? java.time.Duration.ofSeconds(2)
+                    : properties.connectTimeout())
+            .followRedirects(java.net.http.HttpClient.Redirect.NEVER)
+            .build();
+    if (expectedValidatorVersion.isBlank()) {
+      throw new IllegalArgumentException("Expected validator version must not be blank");
+    }
   }
 
   /**
@@ -66,7 +94,7 @@ public class RunnerValidationClient {
       List<String> orderedSource,
       Collection<String> variableNames,
       Collection<String> secretNames) {
-    return validate(artifactJson, orderedSource, variableNames, secretNames, null);
+    return validate(artifactJson, orderedSource, variableNames, secretNames, (String) null);
   }
 
   public ValidationOutcome validate(
@@ -108,11 +136,14 @@ public class RunnerValidationClient {
                       throw new ValidatorUnavailableException(
                           "runner answered HTTP " + status.value());
                     }
-                    return new String(
-                        clientResponse.getBody().readAllBytes(),
-                        java.nio.charset.StandardCharsets.UTF_8);
+                    byte[] bytes = clientResponse.getBody().readNBytes(MAX_RESPONSE_BYTES + 1);
+                    if (bytes.length > MAX_RESPONSE_BYTES) {
+                      throw new ValidatorUnavailableException(
+                          "runner verdict exceeds response limit");
+                    }
+                    return new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
                   });
-      return parse(response);
+      return parse(response, orderedSource.size(), expectedValidatorVersion);
     } catch (ValidatorUnavailableException e) {
       LOGGER.warn("studio.validate.unavailable reason={}", e.reason());
       return ValidationOutcome.unavailable(e.reason());
@@ -123,6 +154,111 @@ public class RunnerValidationClient {
       LOGGER.warn("studio.validate.unavailable reason={}", reason);
       return ValidationOutcome.unavailable(reason);
     }
+  }
+
+  /** Cancellable transport whose complete response consumes the request's remaining budget. */
+  public ValidationOutcome validate(
+      String artifactJson,
+      List<String> orderedSource,
+      Collection<String> variableNames,
+      Collection<String> secretNames,
+      CompileBudget budget) {
+    budget.remaining();
+    if (!properties.isConfigured()) {
+      return ValidationOutcome.unavailable("studio.runner.base-url is not configured");
+    }
+    String body = requestBody(artifactJson, orderedSource, variableNames, secretNames);
+    java.net.http.HttpRequest.Builder builder =
+        java.net.http.HttpRequest.newBuilder()
+            .uri(java.net.URI.create(properties.validateUrl()))
+            .timeout(budget.cap(properties.validateTimeout()))
+            .header("Content-Type", "application/json")
+            .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body));
+    if (properties.serviceIdentityToken() != null && !properties.serviceIdentityToken().isBlank()) {
+      builder.header("Authorization", "Bearer " + properties.serviceIdentityToken());
+    }
+    calls.incrementAndGet();
+    var future = boundedHttpClient.sendAsync(builder.build(), ignored -> new BoundedBody());
+    Runnable unregister =
+        () -> {
+          /* No registration exists until onCancel succeeds. */
+        };
+    try {
+      unregister = budget.onCancel(() -> future.cancel(true));
+      var response =
+          future.get(
+              budget.cap(properties.validateTimeout()).toNanos(),
+              java.util.concurrent.TimeUnit.NANOSECONDS);
+      budget.remaining();
+      if (response.statusCode() < 200 || response.statusCode() >= 300) {
+        return ValidationOutcome.unavailable("runner answered HTTP " + response.statusCode());
+      }
+      return parse(
+          new String(response.body(), java.nio.charset.StandardCharsets.UTF_8),
+          orderedSource.size(),
+          expectedValidatorVersion);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return ValidationOutcome.unavailable("validator call cancelled");
+    } catch (java.util.concurrent.ExecutionException
+        | java.util.concurrent.TimeoutException
+        | java.util.concurrent.CancellationException e) {
+      return ValidationOutcome.unavailable("validator call failed or exceeded budget");
+    } finally {
+      unregister.run();
+      future.cancel(true);
+    }
+  }
+
+  /** Cancels before retaining more than the closed verdict body cap. */
+  private static final class BoundedBody
+      implements java.net.http.HttpResponse.BodySubscriber<byte[]> {
+    private final java.util.concurrent.CompletableFuture<byte[]> result =
+        new java.util.concurrent.CompletableFuture<>();
+    private final java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+    private java.util.concurrent.Flow.Subscription subscription;
+
+    @Override
+    public java.util.concurrent.CompletionStage<byte[]> getBody() {
+      return result;
+    }
+
+    @Override
+    public void onSubscribe(java.util.concurrent.Flow.Subscription value) {
+      subscription = value;
+      subscription.request(1);
+    }
+
+    @Override
+    public void onNext(List<java.nio.ByteBuffer> buffers) {
+      for (java.nio.ByteBuffer buffer : buffers) {
+        if ((long) bytes.size() + buffer.remaining() > MAX_RESPONSE_BYTES) {
+          subscription.cancel();
+          result.completeExceptionally(new java.io.IOException("verdict exceeds response limit"));
+          return;
+        }
+        byte[] chunk = new byte[buffer.remaining()];
+        buffer.get(chunk);
+        bytes.writeBytes(chunk);
+      }
+      subscription.request(1);
+    }
+
+    @Override
+    public void onError(Throwable error) {
+      result.completeExceptionally(error);
+    }
+
+    @Override
+    public void onComplete() {
+      result.complete(bytes.toByteArray());
+    }
+  }
+
+  /** Releases the shared validator transport when the application stops. */
+  @jakarta.annotation.PreDestroy
+  public void close() {
+    boundedHttpClient.shutdownNow();
   }
 
   /**
@@ -181,54 +317,103 @@ public class RunnerValidationClient {
     return root.toString();
   }
 
-  private static ValidationOutcome parse(String responseBody) {
+  private static ValidationOutcome parse(
+      String responseBody, int sourceCount, String expectedVersion) {
     JsonNode root;
     try {
       root = MAPPER.readTree(responseBody);
-    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-      return ValidationOutcome.unavailable("runner answered a body that is not JSON");
+    } catch (java.io.IOException | IllegalArgumentException e) {
+      return invalidVerdict();
     }
-    if (!root.isObject() || !root.path("ok").isBoolean()) {
-      return ValidationOutcome.unavailable("runner answered a body without a boolean ok");
+    if (!hasKeys(root, Set.of("ok", "validatorSchemaVersion", "diagnostics", "steps"))
+        || !root.path("ok").isBoolean()
+        || !root.path("validatorSchemaVersion").isTextual()
+        || !expectedVersion.equals(root.path("validatorSchemaVersion").textValue())
+        || !validDiagnostics(root.path("diagnostics"), null, sourceCount)
+        || !root.path("steps").isArray()
+        || root.path("steps").size() != sourceCount) {
+      return invalidVerdict();
     }
-    List<RunnerDiagnostic> artifactDiagnostics = diagnostics(root.path("diagnostics"), null);
+    List<RunnerDiagnostic> artifactDiagnostics = diagnostics(root.path("diagnostics"));
     List<ValidationOutcome.StepVerdict> steps = new ArrayList<>();
-    JsonNode stepNodes = root.path("steps");
-    if (stepNodes.isArray()) {
-      for (JsonNode step : stepNodes) {
-        int stepIndex = step.path("stepIndex").asInt(steps.size());
-        steps.add(
-            new ValidationOutcome.StepVerdict(
-                stepIndex,
-                step.path("ok").asBoolean(false),
-                diagnostics(step.path("diagnostics"), stepIndex)));
+    boolean allStepsOk = true;
+    for (int index = 0; index < sourceCount; index++) {
+      JsonNode step = root.path("steps").get(index);
+      if (!hasKeys(step, Set.of("stepIndex", "ok", "diagnostics"))
+          || !step.path("stepIndex").isIntegralNumber()
+          || !step.path("stepIndex").canConvertToInt()
+          || step.path("stepIndex").intValue() != index
+          || !step.path("ok").isBoolean()
+          || !validDiagnostics(step.path("diagnostics"), index, sourceCount)
+          || (step.path("ok").booleanValue() && !step.path("diagnostics").isEmpty())) {
+        return invalidVerdict();
       }
+      boolean ok = step.path("ok").booleanValue();
+      allStepsOk &= ok;
+      steps.add(
+          new ValidationOutcome.StepVerdict(index, ok, diagnostics(step.path("diagnostics"))));
     }
-    return ValidationOutcome.verdict(
-        root.path("ok").asBoolean(false),
-        root.path("validatorSchemaVersion").asText(null),
-        artifactDiagnostics,
-        steps);
+    boolean ok = root.path("ok").booleanValue();
+    if (ok != (artifactDiagnostics.isEmpty() && allStepsOk)) {
+      return invalidVerdict();
+    }
+    return ValidationOutcome.verdict(ok, expectedVersion, artifactDiagnostics, steps);
   }
 
-  private static List<RunnerDiagnostic> diagnostics(JsonNode array, Integer defaultStepIndex) {
-    List<RunnerDiagnostic> parsed = new ArrayList<>();
+  private static ValidationOutcome invalidVerdict() {
+    return ValidationOutcome.unavailable("runner answered an invalid or incompatible verdict");
+  }
+
+  private static boolean hasKeys(JsonNode node, Set<String> expected) {
+    if (node == null || !node.isObject()) {
+      return false;
+    }
+    Set<String> actual = new HashSet<>();
+    node.fieldNames().forEachRemaining(actual::add);
+    return actual.equals(expected);
+  }
+
+  private static boolean validDiagnostics(JsonNode array, Integer containerIndex, int count) {
     if (!array.isArray()) {
-      return parsed;
+      return false;
     }
     for (JsonNode node : array) {
-      JsonNode stepIndex = node.path("stepIndex");
+      if (!hasKeys(node, Set.of("code", "stepIndex", "message", "node", "excerpt"))
+          || !node.path("code").isTextual()
+          || !node.path("message").isTextual()
+          || !(node.path("node").isNull() || node.path("node").isTextual())
+          || !(node.path("excerpt").isNull() || node.path("excerpt").isTextual())) {
+        return false;
+      }
+      JsonNode index = node.path("stepIndex");
+      if (containerIndex != null) {
+        if (!index.isIntegralNumber()
+            || !index.canConvertToInt()
+            || index.intValue() != containerIndex) {
+          return false;
+        }
+      } else if (!index.isNull()
+          && (!index.isIntegralNumber()
+              || !index.canConvertToInt()
+              || index.intValue() < 0
+              || index.intValue() >= count)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static List<RunnerDiagnostic> diagnostics(JsonNode array) {
+    List<RunnerDiagnostic> parsed = new ArrayList<>();
+    for (JsonNode node : array) {
+      JsonNode index = node.path("stepIndex");
       parsed.add(
           new RunnerDiagnostic(
-              node.path("code").asText(null),
-              // Integer, not int: a conditional with one int branch unboxes the other, and a
-              // null stepIndex is exactly what an artifact-level diagnostic carries.
-              stepIndex.isIntegralNumber()
-                  ? Integer.valueOf(stepIndex.intValue())
-                  : defaultStepIndex,
-              node.path("message").asText(null),
-              node.path("node").asText(null),
-              node.path("excerpt").asText(null)));
+              node.path("code").textValue(),
+              index.isNull() ? null : Integer.valueOf(index.intValue()),
+              node.path("message").textValue(),
+              node.path("node").textValue(),
+              node.path("excerpt").textValue()));
     }
     return parsed;
   }

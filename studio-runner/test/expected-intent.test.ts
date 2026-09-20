@@ -67,7 +67,10 @@ describe('expected intent correspondence', () => {
     ['wrong target', `await page.getByText('Cancel', { exact: true }).click();`],
     ['changed force', `await page.getByText('Submit', { exact: true }).click({ force: true });`],
     ['changed click count', `await page.getByText('Submit', { exact: true }).click({ clickCount: 2 });`],
-    ['changed trial', `await page.getByText('Submit', { exact: true }).click({ trial: true });`],
+    // `trial` used to belong to this table. The accepted language no longer has the key at all
+    // (validator 2.0.0), so the artifact is refused one gate earlier, as OPTION_UNKNOWN_KEY with
+    // the "Remove trial" message — asserted for every action method by the dedicated
+    // "trial actions are never executable" suite in test/language-surface.test.ts.
     ['changed button', `await page.getByText('Submit', { exact: true }).click({ button: 'right' });`],
     ['relaxed exact', `await page.getByText('Submit', { exact: false }).click();`],
   ])('rejects %s', (_name, code) => {

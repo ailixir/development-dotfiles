@@ -236,7 +236,9 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = '1022d9ad9d2ed6d5e71930fb84fc5c25974e64fe10e10af57b69399b3a2a3f1e';
+  // Story 10.20 C0 adds an architect-owned inference amendment link; runner body remains closed.
+  // Story 10.27 / ADR-002 §30 adds the confirmed artifact pair on public reads only.
+  const BASE_SHA256 = '660031fabc61b8675d6bb7882cbd1abb0cf5eae88cda29fcf29e34791c00b994';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
@@ -301,7 +303,7 @@ describe('AC-24 — no new production dependency', () => {
     const pkg = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')) as {
       dependencies?: Record<string, string>;
     };
-    expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual(['playwright', 'typescript']);
+    expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual(['@aws-sdk/client-s3', 'playwright', 'typescript']);
     // Anything a real browser needs beyond the pinned library is a signal the design drifted.
     expect(pkg.dependencies?.playwright).toBe('1.63.0');
   });

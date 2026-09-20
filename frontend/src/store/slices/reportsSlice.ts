@@ -68,7 +68,7 @@ export const generatePreview = createAsyncThunk(
     // Expose HTML for iframe rendering without changing state shape
     try {
       (window as any).__REPORT_HTML_PREVIEW__ = resp?.html;
-    } catch {}
+    } catch { /* The optional preview bridge must not prevent the API result from rendering. */ }
     return resp;
   }
 );

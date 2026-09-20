@@ -59,6 +59,8 @@ studio:
   execution:
     dispatcher:
       enabled: ${STUDIO_DISPATCHER_ENABLED:true}
+  storage:
+    provider: ${STUDIO_STORAGE_PROVIDER:filesystem}
   # Studio secret resolution (§9.2, story 10.17 AC-9).
   #
   # `provider` has NO default anywhere — not here, not in application.yml, not in code. A

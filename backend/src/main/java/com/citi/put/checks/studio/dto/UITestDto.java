@@ -73,6 +73,8 @@ public record UITestDto(
     String currentCandidateArtifactHash,
     JsonNode currentCandidateArtifact,
     UUID confirmedRevisionId,
+    String confirmedRevisionArtifactHash,
+    JsonNode confirmedRevisionArtifact,
     CompileErrorDto compileError,
     CompileDiagnosticsDto compileDiagnostics) {
 
@@ -91,7 +93,12 @@ public record UITestDto(
    * @return the full representation returned by {@code GET /tests/{id}} and the write routes
    */
   public static UITestDto from(UITest entity, UITestRevision candidate) {
-    return from(entity, candidate, true);
+    return from(entity, candidate, null, true);
+  }
+
+  /** The candidate and confirmed revisions are resolved independently by their persisted IDs. */
+  public static UITestDto from(UITest entity, UITestRevision candidate, UITestRevision confirmed) {
+    return from(entity, candidate, confirmed, true);
   }
 
   /**
@@ -111,10 +118,11 @@ public record UITestDto(
    * @return the list representation returned by {@code GET /tests}
    */
   public static UITestDto forList(UITest entity) {
-    return from(entity, null, false);
+    return from(entity, null, null, false);
   }
 
-  private static UITestDto from(UITest entity, UITestRevision candidate, boolean withDiagnostics) {
+  private static UITestDto from(
+      UITest entity, UITestRevision candidate, UITestRevision confirmed, boolean withDiagnostics) {
     // The hash and the artifact travel together, and **this method is not what makes that true**.
     //
     // An earlier version read the artifact first and then withheld the hash when the artifact came
@@ -162,6 +170,8 @@ public record UITestDto(
         candidateArtifactHash,
         candidateArtifact,
         entity.getConfirmedRevisionId(),
+        confirmed == null ? null : confirmed.getArtifactHash(),
+        confirmed == null ? null : parse(confirmed.getArtifact(), JsonNode.class),
         parse(entity.getCompileError(), CompileErrorDto.class),
         withDiagnostics
             ? parse(entity.getCompileDiagnostics(), CompileDiagnosticsDto.class)

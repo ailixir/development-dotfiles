@@ -165,7 +165,6 @@ export const ACTION_METHODS: Readonly<Record<string, MethodSchema>> = {
       clickCount: { type: 'integer', min: 1, max: 3 },
       delay: { type: 'integer', min: 0, max: 5_000 },
       force: { type: 'boolean' },
-      trial: { type: 'boolean' },
       timeout: TIMEOUT,
     },
   },
@@ -179,15 +178,15 @@ export const ACTION_METHODS: Readonly<Record<string, MethodSchema>> = {
   },
   check: {
     positional: [],
-    options: { force: { type: 'boolean' }, trial: { type: 'boolean' }, timeout: TIMEOUT },
+    options: { force: { type: 'boolean' }, timeout: TIMEOUT },
   },
   uncheck: {
     positional: [],
-    options: { force: { type: 'boolean' }, trial: { type: 'boolean' }, timeout: TIMEOUT },
+    options: { force: { type: 'boolean' }, timeout: TIMEOUT },
   },
   hover: {
     positional: [],
-    options: { force: { type: 'boolean' }, trial: { type: 'boolean' }, timeout: TIMEOUT },
+    options: { force: { type: 'boolean' }, timeout: TIMEOUT },
   },
   selectOption: {
     positional: ['selectValue'],

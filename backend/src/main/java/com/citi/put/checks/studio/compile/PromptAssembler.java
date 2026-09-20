@@ -92,6 +92,46 @@ public class PromptAssembler {
         CompilePins.PROMPT_VERSION);
   }
 
+  /** Uses only captured data; repair cannot change the frozen write set. */
+  public CompileRequest assembleCaptured(
+      CompileStateService.Capture capture, int attempt, String diagnostics) {
+    if (capture.plan().mode()
+        == com.citi.put.checks.studio.compile.incremental.CompilationPlanner.Mode.REUSE) {
+      return null;
+    }
+    List<String> fenced = new ArrayList<>();
+    for (int index = 0; index < capture.steps().size(); index++) {
+      var step = capture.steps().get(index);
+      String baselineCode =
+          capture.baseline() != null && index < capture.baseline().code().size()
+              ? capture.baseline().code().get(index)
+              : null;
+      fenced.add(
+          step.id()
+              + ": "
+              + new TextNode(step.text())
+              + (baselineCode == null ? "" : " baselineCode=" + new TextNode(baselineCode)));
+    }
+    String references = "\nDeclared opaque references: " + capture.inputs().referencesJson();
+    return new CompileRequest(
+        capture.inputs().testId(),
+        capture.inputs().csiId(),
+        capture.inputs().principal(),
+        capture.request().requestId().toString(),
+        attempt,
+        fenced,
+        syntaxReference,
+        CompilePins.SYNTAX_REFERENCE_VERSION,
+        outputContract + references,
+        CompilePins.PROMPT_VERSION,
+        diagnostics,
+        capture.plan().mode()
+                == com.citi.put.checks.studio.compile.incremental.CompilationPlanner.Mode.FULL
+            ? "FULL"
+            : "PATCH",
+        capture.plan().writableIds());
+  }
+
   /**
    * Fences the ordered source as data.
    *

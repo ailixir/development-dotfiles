@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Card, CardContent, CardHeader, Chip, Divider, Grid, IconButton, Stack, Typography, Button, Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Paper, Tooltip, Skeleton, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { fetchReportById, fetchReportExecutions, pauseReport, resumeReport, duplicateReport, generatePreview, sendTestReport, runReportNow } from '@/store/slices/reportsSlice';
 import EmptyState from '@/components/shared/States/EmptyState';
 import ErrorState from '@/components/shared/States/ErrorState';
-import { Preview, Edit, Pause, PlayArrow, ContentCopy, Send, Refresh, OpenInFull } from '@mui/icons-material';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { duplicateReport, fetchReportById, fetchReportExecutions, generatePreview, pauseReport, resumeReport, runReportNow } from '@/store/slices/reportsSlice';
+import { ContentCopy, Edit, OpenInFull, Pause, PlayArrow, Refresh, Send } from '@mui/icons-material';
+import { Alert, Box, Button, Card, CardContent, CardHeader, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, IconButton, Paper, Skeleton, Snackbar, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const ReportDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -193,7 +193,7 @@ const ReportDetailsPage: React.FC = () => {
                     </Table>
                   </TableContainer>
                 ) : (
-                  <EmptyState title="No sends yet" description="This report hasn't been sent yet." onAction={async () => { try { await dispatch(runReportNow(id)).unwrap(); } catch {} }} />
+                  <EmptyState title="No sends yet" description="This report hasn't been sent yet." onAction={async () => { try { await dispatch(runReportNow(id)).unwrap(); } catch { /* The rejected thunk records the request error in report state. */ } }} />
                 )}
               </CardContent>
             </Card>
@@ -219,7 +219,7 @@ const ReportDetailsPage: React.FC = () => {
                       const anyWin = window as any;
                       if (typeof anyWin.__REPORT_HTML_PREVIEW__ === 'string' && anyWin.__REPORT_HTML_PREVIEW__.length > 0) return anyWin.__REPORT_HTML_PREVIEW__;
                       const safe = (previewContent || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                      return `<!DOCTYPE html><html><body style=\"font-family:ui-sans-serif,system-ui,Helvetica,Arial,sans-serif;padding:16px;\"><pre style=\"white-space:pre-wrap;margin:0;\">${safe}</pre></body></html>`;
+                      return `<!DOCTYPE html><html><body style="font-family:ui-sans-serif,system-ui,Helvetica,Arial,sans-serif;padding:16px;"><pre style="white-space:pre-wrap;margin:0;">${safe}</pre></body></html>`;
                     })()}
                   />
                 </Paper>
