@@ -1,4 +1,3 @@
-import { createRedactor } from '../../src/executor/redaction.js';
 /**
  * AC-11a, AC-12, AC-13, AC-16 and AC-7a — **observed**, against real pinned Chromium.
  *
@@ -544,7 +543,6 @@ describe('O-13 — the reported partiality reaches the wire, and the API now pub
     await expectTreeGone(tree);
 
     const snapshot = createRunSnapshot({
-      redactor: createRedactor([]),
       identity: {
         executionId: '11111111-1111-4111-8111-111111111111',
         attemptId: '22222222-2222-4222-8222-222222222222',
