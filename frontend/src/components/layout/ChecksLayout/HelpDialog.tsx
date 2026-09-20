@@ -22,9 +22,6 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
             <ListItemText primary={<Typography variant="body2"><strong>Cmd/Ctrl + N</strong> — Create a new Check</Typography>} />
           </ListItem>
           <ListItem>
-            <ListItemText primary={<Typography variant="body2"><strong>G</strong> — Go to Home</Typography>} />
-          </ListItem>
-          <ListItem>
             <ListItemText primary={<Typography variant="body2"><strong>Esc</strong> — Close dialogs/overlays</Typography>} />
           </ListItem>
           <ListItem>
