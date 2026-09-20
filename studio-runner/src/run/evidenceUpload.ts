@@ -215,7 +215,10 @@ async function putWithBoundedRetry(
     }
     attempts += 1;
     try {
-      await ports.store.put(request);
+      await ports.store.put({
+        ...request,
+        signal: AbortSignal.timeout(Math.max(1, Math.ceil(window.deadlineAtMs - ports.now()))),
+      });
       return { ok: true, attempts, error: null };
     } catch (error) {
       lastError = error;

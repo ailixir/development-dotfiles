@@ -37,6 +37,7 @@ public class IdempotencyFilter extends OncePerRequestFilter {
           new AntPathRequestMatcher("/api/v1/checks"),
           new AntPathRequestMatcher("/api/v1/reports/**"),
           new AntPathRequestMatcher("/api/v1/studio/**"),
+          new AntPathRequestMatcher("/api/v2/studio/**"),
           new AntPathRequestMatcher("/api/v1/schedules/**"));
 
   private final Cache<String, CachedResponse> cache;

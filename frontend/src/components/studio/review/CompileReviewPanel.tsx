@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Alert, Box, Button, Card, CardContent, Stack, Typography } from '@mui/material';
 import type { TestDto } from '@/types/studio/studioTypes';
 import { narrativeFor } from './compileStateNarratives';
@@ -29,6 +30,7 @@ export const RECOMPILE_LABEL = 'Ask for the translation again';
 
 export interface CompileReviewPanelProps {
   testId: string;
+  onTestChange?: (test: TestDto | null) => void;
 }
 
 function needsReconfirmation(test: TestDto): boolean {
@@ -37,9 +39,10 @@ function needsReconfirmation(test: TestDto): boolean {
   return test.confirmedRevisionId !== null && test.compileStatus !== 'READY';
 }
 
-export function CompileReviewPanel({ testId }: CompileReviewPanelProps) {
+export function CompileReviewPanel({ testId, onTestChange }: CompileReviewPanelProps) {
   const review = useCompileReview(testId);
   const { test } = review;
+  useEffect(() => { onTestChange?.(test); }, [test, onTestChange]);
 
   if (review.loading && !test) {
     return (

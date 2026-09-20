@@ -1,5 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import sourcesReducer, { fetchSources, selectIsSourceEnabled, selectSources } from './sourcesSlice';
+import { describe, expect, it, vi } from 'vitest';
+import { configureStore } from '@reduxjs/toolkit';
+import { sourcesApi, type CheckSourcesResponse } from '@/services/api/sourcesApi';
+import sourcesReducer, { fetchSources, selectIsSourceEnabled } from './sourcesSlice';
 
 describe('sourcesSlice', () => {
   it('should return initial state', () => {
@@ -68,4 +70,16 @@ describe('sourcesSlice', () => {
     };
     expect(selectIsSourceEnabled('SPLUNK')(state)).toBe(true);
   });
+  it('rejects malformed successful API bodies through the existing failure path', async () => {
+    const spy = vi.spyOn(sourcesApi, 'getSources').mockResolvedValueOnce({} as CheckSourcesResponse);
+    try {
+      const store = configureStore({reducer:{sources:sourcesReducer}});
+      const result = await store.dispatch(fetchSources());
+      expect(fetchSources.rejected.match(result)).toBe(true);
+      expect(store.getState().sources.error).toBe('Invalid check sources response');
+      expect(selectIsSourceEnabled('UI_TEST')(store.getState())).toBe(true);
+      expect(store.getState().sources.data).toHaveLength(7);
+    } finally { spy.mockRestore(); }
+  });
+
 });

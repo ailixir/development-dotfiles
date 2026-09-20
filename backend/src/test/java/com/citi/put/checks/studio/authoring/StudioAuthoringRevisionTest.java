@@ -593,9 +593,12 @@ class StudioAuthoringRevisionTest {
         1,
         "{\"environment\":\"Production\"}",
         "{}",
+        // The two runtime pins must equal RuntimePinProperties' defaults, which the runner's
+        // corpus/validator change moved to 2.0.0 (studio-runner/src/versions.ts). The intent
+        // derivation version is a separate pin, still VersionedIntentDeriver.CURRENT_VERSION.
         "{\"intentDerivationVersion\":\"1.0.0\","
-            + "\"validatorSchemaVersion\":\"1.0.0\","
-            + "\"syntaxReferenceVersion\":\"1.0.0\"}",
+            + "\"validatorSchemaVersion\":\"2.0.0\","
+            + "\"syntaxReferenceVersion\":\"2.0.0\"}",
         OWNER,
         "{\"schemaVersion\":1,\"steps\":["
             + intentStep(0, promoted.steps().get(0).id(), "https://example.test/one")

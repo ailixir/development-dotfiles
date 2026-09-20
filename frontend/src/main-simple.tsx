@@ -18,7 +18,7 @@ async function start() {
     if (typeof initSharing === 'function') {
       await initSharing('default');
     }
-  } catch {}
+  } catch { /* Environment initialization is optional; continue with the configured defaults. */ }
 
   const { default: Bootstrap } = await import('./bootstrap');
   const root = createRoot(container);

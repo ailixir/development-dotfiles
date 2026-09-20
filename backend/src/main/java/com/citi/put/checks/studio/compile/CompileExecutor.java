@@ -2,7 +2,6 @@ package com.citi.put.checks.studio.compile;
 
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
-import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -74,7 +73,10 @@ public class CompileExecutor {
             new SynchronousQueue<>(),
             named("studio-compile-"),
             new ThreadPoolExecutor.AbortPolicy());
-    this.deadlines = Executors.newSingleThreadScheduledExecutor(named("studio-compile-deadline-"));
+    java.util.concurrent.ScheduledThreadPoolExecutor timer =
+        new java.util.concurrent.ScheduledThreadPoolExecutor(1, named("studio-compile-deadline-"));
+    timer.setRemoveOnCancelPolicy(true);
+    this.deadlines = timer;
   }
 
   /**
@@ -98,6 +100,9 @@ public class CompileExecutor {
      * @return true once claimed
      */
     boolean isSettled();
+
+    /** The same monotonic budget must be passed to gateway and validator calls. */
+    CompileBudget budget();
   }
 
   /** One attempt's body. Receives the settlement so every publish can be guarded by it. */
@@ -124,7 +129,20 @@ public class CompileExecutor {
    * @return true when the attempt started, false when the pool was saturated
    */
   public boolean submit(AttemptBody body, Runnable onBudgetExpired) {
-    Claim claim = new Claim();
+    Claim claim = new Claim(new CompileBudget(attemptBudget));
+    java.util.concurrent.ScheduledFuture<?> deadline =
+        deadlines.schedule(
+            () -> {
+              if (claim.claimExpiry()) {
+                if (!claim.workerFinished.get()) {
+                  claim.budget.cancel();
+                }
+                LOGGER.warn("studio.compile.budget_expired budgetMs={}", attemptBudget.toMillis());
+                onBudgetExpired.run();
+              }
+            },
+            attemptBudget.toMillis(),
+            TimeUnit.MILLISECONDS);
     try {
       pool.execute(
           () -> {
@@ -135,20 +153,18 @@ public class CompileExecutor {
               // the source text that caused it, and AC-29's assertion is on the bytes handed to
               // the log sink rather than on the object that produced them.
               LOGGER.warn("studio.compile.attempt_failed type={}", e.getClass().getName());
+            } finally {
+              claim.workerFinished.set(true);
+              if (claim.isSettled()) {
+                deadline.cancel(false);
+              }
+              Thread.interrupted();
             }
           });
     } catch (RejectedExecutionException rejected) {
+      deadline.cancel(false);
       return false;
     }
-    deadlines.schedule(
-        () -> {
-          if (claim.claim()) {
-            LOGGER.warn("studio.compile.budget_expired budgetMs={}", attemptBudget.toMillis());
-            onBudgetExpired.run();
-          }
-        },
-        attemptBudget.toMillis(),
-        TimeUnit.MILLISECONDS);
     return true;
   }
 
@@ -189,9 +205,24 @@ public class CompileExecutor {
   private static final class Claim implements Settlement {
 
     private final AtomicBoolean settled = new AtomicBoolean(false);
+    private final AtomicBoolean workerFinished = new AtomicBoolean(false);
+    private final CompileBudget budget;
+
+    private Claim(CompileBudget budget) {
+      this.budget = budget;
+    }
+
+    @Override
+    public CompileBudget budget() {
+      return budget;
+    }
 
     @Override
     public boolean claim() {
+      return !budget.isCancelled() && settled.compareAndSet(false, true);
+    }
+
+    private boolean claimExpiry() {
       return settled.compareAndSet(false, true);
     }
 

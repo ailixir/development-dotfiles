@@ -152,7 +152,6 @@ describe('actions map the permitted options, and nothing else', () => {
       clickCount: 2,
       delay: 10,
       force: true,
-      trial: false,
       timeout: 5_000,
     });
     expect(page.calls.at(-1)?.args[0]).toEqual({
@@ -160,7 +159,6 @@ describe('actions map the permitted options, and nothing else', () => {
       clickCount: 2,
       delay: 10,
       force: true,
-      trial: false,
       timeout: 5_000,
     });
   });
@@ -332,5 +330,54 @@ describe('AC-15 — the guard refuses every operation once the run is unsupporte
     await expect(
       adapter.expectContainText(handle, { kind: 'string', value: 'nowhere' }, { timeout: 1_000 }),
     ).rejects.toThrow(/UnsupportedWorkflow/u);
+  });
+});
+
+
+describe('assertion semantics v2', () => {
+  it.each([
+    ['', undefined, false], ['i', undefined, true], ['', true, true],
+    ['i', true, true], ['i', false, false], ['', false, false],
+  ] as const)('regex flags=%s ignoreCase=%s', async (flags, ignoreCase, passes) => {
+    const page = createFakePage();
+    page.text = 'HELLO';
+    page.currentUrl = 'https://fixture.example/HELLO';
+    let instant = 0;
+    const adapter = adapterFor(page, { defaultTimeoutMs: 100, now: () => instant,
+      sleep: (ms: number) => { instant += ms; return Promise.resolve(); } });
+    const target = await adapter.locate(chain({ kind: 'locator', selector: '#text' }));
+    const matcher = { kind: 'pattern' as const, source: 'hello', flags };
+    const text = adapter.expectContainText(target, matcher, { ignoreCase });
+    if (passes) await expect(text).resolves.toBeUndefined();
+    else await expect(text).rejects.toThrow('AssertionFailed');
+    const url = adapter.expectUrl(matcher, { ignoreCase });
+    if (passes) await expect(url).resolves.toBeUndefined();
+    else await expect(url).rejects.toThrow('AssertionFailed');
+  });
+
+  it('normalizes text and title strings on both sides, leaving regex and input literal', async () => {
+    const page = createFakePage();
+    page.text = '  Hello\n\t WORLD\u200b\u00ad  ';
+    page.currentTitle = page.text;
+    page.value = page.text;
+    let instant = 0;
+    const adapter = adapterFor(page, { defaultTimeoutMs: 100, now: () => instant,
+      sleep: (ms: number) => { instant += ms; return Promise.resolve(); } });
+    const target = await adapter.locate(chain({ kind: 'locator', selector: '#text' }));
+    const matcher = { kind: 'string' as const, value: ' Hello\t WORLD ' };
+    await expect(adapter.expectContainText(target, matcher)).resolves.toBeUndefined();
+    await expect(adapter.expectTitle(matcher)).resolves.toBeUndefined();
+    await expect(adapter.expectValue(target, matcher)).rejects.toThrow('AssertionFailed');
+    await expect(adapter.expectTitle({ kind: 'pattern', source: 'Hello WORLD', flags: '' })).rejects.toThrow('AssertionFailed');
+  });
+
+  it('canonicalizes URL strings without supplying a base URL', async () => {
+    const page = createFakePage();
+    page.currentUrl = 'https://fixture.example/AbC';
+    let instant = 0;
+    const adapter = adapterFor(page, { defaultTimeoutMs: 100, now: () => instant,
+      sleep: (ms: number) => { instant += ms; return Promise.resolve(); } });
+    await expect(adapter.expectUrl({ kind: 'string', value: ' HTTPS://FIXTURE.EXAMPLE:443/AbC ' })).resolves.toBeUndefined();
+    await expect(adapter.expectUrl({ kind: 'string', value: '/AbC' })).rejects.toThrow('AssertionFailed');
   });
 });

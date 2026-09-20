@@ -84,7 +84,6 @@ export interface GotoOptions extends TimeoutOptions {
 
 export interface ActionOptions extends TimeoutOptions {
   readonly force?: boolean | undefined;
-  readonly trial?: boolean | undefined;
 }
 
 export interface ClickOptions extends ActionOptions {

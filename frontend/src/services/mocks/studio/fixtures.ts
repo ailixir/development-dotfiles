@@ -74,6 +74,12 @@ export const mockTests: TestDto[] = [
     compileStatus: 'READY',
     currentCandidateRevisionId: '22222222-2222-2222-2222-222222222222',
     confirmedRevisionId: '22222222-2222-2222-2222-222222222222',
+    confirmedRevisionArtifactHash: 'a'.repeat(64),
+    confirmedRevisionArtifact: { version: 1, steps: [
+      {stepIndex:0,originalText:'Go to "https://www.citi.com"',code:"await page.goto('https://www.citi.com');"},
+      {stepIndex:1,originalText:'Click "Sign On"',code:"await page.getByRole('button', { name: 'Sign On' }).click();"},
+      {stepIndex:2,originalText:'Check that the URL contains "dashboard"',code:'await expect(page).toHaveURL(/dashboard/);'},
+    ]},
   },
   {
     id: '11111111-1111-1111-1111-111111111112',
@@ -96,6 +102,10 @@ export const mockTests: TestDto[] = [
     compileStatus: 'STALE',
     currentCandidateRevisionId: null,
     confirmedRevisionId: '22222222-2222-2222-2222-222222222223',
+    confirmedRevisionArtifactHash: 'b'.repeat(64),
+    confirmedRevisionArtifact: { version: 1, steps: [
+      {stepIndex:0,originalText:'Open the previously confirmed statement page',code:"await page.goto('https://www.citi.com/previous-statements');"},
+    ]},
   },
   {
     // Belongs to a CSI the mock principal cannot read. No list handler may ever return it.

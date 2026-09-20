@@ -87,8 +87,22 @@ spec:
             # same key, compared to each other in the assertion rather than each to a literal.
             - name: STUDIO_RUNNER_SCRATCH_DIR
               value: {{ $scratch | quote }}
+            # MERGE NOTE (Epic 10 fold): the wt/epic work rendered the remote store here
+            # (PROVIDER/BUCKET/REGION/CREDENTIALS_DIRECTORY from .Values.objectStore) and made the
+            # render fail unless provider=s3. No shipped value set carries a bucket or a region --
+            # values.yaml says to provision them "before enabling Studio" -- so the runner's own
+            # loader rejected all four rendered environments ("S3 requires ..._BUCKET and
+            # ..._REGION"), which test/deployment/backend-env.test.ts asserts must never happen.
+            # The scratch-backed store below is restored until a value set carries a real bucket
+            # and region. The loader still accepts the four remote keys and the runner's S3 writer
+            # is still in the image, so switching over is a values change.
+            #
+            # A SIBLING of the scratch directory inside the same `scratch` emptyDir, not a child of
+            # it: the loader now refuses an object-store directory nested inside scratch ("Object
+            # storage and scratch directories must be disjoint; scratch is deleted on restart").
+            # `dev.sh` already lays the two out this way.
             - name: STUDIO_RUNNER_OBJECT_STORE_DIR
-              value: {{ printf "%s/objects" $scratch | quote }}
+              value: {{ printf "%s/objects" (trimSuffix "/" .Values.studioRunner.scratch.mountPath) | quote }}
             - name: STUDIO_RUNNER_CALLBACK_BASE_URL
               value: {{ include "put-checks.studioRunner.callbackBaseUrl" . | quote }}
             - name: STUDIO_RUNNER_SERVICE_IDENTITY
@@ -106,15 +120,15 @@ spec:
           # which is precisely the open half SEC-2 exploits: the enumerated list above is the only
           # way a variable reaches this container.
           readinessProbe:
-            httpGet:
-              path: {{ .Values.studioRunner.probes.readinessPath }}
-              port: http
+            exec:
+              command: ["node", "dist/probe.js", {{ .Values.studioRunner.probes.readinessPath | quote }}]
+            timeoutSeconds: 3
             initialDelaySeconds: {{ .Values.studioRunner.probes.initialDelaySeconds }}
             periodSeconds: {{ .Values.studioRunner.probes.periodSeconds }}
           livenessProbe:
-            httpGet:
-              path: {{ .Values.studioRunner.probes.livenessPath }}
-              port: http
+            exec:
+              command: ["node", "dist/probe.js", {{ .Values.studioRunner.probes.livenessPath | quote }}]
+            timeoutSeconds: 3
             initialDelaySeconds: {{ .Values.studioRunner.probes.initialDelaySeconds }}
             periodSeconds: {{ .Values.studioRunner.probes.periodSeconds }}
           resources:

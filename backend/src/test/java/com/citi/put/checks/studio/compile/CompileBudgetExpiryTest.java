@@ -81,7 +81,7 @@ class CompileBudgetExpiryTest {
         throw new IllegalStateException(e);
       }
       return CompileResponse.ok(
-          artifact(),
+          ProposalFixtures.envelope(request, artifact()),
           new GatewayProvenance(
               "stub-model@1", "001", CompilePins.PROMPT_VERSION, "1.52.0", true, 0),
           0,
@@ -135,7 +135,7 @@ class CompileBudgetExpiryTest {
                     .withStatus(200)
                     .withHeader("content-type", "application/json")
                     .withBody(
-                        "{\"ok\":true,\"validatorSchemaVersion\":\"1.0.0\",\"diagnostics\":[],"
+                        "{\"ok\":true,\"validatorSchemaVersion\":\"2.0.0\",\"diagnostics\":[],"
                             + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]}]}")));
     seedUser();
     seedCsi();

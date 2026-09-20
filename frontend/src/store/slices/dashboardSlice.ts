@@ -1,13 +1,13 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { dashboardApi } from '@/services/api/dashboardApi';
 import { AsyncState } from '@/types/common/commonTypes';
 import type {
-  DashboardSummary,
-  AttentionItem,
   ActivityItem,
+  AttentionItem,
+  DashboardSummary,
   ReportSnapshotItem,
   SearchResultItem,
 } from '@/types/dashboard/dashboardTypes';
-import { dashboardApi } from '@/services/api/dashboardApi';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface DashboardState {
   summary: AsyncState<DashboardSummary | null>;
@@ -260,7 +260,7 @@ const dashboardSlice = createSlice({
         const id = action.meta.arg;
         state.attention.data = state.attention.data.filter((i) => i.id !== id);
       })
-      .addCase(assignCheck.fulfilled, (state) => {
+      .addCase(assignCheck.fulfilled, (_state) => {
         // no-op for now; UI may show toast
       });
   },

@@ -1,4 +1,4 @@
-<!-- syntaxReferenceVersion: 1.0.0 -->
+<!-- syntaxReferenceVersion: 2.0.0 -->
 
 # Playwright syntax reference (Studio, V1)
 
@@ -48,10 +48,25 @@ await page.locator('#search-field').fill('invoices');
 ## Actions
 
 `click`, `fill`, `press`, `check`, `uncheck`, `selectOption`, `hover` — each awaited, each on a
-locator chain, each with at most the documented option keys (`timeout`, `force`, `delay`, `button`,
-`clickCount`, `noWaitAfter`).
+locator chain. Permitted options are:
+
+| Action | Options |
+|---|---|
+| `click` | `button`, `clickCount`, `delay`, `force`, `timeout` |
+| `fill`, `check`, `uncheck`, `selectOption`, `hover` | `force`, `timeout` |
+| `press` | `delay`, `timeout` |
+
+The `trial` key is rejected, including `trial: false`. A trial skips the reviewed action.
 
 ## Assertions
+
+String `toContainText` and `toHaveTitle` expectations trim and collapse whitespace on both
+sides (including removal of zero-width spaces and soft hyphens). Regex expectations match raw
+text. `toHaveValue` strings remain literal. `toContainText` and `toHaveURL` support `ignoreCase`:
+explicit `true` or `false` overrides a regex's `i` flag; omission preserves it. `toContainText`
+also supports `useInnerText`. URL string expectations use absolute URL canonicalization;
+relative or invalid values remain literal (Studio does not configure a base URL). Regex URLs
+remain raw patterns. Each assertion supports a bounded `timeout`.
 
 ```js
 await expect(page.getByText('Welcome')).toBeVisible();

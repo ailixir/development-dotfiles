@@ -8,9 +8,17 @@ metadata:
     {{- include "put-checks.api.selectorLabels" . | nindent 4 }}
 data:
   SERVER_PORT: {{ .Values.backend.service.port | quote }}
-  {{- range $key, $val := .Values.backend.configOverrides }}
-  {{ $key }}: {{ $val | quote }}
-  {{- end }}
+---
+# Spring property names belong in configuration data, not environment-variable names.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.api.fullname" . }}-properties
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+data:
+  application.yaml: |
+    {{- .Values.backend.configOverrides | toYaml | nindent 4 }}
 {{- end }}
 {{- if .Values.worker.enabled }}
 ---
@@ -23,9 +31,17 @@ metadata:
     {{- include "put-checks.worker.selectorLabels" . | nindent 4 }}
 data:
   SERVER_PORT: {{ .Values.worker.service.port | quote }}
-  {{- range $key, $val := .Values.worker.configOverrides }}
-  {{ $key }}: {{ $val | quote }}
-  {{- end }}
+---
+# Spring property names belong in configuration data, not environment-variable names.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.worker.fullname" . }}-properties
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+data:
+  application.yaml: |
+    {{- .Values.worker.configOverrides | toYaml | nindent 4 }}
 {{- end }}
 {{- if .Values.frontend.enabled }}
 ---

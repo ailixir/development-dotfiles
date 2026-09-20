@@ -24,10 +24,10 @@ public final class CompilePins {
    * runner compares it exactly before launching a browser, so an artifact proposed against a
    * different corpus is refused rather than reinterpreted.
    */
-  public static final String SYNTAX_REFERENCE_VERSION = "1.0.0";
+  public static final String SYNTAX_REFERENCE_VERSION = "2.0.0";
 
   /** Version of the prompt assembly — fencing rule, reference framing and output contract. */
-  public static final String PROMPT_VERSION = "1.0.0";
+  public static final String PROMPT_VERSION = "2.0.0";
 
   /**
    * The only artifact schema version this backend can hand to the runner.

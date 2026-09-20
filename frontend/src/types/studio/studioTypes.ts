@@ -415,6 +415,10 @@ export interface TestDto {
    */
   currentCandidateArtifact?: SourceArtifact | null;
   confirmedRevisionId: string | null;
+  /** Persisted hash of exactly confirmedRevisionId; null in list projections or when unavailable. */
+  confirmedRevisionArtifactHash?: string | null;
+  /** Immutable confirmed source, independent of the current candidate and editable draft. */
+  confirmedRevisionArtifact?: SourceArtifact | null;
   /**
    * Non-null only with `compileStatus: STALE`. Present on both `GET /tests` and `GET /tests/{id}`
    * (ADR-002 §16.5).

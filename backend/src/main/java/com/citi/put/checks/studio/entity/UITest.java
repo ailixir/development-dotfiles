@@ -126,6 +126,51 @@ public class UITest {
   @Column(name = "confirmed_revision_id")
   private UUID confirmedRevisionId;
 
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "authoring_snapshot", columnDefinition = "jsonb")
+  private String authoringSnapshot;
+
+  @Column(name = "authoring_hash")
+  private String authoringHash;
+
+  @Column(name = "scope_reviewed_by")
+  private String scopeReviewedBy;
+
+  @Column(name = "scope_reviewed_at")
+  private Instant scopeReviewedAt;
+
+  public String getAuthoringSnapshot() {
+    return authoringSnapshot;
+  }
+
+  public void setAuthoringSnapshot(String value) {
+    authoringSnapshot = value;
+  }
+
+  public String getAuthoringHash() {
+    return authoringHash;
+  }
+
+  public void setAuthoringHash(String value) {
+    authoringHash = value;
+  }
+
+  public String getScopeReviewedBy() {
+    return scopeReviewedBy;
+  }
+
+  public void setScopeReviewedBy(String value) {
+    scopeReviewedBy = value;
+  }
+
+  public Instant getScopeReviewedAt() {
+    return scopeReviewedAt;
+  }
+
+  public void setScopeReviewedAt(Instant value) {
+    scopeReviewedAt = value;
+  }
+
   protected UITest() {}
 
   public UITest(

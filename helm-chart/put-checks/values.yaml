@@ -151,6 +151,9 @@ backend:
         - SPRING_DATASOURCE_USERNAME
         - SPRING_DATASOURCE_PASSWORD
 
+  # Non-secret Spring properties, mounted as application.yaml; canonical Spring env values win.
+  # Chart-managed controls are reserved. Do not duplicate a packaged ENV alias here.
+  # Preserve canonical property names; do not convert dots or hyphens into env spelling.
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "20"
     checks.scheduling.min-interval-seconds: "60"
@@ -241,6 +244,9 @@ worker:
         - SPRING_DATASOURCE_USERNAME
         - SPRING_DATASOURCE_PASSWORD
 
+  # Non-secret Spring properties, mounted as application.yaml; canonical Spring env values win.
+  # Chart-managed controls are reserved. Do not duplicate a packaged ENV alias here.
+  # Preserve canonical property names; do not convert dots or hyphens into env spelling.
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "30"
     checks.executor.max-concurrency: "250"
@@ -530,10 +536,9 @@ studioRunner:
     # with: the runner principal is write-only under the `studio/` prefix and holds no Get or List
     # permission (§6.2). The two names are asserted unequal in the rendered manifest.
     #
-    # Mounted as a file rather than injected as environment: the runner's loader is fail-closed
-    # inside STUDIO_RUNNER_*, and inventing a credential environment name for a client that does
-    # not exist yet would be exactly the signal AC-4a exists to catch. The consuming client is
-    # story 10.19's (ED-03); this is the deployment surface it will read.
+    # Mounted files are consumed by the S3 writer and re-read when credentials rotate.
+    # Add sessionToken to keys when using temporary credentials. Provision the write-only
+    # principal later; the read-only API/worker principal is configured below.
     credentialsSecret: checks-studio-runner-object-store
     mountPath: /etc/studio/object-store
     # Write-only. A Get or List credential key appearing here is a scope violation, not a
@@ -594,6 +599,10 @@ studioRunner:
 # different Secret from the runner's write-only one (§6.2, ED-03).
 # ---------------------------------------------------------------------------
 objectStore:
+  # Remote provider. Provision the bucket, region, IAM principals and lifecycle before enabling Studio.
+  provider: s3
+  bucket: ""
+  region: ""
   credentialsSecret: checks-api-object-store
   mountPath: /etc/studio/object-store
   keys:

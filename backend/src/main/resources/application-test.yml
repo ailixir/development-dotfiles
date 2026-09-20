@@ -5,7 +5,9 @@ spring:
   datasource:
     # Testcontainers-JDBC magic URL: spins up a real postgres:15-alpine on first request.
     # @Testcontainers(disabledWithoutDocker = true) on the IT classes guards against missing Docker.
-    url: jdbc:tc:postgresql:15-alpine:///checks
+    # Cached Spring contexts share this URL. Closing a transient/last connection must not
+    # stop the database underneath another pool; Testcontainers cleans it up at JVM exit.
+    url: jdbc:tc:postgresql:15-alpine:///checks?TC_DAEMON=true
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     username: test
     password: test
@@ -23,6 +25,8 @@ logging:
 # `fake` is confined to the test/local/dev profiles. A silent fallback to a fake vault is the worst
 # failure mode this path can have, and it is cheaper to make impossible than to detect.
 studio:
+  storage:
+    provider: fake
   secrets:
     vault:
       provider: fake

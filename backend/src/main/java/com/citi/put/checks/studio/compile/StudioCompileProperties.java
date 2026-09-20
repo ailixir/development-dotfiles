@@ -157,18 +157,8 @@ public record StudioCompileProperties(
   /**
    * Fails startup with one message listing every invalid value.
    *
-   * <p>The per-attempt budget is checked against the gateway's request timeout rather than merely
-   * being positive: a budget at or below the gateway deadline would abandon every slow call before
-   * the gateway itself gave up, turning a recoverable {@code GATEWAY_TIMEOUT} into a budget expiry
-   * and hiding which bound actually fired.
-   *
-   * <p>Story 10.9 adds the arithmetic that makes the repair loop honest. The budget now covers the
-   * whole request, so it must exceed the worst case the bounds themselves describe: {@code (1 +
-   * repair.max-attempts) x (gateway.request-timeout + runner.validate-timeout)}. Without the check
-   * a healthy loop could be abandoned mid-repair by arithmetic nobody had done, and the recorded
-   * code would name the budget rather than the bound that actually fired. The sweep threshold is
-   * checked against the budget for the mirror-image reason: a threshold at or below the budget
-   * would let the sweep take a compile that is still legitimately running.
+   * <p>The shared monotonic budget truncates the retry/repair sequence. Lower-level timeouts are
+   * caps, not a promise that all possible attempts fit inside the request deadline.
    *
    * @param gateway 10.5's gateway configuration, the source of the timeout this budget must exceed
    * @param runner the runner configuration, the source of the {@code /v1/validate} deadline
@@ -189,47 +179,16 @@ public record StudioCompileProperties(
 
     long budgetMs = pipeline().attemptBudget() == null ? 0L : pipeline().attemptBudget().toMillis();
     requirePositive(problems, "pipeline.attempt-budget", budgetMs);
-    long gatewayTimeoutMs =
-        gateway == null || gateway.requestTimeout() == null
-            ? 0L
-            : gateway.requestTimeout().toMillis();
-    if (budgetMs > 0 && gatewayTimeoutMs > 0 && budgetMs <= gatewayTimeoutMs) {
-      problems.add(
-          "studio.compile.pipeline.attempt-budget ("
-              + budgetMs
-              + "ms) must be strictly greater than studio.compile.gateway.request-timeout ("
-              + gatewayTimeoutMs
-              + "ms)");
-    }
-
     requireNonNegative(problems, "repair.max-attempts", repair().maxAttempts());
+    if (repair().maxAttempts() > 2) {
+      problems.add("studio.compile.repair.max-attempts must be <= 2");
+    }
     requirePositive(problems, "abandonment.batch-size", abandonment().batchSize());
     requirePositive(problems, "abandonment.interval-ms", abandonment().intervalMs());
     long thresholdMs =
         abandonment().threshold() == null ? 0L : abandonment().threshold().toMillis();
     requirePositive(problems, "abandonment.threshold", thresholdMs);
 
-    long validateTimeoutMs =
-        runner == null || runner.validateTimeout() == null
-            ? 0L
-            : runner.validateTimeout().toMillis();
-    if (budgetMs > 0 && gatewayTimeoutMs > 0 && validateTimeoutMs > 0) {
-      long worstCaseMs = (1L + repair().maxAttempts()) * (gatewayTimeoutMs + validateTimeoutMs);
-      if (budgetMs <= worstCaseMs) {
-        problems.add(
-            "studio.compile.pipeline.attempt-budget ("
-                + budgetMs
-                + "ms) must be strictly greater than (1 + studio.compile.repair.max-attempts="
-                + repair().maxAttempts()
-                + ") x (studio.compile.gateway.request-timeout="
-                + gatewayTimeoutMs
-                + "ms + studio.runner.validate-timeout="
-                + validateTimeoutMs
-                + "ms) = "
-                + worstCaseMs
-                + "ms, or a healthy repair loop would be abandoned by the budget");
-      }
-    }
     if (budgetMs > 0 && thresholdMs > 0 && thresholdMs <= budgetMs) {
       problems.add(
           "studio.compile.abandonment.threshold ("

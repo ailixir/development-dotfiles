@@ -1,13 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Button, Card, CardContent, Chip, Grid, Skeleton, Stack, TextField, Typography, Select, MenuItem, InputLabel, FormControl, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions, Toolbar, Alert, Snackbar, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, LinearProgress, InputAdornment, Menu, CircularProgress, Paper, Tooltip } from '@mui/material';
-import { Search as SearchIcon, FilterList, Add as AddIcon, Visibility, Edit as EditIcon, ContentCopy, Pause, PlayArrow, Delete as DeleteIcon, Preview, MoreVert, Send, Assessment } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { fetchReports, pauseReport, resumeReport, duplicateReport, deleteReportThunk, runReportNow } from '@/store/slices/reportsSlice';
-import { fetchChecks } from '@/store/slices/checksSlice';
-import reportsApi from '@/services/api/reportsApi';
-import { useNavigate } from 'react-router-dom';
 import EmptyState from '@/components/shared/States/EmptyState';
 import ErrorState from '@/components/shared/States/ErrorState';
+import reportsApi from '@/services/api/reportsApi';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { fetchChecks } from '@/store/slices/checksSlice';
+import { deleteReportThunk, duplicateReport, fetchReports, pauseReport, resumeReport, runReportNow } from '@/store/slices/reportsSlice';
+import { Add as AddIcon, Assessment, FilterList, MoreVert, Pause, PlayArrow, Preview, Search as SearchIcon, Send } from '@mui/icons-material';
+import { Alert, Box, Button, Card, CardContent, Checkbox, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Grid, IconButton, InputAdornment, InputLabel, LinearProgress, Menu, MenuItem, Paper, Select, Skeleton, Snackbar, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField, Toolbar, Tooltip, Typography } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ReportsHome: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -300,7 +300,7 @@ const ReportsHome: React.FC = () => {
                             } finally {
                               setStatusLoadingId(null);
                               // clear override to reflect store state
-                              setOptimisticStatus((prev) => { const { [r.id]: _omit, ...rest } = prev; return rest; });
+                              setOptimisticStatus((prev) => { const { ...rest } = prev; return rest; });
                             }
                           }}
                           disabled={statusLoadingId === r.id}
@@ -326,7 +326,7 @@ const ReportsHome: React.FC = () => {
                           setPreviewOpen(true);
                           setPreviewTitle(r.name);
                           const resp = await reportsApi.previewReport(r.id);
-                          try { (window as any).__REPORT_HTML_PREVIEW__ = resp?.html; } catch {}
+                          try { (window as any).__REPORT_HTML_PREVIEW__ = resp?.html; } catch { /* The optional preview bridge must not prevent the API result from rendering. */ }
                           setPreviewContent(resp.preview || '');
                         } catch {
                           setPreviewContent('Failed to load preview');
@@ -409,7 +409,7 @@ const ReportsHome: React.FC = () => {
                     const anyWin = window as any;
                     if (typeof anyWin.__REPORT_HTML_PREVIEW__ === 'string' && anyWin.__REPORT_HTML_PREVIEW__.length > 0) return anyWin.__REPORT_HTML_PREVIEW__;
                     const safe = (previewContent || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    return `<!DOCTYPE html><html><body style=\"font-family:ui-sans-serif,system-ui,Helvetica,Arial,sans-serif;padding:16px;\"><pre style=\"white-space:pre-wrap;margin:0;\">${safe}</pre></body></html>`;
+                    return `<!DOCTYPE html><html><body style="font-family:ui-sans-serif,system-ui,Helvetica,Arial,sans-serif;padding:16px;"><pre style="white-space:pre-wrap;margin:0;">${safe}</pre></body></html>`;
                   })()}
                 />
               </Paper>

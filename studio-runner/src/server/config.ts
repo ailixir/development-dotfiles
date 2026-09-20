@@ -1,3 +1,5 @@
+import { isAbsolute, relative, resolve } from 'node:path';
+
 /**
  * Runner configuration (AC-22c, architecture §8.5).
  *
@@ -41,14 +43,12 @@ export interface RunnerConfig {
   readonly callbackBaseUrl: string;
   /** Per-run scratch root, cleared at startup and on every exit path (AC-12, AC-21). */
   readonly scratchDir: string;
-  /**
-   * Filesystem root of the local, S3-shaped **compatible** object store (`ED-03`).
-   *
-   * Sonic's real endpoint, its write-only runner credentials and its lifecycle rules are story
-   * 10.18's and 10.19's. Until then the runner writes real objects to a real store — this one —
-   * rather than to a stub, so the upload path, its bounded retry and its idempotency are exercised
-   * by everything that runs the runner rather than only by tests that mock it.
-   */
+  /** Explicit provider; remote deployment selects s3. Filesystem is for local runs. */
+  readonly objectStoreProvider: 'filesystem' | 's3';
+  readonly objectStoreBucket: string;
+  readonly objectStoreRegion: string;
+  readonly objectStoreCredentialsDirectory: string;
+  /** Persistent evidence directory, disjoint from scratch. */
   readonly objectStoreDir: string;
   /** Attempts per object, the first included. Bounded on both axes with the window below. */
   readonly objectStoreMaxAttempts: number;
@@ -164,6 +164,10 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
   CALLBACK_IDENTITY: { field: 'callbackIdentityToken', kind: 'string', required: true },
   CALLBACK_BASE_URL: { field: 'callbackBaseUrl', kind: 'string', required: true },
   SCRATCH_DIR: { field: 'scratchDir', kind: 'string', required: false, fallback: '/tmp/studio-runner' },
+  OBJECT_STORE_CREDENTIALS_DIRECTORY: { field: 'objectStoreCredentialsDirectory', kind: 'string', required: false, fallback: '' },
+  OBJECT_STORE_PROVIDER: { field: 'objectStoreProvider', kind: 'string', required: false, fallback: 'filesystem' },
+  OBJECT_STORE_BUCKET: { field: 'objectStoreBucket', kind: 'string', required: false, fallback: '' },
+  OBJECT_STORE_REGION: { field: 'objectStoreRegion', kind: 'string', required: false, fallback: '' },
   OBJECT_STORE_DIR: {
     field: 'objectStoreDir',
     kind: 'string',
@@ -446,6 +450,23 @@ export function loadConfig(env: Readonly<Record<string, string | undefined>>): R
     }
   }
 
+  if (draft.objectStoreProvider !== 'filesystem' && draft.objectStoreProvider !== 's3') {
+    problems.push('STUDIO_RUNNER_OBJECT_STORE_PROVIDER must be filesystem or s3.');
+  }
+  if (draft.objectStoreProvider === 's3' && (!draft.objectStoreBucket || !draft.objectStoreRegion)) {
+    problems.push('S3 requires STUDIO_RUNNER_OBJECT_STORE_BUCKET and STUDIO_RUNNER_OBJECT_STORE_REGION.');
+  }
+  if (draft.objectStoreProvider === 'filesystem') {
+    const scratch = resolve(String(draft.scratchDir));
+    const objects = resolve(String(draft.objectStoreDir));
+    const contains = (parent: string, child: string): boolean => {
+      const rel = relative(parent, child);
+      return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel));
+    };
+    if (contains(scratch, objects) || contains(objects, scratch)) {
+      problems.push('Object storage and scratch directories must be disjoint; scratch is deleted on restart.');
+    }
+  }
   if (problems.length > 0) throw new ConfigurationError(problems);
   return draft as unknown as RunnerConfig;
 }

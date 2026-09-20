@@ -29,7 +29,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+      "checks.local-dev-auth.enabled=false",
+      "checks.security.bypass.identity-headers=false"
+    })
 @ActiveProfiles("local")
 class ReportsDuplicateIT {
 
@@ -60,14 +65,14 @@ class ReportsDuplicateIT {
             .willReturn(
                 okJson(
                     """
-        {
-          "user_id": "dup-user",
-          "email": "dup-test@citi.com",
-          "name": "Dup Tester",
-          "roles": ["checks-operator"],
-          "csi_ownership": [{"csi_id": "30001", "role": "owner"}]
-        }
-        """)));
+                    {
+                      "user_id": "dup-user",
+                      "email": "dup-test@citi.com",
+                      "name": "Dup Tester",
+                      "roles": ["checks-operator"],
+                      "csi_ownership": [{"csi_id": "30001", "role": "owner"}]
+                    }
+                    """)));
   }
 
   @Test

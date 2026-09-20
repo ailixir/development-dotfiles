@@ -1,34 +1,32 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Grid,
-  TextField,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Typography,
-  Slider,
-  Button,
-  Tooltip,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Switch,
-  Stack,
-  Chip,
-  Box,
-  Alert,
-  CircularProgress,
-  IconButton,
-} from '@mui/material';
-import {
-  InfoOutlined,
-  ExpandMore,
-  PlayArrow,
   Add as AddIcon,
-  Delete,
+  ExpandMore,
+  InfoOutlined,
+  PlayArrow
 } from '@mui/icons-material';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Grid,
+  Radio,
+  RadioGroup,
+  Slider,
+  Stack,
+  Switch,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
 
 interface HttpConfigProps {
   formData: any;

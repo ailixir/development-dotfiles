@@ -1,3 +1,4 @@
+import { studioInferenceHandlers, resetInferenceMocks, inferenceMockTests } from './inferenceHandlers';
 import { http, HttpResponse } from 'msw';
 import { createAuthoringHandlers } from './authoringHandlers';
 import { resetAuthoringMocks } from './authoringState';
@@ -55,12 +56,16 @@ const idempotency = new Map<string, string>();
 
 export function resetStudioMocks(): void {
   resetAuthoringMocks();
+  resetInferenceMocks();
   created = [];
   acceptedExecutions = [];
   idempotency.clear();
 }
 
-const allTests = (): TestDto[] => [...created, ...mockTests];
+const allTests = (): TestDto[] => {
+  const inference = inferenceMockTests();
+  return [...inference, ...created, ...mockTests].filter((test,index,all) => all.findIndex(item => item.id === test.id) === index);
+};
 
 /**
  * Story 10.10's compile-review corpus. Reachable by id from `GET /tests/{id}` — the single-draft
@@ -197,6 +202,7 @@ export const studioHandlers = [
     get: id => allTests().find(test => test.id === id) ?? reviewDraft(id),
     put: test => { created = [test, ...created.filter(candidate => candidate.id !== test.id)]; },
   }),
+  ...studioInferenceHandlers,
   http.get(`${BASE}/tests`, ({ request }) => {
     const url = new URL(request.url);
     const csiId = url.searchParams.get('csiId');
@@ -205,7 +211,8 @@ export const studioHandlers = [
       // An explicit filter can only narrow the scope, never widen it.
       items = items.filter((test) => test.csiId === csiId);
     }
-    return HttpResponse.json(paginate(items, url));
+    return HttpResponse.json(paginate(items.map(test=>({...test, currentCandidateArtifact:null, currentCandidateArtifactHash:null,
+      confirmedRevisionArtifact:null, confirmedRevisionArtifactHash:null, compileDiagnostics:null})), url));
   }),
 
   http.get(`${BASE}/tests/:id`, ({ params }) => {
@@ -362,6 +369,8 @@ export const studioHandlers = [
       ...test,
       compileStatus: 'READY',
       confirmedRevisionId: test.currentCandidateRevisionId,
+      confirmedRevisionArtifact: test.currentCandidateArtifact ?? null,
+      confirmedRevisionArtifactHash: test.currentCandidateArtifactHash ?? null,
       compileError: null,
       compileDiagnostics: null,
     };

@@ -36,7 +36,7 @@ public final class ScriptedRepairGateway implements LlmGatewayClient {
       com.citi.put.checks.studio.compile.gateway.CompileRequest request) {
     calls.incrementAndGet();
     seen.add(request);
-    return script.apply(request);
+    return ProposalFixtures.fromArtifact(request, script.apply(request));
   }
 
   /** Installs the answer function for subsequent calls. */

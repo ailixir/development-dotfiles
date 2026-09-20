@@ -17,6 +17,10 @@ const initialState: SourcesState = {
 
 export const fetchSources = createAsyncThunk('sources/fetch', async () => {
   const response = await sourcesApi.getSources();
+  if (!Array.isArray(response?.sources) || response.sources.some(source =>
+    !source || typeof source.type !== 'string' || typeof source.enabled !== 'boolean' || typeof source.label !== 'string')) {
+    throw new Error('Invalid check sources response');
+  }
   return response.sources;
 });
 

@@ -67,7 +67,8 @@ public class StudioCompileConfig {
    * @return the validation client
    */
   @Bean
-  public RunnerValidationClient runnerValidationClient(StudioRunnerProperties properties) {
+  public RunnerValidationClient runnerValidationClient(
+      StudioRunnerProperties properties, RuntimePinProperties pin) {
     SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
     Duration connect =
         properties.connectTimeout() == null ? Duration.ofSeconds(2) : properties.connectTimeout();
@@ -78,7 +79,9 @@ public class StudioCompileConfig {
     factory.setConnectTimeout((int) connect.toMillis());
     factory.setReadTimeout((int) read.toMillis());
     return new RunnerValidationClient(
-        RestClient.builder().requestFactory(factory).build(), properties);
+        RestClient.builder().requestFactory(factory).build(),
+        properties,
+        pin.validatorSchemaVersion());
   }
 
   /** Marker for the startup bound validation; carries no behaviour. */

@@ -1,10 +1,10 @@
-import React, { Suspense } from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
-import { LayoutProvider } from '@components/layout/LayoutProvider';
 import { ChecksLayout } from '@components/layout/ChecksLayout';
+import { LayoutProvider } from '@components/layout/LayoutProvider';
 import { ErrorBoundary } from '@components/shared/ErrorBoundary';
 import FeatureGate from '@components/shared/FeatureGate';
+import { Box, CircularProgress, Typography } from '@mui/material';
+import React, { Suspense } from 'react';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
 // Lazy load pages for better performance and code splitting
 const HomePage = React.lazy(() => import('@pages/HomePage'));
@@ -15,7 +15,6 @@ const CreateCheckPage = React.lazy(
 const CheckDetailsPage = React.lazy(() => import('@pages/CheckDetailsPage'));
 const EditCheckPage = React.lazy(() => import('@pages/CreateCheckPage')); // reuse create page in edit mode
 const ChecksStudioPage = React.lazy(() => import('@pages/ChecksStudioPage'));
-const ReportsPage = React.lazy(() => import('@pages/ReportsPage'));
 const ReportsHome = React.lazy(() => import('./pages/Reports/ReportsHome'));
 const ReportBuilder = React.lazy(() => import('./pages/Reports/ReportBuilder'));
 const ReportDetailsPage = React.lazy(() => import('./pages/Reports/ReportDetailsPage'));

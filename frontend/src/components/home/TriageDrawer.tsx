@@ -85,7 +85,7 @@ const TriageDrawer: React.FC<TriageDrawerProps> = ({ open, checkId, onClose }) =
   };
 
   const copyOutput = async (text: string) => {
-    try { await navigator.clipboard.writeText(text); setCopyFeedback(true); setTimeout(() => setCopyFeedback(false), 1500); } catch {}
+    try { await navigator.clipboard.writeText(text); setCopyFeedback(true); setTimeout(() => setCopyFeedback(false), 1500); } catch { /* Clipboard permissions may deny this optional copy; keep the original output available. */ }
   };
 
   return (

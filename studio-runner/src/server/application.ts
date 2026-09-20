@@ -31,6 +31,7 @@ import type { RunOrigin } from '../run/timeline.js';
 import { readFile, stat } from 'node:fs/promises';
 
 import { createLocalObjectStore } from '../run/objectStore.js';
+import { createS3ObjectStore } from '../run/s3ObjectStore.js';
 import type { ObjectStoreClient } from '../run/objectStore.js';
 import type { EvidenceFileSystem } from '../run/evidenceUpload.js';
 import { createRunCoordinator } from './runCoordinator.js';
@@ -125,11 +126,15 @@ export function createApplication(
   const pool = dependencies.pool ?? createCapacityPool(config.poolSize);
   const http = dependencies.http ?? createFetchHttpClient();
   const scratch = dependencies.scratch ?? createFsScratchStore(config.scratchDir);
-  // `ED-03` is open: the real Sonic endpoint, its write-only credentials and its lifecycle rules
-  // belong to stories 10.18/10.19. Until then the runner writes to a real, local, S3-shaped
-  // compatible store rather than to a stub, so the upload path is exercised wherever the runner
-  // runs and not only where a test substitutes a fake.
-  const objectStore = dependencies.objectStore ?? createLocalObjectStore({ root: config.objectStoreDir });
+  const s3 = dependencies.objectStore === undefined && config.objectStoreProvider === 's3'
+    ? createS3ObjectStore({
+      bucket: config.objectStoreBucket,
+      region: config.objectStoreRegion,
+      credentialsDirectory: config.objectStoreCredentialsDirectory,
+      requestTimeoutMs: config.objectStoreWindowMs,
+    }) : undefined;
+  const objectStore = dependencies.objectStore ?? s3?.store
+    ?? createLocalObjectStore({ root: config.objectStoreDir });
   const evidenceFileSystem = dependencies.evidenceFileSystem ?? NODE_EVIDENCE_FILE_SYSTEM;
   const bounds = boundsFrom(config);
 
@@ -240,6 +245,7 @@ export function createApplication(
       }
       await server.close();
       await scratch.clearAll();
+      s3?.close();
       logger.info('runner.drained', { completed });
       return { completed };
     },

@@ -1,12 +1,5 @@
 import type { ApiResponse } from '../../types/common/commonTypes';
 
-interface SpringPageResponse<T> {
-  content: T[];
-  number: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-}
 
 export function normalizePageResponse<T>(raw: any): ApiResponse<T[]> {
   if (!raw) return raw;

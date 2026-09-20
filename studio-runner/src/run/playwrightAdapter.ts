@@ -143,11 +143,33 @@ export function compileMatcher(matcher: ResolvedMatcher): string | RegExp {
   return matcher.kind === 'string' ? matcher.value : new RegExp(matcher.source, matcher.flags);
 }
 
-function matches(matcher: string | RegExp, actual: string, mode: 'equals' | 'contains'): boolean {
+/** Playwright 1.63 normalizes string text/title assertions, never regexes or input values. */
+function normalizeWhitespace(value: string): string {
+  return value.replace(/[\u200b\u00ad]/gu, '').trim().replace(/\s+/gu, ' ');
+}
+
+function matches(
+  matcher: string | RegExp,
+  actual: string,
+  mode: 'equals' | 'contains',
+  normalize = false,
+  ignoreCase?: boolean,
+): boolean {
   if (matcher instanceof RegExp) {
     // A global/sticky pattern carries `lastIndex` between calls; polling would then flip between
     // matching and not matching for the same page state. Test from a fresh instance each time.
-    return new RegExp(matcher.source, matcher.flags.replace(/[gy]/gu, '')).test(actual);
+    let flags = matcher.flags.replace(/[gy]/gu, '');
+    if (ignoreCase === true && !flags.includes('i')) flags += 'i';
+    if (ignoreCase === false) flags = flags.replace(/i/gu, '');
+    return new RegExp(matcher.source, flags).test(actual);
+  }
+  if (normalize) {
+    actual = normalizeWhitespace(actual);
+    matcher = normalizeWhitespace(matcher);
+  }
+  if (ignoreCase === true) {
+    actual = actual.toLowerCase();
+    matcher = matcher.toLowerCase();
   }
   return mode === 'equals' ? actual === matcher : actual.includes(matcher);
 }
@@ -240,7 +262,7 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
    * actual; the actual goes through the executor's redactor before it reaches a report (AC-21).
    */
   async function pollUntil(
-    read: () => Promise<string>,
+    read: (remainingMs: number) => Promise<string>,
     ok: (actual: string) => boolean,
     timeout: number,
     label: string,
@@ -250,21 +272,27 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
     let actual = '';
     for (;;) {
       guard();
+      let matched = false;
       try {
-        actual = await read();
-        if (ok(actual)) return;
+        const remaining = deadline - now();
+        if (remaining > 0) {
+          actual = await read(Math.max(1, remaining));
+          matched = ok(actual);
+        }
       } catch (error) {
         // A locator that is not attached yet throws; that is a not-yet, not a failure, until the
         // deadline says otherwise.
         actual = error instanceof Error ? error.name : 'unknown';
       }
+      guard();
+      if (now() < deadline && matched) return;
       if (now() >= deadline) {
         throw new Error(
           `AssertionFailed: ${label} expected ${expected}, last seen ${JSON.stringify(truncate(actual))} ` +
             `after ${String(timeout)}ms.`,
         );
       }
-      await sleep(pollIntervalMs);
+      await sleep(Math.min(pollIntervalMs, Math.max(0, deadline - now())));
     }
   }
 
@@ -306,7 +334,6 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
         clickCount: clickOptions?.clickCount,
         delay: clickOptions?.delay,
         force: clickOptions?.force,
-        trial: clickOptions?.trial,
         timeout: timeoutOf(clickOptions?.timeout),
       });
     },
@@ -376,20 +403,18 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
     ): Promise<void> {
       const locator = resolveHandle(target);
       const matcher = compileMatcher(expected);
-      const ignoreCase = containOptions?.ignoreCase === true;
+      const ignoreCase = containOptions?.ignoreCase;
       const useInnerText = containOptions?.useInnerText === true;
       const timeout = timeoutOf(containOptions?.timeout);
       const compare = (actual: string): boolean =>
-        ignoreCase && typeof matcher === 'string'
-          ? actual.toLowerCase().includes(matcher.toLowerCase())
-          : matches(matcher, actual, 'contains');
+        matches(matcher, actual, 'contains', true, ignoreCase);
       // Named rather than inline: an inline async arrow passed straight to a call emits a shape
       // `test/no-dynamic-evaluation.test.ts` scans for (architecture §4.5). The scan is blunt on
       // purpose, and writing around it costs one named constant.
-      const readText = async (): Promise<string> =>
+      const readText = async (remainingMs: number): Promise<string> =>
         useInnerText
-          ? await locator.innerText({ timeout })
-          : ((await locator.textContent({ timeout })) ?? '');
+          ? await locator.innerText({ timeout: remainingMs })
+          : ((await locator.textContent({ timeout: remainingMs })) ?? '');
       await pollUntil(
         readText,
         compare,
@@ -407,7 +432,8 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
       const locator = resolveHandle(target);
       const matcher = compileMatcher(expected);
       const timeout = timeoutOf(timeoutOptions?.timeout);
-      const readValue = async (): Promise<string> => await locator.inputValue({ timeout });
+      const readValue = async (remainingMs: number): Promise<string> =>
+        await locator.inputValue({ timeout: remainingMs });
       await pollUntil(
         readValue,
         (actual) => matches(matcher, actual, 'equals'),
@@ -418,15 +444,17 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
     },
 
     async expectUrl(expected: ResolvedMatcher, urlOptions?: HaveUrlOptions): Promise<void> {
-      const matcher = compileMatcher(expected);
-      const ignoreCase = urlOptions?.ignoreCase === true;
+      let matcher = compileMatcher(expected);
+      // Playwright resolves string expectations with URL(), falling back to the literal when
+      // parsing fails. Studio has no baseURL; never infer one from the current page.
+      if (typeof matcher === 'string') {
+        try { matcher = new URL(matcher).toString(); } catch { /* Keep the literal. */ }
+      }
+      const ignoreCase = urlOptions?.ignoreCase;
       const timeout = timeoutOf(urlOptions?.timeout);
       await pollUntil(
         () => Promise.resolve(page.url()),
-        (actual) =>
-          ignoreCase && typeof matcher === 'string'
-            ? actual.toLowerCase() === matcher.toLowerCase()
-            : matches(matcher, actual, 'equals'),
+        (actual) => matches(matcher, actual, 'equals', false, ignoreCase),
         timeout,
         'the page URL to be',
         describeMatcher(matcher),
@@ -442,7 +470,7 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
       const readTitle = async (): Promise<string> => await page.title();
       await pollUntil(
         readTitle,
-        (actual) => matches(matcher, actual, 'equals'),
+        (actual) => matches(matcher, actual, 'equals', true),
         timeout,
         'the page title to be',
         describeMatcher(matcher),
@@ -455,7 +483,7 @@ function actionOf(
   actionOptions: ActionOptions | undefined,
   timeout: number,
 ): Record<string, unknown> {
-  return { force: actionOptions?.force, trial: actionOptions?.trial, timeout };
+  return { force: actionOptions?.force, timeout };
 }
 
 /** A locator's text argument after resolution. Secrets never reach a locator (validator AC-13). */

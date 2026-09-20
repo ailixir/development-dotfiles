@@ -9,18 +9,6 @@ export interface CommsTemplateState {
 export function createCommsTemplateFromCheck(item: AttentionItem): CommsTemplateState {
   const status = (item.status || '').toUpperCase();
   const statusDisplay = status === 'FAILING' ? '🔴 FAILING' : status === 'WARNING' ? '🟠 WARNING' : status ? `🟢 ${status}` : 'UNKNOWN';
-  const palette = {
-    primary: '#0056C7',
-    primaryDark: '#003C8F',
-    bgLight: '#F5F9FF',
-    border: '#D8E2F1',
-    tableHeader: '#EEF4FF',
-    textSecondary: '#475569',
-    success: '#10B981',
-    warning: '#F59E0B',
-    error: '#EF4444',
-  } as const;
-  const statusChip = status === 'FAILING' ? palette.error : status === 'WARNING' ? palette.warning : palette.success;
 
   const templateTitle = 'Check Status Update';
   const templateSubject = `Check Status: ${item.name} • ${item.csiName}`;
@@ -80,18 +68,6 @@ export function createCommsTemplateFromCheckDetails(check: {
 }): CommsTemplateState {
   const status = (check.status || '').toUpperCase();
   const statusDisplay = status === 'FAILING' ? '🔴 FAILING' : status === 'WARNING' ? '🟠 WARNING' : status ? `🟢 ${status}` : 'UNKNOWN';
-  const palette = {
-    primary: '#0056C7',
-    primaryDark: '#003C8F',
-    bgLight: '#F5F9FF',
-    border: '#D8E2F1',
-    tableHeader: '#EEF4FF',
-    textSecondary: '#475569',
-    success: '#10B981',
-    warning: '#F59E0B',
-    error: '#EF4444',
-  } as const;
-  const statusChip = status === 'FAILING' ? palette.error : status === 'WARNING' ? palette.warning : palette.success;
 
   const templateTitle = 'Check Status Update';
   const templateSubject = `Check Status: ${check.name} • ${check.csiName || check.csiId || ''}`.trim();

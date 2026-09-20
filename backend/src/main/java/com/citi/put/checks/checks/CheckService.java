@@ -16,6 +16,7 @@ import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.tags.CheckTagService;
+import com.citi.put.checks.users.UserProvisioningService;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class CheckService {
   private final ScheduleService scheduleService;
   private final CheckSourceProperties sourceProperties;
   private final CheckTagService checkTagService;
+  private final UserProvisioningService userProvisioningService;
 
   public CheckService(
       CheckRepository checkRepository,
@@ -51,7 +53,8 @@ public class CheckService {
       ScheduleRepository scheduleRepository,
       ScheduleService scheduleService,
       CheckSourceProperties sourceProperties,
-      CheckTagService checkTagService) {
+      CheckTagService checkTagService,
+      UserProvisioningService userProvisioningService) {
     this.checkRepository = checkRepository;
     this.csiRepository = csiRepository;
     this.ownershipEvaluator = ownershipEvaluator;
@@ -59,6 +62,7 @@ public class CheckService {
     this.scheduleService = scheduleService;
     this.sourceProperties = sourceProperties;
     this.checkTagService = checkTagService;
+    this.userProvisioningService = userProvisioningService;
   }
 
   @Transactional
@@ -73,6 +77,9 @@ public class CheckService {
             .map(csi -> csi.getName())
             .orElseThrow(() -> new IllegalArgumentException("CSI not found: " + request.csiId()));
 
+    // Authentication mirrors users asynchronously; author-backed writes must establish the FK
+    // dependency in this transaction rather than race that listener.
+    userProvisioningService.ensureMirrored(identity);
     Check check =
         new Check(
             request.name(),

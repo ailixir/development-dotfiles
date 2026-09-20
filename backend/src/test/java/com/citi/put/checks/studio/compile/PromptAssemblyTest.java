@@ -39,7 +39,8 @@ class PromptAssemblyTest {
 
     assertThat(request.fencedSourceLines()).hasSize(1);
     assertThat(request.syntaxReference()).contains("Playwright syntax reference");
-    assertThat(request.outputContract()).contains("Return **one JSON document and nothing else**");
+    assertThat(request.outputContract())
+        .contains("Return one JSON document only", "UNSUPPORTED_CAPABILITY", "AMBIGUOUS_INTENT");
 
     assertThat(request.testId()).isEqualTo(TEST_ID);
     assertThat(request.csiId()).isEqualTo("60401");
