@@ -201,14 +201,17 @@ public class StudioService {
   @Transactional
   public UITestDto createTest(
       UITestRequest request, AuthoringV2Request authoring, Authentication auth) {
-    return createTest(request, authoring, auth, true, test -> {});
+    return createTest(request, authoring, auth, true, StudioService::noInitializer);
   }
 
   /** Saves versioned drafts without implicitly issuing a model call. */
   @Transactional
   public UITestDto createTest(UITestRequest request, Authentication auth, boolean enqueueCompile) {
-    return createTest(request, null, auth, enqueueCompile, test -> {});
+    return createTest(request, null, auth, enqueueCompile, StudioService::noInitializer);
   }
+
+  /** No-op initializer for drafts without versioned metadata. */
+  private static void noInitializer(UITest test) {}
 
   /** Initializes versioned metadata before the entity's first INSERT. */
   @Transactional

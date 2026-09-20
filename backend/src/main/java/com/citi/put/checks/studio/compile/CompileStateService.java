@@ -441,7 +441,9 @@ public class CompileStateService {
     return value == null ? null : String.valueOf(value);
   }
 
-  /** Confirms a candidate whose captured compile-request identity must still match (story 10.23). */
+  /**
+   * Confirms a candidate whose captured compile-request identity must still match (story 10.23).
+   */
   @Transactional
   public UUID confirmVersioned(
       UUID testId,
