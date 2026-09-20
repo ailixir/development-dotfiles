@@ -1,4 +1,4 @@
-import type { TestIR, StepIR } from '@/types/studio/studioTypes';
+import type { TestIR, StepIR } from '@/types/studio/legacyTestIr';
 
 function escapePythonString(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');

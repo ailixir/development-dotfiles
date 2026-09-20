@@ -28,7 +28,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+      "checks.local-dev-auth.enabled=false",
+      "checks.security.bypass.identity-headers=false"
+    })
 @ActiveProfiles("local")
 class CheckCrudIT {
 
@@ -38,6 +43,7 @@ class CheckCrudIT {
   @Autowired TestRestTemplate restTemplate;
   @Autowired ObjectMapper objectMapper;
   @Autowired JdbcTemplate jdbc;
+  @Autowired CheckService checkService;
 
   @DynamicPropertySource
   static void configureProperties(DynamicPropertyRegistry registry) {
@@ -60,14 +66,14 @@ class CheckCrudIT {
             .willReturn(
                 okJson(
                     """
-        {
-          "user_id": "crud-user",
-          "email": "crud-owner@citi.com",
-          "name": "CRUD User",
-          "roles": ["checks-admin"],
-          "csi_ownership": [{"csi_id": "40001", "role": "owner"}]
-        }
-        """)));
+                    {
+                      "user_id": "crud-user",
+                      "email": "crud-owner@citi.com",
+                      "name": "CRUD User",
+                      "roles": ["checks-admin"],
+                      "csi_ownership": [{"csi_id": "40001", "role": "owner"}]
+                    }
+                    """)));
   }
 
   private void seedUser(String email) {
@@ -130,10 +136,16 @@ class CheckCrudIT {
             HttpMethod.POST,
             new HttpEntity<>(createBody, authHeaders("crud-create")),
             String.class);
-    assertThat(createResp.getStatusCode().value()).isEqualTo(201);
+    assertThat(createResp.getStatusCode().value())
+        .as("Create response: %s", createResp.getBody())
+        .isEqualTo(201);
     assertThat(createResp.getHeaders().getLocation()).isNotNull();
     JsonNode created = objectMapper.readTree(createResp.getBody());
     String checkId = created.path("id").asText();
+    assertThat(created.path("createdBy").asText()).isEqualTo("crud-owner@citi.com");
+    wireMock.verify(
+        com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor(
+            urlEqualTo("/api/v1/users/me")));
 
     // READ
     ResponseEntity<String> readResp =
@@ -200,16 +212,55 @@ class CheckCrudIT {
   }
 
   @Test
+  void firstCheckWriteEstablishesItsAuthenticatedAuthorBeforeTheAsyncMirror() throws Exception {
+    String email = "first-check-" + UUID.randomUUID() + "@citi.com";
+    var identity =
+        new com.citi.put.checks.security.UserIdentity(
+            UUID.randomUUID().toString(),
+            email,
+            "First Author",
+            "Ops",
+            java.util.List.of("checks-admin"),
+            java.util.List.of());
+    var request =
+        objectMapper.readValue(
+            """
+            {"name":"First check","csiId":"40001","environment":"Production",
+             "configuration":{"type":"HTTP","url":"https://example.com/health"}}
+            """,
+            com.citi.put.checks.checks.dto.CheckRequest.class);
+    assertThat(
+            jdbc.queryForObject("SELECT count(*) FROM users WHERE email=?", Integer.class, email))
+        .isZero();
+    var created =
+        checkService.create(
+            request, new com.citi.put.checks.security.BffAuthenticationToken(identity));
+    assertThat(created.createdBy()).isEqualTo(email);
+    assertThat(
+            jdbc.queryForObject("SELECT count(*) FROM users WHERE email=?", Integer.class, email))
+        .isEqualTo(1);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT created_by FROM checks WHERE id=?", String.class, created.id()))
+        .isEqualTo(email);
+  }
+
+  @Test
   void listChecksWithFilters() throws Exception {
     String body1 =
         """
-        {"name":"Filter A","csiId":"40001","configuration":{"type":"HTTP","method":"GET","url":"https://a.com"}}
+        {"name":"Filter A","csiId":"40001",
+         "configuration":{"type":"HTTP","method":"GET","url":"https://a.com"}}
         """;
-    restTemplate.exchange(
-        "/api/v1/checks",
-        HttpMethod.POST,
-        new HttpEntity<>(body1, authHeaders("crud-filter1")),
-        String.class);
+    ResponseEntity<String> created =
+        restTemplate.exchange(
+            "/api/v1/checks",
+            HttpMethod.POST,
+            new HttpEntity<>(body1, authHeaders("crud-filter1")),
+            String.class);
+    assertThat(created.getStatusCode().value())
+        .as("Create response: %s", created.getBody())
+        .isEqualTo(201);
 
     ResponseEntity<String> listResp =
         restTemplate.exchange(

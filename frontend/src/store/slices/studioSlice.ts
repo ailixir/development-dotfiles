@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { TestIR } from '@/types/studio/studioTypes';
+import type { TestIR } from '@/types/studio/legacyTestIr';
 
 interface StudioState {
   testSteps: string[];
@@ -16,14 +16,7 @@ interface StudioState {
     message?: string;
     timestamp: string;
   }>;
-  videoUrl: string | null;
   currentStep: number;
-  testConfiguration: {
-    browser: 'chrome' | 'firefox' | 'safari' | 'edge';
-    viewport: { width: number; height: number };
-    timeout: number;
-    waitStrategy: 'none' | 'networkidle' | 'domcontentloaded';
-  };
   testIR: TestIR | null;
   generatedCode: string;
   autoSyncCode: boolean;
@@ -34,14 +27,7 @@ const initialState: StudioState = {
   isExecuting: false,
   executionLogs: [],
   stepResults: [],
-  videoUrl: null,
   currentStep: -1,
-  testConfiguration: {
-    browser: 'chrome',
-    viewport: { width: 1920, height: 1080 },
-    timeout: 30000,
-    waitStrategy: 'networkidle',
-  },
   testIR: null,
   generatedCode: '',
   autoSyncCode: true,
@@ -55,7 +41,6 @@ const studioSlice = createSlice({
       state.testSteps = action.payload;
       // Reset results when steps change
       state.stepResults = [];
-      state.videoUrl = null;
       state.currentStep = -1;
     },
 
@@ -121,14 +106,6 @@ const studioSlice = createSlice({
       state.currentStep = action.payload;
     },
 
-    setVideoUrl: (state, action: PayloadAction<string | null>) => {
-      state.videoUrl = action.payload;
-    },
-
-    updateConfiguration: (state, action: PayloadAction<Partial<StudioState['testConfiguration']>>) => {
-      state.testConfiguration = { ...state.testConfiguration, ...action.payload };
-    },
-
     setTestIR: (state, action: PayloadAction<TestIR | null>) => {
       state.testIR = action.payload;
     },
@@ -146,7 +123,6 @@ const studioSlice = createSlice({
       state.isExecuting = false;
       state.executionLogs = [];
       state.stepResults = [];
-      state.videoUrl = null;
       state.currentStep = -1;
       state.testIR = null;
       state.generatedCode = '';
@@ -167,8 +143,6 @@ export const {
   updateStepResult,
   setAllStepResults,
   setCurrentStep,
-  setVideoUrl,
-  updateConfiguration,
   setTestIR,
   setGeneratedCode,
   setAutoSyncCode,

@@ -182,7 +182,7 @@ workspace/domains/design-system/mcp/
 
 **Objetivo:** Adicionar comandos DS+AI ao agent Brad Frost.
 
-**Agent:** `.claude/agents/AIOS/agents/brad-frost.md` v4.0.0
+**Agent:** `.claude/agents/AIOX/agents/brad-frost.md` v4.0.0
 
 **6 Novos Comandos (Phase 11 — DS+AI Integration):**
 

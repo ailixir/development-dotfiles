@@ -1,0 +1,149 @@
+{
+  "name": "assert-option-coverage",
+  "description": "Every permitted assertion option: timeout, ignoreCase and useInnerText on toContainText, timeout on toHaveValue, toHaveURL and toHaveTitle.",
+  "source": [
+    "Check that the summary says \"Order confirmed\"",
+    "Check that the \"Filter\" field holds \"open\"",
+    "Check that we are on the dashboard",
+    "Check that the page title is \"Checks\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "values": {
+    "variables": {},
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Check that the summary says \"Order confirmed\"",
+        "code": "await expect(page.getByTestId('summary')).toContainText('Order confirmed', { timeout: 8000, ignoreCase: true, useInnerText: true });"
+      },
+      {
+        "stepIndex": 1,
+        "originalText": "Check that the \"Filter\" field holds \"open\"",
+        "code": "await expect(page.getByLabel('Filter')).toHaveValue('open', { timeout: 8000 });"
+      },
+      {
+        "stepIndex": 2,
+        "originalText": "Check that we are on the dashboard",
+        "code": "await expect(page).toHaveURL('https://example.com/dashboard', { timeout: 8000 });"
+      },
+      {
+        "stepIndex": 3,
+        "originalText": "Check that the page title is \"Checks\"",
+        "code": "await expect(page).toHaveTitle('Checks', { timeout: 8000 });"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByTestId",
+              "testId": {
+                "kind": "literal",
+                "value": "summary"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "expectContainText",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByTestId",
+              "testId": {
+                "kind": "literal",
+                "value": "summary"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "string",
+          "value": "Order confirmed"
+        },
+        {
+          "timeout": 8000,
+          "ignoreCase": true,
+          "useInnerText": true
+        }
+      ]
+    },
+    {
+      "method": "locate",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Filter"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "expectValue",
+      "args": [
+        {
+          "segments": [
+            {
+              "kind": "getByLabel",
+              "text": {
+                "kind": "literal",
+                "value": "Filter"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "string",
+          "value": "open"
+        },
+        {
+          "timeout": 8000
+        }
+      ]
+    },
+    {
+      "method": "expectUrl",
+      "args": [
+        {
+          "kind": "string",
+          "value": "https://example.com/dashboard"
+        },
+        {
+          "timeout": 8000
+        }
+      ]
+    },
+    {
+      "method": "expectTitle",
+      "args": [
+        {
+          "kind": "string",
+          "value": "Checks"
+        },
+        {
+          "timeout": 8000
+        }
+      ]
+    }
+  ]
+}

@@ -8,9 +8,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const LazyApp = React.lazy(() => import('./App'));
 import { store } from '@store/index';
 import { theme } from './theme';
+import { MswGate } from '@components/providers/MswGate';
 
-// MSW initialization is handled in main.tsx for Vite mode
-// For Module Federation mode, the host should handle MSW initialization
+// MSW is started by MswGate below, which is on this tree because main.tsx (the Vite standalone
+// entry) renders Bootstrap and never touches ChecksModule.tsx. The gate holds the app back until
+// the worker is active, so the first Studio request cannot escape to the network (story 10.1,
+// AC-16). ChecksModule.tsx mounts its own gate for the Module Federation entry.
 
 // Mark platform shell integration
 if (typeof window !== 'undefined') {
@@ -59,19 +62,18 @@ const Bootstrap: React.FC<BootstrapProps> = ({
       <Provider store={store}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <React.Suspense fallback={null}>
-            <RouterComponent>
-              <LazyApp />
-            </RouterComponent>
-          </React.Suspense>
+          <MswGate>
+            <React.Suspense fallback={null}>
+              <RouterComponent>
+                <LazyApp />
+              </RouterComponent>
+            </React.Suspense>
+          </MswGate>
         </ThemeProvider>
       </Provider>
     </QueryClientProvider>
   );
 };
-
-// MSW initialization is handled in main.tsx for Vite mode
-// For Module Federation mode, the host should handle MSW initialization
 
 // For Module Federation - expose the component
 if (typeof window !== 'undefined') {

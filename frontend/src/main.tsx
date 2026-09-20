@@ -21,7 +21,7 @@ async function startApp() {
       if (typeof initSharing === 'function') {
         await initSharing('default');
       }
-    } catch {}
+    } catch { /* Environment initialization is optional; continue with the configured defaults. */ }
 
     let root: Root;
     if (!(window as any).__REACT_ROOT__) {

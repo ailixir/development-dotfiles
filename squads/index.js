@@ -78,7 +78,7 @@ class PremiumSquads {
         /* squad configuration */
       },
       exportedAt: new Date().toISOString(),
-      exportedBy: 'AIOS Pro',
+      exportedBy: 'AIOX Pro',
     };
   }
 

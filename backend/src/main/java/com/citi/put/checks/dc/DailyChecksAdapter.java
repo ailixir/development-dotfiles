@@ -88,7 +88,8 @@ public class DailyChecksAdapter {
   }
 
   private ExecutionOutcome mapOuter(DcResponse response, String detail, Duration duration) {
-    String status = response.status() == null ? "" : response.status().trim().toUpperCase(Locale.ROOT);
+    String status =
+        response.status() == null ? "" : response.status().trim().toUpperCase(Locale.ROOT);
     String message = firstNonBlank(detail, response.comment(), "DC returned status " + status);
     String deepLink = response.deepLink();
 

@@ -1,0 +1,116 @@
+package com.citi.put.checks.studio.evidence;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
+
+/**
+ * The `ED-03` stand-in this story owns (story 10.15 AC-18a).
+ *
+ * <p>In-memory test fixture. Local runtime uses filesystem storage and remote runtime uses S3,
+ * selected by {@code studio.storage.provider}. External bucket/IAM verification remains ED-03.
+ *
+ * <p>Two properties it has that a {@code Map<String, byte[]>} would not, and both are criteria:
+ *
+ * <ul>
+ *   <li><b>It reads ranges, and it counts what it produced.</b> {@link #bytesProduced()} is the
+ *       instrument AC-16's behavioural half asserts on: a route that read the whole object and then
+ *       sliced it would be sixteen times over on a 64 KiB request against a 1 MiB object. A fake
+ *       that handed back the whole array and let the caller slice would make that unfalsifiable.
+ *   <li><b>Unreachable is not absent.</b> {@link #makeUnreachable()} makes every operation throw
+ *       {@link VideoObjectStoreUnavailableException}; an absent key is {@link Optional#empty()}
+ *       from {@link #metadata}. The two are different outcomes at the route and a test drives both.
+ * </ul>
+ *
+ * <p>The inspection methods live on the fake and not on {@link VideoObjectStore}, which is what
+ * keeps "read-only by construction" a statement about the production interface rather than about a
+ * test double that quietly grew a surface.
+ *
+ * <p>Only selected under the test profile with studio.storage.provider=fake.
+ */
+@Component
+@Profile("test")
+@ConditionalOnProperty(name = "studio.storage.provider", havingValue = "fake")
+public class FakeVideoObjectStore implements VideoObjectStore {
+
+  private final Map<String, byte[]> objects = new ConcurrentHashMap<>();
+  private final AtomicLong bytesProduced = new AtomicLong();
+  private final VideoStoreProperties properties;
+  private volatile boolean reachable = true;
+
+  public FakeVideoObjectStore(VideoStoreProperties properties) {
+    this.properties = properties;
+  }
+
+  @Override
+  public Optional<VideoObjectMetadata> metadata(String key) {
+    requireReachable();
+    byte[] object = objects.get(key);
+    return object == null ? Optional.empty() : Optional.of(new VideoObjectMetadata(object.length));
+  }
+
+  @Override
+  public byte[] read(String key, long firstByte, long lastByte) {
+    requireReachable();
+    byte[] object = objects.get(key);
+    if (object == null) {
+      throw new IllegalStateException("No object at the derived key");
+    }
+    if (firstByte < 0 || lastByte < firstByte || lastByte >= object.length) {
+      throw new IllegalArgumentException(
+          "The store was asked for bytes outside the object it holds");
+    }
+    // Only the requested window is materialized, and only the requested window is counted.
+    byte[] slice = Arrays.copyOfRange(object, (int) firstByte, (int) lastByte + 1);
+    bytesProduced.addAndGet(slice.length);
+    return slice;
+  }
+
+  // ── test-facing surface; deliberately not on VideoObjectStore ────────────
+
+  public void put(String key, byte[] bytes) {
+    objects.put(key, bytes.clone());
+  }
+
+  public void clear() {
+    objects.clear();
+    bytesProduced.set(0);
+    reachable = true;
+  }
+
+  /** How many bytes this store has been asked to produce since the last {@link #resetMeter()}. */
+  public long bytesProduced() {
+    return bytesProduced.get();
+  }
+
+  public void resetMeter() {
+    bytesProduced.set(0);
+  }
+
+  /** An unreachable store must not look like an absent key; a test drives both and compares. */
+  public void makeUnreachable() {
+    this.reachable = false;
+  }
+
+  public void makeReachable() {
+    this.reachable = true;
+  }
+
+  private void requireReachable() {
+    if (!reachable) {
+      // The message names the deployment values on purpose: it is a real leak path, and AC-6
+      // asserts that none of it reaches the wire.
+      throw new VideoObjectStoreUnavailableException(
+          "The Studio evidence store is unreachable (bucket "
+              + properties.bucketOrDefault()
+              + " at "
+              + properties.endpointOrDefault()
+              + ")");
+    }
+  }
+}

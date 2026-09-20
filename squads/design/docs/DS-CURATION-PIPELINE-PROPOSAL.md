@@ -10,7 +10,7 @@
 
 ## 1. PROBLEMA
 
-O AIOS precisa transformar dados BRUTOS de Figma (31K+ nodes, 146+ cores, 76 text styles, 52 shadows, 164 componentes — e isso de UMA UNICA pagina de 78) em um Design System padronizado, curado, com nivel de qualidade enterprise.
+O AIOX precisa transformar dados BRUTOS de Figma (31K+ nodes, 146+ cores, 76 text styles, 52 shadows, 164 componentes — e isso de UMA UNICA pagina de 78) em um Design System padronizado, curado, com nivel de qualidade enterprise.
 
 **Hoje:** Toda curadoria e manual. O humano (ou o AI sem restricoes) olha os dados brutos e decide o que manter. Nao ha scoring, nao ha thresholds, nao ha rejeicao automatica.
 
@@ -543,7 +543,7 @@ Injetar dados com < 85% reducao cores → pipeline DEVE retornar CONDITIONAL
 
 ## 11. COMPARACAO COM EQUIPES SILICON VALLEY
 
-| Aspecto | Enterprise (Material/Fluent/Carbon) | AIOS Pipeline |
+| Aspecto | Enterprise (Material/Fluent/Carbon) | AIOX Pipeline |
 |---------|-------------------------------------|---------------|
 | **Token naming** | namespace-category-variant-scale | Mesmo padrao (W3C DTCG) |
 | **Color space** | OKLCH / tonal palettes | OKLCH com deltaE clustering |

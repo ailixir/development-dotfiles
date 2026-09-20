@@ -1,7 +1,8 @@
 ---
 paths:
   - "docs/stories/**"
-  - ".aios-core/development/**"
+  - "docs/framework/epics/**"
+  - ".aiox-core/development/**"
 ---
 
 # Story Lifecycle — Detailed Rules
@@ -16,11 +17,17 @@ Draft → Ready → InProgress → InReview → Done
 |--------|---------|-------|--------|
 | Draft | @sm creates story | @sm | Story file created |
 | Ready | @po validates (GO) | @po | **MUST update status field in story file from Draft → Ready** |
-| InProgress | @dev starts implementation | @dev | Update status field |
-| InReview | @dev completes, @qa reviews | @qa | Update status field |
-| Done | @qa PASS, @devops pushes | @devops | Update status field |
+| InProgress | @dev starts implementation; @qa FAIL returns story | @dev / @qa | **MUST update status field: Ready → InProgress on dev start, or InReview → InProgress on QA FAIL** |
+| InReview | @dev completes implementation | @dev | **MUST update status field from InProgress → InReview before QA handoff** |
+| Done | @qa PASS, CONCERNS, or WAIVED | @qa | **MUST update status field from InReview → Done before @devops push** |
 
 **CRITICAL:** The `Draft → Ready` transition is the responsibility of @po during `*validate-story-draft`. When verdict is GO (including conditional GO after fixes are applied), @po MUST update the story's Status field to `Ready` and log the transition in the Change Log. A story left in `Draft` after a GO verdict is a process violation.
+
+**CRITICAL:** The `Ready → InProgress` and `InProgress → InReview` transitions are the responsibility of @dev during `*dev-develop-story`. @dev MUST log both transitions in the Change Log using the mandatory status-transition block in `dev-develop-story.md`.
+
+**CRITICAL:** The `InReview → Done` and `InReview → InProgress` transitions are the responsibility of @qa during `*qa-gate`. PASS, CONCERNS, and WAIVED move the story to `Done`; FAIL returns it to `InProgress`. @qa MUST update the story status and Change Log before reporting the gate result.
+
+**CRITICAL:** @devops does not change story status. @devops push/PR/release authority starts only after the story already reflects the QA gate outcome.
 
 ## Phase 1: Create (@sm)
 
@@ -108,6 +115,8 @@ if CRITICAL persist after 2 iterations:
 ```yaml
 storyId: STORY-42
 verdict: PASS | CONCERNS | FAIL | WAIVED
+reviewer: Quinn (@qa)
+reviewed_revision: commit:abc1234
 issues:
   - severity: low | medium | high
     category: code | tests | requirements | performance | security | docs
@@ -118,7 +127,7 @@ issues:
 ## QA Loop (Iterative Review-Fix)
 
 ```
-@qa review → verdict → @dev fixes → re-review (max 5 iterations)
+@qa review → verdict → @dev fixes → re-review (max 3 iterations)
 ```
 
 **Commands:**
@@ -128,7 +137,7 @@ issues:
 - `*escalate-qa-loop` — Force manual escalation
 
 **Escalation triggers:**
-- max_iterations_reached (default: 5)
+- max_iterations_reached (default: 3)
 - verdict_blocked
 - fix_failure (after retries)
 - manual_escalate (user command)

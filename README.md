@@ -10,7 +10,7 @@ See [`PRD.md`](./PRD.md) for product requirements (v2.2) and [`ARCH.md`](./ARCH.
 put-checks/
 ├── frontend/          React 18 + TypeScript MFE (Vite + Webpack/Module Federation)
 ├── backend/           Java 21 + Spring Boot 3 (Gradle KTS) — in development
-├── docs/              Stories, specs, architecture docs (AIOS convention)
+├── docs/              Stories, specs, architecture docs (AIOX convention)
 │   ├── stories/
 │   ├── specs/
 │   └── architecture/
@@ -42,7 +42,7 @@ _(Backend scaffold in progress — see [`docs/specs/backend/`](./docs/specs/back
 
 ## Development Methodology
 
-This repo follows AIOS (Agent-Orchestrated System) conventions:
+This repo follows AIOX (Agent-Orchestrated System) conventions:
 
 - **Story-driven development** — work tracked in `docs/stories/`.
 - **Agent delegation** — `@pm`, `@architect`, `@sm`, `@po`, `@dev`, `@qa`, `@devops` (see `CLAUDE.md`).

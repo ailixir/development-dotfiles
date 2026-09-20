@@ -55,7 +55,8 @@ class CheckServiceSourceGateTest {
         scheduleRepository,
         scheduleService,
         new CheckSourceProperties(sources),
-        checkTagService);
+        checkTagService,
+        mock(com.citi.put.checks.users.UserProvisioningService.class));
   }
 
   private BffAuthenticationToken fakeAuth() {

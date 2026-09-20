@@ -1,0 +1,756 @@
+schema: 1
+story: '10.15'
+story_title: Authorized Range video/download endpoint — and FOC-06 step 2
+epic: EPIC-10
+wave: 6
+
+gate: CONCERNS
+
+status_reason: >-
+  Everything load-bearing in this story reproduced under measurement, and several of the developer's
+  own numbers came back byte-for-byte. Both contract digests were re-read from the files rather than
+  accepted: the pre-edit document at the merge base 39939a213 hashes
+  d1a987663b25d7240fc460f923289aaf22a07145df7d6913114f9f3c1d627c18, which is exactly the
+  BASE_SHA256 the runner pin carried at that commit (confinement.test.ts:159) — so the pin really
+  was green on arrival at 10.18a's step-1 anchor and nothing unowned is folded in. The document at
+  HEAD hashes 310d3c984b77104898440cae450795cdd56c11ef926f75209fb6d4198dcc0cf7, which is the value
+  now at confinement.test.ts:176. The re-anchor is in the SAME commit as the contract edit —
+  761a88830 touches openapi.yaml and confinement.test.ts together, and nothing else in the runner
+  tree — which is what FOC-04's rule and FOC-06 step 2 require. The contract diff is four edits on
+  getExecutionVideo and on nothing else, with the status set still exactly {200,206,404,410,416}.
+  The last x-not-yet-implemented marker is gone: a SnakeYAML walk over every operation returns zero
+  markers, and the one remaining textual occurrence is the document's own prose at line 54, which
+  the test handles deliberately — the scan matches only at YAML key positions and asserts the prose
+  is still present as its control, which is the epic's fourteenth shape closed rather than tripped.
+  ADR-002 §13's row is measured, not predicted, and this reviewer measured all three of its suites
+  on both sides by restoring the pre-edit document with the final test files: ExecutionVideoContractTest
+  6/15 → 15/15, StudioContractTest 9/13 → 13/13, ExecutionVideoContractEscalationTest 0/2 → 0/2.
+  The developer's deviation from @po's wording is correct and should not be worked around. @po asked
+  for "no shipped operation carries no attribution". Parsing the document: 18 operations, 10 carry
+  x-implemented-by, and EXACTLY THE EIGHT the developer named carry none — listTests, createTest,
+  getTest, updateTest, deleteTest, executeTest, listExecutions, getExecution. The universal is false
+  on this document, and attributing eight pre-Epic-10 routes would have been invention. The
+  implemented backward half — set equality over the ten that do carry one, with the pinned set a
+  deliberate second copy — catches the defect @po named (an attribution silently dropped reddens
+  theSetOfOperationsCarryingAnAttributionIsPinnedBothWays) and is true. The AC wording needs @po,
+  not a workaround.
+  Eight mutations were re-applied and all eight reproduced, four of them with the recorded failure
+  message verbatim. M12: the right length at the wrong offset reddens on BYTES — "first byte: the
+  bytes returned are not the bytes requested, expected [-55] but was [-67]", at
+  ExecutionVideoRangeIT:186, the byte assertion, with the status, Content-Range and Content-Length
+  assertions at :177/:180/:183 all passing first. That is the shape asserting a 206 without
+  asserting the bytes, and it cannot live here. M15: read-the-whole-object-then-slice reddens ONE
+  test on the instrumented count — "the store was asked for 65536 bytes of a 1200000-byte object:
+  expected 65536L but was 1200000L" — with the other eight tests in the file green, so the bytes
+  really were identical either way. M8: "the refusal carried the recording: the answer was 200 with
+  1310721 bytes, and the object at the derived key is 1310721 bytes" — verbatim, and the criterion's
+  whole point is that the red is a 200 carrying the object, not a missing-object error. M17: the
+  gate-still-shut assertion's failure message tells the reader in capitals that a manifest edit,
+  not a code change, reddened it, and that it is a FOC-class finding to raise rather than a test to
+  adjust. M13, M16, M18a and M19 also reproduced, M19 with the pin alone red and 17 siblings green.
+  Five shipped-file digests in the mutation table were confirmed independently after restore.
+  The backend hung for this reviewer too, 1 of 1, making it 7 of 7 across the epic. The run reached
+  413 passed / 22 failed / 1 skipped across 126 classes, went silent, and a thread dump shows MED-2
+  exactly: "Test worker" BLOCKED waiting to lock <0x00000007c2ce78c8> inside
+  ContainerDatabaseDriver.connect, and a daemon "HikariPool-4 connection adder" TIMED_WAITING in
+  JdbcDatabaseContainer.createConnection holding that same monitor. Same HikariPool-4 ordinal, same
+  class boundary — the last result is StudioOverloadIT. The failing set is the developer's list
+  class by class and count by count: 13 classes, 22 failures, ZERO in com.citi.put.checks.studio.
+  Per @po's MED-2 clause this is recorded as HUNG, NOT GREEN AND NOT RED, and the developer's
+  reading of the 184-vs-126 class-count difference as an artefact of fork partitioning is supported
+  — this reviewer's independent run reached 126, the same as the retry, with the identical failing
+  set.
+  What keeps this off PASS is not a defect in what ships. It is two case matrices that would not
+  notice a row being deleted, measured in both directions. Removing Arguments.of("UNAVAILABLE", 404)
+  from AC-7's evidenceStates() leaves ExecutionVideoEvidenceIT BUILD SUCCESSFUL at 13 passed; only
+  the test count drops. Removing the wrong-CSI identity — the single most load-bearing row in AC-1 —
+  from identities() leaves ExecutionVideoAuthorizationIT BUILD SUCCESSFUL at 12 passed, because
+  theMatrixContainsBothAnswers is satisfied by the surviving no-ownership row. That is the epic's
+  catalogued eighteenth shape, and the contrast is sharp: the third matrix in the same story,
+  AC-13's cases(), carries the remedy, and deleting a row from it turns
+  theFixtureIsLargerThanEveryBoundaryTheCaseTableUses RED. The author knew the hazard and applied it
+  one matrix too narrowly — the same diagnosis this epic recorded against 10.14's fourteenth shape.
+  The remedy for AC-7 is one assertion against a production carrier: VideoEvidence already declares
+  all five states as public constants.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-16T00:00:00Z'
+branch: story/10.15
+head_sha: 3595699d2
+base_sha: 39939a213
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.15
+scope: >-
+  Story 10.15 only, three commits on epic/EPIC-10 at 39939a213. Includes FOC-06 step 2 (the
+  openapi.yaml edit and the runner pin re-anchor). 10.11c (step 3) is unreviewed and untouched.
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands this reviewer executed. Numbers are what they returned.
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+
+  contract_hashes_both_read:
+    command: >-
+      git show 39939a213:docs/specs/studio/openapi.yaml | shasum -a 256;
+      shasum -a 256 docs/specs/studio/openapi.yaml;
+      git show 39939a213:studio-runner/test/run/confinement.test.ts | grep BASE_SHA256;
+      sed -n '176p' studio-runner/test/run/confinement.test.ts
+    result: BOTH CONFIRMED — READ, NOT ACCEPTED. GREEN ON ARRIVAL IS TRUE.
+    detail: >-
+      BEFORE d1a987663b25d7240fc460f923289aaf22a07145df7d6913114f9f3c1d627c18, which is byte-equal
+      to the BASE_SHA256 the pin carried at the merge base (confinement.test.ts:159 at 39939a213).
+      So FOC-06 step 1 had landed, the pin was green before this story touched anything, and B-8's
+      report-don't-launder instruction was correctly not triggered. AFTER
+      310d3c984b77104898440cae450795cdd56c11ef926f75209fb6d4198dcc0cf7, equal to the constant now
+      at confinement.test.ts:176 and to the file at HEAD.
+
+  reanchor_is_in_the_same_commit:
+    command: git show --stat 761a88830; git diff --name-only 39939a213..HEAD
+    result: CONFIRMED — SAME COMMIT, AND THE RUNNER TREE HOLDS NOTHING ELSE
+    detail: >-
+      761a88830 changes five files and only five: StudioContractTest.java,
+      ExecutionVideoContractTest.java, ADR-002 (+1 line), docs/specs/studio/openapi.yaml (38 lines),
+      studio-runner/test/run/confinement.test.ts (27 lines). The contract edit and the re-anchor
+      are one change, which is FOC-04's rule and FOC-06 step 2's requirement. Across all three
+      commits the diff is 28 files, every one of them in the story's File List and nothing outside
+      it. docs/qa/spikes/ — 0 files. frontend/ — 0 files.
+
+  contract_diff_is_four_edits_and_nothing_else:
+    command: git show 761a88830 -- docs/specs/studio/openapi.yaml
+    result: CONFIRMED
+    detail: >-
+      Two hunks on getExecutionVideo. x-not-yet-implemented removed and x-implemented-by corrected
+      '10.16' → '10.15'; 206 gains video/webm content plus Content-Range and Content-Length headers;
+      404 gains application/json ErrorResponse content with a noEvidence example; 416 gains the same
+      content with an unsatisfiable example plus its Content-Range header. No status added or
+      removed — the response set is still exactly {200,206,404,410,416}, which
+      theVideoOperationsStatusSetIsUnchanged also asserts at runtime.
+
+  last_marker_is_gone:
+    command: >-
+      SnakeYAML/js-yaml walk over paths × methods for x-not-yet-implemented and x-implemented-by;
+      grep -n x-not-yet-implemented at the merge base and at HEAD
+    result: ZERO MARKERS ON ANY OPERATION
+    detail: >-
+      At 39939a213 the document carried the marker at line 704 on getExecutionVideo, plus the prose
+      mention at line 54. At HEAD the operation-level count is 0 and only line 54 remains. That is
+      exactly the artefact-quotes-itself hazard (shape 14), and the story closes it rather than
+      tripping it: markerKeyLines() matches `^[ \t]*x-not-yet-implemented[ \t]*:` — key positions
+      only — and noOperationCarriesAPendingMarkerInEitherView additionally asserts the prose IS
+      still present, so the narrower scan is demonstrably narrower and not merely lucky.
+      theMarkerScanCanStillFindAMarker is its control and reddens under M18a.
+
+  unattributed_operation_count:
+    command: node yaml walk over paths × HTTP methods, partitioned on presence of x-implemented-by
+    result: 18 OPERATIONS; 10 CARRY AN ATTRIBUTION; 8 CARRY NONE — THE DEVELOPER'S COUNT AND LIST
+    detail: >-
+      WITHOUT: listTests, createTest, getTest, updateTest, deleteTest, executeTest, listExecutions,
+      getExecution — exactly the eight named in the story's Findings 1. WITH: compileTest 10.8,
+      confirmCompile 10.9, streamExecution 10.7, getExecutionVideo 10.15, runnerValidateArtifact
+      10.6, runnerAdmitRun 10.6, claimAdmission 10.7, reportProgress 10.7, runnerHealth 10.6,
+      runnerReadiness 10.6. @po's universal is FALSE on this document. The developer was right to
+      refuse it and right to say so rather than adjust it quietly.
+
+  adr002_s13_row_measured_both_sides:
+    command: >-
+      git show 39939a213:docs/specs/studio/openapi.yaml > docs/specs/studio/openapi.yaml, then
+      ./gradlew --no-daemon test --continue --tests '*ExecutionVideoContractTest'
+      --tests '*StudioContractTest' --tests '*ExecutionVideoContractEscalationTest';
+      git checkout -- the document; re-run
+    result: ALL THREE SUITES REPRODUCED ON BOTH SIDES
+    detail: >-
+      BEFORE (pre-edit document, final test files): ExecutionVideoContractTest 6 passed / 9 failed
+      of 15; StudioContractTest 9 passed / 4 failed of 13; ExecutionVideoContractEscalationTest
+      0 passed / 2 failed of 2. AFTER (restored, shasum back to 310d3c98…): 15/15, 13/13, 0/2.
+      The escalation test is red on both sides, deliberately, so the two reds cannot be mistaken
+      for a regression this story introduced. The brief asked for at least two rows spot-checked on
+      both sides; all three were.
+
+  mutation_M12_right_length_wrong_offset:
+    command: >-
+      ExecutionVideoService: readBytes(key, range.firstByte()+1, min(range.lastByte()+1, size-1));
+      ./gradlew --no-daemon test --tests '*ExecutionVideoRangeIT'
+    result: REPRODUCED — RED ON BYTES, HEADERS STILL CORRECT
+    detail: >-
+      3 failed / 6 passed. The named test everySatisfiableRangeReturnsExactlyItsSlice fails at
+      ExecutionVideoRangeIT.java:186 — the BODY assertion — with "[first byte: the bytes returned
+      are not the bytes requested] expected: [-55] but was: [-67]". One byte expected, one byte
+      returned: the length is right. The status assertion (:177), the Content-Range assertion (:180)
+      and the Content-Length assertion (:183) all evaluated and passed before it. This is the
+      characteristic Range vacuous shape and AC-13's prohibition is enforced, not merely stated.
+
+  mutation_M15_read_whole_then_slice:
+    command: >-
+      ExecutionVideoService: read the whole object then Arrays.copyOfRange the window;
+      ./gradlew --no-daemon test --tests '*ExecutionVideoRangeIT'
+    result: REPRODUCED VERBATIM — RED ON THE INSTRUMENTED COUNT, BYTES IDENTICAL
+    detail: >-
+      Exactly ONE test red: aRangedReadAsksTheStoreForTheRangeAndNotForTheObject, "[the store was
+      asked for 65536 bytes of a 1200000-byte object] expected: 65536L but was: 1200000L". The
+      other 8 tests in the file — including everySatisfiableRangeReturnsExactlyItsSlice and
+      aFullRequestIsAComplete200 — stayed green, which is the proof that the bytes were identical
+      either way and that only the instrument discriminates. The fake's counter is incremented
+      inside read() during the response, so the mutation lands inside the measurement window.
+
+  mutation_M8_expiry_discriminator:
+    command: >-
+      delete the AVAILABLE-and-past-expiry branch from ExecutionSnapshotMapper.videoEvidence;
+      ./gradlew --no-daemon test --tests '*ExecutionVideoEvidenceIT'
+    result: REPRODUCED VERBATIM
+    detail: >-
+      3 red / 11 green. aLogicallyExpiredRecordingIsRefusedWhileItsBytesAreStillThere fails with
+      "[the refusal carried the recording: the answer was 200 with 1310721 bytes, and the object at
+      the derived key is 1310721 bytes]" — the recorded message word for word, and the criterion's
+      whole point: the mutation reddens with a 200 CARRYING THE OBJECT'S BYTES, not with a
+      missing-object error. The assertion is deliberately placed on the payload BEFORE the status
+      assertion so that the recorded failure shows which failure it is. Siblings:
+      "AC-7 — EXPIRED answers 410" and onlyTheClockMovesTheExpiryAnswer.
+
+  mutation_M17_gate_still_shut:
+    command: >-
+      set ED-03's `status: open` to `closed` in docs/epics/EPIC-10-EXECUTION.yaml;
+      ./gradlew --no-daemon test --tests '*ExecutionVideoExternallyGatedCriteriaTest'
+    result: REPRODUCED VERBATIM, INCLUDING THE FOC DISCLOSURE
+    detail: >-
+      theEd03StorageGateIsStillShutWhichIsWhyAc18bIsSkipped fails with the full recorded message,
+      naming the file, the ED id and the value read, and telling the reader in capitals that if the
+      value is anything other than `closed` then THIS FILE WAS NOT CHANGED BY A CODE EDIT — the
+      epic manifest is @pm's file — and that is a FOC-class finding to raise, NOT a test to adjust.
+      @po's three wave-6 requirements are all met. theEd06IngressGateIsStillShutWhichIsWhyAc19bIsSkipped
+      and theGateReaderIsShownSayingClosed stayed green, so the reader is resolving by id.
+      theGateReaderResolvesByIdRatherThanByPosition also reddened — collateral from its scratch copy
+      deriving from the mutated manifest, benign, and not named in the developer's table.
+      Manifest restored; shasum back to 0329ab9d75399c8151e5c3a134317e76280a15faf38eb3e68f65fc8eac838fd8.
+
+  mutation_M13_malformed_range:
+    command: ByteRangeRequest — ignored() returns UNSATISFIABLE; run RangeIT + ByteRangeRequestTest
+    result: REPRODUCED VERBATIM
+    detail: >-
+      9 red. aMalformedRangeHeaderIsIgnoredAndTheWholeObjectIsServed fails with "Range: 'bytes=abc'
+      is not a range this server can serve; ignoring it is the honest answer: expected 200 but was
+      416", plus all eight parser cases. This is the case that stops "everything is 416" passing,
+      and it is real.
+
+  mutation_M16_unreachable_mapped_to_absent:
+    command: ExecutionVideoService.unreachable() returns noEvidence(); run EvidenceIT
+    result: REPRODUCED VERBATIM
+    detail: >-
+      Exactly one red: anUnreachableStoreAndAnAbsentObjectAreDifferentAnswers — "[an unreachable
+      store must not be answered as 'no evidence for this execution' — which status it IS answered
+      with is ESC-2, escalated and not invented here] Expecting actual: 404 not to be equal to: 404".
+
+  mutation_M18a_marker_restored_on_a_neighbour:
+    command: add x-not-yet-implemented to getExecution; run both contract test classes
+    result: REPRODUCED — SIX RED ACROSS BOTH FILES
+    detail: >-
+      StudioContractTest — theVideoRouteIsShippedAndTheMarkerCameOffForThatOperationOnly,
+      everyImplementedStudioRouteIsDeclaredInTheContract,
+      theCompileRouteIsShippedAndTheMarkerCameOffForThatOperationOnly (which carries the AMENDED
+      pendingOperations().isEmpty()). ExecutionVideoContractTest — theMarkerScanCanStillFindAMarker,
+      noOperationCarriesAPendingMarkerInEitherView, thisIsTheLastOperationTheDocumentDeclaredAsUnshipped.
+      One precision on the developer's wording: only ONE of the two amended assertions reddens here.
+      The other (the video-route marker inverted to isNull()) correctly stays green, because the
+      marker was planted on a different operation. The developer's "including both amended ones" is
+      loose; the count of six is right.
+
+  mutation_M19_one_further_byte:
+    command: >-
+      change `summary: Protected video stream` to `…stream.`;
+      npx vitest run test/run/confinement.test.ts --coverage.enabled=false
+    result: REPRODUCED VERBATIM — 1 FAILED / 17 PASSED
+    detail: >-
+      The pin alone: "this story may not edit the contract (ADR-002 §12, Class B): expected
+      'f3b8acbafa…' to be '310d3c984b…'". Seventeen siblings in that file stayed green, which is
+      the developer's recorded figure.
+
+  restoration_verified_byte_identical:
+    command: git checkout -- <path> after each mutation; git diff --quiet; shasum -a 256
+    result: ALL FIVE MUTATED FILES BACK TO THE SHIPPED DIGESTS, TREE FULLY CLEAN
+    detail: >-
+      ExecutionVideoService.java 993801b80b5ca2eddcc3730ddea15e042ff252b49ebffb3aba91ba499a0c5b08
+      (matches the table's 993801b8…c5b08). ByteRangeRequest.java d8aecc1b…b5a50 (matches M13's
+      row). ExecutionSnapshotMapper.java c1401aa5…9201b (matches M8's row). openapi.yaml
+      310d3c98…c0cf7 (matches M18a/M18b/M19). EPIC-10-EXECUTION.yaml 0329ab9d…38fd8 (matches M17).
+      Five of the developer's recorded hashes independently confirmed.
+
+  ac13_fixture_guard_is_real:
+    command: >-
+      read the guard; then delete one RangeCase row from cases() and re-run
+      '*ExecutionVideoRangeIT'
+    result: THE GUARD FIRES — AND IT IS THE ONLY ONE OF THE STORY'S THREE MATRICES THAT DOES
+    detail: >-
+      The fixture is 1_200_000 bytes; max(boundaries) computed from the case table is
+      OBJECT_SIZE-1 = 1_199_999; the guard asserts measuredSize() > max AND >= 1 MiB AND
+      cases().hasSize(6). Deleting the "suffix" row turns
+      theFixtureIsLargerThanEveryBoundaryTheCaseTableUses RED (8 passed). So AC-13's fixture IS
+      larger than every boundary it exercises and the guard @po named a cut candidate is
+      load-bearing. Minor: the "end past EOF" row deliberately omits OBJECT_SIZE+1000 from its
+      boundaries array, so the javadoc's "every offset that appears in a header appears in
+      boundaries" is not literally true; the omission is correct (a past-EOF boundary must exceed
+      the fixture) and everySatisfiableRangeReturnsExactlyItsSlice covers any case whose fixture is
+      too small by asserting 206 on all six.
+
+  lengths_measured_from_the_object:
+    command: read ExecutionVideoService + everyStatedLengthComesFromTheObjectAndNotFromARowColumn
+    result: CONFIRMED, INCLUDING THE NOT-AN-ACCIDENT-OF-EQUAL-NUMBERS CONTROL
+    detail: >-
+      The route reads VideoObjectStore.metadata(key).sizeBytes() and nothing else; Content-Length
+      is bytes.length and Content-Range's total is that measured size. The AC-11 test puts a
+      262_143-byte object on a row carrying duration_ms = 600_000 and partial = true, asserts
+      Content-Range is "bytes 1000-1999/262143", and then SELECTs duration_ms and snapshot_revision
+      and asserts neither equals 262143 — so the pass is not an accident of equal numbers. M10's
+      recorded red (…/600000) is consistent with this fixture.
+
+  no_ebml_parsing:
+    command: read every new file; aMalformedContainerIsServedExactlyAsAWellFormedOneOfTheSameLength
+    result: CONFIRMED — ADR-002 §17.6 HONOURED
+    detail: >-
+      VideoObjectMetadata carries a size and deliberately not a duration, and says so. Nothing in
+      ExecutionVideoService, ByteRangeRequest, VideoObjectStore or the fake reads a container byte.
+      The behavioural proof serves a well-formed object (EBML magic 1A 45 DF A3) and a garbage
+      object of the SAME LENGTH from the same seed and asserts status, headers and bytes are
+      indistinguishable.
+
+  blocked_criteria_cannot_self_arm:
+    command: read ExecutionVideoExternallyGatedCriteriaTest; M17; grep for skip mechanisms
+    result: CONFIRMED — SKIPPED, NEVER PASSED, AND THE GATE ASSERTIONS CAN FAIL
+    detail: >-
+      AC-18b and AC-19b are unconditional @Disabled with bodies that throw AssertionError, so they
+      cannot pass even if enabled. The class carries no @SpringBootTest, no @Testcontainers, no
+      Assumptions and no @EnabledIf/@DisabledIf — verified by grep across all five non-Spring
+      classes. The gate-still-shut assertions run in the default tier and M17 proves they redden
+      when the manifest's status moves. Non-vacuity controls (theGateReaderIsShownSayingClosed,
+      theGateReaderResolvesByIdRatherThanByPosition) are present and green. No spike Result line
+      was touched: docs/qa/spikes/ is absent from the diff.
+
+  docker_prerequisite_break_attempt:
+    command: >-
+      (1) DOCKER_HOST=tcp://127.0.0.1:1 TESTCONTAINERS_DOCKER_CLIENT_STRATEGY=…EnvironmentAndSystemProperty…;
+      (2) HOME=<fake> with a .testcontainers.properties pinning the env strategy, + bogus DOCKER_HOST, --rerun-tasks;
+      (3) JAVA_TOOL_OPTIONS="-Ddocker.client.strategy=… -Duser.home=<fake>" + bogus DOCKER_HOST
+    result: COULD NOT BREAK IT EITHER — THREE ATTEMPTS, TESTCONTAINERS FOUND THE DAEMON EVERY TIME
+    detail: >-
+      In all three runs ExecutionVideoRangeIT still executed (9 passed), so Docker was never absent
+      and the experiment is INCOMPLETE, exactly as the developer labelled it. Root cause identified:
+      ~/.testcontainers.properties pins docker.client.strategy=UnixSocketClientProviderStrategy,
+      which goes straight to /var/run/docker.sock and never consults DOCKER_HOST; the socket cannot
+      be removed without disturbing another agent's worktree (wt/10.18b was running tests
+      concurrently), so this reviewer declined that route. The developer's claim therefore remains
+      INFERRED BY CONSTRUCTION — but this reviewer added a MEASURED structural fact that is
+      stronger: in run (3), ExecutionVideoContractEscalationTest reported 2 FAILED with no Spring
+      context, so this story's tier CAN NEVER REPORT BUILD SUCCESSFUL by skipping. Two deliberate,
+      unconditional, non-Spring reds sit in it permanently. That closes the 10.18a green-file shape
+      at the build level, though not at the assertion level — see LOW-2.
+
+  backend_full_suite:
+    command: ./gradlew --no-daemon test --continue (from wt/10.15)
+    result: HUNG. NOT GREEN AND NOT RED. 7 OF 7 ACROSS THE EPIC.
+    detail: >-
+      Reached 413 passed / 22 failed / 1 skipped across 126 classes in ~10 minutes, then stopped.
+      Last result StudioOverloadIT > ordinaryRestTrafficContinuesWhileEveryStudioBoundIsUnderPressure
+      PASSED — the same boundary the developer reported twice and the same one recorded on 10.18a.
+      jcmd Thread.print on the worker (pid 5173): "Test worker" #1 BLOCKED (on object monitor),
+      "waiting to lock <0x00000007c2ce78c8> (a org.testcontainers.jdbc.ContainerDatabaseDriver)"
+      inside ContainerDatabaseDriver.connect under Hibernate's JdbcEnvironmentInitiator; and
+      "HikariPool-4 connection adder" #118 daemon TIMED_WAITING (sleeping) at
+      JdbcDatabaseContainer.createConnection:257 → ContainerDatabaseDriver.connect:140,
+      "- locked <0x00000007c2ce78c8>". Same monitor id, same HikariPool-4 ordinal. MED-2 exactly.
+      The developer's 184-vs-126 explanation is supported: this reviewer's independent run also
+      reached 126 classes with the IDENTICAL failing set, so the class count measures the hang and
+      not the change.
+
+  backend_failing_set_compared:
+    command: grep ' FAILED$' | sed 's/ >.*//' | sort | uniq -c
+    result: THE DEVELOPER'S LIST, CLASS BY CLASS AND COUNT BY COUNT
+    detail: >-
+      RateLimitFilterIT 4, ScheduleAuthzIT 2, ReportsPreviewIT 2, ReportsExecutionIT 2,
+      ReportsCrudIT 2, CheckCrudIT 2, BulkDeleteIT 2, ReportsDuplicateIT 1,
+      ReportDeliveryDispatcherIT 1, IdentityCacheIT 1, CsiFetchIT 1, BffFilterUnauthIT 1,
+      BffFilter503IT 1 — 13 classes, 22 failures, ZERO in com.citi.put.checks.studio. The epic's
+      recorded baseline is 14 classes; this reached 13 before hanging, and like the developer this
+      reviewer reports that as a comparison against a partial measurement.
+
+  backend_story_packages:
+    command: >-
+      ./gradlew --no-daemon test --continue --rerun-tasks --tests
+      'com.citi.put.checks.studio.evidence.*' --tests '*StudioContractTest'
+      --tests '*ExecutionSnapshotMapperTest' --tests '*EvidenceRetentionTest'
+      --tests '*StudioAuthorizationIT' --tests '*StudioApiIT'
+    result: 125 PASSED / 2 FAILED / 2 SKIPPED — THE DEVELOPER'S FIGURE, REPRODUCED TWICE
+    detail: >-
+      The two failures are ESC-1 and ESC-2, deliberately red. The two skips are AC-18b and AC-19b,
+      blocked. Zero unintended failures. Run once mid-review and once after every mutation was
+      restored, with --rerun-tasks, to confirm the tree is back to the shipped state.
+
+  backend_static_gates:
+    command: ./gradlew --no-daemon --rerun-tasks spotlessCheck checkstyleMain checkstyleTest spotbugsMain
+    result: BUILD SUCCESSFUL — 14 actionable tasks, 14 executed
+    detail: >-
+      Forced with --rerun-tasks rather than accepted UP-TO-DATE. backend/build.gradle.kts is ABSENT
+      from the whole diff, so no coverage threshold was lowered and no jacocoExcludes entry added.
+      Coverage itself is UNVERIFIED — `check` depends on jacocoTestCoverageVerification which
+      depends on :test, and :test never completes.
+
+  runner_gates:
+    command: npm test; npm run test:deployment; npm run check:pins; npm run lint; npm run type-check
+    result: 1028 / 22 / 50 — THE EPIC'S RECORDED BASELINE, EXACTLY
+    detail: >-
+      npm test 927 passed | 22 skipped, 47 files passed | 1 skipped (48). test:deployment 101
+      passed, 2 files. Combined 1028 passed / 22 skipped / 50 files. check:pins OK with the one
+      recorded NOT ASSERTED line (dist image null, ED-05). lint clean. confinement.test.ts 18/18
+      standalone. type-check RED with the single recorded error —
+      test/fixtures-tier/deadline-cleanup.test.ts(550,40) TS2345, 'redactor' missing from
+      SnapshotOptions — and PROVEN pre-existing: that file is untouched by this story's diff and is
+      byte-identical at the merge base.
+
+  probe_matrix_silent_subtraction:
+    command: >-
+      delete one row from each of the story's three case tables in turn and re-run the owning class
+    result: TWO OF THREE MATRICES DO NOT NOTICE — SHAPE 18
+    detail: >-
+      AC-7 evidenceStates(), remove Arguments.of("UNAVAILABLE", 404) → ExecutionVideoEvidenceIT
+      BUILD SUCCESSFUL, 13 passed, 0 failed. AC-1/AC-3 identities(), remove "a principal on a
+      different CSI" (the wrong-CSI denial) → ExecutionVideoAuthorizationIT BUILD SUCCESSFUL,
+      12 passed, 0 failed; theMatrixContainsBothAnswers is satisfied by the surviving
+      no-ownership row. AC-13 cases(), remove the "suffix" row →
+      theFixtureIsLargerThanEveryBoundaryTheCaseTableUses RED. All three restored, tree clean.
+
+  probe_ac7_two_surface_claim:
+    command: read everyEvidenceStateIsAnsweredAndBothSurfacesAgree; observe its message under M8
+    result: THE ASSERTION IS NOT A COMPARISON — SHAPE 16'S SUB-FORM, MEASURED
+    detail: >-
+      The body asserts snapshot.video.status == the case-row literal, and separately
+      answer.getStatusCode() == another case-row literal. Nothing relates the two surfaces. Under
+      M8 the printed failure was "[the snapshot route and this route must not drift apart about
+      evidence state] expected: \"EXPIRED\" but was: \"AVAILABLE\"" — a SINGLE-surface value
+      mismatch narrated as a cross-surface drift. Non-vacuous in effect, because both expectations
+      are pinned in one row, so a drift surfaces through the status assertion; but AC-7's stated
+      mechanism is not what was built.
+
+# ─────────────────────────────────────────────────────────────────────────────
+developer_claims_verified:
+
+  - claim: The pin was green on arrival at d1a987663b… (10.18a's step-1 anchor)
+    verdict: TRUE — the digest of the document at 39939a213 equals BASE_SHA256 at that commit
+
+  - claim: Re-anchored to 310d3c984b… in the same change as the edit
+    verdict: TRUE — 761a88830 carries both; confinement.test.ts 18/18 at HEAD
+
+  - claim: The marker removed was the LAST ONE in the document
+    verdict: TRUE — zero operation-level markers at HEAD; one at 39939a213, on this route
+
+  - claim: §13's row is MEASURED, 6/15 → 15/15 and 9/13 → 13/13, escalation 0/2 both sides
+    verdict: TRUE — all three suites reproduced on both sides by this reviewer
+
+  - claim: Eight pre-Epic-10 operations carry no attribution, so @po's universal is false
+    verdict: TRUE — 18 operations, 10 with, 8 without, and the eight are exactly those named
+
+  - claim: M12 reddens on BYTES with headers still correct
+    verdict: TRUE — fails at :186, the body assertion, with a one-byte expected/actual mismatch
+
+  - claim: M15 reddens on the instrumented count, bytes identical
+    verdict: TRUE — one red, 8 siblings green, 65536L vs 1200000L
+
+  - claim: M8 reddens with a 200 carrying 1310721 bytes
+    verdict: TRUE — recorded message reproduced verbatim
+
+  - claim: M17's failure message tells the reader a manifest edit reddened it
+    verdict: TRUE — reproduced verbatim including the FOC-class instruction
+
+  - claim: All files restored byte-identically, hashes taken from the shipped files
+    verdict: TRUE — five digests independently confirmed after this reviewer's own restores
+
+  - claim: Nineteen mutations run, none survived
+    verdict: PARTIALLY VERIFIED — eight re-applied here, eight reproduced. The other eleven are
+      taken on the developer's record, which has been accurate everywhere it was checked.
+
+  - claim: The gate-assertion files are not Spring/Testcontainers-annotated so they run unconditionally
+    verdict: TRUE BY CONSTRUCTION — all five non-Spring classes carry no conditional-skip mechanism
+      of any kind. NOT confirmed by a completed absent-Docker experiment; this reviewer's three
+      attempts to break the prerequisite failed, the same as the developer's two.
+
+  - claim: The backend hung, failing set identical on both runs, zero in studio
+    verdict: TRUE AND INDEPENDENTLY REPRODUCED — 413/22/1 at the same class boundary, the same
+      13-class 22-failure list, and the MED-2 thread-dump pair on the same monitor id
+
+  - claim: The 184-vs-126 class-count difference measures the hang, not the change
+    verdict: SUPPORTED — this reviewer's independent run also reached 126 with the identical
+      failing set
+
+  - claim: npm run type-check is RED and pre-existing
+    verdict: TRUE — one error, in a file this story does not touch, byte-identical at the base
+
+  - claim: Runner 1028 / 22 / 50, unchanged
+    verdict: TRUE — reproduced exactly
+
+  - claim: AC-1's and AC-4's absolute claims are not decidable here because of the ED-02 bypass
+    verdict: TRUE AND CORRECTLY SCOPED — BffSessionAuthenticationFilter carries a hardcoded
+      "platform-bypass" identity with roles [checks-admin, platform-admin] and a TODO to remove it,
+      so a header-less request really is answered with an admin identity. Writing every claim
+      comparatively against the snapshot route is the only decidable form on this branch, it is what
+      §9.1 actually requires, and the absolute half is correctly AC-19b's and correctly skipped.
+      theMatrixContainsBothAnswers keeps the comparison from being satisfied by one answer for all.
+
+  - claim: Nothing was cut, including both of @po's cut candidates
+    verdict: TRUE — the x-implemented-by both-ways guard ships with its scratch-copy control, and
+      AC-13's fixtureSize > max(boundaries) guard ships and demonstrably fires
+
+# ─────────────────────────────────────────────────────────────────────────────
+top_issues:
+
+  - id: MED-1
+    severity: medium
+    title: >-
+      Two of the story's three case matrices would not notice a row being deleted — including the
+      one carrying AC-1's wrong-CSI denial. The epic's eighteenth shape, measured, in a story that
+      applied its remedy to the third matrix
+    detail: >-
+      Measured in both directions rather than reasoned. Removing Arguments.of("UNAVAILABLE", 404)
+      from ExecutionVideoEvidenceIT.evidenceStates() leaves the class BUILD SUCCESSFUL at 13 passed;
+      the only observable change is the test count. Removing the "a principal on a different CSI"
+      row from ExecutionVideoAuthorizationIT.identities() leaves that class BUILD SUCCESSFUL at
+      12 passed — and that row is the wrong-CSI denial, the single most load-bearing identity in
+      AC-1. theMatrixContainsBothAnswers does not catch it, because the surviving
+      no-ownership-at-all row still produces the 403 it looks for. By contrast, removing a row from
+      ExecutionVideoRangeIT.cases() turns theFixtureIsLargerThanEveryBoundaryTheCaseTableUses RED,
+      because that matrix carries hasSize(6) plus a computed max. So the author knew the hazard and
+      applied the remedy to one matrix of three. No mutation in the story's table would have found
+      this: every one of them reddens through the surviving rows.
+      This is not a defect in what ships — all rows are present today and AC-1 and AC-7 are
+      correctly implemented. It is a defect in what would notice a future subtraction, which is
+      exactly what this epic's catalogue exists for.
+    suggested_owner: dev
+    suggested_action: >-
+      One assertion per matrix. For AC-7 the remedy is free and points at a production carrier:
+      com.citi.put.checks.studio.dto.VideoEvidence declares PROCESSING, AVAILABLE, FAILED,
+      UNAVAILABLE and EXPIRED as public constants, so assert set equality between the matrix's state
+      column and those five — both directions, not a floor. For AC-1 there is no such carrier, so
+      the analogue is hasSize(6) plus a named assertion that the wrong-CSI row and the null-CSI row
+      are present and each produced a denial.
+    refs: [ExecutionVideoEvidenceIT.evidenceStates, ExecutionVideoAuthorizationIT.identities]
+
+  - id: LOW-1
+    severity: low
+    title: >-
+      AC-7's "the two surfaces are compared in the same test" is not implemented as a comparison,
+      and its failure message misdescribes what failed
+    detail: >-
+      everyEvidenceStateIsAnsweredAndBothSurfacesAgree asserts the snapshot route's video.status
+      against the case-row literal, then asserts the video route's status code against a second
+      case-row literal. No assertion relates the two surfaces to each other. Measured under M8, the
+      printed failure was "[the snapshot route and this route must not drift apart about evidence
+      state] expected: \"EXPIRED\" but was: \"AVAILABLE\"" — a single-surface mismatch wearing a
+      cross-surface message, which is this epic's sixteenth shape in its documented sub-form. The
+      conjunction is not vacuous, because both expectations are pinned in one row, so a genuine
+      drift does surface through the status assertion. The cost is diagnostic, and the claim in
+      AC-7 is stronger than the code.
+    suggested_owner: dev
+    suggested_action: >-
+      Derive the expected status from the snapshot's published state rather than from the case-row
+      literal, so the assertion genuinely relates the two surfaces; keep the per-state table for
+      coverage.
+    refs: [ExecutionVideoEvidenceIT.everyEvidenceStateIsAnsweredAndBothSurfacesAgree]
+
+  - id: LOW-2
+    severity: low
+    title: >-
+      The story's PASSED evidence is environment-conditional while its BLOCKED halves are
+      unconditional — 10.18a's direction again, mitigated but not closed
+    detail: >-
+      Four of nine test classes carry @Testcontainers(disabledWithoutDocker = true):
+      ExecutionVideoAuthorizationIT (13), ExecutionVideoEvidenceIT (14), ExecutionVideoRangeIT (9),
+      ExecutionVideoStoreBindingIT (2) — 38 tests, and EVERY byte, Range, authorization,
+      evidence-state, partiality and store-instrument assertion in the story lives in them. With
+      Docker absent they skip silently. Two things keep this off medium, both measured: the five
+      non-Spring classes carry no conditional-skip mechanism at all, and
+      ExecutionVideoContractEscalationTest fails unconditionally, so the tier can never report
+      BUILD SUCCESSFUL by skipping. And the annotation is inherited repo convention — 30 of 112 IT
+      classes use it — not this story's invention. Recorded so the epic can see that the direction
+      10.18a's HIGH finding named is still the default on the backend side.
+    suggested_owner: devops
+    suggested_action: >-
+      Epic-level: make absent Docker FAIL the backend test task unless an explicit documented
+      opt-out is set, or report the skip count against a floor in CI. Not this story's to fix.
+    refs: [ExecutionVideoRangeIT, ExecutionVideoEvidenceIT, ExecutionVideoAuthorizationIT]
+
+  - id: LOW-3
+    severity: low
+    title: FakeVideoObjectStore is an unguarded @Component in src/main/java
+    detail: >-
+      The ED-03 stand-in is annotated @Component with no @Profile and no
+      @ConditionalOnMissingBean, so it is the VideoObjectStore bean in every profile including
+      production — where the shipped route would answer 404 for every execution. This is deliberate
+      and declared (AC-18a), and ExecutionVideoStoreBindingIT asserts it is the injected bean, which
+      is the right guard for today. It becomes a hazard at 10.18: a real client added alongside it
+      collides or is shadowed depending on bean ordering.
+    suggested_owner: dev
+    suggested_action: >-
+      Flag in 10.18's scope. A @Profile("!prod") or @ConditionalOnMissingBean on the fake makes the
+      replacement mechanical and keeps AC-20's binding assertion meaningful.
+    refs: [FakeVideoObjectStore]
+
+  - id: LOW-4
+    severity: low
+    title: >-
+      runnerEvidenceStillRequiresEveryComponentTheJavaRecordDeclares asserts a stronger invariant
+      than AC-23 states, over a record this story does not own — FOC-04's shape again
+    detail: >-
+      AC-23 says "RunnerEvidence.required is still [videoKey, manifestKey, state]" (superseded by
+      10.18a's O-14 landing to the four-key form). What the test asserts is that `required` equals
+      the FULL set of Java record components. Those coincide today. A later story that adds an
+      OPTIONAL component to RunnerEvidence reddens this story's test without touching its subject —
+      the same blameless-red shape @po flagged for the manifest reader, and the same shape FOC-04
+      names. The same applies to videoEvidenceStillRequiresExactlyItsNonNullableProperties, which
+      asserts required ⟺ not-nullable rather than the literal [status, partial]. Both weaker forms
+      are defensible as diagnostics — the byte pin is what actually holds "nothing else moved", and
+      M19 proves the pin — but the criterion's words and the code's claim differ.
+    suggested_owner: dev
+    suggested_action: >-
+      Give both assertions the treatment the manifest reader already has: name the file, the schema
+      and both sets in the failure message, so a red is diagnosable as "a neighbour changed the
+      record" rather than "this story broke the contract".
+    refs: [ExecutionVideoContractTest]
+
+  - id: INFO-1
+    severity: low
+    title: >-
+      theSetOfOperationsCarryingAnAttributionIsPinnedBothWays's second assertion says "the total,
+      read from the document" and reads the pin's own size
+    detail: >-
+      hasSize(OPERATIONS_CARRYING_ATTRIBUTION.size()) is redundant with the isEqualTo above it and
+      the as() message is false — nothing there reads a total from the document. Harmless. Related:
+      OPERATIONS_CARRYING_ATTRIBUTION is a deliberate second copy whose provenance nothing enforces,
+      which is the epic's thirteenth shape; the javadoc cites the remedy but a future DRY refactor
+      deriving the set from the document would silently convert the guard into a tautology, exactly
+      as it did on 10.10 round 2. One import assertion closes it.
+    suggested_owner: dev
+    suggested_action: Correct the message; consider the import assertion 10.10 round 2 concluded with.
+    refs: [ExecutionVideoContractTest]
+
+  - id: LOW-5
+    severity: low
+    title: >-
+      The permanent reds that keep this tier off a false green also make its exit code
+      informationless — the anti-shape-19 argument cuts both ways
+    detail: >-
+      Cross-checked against the twentieth shape's companion OPS note, landed the same day by
+      10.18b's gate. ExecutionVideoContractEscalationTest is red by design and permanently, which is
+      correct (ESC-1 and ESC-2 are Class C and must not be taken here) and which this reviewer used
+      as the measured mitigation for LOW-2: two unconditional non-Spring reds mean this tier can
+      never report BUILD SUCCESSFUL by skipping. The same fact means the :test task's exit code
+      carries no information for this story's packages — a NEW red is invisible to a pipeline that
+      reads exit codes — and the natural accommodation, continue-on-error, reinstates shape 19
+      through the front door. Nobody has stated what CI is supposed to read instead. This is not
+      this story's invention; it is the epic's deliberate escalation convention meeting a pipeline
+      that only has one bit.
+    suggested_owner: devops
+    suggested_action: >-
+      For any package carrying a deliberate red, have CI compare a per-class passed/failed/skipped
+      count against a frozen baseline rather than reading the task's exit code — that also closes
+      LOW-2's skip half in the same instrument.
+    refs: [ExecutionVideoContractEscalationTest]
+
+  - id: BUILD-1
+    severity: medium
+    title: The backend gate hangs — 7 of 7 across the epic, and coverage is therefore unverified
+    detail: >-
+      Reproduced by this reviewer 1 of 1 at 413/22/1, same class boundary, MED-2 thread-dump pair on
+      the same monitor. Carried, not owned by this story: the baseline hung on this branch before
+      the first commit, the story touches no file that could move it, and its own packages run to
+      completion at 125/2/2. Consequence to state plainly: jacoco coverage on this story's new
+      surfaces is NOT verified, because `check` never reaches jacocoTestCoverageVerification when
+      :test does not complete. What IS verified is that no threshold was lowered and no exclude
+      added — backend/build.gradle.kts is absent from the diff.
+    suggested_owner: devops
+    suggested_action: >-
+      Unchanged from 10.14/10.17/10.18a. Detect on the pair — a thread named "HikariPool-N
+      connection adder" with a JdbcDatabaseContainer.createConnection frame AND a
+      "locked <…ContainerDatabaseDriver>" line — never on the Test worker's thread state.
+    refs: [MED-2]
+
+# ─────────────────────────────────────────────────────────────────────────────
+twentieth_shape_hunt:
+  result: >-
+    HUNTED, NO NEW SHAPE FOUND. (A #20 was catalogued the same day from 10.18b's gate,
+    independently of this review; its companion OPS note is cross-checked here as LOW-5.)
+  detail: >-
+    Three fresh INSTANCES of catalogued shapes, all found by probing rather than reading, and all
+    measured: two of shape 18 (MED-1, the AC-7 and AC-1 matrices) and one of shape 16's sub-form
+    (LOW-1, AC-7's drift message). Nothing here is a mechanism the catalogue does not already
+    describe. Two things checked and cleared that would have been candidates: the document's prose
+    mention of x-not-yet-implemented at line 54 is shape 14's trap and the story closes it properly
+    (key-position regex plus a control that asserts the prose is still there); and
+    ExecutionVideoContractEscalationTest's premise assertions ("the sibling routes really do declare
+    both", "the three statuses that are NOT this case are declared") are real non-vacuity controls,
+    not decoration.
+  worth_adding_to_the_catalogue_as_a_diagnostic: >-
+    A story can ship the remedy for a catalogued shape on one artefact and not on its siblings, and
+    a mutation table cannot see the gap — every mutation reddens through the surviving rows, so the
+    table reads "19 of 19, none survived" while two matrices remain unguarded. When a story applies
+    a named remedy once, ask where else the same construct occurs in the same story. This is the
+    second time the epic has recorded that pattern (10.14's shape 14 was "the author already knew
+    the hazard and applied the remedy one assertion too narrowly").
+
+unreachable_criteria:
+  - id: AC-18b
+    gate: ED-03 (status open), spike SPK-03, owner 10.18, proof 10.19
+    state: SKIPPED, NEVER PASSED — unconditional @Disabled with a throwing body; cannot self-arm
+  - id: AC-19b
+    gate: ED-06 (status open), spike SPK-02, owner 10.18, proof 10.19
+    state: SKIPPED, NEVER PASSED — unconditional @Disabled with a throwing body; cannot self-arm
+  - id: ESC-1
+    state: RED BY DESIGN — getExecutionVideo declares no 401 and no 403; Class C, @architect's ruling
+  - id: ESC-2
+    state: RED BY DESIGN — no status declared for an unreachable store; 503 offered as a candidate
+  - id: AC-26 backend half
+    state: >-
+      NO RESULT. The full suite hung for the developer twice and for this reviewer once. Coverage
+      unverified for the same reason.
+
+required_before_merge: []
+
+recommended_not_blocking:
+  - >-
+    MED-1 — close the two unguarded matrices. Cheap, and the AC-7 half points at a production
+    carrier that already exists. Worth doing before 10.16 consumes this route.
+  - >-
+    LOW-1 — make AC-7's cross-surface assertion a comparison, or reword the message.
+  - >-
+    LOW-3 — carry into 10.18's scope so the real Sonic client can replace the fake mechanically.
+  - >-
+    AC-21's deviation is @po's call, not @dev's. Either keep the set-equality form (recommended —
+    it is true and it catches the named defect) or widen the manifest so the universal becomes true.
+
+do_not_do:
+  - >-
+    Do not "fix" the x-implemented-by guard by attributing the eight pre-Epic-10 operations. The
+    developer's refusal is correct and the count was independently verified.
+  - >-
+    Do not report the backend as green. It is HUNG. A run short of its baseline count is a hang.
+  - >-
+    Do not re-anchor BASE_SHA256 anywhere but in the PR that edits the document. 10.11c is FOC-06
+    step 3 and inherits 310d3c984b… as its green-on-arrival value.
+  - >-
+    Do not adjust the gate-still-shut assertions if they redden. Read the failure message: it tells
+    you whether @pm moved the manifest or the gate moved, and the former is a FOC-class finding.
+  - >-
+    Do not widen MEDIAN_TOLERANCE_MS for the seek-measurement flake. It is 10.16's with @po's three
+    constraints and this story correctly absorbed nothing.
+
+final_decision: >-
+  CONCERNS — merge. The route is correct, the contract edit is exactly the four declared edits and
+  nothing else, FOC-06 step 2 is executed properly with the pin green on arrival and re-anchored in
+  the same commit, ADR-002 §13's row is measured on both sides and reproduces, and every one of the
+  eight mutations this reviewer re-applied reddened the named test — four of them with the recorded
+  failure message verbatim. The developer's honesty is the strongest thing in this record: it
+  refused a wording it could not make true and said so, labelled an incomplete experiment as
+  inferred rather than claiming it, recorded a mutation that reddens more than its criterion
+  predicts rather than trimming the report, and reported a hung gate as hung.
+  What holds it at CONCERNS is MED-1: two case matrices behind AC-1 and AC-7 that would not notice
+  a row disappearing, proved by deleting one from each and watching the build stay green — while
+  the third matrix in the same story catches exactly that. Nothing ships broken; what is missing is
+  the thing that would notice if it later did. BUILD-1 is the epic's, not this story's, and it
+  leaves the backend effect and the coverage numbers unverified — which is the honest outcome, not
+  a pass.

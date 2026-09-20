@@ -1,0 +1,22 @@
+{
+  "name": "argument-count",
+  "expectedClass": "ARGUMENT_COUNT",
+  "description": "goto() requires a URL argument.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "await page.goto();"
+      }
+    ]
+  }
+}

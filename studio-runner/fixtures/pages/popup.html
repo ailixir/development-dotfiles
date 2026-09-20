@@ -1,0 +1,28 @@
+<!doctype html>
+<!--
+  Controlled fixture page for story 10.12 AC-15: an unsupported multi-page workflow.
+
+  V1 records and drives exactly one page (architecture §5.2). This page opens a second one the
+  moment it loads, which is the shape the criterion exists for: the run must close the popup,
+  report an unsupported-workflow code, and continue on neither page — rather than carrying on
+  against a page the recording no longer follows.
+
+  Deliberately NOT in `fixtures/reference/manifest.json`: that manifest is the pinned syntax
+  reference, compared exactly by `src/compat`, and adding a page to it would bump
+  SYNTAX_REFERENCE_VERSION and make every confirmed artifact incompatible. A test page is not a
+  language change.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Checks — Popup</title>
+  </head>
+  <body>
+    <h1 role="heading" aria-level="1">Popup</h1>
+    <p><a id="open" role="link" href="/home.html" target="_blank">Open in a new window</a></p>
+    <script>
+      // Immediately, so the run has a popup to refuse before its first operation completes.
+      window.open('/home.html', '_blank');
+    </script>
+  </body>
+</html>

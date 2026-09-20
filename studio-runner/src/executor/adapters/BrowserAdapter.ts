@@ -1,0 +1,68 @@
+import type {
+  ActionOptions,
+  ClickOptions,
+  ContainTextOptions,
+  GotoOptions,
+  HaveUrlOptions,
+  LocatorChain,
+  PressOptions,
+  TimeoutOptions,
+} from '../operations.js';
+
+/**
+ * The seam between the trusted executor and Playwright (story 10.12 supplies the real
+ * implementation; every test here uses a fake).
+ *
+ * Deliberately minimal and Playwright-free: no Playwright type appears in the validator or the
+ * executor, so neither can grow a capability by accident. Matchers arrive as data, never as code:
+ * a regular expression is `{source, flags}` and the adapter is responsible for compiling it.
+ */
+
+/** Opaque handle returned by `locate`. The executor never inspects it. */
+export interface LocatorHandle {
+  readonly kind: 'locator-handle';
+}
+
+/** A text/URL matcher after resolution: either a concrete string or a safe pattern. */
+export type ResolvedMatcher =
+  | { readonly kind: 'string'; readonly value: string }
+  | { readonly kind: 'pattern'; readonly source: string; readonly flags: string };
+
+export interface BrowserAdapter {
+  goto(url: string, options?: GotoOptions): Promise<void>;
+  waitForURL(url: ResolvedMatcher, options?: GotoOptions): Promise<void>;
+  locate(chain: LocatorChain): Promise<LocatorHandle>;
+  click(target: LocatorHandle, options?: ClickOptions): Promise<void>;
+  fill(target: LocatorHandle, value: string, options?: ActionOptions): Promise<void>;
+  press(target: LocatorHandle, key: string, options?: PressOptions): Promise<void>;
+  check(target: LocatorHandle, options?: ActionOptions): Promise<void>;
+  uncheck(target: LocatorHandle, options?: ActionOptions): Promise<void>;
+  hover(target: LocatorHandle, options?: ActionOptions): Promise<void>;
+  selectOption(target: LocatorHandle, value: string, options?: ActionOptions): Promise<void>;
+  expectVisible(target: LocatorHandle, options?: TimeoutOptions): Promise<void>;
+  expectContainText(
+    target: LocatorHandle,
+    expected: ResolvedMatcher,
+    options?: ContainTextOptions,
+  ): Promise<void>;
+  expectValue(
+    target: LocatorHandle,
+    expected: ResolvedMatcher,
+    options?: TimeoutOptions,
+  ): Promise<void>;
+  expectUrl(expected: ResolvedMatcher, options?: HaveUrlOptions): Promise<void>;
+  expectTitle(expected: ResolvedMatcher, options?: TimeoutOptions): Promise<void>;
+}
+
+/**
+ * Resolves declared references at the moment of use (AC-13).
+ *
+ * `knownValues` exists so the executor can build a redactor without ever holding the values it
+ * redacts anywhere else; it is the only bulk read of secret material and its result never leaves
+ * the redactor.
+ */
+export interface ValueResolver {
+  variable(name: string): string;
+  secret(id: string): string;
+  knownValues(): readonly string[];
+}

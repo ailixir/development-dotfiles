@@ -1,0 +1,24 @@
+{{- if .Values.studioRunner.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "put-checks.studioRunner.fullname" . }}
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.studioRunner.selectorLabels" . | nindent 4 }}
+spec:
+  # ClusterIP only, and no Ingress anywhere names this Service: architecture §8.4's internal
+  # routes are not exposed publicly, and the MFE never talks to the runner.
+  type: {{ .Values.studioRunner.service.type }}
+  ports:
+    - name: http
+      # The one key. `STUDIO_RUNNER_PORT` on the pod and `STUDIO_RUNNER_BASE_URL` on the worker
+      # are rendered from this same value, which is what closes the 8080/8090 disagreement
+      # between `application.yml` and `studio-runner/src/server/config.ts` — by removing the
+      # second derivation rather than by editing one of the two defaults into agreement.
+      port: {{ .Values.studioRunner.service.port }}
+      targetPort: http
+      protocol: TCP
+  selector:
+    {{- include "put-checks.studioRunner.selectorLabels" . | nindent 4 }}
+{{- end }}

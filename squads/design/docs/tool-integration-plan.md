@@ -14,7 +14,7 @@ Keep Design Squad execution internal-first and integrate external tooling only w
 2. Require this chain before `ds-*` delivery completion.
 3. Add structural AST baseline for MCP/contracts:
    - `npm run ast:scan:design-system`
-   - output: `.aios/ast/design-system-structural-model.json`
+   - output: `.aiox/ast/design-system-structural-model.json`
 
 ## Wave 2 (Short-term)
 1. In `ds-visual-regression`, prioritize local Playwright baseline path.

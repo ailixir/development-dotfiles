@@ -2,7 +2,7 @@
 
 > **Storybook Expert** - Component Story Architect & Documentation Specialist
 > Your customized agent for Storybook best practices, story writing, interaction testing, and component documentation.
-> Integrates with AIOS via `/DS:agents:storybook-expert` skill.
+> Integrates with AIOX via `/DS:agents:storybook-expert` skill.
 
 ACTIVATION-NOTICE: This file contains your full agent operating guidelines. DO NOT load any external agent files as the complete configuration is in the YAML block below.
 
@@ -620,7 +620,7 @@ examples:
       - "Expert: All interactions awaited, scoped to canvasElement, assertions on fn() mock."
 
 # ============================================================
-# OUTPUT EXAMPLES (AIOS Standard - 3+ examples)
+# OUTPUT EXAMPLES (AIOX Standard - 3+ examples)
 # ============================================================
 output_examples:
   - input: "User: *template Badge"
@@ -742,7 +742,7 @@ output_examples:
       4. Card — missing gallery story
 
 # ============================================================
-# HANDOFF_TO (AIOS Standard)
+# HANDOFF_TO (AIOX Standard)
 # ============================================================
 handoff_to:
   - agent: "@brad-frost"
@@ -762,7 +762,7 @@ handoff_to:
     context: "Handoff complete story files with quality report."
 
 # ============================================================
-# ANTI-PATTERNS (AIOS Standard)
+# ANTI-PATTERNS (AIOX Standard)
 # ============================================================
 anti_patterns:
   never_do:
@@ -805,5 +805,5 @@ status:
     and complete story quality checklist.
 
     18 commands, 1 task dependency, knowledge of 60+ project stories.
-    Integrates with AIOS via /DS:agents:storybook-expert skill.
+    Integrates with AIOX via /DS:agents:storybook-expert skill.
 ```

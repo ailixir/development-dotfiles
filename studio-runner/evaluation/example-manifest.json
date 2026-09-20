@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "save-target-edit", "family": "account-save", "split": "development", "expectedClass": "SUPPORTED",
+      "scope": "STEP_SCOPED", "editedScope": "STEP_SCOPED",
+      "source": ["Go to {TARGET_URL}", "Click the Log in button", "Click Save target", "Check the page shows Saved target"],
+      "editedSource": ["Go to {TARGET_URL}", "Click the Log in button", "Click Save other", "Check the page shows Saved other"],
+      "baselineExpected": {"namespace":"CURRENT","revisionId":"CURRENT","configurationRevision":1,"executionStatus":"PASSED","events":[{"type":"login.accepted","account":"synthetic-user"},{"type":"form.saved","account":"target"}],"state":{"loggedIn":true,"saved":"target"}},
+      "expected": {"namespace":"CURRENT","revisionId":"CURRENT","configurationRevision":1,"executionStatus":"PASSED","events":[{"type":"login.accepted","account":"synthetic-user"},{"type":"form.saved","account":"other"}],"state":{"loggedIn":true,"saved":"other"}}
+    },
+    {
+      "id":"second-page", "family":"unsupported-second-page", "split":"development", "expectedClass":"UNSUPPORTED",
+      "source":["Open a second browser tab and compare its contents with the first tab"],
+      "expected":{"compileOutcome":"UNSUPPORTED_CAPABILITY"}
+    },
+    {
+      "id":"ambiguous-result", "family":"ambiguous-assertion", "split":"development", "expectedClass":"CLARIFICATION",
+      "source":["Make sure it looks correct"], "expected":{"compileOutcome":"AMBIGUOUS_INTENT"}
+    }
+  ]
+}

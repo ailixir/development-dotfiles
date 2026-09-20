@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Box, Stack, TextField, useTheme, useMediaQuery } from '@mui/material';
 import CommandPalette from '@/components/home/CommandPalette';
-import HelpDialog from './HelpDialog';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { PlatformSidebar } from '@put/core-components';
-import { useLayout } from '../LayoutProvider';
-import { registerChecksNavigation, getCurrentPageId } from '../../../utils/navigation/navigationSetup';
 import GlobalSearch from '@/components/home/GlobalSearch';
+import { Box, Stack, useMediaQuery, useTheme } from '@mui/material';
+import { PlatformSidebar } from '@put/core-components';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { getCurrentPageId, registerChecksNavigation } from '../../../utils/navigation/navigationSetup';
+import { useLayout } from '../LayoutProvider';
+import HelpDialog from './HelpDialog';
 import Notifications from './Notifications';
 
 interface ChecksLayoutProps {
@@ -66,13 +66,8 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
       e.preventDefault();
       navigate('/checks/create');
     }
-    if (e.key.toLowerCase() === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-      // simple Go home
-      e.preventDefault();
-      navigate('/checks');
-    }
     // Reduced motion preference: no-op shortcut but show how we'd adapt animations if needed
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);
@@ -92,6 +87,30 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Box
+        component="a"
+        href="#checks-main"
+        onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+          // A hash href moves the viewport but not focus, and jsdom does not even do that. The
+          // landmark carries tabIndex={-1} precisely so it can take focus here.
+          event.preventDefault();
+          document.getElementById('checks-main')?.focus();
+        }}
+        sx={{
+          position: 'fixed',
+          left: 16,
+          top: -48,
+          zIndex: 1300,
+          px: 2,
+          py: 1,
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+          borderRadius: 1,
+          '&:focus': { top: 16 },
+        }}
+      >
+        Skip to main content
+      </Box>
       {shouldShowSidebar && (
         <PlatformSidebar
           key={`checks-sidebar-${currentPage}`}
@@ -105,6 +124,8 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
       
         <Box
         component="main"
+        id="checks-main"
+        tabIndex={-1}
         sx={{
           flexGrow: 1,
           backgroundColor: theme.palette.background.default,
@@ -125,7 +146,6 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
           },
         }}
       >
-          <Box component="div" id="checks-main" tabIndex={-1} sx={{ position: 'absolute', top: 0 }} />
           {showGlobalSearch && (
             <Stack spacing={2} sx={{ mb: 2 }}>
               <GlobalSearch />

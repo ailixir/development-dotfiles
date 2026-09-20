@@ -29,7 +29,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+      "checks.local-dev-auth.enabled=false",
+      "checks.security.bypass.identity-headers=false"
+    })
 @ActiveProfiles("local")
 class ReportsCrudIT {
 
@@ -39,6 +44,8 @@ class ReportsCrudIT {
   @Autowired TestRestTemplate restTemplate;
   @Autowired ObjectMapper objectMapper;
   @Autowired JdbcTemplate jdbc;
+  @Autowired ReportsService reportsService;
+  private String sessionCookie;
 
   @DynamicPropertySource
   static void configureProperties(DynamicPropertyRegistry registry) {
@@ -54,20 +61,21 @@ class ReportsCrudIT {
   @BeforeEach
   void setUp() {
     wireMock.resetAll();
+    sessionCookie = "reports-" + UUID.randomUUID();
     seedUser("reports-test@citi.com");
     wireMock.stubFor(
         get(urlEqualTo("/api/v1/users/me"))
             .willReturn(
                 okJson(
                     """
-        {
-          "user_id": "reports-user",
-          "email": "reports-test@citi.com",
-          "name": "Reports Tester",
-          "roles": ["checks-operator"],
-          "csi_ownership": [{"csi_id": "30001", "role": "owner"}]
-        }
-        """)));
+                    {
+                      "user_id": "reports-user",
+                      "email": "reports-test@citi.com",
+                      "name": "Reports Tester",
+                      "roles": ["checks-operator"],
+                      "csi_ownership": [{"csi_id": "30001", "role": "owner"}]
+                    }
+                    """)));
   }
 
   @Test
@@ -86,9 +94,15 @@ class ReportsCrudIT {
         """;
 
     ResponseEntity<String> createResp = postJson("/api/v1/reports", createBody);
-    assertThat(createResp.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    assertThat(createResp.getStatusCode())
+        .as("Create response: %s", createResp.getBody())
+        .isEqualTo(HttpStatus.CREATED);
     JsonNode created = objectMapper.readTree(createResp.getBody());
     String id = created.path("id").asText();
+    assertThat(created.path("createdBy").asText()).isEqualTo("reports-test@citi.com");
+    wireMock.verify(
+        com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor(
+            urlEqualTo("/api/v1/users/me")));
     assertThat(created.path("name").asText()).isEqualTo("Daily Status Report");
     assertThat(created.path("template").asText()).isEqualTo("standard");
     assertThat(created.path("status").asText()).isEqualTo("DRAFT");
@@ -131,6 +145,46 @@ class ReportsCrudIT {
   }
 
   @Test
+  void firstReportAndDuplicateWritesEstablishTheirAuthorsWithoutAnAsyncEvent() throws Exception {
+    var request =
+        objectMapper.readValue(
+            """
+            {"name":"First report","template":"standard","sections":[],
+             "schedule":{"frequency":"daily"},"recipients":["ops@citi.com"]}
+            """,
+            com.citi.put.checks.reports.dto.ReportRequest.class);
+    String creator = "first-report-" + UUID.randomUUID() + "@citi.com";
+    String copier = "copy-report-" + UUID.randomUUID() + "@citi.com";
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM users WHERE email IN (?,?)", Integer.class, creator, copier))
+        .isZero();
+    var created = reportsService.create(request, firstAuthor(creator));
+    var copy = reportsService.duplicate(created.id(), firstAuthor(copier));
+    assertThat(created.createdBy()).isEqualTo(creator);
+    assertThat(copy.createdBy()).isEqualTo(copier);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM users WHERE email IN (?,?)", Integer.class, creator, copier))
+        .isEqualTo(2);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT created_by FROM reports WHERE id=?", String.class, copy.id()))
+        .isEqualTo(copier);
+  }
+
+  private com.citi.put.checks.security.BffAuthenticationToken firstAuthor(String email) {
+    return new com.citi.put.checks.security.BffAuthenticationToken(
+        new com.citi.put.checks.security.UserIdentity(
+            UUID.randomUUID().toString(),
+            email,
+            "First Author",
+            "Ops",
+            java.util.List.of("checks-admin"),
+            java.util.List.of()));
+  }
+
+  @Test
   void listFiltersByStatus() throws Exception {
     String body =
         """
@@ -145,7 +199,7 @@ class ReportsCrudIT {
         }
         """;
 
-    postJson("/api/v1/reports", body);
+    assertThat(postJson("/api/v1/reports", body).getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
     ResponseEntity<String> filtered = getJson("/api/v1/reports?status=DRAFT");
     assertThat(filtered.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -195,6 +249,9 @@ class ReportsCrudIT {
         """;
 
     ResponseEntity<String> created = postJson("/api/v1/reports", body);
+    assertThat(created.getStatusCode())
+        .as("Create response: %s", created.getBody())
+        .isEqualTo(HttpStatus.CREATED);
     String id = objectMapper.readTree(created.getBody()).path("id").asText();
 
     ResponseEntity<String> paused = postJson("/api/v1/reports/" + id + "/pause", "");
@@ -221,7 +278,7 @@ class ReportsCrudIT {
 
   private HttpHeaders authHeaders() {
     HttpHeaders headers = new HttpHeaders();
-    headers.add("Cookie", "put_session=reports-test-token");
+    headers.add("Cookie", "put_session=" + sessionCookie);
     headers.setContentType(MediaType.APPLICATION_JSON);
     return headers;
   }

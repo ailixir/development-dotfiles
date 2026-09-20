@@ -1,0 +1,22 @@
+{
+  "name": "unsupported-typescript-expect",
+  "expectedClass": "UNSUPPORTED_TYPESCRIPT",
+  "description": "Type arguments on the expect(...) receiver are rejected.",
+  "source": [
+    "Check the page title is \"Dashboard\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Check the page title is \"Dashboard\"",
+        "code": "await expect<string>(page).toHaveTitle('Dashboard');"
+      }
+    ]
+  }
+}

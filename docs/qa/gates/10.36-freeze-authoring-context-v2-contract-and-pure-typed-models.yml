@@ -1,0 +1,50 @@
+schema: 1
+story: '10.36'
+story_title: 'Freeze authoring context v2 contract and pure typed models'
+gate: PASS
+status_reason: 'SEC-001 is resolved: both pure validators reject cross-step local evidence as ORPHAN_STEP_ID while global evidence may reference any existing step. All 12 acceptance criteria are covered and the focused quality gates pass.'
+reviewer: 'Quinn (Test Architect)'
+reviewed_revision: 'working-tree-sha256:d34d8b2e0b074f4448d6c66e258e6519d9de970da1c28b9c0d15709bdc4645c5'
+updated: '2026-09-18T23:06:17Z'
+
+top_issues: []
+waiver: { active: false }
+
+quality_score: 100
+evidence:
+  tests_reviewed: 34
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Step-local evidence must name its owning step, global evidence remains limited to an existing step, secrets remain opaque references, and author-submitted observed provenance is rejected.'
+  performance:
+    status: PASS
+    notes: 'The change is pure bounded validation over at most 100 authoring steps.'
+  reliability:
+    status: PASS
+    notes: 'Java and TypeScript consume the same valid and invalid fixture corpus and now agree on cross-step ownership.'
+  maintainability:
+    status: PASS
+    notes: 'The shared semantic negative fixture prevents recurrence of the original parity drift.'
+
+recommendations:
+  immediate: []
+  future: []
+
+resolved_issues:
+  - id: 'SEC-001'
+    resolution: 'Frontend local-context validation now receives ownerStepId and returns ORPHAN_STEP_ID when nested evidence names a different existing step. The ninth shared invalid fixture exercises the same category in Java and TypeScript.'
+
+review_evidence:
+  cross_step_fixture: 'PASS — structurally complete; evidence.stepId names a real second step, so rejection isolates the local ownership invariant.'
+  scope_behavior: 'PASS — step-local cross-step evidence is rejected as ORPHAN_STEP_ID; moving the same reference to globalContext is accepted because it names an existing request step.'
+  login_flow: 'PASS — six unique steps, opaque password secretRef, and supplied evidence bound to /login, authenticated /home, and /reports/protected states.'
+  focused_frontend: 'PASS — 27/27 tests.'
+  focused_backend: 'PASS — 7/7 tests; Spotless, Checkstyle main/test, and SpotBugs main also pass.'
+  baseline: 'The frozen repository-wide exceptions remain the two EXPECTED RED frontend assertions, two @put/core-components TS2307 errors, and the invalid ESLint preset documented in docs/qa/carry-forward-2026-09-16.md.'
+  coderabbit: 'Unavailable on Darwin; neither a local executable nor ~/.local/bin/coderabbit exists. Manual deep re-review completed under the documented graceful-degradation rule.'

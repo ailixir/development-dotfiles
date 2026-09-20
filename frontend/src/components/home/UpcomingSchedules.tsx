@@ -1,8 +1,8 @@
-import React from 'react';
-import { Box, List, ListItem, ListItemText, Typography, useTheme, Skeleton, Stack, alpha, Alert, Button } from '@mui/material';
-import SectionBox from './SectionBox';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchUpcomingSchedules } from '@/store/slices/dashboardSlice';
+import { Alert, Button, List, ListItem, ListItemText, Skeleton, Stack, Typography, alpha, useTheme } from '@mui/material';
+import React from 'react';
+import SectionBox from './SectionBox';
 
 interface UpcomingSchedulesProps { maxHeight?: number | string }
 

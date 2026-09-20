@@ -12,7 +12,7 @@
 1. `workspace/domains/design-system/*` (tokens, components, guidelines, MCP handlers)
 2. `squads/design/scripts/design-system/*` (manifest sync, metadata generation/validation, MCP checks)
 3. `squads/design/*` (tasks, checklists, workflows, protocols)
-4. `.aios-core/infrastructure/*` (generic validation and dependency tooling)
+4. `.aiox-core/infrastructure/*` (generic validation and dependency tooling)
 
 ### Capabilities fully covered internally
 - DS token catalog and component metadata

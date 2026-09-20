@@ -85,7 +85,7 @@ class DefaultPartitionIT {
     jdbc.update(
         "INSERT INTO ui_tests (id, name, csi_id, environment, browser, steps, created_by,"
             + " created_at, updated_at) "
-            + "VALUES (?, 'DP UITest', ?, 'Production', 'chrome', '[]'::jsonb, ?, ?, ?)",
+            + "VALUES (?, 'DP UITest', ?, 'Production', 'chromium', '[]'::jsonb, ?, ?, ?)",
         uiTestId,
         csiId,
         email,

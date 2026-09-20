@@ -1,4 +1,5 @@
 {{- if .Values.backend.enabled }}
+{{- include "put-checks.springConfig.validate" (index .Values "backend") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -60,8 +61,84 @@ spec:
               containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
           env:
+            {{- include "put-checks.studio.backendEnv" . | nindent 12 }}
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/etc/put-checks/config/application.yaml"
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.backend.springProfile | quote }}
+            # The same single retention key as the worker and the object-store lifecycle
+            # declaration (§6.2, AC-12).
+            - name: STUDIO_EVIDENCE_RETENTION
+              value: {{ .Values.objectStore.retention | quote }}
+            # ── The kill switch and the dispatcher, on the API (story 10.18b, AC-23a) ─────
+            #
+            # The kill switch comes from its own values key. The dispatcher is `false` here as a
+            # LITERAL and not a values key, because the API never dispatches in any configuration:
+            # `StudioDispatcher` is a worker-profile bean, and a values key that appeared to turn
+            # it on would be a control that does nothing — which is worse than no control, because
+            # somebody would rely on it. Written explicitly rather than left to a default because
+            # `application.yml` (`false`) and `Dispatcher.enabledOrDefault()` (`true`) disagree.
+            - name: STUDIO_EXECUTION_ENABLED
+              value: {{ .Values.studioExecution.enabled | quote }}
+            - name: STUDIO_DISPATCHER_ENABLED
+              value: "false"
+            # ── The SSE bounds the edge is configured against (story 10.18b, AC-13a) ──────
+            #
+            # These two are the ONLY values SnapshotBroadcaster reads, and the streaming Ingress's
+            # `proxy-read-timeout` is derived from `studioSse.lifetimeSeconds` — the same key that
+            # renders `STUDIO_SSE_LIFETIME` here. A test compares the rendered annotation against
+            # these rendered values in the SAME manifest, so the proxy bound and the application
+            # bound cannot drift apart unobserved. Raising the heartbeat above the timeout is M11.
+            - name: STUDIO_SSE_HEARTBEAT
+              value: {{ printf "%ds" (int .Values.studioSse.heartbeatSeconds) | quote }}
+            - name: STUDIO_SSE_LIFETIME
+              value: {{ printf "%ds" (int .Values.studioSse.lifetimeSeconds) | quote }}
+            # ── ED-02: the three identity bypasses, closed in the deployed profile (AC-19a) ─────
+            #
+            # ⚠ **THE CODE PATHS STILL EXIST. THEY ARE CLOSED HERE BY CONFIGURATION, NOT REMOVED.**
+            # `BffSessionAuthenticationFilter` carries three ways to obtain an identity the
+            # platform never vouched for: the hardcoded Core-service bypass, the client-supplied
+            # `X-User-Id` header path (which is checked FIRST, so closing the bypass alone closes
+            # nothing for a client that sends a header), and the `/api/v1/csi` read bypass that
+            # appends `checks-admin`. All three now read a property whose default is `false`, and
+            # all three are rendered `false` here so that the value is deliberate and visible in
+            # the manifest rather than inherited from a default somebody may change.
+            #
+            # **No credentialed pilot may run until ED-02 has linked completed tickets.** ED-02's
+            # owner reads "TBD — not assigned in sources"; @po could not name one and raised the
+            # escalation to @pm. The real vault is ALSO still a stub: `SecretsService` returns
+            # `REDACTED`. See `docs/runbooks/studio-runner.md` §9.
+            - name: CHECKS_BYPASS_CORE_SERVICE
+              value: {{ .Values.backend.identityBypass.coreService | quote }}
+            - name: CHECKS_BYPASS_IDENTITY_HEADERS
+              value: {{ .Values.backend.identityBypass.identityHeaders | quote }}
+            - name: CHECKS_BYPASS_CSI_READ
+              value: {{ .Values.backend.identityBypass.csiRead | quote }}
+            {{- if .Values.studioRunner.enabled }}
+            # ── The API's two runner-facing identities (Studio v1 gaps) ─────────────────────────
+            #
+            # The API talks to the runner in both directions, and without these a chart-deployed
+            # API refused every runner callback (the internal chain refuses all callers when its
+            # token is empty) and reported VALIDATOR_UNAVAILABLE for every compile.
+            #
+            # 1. Inbound: the runner's admission/progress callbacks. The token the API accepts is
+            #    the SAME Secret key the runner presents as STUDIO_RUNNER_CALLBACK_IDENTITY.
+            - name: STUDIO_CALLBACK_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.studioRunner.identity.secretName }}
+                  key: {{ .Values.studioRunner.identity.callbackIdentityKey }}
+            # 2. Outbound: POST /v1/validate from the compile pipeline, which runs on the API
+            #    (StudioController is `!worker`). Same address and bearer as the worker's
+            #    POST /v1/runs, from the same keys, so the three pods cannot be configured apart.
+            - name: STUDIO_RUNNER_BASE_URL
+              value: {{ include "put-checks.studioRunner.baseUrl" . | quote }}
+            - name: STUDIO_RUNNER_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.studioRunner.identity.secretName }}
+                  key: {{ .Values.studioRunner.identity.serviceIdentityKey }}
+            {{- end }}
             {{- range $key, $val := .Values.backend.env }}
             - name: {{ $key }}
               value: {{ $val | quote }}
@@ -94,15 +171,37 @@ spec:
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           volumeMounts:
+            - name: spring-config
+              mountPath: /etc/put-checks/config
+              readOnly: true
             - name: tmp
               mountPath: /tmp
+            # **The read-only store principal**, and a *different* Kubernetes Secret from the
+            # runner's write-only one (§6.2, ED-03): the runner writes only the `studio/` prefix
+            # and holds no Get or List permission; the API and the recovery path read and never
+            # write. Two principals, asserted unequal in the rendered manifest rather than each
+            # matched against a literal (AC-10a).
+            - name: object-store-credentials
+              mountPath: {{ .Values.objectStore.mountPath }}
+              readOnly: true
           lifecycle:
             preStop:
               exec:
                 command: ["sh", "-c", "sleep 5"]
       volumes:
+        - name: spring-config
+          configMap:
+            name: {{ include "put-checks.api.fullname" . }}-properties
         - name: tmp
           emptyDir: {}
+        - name: object-store-credentials
+          secret:
+            secretName: {{ .Values.objectStore.credentialsSecret }}
+            items:
+              {{- range .Values.objectStore.keys }}
+              - key: {{ . }}
+                path: {{ . }}
+              {{- end }}
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -117,6 +216,7 @@ spec:
       {{- end }}
 {{- end }}
 {{- if .Values.worker.enabled }}
+{{- include "put-checks.springConfig.validate" (index .Values "worker") }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -177,8 +277,70 @@ spec:
               containerPort: {{ .Values.worker.service.port }}
               protocol: TCP
           env:
+            {{- include "put-checks.studio.backendEnv" . | nindent 12 }}
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/etc/put-checks/config/application.yaml"
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.worker.springProfile | quote }}
+            # **Actuator on the container port the probes use.** `application-worker.yml` sets
+            # `management.server.port: 8081` while the ConfigMap's SERVER_PORT moves the main port
+            # to `worker.service.port`; with the two apart, /actuator/health/* is served only on the
+            # management port and the http-port probes (and the prometheus scrape) find nothing.
+            - name: MANAGEMENT_SERVER_PORT
+              value: {{ .Values.worker.service.port | quote }}
+            {{- if .Values.studioRunner.enabled }}
+            # **Derived from the runner's own Service, never restated.** `application.yml` has no
+            # default for this (`STUDIO_RUNNER_BASE_URL` falls back to empty, and an empty base URL
+            # closes every dispatch DISPATCH_FAILED), while `studio-runner/src/server/config.ts`
+            # defaults its listener to 8080. The chart is therefore the single source of the
+            # address: both the worker's URL and the runner's listener render from
+            # `studioRunner.service.port` (AC-1).
+            - name: STUDIO_RUNNER_BASE_URL
+              value: {{ include "put-checks.studioRunner.baseUrl" . | quote }}
+            # **The bearer the worker presents on POST /v1/runs (DEF-05, Studio v1 WP2).** Without
+            # it `HttpRunnerDispatchClient` refuses every dispatch before sending. It is read from
+            # the SAME Secret and key the runner reads its inbound `STUDIO_RUNNER_SERVICE_IDENTITY`
+            # from (`studioRunner.identity.*`), so the two sides cannot be configured apart, and the
+            # value never appears in values or in the manifest.
+            - name: STUDIO_RUNNER_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.studioRunner.identity.secretName }}
+                  key: {{ .Values.studioRunner.identity.serviceIdentityKey }}
+            # **The runner's cancel-path bounds, from the runner's own values keys (Studio v1
+            # WP16).** The running reaper here waits `RunnerCancelBudget.effectiveMargin()` before
+            # closing a cancel the runner never finished, and that margin is derived from these
+            # four bounds. Rendered from `studioRunner.runnerEnv` — the map the runner Deployment
+            # renders its environment from — so the worker derives its margin from the values the
+            # deployed runner actually runs with, never from defaults. A key the runner does not
+            # receive is not rendered here either: both then fall back to the same default, which
+            # `RunnerCancelBudgetTest` pins against the runner's `config.ts`.
+            {{- $runnerEnv := .Values.studioRunner.runnerEnv | default dict }}
+            {{- range $key := list "STUDIO_RUNNER_ADMISSION_TIMEOUT_MS" "STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS" "STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS" "STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS" }}
+            {{- if hasKey $runnerEnv $key }}
+            - name: {{ $key }}
+              value: {{ get $runnerEnv $key | quote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            # ── The kill switch and the dispatcher, on the WORKER (story 10.18b, AC-23a) ──
+            #
+            # Two distinct values keys, because they are two distinct decisions. Engaging the kill
+            # switch must NOT also stop the dispatcher: BRD §9 requires queued undispatched work to
+            # be closed EXPLICITLY when the switch goes off, and `StudioDispatcher.dispatchOnce()`
+            # is what closes it — a worker with the dispatcher off would leave that work queued
+            # until its deadline, which is the opposite of what the switch promises.
+            #
+            # This is the ONLY component with the dispatcher enabled.
+            - name: STUDIO_EXECUTION_ENABLED
+              value: {{ .Values.studioExecution.enabled | quote }}
+            - name: STUDIO_DISPATCHER_ENABLED
+              value: {{ .Values.studioExecution.dispatcherEnabled | quote }}
+            # Logical expiry, which is what the API enforces at `videoExpiresAt` (§6.2). The
+            # object-store lifecycle window renders from this same key; physical deletion on the
+            # store is asynchronous and nothing in this chart claims otherwise.
+            - name: STUDIO_EVIDENCE_RETENTION
+              value: {{ .Values.objectStore.retention | quote }}
             {{- range $key, $val := .Values.worker.env }}
             - name: {{ $key }}
               value: {{ $val | quote }}
@@ -211,15 +373,36 @@ spec:
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}
           volumeMounts:
+            - name: spring-config
+              mountPath: /etc/put-checks/config
+              readOnly: true
             - name: tmp
               mountPath: /tmp
+            {{- if .Values.studioRunner.enabled }}
+            - name: object-store-credentials
+              mountPath: {{ .Values.objectStore.mountPath }}
+              readOnly: true
+            {{- end }}
           lifecycle:
             preStop:
               exec:
                 command: ["sh", "-c", "sleep 10"]
       volumes:
+        - name: spring-config
+          configMap:
+            name: {{ include "put-checks.worker.fullname" . }}-properties
         - name: tmp
           emptyDir: {}
+        {{- if .Values.studioRunner.enabled }}
+        - name: object-store-credentials
+          secret:
+            secretName: {{ .Values.objectStore.credentialsSecret }}
+            items:
+              {{- range .Values.objectStore.keys }}
+              - key: {{ . }}
+                path: {{ . }}
+              {{- end }}
+        {{- end }}
       {{- with .Values.worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

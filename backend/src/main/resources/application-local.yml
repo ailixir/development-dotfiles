@@ -12,6 +12,27 @@ spring:
     password: ${SMTP_PASSWORD:}
 
 checks:
+  # ── ED-02 in the LOCAL profile — one of the three opened (story 10.18b, AC-19a) ───────────────
+  #
+  # `core-service` and `csi-read` stay at their new default of **false**. `identity-headers` is
+  # true here because the local profile's identity mechanism IS a header: `LocalDevAuthFilter`
+  # injects a fixed developer identity, and the integration tests that run under this profile turn
+  # that filter off (`checks.local-dev-auth.enabled=false`) precisely so they can inject their own
+  # caller with `X-User-Id` / `X-User-Roles` and assert authorization ordering. With this closed,
+  # every one of those tests authenticates as nobody and the route under test answers 401 before it
+  # is reached.
+  #
+  # **`local` is a developer profile and is never deployed.** The chart renders `api,dev`,
+  # `api,staging` and `api,prod`, and the rendered manifest closes all three flags in every one of
+  # the four value sets — asserted in `studio-runner/test/deployment/edge.test.ts`.
+  security:
+    bypass:
+      identity-headers: true
+  # The Studio pages render "not available in this environment" while the UI_TEST source is off,
+  # which it is by default everywhere (application.yml). `dev.sh` turns it on together with the
+  # studio-runner so that "Run Test" is reachable locally (Studio v1 WP2).
+  sources:
+    UI_TEST: ${CHECKS_SOURCE_UI_TEST:false}
   scheduling:
     dispatcher-enabled: true
   reports:
@@ -25,3 +46,43 @@ management:
   endpoint:
     health:
       show-details: always
+
+studio:
+  # The local e2e path (Studio v1 WP2): one bootRun is both the API and the worker, so the
+  # dispatcher and the reapers run here (their schedulers are gated `worker` or `local & !api`).
+  # The runner side is NOT configured here on purpose: `studio.runner.base-url` and
+  # `studio.runner.service-identity-token` come from STUDIO_RUNNER_BASE_URL and
+  # STUDIO_RUNNER_SERVICE_TOKEN (application.yml, no fallback), and the callback token from
+  # STUDIO_CALLBACK_SERVICE_TOKEN. `dev.sh` exports all three and hands the same
+  # values to the runner. Without them a run is closed ERROR/DISPATCH_FAILED naming the missing
+  # key, rather than left PENDING.
+  execution:
+    dispatcher:
+      enabled: ${STUDIO_DISPATCHER_ENABLED:true}
+  storage:
+    provider: ${STUDIO_STORAGE_PROVIDER:filesystem}
+  # Studio secret resolution (§9.2, story 10.17 AC-9).
+  #
+  # `provider` has NO default anywhere — not here, not in application.yml, not in code. A
+  # deployed profile that does not name a provider refuses to start rather than falling back
+  # to anything, and `fake` is confined to the test/local/dev profiles. A silent fallback to a
+  # fake vault is the worst failure mode this path can have.
+  secrets:
+    vault:
+      provider: fake
+  compile:
+    gateway:
+      # Local runs never hold R2D2 credentials; keep the gateway off unless a stub is wired in.
+      enabled: ${STUDIO_GATEWAY_ENABLED:false}
+      credentials:
+        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:none}
+      # With the gateway off, `true` swaps the always-refusing client for LocalPassthroughGateway-
+      # Client: a draft whose every step is already a Playwright statement is proposed verbatim,
+      # and validation, confirmation, dispatch and the run are all the real path. Refused at
+      # startup under any other profile. `dev.sh` turns it on unless STUDIO_GATEWAY_ENABLED=true.
+      local-passthrough: ${STUDIO_GATEWAY_LOCAL_PASSTHROUGH:false}
+
+logging:
+  level:
+    com.google.cloud.vertexai: ${STUDIO_GATEWAY_SDK_LOG_LEVEL:INFO}
+

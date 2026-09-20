@@ -67,10 +67,15 @@ class ApiClient {
         });
 
         if (error.response?.status === 401) {
-          window.dispatchEvent(
-            new CustomEvent('put:auth:unauthorized', { detail: { url: error.config?.url } }),
-          );
-          (window as any).__PUT_AUTH__?.login?.();
+          // Story 10.11b: the Studio transport's real-socket tests drive this client from a
+          // `node` environment, where there is no `window`. The guard changes nothing in a browser
+          // and keeps an unauthenticated response from becoming a ReferenceError outside one.
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(
+              new CustomEvent('put:auth:unauthorized', { detail: { url: error.config?.url } }),
+            );
+            (window as any).__PUT_AUTH__?.login?.();
+          }
         } else if (error.response?.status === 403) {
           console.warn('Access forbidden - insufficient permissions');
         } else if (error.response?.status >= 500) {

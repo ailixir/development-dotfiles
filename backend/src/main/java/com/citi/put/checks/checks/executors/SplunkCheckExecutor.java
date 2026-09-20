@@ -27,9 +27,6 @@ public class SplunkCheckExecutor implements CheckExecutor {
   @Override
   public ExecutionOutcome execute(Check check, ExecutionContext context) {
     return adapter.run(
-        check,
-        context,
-        c -> SplunkMapping.toRequest(c, dcProperties),
-        SplunkMapping::parseDetail);
+        check, context, c -> SplunkMapping.toRequest(c, dcProperties), SplunkMapping::parseDetail);
   }
 }

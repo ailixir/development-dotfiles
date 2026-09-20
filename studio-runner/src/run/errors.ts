@@ -1,0 +1,176 @@
+/**
+ * The real runner error-code set (AC-17, ADR-002 open item **O-5**).
+ *
+ * Story 10.6 shipped three placeholders — `STEP_FAILED`, `RUN_ERROR`, `RUN_NOT_STARTED` — built
+ * around a launcher that refused every launch. With a real browser the run has real failure
+ * conditions, and this module is the single enumeration of the codes they map to.
+ *
+ * Two properties make the set worth having, and both are asserted in `test/run/errors.test.ts`
+ * rather than left to inspection:
+ *
+ * **(a) Disjoint from the API's `ExecutionErrorCode`, except for `TIMEOUT` and `CANCELLED`.** Architecture §5.4
+ * assigns every other value there to the dispatcher or a reaper; a runner that emitted one would
+ * be claiming an observation it cannot make. §8.2 fixes exactly one runner-observable case — a
+ * parent-enforced total timeout is `ERROR`/`TIMEOUT` — so `TIMEOUT` is *reserved* here and
+ * **emitted by story 10.13**, which owns the enforcement. The test reads the contract's
+ * enumeration rather than a copy of it, because 10.7 adds dispatch-time codes in the same wave.
+ * Studio v1 WP4 adds the second shared value, `CANCELLED`, for a run stopped by
+ * `DELETE /v1/runs/{id}` (ADR-002 §29); the API assigns its own copy only against a cancel it
+ * recorded.
+ *
+ * **(b) Total.** {@link RunFailureKind} enumerates the run's failure conditions and
+ * {@link errorCodeFor} switches exhaustively over them, so a new failure kind fails the
+ * type-check instead of inventing a string at the call site.
+ */
+
+import { RUNTIME_INCOMPATIBLE } from '../compat/index.js';
+
+/**
+ * Every `outcome.errorCode` this runner may emit, each traced to an observable condition.
+ *
+ * `RunOutcome.errorCode` is left open by the contract (`docs/specs/studio/openapi.yaml`,
+ * `RunOutcome.errorCode`: "a runner-assigned code, left open rather than enumerated"), which is
+ * exactly why the enumeration has to exist here: an open wire field is a licence to invent one
+ * unless the producer enumerates its own.
+ */
+export const RUNNER_ERROR_CODES = {
+  /** The confirmed artifact failed default-deny revalidation after admission (AC-2). */
+  ARTIFACT_REVALIDATION_FAILED: 'ARTIFACT_REVALIDATION_FAILED',
+  /** `src/compat` refused the runtime this build is running (AC-2). */
+  RUNTIME_INCOMPATIBLE,
+  /** Chromium did not start. The generic case: no browser process, no readings (AC-6a). */
+  BROWSER_LAUNCH_FAILED: 'BROWSER_LAUNCH_FAILED',
+  /**
+   * Chromium refused to start **with the sandbox enabled**.
+   *
+   * Separated from the generic case on purpose: architecture §9.3 forbids relaunching without it,
+   * so the one failure an operator must be able to see by its own name is this one. There is no
+   * code path that retries, and `test/run/sandbox.test.ts` drives this path and asserts a single
+   * launch attempt.
+   */
+  BROWSER_SANDBOX_UNAVAILABLE: 'BROWSER_SANDBOX_UNAVAILABLE',
+  /**
+   * The job's admitted-start deadline had already elapsed at the launch point (AC-4, §5.2).
+   *
+   * Deliberately **not** `START_TIMEOUT`: that value belongs to the API's reaper (§5.4) and is
+   * assigned when a runner never reports a start at all. This is the runner refusing, which is a
+   * different observation made by a different component.
+   */
+  START_DEADLINE_EXCEEDED: 'START_DEADLINE_EXCEEDED',
+  /** A second page or popup appeared; V1 supports one page (AC-15, §5.2). */
+  UNSUPPORTED_MULTI_PAGE: 'UNSUPPORTED_MULTI_PAGE',
+  /**
+   * The run could not produce or flush a recording **and had no assertion outcome to report**.
+   *
+   * A recording failure alone never becomes the run's outcome — §6.1, AC-8: evidence and outcome
+   * are independent, and a run whose steps passed is `PASSED` with failed evidence. This code is
+   * reachable only where the recording lifecycle failed before any step ran.
+   */
+  RECORDING_FAILED: 'RECORDING_FAILED',
+  /** A step's assertion or action failed. The run stops at the first one (§5.2). */
+  STEP_FAILED: 'STEP_FAILED',
+  /**
+   * **Reserved, not emitted here.** §8.2 fixes the parent-enforced total-runtime timeout as
+   * `ERROR`/`TIMEOUT`, and it is the single value this set shares with `ExecutionErrorCode`.
+   * Enforcement — the deadline, the kill and the emission — is story **10.13**.
+   */
+  TIMEOUT: 'TIMEOUT',
+  /**
+   * The run was stopped by `DELETE /v1/runs/{id}` (Studio v1 WP4, ADR-002 §29): ordered stop,
+   * bounded grace, then the process tree — the deadline's own path, for a different reason. Also
+   * the answer for a run cancelled before its browser started, which then never starts one.
+   *
+   * Shared with `ExecutionErrorCode` like `TIMEOUT`, and for the same reason: the condition is one
+   * both sides observe. The API copies nothing; it assigns its own `CANCELLED` only where it
+   * recorded the request.
+   */
+  CANCELLED: 'CANCELLED',
+  /**
+   * The run path itself threw where no enumerated condition applies: the scratch directory could
+   * not be created, the child exited without a result, the protocol was violated.
+   *
+   * It is a residual, not a catch-all for conditions that have their own code above, and it is
+   * the one placeholder from 10.6 that is **justified rather than replaced**: a component that
+   * cannot report its own faults reports nothing, and "nothing" is what a reaper has to guess at.
+   */
+  RUN_ERROR: 'RUN_ERROR',
+} as const;
+
+export type RunnerErrorCode = (typeof RUNNER_ERROR_CODES)[keyof typeof RUNNER_ERROR_CODES];
+
+/** The enumeration as a list, for the disjointness and completeness assertions. */
+export const RUNNER_ERROR_CODE_VALUES: readonly RunnerErrorCode[] =
+  Object.values(RUNNER_ERROR_CODES);
+
+/**
+ * The run's failure conditions.
+ *
+ * The union is the thing that keeps {@link RUNNER_ERROR_CODES} honest: `errorCodeFor` switches
+ * over it exhaustively (`@typescript-eslint/switch-exhaustiveness-check` is an error in this
+ * package), so adding a condition without giving it a code does not compile.
+ */
+export type RunFailureKind =
+  | 'artifact-revalidation'
+  | 'runtime-incompatible'
+  | 'browser-launch'
+  | 'sandbox-unavailable'
+  | 'start-deadline'
+  | 'unsupported-multi-page'
+  | 'recording'
+  | 'step'
+  | 'total-timeout'
+  | 'cancelled'
+  | 'run-fault';
+
+/** Every failure kind, so a test can assert the mapping is total in both directions. */
+export const RUN_FAILURE_KINDS: readonly RunFailureKind[] = [
+  'artifact-revalidation',
+  'runtime-incompatible',
+  'browser-launch',
+  'sandbox-unavailable',
+  'start-deadline',
+  'unsupported-multi-page',
+  'recording',
+  'step',
+  'total-timeout',
+  'cancelled',
+  'run-fault',
+];
+
+/** The `outcome.result` each failure kind produces (§8.2). */
+export type RunFailureResult = 'FAILED' | 'ERROR';
+
+export function errorCodeFor(kind: RunFailureKind): RunnerErrorCode {
+  switch (kind) {
+    case 'artifact-revalidation':
+      return RUNNER_ERROR_CODES.ARTIFACT_REVALIDATION_FAILED;
+    case 'runtime-incompatible':
+      return RUNNER_ERROR_CODES.RUNTIME_INCOMPATIBLE;
+    case 'browser-launch':
+      return RUNNER_ERROR_CODES.BROWSER_LAUNCH_FAILED;
+    case 'sandbox-unavailable':
+      return RUNNER_ERROR_CODES.BROWSER_SANDBOX_UNAVAILABLE;
+    case 'start-deadline':
+      return RUNNER_ERROR_CODES.START_DEADLINE_EXCEEDED;
+    case 'unsupported-multi-page':
+      return RUNNER_ERROR_CODES.UNSUPPORTED_MULTI_PAGE;
+    case 'recording':
+      return RUNNER_ERROR_CODES.RECORDING_FAILED;
+    case 'step':
+      return RUNNER_ERROR_CODES.STEP_FAILED;
+    case 'total-timeout':
+      return RUNNER_ERROR_CODES.TIMEOUT;
+    case 'cancelled':
+      return RUNNER_ERROR_CODES.CANCELLED;
+    case 'run-fault':
+      return RUNNER_ERROR_CODES.RUN_ERROR;
+  }
+}
+
+/**
+ * §8.2: "a step locator or assertion timeout is `FAILED`; a parent-enforced total timeout is
+ * `ERROR`". Everything that prevents the run from producing an assertion outcome is `ERROR`.
+ */
+export function resultFor(kind: RunFailureKind): RunFailureResult {
+  return kind === 'step' ? 'FAILED' : 'ERROR';
+}

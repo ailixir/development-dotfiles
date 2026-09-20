@@ -18,7 +18,7 @@ When this task is invoked:
 
 ## Critical: Template Discovery
 
-If a YAML Template has not been provided, list all templates from .aios-core/templates or ask the user to provide another.
+If a YAML Template has not been provided, list all templates from .aiox-core/templates or ask the user to provide another.
 
 ## CRITICAL: Mandatory Elicitation Format
 

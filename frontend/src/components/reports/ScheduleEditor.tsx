@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
-import { Alert, AlertTitle, Box, FormControl, FormLabel, Paper, Stack, TextField, Typography, FormControlLabel, Chip, Switch, useTheme, alpha } from '@mui/material';
-import { AccessTime, Schedule, CalendarMonth, CalendarToday, Code } from '@mui/icons-material';
 import { formatNextCronRun, parseCron } from '@/utils/cronNextRun';
+import { AccessTime, CalendarMonth, CalendarToday, Code, Schedule } from '@mui/icons-material';
+import { Alert, AlertTitle, alpha, Box, Chip, FormControl, FormControlLabel, FormLabel, Stack, Switch, TextField, Typography, useTheme } from '@mui/material';
+import React, { useMemo } from 'react';
 
 export interface ScheduleEditorProps {
   enabled: boolean;
@@ -22,7 +22,7 @@ const frequencyOptions = [
   { value: 'custom', label: 'Cron', icon: Code },
 ] as const;
 
-const ScheduleEditor: React.FC<ScheduleEditorProps> = ({ enabled, frequency, cron = '', time = '18:00', timezone = 'America/New_York', daysOfWeek = [], daysOfMonth = [], onChange }) => {
+const ScheduleEditor: React.FC<ScheduleEditorProps> = ({ enabled, frequency, cron = '', time = '18:00', daysOfWeek = [], daysOfMonth = [], onChange }) => {
   const theme = useTheme();
   const dow = Array.isArray(daysOfWeek) ? daysOfWeek : [];
   const dom = Array.isArray(daysOfMonth) ? daysOfMonth : [];

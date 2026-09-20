@@ -1,0 +1,38 @@
+<!doctype html>
+<!--
+  Controlled fixture page for the fixture-corpus tier. See home.html for the conventions.
+
+  The title is exactly "Checks" because `assert-option-coverage` asserts `toHaveTitle('Checks')`
+  and `assert-page-have-title` asserts `/Checks/i`; both hold only on this exact title.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Checks</title>
+  </head>
+  <body>
+    <h1 role="heading" aria-level="1">Welcome</h1>
+
+    <p>
+      <label for="filter">Filter</label>
+      <input id="filter" name="filter" role="textbox" type="text" value="open" />
+    </p>
+
+    <p>
+      <label for="username">Username</label>
+      <input id="username" name="username" role="textbox" type="text" value="alice" />
+    </p>
+
+    <div data-testid="summary" role="status">Order confirmed</div>
+    <div data-testid="total">GBP 42.00</div>
+
+    <table role="table">
+      <tbody role="rowgroup">
+        <tr role="row">
+          <td role="cell">Order 42</td>
+          <td role="cell"><button role="button" type="button">Edit</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

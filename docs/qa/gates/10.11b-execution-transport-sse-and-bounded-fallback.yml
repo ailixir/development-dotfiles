@@ -1,0 +1,544 @@
+schema: 1
+story: '10.11b'
+story_title: The transport — SSE progress, bounded reconnect, bounded GET fallback
+epic: EPIC-10
+wave: 6
+half_of: '10.11'
+criteria_owned: 'AC-7 – AC-17, AC-20, plus this half''s share of AC-22 – AC-24'
+
+gate: CONCERNS
+rounds: 1
+
+status_reason: >-
+  **The load-bearing claim is real and was reproduced, not read.** AC-9's streaming proof is a
+  genuine `node:http` server writing a genuinely chunked `text/event-stream`, with the **production**
+  transport module as the client and `StreamConnection.finished` implemented as `res.writableEnded`
+  on the server's own response object — verified by reading the harness and by running the
+  falsification. Applying **M1** myself (replacing `createStudioEventSource` with a reader that
+  awaits the whole body through `fetch` before parsing) turns `studioSseStreaming.node.test.ts` to
+  **4 failed | 3 passed (7)**, red on exactly `SCN-STREAM-TWO-FRAMES` and
+  `SCN-IDLE-SURVIVES-CLIENT-TIMEOUT`, by timing out waiting for frame 1 to be surfaced. That is the
+  criterion behaving as written: a buffering client cannot surface frame 1 before the response
+  closes. This is not a buffered mock.
+  **Every gate number in the Dev Agent Record reproduced.** `npm run type-check` exit 2 with exactly
+  the two pre-existing `TS2307 @put/core-components` errors at `ChecksLayout.tsx(6,33)` and
+  `navigationSetup.ts(1,36)`. `npm run lint` fails before linting any file — *"ESLint couldn't find
+  the config @typescript-eslint/recommended"* — and is reported **FAILED**, per @po's standing rule.
+  `vitest run` **Test Files 2 failed | 23 passed (25); Tests 1 failed | 304 passed (305)**, run
+  twice (before and after the mutation pass) with identical results. The baseline was **measured, not
+  adopted**: a detached worktree at `78cc634b2` sharing this worktree's `node_modules` returned
+  **21 files / 276 tests**, matching the record's totals exactly, and the +4 files / +29 tests delta
+  is fully accounted by the per-suite table (7 + 12 + 4 + 4 new, plus `studioContract.test.ts`
+  25 → 27).
+  **Ten mutations were re-applied here** — M1, M2, the negative control, M3, M6, M7, M8, M9, M10,
+  M13, M15 — plus three probes of my own. Each reddened the named test; sibling green counts matched
+  the record in every case; every file was restored from a byte copy and compared by SHA-256, all
+  six matching, with `git status --short` empty afterwards. **M13's discrimination is correct and I
+  judge it correct**: moving the ordering rule into the streaming implementation leaves
+  `SCN-REVISION-OUT-OF-ORDER` **green** and reddens `SCN-FALLBACK-AS-PRIMARY`, which is precisely the
+  asymmetry AC-16 exists to detect. **M9 and M10 each redden exactly one of AC-13's two count tests
+  and leave the other green** — AC-13, which story 10.16 depends on, is verified.
+  **All three self-caught repairs hold, and I re-derived the defect each closed.** (1) With M3 applied
+  and the dwell reduced back to 400 ms, AC-7's `SCN-DEV-TRANSPORT` goes **green** — the restored
+  poller's tick falls outside the window, exactly as @dev diagnosed — and at the shipped 1600 ms it is
+  **red**. (2) M6 reddens `SCN-DENY-401-STREAM` because of the two request-count assertions
+  (`streamRequests().length === 1`, `snapshotRequests().length === 1`) that stop the fallback's own
+  denial branch from satisfying the stream's guard. (3) M15 reddens the AC-17 frame test, which now
+  locates all five named frames by index and asserts them strictly increasing.
+  **The `EventSource` approach is sound and is option (a), not option (b).** Measured here: Node
+  v23.10.0 exposes no `globalThis.EventSource`; `--experimental-eventsource` makes it a `function`;
+  `process.allowedNodeEnvironmentFlags.has('--experimental-eventsource')` is `true`. No dependency,
+  no polyfill, no second implementation. The guard is an ordinary `it()` asserting
+  `'EventSource' in globalThis` and `typeof === 'function'` — **it fails, it does not skip**, which is
+  the property that stops every streaming test going vacuous on a machine without the flag.
+  **AC-14(ii)'s wording claims only what it proves.** The test sets the shared client's timeout to
+  120 ms, idles ~480 ms behind heartbeat comments and delivers a later snapshot with
+  `streamsOpened === 1` and zero snapshot reads. Both the criterion and the record say plainly that
+  the literal 30 s is never exercised and that the ceiling that matters is the ingress's. That is
+  honest; the criterion is weak, and it says so.
+  **What holds this at CONCERNS rather than PASS** is one behaviour regression this half introduced
+  and one measured merge hazard. `SCEN-1`: the four-line route-`:id` effect that makes
+  `handleScenarioSelect` reachable also makes `handleCreateNewScenario` snap back to the previous
+  draft. `MERGE-1`: `git merge-tree` of `story/10.11a` and `story/10.11b` produces **7 conflict
+  markers** across three files, and 10.11a **deliberately retains the 700 ms poller** — so a
+  resolution that takes 10.11a's `ChecksStudioPage.tsx` wholesale silently defeats AC-8. Neither is a
+  defect in the transport; both are actionable and must not close by silence.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-15T00:00:00Z'
+branch: story/10.11b
+head_sha: a41d55caf
+base_sha: 78cc634b2
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.11b
+sibling_half_reviewed_against: story/10.11a @ d274b0625 (in flight, not gated here)
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands this reviewer executed. Numbers are what they returned.
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  baseline_measured_at_base_commit:
+    command: >-
+      git worktree add --detach <scratch>/qa1011b-baseline-wt 78cc634b2; symlink
+      wt/10.11b/frontend/node_modules into it; ./node_modules/.bin/vitest run
+    result: TOTALS REPRODUCED EXACTLY; FAILURE SET DIFFERED AND THE DIFFERENCE IS TIMING
+    detail: >-
+      `Test Files 5 failed | 16 passed (21); Tests 4 failed | 272 passed (276)`, 81.44 s. **The
+      totals — 21 files, 276 tests — match the record to the digit.** The record says 2 failed files
+      / 1 failed test; I measured 5 / 4. The three extra are **timeouts, not assertion failures**:
+      `SplunkPrototypePage.test.tsx > combines thresholds across columns` (20 000 ms),
+      `review/accessibility.test.tsx > the confirm control is a button with a name, in every state`
+      (5 000 ms) and `review/confirmFlow.test.tsx > enumerating the document union…`. Re-run in
+      isolation the two studio-review files **pass**, and `SplunkPrototypePage.test.tsx` alone takes
+      **110.64 s**. @dev's baseline ran in 40.89 s and mine in 81.44 s on a loaded machine. See
+      FLAKE-1. The worktree was removed afterwards; the shared stash stack was never touched.
+  gates_after:
+    command: npm run type-check; npm run lint; npx --no-install vitest run — in wt/10.11b/frontend
+    result: REPRODUCED TO THE DIGIT, TWICE
+    detail: >-
+      type-check exit 2, exactly two errors, both `TS2307 Cannot find module '@put/core-components'`,
+      at `ChecksLayout.tsx(6,33)` and `navigationSetup.ts(1,36)` — neither in any File List file.
+      lint: ESLint 8.57.1 aborts on `.eslintrc.json`'s `"@typescript-eslint/recommended"` shorthand,
+      **zero files linted**, reported FAILED. vitest `Test Files 2 failed | 23 passed (25); Tests 1
+      failed | 304 passed (305)` at 47.92 s, and again at 46.01 s after every mutation was restored.
+      Failing set compared file by file against baseline: `ChecksLayout.a11y.test.tsx` (pre-existing,
+      unchanged message) plus `studioEscalation.test.ts` (10.10 AC-15, expected red). **No new
+      failure. No run short of its baseline count.**
+  vitest_version_is_1_6_1_not_3_2_7:
+    command: node -e "require('./node_modules/vitest/package.json').version"
+    result: THE RECORD'S CAVEAT IS CORRECT
+    detail: >-
+      The installed vitest is **1.6.1**, which is what the runner banner reports. `npx vitest
+      --version` returning 3.2.7 is npx fetching a remote binary and is not what ran. jsdom 23.2.0,
+      Node v23.10.0, npm 11.3.0 all confirmed in this worktree.
+  escalation_byte_unchanged_and_still_red:
+    command: >-
+      shasum -a 256 frontend/src/services/mocks/studio/studioEscalation.test.ts; git diff
+      78cc634b2..HEAD -- <that file>; vitest run <that file>
+    result: HASH MATCHES, DIFF EMPTY, STILL RED
+    detail: >-
+      `f7a8f98adc20b741b2cd8cc7bb23bcef7a982bf5aa8f35756f6da3e5c93ac5ea` — the value the record
+      states. The file's last commit is `a50313194` (story 10.10) and the diff against the base is
+      empty, so it was not touched on this branch. In the full run it fails with
+      `expected [ 'confirmCompile.artifactHash' ] to deeply equal []`, naming exactly one field. The
+      live Class C escalation is intact.
+  no_repository_file_changed_by_the_install:
+    command: >-
+      git status --short; git diff --stat 78cc634b2..HEAD; grep the changed-file list for
+      package|lock|eslint|tsconfig|vite
+    result: CLAIM VERIFIED
+    detail: >-
+      Working tree empty at review start and at review end. 17 files changed, 3218 insertions. **Not
+      one** is `package.json`, `package-lock.json`, `.eslintrc.json` or `tsconfig*.json`. The only
+      tool config in the diff is `frontend/vitest.config.ts` (+26), which is the intended deliverable
+      for *Open questions* 1. `frontend/src/test/setup.ts` (+33/-? ) is a source file, and its whole
+      change is wrapping the `window.matchMedia` stub in `typeof window !== 'undefined'` so the
+      shared setup works from a `node` environment — behaviour-preserving for every jsdom suite.
+      `apiClient.ts` (+13) is the same shape: a `typeof window` guard around the 401 handler's
+      `window.dispatchEvent`. No `backend/`, no `studio-runner/`, no `docs/specs/`.
+  streaming_is_real_not_buffered:
+    command: read frontend/src/test/studioStreamServer.ts; apply M1; vitest run the AC-9 suite
+    result: GENUINE
+    detail: >-
+      The harness is `node:http`, listening on 127.0.0.1:0, writing `Content-Type:
+      text/event-stream` with `X-Accel-Buffering: no` and flushing `id:`/`event:`/`data:` frames one
+      at a time. `StreamConnection.finished` is `get finished() { return res.writableEnded; }` — the
+      server's own response object, as AC-9 requires, not an inference from the client. The AC-9 test
+      pushes `'wrote:1'`, writes frame 1, **awaits until the client has surfaced it**, asserts
+      `open.finished === false`, then writes frame 2. Under M1 the suite is **4 failed | 3 passed
+      (7)**, failing at `timed out waiting for: frame 1 to be surfaced by the production transport`.
+      The one real bug this criterion exists to catch is caught.
+  eventsource_flag_measured:
+    command: >-
+      node -e "process.allowedNodeEnvironmentFlags.has('--experimental-eventsource'); typeof
+      globalThis.EventSource"; node --experimental-eventsource -e "typeof globalThis.EventSource"
+    result: 'true / undefined / function — DA-11 CONFIRMED, AND THE GUARD FAILS RATHER THAN SKIPS'
+    detail: >-
+      Node v23.10.0 exposes no `EventSource` unflagged and a `function` with the flag; the flag is in
+      `allowedNodeEnvironmentFlags`, so `vitest.config.ts`'s conditional passes it to the `forks`
+      pool that `poolMatchGlobs` routes `*.node.test.*` to. The guard in
+      `studioSseStreaming.node.test.ts:35` is an ordinary `it()` asserting `'EventSource' in
+      globalThis` and `typeof … === 'function'` — **no `skipIf`, no `skip`, no `t.skip()` anywhere in
+      the file.** On a Node without the flag it produces a red test and a visible finding. This is
+      the platform global @po's option (a) names; option (b) was not taken.
+  no_second_document_parser_and_no_second_ajv:
+    command: grep -rn "from 'yaml'" src; grep -rn "new Ajv" src
+    result: CONSTRAINT HOLDS FOR THIS HALF
+    detail: >-
+      Five `parseYaml` importers, **all five pre-existing** (`recompile.test.tsx`,
+      `compileStates.test.tsx`, `confirmFlow.test.tsx`, `studioContract.test.ts`,
+      `studioEscalation.test.ts`). Exactly one `new Ajv2020`, at `studioContract.test.ts:35`. AC-17's
+      validation was added as a describe block inside that file reusing `componentValidator`,
+      `requiredPropertiesOf` and `declaredPropertiesOf`. The record is right that this is a **review
+      constraint, not a guard** — nothing in the suite can fail because a second parser appeared —
+      and it is right that no second parser appeared.
+  deferrals_cannot_turn_green:
+    command: read docs/architecture/studio-staging-spikes.md; ls docs/qa/spikes/
+    result: BOTH GATES VERIFIED OPEN AND THE CLOSING ARTEFACT IS ABSENT
+    detail: >-
+      SPK-02's row reads `… | 10.18, 10.19 | 10.11 transport client; 10.15 media route assumption |
+      … | OPEN`. `docs/qa/spikes/` contains **only `SPK-01`** — there is no `SPK-02/` directory, so
+      the HAR captures, the ingress excerpts and the signed browser-auth statement that close
+      AC-15(b) and AC-20(b) do not exist. Nothing in this repository can observe either property:
+      there is no ingress and no federated shell to run inside. Both are recorded **skipped, never
+      passed**, both checkboxes are unticked, and neither could report green without its artefact.
+  merge_hazard_measured:
+    command: >-
+      git merge-tree $(git merge-base story/10.11a story/10.11b) story/10.11b story/10.11a; git show
+      story/10.11a:frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx | grep pollingRef
+    result: 7 CONFLICT MARKERS, AND 10.11a DELIBERATELY KEEPS THE POLLER — see MERGE-1
+    detail: >-
+      Three files are "changed in both": `docs/stories/10.11.story.md`,
+      `frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx` and
+      `frontend/src/services/mocks/studio/studioContract.test.ts` — exactly the three @dev disclosed.
+      `story/10.11a` still holds `pollingRef`, `stopPolling` and `setInterval(…, 700)` at lines
+      266-327, with a comment stating the interval is *"explicitly **not** this story's to remove"*.
+      Both halves are correct in isolation; the merge is where AC-8 can be lost.
+
+mutations_reapplied:
+  method: >-
+    Anchored replacement with a driver that ABORTS if the anchor is not found exactly once (it did
+    abort once, on a duplicate anchor, and the run was redone). Backups taken to a PID-suffixed
+    harness directory before the first mutation; every file restored from the byte copy and compared
+    by SHA-256 afterwards. Six files were backed up; **all six matched on restore**; `git status
+    --short` was empty at the end.
+  rows:
+    - id: M1
+      criterion: AC-9 (and AC-14ii)
+      mutation: >-
+        createStudioEventSource replaced by a reader that awaits the whole body (fetch + res.text())
+        before parsing
+      observed: >-
+        4 failed | 3 passed (7). Red on SCN-STREAM-TWO-FRAMES (both), SCN-TWO-CONFIGURED-BASES and
+        SCN-IDLE-SURVIVES-CLIENT-TIMEOUT.
+      matches_record: YES — 4 red, 3 of 7 green, the two named tests among them
+    - id: M2
+      criterion: AC-10
+      mutation: the revision comparison removed from subscribeToExecution's deliver
+      observed: >-
+        3 failed | 9 passed (12). Red on SCN-REVISION-OUT-OF-ORDER, SCN-RECONNECT-RESTORES,
+        SCN-FALLBACK-AS-PRIMARY.
+      matches_record: YES — 3 red, 9 of 12 green
+    - id: NC
+      criterion: AC-10 negative control
+      mutation: M2 plus the fixture swapped to REVISION_ORDERING_SEQUENCE_FLATTENED
+      observed: >-
+        **RED**, not green — `expected [ 5, 7, 6, 7 ] to deeply equal [ 5, 7 ]`. Re-run in the
+        criterion-literal form (surface-only, the applied-revision-list assertion dropped) it is
+        **GREEN**, which is the negative control the criterion describes.
+      matches_record: 'NO — see REC-1. The substance holds; the shipped test is stronger than the criterion.'
+    - id: M3
+      criterion: AC-7 + AC-8
+      mutation: a 700 ms setInterval reading studioApi.getExecution restored inside the component
+      observed: >-
+        2 failed | 2 passed (4). Red on both SCN-DEV-TRANSPORT tests. With the dwell reduced to 400
+        ms, AC-7's test goes **green** and AC-8's stays red.
+      matches_record: 'YES for the shipped test; see REC-2 for the pre-repair claim'
+    - id: M6
+      criterion: AC-12 (stream/probe half)
+      mutation: the 401/403 branch deleted from createSseTransport
+      observed: >-
+        3 failed | 9 passed (12). Red on SCN-DENY-401-STREAM, SCN-DENY-403-STREAM, SCN-DENY-403-PROBE.
+      matches_record: YES — repair 2 verified, the previously-vacuous guard now fails
+    - id: M7
+      criterion: AC-12 (mid-fallback half)
+      mutation: the 401/403 branch disabled in createPollTransport only
+      observed: 1 failed | 11 passed (12). Red on SCN-DENY-401-MID-FALLBACK alone.
+      matches_record: YES — shape #7 genuinely covered by its own fourth test
+    - id: M8
+      criterion: AC-13(a)
+      mutation: close on terminal status instead of on streamComplete
+      observed: >-
+        2 failed | 10 passed (12). Red on SCN-TERMINAL-EVIDENCE-PROCESSING and
+        SCN-TERMINAL-EVIDENCE-FAILED.
+      matches_record: YES — the evidence-arrival lifecycle 10.16 depends on is guarded
+    - id: M9
+      criterion: AC-13(b)
+      mutation: the component's unmount cleanup effect removed
+      observed: >-
+        1 failed | 3 passed (4). Red on the three-mount/unmount count test only; **the
+        scenario-switch test stayed green.**
+      matches_record: YES
+    - id: M10
+      criterion: AC-13(c)
+      mutation: the scenario-switch cleanup removed only
+      observed: >-
+        1 failed | 3 passed (4). Red on the scenario-switch count test only; **the mount/unmount test
+        stayed green.**
+      matches_record: YES — M9/M10 are a genuinely discriminating pair
+    - id: M13
+      criterion: AC-16
+      mutation: the ordering rule moved out of the shared layer and into createSseTransport
+      observed: >-
+        2 failed | 10 passed (12). Red on SCN-FALLBACK-AS-PRIMARY and SCN-RECONNECT-RESTORES;
+        **SCN-REVISION-OUT-OF-ORDER stayed GREEN.**
+      matches_record: >-
+        YES on the count (10 of 12) and on the discrimination. The record names only
+        SCN-FALLBACK-AS-PRIMARY though its own count implies a second red; judged correct
+        discrimination either way.
+    - id: M15
+      criterion: AC-17
+      mutation: the truncation frame's logsTruncated flipped to false
+      observed: >-
+        1 failed | 3 passed (4). Red with `the five frames the criterion names must occur in that
+        order: expected [ 1, 2, 4, 4, 5 ] to deeply equal [ 1, 2, 4, 5 ]`.
+      matches_record: YES — repair 3 verified
+  additional_probes_by_this_reviewer:
+    - id: P1
+      what: 'NC in its criterion-literal form (surface-only assertion, flattened fixture, M2 applied)'
+      result: GREEN — the fixture sizing is load-bearing and the criterion's negative control is real
+    - id: P2
+      what: M3 re-run with the pre-repair 400 ms dwell
+      result: >-
+        AC-7's test GREEN, AC-8's still red. Confirms @dev's diagnosis of the vacuity and that the
+        1600 ms dwell is what closed it.
+    - id: P3
+      what: >-
+        The wave-5 drift injected into AC-9's own construction — frame 2 written before frame 1 is
+        observed
+      result: >-
+        RED (`Test timed out in 5000ms`). The test cannot be silently degraded into a
+        write-both-then-check shape. Caught by the `until(surfaced.length === 1)` wait rather than by
+        the `order` assertion — see VAC-OBS.
+
+vacuous_guard_hunt:
+  seventeenth_shape_found: false
+  detail: >-
+    The sixteen catalogued shapes were walked against every new suite. Two instances of **already
+    catalogued** shapes were found, both benign, both recorded below as VAC-OBS. No new shape.
+    Checked and clear: shape #5 (expected value imported from the module under test) — AC-17's
+    contract assertions read `openapi.yaml` through the existing binding, never `studioTypes.ts`;
+    shape #8 (structural name over a test-local stand-in) — AC-15(a)'s test asserts
+    `sse.SSE_AUTH_MODES` directly on the imported production symbol, `toHaveLength(1)`, which is
+    @qa's own probe applied literally; shape #3 (a hardcoded file list that new code escapes) —
+    AC-22's `SUITE_FILES` is hardcoded, but the direction of harm is strict, not permissive: a test
+    living outside the list makes an entry report *unreferenced* (red), never covered; shape #1 (a
+    source scan standing alone) — every retirement and count assertion in this half is on observed
+    requests or on the server's connection count, never on source text.
+
+deferrals_checked:
+  - id: AC-15(b)
+    status: SKIPPED, NEVER PASSED — verified
+    gate: ED-06 / SPK-02, OPEN. Owner 10.18.
+    closing_artefact: docs/qa/spikes/SPK-02/ — absent from this branch (only SPK-01 exists)
+    can_it_turn_green_silently: >-
+      No. No test asserts it, nothing local can observe it, and the checkbox is unticked. A green
+      here before SPK-02 closes would be a defect and would be visible as one.
+  - id: AC-20(b)
+    status: SKIPPED, NEVER PASSED — verified
+    gate: ED-06 / SPK-02 question 1, OPEN. Owner 10.18.
+    closing_artefact: the same SPK-02 record, plus an updated ED-06 manifest entry
+    can_it_turn_green_silently: 'No — same reasoning.'
+  - id: AC-22 / AC-23 / AC-24
+    status: 'correctly left unticked — shared with 10.11a, not one half''s to claim'
+  - id: AC-18 / AC-19
+    status: >-
+      not implemented here and correctly so — the Split hint assigns both to **10.11a**; see T17-1
+
+top_issues:
+  - id: MERGE-1
+    severity: medium
+    owner: '@po / the epic lead (not @dev)'
+    finding: >-
+      `git merge-tree` of `story/10.11a` and `story/10.11b` produces **7 conflict markers** across
+      three files that changed in both: `docs/stories/10.11.story.md`,
+      `frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx` and
+      `frontend/src/services/mocks/studio/studioContract.test.ts`. The dangerous one is the page.
+      **10.11a deliberately retains the 700 ms poller** (`pollingRef`, `stopPolling`,
+      `setInterval(…, 700)` at `ChecksStudioPage.tsx:266-327` on that branch, with a comment saying
+      removing it is *"explicitly not this story's"*), while 10.11b's whole AC-8 is its removal. Both
+      halves are internally correct. A conflict resolution that takes 10.11a's `handleRunTest`
+      wholesale reinstates the poller and defeats AC-8 — and AC-8's guard lives in 10.11b's file, so
+      it would only be caught if the merged tree is re-run.
+    suggested_action: >-
+      Merge with a stated resolution rule recorded in the merge commit: **10.11a owns the enablement
+      predicate of `handleRunTest`; 10.11b owns its body and the subscription lifecycle.** After the
+      merge, re-run `studioRunTransport.node.test.tsx` and `studioTransport.node.test.ts` **and**
+      10.11a's `pageRunGate.test.tsx` / `runGate.test.tsx` on the merged tree before either half is
+      considered landed, and confirm `pollingRef` and `setInterval(…, 700)` appear nowhere in
+      `ChecksStudioPage.tsx`.
+  - id: SCEN-1
+    severity: medium
+    owner: '@dev (10.11b), or whoever resolves MERGE-1'
+    finding: >-
+      The four-line route-`:id` effect added to make `handleScenarioSelect` reachable (AC-13's
+      mid-stream switch) introduces a behaviour regression in an unrelated flow.
+      `handleCreateNewScenario` calls `reloadScenarios()` then `setSelectedScenario(created.id)`. The
+      effect's deps are `[params.id, scenarios, selectedScenario]`, so it re-runs, sees
+      `params.id !== selectedScenario`, finds `params.id` in the reloaded list, and calls
+      `handleScenarioSelect(params.id)` — **reselecting the previous draft and overwriting
+      `testSteps` with its steps.** Reachable whenever the page is at `/checks/studio/:id`
+      (`App.tsx:114`) and the user creates a new scenario. The change itself is otherwise minimal and
+      correct: it calls the **existing** handler, it is guarded against unknown ids and against
+      re-entry, and `handleScenarioSelect` contains no `navigate()`, so there is no loop.
+    suggested_action: >-
+      One line. Either navigate to the created id (`navigate(\`/checks/studio/${created.id}\`)`, which
+      is what the route is for and makes the effect a no-op), or track the last route id the effect
+      acted on in a ref and skip when `params.id` has not itself changed. Also correct the effect's
+      docstring: it names the route as `/checks/studio/tests/:id`, but `studio/tests` is
+      `StudioTestsPage` (`App.tsx:112`) — the studio page's parameterised route is
+      `/checks/studio/:id`.
+  - id: ENV-1
+    severity: medium
+    owner: unowned, epic-wide — explicitly NOT this story's
+    finding: >-
+      `npm run lint` lints **zero files** (ESLint 8.57.1 cannot load `.eslintrc.json`'s
+      `"@typescript-eslint/recommended"` shorthand) and `npm run type-check` carries two
+      pre-existing `TS2307 @put/core-components` errors, with `ChecksLayout.a11y.test.tsx` failing
+      behind the same unresolved import. All three are identical at base and at HEAD.
+    suggested_action: >-
+      Keep reporting the lint gate as **FAILED**, never as passed — @po's standing rule, and @dev
+      applied it correctly. Do not fix any of the three inside a transport story. Note for the
+      record: `@put/core-components` resolves in the main checkout and dangles only from a worktree,
+      and behind the import there is a genuinely missing skip link — both accounts remain true.
+  - id: REC-1
+    severity: low
+    owner: '@dev (record accuracy)'
+    finding: >-
+      The falsification table's **NC** row records *"(none — the test stays GREEN with the ordering
+      rule gone)"*. It does not. With M2 applied and the fixture swapped to
+      `REVISION_ORDERING_SEQUENCE_FLATTENED`, `SCN-REVISION-OUT-OF-ORDER` is **RED**:
+      `expected [ 5, 7, 6, 7 ] to deeply equal [ 5, 7 ]`. The shipped test asserts the *applied
+      revision list* as well as the surface, which is stronger than AC-10's wording (*"the rendered
+      state after the whole sequence equals rev 7's, field by field on the surface"*). Dropping that
+      one assertion — the criterion-literal form — makes the flattened fixture **green**, which is
+      the negative control the criterion actually describes and which I reproduced.
+    suggested_action: >-
+      Amend the NC row to say which assertion set it refers to. The substance is fine and the guard
+      is stronger than required; the row as written is not reproducible and AC-23 makes the record a
+      deliverable.
+  - id: REC-2
+    severity: low
+    owner: '@dev (record accuracy)'
+    finding: >-
+      *"M3 restored a 700 ms poller inside the component and **nothing** went red"* is imprecise.
+      Re-running M3 with the dwell reduced back to 400 ms, AC-7's `SCN-DEV-TRANSPORT` is green — the
+      vacuity is real and is exactly as diagnosed — but **AC-8's test still reddens**, because its
+      full run exceeds 700 ms in this environment. The repair and its reasoning are correct; only
+      the scope of "nothing" is wrong.
+    suggested_action: 'Narrow the sentence to AC-7''s test. No code change.'
+  - id: VAC-OBS
+    severity: low
+    owner: informational — no action required
+    finding: >-
+      Two instances of **already-catalogued** shapes, both benign. (a) Shape #15 (*an ordering
+      assertion against a sentinel the test appends after the fact*): AC-9's
+      `expect(order.indexOf('wrote:2')).toBeGreaterThan(order.indexOf('surfaced:2'))` is
+      unfalsifiable by the test's own control flow — `order.push('wrote:2')` executes after
+      `await until(() => surfaced.length === 1)` — and both `wrote:*` elements are written by the
+      test body, not by a seam. (b) Shape #9 (*a stated discriminating mechanism pre-empted by a
+      different guard*): when I injected the wave-5 drift (P3), the test went red by the `until`
+      **timing out**, not by the `order` assertion. **Neither makes AC-9 vacuous.** The
+      `expect(order).toEqual([...])` equality does guard the test's construction against exactly that
+      drift, and the load-bearing discrimination is the `until` plus
+      `expect(open.finished).toBe(false)` read from `res.writableEnded` — which M1 reddens. Recorded
+      so the next reader does not mistake the `indexOf` line for the guard.
+    suggested_action: >-
+      None. If AC-9 is ever edited, keep the `toEqual` and the `until`; the `indexOf` line is
+      redundant and may be dropped without loss.
+  - id: T17-1
+    severity: low
+    owner: '@po'
+    finding: >-
+      `T-10.11.17` sits in the **10.11b** task block but covers AC-18 and AC-19, which the *Split
+      hint* table assigns to **10.11a** (`10.11b` is `AC-7 – AC-17, AC-20`). @dev left it unticked,
+      unimplemented, and raised it rather than absorbing two of 10.11a's criteria. **Verified against
+      the Split hint table and confirmed as the correct call** — implementing it here would have put
+      two developers in the same files in the same wave, which is the very thing MERGE-1 shows is
+      already tight enough.
+    suggested_action: >-
+      Re-file `T-10.11.17` under the 10.11a task block. 10.11b already ships the `logsTruncated`
+      frames those criteria need (AC-17's scenario), so 10.11a inherits fixtures, not work.
+  - id: FLAKE-1
+    severity: low
+    owner: unowned, epic-wide — not this story's
+    finding: >-
+      This suite's pass/fail set is load-sensitive. Measuring the baseline in a detached worktree on
+      a loaded machine (81.44 s against @dev's 40.89 s) produced three **timeout** failures that are
+      not assertion failures: `SplunkPrototypePage.test.tsx > combines thresholds across columns`,
+      `review/accessibility.test.tsx > the confirm control is a button with a name` and
+      `review/confirmFlow.test.tsx > enumerating the document union`. The two review files pass in
+      isolation; `SplunkPrototypePage.test.tsx` alone takes **110.64 s**. 10.11b's own suites are
+      also timing-shaped — `until()` defaults to 5 000 ms and the AC-9 file's tests use vitest's
+      5 000 ms default — so on a slow machine a real failure and a timeout look identical.
+    suggested_action: >-
+      Not 10.11b's to fix, and the after-state was clean at 305/304 on two independent runs in the
+      unloaded worktree. Worth raising to @po as an epic-level item: give
+      `SplunkPrototypePage.test.tsx` an explicit budget, and treat any run **short of its baseline
+      count** as a hang rather than a pass, per the epic's own rule.
+
+ac_coverage:
+  owned_by_this_half: 'AC-7, AC-8, AC-9, AC-10, AC-11, AC-12, AC-13, AC-14, AC-15(a), AC-15(b), AC-16, AC-17, AC-20(a), AC-20(b)'
+  ticked_and_verified: 'AC-7, AC-8, AC-9, AC-10, AC-11, AC-12, AC-13, AC-14, AC-15(a), AC-16, AC-17, AC-20(a)'
+  skipped_never_passed_and_verified_unreachable: 'AC-15(b), AC-20(b)'
+  shared_and_correctly_unticked: 'AC-22, AC-23, AC-24'
+  not_this_half: 'AC-1 – AC-6, AC-18, AC-19, AC-21(a) → 10.11a; AC-25 – AC-32 → 10.11c'
+  story_10_16_dependency: >-
+    **AC-13 is verified specifically.** M8 reddens the two evidence-lifecycle tests; M9 and M10 each
+    redden exactly one of the two connection-count tests and leave the other green. 10.16's need —
+    *"AC-13's evidence-arrival lifecycle from 10.11b"* — is satisfied by this half. It still needs
+    **AC-19 from 10.11a**, which has not landed; per @po, if only one half lands in wave 6 the
+    dependency is **not** satisfied.
+
+what_must_not_be_undone:
+  - >-
+    Do not shorten the 1600 ms dwell in `studioRunTransport.node.test.tsx`. Measured here — at 400 ms
+    the AC-7 falsification passes silently. The number is the guard.
+  - >-
+    Do not remove `expect(api().streamRequests().length).toBe(1)` and
+    `expect(api().snapshotRequests().length).toBe(1)` from `SCN-DENY-401-STREAM`. Without them M6
+    leaves it green, satisfied by the fallback's denial branch instead of the stream's.
+  - >-
+    Do not replace AC-17's index-located frame assertions with "occurs somewhere". Two later frames
+    carry `logsTruncated: true`; that is what made it vacuous the first time.
+  - >-
+    Do not move the revision-ordering rule or the `streamComplete` close rule out of
+    `studioExecutionTransport.ts`. M13 shows the SSE ordering test stays green when they migrate into
+    the streaming implementation; only the fallback re-run catches it.
+  - >-
+    Do not flatten `REVISION_ORDERING_SEQUENCE`'s rev 6. P1 confirms the criterion-literal assertion
+    goes green with the ordering rule gone once rev 6 matches rev 7.
+  - >-
+    Do not turn the `EventSource` precondition into a `skipIf`. A skip there makes every streaming
+    test vacuous on a machine without the flag, silently.
+  - >-
+    Do not add a second `SseAuthMode`, a second `parseYaml` or a second Ajv instance. The first is
+    SPK-02's deferred header client and belongs behind the same seam; the other two are §18.3's.
+  - >-
+    Do not resolve MERGE-1 by taking either side of `handleRunTest` wholesale. See MERGE-1.
+  - >-
+    Do not tick AC-15(b) or AC-20(b) until `docs/qa/spikes/SPK-02/` exists and is signed.
+  - >-
+    Do not edit `studioEscalation.test.ts`. It is byte-unchanged at
+    `f7a8f98adc20b741b2cd8cc7bb23bcef7a982bf5aa8f35756f6da3e5c93ac5ea` and must stay red until
+    10.11c's amendment lands.
+
+final_decision:
+  gate: CONCERNS
+  merge: 'SAFE, with the MERGE-1 resolution rule stated in the merge commit'
+  rationale: >-
+    The transport is real work, honestly measured, and the one claim that could most easily have been
+    faked was not: AC-9's streaming proof survives the falsification the SSE assessment named in
+    advance, and I ran that falsification rather than reading about it. Ten mutations reproduce, all
+    six restores are byte-identical, all three self-caught repairs hold against the mutations they
+    originally missed, and both blocked criteria are genuinely unreachable — SPK-02 is OPEN and its
+    closing directory does not exist. The `EventSource` decision is option (a) as @po ruled it, adds
+    no dependency, and its guard fails rather than skips, which is what keeps every streaming test
+    from going vacuous elsewhere. AC-14(ii) is weak and its own wording says so, accurately; that is
+    the correct way to carry a weak criterion. @dev finding three of its own guards unfalsifiable and
+    **repairing rather than counting them** is the single best thing in this record.
+    It is CONCERNS rather than PASS for two reasons, neither of them in the transport. **SCEN-1** is a
+    real behaviour regression this half introduced into a shared file — making `handleScenarioSelect`
+    reachable was necessary and minimal, but the effect as written also fires on the create-scenario
+    path and snaps the selection back. **MERGE-1** is measured, not speculative: seven conflict
+    markers, and a resolution taking 10.11a's page wholesale reinstates the 700 ms poller that
+    10.11a deliberately kept, silently defeating AC-8 with the guard that would catch it sitting in
+    the other half's file. Both have concrete one-step remedies and both must be closed before the
+    two halves land, not after.
+    Three low findings are record accuracy rather than behaviour (**REC-1**, **REC-2**, **VAC-OBS**),
+    one is @po's filing (**T17-1**, and @dev's refusal to absorb it was right), and two are unowned
+    epic conditions reported rather than absorbed (**ENV-1**, **FLAKE-1**). **No seventeenth vacuous
+    shape was found** — two instances of catalogued shapes #15 and #9 in AC-9's ordering assertion,
+    both benign, both recorded so the next reader does not mistake the redundant line for the guard.

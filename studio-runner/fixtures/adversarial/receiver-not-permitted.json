@@ -1,0 +1,22 @@
+{
+  "name": "receiver-not-permitted",
+  "expectedClass": "RECEIVER_NOT_PERMITTED",
+  "description": "A permitted method on a non-permitted receiver.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "await browser.goto('https://example.com/');"
+      }
+    ]
+  }
+}

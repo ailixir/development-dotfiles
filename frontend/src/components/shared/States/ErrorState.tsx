@@ -1,5 +1,5 @@
+import { Alert, Button } from '@mui/material';
 import React from 'react';
-import { Alert, Button, Stack } from '@mui/material';
 
 interface ErrorStateProps {
   message?: string;

@@ -267,7 +267,7 @@ The following are implementation details specific to this agent that extend Brad
 |---------|------|-------|
 | YOLO Mode | Agent Enhancement | Parallel execution feature |
 | State Management (.state.yaml) | Agent Enhancement | Session persistence |
-| Specific Token Paths | Agent Enhancement | AIOS integration |
+| Specific Token Paths | Agent Enhancement | AIOX integration |
 | Tailwind v4 / Shadcn Integration | Agent Enhancement | Modern tooling choices |
 | OKLCH Color System | Agent Enhancement | Current best practice |
 

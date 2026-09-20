@@ -1,0 +1,22 @@
+{
+  "name": "locator-chain-invalid",
+  "expectedClass": "LOCATOR_CHAIN_INVALID",
+  "description": "An action called directly on page has no locator.",
+  "source": [
+    "Click the \"Submit\" button"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Click the \"Submit\" button",
+        "code": "await page.click();"
+      }
+    ]
+  }
+}

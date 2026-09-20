@@ -70,7 +70,8 @@ public class DcClient {
       if (status == 401 || status == 403 || status >= 500) {
         throw ex;
       }
-      // 4xx (other): return parsed envelope when possible so adapter can map business/contract fails
+      // 4xx (other): return parsed envelope when possible so adapter can map business/contract
+      // fails
       try {
         return parseBody(status, body);
       } catch (Exception parseEx) {

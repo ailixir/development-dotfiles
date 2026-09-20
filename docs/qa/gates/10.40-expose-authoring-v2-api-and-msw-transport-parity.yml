@@ -1,0 +1,33 @@
+schema: 1
+story: '10.40'
+story_title: 'Expose authoring v2 API and MSW transport parity'
+gate: PASS
+status_reason: 'Existing-route v2 negotiation is explicit and additive, and backend, centralized transport, and MSW preserve the same validation, revision, CSI, and non-mutation semantics. All focused contract and transport gates pass within the recorded frontend baseline.'
+reviewer: '@architect (independent quality gate)'
+reviewed_revision: 'working-tree:sha256:09b4612591fea6f80b74903ab44f0ec27d836f4734a990ab580b5c7772bd4c83'
+updated: '2026-09-19T00:06:47Z'
+top_issues: []
+waiver: { active: false }
+quality_score: 100
+evidence:
+  tests_reviewed: 37
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    ac_gaps: []
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Backend and mocks enforce CSI scope, evidence ownership, opaque secret references, and supplied-only provenance before persistence.'
+  performance:
+    status: PASS
+    notes: 'The composite service uses one bounded transaction and row lock; transport reuses the centralized client and existing MSW server.'
+  reliability:
+    status: PASS
+    notes: 'Revision CAS, failed-write non-mutation, legacy 409 fallback, and one-increment-per-dimension behavior are covered.'
+  maintainability:
+    status: PASS
+    notes: 'Request/response types compose canonical 10.36 types and route negotiation is isolated in one strict mapper and one transport module.'
+recommendations:
+  immediate: []
+  future: []

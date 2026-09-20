@@ -126,7 +126,7 @@ const CheckDetailsPage: React.FC = () => {
   };
 
   const copyOutput = async (text: string) => {
-    try { await navigator.clipboard.writeText(text); setSnack({ open: true, message: 'Output copied', severity: 'success' }); } catch {}
+    try { await navigator.clipboard.writeText(text); setSnack({ open: true, message: 'Output copied', severity: 'success' }); } catch { /* Clipboard permissions may deny this optional copy; keep the original output available. */ }
   };
 
   const avgDuration = history && history.length ? Math.round(history.reduce((a, c) => a + (c.duration || 0), 0) / history.length) : null;
@@ -184,7 +184,7 @@ const CheckDetailsPage: React.FC = () => {
                     onClick={() => {
                       const payload = createCommsTemplateFromCheckDetails({ id: check.id, name: check.name, status: check.status, csiId: check.csiId, csiName: check.csiName, type: check.type, tags: check.tags, configuration: check.configuration as unknown as Record<string, unknown> });
                       const handoffKey = `put:handoff:comms:${Date.now()}:${Math.random().toString(36).slice(2)}`;
-                      try { sessionStorage.setItem(handoffKey, JSON.stringify(payload)); sessionStorage.setItem('put:handoff:comms:latest', JSON.stringify(payload)); } catch {}
+                      try { sessionStorage.setItem(handoffKey, JSON.stringify(payload)); sessionStorage.setItem('put:handoff:comms:latest', JSON.stringify(payload)); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
                       navigate(`/comms?handoff=${encodeURIComponent(handoffKey)}`);
                     }}
                   >

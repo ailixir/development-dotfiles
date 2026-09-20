@@ -7,7 +7,7 @@ description: "This skill should be used when users want to understand the SYNAPS
 
 ## Overview
 
-SYNAPSE (Synkra Adaptive Processing & State Engine) is the unified context engine for AIOS. It injects contextual rules into every prompt via an 8-layer processing pipeline, adapting to context window usage through bracket-aware filtering.
+SYNAPSE (Synkra Adaptive Processing & State Engine) is the unified context engine for AIOX. It injects contextual rules into every prompt via an 8-layer processing pipeline, adapting to context window usage through bracket-aware filtering.
 
 **What it does:**
 - Injects rules per-prompt via Codex's `UserPromptSubmit` hook
@@ -18,7 +18,7 @@ SYNAPSE (Synkra Adaptive Processing & State Engine) is the unified context engin
 
 **What it replaces:** SYNAPSE replaces the legacy CARL system with full feature parity plus 8 new capabilities including agent-scoped domains, workflow activation, and CRUD management commands.
 
-**Architecture model:** Open Core — the 8-layer engine lives in `aios-core` (open source), memory integration is feature-gated in `aios-pro`.
+**Architecture model:** Open Core — the 8-layer engine lives in `aiox-core` (open source), memory integration is feature-gated in `aiox-pro`.
 
 ## Quick Start
 
@@ -57,10 +57,10 @@ This walks you through creating a new domain file + manifest entry. See [referen
 SYNAPSE operates as a 4-layer architecture:
 
 ```
-.Codex/hooks/synapse-engine.js          # Layer 1: Hook Entry (~50 lines)
+.codex/hooks/synapse-engine.js          # Layer 1: Hook Entry (~50 lines)
         |
         v imports
-.aios-core/core/synapse/                 # Layer 2: Engine Modules
+.aiox-core/core/synapse/                 # Layer 2: Engine Modules
 |-- engine.js                            #   SynapseEngine class
 |-- layers/                              #   8 layer processors (L0-L7)
 |-- session/session-manager.js           #   Session state (JSON v2.0)
@@ -78,7 +78,7 @@ SYNAPSE operates as a 4-layer architecture:
 |-- sessions/, cache/                    #   Session state (gitignored)
         |
         v user-invoked
-.Codex/commands/synapse/                # Layer 4: CRUD Commands + Skill Docs
+.codex/commands/synapse/                # Layer 4: CRUD Commands + Skill Docs
 |-- manager.md                           #   Router/dispatcher
 |-- tasks/ (6 tasks)                     #   create, add, edit, toggle, command, suggest
 ```
@@ -101,8 +101,8 @@ SYNAPSE operates as a 4-layer architecture:
 
 Templates for creating custom domains and manifest entries are maintained at:
 
-- **Domain template:** `.Codex/commands/synapse/templates/domain-template`
-- **Manifest entry template:** `.Codex/commands/synapse/templates/manifest-entry-template`
+- **Domain template:** `.codex/commands/synapse/templates/domain-template`
+- **Manifest entry template:** `.codex/commands/synapse/templates/manifest-entry-template`
 
 See [assets/README.md](assets/README.md) for details.
 
@@ -125,8 +125,8 @@ Full details: [references/commands.md](references/commands.md)
 
 | File | Purpose |
 |------|---------|
-| `.Codex/hooks/synapse-engine.js` | Hook entry point (UserPromptSubmit) |
-| `.aios-core/core/synapse/engine.js` | SynapseEngine orchestrator |
+| `.codex/hooks/synapse-engine.js` | Hook entry point (UserPromptSubmit) |
+| `.aiox-core/core/synapse/engine.js` | SynapseEngine orchestrator |
 | `.synapse/manifest` | Domain registry (KEY=VALUE) |
 | `.synapse/commands` | Star-command definitions |
-| `.Codex/commands/synapse/manager.md` | CRUD command router |
+| `.codex/commands/synapse/manager.md` | CRUD command router |

@@ -101,7 +101,13 @@ const config = {
         {
           from: path.resolve(process.cwd(), 'public'),
           to: '.',
-          globOptions: { ignore: ['**/index.html'] },
+          globOptions: {
+            // The mock service worker script is a development asset; a production build must not
+            // serve it (story 10.1, AC-16).
+            ignore: isDevelopment
+              ? ['**/index.html']
+              : ['**/index.html', '**/mockServiceWorker.js'],
+          },
           noErrorOnMissing: true,
         },
       ],
@@ -109,6 +115,14 @@ const config = {
     new webpack.DefinePlugin({
       'process.env.REACT_APP_API_BASE_URL': JSON.stringify(process.env.REACT_APP_API_BASE_URL || ''),
       'process.env.REACT_APP_STANDALONE': JSON.stringify(process.env.REACT_APP_STANDALONE || ''),
+      // Build-time gate for the MSW mocks (story 10.1, AC-16). Folded to the literal 'false' in a
+      // production build so webpack drops the dynamic import in MswGate and emits no msw chunk.
+      'process.env.MSW_BUNDLED': JSON.stringify(isDevelopment ? 'true' : 'false'),
+      // Runtime gate, same flag name Vite uses, default off. Webpack has no import.meta.env, so
+      // without this substitution MswGate's runtime check could never evaluate true here.
+      'process.env.VITE_ENABLE_MSW': JSON.stringify(
+        process.env.VITE_ENABLE_MSW === 'true' ? 'true' : 'false',
+      ),
     }),
     new webpack.ProvidePlugin({ process: 'process/browser', Buffer: ['buffer', 'Buffer'] }),
     isDevelopment && new ReactRefreshWebpackPlugin(),

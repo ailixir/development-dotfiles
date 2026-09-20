@@ -5,7 +5,9 @@ spring:
   datasource:
     # Testcontainers-JDBC magic URL: spins up a real postgres:15-alpine on first request.
     # @Testcontainers(disabledWithoutDocker = true) on the IT classes guards against missing Docker.
-    url: jdbc:tc:postgresql:15-alpine:///checks
+    # Cached Spring contexts share this URL. Closing a transient/last connection must not
+    # stop the database underneath another pool; Testcontainers cleans it up at JVM exit.
+    url: jdbc:tc:postgresql:15-alpine:///checks?TC_DAEMON=true
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     username: test
     password: test
@@ -15,3 +17,38 @@ logging:
     root: INFO
     com.citi.put.checks: DEBUG
     org.flywaydb: INFO
+
+# Studio secret resolution (§9.2, story 10.17 AC-9).
+#
+# `provider` has NO default anywhere — not here, not in application.yml, not in code. A deployed
+# profile that does not name a provider refuses to start rather than falling back to anything, and
+# `fake` is confined to the test/local/dev profiles. A silent fallback to a fake vault is the worst
+# failure mode this path can have, and it is cheaper to make impossible than to detect.
+studio:
+  storage:
+    provider: fake
+  secrets:
+    vault:
+      provider: fake
+
+# ── ED-02 in the TEST profile — one of the three opened, deliberately (story 10.18b, AC-19a) ────
+#
+# `core-service` and `csi-read` are left at their new default of **false**, so the suite observes
+# the closure rather than being insulated from it. That is the point of the change: with the
+# hardcoded `return true` gone, a request with no session cookie now gets a 401, which is what the
+# epic's ED-02 failing tests have been asserting all along.
+#
+# `identity-headers` is **true here and nowhere else**. Twelve integration-test files inject their
+# caller with `X-User-Id` / `X-User-Roles`; that is the suite's identity-injection mechanism, not a
+# production behaviour, and closing it inside a Studio story would conflate ED-02's closure with a
+# suite-wide test-harness migration that no story owns.
+#
+# **This profile is never deployed.** What the deployed profiles do is asserted over the *rendered*
+# manifest (all three false in every one of the four value sets), and the closure itself is driven
+# against the production filter under both values of each property in
+# `BffSessionBypassClosureTest` — refusals with a permit companion each, so a flag that stopped
+# discriminating cannot hide behind a passing test.
+checks:
+  security:
+    bypass:
+      identity-headers: true

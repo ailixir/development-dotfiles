@@ -67,7 +67,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({ value, onChange, availableTag
   }, [csiInput]);
 
   useEffect(() => {
-    let active = true;
+    const active = true;
     setTagsLoading(true);
     apiClient.get('/tags')
       .then((res: any) => {

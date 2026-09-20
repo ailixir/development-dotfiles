@@ -1,0 +1,22 @@
+{
+  "name": "option-unknown-key",
+  "expectedClass": "OPTION_UNKNOWN_KEY",
+  "description": "An option key outside the schema is rejected.",
+  "source": [
+    "Go to \"https://example.com/\""
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://example.com/\"",
+        "code": "await page.goto('https://example.com/', { referer: 'https://evil.example/' });"
+      }
+    ]
+  }
+}

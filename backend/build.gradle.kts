@@ -9,6 +9,11 @@ plugins {
     jacoco
 }
 
+// Keep every Testcontainers module on the explicitly selected version; Boot otherwise
+// managed JDBC/core at 1.19.8 beside the declared PostgreSQL/JUnit 1.20.2 modules.
+val testcontainersVersion = "1.20.2"
+extra["testcontainers.version"] = testcontainersVersion
+
 group = "com.citi.put"
 version = "0.1.0-SNAPSHOT"
 description = "PUT Checks — backend service"
@@ -26,6 +31,9 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    // The Prometheus scrape format for /actuator/prometheus. The worker exposes it on its
+    // cluster-internal port only; the Studio runner autoscaler reads studio_dispatch_backlog from it.
+    implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
@@ -42,6 +50,97 @@ dependencies {
     implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.16.0")
 
+    implementation(platform("software.amazon.awssdk:bom:2.54.19"))
+    implementation("software.amazon.awssdk:s3") {
+        // Keep Spring's existing HTTP client selection; Apache 5 otherwise adds automatic 429 retries.
+        exclude(group = "software.amazon.awssdk", module = "apache5-client")
+        exclude(group = "software.amazon.awssdk", module = "apache-client")
+        exclude(group = "software.amazon.awssdk", module = "netty-nio-client")
+    }
+    implementation("software.amazon.awssdk:url-connection-client")
+    implementation("software.amazon.awssdk:sts") {
+        // Keep Spring's existing HTTP client selection; Apache 5 otherwise adds automatic 429 retries.
+        exclude(group = "software.amazon.awssdk", module = "apache5-client")
+        exclude(group = "software.amazon.awssdk", module = "apache-client")
+        exclude(group = "software.amazon.awssdk", module = "netty-nio-client")
+    }
+
+    // Maintained production SDK. SPK-01 still gates live R2D2 enablement.
+    // Legacy Vertex classes below are test-only historical regression fixtures.
+    implementation("com.google.api:gax:2.76.0")
+    implementation("com.google.genai:google-genai:1.71.0")
+    testImplementation("com.google.cloud:google-cloud-vertexai:1.52.0") {
+        // gRPC transport plugins, load balancers and the bundled TLS provider — grpc only.
+        exclude(group = "io.grpc", module = "grpc-netty-shaded")
+        exclude(group = "io.grpc", module = "grpc-xds")
+        exclude(group = "io.grpc", module = "grpc-alts")
+        exclude(group = "io.grpc", module = "grpc-grpclb")
+        exclude(group = "io.grpc", module = "grpc-googleapis")
+        exclude(group = "io.grpc", module = "grpc-services")
+        exclude(group = "org.conscrypt", module = "conscrypt-openjdk-uber")
+        exclude(group = "io.perfmark", module = "perfmark-api")
+        exclude(group = "com.google.re2j", module = "re2j")
+        // gRPC runtime: channel implementation, generated-stub support and the in-process
+        // transport. Only the three Grpc*Stub classes need them and the httpjson path never
+        // loads those. KEPT ON PURPOSE: io.grpc:grpc-api and com.google.api:gax-grpc —
+        // PredictionServiceStubSettings.createStub() tests `instanceof GrpcTransportChannel`
+        // before it reaches the httpjson branch, so both are required at runtime even here.
+        exclude(group = "io.grpc", module = "grpc-core")
+        exclude(group = "io.grpc", module = "grpc-inprocess")
+        exclude(group = "io.grpc", module = "grpc-util")
+        exclude(group = "io.grpc", module = "grpc-auth")
+        exclude(group = "io.grpc", module = "grpc-stub")
+        exclude(group = "io.grpc", module = "grpc-protobuf")
+        exclude(group = "io.grpc", module = "grpc-protobuf-lite")
+        // gRPC service stubs for common/IAM protos. The proto-google-* message jars are kept:
+        // httpjson transcodes the same protobuf messages.
+        exclude(group = "com.google.api.grpc", module = "grpc-google-common-protos")
+        exclude(group = "com.google.api.grpc", module = "grpc-google-iam-v1")
+        // com.google.genai — the standalone Google Gen AI SDK. Dev Decision 3 chose the
+        // VertexAI/GenerativeModel surface precisely so this artifact would not be adopted, but
+        // the flattened POM ships it anyway. Every reference to com.google.genai inside
+        // google-cloud-vertexai-1.52.0 is confined to com.google.cloud.vertexai.genai.*, which
+        // this client never touches; VertexAI, GenerativeModel and ResponseHandler have none.
+        // okhttp/okio/Java-WebSocket/kotlin-stdlib are its transport and come with it.
+        exclude(group = "com.google.genai", module = "google-genai")
+        exclude(group = "com.squareup.okhttp3", module = "okhttp")
+        exclude(group = "com.squareup.okio", module = "okio")
+        exclude(group = "com.squareup.okio", module = "okio-jvm")
+        exclude(group = "org.java-websocket", module = "Java-WebSocket")
+        exclude(group = "org.jetbrains.kotlin")
+    }
+
+    // Runtime artifact-schema validation for the LLM gateway response parser (Story 10.5, AC-7).
+    implementation("com.networknt:json-schema-validator:1.4.0")
+
+    // ADR-001 exact pinning for what survives the exclusions above. google-cloud-vertexai
+    // declares these without a BOM, so without constraints their versions move whenever the
+    // Vertex pin moves. Each value is the version actually resolved and tested at 1.52.0.
+    // These are `require` constraints: they make the resolved set explicit and reviewable and
+    // hold the floor, but a later Vertex pin asking for a higher version still wins conflict
+    // resolution — SPK-01 must re-review this list whenever the Vertex version changes.
+    constraints {
+        implementation("com.google.api:api-common:2.59.0")
+        implementation("com.google.api:gax:2.76.0")
+        implementation("com.google.api:gax-httpjson:2.76.0")
+        implementation("com.google.api:gax-grpc:2.76.0")
+        implementation("com.google.api.grpc:proto-google-cloud-vertexai-v1:1.52.0")
+        implementation("com.google.api.grpc:proto-google-common-protos:2.67.0")
+        implementation("com.google.api.grpc:proto-google-iam-v1:1.62.0")
+        implementation("com.google.auth:google-auth-library-credentials:1.43.0")
+        implementation("com.google.auth:google-auth-library-oauth2-http:1.43.0")
+        implementation("com.google.http-client:google-http-client:2.1.0")
+        implementation("com.google.http-client:google-http-client-gson:2.1.0")
+        implementation("com.google.protobuf:protobuf-java:4.33.2")
+        implementation("com.google.protobuf:protobuf-java-util:4.33.2")
+        implementation("com.google.guava:guava:33.5.0-jre")
+        implementation("io.grpc:grpc-api:1.76.3")
+        implementation("io.grpc:grpc-context:1.76.3")
+        implementation("io.opencensus:opencensus-api:0.31.1")
+        implementation("io.opencensus:opencensus-contrib-http-util:0.31.1")
+        implementation("org.threeten:threetenbp:1.7.0")
+    }
+
     implementation("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
@@ -53,10 +152,9 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.assertj:assertj-core")
-    testImplementation("com.networknt:json-schema-validator:1.4.0")
     testImplementation("io.zonky.test:embedded-database-spring-test:2.5.1")
-    testImplementation("org.testcontainers:postgresql:1.20.2")
-    testImplementation("org.testcontainers:junit-jupiter:1.20.2")
+    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
     testImplementation("org.wiremock:wiremock-standalone:3.3.1")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("com.icegreen:greenmail-junit5:2.0.1")
@@ -73,11 +171,26 @@ tasks.withType<JavaCompile>().configureEach {
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     include("**/*Test.class", "**/*IT.class")
+    // Story 10.7 AC-33 runs a *second* Spring application context with its own embedded servlet
+    // container inside one test. That second container's threads keep the Gradle worker JVM alive
+    // past the end of the class, so with forkEvery the worker cannot be recycled and the whole
+    // run stalls. The test itself is sound and is not weakened: it is moved to its own forked
+    // task below, which is wired into `check`, rather than deleted, downgraded or quarantined.
+    exclude("**/SseCrossReplicaIT.class")
     testLogging {
         events("passed", "skipped", "failed")
     }
     jvmArgs("-Xmx1g")
     forkEvery = 12
+
+    // Keep context reuse bounded and efficient. The test profile explicitly uses TC_DAEMON=true,
+    // so connection/pool churn cannot stop its shared database while cached contexts still use it.
+    systemProperty("spring.test.context.cache.maxSize", "64")
+
+    // The Studio recording route is exercised against the in-memory FakeVideoObjectStore. Outside
+    // tests the provider defaults to `none`, and snapshots report recordings UNAVAILABLE instead
+    // of offering a player the route can only answer with 404 (application.yml).
+    systemProperty("studio.execution.video-store.provider", "in-memory")
 }
 
 spotless {
@@ -149,7 +262,91 @@ tasks.jacocoTestCoverageVerification {
                 minimum = "0.70".toBigDecimal()
             }
         }
+        // Story 10.5 AC-15: the R2D2 gateway client carries a higher bar than the repo baseline.
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.compile.gateway")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+        // Story 10.7 AC-40: the dispatch and internal-callback packages carry their own
+        // thresholds so the new surface cannot hide inside the bundle figure. These are the
+        // reliability guarantees of Epic 10; a package-level number is the only way to notice
+        // that one of them arrived untested.
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.dispatch")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.internal")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.recovery")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.sse")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
+        // Story 10.9 AC-23: the compile package is this story's main new surface — the repair
+        // loop, the confirmation transaction and the abandoned-compile sweep all live in it. The
+        // bar matches the one story 10.5 set for its sibling `.gateway` package, for the same
+        // reason 10.7 gave: a package-level number is the only way to notice that one of these
+        // arrived untested, because the bundle figure absorbs it. Measured 90.6% when the rule was
+        // added, so this enforces what was measured rather than raising the bar to it.
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.citi.put.checks.studio.compile")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
     }
+}
+
+/**
+ * Story 10.7 AC-33 — cross-replica SSE visibility, in its own JVM.
+ *
+ * It runs two application contexts against one database, and the second one's embedded servlet
+ * container outlives the test class. One class per fork keeps that contained.
+ */
+tasks.register<Test>("crossReplicaTest") {
+    description = "Story 10.7 AC-33: two application contexts, one database, in an isolated JVM."
+    group = "verification"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    useJUnitPlatform()
+    setIncludes(listOf("**/SseCrossReplicaIT.class"))
+    setExcludes(emptyList<String>())
+    forkEvery = 1
+    jvmArgs("-Xmx1g")
+    testLogging { events("passed", "skipped", "failed") }
 }
 
 tasks.register<RdsParityLintTask>("rdsParityLint") {
@@ -192,7 +389,23 @@ tasks.register("antiRegressionCheck") {
 }
 
 tasks.check {
+    dependsOn("crossReplicaTest")
     dependsOn(tasks.jacocoTestCoverageVerification)
     dependsOn("rdsParityLint")
     dependsOn("antiRegressionCheck")
 }
+
+// Mixed JDBC/core/database modules caused intermittent initialization retries in the full suite.
+tasks.register("testcontainersAlignmentCheck") {
+    group = "verification"
+    doLast {
+        val modules = configurations["testRuntimeClasspath"].resolvedConfiguration.resolvedArtifacts
+            .map { it.moduleVersion.id }
+            .filter { it.group == "org.testcontainers" }
+        check(modules.isNotEmpty() && modules.all { it.version == testcontainersVersion }) {
+            "Testcontainers modules must all resolve to $testcontainersVersion: ${modules.joinToString()}"
+        }
+        logger.lifecycle("testcontainersAlignmentCheck: ${modules.size} modules aligned at $testcontainersVersion")
+    }
+}
+tasks.named("check") { dependsOn("testcontainersAlignmentCheck") }

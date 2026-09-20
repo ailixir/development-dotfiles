@@ -1,0 +1,124 @@
+package com.citi.put.checks.studio.dispatch;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+/**
+ * The job envelope the dispatcher sends to the runner (§8.4, contract {@code RunJob}).
+ *
+ * <p><b>Fourteen fields, because the contract closes this body at fourteen.</b> {@code
+ * additionalProperties: false} plus fourteen {@code required} names means the runner accepts the
+ * body or refuses it; there is no partial credit. Until story 10.17 this record carried eight
+ * fields of which four — {@code testId}, {@code csiId}, {@code environment} and {@code
+ * callbackBaseUrl} — were not properties of the closed body at all, and ten required fields were
+ * absent. Every real dispatch was refused {@code 400 JOB_INVALID} by the runner's {@code
+ * validateEnvelope}, which runs as step 1 of {@code submit}, before capacity and before any
+ * artifact check, and ended {@code ERROR / DISPATCH_FAILED}. No test in either tree looked.
+ *
+ * <p>{@code callbackBaseUrl} deserves its own sentence, because it was not merely an extra key.
+ * §8.4 makes the callback destination deployment configuration and <em>"never arbitrary
+ * job-supplied URL"</em>, and the runner keeps a {@code CALLBACK_SHAPED_KEYS} list whose sole
+ * purpose is to refuse that class of key by name with a dedicated code. This API's own dispatcher
+ * was tripping the one control the closed key set exists to enforce. The destination is the
+ * runner's {@code STUDIO_RUNNER_CALLBACK_BASE_URL} and it is not this body's business.
+ *
+ * <p>It still carries <b>typed reference declarations</b> — names, never values, for the artifact
+ * to name — and it now <em>also</em> carries the two ephemeral resolved maps the contract has
+ * declared all along. The javadoc sentence this record used to carry, <em>"It carries declared
+ * reference names and never resolved values (§9.2): the runner holds no vault credential and has
+ * nothing to do with a value"</em>, was half right and half exactly backwards: §9.2 says the runner
+ * <em>"may receive per-run values"</em>, and holding no vault credential is precisely <b>why</b>
+ * the worker must hand them over.
+ *
+ * <p>It carries no approved-target or secret-use policy field. ADR-002 O-6 is still open and SPK-05
+ * has not ruled between carrying that policy on the job and enforcing it solely at the egress
+ * layer; adding a field to a closed runner-consumed body is §12 Class B, which an architect must
+ * rule on first and which a story may propose but not land. What is decidable today — which policy
+ * identity this dispatch ran under — is recorded on the execution instead.
+ *
+ * @param executionId the execution
+ * @param attemptId this attempt, never reused
+ * @param revisionId the confirmed revision the execution snapshotted
+ * @param artifactHash the canonical artifact hash from that revision (§4.2, §8.1)
+ * @param artifact the immutable confirmed artifact from that revision (§4.4, §8.1)
+ * @param source the ordered source lines from that revision, references still opaque
+ * @param configuration the nonsecret configuration from that revision (§8.1); clamping is the
+ *     runner's (10.13 AC-6) and nothing is clamped here
+ * @param csi the execution's own immutable CSI (§8.1, §9.1), replacing the forbidden {@code csiId}
+ * @param references the typed declaration (§4.5, §8.3), replacing the flat array
+ * @param resolvedVars ephemeral resolved variable values (§8.4, §9.2)
+ * @param resolvedSecrets ephemeral resolved secret values (§8.4, §9.2)
+ * @param deadlines §8.5's admitted-start and runtime values, sent faithfully
+ * @param videoKey the server-derived video key (§6.2); deriving a key is not writing an object
+ * @param manifestKey the server-derived result manifest key (§5.3, §6.2)
+ */
+public record RunJob(
+    UUID executionId,
+    UUID attemptId,
+    UUID revisionId,
+    String artifactHash,
+    JsonNode artifact,
+    List<String> source,
+    JsonNode configuration,
+    String csi,
+    ReferenceDeclarations references,
+    Map<String, String> resolvedVars,
+    Map<String, String> resolvedSecrets,
+    JobDeadlines deadlines,
+    String videoKey,
+    String manifestKey,
+    JsonNode expectedIntent) {
+
+  public RunJob(
+      UUID executionId,
+      UUID attemptId,
+      UUID revisionId,
+      String artifactHash,
+      JsonNode artifact,
+      List<String> source,
+      JsonNode configuration,
+      String csi,
+      ReferenceDeclarations references,
+      Map<String, String> resolvedVars,
+      Map<String, String> resolvedSecrets,
+      JobDeadlines deadlines,
+      String videoKey,
+      String manifestKey) {
+    this(
+        executionId,
+        attemptId,
+        revisionId,
+        artifactHash,
+        artifact,
+        source,
+        configuration,
+        csi,
+        references,
+        resolvedVars,
+        resolvedSecrets,
+        deadlines,
+        videoKey,
+        manifestKey,
+        null);
+  }
+
+  /**
+   * Server-issued deadlines (§8.5, contract {@code JobDeadlines}).
+   *
+   * @param admittedStartMs how long an admitted run may take to start a browser
+   * @param totalRuntimeMs the browser runtime cap, parent-enforced (§5.2)
+   */
+  public record JobDeadlines(long admittedStartMs, long totalRuntimeMs) {}
+
+  /** The §6.2 video key template. Derived from immutable execution identity, never supplied. */
+  public static String videoKeyFor(String csiId, UUID testId, UUID executionId, UUID attemptId) {
+    return "studio/" + csiId + '/' + testId + '/' + executionId + '/' + attemptId + ".webm";
+  }
+
+  /** The §6.2 result manifest key template. */
+  public static String manifestKeyFor(String csiId, UUID testId, UUID executionId, UUID attemptId) {
+    return "studio/" + csiId + '/' + testId + '/' + executionId + '/' + attemptId + ".result.json";
+  }
+}

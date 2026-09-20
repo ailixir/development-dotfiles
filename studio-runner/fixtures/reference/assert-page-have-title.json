@@ -1,0 +1,38 @@
+{
+  "name": "assert-page-have-title",
+  "description": "expect(page).toHaveTitle with a safe regular expression.",
+  "source": [
+    "Check that the page title mentions Checks"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "values": {
+    "variables": {},
+    "secrets": {}
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Check that the page title mentions Checks",
+        "code": "await expect(page).toHaveTitle(/Checks/i);"
+      }
+    ]
+  },
+  "expectedCalls": [
+    {
+      "method": "expectTitle",
+      "args": [
+        {
+          "kind": "pattern",
+          "source": "Checks",
+          "flags": "i"
+        },
+        null
+      ]
+    }
+  ]
+}

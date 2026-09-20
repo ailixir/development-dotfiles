@@ -1,0 +1,22 @@
+{
+  "name": "method-locator-nth",
+  "expectedClass": "METHOD_NOT_PERMITTED",
+  "description": "Locator methods outside the permitted list are rejected.",
+  "source": [
+    "Click the \"Submit\" button"
+  ],
+  "references": {
+    "variables": [],
+    "secrets": []
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Click the \"Submit\" button",
+        "code": "await page.getByRole('button').nth(2).click();"
+      }
+    ]
+  }
+}

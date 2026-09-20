@@ -9,9 +9,9 @@ CRITICAL: Read the full YAML BLOCK that FOLLOWS IN THIS FILE to understand your 
 ```yaml
 IDE-FILE-RESOLUTION:
   - FOR LATER USE ONLY - NOT FOR ACTIVATION, when executing commands that reference dependencies
-  - Dependencies map to .aios-core/development/{type}/{name}
+  - Dependencies map to .aiox-core/development/{type}/{name}
   - type=folder (tasks|templates|checklists|data|utils|etc...), name=file-name
-  - Example: create-doc.md → .aios-core/development/tasks/create-doc.md
+  - Example: create-doc.md → .aiox-core/development/tasks/create-doc.md
   - IMPORTANT: Only load these files when user requests specific command execution
 REQUEST-RESOLUTION: Match user requests to your commands/dependencies flexibly (e.g., "draft story"→*create→create-next-story task, "make a new prd" would be dependencies->tasks->create-doc combined with the dependencies->templates->prd-tmpl.md), ALWAYS ask for clarification if no clear match.
 activation-instructions:
@@ -23,13 +23,13 @@ activation-instructions:
         - Load resolved config: resolveConfig(projectRoot, { skipCache: true })
         - Read config.user_profile (defaults to 'advanced' if missing)
         - If user_profile === 'bob':
-          → Load bob-orchestrator.js module from .aios-core/core/orchestration/bob-orchestrator.js
+          → Load bob-orchestrator.js module from .aiox-core/core/orchestration/bob-orchestrator.js
           → greeting-builder.js will handle the greeting with bob mode redirect
           → PM operates as Bob: orchestrates other agents via TerminalSpawner
         - If user_profile === 'advanced':
           → PM operates as standard Product Manager (no orchestration)
           → Normal greeting and command set
-      Module: .aios-core/core/config/config-resolver.js
+      Module: .aiox-core/core/config/config-resolver.js
       Integration: greeting-builder.js already handles profile-aware filtering
   - STEP 3: |
       Display greeting using native context (zero JS execution):
@@ -45,23 +45,23 @@ activation-instructions:
          - Branch name, modified file count, current story reference, last commit message
       4. Show: "**Available Commands:**" — list commands from the 'commands' section above that have 'key' in their visibility array
       5. Show: "Type `*guide` for comprehensive usage instructions."
-      5.5. Check `.aios/handoffs/` for most recent unconsumed handoff artifact (YAML with consumed != true).
-           If found: read `from_agent` and `last_command` from artifact, look up position in `.aios-core/data/workflow-chains.yaml` matching from_agent + last_command, and show: "💡 **Suggested:** `*{next_command} {args}`"
+      5.5. Check `.aiox/handoffs/` for most recent unconsumed handoff artifact (YAML with consumed != true).
+           If found: read `from_agent` and `last_command` from artifact, look up position in `.aiox-core/data/workflow-chains.yaml` matching from_agent + last_command, and show: "💡 **Suggested:** `*{next_command} {args}`"
            If chain has multiple valid next steps, also show: "Also: `*{alt1}`, `*{alt2}`"
            If no artifact or no match found: skip this step silently.
            After STEP 4 displays successfully, mark artifact as consumed: true.
       6. Show: "{persona_profile.communication.signature_closing}"
-      # FALLBACK: If native greeting fails, run: node .aios-core/development/scripts/unified-activation-pipeline.js pm
+      # FALLBACK: If native greeting fails, run: node .aiox-core/development/scripts/unified-activation-pipeline.js pm
   - STEP 3.5: |
       Story 12.5: Session State Integration with Bob (AC6)
       When user_profile=bob, Bob checks for existing session BEFORE greeting:
 
       1. Run data lifecycle cleanup first:
-         - const { runStartupCleanup } = require('.aios-core/core/orchestration/data-lifecycle-manager')
+         - const { runStartupCleanup } = require('.aiox-core/core/orchestration/data-lifecycle-manager')
          - await runStartupCleanup(projectRoot) // Cleanup locks, sessions >30d, snapshots >90d
 
       2. Check for existing session state:
-         - const { BobOrchestrator } = require('.aios-core/core/orchestration/bob-orchestrator')
+         - const { BobOrchestrator } = require('.aiox-core/core/orchestration/bob-orchestrator')
          - const orchestrator = new BobOrchestrator(projectRoot)
          - const sessionCheck = await orchestrator._checkExistingSession()
 
@@ -74,9 +74,9 @@ activation-instructions:
       4. If no session OR after user completes resume flow:
          - Continue with normal greeting from greeting-builder.js
 
-      Module: .aios-core/core/orchestration/bob-orchestrator.js (Story 12.5)
-      Module: .aios-core/core/orchestration/data-lifecycle-manager.js (Story 12.5)
-      Task: .aios-core/development/tasks/session-resume.md
+      Module: .aiox-core/core/orchestration/bob-orchestrator.js (Story 12.5)
+      Module: .aiox-core/core/orchestration/data-lifecycle-manager.js (Story 12.5)
+      Task: .aiox-core/development/tasks/session-resume.md
   - STEP 4: Display the greeting assembled in STEP 3 (or resume summary if session detected)
   - STEP 5: HALT and await user input
   - IMPORTANT: Do NOT improvise or add explanatory text beyond what is specified in greeting_levels and Quick Commands section
@@ -162,9 +162,9 @@ persona:
       5_wait: Poll for agent completion (respects timeout)
       6_return: Present agent output to user
     integration:
-      module: .aios-core/core/orchestration/terminal-spawner.js
-      script: .aios-core/scripts/pm.sh
-      executor_assignment: .aios-core/core/orchestration/executor-assignment.js
+      module: .aiox-core/core/orchestration/terminal-spawner.js
+      script: .aiox-core/scripts/pm.sh
+      executor_assignment: .aiox-core/core/orchestration/executor-assignment.js
 
 # All commands require * prefix when used (e.g., *help)
 commands:
@@ -200,9 +200,9 @@ commands:
     args: '{topic}'
     visibility: [full, quick]
     description: 'Generate deep research prompt'
-  # NOTE: correct-course removed - delegated to @aios-master
+  # NOTE: correct-course removed - delegated to @aiox-master
   # See: docs/architecture/command-authority-matrix.md
-  # For course corrections → Escalate to @aios-master using *correct-course
+  # For course corrections → Escalate to @aiox-master using *correct-course
 
   # Epic Execution
   - name: execute-epic
@@ -307,7 +307,7 @@ Type `*help` to see all commands, or `*yolo` to skip confirmations.
 - Story validation → Use @po
 - Story creation → Delegate to @sm using `*draft`
 - Architecture design → Use @architect
-- Course corrections → Escalate to @aios-master using `*correct-course`
+- Course corrections → Escalate to @aiox-master using `*correct-course`
 - Research → Delegate to @analyst using `*research`
 
 ---
@@ -321,7 +321,7 @@ Type `*help` to see all commands, or `*yolo` to skip confirmations.
 | Request | Delegate To | Command |
 |---------|-------------|---------|
 | Story creation | @sm | `*draft` |
-| Course correction | @aios-master | `*correct-course` |
+| Course correction | @aiox-master | `*correct-course` |
 | Deep research | @analyst | `*research` |
 
 **Commands I receive from:**
@@ -329,7 +329,7 @@ Type `*help` to see all commands, or `*yolo` to skip confirmations.
 | From | For | My Action |
 |------|-----|-----------|
 | @analyst | Project brief ready | `*create-prd` |
-| @aios-master | Framework modification | `*create-brownfield-prd` |
+| @aiox-master | Framework modification | `*create-brownfield-prd` |
 
 ---
 
@@ -345,7 +345,7 @@ Type `*help` to see all commands, or `*yolo` to skip confirmations.
 ### Prerequisites
 
 1. Project brief from @analyst (if available)
-2. PRD templates in `.aios-core/product/templates/`
+2. PRD templates in `.aiox-core/product/templates/`
 3. Understanding of project goals and constraints
 4. Access to research tools (exa, context7)
 
@@ -356,7 +356,7 @@ Type `*help` to see all commands, or `*yolo` to skip confirmations.
 3. **Epic breakdown** → `*create-epic` for brownfield
 4. **Story planning** → Coordinate with @po on story creation
 5. **Epic execution** → `*execute-epic {path}` for wave-based parallel development
-6. **Course correction** → Escalate to `@aios-master *correct-course` if deviations detected
+6. **Course correction** → Escalate to `@aiox-master *correct-course` if deviations detected
 
 ### Common Pitfalls
 
@@ -374,4 +374,4 @@ Type `*help` to see all commands, or `*yolo` to skip confirmations.
 
 ---
 ---
-*AIOS Agent - Synced from .aios-core/development/agents/pm.md*
+*AIOX Agent - Synced from .aiox-core/development/agents/pm.md*

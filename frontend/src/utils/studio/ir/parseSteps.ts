@@ -1,4 +1,4 @@
-import type { StepIR, TestIR } from '@/types/studio/studioTypes';
+import type { StepIR, TestIR } from '@/types/studio/legacyTestIr';
 
 let idCounter = 0;
 function nextId(prefix: string) {
@@ -33,8 +33,8 @@ export function parsePlainStepsToIR(lines: string[]): StepIR[] {
       const rawVal = valueMatch ? valueMatch[1] : '';
       const targetFieldText = fieldMatch ? fieldMatch[1] : undefined;
       // Recognize token formats: <var NAME> or <secret SECRET_ID>
-      const varToken = rawVal.match(/^<var\s+([A-Z0-9_\-]+)>$/i);
-      const secretToken = rawVal.match(/^<secret\s+([A-Za-z0-9_\-]+)>$/i);
+      const varToken = rawVal.match(/^<var\s+([A-Z0-9_-]+)>$/i);
+      const secretToken = rawVal.match(/^<secret\s+([A-Za-z0-9_-]+)>$/i);
       const value = secretToken
         ? { secretId: secretToken[1] }
         : varToken

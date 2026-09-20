@@ -1,0 +1,288 @@
+schema: 1
+story: '10.32'
+story_title: Runner seek calibration setting and seek-measurement diagnostics (ADR-002 O-20, §26)
+epic: EPIC-10
+story_file: docs/stories/10.32.story.md
+
+gate: CONCERNS
+
+status_reason: >-
+  Every guard AC is falsifiable and every falsification reproduces. Six of the developer's rows were
+  re-run by this reviewer (M3, M4, M5, M7, M8, M10) and all six reddened with the predicted tests;
+  M7 reddened through real Chromium ("expected 5 to be +0"), which also proves the ready echo is
+  live end to end. The F-7 text-read constraint this story had to obey still holds and still fails
+  loudly: outside comments `MEDIAN_TOLERANCE_MS` occurs exactly twice, the assertion occurs once,
+  the block-comment count is identical to the base (6/6), and S7 applied to the real file, the name
+  interpolated into the new message, a `/*` inside the new message and a trailing space on the
+  declaration each stop `webm.test.ts` from loading with the expected message. The declaration and
+  `OUTLIER_BOUND_MS` line hashes are byte-identical to the base. Tiers reproduce: 984/29 twice,
+  90/10 twice, 184 passed / 4 AC-18 EXPECTED RED, lint clean, one pre-existing type error.
+  CONCERNS rather than PASS for two reasons, neither a defect in the code: (1) the `ready`-echo
+  design is sound and leak-free but it is an unratified scope extension touching five files, not the
+  one the Dev Agent Record enumerates, and @po has not ruled; (2) the `_helpers.tpl` line cannot be
+  merged from either side's gate, and the merged key-count comment must read "thirty-six", which
+  neither side currently writes. Both are pre-merge actions, not rework.
+
+reviewer: Quinn (@qa)
+reviewed_revision: 'commit:af8b12171'
+updated: '2026-09-17T15:05:00Z'
+branch: story/10.32
+head_sha: af8b12171
+base_sha: 714dc4553
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.32
+host_load: >-
+  Load average 11-27 throughout (a shared host running several agents). Recorded because the
+  fixtures tier is timing-sensitive and one inner run came within 2.5 ms of its bound (see
+  observations.seek_margin).
+
+harness: >-
+  Node, in a private mktemp directory under $TMPDIR (qa1032-<pid>-XXXX), never in the shared session
+  scratchpad. Each mutation asserts its anchor occurs exactly once and aborts on "no change"; each
+  restore copies back the pre-mutation bytes and asserts sha256, printing RESTORED-OK. Every row
+  printed RESTORED-OK. After all batches `git status --short` was empty and six tracked files were
+  compared to `git show HEAD:<path>` and matched:
+  timeline.ts 7d7e0bfd91065b61, main.ts 7f73e709b51f03a8, childRuntime.ts 3e432760d44286d9,
+  realRunner.ts c7008cc3bb20f565, _helpers.tpl 7594a1bb9e6505f9,
+  seek-measurement.test.ts 259338c81c9afe42.
+  Two throwaway test files were created and deleted within the same command (the echo-leak probe and
+  a loader edge-value probe); `git status` was empty afterwards. No worktree other than wt/10.32 was
+  written to; wt/epic was read only, with `git status` and `grep`.
+
+ac_verdicts:
+  AC-1:
+    verdict: PASS
+    evidence: >-
+      `KEY_SPECS.SEEK_ORIGIN_CALIBRATION_MS` is integer/min 0/fallback 0/not required, and the loader
+      now enumerates 32 keys (counted). Independently probed through `loadConfig`: `"-50"` produces
+      `STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS must be a non-negative integer; got "-50".`, naming
+      the key. M1/M2 were not re-run by this reviewer; M2's target (the `fallback`) is covered
+      transitively by the "reads 0 when the deployment does not set it" test, which E-probes exercise.
+  AC-2:
+    verdict: PASS
+    evidence: >-
+      M3 (sign flip) → 3 red: timeline property (2), the startedAt/monotonicZero test, and
+      childRuntime's applied-calibration test. M4 (offset moved into the `clock.now()` closure) →
+      the same 3 red, property (1) green, exactly as the story predicted. Both restored to
+      7d7e0bfd91065b61.
+  AC-3:
+    verdict: PASS
+    evidence: >-
+      M5 (the `main.ts` line removed) → 2 red in production-seams: the `PRODUCTION_KEYS` key-set
+      equality and the configured-value assertion. The chain was also read file by file; the child
+      genuinely applies the value (childRuntime test asserts step starts at 250, not 300, under
+      N = 50).
+  AC-4:
+    verdict: CONCERNS
+    evidence: >-
+      M7 (`realRunner.ts` literal 0 → 5) → the new fixtures test red through a real Chromium run,
+      "expected 5 to be +0". The pin is real, not inferred. CONCERNS is about the mechanism that
+      makes it readable, not the pin: see finding SCOPE-1. The other six fixtures-tier sites still
+      rely on a literal plus the required field (the story's own named limit); `npm run type-check`
+      passing is what guarantees none was missed.
+  AC-5:
+    verdict: PASS
+    evidence: >-
+      All four value sets rendered by this reviewer with `helm template` directly: base, dev, uat and
+      prod each carry STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS with value "0", exactly once.
+      `--set-string ...=90` renders "90"; `--set-string ...=-50` renders "-50"; `--set ...=90` and
+      `--set ...=-50` also render. The chart validates the key, never the value — the loader is what
+      refuses "-50" (probed above). M8 (key removed from the real `_helpers.tpl`) → 96 of 104
+      deployment tests red, every one with `... is not an accepted STUDIO_RUNNER_* key`, restored to
+      7594a1bb9e6505f9. `helm lint` 1 chart, 0 failed. The in-suite falsification (ii) works on a
+      scratch copy and guards itself with an "exactly once" precondition, so it cannot pass vacuously.
+  AC-6:
+    verdict: PASS (documentation only)
+    evidence: >-
+      Confirmed labelled not-a-guard and not counted. The §26.3 item 4 one-sign/over-spread rule
+      appears only in `config.ts`'s `seekOriginCalibrationMs` JSDoc (lines 110-112) and in the
+      `values.yaml` comment. A repo-wide grep for "same sign", "one-sign", "over-spread" and
+      "run-to-run spread" finds no test asserting it. Nothing dresses it as a passing check.
+  AC-7:
+    verdict: PASS
+    evidence: >-
+      The message construction is never executed by a green run, so this reviewer forced it: with the
+      tolerance temporarily at 1 (restored byte-identically, sha 259338c81c9afe42), the real failure
+      message read "median seek error was 67.8ms across 5 steps; step 0: signed lead -1.9ms, step 1:
+      signed lead -85.4ms, step 2: signed lead -65.7ms, step 3: signed lead -88.3ms, step 4: signed
+      lead -67.8ms". It renders, it does not throw, and every lead is the small negative number
+      §26.4(b) asked for. `lastChangeAtOrBefore` is used only inside the message; the threshold is
+      untouched. The unit tests use hand-read literals (2840, 0), so shape #11 is avoided.
+  AC-8:
+    verdict: CONCERNS
+    evidence: >-
+      Conditions 1, 2 and 4 verified independently: `const MEDIAN_TOLERANCE_MS = 100;` hashes
+      558c3e0a8b06fecf8bf7af090b54559f0effb1a26565b0f5b54e8ced16880e38 and `OUTLIER_BOUND_MS`
+      993e4dd99bacfada96b1c348302784817dcd4ee0548df908e4a3ca00c3d0b49f, both identical to the base's
+      lines 84/85 (now 91/92); `webm.ts`'s `slackMs = 100` is still at :198 and unchanged;
+      `git diff -U0` shows exactly five hunks, at :37, :44, :72, :74 and :260, i.e. the import, the
+      two comment blocks and the message. Condition 3: `webm.test.ts` 19 passed and the F-1 boundary
+      test "matches a step reported just under one tolerance after a repaint to that repaint" green.
+      CONCERNS is DOC-1 below (the surviving "bet against the detector" sentence), which is @po's
+      call under AC-8.4, not a code defect.
+
+ready_echo_ruling:
+  question: >-
+    Is the child's `ready` echo sound; can a child report a value it did not apply; is it validated
+    on the parent; does it reach any report or API payload?
+  ruling: SOUND, with one documentation inaccuracy and one unratified scope extension.
+  can_a_child_report_what_it_did_not_apply:
+    answer: >-
+      The echo is the value `takeRunOrigin` received, not an independent measurement of the shift, so
+      it is honest exactly when `takeRunOrigin` is correct — and that is pinned at the unit tier.
+      Three mutations were written to make the echo lie; all three are caught:
+    probes:
+      - 'E1: `RunOrigin` echoes 0 while applying N → 2 red (timeline property (2), childRuntime).'
+      - 'E2: the child drops the argument but echoes the received value → childRuntime red, "expected 300 to be 250" (the reading, not the echo, is what catches it).'
+      - 'E3: the child echoes a literal 0 → childRuntime red.'
+    residual: >-
+      At the pinned value of 0 the fixtures-tier assertion alone cannot distinguish "applied 0" from
+      "echoed 0 regardless" — E3 is caught by the unit test, not by the real run. That is acceptable:
+      the two tiers together close it, and property (1) makes 0 byte-identical to uncalibrated anyway.
+  parent_validation:
+    answer: >-
+      Shape-checked only: `parseChildMessage` accepts the `ready` message when `calibrationOffsetMs`
+      is absent or `typeof === 'number'`. The parent never compares the echo to the value it sent, so
+      a divergent-but-numeric echo is carried silently onto `SessionOrigin`. Harmless today (nothing
+      but the fixtures harness reads it), and noted as ECHO-1.
+  does_it_leave_the_process:
+    answer: NO — verified at runtime, not inferred.
+    evidence: >-
+      A throwaway coordinator test (created and deleted in one command) drove a real run through the
+      harness with `origin.calibrationOffsetMs = 7314159265` and scanned every outbound HTTP request
+      body, every log sink line and every run event. Control case first: a marker planted in a step
+      failure message IS found by the same scanner, so the scan is not blind. With the marker only in
+      the origin, neither the number nor the string "calibration" appears anywhere. Reading agrees:
+      `runCoordinator.asSessionOrigin` copies three named fields, `reporter.browserStarted` reads only
+      `browserStartedAt` and `startedAtMs`, and the runner exposes no GET route that serializes a
+      session. ADR-002 §26.3 item 2's "never on the wire" holds — the developer inferred this; it is
+      now measured.
+
+f7_constraint:
+  status: HELD — the story took the "rule 3 not changed" path, and the path is verified.
+  evidence:
+    - 'Independent parse using `medianToleranceIn` extracted from `webm.test.ts`: mentions 2, assertions 1, value 100 — identical to the base file''s own numbers.'
+    - 'Block-comment openers/closers in seek-measurement.test.ts: 6/6 at base and 6/6 at head. No added `/*`.'
+    - 'S7, S8, S10 and the other six planted forms: green as refusals (`webm.test.ts` 19 passed), i.e. the F-7 block still reddens every decoupled form on this tree''s text.'
+    - 'S7 applied to the real file: "exactly one \".toBeLessThan(MEDIAN_TOLERANCE_MS);\", found 0".'
+    - 'The name interpolated into the NEW message: "the name twice outside comments ..., found 3".'
+    - 'A `/*` inside the NEW message: "found 0; ... found 1" — the comment strip swallows the code.'
+    - 'M10, a trailing space on the declaration: "exactly one top-level ..., found 0".'
+  conclusion: >-
+    The new message is written the one way F-7 permits, and every way it could have been written
+    wrongly still fails loudly rather than silently.
+
+mutations_rerun:
+  M3: {target: 'timeline.ts + → -', result: '3 red as predicted', restored: 7d7e0bfd9106}
+  M4: {target: 'offset into clock.now()', result: '3 red; property (1) green', restored: 7d7e0bfd9106}
+  M5: {target: 'main.ts line removed', result: '2 red in production-seams', restored: 7f73e709b51f}
+  M7: {target: 'realRunner.ts 0 → 5', result: 'fixtures red via real Chromium, "expected 5 to be +0"', restored: c7008cc3bb20}
+  M8: {target: '_helpers.tpl key removed', result: '96 of 104 deployment tests red', restored: 7594a1bb9e65}
+  M10: {target: 'trailing space on the declaration', result: 'webm.test.ts fails to load', restored: 259338c81c9a}
+  E1: {target: 'RunOrigin echoes 0 while applying N (added by @qa)', result: '2 red', restored: 7d7e0bfd9106}
+  E2: {target: 'child drops the argument, echoes the received value (added by @qa)', result: '1 red, expected 300 to be 250', restored: 3e432760d442}
+  E3: {target: 'child echoes literal 0 (added by @qa)', result: '1 red', restored: 3e432760d442}
+  S7r: {target: 'S7 applied to the real seek-measurement.test.ts (added by @qa)', result: 'webm.test.ts fails to load', restored: 259338c81c9a}
+  Kmsg: {target: 'the tolerance name interpolated into the new message (added by @qa)', result: 'fails to load, found 3', restored: 259338c81c9a}
+  K7: {target: 'a `/*` inside the new message (added by @qa)', result: 'fails to load', restored: 259338c81c9a}
+  P1: {target: 'tolerance forced to 1 so the AC-7 message renders (added by @qa)', result: 'message renders with five small negative leads', restored: 259338c81c9a}
+
+tiers:
+  default: '984 passed | 29 skipped (1013), 49 files + 1 skipped — twice, 5.6 s each. The known F-3 httpClient race did not occur in either run. Baseline 957/29.'
+  fixtures: '90 passed | 10 skipped (100), 7 files — twice (108 s at load 27, 144 s at load 26). Baseline 89/10.'
+  deployment: '184 passed | 4 failed (188). The 4 are AC-18''s deliberate EXPECTED RED in envfrom-keys.test.ts, unchanged from the baseline 177/4.'
+  webm: '19 passed (baseline 16).'
+  lint: 'eslint . — clean, exit 0.'
+  type_check: >-
+    One error: test/fixtures-tier/deadline-cleanup.test.ts(558,40) TS2345, SnapshotOptions.redactor
+    missing. Pre-existing; this story only moved it from :550 by inserting 8 lines above. No new error.
+  chart: 'helm lint — 1 chart linted, 0 failed (helm v4.2.0).'
+
+observations:
+  seek_margin: >-
+    In this reviewer's fixtures run 1, inner run 1, one step was mis-attributed at +615.5 ms
+    (reported 2264.5 ms matched to a change at 2880.0 ms) and the median |error| was 97.5 ms against
+    the 100 ms bound — 2.5 ms of margin, at load 27. The other three inner runs were 65.1, 60.5 and
+    57.9 ms. This is not a regression and not this story's doing; it is exactly the §26.3 item 6
+    situation the calibration exists for, and it is the first recorded margin that small. Feed it to
+    SPK-06 phase B. It also means a future red here is plausible on a loaded host — and, with AC-7
+    landed, that red will now print the true negative leads instead of a fictitious +615 ms.
+  measured_medians: >-
+    Run 1: inner 1 median |error| 97.5 ms (steps -1.6, -85.8, -97.5, +615.5, -99.7); inner 2
+    31.4 ms (-1.2, -57.5, -31.4, -65.1, -24.6). Run 2: inner 1 60.5 ms (-1.9, -61.4, -65.1, -60.5,
+    -57.4); inner 2 57.9 ms (-2.5, -49.0, -57.9, -68.4, -64.2). Largest single |step| 615.5 ms
+    (the mis-attribution); largest correctly-attributed step 99.7 ms. Steps over 100 ms: one, the
+    mis-attribution. The developer's own medians (63.4/48.6/38.1/14.6, largest step 86.4) were
+    measured at a different load and are not contradicted.
+
+findings:
+  SCOPE-1:
+    severity: medium
+    title: The `ready` echo is an unratified scope extension across five files, not one.
+    detail: >-
+      The Dev Agent Record escalates `src/server/adapters.ts` and names three files as out of scope.
+      The echo mechanism actually touches five: `childRuntime.ts` (sends it), `protocol.ts`
+      (`ReadyMessage.calibrationOffsetMs` plus its parse check — the Scope bullet for that file lists
+      only `LaunchMessage`, `ACCEPTED_LAUNCH_KEYS`, `parseLaunchMessage`, `isNonNegativeNumber`),
+      `launcher.ts` (`ReadyOutcome`, the inbox mapping, the session origin — the Scope bullet lists
+      only the options field and the launch message), `adapters.ts` (escalated) and `realRunner.ts`.
+      The design is sound and nothing leaks, so this is a Scope-list ruling, not rework.
+    action: '@po ratifies AC-4 and the Scope list, naming all five files, before merge.'
+  ECHO-1:
+    severity: low
+    title: The parent shape-checks the echo but never compares it to the value it sent, and a mistyped echo costs the launch.
+    detail: >-
+      `parseChildMessage` accepts any number, including a negative one, and drops the whole `ready`
+      message when the field is present but not a number — which on the production path is a launch
+      that times out. `ReadyMessage`'s own JSDoc says the field is "optional so a parent never
+      refuses a start over it", and that is true only for an absent field, not a malformed one.
+      No impact today: nothing but the fixtures harness reads the value, and the child that sends it
+      is the runner's own.
+    action: 'Correct the JSDoc, or have the parent ignore a malformed echo rather than dropping the message. Not a merge blocker.'
+  DOC-1:
+    severity: low
+    title: '"Tightening further would start to bet against the detector" survives outside AC-8.4''s permitted ranges.'
+    detail: >-
+      The developer flagged this. The sentence sits in the outlier-bound paragraph (now ~:88), which
+      AC-8.4 forbids editing, so §26.5's "name the slack, not the detector" fact is stated in the
+      :72-75 block only. The two paragraphs now describe the same phenomenon with different causes
+      one screen apart.
+    action: '@po decides whether to widen AC-8.4 by one paragraph in a follow-up. Do not widen it inside this story.'
+  CFG-1:
+    severity: low
+    title: The calibration key has no upper bound, and the chart renders any value.
+    detail: >-
+      `KeySpec` has `min` but no `max`, for every key — so this matches house style rather than
+      departing from it. The chart validates key names only: `--set-string ...=-50` and `...=90` both
+      render. The loader is the fail-closed layer and does refuse "-50" by name. But a mistaken
+      99999999999999999999 is accepted by both the loader and `parseLaunchMessage`, and would make
+      every reading hugely negative.
+    action: 'Feed to ESC-3 as evidence: whatever @architect rules about negative readings should also say whether the key needs a sane ceiling. No change in this story.'
+  MERGE-1:
+    severity: medium
+    title: The `_helpers.tpl` key line cannot be merged from either side's gate, and the merged count comment must read "thirty-six".
+    detail: >-
+      Measured, read-only, in wt/epic at review time. Base: 27 chart entries, 31 loader keys, comment
+      "thirty-one". This story: 28 entries, 32 loader keys, comment "thirty-two" — correct for this
+      branch. The inference tree: 31 entries (base plus 4 OBJECT_STORE_*), 35 loader keys, comment
+      still "thirty-one" — already stale on that side. After both land the line must carry 32 entries
+      (27 + 4 + 1) and the loader will hold 36 keys, so the comment must read "thirty-six". Neither
+      side's gate can observe this, because neither tree contains both changes.
+    action: >-
+      Whoever lands second re-reads the merged line, keeps all five additions (FOC-07), and sets the
+      count comment to the number of KEY_SPECS rows in the merged `config.ts`, counted after merging
+      rather than copied from either branch. Re-run `npm run test:deployment` after the merge.
+
+evidence_limits:
+  - 'M1, M2, M6, M6b, M9 and M9b were not re-run; the brief asked for M3, M4, M5, M7, M8 and M10. M1/M2 are partly covered transitively by E1-E3 and by the AC-1 loader probe.'
+  - 'The leak probe drove the coordinator with an in-process session carrying the field, not a real forked child; it proves nothing in the parent''s report-building path reads the field, which is the claim at issue.'
+  - 'CodeRabbit was not run: WSL-only CLI, Darwin host, epic convention (no Epic 10 story carries the section).'
+  - 'The fixtures tier ran at load 11-27 on a shared host. Numbers are comparable to the developer''s in shape, not in absolute duration.'
+
+recommended_status: >-
+  CONCERNS — mergeable after @po rules on SCOPE-1 and the lander of the second chart change applies
+  MERGE-1. No rework is required of @dev.
+
+before_merge:
+  - '@po ratifies AC-4 and the Scope list to cover all five files the ready echo touches (SCOPE-1).'
+  - 'Apply MERGE-1''s reconciliation rule on the `acceptedEnvKeys` line and fix the key-count comment to the merged number.'
+  - 'Route CFG-1''s ceiling question and observations.seek_margin to ESC-3 and SPK-06 phase B respectively.'

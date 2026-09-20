@@ -1,5 +1,7 @@
 # Product Requirements Document - Checks
 
+Studio V1 scope and architecture alignment updated 2026-09-10. Detailed contracts: [Studio architecture](docs/architecture/studio-execution.md).
+
 ## 1. Problem Statement
 
 ### 1.1. Current State Challenges
@@ -71,9 +73,9 @@ This section outlines the expanded feature set for the V2.2 vision of the "Check
         * ITRS Geneos Sampler Status - Real-time sampler state monitoring with expected value comparison
         * AppDynamics Health Rule Violation - Application health rule monitoring and APM integration
     * **UI Test Checks:**
-        * No-Code UI Test - Plain English commands with video recording and Python code generation (see section 5.2)
+        * No-Code UI Test - Plain-English steps compiled to confirmed Playwright TypeScript, live progress, and private video evidence (see section 5.2)
 * **Secure Parameterization:** Integration with the enterprise secrets vault with `<secret ID>` token support
-* **Execution & Scheduling Engine:** On-demand and scheduled execution for all check types with cron expression support
+* **Execution & Scheduling Engine:** On-demand execution and cron scheduling for supported check types; Studio scheduling is post-V1
 * **Dashboards & Visualization:** CSI-centric dashboards with history views, real-time updates and KPI tracking
 * **Reporting:** A flexible reporting tool to create and schedule email-based status reports with a "live-preview" editor, autosave and cross-CSI support
 
@@ -82,31 +84,48 @@ This section outlines the expanded feature set for the V2.2 vision of the "Check
 This flagship capability is designed to empower all users, regardless of technical skill, to create robust UI tests.
 
 > #### **Core UX Philosophy: "From Checklist to Reality"**
-> The entire experience should feel like writing a simple checklist of instructions and then watching a video of a robot perfectly executing that list. The goal is to build **trust** and **empowerment**. The user should feel confident that their plain English commands are being understood, and the video provides undeniable proof.
+> The entire experience should feel like writing a simple checklist of instructions and then watching video of a browser executing the confirmed instructions. The goal is to build **trust** and **empowerment**. The user should feel confident that their plain English commands are being understood, and the video provides inspectable evidence of what happened. Compilation and confirmation do not guarantee that an assertion captures the intended business condition.
 
 #### **Main Interface Layout**
 A clean, three-panel screen separating user *instructions* from system *actions* and *proof*.
 
 1.  **Left Panel: The Test Steps (Your Checklist)**
     * A simple, numbered text editor where each line is a distinct step (`1. Go to...`, `2. Click...`).
-    * After a run, each line gets a status icon: **green checkmark (✓)** for pass or **red X (✗)** for fail.
+    * After a run, each line gets a status icon: **green checkmark (✓)** for pass, **red X (✗)** for fail, or **skipped** for steps not attempted after failure.
     * Includes syntax highlighting, auto-completion, variable support (`<var NAME>`), and secret tokens (`<secret ID>`).
 
 2.  **Middle Panel: The Control Tower (The "Go" Button & Logs)**
     * Contains the **Test Name**, a large **"Run Test"** button, and a **Live Log** area for real-time text updates during execution.
-    * Includes test metadata, environment selection, schedule configuration, and Python code generation.
+    * Includes test metadata, environment selection, readable action/target/assertion summaries, and an expandable Playwright TypeScript view. The user confirms the exact generated revision before Run becomes available. Schedule configuration is post-V1.
 
 3.  **Right Panel: The Visual Proof (The Video)**
-    * After a test run, a **video player** appears here, showing a full screen recording of the test.
+    * After a test run, a **video player** appears here, showing a recording of the tested page, including attempted failing steps where recording was finalized.
     * The video timeline is synchronized with the test steps.
-    * Includes step-synchronized timeline, screenshot capture, and download capabilities.
+    * Includes attempted-step seeking and authorized video download. Screenshot capture is outside V1. Evidence availability, partial recording and expiry are shown separately from the check outcome.
+
+#### **Studio V1 delivery scope**
+
+| Capability | V1 commitment | Later / excluded |
+|---|---|---|
+| Authoring and trust | Save drafts, compile during authoring, review actions/source, confirm exact immutable revision; relevant edits require reconfirmation | No runtime AI or silent regeneration; Python export retired |
+| Execution | On-demand Chromium, single-page workflows, CSI ownership and approved destinations | Scheduling, multi-page/popups/iframes, other engines |
+| Live progress | SSE step/log snapshots with reconnection and GET fallback; browser disconnect does not restart the test | Live video and lossless replay of every intermediate event |
+| Evidence | Private native video, authorized download, attempted-step seek, 30-day logical expiry with verified storage deletion policy | Screenshots and video transcoding |
+| Reliability | Durable accepted work/results, no automatic replay of an ambiguous attempt, explicit infrastructure/evidence errors | Exactly identical browser outcomes are not promised |
+| Integration | Studio test/history views organized by registered CSI; stable historical authorization | Unified UI_TEST catalog/application-component/report projections and scheduling integration |
+
+SSE is the preferred V1 transport, subject to verifying platform authentication and streaming ingress behavior. GET provides recovery/fallback with the same authorized snapshot. The first implementation targets 1–2 concurrent runs across separate runner pods; larger capacity follows measurement. Ordinary REST/check resources must remain protected by admission limits and bounded execution/progress workloads.
+
+A normal successful or assertion-failing browser run produces video. Pre-browser failures, abrupt browser/pod loss or storage failure may leave partial or unavailable evidence; the UI must explain this without rewriting the check outcome. Step seeking targets the start of an attempted step, with tolerance measured in staging. User-pasted credentials are prohibited; use vault references. Video can contain sensitive target-page content, which requires the BRD's Security acceptance before GA.
+
+The broader application/component association and CSI-wide reporting requirements remain the platform vision; their Studio integration is explicitly post-V1 rather than implied by updating Studio history alone.
 
 ### 5.3. Additional Features
 
 * **Bulk Operations:** Multi-select and bulk actions for check management
 * **Advanced Filtering:** Global search context with CSI, environment, and tag filtering
 * **Autosave:** Draft persistence for check creation and reports
-* **Code Generation:** Python code generation from Checks Studio tests
+* **Code Generation:** Confirmed Playwright TypeScript source in Checks Studio; Python export is retired from the Studio plan
 * **Template Library:** Pre-built templates for common UI test scenarios
 * **Keyboard Shortcuts:** Comprehensive keyboard navigation throughout the application
 * **Accessibility:** Full ARIA support and screen reader compatibility
@@ -136,9 +155,10 @@ A clean, three-panel screen separating user *instructions* from system *actions*
         * `2. Click "Sign On"`
         * `3. Wait for the text "User ID" to appear`
         * `4. Check that the URL contains "login"`
-    2.  **Execute:** She clicks the large **"Run Test"** button and watches the live log for progress.
-    3.  **Review Proof:** The test finishes. The steps get green checkmarks, and a video recording appears.
-    4.  **Investigate:** **Priya** clicks on "Step 3" in her list. The video instantly jumps to the exact moment the "User ID" text appeared on the page, providing undeniable, context-sensitive proof.
+    2.  **Review and Confirm:** Saving starts compilation. Priya reviews the proposed action/target/assertion summary and optional source, then confirms that exact revision. Unsupported steps receive a clear explanation.
+    3.  **Execute:** She clicks **"Run Test"** and observes step status and logs as the browser runs. Connection recovery preserves the current execution without rerunning it.
+    4.  **Review Proof:** Passed/failed/skipped steps and video availability appear independently. A failed assertion normally includes video; infrastructure loss may show unavailable or partial evidence.
+    5.  **Investigate:** Priya clicks attempted "Step 3". The video seeks to the start of waiting for "User ID", letting her inspect when the condition became true. Skipped steps cannot be sought.
 
 ### For the Reports Feature
 
@@ -204,8 +224,10 @@ A clean, three-panel screen separating user *instructions* from system *actions*
 
 ## 11. Assumptions & Dependencies
 - **Email Delivery Service:** Access to an enterprise-grade SMTP relay.
-* **Browser Automation Service:** The UI Testing feature requires a robust, scalable backend service for browser automation (e.g., an internal Selenium Grid or a cloud-based service).
-* **Video Processing Service:** The UI Testing feature requires a backend service capable of screen recording, storing, and streaming video.
+* **Studio Runner:** An isolated Node/Playwright Deployment in this monorepo, approved Chromium image/sandbox, and network access restricted to approved application/auth-provider destinations.
+* **Studio Evidence:** Native browser recording, private Sonic object storage for videos and redacted result manifests, and an authenticated Range/download proxy. No separate video-processing service is required.
+* **Studio Compiler:** Citi LLM gateway access during authoring; confirmed executions do not depend on gateway availability.
+* **Studio Platform Security and Progress:** Real trusted identity and authorized vault resolution, an authenticated media/SSE route, and ingress capable of unbuffered streaming. Existing development bypasses/stubs do not satisfy these dependencies.
 * **Expanded API/Client Access:** The advanced check types require network access and API clients/credentials for ITRS, Grafana, AppDynamics, and relevant enterprise databases.
 * **Citi System Inventory (CSI) API:** An accessible, reliable, and performant API for the **CSI** system is mandatory. This service must provide a list of valid CSIs and their associated applications/components.
 * Stable, documented APIs for all other integration targets (Splunk).

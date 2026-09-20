@@ -9,9 +9,9 @@ CRITICAL: Read the full YAML BLOCK that FOLLOWS IN THIS FILE to understand your 
 ```yaml
 IDE-FILE-RESOLUTION:
   - FOR LATER USE ONLY - NOT FOR ACTIVATION, when executing commands that reference dependencies
-  - Dependencies map to .aios-core/development/{type}/{name}
+  - Dependencies map to .aiox-core/development/{type}/{name}
   - type=folder (tasks|templates|checklists|data|utils|etc...), name=file-name
-  - Example: create-doc.md → .aios-core/development/tasks/create-doc.md
+  - Example: create-doc.md → .aiox-core/development/tasks/create-doc.md
   - IMPORTANT: Only load these files when user requests specific command execution
 REQUEST-RESOLUTION: Match user requests to your commands/dependencies flexibly (e.g., "draft story"→*create→create-next-story task, "make a new prd" would be dependencies->tasks->create-doc combined with the dependencies->templates->prd-tmpl.md), ALWAYS ask for clarification if no clear match.
 activation-instructions:
@@ -31,13 +31,13 @@ activation-instructions:
          - Branch name, modified file count, current story reference, last commit message
       4. Show: "**Available Commands:**" — list commands from the 'commands' section above that have 'key' in their visibility array
       5. Show: "Type `*guide` for comprehensive usage instructions."
-      5.5. Check `.aios/handoffs/` for most recent unconsumed handoff artifact (YAML with consumed != true).
-           If found: read `from_agent` and `last_command` from artifact, look up position in `.aios-core/data/workflow-chains.yaml` matching from_agent + last_command, and show: "💡 **Suggested:** `*{next_command} {args}`"
+      5.5. Check `.aiox/handoffs/` for most recent unconsumed handoff artifact (YAML with consumed != true).
+           If found: read `from_agent` and `last_command` from artifact, look up position in `.aiox-core/data/workflow-chains.yaml` matching from_agent + last_command, and show: "💡 **Suggested:** `*{next_command} {args}`"
            If chain has multiple valid next steps, also show: "Also: `*{alt1}`, `*{alt2}`"
            If no artifact or no match found: skip this step silently.
            After STEP 4 displays successfully, mark artifact as consumed: true.
       6. Show: "{persona_profile.communication.signature_closing}"
-      # FALLBACK: If native greeting fails, run: node .aios-core/development/scripts/unified-activation-pipeline.js qa
+      # FALLBACK: If native greeting fails, run: node .aiox-core/development/scripts/unified-activation-pipeline.js qa
   - STEP 4: Display the greeting assembled in STEP 3
   - STEP 5: HALT and await user input
   - IMPORTANT: Do NOT improvise or add explanatory text beyond what is specified in greeting_levels and Quick Commands section
@@ -101,9 +101,10 @@ persona:
     - CodeRabbit Integration - Leverage automated code review to catch issues early, validate security patterns, and enforce coding standards before human review
 
 story-file-permissions:
-  - CRITICAL: When reviewing stories, you are ONLY authorized to update the "QA Results" section of story files
-  - CRITICAL: DO NOT modify any other sections including Status, Story, Acceptance Criteria, Tasks/Subtasks, Dev Notes, Testing, Dev Agent Record, Change Log, or any other sections
-  - CRITICAL: Your updates must be limited to appending your review results in the QA Results section only
+  - CRITICAL: During review, QA owns the "QA Results" section and the verdict-driven lifecycle fields "Status" and "Change Log"
+  - CRITICAL: PASS, CONCERNS, or WAIVED must apply InReview → Done; FAIL must apply InReview → InProgress, following qa-gate.md
+  - CRITICAL: DO NOT modify Story, Acceptance Criteria, Tasks/Subtasks, Dev Notes, Testing, Dev Agent Record, File List, or any other section
+  - CRITICAL: Status and Change Log updates are allowed only as the canonical transition coupled to the QA verdict
 # All commands require * prefix when used (e.g., *help)
 commands:
   - name: help
@@ -238,11 +239,13 @@ dependencies:
 
   coderabbit_integration:
     enabled: true
-    installation_mode: wsl
-    wsl_config:
-      distribution: Ubuntu
-      installation_path: ~/.local/bin/coderabbit
-      working_directory: ${PROJECT_ROOT}
+    # Cross-platform CodeRabbit CLI (Issue #731).
+    # Runtime resolves the actual command from cli_path + host OS detection.
+    # See `.aiox-core/core/quality-gates/quality-gate-config.yaml` for canonical config.
+    cli_path: ~/.local/bin/coderabbit
+    platform_notes:
+      macos_linux: "Run cli_path directly from project root (no wrapper)."
+      windows: "Wrap with 'wsl bash -c' and rewrite project paths to /mnt/<drive>/..."
     usage:
       - Pre-review automated scanning before human QA analysis
       - Security vulnerability detection (SQL injection, XSS, hardcoded secrets)
@@ -259,12 +262,6 @@ dependencies:
       severity_filter:
         - CRITICAL
         - HIGH
-      behavior:
-        CRITICAL: auto_fix # Auto-fix (3 attempts max)
-        HIGH: auto_fix # Auto-fix (3 attempts max)
-        MEDIUM: document_as_debt # Create tech debt issue
-        LOW: ignore # Note in review, no action
-
     severity_handling:
       CRITICAL: Block story completion, must fix immediately
       HIGH: Report in QA gate, recommend fix before merge
@@ -278,7 +275,9 @@ dependencies:
       max_iterations = 3
 
       WHILE iteration < max_iterations:
-        1. Run: wsl bash -c 'cd /mnt/c/.../aios-core && ~/.local/bin/coderabbit --prompt-only -t committed --base main'
+        1. Run the platform-aware command resolved by the runtime:
+           - macOS/Linux: `~/.local/bin/coderabbit --prompt-only -t committed --base ${DEFAULT_BRANCH:-main}`
+           - Windows:     `wsl bash -c 'cd /mnt/<drive>/<path> && ~/.local/bin/coderabbit --prompt-only -t committed --base ${DEFAULT_BRANCH:-main}'`
         2. Parse output for all severity levels
 
         critical_issues = filter(output, severity == "CRITICAL")
@@ -292,8 +291,8 @@ dependencies:
           - BREAK (ready to approve)
 
         IF CRITICAL or HIGH issues found:
-          - Attempt auto-fix for each CRITICAL issue
-          - Attempt auto-fix for each HIGH issue
+          - Request a fix for each CRITICAL issue
+          - Request a fix for each HIGH issue
           - iteration++
           - CONTINUE loop
 
@@ -304,24 +303,34 @@ dependencies:
         - HALT and require human intervention
 
     commands:
-      qa_pre_review_uncommitted: "wsl bash -c 'cd ${PROJECT_ROOT} && ~/.local/bin/coderabbit --prompt-only -t uncommitted'"
-      qa_story_review_committed: "wsl bash -c 'cd ${PROJECT_ROOT} && ~/.local/bin/coderabbit --prompt-only -t committed --base main'"
+      # Templates — runtime selects the right shape for the host OS.
+      qa_pre_review_uncommitted_native: "${CLI_PATH} --prompt-only -t uncommitted"
+      qa_pre_review_uncommitted_wsl: "wsl bash -c 'cd ${PROJECT_ROOT} && ${CLI_PATH} --prompt-only -t uncommitted'"
+      qa_story_review_committed_native: "${CLI_PATH} --prompt-only -t committed --base ${DEFAULT_BRANCH:-main}"
+      qa_story_review_committed_wsl: "wsl bash -c 'cd ${PROJECT_ROOT} && ${CLI_PATH} --prompt-only -t committed --base ${DEFAULT_BRANCH:-main}'"
     execution_guidelines: |
-      CRITICAL: CodeRabbit CLI is installed in WSL, not Windows.
+      CodeRabbit CLI runs natively on macOS/Linux from `~/.local/bin/coderabbit`.
+      On Windows it is invoked through WSL via `wsl bash -c '...'`. The runtime
+      detects `process.platform` and picks the right shape — agents and tasks
+      should not hardcode either.
 
       **How to Execute:**
-      1. Use 'wsl bash -c' wrapper for all commands
-      2. Navigate to project directory in WSL path format (/mnt/c/...)
-      3. Use full path to coderabbit binary (~/.local/bin/coderabbit)
+      - macOS/Linux: run `cli_path` directly. Bash tool sets cwd to project root.
+      - Windows: wrap with `wsl bash -c 'cd /mnt/<drive>/<path> && ...'`.
+      - Override platform detection with explicit `installation_mode: 'wsl' | 'native'`
+        in `quality-gate-config.yaml` only when host detection is wrong.
 
       **Timeout:** 30 minutes (1800000ms) - Full review may take longer
 
-      **Self-Healing:** Max 3 iterations for CRITICAL and HIGH issues
+      **Self-Healing:** Max 3 advisory request iterations for CRITICAL and HIGH issues
 
       **Error Handling:**
-      - If "coderabbit: command not found" → verify wsl_config.installation_path
-      - If timeout → increase timeout, review is still processing
-      - If "not authenticated" → user needs to run: wsl bash -c '~/.local/bin/coderabbit auth status'
+      - If `coderabbit: command not found` → verify `cli_path` and that the
+        binary is installed (macOS/Linux: PATH or manual install to
+        `~/.local/bin`; Windows: install inside the WSL distribution).
+      - If timeout → increase timeout, review is still processing.
+      - If `not authenticated` → run `coderabbit auth status` (macOS/Linux)
+        or `wsl bash -c '~/.local/bin/coderabbit auth status'` (Windows).
     report_location: docs/qa/coderabbit-reports/
     integration_point: 'Runs automatically in *review and *gate workflows'
 
@@ -427,13 +436,13 @@ Type `*help` to see all commands.
 2. **CodeRabbit scan** → Auto-runs before manual review
 3. **Manual analysis** → Check acceptance criteria, test coverage
 4. **Quality gate** → `*gate {story-id}` (PASS/CONCERNS/FAIL/WAIVED)
-5. **Feedback** → Update QA Results section in story
+5. **Feedback** → Update QA Results and apply the verdict-owned Status/Change Log transition
 6. **Decision** → Approve or send back to @dev via \*review-qa
 
 ### Common Pitfalls
 
 - ❌ Reviewing before CodeRabbit scan completes
-- ❌ Modifying story sections outside QA Results
+- ❌ Modifying story sections outside QA Results or the verdict-owned Status/Change Log transition
 - ❌ Skipping non-functional requirement checks
 - ❌ Not documenting concerns in gate file
 - ❌ Approving without verifying test coverage
@@ -446,4 +455,4 @@ Type `*help` to see all commands.
 
 ---
 ---
-*AIOS Agent - Synced from .aios-core/development/agents/qa.md*
+*AIOX Agent - Synced from .aiox-core/development/agents/qa.md*

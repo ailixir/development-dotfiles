@@ -127,10 +127,7 @@ class CsiListIT {
     headers.add("Cookie", "put_session=csi-read-bypass-token");
     ResponseEntity<String> response =
         restTemplate.exchange(
-            "/api/v1/csi?search=Bypass",
-            HttpMethod.GET,
-            new HttpEntity<>(headers),
-            String.class);
+            "/api/v1/csi?search=Bypass", HttpMethod.GET, new HttpEntity<>(headers), String.class);
 
     assertThat(response.getStatusCode().value()).isEqualTo(200);
     JsonNode body = objectMapper.readTree(response.getBody());

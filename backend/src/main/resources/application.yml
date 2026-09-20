@@ -28,7 +28,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
+        # No prometheus here. This is what the API pods serve, on the port the public Ingress routes
+        # to, and SecurityConfig permits /actuator/** without a session. The scrape endpoint is a
+        # worker-only exposure (application-worker.yml), on a ClusterIP Service with no Ingress.
+        include: health,info
       base-path: /actuator
   endpoint:
     health:
@@ -108,6 +111,29 @@ checks:
       from: ${CHECKS_REPORT_MAIL_FROM:put-checks-noreply@citi.com}
   cors:
     allowed-origins: ${CHECKS_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3002,http://localhost:5173}
+  security:
+    # ── ED-02: the three identity bypasses, ALL DEFAULT-CLOSED (story 10.18b, AC-19a) ──────────
+    #
+    # ⚠ **THE CODE PATHS STILL EXIST. These close them; nothing here removes them.** @po ruled at
+    # wave-6 validation that removal is out of scope — deleting the Core-service bypass moves
+    # identity resolution onto CoreServiceClient, and the filter's own comment records why that is
+    # unavailable: "while the target platform does not provide Core services". So the paths
+    # survive, default-closed, and watched by a test pinned to the production symbol.
+    #
+    # **There are three, and the order among them decides whether closing achieves anything.**
+    # `BffSessionAuthenticationFilter.resolveIdentity` reads the client-supplied `X-User-Id` header
+    # and returns BEFORE it reaches the Core-service bypass, so closing `core-service` alone closes
+    # nothing for a caller that can reach the pod and send a header. Architecture §9.1 assigns
+    # stripping those headers to a trusted gateway; this repository contains no such gateway.
+    #
+    # ⚠ **The vault is also still a stub** — `SecretsService` returns REDACTED — and **no
+    # credentialed pilot may run until ED-02 has linked completed tickets**. ED-02's owner reads
+    # "TBD — not assigned in sources"; the escalation path is @pm → Checks-squad engineering
+    # management (BRD §8), with Security & Compliance accepting.
+    bypass:
+      core-service: ${CHECKS_BYPASS_CORE_SERVICE:false}
+      identity-headers: ${CHECKS_BYPASS_IDENTITY_HEADERS:false}
+      csi-read: ${CHECKS_BYPASS_CSI_READ:false}
   rate-limit:
     read-per-min: 600
     write-per-min: 120
@@ -164,11 +190,210 @@ resilience4j:
         ignore-exceptions:
           - org.springframework.web.client.HttpClientErrorException
 
+# Studio execution — the one configuration source for dispatch, callbacks, recovery and SSE
+# (Story 10.7, architecture §8.5). Every value here is a §8.5 STARTING value tuned against staging
+# measurements (§10), not a commitment, and every bound AC-38 inventories has its name here.
+studio:
+  authoring:
+    v2-enabled: ${STUDIO_AUTHORING_V2_ENABLED:false}
+  storage:
+    provider: ${STUDIO_STORAGE_PROVIDER:disabled}
+    directory: ${STUDIO_STORAGE_DIRECTORY:/tmp/studio-runner-objects}
+    bucket: ${STUDIO_STORAGE_BUCKET:}
+    region: ${STUDIO_STORAGE_REGION:}
+    credentials-directory: ${STUDIO_STORAGE_CREDENTIALS_DIRECTORY:}
+    request-timeout: ${STUDIO_STORAGE_REQUEST_TIMEOUT:10s}
+  execution:
+    # The kill switch (§8.5). When false: new executes are 503 DISPATCH_DISABLED, queued and
+    # claimed work is closed explicitly, admitted work finishes, and reads, callbacks and
+    # recovery all stay active.
+    enabled: ${STUDIO_EXECUTION_ENABLED:true}
+    # Queue time and browser runtime are separate budgets and must stay separate columns.
+    pending-sla: ${STUDIO_PENDING_SLA:600s}
+    start-deadline: ${STUDIO_START_DEADLINE:30s}
+    run-deadline: ${STUDIO_RUN_DEADLINE:600s}
+    admission-timeout: ${STUDIO_ADMISSION_TIMEOUT:10s}
+    evidence-retention: ${STUDIO_EVIDENCE_RETENTION:30d}
+    # Deployment configuration, never job-supplied (§8.4, §8.5).
+    callback-base-url: ${STUDIO_CALLBACK_BASE_URL:http://put-checks-api:8080}
+    # Where the recordings live (§6.2). Deployment configuration, and never a response value:
+    # the API stores object keys only and hands the browser the protected API path.
+    # No retention value here — `evidence-retention` above is the single source (§8.5).
+    video-store:
+      bucket: ${STUDIO_EVIDENCE_BUCKET:put-checks-studio-evidence}
+      endpoint: ${STUDIO_EVIDENCE_ENDPOINT:https://sonic.invalid}
+      # `none` until a real object-store client exists (ED-03): recordings are then reported
+      # UNAVAILABLE rather than offered on a route that can only 404. `in-memory` is the test fake,
+      # set by the Gradle test task (build.gradle.kts), never by a deployment.
+      provider: ${STUDIO_EVIDENCE_PROVIDER:none}
+    quotas:
+      per-csi: ${STUDIO_QUOTA_PER_CSI:20}
+      global: ${STUDIO_QUOTA_GLOBAL:200}
+      max-steps-per-test: ${STUDIO_MAX_STEPS:200}
+    recovery:
+      # Both reapers and finalization reconciliation, worker profile only (§5.4).
+      poll-interval-ms: ${STUDIO_RECOVERY_POLL_MS:5000}
+    # How long the running reaper waits before closing a cancel the runner never finished (Studio
+    # v1 WP16, ADR-002 §29). Each value mirrors a runner bound and reads the runner's OWN env name,
+    # so rendering the runner's values into this process configures both sides from one fact. The
+    # margin is derived as poll + 2 x report-timeout + stop-grace + report-timeout + evidence-window
+    # + delivery-window + slack (92s with these values) unless STUDIO_CANCEL_MARGIN is set, and a
+    # margin shorter than that worst case is refused at startup: it would close rows under a live
+    # runner and refuse its FINAL. Bare numbers are milliseconds.
+    cancel:
+      # The runner's CONTROL_POLL_INTERVAL_MS, a constant in runCoordinator.ts, not a setting.
+      control-poll-interval: 2s
+      report-timeout: ${STUDIO_RUNNER_ADMISSION_TIMEOUT_MS:10000}
+      stop-grace: ${STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS:5000}
+      evidence-window: ${STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS:15000}
+      delivery-window: ${STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS:30000}
+      slack: ${STUDIO_CANCEL_MARGIN_SLACK:10s}
+      margin: ${STUDIO_CANCEL_MARGIN:}
+    dispatcher:
+      enabled: ${STUDIO_DISPATCHER_ENABLED:false}
+      threads: ${STUDIO_DISPATCHER_THREADS:4}
+      batch-size: ${STUDIO_DISPATCHER_BATCH:20}
+      lease: ${STUDIO_DISPATCHER_LEASE:60s}
+      poll-interval-ms: ${STUDIO_DISPATCHER_POLL_MS:2000}
+    callback:
+      max-body-bytes: ${STUDIO_CALLBACK_MAX_BODY:262144}
+      max-steps: ${STUDIO_CALLBACK_MAX_STEPS:500}
+      max-log-entries: ${STUDIO_CALLBACK_MAX_LOGS:500}
+      max-log-entry-chars: ${STUDIO_CALLBACK_MAX_LOG_CHARS:2000}
+      # The restricted service identity of §8.4/§9.1. No default: a deployment that does not set
+      # it gets a chain that refuses every caller, which is the correct failure direction.
+      service-token: ${STUDIO_CALLBACK_SERVICE_TOKEN:}
+    sse:
+      heartbeat: ${STUDIO_SSE_HEARTBEAT:15s}
+      lifetime: ${STUDIO_SSE_LIFETIME:60s}
+      read-interval: ${STUDIO_SSE_READ_INTERVAL:750ms}
+      # The same 500-1000 ms budget, as a plain millis value for the scheduler annotation.
+      read-interval-ms: ${STUDIO_SSE_READ_INTERVAL_MS:750}
+      authorization-refresh: ${STUDIO_SSE_AUTH_REFRESH:30s}
+      max-streams-per-user: ${STUDIO_SSE_MAX_PER_USER:5}
+      max-streams-per-pod: ${STUDIO_SSE_MAX_PER_POD:200}
+      max-watched-executions: ${STUDIO_SSE_MAX_WATCHED:200}
+      sender-threads: ${STUDIO_SSE_SENDER_THREADS:4}
+  # Studio compile — Citi/R2D2 LLM gateway (Story 10.5, architecture §4.1/§8.5).
+  # Off by default: a stock build never reaches an LLM. Endpoint/project/location/model/
+  # credentials are deployment configuration and carry no default value.
+  compile:
+    incremental:
+      enabled: ${STUDIO_INCREMENTAL_ENABLED:false}
+    gateway:
+      enabled: ${STUDIO_GATEWAY_ENABLED:false}
+      endpoint: ${STUDIO_GATEWAY_ENDPOINT:}
+      project: ${STUDIO_GATEWAY_PROJECT:}
+      location: ${STUDIO_GATEWAY_LOCATION:}
+      model: ${STUDIO_GATEWAY_MODEL:}
+      credentials:
+        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
+        service-account-key-file: ${STUDIO_GATEWAY_CREDENTIALS_KEY_FILE:}
+      request-timeout: ${STUDIO_GATEWAY_REQUEST_TIMEOUT:60s}
+      max-concurrency: ${STUDIO_GATEWAY_MAX_CONCURRENCY:4}
+      max-input-bytes: ${STUDIO_GATEWAY_MAX_INPUT_BYTES:262144}
+      max-output-bytes: ${STUDIO_GATEWAY_MAX_OUTPUT_BYTES:262144}
+      max-output-tokens: ${STUDIO_GATEWAY_MAX_OUTPUT_TOKENS:8192}
+      structured-output: ${STUDIO_GATEWAY_STRUCTURED_OUTPUT:true}
+      temperature: ${STUDIO_GATEWAY_TEMPERATURE:0}
+      retry:
+        max-retries: 2
+        initial-backoff: 250ms
+        backoff-multiplier: 2.0
+        jitter-factor: 0.5
+      # FIXTURE COPY pending story 10.1a; see the $comment in the schema file.
+      artifact-schema: ${STUDIO_GATEWAY_ARTIFACT_SCHEMA:classpath:studio/artifact.schema.json}
+
+    # Bounded compile work (Story 10.8, AC-17/AC-18/AC-19). Every value below is a starting value
+    # to be tuned against staging measurements (§8.5), and every one has a defined behaviour at the
+    # bound with a test that drives the input past it.
+    pipeline:
+      # Fixed pool, NO queue: attempt concurrency+1 is refused, not parked.
+      concurrency: ${STUDIO_COMPILE_CONCURRENCY:4}
+      # One monotonic deadline covers authentication, inference retries, repairs and validation.
+      # Every call is capped by remaining time; configured retries need not all fit in this bound.
+      # Expiry cancels active transports and prevents publication. Saturation is retryable STALE.
+      attempt-budget: ${STUDIO_COMPILE_ATTEMPT_BUDGET:240s}
+    # The bounded repair loop (§4.3 "a maximum of two repair attempts"). This is a bound the
+    # architecture fixes, not a tuning parameter: at most 3 propose calls and 3 /v1/validate calls
+    # per compile request, and exhaustion is NEEDS_REVISION with the final attempt's diagnostics.
+    # If throughput needs tuning, pipeline.concurrency is the knob.
+    repair:
+      max-attempts: ${STUDIO_COMPILE_REPAIR_MAX_ATTEMPTS:2}
+    # The abandoned-compile sweep (§4.7). A compile in flight when its replica died leaves a row in
+    # COMPILING forever, because the budget and the late-result drop are held in memory. This moves
+    # such a row to exactly what publishError produces — STALE, retryable, candidate cleared — and
+    # additionally clears the request identity, which is what makes a late result from the swept
+    # compile fail the publish guards that already condition on it.
+    #
+    # It buys a truthful authoring display, NOT a recovered capability: readiness never reads
+    # compile_status, so a stranded row blocks nothing and POST /execute is accepted before and
+    # after a sweep.
+    #
+    # Studio v1 WP9 (decision D11): sweep-to-STALE IS the v1 recovery for a compile whose replica
+    # died, so an author learns of it within threshold + one interval. Both were shortened for that
+    # (600s -> 300s, 60s -> 15s). The frontend's COMPILING watch window is derived from these two
+    # defaults and compilePollBounds.test.ts fails if they drift apart.
+    abandonment:
+      enabled: ${STUDIO_COMPILE_ABANDONMENT_ENABLED:true}
+      # Must strictly exceed pipeline.attempt-budget, validated at startup, so a healthy in-flight
+      # compile can never be swept out from under itself.
+      threshold: ${STUDIO_COMPILE_ABANDONMENT_THRESHOLD:300s}
+      # The run stops at the cap and the next scheduled run continues; never an unbounded UPDATE.
+      batch-size: ${STUDIO_COMPILE_ABANDONMENT_BATCH:200}
+      # One key, read by both the schedule annotation and the bound validation — not two
+      # representations of one value (§8.5).
+      interval-ms: ${STUDIO_COMPILE_ABANDONMENT_INTERVAL_MS:15000}
+    # Enforced before beginCompile: over-limit is a 400 and no compile state changes (AC-6).
+    authoring:
+      # Must never be looser than the runner's DEFAULT_BOUNDS.maxSteps, or a draft could be
+      # authorable and structurally uncompilable. RunnerBoundsAlignmentTest enforces that.
+      max-steps: ${STUDIO_COMPILE_MAX_STEPS:100}
+      max-line-chars: ${STUDIO_COMPILE_MAX_LINE_CHARS:1024}
+      max-source-bytes: ${STUDIO_COMPILE_MAX_SOURCE_BYTES:65536}
+    # Applied before publishInvalid; truncation is explicit in the stored structure (AC-15).
+    diagnostics:
+      max-per-step: ${STUDIO_COMPILE_MAX_DIAGNOSTICS_PER_STEP:10}
+      max-message-chars: ${STUDIO_COMPILE_MAX_DIAGNOSTIC_MESSAGE:400}
+      max-excerpt-chars: ${STUDIO_COMPILE_MAX_DIAGNOSTIC_EXCERPT:120}
+      max-total-bytes: ${STUDIO_COMPILE_MAX_DIAGNOSTICS_BYTES:65536}
+  # The studio-runner Service. The base URL is deployment configuration and never job- or
+  # user-supplied (§8.4, §8.5). Empty by default: without it the pipeline reports
+  # VALIDATOR_UNAVAILABLE and the draft stays retryable, rather than publishing an unvalidated
+  # candidate. Both runner routes (POST /v1/validate and the worker's POST /v1/runs) read this
+  # one block and present the same bearer; without base-url or service-identity-token the
+  # dispatcher sends nothing and closes the execution DISPATCH_FAILED (DEF-05).
+  runner:
+    base-url: ${STUDIO_RUNNER_BASE_URL:}
+    service-identity-token: ${STUDIO_RUNNER_SERVICE_TOKEN:}
+    validate-timeout: ${STUDIO_RUNNER_VALIDATE_TIMEOUT:10s}
+    connect-timeout: ${STUDIO_RUNNER_CONNECT_TIMEOUT:2s}
+  # The exact-match half of the §4.6 compatibility rule. The ranged Playwright/executor terms stay
+  # with the runner's own isCompatible, which revalidates before any browser launch — one rule, one
+  # owner, no drift. executor-version and playwright-version below are RECORDED on revision
+  # provenance and never compared by this backend.
+  runtime:
+    pin:
+      artifact-schema-version: 1
+      validator-schema-version: ${STUDIO_RUNTIME_VALIDATOR_SCHEMA_VERSION:2.0.0}
+      syntax-reference-version: ${STUDIO_RUNTIME_SYNTAX_REFERENCE_VERSION:2.0.0}
+      executor-version: ${STUDIO_RUNTIME_EXECUTOR_VERSION:2.0.0}
+      playwright-version: ${STUDIO_RUNTIME_PLAYWRIGHT_VERSION:1.63.0}
+
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+  # The internal callbacks are never part of the public surface (§8.4, AC-6a). The contract test
+  # still covers them; springdoc does not publish them.
+  paths-to-exclude:
+    - /internal/**
 
 logging:
   config: classpath:logback-spring.xml
+  level:
+    # Vertex AI SDK debug logging stays off outside the local profile (Story 10.5).
+    com.google.cloud.vertexai: WARN
+    com.google.api: WARN
+    io.grpc: WARN

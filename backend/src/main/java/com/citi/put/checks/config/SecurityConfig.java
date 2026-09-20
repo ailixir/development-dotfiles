@@ -102,9 +102,10 @@ public class SecurityConfig {
       CoreServiceClient coreServiceClient,
       Cache<String, UserIdentity> identityCache,
       ApplicationEventPublisher eventPublisher,
-      ObjectMapper objectMapper) {
+      ObjectMapper objectMapper,
+      IdentityBypassProperties identityBypass) {
     return new BffSessionAuthenticationFilter(
-        coreServiceClient, identityCache, eventPublisher, objectMapper);
+        coreServiceClient, identityCache, eventPublisher, objectMapper, identityBypass);
   }
 
   @Bean
@@ -116,6 +117,30 @@ public class SecurityConfig {
       CorsProperties corsProps,
       Optional<LocalDevAuthFilter> localDevAuthFilter)
       throws Exception {
+    // ── FINDING: CSRF is disabled while the browser authenticates with a COOKIE (AC-21a) ────────
+    //
+    // Architecture §9.1: "cookie-authenticated mutations require a documented CSRF control." That
+    // control does not exist, and until story 10.18b nobody had been asked for it. Two facts bound
+    // the gap, both read on this branch:
+    //
+    //   1. the browser's credential is a cookie — `BffSessionAuthenticationFilter.COOKIE_NAME` is
+    //      `put_session`, read off the request by `extractSessionCookie`; and
+    //   2. CORS is CREDENTIALED — `buildCorsSource` below sets `setAllowCredentials(true)` for
+    //      `/api/**`, and the chart deploys the MFE and the API on different hosts
+    //      (`checks.citi.com` vs `checks-api.citi.com`).
+    //
+    // An ambient cookie plus a state-changing endpoint is the classic forgery surface. `SameSite`
+    // on the cookie would bound it, but this application does not set the cookie — Core does — and
+    // what Core sets is not established anywhere in this repository.
+    //
+    // **This story deliberately does NOT enable Spring's CSRF filter and does NOT drop CORS
+    // credentials.** Either change alters the public request contract of every existing Checks
+    // route — every mutation would need a token the frontend does not send today — and landing
+    // that inside a Studio story is the Class C change ADR-002 §12 reserves for a ruling. The gap
+    // is recorded here, in `docs/runbooks/studio-runner.md` §10 as an open launch prerequisite, and
+    // as SPK-02 question 7: "Is CSRF protection for cookie-authenticated mutations defined?" — a
+    // question the PLATFORM's browser-auth route may already answer, which is why the answer is
+    // ED-06's to state in writing (AC-21b, blocked) rather than this story's to invent.
     http.csrf(csrf -> csrf.disable())
         .formLogin(form -> form.disable())
         .httpBasic(basic -> basic.disable())
@@ -132,6 +157,13 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/features")
                     .permitAll()
+                    // The internal callbacks are served by StudioInternalSecurityConfig's
+                    // higher-precedence chain and must never reach the permissive tail below.
+                    // This matcher is defence in depth: if that chain were ever removed or its
+                    // securityMatcher narrowed, /internal/** would otherwise become open again,
+                    // which is exactly the hole story 10.7 AC-6a closes.
+                    .requestMatchers("/internal/**")
+                    .denyAll()
                     .requestMatchers("/api/**")
                     .authenticated()
                     .anyRequest()

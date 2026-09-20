@@ -22,9 +22,6 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
             <ListItemText primary={<Typography variant="body2"><strong>Cmd/Ctrl + N</strong> — Create a new Check</Typography>} />
           </ListItem>
           <ListItem>
-            <ListItemText primary={<Typography variant="body2"><strong>G</strong> — Go to Home</Typography>} />
-          </ListItem>
-          <ListItem>
             <ListItemText primary={<Typography variant="body2"><strong>Esc</strong> — Close dialogs/overlays</Typography>} />
           </ListItem>
           <ListItem>
@@ -33,9 +30,16 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
           <ListItem>
             <ListItemText primary={<Typography variant="body2"><strong>Reports builder</strong>: ⌘S to save draft, ⌘⏎ to generate preview, <code>/</code> to focus check search.</Typography>} />
           </ListItem>
-          <ListItem>
-            <ListItemText primary={<Typography variant="body2">Dev toggles (localStorage): <code>__msw_debug_slow</code> (ms), <code>__msw_debug_fail</code> (code), <code>__msw_debug_empty</code> (1)</Typography>} />
-          </ListItem>
+          {/*
+            MSW serves mock Studio data only in tests and in a development server started with
+            VITE_ENABLE_MSW=true (see `MswGate`). This row appears only in that case, so the help
+            never claims mock behaviour for a build that talks to the real API.
+          */}
+          {process.env.VITE_ENABLE_MSW === 'true' && (
+            <ListItem>
+              <ListItemText primary={<Typography variant="body2"><strong>Mock data</strong>: this development build serves Checks Studio from mock data (MSW), not from the real API.</Typography>} />
+            </ListItem>
+          )}
         </List>
       </DialogContent>
       <DialogActions>

@@ -1,0 +1,763 @@
+schema: 1
+story: '10.6'
+story_title: Runner admission and reporting service
+epic: EPIC-10
+wave: 2
+
+gate: CONCERNS
+status_reason: >-
+  All 21 non-deferred acceptance criteria are implemented and independently verified from a clean
+  install; npm ci, build, type-check, lint, test (564 passed, 3 skipped, 22 files), test:fixtures
+  (58 passed, 1 skipped) and check:pins all exit 0. The reliability properties the rest of Epic 10
+  rests on were falsified by the reviewer rather than read: neutralising the atomic acquire in
+  src/server/capacity.ts turns the synchronous-burst test red with 8 admissions against a pool of
+  one; neutralising obedience to the CAS verdict in src/server/runCoordinator.ts turns the
+  two-instance race red with two 202s for one attempt; adding a single resend on an ambiguous
+  admission in src/reporting/admissionClient.ts turns the AC-9 timeout and transport cases red;
+  recomputing the FINAL timestamp per delivery turns the AC-17 byte-identity assertion red. The
+  isolation allowlist is genuinely fail-closed: a real npm install of debug@4.3.4 made three
+  assertions fail, including on its transitive ms. The playwright-core entry is correct — it is a
+  direct dependency of playwright@1.63.0 pinned at exactly 1.63.0 and is not declared at the root.
+  Zero production dependencies were added; package-lock.json is byte-unchanged from the epic base.
+  Three medium findings keep this off PASS, all of them test-sensitivity rather than behaviour: the
+  AC-20 "redacts a value added later" test stays green with outbound redaction removed, the AC-22b
+  lint denylist silently shrinks if a name is deleted from FORBIDDEN_MODULES, and the AC-1
+  auto-enabled assertion checks only that route strings appear in the YAML, not the body
+  conformance AC-1 asks for. The production properties behind all three were verified directly by
+  the reviewer and hold.
+
+reviewer: Quinn (@qa)
+updated: '2026-09-11T00:00:00Z'
+branch: story/10.6
+head_sha: 22fd0749c
+worktree: /Users/brunobuger/orca/workspaces/put-checks/wt/10.6
+
+waiver:
+  active: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Evidence — commands actually executed by the reviewer, not developer claims
+# ─────────────────────────────────────────────────────────────────────────────
+evidence:
+  clean_install:
+    command: rm -rf node_modules dist coverage && npm ci
+    result: PASS
+    detail: 380 packages, exit 0, no browser download attempted
+  build:
+    command: npm run build
+    result: PASS
+    detail: tsc -p tsconfig.build.json + write-runtime-versions.mjs, wrote dist/runtime-versions.json
+  type_check:
+    command: npm run type-check
+    result: PASS
+    detail: exit 0, no output
+  lint:
+    command: npm run lint
+    result: PASS
+    detail: eslint ., exit 0, no output
+  unit_tests:
+    command: npm test
+    result: PASS
+    detail: >-
+      22 files, 564 passed, 3 skipped, exit 0. The 3 skips are exactly the declared deferrals:
+      AC-1 contract conformance (skipIf, openapi.yaml absent), AC-14b real Chromium (it.skip,
+      10.12) and AC-12 under SIGKILL (it.skip, 10.7). Coverage src/server/** 96.73% lines /
+      93.36% branches; src/reporting/** 94.81% / 86.87%; global 95.89% / 90.68%.
+  fixtures_tier:
+    command: npm run test:fixtures
+    result: PASS
+    detail: 58 passed, 1 skipped, exit 0 — unchanged by this story
+  pin_check:
+    command: npm run check:pins
+    result: PASS
+    detail: exit 0, playwright 1.63.0 across copies, node floor 22, chromiumBuild/image NOT ASSERTED
+  coverage_thresholds:
+    command: git diff epic/EPIC-10..HEAD -- vitest.config.ts
+    result: NOT LOWERED
+    detail: >-
+      Global stays 85 lines / 85 statements / 80 functions / 80 branches. The story ADDS
+      src/server/**, src/reporting/** and src/main.ts to `include` and pins each at 85/85/80/80,
+      so the new surface cannot hide inside the global figure. Nothing was relaxed.
+  working_tree:
+    command: git status --short --untracked-files=all
+    result: CLEAN
+    detail: >-
+      Empty after every falsification edit was reverted, node_modules reinstalled from the restored
+      lockfile, the throwaway probe tests deleted and the stub docs/specs/studio tree removed.
+      Full gate re-run after restoration reproduced 564 passed / 3 skipped.
+
+developer_claims_verified:
+  - claim: 22 of 24 criteria met, 2 deferred
+    verdict: >-
+      CONFIRMED with a correction of arithmetic, not of substance. AC-2b and AC-14b are the two
+      declared deferrals; AC-1 is a third, disclosed separately in the Dev Agent Record but not
+      counted in the "2 deferred" headline. Counting AC-1 honestly the split is 21 verified /
+      3 deferred / 0 unmet out of 24.
+  - claim: 564 tests passing, all gates green from clean
+    verdict: CONFIRMED — reproduced exactly from rm -rf node_modules dist coverage
+  - claim: zero production dependencies added; node:http and built-in fetch instead of a library
+    verdict: >-
+      CONFIRMED — git diff epic/EPIC-10..HEAD -- package.json shows one added line and it is the
+      `start` script. package-lock.json is not in the diff at all. src/server/server.ts imports
+      node:http; src/reporting/httpClient.ts uses the global fetch.
+  - claim: playwright-core is playwright's own engine, transitive, at the same pin
+    verdict: >-
+      CONFIRMED INDEPENDENTLY — see allowlist_audit below. The story text's claim that "today that
+      closure is playwright and typescript" was simply wrong; the closure has always been three.
+  - claim: the two falsifications in test/server/concurrency.test.ts
+    verdict: >-
+      CONFIRMED, and re-run by the reviewer against the production guards themselves rather than
+      against the in-suite substitutes. See falsification_rerun.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AC-22a — the isolation allowlist, audited because it was widened
+# ─────────────────────────────────────────────────────────────────────────────
+allowlist_audit:
+  entry_added: playwright-core
+  claim: "playwright's own engine, pulled in transitively at the same exact version by the same pin"
+  verification:
+    transitive:
+      finding: TRUE
+      proof: >-
+        package-lock.json packages['node_modules/playwright'].dependencies is exactly
+        {"playwright-core": "1.63.0"}. It is reached only through playwright.
+    same_version:
+      finding: TRUE
+      proof: >-
+        packages['node_modules/playwright-core'].version = 1.63.0, identical to
+        packages['node_modules/playwright'].version and to the declared pin.
+    not_separately_declared:
+      finding: TRUE
+      proof: >-
+        package-lock.json packages[''].dependencies is {"playwright":"1.63.0","typescript":"5.9.3"}
+        and package.json dependencies matches. playwright-core appears nowhere as a root dependency.
+    lockfile_unchanged:
+      finding: TRUE
+      proof: >-
+        package-lock.json does not appear in git diff --stat epic/EPIC-10..HEAD. The closure the
+        allowlist now enumerates is the closure that already existed; the developer corrected the
+        story's stale two-package statement rather than widening anything real.
+  fail_closed_probe:
+    method: >-
+      Real `npm install --save debug@4.3.4` in the package root (not a hand-edited lockfile), so
+      both a declared dependency and a genuinely transitive one entered the production closure.
+      package.json and package-lock.json were backed up first, restored with git checkout -- and
+      node_modules reinstalled from the restored lockfile.
+    closure_after: [debug@4.3.4, debug/node_modules/ms@2.1.2, playwright, playwright-core, typescript]
+    result: >-
+      FAIL-CLOSED CONFIRMED — exit 1, 3 failed / 18 passed. "contains exactly the allowlisted
+      packages and nothing else" named debug and the nested ms; "every declared runtime dependency
+      is allowlisted and exact-pinned" named debug; "story 10.6 added no production dependency"
+      named debug. The transitive ms was caught without anybody predicting it, which is the
+      property AC-22a exists for.
+  residual: >-
+    Nested lockfile paths are reported under their nesting prefix (debug/node_modules/ms rather
+    than ms) because the name is derived by stripping only the leading "node_modules/". Cosmetic:
+    the entry still fails the equality assertion. Recorded as LOW-1.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Admission — the three outcomes
+# ─────────────────────────────────────────────────────────────────────────────
+admission:
+  order_of_operations:
+    finding: CORRECT
+    proof: >-
+      src/server/runCoordinator.ts submit() runs validateEnvelope -> validateArtifact ->
+      pool.draining check -> pool.tryAcquire() -> admission.admit(). Every step before the acquire
+      is synchronous, so there is no await between observing free capacity and holding the slot.
+      Scratch creation, the browser launch and the evidence key all live in execute(), which is
+      only reachable after outcome.kind === 'ADMITTED'.
+  saturation_429:
+    finding: >-
+      NO NETWORK. tryAcquire() returning null returns 429 + Retry-After directly; the
+      AdmissionClient is not constructed into that path at all. test/server/admission.test.ts
+      asserts admissionRequests length 0 on the draining path and exactly 1 on the saturated path
+      (the one held by the in-flight run), and the burst test asserts 1 admission for 8 submits.
+  definite_refusals:
+    finding: CORRECT
+    detail: >-
+      409/401/403 map to REFUSED; the coordinator releases the slot and returns 409 or 503 with no
+      second call anywhere. Confirmed by inspection (no loop) and by the two-instance race, where
+      the loser's admissionRequests has length 1 and its launches, scratch and event log are empty.
+  ambiguous_never_resent:
+    finding: CORRECT
+    detail: >-
+      timeout, transport loss, 5xx and 301/302/303/307/308 all map to AMBIGUOUS. The coordinator
+      releases the slot and stops. Falsified by the reviewer — see falsification_rerun case 3.
+  redirect_manual:
+    finding: >-
+      GENUINELY SET — src/reporting/httpClient.ts passes redirect: 'manual' to fetch, with the
+      reason stated inline. A 307 therefore arrives as a status, never as a second POST. The AC-9
+      suite covers 307 and 308 as their own cases and asserts http.requests length 1.
+  retry_loop_search:
+    command: grep for retry/for/while across src/reporting/** src/server/** src/main.ts
+    finding: >-
+      EXACTLY ONE retry loop exists in the package and it is deliberately scoped: the bounded
+      terminal-delivery loop in src/reporting/reportClient.ts deliverTerminal. The HttpClient
+      interface has no retry parameter, the admission client has no loop, and deliverProgress makes
+      exactly one attempt. There is no retry anywhere on the admission path.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Exclusive ownership — the reviewer tried to break it
+# ─────────────────────────────────────────────────────────────────────────────
+ownership:
+  design:
+    finding: >-
+      newAdmissionIdentity() is called once, inline, in submit(). There is deliberately no
+      regenerate helper, so no code path can produce a second admissionId for one attemptId.
+  probes:
+    - probe: same attemptId submitted twice concurrently to ONE instance with POOL_SIZE=2
+      result: >-
+        ONE LAUNCH. Statuses [202, 409]; two distinct admissionIds were offered and the
+        single-winner CAS refused the loser, which the runner obeyed. Capacity is not the thing
+        protecting the attempt — obedience to the verdict is.
+    - probe: three instances with distinct runnerInstanceIds contending for one attemptId
+      result: >-
+        ONE LAUNCH. Statuses [202, 409, 409]; each instance issued exactly one admission request
+        and none re-attempted under any identity.
+    - probe: neutralise obedience to the verdict (see falsification_rerun case 2)
+      result: TWO LAUNCHES — the assertion is sensitive to the property, not to the fake CAS.
+  verdict: >-
+    The reviewer could not construct a case in which two instances own one attempt while the CAS
+    behaves as a single-winner compare-and-set. The residual — an AMBIGUOUS outcome where the API
+    may in fact have granted admission — is correctly left unresolved here and assigned to 10.7's
+    reaper, which is the only component holding the state needed to resolve it.
+  note: >-
+    admissionId is built from Date.now() plus Math.random().toString(36).slice(2,12) rather than
+    node:crypto randomUUID. Collision probability is negligible and the API CAS is authoritative,
+    so this is not a correctness defect. Recorded as LOW-2.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Ready versus busy — four states
+# ─────────────────────────────────────────────────────────────────────────────
+ready_vs_busy:
+  idle: /health 200, /ready 200 — verified
+  saturated: >-
+    /health 200, /ready 200 with ready:true, /v1/runs 429 with Retry-After — verified. Saturation
+    alone does NOT flip readiness. src/server/routes.ts derives readiness from `!pool.draining`
+    only; inUse is reported as a field, never as the verdict.
+  draining: >-
+    /health 200 with draining:true, /ready 503 with ready:false, /v1/runs 503 RUNNER_DRAINING and
+    zero admission requests — verified.
+  liveness_under_drain: /health stays 200 while draining — verified
+  verdict: >-
+    All four states correct and asserted as four distinct cases rather than one combined endpoint.
+    No path exists by which capacity saturation can set readiness false.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Falsification — re-run by the reviewer against the PRODUCTION guards
+# ─────────────────────────────────────────────────────────────────────────────
+falsification_rerun:
+  method: >-
+    The suite's own two falsifications substitute a broken pool and a lying transport through
+    existing DI seams, which proves the assertions are sensitive but leaves the production code
+    untouched. The reviewer therefore neutralised the production guards themselves, ran the REAL
+    assertions, captured the failure, and restored each file from a backup with git diff --quiet
+    confirming byte-equality before moving on.
+  cases:
+    - guard: atomic acquire (AC-10) in src/server/capacity.ts
+      mutation: >-
+        `inUse += 1` moved out of the synchronous path into setImmediate, making tryAcquire a
+        read-then-write
+      target_test: Case 2 — "eight submits in one synchronous burst yield exactly one 202"
+      result: RED — exit 1, "expected [ …(8) ] to have a length of 1 but got 8"
+      restored: true
+    - guard: obedience to the CAS verdict (AC-7b) in src/server/runCoordinator.ts
+      mutation: the `outcome.kind === 'REFUSED'` branch disabled
+      target_test: Case 3 — "one runner wins, the other gets 409, launches nothing"
+      result: RED — exit 1, "expected [ 202, 202 ] to deeply equal [ 202, 409 ]" (two owners)
+      restored: true
+    - guard: no resend of an ambiguous admission (AC-9) in src/reporting/admissionClient.ts
+      mutation: one resend added on timeout/transport
+      target_test: AC-9 "issues exactly one admission request for %s and starts nothing"
+      result: >-
+        RED — exit 1, 2 failed (timeout and connection loss), "expected [ …, … ] to have a length
+        of 1 but got 2". The 5xx and redirect cases stayed green, correctly, because the injected
+        resend did not cover them.
+      restored: true
+    - guard: byte-identical terminal retry (AC-17) in src/reporting/reportClient.ts
+      mutation: the FINAL body re-serialized per attempt with a per-attempt reportedAt
+      target_test: AC-17 "re-sends the exact same bytes on every attempt, timestamps included"
+      result: RED — exit 1, Object.is inequality on the serialized bodies
+      restored: true
+    - guard: the AC-22b named-module denylist in eslint.boundary-rules.js
+      mutation: "'pg' removed from FORBIDDEN_MODULES"
+      target_test: test/lint-boundary.test.ts
+      result: >-
+        STAYED GREEN — 76 passed. The suite iterates over FORBIDDEN_MODULES, so deleting an entry
+        deletes its own test case. See MED-2.
+      restored: true
+    - guard: outbound redaction in src/reporting/reportClient.ts freezeBytes
+      mutation: redactor.redact(...) removed from the serialization path
+      target_test: the three AC-20 canary tests
+      result: >-
+        STAYED GREEN — 3 passed. The canary is already redacted upstream by the executor, so those
+        tests never exercise the finished-bytes pass they are named for. See MED-1; the production
+        property itself was verified separately and holds.
+  tree_after: clean (git status --short --untracked-files=all empty; full suite re-run 564/3)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Reporting contract
+# ─────────────────────────────────────────────────────────────────────────────
+reporting:
+  cumulative: >-
+    VERIFIED — createRunSnapshot produces a full current-state snapshot per report; AC-16's test
+    drops the first two deliveries and asserts every step still arrives correctly in the third with
+    no step executed twice.
+  identity_and_sequence: >-
+    VERIFIED — every body carries executionId, attemptId, admissionId, runnerInstanceId, kind,
+    reportedAt, runnerSequence, cumulative steps, bounded logs, runtimeVersions, and on FINAL the
+    outcome and evidence state. runnerSequence is asserted strictly increasing within an attempt,
+    restarting for a new attempt, never reused; STARTED's sequence is asserted lower than any
+    step's.
+  started_timing: >-
+    VERIFIED (AC-14a) — reporter.browserStarted() is called after launcher.launch() resolves, not
+    on admission and not when the HTTP call begins. A run whose adapter never reports a launch
+    sends no STARTED.
+  terminal_byte_identity: >-
+    VERIFIED — freezeBytes() serializes, bounds and redacts once before the first send; every
+    attempt re-sends that exact string. The per-delivery counter travels in the
+    x-runner-delivery-attempt header and the test asserts the body never contains it. Falsified
+    (case 4 above).
+  stepreporter_seam: >-
+    VERIFIED — src/reporting/reportingStepReporter.ts implements the StepReporter interface from
+    src/executor/adapters/StepReporter.ts and is passed to the existing executeSteps({ reporter }).
+    No parallel reporting mechanism exists; executeSteps was not modified.
+  ownership_lost_409: >-
+    VERIFIED (AC-18) — a 409 on any report sets stopped, emits one audit line plus
+    runner.report.ownership_lost, and never escalates to a retry, a new admission or a relaunch.
+  sensitivity_note: >-
+    The harness pins wallClock to a fixed instant, so a regression that rebuilt the FINAL body per
+    attempt from the snapshot would still serialize identically unless it also moved the sequence.
+    The explicit-timestamp falsification above does exercise the byte comparison itself. LOW-3.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Redaction
+# ─────────────────────────────────────────────────────────────────────────────
+redaction:
+  suite_canary: >-
+    The suite plants canary-secret-value in resolvedSecrets, forces a step failure whose message
+    embeds it, and asserts its absence in plain, encodeURIComponent, encodeURI, double-encoded and
+    three base64 forms across every outbound body and every log line. Green.
+  reviewer_canary: >-
+    PLANTED INDEPENDENTLY. The reviewer built a FINAL body carrying a fresh canary
+    (qa-probe-canary-9f3a) in outcome.errorMessage and evidence.videoKey — fields no redaction call
+    site enumerates — handed it to a real createReportClient with a real createRedactor, and
+    asserted on the bytes handed to the HttpClient. The canary appears in no form: plain, URL
+    encoded, base64 and base64url all absent, REDACTED present. The finished-bytes property AC-20
+    asks for is real. Probe file deleted; tree clean.
+  logging: >-
+    createLogger serializes the line and then redacts it (never the reverse), and
+    logger.withRedactor(redactor) is wired into the report client per run. Request logging records
+    only the AC-13 identity fields; asserted not to contain artifact source, resolvedSecrets or the
+    target URL.
+  caveat: >-
+    The suite's own outbound-redaction guard is insensitive — see MED-1. The behaviour is correct;
+    the test protecting it is not.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Deferrals — checked for honesty
+# ─────────────────────────────────────────────────────────────────────────────
+deferrals:
+  AC-1:
+    mechanism: it.skipIf(!CONTRACT_PRESENT) keyed on existsSync(docs/specs/studio/openapi.yaml)
+    cannot_silently_pass: >-
+      CONFIRMED — vitest reports it in the 3 skipped, never in the 564 passed. A companion test
+      records the presence flag either way, so the absence is visible rather than silent.
+    auto_enable_is_real: >-
+      CONFIRMED BY EXPERIMENT — the reviewer created docs/specs/studio/openapi.yaml containing a
+      minimal stub. The skipIf immediately flipped to running and FAILED ("expected 'openapi: 3.1.0
+      \npaths: {}' to contain '/v1/validate'"). The stub was then removed and the directory pruned.
+      The gate genuinely arms itself when 10.1 lands, and it does not pass on a spec that lacks the
+      routes.
+    quality_caveat: >-
+      The armed assertion is substring containment over the raw YAML text, not conformance. AC-1
+      also requires the request BODIES the runner sends to conform. See MED-3.
+  AC-2b:
+    mechanism: not attempted; ED-02 gates it; verified in story 10.18 through the real ingress
+    honest: >-
+      YES — AC-2a is genuinely verified here against a configured stub, on all four routes, for
+      missing, blank, malformed and wrong credentials, with a constant-time comparison over sha256
+      digests so a length mismatch is indistinguishable from a value mismatch. Nothing in this
+      story depends on the backend's BffSessionAuthenticationFilter bypass.
+  AC-14b:
+    mechanism: it.skip naming story 10.12
+    honest: >-
+      YES — reported as skipped. No browser was installed or launched anywhere in this review; the
+      default launcher in src/server/adapters.ts refuses loudly and has its own test.
+  AC-12_sigkill:
+    mechanism: it.skip with expect.unreachable in the body
+    honest: >-
+      YES, AND NOT FAKED — the body would throw if it ever ran, so the skip cannot decay into a
+      vacuous pass. The comment states plainly that no assertion inside a process can observe that
+      process being SIGKILLed and assigns recovery to 10.7's running reaper. The graceful SIGTERM
+      drain IS asserted: readiness false, new runs 503, the in-flight run finishes and delivers its
+      terminal report, scratch cleared, and a separate test covers the drain-deadline case rather
+      than pretending completion.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Acceptance criteria
+# ─────────────────────────────────────────────────────────────────────────────
+ac_coverage:
+  total: 24
+  verified: 21
+  deferred: 3
+  unmet: 0
+  detail:
+    AC-1: DEFERRED to 10.1 — skipIf, reports as skipped, auto-enable proven by experiment. MED-3.
+    AC-2a: >-
+      PASS — identity checked on the request head before the body is read, on all four routes;
+      missing/blank 401, malformed 401, wrong 403; sha256 digests compared with timingSafeEqual; a
+      blank configured credential fails at construction. Bodies carry a code and no job detail.
+    AC-2b: DEFERRED to 10.18 on ED-02 — not attempted, honestly recorded.
+    AC-3: >-
+      PASS — callbackUrl, callbackHost, callbackPort, reportUrl, webhookUrl and endpoint in a job
+      body are each rejected 400 JOB_CALLBACK_NOT_PERMITTED with http.requests empty, so nothing
+      leaves for the attacker's URL. The configured callback base URL is refused if it carries
+      userinfo or a query string, and the credential travels in an Authorization header only.
+    AC-4: >-
+      PASS — /v1/validate is a browser-free wrapper over validateArtifact, never touches the pool,
+      creates no scratch, bounds body/steps from DEFAULT_BOUNDS and reports a wall-clock overrun as
+      503 rather than hiding it. Answers successfully while the single slot is held.
+    AC-5: >-
+      PASS — oversized 413 during upload (the cap is applied as chunks arrive), non-JSON 400,
+      non-object 400, unknown key 400 with key names only. No stack trace, path or artifact echo.
+    AC-6: >-
+      PASS — order is envelope -> artifact -> capacity -> CAS -> 202, all of it synchronous up to
+      the acquire. Zero adapter calls asserted for 409, 401, 403, timeout, transport loss and 5xx.
+      Scratch is created inside execute(), which only the ADMITTED branch reaches.
+    AC-7: >-
+      PASS — runnerInstanceId is process-stable (configured or generated once); admissionId is
+      minted once per submit by newAdmissionIdentity, which has no regenerate counterpart. LOW-2
+      notes the randomness source.
+    AC-7b: >-
+      PASS — two instances, one single-winner CAS, the same attemptId, interleaved: [202, 409] and
+      exactly one launch. The loser launched nothing, created no scratch, released its slot and
+      issued exactly one admission request. Reviewer extended it to three instances with the same
+      result, and falsified it to two launches by disabling the REFUSED branch.
+    AC-8: >-
+      PASS — 409/401/403 release the slot and answer 409 or 503 with no re-attempt under any
+      identity.
+    AC-9: >-
+      PASS — timeout, transport loss, 5xx and 301/302/303/307/308 all resolve to AMBIGUOUS: slot
+      released, nothing launched, one structured audit line plus runner.admission.ambiguous, and
+      exactly one request issued. redirect: 'manual' is set on the fetch call. Falsified.
+    AC-10: >-
+      PASS — 429 with Retry-After, decided by a synchronous tryAcquire before the admission client
+      is ever consulted. No await between observing capacity and holding the slot. Falsified: a
+      read-then-write pool admits eight against a pool of one.
+    AC-11: >-
+      PASS — four distinct states verified; saturation keeps /ready 200, only draining sets it 503,
+      /health stays 200 throughout.
+    AC-12: >-
+      PASS for the graceful path — SIGTERM sets draining, new runs get 503, the admitted run
+      finishes and reports, scratch is cleared at startup and on the drain path, and main.ts binds
+      SIGTERM and SIGINT to drain with no shell-form CMD in the Dockerfile so PID 1 receives the
+      signal. SIGKILL is an honest, non-faked skip resting on 10.7.
+    AC-13: >-
+      PASS — full identity, kind, timestamps, strictly increasing per-attempt runnerSequence,
+      cumulative step list, bounded logs, runtime versions from runtime-versions.json, and outcome
+      plus evidence state on FINAL. Progress is a snapshot, not a delta.
+    AC-14a: >-
+      PASS — STARTED is emitted only after the launch resolves; no launch means no STARTED, and its
+      sequence is lower than any step's.
+    AC-14b: DEFERRED to 10.12 — it.skip, no browser installed or launched.
+    AC-15: >-
+      PASS — the 10.2 StepReporter seam is implemented, not bypassed; per-step PASSED/FAILED/
+      SKIPPED outcomes and null timings for skipped steps reach the wire unchanged, and reporting
+      is asynchronous to execution so a slow callback does not delay a step.
+    AC-16: >-
+      PASS — a failed STARTED/PROGRESS is dropped with a counter; the next cumulative snapshot
+      repairs the gap and no step runs twice.
+    AC-17: >-
+      PASS — serialized once, re-sent byte for byte, nothing recomputed including timestamps, the
+      attempt counter in a header, bounded count and window with jitter, stops on ack or deadline,
+      sequence never incremented on a retry. Falsified. LOW-3 on harness sensitivity.
+    AC-18: >-
+      PASS — a 409 on any report stops reporting immediately, releases slot and scratch, records
+      one audit line plus a counter, and never escalates.
+    AC-19: >-
+      PASS — one bounds source; max steps, max log entries, max entry length and max body size.
+      logsTruncated is set and the oldest-dropped/newest-retained policy is asserted end to end
+      through a real run, after the developer's own self-critique found the buffer was never
+      populated during execution.
+    AC-20: >-
+      PASS on behaviour, verified independently by the reviewer's own canary in unanticipated
+      fields. The suite's guard for the finished-bytes property is insensitive — MED-1.
+    AC-21: >-
+      PASS — resolved values live in a Map cleared on every exit path including drain and error;
+      scratch is inspected after a failed run and is empty; no queued report body contains a value,
+      resolvedVars or resolvedSecrets.
+    AC-22: >-
+      PASS — (a) allowlist over the resolved production closure, proven fail-closed against a real
+      transitive install; (b) 32 named-module lint rules across database, vault, identity and
+      gateway classes, each with its own fixture proven to fire, subject to MED-2; (c) the config
+      loader enumerates its keys and refuses DATABASE_URL, VAULT_ADDR, CSI_ENDPOINT, LLM_GATEWAY_KEY,
+      R2D2_ENDPOINT and an unpredicted key alike, naming the key and never the value.
+    AC-23: >-
+      PASS — all seven required cases present and genuinely concurrent: a held slot, eight
+      interleaved HTTP requests with bodies delivered in halves, eight submits in one synchronous
+      burst, two instances on one attempt, validate responsive under a held slot, SIGTERM mid-run,
+      a FINAL retry racing the drain deadline with bytes compared, and an ambiguous admission racing
+      SIGTERM. The burst form is the one that races two acquires inside a single event-loop turn and
+      it is the one that goes red when the guard is removed.
+    AC-24: >-
+      PASS — every gate green from a clean npm ci, coverage on the two new directories pinned at the
+      validator/executor thresholds and comfortably met, no new runtime dependency at all.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Issues
+# ─────────────────────────────────────────────────────────────────────────────
+top_issues:
+  - id: MED-1
+    severity: medium
+    title: The AC-20 finished-bytes guard stays green with outbound redaction removed
+    ac: AC-20
+    finding: >-
+      Deleting redactor.redact(...) from freezeBytes in src/reporting/reportClient.ts leaves all
+      three AC-20 tests passing. The canary reaches the snapshot already redacted by the executor's
+      own redaction of step failure text, so the outbound pass — the one AC-20 names as the reason a
+      value cannot escape through a field nobody enumerated — is never the thing under test. The
+      test literally titled "redacts a value added to the payload later, because it redacts the
+      finished bytes" is the one that proves least.
+    proof: >-
+      Mutation applied and the AC-20 block re-run: 3 passed, 29 skipped, exit 0. File restored and
+      verified byte-identical.
+    impact: >-
+      The behaviour is correct today — the reviewer proved it directly by handing a fresh canary to
+      a real report client in outcome.errorMessage and evidence.videoKey and observing REDACTED on
+      the wire. The risk is regression: a future refactor that moves redaction off the serialized
+      string would ship green.
+    suggested_action: >-
+      Add one test that places a canary into a ReportBody field no upstream redactor touches and
+      asserts on client.sentBodies, so the guard fails when the outbound pass is removed.
+    owner: '@dev'
+    blocking: false
+    status: RESOLVED
+    resolution: >-
+      Resolved by @dev 2026-09-11: AC-20's finished-bytes case now asserts on a report client
+      given a body no upstream redactor has seen, including an unenumerated field, and goes red
+      when the outbound pass in freezeBytes is deleted.
+
+  - id: MED-2
+    severity: medium
+    title: Deleting a name from FORBIDDEN_MODULES silently deletes its own test case
+    ac: AC-22b
+    finding: >-
+      test/lint-boundary.test.ts derives ISOLATION_MODULES from FORBIDDEN_MODULES and asserts a
+      fixture exists for each. The manifest is never asserted in the other direction, so removing
+      an entry removes the iteration that would have caught the removal.
+    proof: >-
+      "'pg'" removed from eslint.boundary-rules.js and the suite re-run: 76 passed, exit 0. Restored
+      and verified byte-identical.
+    impact: >-
+      Layer (a) remains genuinely fail-closed and is the layer the story itself designates as the
+      one that catches the unpredicted case, so the security property does not rest on this. The
+      narrow uncovered path is a client that enters through devDependencies — invisible to the
+      production closure — whose lint rule someone has since deleted.
+    suggested_action: >-
+      Assert the manifest is a superset of ISOLATION_MODULES as well as a subset, or derive the
+      expected module list from the manifest and assert both directions agree.
+    owner: '@dev'
+    blocking: false
+    status: RESOLVED
+    resolution: >-
+      Resolved by @dev 2026-09-11: the covered set is now pinned by the denylist, the fixture
+      manifest and the fixtures on disk, asserted to agree in both directions, so removing a name
+      from FORBIDDEN_MODULES — with or without the manifest entry — fails.
+
+  - id: MED-3
+    severity: medium
+    title: The AC-1 assertion that auto-enables checks route strings, not body conformance
+    ac: AC-1
+    finding: >-
+      When docs/specs/studio/openapi.yaml lands, the skipIf arms an assertion that the six route
+      strings and the word "internal" appear somewhere in the raw YAML. AC-1 also requires that
+      "the request bodies it sends to the API's admission and progress routes conform to the
+      internal-tagged section". Substring containment over the whole file neither scopes the check
+      to the internal tag nor looks at a single request body field.
+    proof: >-
+      A stub openapi.yaml was created; the test armed and failed on the missing routes, confirming
+      the auto-enable is real. Reading the armed assertion shows it is six toContain calls.
+    impact: >-
+      The deferral is honest and the arming works. The risk is that 10.1's landing will turn AC-1
+      green on a check considerably weaker than AC-1 describes, and nobody will revisit it.
+    suggested_action: >-
+      Carry this as an explicit obligation on 10.1 or 10.7: parse the internal section and assert
+      the admission and progress request-body shapes the runner actually serializes.
+    owner: '@po'
+    blocking: false
+    status: RESOLVED
+    resolution: >-
+      Resolved by @dev 2026-09-11: the armed assertion parses the contract and checks the runner's
+      real request and response bodies against the schemas of internal-tagged operations, proven
+      red against a throwaway contract on a bad body, a bad response type and a missing internal
+      tag.
+
+  - id: LOW-1
+    severity: low
+    title: Nested lockfile entries are reported under their nesting prefix in the closure
+    ac: AC-22a
+    finding: >-
+      productionClosure() strips only the leading "node_modules/", so a nested install appears as
+      debug/node_modules/ms rather than ms. It still fails the equality assertion, so the gate holds;
+      only the failure message is harder to read.
+    owner: '@dev'
+    blocking: false
+
+  - id: LOW-2
+    severity: low
+    title: admissionId derives from Math.random rather than a cryptographic source
+    ac: AC-7
+    finding: >-
+      newAdmissionIdentity uses Date.now() plus Math.random().toString(36).slice(2,12). The API CAS
+      is authoritative and collision probability is negligible, so this is not a correctness defect,
+      but node:crypto randomUUID costs nothing and removes the question entirely.
+    owner: '@dev'
+    blocking: false
+
+  - id: LOW-3
+    severity: low
+    title: The harness's frozen wall clock limits AC-17 sensitivity
+    ac: AC-17
+    finding: >-
+      wallClock is pinned to a fixed instant, so a regression that rebuilt the FINAL body per
+      attempt would still serialize identically unless it also changed the sequence. The reviewer's
+      explicit varying-timestamp mutation does turn the assertion red, so the byte comparison itself
+      is live.
+    owner: '@dev'
+    blocking: false
+
+  - id: LOW-4
+    severity: low
+    title: The story headline undercounts its own deferrals
+    ac: AC-1
+    finding: >-
+      The Status/summary reports "2 deferred" while the Dev Agent Record correctly lists three live
+      deferrals plus the SIGKILL skip. The detail is honest; only the headline count is off.
+    owner: '@sm'
+    blocking: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Recommendation
+# ─────────────────────────────────────────────────────────────────────────────
+recommendation:
+  verdict: CONCERNS
+  merge: SAFE
+  rationale: >-
+    Every blocking condition in the gate standard was tested and none fired. No retry of an
+    ambiguous admission exists anywhere; two instances cannot own one attempt under a single-winner
+    CAS, including at three-way contention; saturation never flips readiness; the allowlist is
+    fail-closed against a real transitive install; and no deferral is faked — each one reports as
+    skipped and the AC-1 arming was proven to work by creating the file. The three medium findings
+    are all about how well the suite would catch a future regression, not about behaviour that is
+    wrong today; the reviewer verified each underlying production property directly. Five stories
+    depend on this one, so MED-1 and MED-2 should be closed before the dependents land, not after.
+  immediate_actions:
+    - Add a finished-bytes redaction test that fails when the outbound pass is removed (MED-1)
+    - Assert the isolation fixture manifest in both directions (MED-2)
+  follow_up:
+    - Strengthen the AC-1 conformance assertion when 10.1 lands (MED-3)
+    - Consider crypto randomUUID for admissionId (LOW-2)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Post-merge integration fix — 2026-09-11, @dev (epic/EPIC-10)
+# ─────────────────────────────────────────────────────────────────────────────
+post_merge_integration_fixes:
+  - id: PMI-1
+    date: '2026-09-11'
+    agent: '@dev'
+    branch: epic/EPIC-10
+    trigger: >-
+      Stories 10.1 and 10.6 both merged. AC-1's skipIf gate armed itself exactly as designed once
+      docs/specs/studio/openapi.yaml appeared, and both conformance cases errored in
+      test/helpers/openapi.ts: "Malformed flow mapping entry:  sequence or transition conflict".
+    diagnosis: >-
+      Not a contract mismatch. Story 10.6's hand-rolled YAML-subset reader was written against a
+      small stub contract and could not read 10.1's real 1188-line document. It died on line 599,
+      '409': { description: Ownership, sequence or transition conflict } — an unquoted comma inside
+      a flow mapping. The reader's fail-loudly design (MED-3) is what surfaced this as an error
+      rather than a vacuous pass, and that behaviour is preserved.
+    change: >-
+      The hand-rolled reader (268 lines) was deleted and replaced by `yaml` 2.9.0, added as an
+      exact-pinned devDependency. parseYaml now throws on any parser error *or warning*, enforces
+      uniqueKeys and bounds alias expansion. The JSON-Schema conformance checker is unchanged. No
+      production source, no coverage threshold and no acceptance criterion was touched.
+    isolation_impact: none
+    isolation_evidence: >-
+      AC-22a allowlists the resolved *production* closure, read off lockfile entries npm did not
+      mark dev. node_modules/yaml is marked "dev": true and has zero transitive dependencies, so
+      the closure is unchanged at playwright, playwright-core, typescript. test/isolation.test.ts
+      passes unmodified; it did not object to a devDependency, which is correct — a test-only
+      parser never enters the image or the browser-facing process.
+    vacuous_pass_guard: >-
+      Falsified, not asserted. Making parseYaml swallow parser problems turns "fails loudly on a
+      document it cannot read, rather than passing vacuously" red; restoring it turns it green and
+      leaves the file byte-identical.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Open integration findings raised by the now-armed AC-1 assertion
+# ─────────────────────────────────────────────────────────────────────────────
+# Both are left failing on purpose. docs/specs/studio/openapi.yaml is frozen and owned by story
+# 10.1; neither the contract nor the acceptance criteria were adjusted to produce a green run.
+integration_findings:
+  - id: INT-1
+    severity: high
+    title: The runner's progress-report log entries do not conform to ExecutionLogEntry
+    ac: AC-1
+    owner: '@dev / 10.7'
+    blocking_for: '10.7'
+    finding: >-
+      ProgressReport.logs[] is ExecutionLogEntry, which requires `at` (format date-time) and a
+      `level` drawn from DEBUG|INFO|WARN|ERROR. The runner sends `atMs` (epoch millis) and a
+      lower-case level, so every progress report violates a required field. Reported violations:
+      progressRequest[n].logs[i].at required property is missing; progressRequest[n].logs[i].level
+      "info" is not one of ["DEBUG","INFO","WARN","ERROR"].
+    why_not_fixed_here: >-
+      It is not a rename. Two of the four appendLog call sites in reportingStepReporter.ts pass
+      `atMs: 0` as a placeholder, so the runner holds no wall-clock instant for those entries.
+      Emitting a conformant `at` means threading the wall clock through appendLog and LogEntry,
+      which changes src/reporting/** and its AC-17, AC-19 and AC-20 tests — a design decision for
+      10.6/10.7, not a parser fix.
+  - id: INT-2
+    severity: high
+    title: The frozen contract declares none of the runner's four routes
+    ac: AC-1
+    owner: '@po / 10.1'
+    blocking_for: '10.6 AC-1'
+    finding: >-
+      AC-1 requires POST /v1/validate, POST /v1/runs, GET /health and GET /ready to conform to the
+      internal-tagged section of docs/specs/studio/openapi.yaml. That document declares none of
+      them: its `servers` is /api/v1/studio and its `internal` tag carries exactly the two API-side
+      callback routes. The response-direction case fails with "The contract declares no path
+      /v1/validate."
+    why_not_fixed_here: >-
+      Story 10.1's own AC-1 undertook "internal routes per architecture §8.4", and §8.4 tabulates
+      six routes, four of them the runner's. Either the frozen document is incomplete or 10.6's
+      AC-1 is scoped to a document that was never meant to carry the runner's surface. Both are
+      decisions above @dev, and the contract is frozen, so this is reported and stopped on.
+  - id: INT-3
+    severity: low
+    title: A truncated description in the frozen contract
+    ac: AC-1
+    owner: '@po / 10.1'
+    blocking: false
+    finding: >-
+      openapi.yaml line 599 reads '409': { description: Ownership, sequence or transition conflict }.
+      A spec-compliant parser reads the unquoted comma as an entry separator, giving
+      description "Ownership" plus a null-valued key "sequence or transition conflict". Cosmetic —
+      it affects no schema — but the 409 description is not what was written. Quoting the string
+      would fix it; the file is frozen, so it is recorded rather than edited.
+  - id: INT-4
+    severity: medium
+    title: ProgressReport and the runner's report body agree on names for almost nothing
+    ac: AC-1
+    owner: '@dev / 10.7'
+    blocking: false
+    finding: >-
+      Beyond INT-1, the contract names stepResults, status/errorCode, video/manifestKey and runtime
+      where the runner sends steps, outcome, evidence and runtimeVersions. The conformance check
+      cannot fail on this: ProgressReport declares neither additionalProperties:false nor these
+      fields as required, so the runner's names pass through as permitted extras and the contract's
+      names are simply absent. Both shapes are faithful to architecture §8.4, which names the
+      fields only in English. 10.7's handler would find no status and no stepResults.

@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Grid, Card, CardContent, Typography, Chip, Stack, TextField, InputAdornment, MenuItem, Button, Skeleton, Dialog, DialogTitle, DialogContent, DialogActions, Paper } from '@mui/material';
-import { Api, Storage, AutoGraph, Security, BugReport, Science, Search } from '@mui/icons-material';
 import templatesApi from '@/services/api/templatesApi';
+import { Api, AutoGraph, BugReport, Science, Search, Security, Storage } from '@mui/icons-material';
+import { Box, Button, Card, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, InputAdornment, MenuItem, Paper, Skeleton, Stack, TextField, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const TYPE_ICON: Record<string, any> = { HTTP: Api, TCP: Storage, SPLUNK: AutoGraph, GRAFANA: AutoGraph, ITRS: Security, APPDYNAMICS: BugReport, UI_TEST: Science };
@@ -33,12 +33,12 @@ const ChecksTemplatesPage: React.FC = () => {
         if (f.query) setQuery(f.query);
         if (f.type) setType(f.type);
       }
-    } catch {}
+    } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
     load();
   }, []);
 
   useEffect(() => {
-    try { localStorage.setItem('templates:filters', JSON.stringify({ query, type })); } catch {}
+    try { localStorage.setItem('templates:filters', JSON.stringify({ query, type })); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
   }, [query, type]);
 
   const onApply = async (tpl: any) => {
@@ -48,7 +48,7 @@ const ChecksTemplatesPage: React.FC = () => {
       const draft = draftRaw ? JSON.parse(draftRaw) : {};
       const merged = { ...draft, checkType: tpl.type, ...tpl.defaults, __fromTemplate: tpl.title };
       localStorage.setItem('checks:create:draft', JSON.stringify(merged));
-    } catch {}
+    } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
     navigate('/checks/create');
   };
 
