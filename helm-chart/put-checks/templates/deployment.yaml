@@ -110,6 +110,31 @@ spec:
               value: {{ .Values.backend.identityBypass.identityHeaders | quote }}
             - name: CHECKS_BYPASS_CSI_READ
               value: {{ .Values.backend.identityBypass.csiRead | quote }}
+            {{- if .Values.studioRunner.enabled }}
+            # ── The API's two runner-facing identities (Studio v1 gaps) ─────────────────────────
+            #
+            # The API talks to the runner in both directions, and without these a chart-deployed
+            # API refused every runner callback (the internal chain refuses all callers when its
+            # token is empty) and reported VALIDATOR_UNAVAILABLE for every compile.
+            #
+            # 1. Inbound: the runner's admission/progress callbacks. The token the API accepts is
+            #    the SAME Secret key the runner presents as STUDIO_RUNNER_CALLBACK_IDENTITY.
+            - name: STUDIO_CALLBACK_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.studioRunner.identity.secretName }}
+                  key: {{ .Values.studioRunner.identity.callbackIdentityKey }}
+            # 2. Outbound: POST /v1/validate from the compile pipeline, which runs on the API
+            #    (StudioController is `!worker`). Same address and bearer as the worker's
+            #    POST /v1/runs, from the same keys, so the three pods cannot be configured apart.
+            - name: STUDIO_RUNNER_BASE_URL
+              value: {{ include "put-checks.studioRunner.baseUrl" . | quote }}
+            - name: STUDIO_RUNNER_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.studioRunner.identity.secretName }}
+                  key: {{ .Values.studioRunner.identity.serviceIdentityKey }}
+            {{- end }}
             {{- range $key, $val := .Values.backend.env }}
             - name: {{ $key }}
               value: {{ $val | quote }}
@@ -243,15 +268,46 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.worker.springProfile | quote }}
+            # **Actuator on the container port the probes use.** `application-worker.yml` sets
+            # `management.server.port: 8081` while the ConfigMap's SERVER_PORT moves the main port
+            # to `worker.service.port`; with the two apart, /actuator/health/* is served only on the
+            # management port and the http-port probes (and the prometheus scrape) find nothing.
+            - name: MANAGEMENT_SERVER_PORT
+              value: {{ .Values.worker.service.port | quote }}
             {{- if .Values.studioRunner.enabled }}
-            # **Derived from the runner's own Service, never restated.** `application.yml` defaults
-            # this to port 8090 and `studio-runner/src/server/config.ts` defaults its listener to
-            # 8080 — two derivations of one fact in two languages, neither ever deployed. The fix
-            # is not to edit one default into agreement with the other, which would make a third
-            # copy: it is that the chart is the single source and both sides render from
+            # **Derived from the runner's own Service, never restated.** `application.yml` has no
+            # default for this (`STUDIO_RUNNER_BASE_URL` falls back to empty, and an empty base URL
+            # closes every dispatch DISPATCH_FAILED), while `studio-runner/src/server/config.ts`
+            # defaults its listener to 8080. The chart is therefore the single source of the
+            # address: both the worker's URL and the runner's listener render from
             # `studioRunner.service.port` (AC-1).
             - name: STUDIO_RUNNER_BASE_URL
-              value: "http://{{ include "put-checks.studioRunner.fullname" . }}:{{ .Values.studioRunner.service.port }}"
+              value: {{ include "put-checks.studioRunner.baseUrl" . | quote }}
+            # **The bearer the worker presents on POST /v1/runs (DEF-05, Studio v1 WP2).** Without
+            # it `HttpRunnerDispatchClient` refuses every dispatch before sending. It is read from
+            # the SAME Secret and key the runner reads its inbound `STUDIO_RUNNER_SERVICE_IDENTITY`
+            # from (`studioRunner.identity.*`), so the two sides cannot be configured apart, and the
+            # value never appears in values or in the manifest.
+            - name: STUDIO_RUNNER_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.studioRunner.identity.secretName }}
+                  key: {{ .Values.studioRunner.identity.serviceIdentityKey }}
+            # **The runner's cancel-path bounds, from the runner's own values keys (Studio v1
+            # WP16).** The running reaper here waits `RunnerCancelBudget.effectiveMargin()` before
+            # closing a cancel the runner never finished, and that margin is derived from these
+            # four bounds. Rendered from `studioRunner.runnerEnv` — the map the runner Deployment
+            # renders its environment from — so the worker derives its margin from the values the
+            # deployed runner actually runs with, never from defaults. A key the runner does not
+            # receive is not rendered here either: both then fall back to the same default, which
+            # `RunnerCancelBudgetTest` pins against the runner's `config.ts`.
+            {{- $runnerEnv := .Values.studioRunner.runnerEnv | default dict }}
+            {{- range $key := list "STUDIO_RUNNER_ADMISSION_TIMEOUT_MS" "STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS" "STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS" "STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS" }}
+            {{- if hasKey $runnerEnv $key }}
+            - name: {{ $key }}
+              value: {{ get $runnerEnv $key | quote }}
+            {{- end }}
+            {{- end }}
             {{- end }}
             # ── The kill switch and the dispatcher, on the WORKER (story 10.18b, AC-23a) ──
             #

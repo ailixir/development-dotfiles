@@ -50,12 +50,12 @@ public class CompileStateService {
       INSERT INTO ui_test_revisions (
           test_id, csi_id, source_revision, configuration_revision,
           source, source_hash, artifact, artifact_hash, artifact_schema_version,
-          configuration, "references", provenance, created_by)
+          configuration, "references", provenance, created_by, expected_intent,
+          intent_derivation_version)
       VALUES (?, ?, ?, ?,
           CAST(? AS jsonb), ?, CAST(? AS jsonb), ?, ?,
-          CAST(? AS jsonb), CAST(? AS jsonb), CAST(? AS jsonb), ?)
-      ON CONFLICT (test_id, source_revision, configuration_revision, artifact_hash)
-          DO NOTHING
+          CAST(? AS jsonb), CAST(? AS jsonb), CAST(? AS jsonb), ?, CAST(? AS jsonb), ?)
+      ON CONFLICT DO NOTHING
       RETURNING id
       """;
 
@@ -64,6 +64,8 @@ public class CompileStateService {
       SELECT id FROM ui_test_revisions
        WHERE test_id = ? AND source_revision = ? AND configuration_revision = ?
          AND artifact_hash = ?
+         AND expected_intent IS NOT DISTINCT FROM CAST(? AS jsonb)
+         AND intent_derivation_version IS NOT DISTINCT FROM ?
       """;
 
   private final JdbcTemplate jdbc;
@@ -251,6 +253,30 @@ public class CompileStateService {
       String principal) {
     requireCompilable(testId);
 
+    List<Map<String, Object>> candidates =
+        jdbc.queryForList(
+            """
+            SELECT source::text AS source, authoring::text AS authoring,
+                   authoring_revision_inputs::text AS authoring_inputs, csi_id,
+                   configuration::text AS configuration, expected_intent::text AS expected_intent,
+                   intent_derivation_version, provenance::text AS provenance
+              FROM ui_test_revisions
+             WHERE id = ? AND test_id = ? AND artifact_hash = ?
+               AND source_revision = ? AND configuration_revision = ?
+               AND confirmed_by IS NULL AND confirmed_at IS NULL
+             FOR UPDATE
+            """,
+            revisionId,
+            testId,
+            artifactHash,
+            sourceRevision,
+            configurationRevision);
+    if (candidates.isEmpty() || !verifiedIntent(candidates.get(0))) {
+      throw new StudioConflictException(
+          STALE_CANDIDATE,
+          "Revision " + revisionId + " does not carry verifiable immutable intent");
+    }
+
     int revisionUpdated =
         jdbc.update(
             """
@@ -303,6 +329,22 @@ public class CompileStateService {
               + " that is awaiting confirmation");
     }
     return revisionId;
+  }
+
+  private static boolean verifiedIntent(Map<String, Object> row) {
+    return IntentRevisionVerifier.verify(
+        text(row.get("source")),
+        text(row.get("authoring")),
+        text(row.get("authoring_inputs")),
+        text(row.get("csi_id")),
+        text(row.get("configuration")),
+        text(row.get("expected_intent")),
+        text(row.get("intent_derivation_version")),
+        text(row.get("provenance")));
+  }
+
+  private static String text(Object value) {
+    return value == null ? null : String.valueOf(value);
   }
 
   /**
@@ -504,7 +546,9 @@ public class CompileStateService {
             candidate.configuration(),
             candidate.references(),
             candidate.provenance(),
-            candidate.createdBy());
+            candidate.createdBy(),
+            candidate.expectedIntent(),
+            candidate.intentDerivationVersion());
     if (!inserted.isEmpty()) {
       return inserted.get(0);
     }
@@ -514,7 +558,9 @@ public class CompileStateService {
         testId,
         sourceRevision,
         candidate.configurationRevision(),
-        candidate.artifactHash());
+        candidate.artifactHash(),
+        candidate.expectedIntent(),
+        candidate.intentDerivationVersion());
   }
 
   private static long asLong(Object value) {

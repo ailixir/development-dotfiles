@@ -47,6 +47,8 @@ export interface JobEnvelope extends JobIdentity {
   /** Server-derived. The runner never invents or accepts an arbitrary key (architecture §8.4). */
   readonly videoKey: string;
   readonly manifestKey: string;
+  /** Canonical compiler-owned expectation snapshot. Optional only for legacy revisions. */
+  readonly expectedIntent?: unknown;
 }
 
 /**
@@ -71,6 +73,7 @@ export const ACCEPTED_JOB_KEYS = new Set([
   'deadlines',
   'videoKey',
   'manifestKey',
+  'expectedIntent',
 ]);
 
 /**

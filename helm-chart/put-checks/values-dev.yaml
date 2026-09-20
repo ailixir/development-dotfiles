@@ -24,6 +24,14 @@ backend:
     CHECKS_CORS_ALLOWED_ORIGINS: "https://checks.dev.citi.com"
     CHECKS_CORE_SERVICE_URL: "http://checks-core.dev.svc.cluster.local:8081"
 
+  # application-dev.yml falls back to jdbc:postgresql://localhost:5432, which inside a pod is
+  # nothing; SPRING_DATASOURCE_* outranks that profile file.
+  envFromSecrets:
+    - secretName: checks-db-credentials-dev
+      keys:
+        - SPRING_DATASOURCE_URL
+        - SPRING_DATASOURCE_USERNAME
+        - SPRING_DATASOURCE_PASSWORD
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "10"
     checks.scheduling.min-interval-seconds: "30"
@@ -50,6 +58,14 @@ worker:
     JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m"
     CHECKS_CORE_SERVICE_URL: "http://checks-core.dev.svc.cluster.local:8081"
 
+  # application-dev.yml falls back to jdbc:postgresql://localhost:5432, which inside a pod is
+  # nothing; SPRING_DATASOURCE_* outranks that profile file.
+  envFromSecrets:
+    - secretName: checks-db-credentials-dev
+      keys:
+        - SPRING_DATASOURCE_URL
+        - SPRING_DATASOURCE_USERNAME
+        - SPRING_DATASOURCE_PASSWORD
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "10"
     checks.executor.max-concurrency: "40"
@@ -86,7 +102,7 @@ frontend:
 # ---------------------------------------------------------------------------
 studioRunner:
   enabled: false
-  replicaCount: 1
+  replicaCount: 2
   resources:
     requests:
       cpu: 250m

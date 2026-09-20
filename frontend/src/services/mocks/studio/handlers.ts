@@ -1,6 +1,10 @@
 import { http, HttpResponse } from 'msw';
+import { createAuthoringHandlers } from './authoringHandlers';
+import { resetAuthoringMocks } from './authoringState';
 import {
+  CANCELLED_ERROR_CODE,
   defaultConfiguration,
+  isTerminalExecutionStatus,
   type ConfirmCompileRequest,
   type ExecutionSnapshot,
   type Page,
@@ -50,6 +54,7 @@ let acceptedExecutions: ExecutionSnapshot[] = [];
 const idempotency = new Map<string, string>();
 
 export function resetStudioMocks(): void {
+  resetAuthoringMocks();
   created = [];
   acceptedExecutions = [];
   idempotency.clear();
@@ -188,6 +193,10 @@ function serveExecutionVideo(execution: ExecutionSnapshot | undefined, request: 
 }
 
 export const studioHandlers = [
+  ...createAuthoringHandlers({
+    get: id => allTests().find(test => test.id === id) ?? reviewDraft(id),
+    put: test => { created = [test, ...created.filter(candidate => candidate.id !== test.id)]; },
+  }),
   http.get(`${BASE}/tests`, ({ request }) => {
     const url = new URL(request.url);
     const csiId = url.searchParams.get('csiId');
@@ -426,6 +435,52 @@ export const studioHandlers = [
       ...acceptedExecutions,
     ];
     return HttpResponse.json({ executionId, status: 'PENDING' }, { status: 202 });
+  }),
+
+  /*
+   * `POST /executions/{id}/cancel` (Studio v1 cancel). `202` with the execution's snapshot, or
+   * `409` when the run is already terminal. The mock ends the run at once, which is what the
+   * server does for a run that was never sent to a browser: `ERROR` with `errorCode: CANCELLED`.
+   * A run that is already in a browser ends later on the server. The page waits for the terminal
+   * snapshot either way, so it does not depend on which of the two happened.
+   */
+  http.post(`${BASE}/executions/:id/cancel`, ({ params }) => {
+    const execution = readable(allExecutions()).find(
+      (candidate) => candidate.executionId === params.id,
+    );
+    if (!execution) {
+      return HttpResponse.json(
+        { error: 'STUDIO_FORBIDDEN', message: 'You do not have access to this Studio resource' },
+        { status: 403 },
+      );
+    }
+    if (isTerminalExecutionStatus(execution.status)) {
+      return HttpResponse.json(
+        { error: 'EXECUTION_TERMINAL', message: `Execution ${execution.executionId} has already ended` },
+        { status: 409 },
+      );
+    }
+    const now = new Date().toISOString();
+    const cancelled: ExecutionSnapshot = {
+      ...execution,
+      status: 'ERROR',
+      errorCode: CANCELLED_ERROR_CODE,
+      endedAt: now,
+      stepResults: execution.stepResults.map((step) =>
+        step.status === 'PASS' || step.status === 'FAIL' ? step : { ...step, status: 'SKIPPED' },
+      ),
+      video:
+        execution.video.status === 'PROCESSING'
+          ? { status: 'UNAVAILABLE', error: null, expiresAt: null, partial: false }
+          : execution.video,
+      revision: execution.revision + 1,
+      streamComplete: true,
+    };
+    acceptedExecutions = [
+      cancelled,
+      ...acceptedExecutions.filter((candidate) => candidate.executionId !== cancelled.executionId),
+    ];
+    return HttpResponse.json(cancelled, { status: 202 });
   }),
 
   http.get(`${BASE}/executions/:id`, ({ params }) => {

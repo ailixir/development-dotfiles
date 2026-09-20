@@ -11,9 +11,10 @@ import type { StepResult } from '@/types/studio/studioTypes';
  *    particular it never re-bases readings against the first one it sees"* (`openapi.yaml`,
  *    ADR-002 §INT-5). A wait or assertion step seeks to its start too (architecture §6.4), never to
  *    its finish or its duration.
- *  - **A null `offsetMs` is not seekable.** `SKIPPED` and never-attempted steps carry null timings
- *    (§8.2), and §6.4 gives them a disabled seek. A `?? 0` here would send the reader to the start
- *    of the recording for a step that never ran.
+ *  - **A null `offsetMs` is not seekable.** Never-attempted steps, `SKIPPED` ones included, carry
+ *    null timings (§8.2), and §6.4 gives them a disabled seek. A `?? 0` here would send the reader
+ *    to the start of the recording for a step that never ran. The one `SKIPPED` step with a start
+ *    is the one a cancel interrupted (ADR-002 §29.5); it did run, so it is seekable like any other.
  */
 export type SeekEligibility =
   | { readonly seekable: true; readonly offsetMs: number }

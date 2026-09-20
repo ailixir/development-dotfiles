@@ -57,6 +57,11 @@ export interface ApplicationDependencies {
    * supplies none and gets `SYSTEM_DEADLINE_TIMERS`.
    */
   readonly timers?: DeadlineTimers | undefined;
+  /**
+   * Test seam: the timer the control read is scheduled on (ADR-002 §29). Production supplies none
+   * and gets real timers; the harness gives it a scheduler of its own.
+   */
+  readonly controlTimers?: DeadlineTimers | undefined;
   /** Test seam: an alternative pool, used to falsify the atomic-acquire guard (AC-23). */
   readonly pool?: CapacityPool | undefined;
   /**
@@ -175,6 +180,7 @@ export function createApplication(
       stepTimeoutMs: config.maxStepTimeoutMs,
     },
     timers: dependencies.timers,
+    controlTimers: dependencies.controlTimers,
     takeOrigin: dependencies.takeOrigin,
   });
 

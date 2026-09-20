@@ -70,6 +70,28 @@ public class PromptAssembler {
         CompilePins.PROMPT_VERSION);
   }
 
+  /** Assembles v2 source and untrusted context as one JSON envelope per stable step boundary. */
+  public CompileRequest assemble(
+      UUID testId,
+      String csiId,
+      String principal,
+      UUID compileRequestId,
+      int attempt,
+      List<String> orderedSource,
+      ContextPromptSection context) {
+    return new CompileRequest(
+        testId,
+        csiId,
+        principal,
+        compileRequestId.toString(),
+        attempt,
+        context.fenceWithSource(orderedSource),
+        syntaxReference,
+        CompilePins.SYNTAX_REFERENCE_VERSION,
+        outputContract,
+        CompilePins.PROMPT_VERSION);
+  }
+
   /**
    * Fences the ordered source as data.
    *

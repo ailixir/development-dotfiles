@@ -3,7 +3,9 @@ package com.citi.put.checks.studio.dispatch;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
@@ -109,15 +112,25 @@ class StudioKillSwitchWiringTest {
 
   // ── Dispatch: queued work is CLOSED rather than dispatched, and reads/recovery stay up ──────
 
-  private record DispatchFixture(StudioDispatcher dispatcher, JdbcTemplate jdbc) {}
+  private record DispatchFixture(
+      StudioDispatcher dispatcher, JdbcTemplate jdbc, StudioDispatchLedgerStatements statements) {}
 
+  @SuppressWarnings("unchecked")
   private static DispatchFixture dispatcher(boolean enabled) {
     JdbcTemplate jdbc = mock(JdbcTemplate.class);
     when(jdbc.queryForList(anyString(), any(Class.class), any(Object[].class)))
         .thenReturn(List.of());
+    StudioDispatchLedgerStatements statements = mock(StudioDispatchLedgerStatements.class);
+    // The transaction runs its callback, so which statement the production path reaches for is
+    // what is observed. An empty claim is "nothing queued in this fixture".
+    TransactionTemplate transactions = mock(TransactionTemplate.class);
+    when(transactions.execute(any()))
+        .thenAnswer(
+            invocation ->
+                ((TransactionCallback<Object>) invocation.getArgument(0)).doInTransaction(null));
     StudioDispatcher dispatcher =
         new StudioDispatcher(
-            mock(StudioDispatchLedgerStatements.class),
+            statements,
             mock(UITestRevisionRepository.class),
             mock(DispatchAuthorization.class),
             mock(StudioReferenceResolver.class),
@@ -125,10 +138,10 @@ class StudioKillSwitchWiringTest {
             withSwitch(enabled),
             new ObjectMapper(),
             jdbc,
-            mock(TransactionTemplate.class),
+            transactions,
             "dispatcher-test",
             Clock.systemUTC());
-    return new DispatchFixture(dispatcher, jdbc);
+    return new DispatchFixture(dispatcher, jdbc, statements);
   }
 
   /** The SQL the production method issued, which is how we tell the two branches apart. */
@@ -150,19 +163,22 @@ class StudioKillSwitchWiringTest {
     // EXPLICITLY". The closing query selects QUEUED *and* CLAIMED; the dispatching query selects
     // QUEUED only. Which statement ran is the observation, not a flag a mock was handed.
     assertThat(issuedSql(fixture.jdbc())).contains("state IN ('QUEUED', 'CLAIMED')");
+    verify(fixture.statements(), never()).claimQueued(any(), any(), any(), anyInt(), any());
   }
 
   @Test
-  @DisplayName("switch ON: dispatchOnce() takes the queued batch instead — INVERTED")
+  @DisplayName("switch ON: dispatchOnce() claims queued work instead — INVERTED")
   void switchOnDispatchesTheQueuedBatch() {
     DispatchFixture fixture = dispatcher(true);
 
     int dispatched = fixture.dispatcher().dispatchOnce();
 
     assertThat(dispatched).isZero(); // nothing queued in this fixture
-    String sql = issuedSql(fixture.jdbc());
-    assertThat(sql).contains("state = 'QUEUED'");
-    assertThat(sql).doesNotContain("state IN ('QUEUED', 'CLAIMED')");
+    // Studio v1 WP8: the dispatching branch selects and claims in one ledger statement, so the
+    // observation is that it reached for the claim and never issued the closing query.
+    verify(fixture.statements()).claimQueued(eq("dispatcher-test"), any(), any(), eq(1), any());
+    verify(fixture.jdbc(), never())
+        .queryForList(anyString(), any(Class.class), any(Object[].class));
   }
 
   @Test

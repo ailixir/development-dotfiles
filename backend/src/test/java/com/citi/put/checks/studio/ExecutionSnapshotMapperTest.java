@@ -111,6 +111,51 @@ class ExecutionSnapshotMapperTest {
     assertThat(snapshot.videoPath()).isNull();
   }
 
+  /**
+   * Studio v1 gaps: with no store the API can read, a recording the runner reported AVAILABLE is
+   * published UNAVAILABLE with a reason, and no path — so the MFE renders no player for a route
+   * that could only answer 404.
+   */
+  @Test
+  void anAvailableRecordingWithNoReadableStoreIsPublishedUnavailableWithoutAPath() {
+    ExecutionSnapshotMapper noStore =
+        new ExecutionSnapshotMapper(objectMapper, Clock.fixed(NOW, ZoneOffset.UTC), false);
+    UITestExecution execution = finishedWithVideo(VideoEvidence.AVAILABLE, NOW.plusSeconds(3600));
+    execution.setVideoPartial(true);
+
+    ExecutionSnapshotDto snapshot = noStore.toSnapshot(execution);
+
+    assertThat(snapshot.status()).isEqualTo("PASSED");
+    assertThat(snapshot.video().status()).isEqualTo(VideoEvidence.UNAVAILABLE);
+    assertThat(snapshot.video().error()).isEqualTo(ExecutionSnapshotMapper.NO_RECORDING_STORE);
+    assertThat(snapshot.video().partial()).isFalse();
+    assertThat(snapshot.video().expiresAt()).isNull();
+    assertThat(snapshot.videoPath()).isNull();
+    assertThat(snapshot.streamComplete()).isTrue();
+    // The persisted evidence is untouched, so a real store makes it servable again.
+    assertThat(execution.getVideoStatus()).isEqualTo(VideoEvidence.AVAILABLE);
+  }
+
+  @Test
+  void withNoReadableStoreTheOtherEvidenceStatesAreReportedAsTheyAre() {
+    ExecutionSnapshotMapper noStore =
+        new ExecutionSnapshotMapper(objectMapper, Clock.fixed(NOW, ZoneOffset.UTC), false);
+
+    UITestExecution failed = finishedWithVideo(VideoEvidence.FAILED, null);
+    failed.setVideoError("Upload failed after 3 attempts");
+    assertThat(noStore.toSnapshot(failed).video().error())
+        .isEqualTo("Upload failed after 3 attempts");
+    assertThat(
+            noStore
+                .toSnapshot(finishedWithVideo(VideoEvidence.AVAILABLE, NOW.minusSeconds(1)))
+                .video()
+                .status())
+        .isEqualTo(VideoEvidence.EXPIRED);
+    assertThat(
+            noStore.toSnapshot(finishedWithVideo(VideoEvidence.PROCESSING, null)).video().status())
+        .isEqualTo(VideoEvidence.PROCESSING);
+  }
+
   @Test
   void anEvidenceFailureNeverOverwritesAKnownOutcome() {
     UITestExecution execution = finishedWithVideo(VideoEvidence.FAILED, null);

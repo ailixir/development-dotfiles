@@ -84,9 +84,10 @@ export interface SessionRecording {
  * leaving while a run is still hung: §9.3 requires admitted work to be drained on `SIGTERM`, and
  * §5.4 requires that a runner never exit holding a browser — but the run did not exceed its
  * budget, so calling it a timeout would be a false statement about the test. It takes the
- * documented residual, `RUN_ERROR`.
+ * documented residual, `RUN_ERROR`. `cancel` is a principal's `DELETE /v1/runs/{id}` (Studio v1
+ * WP4): the same stop, and a third answer, `CANCELLED` — neither a timeout nor a runner fault.
  */
-export type SessionKillReason = 'total-runtime' | 'drain';
+export type SessionKillReason = 'total-runtime' | 'drain' | 'cancel';
 
 /** What the parent observed while stopping a run it had decided to end (AC-5a, AC-16). */
 export interface SessionKillOutcome {

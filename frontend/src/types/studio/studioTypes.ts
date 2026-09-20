@@ -43,6 +43,7 @@ export const EXECUTION_ERROR_CODES = [
   'DISPATCH_DISABLED',
   'AUTHORIZATION_REVOKED',
   'REFERENCE_UNAVAILABLE',
+  'CANCELLED',
 ] as const;
 
 export type ExecutionErrorCode = (typeof EXECUTION_ERROR_CODES)[number];
@@ -62,6 +63,17 @@ type AssertTrue<T extends true> = T;
 export type ExecutionErrorCodeIsDerivedFromItsCarrier = AssertTrue<
   TypeEquals<ExecutionErrorCode, (typeof EXECUTION_ERROR_CODES)[number]>
 >;
+
+/**
+ * The code a cancelled run ends with: `status: ERROR`, `errorCode: CANCELLED`.
+ *
+ * A member of {@link EXECUTION_ERROR_CODES} since Studio v1 WP4 amended the contract's enum
+ * (ADR-002 §29). WP5 kept it outside the carrier while the enum did not declare it, so that
+ * `studioContract.test.ts` would go red on the amendment and force this fold; the fold is done, and
+ * this name stays only because the Stop flow and its tests read it. `satisfies` keeps it a member:
+ * dropping `CANCELLED` from the carrier fails the type-check here.
+ */
+export const CANCELLED_ERROR_CODE = 'CANCELLED' as const satisfies ExecutionErrorCode;
 
 export type StepStatus = 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL' | 'SKIPPED';
 
@@ -99,6 +111,164 @@ export interface StudioVariable {
   value?: string | null;
   secretId?: string | null;
 }
+
+/** Story 10.36 authoring-context v2 contract. Array position is presentation, never identity. */
+export interface LegacyAuthoringRequest {
+  steps: string[];
+}
+
+export interface ContextText {
+  kind: 'text';
+  value: string;
+}
+
+/** An explicit input whose value must survive authoring byte-for-byte, including the empty string. */
+export interface LiteralInput {
+  kind: 'literal';
+  value: string;
+}
+
+export interface VariableReference {
+  kind: 'variableRef';
+  referenceId: string;
+}
+
+/** An opaque reference only. A resolved secret is never part of the authoring contract. */
+export interface SecretReference {
+  kind: 'secretRef';
+  referenceId: string;
+}
+
+export interface TargetHint {
+  kind: 'targetHint';
+  strategy: 'role' | 'label' | 'testId' | 'text';
+  value: string;
+  scope?: string;
+  exact?: boolean;
+}
+
+export type ContextualDefaultValue = LiteralInput | VariableReference;
+
+export interface ContextualDefault {
+  kind: 'default';
+  name: string;
+  value: ContextualDefaultValue;
+}
+
+export type GlobalContextEntry = ContextText | TargetHint | ContextualDefault;
+export type StepContextEntry =
+  | GlobalContextEntry
+  | LiteralInput
+  | VariableReference
+  | SecretReference;
+
+export type EvidenceCompleteness = 'complete' | 'partial' | 'unknown';
+
+/**
+ * Evidence selectable by an author. Its source is intentionally narrower than server-held
+ * evidence: imported or user-supplied evidence cannot assert that a live page was observed.
+ */
+export interface AuthoringEvidenceReference {
+  id: string;
+  revision: number;
+  source: 'supplied';
+  csiId: string;
+  environment: string;
+  route: string;
+  state: string;
+  stepId: string;
+  capturedAt: string;
+  completeness: EvidenceCompleteness;
+  hash: string;
+}
+
+/** Server-held evidence; only a trusted capture boundary may mint `observed`. */
+export interface EvidenceReference extends Omit<AuthoringEvidenceReference, 'source'> {
+  source: 'supplied' | 'observed';
+}
+
+export interface GlobalAuthoringContext {
+  entries?: GlobalContextEntry[];
+  evidenceReferences?: AuthoringEvidenceReference[];
+}
+
+export interface StepAuthoringContext {
+  entries?: StepContextEntry[];
+  evidenceReferences?: AuthoringEvidenceReference[];
+}
+
+export interface AuthoringStep {
+  id: string;
+  text: string;
+  context?: StepAuthoringContext;
+}
+
+export interface AuthoringV2Request {
+  authoringSchemaVersion: 2;
+  globalContext?: GlobalAuthoringContext;
+  steps: AuthoringStep[];
+}
+
+export interface AuthoringRevisionInputs {
+  contextDigest: string;
+  globalContext: string;
+  stepContexts: Array<{ stepId: string; hash: string }>;
+  nonsecretReferencedValues: Array<{ referenceId: string; valueHash: string }>;
+  selectedEvidenceReferences: Array<{ id: string; revision: number; hash: string }>;
+}
+
+export interface ResolvedOperation {
+  kind: 'navigate' | 'click' | 'fill' | 'press' | 'select' | 'check' | 'assert';
+}
+
+export interface ResolvedTarget {
+  strategy: 'role' | 'label' | 'testId' | 'text' | 'url';
+  value: string;
+  exact?: boolean;
+  evidenceReferenceId?: string | null;
+}
+
+export type ResolvedInput = LiteralInput | VariableReference | SecretReference;
+
+export interface ContextProvenance {
+  field: string;
+  scope: 'explicitStep' | 'stepContext' | 'globalContext' | 'policy' | 'evidence';
+  sourceKind: 'user' | 'supplied' | 'observed' | 'policy';
+  sourceId?: string | null;
+}
+
+export type AuthoringDiagnosticCategory =
+  | 'missingContext'
+  | 'conflictingValue'
+  | 'ambiguousTarget'
+  | 'incompatibleEvidence'
+  | 'staleEvidence'
+  | 'literalMismatch'
+  | 'unsupportedOperation';
+
+export interface AuthoringDiagnostic {
+  category: AuthoringDiagnosticCategory;
+  stepId: string | null;
+  field: string | null;
+  message: string;
+}
+
+export interface ResolvedStepReview {
+  stepId: string;
+  operation: ResolvedOperation | null;
+  target: ResolvedTarget | null;
+  input: ResolvedInput | null;
+  contextProvenance: ContextProvenance[];
+  assertions?: string[];
+  diagnostics: AuthoringDiagnostic[];
+}
+
+export interface AuthoringV2Response extends AuthoringV2Request {
+  revisionInputs?: AuthoringRevisionInputs;
+  review?: ResolvedStepReview[];
+}
+
+export type StudioAuthoring = LegacyAuthoringRequest | AuthoringV2Request;
 
 /** Clients submit English steps only; the server generates the executable artifact. */
 export interface TestRequest {
@@ -258,7 +428,11 @@ export interface TestDto {
   compileDiagnostics?: CompileDiagnostics | null;
 }
 
-/** One entry per original step. Skipped or unstarted steps carry null timings. */
+/**
+ * One entry per original step. Skipped or unstarted steps carry null timings — except the step a
+ * cancel interrupted, which is `SKIPPED` with the start it had and the runner's stop text in
+ * `message` (openapi `StepResult`, ADR-002 §29.5).
+ */
 export interface StepResult {
   stepIndex: number;
   originalText: string;
@@ -269,7 +443,8 @@ export interface StepResult {
 }
 
 export interface ExecutionLogEntry {
-  at: string;
+  /** Null where the runner held no reading (openapi `ExecutionLogEntry`). */
+  at: string | null;
   level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
   message: string;
   stepIndex?: number | null;
@@ -356,6 +531,10 @@ export interface SourceArtifact {
   steps: ArtifactStep[];
 }
 
+/**
+ * The terminal outcomes, in one place. Every Studio surface that decides whether a run has ended
+ * (the Studio page, the Tests page, the Runs page) reads this set rather than keeping its own.
+ */
 export const TERMINAL_EXECUTION_STATUSES: readonly ExecutionStatus[] = [
   'PASSED',
   'FAILED',

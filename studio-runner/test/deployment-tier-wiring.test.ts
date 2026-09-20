@@ -59,6 +59,12 @@ const REQUIRED_FILES = [
   // that can be deleted without reddening the run everyone executes is a tier file that will be.
   'edge.test.ts',
   'envfrom-keys.test.ts',
+  // Studio v1 WP7: the runner's scaling manifests (ScaledObject, PDB, static replicas).
+  'scaling.test.ts',
+  // Studio v1 gaps: the API/worker/runner environment the three pods need to reach each other.
+  'backend-env.test.ts',
+  // Studio v1 WP16: the worker receives the same runner timings its cancel budget is derived from.
+  'cancel-budget-env.test.ts',
 ] as const;
 
 describe('the deployment-evidence tier is wired and cannot be lost quietly (QA HIGH-1)', () => {

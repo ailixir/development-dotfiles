@@ -2,9 +2,11 @@ package com.citi.put.checks.studio.dispatch;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -59,6 +61,7 @@ public class StudioDispatchLedgerStatements {
               ('CLAIMED','DISPATCHING'),
               ('DISPATCHING','ADMITTED'),
               ('ADMITTED','RUNNING'),
+              ('ADMITTED','FINALIZING'),
               ('RUNNING','FINALIZING'),
               ('FINALIZING','DONE'),
               ('CLAIMED','QUEUED'),
@@ -115,6 +118,85 @@ public class StudioDispatchLedgerStatements {
         Timestamp.from(leaseExpiresAt),
         executionId,
         Timestamp.from(now));
+  }
+
+  /**
+   * Selects and claims the oldest claimable queued rows in <b>one</b> statement (Studio v1 WP8).
+   *
+   * <p>This is the dispatcher's pass-time claim. It replaces "read a queued batch, then {@link
+   * #claim} each id" — a shape in which two dispatchers read the same batch and every row one of
+   * them lost cost the other a round trip that updated nothing. Here the selection takes {@code FOR
+   * UPDATE SKIP LOCKED}, so a concurrent dispatcher's selection passes over a row this statement is
+   * claiming instead of queueing behind it, and the statement returns only rows it actually moved.
+   * There is no id to lose a race on afterwards.
+   *
+   * <p>What does not change is the claim itself: {@code QUEUED} plus an expired-or-absent lease is
+   * still the whole predicate, re-stated in the outer {@code WHERE} so it is re-evaluated against
+   * the committed row once the lock is held; the lease owner and expiry written are the same; the
+   * back-edges ({@link #releaseClaim}, {@link #returnAfterDefiniteRefusal}) are untouched.
+   *
+   * <p>The selection is a CTE, not {@code WHERE execution_id IN (SELECT ... LIMIT ?)}. PostgreSQL
+   * may re-evaluate an uncorrelated {@code IN} subquery per outer row, and the {@code LIMIT} then
+   * bounds each evaluation rather than the statement — measured on this codebase by {@link
+   * com.citi.put.checks.studio.compile.CompileStateService#sweepAbandoned}'s story. A CTE is
+   * evaluated once, so {@code limit} is a bound on how many rows this statement claims.
+   *
+   * @param owner the claiming dispatcher's lease owner
+   * @param leaseExpiresAt the lease written onto every claimed row
+   * @param now the instant a lease must have expired by for its row to be claimable
+   * @param limit the most rows this statement may claim
+   * @param excluded rows this statement must not claim even when claimable — the dispatcher passes
+   *     the rows it has already attempted in the current pass, so a row a {@code 429} returned to
+   *     the queue waits for the next pass exactly as it did when the pass worked from a fixed batch
+   * @return the claimed execution ids, oldest acceptance first; empty when nothing was claimable
+   */
+  public List<UUID> claimQueued(
+      String owner, Instant leaseExpiresAt, Instant now, int limit, Collection<UUID> excluded) {
+    if (limit <= 0) {
+      throw new IllegalArgumentException("claimQueued needs a positive limit, not " + limit);
+    }
+    List<Map.Entry<UUID, Timestamp>> claimed =
+        jdbc.query(
+            """
+            WITH claimable AS (
+                SELECT execution_id
+                  FROM studio_dispatch_ledger
+                 WHERE state = 'QUEUED'
+                   AND (lease_expires_at IS NULL OR lease_expires_at <= ?)
+                   AND execution_id <> ALL (CAST(? AS uuid[]))
+                 ORDER BY execution_accepted_at
+                 LIMIT ?
+                   FOR UPDATE SKIP LOCKED
+            )
+            UPDATE studio_dispatch_ledger l
+               SET state = 'CLAIMED', lease_owner = ?, lease_expires_at = ?, updated_at = now()
+              FROM claimable c
+             WHERE l.execution_id = c.execution_id
+               AND l.state = 'QUEUED'
+               AND (l.lease_expires_at IS NULL OR l.lease_expires_at <= ?)
+            RETURNING l.execution_id, l.execution_accepted_at
+            """,
+            (rs, rowNum) ->
+                Map.entry(
+                    rs.getObject("execution_id", UUID.class),
+                    rs.getTimestamp("execution_accepted_at")),
+            Timestamp.from(now),
+            uuidArrayLiteral(excluded),
+            limit,
+            owner,
+            Timestamp.from(leaseExpiresAt),
+            Timestamp.from(now));
+    // RETURNING carries no order of its own; the CTE's order is restored here.
+    return claimed.stream().sorted(Map.Entry.comparingByValue()).map(Map.Entry::getKey).toList();
+  }
+
+  /** A PostgreSQL array literal of ids we generated ourselves; UUID text needs no escaping. */
+  private static String uuidArrayLiteral(Collection<UUID> ids) {
+    StringJoiner literal = new StringJoiner(",", "{", "}");
+    if (ids != null) {
+      ids.forEach(id -> literal.add(id.toString()));
+    }
+    return literal.toString();
   }
 
   /**
@@ -181,6 +263,11 @@ public class StudioDispatchLedgerStatements {
    *
    * <p>The two deadlines are assigned here and derive from different origins than {@code
    * pending_deadline_at}, which acceptance set (AC-19).
+   *
+   * <p>{@code cancel_requested_at IS NULL} is in the predicate (Studio v1 WP4). A cancel that lands
+   * between the dispatcher's send and the runner's admission request marks a {@code DISPATCHING}
+   * row, and this is the statement that makes the mark binding: the runner is refused before it
+   * launches anything, so a cancelled run never starts a browser however the two requests race.
    */
   public int admit(
       UUID executionId,
@@ -200,6 +287,7 @@ public class StudioDispatchLedgerStatements {
            AND state = 'DISPATCHING'
            AND admission_id IS NULL
            AND (pending_deadline_at IS NULL OR pending_deadline_at > ?)
+           AND cancel_requested_at IS NULL
         """,
         admissionId,
         runnerInstanceId,
@@ -376,6 +464,11 @@ public class StudioDispatchLedgerStatements {
    *
    * <p>{@code error_code} is written from the API's own vocabulary only; a runner-supplied code
    * never reaches this parameter (AC-16).
+   *
+   * <p><b>The one {@code ADMITTED} path</b> (Studio v1 WP4, ADR-002 §29): a run cancelled before
+   * its browser reported a start sends its {@code FINAL} without a {@code STARTED}. It is applied
+   * only when the ledger records a cancel, and the edge {@code ADMITTED → FINALIZING} exists in the
+   * matrix for that case alone. Every other report still needs {@code RUNNING}.
    */
   public int applyFinal(
       UUID executionId,
@@ -401,14 +494,15 @@ public class StudioDispatchLedgerStatements {
         jdbc.queryForObject(
             """
             WITH owner AS (
-              SELECT execution_id, execution_accepted_at
+              SELECT execution_id, execution_accepted_at, state
                 FROM studio_dispatch_ledger
                WHERE execution_id = ?
                  AND attempt_id = ?
                  AND admission_id = ?
                  AND runner_instance_id = ?
                  AND last_runner_sequence < ?
-                 AND state = 'RUNNING'
+                 AND (state = 'RUNNING'
+                      OR (state = 'ADMITTED' AND cancel_requested_at IS NOT NULL))
                FOR UPDATE
             ),
             history AS (
@@ -430,7 +524,7 @@ public class StudioDispatchLedgerStatements {
                 FROM owner o
                WHERE e.id = o.execution_id
                  AND e.started_at = o.execution_accepted_at
-                 AND e.status = 'RUNNING'
+                 AND (e.status = 'RUNNING' OR (e.status = 'PENDING' AND o.state = 'ADMITTED'))
               RETURNING e.id
             ),
             ledger AS (
@@ -544,6 +638,150 @@ public class StudioDispatchLedgerStatements {
     return applied == null ? 0 : applied;
   }
 
+  /**
+   * The cancel compare-and-set (Studio v1 WP4, ADR-002 §29). One statement, and its result is the
+   * verdict.
+   *
+   * <p>The predicate is the whole precondition: the row is not terminal, has not reached {@code
+   * FINALIZING} (its outcome is already known, so there is nothing left to cancel), and carries no
+   * earlier request — which is what makes a second cancel match nothing and answer {@code 409}.
+   *
+   * <ul>
+   *   <li><b>{@code QUEUED} or {@code CLAIMED}</b> — nothing was sent, so the execution is closed
+   *       here and now: history {@code ERROR / CANCELLED} with its revision bumped, ledger {@code
+   *       DONE}. A dispatcher holding the claim then fails its own {@code beginDispatch}, so no
+   *       runner is ever called for it.
+   *   <li><b>{@code DISPATCHING}, {@code ADMITTED} or {@code RUNNING}</b> — only the request is
+   *       recorded. The admission CAS refuses a marked row, the dispatcher relays the rest to the
+   *       runner, and the running reaper closes whatever nobody finished. The public snapshot does
+   *       not change, so no revision is spent.
+   * </ul>
+   *
+   * @return the ledger state after the statement — {@code DONE} when the execution was closed, the
+   *     unchanged dispatched state when the request was recorded — or empty when nothing matched
+   */
+  public Optional<String> requestCancel(UUID executionId, String principal, Instant now) {
+    List<String> states =
+        jdbc.queryForList(
+            """
+            WITH target AS (
+              SELECT execution_id, execution_accepted_at, state
+                FROM studio_dispatch_ledger
+               WHERE execution_id = ?
+                 AND state IN ('QUEUED', 'CLAIMED', 'DISPATCHING', 'ADMITTED', 'RUNNING')
+                 AND cancel_requested_at IS NULL
+               FOR UPDATE
+            ),
+            history AS (
+              UPDATE ui_test_executions e
+                 SET status = 'ERROR',
+                     error_code = 'CANCELLED',
+                     ended_at = COALESCE(e.ended_at, CAST(? AS timestamptz)),
+                     snapshot_revision = e.snapshot_revision + 1
+                FROM target t
+               WHERE e.id = t.execution_id
+                 AND e.started_at = t.execution_accepted_at
+                 AND t.state IN ('QUEUED', 'CLAIMED')
+                 AND e.status = 'PENDING'
+              RETURNING e.id
+            ),
+            ledger AS (
+              UPDATE studio_dispatch_ledger d
+                 SET cancel_requested_at = CAST(? AS timestamptz),
+                     cancel_requested_by = ?,
+                     state = CASE
+                               WHEN EXISTS (SELECT 1 FROM history h WHERE h.id = d.execution_id)
+                               THEN 'DONE'
+                               ELSE d.state
+                             END,
+                     updated_at = now()
+                FROM target t
+               WHERE d.execution_id = t.execution_id
+                 AND (t.state IN ('DISPATCHING', 'ADMITTED', 'RUNNING')
+                      OR EXISTS (SELECT 1 FROM history h WHERE h.id = t.execution_id))
+              RETURNING d.state
+            )
+            SELECT state FROM ledger
+            """,
+            String.class,
+            executionId,
+            Timestamp.from(now),
+            Timestamp.from(now),
+            principal);
+    return states.isEmpty() ? Optional.empty() : Optional.of(states.get(0));
+  }
+
+  /** True when a cancel has been recorded for this execution. The column is write-once. */
+  public boolean isCancelRequested(UUID executionId) {
+    Integer count =
+        jdbc.queryForObject(
+            """
+            SELECT count(*) FROM studio_dispatch_ledger
+             WHERE execution_id = ? AND cancel_requested_at IS NOT NULL
+            """,
+            Integer.class,
+            executionId);
+    return count != null && count > 0;
+  }
+
+  /**
+   * Marked rows whose run the runner holds and has not yet acknowledged a relayed cancel for.
+   *
+   * <p>{@code DISPATCHING} is absent on purpose: a row that has not been admitted holds no run on
+   * any runner, and the admission CAS already refuses it. Only {@code ADMITTED} and {@code RUNNING}
+   * rows have something to stop.
+   */
+  public List<UUID> findCancelsToRelay(int limit) {
+    return jdbc.queryForList(
+        """
+        SELECT execution_id FROM studio_dispatch_ledger
+         WHERE cancel_requested_at IS NOT NULL
+           AND cancel_relayed_at IS NULL
+           AND state IN ('ADMITTED', 'RUNNING')
+         ORDER BY cancel_requested_at
+         LIMIT ?
+        """,
+        UUID.class,
+        limit);
+  }
+
+  /**
+   * Records that the runner acknowledged the relayed cancel, so no later pass sends it again.
+   * Conditional on a request existing and no acknowledgement yet: a racing second relay records
+   * nothing.
+   */
+  public int markCancelRelayed(UUID executionId, Instant now) {
+    return jdbc.update(
+        """
+        UPDATE studio_dispatch_ledger
+           SET cancel_relayed_at = ?, updated_at = now()
+         WHERE execution_id = ?
+           AND cancel_requested_at IS NOT NULL
+           AND cancel_relayed_at IS NULL
+        """,
+        Timestamp.from(now),
+        executionId);
+  }
+
+  /**
+   * Cancelled rows nobody finished: requested at or before {@code requestedBy} and still
+   * dispatched. The running reaper closes them {@code ERROR / CANCELLED} (ADR-002 §29).
+   */
+  public List<UUID> findUnfinishedCancels(Instant requestedBy, int limit) {
+    return jdbc.queryForList(
+        """
+        SELECT execution_id FROM studio_dispatch_ledger
+         WHERE cancel_requested_at IS NOT NULL
+           AND cancel_requested_at <= ?
+           AND state IN ('DISPATCHING', 'ADMITTED', 'RUNNING')
+         ORDER BY cancel_requested_at
+         LIMIT ?
+        """,
+        UUID.class,
+        Timestamp.from(requestedBy),
+        limit);
+  }
+
   /** Closes a finalized row once outcome and evidence are both settled. Bumps no revision. */
   public int closeFinalized(UUID executionId) {
     return transition(executionId, DispatchState.FINALIZING, DispatchState.DONE);
@@ -563,11 +801,30 @@ public class StudioDispatchLedgerStatements {
    * query happened to select the row.
    */
   public int closeWithError(UUID executionId, String errorCode, Instant endedAt) {
+    return close(executionId, errorCode, endedAt, false);
+  }
+
+  /**
+   * {@link #closeWithError}, for the reapers: a row whose cancel has been recorded is closed {@code
+   * ERROR / CANCELLED} whatever {@code errorCode} the reaper would otherwise name it (Studio v1
+   * WP16). The user asked for the run to stop, and it stopped; a {@code START_TIMEOUT}, {@code
+   * STALE} or {@code DISPATCH_UNKNOWN} on a row the user cancelled would report a fault nobody saw.
+   *
+   * <p>The choice is made inside the statement, against the row it has locked, so a cancel recorded
+   * between the reaper's selection and its close still decides the code. A separate read would
+   * leave exactly that window open.
+   */
+  public int closeByReaper(UUID executionId, String errorCode, Instant endedAt) {
+    return close(executionId, errorCode, endedAt, true);
+  }
+
+  private int close(
+      UUID executionId, String errorCode, Instant endedAt, boolean cancelledIfRequested) {
     Integer applied =
         jdbc.queryForObject(
             """
             WITH owner AS (
-              SELECT execution_id, execution_accepted_at, state
+              SELECT execution_id, execution_accepted_at, state, cancel_requested_at
                 FROM studio_dispatch_ledger
                WHERE execution_id = ?
                  AND state <> 'DONE'
@@ -576,7 +833,10 @@ public class StudioDispatchLedgerStatements {
             history AS (
               UPDATE ui_test_executions e
                  SET status = 'ERROR',
-                     error_code = ?,
+                     error_code = CASE
+                                    WHEN ? AND o.cancel_requested_at IS NOT NULL THEN 'CANCELLED'
+                                    ELSE CAST(? AS varchar)
+                                  END,
                      ended_at = COALESCE(e.ended_at, CAST(? AS timestamptz)),
                      snapshot_revision = e.snapshot_revision + 1
                 FROM owner o
@@ -601,6 +861,7 @@ public class StudioDispatchLedgerStatements {
             """,
             Integer.class,
             executionId,
+            cancelledIfRequested,
             errorCode,
             Timestamp.from(endedAt));
     return applied == null ? 0 : applied;
@@ -756,7 +1017,13 @@ public class StudioDispatchLedgerStatements {
         limit);
   }
 
-  /** Admitted rows past their start deadline — the index V13 built for exactly this (AC-30). */
+  /**
+   * Admitted rows past their start deadline — the index V13 built for exactly this (AC-30).
+   *
+   * <p>A row with a recorded cancel is excluded (Studio v1 WP16): {@link #findUnfinishedCancels}
+   * owns it, on the cancel budget's margin rather than the start deadline, so the start deadline
+   * can neither close it before a healthy runner has finished stopping nor name it START_TIMEOUT.
+   */
   public List<UUID> findPastStartDeadline(Instant now, int limit) {
     return jdbc.queryForList(
         """
@@ -764,6 +1031,7 @@ public class StudioDispatchLedgerStatements {
          WHERE state = 'ADMITTED'
            AND start_deadline_at IS NOT NULL
            AND start_deadline_at <= ?
+           AND cancel_requested_at IS NULL
          ORDER BY start_deadline_at
          LIMIT ?
         """,
@@ -772,7 +1040,10 @@ public class StudioDispatchLedgerStatements {
         limit);
   }
 
-  /** Running rows past their total runtime deadline (AC-30). Heartbeats never move this. */
+  /**
+   * Running rows past their total runtime deadline (AC-30). Heartbeats never move this. A row with
+   * a recorded cancel is excluded for the same reason as {@link #findPastStartDeadline}.
+   */
   public List<UUID> findPastRunDeadline(Instant now, int limit) {
     return jdbc.queryForList(
         """
@@ -780,6 +1051,7 @@ public class StudioDispatchLedgerStatements {
          WHERE state = 'RUNNING'
            AND run_deadline_at IS NOT NULL
            AND run_deadline_at <= ?
+           AND cancel_requested_at IS NULL
          ORDER BY run_deadline_at
          LIMIT ?
         """,

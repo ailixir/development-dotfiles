@@ -30,4 +30,60 @@ public record CandidateRevision(
     String configuration,
     String references,
     String provenance,
-    String createdBy) {}
+    String createdBy,
+    String expectedIntent,
+    String intentDerivationVersion) {
+
+  public CandidateRevision(
+      long configurationRevision,
+      String source,
+      String sourceHash,
+      String artifact,
+      String artifactHash,
+      int artifactSchemaVersion,
+      String configuration,
+      String references,
+      String provenance,
+      String createdBy) {
+    this(
+        configurationRevision,
+        source,
+        sourceHash,
+        artifact,
+        artifactHash,
+        artifactSchemaVersion,
+        configuration,
+        references,
+        provenance,
+        createdBy,
+        null,
+        null);
+  }
+
+  public CandidateRevision(
+      long configurationRevision,
+      String source,
+      String sourceHash,
+      String artifact,
+      String artifactHash,
+      int artifactSchemaVersion,
+      String configuration,
+      String references,
+      String provenance,
+      String createdBy,
+      String expectedIntent) {
+    this(
+        configurationRevision,
+        source,
+        sourceHash,
+        artifact,
+        artifactHash,
+        artifactSchemaVersion,
+        configuration,
+        references,
+        provenance,
+        createdBy,
+        expectedIntent,
+        null);
+  }
+}

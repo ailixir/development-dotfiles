@@ -65,6 +65,26 @@ export interface ReportClientOptions {
   readonly sleep: (ms: number) => Promise<void>;
   /** `[0, 1)` jitter source. Injected so the retry schedule is deterministic under test. */
   readonly random: () => number;
+  /**
+   * Called when a progress acknowledgement carries `cancelRequested: true` (ADR-002 §29). The API
+   * answers the pod that holds the run, so this is one of the two pull paths a cancel reaches it
+   * by; the other is the control read.
+   */
+  readonly onCancelRequested?: (() => void) | undefined;
+}
+
+/** True when an acknowledgement body says a cancel is recorded. Anything unreadable is false. */
+export function ackRequestsCancel(body: string): boolean {
+  try {
+    const parsed = JSON.parse(body) as unknown;
+    return (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      (parsed as { cancelRequested?: unknown }).cancelRequested === true
+    );
+  } catch {
+    return false;
+  }
 }
 
 export interface ReportClient {
@@ -149,6 +169,7 @@ export function createReportClient(options: ReportClientOptions): ReportClient {
         return { kind: 'OWNERSHIP_LOST', attempts: 1 };
       }
       if (outcome.kind === 'response' && outcome.status >= 200 && outcome.status < 300) {
+        if (ackRequestsCancel(outcome.body)) options.onCancelRequested?.();
         return { kind: 'ACKNOWLEDGED', attempts: 1 };
       }
 

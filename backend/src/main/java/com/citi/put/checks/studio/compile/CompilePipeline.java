@@ -1,18 +1,21 @@
 package com.citi.put.checks.studio.compile;
 
 import com.citi.put.checks.studio.StudioRepository;
+import com.citi.put.checks.studio.StudioValidationException;
 import com.citi.put.checks.studio.compile.gateway.CompileResponse;
 import com.citi.put.checks.studio.compile.gateway.GatewayErrorCode;
 import com.citi.put.checks.studio.compile.gateway.GatewayProvenance;
 import com.citi.put.checks.studio.compile.gateway.LlmGatewayClient;
 import com.citi.put.checks.studio.compile.validator.RunnerValidationClient;
 import com.citi.put.checks.studio.compile.validator.ValidationOutcome;
+import com.citi.put.checks.studio.dto.AuthoringDiagnostic;
 import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.readiness.RuntimePinProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,15 +149,36 @@ public class CompilePipeline {
             .findById(testId)
             .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + testId));
     CompileInputs inputs = CompileInputs.from(draft, principal);
+    ContextCompileInputs contextInputs;
+    try {
+      contextInputs = ContextCompileInputs.from(draft);
+    } catch (IllegalArgumentException exception) {
+      throw new StudioValidationException(
+          "UNRESOLVED_TYPED_INTENT", "Saved v2 authoring cannot produce closed expected intent");
+    }
+
+    if (contextInputs != null && contextInputs.blocked()) {
+      throw new StudioValidationException(
+          "UNRESOLVED_TYPED_INTENT",
+          "Saved v2 authoring has blocking deterministic intent diagnostics: "
+              + contextInputs.blockingDiagnostics().stream()
+                  .map(diagnostic -> diagnostic.category().name())
+                  .distinct()
+                  .toList());
+    }
 
     authoringLimits.requireWithinLimits(inputs.orderedSource());
     credentialScreen.requireNoInlineCredentials(inputs.orderedSource());
 
     CompileRequest request = compileStateService.beginCompile(testId);
+    if (contextInputs != null && !contextInputs.matches(request)) {
+      publishError(testId, request, CompileErrorCode.COMPILE_INTERNAL_ERROR);
+      return request;
+    }
 
     boolean started =
         executor.submit(
-            settlement -> runAttempt(inputs, request, settlement),
+            settlement -> runAttempt(inputs, contextInputs, request, settlement),
             () -> publishError(inputs.testId(), request, CompileErrorCode.COMPILE_BUDGET_EXCEEDED));
     if (!started) {
       // Saturation is refusal, not queueing. The 202 still holds: acceptance and execution are
@@ -205,8 +229,12 @@ public class CompilePipeline {
   // ── the attempt ────────────────────────────────────────────────────────────
 
   private void runAttempt(
-      CompileInputs inputs, CompileRequest request, CompileExecutor.Settlement settlement) {
+      CompileInputs inputs,
+      ContextCompileInputs contextInputs,
+      CompileRequest request,
+      CompileExecutor.Settlement settlement) {
     try {
+      AggregateUsage aggregate = new AggregateUsage(properties.aggregate());
       int maxAttempts = 1 + repairAttempts();
       int stepCount = inputs.orderedSource().size();
       String lastDiagnostics = null;
@@ -220,18 +248,26 @@ public class CompilePipeline {
         }
 
         com.citi.put.checks.studio.compile.gateway.CompileRequest prompt =
-            attempt == 1
-                ? promptAssembler.assemble(
-                    inputs.testId(),
-                    inputs.csiId(),
-                    inputs.principal(),
-                    request.requestId(),
-                    1,
-                    inputs.orderedSource())
-                : repairPromptAssembler.assemble(
-                    inputs, request.requestId(), attempt, lastDiagnostics);
+            assemblePrompt(inputs, contextInputs, request.requestId(), attempt, lastDiagnostics);
+
+        if (!aggregate.canStart()) {
+          settleError(
+              settlement,
+              inputs.testId(),
+              request,
+              CompileErrorCode.COMPILE_BUDGET_EXCEEDED.name());
+          return;
+        }
 
         CompileResponse response = gatewayClient.propose(prompt);
+        if (!aggregate.charge(response)) {
+          settleError(
+              settlement,
+              inputs.testId(),
+              request,
+              CompileErrorCode.COMPILE_BUDGET_EXCEEDED.name());
+          return;
+        }
         if (!response.isOk()) {
           // A gateway refusal ends the whole request — on a repair exactly as on the first
           // attempt. It does not silently consume a further attempt and then try again: the
@@ -261,7 +297,11 @@ public class CompilePipeline {
 
         ValidationOutcome validation =
             validationClient.validate(
-                artifactJson, inputs.orderedSource(), inputs.variableNames(), inputs.secretNames());
+                artifactJson,
+                inputs.orderedSource(),
+                inputs.variableNames(),
+                inputs.secretNames(),
+                contextInputs == null ? null : contextInputs.expectedIntent());
 
         if (!validation.available()) {
           settleError(
@@ -280,7 +320,8 @@ public class CompilePipeline {
           compileStateService.publishCandidate(
               inputs.testId(),
               request,
-              candidate(inputs, request, artifactJson, response.provenance(), validation));
+              candidate(
+                  inputs, contextInputs, request, artifactJson, response.provenance(), validation));
           return;
         }
 
@@ -309,6 +350,108 @@ public class CompilePipeline {
     }
   }
 
+  static final class AggregateUsage {
+
+    private final long maxCalls;
+    private final long maxBytes;
+    private long calls;
+    private long bytes;
+
+    AggregateUsage(StudioCompileProperties.Aggregate bound) {
+      if (bound == null || bound.maxCalls() <= 0 || bound.maxBytes() <= 0) {
+        throw new IllegalArgumentException("aggregate compile bounds must be positive");
+      }
+      this.maxCalls = bound.maxCalls();
+      this.maxBytes = bound.maxBytes();
+    }
+
+    boolean canStart() {
+      return calls < maxCalls && bytes < maxBytes;
+    }
+
+    boolean charge(CompileResponse response) {
+      long transportCalls = 1L + Math.max(0, response.retries());
+      long repeatedInput;
+      try {
+        repeatedInput = Math.multiplyExact(transportCalls, Math.max(0, response.inputBytes()));
+        calls = Math.addExact(calls, transportCalls);
+        bytes =
+            Math.addExact(bytes, Math.addExact(repeatedInput, Math.max(0, response.outputBytes())));
+      } catch (ArithmeticException overflow) {
+        calls = Long.MAX_VALUE;
+        bytes = Long.MAX_VALUE;
+      }
+      return calls <= maxCalls && bytes <= maxBytes;
+    }
+
+    long calls() {
+      return calls;
+    }
+
+    long bytes() {
+      return bytes;
+    }
+  }
+
+  private com.citi.put.checks.studio.compile.gateway.CompileRequest assemblePrompt(
+      CompileInputs inputs,
+      ContextCompileInputs contextInputs,
+      UUID requestId,
+      int attempt,
+      String diagnostics) {
+    if (contextInputs == null) {
+      return attempt == 1
+          ? promptAssembler.assemble(
+              inputs.testId(),
+              inputs.csiId(),
+              inputs.principal(),
+              requestId,
+              attempt,
+              inputs.orderedSource())
+          : repairPromptAssembler.assemble(inputs, requestId, attempt, diagnostics);
+    }
+    com.citi.put.checks.studio.compile.gateway.CompileRequest prompt =
+        promptAssembler.assemble(
+            inputs.testId(),
+            inputs.csiId(),
+            inputs.principal(),
+            requestId,
+            attempt,
+            inputs.orderedSource(),
+            contextInputs.promptSection());
+    if (attempt == 1) {
+      return prompt;
+    }
+    if (diagnostics == null || diagnostics.isBlank()) {
+      throw new IllegalArgumentException("repair requires bounded diagnostics");
+    }
+    return new com.citi.put.checks.studio.compile.gateway.CompileRequest(
+        prompt.testId(),
+        prompt.csiId(),
+        prompt.principal(),
+        prompt.compileRequestId(),
+        prompt.attempt(),
+        prompt.fencedSourceLines(),
+        prompt.syntaxReference(),
+        prompt.syntaxReferenceVersion(),
+        prompt.outputContract(),
+        prompt.promptVersion(),
+        diagnostics);
+  }
+
+  private static String correspondenceDiagnostics(
+      List<AuthoringDiagnostic> diagnostics, int attempt, boolean exhausted) {
+    ObjectNode root = MAPPER.createObjectNode();
+    root.put("attempts", attempt);
+    root.put("exhausted", exhausted);
+    root.set("steps", MAPPER.valueToTree(diagnostics));
+    String json = root.toString();
+    if (json.length() > ContextPromptSection.MAX_BYTES) {
+      throw new IllegalArgumentException("typed-intent diagnostics exceed the bounded prompt size");
+    }
+    return json;
+  }
+
   /**
    * The configured repair bound, defensively floored at zero.
    *
@@ -330,6 +473,7 @@ public class CompilePipeline {
    */
   private CandidateRevision candidate(
       CompileInputs inputs,
+      ContextCompileInputs contextInputsForCandidate,
       CompileRequest request,
       String artifactJson,
       GatewayProvenance gatewayProvenance,
@@ -345,11 +489,14 @@ public class CompilePipeline {
         CompilePins.SUPPORTED_ARTIFACT_VERSION,
         inputs.configurationJson(),
         inputs.referencesJson(),
-        provenance(gatewayProvenance, validation),
-        inputs.principal());
+        provenance(gatewayProvenance, validation, contextInputsForCandidate != null),
+        inputs.principal(),
+        contextInputsForCandidate == null ? null : contextInputsForCandidate.expectedIntent(),
+        contextInputsForCandidate == null ? null : VersionedIntentDeriver.CURRENT_VERSION);
   }
 
-  private String provenance(GatewayProvenance gateway, ValidationOutcome validation) {
+  private String provenance(
+      GatewayProvenance gateway, ValidationOutcome validation, boolean versionedIntent) {
     ObjectNode provenance = MAPPER.createObjectNode();
     provenance.put("model", gateway == null ? null : gateway.model());
     provenance.put("modelVersion", gateway == null ? null : gateway.modelVersion());
@@ -369,6 +516,9 @@ public class CompilePipeline {
     // Recorded for the runner's own ranged revalidation; never compared by this backend (AC-25).
     provenance.put("executorVersion", runtimePin.executorVersion());
     provenance.put("playwrightVersion", runtimePin.playwrightVersion());
+    if (versionedIntent) {
+      provenance.put("intentDerivationVersion", VersionedIntentDeriver.CURRENT_VERSION);
+    }
     return provenance.toString();
   }
 

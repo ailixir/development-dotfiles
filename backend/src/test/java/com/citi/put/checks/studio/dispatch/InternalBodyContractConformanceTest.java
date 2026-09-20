@@ -176,7 +176,11 @@ class InternalBodyContractConformanceTest {
             new ObjectMapper(),
             new StudioExecutionProperties(
                 true, null, null, null, Duration.ofSeconds(5), null, null, null, null, null, null),
-            "http://localhost:" + wireMock.port())
+            new StudioRunnerProperties(
+                "http://localhost:" + wireMock.port(),
+                "test-runner-token",
+                Duration.ofSeconds(5),
+                Duration.ofSeconds(2)))
         .send(RunJobFixtures.conformingJob());
 
     var requests = wireMock.findAll(postRequestedFor(urlPathEqualTo("/v1/runs")));

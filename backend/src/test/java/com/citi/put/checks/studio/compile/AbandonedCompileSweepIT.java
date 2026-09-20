@@ -37,7 +37,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  * background sweeper running every minute could settle a backdated row before the test did, turning
  * a deterministic assertion into a race.
  */
-@SpringBootTest(properties = "studio.compile.sweep.enabled=false")
+@SpringBootTest(properties = "studio.compile.abandonment.enabled=false")
 @ActiveProfiles("local")
 class AbandonedCompileSweepIT {
 
@@ -51,6 +51,7 @@ class AbandonedCompileSweepIT {
   @Autowired private CompileStateService states;
   @Autowired private JdbcTemplate jdbc;
   @Autowired private PlatformTransactionManager transactionManager;
+  @Autowired private StudioCompileProperties properties;
 
   private ExecutorService threads;
   private TransactionTemplate transactions;
@@ -208,6 +209,45 @@ class AbandonedCompileSweepIT {
                     SOURCE, request.configurationRevision(), "await page.goto('https://a/');")))
         .as("the untouched compile publishes normally")
         .isEqualTo(PublishResult.PUBLISHED);
+  }
+
+  /**
+   * Studio v1 WP9 (decision D11) — the <b>configured</b> sweep, not a threshold this test chose.
+   *
+   * <p>The pass is the scheduled component's own {@code sweepOnce()}, reading {@code
+   * studio.compile.abandonment.*} as this context bound it; only the cadence is left out, because
+   * this context switches the schedule off. A compile just past the shortened threshold is settled
+   * to {@code STALE} with no candidate fabricated for it, and one just short of it is left alone —
+   * so the threshold in force is the shortened one, and it is still a threshold.
+   */
+  @Test
+  void theConfiguredSweepSettlesACompileJustPastTheShortenedThresholdAndNoSooner() {
+    Duration threshold = properties.abandonment().threshold();
+    assertThat(threshold)
+        .as("the shortened default, still strictly above the attempt budget")
+        .isEqualTo(Duration.ofSeconds(300))
+        .isGreaterThan(properties.pipeline().attemptBudget());
+    assertThat(properties.abandonment().intervalMs()).isEqualTo(15_000L);
+
+    UUID abandoned = ConfirmFixtures.seedTest(jdbc, CSI_ID, OWNER, SOURCE);
+    states.beginCompile(abandoned);
+    backdate(abandoned, threshold.plusSeconds(10));
+    UUID inFlight = ConfirmFixtures.seedTest(jdbc, CSI_ID, OWNER, SOURCE);
+    CompileRequest live = states.beginCompile(inFlight);
+    backdate(inFlight, threshold.minusSeconds(10));
+
+    new CompileAbandonmentSweeper(states, properties).sweepOnce();
+
+    assertThat(compileStatus(abandoned)).isEqualTo("STALE");
+    assertThat(errorCode(abandoned)).isEqualTo(CompileErrorCode.COMPILE_BUDGET_EXCEEDED.name());
+    assertThat(currentCandidate(abandoned)).as("no candidate is fabricated").isNull();
+    assertThat(revisionCount(abandoned)).as("and no revision row is written").isZero();
+    assertThat(startedAt(abandoned)).isNull();
+
+    assertThat(compileStatus(inFlight))
+        .as("a compile younger than the threshold is still in flight, not abandoned")
+        .isEqualTo("COMPILING");
+    assertThat(requestId(inFlight)).isEqualTo(live.requestId());
   }
 
   /** The batch size is a bound, not a suggestion: the run stops at the cap. */

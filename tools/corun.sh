@@ -6,9 +6,14 @@
 # stubbed and the runner's object store on the filesystem, and drives a draft through compile,
 # confirm and dispatch across the seam between them.
 #
-# It does NOT yet cover the media route's ranged read: the API's object store is still the
-# in-memory fake, and there is nothing to read until a dispatch is admitted and a browser
-# records something. See StudioCoRunIT for the four legs it does cover.
+# It does NOT yet cover the media route's ranged read: the API's video store provider is `none`
+# under the co-run. See StudioCoRunIT for the eleven legs it does cover: legs 0-3 cross the seam
+# in each direction, leg 4 runs a real Chromium against a loopback page to PASSED/DONE, legs 5-9
+# cancel over the public HTTP route (control read, DELETE relay, queued, before admission, right
+# after admission) with a real browser and assert the signal, the ledger, the pids and the
+# evidence on the row, and leg 10 proves the pod still passes a run afterwards (Studio v1 WP12).
+# The runner's callbacks go through a loopback proxy (CallbackProxy) so the legs can time each
+# hop and hold an admission; it forwards verbatim and records no bodies.
 #
 # WHY THIS EXISTS
 #

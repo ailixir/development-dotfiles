@@ -71,6 +71,8 @@ export interface ValidationPolicy {
 
 export interface ValidationPolicyInput {
   readonly bounds?: Partial<ValidationBounds> | undefined;
+  /** Exact runtime-policy timeout that is semantically equivalent to omission. */
+  readonly defaultTimeoutMs?: number | undefined;
 }
 
 /** Merges caller overrides over the documented defaults. */

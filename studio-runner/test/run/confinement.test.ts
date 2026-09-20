@@ -111,10 +111,10 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   });
 
   /**
-   * The document's SHA-256 after **ADR-002 §24.6 and §25.4 landed with story 10.31**, on top of
+   * The document's SHA-256 after **ADR-002 §29 and §29.4 landed with Studio v1 WP4**, on top of
    * everything that preceded it.
    *
-   * **This is the seventh re-anchor.** What this digest now covers, in the order it happened:
+   * **This is the ninth re-anchor.** What this digest now covers, in the order it happened:
    *
    * 1. ADR-002 sections 14, 15, 16 and 17 — architect rulings, not runner edits: the conflict
    *    responses for a deleted or quarantined draft, the two ratified `ExecutionErrorCode` values,
@@ -183,6 +183,28 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    *    edited. **No production code changed anywhere**: the document catches up with what the
    *    producers already send (§24.2). Which envelope the application standardises on is O-19 /
    *    ADR-003, outside Epic 10, and is deliberately not decided here.
+   * 8. **ADR-002 §29, landed by Studio v1 WP4** — this re-anchor, in the same commit as the
+   *    contract edit and its producers (the backend cancel route, the runner's `DELETE`). Two
+   *    operations added: public `cancelExecution` (`POST /executions/{id}/cancel`: `202`
+   *    `ExecutionSnapshot`, `400`, `401` `SessionUnauthorized`, `403`, `409` with `x-conflict-codes`
+   *    `[EXECUTION_TERMINAL, CANCEL_ALREADY_REQUESTED]`) and runner `runnerCancelRun`
+   *    (`DELETE /v1/runs/{id}`: `202` closed `RunCancelAccepted`, `401`, `403`, `404`, `409`).
+   *    `ExecutionErrorCode` gains `CANCELLED` with its table row and `x-assigned-by` entry;
+   *    `x-runner-error-codes` gains `CANCELLED`; the intersection prose, the `RunOutcome.errorCode`
+   *    description and the `RunnerReport` mapping row say `TIMEOUT` **and** `CANCELLED`. No
+   *    runner-produced body gained or lost a field, and no existing status moved.
+   * 9. **ADR-002 §29.4, landed by the same package's follow-up** — this re-anchor. The multi-pod
+   *    cancel gap closed by pulling: a new internal callback `readExecutionControl`
+   *    (`GET /internal/studio/executions/{id}/control`, closed `ExecutionControl`), a required
+   *    `cancelRequested` on the closed `ProgressAck`, and prose on `runnerCancelRun`'s `404` and
+   *    `cancelExecution`'s table. No runner-produced body moved.
+   * 10. **ADR-002 §29.5, landed by Studio v1 WP11** — this re-anchor, in the same commit as its
+   *    producer (`stopAwareReporter` in `src/server/runCoordinator.ts`). Description text only, on
+   *    three fields and one operation: `RunnerStepState.failure` is no longer null on every
+   *    non-`FAIL` step — the step a cancel interrupted is `SKIPPED` with the fixed stop text — and
+   *    `RunnerStepState.startedAtMs` and `StepResult` say that step keeps its start reading;
+   *    `runnerCancelRun` names the chart's grace and the `SKIPPED` step. No schema shape, no
+   *    `required` list, no enum and no status moved.
    *
    * **The criterion is unchanged and still holds: nothing in story 10.13 edited the contract.**
    * Every byte of difference between this digest and the previous one belongs to another story,
@@ -214,7 +236,7 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = 'd9f5f2a2bfac4f51baa2a334b1129236578703acbe5f0d137c98ab54b227af6a';
+  const BASE_SHA256 = '1022d9ad9d2ed6d5e71930fb84fc5c25974e64fe10e10af57b69399b3a2a3f1e';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
@@ -226,6 +248,12 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
     // PR whose subject is something else.
     const actual = createHash('sha256').update(readFileSync(contract)).digest('hex');
     expect(actual, 'this story may not edit the contract (ADR-002 §12, Class B)').toBe(BASE_SHA256);
+  });
+
+  it('contains ADR-SC-001 expectedIntent only on the two architect-approved internal bodies', () => {
+    const document = readFileSync(contract, 'utf8');
+    expect(document.match(/expectedIntent:/gu)).toHaveLength(2);
+    expect(document).toContain('ExpectedIntent:');
   });
 
   it('emits the RunnerEvidence.partial that ADR-002 §20 promoted to required', () => {

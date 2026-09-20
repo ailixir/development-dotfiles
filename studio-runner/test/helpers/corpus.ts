@@ -31,6 +31,7 @@ export interface AdversarialFixture {
   readonly source: string[];
   readonly references: ReferenceDeclarations;
   readonly artifact: unknown;
+  readonly expectedIntent?: unknown;
   readonly policy?: ValidationPolicyInput;
 }
 

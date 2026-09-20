@@ -1,4 +1,5 @@
 import apiClient from './apiClient';
+import { createTest, getTest, updateTest } from './studioAuthoringTransport';
 import type {
   CompileAccepted,
   ConfirmCompileRequest,
@@ -7,7 +8,6 @@ import type {
   ExecutionSnapshot,
   TestDto,
   TestPage,
-  TestRequest,
 } from '@/types/studio/studioTypes';
 
 /**
@@ -39,13 +39,9 @@ export const studioApi = {
   listTests: async (params?: ListTestsParams): Promise<TestPage> =>
     apiClient.get('/studio/tests', { params }),
 
-  getTest: async (id: string): Promise<TestDto> => apiClient.get(`/studio/tests/${id}`),
-
-  createTest: async (payload: TestRequest): Promise<TestDto> =>
-    apiClient.post('/studio/tests', payload),
-
-  updateTest: async (id: string, payload: TestRequest): Promise<TestDto> =>
-    apiClient.put(`/studio/tests/${id}`, payload),
+  getTest,
+  createTest,
+  updateTest,
 
   deleteTest: async (id: string): Promise<void> => apiClient.delete(`/studio/tests/${id}`),
 
@@ -64,6 +60,15 @@ export const studioApi = {
   /** The same payload the SSE `execution.snapshot` event carries; this is the fallback path. */
   getExecution: async (id: string): Promise<ExecutionSnapshot> =>
     apiClient.get(`/studio/executions/${id}`),
+
+  /**
+   * Asks the server to stop a run. `202` carries the execution's current snapshot: the request was
+   * accepted, not that the run has ended. The run ends later with `status: ERROR` and
+   * `errorCode: CANCELLED`, and that terminal snapshot arrives through the live transport like any
+   * other. `409` means the run was already terminal.
+   */
+  cancelExecution: async (id: string): Promise<ExecutionSnapshot> =>
+    apiClient.post(`/studio/executions/${id}/cancel`, undefined),
 
   listExecutions: async (params?: ListExecutionsParams): Promise<ExecutionPage> =>
     apiClient.get('/studio/executions', { params }),
@@ -93,7 +98,18 @@ export const studioApi = {
   validateVariables: async (
     id: string,
     variables: Record<string, unknown>,
-  ): Promise<{ valid: boolean; hasVariables: boolean; testId: string }> =>
+  ): Promise<{
+    testId: string;
+    isValid: boolean;
+    valid: boolean;
+    hasVariables: boolean;
+    /** `undeclared` then `unvalued`; `unused` is informational only. */
+    missing: string[];
+    undeclared: string[];
+    unvalued: string[];
+    conflicting: string[];
+    unused: string[];
+  }> =>
     apiClient.post(`/studio/tests/${id}/validate-variables`, { variables }),
 };
 

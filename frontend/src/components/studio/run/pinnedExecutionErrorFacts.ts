@@ -78,6 +78,11 @@ export const PINNED_EXECUTION_ERROR_FACTS: Readonly<
     remedyPhrase: 'entitlements',
     rerunOffered: false,
   },
+  CANCELLED: {
+    browserPhrase: 'Someone pressed Stop',
+    remedyPhrase: 'Nothing needs clearing',
+    rerunOffered: false,
+  },
   REFERENCE_UNAVAILABLE: {
     browserPhrase: 'no longer resolved when it was sent',
     remedyPhrase: 'restoring it',

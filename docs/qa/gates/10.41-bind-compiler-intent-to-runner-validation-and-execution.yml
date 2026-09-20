@@ -1,0 +1,68 @@
+schema: 1
+story: '10.41'
+story_title: 'Bind compiler intent to runner validation and execution'
+gate: PASS
+status_reason: 'Story 10.42 now binds persisted expected intent to immutable authoring through the shared versioned derivation at confirmation and readiness. All prior 10.41 correspondence, contract, reference, browser and confidentiality findings remain closed.'
+reviewer: 'Quinn (Test Architect) / @architect'
+reviewed_revision: 'working-tree-sha256:b77fc47e67ccb3505cc7d1bf79f398326ee925380c1a303c9d7188ae75d4ff89'
+updated: '2026-09-19T03:58:42Z'
+
+top_issues: []
+waiver: { active: false }
+
+quality_score: 100
+
+review_history:
+  - reviewed_revision: 'working-tree-sha256:bcbf4a8aa1ffae381e4ada967bbde848605c6f70b2fb80119269867f960ad41f'
+    updated: '2026-09-19T01:59:32Z'
+    gate: FAIL
+    status_reason: 'Behavior-changing timeout options bypassed intent correspondence; v2 snapshot readiness/dispatch and actual runner-boundary Chromium proof were incomplete.'
+    issue_ids: ['SEC-001', 'REL-001', 'REQ-001', 'ARCH-001', 'TEST-001']
+  - reviewed_revision: 'working-tree-sha256:19ddea952534a61a767fae6921da5165e9c40c0ce965cb29d190626780f82894'
+    updated: '2026-09-19T02:15:10Z'
+    gate: FAIL
+    status_reason: 'Runner runtime closure and complete structural/source-correspondence validation during readiness remained incomplete.'
+    issue_ids: ['SEC-002', 'REL-002']
+  - reviewed_revision: 'working-tree-sha256:a0e06b7c0d5da828df5ad8089b97fc41bd1b2a4953d96852b218647cb360e327'
+    updated: '2026-09-19T02:28:49Z'
+    gate: FAIL
+    status_reason: 'A valid-shaped semantic mutation of persisted expected intent passed backend readiness before runner refusal.'
+    issue_ids: ['REL-003']
+
+evidence:
+  tests_reviewed: 1045
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    ac_gaps: []
+  commands:
+    - 'studio-runner: npm test — PASS, 1010 passed / 29 skipped'
+    - 'studio-runner: type-check and lint — PASS'
+    - 'studio-runner fixtures: login-protected-session — PASS, 1 passed through POST /v1/runs and real child Chromium'
+    - 'backend 10.41/10.42 focused tests — PASS, 34 passed including derivation, real boundaries, V23 migration, assembler, dispatch and internal contracts'
+    - 'adversarial timeout probe — PASS: click({ timeout: 1 }) is rejected while the exact supplied policy default is equivalent to omission'
+    - 'adversarial runtime-closure probe — PASS: forbidden/misplaced/unknown operation, option, locator and matcher fields fail before normalization with bounded paths'
+    - 'REL-003 changed-target attack — PASS: confirmation refuses and acceptance returns COMPILE_REQUIRED with zero execution/ledger growth'
+    - 'immutable identity attacks — PASS: missing/corrupt context, reference and evidence identity refuse before confirmation/acceptance effects'
+    - 'V23 rollout — PASS: historical v2 rows remain unversioned and immutable; version-aware recompilation/dedup works without fabricated provenance'
+    - 'saved-snapshot dispatch — PASS: HttpRunnerDispatchClient sends the exact persisted expectedIntent without resolved values'
+    - 'git diff --check — PASS'
+    - 'CodeRabbit — unavailable on Darwin; configured graceful degradation applied'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Immutable authoring binding, deep runner closure, exact correspondence, step-scoped reference authorization and secret-canary checks pass.'
+  performance:
+    status: PASS
+    notes: 'Expected-intent parsing remains bounded and semantic validation precedes runner capacity acquisition.'
+  reliability:
+    status: PASS
+    notes: 'Confirmation and readiness rederive versioned intent from immutable revision inputs before writes; rollout, dedup and zero-side-effect refusals pass.'
+  maintainability:
+    status: PASS
+    notes: 'OpenAPI and runner own the closed operation contract; backend authenticity is centralized in the shared versioned derivation and identity verifier.'
+
+recommendations:
+  immediate: []
+  future: []

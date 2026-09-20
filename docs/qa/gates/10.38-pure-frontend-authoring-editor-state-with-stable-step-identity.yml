@@ -1,0 +1,55 @@
+schema: 1
+story: '10.38'
+story_title: 'Pure frontend authoring editor state with stable step identity'
+gate: PASS
+status_reason: 'REQ-001 is resolved: source-only structural operations leave context clean, while copy/delete of context-bearing steps mark both dirty dimensions. All 10 acceptance criteria are covered and the focused gates pass.'
+reviewer: 'Quinn (Test Architect)'
+reviewed_revision: 'working-tree-sha256:0ab82f8cc141c24bdbb195aef5f365fe14dcbd2f99d6f7e7e7e0bd769c03682b'
+updated: '2026-09-18T23:32:13Z'
+
+top_issues: []
+waiver: { active: false }
+
+quality_score: 100
+evidence:
+  tests_reviewed: 15
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'The feature is pure state logic with no network, storage, browser, API, React, Redux or persistence side effects; evidence references remain typed data.'
+  performance:
+    status: PASS
+    notes: 'State cloning/projection work is bounded by the authoring contract step limit.'
+  reliability:
+    status: PASS
+    notes: 'Source-only operations and context-bearing copy/delete now produce the intended independent dirty dimensions.'
+  maintainability:
+    status: PASS
+    notes: 'Focused regressions cover all four source-only operations plus positive context-bearing copy/delete cases.'
+
+recommendations:
+  immediate: []
+  future: []
+
+resolved_issues:
+  - id: 'REQ-001'
+    resolution: 'contextProjection omits context-free steps and sorts context-bearing entries by stable ID. Source-only structure is therefore order-insensitive while real context additions/removals remain dirty.'
+
+review_evidence:
+  stable_identity: 'PASS — add/copy validate factory UUIDs; edit and reorder retain identity; delete addresses a stable ID.'
+  evidence_rebinding: 'PASS — copy rebinds nested step evidence to the new ID; delete removes global references to the deleted step and clears selectedStepId.'
+  stale_commands: 'PASS — draft ID plus monotonically increasing selectionGeneration rejects A-B-A stale commands.'
+  immutability: 'PASS — hydration detaches with structuredClone and all returned state is recursively frozen; reducer inputs are cloned before mutation.'
+  legacy_and_exact_text: 'PASS — the Story 10.36 adapter is used at hydration and exact empty/Unicode/quoted/backslash/newline/whitespace text is preserved.'
+  selectors: 'PASS — selectors only read frozen state and never allocate IDs.'
+  dirty_probe: 'PASS — add/reorder/copy-no-context/delete-no-context each return {source:true,context:false}; copy-with-context and delete-with-context each return {source:true,context:true}.'
+  projection_stability: 'PASS — context-free steps are omitted and context-bearing steps are sorted by stable ID, so presentation reorder does not alter context identity.'
+  focused_vitest: 'PASS — 15/15 tests.'
+  focused_eslint: 'PASS — seven owned files under the repository parser/plugin with the broken inherited preset bypassed.'
+  type_check: 'BASELINE ONLY — the same two frozen @put/core-components TS2307 errors; no authoring-feature error.'
+  coderabbit: 'Unavailable on Darwin; neither a local executable nor ~/.local/bin/coderabbit exists. Manual deep re-review completed under the documented graceful-degradation rule.'

@@ -77,9 +77,12 @@ export interface FakeHttpClient extends HttpClient {
   readonly requests: readonly RecordedHttpRequest[];
   readonly admissionRequests: readonly RecordedHttpRequest[];
   readonly reportRequests: readonly RecordedHttpRequest[];
+  /** `GET …/control` reads (ADR-002 §29), kept apart so report counts stay report counts. */
+  readonly controlRequests: readonly RecordedHttpRequest[];
   /** Outcome for the next admission call, or a function of (request, call index). */
   admissionOutcome: OutcomeSource;
   reportOutcome: OutcomeSource;
+  controlOutcome: OutcomeSource;
   /** Gate that holds an admission call open until released, for interleaving tests. */
   holdAdmission(): () => void;
 }
@@ -100,6 +103,7 @@ export function createFakeHttpClient(
   const requests: RecordedHttpRequest[] = [];
   const admissionRequests: RecordedHttpRequest[] = [];
   const reportRequests: RecordedHttpRequest[] = [];
+  const controlRequests: RecordedHttpRequest[] = [];
   let release: (() => void) | null = null;
   let gate: Promise<void> | null = null;
 
@@ -107,8 +111,10 @@ export function createFakeHttpClient(
     requests,
     admissionRequests,
     reportRequests,
+    controlRequests,
     admissionOutcome: OK,
     reportOutcome: OK,
+    controlOutcome: { kind: 'response', status: 200, body: '{"cancelRequested":false}' },
     holdAdmission(): () => void {
       gate = new Promise<void>((resolve) => {
         release = resolve;
@@ -135,6 +141,13 @@ export function createFakeHttpClient(
         return typeof source === 'function'
           ? source(request, admissionRequests.length - 1)
           : source;
+      }
+      if (request.url.endsWith('/control')) {
+        controlRequests.push(recorded);
+        const control = client.controlOutcome;
+        return typeof control === 'function'
+          ? control(request, controlRequests.length - 1)
+          : control;
       }
       reportRequests.push(recorded);
       log?.push('report.request');

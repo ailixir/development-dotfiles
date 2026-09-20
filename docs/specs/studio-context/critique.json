@@ -1,0 +1,106 @@
+{
+  "storyId": "STUDIO-CONTEXT",
+  "critiquedAt": "2026-09-18T22:21:38.270602+00:00",
+  "critiquedBy": "@qa",
+  "specVersion": 2,
+  "verdict": "APPROVED",
+  "verdictReason": "Iteration 2 resolves both first-critique ambiguities. The specification covers global/step context, exact literals, page-grounded generation and the user-selected bounded learning workflow while preserving immutable confirmation and no runtime LLM. Approved to proceed to implementation planning; production quality and environment acceptance remain explicit future gates.",
+  "scores": {
+    "accuracy": 5,
+    "completeness": 4.5,
+    "consistency": 5,
+    "feasibility": 4.5,
+    "alignment": 5,
+    "average": 4.8
+  },
+  "issues": [],
+  "summary": {
+    "highIssues": 0,
+    "mediumIssues": 0,
+    "lowIssues": 0,
+    "autoFixable": 0,
+    "resolvedFromFirstCritique": 2
+  },
+  "nextAction": "Proceed to the architect implementation plan with story-sized dependencies and acceptance tests. Do not mark the feature implemented or production-ready.",
+  "autoFixes": [],
+  "inputs": {
+    "specPath": "docs/specs/studio-context/spec.md",
+    "specSha256": "e898dfe71237bbc08c1bef02db2156b2e7c5d96d198fcc57b59eef8d46022b17",
+    "requirementsPath": "docs/specs/studio-context/requirements.json",
+    "complexityPath": "docs/specs/studio-context/complexity.json",
+    "researchPath": "docs/specs/studio-context/research.json",
+    "currentStatePath": "docs/specs/studio-context/current-state.md",
+    "originalReviewedSpecSha256": "ff14322d113844a3726e75adae79a22239c3d6465a87bb59a2bdf3533ca7c8e3"
+  },
+  "requirementCoverage": {
+    "FR-1": "Covered in design and acceptance matrix",
+    "FR-2": "Covered in design and acceptance matrix",
+    "FR-3": "Covered in design and acceptance matrix",
+    "FR-4": "Covered in design and acceptance matrix",
+    "FR-5": "Covered in design and acceptance matrix",
+    "FR-6": "Covered in design and acceptance matrix",
+    "FR-7": "Covered in design and acceptance matrix",
+    "FR-8": "Covered in design and acceptance matrix",
+    "FR-9": "Covered in design and acceptance matrix",
+    "FR-10": "Covered in design and acceptance matrix",
+    "FR-11": "Covered in design and acceptance matrix",
+    "NFR-1": "Covered in requirements summary and validation/release gates",
+    "NFR-2": "Covered in requirements summary and validation/release gates",
+    "NFR-3": "Covered in requirements summary and validation/release gates",
+    "NFR-4": "Covered in requirements summary and validation/release gates"
+  },
+  "positiveFindings": [
+    "Accurately identifies that current AI preview and local Run consume different sources, and makes immutable confirmed-artifact execution a prerequisite.",
+    "Defines explicit step intent over local/global defaults, stable IDs through reorder/copy, optimistic save-before-compile, context hashing and stale-result rejection.",
+    "Keeps authoring schema v2 separate from unchanged artifact v1, and permits bounded allowed statements without weakening source-step alignment.",
+    "Independent explicit literal/reference slots and complete action-signature checks avoid treating originalText equality or a model assertion as semantic proof.",
+    "Included live learning has bounded session/state identity, once-only advance, scope authorization, cleanup and atomic evidence publication; ordinary Compile remains browser-free and Execute LLM-free.",
+    "Behavioral evidence is tied to the learned source/action and state generations; regenerated source cannot inherit proof that different code was exercised."
+  ],
+  "validationPerformed": [
+    "Read spec, requirements, complexity, research and architecture assessment.",
+    "Cross-checked actual compiler, request/parser/API and artifact schema with existing architecture sections 4, 8 and 9.",
+    "Checked all FR/AC references and the proposed acceptance layers by static review. No product tests, browser sessions, model benchmark, staging validation or security approvals performed."
+  ],
+  "productionGates": [
+    "Verify incomplete Epic 10 contracts, trusted validator/executor, immutable revisions and confirmed-artifact run path.",
+    "Freeze and test shared API/schema, migrations and actual pinned runtime compatibility.",
+    "Verify authenticated capture, restricted egress, retention/sanitization policy and isolated browser cleanup in the intended environment.",
+    "Run pinned real-model/page fixture corpus and establish measured latency/context/cost/task-success release thresholds."
+  ],
+  "selfCritique": {
+    "performed": true,
+    "checklist": "spec-critique.md explicit five-dimension checks",
+    "missingReferencedChecklist": "spec-quality-checklist.md was not present under searched framework/skill paths; the unrelated code self-critique checklist is not substituted.",
+    "scope": "Findings concern concrete specification ambiguity, not unavailable production evidence. No unsupported requirement added, product code changed, or implementation claimed."
+  },
+  "resolvedIssues": [
+    {
+      "id": "CRIT-1",
+      "resolution": "Section 3.3 defines supplied/predicted/observed provenance and allows only capture of the actual state in its current session generation to establish observation."
+    },
+    {
+      "id": "CRIT-2",
+      "resolution": "Section 3.7 assigns vault-reference resolution to the authorized backend/worker, encrypted ephemeral delivery to the runner, and explicitly denies runner vault/CSI-store/LLM credentials."
+    }
+  ],
+  "secondReviewChecks": [
+    "User-selected live inspection remains included, with Start learning authorizing a displayed plan/action scope once; unchanged unambiguous validated actions can auto-advance.",
+    "Per-session budgets, revision/state-generation identity, once-only advance and atomic final publication are specified; uncertain outcomes cannot trigger hidden replay.",
+    "Learned behavioral evidence binds exact code/action hashes and pre/post state generations; regenerated or dependency-changed steps lose behavioral verification.",
+    "The baseline no-browser ordinary Compile and no-LLM Execute boundaries remain intact.",
+    "Versioned authoring and immutable metadata do not silently expand artifact V1 fields or limits.",
+    "Supplied context can operate when inspection is unavailable, but delivering only that path does not fulfill the complete user-selected feature."
+  ],
+  "planningTestReminders": [
+    "Translate session guarantees into explicit duplicates/lost-response/stale-generation/cancel-race/final-publication-conflict tests.",
+    "Include extra and missing AST actions, literal argument-position swaps, ambiguous quoting, typed-slot conflicts and reference substitution tests.",
+    "Verify regenerated learned source clears behavioral proof for affected and dependent steps."
+  ],
+  "approvalScope": "Specification and transition to planning only. This review executed no product tests and grants no staging, deployment, security or production approval.",
+  "metadataRefresh": {
+    "verifiedAt": "2026-09-18T22:23:01.797118+00:00",
+    "reason": "Only the spec status header and closing workflow sentence changed after approval. Reversing those two exact substitutions reproduces the original reviewed SHA-256; no design change detected.",
+    "verdictChanged": false
+  }
+}

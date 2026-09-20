@@ -15,6 +15,7 @@ import {
   PROTOTYPE_PROPERTY_NAMES,
 } from './language.js';
 import type { ArtifactStep } from './schema.js';
+import type { SourceTokens } from './references.js';
 import {
   ReferenceRecorder,
   checkStepReferenceAlignment,
@@ -100,6 +101,7 @@ export function validateStepCode(
   declarations: ReferenceDeclarations,
   bounds: ValidationBounds,
   collector: DiagnosticCollector,
+  expectedReferences?: SourceTokens,
 ): readonly Operation[] | null {
   // A step is parsed on its own, as written. One parser subtlety is load-bearing and benign:
   // outside a module context `await (` parses as a call to an identifier named `await`, so a
@@ -178,7 +180,7 @@ export function validateStepCode(
   }
 
   const tokens = extractSourceTokens(step.originalText);
-  if (!checkStepReferenceAlignment(recorder.usages(), tokens, collector)) ok = false;
+  if (!checkStepReferenceAlignment(recorder.usages(), tokens, collector, expectedReferences)) ok = false;
 
   return ok ? operations : null;
 }

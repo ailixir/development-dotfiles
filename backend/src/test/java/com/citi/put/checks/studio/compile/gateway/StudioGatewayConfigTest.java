@@ -42,6 +42,45 @@ class StudioGatewayConfigTest {
   }
 
   @Test
+  void theLocalPassthroughIsSelectedOnlyUnderTheLocalProfile() {
+    runner
+        .withPropertyValues(
+            "studio.compile.gateway.local-passthrough=true", "spring.profiles.active=local")
+        .run(
+            context ->
+                assertThat(context)
+                    .hasNotFailed()
+                    .getBean(LlmGatewayClient.class)
+                    .isInstanceOf(LocalPassthroughGatewayClient.class));
+  }
+
+  @Test
+  void theLocalPassthroughOutsideTheLocalProfileFailsStartup() {
+    runner
+        .withPropertyValues(
+            "studio.compile.gateway.local-passthrough=true", "spring.profiles.active=worker,dev")
+        .run(
+            context ->
+                assertThat(context)
+                    .hasFailed()
+                    .getFailure()
+                    .rootCause()
+                    .hasMessageContaining(
+                        "local-passthrough=true is only permitted under the local"));
+  }
+
+  @Test
+  void theLocalProfileAloneStillSelectsTheDisabledClient() {
+    runner
+        .withPropertyValues("spring.profiles.active=local")
+        .run(
+            context ->
+                assertThat(context)
+                    .getBean(LlmGatewayClient.class)
+                    .isInstanceOf(DisabledLlmGatewayClient.class));
+  }
+
+  @Test
   void anEnabledGatewayWithoutConfigurationFailsStartup() {
     runner
         .withPropertyValues("studio.compile.gateway.enabled=true")

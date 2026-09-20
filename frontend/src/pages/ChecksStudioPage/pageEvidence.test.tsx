@@ -20,6 +20,7 @@ import {
   setExecutionTransportSeam,
 } from '@/services/api/studioTransportWiring';
 import { VIDEO_EVIDENCE_NARRATIVES } from '@/components/studio/evidence';
+import { executionStatusLabel } from '@/components/studio/run';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
@@ -149,7 +150,7 @@ describe('AC-21: the page has exactly one playback path', () => {
 
   it('a terminal run whose evidence is still PROCESSING mounts no <video> and offers no seek', async () => {
     await runWithFrames([TERMINAL_EVIDENCE_PROCESSING]);
-    await screen.findByText(TERMINAL_EVIDENCE_PROCESSING.status, { selector: '[data-testid="execution-status"] *' });
+    await screen.findByText(executionStatusLabel(TERMINAL_EVIDENCE_PROCESSING.status), { selector: '[data-testid="execution-status"] *' });
     await userEvent.click(screen.getByRole('tab', { name: 'Proof' }));
     await screen.findByRole('region', { name: VIDEO_EVIDENCE_NARRATIVES.PROCESSING.title });
     expect(document.querySelectorAll('video')).toHaveLength(0);

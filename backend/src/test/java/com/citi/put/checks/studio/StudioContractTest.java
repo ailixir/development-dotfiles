@@ -140,10 +140,14 @@ class StudioContractTest {
 
     List<InternalOperation> internal = internalOperations();
     assertThat(internal.stream().map(InternalOperation::key))
-        .as("architecture §8.4 tabulates six internal routes and ADR-002 §3.1 declares all six")
+        .as(
+            "architecture §8.4 tabulates six internal routes and ADR-002 §3.1 declares all six;"
+                + " ADR-002 §29 (Studio v1 WP4) adds the runner's cancel and the control read")
         .containsExactlyInAnyOrder(
             "POST /v1/validate",
             "POST /v1/runs",
+            "DELETE /v1/runs/{id}",
+            "GET /internal/studio/executions/{id}/control",
             "GET /health",
             "GET /ready",
             "POST /internal/studio/executions/{id}/admission",
@@ -311,6 +315,11 @@ class StudioContractTest {
   void noOperationsStatusSetOrMarkerMovedWhileTestDtoGainedTwoProperties() {
     Map<String, String> expected = new TreeMap<>();
     expected.put("DELETE /tests/{id}", "204,400,401,403");
+    // Studio v1 WP4 (ADR-002 §29): the public cancel and the runner's DELETE, added deliberately.
+    expected.put("DELETE /v1/runs/{id}", "202,401,403,404,409");
+    expected.put("POST /executions/{id}/cancel", "202,400,401,403,409");
+    // ADR-002 §29.4: the owning runner's control read.
+    expected.put("GET /internal/studio/executions/{id}/control", "200,400,401,403,404");
     expected.put("GET /executions", "200,401");
     expected.put("GET /executions/{id}", "200,400,401,403");
     expected.put("GET /executions/{id}/events", "200,401,403");
@@ -333,8 +342,8 @@ class StudioContractTest {
 
     // The total, asserted separately. Without it, both comparisons below could agree on a set that
     // had silently shrunk to nothing on both sides at once.
-    assertThat(declared).as("the document declares a different number of operations").hasSize(18);
-    assertThat(expected).hasSize(18);
+    assertThat(declared).as("the document declares a different number of operations").hasSize(21);
+    assertThat(expected).hasSize(21);
 
     assertThat(declared.keySet())
         .as("an operation the document declares that this copy does not name")

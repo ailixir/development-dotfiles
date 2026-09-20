@@ -3,9 +3,10 @@
  *
  * Two properties, both asserted rather than asserted-by-inspection:
  *
- * **(a)** the set is disjoint from the API's `ExecutionErrorCode` **except for the single value
- * `TIMEOUT`**. Architecture §5.4 assigns every other value there to the dispatcher or a reaper;
- * §8.2 fixes exactly one runner-observable code, the parent-enforced total timeout.
+ * **(a)** the set is disjoint from the API's `ExecutionErrorCode` **except for `TIMEOUT` and
+ * `CANCELLED`**. Architecture §5.4 assigns every other value there to the dispatcher or a reaper;
+ * §8.2 fixes the parent-enforced total timeout, and ADR-002 §29 (Studio v1 WP4) the run stopped by
+ * `DELETE /v1/runs/{id}` — the two conditions both sides observe.
  *
  * The list is **read out of the contract**, never copied. Story 10.7 adds `AUTHORIZATION_REVOKED`
  * and `REFERENCE_UNAVAILABLE` in this same wave, so a frozen list of "the five this component
@@ -44,7 +45,7 @@ function executionErrorCodes(): string[] {
   return values.filter((value): value is string => typeof value === 'string');
 }
 
-describe('AC-17(a) — disjoint from the API enumeration, except TIMEOUT', () => {
+describe('AC-17(a) — disjoint from the API enumeration, except TIMEOUT and CANCELLED', () => {
   it('finds the contract, so this cannot pass vacuously', () => {
     expect(existsSync(CONTRACT_PATH)).toBe(true);
     // If the enumeration were missing or unreadable, an empty list would make the intersection
@@ -52,13 +53,13 @@ describe('AC-17(a) — disjoint from the API enumeration, except TIMEOUT', () =>
     expect(executionErrorCodes().length).toBeGreaterThan(3);
   });
 
-  it('intersects the API enumeration in exactly {TIMEOUT}', () => {
+  it('intersects the API enumeration in exactly {CANCELLED, TIMEOUT}', () => {
     const api = new Set(executionErrorCodes());
     const overlap = RUNNER_ERROR_CODE_VALUES.filter((code) => api.has(code)).sort();
     expect(
       overlap,
       `these runner codes collide with reaper-assigned ExecutionErrorCode values: ${overlap.join(', ')}`,
-    ).toEqual(['TIMEOUT']);
+    ).toEqual(['CANCELLED', 'TIMEOUT']);
   });
 
   it('does not reuse START_TIMEOUT for the runner’s own start-deadline refusal', () => {

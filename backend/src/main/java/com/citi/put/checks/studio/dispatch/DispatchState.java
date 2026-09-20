@@ -53,6 +53,8 @@ public enum DispatchState {
     permitted.add(new Transition(CLAIMED, DISPATCHING));
     permitted.add(new Transition(DISPATCHING, ADMITTED));
     permitted.add(new Transition(ADMITTED, RUNNING));
+    // A FINAL for a run cancelled before it reported a start (Studio v1 WP4, ADR-002 §29).
+    permitted.add(new Transition(ADMITTED, FINALIZING));
     permitted.add(new Transition(RUNNING, FINALIZING));
     permitted.add(new Transition(FINALIZING, DONE));
     // Lease expiry with no attempt issued.

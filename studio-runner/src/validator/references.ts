@@ -117,6 +117,7 @@ export function checkStepReferenceAlignment(
   usages: readonly ReferenceUsage[],
   tokens: SourceTokens,
   collector: DiagnosticCollector,
+  expected?: SourceTokens,
 ): boolean {
   let ok = true;
   const usedVariables = new Set<string>();
@@ -126,7 +127,8 @@ export function checkStepReferenceAlignment(
     else usedVariables.add(usage.name);
   }
 
-  for (const name of tokens.secrets) {
+  const authorized = expected ?? tokens;
+  for (const name of authorized.secrets) {
     if (!usedSecrets.has(name)) {
       ok = false;
       collector.add({
@@ -135,7 +137,7 @@ export function checkStepReferenceAlignment(
       });
     }
   }
-  for (const name of tokens.variables) {
+  for (const name of authorized.variables) {
     if (!usedVariables.has(name)) {
       ok = false;
       collector.add({
@@ -145,20 +147,20 @@ export function checkStepReferenceAlignment(
     }
   }
   for (const name of usedSecrets) {
-    if (!tokens.secrets.has(name)) {
+    if (!authorized.secrets.has(name)) {
       ok = false;
       collector.add({
         code: 'REFERENCE_EXTRA',
-        message: `The step code uses vars.secret('${name}') but the source line does not mention <secret ${name}>.`,
+        message: `The step code uses an unauthorized secret reference for this step.`,
       });
     }
   }
   for (const name of usedVariables) {
-    if (!tokens.variables.has(name)) {
+    if (!authorized.variables.has(name)) {
       ok = false;
       collector.add({
         code: 'REFERENCE_EXTRA',
-        message: `The step code uses vars.get('${name}') but the source line does not mention <var ${name}>.`,
+        message: `The step code uses an unauthorized variable reference for this step.`,
       });
     }
   }

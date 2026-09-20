@@ -31,6 +31,8 @@ export {
 } from './recording.js';
 export type { RecordingObservation, RecordingOutcome, RunnerEvidenceState } from './recording.js';
 export { isSandboxFailure, SANDBOX_DISABLING_FLAG_SUFFIXES } from './sandbox.js';
+export { canEnumerateProcessTree, readProcessTable } from './tree.js';
+export type { ProcessRow } from './tree.js';
 export { SCRATCH_SUBDIRECTORIES } from './scratchLayout.js';
 export {
   PROTOCOL_CODES,

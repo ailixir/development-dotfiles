@@ -1,0 +1,58 @@
+schema: 1
+story: '10.42'
+story_title: 'Verify persisted intent against immutable authoring before execution acceptance'
+gate: PASS
+status_reason: 'The shared pure identity implementation now constructs and verifies every immutable authoring revision-input field, and both confirmation and acceptance fail before side effects on semantic or identity corruption. All Story 10.42 acceptance criteria and focused regressions pass.'
+reviewer: 'Quinn (Test Architect) / @architect'
+reviewed_revision: 'working-tree-sha256:261b93b55ae524c9427fa4a39fdb86b30b7051a909b67b1792bd134b76be3ad7'
+updated: '2026-09-19T03:54:57Z'
+
+top_issues: []
+waiver: { active: false }
+
+quality_score: 100
+
+review_history:
+  - reviewed_revision: 'working-tree-sha256:2133f937b40dc5862e8913bc05826477b7eb8d9df7f47f3800c13bce1646f3f2'
+    updated: '2026-09-19T03:40:09Z'
+    gate: FAIL
+    status_reason: 'Malformed or altered immutable authoring revision-input identity was accepted by the shared confirmation/readiness verifier.'
+    issue_ids: ['REL-001', 'TEST-001']
+
+evidence:
+  tests_reviewed: 1034
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    ac_gaps: []
+  commands:
+    - 'backend focused tests — 23 story-relevant tests passed; CompileStateServiceTest and CompilePipelineTest could not initialize local embedded Postgres (recurring unrelated environment failure)'
+    - 'backend compileJava, compileTestJava, Spotless and Checkstyle — PASS'
+    - 'V23 Testcontainers migration tests — PASS, 2 passed'
+    - 'changed-target real-boundary tests — PASS: confirmation refused and acceptance returned COMPILE_REQUIRED with unchanged execution/ledger counts'
+    - 'unsupported-version real acceptance test — PASS with zero execution/ledger effects'
+    - 'immutable-input pure probes — PASS: baseline and property-order/whitespace equivalents accepted; empty and changed identity rejected'
+    - 'immutable-input corpus — PASS: omissions, changed/reordered/duplicate collections, invalid IDs/hashes, unknown/duplicate/trailing/coerced JSON and digest mutations rejected'
+    - 'real confirmation/acceptance identity tests — PASS: no confirmation write and unchanged execution/ledger counts; ordering inspection confirms readiness precedes reference preflight, quotas and external work'
+    - 'studio-runner npm test — PASS, 1010 passed / 29 skipped; type-check, lint and coverage passed'
+    - 'real POST /v1/runs child-Chromium login/protected fixture — PASS, 1 passed with secret-canary scan'
+    - 'git diff --check — PASS'
+    - 'CodeRabbit — unavailable on Darwin; configured graceful degradation applied'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Semantic intent, immutable context/reference/evidence identity, version provenance and secret non-disclosure are verified before side effects.'
+  performance:
+    status: PASS
+    notes: 'Derivation is local, pure and bounded; no repository, network, runner, browser, LLM or vault dependency was found.'
+  reliability:
+    status: PASS
+    notes: 'Compilation, confirmation and readiness share the versioned deriver and pure identity verifier; mutation and rollout tests pass.'
+  maintainability:
+    status: PASS
+    notes: 'AuthoringRevisionIdentity centralizes construction and verification; the golden fixture pins the complete versioned pipeline.'
+
+recommendations:
+  immediate: []
+  future: []

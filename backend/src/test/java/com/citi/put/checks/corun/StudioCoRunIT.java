@@ -15,6 +15,9 @@ import com.citi.put.checks.studio.compile.gateway.LlmGatewayClient;
 import com.citi.put.checks.studio.compile.validator.RunnerValidationClient;
 import com.citi.put.checks.studio.dispatch.StudioDispatcher;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
+import com.citi.put.checks.studio.evidence.VideoEvidenceFixtures;
+import com.citi.put.checks.studio.recovery.RunnerCancelBudget;
+import com.citi.put.checks.studio.recovery.RunningReaper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -23,10 +26,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -38,9 +50,13 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
@@ -72,7 +88,7 @@ import org.springframework.test.context.DynamicPropertySource;
  *
  * <h2>What it is, exactly</h2>
  *
- * <p>Four ordered legs, each of which crosses the seam in a direction that matters:
+ * <p>Five ordered legs, each of which crosses the seam in a direction that matters:
  *
  * <ol>
  *   <li><b>Leg 0 — the attribution baseline.</b> The harness probes the runner itself, with and
@@ -91,7 +107,38 @@ import org.springframework.test.context.DynamicPropertySource;
  *   <li><b>Leg 3 — runner back to API.</b> The runner's admission and its terminal report arrive at
  *       the API's internal routes over HTTP, under the callback identity, and the API either
  *       accepts them or refuses them. This is DEF-02's path.
+ *   <li><b>Leg 4 — a whole run, to a verdict.</b> A trivial test against a page this JVM serves on
+ *       loopback must end {@code PASSED}, with its ledger row {@code DONE}. Leg 3 accepts any state
+ *       past {@code PENDING}; this leg is what fails when every run errors.
  * </ol>
+ *
+ * <p><b>Legs 5 – 10 — Stop, with a real browser (Studio v1 WP12).</b> Each one starts from the
+ * public {@code POST /api/v1/studio/executions/{id}/cancel} over HTTP and ends with the runner idle
+ * and a later run still able to pass:
+ *
+ * <ol start="5">
+ *   <li><b>Leg 5 — the control read alone.</b> A run stalled inside Chromium is cancelled and the
+ *       dispatcher's relay is <em>not</em> driven, so the only way the runner can learn of it is
+ *       its own poll. It must stop, deliver {@code ERROR / CANCELLED}, leave no browser process and
+ *       settle an honest row.
+ *   <li><b>Leg 6 — the DELETE relay.</b> The same, with {@code dispatchOnce()} driven right after
+ *       the cancel so {@code DELETE /v1/runs/{id}} is what reaches the runner first.
+ *   <li><b>Leg 7 — a queued cancel.</b> Closed by the API at once; the dispatcher never sends it
+ *       and no browser is launched.
+ *   <li><b>Leg 8 — cancel between the send and the admission.</b> The runner's admission is held at
+ *       {@link CallbackProxy} while the cancel is recorded; the API must refuse the admission, the
+ *       runner must answer {@code 409} and launch nothing.
+ *   <li><b>Leg 9 — cancel right after the admission.</b> Before or while the browser starts; the
+ *       branch the runner took is recorded, and the invariants hold on every branch.
+ *   <li><b>Leg 10 — the next run.</b> After all of the above, a trivial run still ends {@code
+ *       PASSED}.
+ * </ol>
+ *
+ * <p>In this harness neither the dispatcher nor the reapers are scheduled. Each cancel leg names
+ * the signal it exercises and asserts it from the runner's own {@code run.cancel_requested} line,
+ * and the legs that wait for a live runner drive the running reaper on every poll, so a reaper
+ * margin that could fire before a healthy runner's {@code FINAL} would show up here as a refused
+ * {@code FINAL} rather than being masked by the reaper never running.
  *
  * <h2>Rules this harness obeys</h2>
  *
@@ -138,6 +185,9 @@ class StudioCoRunIT {
 
   private static RunnerProcess runner;
 
+  /** The runner's callback address: the API's internal routes, observed (Studio v1 WP12). */
+  private static CallbackProxy proxy;
+
   /**
    * Both directions of the seam, decided before the context starts.
    *
@@ -150,7 +200,6 @@ class StudioCoRunIT {
   static void coRunWiring(DynamicPropertyRegistry registry) {
     registry.add("studio.runner.base-url", ENVIRONMENT::runnerBaseUrl);
     registry.add("studio.runner.service-identity-token", ENVIRONMENT::runnerServiceToken);
-    registry.add("studio.execution.runner-base-url", ENVIRONMENT::runnerBaseUrl);
     registry.add("studio.execution.callback-base-url", ENVIRONMENT::apiBaseUrl);
     registry.add("studio.execution.callback.service-token", ENVIRONMENT::callbackServiceToken);
     // Driven, never scheduled: the harness calls dispatchOnce() itself so that a red leg names a
@@ -230,8 +279,18 @@ class StudioCoRunIT {
   @Autowired private RunnerValidationClient validationClient;
   @Autowired private CorpusGateway gateway;
   @Autowired private JdbcTemplate jdbc;
+  @Autowired private RunningReaper runningReaper;
+  @Autowired private RunnerCancelBudget cancelBudget;
+  @Autowired private TestRestTemplate restTemplate;
 
   @LocalServerPort private int apiPort;
+
+  /**
+   * The two pages the cancel legs' stalled test navigates to: one that loads, one that never does.
+   */
+  private FixturePage cancelFixture;
+
+  private BlackHolePage blackHole;
 
   private StudioExecutionFixtures fixtures;
   private Authentication owner;
@@ -255,13 +314,25 @@ class StudioCoRunIT {
     fixtures.seedCsi(CSI_ID, OWNER);
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
 
-    runner = RunnerProcess.start(ENVIRONMENT, "http://" + CoRunEnvironment.HOST + ":" + apiPort);
+    cancelFixture = FixturePage.start();
+    blackHole = BlackHolePage.start();
+    proxy = CallbackProxy.start("http://" + CoRunEnvironment.HOST + ":" + apiPort);
+    runner = RunnerProcess.start(ENVIRONMENT, proxy.url());
   }
 
   @AfterAll
   void stopTheRunner() {
     if (runner != null) {
       runner.close();
+    }
+    if (proxy != null) {
+      proxy.close();
+    }
+    if (blackHole != null) {
+      blackHole.close();
+    }
+    if (cancelFixture != null) {
+      cancelFixture.close();
     }
   }
 
@@ -493,6 +564,931 @@ class StudioCoRunIT {
         .isEqualTo(confirmedRevisionId(testId));
   }
 
+  // ── Leg 4: a whole run, to a verdict ──────────────────────────────────────
+
+  /**
+   * A trivial test against a page the harness serves reaches {@code PASSED}, and its ledger row
+   * reaches {@code DONE} (Studio v1 WP2).
+   *
+   * <p>Leg 3 deliberately accepts any state past {@code PENDING}: it proves that one report crossed
+   * the seam, and a run that ends {@code ERROR} still proves that. It cannot tell a working
+   * execution path from one where every run errors, which is the shape a developer would actually
+   * notice. This leg closes that gap: the target page is served from this JVM on loopback, so the
+   * only way to a verdict other than {@code PASSED} is the product — a browser that did not launch,
+   * a step the executor could not run, a terminal report the API refused, or a ledger that never
+   * settled.
+   *
+   * <p>The artifact is assembled from two codes of the runner's own corpus ({@code
+   * navigation-goto.json}'s {@code page.goto} with the URL replaced, and {@link #CORPUS_EXAMPLE}'s
+   * click) and still goes through the real compile pipeline and the real {@code /v1/validate}, so a
+   * harness that wrote an unacceptable artifact is red at the compile step, not at the verdict.
+   */
+  @Test
+  @Order(4)
+  void aTrivialPassingTestRunsToPassedAndItsLedgerSettlesDone() throws IOException {
+    // The runner admits one run at a time (pool size 1), and leg 3's run may still hold the
+    // slot: its click has no page to act on and waits out the step timeout. Dispatching now
+    // would be a 429 that the driven dispatcher never retries, so wait for that run to settle.
+    if (dispatchedExecutionId != null) {
+      awaitSettled(dispatchedExecutionId);
+    }
+    runATrivialPassingTestToPassed("Co-run passing test");
+  }
+
+  /**
+   * Compiles, confirms, dispatches and runs a two-step test against a page served here, and fails
+   * with an attribution unless it ends {@code PASSED} with its ledger {@code DONE}. Leg 4 is this
+   * alone; leg 10 is this after every cancel leg has run.
+   */
+  private void runATrivialPassingTestToPassed(String name) throws IOException {
+    try (FixturePage page = FixturePage.start()) {
+      String gotoLine = "Go to " + page.url();
+      String clickLine = source.get(0);
+      List<String> passingSource = List.of(gotoLine, clickLine);
+      UUID passingTest = fixtures.seedTest(name, CSI_ID, OWNER, passingSource);
+      gateway.answerWith(passingArtifact(page.url(), gotoLine, clickLine));
+
+      pipeline.compile(passingTest, OWNER);
+      awaitCompileStatusIn(passingTest, Set.of("AWAITING_CONFIRMATION", "NEEDS_REVISION", "STALE"));
+      if (!"AWAITING_CONFIRMATION".equals(compileStatus(passingTest))) {
+        throw new CoRunFailure(
+            "co-run harness or studio-runner (POST /v1/validate)",
+            "the passing test did not become confirmable — compile_status is "
+                + compileStatus(passingTest),
+            "compile_error=" + compileError(passingTest));
+      }
+      UUID candidate = candidateRevisionId(passingTest);
+      states.confirm(
+          passingTest,
+          candidate,
+          artifactHash(candidate),
+          sourceRevision(passingTest),
+          configurationRevision(passingTest),
+          OWNER);
+
+      awaitRunnerIdle();
+      UUID executionId = studioService.executeTest(passingTest, owner, null).executionId();
+      long mark = runner.logMark();
+      int dispatched = dispatcher.dispatchOnce();
+      ExecutionSnapshotDto snapshot = awaitSettled(executionId);
+      String ledgerState = ledgerState(executionId);
+
+      if (dispatched != 1 || !"PASSED".equals(snapshot.status()) || !"DONE".equals(ledgerState)) {
+        throw new CoRunFailure(
+            "the execution path (dispatch, runner, or the API's terminal report handling)",
+            "a trivial test against a reachable page did not settle PASSED/DONE — execution "
+                + snapshot.status()
+                + "/"
+                + snapshot.errorCode()
+                + ", ledger "
+                + ledgerState
+                + ", dispatched "
+                + dispatched,
+            "fixture page requests="
+                + page.requests()
+                + ", steps="
+                + describeSteps(snapshot)
+                + "; what the runner recorded during the run:\n"
+                + quoted(runner.logSince(mark)));
+      }
+
+      assertThat(page.requests())
+          .as("the browser must actually have loaded the fixture page")
+          .isPositive();
+      assertThat(snapshot.stepResults())
+          .as("both steps ran and passed")
+          .extracting(com.citi.put.checks.studio.dto.StepResult::status)
+          .containsExactly("PASS", "PASS");
+      assertThat(snapshot.endedAt()).as("a settled execution has an end").isNotNull();
+    }
+  }
+
+  // ── Legs 5 – 10: Stop, with a real browser (Studio v1 WP12) ─────────────────
+
+  /** The plan's co-run bound on API cancel → ledger {@code DONE} for a live runner (§2.7). */
+  private static final Duration CANCEL_PATH_BOUND = Duration.ofSeconds(25);
+
+  /**
+   * The stalling test's runtime and step budget. Must stay at or below the runner's {@code
+   * STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS} ({@link RunnerProcess}) and its default total-runtime
+   * ceiling (120 s), or the runner clamps it back down.
+   */
+  private static final int STALL_BUDGET_SECONDS = 120;
+
+  /** How long a pid observed before the kill is given to disappear once the run is settled. */
+  private static final Duration PIDS_GONE_WITHIN = Duration.ofSeconds(30);
+
+  /**
+   * Leg 5: a run stalled inside Chromium is stopped by the runner's <b>control read</b> alone.
+   *
+   * <p>The dispatcher's relay is deliberately not driven, so no {@code DELETE} is ever sent;
+   * nothing reports progress while step 1's navigation hangs, so no acknowledgement can carry the
+   * flag either. If this leg is green the poll is what stopped the run, and the runner's own {@code
+   * run.cancel_requested} line is asserted to say {@code source: control} rather than assumed to.
+   */
+  @Test
+  @Order(5)
+  void aLiveMidStepRunIsStoppedByTheControlReadAloneAfterAnHttpCancel() throws IOException {
+    StalledRun run = startStalledRun("Co-run cancel: control read");
+    try {
+      long cancelAt = System.nanoTime();
+      ResponseEntity<String> answer = cancelOverHttp(run.executionId());
+      assertCancelAccepted(answer, "RUNNING");
+      // No dispatchOnce() here: the relay is not driven, so only the runner's own reads carry it.
+
+      Timings timings = awaitCancelSettled(run, cancelAt, "control");
+
+      assertThat(ledgerColumn(run.executionId(), "cancel_relayed_at"))
+          .as("no DELETE was relayed — the relay was never driven in this leg")
+          .isNull();
+      Optional<CallbackProxy.Call> read = proxy.controlReadThatSaidCancel(run.executionId());
+      assertThat(read)
+          .as("the runner's control read must have been answered cancelRequested: true")
+          .isPresent();
+      assertHonestCancel(run, timings, "5 (control read)");
+    } finally {
+      settleOrForce(run.executionId(), run.pids());
+    }
+  }
+
+  /**
+   * Leg 6: the same stalled run, stopped by the <b>DELETE relay</b>.
+   *
+   * <p>{@link #startStalledRun} returns just after one of the runner's control reads has been
+   * answered, and the relay is driven straight after the cancel, so the {@code DELETE} reaches the
+   * owning pod most of a poll interval before the next read could. The runner's line must then say
+   * {@code source: delete}, and the relay must be recorded on the ledger.
+   */
+  @Test
+  @Order(6)
+  void aLiveMidStepRunIsStoppedByTheDeleteRelayTheDispatcherSends() throws IOException {
+    StalledRun run = startStalledRun("Co-run cancel: DELETE relay");
+    try {
+      long cancelAt = System.nanoTime();
+      ResponseEntity<String> answer = cancelOverHttp(run.executionId());
+      dispatcher.dispatchOnce();
+      long relayedAt = System.nanoTime();
+      assertCancelAccepted(answer, "RUNNING");
+      assertThat(ledgerColumn(run.executionId(), "cancel_relayed_at"))
+          .as("the dispatcher's relay must have reached the runner and been acknowledged 202")
+          .isNotNull();
+
+      Timings timings = awaitCancelSettled(run, cancelAt, "delete");
+      System.out.println(
+          "[co-run] leg 6: cancel -> DELETE acknowledged " + millis(relayedAt - cancelAt) + " ms");
+      assertHonestCancel(run, timings, "6 (DELETE relay)");
+    } finally {
+      settleOrForce(run.executionId(), run.pids());
+    }
+  }
+
+  /**
+   * Leg 7: a cancel of a run nobody has dispatched yet is closed by the API alone, and no browser
+   * is ever launched for it.
+   *
+   * <p>"No POST /v1/runs" is read off the ledger rather than the runner: {@code attempt_id} is
+   * written by the statement that begins a send and by nothing else, so a row that is {@code DONE}
+   * with no attempt was never sent. The runner's side is corroborated by its silence — no callback
+   * and no log line for this execution — and by no browser process appearing while the dispatcher
+   * is driven twice.
+   */
+  @Test
+  @Order(7)
+  void aQueuedCancelIsClosedByTheApiAndNoBrowserIsEverLaunched() throws IOException {
+    UUID testId = confirmedStallTest("Co-run cancel: queued");
+    awaitRunnerIdle();
+    int blackHoleBefore = blackHole.requests();
+    long mark = runner.logMark();
+    UUID executionId = studioService.executeTest(testId, owner, null).executionId();
+
+    try (PidSampler sampler = PidSampler.start()) {
+      ResponseEntity<String> answer = cancelOverHttp(executionId);
+      assertCancelAccepted(answer, "ERROR");
+      assertThat(readTree(answer.getBody()).path("errorCode").asText()).isEqualTo("CANCELLED");
+
+      assertThat(dispatcher.dispatchOnce()).as("nothing is left to dispatch").isZero();
+      assertThat(dispatcher.dispatchOnce()).isZero();
+      // A bounded observation window: long enough for a wrongly-sent job to launch a browser.
+      pauseFor(Duration.ofSeconds(3));
+
+      assertThat(ledgerState(executionId)).isEqualTo("DONE");
+      assertThat(ledgerColumn(executionId, "attempt_id"))
+          .as("no send ever began, so no POST /v1/runs was made for it")
+          .isNull();
+      assertThat(proxy.callsFor(executionId)).as("the runner never called back for it").isEmpty();
+      assertThat(linesAbout(runner.logSince(mark), executionId))
+          .as("the runner never heard of it")
+          .isEmpty();
+      assertThat(sampler.browsers()).as("no browser process appeared").isEmpty();
+      assertThat(blackHole.requests()).isEqualTo(blackHoleBefore);
+      assertThat(historyColumn(executionId, "error_code")).isEqualTo("CANCELLED");
+      assertThat(historyColumn(executionId, "ended_at")).isNotNull();
+    }
+  }
+
+  /**
+   * Leg 8: a cancel recorded <b>between the dispatcher's send and the runner's admission</b>.
+   *
+   * <p>A real runner answers {@code 202} only after its admission CAS, so this window cannot be hit
+   * black-box. The runner's {@code POST …/admission} is held at the callback proxy until the cancel
+   * has been recorded over HTTP, then released: the API must refuse it {@code 409}, the runner must
+   * release its slot and launch nothing, and the row must close {@code ERROR / CANCELLED} with no
+   * admission ever written. The signal here is the admission CAS itself, not any of the three stop
+   * signals, so the runner must log no {@code run.cancel_requested} at all.
+   */
+  @Test
+  @Order(8)
+  void aCancelBetweenTheSendAndTheAdmissionIsRefusedAdmissionAndNoBrowserStarts() throws Exception {
+    UUID testId = confirmedStallTest("Co-run cancel: before admission");
+    awaitRunnerIdle();
+    int blackHoleBefore = blackHole.requests();
+    long mark = runner.logMark();
+    UUID executionId = studioService.executeTest(testId, owner, null).executionId();
+    CallbackProxy.Hold hold = proxy.holdAdmission(executionId);
+
+    try (PidSampler sampler = PidSampler.start()) {
+      CompletableFuture<Integer> send = CompletableFuture.supplyAsync(dispatcher::dispatchOnce);
+      try {
+        if (!hold.awaitArrival(Duration.ofSeconds(15))) {
+          throw new CoRunFailure(
+              "studio-runner (POST /v1/runs) or the API's dispatcher",
+              "the runner never asked for its admission",
+              "ledger " + ledgerState(executionId) + "; runner:\n" + quoted(runner.logSince(mark)));
+        }
+        assertThat(ledgerState(executionId))
+            .as("the send is in flight and the runner is waiting on its admission")
+            .isEqualTo("DISPATCHING");
+        ResponseEntity<String> answer = cancelOverHttp(executionId);
+        assertThat(answer.getStatusCode().value()).isEqualTo(202);
+      } finally {
+        hold.release();
+      }
+      send.get(30, TimeUnit.SECONDS);
+      pauseFor(Duration.ofSeconds(2));
+
+      CallbackProxy.Call admission =
+          proxy.callsFor(executionId).stream()
+              .filter(call -> "admission".equals(call.route()))
+              .findFirst()
+              .orElseThrow(() -> new AssertionError("the held admission was never forwarded"));
+      assertThat(admission.status())
+          .as("the API must refuse an admission for a row whose cancel is recorded")
+          .isEqualTo(409);
+      List<String> lines = linesAbout(runner.logSince(mark), executionId);
+      assertThat(lines)
+          .as("the runner must have recorded the refusal")
+          .anyMatch(line -> line.contains("\"event\":\"admission.refused\""));
+      assertThat(lines)
+          .as("nothing was admitted, so nothing was there to cancel on the runner")
+          .noneMatch(line -> line.contains("\"event\":\"admission.admitted\""))
+          .noneMatch(line -> line.contains("\"event\":\"run.cancel_requested\""));
+      assertThat(ledgerState(executionId)).isEqualTo("DONE");
+      assertThat(ledgerColumn(executionId, "admission_id")).as("no admission written").isNull();
+      assertThat(historyColumn(executionId, "status")).isEqualTo("ERROR");
+      assertThat(historyColumn(executionId, "error_code")).isEqualTo("CANCELLED");
+      assertThat(sampler.browsers()).as("no browser was ever launched").isEmpty();
+      assertThat(blackHole.requests()).isEqualTo(blackHoleBefore);
+      assertThat(scratchEntries()).as("no scratch directory was created").isEmpty();
+      awaitRunnerIdle();
+    } finally {
+      settleOrForce(executionId, List.of());
+    }
+  }
+
+  /**
+   * Leg 9: a cancel recorded <b>right after the admission</b>, relayed at once.
+   *
+   * <p>Where the runner is when it learns of it is a race — before the launch, while the browser is
+   * starting, or already stepping — and all three are correct. The leg records which branch ran
+   * (from the {@code FINAL}'s message and whether it carried a browser start) and which signal
+   * delivered it, and asserts the invariants that hold on every branch: {@code ERROR / CANCELLED},
+   * the {@code FINAL} accepted, the ledger {@code DONE}, every browser pid ever seen gone, and — on
+   * the before-launch branch — no browser pid at all and no browser start on the row.
+   */
+  @Test
+  @Order(9)
+  void aCancelRightAfterTheAdmissionEndsCancelledOnWhicheverBranchTheRunnerTook()
+      throws IOException {
+    UUID testId = confirmedStallTest("Co-run cancel: right after admission");
+    awaitRunnerIdle();
+    long mark = runner.logMark();
+    UUID executionId = studioService.executeTest(testId, owner, null).executionId();
+
+    PidSampler sampler = PidSampler.start();
+    try {
+      dispatcher.dispatchOnce();
+      long cancelAt = System.nanoTime();
+      ResponseEntity<String> answer = cancelOverHttp(executionId);
+      dispatcher.dispatchOnce();
+      assertThat(answer.getStatusCode().value()).isEqualTo(202);
+      assertThat(ledgerColumn(executionId, "admission_id"))
+          .as("the dispatcher's send returns only after the runner's admission CAS")
+          .isNotNull();
+
+      StalledRun run = new StalledRun(executionId, mark, List.of());
+      Timings timings = awaitCancelSettled(run, cancelAt, null);
+      sampler.close();
+
+      CallbackProxy.FinalReport fin = finalOf(executionId);
+      String branch =
+          fin.errorMessage() != null && fin.errorMessage().contains("before its browser")
+              ? "before launch"
+              : fin.errorMessage() != null && fin.errorMessage().contains("while its browser")
+                  ? "while launching"
+                  : "mid-run";
+      String source = cancelSource(runner.logSince(mark), executionId);
+      System.out.println(
+          "[co-run] leg 9: branch=" + branch + ", signal=" + source + ", " + timings.describe());
+      assertThat(source)
+          .as("within milliseconds of the admission, only the DELETE or a progress ack can win")
+          .isIn("delete", "progress-ack");
+      if ("before launch".equals(branch)) {
+        assertThat(sampler.browsers()).as("before launch: no browser pid, ever").isEmpty();
+        assertThat(historyColumn(executionId, "browser_started_at")).isNull();
+        assertThat(fin.browserStarted()).isFalse();
+      }
+      assertOutcomeAndLedger(executionId, timings, "9 (" + branch + ")");
+      assertPidsGone(sampler.allPids(), "9 (" + branch + ")");
+      awaitRunnerIdle();
+    } finally {
+      sampler.close();
+      settleOrForce(executionId, sampler.allPids());
+    }
+  }
+
+  /** Leg 10: after every cancel above, the pod is still a working pod. */
+  @Test
+  @Order(10)
+  void aTrivialPassingTestStillRunsToPassedAfterEveryCancel() throws IOException {
+    runATrivialPassingTestToPassed("Co-run passing test after the cancels");
+  }
+
+  // ── cancel-leg machinery ──────────────────────────────────────────────────
+
+  /** A dispatched run that is alive inside step 1's navigation, and what was observed of it. */
+  private record StalledRun(UUID executionId, long logMark, List<Long> pids) {}
+
+  /** The cancel path, hop by hop, on this JVM's monotonic clock. {@code -1} = not observed. */
+  private record Timings(long cancelAt, long observedAt, long finalAt, long doneAt) {
+
+    long cancelToDoneMillis() {
+      return millis(doneAt - cancelAt);
+    }
+
+    String describe() {
+      return "cancel -> control read said cancel "
+          + (observedAt < 0 ? "n/a" : millis(observedAt - cancelAt) + " ms")
+          + ", cancel -> FINAL at the API "
+          + (finalAt < 0 ? "n/a" : millis(finalAt - cancelAt) + " ms")
+          + ", cancel -> ledger DONE "
+          + cancelToDoneMillis()
+          + " ms";
+    }
+  }
+
+  /**
+   * Compiles, confirms and dispatches the stalling test, and returns once its browser is inside
+   * step 1's navigation with its pids snapshotted.
+   */
+  private StalledRun startStalledRun(String name) throws IOException {
+    UUID testId = confirmedStallTest(name);
+    awaitRunnerIdle();
+    int blackHoleBefore = blackHole.requests();
+    long mark = runner.logMark();
+    UUID executionId = studioService.executeTest(testId, owner, null).executionId();
+    int dispatched = dispatcher.dispatchOnce();
+    if (dispatched != 1 || awaitAdmission(executionId) == null) {
+      throw new CoRunFailure(
+          "studio-runner (POST /v1/runs), as reached by the API's HttpRunnerDispatchClient",
+          "the stalling run was never admitted — ledger " + ledgerState(executionId),
+          whatTheRunnerSaidAboutTheDispatch(runner.logSince(mark)));
+    }
+
+    long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+    List<RunnerProcess.Descendant> seen = List.of();
+    while (System.nanoTime() < deadline) {
+      seen = runner.descendants();
+      boolean inStep1 = blackHole.requests() > blackHoleBefore;
+      boolean browser = seen.stream().anyMatch(RunnerProcess.Descendant::isBrowser);
+      ExecutionSnapshotDto snapshot = studioService.findExecutionById(executionId, owner);
+      boolean step1Applied =
+          snapshot.stepResults() != null
+              && snapshot.stepResults().stream()
+                  .anyMatch(step -> step.stepIndex() == 1 && "RUNNING".equals(step.status()));
+      if (inStep1 && browser && "RUNNING".equals(snapshot.status()) && step1Applied) {
+        // Quiet from here: the API has applied the report that step 1 began, and a stalled
+        // navigation sends nothing more until the kill, so no progress acknowledgement is in
+        // flight to carry the cancel. Measured, not assumed: without this wait the step reports
+        // were still being delivered when the cancel landed, and an ack won the race. Placing the
+        // cancel just after a control read also puts the next read a full interval away.
+        awaitAControlReadAfter(executionId, System.nanoTime());
+        List<Long> pids = seen.stream().map(RunnerProcess.Descendant::pid).toList();
+        System.out.println("[co-run] " + name + ": pids before the kill " + seen);
+        return new StalledRun(executionId, mark, pids);
+      }
+      pause();
+    }
+    StalledRun partial =
+        new StalledRun(
+            executionId, mark, seen.stream().map(RunnerProcess.Descendant::pid).toList());
+    settleOrForce(executionId, partial.pids());
+    throw new CoRunFailure(
+        "studio-runner (the run under test)",
+        "the stalling run never reached its stalled step with a live browser",
+        "black-hole requests="
+            + (blackHole.requests() - blackHoleBefore)
+            + ", descendants="
+            + seen
+            + ", execution "
+            + studioService.findExecutionById(executionId, owner).status()
+            + "; runner:\n"
+            + quoted(runner.logSince(mark)));
+  }
+
+  /** A confirmed test whose step 1 navigates to the black hole and waits two minutes for it. */
+  private UUID confirmedStallTest(String name) throws IOException {
+    String loadLine = "Go to " + cancelFixture.url();
+    String stallLine = "Go to " + blackHole.url();
+    UUID testId = fixtures.seedTest(name, CSI_ID, OWNER, List.of(loadLine, stallLine));
+    // The test's timeoutSeconds is both the job's browser runtime budget and its step timeout. At
+    // the seeded 30 s the run would end on its own half a minute in, and a leg whose signal never
+    // arrived would go red as a timeout verdict rather than as "the cancel never landed". 120 s is
+    // twice the longest wait in any leg; the runner's step-timeout ceiling is raised to match.
+    jdbc.update(
+        "UPDATE ui_tests SET timeout_seconds = ? WHERE id = ?", STALL_BUDGET_SECONDS, testId);
+    com.fasterxml.jackson.databind.node.ObjectNode root = MAPPER.createObjectNode();
+    root.put("version", 1);
+    com.fasterxml.jackson.databind.node.ArrayNode steps = root.putArray("steps");
+    steps
+        .addObject()
+        .put("stepIndex", 0)
+        .put("originalText", loadLine)
+        .put("code", "await page.goto('" + cancelFixture.url() + "');");
+    // Far above every bound in the leg, so nothing but the cancel can end the run.
+    steps
+        .addObject()
+        .put("stepIndex", 1)
+        .put("originalText", stallLine)
+        .put("code", "await page.goto('" + blackHole.url() + "', { timeout: 120000 });");
+    gateway.answerWith(root.toString());
+
+    pipeline.compile(testId, OWNER);
+    awaitCompileStatusIn(testId, Set.of("AWAITING_CONFIRMATION", "NEEDS_REVISION", "STALE"));
+    if (!"AWAITING_CONFIRMATION".equals(compileStatus(testId))) {
+      throw new CoRunFailure(
+          "co-run harness or studio-runner (POST /v1/validate)",
+          "the stalling test did not become confirmable — compile_status is "
+              + compileStatus(testId),
+          "compile_error=" + compileError(testId));
+    }
+    UUID candidate = candidateRevisionId(testId);
+    states.confirm(
+        testId,
+        candidate,
+        artifactHash(candidate),
+        sourceRevision(testId),
+        configurationRevision(testId),
+        OWNER);
+    return testId;
+  }
+
+  /** The public route, over HTTP, as the Studio page's Stop button calls it. */
+  private ResponseEntity<String> cancelOverHttp(UUID executionId) {
+    return restTemplate.exchange(
+        "/api/v1/studio/executions/" + executionId + "/cancel",
+        HttpMethod.POST,
+        new HttpEntity<>(VideoEvidenceFixtures.identity(OWNER, "", CSI_ID + ":owner")),
+        String.class);
+  }
+
+  private void assertCancelAccepted(ResponseEntity<String> answer, String status)
+      throws IOException {
+    assertThat(answer.getStatusCode().value())
+        .as("POST …/cancel answered %s", answer.getBody())
+        .isEqualTo(202);
+    assertThat(readTree(answer.getBody()).path("status").asText())
+        .as("the 202 carries the snapshot as committed")
+        .isEqualTo(status);
+  }
+
+  /**
+   * Waits for the cancel to settle, driving the running reaper on every poll exactly as a worker's
+   * schedule would, and times it.
+   *
+   * <p>Driving the reaper is the point, not a convenience: it is a backstop, and a backstop that
+   * closed the row before a healthy runner's {@code FINAL} landed would show up below as a {@code
+   * FINAL} refused {@code 409 EXECUTION_SETTLED}. The margin itself is pinned by {@code
+   * RunnerCancelBudgetTest}; this is where it meets a real runner.
+   *
+   * @param expectedSource the {@code run.cancel_requested} source this leg exercises, or {@code
+   *     null} when the leg records it instead
+   */
+  private Timings awaitCancelSettled(StalledRun run, long cancelAt, String expectedSource) {
+    UUID executionId = run.executionId();
+    long deadline = System.nanoTime() + Duration.ofSeconds(60).toNanos();
+    long doneAt = -1;
+    while (System.nanoTime() < deadline) {
+      runningReaper.reapOnce();
+      if ("DONE".equals(ledgerState(executionId))) {
+        doneAt = System.nanoTime();
+        break;
+      }
+      pause();
+    }
+    List<String> lines = runner.logSince(run.logMark());
+    if (doneAt < 0) {
+      throw new CoRunFailure(
+          "studio-runner (the cancelled run) or the API's terminal report handling",
+          "the cancelled run did not settle within 60 s — ledger "
+              + ledgerState(executionId)
+              + ", execution "
+              + historyColumn(executionId, "status"),
+          "calls the runner made: "
+              + describeCalls(executionId)
+              + "; runner:\n"
+              + quoted(linesAbout(lines, executionId)));
+    }
+    // DONE is committed inside the API's handling of the FINAL, and the proxy records the call
+    // once it has relayed the answer, so give the record a moment before reading its absence.
+    long finalDeadline = System.nanoTime() + Duration.ofSeconds(2).toNanos();
+    while (proxy.finalReport(executionId).isEmpty() && System.nanoTime() < finalDeadline) {
+      pauseFor(Duration.ofMillis(20));
+    }
+    if (proxy.finalReport(executionId).isEmpty()) {
+      throw new CoRunFailure(
+          "put-checks API (the running reaper, driven on every poll of this wait)",
+          "the ledger reached DONE without the runner's FINAL — something other than the runner"
+              + " closed a cancel a live runner was still finishing; execution "
+              + historyColumn(executionId, "status")
+              + "/"
+              + historyColumn(executionId, "error_code")
+              + ", reaper cancel margin "
+              + runningReaper.cancelMargin(),
+          "calls the runner made: "
+              + describeCalls(executionId)
+              + "; runner:\n"
+              + quoted(linesAbout(lines, executionId)));
+    }
+    long observedAt =
+        proxy
+            .controlReadThatSaidCancel(executionId)
+            .map(CallbackProxy.Call::answeredAtNanos)
+            .orElse(-1L);
+    long finalAt =
+        proxy.finalReport(executionId).map(CallbackProxy.Call::receivedAtNanos).orElse(-1L);
+    Timings timings = new Timings(cancelAt, observedAt, finalAt, doneAt);
+    if (expectedSource != null) {
+      String source = cancelSource(lines, executionId);
+      assertThat(source)
+          .as(
+              "the runner's run.cancel_requested line names the signal this leg exercises; calls: %s",
+              describeCalls(executionId))
+          .isEqualTo(expectedSource);
+    }
+    return timings;
+  }
+
+  /** Outcome, ledger, delivery and timing: what every cancel of an admitted run must end with. */
+  private void assertOutcomeAndLedger(UUID executionId, Timings timings, String leg) {
+    System.out.println(
+        "[co-run] leg "
+            + leg
+            + ": "
+            + timings.describe()
+            + "; reaper cancel margin "
+            + runningReaper.cancelMargin().toSeconds()
+            + " s, healthy-runner worst case "
+            + cancelBudget.worstCase().toSeconds()
+            + " s");
+    CallbackProxy.Call fin =
+        proxy
+            .finalReport(executionId)
+            .orElseThrow(
+                () ->
+                    new CoRunFailure(
+                        "studio-runner",
+                        "the cancelled run settled but its FINAL never reached the API",
+                        "calls: " + describeCalls(executionId)));
+    assertThat(fin.status())
+        .as("the runner's FINAL must be ACCEPTED — a 409 means the reaper closed the row under it")
+        .isBetween(200, 299);
+    assertThat(fin.finalReport().result()).isEqualTo("ERROR");
+    assertThat(fin.finalReport().errorCode()).isEqualTo("CANCELLED");
+    assertThat(historyColumn(executionId, "status")).isEqualTo("ERROR");
+    assertThat(historyColumn(executionId, "error_code")).isEqualTo("CANCELLED");
+    assertThat(historyColumn(executionId, "ended_at")).as("a settled run has an end").isNotNull();
+    assertThat(ledgerState(executionId)).isEqualTo("DONE");
+    assertThat(linesAbout(runner.logSince(0), executionId))
+        .as("the runner recorded its terminal delivery")
+        .anyMatch(line -> line.contains("\"event\":\"report.terminal_delivered\""));
+    assertThat(Duration.ofMillis(timings.cancelToDoneMillis()))
+        .as("API cancel -> ledger DONE, against the plan's co-run bound")
+        .isLessThanOrEqualTo(CANCEL_PATH_BOUND)
+        .as("and it must finish well inside the reaper's margin, or the reaper races it")
+        .isLessThan(runningReaper.cancelMargin());
+  }
+
+  /**
+   * Everything a mid-step cancel must leave behind: the outcome, the ledger, no browser process, an
+   * evidence disposition on the row that is the one the runner reported, and an idle pod.
+   *
+   * <p>The snapshot's video state is deliberately not read: under this harness the API's video
+   * store provider is {@code none}, so the snapshot says {@code UNAVAILABLE} whatever the runner
+   * stored. The persisted row and the runner's own object directory are where honesty is decided.
+   */
+  private void assertHonestCancel(StalledRun run, Timings timings, String leg) throws IOException {
+    UUID executionId = run.executionId();
+    assertOutcomeAndLedger(executionId, timings, leg);
+    assertPidsGone(run.pids(), leg);
+
+    CallbackProxy.FinalReport fin = finalOf(executionId);
+    assertThat(historyColumn(executionId, "video_status"))
+        .as("the row's video status is the projection of what the runner reported (%s)", fin)
+        .isEqualTo(videoStatusFor(fin.evidenceState()));
+    assertThat(historyColumn(executionId, "video_partial"))
+        .as("partial is carried from the runner, never recomputed")
+        .isEqualTo(String.valueOf(Boolean.TRUE.equals(fin.evidencePartial())));
+    assertThat(historyColumn(executionId, "video_key")).isEqualTo(fin.videoKey());
+    if ("STORED".equals(fin.evidenceState())) {
+      Path object = ENVIRONMENT.objectStoreDir().resolve(fin.videoKey());
+      assertThat(object).as("STORED must mean an object exists in the runner's store").exists();
+      assertThat(Files.size(object)).as("and it is not empty").isPositive();
+    }
+    System.out.println(
+        "[co-run] leg "
+            + leg
+            + ": evidence "
+            + fin.evidenceState()
+            + " partial="
+            + fin.evidencePartial());
+    awaitRunnerIdle();
+  }
+
+  private CallbackProxy.FinalReport finalOf(UUID executionId) {
+    return proxy
+        .finalReport(executionId)
+        .orElseThrow(
+            () ->
+                new CoRunFailure(
+                    "studio-runner",
+                    "no FINAL reached the API for " + executionId,
+                    "calls: " + describeCalls(executionId)))
+        .finalReport();
+  }
+
+  /**
+   * Each pid observed while the run was alive must be gone; survivors are killed, then reported.
+   */
+  private static void assertPidsGone(Collection<Long> pids, String leg) {
+    long deadline = System.nanoTime() + PIDS_GONE_WITHIN.toNanos();
+    List<Long> alive = pids.stream().filter(RunnerProcess::isAlive).toList();
+    while (!alive.isEmpty() && System.nanoTime() < deadline) {
+      pause();
+      alive = alive.stream().filter(RunnerProcess::isAlive).toList();
+    }
+    if (!alive.isEmpty()) {
+      List<Long> killed = RunnerProcess.destroyForcibly(alive);
+      throw new CoRunFailure(
+          "studio-runner (process-tree cleanup)",
+          "leg "
+              + leg
+              + ": processes observed before the kill were still alive "
+              + PIDS_GONE_WITHIN
+              + " after the run settled",
+          "surviving pids " + killed + " (now killed by the harness)");
+    }
+  }
+
+  /**
+   * Leaves the runner free for the next leg whatever happened: cancels an unsettled row, waits a
+   * bounded time for it, and kills any snapshotted pid still alive.
+   */
+  private void settleOrForce(UUID executionId, Collection<Long> pids) {
+    if (!"DONE".equals(ledgerState(executionId))) {
+      try {
+        studioService.cancelExecution(executionId, owner);
+      } catch (RuntimeException alreadyAsked) {
+        // 409: already cancelled or already settled — either way nothing more to ask for.
+      }
+      dispatcher.dispatchOnce();
+      long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+      while (System.nanoTime() < deadline && !"DONE".equals(ledgerState(executionId))) {
+        pause();
+      }
+    }
+    List<Long> killed = RunnerProcess.destroyForcibly(pids);
+    if (!killed.isEmpty()) {
+      System.err.println("[co-run] teardown killed surviving pids " + killed);
+    }
+  }
+
+  /** Waits until a control read for {@code executionId} is answered at or after {@code since}. */
+  private void awaitAControlReadAfter(UUID executionId, long since) {
+    long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+    while (System.nanoTime() < deadline) {
+      if (proxy.controlReadSince(executionId, since).isPresent()) {
+        return;
+      }
+      pauseFor(Duration.ofMillis(20));
+    }
+    throw new CoRunFailure(
+        "studio-runner (control poll)",
+        "no control read for a live run within 10 s",
+        "calls: " + describeCalls(executionId));
+  }
+
+  /** Blocks until the runner reports no slot in use, so the next dispatch cannot be a 429. */
+  private void awaitRunnerIdle() {
+    long deadline = System.nanoTime() + Duration.ofSeconds(60).toNanos();
+    RunnerProcess.Probe last = new RunnerProcess.Probe(-1, "never attempted");
+    while (System.nanoTime() < deadline) {
+      last = runner.probe("GET", "/ready", ENVIRONMENT.runnerServiceToken(), null);
+      if (last.status() == 200 && last.body().contains("\"inUse\":0")) {
+        return;
+      }
+      pause();
+    }
+    throw new CoRunFailure(
+        "studio-runner", "never became idle within 60 s", "GET /ready answered " + last);
+  }
+
+  /**
+   * The runner's {@code run.cancel_requested} source for this execution; exactly one is required.
+   */
+  private static String cancelSource(List<String> lines, UUID executionId) {
+    Pattern source = Pattern.compile("\"source\":\"([a-z-]+)\"");
+    List<String> sources = new ArrayList<>();
+    for (String line : linesAbout(lines, executionId)) {
+      if (line.contains("\"event\":\"run.cancel_requested\"")) {
+        Matcher matcher = source.matcher(line);
+        sources.add(matcher.find() ? matcher.group(1) : "?");
+      }
+    }
+    assertThat(sources)
+        .as("the runner must record exactly one cancel request for the run, whatever the signal")
+        .hasSize(1);
+    return sources.get(0);
+  }
+
+  private static List<String> linesAbout(List<String> lines, UUID executionId) {
+    String id = "\"executionId\":\"" + executionId + "\"";
+    return lines.stream().filter(line -> line.contains(id)).toList();
+  }
+
+  private String describeCalls(UUID executionId) {
+    Map<String, Integer> counts = new LinkedHashMap<>();
+    for (CallbackProxy.Call call : proxy.callsFor(executionId)) {
+      String key =
+          call.route()
+              + (call.reportKind() == null ? "" : ":" + call.reportKind())
+              + "→"
+              + call.status()
+              + (Boolean.TRUE.equals(call.cancelRequested()) ? "(cancel)" : "");
+      counts.merge(key, 1, Integer::sum);
+    }
+    return counts.toString();
+  }
+
+  private static String videoStatusFor(String evidenceState) {
+    return switch (String.valueOf(evidenceState)) {
+      case "PENDING" -> "PROCESSING";
+      case "STORED" -> "AVAILABLE";
+      case "FAILED" -> "FAILED";
+      case "UNAVAILABLE" -> "UNAVAILABLE";
+      default -> "(runner reported " + evidenceState + ")";
+    };
+  }
+
+  private List<Path> scratchEntries() throws IOException {
+    if (!Files.isDirectory(ENVIRONMENT.scratchDir())) {
+      return List.of();
+    }
+    try (var entries = Files.list(ENVIRONMENT.scratchDir())) {
+      return entries.toList();
+    }
+  }
+
+  private static JsonNode readTree(String body) throws IOException {
+    return MAPPER.readTree(body == null ? "{}" : body);
+  }
+
+  private static long millis(long nanos) {
+    return TimeUnit.NANOSECONDS.toMillis(nanos);
+  }
+
+  private String ledgerColumn(UUID executionId, String column) {
+    List<String> values =
+        jdbc.queryForList(
+            "SELECT " + column + "::text FROM studio_dispatch_ledger WHERE execution_id = ?",
+            String.class,
+            executionId);
+    return values.isEmpty() ? null : values.get(0);
+  }
+
+  private String historyColumn(UUID executionId, String column) {
+    List<String> values =
+        jdbc.queryForList(
+            "SELECT " + column + "::text FROM ui_test_executions WHERE id = ?",
+            String.class,
+            executionId);
+    return values.isEmpty() ? null : values.get(0);
+  }
+
+  /**
+   * Samples the runner's descendants every 50 ms until closed, so a browser that lived for less
+   * than a leg's own checks still counts as having existed.
+   */
+  private static final class PidSampler implements AutoCloseable {
+
+    private final Map<Long, RunnerProcess.Descendant> seen = new ConcurrentHashMap<>();
+    private final Thread thread;
+    private volatile boolean running = true;
+
+    private PidSampler() {
+      this.thread =
+          new Thread(
+              () -> {
+                while (running) {
+                  runner.descendants().forEach(d -> seen.putIfAbsent(d.pid(), d));
+                  try {
+                    Thread.sleep(50L);
+                  } catch (InterruptedException e) {
+                    return;
+                  }
+                }
+              },
+              "corun-pid-sampler");
+      this.thread.setDaemon(true);
+    }
+
+    static PidSampler start() {
+      PidSampler sampler = new PidSampler();
+      sampler.thread.start();
+      return sampler;
+    }
+
+    List<RunnerProcess.Descendant> browsers() {
+      return seen.values().stream().filter(RunnerProcess.Descendant::isBrowser).toList();
+    }
+
+    List<Long> allPids() {
+      return List.copyOf(seen.keySet());
+    }
+
+    @Override
+    public void close() {
+      running = false;
+      try {
+        thread.join(1_000L);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+    }
+  }
+
+  private String passingArtifact(String url, String gotoLine, String clickLine) throws IOException {
+    JsonNode click = MAPPER.readTree(artifact).path("steps").get(0).path("code");
+    com.fasterxml.jackson.databind.node.ObjectNode root = MAPPER.createObjectNode();
+    root.put("version", 1);
+    com.fasterxml.jackson.databind.node.ArrayNode steps = root.putArray("steps");
+    steps
+        .addObject()
+        .put("stepIndex", 0)
+        .put("originalText", gotoLine)
+        .put("code", "await page.goto('" + url + "');");
+    steps
+        .addObject()
+        .put("stepIndex", 1)
+        .put("originalText", clickLine)
+        .put("code", click.asText());
+    return root.toString();
+  }
+
+  /** Waits until the execution is terminal AND its ledger row is {@code DONE}, or 90 s pass. */
+  private ExecutionSnapshotDto awaitSettled(UUID executionId) {
+    Set<String> terminal = Set.of("PASSED", "FAILED", "ERROR");
+    long deadline = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+    ExecutionSnapshotDto snapshot = studioService.findExecutionById(executionId, owner);
+    while (System.nanoTime() < deadline) {
+      snapshot = studioService.findExecutionById(executionId, owner);
+      if (terminal.contains(snapshot.status()) && "DONE".equals(ledgerState(executionId))) {
+        return snapshot;
+      }
+      pause();
+    }
+    return snapshot;
+  }
+
+  private static String describeSteps(ExecutionSnapshotDto snapshot) {
+    if (snapshot.stepResults() == null || snapshot.stepResults().isEmpty()) {
+      return "(none)";
+    }
+    return snapshot.stepResults().stream()
+        .map(step -> step.stepIndex() + ":" + step.status() + " " + step.message())
+        .toList()
+        .toString();
+  }
+
   // ── helpers ────────────────────────────────────────────────────────────
 
   /**
@@ -567,7 +1563,8 @@ class StudioCoRunIT {
     if (lines.isEmpty()) {
       return "    (the runner recorded nothing at all in this window)";
     }
-    return String.join("\n", lines.stream().map(line -> "    " + line).toList());
+    List<String> shown = lines.size() > 80 ? lines.subList(lines.size() - 80, lines.size()) : lines;
+    return String.join("\n", shown.stream().map(line -> "    " + line).toList());
   }
 
   private ExecutionSnapshotDto awaitExecutionPastPending(UUID executionId) {
@@ -594,8 +1591,15 @@ class StudioCoRunIT {
   }
 
   private static void pause() {
+    pauseFor(Duration.ofMillis(100));
+  }
+
+  /**
+   * A bounded wait. Every caller either polls a condition under a deadline or observes a window.
+   */
+  private static void pauseFor(Duration duration) {
     try {
-      Thread.sleep(100L);
+      Thread.sleep(duration.toMillis());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new IllegalStateException("interrupted while waiting for the co-run", e);

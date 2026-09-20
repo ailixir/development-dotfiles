@@ -28,7 +28,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
+        # No prometheus here. This is what the API pods serve, on the port the public Ingress routes
+        # to, and SecurityConfig permits /actuator/** without a session. The scrape endpoint is a
+        # worker-only exposure (application-worker.yml), on a ClusterIP Service with no Ingress.
+        include: health,info
       base-path: /actuator
   endpoint:
     health:
@@ -202,7 +205,6 @@ studio:
     run-deadline: ${STUDIO_RUN_DEADLINE:600s}
     admission-timeout: ${STUDIO_ADMISSION_TIMEOUT:10s}
     evidence-retention: ${STUDIO_EVIDENCE_RETENTION:30d}
-    runner-base-url: ${STUDIO_RUNNER_BASE_URL:http://put-checks-studio-runner:8090}
     # Deployment configuration, never job-supplied (§8.4, §8.5).
     callback-base-url: ${STUDIO_CALLBACK_BASE_URL:http://put-checks-api:8080}
     # Where the recordings live (§6.2). Deployment configuration, and never a response value:
@@ -211,6 +213,10 @@ studio:
     video-store:
       bucket: ${STUDIO_EVIDENCE_BUCKET:put-checks-studio-evidence}
       endpoint: ${STUDIO_EVIDENCE_ENDPOINT:https://sonic.invalid}
+      # `none` until a real object-store client exists (ED-03): recordings are then reported
+      # UNAVAILABLE rather than offered on a route that can only 404. `in-memory` is the test fake,
+      # set by the Gradle test task (build.gradle.kts), never by a deployment.
+      provider: ${STUDIO_EVIDENCE_PROVIDER:none}
     quotas:
       per-csi: ${STUDIO_QUOTA_PER_CSI:20}
       global: ${STUDIO_QUOTA_GLOBAL:200}
@@ -218,6 +224,22 @@ studio:
     recovery:
       # Both reapers and finalization reconciliation, worker profile only (§5.4).
       poll-interval-ms: ${STUDIO_RECOVERY_POLL_MS:5000}
+    # How long the running reaper waits before closing a cancel the runner never finished (Studio
+    # v1 WP16, ADR-002 §29). Each value mirrors a runner bound and reads the runner's OWN env name,
+    # so rendering the runner's values into this process configures both sides from one fact. The
+    # margin is derived as poll + 2 x report-timeout + stop-grace + report-timeout + evidence-window
+    # + delivery-window + slack (92s with these values) unless STUDIO_CANCEL_MARGIN is set, and a
+    # margin shorter than that worst case is refused at startup: it would close rows under a live
+    # runner and refuse its FINAL. Bare numbers are milliseconds.
+    cancel:
+      # The runner's CONTROL_POLL_INTERVAL_MS, a constant in runCoordinator.ts, not a setting.
+      control-poll-interval: 2s
+      report-timeout: ${STUDIO_RUNNER_ADMISSION_TIMEOUT_MS:10000}
+      stop-grace: ${STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS:5000}
+      evidence-window: ${STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS:15000}
+      delivery-window: ${STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS:30000}
+      slack: ${STUDIO_CANCEL_MARGIN_SLACK:10s}
+      margin: ${STUDIO_CANCEL_MARGIN:}
     dispatcher:
       enabled: ${STUDIO_DISPATCHER_ENABLED:false}
       threads: ${STUDIO_DISPATCHER_THREADS:4}
@@ -303,16 +325,21 @@ studio:
     # It buys a truthful authoring display, NOT a recovered capability: readiness never reads
     # compile_status, so a stranded row blocks nothing and POST /execute is accepted before and
     # after a sweep.
-    sweep:
-      enabled: ${STUDIO_COMPILE_SWEEP_ENABLED:true}
+    #
+    # Studio v1 WP9 (decision D11): sweep-to-STALE IS the v1 recovery for a compile whose replica
+    # died, so an author learns of it within threshold + one interval. Both were shortened for that
+    # (600s -> 300s, 60s -> 15s). The frontend's COMPILING watch window is derived from these two
+    # defaults and compilePollBounds.test.ts fails if they drift apart.
+    abandonment:
+      enabled: ${STUDIO_COMPILE_ABANDONMENT_ENABLED:true}
       # Must strictly exceed pipeline.attempt-budget, validated at startup, so a healthy in-flight
       # compile can never be swept out from under itself.
-      threshold: ${STUDIO_COMPILE_SWEEP_THRESHOLD:600s}
+      threshold: ${STUDIO_COMPILE_ABANDONMENT_THRESHOLD:300s}
       # The run stops at the cap and the next scheduled run continues; never an unbounded UPDATE.
-      batch-size: ${STUDIO_COMPILE_SWEEP_BATCH:200}
+      batch-size: ${STUDIO_COMPILE_ABANDONMENT_BATCH:200}
       # One key, read by both the schedule annotation and the bound validation — not two
       # representations of one value (§8.5).
-      interval-ms: ${STUDIO_COMPILE_SWEEP_INTERVAL_MS:60000}
+      interval-ms: ${STUDIO_COMPILE_ABANDONMENT_INTERVAL_MS:15000}
     # Enforced before beginCompile: over-limit is a 400 and no compile state changes (AC-6).
     authoring:
       # Must never be looser than the runner's DEFAULT_BOUNDS.maxSteps, or a draft could be
@@ -329,7 +356,9 @@ studio:
   # The studio-runner Service. The base URL is deployment configuration and never job- or
   # user-supplied (§8.4, §8.5). Empty by default: without it the pipeline reports
   # VALIDATOR_UNAVAILABLE and the draft stays retryable, rather than publishing an unvalidated
-  # candidate.
+  # candidate. Both runner routes (POST /v1/validate and the worker's POST /v1/runs) read this
+  # one block and present the same bearer; without base-url or service-identity-token the
+  # dispatcher sends nothing and closes the execution DISPATCH_FAILED (DEF-05).
   runner:
     base-url: ${STUDIO_RUNNER_BASE_URL:}
     service-identity-token: ${STUDIO_RUNNER_SERVICE_TOKEN:}

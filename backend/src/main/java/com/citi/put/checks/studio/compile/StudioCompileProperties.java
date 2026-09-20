@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
@@ -25,15 +26,32 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * @param authoring limits enforced before a compile request is begun
  * @param diagnostics caps applied to validator output before it is persisted
  * @param repair the bounded repair loop (story 10.9, architecture &sect;4.3)
- * @param sweep the abandoned-compile sweep (story 10.9, architecture &sect;4.7)
+ * @param abandonment the abandoned-compile sweep (story 10.9, architecture &sect;4.7; bound under
+ *     {@code studio.compile.abandonment} since Studio v1 WP9)
  */
 @ConfigurationProperties(prefix = "studio.compile")
 public record StudioCompileProperties(
     @DefaultValue Pipeline pipeline,
+    @DefaultValue Aggregate aggregate,
     @DefaultValue Authoring authoring,
     @DefaultValue Diagnostics diagnostics,
     @DefaultValue Repair repair,
-    @DefaultValue Sweep sweep) {
+    @DefaultValue Abandonment abandonment) {
+
+  @ConstructorBinding
+  public StudioCompileProperties {}
+
+  /**
+   * Compatibility constructor for pre-context callers; aggregate bounds retain shipped defaults.
+   */
+  public StudioCompileProperties(
+      Pipeline pipeline,
+      Authoring authoring,
+      Diagnostics diagnostics,
+      Repair repair,
+      Abandonment abandonment) {
+    this(pipeline, new Aggregate(12, 786432), authoring, diagnostics, repair, abandonment);
+  }
 
   /**
    * Bounded compile work (AC-17, AC-18).
@@ -50,6 +68,10 @@ public record StudioCompileProperties(
    */
   public record Pipeline(
       @DefaultValue("4") int concurrency, @DefaultValue("240s") Duration attemptBudget) {}
+
+  /** Whole-request gateway transport accounting across proposals, repairs and retries. */
+  public record Aggregate(
+      @DefaultValue("12") int maxCalls, @DefaultValue("786432") long maxBytes) {}
 
   /**
    * The bounded repair loop (story 10.9, AC-10a; architecture &sect;4.3 "a maximum of two repair
@@ -71,6 +93,12 @@ public record StudioCompileProperties(
    * never reads {@code compile_status}, a row stranded in {@code COMPILING} blocks nothing — the
    * confirmed revision still executes and {@code POST /execute} is still accepted.
    *
+   * <p>Studio v1 WP9 (decision D11) accepts sweep-to-{@code STALE} as the v1 recovery for a compile
+   * whose replica died, so the time an author waits to learn that is this record's threshold plus
+   * at most one interval. The defaults were shortened for that reason: 300s is the smallest round
+   * value strictly above the 240s attempt budget the startup check requires, and a 15s interval
+   * keeps the added wait small against it while still being one bounded statement per replica.
+   *
    * @param enabled whether the schedule runs; the statement itself is always available
    * @param threshold how long a row may sit in {@code COMPILING} before it is swept; validated at
    *     startup to exceed {@code pipeline.attempt-budget}, so a healthy in-flight compile can never
@@ -80,11 +108,11 @@ public record StudioCompileProperties(
    * @param intervalMs milliseconds between runs, as a plain number so the schedule and this record
    *     read one configuration key rather than two representations of one value
    */
-  public record Sweep(
+  public record Abandonment(
       @DefaultValue("true") boolean enabled,
-      @DefaultValue("600s") Duration threshold,
+      @DefaultValue("300s") Duration threshold,
       @DefaultValue("200") int batchSize,
-      @DefaultValue("60000") long intervalMs) {
+      @DefaultValue("15000") long intervalMs) {
 
     /**
      * The interval as a duration.
@@ -149,6 +177,8 @@ public record StudioCompileProperties(
   public void validate(StudioGatewayProperties gateway, StudioRunnerProperties runner) {
     List<String> problems = new ArrayList<>();
     requirePositive(problems, "pipeline.concurrency", pipeline().concurrency());
+    requirePositive(problems, "aggregate.max-calls", aggregate().maxCalls());
+    requirePositive(problems, "aggregate.max-bytes", aggregate().maxBytes());
     requirePositive(problems, "authoring.max-steps", authoring().maxSteps());
     requirePositive(problems, "authoring.max-line-chars", authoring().maxLineChars());
     requirePositive(problems, "authoring.max-source-bytes", authoring().maxSourceBytes());
@@ -173,10 +203,11 @@ public record StudioCompileProperties(
     }
 
     requireNonNegative(problems, "repair.max-attempts", repair().maxAttempts());
-    requirePositive(problems, "sweep.batch-size", sweep().batchSize());
-    requirePositive(problems, "sweep.interval-ms", sweep().intervalMs());
-    long thresholdMs = sweep().threshold() == null ? 0L : sweep().threshold().toMillis();
-    requirePositive(problems, "sweep.threshold", thresholdMs);
+    requirePositive(problems, "abandonment.batch-size", abandonment().batchSize());
+    requirePositive(problems, "abandonment.interval-ms", abandonment().intervalMs());
+    long thresholdMs =
+        abandonment().threshold() == null ? 0L : abandonment().threshold().toMillis();
+    requirePositive(problems, "abandonment.threshold", thresholdMs);
 
     long validateTimeoutMs =
         runner == null || runner.validateTimeout() == null
@@ -201,7 +232,7 @@ public record StudioCompileProperties(
     }
     if (budgetMs > 0 && thresholdMs > 0 && thresholdMs <= budgetMs) {
       problems.add(
-          "studio.compile.sweep.threshold ("
+          "studio.compile.abandonment.threshold ("
               + thresholdMs
               + "ms) must be strictly greater than studio.compile.pipeline.attempt-budget ("
               + budgetMs

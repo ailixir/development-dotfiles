@@ -8,6 +8,7 @@ import com.citi.put.checks.studio.compile.CompileRequest;
 import com.citi.put.checks.studio.compile.CompileStateService;
 import com.citi.put.checks.studio.compile.PublishResult;
 import com.citi.put.checks.studio.dto.UITestRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Map;
@@ -46,6 +47,7 @@ class CompileStateServiceTest {
   private static final String OWNER = "compile-owner@citi.com";
   private static final String CSI_ID = "60401";
   private static final String STALE_CANDIDATE = "STALE_CANDIDATE";
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   @Autowired private CompileStateService compileStateService;
   @Autowired private StudioService studioService;
@@ -109,6 +111,39 @@ class CompileStateServiceTest {
 
     assertThat(column("current_candidate_revision_id", UUID.class)).isEqualTo(currentCandidate);
     assertThat(revisionCount()).isEqualTo(1);
+  }
+
+  @Test
+  void derivationVersionParticipatesInIdentityWhileCompleteIdentityStillDeduplicates() {
+    CandidateRevision base = candidate("hash-versioned");
+    CandidateRevision versionOne = versioned(base, "1.0.0");
+    CandidateRevision versionTwo = versioned(base, "2.0.0");
+
+    compileStateService.publishCandidate(
+        testId, compileStateService.beginCompile(testId), versionOne);
+    compileStateService.publishCandidate(
+        testId, compileStateService.beginCompile(testId), versionTwo);
+    assertThat(revisionCount()).isEqualTo(2);
+
+    compileStateService.publishCandidate(
+        testId, compileStateService.beginCompile(testId), versionTwo);
+    assertThat(revisionCount()).isEqualTo(2);
+  }
+
+  private static CandidateRevision versioned(CandidateRevision base, String version) {
+    return new CandidateRevision(
+        base.configurationRevision(),
+        base.source(),
+        base.sourceHash(),
+        base.artifact(),
+        base.artifactHash(),
+        base.artifactSchemaVersion(),
+        base.configuration(),
+        base.references(),
+        "{\"intentDerivationVersion\":\"" + version + "\"}",
+        base.createdBy(),
+        "{\"schemaVersion\":1,\"steps\":[]}",
+        version);
   }
 
   @Test
@@ -199,6 +234,35 @@ class CompileStateServiceTest {
 
     assertThat(compileStatus()).isEqualTo("AWAITING_CONFIRMATION");
     assertThat(column("confirmed_revision_id", UUID.class)).isNull();
+  }
+
+  @Test
+  void expectedIntentSnapshotIsPersistedWithTheImmutableCandidate() throws Exception {
+    String expected =
+        "{\"schemaVersion\":1,\"steps\":[{\"stepIndex\":0,\"stepId\":\"11111111-1111-4111-8111-111111111111\",\"operations\":[{\"op\":\"goto\",\"url\":{\"kind\":\"literal\",\"value\":\"https://example.test/\"}}]}]}";
+    CompileRequest request = compileStateService.beginCompile(testId);
+    CandidateRevision base = candidate("hash-expected-intent");
+    CandidateRevision candidate =
+        new CandidateRevision(
+            base.configurationRevision(),
+            base.source(),
+            base.sourceHash(),
+            base.artifact(),
+            base.artifactHash(),
+            base.artifactSchemaVersion(),
+            base.configuration(),
+            base.references(),
+            base.provenance(),
+            base.createdBy(),
+            expected);
+    assertThat(compileStateService.publishCandidate(testId, request, candidate))
+        .isEqualTo(PublishResult.PUBLISHED);
+    String stored =
+        jdbc.queryForObject(
+            "SELECT expected_intent::text FROM ui_test_revisions WHERE test_id = ?",
+            String.class,
+            testId);
+    assertThat(MAPPER.readTree(stored)).isEqualTo(MAPPER.readTree(expected));
   }
 
   @Test

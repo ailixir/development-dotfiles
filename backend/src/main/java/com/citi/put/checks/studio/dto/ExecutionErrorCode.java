@@ -20,12 +20,13 @@ import java.util.Set;
  * consequence: {@code DISPATCH_FAILED} was available and is wrong, because it says the send failed
  * when in fact the send never happened.
  *
- * <p><b>Known contract divergence, escalated rather than fixed here.</b> {@code
- * components.schemas.ExecutionErrorCode} in {@code docs/specs/studio/openapi.yaml} still enumerates
- * only the original six values. Widening an enum on the public surface is ADR-002 §12 Class B/C —
- * architect first, never a story's call, and "loosening is never a story's call" applies even when
- * the widening is the API's own vocabulary. {@code ExecutionErrorCodeContractTest} is left failing
- * on purpose so the divergence is machine-visible rather than a comment somebody deletes.
+ * <p>{@code components.schemas.ExecutionErrorCode} in {@code docs/specs/studio/openapi.yaml}
+ * declares the same set; {@code ErrorCodeVocabularyTest} compares it, this class and the V20 CHECK.
+ *
+ * <p><b>The one value a runner also names.</b> {@link #CANCELLED} joins {@link #TIMEOUT} as a value
+ * the runner's open {@code outcome.errorCode} can carry. As with {@code TIMEOUT} the API assigns
+ * its own copy rather than copying the runner's, and only where it can name the cause: a cancel
+ * recorded on the ledger (ADR-002 §29).
  */
 public final class ExecutionErrorCode {
 
@@ -42,6 +43,15 @@ public final class ExecutionErrorCode {
   /** A declared reference that preflighted at acceptance no longer resolves (AC-13a, §5.1.3). */
   public static final String REFERENCE_UNAVAILABLE = "REFERENCE_UNAVAILABLE";
 
+  /**
+   * A principal asked to cancel the execution and it ended because of that (Studio v1 WP4, ADR-002
+   * §29). Assigned by the cancel route for queued work, by the admission refusal for a cancel that
+   * landed before admission, by the running reaper for a cancel the runner never finished, and by
+   * the report projection — only when a cancel was actually requested — for the runner's own {@code
+   * CANCELLED} outcome. A runner cannot obtain it by naming it.
+   */
+  public static final String CANCELLED = "CANCELLED";
+
   private static final Set<String> VALUES =
       Set.of(
           TIMEOUT,
@@ -51,7 +61,8 @@ public final class ExecutionErrorCode {
           STALE,
           DISPATCH_DISABLED,
           AUTHORIZATION_REVOKED,
-          REFERENCE_UNAVAILABLE);
+          REFERENCE_UNAVAILABLE,
+          CANCELLED);
 
   /** Codes the reapers own. A dispatcher must never emit one of these (AC-13a disjointness). */
   private static final Set<String> REAPER_ASSIGNED = Set.of(START_TIMEOUT, STALE, TIMEOUT);

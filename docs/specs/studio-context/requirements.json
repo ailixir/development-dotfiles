@@ -1,0 +1,666 @@
+{
+  "storyId": "STUDIO-CONTEXT",
+  "gatheredAt": "2026-09-18T22:12:38.743081+00:00",
+  "source": "user",
+  "gatheredBy": "@pm",
+  "elicitationVersion": "2.0",
+  "status": "Draft requirements for review/specification; no implementation authorization implied",
+  "pipelineOutputDirectory": "docs/specs/studio-context",
+  "elicitation": {
+    "method": "User request, existing PRD/architecture and answered structured scope preference.",
+    "pendingPreference": null,
+    "unansweredHandling": "Preference answered; live inspection included in specification scope, separate from ordinary compilation/execution.",
+    "userAnswer": "Both user context and live page inspection (Recommended)"
+  },
+  "sources": [
+    {
+      "id": "USER-1",
+      "reference": "User request, 2026-09-18",
+      "quote": "include the context for each different step, having different context step level and global"
+    },
+    {
+      "id": "USER-2",
+      "reference": "User request, 2026-09-18",
+      "quote": "use some specific text on the search"
+    },
+    {
+      "id": "USER-3",
+      "reference": "User request, 2026-09-18",
+      "quote": "generate the right playwright with the optimized code for that page"
+    },
+    {
+      "id": "USER-4",
+      "reference": "User request, 2026-09-18",
+      "quote": "Invoke spec pipeline to review the plain english to playwright mechanism is smart enought"
+    },
+    {
+      "id": "PRD-1",
+      "reference": "PRD.md §5.2",
+      "summary": "Authoring-time compile, readable summaries, immutable confirmation, no runtime AI, Chromium single-page scope, vault references."
+    },
+    {
+      "id": "ARCH-1",
+      "reference": "docs/architecture/studio-execution.md §§4,8,9",
+      "summary": "Revision races, bounded two-repair policy, allowed language, contextual cache identity, CSI/vault/origin security and canonical contracts."
+    },
+    {
+      "id": "REPO-1",
+      "reference": "AGENTS.md",
+      "summary": "React/TypeScript/MUI, centralized API, MSW-first development, Java 21 backend and required tests."
+    },
+    {
+      "id": "USER-5",
+      "reference": "User scope selection, 2026-09-18",
+      "quote": "Both user context and live page inspection (Recommended)"
+    }
+  ],
+  "functional": [
+    {
+      "id": "FR-1",
+      "description": "Persist global authoring context and context specific to each step; carry both through save, load, compile and review without losing their scope. Compile the current saved editor revision rather than an older stored draft.",
+      "priority": "P0",
+      "rationale": "User explicitly requests global and different step-level context.",
+      "acceptance": [
+        "AC-1",
+        "AC-2"
+      ],
+      "source": [
+        "USER-1"
+      ]
+    },
+    {
+      "id": "FR-2",
+      "description": "Resolve explicit step intent and values against scoped context deterministically; identify conflicts or missing information instead of silently substituting a different action, target or value.",
+      "priority": "P0",
+      "rationale": "A search step must use the specific text requested by the user.",
+      "acceptance": [
+        "AC-3",
+        "AC-4"
+      ],
+      "source": [
+        "USER-2"
+      ]
+    },
+    {
+      "id": "FR-3",
+      "description": "Generate page-specific Playwright using available target evidence and clearly distinguish observed page facts, user-supplied hints and unverified assumptions. Bind evidence to the intended step, route, environment and state preconditions; distinguish observed state from predicted effects of earlier actions.",
+      "priority": "P0",
+      "rationale": "Correct code for the actual page requires evidence, not merely plausible selectors.",
+      "acceptance": [
+        "AC-5",
+        "AC-6"
+      ],
+      "source": [
+        "USER-3"
+      ]
+    },
+    {
+      "id": "FR-4",
+      "description": "Retain context identity as steps are edited, inserted, removed, duplicated or reordered; use the correct earlier-step state while compiling each step.",
+      "priority": "P0",
+      "rationale": "Different contexts must not attach to the wrong step or leak into later unrelated steps.",
+      "acceptance": [
+        "AC-7"
+      ],
+      "source": [
+        "USER-1"
+      ]
+    },
+    {
+      "id": "FR-5",
+      "description": "Bind every execution-affecting context change and target-evidence selection to the immutable compiled revision; require fresh review and confirmation after relevant edits.",
+      "priority": "P0",
+      "rationale": "Existing trust model confirms exact instructions/source/configuration.",
+      "acceptance": [
+        "AC-8",
+        "AC-9"
+      ],
+      "source": [
+        "PRD-1"
+      ]
+    },
+    {
+      "id": "FR-6",
+      "description": "Show readable per-step action, target, literal or variable reference, assertions and unresolved diagnostics together with context scope before confirmation.",
+      "priority": "P1",
+      "rationale": "Users need to verify that generated actions reflect their actual checklist.",
+      "acceptance": [
+        "AC-10"
+      ],
+      "source": [
+        "PRD-1"
+      ]
+    },
+    {
+      "id": "FR-7",
+      "description": "Preserve exact user-provided nonsecret text and opaque variable/secret references throughout authoring, prompt assembly, generated code and execution. Independently compare explicit quoted literals or typed input slots to validated action arguments; ambiguous unquoted prose requires intent clarification/review rather than a claim of deterministic extraction.",
+      "priority": "P0",
+      "rationale": "Specific search text must survive quotes, Unicode and punctuation; secrets remain references.",
+      "acceptance": [
+        "AC-11",
+        "AC-12"
+      ],
+      "source": [
+        "USER-2"
+      ]
+    },
+    {
+      "id": "FR-8",
+      "description": "Generate Playwright within the approved language policy, choosing evidence-supported resilient locators and condition-based waits; preserve distinct checklist steps and their reporting.",
+      "priority": "P0",
+      "rationale": "Optimized code must be reliable for the page without weakening validation or step traceability.",
+      "acceptance": [
+        "AC-13",
+        "AC-14"
+      ],
+      "source": [
+        "USER-3"
+      ]
+    },
+    {
+      "id": "FR-9",
+      "description": "Expose actionable per-step clarification and validation diagnostics when a target, value, state transition or supported operation cannot be established; use only bounded authoring-time repair.",
+      "priority": "P0",
+      "rationale": "Ambiguous instructions must not produce apparently trusted but guessed behavior.",
+      "acceptance": [
+        "AC-15",
+        "AC-16"
+      ],
+      "source": [
+        "ARCH-1"
+      ]
+    },
+    {
+      "id": "FR-10",
+      "description": "Evaluate translation quality against a representative page-backed corpus including exact search values, duplicate controls, context conflicts, changing page state and stale context.",
+      "priority": "P0",
+      "rationale": "Review whether the mechanism is smart enough with behavioral evidence rather than syntax acceptance alone.",
+      "acceptance": [
+        "AC-17"
+      ],
+      "source": [
+        "USER-4"
+      ]
+    },
+    {
+      "id": "FR-11",
+      "description": "Provide explicit, bounded authoring-time live page inspection alongside supplied context: observe current step state, propose and validate any requested learning action, verify coverage by the explicit user-approved learning scope, pausing for clarification or new approval only when needed, act once and observe the resulting state. Never silently replay prior steps or treat predicted states as observations.",
+      "priority": "P0",
+      "rationale": "User selected both supplied context and live page inspection.",
+      "acceptance": [
+        "AC-18",
+        "AC-19",
+        "AC-20"
+      ],
+      "source": [
+        "USER-5",
+        "ARCH-1"
+      ]
+    }
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "AC-1",
+      "requirement": "FR-1",
+      "givenWhenThen": "Given global context describes the application and a step has local target hints, when a draft is saved and reopened, then both scopes and original values are preserved and supplied to compilation. An unsaved editor change is saved with revision control before compilation, or compilation is blocked with an explicit save requirement.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-2",
+      "requirement": "FR-1",
+      "givenWhenThen": "Given a legacy draft contains no context, when it is loaded, then empty context is valid and its source steps remain unchanged.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-3",
+      "requirement": "FR-2",
+      "givenWhenThen": "Given a global default search term and a step explicitly says Search for \"ACME 42\", when compiled, then the proposed action uses exactly ACME 42 and exposes the resolution in review.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-4",
+      "requirement": "FR-2",
+      "givenWhenThen": "Given conflicting local target hints that cannot be resolved by explicit intent and page evidence, when compiled, then the affected step receives a diagnostic and cannot be confirmed as ready.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-5",
+      "requirement": "FR-3",
+      "givenWhenThen": "Given supplied page evidence identifies an accessible searchbox named Customer Search and an unrelated global Search control, when the user requests a customer search, then generated code targets the Customer Search control and records the supporting evidence.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-6",
+      "requirement": "FR-3",
+      "givenWhenThen": "Given page evidence is absent, stale or belongs to a different page/environment, when compiling, then the system displays its limitation and does not represent an inferred locator as verified. A landing-page snapshot is not reused as proof of a later modal, authenticated page or search-results state; those effects are predictions until separately observed.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-7",
+      "requirement": "FR-4",
+      "givenWhenThen": "Given two steps have distinct contexts, when a preceding step is inserted or the two steps are reordered, then each retains its own context and dependent page-state assumptions are recomputed; duplication does not reuse an identity.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-8",
+      "requirement": "FR-5",
+      "givenWhenThen": "Given a confirmed revision, when global context, local context, a referenced nonsecret value or selected page evidence changes, then the candidate becomes stale and execution requires a matching newly confirmed revision.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-9",
+      "requirement": "FR-5",
+      "givenWhenThen": "Given compile A starts before a context edit and compile B starts afterward, when A finishes after B, then A cannot replace B or make the edited draft ready.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-10",
+      "requirement": "FR-6",
+      "givenWhenThen": "Given a generated candidate, when reviewing it, then each step shows the intended operation, target, input or safe reference, relevant context origin and assertion, with expandable TypeScript and unresolved diagnostics.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-11",
+      "requirement": "FR-7",
+      "givenWhenThen": "Given literal search data contains quotes, backslashes, newlines, Unicode and punctuation, when compiled and executed against a controlled search page, then the resulting input value exactly equals the requested string and cannot become executable source. Include explicit empty input; verification compares the actual decoded action argument to the explicit literal/typed value, independently of the generating LLM.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-12",
+      "requirement": "FR-7",
+      "givenWhenThen": "Given an authorized secret reference is used in a permitted input action, when compiling and reviewing, then the prompt/artifact/logs contain only the reference; unresolved or prohibited references produce diagnostics.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-13",
+      "requirement": "FR-8",
+      "givenWhenThen": "Given a page exposes stable accessible names or approved test IDs, when generating a locator, then the candidate uses the supported evidence-backed locator and does not add arbitrary sleeps, broad first-match selection or selector fallbacks that can target a different control.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-14",
+      "requirement": "FR-8",
+      "givenWhenThen": "Given a checklist step naturally requires more than one approved action, when compiling, then it either produces policy-valid statements under that same reported step or a clear unsupported-operation diagnostic; it never silently drops required work.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-15",
+      "requirement": "FR-9",
+      "givenWhenThen": "Given two equally plausible visible search controls and no disambiguating scope, when compiling, then the system requests target clarification or emits a per-step unresolved diagnostic instead of silently selecting the first.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-16",
+      "requirement": "FR-9",
+      "givenWhenThen": "Given a candidate fails validation, when repair is attempted, then retries stay within the existing two-repair limit, include bounded redacted diagnostics, preserve original intent/context and do not run at execution time.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-17",
+      "requirement": "FR-10",
+      "givenWhenThen": "Given the reviewed compiler and a fixed corpus, when evaluated, then results separately report syntax validity, literal fidelity, locator correctness, task success, ambiguity handling, latency and token/input size; execution success alone is not reported as proof of intent fidelity.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-18",
+      "requirement": "FR-11",
+      "givenWhenThen": "Given an authorized Learn page session on a permitted application state, when the user requests inspection, then bounded sanitized observed evidence records CSI, environment, route, state, step, capture time and completeness; a later state is not labeled observed until captured.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-19",
+      "requirement": "FR-11",
+      "givenWhenThen": "Given learning the next step needs a browser action, when the service proposes it, then policy, AST and intent validation run and the action must match the displayed draft revision and action scope authorized by Start learning; execute each unambiguous matching action once then observe, pausing for changed/unclear intent or state, and never automatically replay an ambiguous attempt.",
+      "status": "Proposed for implementation acceptance"
+    },
+    {
+      "id": "AC-20",
+      "requirement": "FR-11",
+      "givenWhenThen": "Given a learning session times out, is cancelled, exceeds bounds, loses authentication, or cannot sanitize/observe the requested state, when it ends, then the browser/session is closed, reusable credentials remain outside persisted evidence/model context, partial or missing coverage is explicit, affected steps cannot claim verification, and ordinary Compile and Run do not start learning implicitly.",
+      "status": "Proposed for implementation acceptance"
+    }
+  ],
+  "nonFunctional": [
+    {
+      "id": "NFR-1",
+      "category": "reliability",
+      "description": "Measure semantic translation correctness separately from JSON/AST validity and distinguish uncertainty from successful compilation.",
+      "metric": "All critical literal/context-isolation/revision-race cases pass; publish task-success and clarification rates on a pinned corpus. No unsupported aggregate success target is assumed.",
+      "source": [
+        "USER-4",
+        "PRD-1"
+      ]
+    },
+    {
+      "id": "NFR-2",
+      "category": "security",
+      "description": "Apply existing CSI, destination, secret-reference, redaction and allowed-language boundaries to all added context and page evidence; treat page text as untrusted data.",
+      "metric": "No resolved secret in gateway payload/artifact/diagnostics; cross-CSI evidence access denied; malicious context cannot introduce prohibited operations in fixture tests.",
+      "source": [
+        "ARCH-1"
+      ]
+    },
+    {
+      "id": "NFR-3",
+      "category": "performance",
+      "description": "Bound context bytes, step count, evidence size, compile concurrency and repair attempts; measure added context cost before setting production budgets.",
+      "metric": "Explicit configured bounds reject oversized input with diagnostics; repairs <=2; benchmark p50/p95 latency and input/output size against current baseline. Numeric context caps and latency SLO require measurement.",
+      "source": [
+        "ARCH-1",
+        "USER-3"
+      ]
+    },
+    {
+      "id": "NFR-4",
+      "category": "usability",
+      "description": "Keep context optional for existing drafts and make resolution, conflicts and evidence limitations understandable to users without Playwright knowledge.",
+      "metric": "Representative nontechnical reviewer can identify target, literal and context origin in AC-10; legacy load/save retains instructions in AC-2.",
+      "source": [
+        "PRD-1",
+        "USER-1"
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "CON-1",
+      "type": "business",
+      "description": "This task delivers review, specification and implementation planning, without modifying product behavior or starting an implementation cycle.",
+      "impact": "Identify gaps and proposals; create no application changes.",
+      "source": [
+        "USER-4"
+      ]
+    },
+    {
+      "id": "CON-2",
+      "type": "technical",
+      "description": "Preserve authoring-time generation and immutable confirmation; confirmed execution must remain independent of the LLM and must never silently regenerate code.",
+      "impact": "Context affects compile/revision identity; runtime remains fixed-artifact execution.",
+      "source": [
+        "PRD-1",
+        "ARCH-1"
+      ]
+    },
+    {
+      "id": "CON-3",
+      "type": "technical",
+      "description": "Existing V1 architecture states no browser starts during compilation and application DOM is not an input; user-requested authoring-time live inspection is an explicit scope extension requiring an architecture amendment.",
+      "impact": "Supplied-context compilation remains functional on its own. Included explicit Learn page inspection is a separately bounded authoring stage; ordinary compilation starts no browser and execution calls no LLM.",
+      "source": [
+        "ARCH-1"
+      ]
+    },
+    {
+      "id": "CON-4",
+      "type": "technical",
+      "description": "Retain Chromium single-page V1 and approved restricted TypeScript/executor policy; screenshots, popups, iframes, runtime self-healing and scheduling remain outside this review extension unless explicitly agreed.",
+      "impact": "Page optimization cannot assume arbitrary Playwright capabilities.",
+      "source": [
+        "PRD-1",
+        "ARCH-1"
+      ]
+    },
+    {
+      "id": "CON-5",
+      "type": "technical",
+      "description": "Use existing frontend/backend architecture, centralized API and MSW development with versioned API/artifact contracts and forward-only data migrations.",
+      "impact": "Plan coordinated frontend, backend, mock and runner changes rather than an isolated prompt patch.",
+      "source": [
+        "REPO-1",
+        "ARCH-1"
+      ]
+    },
+    {
+      "id": "CON-6",
+      "type": "business",
+      "description": "Preserve the current uncommitted product work and distinguish locally observed implementation from planned architecture.",
+      "impact": "Review the working tree as evidence without claiming planned protections already exist.",
+      "source": [
+        "USER-4"
+      ]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1",
+      "description": "Global means test-level authoring context, inherited by all steps, rather than organization-wide or cross-CSI memory.",
+      "risk": "medium",
+      "risk_if_wrong": "A reusable project-level context library adds lifecycle and authorization scope.",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-2",
+      "description": "Recommended resolution gives explicit action/value intent precedence over context defaults; step-local context specializes global context, while policy constraints remain authoritative. Unresolved conflicts produce diagnostics.",
+      "risk": "medium",
+      "risk_if_wrong": "Wrong precedence can silently change an action or typed value.",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-3",
+      "description": "The user-selected live inspection capability is implemented as an explicit Learn page authoring workflow, separate from ordinary compilation and confirmed execution; its platform authentication, retention and budget parameters require validation.",
+      "risk": "high",
+      "risk_if_wrong": "A no-inspection scope cannot honestly claim observed target correctness.",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-4",
+      "description": "Optimized means resilient, scoped, minimal policy-valid actions and efficient bounded prompts, not shortest generated source or arbitrary performance transformations.",
+      "risk": "low",
+      "risk_if_wrong": "Different optimization goals require different quality measures.",
+      "validation_needed": true
+    }
+  ],
+  "domainModel": [
+    {
+      "id": "DM-1",
+      "entity": "Studio draft",
+      "description": "CSI-scoped mutable ordered instructions, variables, configuration and global authoring context.",
+      "attributes": [
+        "testId",
+        "csiId",
+        "sourceRevision",
+        "configurationRevision",
+        "globalContext"
+      ],
+      "relationships": [
+        "has_many steps",
+        "has_many immutable revisions"
+      ]
+    },
+    {
+      "id": "DM-2",
+      "entity": "Studio step",
+      "description": "Stable step identity, user intent, step-local context and ordered position.",
+      "attributes": [
+        "stepId",
+        "position",
+        "originalText",
+        "context"
+      ],
+      "relationships": [
+        "belongs_to Studio draft",
+        "may depend on prior-step state"
+      ]
+    },
+    {
+      "id": "DM-3",
+      "entity": "Page evidence",
+      "description": "Bounded nonsecret target facts with source, page/environment applicability and freshness; live capture is included through explicit authoring sessions.",
+      "attributes": [
+        "evidenceId",
+        "source",
+        "pageIdentity",
+        "environment",
+        "capturedAt",
+        "hash",
+        "stepId",
+        "route",
+        "statePreconditions",
+        "observedOrPredicted"
+      ],
+      "relationships": [
+        "scoped to authorized CSI",
+        "referenced by relevant step/context revision"
+      ]
+    },
+    {
+      "id": "DM-4",
+      "entity": "Compiled revision",
+      "description": "Immutable binding of ordered intent, context/evidence snapshot, artifact and compiler/runtime provenance.",
+      "attributes": [
+        "revisionId",
+        "artifactHash",
+        "contextHash",
+        "sourceRevision",
+        "configurationRevision"
+      ],
+      "relationships": [
+        "belongs_to Studio draft",
+        "has_many aligned generated steps"
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "id": "INT-1",
+      "flow": "Author, contextualize, compile and review",
+      "description": "User writes steps, supplies global and local context, compiles, resolves diagnostics, reviews values/targets and confirms exact revision.",
+      "states": [
+        "draft",
+        "compiling",
+        "needs revision/clarification",
+        "awaiting confirmation",
+        "ready",
+        "stale"
+      ]
+    },
+    {
+      "id": "INT-2",
+      "flow": "Edit a ready test",
+      "description": "User changes a context or evidence input; prior history remains visible, current readiness invalidates and a newer compile cannot be overwritten by an older response.",
+      "states": [
+        "ready",
+        "stale",
+        "compiling",
+        "awaiting confirmation"
+      ]
+    },
+    {
+      "id": "INT-3",
+      "flow": "Learn page and step state",
+      "description": "Start learning authorizes a displayed unchanged draft/action scope; observe, propose and validate each matching next action, act once and observe; pause for changed/unclear intent or state; publish sanitized evidence and clean up.",
+      "states": [
+        "starting",
+        "observing",
+        "needs action approval",
+        "acting",
+        "captured",
+        "partial",
+        "failed",
+        "cancelled",
+        "expired"
+      ]
+    }
+  ],
+  "edgeCases": [
+    {
+      "scenario": "Same accessible name matches two controls",
+      "handling": "Require distinguishing region/context or an unresolved-target diagnostic; no arbitrary first match.",
+      "severity": "high"
+    },
+    {
+      "scenario": "Page changes after evidence was collected",
+      "handling": "Disclose freshness and page identity; avoid treating evidence as runtime certainty; fail explicitly if confirmed locator no longer works.",
+      "severity": "high"
+    },
+    {
+      "scenario": "User intent conflicts with scoped context",
+      "handling": "Apply documented precedence to resolvable defaults; show unresolved contradictions for correction.",
+      "severity": "high"
+    },
+    {
+      "scenario": "Global or local context contains a secret or malicious page instruction",
+      "handling": "Apply existing credential rejection/redaction boundaries and treat context as data, with runtime capability/origin enforcement independent of prompt text.",
+      "severity": "critical"
+    },
+    {
+      "scenario": "Large DOM or excessive pasted context exceeds budget",
+      "handling": "Reject or explicitly summarize/select bounded facts with provenance; never silently drop the literal action/value.",
+      "severity": "medium"
+    },
+    {
+      "scenario": "Search requires filling then submitting within one natural-language step",
+      "handling": "Preserve the user step boundary with approved multi-statement representation or clearly report the unsupported action.",
+      "severity": "high"
+    },
+    {
+      "scenario": "Compile response arrives after reordered steps/context edits",
+      "handling": "Reject stale publication using request and revision identity.",
+      "severity": "high"
+    }
+  ],
+  "terminology": [
+    {
+      "term": "Global context",
+      "definition": "Test-scoped shared authoring facts and defaults inherited by steps.",
+      "aliases": [
+        "test context"
+      ]
+    },
+    {
+      "term": "Step context",
+      "definition": "Facts or hints applicable only to one stable step, with explicitly modeled dependencies where needed.",
+      "aliases": [
+        "local context"
+      ]
+    },
+    {
+      "term": "Page evidence",
+      "definition": "Target-page facts supplied or observed with provenance; not trusted instructions."
+    },
+    {
+      "term": "Verified",
+      "definition": "Supported by the stated validation/evidence check; syntax validation does not prove target correctness or user intent."
+    },
+    {
+      "term": "Optimized Playwright",
+      "definition": "Minimal policy-valid actions using resilient scoped locators and appropriate waits while preserving intended semantics."
+    }
+  ],
+  "openQuestions": [
+    {
+      "id": "OQ-1",
+      "question": "Include both user-supplied context and live page inspection?",
+      "priority": "high",
+      "blocksProgress": false,
+      "blocksImplementationDecision": false,
+      "assignedTo": "user",
+      "status": "Resolved: user selected both. Live authoring inspection is included in the specification.",
+      "answer": "Both user context and live page inspection (Recommended)"
+    },
+    {
+      "id": "OQ-2",
+      "question": "Which representative internal pages and success/error search workflows may be used to establish locator/task-success baseline?",
+      "priority": "high",
+      "blocksProgress": false,
+      "blocksProductionValidation": true,
+      "assignedTo": "product owner"
+    },
+    {
+      "id": "OQ-3",
+      "question": "What approved retention, sanitization and authentication model applies to any stored page evidence or included authoring inspection session?",
+      "priority": "high",
+      "blocksProgress": false,
+      "blocksLiveInspectionImplementation": true,
+      "assignedTo": "architect/platform"
+    },
+    {
+      "id": "OQ-4",
+      "question": "What measured context/token/latency bounds and minimum corpus task-success rate are required for release?",
+      "priority": "medium",
+      "blocksProgress": false,
+      "blocksProductionAcceptance": true,
+      "assignedTo": "product owner/platform"
+    }
+  ]
+}

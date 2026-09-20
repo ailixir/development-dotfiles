@@ -68,6 +68,21 @@ public class UITestRevision {
   @Column(columnDefinition = "jsonb", nullable = false, updatable = false)
   private String provenance;
 
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(columnDefinition = "jsonb", updatable = false)
+  private String authoring;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "authoring_revision_inputs", columnDefinition = "jsonb", updatable = false)
+  private String authoringRevisionInputs;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "expected_intent", columnDefinition = "jsonb", updatable = false)
+  private String expectedIntent;
+
+  @Column(name = "intent_derivation_version", length = 32, updatable = false)
+  private String intentDerivationVersion;
+
   @Column(name = "created_by", nullable = false, updatable = false)
   private String createdBy;
 
@@ -132,6 +147,22 @@ public class UITestRevision {
 
   public String getProvenance() {
     return provenance;
+  }
+
+  public String getAuthoring() {
+    return authoring;
+  }
+
+  public String getAuthoringRevisionInputs() {
+    return authoringRevisionInputs;
+  }
+
+  public String getExpectedIntent() {
+    return expectedIntent;
+  }
+
+  public String getIntentDerivationVersion() {
+    return intentDerivationVersion;
   }
 
   public String getCreatedBy() {

@@ -4,7 +4,7 @@ import { resetStudioMocks } from './handlers';
 import { MOCK_READABLE_CSIS, OTHER_CSI, mockExecutions, mockTests } from './fixtures';
 import { awaitingDraft, needsRevisionDraft, readyDraft } from './compileFixtures';
 import studioApi from '@/services/api/studioApi';
-import { defaultConfiguration } from '@/types/studio/studioTypes';
+import { CANCELLED_ERROR_CODE, defaultConfiguration } from '@/types/studio/studioTypes';
 
 /**
  * Story 10.1 AC-16 / AC-21 — the mock behaves like the server, including where it refuses.
@@ -152,6 +152,28 @@ describe('execute acceptance', () => {
     const second = await studioApi.executeTest(mockTests[0].id);
 
     expect(second.executionId).not.toBe(first.executionId);
+  });
+});
+
+describe('cancel (Studio v1)', () => {
+  it('ends a live run as ERROR/CANCELLED with 202, and refuses a second cancel with 409', async () => {
+    const accepted = await studioApi.executeTest(mockTests[0].id);
+
+    const snapshot = await studioApi.cancelExecution(accepted.executionId);
+    expect(snapshot.status).toBe('ERROR');
+    expect(snapshot.errorCode).toBe(CANCELLED_ERROR_CODE);
+    expect(snapshot.streamComplete).toBe(true);
+    expect((await studioApi.getExecution(accepted.executionId)).errorCode).toBe(CANCELLED_ERROR_CODE);
+
+    await expect(studioApi.cancelExecution(accepted.executionId)).rejects.toMatchObject({
+      response: { status: 409 },
+    });
+  });
+
+  it('refuses an execution on another CSI', async () => {
+    await expect(studioApi.cancelExecution(otherCsiExecution.executionId)).rejects.toMatchObject({
+      response: { status: 403 },
+    });
   });
 });
 

@@ -1,0 +1,96 @@
+{
+  "storyId": "STUDIO-CONTEXT",
+  "critiquedAt": "2026-09-18T22:20:51.334950+00:00",
+  "critiquedBy": "@qa",
+  "specVersion": 1,
+  "verdict": "NEEDS_REVISION",
+  "verdictReason": "All eleven functional requirements and the four NFRs are addressed, including user-selected live learning. Clarify supplied-versus-observed state and preserve the existing worker/runner credential boundary before final planning approval.",
+  "scores": {
+    "accuracy": 5,
+    "completeness": 4.5,
+    "consistency": 4,
+    "feasibility": 4.5,
+    "alignment": 4,
+    "average": 4.45
+  },
+  "issues": [
+    {
+      "id": "CRIT-1",
+      "severity": "MEDIUM",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "Section 3.3 says transitions remain predicted until an explicit observation or suitable supplied profile exists. This makes the transition provenance ambiguous: a supplied profile can support an expected state but cannot establish that a live state was observed. Later text correctly prohibits unobserved hints from earning page validation.",
+      "location": "spec.md#33-context-resolution-and-page-state",
+      "suggestion": "Separate predicted expectations, supplied facts and live observations explicitly. A supplied profile may support targeting with disclosed limitations, but only an actual capture bound to its session/state generation establishes observed live state.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-2",
+      "severity": "MEDIUM",
+      "category": "alignment",
+      "check": "align-4",
+      "description": "Section 3.7 says to resolve credentials only inside the trusted runtime without defining the vault trust boundary. The baseline architecture section 9.2 assigns vault access to the worker and explicitly denies runner vault/CSI/LLM credentials; a capture implementation could otherwise incorrectly add vault access to the browser runner.",
+      "location": "spec.md#37-included-learn-page-architecture-amendment",
+      "suggestion": "Specify an authorized backend/worker resolves authentication references and transfers only scoped ephemeral values over encrypted internal transport; the capture runner has no vault, CSI or LLM credentials, and values never enter session ledger/evidence/model payloads. Keep authentication-profile feasibility as a production gate.",
+      "autoFixable": true
+    }
+  ],
+  "summary": {
+    "highIssues": 0,
+    "mediumIssues": 2,
+    "lowIssues": 0,
+    "autoFixable": 2
+  },
+  "nextAction": "Author revises the two scoped clauses; QA performs the required second independent critique. No product implementation or production approval is implied.",
+  "autoFixes": [],
+  "inputs": {
+    "specPath": "docs/specs/studio-context/spec.md",
+    "requirementsPath": "docs/specs/studio-context/requirements.json",
+    "complexityPath": "docs/specs/studio-context/complexity.json",
+    "researchPath": "docs/specs/studio-context/research.json",
+    "currentStatePath": "docs/specs/studio-context/current-state.md",
+    "reviewedSpec": "Iteration 1 text read before the author applied CRIT-1 and CRIT-2. No frozen first-spec snapshot was retained; findings quote the reviewed clauses."
+  },
+  "requirementCoverage": {
+    "FR-1": "Covered in design and acceptance matrix",
+    "FR-2": "Covered in design and acceptance matrix",
+    "FR-3": "Covered in design and acceptance matrix",
+    "FR-4": "Covered in design and acceptance matrix",
+    "FR-5": "Covered in design and acceptance matrix",
+    "FR-6": "Covered in design and acceptance matrix",
+    "FR-7": "Covered in design and acceptance matrix",
+    "FR-8": "Covered in design and acceptance matrix",
+    "FR-9": "Covered in design and acceptance matrix",
+    "FR-10": "Covered in design and acceptance matrix",
+    "FR-11": "Covered in design and acceptance matrix",
+    "NFR-1": "Covered in requirements summary and validation/release gates",
+    "NFR-2": "Covered in requirements summary and validation/release gates",
+    "NFR-3": "Covered in requirements summary and validation/release gates",
+    "NFR-4": "Covered in requirements summary and validation/release gates"
+  },
+  "positiveFindings": [
+    "Accurately identifies that current AI preview and local Run consume different sources, and makes immutable confirmed-artifact execution a prerequisite.",
+    "Defines explicit step intent over local/global defaults, stable IDs through reorder/copy, optimistic save-before-compile, context hashing and stale-result rejection.",
+    "Keeps authoring schema v2 separate from unchanged artifact v1, and permits bounded allowed statements without weakening source-step alignment.",
+    "Independent explicit literal/reference slots and complete action-signature checks avoid treating originalText equality or a model assertion as semantic proof.",
+    "Included live learning has bounded session/state identity, once-only advance, scope authorization, cleanup and atomic evidence publication; ordinary Compile remains browser-free and Execute LLM-free.",
+    "Behavioral evidence is tied to the learned source/action and state generations; regenerated source cannot inherit proof that different code was exercised."
+  ],
+  "validationPerformed": [
+    "Read spec, requirements, complexity, research and architecture assessment.",
+    "Cross-checked actual compiler, request/parser/API and artifact schema with existing architecture sections 4, 8 and 9.",
+    "Checked all FR/AC references and the proposed acceptance layers by static review. No product tests, browser sessions, model benchmark, staging validation or security approvals performed."
+  ],
+  "productionGates": [
+    "Verify incomplete Epic 10 contracts, trusted validator/executor, immutable revisions and confirmed-artifact run path.",
+    "Freeze and test shared API/schema, migrations and actual pinned runtime compatibility.",
+    "Verify authenticated capture, restricted egress, retention/sanitization policy and isolated browser cleanup in the intended environment.",
+    "Run pinned real-model/page fixture corpus and establish measured latency/context/cost/task-success release thresholds."
+  ],
+  "selfCritique": {
+    "performed": true,
+    "checklist": "spec-critique.md explicit five-dimension checks",
+    "missingReferencedChecklist": "spec-quality-checklist.md was not present under searched framework/skill paths; the unrelated code self-critique checklist is not substituted.",
+    "scope": "Findings concern concrete specification ambiguity, not unavailable production evidence. No unsupported requirement added, product code changed, or implementation claimed."
+  }
+}

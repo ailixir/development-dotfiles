@@ -87,7 +87,8 @@ class StudioServiceWriteAuthorizationTest {
             mock(StudioAcceptanceService.class),
             mock(CompilePipeline.class),
             mock(CompileStateService.class),
-            mock(UserProvisioningService.class));
+            mock(UserProvisioningService.class),
+            mock(com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements.class));
     // Field-injected by @PersistenceContext in production, as in ProgressReportService.
     entityManager = mock(EntityManager.class);
     ReflectionTestUtils.setField(service, "entityManager", entityManager);

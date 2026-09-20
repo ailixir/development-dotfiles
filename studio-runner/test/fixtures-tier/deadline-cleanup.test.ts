@@ -21,12 +21,12 @@
  * in-image half — PID-1 reaping, `readOnlyRootFilesystem`, `emptyDir` scratch and `/dev/shm` — is
  * AC-11b, and it is recorded below as a **live skip** rather than as a pass.
  */
-import { createServer } from 'node:http';
-import type { Server } from 'node:http';
 import { existsSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+
+import { NULL_REDACTOR } from '../../src/executor/redaction.js';
 
 import { createChildBrowserLauncher, createForkSpawner } from '../../src/run/launcher.js';
 import type { ChildProcessHandle, ChildSpawner } from '../../src/run/launcher.js';
@@ -35,6 +35,8 @@ import { SCRATCH_SUBDIRECTORIES } from '../../src/run/scratchLayout.js';
 import { descendantsOf, isAlive } from '../../src/run/tree.js';
 import type { BrowserSession, SessionRunResult } from '../../src/server/adapters.js';
 import { createRunSnapshot } from '../../src/reporting/snapshot.js';
+import { startBlackHole } from '../helpers/blackHole.js';
+import type { BlackHole } from '../helpers/blackHole.js';
 import { startPageServer } from '../helpers/pageServer.js';
 import type { PageServer } from '../helpers/pageServer.js';
 import { CHILD_MODULE_PATH } from './globalSetup.js';
@@ -44,34 +46,19 @@ const CANARY = 'canary-secret-value-7c1e4a';
 
 let server: PageServer;
 /** A loopback route that accepts the connection and then answers nothing, ever. */
-let blackHole: { server: Server; url: string };
+let blackHole: BlackHole;
 const scratches: string[] = [];
 /** Pids this file suspended, so a failed assertion cannot leave stopped browsers on the machine. */
 const suspended: number[] = [];
 
 beforeAll(async () => {
   server = await startPageServer();
-  blackHole = await new Promise((resolve) => {
-    // Not `node:net`: a real HTTP request that is never answered is what makes `page.goto` hang
-    // *inside Chromium* rather than fail fast on a refused connection.
-    const instance = createServer(() => {
-      // Deliberately no `response.end`. The socket stays open and the navigation never settles.
-    });
-    instance.listen(0, '127.0.0.1', () => {
-      const address = instance.address();
-      const port = typeof address === 'object' && address !== null ? address.port : 0;
-      resolve({ server: instance, url: `http://127.0.0.1:${String(port)}/never` });
-    });
-  });
+  blackHole = await startBlackHole();
 });
 
 afterAll(async () => {
   await server.close();
-  await new Promise<void>((resolve) => {
-    blackHole.server.close(() => {
-      resolve();
-    });
-  });
+  await blackHole.close();
 });
 
 afterEach(() => {
@@ -570,6 +557,7 @@ describe('O-13 — the reported partiality reaches the wire, and the API now pub
       },
       runtimeVersions: {},
       wallClock: () => new Date('2026-09-11T10:00:09Z'),
+      redactor: NULL_REDACTOR,
     });
     snapshot.markBrowserStarted(new Date('2026-09-11T10:00:02Z'));
 

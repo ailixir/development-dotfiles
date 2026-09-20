@@ -30,8 +30,9 @@ import org.yaml.snakeyaml.Yaml;
  * INT-4"</i>. So all three of this test's inputs are read from the artefact that holds them:
  *
  * <ul>
- *   <li>the SQL — parsed out of {@code V17__studio_execution_error_code_check.sql}'s {@code CHECK …
- *       IN (…)};
+ *   <li>the SQL — parsed out of {@code V20__studio_execution_cancel.sql}'s {@code CHECK … IN (…)},
+ *       the migration that last defines the constraint (Studio v1 WP4 replaced V17's list with a
+ *       superset; V17 stays as history and is read by {@code ErrorCodeConstraintMigrationIT});
  *   <li>the API's own vocabulary — {@link ExecutionErrorCode#values()}, which exists so a
  *       disjointness test <i>"reads this enumeration rather than a hardcoded copy of it that
  *       drifts"</i>;
@@ -49,13 +50,7 @@ class ErrorCodeVocabularyTest {
 
   private static final Path CONTRACT = Path.of("..", "docs", "specs", "studio", "openapi.yaml");
   private static final Path MIGRATION =
-      Path.of(
-          "src",
-          "main",
-          "resources",
-          "db",
-          "migration",
-          "V17__studio_execution_error_code_check.sql");
+      Path.of("src", "main", "resources", "db", "migration", "V20__studio_execution_cancel.sql");
 
   /** The statement under test: the {@code CHECK} clause, not the comment that explains it. */
   private static final Pattern CHECK_CLAUSE =
