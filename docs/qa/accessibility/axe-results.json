@@ -20,7 +20,6 @@
           "help": "Elements must only use permitted ARIA attributes",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
           "nodes": [
-            "span[aria-label=\"Run\"]",
             "span[aria-label=\"Delete\"]"
           ]
         },
@@ -30,7 +29,6 @@
           "help": "Buttons must have discernible text",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI",
           "nodes": [
-            "span[aria-label=\"Run\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
             "span[aria-label=\"Delete\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root"
           ]
         },
@@ -63,24 +61,6 @@
     {
       "surface": "StudioRunsPage",
       "violations": [
-        {
-          "id": "aria-prohibited-attr",
-          "impact": "serious",
-          "help": "Elements must only use permitted ARIA attributes",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
-          "nodes": [
-            "span[aria-label=\"Refresh\"]"
-          ]
-        },
-        {
-          "id": "button-name",
-          "impact": "critical",
-          "help": "Buttons must have discernible text",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI",
-          "nodes": [
-            "button"
-          ]
-        },
         {
           "id": "region",
           "impact": "moderate",
@@ -151,10 +131,10 @@
           "help": "Form elements must have labels",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=axeAPI",
           "nodes": [
-            "#\\:r10\\:",
-            "#\\:r14\\:",
-            "#\\:r18\\:",
-            "#\\:r1c\\:"
+            "#\\:ru\\:",
+            "#\\:r12\\:",
+            "#\\:r16\\:",
+            "#\\:r1a\\:"
           ]
         },
         {
@@ -166,7 +146,7 @@
             ".css-syu8eu > .css-0.MuiBox-root",
             ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(1) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
-            ".MuiChip-label",
+            ".MuiChip-root",
             ".css-j3ygch-MuiStack-root > .MuiTypography-caption",
             ".MuiTypography-subtitle1",
             ".css-108hs05-MuiTypography-root",
@@ -240,10 +220,10 @@
           "help": "Form elements must have labels",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=axeAPI",
           "nodes": [
+            "#\\:r1j\\:",
             "#\\:r1n\\:",
             "#\\:r1r\\:",
-            "#\\:r1v\\:",
-            "#\\:r23\\:"
+            "#\\:r1v\\:"
           ]
         },
         {
@@ -255,11 +235,11 @@
             ".css-syu8eu > .css-0.MuiBox-root",
             ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(1) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
-            ".MuiChip-label",
+            ".MuiChip-root",
             ".css-ol7wxs-MuiTypography-root",
             ".css-1kw3y0a > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
             ".MuiList-root",
-            "#\\:r1h\\:",
+            "#\\:r1f\\:",
             ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(2) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".MuiCardHeader-action",
             ".css-1isisa7-MuiTypography-root",
@@ -330,10 +310,10 @@
           "help": "Form elements must have labels",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=axeAPI",
           "nodes": [
-            "#\\:r2e\\:",
-            "#\\:r2i\\:",
-            "#\\:r2m\\:",
-            "#\\:r2q\\:"
+            "#\\:r28\\:",
+            "#\\:r2c\\:",
+            "#\\:r2g\\:",
+            "#\\:r2k\\:"
           ]
         },
         {
@@ -345,11 +325,11 @@
             ".css-syu8eu > .css-0.MuiBox-root",
             ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(1) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
-            ".MuiChip-label",
+            ".MuiChip-root",
             ".css-ol7wxs-MuiTypography-root",
             ".css-1kw3y0a > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
             ".MuiList-root",
-            "#\\:r28\\:",
+            "#\\:r24\\:",
             ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(2) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".MuiCardHeader-action",
             ".css-1isisa7-MuiTypography-root",
@@ -431,10 +411,10 @@
           "help": "Form elements must have labels",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=axeAPI",
           "nodes": [
+            "#\\:r2t\\:",
+            "#\\:r31\\:",
             "#\\:r35\\:",
-            "#\\:r39\\:",
-            "#\\:r3d\\:",
-            "#\\:r3h\\:"
+            "#\\:r39\\:"
           ]
         },
         {
@@ -446,12 +426,12 @@
             ".css-syu8eu > .css-0.MuiBox-root",
             ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(1) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiPaper-elevation > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
-            ".css-1yu2fb4-MuiChip-root > .MuiChip-label.MuiChip-labelSmall.css-wjsjww-MuiChip-label",
+            ".css-1yu2fb4-MuiChip-root",
             ".css-ol7wxs-MuiTypography-root",
             ".css-1kw3y0a > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
             ".MuiBadge-badge",
             ".MuiList-padding",
-            "#\\:r2v\\:",
+            "#\\:r2p\\:",
             ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(2) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiPaper-elevation > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".MuiCardHeader-action",
             ".css-i3pbo > .css-1yuhvjn.MuiBox-root",
@@ -524,10 +504,10 @@
           "help": "Form elements must have labels",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=axeAPI",
           "nodes": [
-            "#\\:r3s\\:",
-            "#\\:r40\\:",
-            "#\\:r44\\:",
-            "#\\:r48\\:"
+            "#\\:r3i\\:",
+            "#\\:r3m\\:",
+            "#\\:r3q\\:",
+            "#\\:r3u\\:"
           ]
         },
         {
@@ -539,7 +519,7 @@
             ".css-syu8eu > .css-0.MuiBox-root",
             ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(1) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiPaper-elevation > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root",
-            ".css-1yu2fb4-MuiChip-root > .MuiChip-label.MuiChip-labelSmall.css-wjsjww-MuiChip-label",
+            ".css-1yu2fb4-MuiChip-root",
             ".css-j3ygch-MuiStack-root > .css-ol7wxs-MuiTypography-root.MuiTypography-caption.MuiTypography-root",
             ".css-1kw3y0a > .css-h8rzac-MuiTypography-root",
             ".css-10kvjzg-MuiListItem-root > .MuiListItemText-root.MuiListItemText-dense.css-1aya492-MuiListItemText-root",
@@ -548,7 +528,7 @@
             ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root",
             ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3)",
             ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4)",
-            "#\\:r3m\\:",
+            "#\\:r3e\\:",
             ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(2) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiPaper-elevation > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".MuiCardHeader-action",
             ".MuiTabs-root"
