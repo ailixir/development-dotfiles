@@ -1,1 +1,2 @@
 - [EPIC-10 worktree topology](project_epic10_worktree_topology.md) — parallel worktrees under `wt/`; work only in the one the spawn names, treat others as read-only snapshots, don't edit docs dirty elsewhere
+- [ui-studio rescue ref](project_ui_studio_rescue_ref.md) — `wip/ui-studio-rescue` archives 162 unclaimed paths; ruled archive-only, never merge forward; ui-studio still not fast-forwarded

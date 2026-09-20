@@ -31,3 +31,9 @@ effect of another story.
 `@ConditionalOnProperty(..., matchIfMissing = true)`. The tell is a route answering a *downstream*
 status (409/200) to a principal who should have been refused, while an unknown id still answers 403
 because the id resolves to no CSI at all. Related: [[test-container-and-context-isolation]].
+
+**UPDATE 2026-09-18 (Studio v1 WP10, `feat/studio-v1-hardening`):** the "unconditional" part is stale on
+w7-based trees — story 10.18b made all three bypasses `checks.security.bypass.*`, default false, and
+`IdentityBypassProfileGuard` now refuses to start if any is open unless every active profile is in
+local/dev/test (+ role profiles api/worker). A brief that asks you to "gate the bypass" is probably
+written against the pre-w7 tree; check `IdentityBypassProperties` first.

@@ -43,3 +43,14 @@
 - [The values files still say ED-02 is unowned](project_disclosure_pin_values_files_stale.md) — live falsehood in values-uat/prod since 2026-09-16; the pin that held it was scoped out, correction unrouted
 - [axe-core in jsdom](project_axe_in_jsdom_limits.md) — contrast/target-size unanswerable, ChecksLayout unscannable, 5 s default too short; pin counts and fail on shrink too
 - [Untracked-file restore trap](project_untracked_file_restore_trap.md) — `git checkout --` no-ops on a `??` file; a mutation stays applied and poisons every later row
+- [Co-run leg-2 attribution gap](project_corun_leg2_attribution_gap.md) — DEF-05 + UUID admissionId made co-run green; a bad body is misreported as "recorded NOTHING"
+- [@SpringBootTest disables metrics export](project_springboottest_metrics_export_off.md) — /actuator/prometheus is absent in ITs without @AutoConfigureObservability; a 404 check is vacuous
+- [Dev seed is unexercised](project_dev_seed_unexercised.md) — only StudioSeedIT applies R__sample_data.sql; V14 broke it silently
+- [Error code is pinned three ways](project_error_code_three_way_pin.md) — TS carrier, yaml enum and Java enum; a new code from one side only reddens a test, and WP5 kept CANCELLED outside
+- [Cross-stack config pins](project_cross_stack_config_pins.md) — frontend vitest regexes application.yml env names; kill-switch test observes dispatchOnce SQL
+- [NOT_SUPPORTED still caches](project_not_supported_stale_read.md) — a JPA re-read after a JDBC write in a NOT_SUPPORTED method returns the stale entity; clear() first
+- [Local Studio e2e path](project_local_studio_e2e_path.md) — five blockers between Run Test and a real PASSED locally; never run dev.sh on 8080/5173 here
+- [Runner control poll has its own scheduler](project_runner_control_poll_scheduler.md) — never put periodic runner work on the deadline timers; tests assert scheduler.pending()
+- [dev.sh stub harness](project_devsh_stub_harness.md) — drive dev.sh cleanup on a scratch stub tree; a `&` job ignores SIGINT, so launch via Python
+- [Co-run cancel signal races](project_corun_cancel_signal_races.md) — cancel too early and the progress ack wins; seeded timeoutSeconds 30 ends a "stall" alone
+- [Context close scales with a hung navigation](project_context_close_scales_with_hung_navigation.md) — ~38 ms per hung second, 4.6 s at 115 s; why the chart grace is 15 s; D1 "before" texts
