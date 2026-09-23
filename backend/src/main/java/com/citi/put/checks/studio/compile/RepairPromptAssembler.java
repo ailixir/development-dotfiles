@@ -78,6 +78,17 @@ public class RepairPromptAssembler {
       CredentialPatternScreen.patternClasses();
 
   /**
+   * A whole private-key block, header through footer. The detection screen's {@code
+   * PRIVATE_KEY_BLOCK} pattern matches only the header, which is enough to refuse a draft but not
+   * to redact one: the key body would survive. With no footer, the block runs to the end of the
+   * JSON string that holds it (the next quote), or to the end of the text.
+   */
+  private static final Pattern WHOLE_PRIVATE_KEY_BLOCK =
+      Pattern.compile(
+          "-----BEGIN [A-Z ]*PRIVATE KEY-----"
+              + "(?:[\\s\\S]*?-----END [A-Z ]*PRIVATE KEY-----|[^\"]*)");
+
+  /**
    * Assembles one repair proposal request.
    *
    * @param firstAttempt the attempt-1 request of this compile request; its kind and writable IDs
@@ -146,18 +157,64 @@ public class RepairPromptAssembler {
    * Redacts, then caps, the rejected proposal.
    *
    * <p>Redaction runs first so a credential cut in half by the cap cannot survive as a fragment the
-   * patterns no longer recognise.
+   * patterns no longer recognise. It runs on the text with JSON unicode escapes (backslash, {@code
+   * u}, four hex digits) decoded, so a credential the model spelled with escapes is matched in its
+   * decoded form, and a private key is replaced as a whole block, header through footer.
    *
    * @param rejectedProposal the raw proposal text
    * @return the redacted text, at most {@link #MAX_REJECTED_PROPOSAL_BYTES} UTF-8 bytes
    */
   static String boundRejectedProposal(String rejectedProposal) {
-    String redacted = rejectedProposal;
+    String redacted = decodeUnicodeEscapes(rejectedProposal);
+    redacted = WHOLE_PRIVATE_KEY_BLOCK.matcher(redacted).replaceAll("[REDACTED:PRIVATE_KEY_BLOCK]");
     for (Map.Entry<String, Pattern> entry : CREDENTIAL_PATTERNS.entrySet()) {
       redacted = entry.getValue().matcher(redacted).replaceAll("[REDACTED:" + entry.getKey() + "]");
     }
     redacted = SecretMasker.mask(redacted);
     return truncateUtf8(redacted, MAX_REJECTED_PROPOSAL_BYTES);
+  }
+
+  /**
+   * Decodes JSON unicode escapes (backslash, {@code u}, four hex digits) and leaves every other
+   * character, and every other escape, as it was. An escaped backslash (two backslashes) is kept as
+   * a pair, so a {@code u} after it is not read as an escape. The result is only ever fenced as a
+   * string literal, never parsed, so a decoded quote or control character cannot break the fence.
+   *
+   * @param value the raw proposal text
+   * @return the text with its unicode escapes decoded
+   */
+  static String decodeUnicodeEscapes(String value) {
+    if (value.indexOf('\\') < 0) {
+      return value;
+    }
+    StringBuilder decoded = new StringBuilder(value.length());
+    int index = 0;
+    while (index < value.length()) {
+      char current = value.charAt(index);
+      if (current == '\\' && index + 1 < value.length()) {
+        char next = value.charAt(index + 1);
+        if (next == 'u' && index + 6 <= value.length() && isHex(value, index + 2, index + 6)) {
+          decoded.append((char) Integer.parseInt(value.substring(index + 2, index + 6), 16));
+          index += 6;
+          continue;
+        }
+        decoded.append(current).append(next);
+        index += 2;
+        continue;
+      }
+      decoded.append(current);
+      index++;
+    }
+    return decoded.toString();
+  }
+
+  private static boolean isHex(String value, int from, int to) {
+    for (int index = from; index < to; index++) {
+      if (Character.digit(value.charAt(index), 16) < 0) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private static String truncateUtf8(String value, int maxBytes) {

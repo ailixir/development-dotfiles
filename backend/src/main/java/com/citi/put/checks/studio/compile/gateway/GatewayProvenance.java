@@ -11,6 +11,13 @@ package com.citi.put.checks.studio.compile.gateway;
  * vendor did not report is {@code null}, never {@code 0}: a zero would claim "nothing was spent" or
  * "nothing was cached", which is not known (spec &sect;3.2.6 "Usage", DEP genai "null-not-zero").
  *
+ * <p><b>{@code usageAvailable} semantics.</b> It is {@code true} only when both core counts were
+ * reported: {@code promptTokenCount} ({@code inputTokens}) and {@code candidatesTokenCount} ({@code
+ * outputTokens}). It says nothing about the other three counts: {@code thoughtsTokens}, {@code
+ * cachedContentTokens} and {@code totalTokens} may each still be {@code null} when it is {@code
+ * true}, and a reader must check each of them for {@code null} on its own. When either core count
+ * is missing it is {@code false}, even if some other count was reported.
+ *
  * @param model model identifier requested by the client
  * @param modelVersion model version reported by the gateway, or {@code null} when it reports none
  * @param promptVersion prompt version passed through from the {@link CompileRequest}

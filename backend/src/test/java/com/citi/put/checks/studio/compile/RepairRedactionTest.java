@@ -312,7 +312,84 @@ class RepairRedactionTest extends AbstractRepairPipelineTest {
         .doesNotContain(diagnosticsMarker);
   }
 
+  /**
+   * QA 10.45 ISSUE-4 — a private key in the rejected proposal is redacted as a whole block, header,
+   * body and footer, including when it sits in a JSON string with escaped newlines, and when the
+   * footer is missing.
+   */
+  @Test
+  void aPrivateKeyInTheRejectedProposalIsRedactedHeaderThroughFooter() {
+    String body = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7" + "privkeybody5a1c";
+    String block = "-----BEGIN RSA PRIVATE KEY-----\\n" + body + "\\n-----END RSA PRIVATE KEY-----";
+    String proposal =
+        "{\"steps\":[{\"code\":\"await page.fill('#k', '" + block + "'); // after-key-3f\"}]}";
+
+    String bounded = RepairPromptAssembler.boundRejectedProposal(proposal);
+
+    assertThat(bounded)
+        .contains("[REDACTED:PRIVATE_KEY_BLOCK]")
+        .doesNotContain("BEGIN RSA PRIVATE KEY")
+        .doesNotContain(body)
+        .doesNotContain("privkeybody5a1c")
+        .doesNotContain("END RSA PRIVATE KEY")
+        .as("text after the footer is kept")
+        .contains("after-key-3f");
+
+    String noFooter =
+        "{\"code\":\"-----BEGIN PRIVATE KEY-----\\n" + body + "\",\"next\":\"kept-8e2d\"}";
+    assertThat(RepairPromptAssembler.boundRejectedProposal(noFooter))
+        .contains("[REDACTED:PRIVATE_KEY_BLOCK]")
+        .doesNotContain("privkeybody5a1c")
+        .as("with no footer, redaction stops at the end of the JSON string")
+        .contains("kept-8e2d");
+  }
+
+  /**
+   * QA 10.45 ISSUE-4 — a credential the model wrote with JSON unicode escapes is matched on its
+   * decoded form, so the escapes cannot carry it past the patterns.
+   */
+  @Test
+  void aUnicodeEscapedCredentialInTheRejectedProposalIsRedacted() {
+    String awsKey = "AKIAIOSFODNN7EXAMPLE";
+    String githubToken = "ghp_" + "a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8";
+    String header = "-----BEGIN PRIVATE KEY-----";
+    String proposal =
+        "{\"code\":\"k="
+            + unicodeEscaped(awsKey)
+            + "&t="
+            + unicodeEscaped(githubToken)
+            + " "
+            + unicodeEscaped(header)
+            + "escapedkeybody9c4b\"}";
+
+    String bounded = RepairPromptAssembler.boundRejectedProposal(proposal);
+
+    assertThat(bounded)
+        .contains("[REDACTED:AWS_ACCESS_KEY_ID]")
+        .contains("[REDACTED:GITHUB_TOKEN]")
+        .contains("[REDACTED:PRIVATE_KEY_BLOCK]")
+        .doesNotContain(awsKey)
+        .doesNotContain(githubToken)
+        .doesNotContain("escapedkeybody9c4b")
+        .doesNotContain(unicodeEscaped(awsKey));
+
+    // An escaped backslash is not the start of a unicode escape.
+    String backslash = "\\";
+    String literal = backslash + backslash + "u0041";
+    assertThat(RepairPromptAssembler.decodeUnicodeEscapes(literal)).isEqualTo(literal);
+    assertThat(RepairPromptAssembler.decodeUnicodeEscapes(backslash + "u0041")).isEqualTo("A");
+  }
+
   // ── helpers ──────────────────────────────────────────────────────────────
+
+  /** Spells every character as a JSON unicode escape, backslash-u and four hex digits. */
+  private static String unicodeEscaped(String value) {
+    StringBuilder escaped = new StringBuilder();
+    for (char character : value.toCharArray()) {
+      escaped.append('\\').append('u').append(String.format("%04x", (int) character));
+    }
+    return escaped.toString();
+  }
 
   /**
    * Plain, URL-encoded, double-encoded and base64 — a redaction pass often survives transformed.
