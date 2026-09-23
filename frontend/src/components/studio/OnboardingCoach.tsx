@@ -13,12 +13,12 @@ const MESSAGES = [
     body: 'Start by describing your flow in simple lines. Use actions like "Go to", "Click", "Type".',
   },
   {
-    title: 'Validate & fix',
-    body: 'We validate your steps in real time and highlight issues to fix before running.',
+    title: 'Save your checklist',
+    body: 'Save keeps your steps, environment, variables, and secure secret references together.',
   },
   {
-    title: 'Run & observe',
-    body: 'Click Run to execute. Watch logs, inspect generated code, and view proof in tabs.',
+    title: 'Run and watch',
+    body: 'Run uses your saved steps. Follow progress, proof, and logs while it runs.',
   },
 ];
 
@@ -46,5 +46,3 @@ const OnboardingCoach: React.FC<OnboardingCoachProps> = ({ step, onNext, onDismi
 };
 
 export default OnboardingCoach;
-
-

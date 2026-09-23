@@ -1,5 +1,9 @@
 package com.citi.put.checks.studio.secrets;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -7,24 +11,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 /**
  * Fail-closed provider selection (AC-9).
  *
- * <p>Three controls, and the reason for all three is the same: a fake vault that can be reached
- * from a deployed profile is worse than no vault at all, and it is very much cheaper to make
- * impossible here than to detect later.
+ * <p>Provider selection is intentionally fail closed. Shipped code contains only the disabled
+ * provider and the real HashiCorp integration; test doubles live under the test source set.
  *
  * <ol>
- *   <li><b>No default.</b> {@code studio.secrets.vault.provider} is enumerated and has no fallback
- *       value in {@code application.yml} or in code. Absent or unrecognised is a refusal to start,
- *       not a substitution.
- *   <li><b>The fake is confined.</b> `ED-02`'s fallback authorises development identities
- *       <em>"confined to local/mock operation"</em>. Selecting {@code fake} outside {@link
- *       #DEVELOPMENT_PROFILES} fails the context rather than quietly building it.
- *   <li><b>It says so out loud.</b> The selected provider's name is logged at startup and published
- *       on the info surface, so a deployment running on a fake vault announces it.
+ *   <li><b>Explicit default-off.</b> {@code application.yml} selects {@code none}; a real call is
+ *       possible only when configuration explicitly selects {@code hashicorp}. Absent or
+ *       unrecognised values are still a refusal to start, not a substitution.
+ *   <li><b>It says so out loud.</b> The selected provider's name is logged at startup.
  * </ol>
  */
 @Configuration
@@ -33,18 +31,15 @@ public class StudioVaultConfiguration {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StudioVaultConfiguration.class);
 
-  /** The only profiles from which the fake provider may be reached. */
-  public static final Set<String> DEVELOPMENT_PROFILES = Set.of("test", "local", "dev");
-
   /** Every provider name this build knows. Anything else is a refusal to start. */
-  public static final Set<String> KNOWN_PROVIDERS = Set.of(FakeStudioVaultProvider.NAME);
+  public static final Set<String> KNOWN_PROVIDERS =
+      Set.of(DisabledStudioVaultProvider.NAME, HashicorpStudioVaultProvider.NAME);
 
   /** The startup line AC-9 asserts on captured output, not on source text. */
   public static final String STARTUP_MESSAGE_PREFIX = "Studio vault provider selected: ";
 
   @Bean
-  public StudioVaultProvider studioVaultProvider(
-      StudioSecretsProperties properties, Environment environment) {
+  public StudioVaultProvider studioVaultProvider(StudioSecretsProperties properties) {
     String provider = properties.vaultOrEmpty().provider();
     if (provider == null || provider.isBlank()) {
       throw new IllegalStateException(
@@ -63,28 +58,74 @@ public class StudioVaultConfiguration {
               + ". It is not substituted with a default.");
     }
 
-    if (FakeStudioVaultProvider.NAME.equals(selected)) {
-      List<String> active = List.of(environment.getActiveProfiles());
-      if (active.stream().noneMatch(DEVELOPMENT_PROFILES::contains)) {
-        throw new IllegalStateException(
-            "studio.secrets.vault.provider=fake is confined to "
-                + DEVELOPMENT_PROFILES
-                + " and the active profiles are "
-                + active
-                + ". A fake vault reachable from a deployed profile is worse than no vault.");
-      }
-      LOGGER.warn(
-          "{}{} — this is a development vault holding development values, not a real vault "
-              + "(ED-02). Active profiles: {}",
-          STARTUP_MESSAGE_PREFIX,
-          selected,
-          active);
-      return new FakeStudioVaultProvider(
-          FakeStudioVaultProvider.parseSeed(
-              properties.vaultOrEmpty().fakeOrEmpty().entriesOrEmpty()));
+    if (HashicorpStudioVaultProvider.NAME.equals(selected)) {
+      StudioSecretsProperties.Vault.Hashicorp hashicorp =
+          properties.vaultOrEmpty().hashicorpOrEmpty();
+      validateHashicorp(hashicorp);
+      LOGGER.info("{}{}", STARTUP_MESSAGE_PREFIX, selected);
+      return new HashicorpStudioVaultProvider(hashicorp, new ObjectMapper());
+    }
+
+    if (DisabledStudioVaultProvider.NAME.equals(selected)) {
+      LOGGER.info(
+          "{}{} — external secret resolution is disabled", STARTUP_MESSAGE_PREFIX, selected);
+      return new DisabledStudioVaultProvider();
     }
 
     throw new IllegalStateException("Unreachable: provider '" + selected + "' has no factory");
+  }
+
+  private static void validateHashicorp(StudioSecretsProperties.Vault.Hashicorp properties) {
+    requireText(properties.address(), "address");
+    requireText(properties.tokenFile(), "token-file");
+    if (properties.connectTimeoutOrDefault().isZero()
+        || properties.connectTimeoutOrDefault().isNegative()
+        || properties.requestTimeoutOrDefault().isZero()
+        || properties.requestTimeoutOrDefault().isNegative()) {
+      throw new IllegalStateException("HashiCorp Vault timeouts must be greater than zero");
+    }
+    if (properties.maxResponseBytesOrDefault() <= 0) {
+      throw new IllegalStateException(
+          "studio.secrets.vault.hashicorp.max-response-bytes must be greater than zero");
+    }
+    String template = properties.pathTemplateOrDefault();
+    for (String placeholder : List.of("{csiId}", "{environment}", "{kind}", "{referenceName}")) {
+      if (!template.contains(placeholder)) {
+        throw new IllegalStateException(
+            "studio.secrets.vault.hashicorp.path-template must contain " + placeholder);
+      }
+    }
+    if (template.startsWith("/")
+        || template.contains("..")
+        || template.contains("?")
+        || template.contains("#")) {
+      throw new IllegalStateException(
+          "studio.secrets.vault.hashicorp.path-template must be a relative Vault path");
+    }
+    URI address = URI.create(properties.address());
+    boolean loopback =
+        "localhost".equals(address.getHost())
+            || "127.0.0.1".equals(address.getHost())
+            || "::1".equals(address.getHost());
+    if (!"https".equals(address.getScheme()) && !("http".equals(address.getScheme()) && loopback)) {
+      throw new IllegalStateException(
+          "studio.secrets.vault.hashicorp.address must use https outside loopback tests");
+    }
+    if (address.getUserInfo() != null
+        || address.getQuery() != null
+        || address.getFragment() != null) {
+      throw new IllegalStateException("Vault address must not contain credentials or a query");
+    }
+    Path tokenFile = Path.of(properties.tokenFile());
+    if (!Files.isReadable(tokenFile)) {
+      throw new IllegalStateException("The configured Vault token file is not readable");
+    }
+  }
+
+  private static void requireText(String value, String field) {
+    if (value == null || value.isBlank()) {
+      throw new IllegalStateException("studio.secrets.vault.hashicorp." + field + " is required");
+    }
   }
 
   @Bean

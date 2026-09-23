@@ -5,7 +5,7 @@
 | **Status** | **COMPLETE for V1, and assembled once.** 10.18a drafted the three pod sections; **story 10.18b drafted the edge sections and assembled them here**, as @po's split mandated — a runbook split into two halves is two half-runbooks. All seven subjects AC-24 names are covered: Chromium and the sandbox (§1), egress and approved destinations (§2), evidence expiry (§3), signals/drain/reaping (§4), stuck runs (§5), the kill switch (§6), SSE (§7) and manifest recovery (§8). §§9-11 carry the three open prerequisites this deployment must not be read without. **§12 (rollback) was added by story 10.19 (AC-9); the epic had never written one down.** |
 | **Accountable owner** | **The Checks squad**, as the on-call owner. BRD §4: the Checks squad *"owns Studio execution, recovery, capacity and the runner runbook"*; **Platform/SRE supports** cluster, ingress, egress, sandbox and storage controls. BRD §8 makes this document a **launch exit criterion**. **Re-verified by story 10.19's audit (AC-8b), 2026-09-17: still named and still accurate** — `docs/brd/checks-ui-studio.brd.md:81` and BRD §8's on-call row |
 | **Sections from 10.18a** | §1 Chromium and the sandbox · §2 Egress and approved destinations · §3 Evidence storage and expiry · §4 Signals, drain and reaping |
-| **Sections from 10.18b** | §5 Stuck runs (reapers, ledger states, what an operator may and may not do by hand) · §6 The kill switch · §7 SSE · §8 Manifest recovery · §9 Identity (`ED-02`) · §10 CSRF · §11 Configuration that does not reach the process |
+| **Sections from 10.18b** | §5 Stuck runs (reapers, ledger states, what an operator may and may not do by hand) · §6 The kill switch · §7 SSE · §8 Manifest recovery · §9 Identity (`ED-02`) · §10 CSRF · §11 Configuration delivery |
 | **Sections from 10.19** | **§12 Rollback** |
 | **Written by** | @dev (Dex), story 10.18a · 2026-09-15; assembled by @dev (Dex), story 10.18b · 2026-09-16; audited and extended by @dev (Dex), story 10.19 · 2026-09-17 |
 | **Last audited against the merged system** | **2026-09-17**, story 10.19 AC-8, at integration head `d3700f23d` (10.30, 10.31 and 10.32 merged). Drift found and corrected in this pass: `ED-02`'s owner (three places), the lifted 10.19 drafting gate (two places), story 10.30's write authorization (§9.1 new), story 10.31's video-route refusal surface (§7 new). Checked and found **not** drifted: §1–§6, §8, §10, §11 — including §11's "no key 10.18b added is affected" claim, which still holds for story 10.32's `STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS` because it matches the `STUDIO_RUNNER_*` shape §11 already names. Every disclosed limitation below is cross-checked against [`docs/qa/staging-acceptance-register.md`](../qa/staging-acceptance-register.md) (AC-8c) |
@@ -31,16 +31,18 @@
 >    traceable to the BRD or the architecture and rests solely on that decision.
 >    **`external_ticket` still reads `"to be linked — no ticket ID exists yet"`, and `status` is
 >    still `open`.** An owner is not a delivery: item 3 below is unchanged.
-> 2. **The vault is still a stub.** `SecretsService` returns `REDACTED`/plaintext. Also `ED-02`.
+> 2. **The Studio Vault adapter is implemented but not connected.** The `hashicorp` KV v2 client
+>    is selected only with `STUDIO_VAULT_PROVIDER=hashicorp`; the shipped deployed default is
+>    `none`; tests alone use the fake. The legacy non-Studio `SecretsService` path still
+>    returns `REDACTED`/plaintext. Real endpoint/policy evidence remains `ED-02`.
 > 3. **No credentialed pilot may run until `ED-02` has linked completed tickets.** That is `ED-02`'s
 >    own `gate_note`, not this document's opinion. **Unchanged, and this is the item that matters.**
 >    *(The second half of this line — @po's ruling that story 10.19 may not be **drafted** while
 >    `ED-02`'s owner read TBD — is **spent**, corrected 2026-09-17 by story 10.19's own audit. That
 >    drafting gate was lifted on 2026-09-16 when the owner was assigned; 10.19 is drafted and
 >    validated GO 8/10. The **pilot** gate in the first half of this line is untouched by that.)*
-> 4. **Cookie-authenticated mutations have no CSRF control** (§10), and **the chart's
->    `configOverrides` mechanism has never reached a process** (§11). Both are recorded findings
->    with named owners, neither is fixed here, and neither is this story's to fix.
+> 4. **Cookie-authenticated mutations have no CSRF control** (§10). The former
+>    `configOverrides` delivery defect is resolved and guarded in §11.
 > 5. **Nothing about the streaming route has crossed a real proxy** (§7): not buffering, not the
 >    idle timeout, not the cookie route in federated mode, not cross-replica reconnect. `ED-06` /
 >    **SPK-02**, OPEN.
@@ -174,10 +176,13 @@ configuration shortcut.
 > against real Sonic (`ED-03`). If asked "is the video gone after 30 days", the true answer today
 > is: *the API stops serving it at 30 days; when the bytes are removed has not been measured.*
 
-**Still open (`ED-03` / SPK-03).** The runner writes to a filesystem-backed compatible store today.
-The real Sonic client swap is **story 10.19's** (@po's ruling on this story's open question 3); the
-denial tests that prove the scopes are real — runner `GET`/`LIST` denied, API `PUT` denied — are
-SPK-03's and have not been run.
+**Implemented, not yet certified (`ED-03` / SPK-03).** The runner and backend now have explicit
+`local` and `s3` providers. Local development shares one filesystem directory, so upload,
+manifest recovery, ranged playback and download exercise the complete path. Setting
+`objectStore.provider=s3` (Helm), `STUDIO_RUNNER_OBJECT_STORE_PROVIDER=s3` (runner) and
+`STUDIO_EVIDENCE_PROVIDER=s3` (backend) activates the Sonic-compatible clients. The real Sonic
+endpoint, lifecycle behavior and denial tests — runner `GET`/`LIST` denied, API `PUT` denied — are
+still SPK-03 and have not been run.
 
 ---
 
@@ -445,8 +450,16 @@ default somebody may change.
    Core-service bypass moves identity resolution onto `CoreServiceClient`, and the filter's own
    comment records why that is unavailable — *"while the target platform does not provide Core
    services."*
-2. **The vault is still a stub.** `SecretsService` returns `REDACTED`/plaintext and secret-use
-   authorization runs against a fake provider. Also `ED-02`.
+2. **The Studio real-vault flow exists but is default-off.** `hashicorp` performs bounded KV v2
+   reads using a mounted token file, returns the nonsecret Vault version, distinguishes `404` from
+   outages, and never sends values through the compile path. Local secret-use authorization still
+   uses the fake; the legacy `SecretsService` remains unchanged. Real policy/endpoint proof is
+   still `ED-02`.
+   **Every Studio secret needs an `allowedOrigins` key** (story 10.44, ADR-SC-003) beside its value
+   in the KV v2 entry: comma-separated `scheme://host[:port]` origins, http(s) only, at most 16.
+   The runner fills a secret only while the page origin is listed and otherwise fails the step with
+   `SECRET_ORIGIN_NOT_ALLOWED`. A missing, empty or malformed list binds the secret to no origin
+   (fail closed), and the API logs a WARN naming the reference.
 3. **`ED-02` has an owner now, and still has no ticket.** *(Corrected 2026-09-17 by story 10.19's
    AC-8 audit. This item used to read "`ED-02`'s owner reads `TBD — not assigned in sources`. @po
    could not name one and said so", and named an escalation path — **@pm** to Checks-squad
@@ -535,35 +548,22 @@ class of change ADR-002 §12 reserves for a ruling.
 route and of the CSRF control that route provides, and whether the application must add one.
 `ED-06`, OPEN.
 
-## 11. Configuration that does not reach the process — an open escalation
+## 11. Configuration delivery — resolved
 
 *Story 10.18b, AC-18.*
 
-**`configOverrides` has been inert since the chart was written.** `templates/configmap.yaml`
-renders each `configOverrides` entry as a ConfigMap **key**, and the containers consume the
-ConfigMap through `envFrom: configMapRef`. Kubernetes skips any key that is not a valid environment
-variable name and reports it as an `InvalidVariableNames` event on the pod — the pod starts, and the
-setting never arrives. Every dotted key in `configOverrides` is a setting somebody believed they had
-applied.
+The earlier escalation was valid: dotted keys were legal ConfigMap keys but invalid names when the
+same ConfigMap was consumed through `envFrom`, so Kubernetes silently skipped them. The chart now
+converts each operator-facing dotted/hyphenated key to Spring Boot's uppercase underscore relaxed-
+binding form before rendering it. For example,
+`spring.datasource.hikari.maximum-pool-size` becomes
+`SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE` (dots become underscores; dashes are removed).
 
-**Fifteen keys per value set, thirteen distinct**, across the API and worker ConfigMaps:
-`spring.datasource.hikari.maximum-pool-size`, `checks.scheduling.{batch-size,
-min-interval-seconds, poll-interval-ms, shutdown-timeout-sec}`, `checks.executor.max-concurrency`,
-and `checks.executor.source-limits.{HTTP, TCP, SPLUNK, GRAFANA, ITRS, APPDYNAMICS, UI_TEST}`.
-
-**The check is left RED, deliberately** (`studio-runner/test/deployment/envfrom-keys.test.ts`).
-Allowlisting the existing keys would produce a guard that cannot fail; converting them changes
-deployment behaviour in database and scheduler subsystems that a Studio story does not own and whose
-owners have not reviewed the change.
-
-**OWNER: @devops (Gage)** carries it to resolution. **MECHANISM: @architect (Aria)** — env-name
-conversion, a mounted application config file, or `SPRING_APPLICATION_JSON` is a
-configuration-architecture choice, not a rename.
-
-**No key story 10.18b added is affected**: `STUDIO_SSE_*`, `CHECKS_BYPASS_*`,
-`STUDIO_EXECUTION_ENABLED`, `STUDIO_DISPATCHER_ENABLED` and every `STUDIO_RUNNER_*` key render as
-container `env` entries with conforming names, and that is asserted separately so this escalation
-cannot be read as covering for them.
+The template fails closed when a source key cannot produce a valid environment name or when two
+source keys collapse to the same name. `studio-runner/test/deployment/envfrom-keys.test.ts` renders
+all four value sets, asserts zero invalid consumed keys, verifies representative API/worker values,
+and mutation-tests both new dotted keys and collisions. This repair makes the former intentionally
+red deployment tier green without allowlisting any bad key.
 
 ---
 
@@ -635,7 +635,8 @@ studio-runner-deployment,studio-runner-service,studio-runner-networkpolicy,servi
    to be auditable from the manifest rather than from a default somebody may change, and a rollback
    moves you to a manifest you have not read today.
 
-**A rollback does not undo `configOverrides`.** It never applied anything in the first place — §11.
+**A rollback to a chart before the §11 repair makes `configOverrides` inert again.** Re-run the
+deployment tier after any rollback and do not deploy while the env-name gate is red.
 
 <!-- ROLLBACK-C-FORWARD-ONLY-MIGRATIONS -->
 ### (c) The database does **not** roll back — every Studio schema change is forward-only
@@ -697,3 +698,55 @@ Record what happened in the open-items register
 ([`docs/qa/staging-acceptance-register.md`](../qa/staging-acceptance-register.md)) if the rollback
 exposed something this runbook does not describe. That register is the handover document; this
 runbook is the operating one.
+
+---
+
+## 13. Plain-English translation through Vertex AI
+
+Studio's supported user path starts with ordinary instructions. The API translates them through
+Vertex AI before review and confirmation; operators must never ask a user to replace those
+instructions with browser commands.
+
+### Deployment contract
+
+The staging and production value sets render these literals into the API container:
+
+```text
+STUDIO_GATEWAY_PROVIDER=vertex
+STUDIO_GATEWAY_MODEL=gemini-3.8-flash
+STUDIO_GATEWAY_CREDENTIALS_MODE=application-default
+CHECKS_SOURCES_UI_TEST=true
+```
+
+`STUDIO_GATEWAY_ENDPOINT`, `STUDIO_GATEWAY_PROJECT`, and `STUDIO_GATEWAY_LOCATION` come from the
+pre-provisioned ConfigMap named by `studioGateway.vertexConfigMap.name`. Its keys default to
+`endpoint`, `project`, and `location`. The repository intentionally does not guess these
+environment-owned identifiers. For `gemini-3.8-flash`, the ConfigMap's `location` must be a
+platform-approved `global`, `us`, or `eu` location; Helm cannot inspect the contents of an external
+ConfigMap, so this remains an explicit pre-deploy check. Before deploying, verify the ConfigMap
+exists in the release namespace and that the API service account has the minimum Vertex prediction
+permission through workload identity.
+
+The chart derives staging/production status from `backend.springProfile`, not from an operator-
+controlled label. It fails closed when a deployed profile selects `disabled` or
+`recorded-fixture`, when its environment label disagrees with the Spring profile, when
+`checks.sources.UI_TEST` is not explicitly true, when the provider is unknown, or when Vertex
+routing configuration is incomplete. Recorded fixtures are only valid with local/test application
+profiles; they are deterministic pipeline tests, not release evidence.
+
+### Pre-deploy check
+
+Render the target value set and inspect the API container. Confirm the provider and model literals,
+the three ConfigMap references, application-default credentials, and the rendered
+`CHECKS_SOURCES_UI_TEST=true` setting. Do not deploy if any routing reference is a literal
+placeholder, if the ConfigMap is absent, or if the source is disabled. Then run the three plain-English
+release scenarios through translation, readable review, explicit confirmation, browser execution,
+and evidence capture. A runner-only pass does not validate translation.
+
+### Failure handling and rollback
+
+If translation becomes unavailable, keep Save available and stop new translation/execution; do not
+switch a shared environment to recorded fixtures. Check API readiness and logs, ConfigMap presence,
+workload-identity binding, Vertex quota, and endpoint reachability. Roll back provider/model changes
+with the chart revision only after engaging the Studio execution kill switch and draining admitted
+runs as described in §12. Existing confirmed revisions and evidence remain revision-bound.

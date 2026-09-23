@@ -8,7 +8,7 @@ import {
   createFakeBrowserAdapter,
   createFakeClock,
   createRecordingStepReporter,
-} from '../../src/executor/adapters/fake.js';
+} from '../helpers/fakeAdapters.js';
 import type { LocatorSegment, Operation } from '../../src/executor/operations.js';
 import { validateArtifact } from '../../src/validator/index.js';
 import { loadReferenceFixtures, normalise, packageRoot } from '../helpers/corpus.js';
@@ -271,6 +271,14 @@ describe('reference corpus on the real pinned Chromium (10.3 AC-6b, 10.12 AC-18a
             steps: stepsFor(fixture, entry?.page ?? 'home.html', server),
             variables: fixture.values.variables,
             secrets: fixture.values.secrets,
+            // Every example runs on the loopback server, so that is the one origin its secrets
+            // are bound to (secret origin binding refuses a secret bound to none).
+            secretOrigins: Object.fromEntries(
+              Object.keys(fixture.values.secrets).map((id) => [
+                id,
+                [`http://127.0.0.1:${String(server.port)}`],
+              ]),
+            ),
           });
           try {
             statuses[fixture.name] = outcome.finished.map((event) => event.status);

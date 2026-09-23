@@ -215,10 +215,11 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
   /**
    * The body, and it is the only place this API decides what {@code POST /v1/runs} looks like.
    *
-   * <p>Exactly the fourteen keys the frozen {@code RunJob} declares, and nothing else. The closed
-   * key set is a security control rather than tidiness — it is what stops a job naming its own
-   * callback destination — and a producer that writes a fifteenth key is refused by the runner
-   * before capacity, before admission and before a browser.
+   * <p>Exactly the keys the frozen {@code RunJob} declares — its fourteen required ones plus the
+   * optional {@code referencePolicy} and {@code secretOrigins} — and nothing else. The closed key
+   * set is a security control rather than tidiness — it is what stops a job naming its own callback
+   * destination — and a producer that writes an undeclared key is refused by the runner before
+   * capacity, before admission and before a browser.
    *
    * <p>{@code InternalBodyContractConformanceTest} validates the bytes this method produces against
    * the schema read from {@code docs/specs/studio/openapi.yaml}, off a real socket. That assertion
@@ -246,9 +247,12 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
     body.put("deadlines", deadlines);
     body.put("videoKey", job.videoKey());
     body.put("manifestKey", job.manifestKey());
-    if (job.expectedIntent() != null) {
-      body.put("expectedIntent", job.expectedIntent());
+    if (job.referencePolicy() != null) {
+      body.put("referencePolicy", job.referencePolicy());
     }
+    // Nonsecret, and always sent: an empty map is the runner's fail-closed reading anyway, but an
+    // explicit one says this producer knows the field.
+    body.put("secretOrigins", job.secretOrigins());
     return body;
   }
 }

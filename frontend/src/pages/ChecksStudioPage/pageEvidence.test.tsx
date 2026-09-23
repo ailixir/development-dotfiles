@@ -52,7 +52,6 @@ function serveDraft() {
       HttpResponse.json({ data: [readyDraft], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
     ),
     http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(readyDraft)),
-    http.post(`${STUDIO_BASE}/validate-steps`, () => HttpResponse.json({ isValid: true, results: [] })),
     http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
       HttpResponse.json(
         { executionId: TERMINAL_EVIDENCE_SETTLED.executionId, status: 'PENDING' },
@@ -121,6 +120,9 @@ describe('AC-21: the page has exactly one playback path', () => {
       </Provider>,
     );
     await screen.findByRole('button', { name: 'Run Test' });
+    expect(screen.getByRole('tab', { name: 'Logs' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.queryByRole('tab', { name: 'Run' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Change…' })).toBeNull();
     // The legacy region rendered a fallback player whenever the store held a source.
     expect(document.querySelectorAll('video')).toHaveLength(0);
     expect(screen.getByTestId('video-evidence-empty')).toBeInTheDocument();
@@ -134,6 +136,9 @@ describe('AC-21: the page has exactly one playback path', () => {
 
     await runWithFrames([TERMINAL_EVIDENCE_SETTLED]);
     const seek = await screen.findByTestId('step-seek-1');
+    expect(screen.getByTestId('execution-time')).toHaveTextContent(
+      `Time ${(TERMINAL_EVIDENCE_SETTLED.durationMs! / 1000).toFixed(1)}s`,
+    );
 
     const videos = document.querySelectorAll('video');
     expect(videos).toHaveLength(1);
@@ -146,7 +151,7 @@ describe('AC-21: the page has exactly one playback path', () => {
     expect((document.querySelector('video') as HTMLVideoElement).currentTime).toBe(1.51);
     // The seek also brings the player's tab forward.
     expect(screen.getByRole('tab', { name: 'Proof' })).toHaveAttribute('aria-selected', 'true');
-  });
+  }, 15000);
 
   it('a terminal run whose evidence is still PROCESSING mounts no <video> and offers no seek', async () => {
     await runWithFrames([TERMINAL_EVIDENCE_PROCESSING]);

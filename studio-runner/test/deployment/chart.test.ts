@@ -585,7 +585,18 @@ describe('AC-5a — the reaping mechanism is chosen, named, and does not cost th
       // Asserted as a relation between three rendered facts — the shared namespace, the mounted
       // Secret and the container count — rather than as "there is one container", so it says what
       // it is for.
-      const pod = podSpec(runnerDeployment(render({ valuesFile })));
+      const pod =
+        podSpec(
+          runnerDeployment(
+            render({
+              valuesFile,
+              set: {
+                'objectStore.provider': 's3',
+                'objectStore.endpoint': 'https://sonic.internal.example',
+              },
+            }),
+          ),
+        );
       expect(pod.shareProcessNamespace).toBe(true);
       expect(
         (pod.volumes ?? []).filter((volume) => volume.secret !== undefined).length,
@@ -622,7 +633,13 @@ describe('AC-5a — the reaping mechanism is chosen, named, and does not cost th
       'utf8',
     );
 
-    const mutated = render({ chartDir: chart });
+    const mutated = render({
+      chartDir: chart,
+      set: {
+        'objectStore.provider': 's3',
+        'objectStore.endpoint': 'https://sonic.internal.example',
+      },
+    });
     const deployment = one(
       byKind(mutated, 'Deployment').filter((d) =>
         (d.metadata?.name ?? '').includes(RUNNER_FRAGMENT),
@@ -849,7 +866,13 @@ describe('AC-10a, AC-12 — two store principals, and one retention key', () => 
     (_label, valuesFile) => {
       // Asserted **unequal to each other** rather than each matched against a literal: two values
       // files that had drifted to the same name would satisfy a literal check twice over.
-      const outcome = render({ valuesFile });
+      const outcome = render({
+        valuesFile,
+        set: {
+          'objectStore.provider': 's3',
+          'objectStore.endpoint': 'https://sonic.internal.example',
+        },
+      });
       const runnerSecrets = (podSpec(runnerDeployment(outcome)).volumes ?? [])
         .map((volume) => volume.secret?.secretName)
         .filter((name): name is string => typeof name === 'string');
@@ -869,7 +892,18 @@ describe('AC-10a, AC-12 — two store principals, and one retention key', () => 
   );
 
   it('the runner’s declared credential keys carry no Get or List capability name', () => {
-    const volume = (podSpec(runnerDeployment(render())).volumes ?? []).find(
+    const volume = (
+      podSpec(
+        runnerDeployment(
+          render({
+            set: {
+              'objectStore.provider': 's3',
+              'objectStore.endpoint': 'https://sonic.internal.example',
+            },
+          }),
+        ),
+      ).volumes ?? []
+    ).find(
       (v) => v.secret !== undefined,
     );
     const keys = (volume?.secret?.items ?? []).map((item) => item.key ?? '');
@@ -904,7 +938,13 @@ describe('AC-10a, AC-12 — two store principals, and one retention key', () => 
     // CORS, which is story 10.18b's**, and labelling this row M12 would put a tick in a box the
     // other half has to fill. The retention pair is AC-12's own comparison and carries no M number.
 
-    const shared = render({ set: { 'studioRunner.objectStore.credentialsSecret': 'checks-api-object-store' } });
+    const shared = render({
+      set: {
+        'objectStore.provider': 's3',
+        'objectStore.endpoint': 'https://sonic.internal.example',
+        'studioRunner.objectStore.credentialsSecret': 'checks-api-object-store',
+      },
+    });
     const runnerSecrets = (podSpec(runnerDeployment(shared)).volumes ?? []).map(
       (v) => v.secret?.secretName,
     );

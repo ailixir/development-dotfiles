@@ -21,9 +21,9 @@ export function serveDraft(test: TestDto): void {
   );
 }
 
-export function renderPanel(test: TestDto): RenderResult {
+export function renderPanel(test: TestDto, detailsInitiallyOpen: boolean = true): RenderResult {
   serveDraft(test);
-  return render(<CompileReviewPanel testId={test.id} />);
+  return render(<CompileReviewPanel testId={test.id} detailsInitiallyOpen={detailsInitiallyOpen} />);
 }
 
 /** A promise a test resolves by hand, so an in-flight window is constructed rather than hoped for. */

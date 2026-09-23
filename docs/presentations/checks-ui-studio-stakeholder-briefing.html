@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Checks UI Studio Briefing</title>
+<style>
+:root{
+  --paper:#F5F7FA; --surface:#FFFFFF; --surface-2:#EDF1F6; --ink:#0F1E36; --ink-2:#34445E; --muted:#5A6A82; --line:#D8E0EA;
+  --accent:#0E7C6B; --accent-soft:#DDF1EC; --on-accent:#FFFFFF;
+  --amber:#8A5710; --amber-soft:#FBEFD9; --red:#B83A3A; --red-soft:#F9E1E1;
+  --screen:#12213B; --screen-2:#1C2E4E; --screen-ink:#E6EDF7; --screen-muted:#9FB0C9;
+  --p1:#DDF1EC; --p2:#E3E9F7; --p3:#F6EAD8; --p4:#ECE4F3;
+  --shadow:0 1px 2px rgba(15,30,54,.06),0 10px 28px rgba(15,30,54,.07);
+  --display:'Archivo','Arial Narrow',Arial,sans-serif;
+  --body:'IBM Plex Sans','Segoe UI',Helvetica,Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#0B1424; --surface:#111D33; --surface-2:#172642; --ink:#E8EEF7; --ink-2:#C4D0E2; --muted:#98A9C2; --line:#26385A;
+    --accent:#3BBFA8; --accent-soft:#103430; --on-accent:#06201C;
+    --amber:#E3AA4D; --amber-soft:#34260F; --red:#F07A7A; --red-soft:#3A1A1C;
+    --screen:#060D1A; --screen-2:#0F1B31; --screen-ink:#E6EDF7; --screen-muted:#8FA2BE;
+    --p1:#123A34; --p2:#1A2A4A; --p3:#3A2C15; --p4:#2C2340;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#0B1424; --surface:#111D33; --surface-2:#172642; --ink:#E8EEF7; --ink-2:#C4D0E2; --muted:#98A9C2; --line:#26385A;
+  --accent:#3BBFA8; --accent-soft:#103430; --on-accent:#06201C;
+  --amber:#E3AA4D; --amber-soft:#34260F; --red:#F07A7A; --red-soft:#3A1A1C;
+  --screen:#060D1A; --screen-2:#0F1B31; --screen-ink:#E6EDF7; --screen-muted:#8FA2BE;
+  --p1:#123A34; --p2:#1A2A4A; --p3:#3A2C15; --p4:#2C2340;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+
+.deck{height:100%;display:flex;flex-direction:column}
+.stage{flex:1;min-height:0;position:relative}
+.slide{position:absolute;inset:0;overflow-y:auto;padding:clamp(24px,5vh,64px) clamp(16px,6vw,96px) clamp(24px,4vh,48px);display:flex}
+.frame{width:100%;max-width:1240px;margin:auto;display:flex;flex-direction:column;gap:clamp(18px,3vh,32px)}
+.slide.is-entering .frame{animation:rise .35s ease both}
+@keyframes rise{from{opacity:.001;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.slide.is-entering .frame{animation:none}}
+
+.eyebrow{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0}
+h1,h2,h3{font-family:var(--display);font-stretch:112%;margin:0;text-wrap:balance;color:var(--ink)}
+h1{font-size:clamp(40px,7vw,92px);font-weight:800;line-height:.98;letter-spacing:-.01em}
+h2{font-size:clamp(27px,3.6vw,48px);font-weight:750;line-height:1.08;letter-spacing:-.005em;max-width:24ch}
+h3{font-size:clamp(18px,1.6vw,22px);font-weight:700;line-height:1.2}
+p{margin:0}
+.lede{font-size:clamp(17px,1.5vw,21px);color:var(--ink-2);max-width:62ch;line-height:1.5}
+.small{font-size:15px;color:var(--muted)}
+.mono{font-family:var(--mono)}
+.grid{display:grid;gap:clamp(12px,1.6vw,20px)}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,1.8vw,24px);display:flex;flex-direction:column;gap:10px}
+.panel p{color:var(--ink-2)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:.04em;padding:4px 10px;border-radius:999px;white-space:nowrap;width:fit-content}
+.chip.done{background:var(--accent-soft);color:var(--accent)}
+.chip.open{background:var(--amber-soft);color:var(--amber)}
+.chip.next{background:var(--surface-2);color:var(--ink-2)}
+.chip.fail{background:var(--red-soft);color:var(--red)}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+ul.clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+ul.clean li{padding-left:18px;position:relative;color:var(--ink-2)}
+ul.clean li::before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:7px;border-radius:2px;background:var(--accent)}
+.note{font-size:15px;color:var(--muted);max-width:90ch}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{text-align:left;vertical-align:top;padding:12px 16px;border-bottom:1px solid var(--line);font-size:15.5px}
+th{font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;color:var(--ink);white-space:nowrap}
+td{color:var(--ink-2)}
+
+/* cover */
+.cover{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(24px,5vw,72px);align-items:center}
+.cover .meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-family:var(--mono);font-size:13.5px;color:var(--muted)}
+.checklist{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.checklist header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 18px;background:var(--surface-2);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.checklist ol{list-style:none;margin:0;padding:8px 0}
+.checklist li{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:10px 18px;font-family:var(--mono);font-size:14.5px;color:var(--ink)}
+.checklist li .n{color:var(--muted)}
+.mark{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600}
+.mark.ok{background:var(--accent-soft);color:var(--accent)}
+.mark.bad{background:var(--red-soft);color:var(--red)}
+.mark.skip{background:var(--surface-2);color:var(--muted)}
+
+/* problem */
+.quote{border-left:3px solid var(--accent);padding:4px 0 4px clamp(14px,2vw,24px);display:flex;flex-direction:column;gap:10px}
+.quote blockquote{margin:0;font-family:var(--display);font-stretch:106%;font-weight:600;font-size:clamp(20px,2.3vw,30px);line-height:1.25;color:var(--ink);max-width:40ch;text-wrap:balance}
+.quote cite{font-style:normal;font-size:15px;color:var(--muted)}
+.sym{display:grid;grid-template-columns:1fr;gap:6px}
+.sym .arrow{font-family:var(--mono);font-size:12.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+/* product mock */
+.mock{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:clamp(10px,1.2vw,16px)}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.pane > header{padding:10px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
+.pane .body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.steps li{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;font-family:var(--mono);font-size:13px;color:var(--ink);line-height:1.45}
+.steps li.skipped{color:var(--muted)}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink-2);border-bottom:1px dashed var(--line);padding-bottom:8px}
+.kv b{font-weight:600;color:var(--ink)}
+.runbtn{align-self:flex-start;background:var(--accent);color:var(--on-accent);font-weight:600;font-size:14.5px;border-radius:10px;padding:9px 18px}
+.log{font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--muted);background:var(--surface-2);border-radius:8px;padding:10px 12px}
+.screen{background:var(--screen);border-radius:10px;aspect-ratio:16/10;max-width:100%;display:flex;flex-direction:column;overflow:hidden}
+.screen .bar{height:26px;background:var(--screen-2);display:flex;align-items:center;gap:6px;padding:0 10px}
+.screen .bar i{width:8px;height:8px;border-radius:50%;background:var(--screen-muted);opacity:.6}
+.screen .bar span{margin-left:8px;flex:1;height:12px;border-radius:6px;background:var(--screen);opacity:.9}
+.screen .page{flex:1;display:grid;place-items:center;padding:12px}
+.screen .login{width:62%;display:flex;flex-direction:column;gap:8px}
+.screen .login div{height:12px;border-radius:4px;background:var(--screen-2)}
+.screen .login div.btn{height:18px;width:45%;background:var(--accent);opacity:.85}
+.scrub{position:relative;height:30px}
+.scrub .track{position:absolute;left:0;right:0;top:13px;height:4px;border-radius:2px;background:var(--line)}
+.scrub .fill{position:absolute;left:0;top:13px;height:4px;border-radius:2px;background:var(--accent);width:74%}
+.scrub .tk{position:absolute;top:6px;transform:translateX(-50%);font-family:var(--mono);font-size:11px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:2px solid var(--accent);color:var(--ink)}
+.scrub .tk.bad{border-color:var(--red)}
+.scrub .tk.skip{border-color:var(--line);color:var(--muted)}
+.caption{font-size:14.5px;color:var(--muted);padding:0 2px}
+
+/* personas */
+.persona{display:grid;grid-template-columns:auto 1fr;gap:14px 16px;align-items:start}
+.avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-stretch:110%;font-weight:750;font-size:22px;color:var(--ink)}
+.persona .who{display:flex;flex-direction:column;gap:2px}
+.persona .role{font-size:14.5px;color:var(--muted)}
+.persona .body{grid-column:1/-1;display:flex;flex-direction:column;gap:10px}
+.persona q{font-style:italic;color:var(--ink-2);quotes:"\201C" "\201D"}
+.tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+
+/* journey */
+.journey{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,1.2vw,16px);counter-reset:j}
+.journey li{counter-increment:j;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;position:relative}
+.journey li::before{content:counter(j);font-family:var(--display);font-stretch:112%;font-weight:800;font-size:34px;line-height:1;color:var(--accent)}
+.journey li p{font-size:15px;color:var(--ink-2)}
+
+/* goals */
+.stat{display:flex;flex-direction:column;gap:6px}
+.stat .v{font-family:var(--display);font-stretch:115%;font-weight:800;font-size:clamp(40px,5.2vw,68px);line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.stat .k{font-weight:600;color:var(--ink)}
+.stat .d{font-size:15px;color:var(--ink-2)}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.metrics div{padding:14px 18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+.metrics b{font-size:15px}
+.metrics span{font-size:14.5px;color:var(--ink-2)}
+
+/* changes */
+.change{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center}
+.change .was{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.change .to{color:var(--ink);font-weight:500}
+.change .arr{font-family:var(--mono);color:var(--accent)}
+.impact{font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;position:relative}
+.tl::before{content:"";position:absolute;left:10px;right:10px;top:9px;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--accent) 0 12%,var(--line) 12% 100%)}
+.tl li{position:relative;padding-top:34px;display:flex;flex-direction:column;gap:8px}
+.tl li::before{content:"";position:absolute;top:0;left:0;width:22px;height:22px;border-radius:50%;background:var(--surface);border:3px solid var(--line)}
+.tl li.done::before{background:var(--accent);border-color:var(--accent)}
+.tl li.open::before{border-color:var(--amber)}
+.tl li.next::before{border-color:var(--ink-2)}
+.tl .when{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.tl p{font-size:14.5px;color:var(--ink-2)}
+.post{border:1px dashed var(--line);border-radius:14px;padding:clamp(14px,1.6vw,20px);display:grid;grid-template-columns:auto 1fr;gap:10px 24px;align-items:start;background:var(--surface)}
+.post .lbl{display:flex;flex-direction:column;gap:4px}
+.post ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+
+/* deps */
+.dep{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:start}
+.dep .own{grid-column:1/-1;font-size:14px;color:var(--muted)}
+
+/* asks */
+.asks{counter-reset:a;list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.asks li{counter-increment:a;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;color:var(--ink-2)}
+.asks li::before{content:counter(a);font-family:var(--display);font-stretch:112%;font-weight:800;font-size:22px;line-height:1.2;color:var(--accent)}
+.asks b{color:var(--ink)}
+
+/* drawn explanations */
+.diagram{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:clamp(10px,1.5vw,18px)}
+.diagram svg{display:block;width:100%;min-width:760px;height:auto;max-height:56vh}
+h2.tight{font-size:clamp(24px,2.9vw,40px);max-width:46ch}
+.d-zone{fill:var(--surface-2);stroke:var(--line);stroke-width:1.5}
+.d-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.d-core{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.d-ext{fill:var(--paper);stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4}
+.d-code{fill:var(--screen)}
+.d-pill{fill:var(--accent)}
+.d-t{font-family:var(--body);font-size:17px;font-weight:600;fill:var(--ink)}
+.d-s{font-family:var(--body);font-size:14px;fill:var(--ink-2)}
+.d-m{font-family:var(--mono);font-size:13px;fill:var(--ink)}
+.d-mc{font-family:var(--mono);font-size:12px;fill:var(--screen-ink)}
+.d-lbl{font-family:var(--body);font-size:13px;fill:var(--muted)}
+.d-red{font-family:var(--body);font-size:13px;font-weight:600;fill:var(--red)}
+.d-zl{font-family:var(--mono);font-size:12px;letter-spacing:.12em;fill:var(--muted)}
+.d-num{font-family:var(--display);font-weight:800;font-size:24px;fill:var(--accent)}
+.d-on{font-family:var(--body);font-size:14px;font-weight:600;fill:var(--on-accent)}
+.d-line{stroke:var(--ink-2);stroke-width:2;fill:none}
+.d-dash{stroke:var(--muted);stroke-width:2;fill:none;stroke-dasharray:7 6}
+.d-warn{stroke:var(--amber);stroke-width:2;fill:none;stroke-dasharray:6 5}
+.d-head{fill:var(--ink-2)}
+.d-head-m{fill:var(--muted)}
+.d-head-w{fill:var(--amber)}
+.d-shield{fill:var(--accent-soft);stroke:var(--accent);stroke-width:3}
+.d-tick{stroke:var(--accent);stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.d-lock{fill:var(--accent)}
+.d-shackle{stroke:var(--accent);stroke-width:7;fill:none}
+.d-hole{fill:var(--on-accent)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:14.5px;color:var(--muted);align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{display:inline-block;width:22px;height:14px;border-radius:4px}
+.legend i.core{background:var(--accent-soft);border:1.5px solid var(--accent)}
+.legend i.ext{background:var(--paper);border:1.5px dashed var(--muted)}
+.legend i.ln{height:0;border-top:2px dashed var(--muted);border-radius:0}
+.nope{display:flex;flex-wrap:wrap;gap:8px}
+.nope span{display:inline-flex;align-items:center;gap:6px;font-size:14.5px;padding:5px 12px;border-radius:999px;background:var(--red-soft);color:var(--red)}
+.nope span::before{content:"\2715";font-weight:700}
+.status{display:flex;gap:12px;align-items:flex-start;background:var(--amber-soft);border-radius:12px;padding:14px 16px;color:var(--ink);font-size:15px}
+.status b{color:var(--amber);white-space:nowrap}
+
+/* nav as a video scrubber */
+.nav{flex:none;border-top:1px solid var(--line);background:var(--surface);padding:10px clamp(16px,3vw,32px) calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:auto 1fr auto auto;gap:clamp(10px,2vw,20px);align-items:center}
+.nav button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;height:38px;min-width:38px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:500}
+.btn:hover{background:var(--surface-2)}
+.btn:disabled{opacity:.4;cursor:default}
+.nav-scrub{position:relative;height:32px}
+.nav-scrub .track{position:absolute;left:0;right:0;top:14px;height:4px;border-radius:2px;background:var(--line)}
+.nav-scrub .fill{position:absolute;left:0;top:14px;height:4px;border-radius:2px;background:var(--accent);transition:width .25s ease}
+.nav-scrub button{position:absolute;top:8px;width:16px;height:16px;transform:translateX(-50%);border-radius:50%;border:2px solid var(--line);background:var(--surface);padding:0}
+.nav-scrub button.past{border-color:var(--accent);background:var(--accent)}
+.nav-scrub button.cur{border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 4px var(--accent-soft)}
+.nav-title{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;display:flex;gap:10px;align-items:center}
+.nav-title b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+@media (max-width:1000px){
+  .cover{grid-template-columns:1fr}
+  .mock{grid-template-columns:1fr}
+  .journey{grid-template-columns:1fr 1fr}
+  .tl{grid-template-columns:1fr;gap:18px}
+  .tl::before{left:9px;right:auto;top:10px;bottom:10px;width:4px;height:auto;background:linear-gradient(180deg,var(--accent) 0 12%,var(--line) 12% 100%)}
+  .tl li{padding-top:0;padding-left:38px}
+  .change{grid-template-columns:1fr}
+  .change .arr{transform:rotate(90deg);width:fit-content}
+  .post{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .journey{grid-template-columns:1fr}
+  .nav{grid-template-columns:auto 1fr auto}
+  .nav-title .t{display:none}
+  .nav .pt{display:none}
+}
+@media print{
+  html,body{height:auto}
+  .deck{display:block;height:auto}
+  .stage{position:static}
+  .slide,.slide[hidden]{display:flex!important;position:static;overflow:visible;min-height:100vh;break-after:page}
+  .nav{display:none}
+}
+</style>
+
+<div class="deck" id="deck">
+<main class="stage" id="stage" aria-live="polite">
+
+<!-- 1 · cover -->
+<section class="slide" id="s1" data-label="Overview">
+  <div class="frame cover">
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <p class="eyebrow">Checks · PUT Platform · Stakeholder briefing</p>
+      <h1>Checks UI Studio</h1>
+      <p class="lede">Write a UI check as a plain-English checklist. Watch a real browser run it. Keep the video as proof.</p>
+      <div class="meta"><span>September 2026</span><span>Product, personas, V1 scope and delivery plan</span></div>
+    </div>
+    <figure class="checklist" style="margin:0" aria-label="An example Studio checklist with each step's result">
+      <header><span>Login flow · example from the PRD</span><span class="chip done">Passed</span></header>
+      <ol>
+        <li><span class="n">1.</span><span>Go to "https://www.citi.com"</span><span class="mark ok" aria-label="passed">✓</span></li>
+        <li><span class="n">2.</span><span>Click "Sign On"</span><span class="mark ok" aria-label="passed">✓</span></li>
+        <li><span class="n">3.</span><span>Wait for the text "User ID" to appear</span><span class="mark ok" aria-label="passed">✓</span></li>
+        <li><span class="n">4.</span><span>Check that the URL contains "login"</span><span class="mark ok" aria-label="passed">✓</span></li>
+      </ol>
+    </figure>
+  </div>
+</section>
+
+<!-- 2 · problem -->
+<section class="slide" id="s2" data-label="The problem" hidden>
+  <div class="frame">
+    <p class="eyebrow">The problem</p>
+    <h2>UI checks today are manual, unrecorded and closed to non-developers</h2>
+    <div class="quote">
+      <blockquote>“I waste 45 minutes every morning running through a wiki page with 30 manual steps. It’s easy to miss something.”</blockquote>
+      <cite>Priya, L2 App Support — PRD persona</cite>
+    </div>
+    <div class="grid g4">
+      <div class="panel sym"><h3>Manual walkthroughs</h3><span class="arrow">Costs</span><p>About 45 minutes of skilled engineer time per person per day, and no durable evidence it was done.</p></div>
+      <div class="panel sym"><h3>One-off scripts</h3><span class="arrow">Costs</span><p>Tribal knowledge. A script goes stale the day its author changes teams.</p></div>
+      <div class="panel sym"><h3>A log line, not proof</h3><span class="arrow">Costs</span><p>“Did the login flow actually work at 9 a.m.?” can’t be answered with confidence during an incident.</p></div>
+      <div class="panel sym"><h3>Code required</h3><span class="arrow">Costs</span><p>L2 and L3 support, the people who run these checks daily, can’t build or maintain them.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · product -->
+<section class="slide" id="s3" data-label="The product" hidden>
+  <div class="frame">
+    <p class="eyebrow">The product</p>
+    <h2>From checklist to reality</h2>
+    <p class="lede">One screen separates what you asked for, what the system will do, and the proof that it did it. Studio is the flagship of Checks: other check types query a system to prove it is healthy; Studio uses it the way a customer would, on camera.</p>
+    <div class="mock" aria-label="Illustration of Studio's three panels">
+      <div class="pane">
+        <header>1 · The checklist</header>
+        <div class="body">
+          <ul class="steps">
+            <li><span class="mark ok" aria-label="passed">✓</span><span>Go to "https://www.citi.com"</span></li>
+            <li><span class="mark ok" aria-label="passed">✓</span><span>Click "Sign On"</span></li>
+            <li><span class="mark bad" aria-label="failed">✗</span><span>Wait for the text "User ID" to appear</span></li>
+            <li class="skipped"><span class="mark skip" aria-label="not attempted">–</span><span>Check that the URL contains "login"</span></li>
+          </ul>
+          <p class="caption" style="margin-top:auto">A failing step stops the run. Later steps show as not attempted, never as passed.</p>
+        </div>
+      </div>
+      <div class="pane">
+        <header>2 · Control tower</header>
+        <div class="body">
+          <div class="kv"><span>Test</span><b>Login flow</b></div>
+          <div class="kv"><span>Environment</span><b>UAT</b></div>
+          <div class="kv"><span>Version</span><b class="chip done">Ready</b></div>
+          <span class="runbtn" aria-hidden="true">Run test</span>
+          <div class="log">step 2 · click "Sign On" · passed<br>step 3 · waiting for "User ID"…</div>
+          <p class="caption" style="margin-top:auto">Run translates the steps and starts the browser; the generated code is one click away.</p>
+        </div>
+      </div>
+      <div class="pane">
+        <header>3 · Visual proof</header>
+        <div class="body">
+          <div class="screen" aria-hidden="true"><div class="bar"><i></i><i></i><i></i><span></span></div><div class="page"><div class="login"><div></div><div></div><div class="btn"></div></div></div></div>
+          <div class="scrub" aria-hidden="true"><div class="track"></div><div class="fill"></div><span class="tk" style="left:6%">1</span><span class="tk" style="left:34%">2</span><span class="tk bad" style="left:62%">3</span><span class="tk skip" style="left:94%">4</span></div>
+          <p class="caption">Click a step to jump the video to it. Recordings are private and expire after 30 days.</p>
+        </div>
+      </div>
+    </div>
+    <p class="note">Illustration. Screen content and log lines are examples, not a recorded run.</p>
+  </div>
+</section>
+
+<!-- 4 · personas -->
+<section class="slide" id="s4" data-label="Personas" hidden>
+  <div class="frame">
+    <p class="eyebrow">Who it’s for</p>
+    <h2>Four personas, one of them does the daily work</h2>
+    <div class="grid g4">
+      <article class="panel persona">
+        <div class="avatar" style="background:var(--p1)" aria-hidden="true">P</div>
+        <div class="who"><h3>Priya</h3><span class="role">L2 App Support</span></div>
+        <div class="body"><span class="tag">Primary user</span><p>Writes the checklist and runs it every day. The 45-minute morning is the problem Studio solves.</p><q>It’s easy to miss something.</q></div>
+      </article>
+      <article class="panel persona">
+        <div class="avatar" style="background:var(--p2)" aria-hidden="true">D</div>
+        <div class="who"><h3>David</h3><span class="role">SRE / DevOps Engineer</span></div>
+        <div class="body"><span class="tag">Power user</span><p>Builds the complex flows and secrets, and is first responder when translation or the browser runner is unhealthy.</p><q>I have no idea where their ‘health check’ script is.</q></div>
+      </article>
+      <article class="panel persona">
+        <div class="avatar" style="background:var(--p3)" aria-hidden="true">M</div>
+        <div class="who"><h3>Maria</h3><span class="role">Operations Analyst</span></div>
+        <div class="body"><span class="tag">Evidence consumer</span><p>Uses the video proof in status reports and incident retrospectives. This is where the evidence pays off.</p></div>
+      </article>
+      <article class="panel persona">
+        <div class="avatar" style="background:var(--p4)" aria-hidden="true">R</div>
+        <div class="who"><h3>Robert</h3><span class="role">IT Director</span></div>
+        <div class="body"><span class="tag">Business sponsor</span><p>Needs adoption, satisfaction, and assurance that a capability involving AI is governed rather than a black box.</p></div>
+      </article>
+    </div>
+    <p class="note">Also at the table: Security &amp; Compliance (accepts the secrets and video-retention model), Platform/SRE (cluster, network and storage controls) and the Checks squad (on-call owner of the runner).</p>
+  </div>
+</section>
+
+<!-- 5 · journey -->
+<section class="slide" id="s5" data-label="User journey" hidden>
+  <div class="frame">
+    <p class="eyebrow">User journey</p>
+    <h2>Five steps from a written checklist to an investigated failure</h2>
+    <ol class="journey">
+      <li><h3>Write</h3><p>Priya types numbered steps in plain English, referencing variables and vaulted secrets by name. Pasted passwords are refused.</p></li>
+      <li><h3>Press Run</h3><p>Run saves the steps and, when needed, the internal AI turns them into browser code. Pressing Run is the go-ahead; there’s no separate approval.</p></li>
+      <li><h3>Watch it run</h3><p>A real, isolated browser runs the saved version. Step status and logs arrive live; closing the tab doesn’t restart or cancel it.</p></li>
+      <li><h3>Review proof</h3><p>Pass, fail and not-attempted steps show next to the video. The outcome and the video’s availability are reported separately.</p></li>
+      <li><h3>Investigate</h3><p>Clicking step 3 jumps the video to the moment it began, so the failure can be watched rather than guessed at.</p></li>
+    </ol>
+    <p class="note">Each run records the exact version it used. Later runs reuse it until the steps, run settings or platform version change.</p>
+  </div>
+</section>
+
+<!-- 6 · english to code -->
+<section class="slide" id="s6" data-label="English to code" hidden>
+  <div class="frame">
+    <p class="eyebrow">How English becomes code</p>
+    <h2 class="tight">The AI writes the code, a safety check guards it, and the exact version is locked before it runs.</h2>
+    <div class="diagram">
+    <svg viewBox="0 0 1330 350" role="img" aria-labelledby="engT engD"><title id="engT">How an English step becomes browser code and runs</title><desc id="engD">1. You write a step in your own words. 2. You press Run, which saves your changes and does the rest. 3. Studio’s AI turns each step into browser actions; one sentence can become several. 4. A safety check lets only allowed browser actions through; if not, the AI gets two more tries, and if it still fails nothing is locked and the test does not run. 5. The exact version is saved and tied to the person who ran it. 6. A real browser runs it, with live progress and a video.</desc>
+      <defs><marker id="ea" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-head"/></marker><marker id="ew" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-head-w"/></marker></defs>
+      <rect x="10" y="30" width="190" height="250" rx="14" class="d-box"/>
+      <text x="24" y="66" class="d-num">1</text>
+      <text x="48" y="64" class="d-t">You write</text>
+      <rect x="230" y="30" width="160" height="250" rx="14" class="d-box"/>
+      <text x="244" y="66" class="d-num">2</text>
+      <text x="268" y="64" class="d-t">Press Run</text>
+      <rect x="420" y="30" width="300" height="250" rx="14" class="d-box"/>
+      <text x="434" y="66" class="d-num">3</text>
+      <text x="458" y="64" class="d-t">AI writes code</text>
+      <rect x="750" y="30" width="170" height="250" rx="14" class="d-core"/>
+      <text x="764" y="66" class="d-num">4</text>
+      <text x="788" y="64" class="d-t">Safety check</text>
+      <rect x="950" y="30" width="170" height="250" rx="14" class="d-core"/>
+      <text x="964" y="66" class="d-num">5</text>
+      <text x="988" y="64" class="d-t">Locked in</text>
+      <rect x="1150" y="30" width="170" height="250" rx="14" class="d-core"/>
+      <text x="1164" y="66" class="d-num">6</text>
+      <text x="1188" y="64" class="d-t">Runs &amp; records</text>
+      <rect x="24" y="86" width="162" height="86" rx="8" class="d-box"/>
+      <text x="34" y="112" class="d-s">Log in as &lt;var USER&gt;</text>
+      <text x="34" y="132" class="d-s">with the password</text>
+      <text x="34" y="152" class="d-s">&lt;secret LOGIN_PW&gt;</text>
+      <text x="105" y="215" class="d-s" text-anchor="middle">Your own words,</text>
+      <text x="105" y="234" class="d-s" text-anchor="middle">no fixed phrasing</text>
+      <rect x="258" y="114" width="104" height="40" rx="20" class="d-pill"/>
+      <path d="M282,126 L282,142 L294,134 Z" style="fill:var(--on-accent)"/>
+      <text x="318" y="139" class="d-on" text-anchor="middle">Run</text>
+      <text x="310" y="215" class="d-s" text-anchor="middle">Saves your changes</text>
+      <text x="310" y="234" class="d-s" text-anchor="middle">and does the rest</text>
+      <rect x="432" y="84" width="276" height="130" rx="8" class="d-code"/>
+      <text x="442" y="106" class="d-mc" xml:space="preserve">page.getByLabel(&apos;User ID&apos;)</text>
+      <text x="442" y="125" class="d-mc" xml:space="preserve">  .fill(vars.get(&apos;USER&apos;));</text>
+      <text x="442" y="144" class="d-mc" xml:space="preserve">page.getByLabel(&apos;Password&apos;)</text>
+      <text x="442" y="163" class="d-mc" xml:space="preserve">  .fill(vars.secret(&apos;LOGIN_PW&apos;));</text>
+      <text x="442" y="182" class="d-mc" xml:space="preserve">page.getByRole(&apos;button&apos;,</text>
+      <text x="442" y="201" class="d-mc" xml:space="preserve">  { name: &apos;Sign On&apos; }).click();</text>
+      <text x="436" y="240" class="d-s">Studio’s AI turns each step into</text>
+      <text x="436" y="259" class="d-s">browser actions: here, one became three</text>
+      <path d="M835,92 L875,107 V137 C875,162 857,177 835,185 C813,177 795,162 795,137 V107 Z" class="d-shield"/>
+      <path d="M817,137 L830,150 L855,124" class="d-tick"/>
+      <text x="835" y="215" class="d-s" text-anchor="middle">Only allowed</text>
+      <text x="835" y="234" class="d-s" text-anchor="middle">browser actions pass</text>
+      <path d="M1015,130 V114 a20,20 0 0 1 40,0 V130" class="d-shackle"/>
+      <rect x="1003" y="128" width="64" height="52" rx="8" class="d-lock"/>
+      <circle cx="1035" cy="152" r="6" class="d-hole"/>
+      <text x="1035" y="215" class="d-s" text-anchor="middle">Exact version saved,</text>
+      <text x="1035" y="234" class="d-s" text-anchor="middle">tied to who ran it</text>
+      <rect x="1187" y="102" width="96" height="64" rx="8" class="d-code"/>
+      <path d="M1225,120 L1225,148 L1249,134 Z" style="fill:var(--accent)"/>
+      <rect x="1187" y="176" width="96" height="5" rx="2.5" style="fill:var(--line)"/>
+      <rect x="1187" y="176" width="52" height="5" rx="2.5" style="fill:var(--accent)"/>
+      <text x="1235" y="215" class="d-s" text-anchor="middle">Real browser, live</text>
+      <text x="1235" y="234" class="d-s" text-anchor="middle">progress and video</text>
+      <line x1="200" y1="155" x2="228" y2="155" class="d-line" marker-end="url(#ea)"/>
+      <line x1="390" y1="155" x2="418" y2="155" class="d-line" marker-end="url(#ea)"/>
+      <line x1="720" y1="155" x2="748" y2="155" class="d-line" marker-end="url(#ea)"/>
+      <line x1="920" y1="155" x2="948" y2="155" class="d-line" marker-end="url(#ea)"/>
+      <line x1="1120" y1="155" x2="1148" y2="155" class="d-line" marker-end="url(#ea)"/>
+      <path d="M835,280 V315 H570 V282" class="d-warn" marker-end="url(#ew)"/>
+      <text x="702" y="338" class="d-lbl" text-anchor="middle">Not allowed? The AI gets two more tries. If it still fails, nothing is locked and the test doesn’t run.</text>
+    </svg>
+    </div>
+    <div class="grid g3">
+      <div class="panel"><h3>Your own words</h3><p>No fixed phrasing. One sentence can become several browser actions.</p></div>
+      <div class="panel"><h3>Checked every time</h3><p>The locked code is checked again before every run, right before the browser starts.</p></div>
+      <div class="panel"><h3>Not an AI call per run</h3><p>The AI runs only when the steps, run settings or platform version change. Other runs reuse the locked version.</p></div>
+    </div>
+    <p class="note">The generated code appears on the Code tab after the first successful run. The AI only ever sees a secret’s name, never its value. Example is illustrative.</p>
+  </div>
+</section>
+
+<!-- 7 · architecture -->
+<section class="slide" id="s7" data-label="Architecture" hidden>
+  <div class="frame">
+    <p class="eyebrow">Architecture</p>
+    <h2 class="tight">How the pieces fit together</h2>
+    <div class="diagram">
+    <svg viewBox="0 0 1200 600" role="img" aria-labelledby="arT arD"><title id="arT">Checks UI Studio architecture</title><desc id="arD">An engineer uses the Studio screen, which reaches the Checks API through the identity gateway. The API saves tests and results in the database and asks the internal AI gateway for browser steps only while a test is being written. The run dispatcher picks up queued runs, fetches secret values from Vault at run time and starts the isolated browser runner. The runner uses your application like a customer, stores video in private storage and reports live progress and results to the API.</desc>
+      <defs><marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-head"/></marker><marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-head-m"/></marker></defs>
+      <rect x="205" y="18" width="460" height="490" rx="16" class="d-zone"/>
+      <text x="222" y="42" class="d-zl">CHECKS PLATFORM</text>
+      <rect x="705" y="372" width="210" height="132" rx="16" class="d-zone"/>
+      <text x="905" y="392" class="d-zl" text-anchor="end">ISOLATED SERVICE</text>
+      <rect x="10" y="60" width="180" height="80" rx="12" class="d-box"/>
+      <text x="26" y="90" class="d-t">Engineer</text>
+      <text x="26" y="112" class="d-s">Priya, L2 support</text>
+      <rect x="220" y="60" width="200" height="80" rx="12" class="d-box"/>
+      <text x="236" y="90" class="d-t">Studio screen</text>
+      <text x="236" y="112" class="d-s">Write · run · watch</text>
+      <rect x="250" y="165" width="140" height="36" rx="18" class="d-ext"/>
+      <text x="320" y="188" class="d-s" text-anchor="middle">Identity gateway</text>
+      <rect x="220" y="225" width="200" height="90" rx="12" class="d-core"/>
+      <text x="236" y="255" class="d-t">Checks API</text>
+      <text x="236" y="277" class="d-s">Checks access, saves</text>
+      <text x="236" y="296" class="d-s">tests, serves results</text>
+      <rect x="220" y="410" width="200" height="80" rx="12" class="d-box"/>
+      <text x="236" y="440" class="d-t">Database</text>
+      <text x="236" y="462" class="d-s">Tests and results</text>
+      <rect x="990" y="225" width="190" height="90" rx="12" class="d-ext"/>
+      <text x="1006" y="255" class="d-t">AI gateway</text>
+      <text x="1006" y="277" class="d-s">Internal · drafts</text>
+      <text x="1006" y="296" class="d-s">browser steps</text>
+      <rect x="470" y="410" width="180" height="80" rx="12" class="d-core"/>
+      <text x="486" y="440" class="d-t">Run dispatcher</text>
+      <text x="486" y="462" class="d-s">Starts every run</text>
+      <rect x="470" y="530" width="180" height="60" rx="12" class="d-ext"/>
+      <text x="486" y="556" class="d-t">Vault</text>
+      <text x="486" y="577" class="d-s">Secret values</text>
+      <rect x="720" y="410" width="180" height="80" rx="12" class="d-core"/>
+      <text x="736" y="440" class="d-t">Browser runner</text>
+      <text x="736" y="462" class="d-s">Runs and records</text>
+      <rect x="720" y="530" width="180" height="60" rx="12" class="d-box"/>
+      <text x="736" y="556" class="d-t">Your application</text>
+      <text x="736" y="577" class="d-s">Under test</text>
+      <rect x="990" y="410" width="190" height="80" rx="12" class="d-ext"/>
+      <text x="1006" y="440" class="d-t">Video storage</text>
+      <text x="1006" y="462" class="d-s">Private, 30 days</text>
+      <line x1="190" y1="100" x2="218" y2="100" class="d-line" marker-end="url(#aa)"/>
+      <line x1="320" y1="140" x2="320" y2="163" class="d-line" marker-end="url(#aa)" marker-start="url(#aa)"/>
+      <line x1="320" y1="201" x2="320" y2="223" class="d-line" marker-end="url(#aa)" marker-start="url(#aa)"/>
+      <line x1="280" y1="315" x2="280" y2="408" class="d-line" marker-end="url(#aa)" marker-start="url(#aa)"/>
+      <line x1="420" y1="450" x2="468" y2="450" class="d-line" marker-end="url(#aa)"/>
+      <line x1="650" y1="450" x2="718" y2="450" class="d-line" marker-end="url(#aa)"/>
+      <line x1="560" y1="490" x2="560" y2="528" class="d-line" marker-end="url(#aa)" marker-start="url(#aa)"/>
+      <line x1="810" y1="490" x2="810" y2="528" class="d-line" marker-end="url(#aa)" marker-start="url(#aa)"/>
+      <line x1="900" y1="450" x2="988" y2="450" class="d-line" marker-end="url(#aa)"/>
+      <line x1="420" y1="270" x2="988" y2="270" class="d-dash" marker-end="url(#am)" marker-start="url(#am)"/>
+      <path d="M745,410 V355 H380 V317" class="d-line" marker-end="url(#aa)"/>
+      <text x="705" y="258" class="d-lbl" text-anchor="middle">Only while writing a test, never during a run</text>
+      <text x="595" y="346" class="d-lbl" text-anchor="middle">Live progress and results</text>
+      <text x="685" y="441" class="d-lbl" text-anchor="middle">Start</text>
+      <text x="945" y="441" class="d-lbl" text-anchor="middle">Video</text>
+      <text x="572" y="517" class="d-lbl">Secrets, at run time</text>
+      <text x="822" y="517" class="d-lbl">Used like a customer</text>
+    </svg>
+    </div>
+    <div class="legend">
+      <span><i class="core"></i>Built for Studio</span>
+      <span><i class="ext"></i>Existing enterprise service</span>
+      <span><i class="ln"></i>Used only while writing a test</span>
+    </div>
+    <p class="note">The browser runs in its own isolated service, so a busy Studio can’t slow down other checks. Videos play back through the Checks API; nobody gets a direct link.</p>
+  </div>
+</section>
+
+<!-- 8 · secrets -->
+<section class="slide" id="s8" data-label="Secrets &amp; Vault" hidden>
+  <div class="frame">
+    <p class="eyebrow">Secrets &amp; compliance</p>
+    <h2 class="tight">Secrets go straight to Vault. Studio borrows one only for the length of a run.</h2>
+    <div class="diagram">
+    <svg viewBox="0 0 1220 355" role="img" aria-labelledby="scT scD"><title id="scT">How Studio saves and uses secrets with Vault</title><desc id="scD">When a secret is saved: the secret owner enters the value in Studio’s secret form, and Studio sends it straight to HashiCorp Vault, keeping no copy, at a path set by convention from the CSI, environment, test id and secret name. When a test runs: the test definition holds only the secret name; a permission check confirms this person may use the secret for this CSI, otherwise the run is refused; the run dispatcher reads the value from Vault over HTTPS right before the run; the browser runner types it into your application and discards it.</desc>
+      <defs><marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-head"/></marker></defs>
+      <text x="10" y="26" class="d-zl">WHEN A SECRET IS SAVED</text>
+      <text x="10" y="196" class="d-zl">WHEN A TEST RUNS</text>
+      <rect x="10" y="40" width="200" height="100" rx="12" class="d-box"/>
+      <text x="26" y="70" class="d-t">Secret owner</text>
+      <text x="26" y="92" class="d-s">Enters the value in</text>
+      <text x="26" y="111" class="d-s">Studio’s secret form</text>
+      <rect x="260" y="40" width="200" height="100" rx="12" class="d-core"/>
+      <text x="276" y="70" class="d-t">Checks UI Studio</text>
+      <text x="276" y="92" class="d-s">Sends it straight to</text>
+      <text x="276" y="111" class="d-s">Vault; keeps no copy</text>
+      <rect x="510" y="40" width="200" height="100" rx="12" class="d-ext"/>
+      <text x="526" y="70" class="d-t">HashiCorp Vault</text>
+      <text x="526" y="92" class="d-m">csi/env/test-id/name</text>
+      <text x="526" y="114" class="d-s">Path set by convention</text>
+      <rect x="10" y="210" width="200" height="110" rx="12" class="d-core"/>
+      <text x="26" y="240" class="d-t">Test definition</text>
+      <text x="26" y="262" class="d-m">&lt;secret LOGIN_PW&gt;</text>
+      <text x="26" y="282" class="d-s">Stores the name only</text>
+      <rect x="260" y="210" width="200" height="110" rx="12" class="d-core"/>
+      <text x="276" y="240" class="d-t">Permission check</text>
+      <text x="276" y="262" class="d-s">May this person use</text>
+      <text x="276" y="281" class="d-s">LOGIN_PW for this CSI?</text>
+      <rect x="510" y="210" width="200" height="110" rx="12" class="d-core"/>
+      <text x="526" y="240" class="d-t">Run dispatcher</text>
+      <text x="526" y="262" class="d-s">Fetches the value</text>
+      <text x="526" y="281" class="d-s">right before the run</text>
+      <rect x="760" y="210" width="200" height="110" rx="12" class="d-core"/>
+      <text x="776" y="240" class="d-t">Browser runner</text>
+      <text x="776" y="262" class="d-s">Types it into the field,</text>
+      <text x="776" y="281" class="d-s">then discards it</text>
+      <rect x="1010" y="210" width="200" height="110" rx="12" class="d-box"/>
+      <text x="1026" y="240" class="d-t">Your application</text>
+      <text x="1026" y="262" class="d-s">Receives it at sign-in</text>
+      <line x1="210" y1="90" x2="258" y2="90" class="d-line" marker-end="url(#sa)"/>
+      <line x1="460" y1="90" x2="508" y2="90" class="d-line" marker-end="url(#sa)"/>
+      <line x1="610" y1="140" x2="610" y2="208" class="d-line" marker-end="url(#sa)"/>
+      <line x1="210" y1="265" x2="258" y2="265" class="d-line" marker-end="url(#sa)"/>
+      <line x1="460" y1="265" x2="508" y2="265" class="d-line" marker-end="url(#sa)"/>
+      <line x1="710" y1="265" x2="758" y2="265" class="d-line" marker-end="url(#sa)"/>
+      <line x1="960" y1="265" x2="1008" y2="265" class="d-line" marker-end="url(#sa)"/>
+      <text x="622" y="180" class="d-lbl">Read at run time, over HTTPS</text>
+      <text x="270" y="344" class="d-red">No → the run is refused</text>
+    </svg>
+    </div>
+    <div class="grid g2">
+      <div class="panel">
+        <h3>A secret value is never stored in or sent to</h3>
+        <div class="nope"><span>The AI</span><span>Test definitions</span><span>The Checks database</span><span>Your browser, after saving</span><span>Logs and diagnostics</span><span>Result files</span></div>
+      </div>
+      <div class="panel">
+        <h3>Built to say no</h3>
+        <ul class="clean">
+          <li>Each secret is filed under its CSI, environment and test</li>
+          <li>Using a secret is its own permission, separate from running the test</li>
+          <li>Unknown person, CSI or environment: refused</li>
+        </ul>
+      </div>
+    </div>
+    <div class="status"><b>Status</b><span>The Vault connection is off in the shipped configuration until PUT Core connects the platform Vault and its access policy. Security &amp; Compliance acceptance is required before GA, including the known limit that a secret shown on screen can appear in the video.</span></div>
+  </div>
+</section>
+
+<!-- 9 · scope -->
+<section class="slide" id="s9" data-label="V1 scope" hidden>
+  <div class="frame">
+    <p class="eyebrow">MVP (V1) scope</p>
+    <h2>What V1 delivers</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:22%">Capability</th><th>In V1</th></tr></thead>
+        <tbody>
+          <tr><td>Authoring</td><td>Plain-English checklists per CSI; variables and vaulted secrets referenced by name only.</td></tr>
+          <tr><td>Translation</td><td>Pressing Run has the internal AI turn the steps into browser code. A safety check blocks anything not allowed; if the AI can’t fix it in two more tries, the test doesn’t run.</td></tr>
+          <tr><td>Execution</td><td>On-demand, one Chromium browser, one page per run. Pass, fail and not-attempted steps. Uncertain attempts are never automatically replayed.</td></tr>
+          <tr><td>Live progress</td><td>Step and log updates as the run happens, with reconnection. Watching a run never controls it.</td></tr>
+          <tr><td>Video proof</td><td>Private recording, seek by step, authorised download, 30-day expiry. Missing or partial video is shown honestly, separate from the result.</td></tr>
+          <tr><td>Access &amp; secrets</td><td>Every action, including history and video, authorised by CSI. Secret values exist only briefly while a run needs them.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Scheduling is designed but not built in V1. It will reuse the platform’s existing scheduler once on-demand runs have earned trust.</p>
+  </div>
+</section>
+
+<!-- 10 · beyond v1 -->
+<section class="slide" id="s10" data-label="Beyond V1" hidden>
+  <div class="frame">
+    <p class="eyebrow">Beyond the MVP</p>
+    <h2>What follows V1, and what V1 deliberately leaves out</h2>
+    <div class="grid g2">
+      <div class="panel">
+        <span class="chip next">Follows V1</span>
+        <h3>Planned after V1</h3>
+        <ul class="clean">
+          <li>Scheduled runs through the platform’s existing scheduler</li>
+          <li>More browser-runner capacity, sized from what MVP v1 measures</li>
+          <li>A remote relay server, to run tests from specific locations or from outside the network</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <span class="chip open">Not in V1</span>
+        <h3>Out of scope for the MVP</h3>
+        <ul class="clean">
+          <li>Browsers other than Chromium; more than 1–2 simultaneous runs per pod</li>
+          <li>Popups, new tabs or windows, and content inside iframes. Moving across pages in one tab works.</li>
+          <li>Screenshots, live video, and public or non-expiring video links</li>
+          <li>Automated fixes for failing checks</li>
+          <li>Python export (retired)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 · timeline -->
+<section class="slide" id="s11" data-label="Timeline" hidden>
+  <div class="frame">
+    <p class="eyebrow">Timeline</p>
+    <h2>From build to MVP v1 and general availability</h2>
+    <ol class="tl">
+      <li class="done"><span class="chip done">Done</span><h3>Foundation</h3><span class="when">2026</span><p>Contracts, immutable versions and CSI access in place.</p></li>
+      <li class="open"><span class="chip open">Open</span><h3>Compiler &amp; skeleton</h3><span class="when">Sep–Oct 2026</span><p>Translation with a safety check; durable run lifecycle, recovery and live progress.</p></li>
+      <li class="open"><span class="chip open">Open</span><h3>Real browser, real video</h3><span class="when">Sep–Oct 2026</span><p>Real browser runs producing real, seekable video.</p></li>
+      <li class="next"><span class="chip next">Target</span><h3>MVP v1</h3><span class="when">Nov 2026</span><p>The full journey — write, run and watch — working against a real internal application.</p></li>
+      <li class="next"><span class="chip next">Target</span><h3>GA</h3><span class="when">Mar 2027</span><p>Security, Platform and Sponsor sign-off; go / no-go for production.</p></li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<nav class="nav" aria-label="Slides">
+  <button class="btn" id="prev" type="button" aria-label="Previous slide">‹ <span class="pt">Prev</span></button>
+  <div class="nav-scrub" id="scrub"><div class="track"></div><div class="fill" id="fill"></div></div>
+  <div class="nav-title"><b id="count">1 / 11</b><span class="t" id="label">Overview</span></div>
+  <button class="btn" id="next" type="button" aria-label="Next slide"><span class="pt">Next</span> ›</button>
+</nav>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length, cur = 0;
+  var scrub = document.getElementById('scrub'), fill = document.getElementById('fill');
+  var count = document.getElementById('count'), label = document.getElementById('label');
+  var prev = document.getElementById('prev'), next = document.getElementById('next');
+  var ticks = slides.map(function(s, k){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.style.left = (total > 1 ? (k / (total - 1)) * 100 : 0) + '%';
+    b.setAttribute('aria-label', 'Go to slide ' + (k + 1) + ': ' + s.getAttribute('data-label'));
+    b.addEventListener('click', function(){ go(k); });
+    scrub.appendChild(b);
+    return b;
+  });
+  function go(n){
+    n = Math.max(0, Math.min(total - 1, n));
+    if (n !== cur) {
+      slides[cur].hidden = true;
+      slides[cur].classList.remove('is-entering');
+    }
+    cur = n;
+    var s = slides[cur];
+    s.hidden = false;
+    s.scrollTop = 0;
+    s.classList.remove('is-entering'); void s.offsetWidth; s.classList.add('is-entering');
+    fill.style.width = (total > 1 ? (cur / (total - 1)) * 100 : 0) + '%';
+    ticks.forEach(function(t, k){ t.classList.toggle('past', k < cur); t.classList.toggle('cur', k === cur); if (k === cur) t.setAttribute('aria-current', 'step'); else t.removeAttribute('aria-current'); });
+    count.textContent = (cur + 1) + ' / ' + total;
+    label.textContent = s.getAttribute('data-label');
+    prev.disabled = cur === 0;
+    next.disabled = cur === total - 1;
+    var h = '#s' + (cur + 1);
+    if (location.hash !== h) { try { history.replaceState(null, '', h); } catch (e) {} }
+  }
+  function fromHash(){ var m = /^#s(\d+)$/.exec(location.hash || ''); return m ? parseInt(m[1], 10) - 1 : null; }
+  prev.addEventListener('click', function(){ go(cur - 1); });
+  next.addEventListener('click', function(){ go(cur + 1); });
+  document.addEventListener('keydown', function(e){
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { e.preventDefault(); go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp' || (k === ' ' && e.shiftKey)) { e.preventDefault(); go(cur - 1); }
+    else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(total - 1); }
+  });
+  window.addEventListener('hashchange', function(){ var n = fromHash(); if (n !== null) go(n); });
+  var sx = null, sy = null;
+  var stage = document.getElementById('stage');
+  stage.addEventListener('touchstart', function(e){ var t = e.touches[0]; sx = t.clientX; sy = t.clientY; }, {passive:true});
+  stage.addEventListener('touchend', function(e){
+    if (sx === null) return;
+    var t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(cur + (dx < 0 ? 1 : -1));
+    sx = sy = null;
+  }, {passive:true});
+  var start = fromHash();
+  cur = 0;
+  go(start === null ? 0 : start);
+})();
+</script>
+
+</html>

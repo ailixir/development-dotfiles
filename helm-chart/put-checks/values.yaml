@@ -130,8 +130,9 @@ backend:
   #   csiRead         — `applyTemporaryCsiReadBypass`, which appends `checks-admin` to any
   #                     identity making a GET under /api/v1/csi.
   #
-  # **The vault is still a stub too**: `SecretsService` returns `REDACTED`. ED-02's owner reads
-  # "TBD — not assigned in sources" and **no credentialed pilot may run until ED-02 has linked
+  # **The Studio Vault adapter is implemented but not connected**: `studioVault.provider` defaults
+  # to `none`; the legacy `SecretsService` still returns `REDACTED`. The PUT Core platform owns
+  # ED-02, but no linked delivery exists, and **no credentialed pilot may run until ED-02 has linked
   # completed tickets** (ED-02 gate_note, BRD §8). Default-closed everywhere, including this base
   # file: an environment with no Core service and no trusted gateway gets 401, which §9.1 calls
   # the correct failure direction. An environment that needs one of these open must set it here,
@@ -153,6 +154,10 @@ backend:
 
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "20"
+    # The API advertises Studio only when its source is enabled. Deployed profiles couple this
+    # value to the Vertex provider in the chart so the application readiness guard cannot be
+    # bypassed by leaving UI_TEST at its application.yml default (`false`).
+    checks.sources.UI_TEST: "true"
     checks.scheduling.min-interval-seconds: "60"
 
   podAnnotations: {}
@@ -594,6 +599,26 @@ studioRunner:
 # different Secret from the runner's write-only one (§6.2, ED-03).
 # ---------------------------------------------------------------------------
 objectStore:
+  # `local` matches the runnable application default. Set `s3` when Sonic is connected; the S3
+  # adapter and credentials are already fully wired. Cluster deployments should use S3 because
+  # pod-local filesystems are not shared across runner/API replicas.
+  provider: local
+  endpoint: ""
+  region: us-east-1
+  bucket: put-checks-studio-evidence
+  pathStyleAccess: true
+  # In local mode every API, worker and runner pod mounts this one RWX claim at this path. Local
+  # development uses dev.sh instead and shares its temporary directory directly.
+  localDirectory: /var/lib/studio-objects
+  local:
+    createClaim: true
+    existingClaim: ""
+    storageClassName: ""
+    accessModes:
+      - ReadWriteMany
+    size: 10Gi
+  connectTimeout: 2s
+  requestTimeout: 10s
   credentialsSecret: checks-api-object-store
   mountPath: /etc/studio/object-store
   keys:
@@ -603,6 +628,44 @@ objectStore:
   # one key. Physical deletion on the store is asynchronous and this chart claims no exact-time
   # deletion anywhere (§6.2).
   retention: 30d
+
+# Real Vault KV v2 is implemented but explicitly off until the platform endpoint is connected.
+studioVault:
+  provider: none
+  address: ""
+  namespace: ""
+  mount: secret
+  pathTemplate: "studio/{csiId}/{environment}/{kind}/{referenceName}"
+  valueKey: value
+  tokenSecret: checks-studio-vault-token
+  tokenKey: token
+  tokenMountPath: /etc/studio/vault
+  connectTimeout: 2s
+  requestTimeout: 5s
+  maxResponseBytes: 65536
+
+# Plain-English compile provider. `vertex` uses the approved Vertex AI path; `disabled` reports
+# compilation as unavailable and never returns a synthetic artifact.
+# A Gemini developer API token is not consumed: use workload ADC or a mounted service-account JSON.
+studioGateway:
+  environment: production
+  provider: vertex
+  endpoint: ""
+  project: ""
+  location: ""
+  model: gemini-3.8-flash
+  # Staging and production deliberately obtain environment-owned, non-secret Vertex routing
+  # values from a pre-provisioned ConfigMap. This keeps unknown project/location/endpoint values
+  # out of source control while making a missing platform dependency fail the Helm render.
+  vertexConfigMap:
+    name: checks-studio-vertex
+    endpointKey: endpoint
+    projectKey: project
+    locationKey: location
+  credentialsMode: application-default
+  credentialsSecret: ""
+  credentialsKey: service-account.json
+  credentialsMountPath: /etc/studio/gateway
 
 # ---------------------------------------------------------------------------
 # Studio SSE — the streaming route at the EDGE (story 10.18b, AC-13a)

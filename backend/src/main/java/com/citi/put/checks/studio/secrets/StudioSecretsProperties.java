@@ -1,40 +1,71 @@
 package com.citi.put.checks.studio.secrets;
 
+import java.time.Duration;
 import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Studio secret-resolution configuration (§8.5 — deployment configuration in one source, AC-9).
  *
- * <p>{@link Vault#provider()} has <b>no default anywhere</b>, and that absence is the criterion.
- * {@link StudioVaultConfiguration} refuses to start when it is missing or unrecognised rather than
- * falling back to anything, because a silent fallback to a fake vault is the single worst failure
- * mode this story could ship.
+ * <p>The shipped configuration names the explicit default-off provider {@code none}; only {@code
+ * hashicorp} can make a real KV v2 call. Missing or unrecognised values fail startup rather than
+ * silently substituting a provider.
  *
- * @param vault which provider, and the fake's development seed
+ * @param vault which provider and its real transport configuration
  * @param entitlements development secret-use policy, {@code principal|csi|environment -> "A,B"}
  */
 @ConfigurationProperties(prefix = "studio.secrets")
 public record StudioSecretsProperties(Vault vault, Map<String, String> entitlements) {
 
   /**
-   * @param provider the enumerated provider name. No default — absent is a refusal to start
-   * @param fake the fake provider's development seed, {@code KIND|csi|environment|name -> value}
+   * @param provider the enumerated provider name; absent is a refusal to start
+   * @param hashicorp HashiCorp Vault transport configuration
    */
-  public record Vault(String provider, Fake fake) {
+  public record Vault(String provider, Hashicorp hashicorp) {
 
-    /**
-     * @param entries the seed
-     */
-    public record Fake(Map<String, String> entries) {
+    /** HashiCorp Vault KV v2 transport configuration. Authentication is a mounted token file. */
+    public record Hashicorp(
+        String address,
+        String namespace,
+        String mount,
+        String pathTemplate,
+        String valueKey,
+        String tokenFile,
+        Duration connectTimeout,
+        Duration requestTimeout,
+        Integer maxResponseBytes) {
 
-      public Map<String, String> entriesOrEmpty() {
-        return entries == null ? Map.of() : entries;
+      public String mountOrDefault() {
+        return mount == null || mount.isBlank() ? "secret" : mount;
+      }
+
+      public String pathTemplateOrDefault() {
+        return pathTemplate == null || pathTemplate.isBlank()
+            ? "studio/{csiId}/{environment}/{kind}/{referenceName}"
+            : pathTemplate;
+      }
+
+      public String valueKeyOrDefault() {
+        return valueKey == null || valueKey.isBlank() ? "value" : valueKey;
+      }
+
+      public Duration connectTimeoutOrDefault() {
+        return connectTimeout == null ? Duration.ofSeconds(2) : connectTimeout;
+      }
+
+      public Duration requestTimeoutOrDefault() {
+        return requestTimeout == null ? Duration.ofSeconds(5) : requestTimeout;
+      }
+
+      public int maxResponseBytesOrDefault() {
+        return maxResponseBytes == null ? 64 * 1024 : maxResponseBytes;
       }
     }
 
-    public Fake fakeOrEmpty() {
-      return fake == null ? new Fake(Map.of()) : fake;
+    public Hashicorp hashicorpOrEmpty() {
+      return hashicorp == null
+          ? new Hashicorp(null, null, null, null, null, null, null, null, null)
+          : hashicorp;
     }
   }
 

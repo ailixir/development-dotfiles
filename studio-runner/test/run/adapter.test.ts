@@ -173,6 +173,14 @@ describe('actions map the permitted options, and nothing else', () => {
     expect(page.calls.at(-1)?.args[1]).toMatchObject({ timeout: 100 });
   });
 
+  it('refuses trial mode defensively because it would report PASS without doing the action', async () => {
+    const adapter = adapterFor(createFakePage());
+    const handle = await adapter.locate(chain({ kind: 'locator', selector: 'button' }));
+    await expect(adapter.click(handle, { trial: true })).rejects.toThrow(/skip the requested action/u);
+    await expect(adapter.check(handle, { trial: true })).rejects.toThrow(/skip the requested action/u);
+    await expect(adapter.hover(handle, { trial: true })).rejects.toThrow(/skip the requested action/u);
+  });
+
   it.each([
     ['press', async (a: ReturnType<typeof adapterFor>, h: { kind: 'locator-handle' }) => a.press(h, 'Control+a')],
     ['check', async (a: ReturnType<typeof adapterFor>, h: { kind: 'locator-handle' }) => a.check(h)],
@@ -332,5 +340,68 @@ describe('AC-15 — the guard refuses every operation once the run is unsupporte
     await expect(
       adapter.expectContainText(handle, { kind: 'string', value: 'nowhere' }, { timeout: 1_000 }),
     ).rejects.toThrow(/UnsupportedWorkflow/u);
+  });
+});
+
+describe('a secret is filled only on an origin it is bound to', () => {
+  const SECRET = 'secret-origin-canary';
+
+  async function fillSecret(
+    currentUrl: string,
+    secretOrigins: Record<string, string[]> | undefined,
+  ): Promise<{ page: FakePage; attempt: Promise<void> }> {
+    const page = createFakePage();
+    page.currentUrl = currentUrl;
+    const adapter = adapterFor(page, secretOrigins === undefined ? {} : { secretOrigins });
+    const handle = await adapter.locate(chain({ kind: 'locator', selector: '#pw' }));
+    return { page, attempt: adapter.fill(handle, SECRET, undefined, 'LOGIN_PW') };
+  }
+
+  const fills = (page: FakePage) => page.calls.filter((call) => call.method.endsWith('fill'));
+
+  it('fills when the page origin is listed for the secret', async () => {
+    const { page, attempt } = await fillSecret('https://login.app.example/signin?x=1', {
+      LOGIN_PW: ['https://other.example', 'https://login.app.example'],
+    });
+    await attempt;
+    expect(fills(page)).toHaveLength(1);
+  });
+
+  it.each([
+    ['a different host', 'https://evil.example/signin'],
+    ['a different scheme', 'http://login.app.example/signin'],
+    ['a different port', 'https://login.app.example:8443/signin'],
+    ['about:blank', 'about:blank'],
+  ])('refuses %s with SECRET_ORIGIN_NOT_ALLOWED and types nothing', async (_label, url) => {
+    const { page, attempt } = await fillSecret(url, { LOGIN_PW: ['https://login.app.example'] });
+    const error = await attempt.then(
+      () => null,
+      (rejection: unknown) => rejection,
+    );
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).name).toBe('SECRET_ORIGIN_NOT_ALLOWED');
+    expect((error as Error).message).toContain('"LOGIN_PW"');
+    expect((error as Error).message).not.toContain(SECRET);
+    expect((error as Error).message).not.toContain(url);
+    expect(fills(page)).toHaveLength(0);
+  });
+
+  it.each([
+    ['no secretOrigins at all', undefined],
+    ['no entry for the secret', { OTHER: ['https://login.app.example'] }],
+    ['an empty list', { LOGIN_PW: [] }],
+  ])('fails closed with %s', async (_label, secretOrigins) => {
+    const { page, attempt } = await fillSecret('https://login.app.example/', secretOrigins);
+    await expect(attempt).rejects.toThrow(/Secret "LOGIN_PW" is not bound/u);
+    expect(fills(page)).toHaveLength(0);
+  });
+
+  it('leaves a non-secret fill unchecked', async () => {
+    const page = createFakePage();
+    page.currentUrl = 'https://anywhere.example/';
+    const adapter = adapterFor(page);
+    const handle = await adapter.locate(chain({ kind: 'locator', selector: '#user' }));
+    await adapter.fill(handle, 'alice');
+    expect(fills(page)).toHaveLength(1);
   });
 });

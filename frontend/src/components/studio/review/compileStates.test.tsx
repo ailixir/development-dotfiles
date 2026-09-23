@@ -104,7 +104,7 @@ describe('AC-2: each state says what is true, what you may do, and what is block
     // And the real thing passes.
     expect(() =>
       assertFactRendered(
-        'Your draft is saved. A translation of the steps shown above is running right now on the server.',
+        'Your draft is saved. A translation of your steps is running right now on the server.',
         phrases,
       ),
     ).not.toThrow();

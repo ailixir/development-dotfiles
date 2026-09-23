@@ -1,0 +1,37 @@
+{
+  "storyId": "UX-001-studio-review-consolidation",
+  "researchedAt": "2026-09-20T23:44:24Z",
+  "researchedBy": "@analyst",
+  "complexity": "STANDARD",
+  "dependencies": [
+    {
+      "name": "React",
+      "type": "library",
+      "version": "^18.2.0",
+      "verified": true,
+      "source": "codebase",
+      "existing": {"installed": true, "currentVersion": "^18.2.0", "usageLocations": ["frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx"]},
+      "documentation": {"url": "https://react.dev/reference/react", "relevantSections": ["state", "controlled components"]},
+      "patterns": [{"name": "controlled disclosure", "description": "A component-owned boolean can progressively disclose existing review content without changing the existing request lifecycle.", "codeExample": "const [detailsOpen, setDetailsOpen] = useState(false);"}],
+      "compatibility": {"preferred": true, "alternatives": [], "conflicts": []}
+    },
+    {
+      "name": "Material UI",
+      "type": "library",
+      "version": "^5.15.0",
+      "verified": true,
+      "source": "codebase",
+      "existing": {"installed": true, "currentVersion": "^5.15.0", "usageLocations": ["frontend/src/components/studio/review/CompileReviewPanel.tsx", "frontend/src/components/studio/review/StepReviewList.tsx"]},
+      "documentation": {"url": "https://mui.com/material-ui/react-accordion/", "relevantSections": ["Accordion accessibility", "controlled expansion"]},
+      "patterns": [{"name": "progressive disclosure", "description": "Use the established MUI button/collapse or Accordion primitives with explicit accessible state to keep the default review compact.", "codeExample": "<Button aria-expanded={detailsOpen} aria-controls=\"translation-details\" />"}],
+      "compatibility": {"preferred": true, "alternatives": [], "conflicts": []}
+    }
+  ],
+  "unverifiedClaims": [],
+  "recommendations": [
+    {"type": "prefer", "subject": "Existing useCompileReview state lifecycle", "rationale": "It centralizes current polling, confirm, recompile, conflict, and in-flight behavior; the change is presentation-only."},
+    {"type": "prefer", "subject": "MUI Button plus Collapse or Accordion", "rationale": "It is already in use in StepReviewList and supports discoverable progressive disclosure without a new dependency."},
+    {"type": "avoid", "subject": "Client parsing of authored English", "rationale": "The codebase explicitly reserves translation truth for the server candidate artifact."}
+  ],
+  "researchNotes": "No external service or new package is required. Existing BRD requirements require readable validated action summaries and explicit confirmation; the design should compact their presentation rather than remove them."
+}

@@ -50,6 +50,14 @@ export interface RunnerConfig {
    * by everything that runs the runner rather than only by tests that mock it.
    */
   readonly objectStoreDir: string;
+  /** `local` is the default; `s3` enables the Sonic-compatible adapter. */
+  readonly objectStoreProvider: 'local' | 's3';
+  readonly objectStoreEndpoint: string;
+  readonly objectStoreRegion: string;
+  readonly objectStoreBucket: string;
+  readonly objectStoreForcePathStyle: boolean;
+  readonly objectStoreAccessKeyIdFile: string;
+  readonly objectStoreSecretAccessKeyFile: string;
   /** Attempts per object, the first included. Bounded on both axes with the window below. */
   readonly objectStoreMaxAttempts: number;
   /**
@@ -144,9 +152,9 @@ export interface RunnerConfig {
 /** One accepted key: its environment suffix, how to read it, and whether it is required. */
 interface KeySpec {
   readonly field: keyof RunnerConfig;
-  readonly kind: 'string' | 'integer';
+  readonly kind: 'string' | 'integer' | 'boolean';
   readonly required: boolean;
-  readonly fallback?: string | number;
+  readonly fallback?: string | number | boolean;
   readonly min?: number;
 }
 
@@ -169,6 +177,48 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
     kind: 'string',
     required: false,
     fallback: '/tmp/studio-runner-objects',
+  },
+  OBJECT_STORE_PROVIDER: {
+    field: 'objectStoreProvider',
+    kind: 'string',
+    required: false,
+    fallback: 'local',
+  },
+  OBJECT_STORE_ENDPOINT: {
+    field: 'objectStoreEndpoint',
+    kind: 'string',
+    required: false,
+    fallback: '',
+  },
+  OBJECT_STORE_REGION: {
+    field: 'objectStoreRegion',
+    kind: 'string',
+    required: false,
+    fallback: 'us-east-1',
+  },
+  OBJECT_STORE_BUCKET: {
+    field: 'objectStoreBucket',
+    kind: 'string',
+    required: false,
+    fallback: '',
+  },
+  OBJECT_STORE_FORCE_PATH_STYLE: {
+    field: 'objectStoreForcePathStyle',
+    kind: 'boolean',
+    required: false,
+    fallback: true,
+  },
+  OBJECT_STORE_ACCESS_KEY_ID_FILE: {
+    field: 'objectStoreAccessKeyIdFile',
+    kind: 'string',
+    required: false,
+    fallback: '',
+  },
+  OBJECT_STORE_SECRET_ACCESS_KEY_FILE: {
+    field: 'objectStoreSecretAccessKeyFile',
+    kind: 'string',
+    required: false,
+    fallback: '',
   },
   OBJECT_STORE_MAX_ATTEMPTS: {
     field: 'objectStoreMaxAttempts',
@@ -372,6 +422,14 @@ function parseInteger(name: string, raw: string, min: number, problems: string[]
   return value;
 }
 
+function parseBoolean(name: string, raw: string, problems: string[]): boolean {
+  const normalized = raw.trim().toLowerCase();
+  if (normalized === 'true') return true;
+  if (normalized === 'false') return false;
+  problems.push(`${name} must be true or false; got ${JSON.stringify(raw)}.`);
+  return false;
+}
+
 /**
  * Loads and validates configuration from an environment-shaped record.
  *
@@ -400,7 +458,7 @@ export function loadConfig(env: Readonly<Record<string, string | undefined>>): R
     );
   }
 
-  const draft: Record<string, string | number> = {};
+  const draft: Record<string, string | number | boolean> = {};
   for (const [suffix, spec] of Object.entries(KEY_SPECS)) {
     const name = `${CONFIG_PREFIX}${suffix}`;
     const raw = env[name];
@@ -418,7 +476,9 @@ export function loadConfig(env: Readonly<Record<string, string | undefined>>): R
     draft[spec.field] =
       spec.kind === 'integer'
         ? parseInteger(name, raw, spec.min ?? 0, problems)
-        : raw.trim();
+        : spec.kind === 'boolean'
+          ? parseBoolean(name, raw, problems)
+          : raw.trim();
   }
 
   // Stable for the life of the process either way (AC-7): configured when the deployment names
@@ -446,6 +506,52 @@ export function loadConfig(env: Readonly<Record<string, string | undefined>>): R
     }
   }
 
+  const objectStoreProvider = draft.objectStoreProvider;
+  if (objectStoreProvider !== 'local' && objectStoreProvider !== 's3') {
+    problems.push(
+      `${CONFIG_PREFIX}OBJECT_STORE_PROVIDER must be local or s3; got ${JSON.stringify(objectStoreProvider)}.`,
+    );
+  }
+  if (objectStoreProvider === 's3') {
+    for (const field of [
+      'objectStoreEndpoint',
+      'objectStoreRegion',
+      'objectStoreBucket',
+      'objectStoreAccessKeyIdFile',
+      'objectStoreSecretAccessKeyFile',
+    ] as const) {
+      if (typeof draft[field] !== 'string' || draft[field].trim() === '') {
+        problems.push(`${CONFIG_PREFIX}${camelToUpperSnake(field)} is required for the s3 provider.`);
+      }
+    }
+    if (typeof draft.objectStoreEndpoint === 'string' && draft.objectStoreEndpoint !== '') {
+      validateObjectStoreEndpoint(draft.objectStoreEndpoint, problems);
+    }
+  }
+
   if (problems.length > 0) throw new ConfigurationError(problems);
   return draft as unknown as RunnerConfig;
+}
+
+function camelToUpperSnake(value: string): string {
+  return value.replace(/[A-Z]/gu, (letter) => `_${letter}`).toUpperCase();
+}
+
+function validateObjectStoreEndpoint(endpoint: string, problems: string[]): void {
+  try {
+    const parsed = new URL(endpoint);
+    const loopback = ['localhost', '127.0.0.1', '::1'].includes(parsed.hostname);
+    if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && loopback)) {
+      problems.push(
+        `${CONFIG_PREFIX}OBJECT_STORE_ENDPOINT must use https (http is allowed only for loopback tests).`,
+      );
+    }
+    if (parsed.username !== '' || parsed.password !== '' || parsed.search !== '' || parsed.hash !== '') {
+      problems.push(
+        `${CONFIG_PREFIX}OBJECT_STORE_ENDPOINT must carry no credentials, query string, or fragment.`,
+      );
+    }
+  } catch {
+    problems.push(`${CONFIG_PREFIX}OBJECT_STORE_ENDPOINT must be an absolute URL.`);
+  }
 }

@@ -3,6 +3,8 @@ import type { Clock, StepReporter, StepStatus } from './adapters/StepReporter.js
 import type { FillValue, Operation, TextMatcher } from './operations.js';
 import type { Redactor } from './redaction.js';
 import { createRedactor, safeMessage } from './redaction.js';
+import type { StepRefusalCode } from './refusals.js';
+import { StepRefusal, isHttpUrl } from './refusals.js';
 import { EXECUTOR_VERSION } from '../versions.js';
 
 /**
@@ -33,6 +35,11 @@ export interface ExecutionResult {
   readonly ok: boolean;
   readonly executorVersion: string;
   readonly steps: readonly StepOutcome[];
+  /**
+   * The policy refusal the failing step ended in, or `null` when no step was refused. Lets the run
+   * report the named condition (`src/run/errors.ts`) rather than a generic step failure.
+   */
+  readonly refusal: StepRefusalCode | null;
 }
 
 export interface ExecuteOptions {
@@ -84,6 +91,7 @@ export async function executeSteps(options: ExecuteOptions): Promise<ExecutionRe
 
   const outcomes: StepOutcome[] = [];
   let failed = false;
+  let refusal: StepRefusalCode | null = null;
 
   for (const step of options.steps) {
     if (failed) {
@@ -111,6 +119,7 @@ export async function executeSteps(options: ExecuteOptions): Promise<ExecutionRe
     } catch (error) {
       failure = safeMessage(error, redactor, maxMessage);
       failed = true;
+      if (error instanceof StepRefusal) refusal = error.code;
     }
 
     const finishedAtMs = clock.now();
@@ -130,6 +139,7 @@ export async function executeSteps(options: ExecuteOptions): Promise<ExecutionRe
     ok: !failed,
     executorVersion: EXECUTOR_VERSION,
     steps: outcomes,
+    refusal,
   };
 }
 
@@ -167,10 +177,19 @@ async function runOperation(
 ): Promise<void> {
   switch (operation.op) {
     case 'goto': {
-      const url =
-        operation.url.kind === 'literal'
-          ? operation.url.value
-          : resolver.variable(operation.url.name);
+      if (operation.url.kind === 'literal') {
+        await adapter.goto(operation.url.value, operation.options);
+        return;
+      }
+      // The validator checks a literal URL's scheme but cannot see a variable's value, so the
+      // same rule is applied here, at resolution. The message names the variable, never the value.
+      const url = resolver.variable(operation.url.name);
+      if (!isHttpUrl(url)) {
+        throw new StepRefusal(
+          'URL_SCHEME_NOT_PERMITTED',
+          `Variable "${operation.url.name}" did not resolve to an absolute http or https URL.`,
+        );
+      }
       await adapter.goto(url, operation.options);
       return;
     }
@@ -190,7 +209,15 @@ async function runOperation(
     }
     case 'fill': {
       const target = await locate(operation, adapter);
-      await adapter.fill(target, resolveFillValue(operation.value, resolver), operation.options);
+      // A secret travels with its id, so the adapter can check the page origin against the
+      // origins that secret is bound to before anything is typed.
+      const secretId = operation.value.kind === 'secret' ? operation.value.id : undefined;
+      await adapter.fill(
+        target,
+        resolveFillValue(operation.value, resolver),
+        operation.options,
+        secretId,
+      );
       return;
     }
     case 'press': {

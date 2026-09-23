@@ -236,7 +236,14 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    * confines to `src/run/**`, and a hash is the stronger statement anyway — it holds in a shallow
    * clone, after a rebase, and in the image, where there may be no history to diff against.
    */
-  const BASE_SHA256 = '1022d9ad9d2ed6d5e71930fb84fc5c25974e64fe10e10af57b69399b3a2a3f1e';
+  // Re-anchored by the production-alpha UI validation after the execute route was deliberately
+  // opened to every authenticated user. The confirmed-artifact projection and the `trial: false`
+  // execution-safety constraint remain part of the same reviewed contract.
+  // Re-anchored by story 10.44 (ADR-SC-003): `ExpectedIntent` was replaced by `ReferencePolicy`
+  // on the validate and run-job bodies.
+  // Re-anchored for secret origin binding: `RunJob.secretOrigins` and the two refusal codes
+  // (`URL_SCHEME_NOT_PERMITTED`, `SECRET_ORIGIN_NOT_ALLOWED`) in `x-runner-error-codes`.
+  const BASE_SHA256 = '395eaeeb3ddca072a2107a3b0f8edeb9ece928c3d4318d30ee143fa99ed3fe6d';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
@@ -250,10 +257,11 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
     expect(actual, 'this story may not edit the contract (ADR-002 §12, Class B)').toBe(BASE_SHA256);
   });
 
-  it('contains ADR-SC-001 expectedIntent only on the two architect-approved internal bodies', () => {
+  it('carries the ADR-SC-003 referencePolicy only on the two internal bodies, and no expectedIntent', () => {
     const document = readFileSync(contract, 'utf8');
-    expect(document.match(/expectedIntent:/gu)).toHaveLength(2);
-    expect(document).toContain('ExpectedIntent:');
+    expect(document.match(/referencePolicy:/gu)).toHaveLength(2);
+    expect(document).toContain('ReferencePolicy:');
+    expect(document).not.toMatch(/expectedIntent|ExpectedIntent/u);
   });
 
   it('emits the RunnerEvidence.partial that ADR-002 §20 promoted to required', () => {
@@ -296,14 +304,19 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   });
 });
 
-describe('AC-24 — no new production dependency', () => {
-  it('keeps the declared runtime dependencies at playwright and typescript', () => {
+describe('AC-24 — production dependencies remain explicit and exact-pinned', () => {
+  it('includes only Playwright, TypeScript and the intentional Sonic S3 client', () => {
     const pkg = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')) as {
       dependencies?: Record<string, string>;
     };
-    expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual(['playwright', 'typescript']);
+    expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual([
+      '@aws-sdk/client-s3',
+      'playwright',
+      'typescript',
+    ]);
     // Anything a real browser needs beyond the pinned library is a signal the design drifted.
     expect(pkg.dependencies?.playwright).toBe('1.63.0');
+    expect(pkg.dependencies?.['@aws-sdk/client-s3']).toBe('3.1136.0');
   });
 
   it('does not touch the fail-closed allowlist to accommodate this story', () => {

@@ -22,8 +22,8 @@ import { connect } from 'node:net';
 import type { Socket } from 'node:net';
 
 import type { BrowserAdapter } from '../../src/executor/adapters/BrowserAdapter.js';
-import { createFakeBrowserAdapter } from '../../src/executor/adapters/fake.js';
-import type { FakeBrowserAdapter } from '../../src/executor/adapters/fake.js';
+import { createFakeBrowserAdapter } from './fakeAdapters.js';
+import type { FakeBrowserAdapter } from './fakeAdapters.js';
 import type {
   BrowserLauncher,
   BrowserSession,

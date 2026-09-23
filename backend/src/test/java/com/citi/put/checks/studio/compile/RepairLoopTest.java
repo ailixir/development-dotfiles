@@ -42,7 +42,7 @@ class RepairLoopTest extends AbstractRepairPipelineTest {
 
     pipeline.compile(testId, OWNER);
 
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
     assertThat(gateway.calls()).isEqualTo(1);
     assertThat(validateCalls()).isEqualTo(1);
     assertThat(gateway.attempts()).containsExactly(1);
@@ -54,7 +54,7 @@ class RepairLoopTest extends AbstractRepairPipelineTest {
 
     pipeline.compile(testId, OWNER);
 
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
     assertThat(gateway.calls()).isEqualTo(2);
     assertThat(validateCalls()).isEqualTo(2);
     assertThat(gateway.attempts()).containsExactly(1, 2);
@@ -66,7 +66,7 @@ class RepairLoopTest extends AbstractRepairPipelineTest {
 
     pipeline.compile(testId, OWNER);
 
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
     assertThat(gateway.calls()).isEqualTo(3);
     assertThat(validateCalls()).isEqualTo(3);
     assertThat(gateway.attempts()).containsExactly(1, 2, 3);
@@ -176,20 +176,21 @@ class RepairLoopTest extends AbstractRepairPipelineTest {
   }
 
   /**
-   * AC-12 — a successful repair becomes {@code AWAITING_CONFIRMATION} and <b>never</b> {@code
-   * READY}.
+   * AC-12 — a successful repair is accepted for the caller that asked for the compile, exactly as a
+   * first-attempt success is. The repair loop still never calls {@code CompileStateService.confirm}
+   * (see the source scan below); acceptance is the publish itself.
    */
   @Test
-  void asuccessfulRepairAwaitsConfirmationAndNeverConfirmsItself() {
+  void asuccessfulRepairIsAcceptedForTheCallerThatAskedForIt() {
     stubValidatorSequence(false, true);
 
     pipeline.compile(testId, OWNER);
 
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
     assertThat(currentCandidate()).isNotNull();
     assertThat(confirmedRevision())
-        .as("no path in the repair loop sets READY; only CompileStateService.confirm does")
-        .isNull();
+        .as("the repaired candidate is the confirmed revision")
+        .isEqualTo(currentCandidate());
   }
 
   /**

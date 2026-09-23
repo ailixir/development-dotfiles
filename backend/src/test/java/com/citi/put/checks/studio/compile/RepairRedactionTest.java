@@ -162,7 +162,7 @@ class RepairRedactionTest extends AbstractRepairPipelineTest {
     stubValidatorSequence(false, true);
 
     pipeline.compile(testId, OWNER);
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
 
     assertThat(gateway.seen()).hasSize(2);
     for (var request : gateway.seen()) {

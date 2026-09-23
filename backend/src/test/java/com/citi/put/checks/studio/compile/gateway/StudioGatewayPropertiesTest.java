@@ -11,19 +11,9 @@ import org.junit.jupiter.api.Test;
 class StudioGatewayPropertiesTest {
 
   @Test
-  void disabledGatewayNeedsNoConfiguration() {
+  void vertexGatewayReportsEveryMissingValueAtOnce() {
     StudioGatewayProperties properties =
         new StudioGatewayProperties(
-            false, null, null, null, null, null, null, 0, 0, 0, false, 0d, null, null);
-
-    assertThatCode(properties::validateForEnabled).doesNotThrowAnyException();
-  }
-
-  @Test
-  void enabledGatewayReportsEveryMissingValueAtOnce() {
-    StudioGatewayProperties properties =
-        new StudioGatewayProperties(
-            true,
             "  ",
             null,
             null,
@@ -38,7 +28,7 @@ class StudioGatewayPropertiesTest {
             new StudioGatewayProperties.TransportRetry(2, Duration.ofMillis(10), 2d, 0.5d),
             null);
 
-    assertThatThrownBy(properties::validateForEnabled)
+    assertThatThrownBy(properties::validateForVertex)
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("studio.compile.gateway.endpoint is required")
         .hasMessageContaining("studio.compile.gateway.project is required")
@@ -48,7 +38,7 @@ class StudioGatewayPropertiesTest {
         .hasMessageContaining("credentials.mode must be one of")
         .hasMessageContaining("studio.compile.gateway.request-timeout must be > 0")
         .hasMessageContaining("studio.compile.gateway.max-concurrency must be > 0")
-        .hasMessageContaining("studio.compile.gateway.enabled=false");
+        .hasMessageContaining("studio.compile.gateway.provider=disabled");
   }
 
   @Test
@@ -58,7 +48,7 @@ class StudioGatewayPropertiesTest {
             new StudioGatewayProperties.Credentials(
                 StudioGatewayProperties.MODE_SERVICE_ACCOUNT_FILE, null));
 
-    assertThatThrownBy(properties::validateForEnabled)
+    assertThatThrownBy(properties::validateForVertex)
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("credentials.service-account-key-file is required");
   }
@@ -69,7 +59,7 @@ class StudioGatewayPropertiesTest {
             complete(
                     new StudioGatewayProperties.Credentials(
                         StudioGatewayProperties.MODE_APPLICATION_DEFAULT, null))
-                ::validateForEnabled)
+                ::validateForVertex)
         .doesNotThrowAnyException();
   }
 
@@ -84,8 +74,7 @@ class StudioGatewayPropertiesTest {
 
   private static StudioGatewayProperties complete(StudioGatewayProperties.Credentials credentials) {
     return new StudioGatewayProperties(
-        true,
-        "https://r2d2.example.invalid",
+        "https://aiplatform.googleapis.com",
         "project",
         "location",
         "model",

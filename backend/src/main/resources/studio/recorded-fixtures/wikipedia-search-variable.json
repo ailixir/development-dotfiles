@@ -1,0 +1,29 @@
+{
+  "name": "wikipedia-search-variable",
+  "description": "Type a plain variable into a named field and assert the address. Proves a reference is translated while its value stays outside the translation boundary. Recorded for local and CI translation only.",
+  "source": [
+    "Go to \"https://www.wikipedia.org/\"",
+    "Type \"<var SEARCH_TERM>\" in the \"Search Wikipedia\" field",
+    "Check that the URL contains \"wikipedia.org\""
+  ],
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Go to \"https://www.wikipedia.org/\"",
+        "code": "await page.goto('https://www.wikipedia.org/');"
+      },
+      {
+        "stepIndex": 1,
+        "originalText": "Type \"<var SEARCH_TERM>\" in the \"Search Wikipedia\" field",
+        "code": "await page.getByLabel('Search Wikipedia', { exact: true }).fill(vars.get('SEARCH_TERM'));"
+      },
+      {
+        "stepIndex": 2,
+        "originalText": "Check that the URL contains \"wikipedia.org\"",
+        "code": "await expect(page).toHaveURL(/.*wikipedia\\.org.*/);"
+      }
+    ]
+  }
+}

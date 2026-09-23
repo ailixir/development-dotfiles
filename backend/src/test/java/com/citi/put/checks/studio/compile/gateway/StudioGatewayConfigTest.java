@@ -31,42 +31,14 @@ class StudioGatewayConfigTest {
   }
 
   @Test
-  void anExplicitFalseAlsoSelectsTheDisabledClient() {
+  void anExplicitDisabledProviderSelectsTheDisabledClient() {
     runner
-        .withPropertyValues("studio.compile.gateway.enabled=false")
+        .withPropertyValues("studio.compile.gateway.provider=disabled")
         .run(
             context ->
                 assertThat(context)
                     .getBean(LlmGatewayClient.class)
                     .isInstanceOf(DisabledLlmGatewayClient.class));
-  }
-
-  @Test
-  void theLocalPassthroughIsSelectedOnlyUnderTheLocalProfile() {
-    runner
-        .withPropertyValues(
-            "studio.compile.gateway.local-passthrough=true", "spring.profiles.active=local")
-        .run(
-            context ->
-                assertThat(context)
-                    .hasNotFailed()
-                    .getBean(LlmGatewayClient.class)
-                    .isInstanceOf(LocalPassthroughGatewayClient.class));
-  }
-
-  @Test
-  void theLocalPassthroughOutsideTheLocalProfileFailsStartup() {
-    runner
-        .withPropertyValues(
-            "studio.compile.gateway.local-passthrough=true", "spring.profiles.active=worker,dev")
-        .run(
-            context ->
-                assertThat(context)
-                    .hasFailed()
-                    .getFailure()
-                    .rootCause()
-                    .hasMessageContaining(
-                        "local-passthrough=true is only permitted under the local"));
   }
 
   @Test
@@ -81,9 +53,9 @@ class StudioGatewayConfigTest {
   }
 
   @Test
-  void anEnabledGatewayWithoutConfigurationFailsStartup() {
+  void vertexWithoutConfigurationFailsStartup() {
     runner
-        .withPropertyValues("studio.compile.gateway.enabled=true")
+        .withPropertyValues("studio.compile.gateway.provider=vertex")
         .run(
             context ->
                 assertThat(context)
@@ -92,6 +64,36 @@ class StudioGatewayConfigTest {
                     .rootCause()
                     .hasMessageContaining("the gateway configuration is incomplete")
                     .hasMessageContaining("studio.compile.gateway.endpoint is required"));
+  }
+
+  @Test
+  void deployedStudioRefusesToAdvertiseTranslationWithoutVertex() {
+    runner
+        .withPropertyValues(
+            "spring.profiles.active=staging",
+            "checks.sources.UI_TEST=true",
+            "studio.compile.gateway.provider=disabled")
+        .run(
+            context ->
+                assertThat(context)
+                    .hasFailed()
+                    .getFailure()
+                    .rootCause()
+                    .hasMessageContaining("UI_TEST is enabled")
+                    .hasMessageContaining("provider is not vertex"));
+  }
+
+  @Test
+  void unknownProviderFailsConfigurationValidation() {
+    runner
+        .withPropertyValues("studio.compile.gateway.provider=surprise")
+        .run(
+            context ->
+                assertThat(context)
+                    .hasFailed()
+                    .getFailure()
+                    .rootCause()
+                    .hasMessageContaining("must be one of disabled, vertex"));
   }
 
   @Test
@@ -111,7 +113,6 @@ class StudioGatewayConfigTest {
   void aMissingServiceAccountKeyFileIsReportedByPath() {
     StudioGatewayProperties properties =
         new StudioGatewayProperties(
-            true,
             "https://r2d2.example.invalid",
             "project",
             "location",

@@ -141,9 +141,10 @@ paths:
         `csiId` filter is supplied (architecture §9.1). Soft-deleted and quarantined drafts are
         never returned.
 
-        **`compileDiagnostics`, `currentCandidateArtifact` and `currentCandidateArtifactHash` are
-        always `null` on this route** and are read from `GET /tests/{id}`. They are the fields of
-        `TestDto` this projection omits, and the reason is the same for all three: the diagnostics
+        **`compileDiagnostics`, `currentCandidateArtifact`, `currentCandidateArtifactHash`,
+        `confirmedRevisionArtifact` and `confirmedRevisionArtifactHash` are always `null` on this route**.
+        They are read from `GET /tests/{id}` and are the fields of
+        `TestDto` this projection omits, and the reason is the same for all five: the diagnostics
         document is capped per draft at a configured byte limit (§8.5) and an artifact is capped
         at a hundred steps of generated source, so a page of drafts would be a multi-megabyte
         response carrying per-step reasons and executable code no list renders. `compileStatus`,
@@ -316,6 +317,16 @@ paths:
                           originalText: 'Check that the URL contains "dashboard"'
                           code: 'await expect(page).toHaveURL(/dashboard/);'
                     confirmedRevisionId: 22222222-2222-2222-2222-222222222222
+                    confirmedRevisionArtifactHash: 9f2c1d5b7a3e4c6f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7
+                    confirmedRevisionArtifact:
+                      version: 1
+                      steps:
+                        - stepIndex: 0
+                          originalText: 'Go to "https://www.citi.com"'
+                          code: "await page.goto('https://www.citi.com');"
+                        - stepIndex: 1
+                          originalText: 'Check that the URL contains "dashboard"'
+                          code: 'await expect(page).toHaveURL(/dashboard/);'
                     compileError: null
                     compileDiagnostics: null
                 needsRevision:
@@ -387,6 +398,13 @@ paths:
         `sourceRevision` and `configurationRevision` are required and carry the optimistic check.
         A mismatch is `409 STALE_REVISION` and changes nothing. A different `csiId` is
         `409 CSI_IMMUTABLE`.
+
+        **Saving persists the draft and nothing else.** A source or configuration change bumps the
+        revisions, clears the candidate and returns `compileStatus: STALE`; it does **not** start a
+        compile. Preparing the saved revision is `POST /tests/{id}/compile`, which the Run action
+        issues when the saved draft has no fresh artifact. Saving used to enqueue a compile, which
+        spent a gateway call on work the author had not asked for and left a failed attempt with no
+        way to retry it, because re-saving identical content is not a change.
 
         Only an owner or an explicitly authorized administrator of the draft's CSI may save. An
         unknown id, a soft-deleted or quarantined draft, and a draft on a CSI the caller may not
@@ -476,6 +494,11 @@ paths:
         last on the request thread (`400`), before any compile request identity is persisted: a
         draft that cannot be compiled must not first be moved to `COMPILING` and then failed.
 
+        A candidate that passes validation is **accepted for the requesting principal and published
+        `READY`** in one transaction: the author asked for this revision to be prepared by pressing
+        Run, and a separate confirmation step would ask the same question twice. `POST
+        /tests/{id}/confirm-compile` is retained for compatibility and is no longer used by the UI.
+
         `202` therefore means the attempt was *started*, not that it will succeed. Pool saturation
         and gateway failure surface asynchronously as `compileStatus: STALE` carrying
         `compileError`, never as a status code on this response (§4.3). `compileError` and, for an
@@ -537,7 +560,12 @@ paths:
     post:
       tags: [tests]
       operationId: confirmCompile
-      summary: Confirm the current compiled candidate
+      summary: Confirm the current compiled candidate (deprecated)
+      deprecated: true
+      description: |
+        Retained for compatibility. `POST /tests/{id}/compile` now accepts a valid candidate for the
+        requesting principal, so no draft is left in `AWAITING_CONFIRMATION` by the current flow and
+        this route has no caller in the UI.
       x-implemented-by: '10.9'
       parameters:
         - { $ref: '#/components/parameters/TestId' }
@@ -596,7 +624,9 @@ paths:
         digest is `409 IDEMPOTENCY_KEY_REUSED`. The response is returned only after commit.
 
         Story 10.1 persists the accepted `PENDING` execution and its ledger row. Live dispatch
-        arrives with 10.7.
+        arrives with 10.7. Any authenticated application user may start a Studio execution;
+        CSI ownership and a separate execute entitlement are not required. Secret-reference use,
+        when that capability is enabled, remains independently authorized.
       parameters:
         - { $ref: '#/components/parameters/TestId' }
         - name: Idempotency-Key
@@ -1169,7 +1199,7 @@ paths:
                     node: v22.11.0
                     validatorSchema: 1.0.0
                     executor: 1.0.0
-                    syntaxReference: 1.0.0
+                    syntaxReference: 1.1.0
       responses:
         '200':
           description: Admission owned by this identity (duplicate identical admission is idempotent)
@@ -1309,7 +1339,7 @@ paths:
                     node: v22.11.0
                     validatorSchema: 1.0.0
                     executor: 1.0.0
-                    syntaxReference: 1.0.0
+                    syntaxReference: 1.1.0
                   outcome: null
                   evidence: null
               final:
@@ -1340,7 +1370,7 @@ paths:
                     node: v22.11.0
                     validatorSchema: 1.0.0
                     executor: 1.0.0
-                    syntaxReference: 1.0.0
+                    syntaxReference: 1.1.0
                   outcome: { result: PASSED, errorCode: null, errorMessage: null }
                   evidence:
                     videoKey: studio/60406/11111111-1111-1111-1111-111111111111/44444444-4444-4444-4444-444444444444/55555555-5555-5555-5555-555555555555.webm
@@ -1596,6 +1626,10 @@ components:
             Canonical engine. The legacy value `chrome` is normalized to `chromium` at the
             controller boundary; any other engine is rejected with `400 INVALID_CONFIGURATION`.
         viewport: { $ref: '#/components/schemas/Viewport' }
+        # The PER-STEP timeout. The whole-run browser budget is server configuration
+        # (`studio.execution.total-runtime`, 120s) and travels on `deadlines.totalRuntimeMs`.
+        # The dispatcher used to derive the total from this value, which capped every run at the
+        # step timeout and produced a recording that stopped mid-test.
         timeoutSeconds: { type: integer, minimum: 1, maximum: 120 }
         waitStrategy:
           type: string
@@ -2082,6 +2116,21 @@ components:
             from `steps` would present the client's reading of the sentence as the validator's
             reading of the artifact (ADR-002 §21.7, architecture §4.7).
         confirmedRevisionId: { type: string, format: uuid, nullable: true }
+        confirmedRevisionArtifactHash:
+          type: string
+          minLength: 64
+          maxLength: 64
+          nullable: true
+          description: |
+            The canonical hash of the immutable revision `confirmedRevisionId` names. Null when
+            there is no confirmed revision and always null on `GET /tests`.
+        confirmedRevisionArtifact:
+          type: object
+          nullable: true
+          description: |
+            The exact immutable artifact that execution uses for `confirmedRevisionId`. Its
+            normative schema is `docs/specs/studio/artifact.schema.json`. Null when there is no
+            confirmed revision and always null on `GET /tests`.
         compileError: { $ref: '#/components/schemas/CompileError' }
         compileDiagnostics: { $ref: '#/components/schemas/CompileDiagnostics' }
 
@@ -2568,332 +2617,45 @@ components:
           description: The ordered original step lines the artifact claims to compile (§4.4).
           items: { type: string }
         references: { $ref: '#/components/schemas/ReferenceDeclarations' }
-        expectedIntent: { $ref: '#/components/schemas/ExpectedIntent' }
+        referencePolicy: { $ref: '#/components/schemas/ReferencePolicy' }
 
-    ExpectedIntent:
+    ReferencePolicy:
       type: object
       additionalProperties: false
-      required: [schemaVersion, steps]
+      required: [version, steps]
+      description: |
+        ADR-SC-003 structural reference policy, derived by the backend from saved authoring data
+        (never from English). One entry per source line. A `required` reference the step code
+        does not use is `REFERENCE_MISSING`; a used reference outside `allowed` is
+        `REFERENCE_EXTRA`; a malformed policy is `REFERENCE_POLICY_INVALID`. When absent (legacy
+        revisions) each step's references must equal its `<var>`/`<secret>` source tokens.
       properties:
-        schemaVersion: { type: integer, enum: [1] }
+        version: { type: integer, enum: [2] }
         steps:
           type: array
           items:
             type: object
             additionalProperties: false
-            required: [stepIndex, stepId, operations]
+            required: [stepIndex, required, allowed]
             properties:
               stepIndex: { type: integer, minimum: 0 }
-              stepId: { type: string, format: uuid }
-              operations:
-                type: array
-                minItems: 1
-                items: { $ref: '#/components/schemas/ExpectedOperation' }
+              required: { $ref: '#/components/schemas/ReferencePolicySet' }
+              allowed:
+                allOf: [{ $ref: '#/components/schemas/ReferencePolicySet' }]
+                description: Always a superset of `required`.
 
-    ExpectedOperation:
-      oneOf:
-        - { $ref: '#/components/schemas/ExpectedGoto' }
-        - { $ref: '#/components/schemas/ExpectedWaitForUrl' }
-        - { $ref: '#/components/schemas/ExpectedClick' }
-        - { $ref: '#/components/schemas/ExpectedFill' }
-        - { $ref: '#/components/schemas/ExpectedPress' }
-        - { $ref: '#/components/schemas/ExpectedCheck' }
-        - { $ref: '#/components/schemas/ExpectedUncheck' }
-        - { $ref: '#/components/schemas/ExpectedHover' }
-        - { $ref: '#/components/schemas/ExpectedSelectOption' }
-        - { $ref: '#/components/schemas/ExpectedVisible' }
-        - { $ref: '#/components/schemas/ExpectedContainText' }
-        - { $ref: '#/components/schemas/ExpectedValue' }
-        - { $ref: '#/components/schemas/ExpectedUrl' }
-        - { $ref: '#/components/schemas/ExpectedTitle' }
-      discriminator: { propertyName: op }
-
-    ExpectedLiteral:
+    ReferencePolicySet:
       type: object
       additionalProperties: false
-      required: [kind, value]
-      properties: { kind: { type: string, enum: [literal] }, value: { type: string } }
-    ExpectedVariable:
-      type: object
-      additionalProperties: false
-      required: [kind, name]
-      properties: { kind: { type: string, enum: [variable] }, name: { type: string, minLength: 1 } }
-    ExpectedSecret:
-      type: object
-      additionalProperties: false
-      required: [kind, id]
-      properties: { kind: { type: string, enum: [secret] }, id: { type: string, minLength: 1 } }
-    ExpectedRegex:
-      type: object
-      additionalProperties: false
-      required: [kind, source, flags]
+      required: [variables, secrets]
+      description: Sorted, de-duplicated reference names; never values.
       properties:
-        kind: { type: string, enum: [regex] }
-        source: { type: string }
-        flags: { type: string }
-    ExpectedTextMatcher:
-      oneOf:
-        - { $ref: '#/components/schemas/ExpectedLiteral' }
-        - { $ref: '#/components/schemas/ExpectedVariable' }
-        - { $ref: '#/components/schemas/ExpectedRegex' }
-      discriminator: { propertyName: kind }
-    ExpectedFillValue:
-      oneOf:
-        - { $ref: '#/components/schemas/ExpectedLiteral' }
-        - { $ref: '#/components/schemas/ExpectedVariable' }
-        - { $ref: '#/components/schemas/ExpectedSecret' }
-      discriminator: { propertyName: kind }
-
-    ExpectedLocator:
-      type: object
-      additionalProperties: false
-      required: [segments]
-      properties:
-        segments:
+        variables:
           type: array
-          minItems: 1
-          items: { $ref: '#/components/schemas/ExpectedLocatorSegment' }
-    ExpectedLocatorSegment:
-      oneOf:
-        - { $ref: '#/components/schemas/ExpectedRoleSegment' }
-        - { $ref: '#/components/schemas/ExpectedTextSegment' }
-        - { $ref: '#/components/schemas/ExpectedLabelSegment' }
-        - { $ref: '#/components/schemas/ExpectedPlaceholderSegment' }
-        - { $ref: '#/components/schemas/ExpectedTestIdSegment' }
-        - { $ref: '#/components/schemas/ExpectedCssSegment' }
-      discriminator: { propertyName: kind }
-    ExpectedRoleSegment:
-      type: object
-      additionalProperties: false
-      required: [kind, role]
-      properties:
-        kind: { type: string, enum: [getByRole] }
-        role: { type: string }
-        options: { $ref: '#/components/schemas/ExpectedRoleOptions' }
-    ExpectedTextSegment:
-      type: object
-      additionalProperties: false
-      required: [kind, text]
-      properties:
-        kind: { type: string, enum: [getByText] }
-        text: { $ref: '#/components/schemas/ExpectedTextMatcher' }
-        options: { $ref: '#/components/schemas/ExpectedLocatorTextOptions' }
-    ExpectedLabelSegment:
-      type: object
-      additionalProperties: false
-      required: [kind, text]
-      properties:
-        kind: { type: string, enum: [getByLabel] }
-        text: { $ref: '#/components/schemas/ExpectedTextMatcher' }
-        options: { $ref: '#/components/schemas/ExpectedLocatorTextOptions' }
-    ExpectedPlaceholderSegment:
-      type: object
-      additionalProperties: false
-      required: [kind, text]
-      properties:
-        kind: { type: string, enum: [getByPlaceholder] }
-        text: { $ref: '#/components/schemas/ExpectedTextMatcher' }
-        options: { $ref: '#/components/schemas/ExpectedLocatorTextOptions' }
-    ExpectedTestIdSegment:
-      type: object
-      additionalProperties: false
-      required: [kind, testId]
-      properties:
-        kind: { type: string, enum: [getByTestId] }
-        testId:
-          oneOf:
-            - { $ref: '#/components/schemas/ExpectedLiteral' }
-            - { $ref: '#/components/schemas/ExpectedVariable' }
-    ExpectedCssSegment:
-      type: object
-      additionalProperties: false
-      required: [kind, selector]
-      properties:
-        kind: { type: string, enum: [locator] }
-        selector: { type: string }
-
-    ExpectedLocatorTextOptions:
-      type: object
-      additionalProperties: false
-      properties: { exact: { type: boolean } }
-    ExpectedRoleOptions:
-      type: object
-      additionalProperties: false
-      properties:
-        name: { $ref: '#/components/schemas/ExpectedTextMatcher' }
-        exact: { type: boolean }
-        checked: { type: boolean }
-        disabled: { type: boolean }
-        expanded: { type: boolean }
-        selected: { type: boolean }
-        pressed: { type: boolean }
-        level: { type: integer }
-    ExpectedTimeoutOptions:
-      type: object
-      additionalProperties: false
-      properties: { timeout: { type: integer, minimum: 0 } }
-    ExpectedGotoOptions:
-      type: object
-      additionalProperties: false
-      properties:
-        timeout: { type: integer, minimum: 0 }
-        waitUntil: { type: string, enum: [load, domcontentloaded, networkidle, commit] }
-    ExpectedActionOptions:
-      type: object
-      additionalProperties: false
-      properties:
-        timeout: { type: integer, minimum: 0 }
-        force: { type: boolean }
-        trial: { type: boolean }
-    ExpectedClickOptions:
-      type: object
-      additionalProperties: false
-      properties:
-        timeout: { type: integer, minimum: 0 }
-        force: { type: boolean }
-        trial: { type: boolean }
-        button: { type: string, enum: [left, right, middle] }
-        clickCount: { type: integer, minimum: 1 }
-        delay: { type: integer, minimum: 0 }
-    ExpectedPressOptions:
-      type: object
-      additionalProperties: false
-      properties:
-        timeout: { type: integer, minimum: 0 }
-        delay: { type: integer, minimum: 0 }
-    ExpectedContainTextOptions:
-      type: object
-      additionalProperties: false
-      properties:
-        timeout: { type: integer, minimum: 0 }
-        ignoreCase: { type: boolean }
-        useInnerText: { type: boolean }
-    ExpectedUrlOptions:
-      type: object
-      additionalProperties: false
-      properties:
-        timeout: { type: integer, minimum: 0 }
-        ignoreCase: { type: boolean }
-
-    ExpectedGoto:
-      type: object
-      additionalProperties: false
-      required: [op, url]
-      properties:
-        op: { type: string, enum: [goto] }
-        url:
-          oneOf: [{ $ref: '#/components/schemas/ExpectedLiteral' }, { $ref: '#/components/schemas/ExpectedVariable' }]
-        options: { $ref: '#/components/schemas/ExpectedGotoOptions' }
-    ExpectedWaitForUrl:
-      type: object
-      additionalProperties: false
-      required: [op, url]
-      properties:
-        op: { type: string, enum: [waitForURL] }
-        url: { $ref: '#/components/schemas/ExpectedTextMatcher' }
-        options: { $ref: '#/components/schemas/ExpectedGotoOptions' }
-    ExpectedClick:
-      type: object
-      additionalProperties: false
-      required: [op, locator]
-      properties:
-        op: { type: string, enum: [click] }
-        locator: { $ref: '#/components/schemas/ExpectedLocator' }
-        options: { $ref: '#/components/schemas/ExpectedClickOptions' }
-    ExpectedFill:
-      type: object
-      additionalProperties: false
-      required: [op, locator, value]
-      properties:
-        op: { type: string, enum: [fill] }
-        locator: { $ref: '#/components/schemas/ExpectedLocator' }
-        value: { $ref: '#/components/schemas/ExpectedFillValue' }
-        options: { $ref: '#/components/schemas/ExpectedActionOptions' }
-    ExpectedPress:
-      type: object
-      additionalProperties: false
-      required: [op, locator, key]
-      properties:
-        op: { type: string, enum: [press] }
-        locator: { $ref: '#/components/schemas/ExpectedLocator' }
-        key: { $ref: '#/components/schemas/ExpectedLiteral' }
-        options: { $ref: '#/components/schemas/ExpectedPressOptions' }
-    ExpectedCheck:
-      type: object
-      additionalProperties: false
-      required: [op, locator]
-      properties:
-        op: { type: string, enum: [check] }
-        locator: { $ref: '#/components/schemas/ExpectedLocator' }
-        options: { $ref: '#/components/schemas/ExpectedActionOptions' }
-    ExpectedUncheck:
-      type: object
-      additionalProperties: false
-      required: [op, locator]
-      properties:
-        op: { type: string, enum: [uncheck] }
-        locator: { $ref: '#/components/schemas/ExpectedLocator' }
-        options: { $ref: '#/components/schemas/ExpectedActionOptions' }
-    ExpectedHover:
-      type: object
-      additionalProperties: false
-      required: [op, locator]
-      properties:
-        op: { type: string, enum: [hover] }
-        locator: { $ref: '#/components/schemas/ExpectedLocator' }
-        options: { $ref: '#/components/schemas/ExpectedActionOptions' }
-    ExpectedSelectOption:
-      type: object
-      additionalProperties: false
-      required: [op, locator, value]
-      properties:
-        op: { type: string, enum: [selectOption] }
-        locator: { $ref: '#/components/schemas/ExpectedLocator' }
-        value:
-          oneOf: [{ $ref: '#/components/schemas/ExpectedLiteral' }, { $ref: '#/components/schemas/ExpectedVariable' }]
-        options: { $ref: '#/components/schemas/ExpectedActionOptions' }
-    ExpectedVisible:
-      type: object
-      additionalProperties: false
-      required: [op, locator]
-      properties:
-        op: { type: string, enum: [expectVisible] }
-        locator: { $ref: '#/components/schemas/ExpectedLocator' }
-        options: { $ref: '#/components/schemas/ExpectedTimeoutOptions' }
-    ExpectedContainText:
-      type: object
-      additionalProperties: false
-      required: [op, locator, expected]
-      properties:
-        op: { type: string, enum: [expectContainText] }
-        locator: { $ref: '#/components/schemas/ExpectedLocator' }
-        expected: { $ref: '#/components/schemas/ExpectedTextMatcher' }
-        options: { $ref: '#/components/schemas/ExpectedContainTextOptions' }
-    ExpectedValue:
-      type: object
-      additionalProperties: false
-      required: [op, locator, expected]
-      properties:
-        op: { type: string, enum: [expectValue] }
-        locator: { $ref: '#/components/schemas/ExpectedLocator' }
-        expected: { $ref: '#/components/schemas/ExpectedTextMatcher' }
-        options: { $ref: '#/components/schemas/ExpectedTimeoutOptions' }
-    ExpectedUrl:
-      type: object
-      additionalProperties: false
-      required: [op, expected]
-      properties:
-        op: { type: string, enum: [expectUrl] }
-        expected: { $ref: '#/components/schemas/ExpectedTextMatcher' }
-        options: { $ref: '#/components/schemas/ExpectedUrlOptions' }
-    ExpectedTitle:
-      type: object
-      additionalProperties: false
-      required: [op, expected]
-      properties:
-        op: { type: string, enum: [expectTitle] }
-        expected: { $ref: '#/components/schemas/ExpectedTextMatcher' }
-        options: { $ref: '#/components/schemas/ExpectedTimeoutOptions' }
+          items: { type: string, minLength: 1, maxLength: 64 }
+        secrets:
+          type: array
+          items: { type: string, minLength: 1, maxLength: 64 }
 
     ValidateResponse:
       type: object
@@ -3001,7 +2763,21 @@ components:
         manifestKey:
           type: string
           description: Server-derived terminal result manifest key (§5.3, §6.2).
-        expectedIntent: { $ref: '#/components/schemas/ExpectedIntent' }
+        referencePolicy: { $ref: '#/components/schemas/ReferencePolicy' }
+        secretOrigins:
+          type: object
+          additionalProperties:
+            type: array
+            maxItems: 16
+            items: { type: string, maxLength: 512 }
+          description: |
+            The origins each declared secret may be filled on, keyed by secret id. Not a secret.
+            Read from the secret's own vault entry (`allowedOrigins`) at dispatch and normalized to
+            the form `URL.origin` renders (`scheme://host[:port]`, lowercase, no default port);
+            only `http` and `https` origins are carried. Before a `fill` whose value is a secret,
+            the runner compares the page's origin against this list and refuses with
+            `SECRET_ORIGIN_NOT_ALLOWED` when it is not listed. **Fail closed:** an absent map, a
+            missing id or an empty list means the secret cannot be filled anywhere.
 
     RunAccepted:
       type: object
@@ -3280,6 +3056,8 @@ components:
             - UNSUPPORTED_MULTI_PAGE
             - RECORDING_FAILED
             - STEP_FAILED
+            - URL_SCHEME_NOT_PERMITTED
+            - SECRET_ORIGIN_NOT_ALLOWED
             - TIMEOUT
             - CANCELLED
             - RUN_ERROR

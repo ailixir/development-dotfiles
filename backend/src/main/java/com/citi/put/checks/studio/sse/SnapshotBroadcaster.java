@@ -108,7 +108,8 @@ public class SnapshotBroadcaster {
       // A bounded authorization refresh: a revocation stops delivery within the interval and the
       // stream closes with an auth-shaped signal rather than silently.
       if (authorization.isRefreshDue(subscription.lastAuthorizedAt())) {
-        if (!authorization.stillAuthorized(subscription.capturedIdentity(), snapshot.csiId())) {
+        if (!authorization.stillAuthorized(
+            subscription.capturedIdentity(), subscription.executionId())) {
           senders.terminateUnauthorized(subscription, release);
           continue;
         }

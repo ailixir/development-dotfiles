@@ -2,7 +2,6 @@ package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -20,16 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-/**
- * Studio v1 WP6 — the {@code dev} seed loads on the current schema and claims nothing the product
- * cannot do.
- *
- * <p>The seed is a repeatable migration, so Flyway applies it <em>after</em> every versioned one.
- * Nothing else in the suite runs it, which is how it drifted: V14 made {@code logs} JSONB and
- * restricted {@code browser} to {@code chromium}, and the seed kept inserting free text and {@code
- * firefox}. This test applies exactly what {@code application-dev.yml} applies — {@code
- * db/migration} plus {@code db/seed} — to an empty database, twice, and reads back what it wrote.
- */
+/** The development seed loads cleanly without inventing Studio tests or run results. */
 @Testcontainers(disabledWithoutDocker = true)
 class StudioSeedIT {
 
@@ -63,109 +53,36 @@ class StudioSeedIT {
 
   @Test
   void theSeedNamesNoObjectStoreThatDoesNotExist() throws IOException {
-    String seed = readSeed();
-    assertThat(seed).doesNotContain("storage.internal.citi.com");
+    assertThat(readSeed()).doesNotContain("storage.internal.citi.com");
   }
 
   @Test
-  void seededExecutionsCarryAnHonestNoVideoState() throws SQLException {
-    List<String> rows =
-        strings(
-            "SELECT id || '|' || COALESCE(video_status, '<null>') || '|' ||"
-                + " COALESCE(video_key, '<null>') || '|' || COALESCE(video_url, '<null>') || '|' ||"
-                + " COALESCE(array_length(screenshot_urls, 1)::text, '<null>')"
-                + "  FROM ui_test_executions WHERE id::text LIKE '"
-                + SEED_EXECUTION_PREFIX
-                + "%' ORDER BY id");
-
-    assertThat(rows).hasSize(6);
-    assertThat(rows)
-        .allSatisfy(row -> assertThat(row).endsWith("|UNAVAILABLE|<null>|<null>|<null>"));
+  void studioStartsWithoutFabricatedTestsOrExecutionHistory() throws SQLException {
+    assertNoSeededStudioRows();
   }
 
   @Test
-  void seededExecutionsAreVisibleNotQuarantined() throws SQLException {
-    // A row with no CSI or no ledger locator is excluded from every user-facing query (V14 §4, §7),
-    // so "the Runs page shows No video" is only observable if the row reaches the page at all.
-    List<String> invisible =
-        strings(
-            "SELECT e.id::text FROM ui_test_executions e"
-                + "  LEFT JOIN studio_dispatch_ledger l ON l.execution_id = e.id"
-                + " WHERE e.id::text LIKE '"
-                + SEED_EXECUTION_PREFIX
-                + "%' AND (e.csi_id IS NULL OR l.execution_id IS NULL"
-                + "        OR l.state <> 'DONE' OR l.execution_accepted_at <> e.started_at)");
-
-    assertThat(invisible).isEmpty();
-  }
-
-  @Test
-  void seededTestsAreChromiumAndCarryNoScheduleNothingExecutes() throws SQLException {
-    List<String> rows =
-        strings(
-            "SELECT browser || '|' || COALESCE(schedule::text, '<null>') FROM ui_tests"
-                + " WHERE id::text LIKE '"
-                + SEED_TEST_PREFIX
-                + "%'");
-
-    assertThat(rows).hasSize(3).containsOnly("chromium|<null>");
-  }
-
-  /**
-   * Studio v1 WP2: every seeded draft must be readable by the Studio API. An earlier revision
-   * stored structured {step, action, target} objects, which LegacyStudioAdapter refuses, so GET
-   * /api/v1/studio/tests answered 400 INVALID_STEPS for the whole list under {@code --seed}.
-   */
-  @Test
-  void seededStepsAreReadableByTheStudioApi() throws SQLException {
-    List<String> steps =
-        strings("SELECT steps::text FROM ui_tests WHERE id::text LIKE '" + SEED_TEST_PREFIX + "%'");
-
-    assertThat(steps).hasSize(3);
-    for (String json : steps) {
-      assertThat(LegacyStudioAdapter.parseSteps(json)).as(json).isNotEmpty();
-    }
-  }
-
-  /** A database seeded by the earlier revision is repaired when the seed re-runs. */
-  @Test
-  void reapplyingTheSeedRepairsTheEarlierStructuredSteps() throws SQLException, IOException {
-    String legacy =
-        "[{\"step\":1,\"action\":\"navigate\",\"target\":\"https://tse.internal.citi.com/status\"}]";
-    try (Connection connection = connect();
-        Statement statement = connection.createStatement()) {
-      statement.execute(
-          "UPDATE ui_tests SET steps = '"
-              + legacy
-              + "'::jsonb WHERE id = 'b8c9d0e1-0001-4000-8000-000000000003'");
-      statement.execute(readSeed());
-    }
-
-    String repaired =
-        strings(
-                "SELECT steps::text FROM ui_tests WHERE id = 'b8c9d0e1-0001-4000-8000-000000000003'")
-            .get(0);
-    assertThat(LegacyStudioAdapter.parseSteps(repaired))
-        .first()
-        .isEqualTo("Go to https://tse.internal.citi.com/status");
-  }
-
-  @Test
-  void reapplyingTheSeedDuplicatesNothing() throws SQLException, IOException {
-    // A repeatable migration re-runs whenever its checksum changes. `ui_test_executions` is keyed
-    // by (id, started_at) and the seed's started_at is NOW()-relative, so ON CONFLICT alone would
-    // insert a second copy of every run on each re-run.
+  void reapplyingTheSeedStillCreatesNoStudioResults() throws SQLException, IOException {
     try (Connection connection = connect();
         Statement statement = connection.createStatement()) {
       statement.execute(readSeed());
     }
+    assertNoSeededStudioRows();
+  }
 
+  private static void assertNoSeededStudioRows() throws SQLException {
+    assertThat(
+            strings(
+                "SELECT COUNT(*)::text FROM ui_tests WHERE id::text LIKE '"
+                    + SEED_TEST_PREFIX
+                    + "%'"))
+        .containsExactly("0");
     assertThat(
             strings(
                 "SELECT COUNT(*)::text FROM ui_test_executions WHERE id::text LIKE '"
                     + SEED_EXECUTION_PREFIX
                     + "%'"))
-        .containsExactly("6");
+        .containsExactly("0");
   }
 
   private static String readSeed() throws IOException {

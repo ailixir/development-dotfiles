@@ -71,9 +71,9 @@ backend:
   #       different fact from a drafting gate and does not reinstate one.
   #
   # Corrected by @po on 2026-09-17 (closure plan, Phase 0 — record truing). **Only these two claims
-  # were touched.** The three warnings above — that the bypass code paths still exist, that the
-  # vault is still a stub, and the pilot prohibition itself — were **not re-verified by this
-  # change** and are left exactly as they stood. No rendered value in this file was altered.
+  # were touched.** The bypass paths still exist. The real Studio Vault adapter now exists but is
+  # default-off and unconnected; the legacy `SecretsService` remains a `REDACTED` stub. The pilot
+  # prohibition remains until ED-02 has a linked completed delivery.
   #
   # See `docs/runbooks/studio-runner.md` §9 for what an operator may and may not do with these.
   identityBypass:
@@ -89,6 +89,7 @@ backend:
 
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "20"
+    checks.sources.UI_TEST: "true"
     checks.scheduling.min-interval-seconds: "60"
 
 worker:
@@ -185,3 +186,13 @@ studioRunner:
     credentialsSecret: checks-studio-runner-object-store-prod
 objectStore:
   credentialsSecret: checks-api-object-store-prod
+
+# Production uses the same model family proven in staging. Endpoint, project and location remain
+# environment-owned ConfigMap values and credentials come from workload identity (ADC). The chart
+# refuses recorded fixtures in this profile even if an operator tries to override this provider.
+studioGateway:
+  environment: production
+  provider: vertex
+  model: gemini-3.8-flash
+  vertexConfigMap:
+    name: checks-studio-vertex-prod

@@ -41,10 +41,11 @@ function requestVideo(executionId: string, init?: { range?: string; query?: stri
 }
 
 describe('the mock video route serves bytes as the document declares (AC-13)', () => {
-  it('the fixture is large enough for the range cases to mean something', () => {
+  it('the fixture is a non-trivial EBML/WebM body large enough for playback and range cases', () => {
     expect(available).toBeDefined();
     expect(expired).toBeDefined();
-    expect(SIZE).toBeGreaterThan(10);
+    expect(SIZE).toBeGreaterThan(1_000);
+    expect(Array.from(MOCK_VIDEO_BYTES.slice(0, 4))).toEqual([0x1a, 0x45, 0xdf, 0xa3]);
   });
 
   it('200 carries the whole fixture, with its length computed from the fixture', async () => {

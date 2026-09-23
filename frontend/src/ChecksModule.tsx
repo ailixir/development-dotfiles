@@ -1,12 +1,11 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material/styles';
-import { CssBaseline, Box, CircularProgress } from '@mui/material';
+import { CssBaseline, Box } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { store } from '@store/index';
 import { theme } from './theme';
 import App from './App';
-import { MswGate } from '@components/providers/MswGate';
 
 // Use the Vite app's route configuration to ensure identical routes
 
@@ -23,13 +22,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-// Loading component (kept for potential future suspense boundaries)
-const LoadingFallback: React.FC = () => (
-  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', width: '100%' }}>
-    <CircularProgress />
-  </Box>
-);
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -83,9 +75,7 @@ const ChecksModule: React.FC<ChecksModuleProps> = () => {
         <Provider store={store}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <MswGate>
-              <App />
-            </MswGate>
+            <App />
           </ThemeProvider>
         </Provider>
       </QueryClientProvider>
@@ -98,5 +88,3 @@ export default ChecksModule;
 
 // Also export as named export for flexibility
 export { ChecksModule };
-
-

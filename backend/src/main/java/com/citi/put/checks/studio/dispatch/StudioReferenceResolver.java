@@ -2,6 +2,7 @@ package com.citi.put.checks.studio.dispatch;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,8 +31,8 @@ import java.util.Map;
  * undifferentiated set.
  *
  * <p>Real vault integration and real per-principal entitlement are {@code ED-02} and story 10.18.
- * What ships here is the seam, a fake provider confined to development profiles, and the canaries
- * that prove values do not leak.
+ * What ships here is the seam and the real provider integration; test doubles and canaries prove
+ * values do not leak.
  */
 public interface StudioReferenceResolver {
 
@@ -156,14 +157,25 @@ public interface StudioReferenceResolver {
     private final Map<String, char[]> variables;
     private final Map<String, char[]> secrets;
     private final Map<String, String> secretVersions;
+    private final Map<String, List<String>> secretOrigins;
 
     public Resolved(
         Map<String, char[]> variables,
         Map<String, char[]> secrets,
         Map<String, String> secretVersions) {
+      this(variables, secrets, secretVersions, Map.of());
+    }
+
+    public Resolved(
+        Map<String, char[]> variables,
+        Map<String, char[]> secrets,
+        Map<String, String> secretVersions,
+        Map<String, List<String>> secretOrigins) {
       this.variables = new LinkedHashMap<>(variables);
       this.secrets = new LinkedHashMap<>(secrets);
       this.secretVersions = new LinkedHashMap<>(secretVersions);
+      this.secretOrigins = new LinkedHashMap<>();
+      secretOrigins.forEach((id, origins) -> this.secretOrigins.put(id, List.copyOf(origins)));
     }
 
     public Map<String, char[]> variables() {
@@ -185,6 +197,15 @@ public interface StudioReferenceResolver {
       return Map.copyOf(secretVersions);
     }
 
+    /**
+     * The normalized origins each resolved secret may be filled on, as its vault entry declares
+     * them. Nonsecret. A secret with no entry here, or an empty list, is bound to no origin and the
+     * runner refuses to fill it.
+     */
+    public Map<String, List<String>> secretOrigins() {
+      return Map.copyOf(secretOrigins);
+    }
+
     public boolean isEmpty() {
       return variables.isEmpty() && secrets.isEmpty();
     }
@@ -196,6 +217,7 @@ public interface StudioReferenceResolver {
       variables.clear();
       secrets.clear();
       secretVersions.clear();
+      secretOrigins.clear();
     }
   }
 }

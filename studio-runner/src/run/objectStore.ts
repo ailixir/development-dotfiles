@@ -35,10 +35,11 @@
  * and the diagnostic says which one happened.
  */
 import { createReadStream } from 'node:fs';
-import { mkdir, rename, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve, sep } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 /** What the caller hands the client. Never a `Buffer` of a recording (AC-5). */
 export type ObjectBody =
@@ -79,8 +80,8 @@ export const PERMITTED_OBJECT_STORE_OPERATIONS = ['put'] as const;
 /**
  * The store could not be reached at all — as distinct from a store that answered and refused.
  *
- * The distinction is the one `FakeResultManifestStore.makeUnavailable` exists to prove on the API
- * side, and story 10.14 AC-21 asserts it through the real write path.
+ * Story 10.14 AC-21 asserts the distinction through the real write path and test-only controlled
+ * failure stores.
  */
 export class ObjectStoreUnavailableError extends Error {
   constructor(message: string, options?: { cause?: unknown }) {
@@ -149,6 +150,114 @@ export function createLocalObjectStore(options: LocalObjectStoreOptions): Object
   };
 }
 
+export interface S3ObjectStoreOptions {
+  readonly endpoint: string;
+  readonly region: string;
+  readonly bucket: string;
+  readonly forcePathStyle: boolean;
+  readonly accessKeyIdFile: string;
+  readonly secretAccessKeyFile: string;
+  readonly requestTimeoutMs: number;
+}
+
+/**
+ * Sonic/S3 writer. Its public surface remains the one-operation {@link ObjectStoreClient}; SDK
+ * retries are disabled because the evidence uploader already owns the bounded retry window.
+ * Credentials are re-read from mounted files for every SDK refresh, allowing rotation without
+ * placing secret material in the process environment or configuration object.
+ */
+export function createS3ObjectStore(options: S3ObjectStoreOptions): ObjectStoreClient {
+  const client = new S3Client({
+    endpoint: options.endpoint,
+    region: options.region,
+    forcePathStyle: options.forcePathStyle,
+    maxAttempts: 1,
+    // S3-compatible stores do not universally implement AWS's optional aws-chunked trailer
+    // checksums. Sign the request normally, but send the actual file bytes unless required.
+    requestChecksumCalculation: 'WHEN_REQUIRED',
+    responseChecksumValidation: 'WHEN_REQUIRED',
+    credentials: async () => ({
+      accessKeyId: await readCredential(options.accessKeyIdFile, 'access key id'),
+      secretAccessKey: await readCredential(options.secretAccessKeyFile, 'secret access key'),
+    }),
+  });
+
+  return {
+    async put(request: PutObjectRequest): Promise<void> {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => {
+        controller.abort();
+      }, options.requestTimeoutMs);
+      try {
+        const contentLength =
+          request.body.kind === 'file' ? (await stat(request.body.path)).size : request.body.data.length;
+        await client.send(
+          new PutObjectCommand({
+            Bucket: options.bucket,
+            Key: request.key,
+            Body:
+              request.body.kind === 'file'
+                ? createReadStream(request.body.path)
+                : request.body.data,
+            ContentLength: contentLength,
+            ContentType: request.contentType,
+          }),
+          { abortSignal: controller.signal },
+        );
+      } catch (error) {
+        if (isUnreachable(error)) {
+          throw new ObjectStoreUnavailableError('The object store is unreachable.', {
+            cause: error,
+          });
+        }
+        throw new ObjectStorePutError(`The object at key ${request.key} was not written.`, {
+          cause: error,
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
+    },
+  };
+}
+
+async function readCredential(path: string, label: string): Promise<string> {
+  try {
+    const value = (await readFile(path, 'utf8')).trim();
+    if (value === '') throw new Error('empty credential file');
+    return value;
+  } catch (error) {
+    throw new ObjectStoreUnavailableError(`The mounted object-store ${label} is unavailable.`, {
+      cause: error,
+    });
+  }
+}
+
+function isUnreachable(error: unknown): boolean {
+  const unavailable = new Set([
+    'AbortError',
+    'TimeoutError',
+    'CredentialsProviderError',
+    'ECONNREFUSED',
+    'ECONNRESET',
+    'ENOTFOUND',
+    'EAI_AGAIN',
+  ]);
+  let current: unknown = error;
+  for (let depth = 0; depth < 8 && current !== undefined && current !== null; depth += 1) {
+    if (current instanceof ObjectStoreUnavailableError) return true;
+    if (typeof current !== 'object') return false;
+    const shaped = current as { readonly name?: unknown; readonly code?: unknown; readonly cause?: unknown };
+    if (
+      (typeof shaped.name === 'string' && unavailable.has(shaped.name)) ||
+      (typeof shaped.code === 'string' && unavailable.has(shaped.code))
+    ) {
+      return true;
+    }
+    current = shaped.cause;
+  }
+  return false;
+}
+
 /** Resolves a key under the root and refuses one that would escape it. */
 function resolveKey(root: string, key: string): string {
   const target = resolve(join(root, key));
@@ -156,132 +265,4 @@ function resolveKey(root: string, key: string): string {
     throw new ObjectStorePutError('The object key resolves outside the store root.');
   }
   return target;
-}
-
-/** One recorded call on {@link createFakeObjectStore}. */
-export interface RecordedPut {
-  readonly key: string;
-  readonly contentType: string;
-  /** The body **as the client received it** — the argument AC-5 (i) is decided on. */
-  readonly body: ObjectBody;
-  /** Bytes the client actually consumed, counted as they streamed past. */
-  readonly bytes: number;
-  /** The stored bytes, so AC-6 can assert on what left the process. */
-  readonly stored: Uint8Array;
-}
-
-export interface FakeObjectStoreOptions {
-  /** Keys whose put throws {@link ObjectStorePutError}. */
-  readonly failKeys?: readonly string[];
-  /** The whole store is unreachable; every put throws {@link ObjectStoreUnavailableError}. */
-  readonly unavailable?: boolean;
-  /** Fails the first N attempts on any key, then succeeds — for AC-5's retry assertions. */
-  readonly failFirstAttempts?: number;
-  /** Shared call log, so an ordering test can interleave store calls with other events. */
-  readonly journal?: string[];
-  /**
-   * Resolves a `file` body without touching the filesystem.
-   *
-   * The unit tier drives fake sessions whose recording path names no real file. Supplying this
-   * keeps those tests about the terminal path rather than about temp-file plumbing. When it is
-   * absent the fake streams the real file exactly as {@link createLocalObjectStore} does, which is
-   * what the ordering, canary and retained-bytes tests use.
-   */
-  readonly resolveFile?: (path: string) => Promise<Uint8Array>;
-}
-
-/**
- * The fake, and the inspection that goes with it.
- *
- * The inspection is deliberately **beside** the client rather than on it. A fake that carried an
- * `objectAt` would be an `ObjectStoreClient` with a read on it, and AC-2's runtime-surface
- * assertion is applied to the fake as well as to the real client — a store double that could be
- * read from would quietly make "write-only by construction" false for every test that used it.
- */
-export interface FakeObjectStore {
-  /** What production code is handed. One operation, and no way to read anything back. */
-  readonly client: ObjectStoreClient;
-  readonly puts: readonly RecordedPut[];
-  /** Distinct keys that hold an object. AC-5's "exactly one object" is decided on this. */
-  readonly keys: readonly string[];
-  /** Total number of times {@link ObjectStoreClient.put} was entered, retries included. */
-  readonly attempts: number;
-  objectAt(key: string): Uint8Array | undefined;
-}
-
-/**
- * The local fake `ED-03` requires (AC-18a): a successful put, a failing put, an unreachable store,
- * and a recorded call log.
- *
- * It streams a `file` body exactly as the real client does, so a test that hands it a whole-file
- * buffer is visibly different from one that hands it a path.
- */
-export function createFakeObjectStore(options: FakeObjectStoreOptions = {}): FakeObjectStore {
-  const puts: RecordedPut[] = [];
-  const objects = new Map<string, Uint8Array>();
-  const failKeys = new Set(options.failKeys ?? []);
-  let attempts = 0;
-
-  const client: ObjectStoreClient = {
-    async put(request: PutObjectRequest): Promise<void> {
-      attempts += 1;
-      options.journal?.push(`put:${request.key}`);
-      if (options.unavailable === true) {
-        throw new ObjectStoreUnavailableError('The object store is unreachable.');
-      }
-      if (failKeys.has(request.key)) {
-        throw new ObjectStorePutError(`The object at key ${request.key} was not written.`);
-      }
-      if (options.failFirstAttempts !== undefined && attempts <= options.failFirstAttempts) {
-        throw new ObjectStorePutError(`The object at key ${request.key} was not written.`);
-      }
-      const stored =
-        request.body.kind === 'file' && options.resolveFile !== undefined
-          ? await options.resolveFile(request.body.path)
-          : await drain(request.body);
-      objects.set(request.key, stored);
-      puts.push({
-        key: request.key,
-        contentType: request.contentType,
-        body: request.body,
-        bytes: stored.length,
-        stored,
-      });
-    },
-  };
-
-  return {
-    client,
-    get puts(): readonly RecordedPut[] {
-      return puts;
-    },
-    get keys(): readonly string[] {
-      return [...objects.keys()];
-    },
-    get attempts(): number {
-      return attempts;
-    },
-    objectAt(key: string): Uint8Array | undefined {
-      return objects.get(key);
-    },
-  };
-}
-
-/** Consumes a body the way the real client does — streaming a file, copying bounded bytes. */
-async function drain(body: ObjectBody): Promise<Uint8Array> {
-  if (body.kind === 'bytes') {
-    return Uint8Array.from(body.data);
-  }
-  const size = (await stat(body.path)).size;
-  const chunks: Buffer[] = [];
-  let consumed = 0;
-  for await (const chunk of createReadStream(body.path)) {
-    const buffer = chunk as Buffer;
-    consumed += buffer.length;
-    chunks.push(buffer);
-  }
-  if (consumed !== size) {
-    throw new ObjectStorePutError('The streamed body did not match the file size.');
-  }
-  return Uint8Array.from(Buffer.concat(chunks));
 }

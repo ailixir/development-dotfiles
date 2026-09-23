@@ -72,8 +72,6 @@ export default defineConfig({
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify('test'),
-    // Unit tests install handlers directly; MswGate must never start a browser worker here.
-    'process.env.MSW_BUNDLED': JSON.stringify('false'),
     global: 'globalThis',
   },
 });

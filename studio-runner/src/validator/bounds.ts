@@ -42,7 +42,9 @@ export interface ValidationBounds {
 export const DEFAULT_BOUNDS: ValidationBounds = {
   maxArtifactBytes: 64 * 1024,
   maxSteps: 100,
-  maxCodeLength: 2048,
+  // Exactly artifact.schema.json's `code.maxLength`: a step that passes the API's schema
+  // must not then be refused here for length.
+  maxCodeLength: 2000,
   maxStatementsPerStep: 8,
   maxAstDepth: 24,
   maxStringLength: 1024,

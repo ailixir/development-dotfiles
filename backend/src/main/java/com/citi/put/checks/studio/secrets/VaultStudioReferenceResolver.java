@@ -4,6 +4,7 @@ import com.citi.put.checks.studio.dispatch.ReferenceDeclarations;
 import com.citi.put.checks.studio.dispatch.StudioReferenceResolver;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
@@ -83,6 +84,7 @@ public class VaultStudioReferenceResolver implements StudioReferenceResolver {
     Map<String, char[]> variables = new LinkedHashMap<>();
     Map<String, char[]> secrets = new LinkedHashMap<>();
     Map<String, String> versions = new LinkedHashMap<>();
+    Map<String, List<String>> origins = new LinkedHashMap<>();
     try {
       for (String name : declarations.variables()) {
         StudioVaultProvider.VaultEntry entry =
@@ -103,6 +105,7 @@ public class VaultStudioReferenceResolver implements StudioReferenceResolver {
                 .orElseThrow(() -> new ReferenceUnavailableException(secretId));
         secrets.put(secretId, entry.value());
         versions.put(secretId, entry.versionIdentifier());
+        origins.put(secretId, entry.allowedOrigins());
       }
     } catch (RuntimeException e) {
       // Everything read so far is erased before the exception leaves, on every refusal path.
@@ -110,7 +113,7 @@ public class VaultStudioReferenceResolver implements StudioReferenceResolver {
       secrets.values().forEach(value -> Arrays.fill(value, '\0'));
       throw e;
     }
-    return new Resolved(variables, secrets, versions);
+    return new Resolved(variables, secrets, versions, origins);
   }
 
   /**

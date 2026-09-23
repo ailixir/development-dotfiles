@@ -1,0 +1,179 @@
+{
+  "planVersion": 1,
+  "storyId": "UI-VALIDATION-20260921",
+  "createdAt": "2026-09-21T23:52:16Z",
+  "createdBy": "@architect",
+  "status": "completed",
+  "complexity": "STANDARD",
+  "totalScore": 9,
+  "planType": "validation-only",
+  "specGate": {
+    "verdict": "APPROVED",
+    "score": 5.0,
+    "critiquePath": "docs/stories/UI-VALIDATION-20260921/spec/critique.json",
+    "specPath": "docs/stories/UI-VALIDATION-20260921/spec/spec.md",
+    "specSha256": "d9954d549d8568a39595c1c4f497a4710ce6f2a6e2636397fbc8b507839f5540",
+    "unresolvedIssues": 0
+  },
+  "scope": {
+    "summary": "Complete the approved UI Studio validation by creating and executing exactly three public-site tests through the visible product workflow, including one plain-variable-backed scenario.",
+    "implementationRequired": false,
+    "productSourceChanges": false,
+    "allowedArtifacts": [
+      "docs/stories/UI-VALIDATION-20260921/spec/"
+    ]
+  },
+  "dependencies": [
+    {
+      "name": "Checks UI Studio authoring and execution flow",
+      "version": "repository-local",
+      "purpose": "Create, save, compile, confirm, execute, and observe the three tests through the visible UI.",
+      "status": "verified"
+    },
+    {
+      "name": "Local passthrough compiler and Studio runner",
+      "version": "local-passthrough; Playwright 1.63.0",
+      "purpose": "Validate accepted statements, resolve the plain variable, and run the browser scenarios.",
+      "status": "verified"
+    },
+    {
+      "name": "Wikipedia, SauceDemo, and Example Domain",
+      "version": "live validation 2026-09-21",
+      "purpose": "Provide accessible, unauthenticated, non-Citi targets for the three non-destructive scenarios.",
+      "status": "verified_by_execution"
+    }
+  ],
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "UI Studio E2E validation",
+      "status": "completed",
+      "dependsOn": [],
+      "tasks": [
+        {
+          "id": "1.1",
+          "description": "Create and execute the Wikipedia navigation test through UI Studio.",
+          "status": "completed",
+          "requirements": ["FR-1", "FR-2", "FR-4"],
+          "evidence": {
+            "testId": "79d9ea8f-3e6e-406e-b0f0-1e33e6386731",
+            "executionId": "f8d6440c-b0e5-4aa5-a843-adf764581b68",
+            "target": "https://www.wikipedia.org/",
+            "result": "PASSED",
+            "steps": "2/2 PASS",
+            "video": "AVAILABLE"
+          }
+        },
+        {
+          "id": "1.2",
+          "description": "Create and execute the SauceDemo variable-backed input test through UI Studio.",
+          "status": "completed",
+          "dependencies": ["1.1"],
+          "requirements": ["FR-1", "FR-2", "FR-3", "FR-4"],
+          "evidence": {
+            "testId": "c0482200-717b-43a6-b974-17c6ba08cef8",
+            "executionId": "0d1b71b5-404a-4170-9589-e27202c27f72",
+            "target": "https://www.saucedemo.com/",
+            "plainVariable": "FORM_TEXT",
+            "variableUse": "vars.get('FORM_TEXT')",
+            "result": "PASSED",
+            "steps": "3/3 PASS",
+            "video": "AVAILABLE"
+          }
+        },
+        {
+          "id": "1.3",
+          "description": "Create and execute the Example Domain navigation test through UI Studio.",
+          "status": "completed",
+          "dependencies": ["1.2"],
+          "requirements": ["FR-1", "FR-2", "FR-4"],
+          "evidence": {
+            "testId": "18e7058d-dcd9-4170-936b-4a469206b94e",
+            "executionId": "747630c6-196a-44db-9694-53f01c841295",
+            "target": "https://example.com/",
+            "result": "PASSED",
+            "steps": "2/2 PASS",
+            "video": "AVAILABLE"
+          }
+        },
+        {
+          "id": "1.4",
+          "description": "Record auditable validation evidence and complete the specification quality gate.",
+          "status": "completed",
+          "dependencies": ["1.1", "1.2", "1.3"],
+          "requirements": ["FR-5"],
+          "evidence": {
+            "report": "docs/stories/UI-VALIDATION-20260921/spec/validation-report.md",
+            "critique": "docs/stories/UI-VALIDATION-20260921/spec/critique.json",
+            "qaVerdict": "APPROVED",
+            "qaScore": 5.0
+          }
+        }
+      ]
+    }
+  ],
+  "completionCriteria": [
+    {
+      "id": "AC-1",
+      "description": "Exactly three distinct tests were created through the visible Studio workflow and no product source was modified.",
+      "status": "passed"
+    },
+    {
+      "id": "AC-2",
+      "description": "Each saved definition contains an ordered executable browser scenario.",
+      "status": "passed"
+    },
+    {
+      "id": "AC-3",
+      "description": "All targets were publicly reachable, unauthenticated, HTTPS, and outside citi.com.",
+      "status": "passed"
+    },
+    {
+      "id": "AC-4",
+      "description": "The SauceDemo scenario declared and resolved the plain FORM_TEXT variable in a passing browser step.",
+      "status": "passed"
+    },
+    {
+      "id": "AC-5",
+      "description": "All three tests were started through UI Studio and reached PASSED terminal outcomes.",
+      "status": "passed"
+    },
+    {
+      "id": "AC-6",
+      "description": "The validation report records all three test identities, targets, variable usage, and final outcomes.",
+      "status": "passed"
+    }
+  ],
+  "artifacts": [
+    "docs/stories/UI-VALIDATION-20260921/spec/requirements.json",
+    "docs/stories/UI-VALIDATION-20260921/spec/complexity.json",
+    "docs/stories/UI-VALIDATION-20260921/spec/research.json",
+    "docs/stories/UI-VALIDATION-20260921/spec/spec.md",
+    "docs/stories/UI-VALIDATION-20260921/spec/critique.json",
+    "docs/stories/UI-VALIDATION-20260921/spec/validation-report.md",
+    "docs/stories/UI-VALIDATION-20260921/spec/plan.json"
+  ],
+  "completion": {
+    "implementationStarted": false,
+    "implementationNeeded": false,
+    "productTestsRun": false,
+    "uiStudioExecutionsRun": 3,
+    "uiStudioExecutionsPassed": 3,
+    "stepsPassed": 7,
+    "stepsTotal": 7,
+    "completedAt": "2026-09-21T23:52:16Z",
+    "nextAction": "No product implementation or validation rerun is required. Preserve the story artifacts as the completed pipeline record."
+  },
+  "planValidation": {
+    "status": "passed",
+    "checks": [
+      "JSON parses successfully",
+      "QA gate is APPROVED with no unresolved issues",
+      "All dependencies are verified",
+      "All four plan tasks are completed and dependency references exist",
+      "All five functional requirements and six acceptance criteria are covered",
+      "Exactly three UI Studio executions are recorded as PASSED",
+      "No product-source implementation is planned or claimed"
+    ]
+  }
+}

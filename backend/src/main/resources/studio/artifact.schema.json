@@ -32,10 +32,10 @@
           "minimum": 0
         },
         "originalText": {
-          "description": "The authored English line, byte-identical to the source. Never rewritten by the compiler.",
+          "description": "The authored English line, byte-identical to the source. Never rewritten by the compiler. The bound matches studio.compile.authoring.max-line-chars: a line the author is allowed to save must be representable here, or every compile of it fails schema validation with no repair possible.",
           "type": "string",
           "minLength": 1,
-          "maxLength": 500
+          "maxLength": 1024
         },
         "code": {
           "description": "Generated Playwright TypeScript for this step. Restricted to the §4.5 permitted language; the runner revalidates before execution.",

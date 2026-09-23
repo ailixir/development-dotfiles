@@ -73,6 +73,8 @@ public record UITestDto(
     String currentCandidateArtifactHash,
     JsonNode currentCandidateArtifact,
     UUID confirmedRevisionId,
+    String confirmedRevisionArtifactHash,
+    JsonNode confirmedRevisionArtifact,
     CompileErrorDto compileError,
     CompileDiagnosticsDto compileDiagnostics) {
 
@@ -90,8 +92,9 @@ public record UITestDto(
    *     same transaction, or {@code null} when the draft has no candidate
    * @return the full representation returned by {@code GET /tests/{id}} and the write routes
    */
-  public static UITestDto from(UITest entity, UITestRevision candidate) {
-    return from(entity, candidate, true);
+  public static UITestDto from(
+      UITest entity, UITestRevision candidate, UITestRevision confirmedRevision) {
+    return from(entity, candidate, confirmedRevision, true);
   }
 
   /**
@@ -111,10 +114,14 @@ public record UITestDto(
    * @return the list representation returned by {@code GET /tests}
    */
   public static UITestDto forList(UITest entity) {
-    return from(entity, null, false);
+    return from(entity, null, null, false);
   }
 
-  private static UITestDto from(UITest entity, UITestRevision candidate, boolean withDiagnostics) {
+  private static UITestDto from(
+      UITest entity,
+      UITestRevision candidate,
+      UITestRevision confirmedRevision,
+      boolean withDiagnostics) {
     // The hash and the artifact travel together, and **this method is not what makes that true**.
     //
     // An earlier version read the artifact first and then withheld the hash when the artifact came
@@ -134,6 +141,10 @@ public record UITestDto(
     JsonNode candidateArtifact =
         candidate == null ? null : parse(candidate.getArtifact(), JsonNode.class);
     String candidateArtifactHash = candidate == null ? null : candidate.getArtifactHash();
+    JsonNode confirmedArtifact =
+        confirmedRevision == null ? null : parse(confirmedRevision.getArtifact(), JsonNode.class);
+    String confirmedArtifactHash =
+        confirmedRevision == null ? null : confirmedRevision.getArtifactHash();
 
     return new UITestDto(
         entity.getId(),
@@ -162,6 +173,8 @@ public record UITestDto(
         candidateArtifactHash,
         candidateArtifact,
         entity.getConfirmedRevisionId(),
+        confirmedArtifactHash,
+        confirmedArtifact,
         parse(entity.getCompileError(), CompileErrorDto.class),
         withDiagnostics
             ? parse(entity.getCompileDiagnostics(), CompileDiagnosticsDto.class)

@@ -102,7 +102,10 @@ export async function startStudioTestServer(
       res.setHeader('Vary', 'Origin');
     }
     if (req.method === 'OPTIONS') {
-      res.setHeader('Access-Control-Allow-Headers', 'content-type');
+      // `idempotency-key` travels on POST /execute: Run retries its own dispatch once after the
+      // server's readiness gate refuses a stale revision, and the key is what makes that retry
+      // return the same execution instead of starting a second run.
+      res.setHeader('Access-Control-Allow-Headers', 'content-type, idempotency-key');
       res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
       res.writeHead(204).end();
       return;

@@ -210,7 +210,6 @@ class CompileBoundsTest {
   void theAttemptBudgetMustBeStrictlyGreaterThanTheGatewayRequestTimeout() {
     var gateway =
         new com.citi.put.checks.studio.compile.gateway.StudioGatewayProperties(
-            false,
             null,
             null,
             null,

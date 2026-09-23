@@ -70,7 +70,13 @@ import type {
 import { executeSteps } from '../executor/index.js';
 import { RUNNER_VERSIONS, isCompatible } from '../compat/index.js';
 import type { ArtifactProvenance, RuntimeVersions } from '../compat/index.js';
-import { RUNNER_ERROR_CODES, RUN_FAILURE_KINDS, errorCodeFor, resultFor } from '../run/errors.js';
+import {
+  RUNNER_ERROR_CODES,
+  RUN_FAILURE_KINDS,
+  errorCodeFor,
+  failureKindForRefusal,
+  resultFor,
+} from '../run/errors.js';
 import type { RunFailureKind } from '../run/errors.js';
 import {
   SYSTEM_DEADLINE_TIMERS,
@@ -629,7 +635,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         job.source,
         job.references,
         { defaultTimeoutMs: effectiveStepTimeoutMs(job.configuration.timeoutSeconds, options.maxima) },
-        job.expectedIntent,
+        job.referencePolicy,
       );
       if (!revalidation.ok) {
         throw new RunFailure(
@@ -768,6 +774,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
               steps,
               variables: job.resolvedVars,
               secrets: job.resolvedSecrets,
+              secretOrigins: job.secretOrigins ?? {},
               reporter: stepReporter,
             })
           : await executeInProcess(session, steps, resolver, stepReporter, origin);
@@ -1044,7 +1051,11 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     });
     return {
       ok: run.ok,
-      failureKind: run.ok ? null : 'step',
+      failureKind: run.ok
+        ? null
+        : run.refusal === null
+          ? 'step'
+          : failureKindForRefusal(run.refusal),
       failureMessage: null,
       // No browser, no recorder: nothing was attempted, so nothing failed (AC-9), and a
       // recording that does not exist is not a partial one (ADR-002 §17.3).
@@ -1109,7 +1120,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         job.source,
         job.references,
         { defaultTimeoutMs: effectiveStepTimeoutMs(job.configuration.timeoutSeconds, options.maxima) },
-        job.expectedIntent,
+        job.referencePolicy,
       );
       if (!validation.ok) {
         const all = [...validation.diagnostics, ...validation.steps.flatMap((step) => step.diagnostics)];

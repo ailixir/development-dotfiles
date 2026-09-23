@@ -45,85 +45,19 @@ dependencies {
     implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.16.0")
 
-    // Google Vertex AI SDK — R2D2 gateway transport (Story 10.5, arch §4.1).
-    // unverified-against-R2D2: pinned for stub tests; SPK-01 must confirm the version R2D2 accepts.
-    //
-    // The gateway client is httpjson/REST only (VertexAiClientFactory builds the transport with
-    // PredictionServiceSettings.newHttpJsonBuilder()). The SDK's flattened POM nevertheless
-    // declares the whole gRPC/Netty/xDS stack and the new google-genai surface. None of it is on
-    // an executed path, so it is excluded rather than left as unpinned supply-chain surface
-    // (ADR-001 exact pinning; QA gate 10.5 MED-001).
-    implementation("com.google.cloud:google-cloud-vertexai:1.52.0") {
-        // gRPC transport plugins, load balancers and the bundled TLS provider — grpc only.
-        exclude(group = "io.grpc", module = "grpc-netty-shaded")
-        exclude(group = "io.grpc", module = "grpc-xds")
-        exclude(group = "io.grpc", module = "grpc-alts")
-        exclude(group = "io.grpc", module = "grpc-grpclb")
-        exclude(group = "io.grpc", module = "grpc-googleapis")
-        exclude(group = "io.grpc", module = "grpc-services")
-        exclude(group = "org.conscrypt", module = "conscrypt-openjdk-uber")
-        exclude(group = "io.perfmark", module = "perfmark-api")
-        exclude(group = "com.google.re2j", module = "re2j")
-        // gRPC runtime: channel implementation, generated-stub support and the in-process
-        // transport. Only the three Grpc*Stub classes need them and the httpjson path never
-        // loads those. KEPT ON PURPOSE: io.grpc:grpc-api and com.google.api:gax-grpc —
-        // PredictionServiceStubSettings.createStub() tests `instanceof GrpcTransportChannel`
-        // before it reaches the httpjson branch, so both are required at runtime even here.
-        exclude(group = "io.grpc", module = "grpc-core")
-        exclude(group = "io.grpc", module = "grpc-inprocess")
-        exclude(group = "io.grpc", module = "grpc-util")
-        exclude(group = "io.grpc", module = "grpc-auth")
-        exclude(group = "io.grpc", module = "grpc-stub")
-        exclude(group = "io.grpc", module = "grpc-protobuf")
-        exclude(group = "io.grpc", module = "grpc-protobuf-lite")
-        // gRPC service stubs for common/IAM protos. The proto-google-* message jars are kept:
-        // httpjson transcodes the same protobuf messages.
-        exclude(group = "com.google.api.grpc", module = "grpc-google-common-protos")
-        exclude(group = "com.google.api.grpc", module = "grpc-google-iam-v1")
-        // com.google.genai — the standalone Google Gen AI SDK. Dev Decision 3 chose the
-        // VertexAI/GenerativeModel surface precisely so this artifact would not be adopted, but
-        // the flattened POM ships it anyway. Every reference to com.google.genai inside
-        // google-cloud-vertexai-1.52.0 is confined to com.google.cloud.vertexai.genai.*, which
-        // this client never touches; VertexAI, GenerativeModel and ResponseHandler have none.
-        // okhttp/okio/Java-WebSocket/kotlin-stdlib are its transport and come with it.
-        exclude(group = "com.google.genai", module = "google-genai")
-        exclude(group = "com.squareup.okhttp3", module = "okhttp")
-        exclude(group = "com.squareup.okio", module = "okio")
-        exclude(group = "com.squareup.okio", module = "okio-jvm")
-        exclude(group = "org.java-websocket", module = "Java-WebSocket")
-        exclude(group = "org.jetbrains.kotlin")
-    }
+    // Current Google Gen AI SDK in Vertex AI mode. This replaces the retired
+    // google-cloud-vertexai generative surface.
+    implementation("com.google.genai:google-genai:1.72.0")
 
     // Runtime artifact-schema validation for the LLM gateway response parser (Story 10.5, AC-7).
     implementation("com.networknt:json-schema-validator:1.4.0")
 
-    // ADR-001 exact pinning for what survives the exclusions above. google-cloud-vertexai
-    // declares these without a BOM, so without constraints their versions move whenever the
-    // Vertex pin moves. Each value is the version actually resolved and tested at 1.52.0.
-    // These are `require` constraints: they make the resolved set explicit and reviewable and
-    // hold the floor, but a later Vertex pin asking for a higher version still wins conflict
-    // resolution — SPK-01 must re-review this list whenever the Vertex version changes.
-    constraints {
-        implementation("com.google.api:api-common:2.59.0")
-        implementation("com.google.api:gax:2.76.0")
-        implementation("com.google.api:gax-httpjson:2.76.0")
-        implementation("com.google.api:gax-grpc:2.76.0")
-        implementation("com.google.api.grpc:proto-google-cloud-vertexai-v1:1.52.0")
-        implementation("com.google.api.grpc:proto-google-common-protos:2.67.0")
-        implementation("com.google.api.grpc:proto-google-iam-v1:1.62.0")
-        implementation("com.google.auth:google-auth-library-credentials:1.43.0")
-        implementation("com.google.auth:google-auth-library-oauth2-http:1.43.0")
-        implementation("com.google.http-client:google-http-client:2.1.0")
-        implementation("com.google.http-client:google-http-client-gson:2.1.0")
-        implementation("com.google.protobuf:protobuf-java:4.33.2")
-        implementation("com.google.protobuf:protobuf-java-util:4.33.2")
-        implementation("com.google.guava:guava:33.5.0-jre")
-        implementation("io.grpc:grpc-api:1.76.3")
-        implementation("io.grpc:grpc-context:1.76.3")
-        implementation("io.opencensus:opencensus-api:0.31.1")
-        implementation("io.opencensus:opencensus-contrib-http-util:0.31.1")
-        implementation("org.threeten:threetenbp:1.7.0")
-    }
+    // Sonic is S3-compatible. Keep the adapter behind studio.execution.video-store.provider=s3;
+    // local filesystem remains the shipped application default. The URLConnection transport is
+    // deliberate: this service needs bounded synchronous Head/Get calls, not Netty or CRT.
+    implementation(platform("software.amazon.awssdk:bom:2.55.1"))
+    implementation("software.amazon.awssdk:s3")
+    implementation("software.amazon.awssdk:url-connection-client")
 
     implementation("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
@@ -175,10 +109,6 @@ tasks.withType<Test>().configureEach {
     // cache keeps the contexts — and therefore the container — alive for the fork's lifetime.
     systemProperty("spring.test.context.cache.maxSize", "64")
 
-    // The Studio recording route is exercised against the in-memory FakeVideoObjectStore. Outside
-    // tests the provider defaults to `none`, and snapshots report recordings UNAVAILABLE instead
-    // of offering a player the route can only answer with 404 (application.yml).
-    systemProperty("studio.execution.video-store.provider", "in-memory")
 }
 
 spotless {

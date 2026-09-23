@@ -84,9 +84,16 @@ describe('AC-20 — the runbook states plainly what is still open', () => {
     ]);
   });
 
-  it('says the vault is still a stub and names what it returns', () => {
+  it('says the real Studio Vault adapter is default-off and the legacy stub remains', () => {
     assertClaims(runbook, RUNBOOK, [
-      { what: 'the vault stub', needles: [/vault is still a stub/iu, 'REDACTED'] },
+      {
+        what: 'the default-off Vault adapter and legacy stub',
+        needles: [
+          /Vault adapter is implemented but not connected/iu,
+          /default is[\s>]*`none`/iu,
+          'REDACTED',
+        ],
+      },
     ]);
   });
 
@@ -146,10 +153,16 @@ describe('AC-20 — the runbook states plainly what is still open', () => {
     ]);
   });
 
-  it('records the envFrom escalation with its owner (AC-18)', () => {
+  it('records the resolved envFrom delivery control (AC-18)', () => {
     assertClaims(runbook, RUNBOOK, [
-      { what: 'the inert mechanism', needles: [/inert since the chart was written/iu] },
-      { what: 'the owner', needles: [/OWNER: @devops/u, /MECHANISM: @architect/u] },
+      {
+        what: 'the canonical Spring environment-name conversion',
+        needles: [/dots become underscores/iu, /dashes are removed/iu],
+      },
+      {
+        what: 'the fail-closed collision control',
+        needles: [/fails closed/iu, /collap(se|sing).*same name/iu],
+      },
     ]);
   });
 
@@ -184,13 +197,18 @@ describe('AC-20 — the STAGING and PROD values say it too, where an operator me
     // the runbook, which is where `ED-02`'s ownership is stated and kept current. Correcting the
     // two comment blocks is routed as a finding, not made here: neither file is this change's to
     // edit. When they are corrected, re-arm an owner claim over them.
-    it(`${file}: states that the code paths survive and the vault is a stub`, () => {
+    it(`${file}: states that the code paths survive and real Vault is unconnected`, () => {
       assertClaims(values, file, [
-        { what: 'the code path survives', needles: [/THE CODE PATHS STILL EXIST/u] },
-        { what: 'the vault stub', needles: [/VAULT IS STILL A STUB/u, 'REDACTED'] },
+        { what: 'the code path survives', needles: [/bypass paths still exist/iu] },
+        {
+          what: 'the default-off real adapter and legacy stub',
+          needles: [/real Studio Vault adapter now exists/iu, /default-off and unconnected/iu, 'REDACTED'],
+        },
         {
           what: 'the pilot prohibition',
-          needles: [/NO CREDENTIALED PILOT MAY RUN UNTIL ED-02 HAS LINKED COMPLETED TICKETS/u],
+          needles: [
+            /pilot[\s#]*prohibition remains until ED-02 has a linked completed delivery/iu,
+          ],
         },
         { what: 'a pointer to the runbook', needles: [/docs\/runbooks\/studio-runner\.md/u] },
       ]);

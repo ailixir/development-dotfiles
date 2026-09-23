@@ -32,7 +32,7 @@ import {
   serializeResultManifest,
 } from '../../src/run/manifest.js';
 import type { ResultManifestInput } from '../../src/run/manifest.js';
-import { createFakeObjectStore } from '../../src/run/objectStore.js';
+import { createFakeObjectStore } from '../helpers/fakeObjectStore.js';
 import { openEvidenceWindow, writeResultManifest } from '../../src/run/evidenceUpload.js';
 import type { EvidenceUploadPorts } from '../../src/run/evidenceUpload.js';
 

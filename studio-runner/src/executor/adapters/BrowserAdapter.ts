@@ -33,7 +33,17 @@ export interface BrowserAdapter {
   waitForURL(url: ResolvedMatcher, options?: GotoOptions): Promise<void>;
   locate(chain: LocatorChain): Promise<LocatorHandle>;
   click(target: LocatorHandle, options?: ClickOptions): Promise<void>;
-  fill(target: LocatorHandle, value: string, options?: ActionOptions): Promise<void>;
+  /**
+   * `secretId` is set when `value` is a resolved secret. The adapter must then refuse unless the
+   * current page origin is one that secret is bound to, and must refuse when it knows no origins
+   * for it: an adapter that cannot check is an adapter that must not fill.
+   */
+  fill(
+    target: LocatorHandle,
+    value: string,
+    options?: ActionOptions,
+    secretId?: string,
+  ): Promise<void>;
   press(target: LocatorHandle, key: string, options?: PressOptions): Promise<void>;
   check(target: LocatorHandle, options?: ActionOptions): Promise<void>;
   uncheck(target: LocatorHandle, options?: ActionOptions): Promise<void>;

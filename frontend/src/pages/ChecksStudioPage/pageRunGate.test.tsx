@@ -10,8 +10,6 @@ import { parse as parseYaml } from 'yaml';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
 import { readyDraft, draftsByCompileStatus } from '@/services/mocks/studio/compileFixtures';
-import { generatePythonFromIR } from '@/utils/studio/codegen/pythonGenerator';
-import { buildDefaultTestIR } from '@/utils/studio/ir/parseSteps';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
@@ -44,10 +42,9 @@ const TIMEOUT_BOUND = openapi.components.schemas.TestConfiguration.properties.ti
  * ENV-TIMING-1 (10.11a's gate, repeated as REL-001 on 10.16a's): the waits in this file are bounded
  * explicitly, not by Testing Library's 1 s and Vitest's 5 s defaults.
  *
- * The editor's verdict arrives after a 250 ms debounce, then `POST /validate-steps`, then a render
- * of the whole page. Run alone, the AC-2 test takes about 1.1 s. In the full suite, @qa measured
- * 2.2–2.7 s on 10.16a's base and 3.7–4.2 s on its head at load 12–16. At load 40 the 1 s wait for
- * the verdict ran out, even though the page it dumped was fully rendered. The bounds below are sized
+ * The page renders in full before Run is enabled. Run alone, the AC-2 test takes about 1.1 s. In the full suite, @qa measured
+ * 2.2–2.7 s on 10.16a's base and 3.7–4.2 s on its head at load 12–16. At load 40 the 1 s wait
+ * ran out, even though the page it dumped was fully rendered. The bounds below are sized
  * from those numbers: each wait gets more than twice the slowest whole-test duration measured, and
  * each test gets room for every wait it makes.
  *
@@ -142,17 +139,6 @@ function serveList(draft: typeof readyDraft) {
       HttpResponse.json({ data: [draft], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
     ),
     http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(draft)),
-    http.post(`${STUDIO_BASE}/validate-steps`, () =>
-      HttpResponse.json({
-        // Forced to refuse everything, for every test in this file.
-        isValid: false,
-        results: draft.steps.map((_, stepIndex) => ({
-          stepIndex,
-          isValid: false,
-          suggestion: 'this editor does not recognise this line',
-        })),
-      }),
-    ),
     http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
       HttpResponse.json(
         { executionId: '88888888-8888-8888-8888-888888888888', status: 'PENDING' },
@@ -164,15 +150,16 @@ function serveList(draft: typeof readyDraft) {
 }
 
 describe('AC-2: the page’s own Run control is governed by the server and not by the editor', () => {
-  it('a READY draft the editor calls invalid produces exactly one POST /execute from the page', async () => {
+  it('a READY draft produces exactly one POST /execute from the page, with no step grammar check', async () => {
     serveList(readyDraft);
     renderPage();
 
     const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
-    // The editor's own verdict is on screen and says the steps are not recognised …
-    const verdicts = await screen.findAllByText(/this editor does not recognise/i, {}, pageWait);
-    expect(verdicts.length).toBeGreaterThan(0);
     await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
+    // Plain English is never marked as wrong: the page asks no server for a step verdict and
+    // shows none.
+    expect(observed.filter((entry) => entry.url.includes('/validate-steps'))).toEqual([]);
+    expect(screen.queryByText(/need attention/i)).toBeNull();
 
     await userEvent.click(control);
     /*
@@ -193,21 +180,62 @@ describe('AC-2: the page’s own Run control is governed by the server and not b
     expect(executeRequests()).toHaveLength(1);
   }, AC2_TEST_TIMEOUT_MS);
 
-  it('an unconfirmed draft the editor is silent about produces none', async () => {
-    serveList(draftsByCompileStatus.AWAITING_CONFIRMATION);
+  it('shows only Save and Run while a saved test becomes runnable automatically', async () => {
+    const preparing = draftsByCompileStatus.COMPILING;
+    let reads = 0;
+    serveList(preparing);
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id`, () => {
+        reads += 1;
+        return HttpResponse.json(reads > 1 ? readyDraft : preparing);
+      }),
+    );
     renderPage();
 
-    const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
-    await screen.findByTestId('run-blocked-reason', {}, pageWait);
-    await userEvent.click(control, { pointerEventsCheck: 0 });
-
-    expect(control).toBeDisabled();
+    const preparingControl = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
+    expect(preparingControl).toHaveTextContent('Getting ready…');
+    expect(preparingControl).toBeDisabled();
+    expect(screen.queryByTestId('compile-review-panel')).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Code' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /confirm|translation/i })).not.toBeInTheDocument();
     expect(executeRequests()).toHaveLength(0);
+
+    const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
+    await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
+    await userEvent.click(control);
+    await waitFor(() => expect(executeRequests()).toHaveLength(1), pageWait);
   }, PAGE_TEST_TIMEOUT_MS);
 });
 
-describe('AC-3(a): editing a step regenerates nothing', () => {
-  it('adding a step leaves the Code view showing its unavailable state, not generated source', async () => {
+describe('the simple Save and Run workflow', () => {
+  it('marks edits unsaved, keeps Run available because Run saves first, and protects navigation until the user decides', async () => {
+    serveList(readyDraft);
+    renderPage();
+
+    const run = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
+    await waitFor(() => expect(run).not.toBeDisabled(), pageWait);
+    const firstStep = screen.getByDisplayValue(readyDraft.steps[0]);
+    await userEvent.clear(firstStep);
+    await userEvent.type(firstStep, 'Go to "https://www.citi.com/health"');
+
+    expect(screen.getByTestId('studio-save-state')).toHaveTextContent('Unsaved changes');
+    // Run is no longer refused for a dirty draft: it saves the edits, prepares the saved
+    // revision and then dispatches it. Telling the author to save and press the same button
+    // again was a state the one-button flow removes, so the caption is gone too.
+    expect(run).not.toBeDisabled();
+    expect(screen.queryByText('Save your changes before running.')).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Studio Tests' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Save changes before continuing?' });
+    expect(dialog).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save and continue' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Keep editing' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Discard changes' })).toBeInTheDocument();
+  }, PAGE_TEST_TIMEOUT_MS);
+});
+
+describe('the Code tab', () => {
+  it('shows saved source without restoring translation controls', async () => {
     serveList(readyDraft);
     renderPage();
     await screen.findByRole('button', { name: 'Run Test' }, pageWait);
@@ -226,26 +254,11 @@ describe('AC-3(a): editing a step regenerates nothing', () => {
       pageWait,
     );
 
-    // Observed by rendering, not by reading the effect: the Code tab is opened and looked at.
     await userEvent.click(screen.getByRole('tab', { name: 'Code' }));
-    const codeView = await screen.findByTestId('code-view-unavailable-title', {}, pageWait);
-    expect(codeView).toBeInTheDocument();
-
-    const generated = generatePythonFromIR(
-      buildDefaultTestIR(readyDraft.name, [...readyDraft.steps, NEW_STEP]),
-    );
-    const distinctive = generated
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line.length > 12 && !line.startsWith('#'));
-    expect(distinctive.length, 'the generator produced nothing distinctive to look for').toBeGreaterThan(2);
-
-    const rendered = document.body.textContent ?? '';
-    for (const line of distinctive) {
-      expect(rendered, `the page rendered generated source after an edit: ${line}`).not.toContain(
-        line,
-      );
-    }
+    const codeView = await screen.findByTestId('confirmed-playwright-source', {}, pageWait);
+    expect(codeView.textContent).not.toContain(NEW_STEP);
+    expect(screen.queryByTestId('compile-review-panel')).not.toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/translation|candidate|confirm this exact/i);
   }, PAGE_TEST_TIMEOUT_MS);
 });
 

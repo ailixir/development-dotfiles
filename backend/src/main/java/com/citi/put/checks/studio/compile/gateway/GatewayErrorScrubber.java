@@ -1,7 +1,7 @@
 package com.citi.put.checks.studio.compile.gateway;
 
 import com.citi.put.checks.config.logging.SecretMasker;
-import com.google.api.gax.rpc.ApiException;
+import com.google.genai.errors.ApiException;
 
 /**
  * Turns a gateway failure into a short reason that is safe to return and to log (Story 10.5,
@@ -29,8 +29,8 @@ final class GatewayErrorScrubber {
       return "unknown failure";
     }
     StringBuilder reason = new StringBuilder(throwable.getClass().getSimpleName());
-    if (throwable instanceof ApiException apiException && apiException.getStatusCode() != null) {
-      reason.append(" (status=").append(apiException.getStatusCode().getCode()).append(')');
+    if (throwable instanceof ApiException apiException) {
+      reason.append(" (status=").append(apiException.code()).append(')');
     }
     String message = scrubText(throwable.getMessage(), request);
     if (!message.isEmpty()) {

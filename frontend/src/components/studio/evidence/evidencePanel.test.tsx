@@ -333,21 +333,18 @@ describe('AC-4: a <video> and a download exist only for AVAILABLE with a videoPa
   });
 });
 
-describe('AC-5: the download is a plain anchor in a new context that never names the file', () => {
-  it('has target=_blank, rel=noopener, no download attribute, and only the download query key', () => {
+describe('AC-5 (retired): the panel offers no download of its own', () => {
+  it('renders no download affordance, because the player\u2019s own controls are the one way', () => {
     renderPanel(AVAILABLE);
-    const anchor = screen.getByTestId('video-evidence-download');
-    expect(anchor.tagName).toBe('A');
-    expect(anchor.getAttribute('target')).toBe('_blank');
-    expect(anchor.getAttribute('rel')).toBe('noopener');
-    expect(anchor.hasAttribute('download')).toBe(false);
-
-    const url = new URL(anchor.getAttribute('href')!);
-    expect([...url.searchParams.keys()]).toEqual(['download']);
-    expect(url.searchParams.get('download')).toBe('true');
-    // Nothing file-like is composed on the client.
-    expect(url.pathname).toBe(AVAILABLE.videoPath);
-    expect(anchor.getAttribute('href')).not.toMatch(/\.webm|\.mp4|filename/u);
+    // A second link on the same bytes, the same route and the same session was one more thing to
+    // keep correct for no reader benefit. `?download=true` stays in the API contract; nothing in
+    // the UI composes it.
+    expect(screen.queryByTestId('video-evidence-download')).toBeNull();
+    expect(screen.queryByRole('link', { name: /download/iu })).toBeNull();
+    const video = screen.getByTestId('video-evidence-player') as HTMLVideoElement;
+    expect(video.controls).toBe(true);
+    // Nothing suppresses the browser's own download item in those controls.
+    expect(video.getAttribute('controlslist')).toBeNull();
   });
 });
 
@@ -395,14 +392,12 @@ describe('AC-20: the evidence region has a distinct accessible name per state', 
     expect(new Set(names).size).toBe(5);
   });
 
-  it('the player and the download link are reachable by keyboard', () => {
+  it('the player is reachable by keyboard', () => {
     renderPanel(AVAILABLE);
     const video = screen.getByTestId('video-evidence-player') as HTMLVideoElement;
     // Native controls make the element operable; it must not be removed from the tab order.
     expect(video.controls).toBe(true);
     expect(video.getAttribute('tabindex')).not.toBe('-1');
-    const anchor = screen.getByRole('link', { name: 'Download recording' });
-    expect(anchor.getAttribute('tabindex')).not.toBe('-1');
   });
 });
 

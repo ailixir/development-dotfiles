@@ -112,6 +112,66 @@ class DispatcherIT {
   // ── AC-12: the claim ─────────────────────────────────────────────────────
 
   @Test
+  void dispatchSendsTheExactRevisionArtifactAndHashSnapshottedAtAcceptance() throws Exception {
+    UUID acceptedRevision =
+        jdbc.queryForObject(
+            "SELECT revision_id FROM ui_test_executions WHERE id = ?", UUID.class, executionId);
+    String persistedHash =
+        jdbc.queryForObject(
+            "SELECT artifact_hash FROM ui_test_revisions WHERE id = ?",
+            String.class,
+            acceptedRevision);
+    String persistedArtifact =
+        jdbc.queryForObject(
+            "SELECT artifact::text FROM ui_test_revisions WHERE id = ?",
+            String.class,
+            acceptedRevision);
+
+    dispatcher.dispatch(executionId);
+
+    RunJob job =
+        runner.sent().stream()
+            .filter(candidate -> executionId.equals(candidate.executionId()))
+            .findFirst()
+            .orElseThrow();
+    assertThat(job.revisionId()).isEqualTo(acceptedRevision);
+    assertThat(job.artifactHash()).isEqualTo(persistedHash);
+    assertThat(job.artifact()).isEqualTo(objectMapper.readTree(persistedArtifact));
+  }
+
+  @Test
+  void plainDraftVariablesAreSnapshottedAtAcceptanceWithoutUsingVault() {
+    List<String> steps = List.of("Go to the home page");
+    UUID variableTest = fixtures.seedTest("Plain variable draft", CSI_ID, OWNER, steps);
+    jdbc.update(
+        "UPDATE ui_tests SET variables = CAST(? AS jsonb) WHERE id = ?",
+        "[{\"name\":\"QUERY\",\"kind\":\"plain\",\"value\":\"studio\",\"secretId\":null}]",
+        variableTest);
+    fixtures.confirmRevision(
+        variableTest,
+        CSI_ID,
+        steps,
+        StudioExecutionFixtures.references(List.of("QUERY"), List.of()));
+
+    UUID variableExecution = studioService.executeTest(variableTest, owner, null).executionId();
+    // A later draft edit cannot alter the already accepted run's input.
+    jdbc.update(
+        "UPDATE ui_tests SET variables = CAST(? AS jsonb) WHERE id = ?",
+        "[{\"name\":\"QUERY\",\"kind\":\"plain\",\"value\":\"changed\",\"secretId\":null}]",
+        variableTest);
+
+    dispatcher.dispatch(variableExecution);
+
+    RunJob job =
+        runner.sent().stream()
+            .filter(candidate -> variableExecution.equals(candidate.executionId()))
+            .findFirst()
+            .orElseThrow();
+    assertThat(job.resolvedVars()).containsExactlyEntriesOf(Map.of("QUERY", "studio"));
+    assertThat(job.resolvedSecrets()).isEmpty();
+  }
+
+  @Test
   void theClaimIsOneConditionalStatementAndASecondClaimOfAClaimedRowUpdatesNothing() {
     Instant now = Instant.now();
 
@@ -509,6 +569,37 @@ class DispatcherIT {
   }
 
   @Test
+  void aVaultOutageRequeuesTheClaimWithoutIssuingAnAttemptOrMislabelingTheReference() {
+    UUID withReference =
+        fixtures.seedTest("Vault outage draft", CSI_ID, OWNER, List.of("Go to the home page"));
+    fixtures.confirmRevision(
+        withReference,
+        CSI_ID,
+        List.of("Go to the home page"),
+        StudioExecutionFixtures.references(List.of(), List.of("LOGIN_PW")));
+    entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, "LOGIN_PW");
+    vault.rotate(
+        StudioVaultProvider.ReferenceKind.SECRET,
+        CSI_ID,
+        ENVIRONMENT,
+        "LOGIN_PW",
+        "value-never-logged");
+    UUID execution = studioService.executeTest(withReference, owner, null).executionId();
+    vault.makeUnavailable();
+
+    dispatcher.dispatch(execution);
+
+    Map<String, Object> row = statements.find(execution).orElseThrow();
+    assertThat(runner.sendCount()).isZero();
+    assertThat(row.get("state")).isEqualTo("QUEUED");
+    assertThat(row.get("attempt_id")).isNull();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT error_code FROM ui_test_executions WHERE id = ?", String.class, execution))
+        .isNull();
+  }
+
+  @Test
   void theTwoDispatcherAssignedCodesAreDisjointFromTheReaperOwnedOnes() {
     assertThat(ExecutionErrorCode.values())
         .contains(
@@ -581,6 +672,48 @@ class DispatcherIT {
                 execution,
                 "%" + canary + "%"))
         .isZero();
+  }
+
+  // ── Two budgets: the total browser runtime is the server's, the step timeout is the test's ──
+
+  /**
+   * A test with {@code timeoutSeconds: 30} is sent a total browser runtime of 120 s, and its
+   * per-step value travels untouched beside it.
+   *
+   * <p>Architecture §5.2: "Default step timeout is 30 seconds and total browser runtime 120
+   * seconds". Until this test existed the dispatcher derived {@code deadlines.totalRuntimeMs} from
+   * the revision's own {@code configuration.timeoutSeconds}, so the per-step value <em>was</em> the
+   * whole-run budget: every run was killed at thirty seconds, the stop was orderly, the recording
+   * was marked {@code partial: false}, and the user saw a clean video that ended mid-test. This
+   * pins the decoupling in both directions: the total comes from {@code
+   * studio.execution.total-runtime} and the step timeout stays the revision's.
+   */
+  @Test
+  void theTotalRuntimeBudgetIsTheServersAndNotTheRevisionsStepTimeout() {
+    dispatcher.dispatch(executionId);
+
+    RunJob job =
+        runner.sent().stream()
+            .filter(candidate -> executionId.equals(candidate.executionId()))
+            .findFirst()
+            .orElseThrow();
+    // The fixture revision declares the contract's default per-step timeout, and it is what the
+    // runner reads as the step timeout — unchanged by the dispatcher.
+    assertThat(job.configuration().path("timeoutSeconds").asLong())
+        .as("the per-step timeout stays on the job's configuration")
+        .isEqualTo(30L);
+    // The whole-run budget is the server's, four times the per-step value, so the two cannot be
+    // one number wearing two names.
+    assertThat(job.deadlines().totalRuntimeMs())
+        .as("deadlines.totalRuntimeMs is studio.execution.total-runtime, not timeoutSeconds")
+        .isEqualTo(120_000L)
+        .isEqualTo(executionProperties.totalRuntimeOrDefault().toMillis())
+        .isNotEqualTo(job.configuration().path("timeoutSeconds").asLong() * 1000L);
+    assertThat(job.deadlines().admittedStartMs())
+        .isEqualTo(executionProperties.startDeadlineOrDefault().toMillis());
+    // And the budget the reaper closes a run at still contains it, with margin to spare.
+    assertThat(executionProperties.totalRuntimeOrDefault())
+        .isLessThan(executionProperties.runDeadlineOrDefault());
   }
 
   // ── AC-11: the kill switch closes queued work explicitly ─────────────────

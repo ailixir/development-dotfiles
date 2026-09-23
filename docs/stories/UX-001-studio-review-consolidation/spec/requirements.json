@@ -1,0 +1,186 @@
+{
+  "storyId": "UX-001-studio-review-consolidation",
+  "title": "Checks Studio translation review consolidation",
+  "gatheredAt": "2026-09-20T23:44:24Z",
+  "source": "user and existing implementation",
+  "gatheredBy": "@pm",
+  "elicitationVersion": "2.0",
+  "functional": [
+    {
+      "id": "FR-1",
+      "description": "Keep the left Steps panel as the sole default location for the complete ordered natural-language checklist, including its existing editing, validation, reordering, and run-state affordances.",
+      "priority": "P0",
+      "rationale": "One canonical authoring surface removes duplicate checklist scanning.",
+      "acceptance": ["AC-1"]
+    },
+    {
+      "id": "FR-2",
+      "description": "Replace the always-expanded duplicate step list in the Control Tower with a compact translation/readiness summary that communicates compile state, readiness or blocker, candidate or confirmed revision identity when applicable, diagnostic attention count, and the next valid action.",
+      "priority": "P0",
+      "rationale": "Daily users need a decision and next action, not a second checklist.",
+      "acceptance": ["AC-1", "AC-4"]
+    },
+    {
+      "id": "FR-3",
+      "description": "Offer an explicit Review translation details disclosure. Only on request, it provides ordered index-aligned source-to-artifact evidence, server-derived action/target/assertion summaries, per-step diagnostics, and opt-in code. Source text is a secondary cross-reference, never a second editable checklist.",
+      "priority": "P0",
+      "rationale": "The exact-revision safety review remains available without dominating routine operation.",
+      "acceptance": ["AC-2", "AC-6"]
+    },
+    {
+      "id": "FR-4",
+      "description": "In NEEDS_REVISION, surface the number of affected steps and a concise action to edit them; enable navigation and focus to the first affected source row in the left Steps panel. Keep detailed diagnostics available through the explicit review disclosure.",
+      "priority": "P0",
+      "rationale": "Exceptions must direct users to corrective work rather than make them scan successful rows.",
+      "acceptance": ["AC-3"]
+    },
+    {
+      "id": "FR-5",
+      "description": "Preserve explicit, exact-revision confirmation. It is enabled only for AWAITING_CONFIRMATION with a candidate and available artifact hash; no automatic confirmation, gate bypass, or semantic change to stale/conflict/in-flight handling is allowed.",
+      "priority": "P0",
+      "rationale": "The confirmation control is the product's human safety control point.",
+      "acceptance": ["AC-5"]
+    },
+    {
+      "id": "FR-6",
+      "description": "Render distinct compact states for COMPILING, AWAITING_CONFIRMATION, READY, NEEDS_REVISION, and STALE. Each explains what is true, what the user may do, and what is blocked; READY makes the confirmed runnable revision available without repeating steps.",
+      "priority": "P1",
+      "rationale": "Operational users need clear state-specific decisions.",
+      "acceptance": ["AC-4"]
+    },
+    {
+      "id": "FR-7",
+      "description": "Keep review/readiness before Logs, Code, and Proof in the Control Tower, using established MUI visual language and a single label set for Translation, Review details, and confirmation.",
+      "priority": "P1",
+      "rationale": "The control should be discoverable without displacing execution evidence.",
+      "acceptance": ["AC-8"]
+    }
+  ],
+  "nonFunctional": [
+    {
+      "id": "NFR-1",
+      "category": "usability",
+      "description": "A full authored step string appears no more than once in the default Studio viewport; compact review is outcome-first and does not render a second source checklist.",
+      "metric": "Automated component test asserts no repeated source rows before Review translation details is activated."
+    },
+    {
+      "id": "NFR-2",
+      "category": "accessibility",
+      "description": "Preserve named review regions, polite state announcements, keyboard-operable disclosure, focus restoration, visible non-colour state indicators, and diagnostic-to-step associations.",
+      "metric": "Existing accessibility coverage remains passing; new disclosure and focus behavior are covered by automated tests."
+    },
+    {
+      "id": "NFR-3",
+      "category": "performance",
+      "description": "Compact review is available from the existing review state and opening/closing details introduces neither duplicate polling nor additional request lifecycle.",
+      "metric": "No new API operation or polling schedule; existing compile-poll tests continue to pass."
+    },
+    {
+      "id": "NFR-4",
+      "category": "security",
+      "description": "Translation summaries and code remain read-only projections of the server candidate artifact; secret values are never surfaced.",
+      "metric": "No client-side parsing/generation path is added; existing artifact/source safety tests remain passing."
+    },
+    {
+      "id": "NFR-5",
+      "category": "usability",
+      "description": "At narrow widths controls remain usable without horizontal overflow and authoring precedes review/action in reading order.",
+      "metric": "Responsive component/E2E coverage verifies usable controls at the project breakpoint."
+    }
+  ],
+  "constraints": [
+    {
+      "id": "CON-1",
+      "type": "technical",
+      "description": "test.steps remains the server draft source of truth; summaries and code may only derive from currentCandidateArtifact.",
+      "impact": "The UI may not reconstruct translated meaning from authored English."
+    },
+    {
+      "id": "CON-2",
+      "type": "technical",
+      "description": "Positional alignment defects among steps, diagnostics, and artifact entries must remain visible rather than silently repaired.",
+      "impact": "The detail view must retain the current honest defect treatment."
+    },
+    {
+      "id": "CON-3",
+      "type": "technical",
+      "description": "CompileReviewPanel remains the sole owner of compile polling, confirmation, and recompile transactions.",
+      "impact": "No duplicated transaction logic or request paths may be introduced."
+    },
+    {
+      "id": "CON-4",
+      "type": "business",
+      "description": "The implementation is front-end UX work; compiler semantics, API contracts, editor behavior, and execution Logs/Code/Proof capability are out of scope.",
+      "impact": "The change must not expand into backend or workflow redesign."
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1",
+      "description": "An inline disclosure beneath the compact review state is the preferred detail pattern because it retains the existing focus and poll ownership.",
+      "risk_if_wrong": "A product decision for a drawer or modal changes interaction and focus requirements.",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-2",
+      "description": "Aggregate status plus exception-first detail is preferable to always displaying every semantic operation for daily operations users.",
+      "risk_if_wrong": "Audit users may need a denser default review summary.",
+      "validation_needed": true
+    }
+  ],
+  "domainModel": [
+    {
+      "id": "DM-1",
+      "entity": "UI test draft",
+      "attributes": ["steps", "compileStatus", "confirmedRevisionId", "currentCandidateRevisionId", "currentCandidateArtifactHash"],
+      "relationships": [{"type": "has_one", "target": "candidate artifact"}, {"type": "has_many", "target": "compile step diagnostics"}]
+    },
+    {
+      "id": "DM-2",
+      "entity": "authored step",
+      "attributes": ["index", "natural-language source", "execution state"],
+      "relationships": [{"type": "has_one", "target": "candidate artifact step by index"}, {"type": "has_many", "target": "diagnostics"}]
+    }
+  ],
+  "interactions": [
+    {
+      "id": "INT-1",
+      "trigger": "User saves an edited draft",
+      "flow": ["Steps remain the canonical authoring view", "Control Tower presents a compact translation state", "User reads next action or opens Review translation details", "Exact candidate may be confirmed only when eligible"],
+      "states": {"loading": "COMPILING is compact and non-blocking", "error": "NEEDS_REVISION directs focus to affected steps", "empty": "No candidate evidence is disclosed honestly"}
+    },
+    {
+      "id": "INT-2",
+      "trigger": "User opens Review translation details",
+      "flow": ["Disclosure opens without refetching", "User reads indexed artifact-derived evidence and optional code", "User closes details and focus returns to the disclosure control"],
+      "states": {"loading": "Existing review loading state remains", "error": "Alignment and artifact absence are explicitly surfaced", "empty": "No candidate is never represented as translated"}
+    }
+  ],
+  "edgeCases": [
+    {"id": "EC-1", "scenario": "Candidate artifact is absent or cannot be summarized", "handling": "Retain explicit unavailable wording; do not infer from English.", "severity": "high"},
+    {"id": "EC-2", "scenario": "Diagnostics/artifact entries do not align with authored steps", "handling": "Show existing alignment defect rather than reordering or padding.", "severity": "high"},
+    {"id": "EC-3", "scenario": "Candidate becomes stale or confirmation conflicts", "handling": "Retain current recompile/re-read and in-flight protections.", "severity": "high"}
+  ],
+  "terminology": [
+    {"term": "Steps", "definition": "The canonical natural-language checklist authored by the user."},
+    {"term": "Translation", "definition": "The server-produced candidate artifact and its validated interpretation of a draft."},
+    {"term": "Review translation details", "definition": "Intentional progressive disclosure of indexed artifact evidence, diagnostics, and optional code."}
+  ],
+  "acceptanceCriteria": [
+    "AC-1: With a candidate awaiting confirmation, initial review is compact and shows translation/readiness state, revision identity, translated-step count, and diagnostic attention count without rendering all authored steps.",
+    "AC-2: Mouse and keyboard users can open and close Review translation details; the opened view contains indexed source cross-references, server-derived summaries, diagnostics, and opt-in code without refetching.",
+    "AC-3: NEEDS_REVISION names the affected-step count, gives actionable edit guidance, and navigates/focuses the first affected source row; it never shows a confirmable candidate.",
+    "AC-4: COMPILING, READY, and STALE remain compact and expose only state-appropriate guidance and controls; STALE exposes recompile and READY identifies the confirmed runnable revision.",
+    "AC-5: Confirmation behavior is unchanged: only AWAITING_CONFIRMATION with candidate and available hash enables it; one request may be in flight and conflict/reconfirmation handling remains intact.",
+    "AC-6: Artifact absence, malformed/unrecognized artifact data, and alignment mismatches are truthfully disclosed without guessing translated meaning.",
+    "AC-7: Screen-reader and keyboard users can find state, operate detail disclosure, return focus to its trigger, and use confirmation/recompile; state/severity is not color-only.",
+    "AC-8: Desktop retains complementary Steps and Control Tower panels; narrow layouts preserve authoring before review/action and leave controls usable."
+  ],
+  "evidence": [
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:650-805",
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:953-979",
+    "frontend/src/components/studio/review/CompileReviewPanel.tsx:165-185",
+    "frontend/src/components/studio/review/StepReviewList.tsx:95-149",
+    "docs/brd/checks-ui-studio.brd.md:93-109"
+  ]
+}

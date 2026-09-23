@@ -48,8 +48,11 @@ import type {
 import { executeSteps } from '../executor/index.js';
 import type { ExecutableStep } from '../executor/index.js';
 import type { BrowserFactory, BrowserHandle } from './browserFactory.js';
+import type { StepRefusalCode } from '../executor/refusals.js';
+import { failureKindForRefusal } from './errors.js';
 import type { RunFailureKind } from './errors.js';
 import { createPlaywrightAdapter } from './playwrightAdapter.js';
+import type { PageLike } from './playwrightAdapter.js';
 import type { ChildMessage, ExecuteMessage, LaunchMessage, RecordingReport } from './protocol.js';
 import { parseExecuteMessage, parseLaunchMessage } from './protocol.js';
 import type { RecordingObservation } from './recording.js';
@@ -75,6 +78,42 @@ export interface ChildRuntimeDependencies {
   readonly inspectRecording?:
     | ((path: string | null, orderlyClose: boolean) => Promise<RecordingObservation>)
     | undefined;
+  /**
+   * The wall-clock wait the tail settle uses (see {@link TAIL_SETTLE_HOLD_MS}). Injected so the
+   * unit tier can observe the hold without spending it; the child itself uses a real timer.
+   */
+  readonly sleep?: ((ms: number) => Promise<void>) | undefined;
+}
+
+// ── The tail settle: the recorder runs on past the last operation, briefly and boundedly ──────
+//
+// `executeSteps` resolves the instant the last operation's promise does, and Playwright resolves
+// a click that triggered a navigation when the navigation *commits* — not when the new document
+// paints. Closing the context right there stops the recorder before the final action's result has
+// composited, and the recorder pads the tail of the file with the **last frame it received**, so
+// the recording ends on the state *before* the last step rather than after it. The user watches
+// the video and the thing the final step did is not in it.
+//
+// So, before the ordinary close and only there: wait for the page's load state, bounded, then hold
+// for a few frame quanta (the recorder samples at 25 fps, 40 ms apart) so the paint reaches the
+// encoder. The two bounds sum to well under the parent's 5 s stop grace
+// (`createChildBrowserLauncher`'s `stopTimeoutMs`), and the settle is abandoned — before it starts
+// and again after — the moment the parent orders a stop: an out-of-band `stop` is never delayed by
+// it, and the stop path keeps sole ownership of the close and the result (AC-5a).
+
+/** How long the settle waits for the current navigation, if any, to reach `load`. */
+export const TAIL_SETTLE_LOAD_TIMEOUT_MS = 450;
+
+/** How long the settle then holds for the final paint to be captured: several 40 ms frames. */
+export const TAIL_SETTLE_HOLD_MS = 300;
+
+/** The settle's whole budget. Pinned by `test/run/childRuntime.test.ts` against the stop grace. */
+export const TAIL_SETTLE_BOUND_MS = TAIL_SETTLE_LOAD_TIMEOUT_MS + TAIL_SETTLE_HOLD_MS;
+
+function defaultSleep(ms: number): Promise<void> {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 /** No recording was ever attempted, so there is nothing to have failed (AC-9). */
@@ -203,10 +242,16 @@ export function failureKindOf(input: {
   readonly unsupportedPage: boolean;
   readonly runFault: string | null;
   readonly ok: boolean;
+  /** The policy refusal the failing step ended in, if it was one. Absent means none. */
+  readonly refusal?: StepRefusalCode | null | undefined;
 }): RunFailureKind | null {
   if (input.unsupportedPage) return 'unsupported-multi-page';
   if (input.runFault !== null) return 'run-fault';
-  if (!input.ok) return 'step';
+  if (!input.ok) {
+    return input.refusal === undefined || input.refusal === null
+      ? 'step'
+      : failureKindForRefusal(input.refusal);
+  }
   return null;
 }
 
@@ -324,6 +369,7 @@ export async function executeInChild(
     page: handle.page,
     defaultTimeoutMs: message.stepTimeoutMs,
     resolveVariable: (name) => resolver.variable(name),
+    secretOrigins: message.secretOrigins,
     guard: () => {
       if (state.unsupportedPage) return UNSUPPORTED_MULTI_PAGE_MESSAGE;
       // The ordered stop is in progress: nothing further runs in the browser (AC-5a).
@@ -339,6 +385,7 @@ export async function executeInChild(
 
   let ok = false;
   let executorVersion = '';
+  let refusal: StepRefusalCode | null = null;
   let runFault: string | null = null;
   try {
     const result = await executeSteps({
@@ -352,6 +399,7 @@ export async function executeInChild(
     });
     ok = result.ok;
     executorVersion = result.executorVersion;
+    refusal = result.refusal;
   } catch (error) {
     runFault = firstLine(error instanceof Error ? error.message : 'unknown');
   }
@@ -361,6 +409,20 @@ export async function executeInChild(
   // The parent ordered a stop while this run was in flight: the stop path owns the close, the
   // flush and the single result message. Racing it here would close the context twice and could
   // report a file that was still being written (AC-5a).
+  if (state.stopping) return;
+
+  // The ordinary path, and only it: let the final action's result reach the recorder before the
+  // context is closed. Bounded, and abandoned the moment a stop is ordered.
+  await settleTail(handle.page, dependencies.sleep ?? defaultSleep, state);
+
+  // A stop that arrived *during* the settle has already closed the context and sent the result.
+  // Same ownership rule as above; checked again because the settle is the one place this run
+  // yields after the steps have finished.
+  //
+  // The flag is set from the message handler while this function is suspended on the settle, so
+  // narrowing from the check above does not hold across the await — TypeScript cannot see the
+  // out-of-band write and reads the re-check as always false.
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (state.stopping) return;
 
   // Closing the context is what flushes the file; the evidence state is read from what it left.
@@ -395,7 +457,7 @@ export async function executeInChild(
     kind: 'result',
     ok,
     executorVersion,
-    failureKind: failureKindOf({ unsupportedPage: state.unsupportedPage, runFault, ok }),
+    failureKind: failureKindOf({ unsupportedPage: state.unsupportedPage, runFault, ok, refusal }),
     failureMessage: state.unsupportedPage ? UNSUPPORTED_MULTI_PAGE_MESSAGE : runFault,
     recording: {
       path: evidence.path,
@@ -406,6 +468,27 @@ export async function executeInChild(
     },
     observedHosts,
   });
+}
+
+/**
+ * Lets the final action's result reach the recorder before the ordinary close (see the constants).
+ *
+ * Every wait here is bounded and every failure is swallowed: a page that never reaches `load`
+ * within the bound, or one whose navigation was torn down, changes nothing about the run's
+ * outcome — the settle exists for the recording, and a recording is never allowed to alter an
+ * outcome (AC-8). It returns early, without the hold, when a stop has been ordered in the
+ * meantime, so the parent's grace is spent on the flush and never on this.
+ */
+async function settleTail(
+  page: PageLike,
+  sleep: (ms: number) => Promise<void>,
+  state: ChildState,
+): Promise<void> {
+  await page
+    .waitForLoadState('load', { timeout: TAIL_SETTLE_LOAD_TIMEOUT_MS })
+    .catch(() => undefined);
+  if (state.stopping) return;
+  await sleep(TAIL_SETTLE_HOLD_MS);
 }
 
 /**

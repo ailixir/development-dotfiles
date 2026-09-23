@@ -189,15 +189,6 @@ class StudioApiIT {
     assertThat(supplied.getBody()).doesNotContain("example.test");
   }
 
-  @Test
-  void stepValidationStillAnswersForTheEditor() throws Exception {
-    ResponseEntity<String> response =
-        post("/api/v1/studio/validate-steps", "{\"steps\":[\"Go to the home page\"]}");
-
-    assertThat(response.getStatusCode().value()).isEqualTo(200);
-    assertThat(objectMapper.readTree(response.getBody()).path("results").isArray()).isTrue();
-  }
-
   // ── helpers ──────────────────────────────────────────────────────────────
 
   private String executionIdOf(ResponseEntity<String> response) throws Exception {

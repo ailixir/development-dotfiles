@@ -264,8 +264,17 @@ export function subscribeToExecution(
       if (lastRevision !== null && revision <= lastRevision) {
         return;
       }
-      lastRevision = revision;
       const snapshot = payload as ExecutionSnapshot;
+      // The subscription is bound to the execution accepted by POST /execute. Never allow a stale
+      // connection or mock seam to replace it with another run's timeline or recording.
+      const expectedVideoPath = `/api/v1/studio/executions/${encodeURIComponent(executionId)}/video`;
+      if (
+        snapshot.executionId !== executionId ||
+        (snapshot.videoPath !== null && snapshot.videoPath !== expectedVideoPath)
+      ) {
+        return;
+      }
+      lastRevision = revision;
       handlers.onSnapshot?.(snapshot);
       // §5.5: close on `streamComplete`, *after evidence is settled* — which is what the server
       // says by setting the flag. A terminal `status` alone closes nothing: §5.4 row 5 keeps the

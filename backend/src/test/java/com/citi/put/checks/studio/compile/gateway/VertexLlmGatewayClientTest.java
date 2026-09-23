@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.google.cloud.vertexai.VertexAI;
+import com.google.genai.Client;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ class VertexLlmGatewayClientTest {
 
   private static WireMockServer wireMock;
 
-  private final List<VertexAI> openClients = new ArrayList<>();
+  private final List<Client> openClients = new ArrayList<>();
 
   @BeforeAll
   static void startWireMock() {
@@ -51,7 +51,7 @@ class VertexLlmGatewayClientTest {
 
   @AfterEach
   void closeClients() {
-    openClients.forEach(VertexAI::close);
+    openClients.forEach(Client::close);
     openClients.clear();
   }
 
@@ -68,6 +68,9 @@ class VertexLlmGatewayClientTest {
     assertThat(response.retries()).isZero();
     assertThat(response.inputBytes()).isPositive();
     assertThat(response.outputBytes()).isPositive();
+    assertThat(wireMock.getAllServeEvents()).hasSize(1);
+    assertThat(wireMock.getAllServeEvents().get(0).getRequest().getBodyAsString())
+        .doesNotContain("temperature", "topP", "topK", "candidateCount");
   }
 
   @Test
@@ -253,7 +256,7 @@ class VertexLlmGatewayClientTest {
     assertThat(provenance.modelVersion()).isEqualTo("stub-model-001");
     assertThat(provenance.promptVersion()).isEqualTo("prompt-2026.09.0");
     assertThat(provenance.structuredOutput()).isTrue();
-    assertThat(provenance.temperature()).isZero();
+    assertThat(provenance.temperature()).as("legacy marker: temperature was not sent").isZero();
     assertThat(provenance.sdkVersion()).isNotBlank();
   }
 
@@ -303,7 +306,7 @@ class VertexLlmGatewayClientTest {
   }
 
   private LlmGatewayClient client(StudioGatewayProperties properties) throws Exception {
-    VertexAI vertexAi = GatewayTestSupport.vertexAi(properties);
+    Client vertexAi = GatewayTestSupport.vertexAi(properties);
     openClients.add(vertexAi);
     return new VertexLlmGatewayClient(
         properties, vertexAi, GatewayTestSupport.parser(), new GatewayAuditLogger());

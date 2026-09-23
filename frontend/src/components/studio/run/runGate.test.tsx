@@ -45,6 +45,11 @@ function executeRequests(): { method: string; url: string }[] {
   return observed.filter((entry) => entry.method === 'POST' && entry.url.includes('/execute'));
 }
 
+/** Run now prepares before it dispatches, so what it asked the server to prepare is countable. */
+function compileRequests(): { method: string; url: string }[] {
+  return observed.filter((entry) => entry.method === 'POST' && entry.url.includes('/compile'));
+}
+
 beforeAll(() => {
   studioMockServer.listen({ onUnhandledRequest: 'error' });
   studioMockServer.events.on('request:start', record);
@@ -97,7 +102,7 @@ function serve(test: TestDto) {
   return render(<RunControl testId={test.id} />);
 }
 
-describe('AC-1: Run is enabled if and only if the server says the draft is READY', () => {
+describe('AC-1: Run acts in every declared state except while a compile is already settling', () => {
   it('enumerating every compileStatus the document declares — FX-RUNGATE-STATE-STALE, FX-RUNGATE-STATE-COMPILING, FX-RUNGATE-STATE-AWAITING_CONFIRMATION, FX-RUNGATE-STATE-READY, FX-RUNGATE-STATE-NEEDS_REVISION', async () => {
     expect(DECLARED_STATES.length).toBeGreaterThan(0);
     const enabledIn: string[] = [];
@@ -116,7 +121,13 @@ describe('AC-1: Run is enabled if and only if the server says the draft is READY
       view.unmount();
     }
 
-    expect(enabledIn, 'Run is enabled in more or fewer than one declared state').toEqual(['READY']);
+    // Saving no longer compiles, so a draft without a fresh artifact is not a blocked draft — it
+    // is a draft whose first Run step is a compile. The one state that still disables the control
+    // is COMPILING: a compile is already settling and a second would be refused anyway.
+    expect(
+      enabledIn.slice().sort(),
+      'Run is disabled in a state it should act in, or enabled while a compile is settling',
+    ).toEqual(DECLARED_STATES.filter((state) => state !== 'COMPILING').slice().sort());
   });
 
   it('a state the document does not declare is a loud failure rather than a permissive default', async () => {
@@ -140,20 +151,10 @@ describe('AC-1: Run is enabled if and only if the server says the draft is READY
 });
 
 describe('AC-2: client-side English-grammar validation is no longer an execution gate', () => {
-  it('the discriminating half: a draft the validator calls invalid still runs when the server says READY', async () => {
-    // The validator is forced to refuse everything. Nothing on the run path consults it, so if the
-    // grammar term were still in the predicate — under any name — this request would not happen.
+  it('the discriminating half: a draft runs when the server says READY', async () => {
+    // The step grammar validator is retired. Nothing on the run path consults the English, so the
+    // server's READY alone dispatches the run.
     studioMockServer.use(
-      http.post(`${STUDIO_BASE}/validate-steps`, () =>
-        HttpResponse.json({
-          isValid: false,
-          results: readyDraft.steps.map((_, stepIndex) => ({
-            stepIndex,
-            isValid: false,
-            suggestion: 'this editor does not recognise this line',
-          })),
-        }),
-      ),
       http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(readyDraft)),
       http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
         HttpResponse.json({ executionId: '77777777-7777-7777-7777-777777777777', status: 'PENDING' }, { status: 202 }),
@@ -169,37 +170,46 @@ describe('AC-2: client-side English-grammar validation is no longer an execution
     expect(executeRequests()).toHaveLength(1);
   });
 
-  it('the companion half: a draft the validator calls valid does not run when the server has not said READY', async () => {
+  it('the companion half: the client\u2019s opinion of the English still gates nothing \u2014 the server\u2019s state decides what Run does', async () => {
+    // A draft in a state that is not dispatchable. Run must not dispatch it as-is: it asks the
+    // server to prepare it first, and only the server's own READY moves it to /execute.
+    const awaiting = draftsByCompileStatus.AWAITING_CONFIRMATION;
+    let served: TestDto = awaiting;
     studioMockServer.use(
-      http.post(`${STUDIO_BASE}/validate-steps`, () =>
-        HttpResponse.json({ isValid: true, results: [] }),
-      ),
-      http.get(`${STUDIO_BASE}/tests/:id`, () =>
-        HttpResponse.json(draftsByCompileStatus.AWAITING_CONFIRMATION),
-      ),
+      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(served)),
+      http.post(`${STUDIO_BASE}/tests/:id/compile`, () => {
+        served = { ...readyDraft, id: awaiting.id };
+        return HttpResponse.json({ compileRequestId: 'r', status: 'COMPILING' }, { status: 202 });
+      }),
     );
 
-    render(<RunControl testId={draftsByCompileStatus.AWAITING_CONFIRMATION.id} />);
+    render(<RunControl testId={awaiting.id} />);
     const control = await screen.findByRole('button', { name: RUN_LABEL });
-    await screen.findByTestId('run-blocked-reason');
-    await userEvent.click(control, { pointerEventsCheck: 0 });
+    await waitFor(() => expect(control).not.toBeDisabled());
+    await userEvent.click(control);
 
-    expect(control).toBeDisabled();
-    expect(executeRequests()).toHaveLength(0);
+    // Prepared exactly once, then dispatched exactly once — never dispatched unprepared.
+    await waitFor(() => expect(executeRequests()).toHaveLength(1));
+    expect(compileRequests()).toHaveLength(1);
   });
 
   it('a programmatic run request is governed by the same predicate as the button', async () => {
     // `?autorun=1` and the terminal-error surface's re-run both come through `runRequest`. A
     // second activation path that skipped the gate would be the defect this story removed, put
     // back by a different door.
+    // The draft stays NEEDS_REVISION however many times it is prepared, so the run must stop
+    // after the preparation rather than dispatch something the server would refuse.
     studioMockServer.use(
       http.get(`${STUDIO_BASE}/tests/:id`, () =>
         HttpResponse.json(draftsByCompileStatus.NEEDS_REVISION),
       ),
+      http.post(`${STUDIO_BASE}/tests/:id/compile`, () =>
+        HttpResponse.json({ compileRequestId: 'r', status: 'COMPILING' }, { status: 202 }),
+      ),
     );
     render(<RunControl testId={draftsByCompileStatus.NEEDS_REVISION.id} runRequest={1} />);
-    await screen.findByTestId('run-blocked-reason');
-    await waitFor(() => expect(executeRequests()).toHaveLength(0));
+    await screen.findByTestId('run-compile-outcome');
+    await waitFor(() => expect(compileRequests()).toHaveLength(1));
     expect(executeRequests()).toHaveLength(0);
   });
 
@@ -232,6 +242,59 @@ describe('AC-2: client-side English-grammar validation is no longer an execution
 });
 
 describe('AC-3(a): client-generated Python is retired, and the Code view says what it has not got', () => {
+  it('renders the exact saved runnable artifact without internal identifiers', async () => {
+    render(<CodeTab testId={readyDraft.id} />);
+
+    const source = await screen.findByTestId('confirmed-playwright-source');
+    const artifactSteps = readyDraft.confirmedRevisionArtifact?.steps ?? [];
+    expect(artifactSteps.length).toBeGreaterThan(0);
+
+    // Complete: every step's code AND the English it was translated from, index-aligned.
+    const codeBlocks = screen.getAllByTestId('code-view-step-code');
+    const stepTexts = screen.getAllByTestId('code-view-step-text');
+    expect(codeBlocks).toHaveLength(artifactSteps.length);
+    expect(stepTexts).toHaveLength(artifactSteps.length);
+    artifactSteps.forEach((step, index) => {
+      expect(codeBlocks[index].textContent).toBe(step.code);
+      expect(stepTexts[index].textContent).toBe(`${index + 1}. ${step.originalText}`);
+    });
+    expect(screen.getByTestId('code-view-step-count').textContent).toBe(
+      `${artifactSteps.length} steps`,
+    );
+    // Not a runnable file, and it does not pretend to be one.
+    expect(source.textContent).not.toMatch(/\bimport\b|\btest\(/u);
+
+    // Internal identifiers stay internal: the revision is named by a short prefix, never in full.
+    expect(document.body.textContent).not.toContain(readyDraft.confirmedRevisionId as string);
+    expect(document.body.textContent).not.toContain(readyDraft.confirmedRevisionArtifactHash as string);
+    expect(screen.getByTestId('code-view-revision').textContent).toContain(
+      (readyDraft.confirmedRevisionArtifactHash as string).slice(0, 8),
+    );
+    expect(screen.queryByTestId('code-view-unavailable-title')).toBeNull();
+  });
+
+  it('refreshes confirmed source when the same test is prepared without changing ids', async () => {
+    let served: TestDto = {
+      ...readyDraft,
+      confirmedRevisionId: null,
+      confirmedRevisionArtifactHash: null,
+      confirmedRevisionArtifact: null,
+    };
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/${readyDraft.id}`, () => HttpResponse.json(served)),
+    );
+    const view = render(<CodeTab testId={readyDraft.id} refreshToken={0} />);
+    await screen.findByTestId('code-view-unavailable-title');
+
+    served = readyDraft;
+    view.rerender(<CodeTab testId={readyDraft.id} refreshToken={1} />);
+    await screen.findByTestId('confirmed-playwright-source');
+    const refreshed = screen.getAllByTestId('code-view-step-code').map((node) => node.textContent);
+    expect(refreshed).toEqual(
+      (readyDraft.confirmedRevisionArtifact?.steps ?? []).map((step) => step.code),
+    );
+  });
+
   it('renders no generator-derived text for any fixture', () => {
     // The falsification is wiring the generator's output back in. For that to be visible the
     // generator must actually produce distinctive lines against these fixtures, so that is
@@ -263,18 +326,13 @@ describe('AC-3(a): client-generated Python is retired, and the Code view says wh
 
     const blocker = screen.getByTestId('code-view-blocker');
     expect(blocker.textContent).toBe(CODE_VIEW_BLOCKER);
-    // @po's amendment to open question 2: the blocker named must be the **new** one — the
-    // confirmed revision's artifact and hash — not the AC-15 ruling, which has landed.
-    expect(blocker.textContent).toMatch(/confirmed revision/i);
-    expect(blocker.textContent).toMatch(/§21/);
-    expect(blocker.textContent?.trim().length).toBeGreaterThan(80);
+    expect(blocker.textContent).not.toMatch(/ADR|story|revision/i);
   });
 
-  it('says why the current candidate is not shown instead', () => {
+  it('explains that the tab shows only saved runnable source', () => {
     render(<CodeTab />);
     const why = screen.getByTestId('code-view-why-not-candidate');
-    expect(why.textContent).toMatch(/refused/i);
-    expect(why.textContent).toMatch(/disagree|disagrees/i);
+    expect(why.textContent).toMatch(/saved test will run/i);
   });
 
   it('the Code view takes no source to render, so there is nothing to wire a generator into', () => {

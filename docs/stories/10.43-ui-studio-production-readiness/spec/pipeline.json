@@ -1,0 +1,12 @@
+{
+  "workflow":"spec-pipeline",
+  "workflowDefinition":".aiox-core/development/workflows/spec-pipeline.yaml",
+  "storyId":"10.43-ui-studio-production-readiness",
+  "source":"prd",
+  "status":"blocked",
+  "strictGate":true,
+  "phases":{"gather":"complete","assess":"complete","research":"complete","spec":"complete","critique":"blocked","plan":"not-run"},
+  "reason":"The QA gate found three HIGH external-feasibility issues. The strict pipeline halted as required; no production-ready completion claim or implementation plan was fabricated.",
+  "localEvidence":{"runnerDefault":"54 passed files, 1063 passed tests, 29 skipped","runnerFixtures":"9 passed files, 107 passed tests, 10 skipped","runnerDeployment":"7 passed files, 269 passed tests; post-review env collision gate 14/14 passed and all four Helm lints passed","backendTargeted":"compile, gateway, confirmation, authorization, acceptance, dispatch, evidence and recovery suites passed","frontend":"Studio suite 36 files / 513 tests passed; post-review focused suite 7 files / 105 tests passed; type-check and production build passed"},
+  "completedAt":"2026-09-21T17:00:00Z"
+}

@@ -273,6 +273,7 @@ export interface Volume {
   readonly emptyDir?: { readonly medium?: string; readonly sizeLimit?: string };
   readonly secret?: { readonly secretName?: string; readonly items?: readonly { key?: string }[] };
   readonly configMap?: { readonly name?: string };
+  readonly persistentVolumeClaim?: { readonly claimName?: string };
 }
 
 export function podSpec(deployment: K8sDocument): PodSpec {

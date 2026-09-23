@@ -78,7 +78,6 @@ function serveDraft(initial: TestDto) {
       HttpResponse.json({ data: [state.current], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
     ),
     http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(state.current)),
-    http.post(`${STUDIO_BASE}/validate-steps`, () => HttpResponse.json({ isValid: true, results: [] })),
   );
   return state;
 }
@@ -158,7 +157,10 @@ describe('Save', () => {
     await screen.findByRole('button', { name: 'Run Test' }, WAIT);
 
     const NEW_STEP = 'Click "Continue"';
-    await userEvent.type(screen.getByPlaceholderText('Add new test step...'), `${NEW_STEP}{enter}`);
+    await userEvent.type(
+      screen.getByPlaceholderText('Add new test step...'),
+      `${NEW_STEP}{Control>}{Enter}{/Control}`,
+    );
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
     await screen.findByText('Test saved', {}, WAIT);
 
@@ -235,6 +237,8 @@ describe('Variables', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Variables' }));
     const dialog = await screen.findByRole('dialog', {}, WAIT);
+    expect(within(dialog).queryByRole('option', { name: 'Secret' })).toBeNull();
+    expect(within(dialog).getByText('Vault secrets are unavailable in this alpha.')).toBeVisible();
     // Loaded from the DTO, not from the browser.
     const plainValue = within(dialog).getByDisplayValue('pilot-user');
     await userEvent.clear(plainValue);
@@ -252,7 +256,9 @@ describe('Variables', () => {
     first.unmount();
     window.localStorage.clear();
     renderPage();
-    await screen.findByRole('button', { name: 'Run Test' }, WAIT);
+    const run = await screen.findByRole('button', { name: 'Run Test' }, WAIT);
+    expect(screen.getByTestId('studio-save-state')).toHaveTextContent('Saved');
+    expect(run).not.toBeDisabled();
     await userEvent.click(screen.getByRole('button', { name: 'Variables' }));
     const reopened = await screen.findByRole('dialog', {}, WAIT);
     expect(within(reopened).getByDisplayValue('other-user')).toBeInTheDocument();
@@ -269,7 +275,10 @@ describe('localStorage', () => {
 
     // Every path that used to write: a step edit (`studio:steps`), the Variables save
     // (`studio:variables`) and the secret picker (`checks:secrets`).
-    await userEvent.type(screen.getByPlaceholderText('Add new test step...'), 'Click "Next"{enter}');
+    await userEvent.type(
+      screen.getByPlaceholderText('Add new test step...'),
+      'Click "Next"{Control>}{Enter}{/Control}',
+    );
     await userEvent.click(screen.getByRole('button', { name: 'Variables' }));
     const dialog = await screen.findByRole('dialog', {}, WAIT);
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));

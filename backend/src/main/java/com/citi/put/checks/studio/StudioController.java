@@ -5,16 +5,13 @@ import com.citi.put.checks.studio.dto.ConfirmCompileRequestDto;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.StudioAuthoringMapper;
 import com.citi.put.checks.studio.dto.UITestDto;
-import com.citi.put.checks.studio.validation.StepValidator;
 import com.citi.put.checks.studio.validation.VariableReferenceValidator;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -42,15 +39,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class StudioController {
 
   private final StudioService studioService;
-  private final StepValidator stepValidator;
   private final StudioAuthoringMapper authoringMapper;
 
-  public StudioController(
-      StudioService studioService,
-      StepValidator stepValidator,
-      StudioAuthoringMapper authoringMapper) {
+  public StudioController(StudioService studioService, StudioAuthoringMapper authoringMapper) {
     this.studioService = studioService;
-    this.stepValidator = stepValidator;
     this.authoringMapper = authoringMapper;
   }
 
@@ -165,10 +157,7 @@ public class StudioController {
     return ResponseEntity.noContent().build();
   }
 
-  /**
-   * Accepts an execution (AC-7 – AC-11). Owners and explicitly authorized administrators only; the
-   * check is on the server and precedes every other step of acceptance.
-   */
+  /** Accepts an execution (AC-7 – AC-11) from any authenticated application user. */
   @PostMapping("/tests/{id}/execute")
   public ResponseEntity<Map<String, Object>> executeTest(
       @PathVariable UUID id,
@@ -247,16 +236,6 @@ public class StudioController {
     Map<String, Object> supplied = new LinkedHashMap<>();
     variables.forEach((name, value) -> supplied.put(String.valueOf(name), value));
     return supplied;
-  }
-
-  @PostMapping("/validate-steps")
-  public ResponseEntity<Map<String, Object>> validateSteps(
-      @RequestBody Map<String, List<String>> body) {
-    List<String> steps = body.getOrDefault("steps", List.of());
-    List<Map<String, Object>> results =
-        steps.stream().map(step -> stepValidator.validate(step)).collect(Collectors.toList());
-    boolean allValid = results.stream().allMatch(r -> Boolean.TRUE.equals(r.get("isValid")));
-    return ResponseEntity.ok(Map.of("results", results, "allValid", allValid));
   }
 
   private Map<String, Object> toEnvelope(Page<UITestDto> page) {

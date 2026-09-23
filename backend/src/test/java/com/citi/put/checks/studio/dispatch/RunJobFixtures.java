@@ -50,9 +50,18 @@ final class RunJobFixtures {
               List.copyOf(resolvedVars.keySet()), List.copyOf(resolvedSecrets.keySet())),
           resolvedVars,
           resolvedSecrets,
-          new RunJob.JobDeadlines(30_000L, 30_000L),
+          // §8.5's admitted-start value and §5.2's total browser runtime. The total is deliberately
+          // not the configuration's timeoutSeconds x 1000: the two are different budgets.
+          new RunJob.JobDeadlines(30_000L, 120_000L),
           RunJob.videoKeyFor(csi, testId, executionId, attemptId),
-          RunJob.manifestKeyFor(csi, testId, executionId, attemptId));
+          RunJob.manifestKeyFor(csi, testId, executionId, attemptId),
+          null,
+          // Every resolved secret bound to one origin, so the conformance test validates a
+          // populated secretOrigins against the frozen schema rather than an empty map.
+          resolvedSecrets.keySet().stream()
+              .collect(
+                  java.util.stream.Collectors.toMap(
+                      id -> id, id -> List.of("https://login.app.example"))));
     } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
       throw new AssertionError("fixture documents are not JSON", e);
     }

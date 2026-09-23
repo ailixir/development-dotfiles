@@ -142,7 +142,7 @@ class CompileStateServiceTest {
         base.references(),
         "{\"intentDerivationVersion\":\"" + version + "\"}",
         base.createdBy(),
-        "{\"schemaVersion\":1,\"steps\":[]}",
+        "{\"version\":2,\"steps\":[]}",
         version);
   }
 
@@ -237,11 +237,13 @@ class CompileStateServiceTest {
   }
 
   @Test
-  void expectedIntentSnapshotIsPersistedWithTheImmutableCandidate() throws Exception {
+  void referencePolicyIsPersistedWithTheImmutableCandidate() throws Exception {
     String expected =
-        "{\"schemaVersion\":1,\"steps\":[{\"stepIndex\":0,\"stepId\":\"11111111-1111-4111-8111-111111111111\",\"operations\":[{\"op\":\"goto\",\"url\":{\"kind\":\"literal\",\"value\":\"https://example.test/\"}}]}]}";
+        "{\"version\":2,\"steps\":[{\"stepIndex\":0,"
+            + "\"required\":{\"variables\":[],\"secrets\":[\"PW\"]},"
+            + "\"allowed\":{\"variables\":[],\"secrets\":[\"PW\"]}}]}";
     CompileRequest request = compileStateService.beginCompile(testId);
-    CandidateRevision base = candidate("hash-expected-intent");
+    CandidateRevision base = candidate("hash-reference-policy");
     CandidateRevision candidate =
         new CandidateRevision(
             base.configurationRevision(),
@@ -259,7 +261,7 @@ class CompileStateServiceTest {
         .isEqualTo(PublishResult.PUBLISHED);
     String stored =
         jdbc.queryForObject(
-            "SELECT expected_intent::text FROM ui_test_revisions WHERE test_id = ?",
+            "SELECT reference_policy::text FROM ui_test_revisions WHERE test_id = ?",
             String.class,
             testId);
     assertThat(MAPPER.readTree(stored)).isEqualTo(MAPPER.readTree(expected));

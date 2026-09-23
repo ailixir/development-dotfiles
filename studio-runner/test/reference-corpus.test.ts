@@ -6,7 +6,7 @@ import {
   createFakeBrowserAdapter,
   createFakeClock,
   createRecordingStepReporter,
-} from '../src/executor/adapters/fake.js';
+} from './helpers/fakeAdapters.js';
 import { loadReferenceFixtures, normalise } from './helpers/corpus.js';
 
 /**

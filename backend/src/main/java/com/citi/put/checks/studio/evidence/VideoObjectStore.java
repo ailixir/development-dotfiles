@@ -33,7 +33,8 @@ import java.util.Optional;
  * manifest side and {@code ObjectStoreUnavailableError} states its mirror in the runner.
  *
  * <p>Real Sonic endpoints, credentials and lifecycle behaviour are `ED-03`, owned by story 10.18
- * and proven in 10.19. This story ships the seam and {@link FakeVideoObjectStore}.
+ * and proven in 10.19. Production implementations are selected explicitly; controllable stores live
+ * only in the test source set.
  */
 public interface VideoObjectStore {
 

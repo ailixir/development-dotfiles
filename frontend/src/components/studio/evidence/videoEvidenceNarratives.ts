@@ -1,4 +1,4 @@
-import type { VideoStatus } from '@/types/studio/studioTypes';
+import type { ExecutionErrorCode, VideoStatus } from '@/types/studio/studioTypes';
 
 /**
  * What the run's evidence state means, per `VideoStatus` (story 10.16a, AC-1, AC-2).
@@ -66,6 +66,51 @@ export const PARTIAL_RECORDING_QUALIFIER =
   'This recording is partial: it does not cover the whole browser session, because the recorder did not stop in an orderly way.';
 
 /**
+ * A recording that ends where the run was stopped, keyed on the **run outcome** and never on
+ * `partial`.
+ *
+ * When a run hits its total time cap (`TIMEOUT`) or is stopped on request (`CANCELLED`), the runner
+ * performs an orderly stop and flushes the recording. ADR-002 §17.3: *"A deadline kill whose
+ * ordered stop flushed cleanly is not partial."* So the body says `partial: false`, and the reader
+ * gets a clean-looking video that simply ends early, with nothing on the page saying why. These two
+ * lines say why.
+ *
+ * They are distinct from {@link PARTIAL_RECORDING_QUALIFIER} on purpose, and the two can both be
+ * true: a stopped run whose recorder then also died is `partial: true` **and** stopped. Neither
+ * line is derived from the other's condition (§17.4).
+ *
+ * The set is exactly the two codes under which the runner had a browser and stopped it in an
+ * orderly way. Every other code either never started a browser or lost it without a stop
+ * (`executionErrorNarratives.ts`), so there is no recording end to explain. `satisfies` keeps both
+ * members inside the contract's vocabulary: dropping either from `EXECUTION_ERROR_CODES` fails the
+ * type-check here.
+ */
+export const STOPPED_RUN_ERROR_CODES = ['TIMEOUT', 'CANCELLED'] as const satisfies readonly ExecutionErrorCode[];
+
+export type StoppedRunErrorCode = (typeof STOPPED_RUN_ERROR_CODES)[number];
+
+/** Shown only beside an `AVAILABLE` recording. The reader is told where the recording ends, and why. */
+export const STOPPED_RUN_RECORDING_STATEMENTS: Readonly<Record<StoppedRunErrorCode, string>> = {
+  TIMEOUT:
+    'The recording ends where the run was stopped: the run reached its total time cap, so nothing after that point was captured.',
+  CANCELLED:
+    'The recording ends where the run was stopped on request, so nothing after the stop was captured.',
+};
+
+function isStoppedRunErrorCode(code: ExecutionErrorCode | null): code is StoppedRunErrorCode {
+  return code !== null && (STOPPED_RUN_ERROR_CODES as readonly ExecutionErrorCode[]).includes(code);
+}
+
+/**
+ * The stopped-run line for a run outcome, or `null` where there is none to give: a run that ended
+ * without a code, and every code that is not an orderly stop. Null is the ordinary case here, not a
+ * fallback, which is why this lookup does not throw the way {@link videoEvidenceNarrative} does.
+ */
+export function stoppedRunRecordingStatement(errorCode: ExecutionErrorCode | null): string | null {
+  return isStoppedRunErrorCode(errorCode) ? STOPPED_RUN_RECORDING_STATEMENTS[errorCode] : null;
+}
+
+/**
  * AC-12: the one message for a `<video>` that failed after being given an `AVAILABLE` URL.
  *
  * A media element exposes only a `MediaError.code`, never an HTTP status, so this wording cannot
@@ -75,8 +120,6 @@ export const PLAYBACK_FAILED_MESSAGE = 'The recording could not be played here.'
 
 /** Rendered before any run is on screen. It is not one of the five states and does not pose as one. */
 export const NO_RUN_EVIDENCE_MESSAGE = 'No run is on screen yet, so there is no recording to show.';
-
-export const DOWNLOAD_RECORDING_LABEL = 'Download recording';
 
 /**
  * Total lookup. A sixth value throws rather than rendering a generic panel that would hide which

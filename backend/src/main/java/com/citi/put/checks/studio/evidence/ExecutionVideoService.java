@@ -139,6 +139,7 @@ public class ExecutionVideoService {
         ResponseEntity.status(status)
             .contentType(MediaType.parseMediaType(VIDEO_WEBM))
             .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+            .header(HttpHeaders.CACHE_CONTROL, "private, no-store")
             .contentLength(bytes.length);
     if (contentRange != null) {
       response = response.header(HttpHeaders.CONTENT_RANGE, contentRange);

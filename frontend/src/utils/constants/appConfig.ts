@@ -88,7 +88,6 @@ export const API_ENDPOINTS = {
   STUDIO_TEST_BY_ID: (id: string) => `/studio/tests/${id}`,
   STUDIO_EXECUTE: (id: string) => `/studio/tests/${id}/execute`,
   STUDIO_EXECUTION: (id: string) => `/studio/executions/${id}`,
-  STUDIO_VALIDATE_STEPS: '/studio/validate-steps',
 } as const;
 
 export const WEBSOCKET_EVENTS = {

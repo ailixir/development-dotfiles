@@ -77,8 +77,9 @@ public class UITestRevision {
   private String authoringRevisionInputs;
 
   @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "expected_intent", columnDefinition = "jsonb", updatable = false)
-  private String expectedIntent;
+  /** ADR-SC-003 structural reference policy; {@code null} for legacy authoring. */
+  @Column(name = "reference_policy", columnDefinition = "jsonb", updatable = false)
+  private String referencePolicy;
 
   @Column(name = "intent_derivation_version", length = 32, updatable = false)
   private String intentDerivationVersion;
@@ -157,8 +158,8 @@ public class UITestRevision {
     return authoringRevisionInputs;
   }
 
-  public String getExpectedIntent() {
-    return expectedIntent;
+  public String getReferencePolicy() {
+    return referencePolicy;
   }
 
   public String getIntentDerivationVersion() {

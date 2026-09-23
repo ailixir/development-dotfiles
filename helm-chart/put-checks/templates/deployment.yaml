@@ -1,4 +1,44 @@
 {{- if .Values.backend.enabled }}
+{{- $gatewayProvider := required "studioGateway.provider is required" .Values.studioGateway.provider -}}
+{{- if not (has $gatewayProvider (list "disabled" "vertex")) -}}
+{{- fail (printf "studioGateway.provider must be one of disabled, vertex; got %q" $gatewayProvider) -}}
+{{- end -}}
+{{- $gatewayEnvironment := required "studioGateway.environment is required" .Values.studioGateway.environment -}}
+{{- if not (has $gatewayEnvironment (list "local" "ci" "staging" "production")) -}}
+{{- fail (printf "studioGateway.environment must be one of local, ci, staging, production; got %q" $gatewayEnvironment) -}}
+{{- end -}}
+{{- $apiProfiles := splitList "," .Values.backend.springProfile -}}
+{{- $isStagingProfile := has "staging" $apiProfiles -}}
+{{- $isProductionProfile := has "prod" $apiProfiles -}}
+{{- $isDeployedProfile := or $isStagingProfile $isProductionProfile -}}
+{{- if and $isStagingProfile (ne $gatewayEnvironment "staging") -}}
+{{- fail (printf "backend.springProfile=%q requires studioGateway.environment=staging; the environment label cannot weaken deployed Studio guards" .Values.backend.springProfile) -}}
+{{- end -}}
+{{- if and $isProductionProfile (ne $gatewayEnvironment "production") -}}
+{{- fail (printf "backend.springProfile=%q requires studioGateway.environment=production; the environment label cannot weaken deployed Studio guards" .Values.backend.springProfile) -}}
+{{- end -}}
+{{- if and $isDeployedProfile (ne $gatewayProvider "vertex") -}}
+{{- fail (printf "backend.springProfile=%q requires studioGateway.provider=vertex; disabled translation cannot serve an enabled Studio" .Values.backend.springProfile) -}}
+{{- end -}}
+{{- $uiTestOverride := index .Values.backend.configOverrides "checks.sources.UI_TEST" | default "false" | toString | lower -}}
+{{- $uiTestEnv := index .Values.backend.env "CHECKS_SOURCES_UI_TEST" | default "false" | toString | lower -}}
+{{- $uiTestEnabled := or (eq $uiTestOverride "true") (eq $uiTestEnv "true") -}}
+{{- if and $isDeployedProfile (not $uiTestEnabled) -}}
+{{- fail (printf "backend.springProfile=%q requires checks.sources.UI_TEST=true (backend.configOverrides) or CHECKS_SOURCES_UI_TEST=true (backend.env); Studio cannot be advertised with its source disabled" .Values.backend.springProfile) -}}
+{{- end -}}
+{{- $vertexConfigMapName := .Values.studioGateway.vertexConfigMap.name | default "" -}}
+{{- if eq $gatewayProvider "vertex" -}}
+{{- $_ := required "studioGateway.model is required for provider=vertex" .Values.studioGateway.model -}}
+{{- if $vertexConfigMapName -}}
+{{- $_ := required "studioGateway.vertexConfigMap.endpointKey is required for provider=vertex" .Values.studioGateway.vertexConfigMap.endpointKey -}}
+{{- $_ := required "studioGateway.vertexConfigMap.projectKey is required for provider=vertex" .Values.studioGateway.vertexConfigMap.projectKey -}}
+{{- $_ := required "studioGateway.vertexConfigMap.locationKey is required for provider=vertex" .Values.studioGateway.vertexConfigMap.locationKey -}}
+{{- else -}}
+{{- $_ := required "studioGateway.endpoint or studioGateway.vertexConfigMap.name is required for provider=vertex" .Values.studioGateway.endpoint -}}
+{{- $_ := required "studioGateway.project or studioGateway.vertexConfigMap.name is required for provider=vertex" .Values.studioGateway.project -}}
+{{- $_ := required "studioGateway.location or studioGateway.vertexConfigMap.name is required for provider=vertex" .Values.studioGateway.location -}}
+{{- end -}}
+{{- end -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -66,6 +106,81 @@ spec:
             # declaration (§6.2, AC-12).
             - name: STUDIO_EVIDENCE_RETENTION
               value: {{ .Values.objectStore.retention | quote }}
+            - name: STUDIO_EVIDENCE_PROVIDER
+              value: {{ .Values.objectStore.provider | quote }}
+            - name: STUDIO_EVIDENCE_DIRECTORY
+              value: {{ .Values.objectStore.localDirectory | quote }}
+            - name: STUDIO_EVIDENCE_ENDPOINT
+              value: {{ if eq .Values.objectStore.provider "s3" }}{{ required "objectStore.endpoint is required for provider=s3" .Values.objectStore.endpoint | quote }}{{ else }}{{ .Values.objectStore.endpoint | quote }}{{ end }}
+            - name: STUDIO_EVIDENCE_REGION
+              value: {{ .Values.objectStore.region | quote }}
+            - name: STUDIO_EVIDENCE_BUCKET
+              value: {{ .Values.objectStore.bucket | quote }}
+            - name: STUDIO_EVIDENCE_PATH_STYLE_ACCESS
+              value: {{ .Values.objectStore.pathStyleAccess | quote }}
+            - name: STUDIO_EVIDENCE_ACCESS_KEY_ID_FILE
+              value: {{ printf "%s/accessKeyId" .Values.objectStore.mountPath | quote }}
+            - name: STUDIO_EVIDENCE_SECRET_ACCESS_KEY_FILE
+              value: {{ printf "%s/secretAccessKey" .Values.objectStore.mountPath | quote }}
+            - name: STUDIO_EVIDENCE_CONNECT_TIMEOUT
+              value: {{ .Values.objectStore.connectTimeout | quote }}
+            - name: STUDIO_EVIDENCE_REQUEST_TIMEOUT
+              value: {{ .Values.objectStore.requestTimeout | quote }}
+            - name: STUDIO_VAULT_PROVIDER
+              value: {{ .Values.studioVault.provider | quote }}
+            - name: STUDIO_VAULT_ADDRESS
+              value: {{ if eq .Values.studioVault.provider "hashicorp" }}{{ required "studioVault.address is required for provider=hashicorp" .Values.studioVault.address | quote }}{{ else }}{{ .Values.studioVault.address | quote }}{{ end }}
+            - name: STUDIO_VAULT_NAMESPACE
+              value: {{ .Values.studioVault.namespace | quote }}
+            - name: STUDIO_VAULT_MOUNT
+              value: {{ .Values.studioVault.mount | quote }}
+            - name: STUDIO_VAULT_PATH_TEMPLATE
+              value: {{ .Values.studioVault.pathTemplate | quote }}
+            - name: STUDIO_VAULT_VALUE_KEY
+              value: {{ .Values.studioVault.valueKey | quote }}
+            - name: STUDIO_VAULT_TOKEN_FILE
+              value: {{ printf "%s/%s" .Values.studioVault.tokenMountPath .Values.studioVault.tokenKey | quote }}
+            - name: STUDIO_VAULT_CONNECT_TIMEOUT
+              value: {{ .Values.studioVault.connectTimeout | quote }}
+            - name: STUDIO_VAULT_REQUEST_TIMEOUT
+              value: {{ .Values.studioVault.requestTimeout | quote }}
+            - name: STUDIO_VAULT_MAX_RESPONSE_BYTES
+              value: {{ .Values.studioVault.maxResponseBytes | quote }}
+            - name: STUDIO_GATEWAY_PROVIDER
+              value: {{ $gatewayProvider | quote }}
+            - name: STUDIO_GATEWAY_ENDPOINT
+              {{- if and (eq $gatewayProvider "vertex") $vertexConfigMapName }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $vertexConfigMapName | quote }}
+                  key: {{ .Values.studioGateway.vertexConfigMap.endpointKey | quote }}
+              {{- else }}
+              value: {{ .Values.studioGateway.endpoint | quote }}
+              {{- end }}
+            - name: STUDIO_GATEWAY_PROJECT
+              {{- if and (eq $gatewayProvider "vertex") $vertexConfigMapName }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $vertexConfigMapName | quote }}
+                  key: {{ .Values.studioGateway.vertexConfigMap.projectKey | quote }}
+              {{- else }}
+              value: {{ .Values.studioGateway.project | quote }}
+              {{- end }}
+            - name: STUDIO_GATEWAY_LOCATION
+              {{- if and (eq $gatewayProvider "vertex") $vertexConfigMapName }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $vertexConfigMapName | quote }}
+                  key: {{ .Values.studioGateway.vertexConfigMap.locationKey | quote }}
+              {{- else }}
+              value: {{ .Values.studioGateway.location | quote }}
+              {{- end }}
+            - name: STUDIO_GATEWAY_MODEL
+              value: {{ .Values.studioGateway.model | quote }}
+            - name: STUDIO_GATEWAY_CREDENTIALS_MODE
+              value: {{ .Values.studioGateway.credentialsMode | quote }}
+            - name: STUDIO_GATEWAY_CREDENTIALS_KEY_FILE
+              value: {{ printf "%s/%s" .Values.studioGateway.credentialsMountPath .Values.studioGateway.credentialsKey | quote }}
             # ── The kill switch and the dispatcher, on the API (story 10.18b, AC-23a) ─────
             #
             # The kill switch comes from its own values key. The dispatcher is `false` here as a
@@ -101,9 +216,9 @@ spec:
             # the manifest rather than inherited from a default somebody may change.
             #
             # **No credentialed pilot may run until ED-02 has linked completed tickets.** ED-02's
-            # owner reads "TBD — not assigned in sources"; @po could not name one and raised the
-            # escalation to @pm. The real vault is ALSO still a stub: `SecretsService` returns
-            # `REDACTED`. See `docs/runbooks/studio-runner.md` §9.
+            # owner is the PUT Core platform (Core BFF), but no external ticket is linked and an
+            # owner is not a delivery. The real vault is ALSO still a stub: `SecretsService`
+            # returns `REDACTED`. See `docs/runbooks/studio-runner.md` §9.
             - name: CHECKS_BYPASS_CORE_SERVICE
               value: {{ .Values.backend.identityBypass.coreService | quote }}
             - name: CHECKS_BYPASS_IDENTITY_HEADERS
@@ -174,9 +289,25 @@ spec:
             # and holds no Get or List permission; the API and the recovery path read and never
             # write. Two principals, asserted unequal in the rendered manifest rather than each
             # matched against a literal (AC-10a).
+            {{- if eq .Values.objectStore.provider "s3" }}
             - name: object-store-credentials
               mountPath: {{ .Values.objectStore.mountPath }}
               readOnly: true
+            {{- end }}
+            {{- if eq .Values.objectStore.provider "local" }}
+            - name: local-object-store
+              mountPath: {{ .Values.objectStore.localDirectory }}
+            {{- end }}
+            {{- if eq .Values.studioVault.provider "hashicorp" }}
+            - name: studio-vault-token
+              mountPath: {{ .Values.studioVault.tokenMountPath }}
+              readOnly: true
+            {{- end }}
+            {{- if and (eq $gatewayProvider "vertex") (eq .Values.studioGateway.credentialsMode "service-account-file") }}
+            - name: studio-gateway-credentials
+              mountPath: {{ .Values.studioGateway.credentialsMountPath }}
+              readOnly: true
+            {{- end }}
           lifecycle:
             preStop:
               exec:
@@ -184,6 +315,7 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
+        {{- if eq .Values.objectStore.provider "s3" }}
         - name: object-store-credentials
           secret:
             secretName: {{ .Values.objectStore.credentialsSecret }}
@@ -192,6 +324,28 @@ spec:
               - key: {{ . }}
                 path: {{ . }}
               {{- end }}
+        {{- end }}
+        {{- if eq .Values.objectStore.provider "local" }}
+        - name: local-object-store
+          persistentVolumeClaim:
+            claimName: {{ include "put-checks.objectStore.localClaim" . }}
+        {{- end }}
+        {{- if eq .Values.studioVault.provider "hashicorp" }}
+        - name: studio-vault-token
+          secret:
+            secretName: {{ .Values.studioVault.tokenSecret }}
+            items:
+              - key: {{ .Values.studioVault.tokenKey }}
+                path: {{ .Values.studioVault.tokenKey }}
+        {{- end }}
+        {{- if and (eq $gatewayProvider "vertex") (eq .Values.studioGateway.credentialsMode "service-account-file") }}
+        - name: studio-gateway-credentials
+          secret:
+            secretName: {{ required "studioGateway.credentialsSecret is required for service-account-file" .Values.studioGateway.credentialsSecret }}
+            items:
+              - key: {{ .Values.studioGateway.credentialsKey }}
+                path: {{ .Values.studioGateway.credentialsKey }}
+        {{- end }}
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -327,6 +481,46 @@ spec:
             # store is asynchronous and nothing in this chart claims otherwise.
             - name: STUDIO_EVIDENCE_RETENTION
               value: {{ .Values.objectStore.retention | quote }}
+            - name: STUDIO_EVIDENCE_PROVIDER
+              value: {{ .Values.objectStore.provider | quote }}
+            - name: STUDIO_EVIDENCE_DIRECTORY
+              value: {{ .Values.objectStore.localDirectory | quote }}
+            - name: STUDIO_EVIDENCE_ENDPOINT
+              value: {{ if eq .Values.objectStore.provider "s3" }}{{ required "objectStore.endpoint is required for provider=s3" .Values.objectStore.endpoint | quote }}{{ else }}{{ .Values.objectStore.endpoint | quote }}{{ end }}
+            - name: STUDIO_EVIDENCE_REGION
+              value: {{ .Values.objectStore.region | quote }}
+            - name: STUDIO_EVIDENCE_BUCKET
+              value: {{ .Values.objectStore.bucket | quote }}
+            - name: STUDIO_EVIDENCE_PATH_STYLE_ACCESS
+              value: {{ .Values.objectStore.pathStyleAccess | quote }}
+            - name: STUDIO_EVIDENCE_ACCESS_KEY_ID_FILE
+              value: {{ printf "%s/accessKeyId" .Values.objectStore.mountPath | quote }}
+            - name: STUDIO_EVIDENCE_SECRET_ACCESS_KEY_FILE
+              value: {{ printf "%s/secretAccessKey" .Values.objectStore.mountPath | quote }}
+            - name: STUDIO_EVIDENCE_CONNECT_TIMEOUT
+              value: {{ .Values.objectStore.connectTimeout | quote }}
+            - name: STUDIO_EVIDENCE_REQUEST_TIMEOUT
+              value: {{ .Values.objectStore.requestTimeout | quote }}
+            - name: STUDIO_VAULT_PROVIDER
+              value: {{ .Values.studioVault.provider | quote }}
+            - name: STUDIO_VAULT_ADDRESS
+              value: {{ if eq .Values.studioVault.provider "hashicorp" }}{{ required "studioVault.address is required for provider=hashicorp" .Values.studioVault.address | quote }}{{ else }}{{ .Values.studioVault.address | quote }}{{ end }}
+            - name: STUDIO_VAULT_NAMESPACE
+              value: {{ .Values.studioVault.namespace | quote }}
+            - name: STUDIO_VAULT_MOUNT
+              value: {{ .Values.studioVault.mount | quote }}
+            - name: STUDIO_VAULT_PATH_TEMPLATE
+              value: {{ .Values.studioVault.pathTemplate | quote }}
+            - name: STUDIO_VAULT_VALUE_KEY
+              value: {{ .Values.studioVault.valueKey | quote }}
+            - name: STUDIO_VAULT_TOKEN_FILE
+              value: {{ printf "%s/%s" .Values.studioVault.tokenMountPath .Values.studioVault.tokenKey | quote }}
+            - name: STUDIO_VAULT_CONNECT_TIMEOUT
+              value: {{ .Values.studioVault.connectTimeout | quote }}
+            - name: STUDIO_VAULT_REQUEST_TIMEOUT
+              value: {{ .Values.studioVault.requestTimeout | quote }}
+            - name: STUDIO_VAULT_MAX_RESPONSE_BYTES
+              value: {{ .Values.studioVault.maxResponseBytes | quote }}
             {{- range $key, $val := .Values.worker.env }}
             - name: {{ $key }}
               value: {{ $val | quote }}
@@ -361,6 +555,20 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            {{- if eq .Values.objectStore.provider "s3" }}
+            - name: object-store-credentials
+              mountPath: {{ .Values.objectStore.mountPath }}
+              readOnly: true
+            {{- end }}
+            {{- if eq .Values.objectStore.provider "local" }}
+            - name: local-object-store
+              mountPath: {{ .Values.objectStore.localDirectory }}
+            {{- end }}
+            {{- if eq .Values.studioVault.provider "hashicorp" }}
+            - name: studio-vault-token
+              mountPath: {{ .Values.studioVault.tokenMountPath }}
+              readOnly: true
+            {{- end }}
           lifecycle:
             preStop:
               exec:
@@ -368,6 +576,29 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
+        {{- if eq .Values.objectStore.provider "s3" }}
+        - name: object-store-credentials
+          secret:
+            secretName: {{ .Values.objectStore.credentialsSecret }}
+            items:
+              {{- range .Values.objectStore.keys }}
+              - key: {{ . }}
+                path: {{ . }}
+              {{- end }}
+        {{- end }}
+        {{- if eq .Values.objectStore.provider "local" }}
+        - name: local-object-store
+          persistentVolumeClaim:
+            claimName: {{ include "put-checks.objectStore.localClaim" . }}
+        {{- end }}
+        {{- if eq .Values.studioVault.provider "hashicorp" }}
+        - name: studio-vault-token
+          secret:
+            secretName: {{ .Values.studioVault.tokenSecret }}
+            items:
+              - key: {{ .Values.studioVault.tokenKey }}
+                path: {{ .Values.studioVault.tokenKey }}
+        {{- end }}
       {{- with .Values.worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

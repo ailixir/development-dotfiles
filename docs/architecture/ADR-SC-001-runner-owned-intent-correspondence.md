@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Accepted for Story 10.41 (2026-09-18) |
+| Status | Superseded by [ADR-SC-003](ADR-SC-003-structural-reference-policy.md) (2026-09-22); originally accepted for Story 10.41 |
 | Author | @architect, reviewed by Astra planning subagent |
 | Source of truth | [Studio context specification](../specs/studio-context/spec.md), [Studio execution architecture](studio-execution.md), [ADR-002](ADR-002-internal-contract-surface.md) |
 | Amends | `docs/specs/studio/openapi.yaml` internal `ValidateRequest` and `RunJob` contracts |

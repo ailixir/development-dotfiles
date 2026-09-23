@@ -1,9 +1,11 @@
 package com.citi.put.checks.studio.sse;
 
-import com.citi.put.checks.security.CsiOwnershipEvaluator;
+import com.citi.put.checks.studio.StudioAccessDeniedException;
 import com.citi.put.checks.studio.StudioExecutionProperties;
+import com.citi.put.checks.studio.StudioService;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -26,26 +28,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class StreamAuthorization {
 
-  private final CsiOwnershipEvaluator evaluator;
+  private final StudioService studioService;
   private final StudioExecutionProperties properties;
   private final Clock clock;
 
   @Autowired
-  public StreamAuthorization(
-      CsiOwnershipEvaluator evaluator, StudioExecutionProperties properties) {
-    this(evaluator, properties, Clock.systemUTC());
+  public StreamAuthorization(StudioService studioService, StudioExecutionProperties properties) {
+    this(studioService, properties, Clock.systemUTC());
   }
 
   StreamAuthorization(
-      CsiOwnershipEvaluator evaluator, StudioExecutionProperties properties, Clock clock) {
-    this.evaluator = evaluator;
+      StudioService studioService, StudioExecutionProperties properties, Clock clock) {
+    this.studioService = studioService;
     this.properties = properties;
     this.clock = clock;
   }
 
-  /** Whether this captured identity may still read this execution's CSI. */
-  public boolean stillAuthorized(Authentication captured, String csiId) {
-    return csiId != null && evaluator.canRead(captured, csiId);
+  /** Reuses the snapshot route's complete initiator-or-CSI authorization decision. */
+  public boolean stillAuthorized(Authentication captured, UUID executionId) {
+    try {
+      studioService.findExecutionById(executionId, captured);
+      return true;
+    } catch (StudioAccessDeniedException
+        | org.springframework.security.access.AccessDeniedException e) {
+      return false;
+    }
   }
 
   /** Whether the bounded refresh interval has elapsed for a subscription. */

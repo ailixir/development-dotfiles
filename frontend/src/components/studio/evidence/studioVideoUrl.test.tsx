@@ -55,14 +55,15 @@ async function loadWithBase(base: string) {
   return { urls, APP_CONFIG, React, rtl, VideoEvidencePanel };
 }
 
-async function renderedUrls(base: string): Promise<{ src: string; href: string }> {
+async function renderedUrls(base: string): Promise<{ src: string }> {
   const { React, rtl, VideoEvidencePanel } = await loadWithBase(base);
   const { container } = rtl.render(React.createElement(VideoEvidencePanel, { snapshot: available }));
   const videos = container.querySelectorAll('video');
   expect(videos).toHaveLength(1);
-  const anchor = container.querySelector('a[data-testid="video-evidence-download"]');
-  expect(anchor).not.toBeNull();
-  return { src: videos[0].src, href: (anchor as HTMLAnchorElement).href };
+  // The download affordance was retired: the player's own controls offer it, so a second
+  // link on the same bytes was one more thing to keep correct for no reader benefit.
+  expect(container.querySelector('a[data-testid="video-evidence-download"]')).toBeNull();
+  return { src: videos[0].src };
 }
 
 const CASES = [
@@ -127,10 +128,9 @@ describe('AC-6: the URL is the API origin followed by videoPath, verbatim', () =
     expect(url.match(/\/api\/v1/gu)).toHaveLength(1);
   }, FRESH_IMPORT_TIMEOUT_MS);
 
-  it.each(CASES)('$name: the rendered <video src> and download href', async ({ base, expectedOrigin }) => {
-    const { src, href } = await renderedUrls(base);
+  it.each(CASES)('$name: the rendered <video src>', async ({ base, expectedOrigin }) => {
+    const { src } = await renderedUrls(base);
     expect(src).toBe(`${expectedOrigin()}${VIDEO_PATH}`);
-    expect(href).toBe(`${expectedOrigin()}${VIDEO_PATH}?download=true`);
     expect(src.match(/\/api\/v1/gu)).toHaveLength(1);
   }, FRESH_IMPORT_TIMEOUT_MS);
 
@@ -147,31 +147,23 @@ describe('AC-6: the URL is the API origin followed by videoPath, verbatim', () =
   }, FRESH_IMPORT_TIMEOUT_MS);
 });
 
-describe('AC-7: no credential in a query string — playback has no query keys, download has exactly one', () => {
-  it.each(CASES)('$name: the constructed URLs’ query key sets', async ({ base }) => {
+describe('AC-7: no credential in a query string — the playback URL carries no query at all', () => {
+  it.each(CASES)('$name: the constructed URL’s query key set', async ({ base }) => {
     const { urls } = await loadWithBase(base);
 
     const playback = new URL(urls.studioVideoUrl(VIDEO_PATH));
     expect([...playback.searchParams.keys()]).toEqual([]);
     expect(playback.search).toBe('');
-
-    const download = new URL(urls.studioVideoDownloadUrl(VIDEO_PATH));
-    expect([...download.searchParams.keys()]).toEqual(['download']);
-    expect(download.searchParams.get('download')).toBe('true');
   }, FRESH_IMPORT_TIMEOUT_MS);
 
-  it.each(CASES)('$name: the rendered URLs’ query key sets', async ({ base }) => {
-    const { src, href } = await renderedUrls(base);
+  it.each(CASES)('$name: the rendered URL’s query key set', async ({ base }) => {
+    const { src } = await renderedUrls(base);
     expect([...new URL(src).searchParams.keys()]).toEqual([]);
-    const download = new URL(href);
-    expect([...download.searchParams.keys()]).toEqual(['download']);
-    expect(download.searchParams.get('download')).toBe('true');
   }, FRESH_IMPORT_TIMEOUT_MS);
 
-  it('the builders take videoPath and nothing else', async () => {
+  it('the builder takes videoPath and nothing else', async () => {
     // The "reads no token, storage or session source" half is a review item (Dev Agent Record).
     const { urls } = await loadWithBase(PATH_ONLY_BASE);
     expect(urls.studioVideoUrl.length).toBe(1);
-    expect(urls.studioVideoDownloadUrl.length).toBe(1);
   }, FRESH_IMPORT_TIMEOUT_MS);
 });

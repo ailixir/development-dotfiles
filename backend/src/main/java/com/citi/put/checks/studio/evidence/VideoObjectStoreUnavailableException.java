@@ -19,4 +19,8 @@ public class VideoObjectStoreUnavailableException extends RuntimeException {
   public VideoObjectStoreUnavailableException(String message) {
     super(message);
   }
+
+  public VideoObjectStoreUnavailableException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

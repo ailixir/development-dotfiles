@@ -27,7 +27,7 @@
  * One narrative is derived rather than quoted and is marked as such below: `RUNTIME_INCOMPATIBLE`
  * has no row in the `tests` tag table. Its *condition* is the document's
  * (`docs/architecture/studio-execution.md`: *"current target/runtime policy permits it"*); its
- * *remedy* is architecture §4.2's ordinary recompile-and-confirm path, stated as the action
+ * *remedy* is architecture §4.2's ordinary save-and-prepare path, stated as the action
  * available rather than as a promise about the outcome.
  */
 
@@ -49,20 +49,20 @@ export interface ExecuteRefusalNarrative {
 /** The five codes `executeTest`'s `409` declares in `x-conflict-codes`. */
 export const EXECUTE_CONFLICT_NARRATIVES: Readonly<Record<string, ExecuteRefusalNarrative>> = {
   COMPILE_REQUIRED: {
-    title: 'This draft is not confirmed as runnable',
+    title: 'Save this test before running',
     explanation:
-      'The server will not run this draft because the steps have moved since the revision you last confirmed. Nothing was started and nothing was changed.',
+      'The saved test is not ready to run. Nothing was started and nothing was changed.',
     whoClearsIt:
-      'You clear this: ask for a translation of the steps as they stand, read the candidate, and confirm it. Confirming is the only thing that makes a draft runnable.',
+      'Check the steps, save the test, then run it again.',
     callerCanRetry: true,
     scope: 'draft',
   },
   RUNTIME_INCOMPATIBLE: {
-    title: 'The confirmed revision does not fit the runner in use',
+    title: 'This saved test needs to be refreshed',
     explanation:
-      'The revision you confirmed is not compatible with the runner runtime the platform is running now. The server refused before anything started — no browser, no run.',
+      'The saved test is not compatible with the service running it now. Nothing was started.',
     whoClearsIt:
-      'You can act on this: ask for a fresh translation of the same steps and confirm the candidate that results, which is made against the runtime in use now.',
+      'Save the test again, then run it.',
     callerCanRetry: true,
     scope: 'draft',
   },

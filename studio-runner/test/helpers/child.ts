@@ -36,11 +36,23 @@ export interface FakePage extends PageLike {
   failOn(method: string, error: Error): void;
   /** Makes `waitFor` never satisfy, so an assertion has to time out. */
   neverVisible: boolean;
+  /**
+   * Observes each page-level call (`goto`, `waitForURL`, `waitForLoadState`) as it is recorded,
+   * before it resolves. A test uses it to act *at* a point in the run — to order a stop while a
+   * navigation is in flight, or while the tail settle is waiting — which no assertion made after
+   * the run can reach.
+   */
+  onCall: ((call: RecordedPageCall) => void) | null;
 }
 
 export function createFakePage(): FakePage {
   const calls: RecordedPageCall[] = [];
   const failures = new Map<string, Error>();
+
+  const observe = (call: RecordedPageCall): void => {
+    calls.push(call);
+    page.onCall?.(call);
+  };
 
   const page: FakePage = {
     calls,
@@ -49,16 +61,24 @@ export function createFakePage(): FakePage {
     currentUrl: 'http://127.0.0.1/',
     currentTitle: 'Checks — Home',
     neverVisible: false,
+    onCall: null,
     failOn(method: string, error: Error): void {
       failures.set(method, error);
     },
     goto(url: string, options?: Record<string, unknown>): Promise<unknown> {
-      calls.push({ method: 'goto', args: [url, options] });
+      observe({ method: 'goto', args: [url, options] });
       return maybeFail(failures, 'goto') ?? Promise.resolve(null);
     },
     waitForURL(url: string | RegExp, options?: Record<string, unknown>): Promise<void> {
-      calls.push({ method: 'waitForURL', args: [describe(url), options] });
+      observe({ method: 'waitForURL', args: [describe(url), options] });
       return maybeFail(failures, 'waitForURL') ?? Promise.resolve();
+    },
+    waitForLoadState(
+      state?: 'load' | 'domcontentloaded' | 'networkidle',
+      options?: Record<string, unknown>,
+    ): Promise<void> {
+      observe({ method: 'waitForLoadState', args: [state, options] });
+      return maybeFail(failures, 'waitForLoadState') ?? Promise.resolve();
     },
     url(): string {
       return page.currentUrl;

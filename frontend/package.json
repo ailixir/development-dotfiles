@@ -11,7 +11,6 @@
     "dev:standalone": "vite --port 5173",
     "build:standalone": "vite build",
     "type-check": "tsc --noEmit",
-    "msw:init": "msw init public/ --save",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "test": "vitest",
@@ -88,10 +87,5 @@
     "citibank"
   ],
   "author": "PUT Platform Team",
-  "license": "MIT",
-  "msw": {
-    "workerDirectory": [
-      "public"
-    ]
-  }
+  "license": "MIT"
 }

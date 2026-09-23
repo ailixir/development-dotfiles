@@ -66,6 +66,34 @@ function surfaceOf(applied: ExecutionSnapshot[]): ExecutionSnapshot | null {
 }
 
 describe('AC-10: state is replaced by monotonic snapshot revision', () => {
+  it('rejects a snapshot and video route that do not belong to the accepted execution', async () => {
+    let connection: StreamConnection | null = null;
+    server = await startStudioTestServer({ onStream: (open) => (connection = open) });
+    const { subscribeToExecution } = await loadTransport(api().baseUrl);
+    const applied: ExecutionSnapshot[] = [];
+    const subscription = subscribeToExecution(EXECUTION_ID, {
+      onSnapshot: (snapshot) => applied.push(snapshot),
+    });
+
+    try {
+      await until(() => connection !== null, 'the stream connection');
+      const open = connection as unknown as StreamConnection;
+      const base = DEV_TRANSPORT_SCENARIO[2];
+      open.write({ ...base, executionId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', revision: 20 });
+      open.write({
+        ...base,
+        revision: 21,
+        videoPath: '/api/v1/studio/executions/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/video',
+      });
+      open.write({ ...base, revision: 22 });
+
+      await until(() => applied.length === 1, 'the corresponding snapshot');
+      expect(applied).toEqual([{ ...base, revision: 22 }]);
+    } finally {
+      subscription.close();
+    }
+  });
+
   it('SCN-REVISION-OUT-OF-ORDER: an older revision and a duplicate are ignored, and the surface ends on rev 7', async () => {
     let connection: StreamConnection | null = null;
     server = await startStudioTestServer({ onStream: (open) => (connection = open) });

@@ -18,6 +18,7 @@ export {
   RUNNER_ERROR_CODE_VALUES,
   RUN_FAILURE_KINDS,
   errorCodeFor,
+  failureKindForRefusal,
   resultFor,
 } from './errors.js';
 export type { RunFailureKind, RunFailureResult, RunnerErrorCode } from './errors.js';

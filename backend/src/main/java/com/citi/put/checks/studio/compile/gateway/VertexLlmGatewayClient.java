@@ -1,10 +1,9 @@
 package com.citi.put.checks.studio.compile.gateway;
 
-import com.google.cloud.vertexai.VertexAI;
-import com.google.cloud.vertexai.api.GenerateContentResponse;
-import com.google.cloud.vertexai.api.GenerationConfig;
-import com.google.cloud.vertexai.generativeai.GenerativeModel;
-import com.google.cloud.vertexai.generativeai.ResponseHandler;
+import com.google.genai.Client;
+import com.google.genai.types.Candidate;
+import com.google.genai.types.GenerateContentConfig;
+import com.google.genai.types.GenerateContentResponse;
 import io.github.resilience4j.bulkhead.Bulkhead;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.core.IntervalFunction;
@@ -16,54 +15,49 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Vertex AI SDK implementation of {@link LlmGatewayClient} against the Citi/R2D2 proxy (Story 10.5,
- * AC-2, AC-4, AC-5, AC-8; architecture &sect;4.1).
+ * Google Gen AI SDK implementation of {@link LlmGatewayClient} in Vertex AI mode (Story 10.5, AC-2,
+ * AC-4, AC-5, AC-8; architecture &sect;4.1).
  *
  * <p>This is the only class in the package that knows the SDK. SDK-level automatic retries are
  * switched off in {@link VertexAiClientFactory}; the bounded retry here is the only one, so total
  * gateway attempts stay inside the compile budget of &sect;4.3.
  *
- * <p>{@code GenerativeModel} and {@code ResponseHandler} are deprecated in google-cloud-vertexai
- * 1.52.0: Google is moving the generative-model surface to the separate {@code
- * com.google.genai:google-genai} artifact, and {@code com.google.cloud.vertexai.genai.Client} in
- * this artifact exposes agent engines only, not models. Architecture &sect;4.1 names the Vertex AI
- * SDK generative-model client, so that is what this uses; swapping SDKs is a decision SPK-01 must
- * make once R2D2's supported surface is known (see docs/qa/spikes/SPK-01/).
+ * <p>The client uses the current Google Gen AI SDK in Vertex AI mode. Gemini 3.8 sampling controls
+ * are deliberately absent from the request; only the structured-response MIME type is supplied.
  */
-@SuppressWarnings("deprecation")
 public class VertexLlmGatewayClient implements LlmGatewayClient {
 
   /**
    * Recorded in provenance when the SDK jar carries no manifest version, for example on an exploded
    * test classpath. Must match the pin in {@code build.gradle.kts}.
    */
-  static final String PINNED_SDK_VERSION = "1.52.0";
+  static final String PINNED_SDK_VERSION = "1.72.0";
 
   private final StudioGatewayProperties properties;
   private final GatewayResponseParser parser;
   private final GatewayAuditLogger auditLogger;
-  private final GenerativeModel model;
+  private final Client client;
+  private final GenerateContentConfig generationConfig;
   private final Bulkhead bulkhead;
   private final Retry retry;
   private final String sdkVersion;
 
   /**
    * @param properties validated gateway configuration
-   * @param vertexAi an SDK handle already pointed at R2D2 with auto-retries disabled
+   * @param client an SDK client in Vertex AI mode with SDK retries disabled
    * @param parser defensive artifact parser
    * @param auditLogger audit sink
    */
   public VertexLlmGatewayClient(
       StudioGatewayProperties properties,
-      VertexAI vertexAi,
+      Client client,
       GatewayResponseParser parser,
       GatewayAuditLogger auditLogger) {
     this.properties = properties;
     this.parser = parser;
     this.auditLogger = auditLogger;
-    this.model =
-        new GenerativeModel(properties.model(), vertexAi)
-            .withGenerationConfig(generationConfig(properties));
+    this.client = client;
+    this.generationConfig = generationConfig(properties);
     this.bulkhead =
         Bulkhead.of(
             "studio-compile-gateway",
@@ -73,7 +67,7 @@ public class VertexLlmGatewayClient implements LlmGatewayClient {
                 .build());
     this.retry = Retry.of("studio-compile-gateway", retryConfig(properties));
     this.sdkVersion =
-        Optional.ofNullable(VertexAI.class.getPackage())
+        Optional.ofNullable(Client.class.getPackage())
             .map(Package::getImplementationVersion)
             .orElse(PINNED_SDK_VERSION);
   }
@@ -120,7 +114,7 @@ public class VertexLlmGatewayClient implements LlmGatewayClient {
               retry,
               () -> {
                 attempts.incrementAndGet();
-                return model.generateContent(payload);
+                return client.models.generateContent(properties.model(), payload, generationConfig);
               });
       GenerateContentResponse raw = call.call();
       return finish(request, interpret(request, raw, attempts, startedAt, inputBytes));
@@ -152,15 +146,15 @@ public class VertexLlmGatewayClient implements LlmGatewayClient {
     GatewayProvenance provenance =
         new GatewayProvenance(
             properties.model(),
-            emptyToNull(raw.getModelVersion()),
+            raw.modelVersion().filter(value -> !value.isEmpty()).orElse(null),
             request.promptVersion(),
             sdkVersion,
             properties.structuredOutput(),
-            properties.temperature());
+            0d);
 
     String text;
     try {
-      text = ResponseHandler.getText(raw);
+      text = raw.text();
     } catch (RuntimeException e) {
       return CompileResponse.parseFailure(
           "no usable candidate text: " + GatewayErrorScrubber.scrub(e, request),
@@ -178,6 +172,17 @@ public class VertexLlmGatewayClient implements LlmGatewayClient {
           GatewayOutcome.TOO_LARGE,
           GatewayErrorCode.GATEWAY_OUTPUT_TOO_LARGE,
           "response is " + outputBytes + " bytes, limit is " + properties.maxOutputBytes(),
+          provenance,
+          retries,
+          elapsedMs(startedAt),
+          inputBytes,
+          outputBytes);
+    }
+
+    if (truncatedAtTokenLimit(raw)) {
+      return CompileResponse.parseFailure(
+          "response was truncated at the model output-token limit of "
+              + properties.maxOutputTokens(),
           provenance,
           retries,
           elapsedMs(startedAt),
@@ -207,11 +212,35 @@ public class VertexLlmGatewayClient implements LlmGatewayClient {
     return response;
   }
 
-  private static GenerationConfig generationConfig(StudioGatewayProperties properties) {
-    return GenerationConfig.newBuilder()
-        .setTemperature((float) properties.temperature())
-        .setResponseMimeType(properties.structuredOutput() ? "application/json" : "text/plain")
+  private static GenerateContentConfig generationConfig(StudioGatewayProperties properties) {
+    return GenerateContentConfig.builder()
+        .responseMimeType(properties.structuredOutput() ? "application/json" : "text/plain")
+        .maxOutputTokens(properties.maxOutputTokens())
         .build();
+  }
+
+  /**
+   * Whether the gateway stopped because it hit the output-token ceiling.
+   *
+   * <p>The SDK's {@code text()} accessor returns a truncated body for this finish reason without
+   * signalling it, and a cut JSON document then fails extraction with a generic parse message. The
+   * outcome stays {@link GatewayOutcome#PARSE_FAILURE} so the caller-facing code vocabulary does
+   * not change, but the recorded reason names truncation so an audit can tell the two apart.
+   *
+   * @param raw the gateway response
+   * @return {@code true} when the first candidate finished at the token limit
+   */
+  private static boolean truncatedAtTokenLimit(GenerateContentResponse raw) {
+    try {
+      return raw.candidates()
+          .filter(candidates -> !candidates.isEmpty())
+          .map(candidates -> candidates.get(0))
+          .flatMap(Candidate::finishReason)
+          .map(reason -> String.valueOf(reason).contains("MAX_TOKENS"))
+          .orElse(false);
+    } catch (RuntimeException ignored) {
+      return false;
+    }
   }
 
   private static RetryConfig retryConfig(StudioGatewayProperties properties) {
@@ -231,9 +260,5 @@ public class VertexLlmGatewayClient implements LlmGatewayClient {
 
   private static long elapsedMs(long startedAt) {
     return Duration.ofNanos(System.nanoTime() - startedAt).toMillis();
-  }
-
-  private static String emptyToNull(String value) {
-    return value == null || value.isEmpty() ? null : value;
   }
 }

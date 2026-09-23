@@ -42,7 +42,7 @@ export const AC2_REQUIRED_FACTS: Readonly<
 > = {
   COMPILING: {
     // §4.2, §8.3: a compile is in flight for the source shown, and the draft is saved.
-    whatIsTrue: [/draft is saved/i, /running right now/i, /steps shown above/i],
+    whatIsTrue: [/draft is saved/i, /running right now/i, /translation of your steps/i],
     whatYouCanDo: [/checks for the result/i, /stops on its own/i],
     // Nothing is confirmable yet.
     whatIsBlocked: [/nothing to confirm yet/i, /cannot be made runnable/i],
@@ -50,18 +50,18 @@ export const AC2_REQUIRED_FACTS: Readonly<
   AWAITING_CONFIRMATION: {
     // §4.2 "It becomes AWAITING_CONFIRMATION"; epic §10.8 "never READY automatically".
     whatIsTrue: [/candidate translation exists/i, /is not runnable/i, /not become runnable on its own/i],
-    whatYouCanDo: [/confirm this exact revision/i, /only way this draft becomes runnable/i],
+    whatYouCanDo: [/review translation details/i, /confirm this exact revision/i, /only way this draft becomes runnable/i],
     whatIsBlocked: [/running is blocked until you confirm/i, /no candidate becomes runnable automatically/i],
   },
   READY: {
     // §4.6: the confirmed revision is runnable and its identity is shown.
     whatIsTrue: [/you confirmed a revision/i, /that revision is the one that runs/i],
     whatYouCanDo: [/run it, or edit the steps/i, /starts a new translation/i],
-    whatIsBlocked: [/nothing is blocked/i, /identity of the revision that runs is shown/i],
+    whatIsBlocked: [/nothing is blocked/i, /card identifies the revision that runs/i],
   },
   NEEDS_REVISION: {
     // §4.7, BRD §6: the candidate is not runnable and the reasons are the author's to act on.
-    whatIsTrue: [/produced nothing runnable/i, /listed against your own steps/i],
+    whatIsTrue: [/produced nothing runnable/i, /review translation details/i, /attached to your steps/i],
     // Retrying without editing will not help.
     whatYouCanDo: [/edit the steps/i, /without editing will reach the same place/i],
     whatIsBlocked: [/no candidate to confirm/i, /until the steps change/i],

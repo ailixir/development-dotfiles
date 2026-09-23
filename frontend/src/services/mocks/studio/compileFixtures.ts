@@ -162,6 +162,8 @@ export const readyDraft = draft('a0000000-0000-0000-0000-000000000003', {
   currentCandidateArtifactHash: CANDIDATE_HASH,
   currentCandidateArtifact: BASE_ARTIFACT,
   confirmedRevisionId: '22222222-2222-2222-2222-222222222222',
+  confirmedRevisionArtifactHash: CANDIDATE_HASH,
+  confirmedRevisionArtifact: BASE_ARTIFACT,
 });
 
 /**

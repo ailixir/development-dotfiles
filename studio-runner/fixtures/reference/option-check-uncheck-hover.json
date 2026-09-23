@@ -30,7 +30,7 @@
       {
         "stepIndex": 2,
         "originalText": "Hover over the \"Account\" button",
-        "code": "await page.getByRole('button', { name: 'Account' }).hover({ force: true, trial: true });"
+        "code": "await page.getByRole('button', { name: 'Account' }).hover({ force: true, trial: false });"
       }
     ]
   },
@@ -146,7 +146,7 @@
         },
         {
           "force": true,
-          "trial": true
+          "trial": false
         }
       ]
     }

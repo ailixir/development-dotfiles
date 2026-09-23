@@ -1,0 +1,50 @@
+{
+  "name": "reference-policy-missing",
+  "expectedClass": "REFERENCE_MISSING",
+  "description": "The step reference policy requires a variable the code never uses.",
+  "source": [
+    "Sign in with the saved password"
+  ],
+  "references": {
+    "variables": [
+      "LOGIN_USER"
+    ],
+    "secrets": [
+      "LOGIN_PASSWORD"
+    ]
+  },
+  "artifact": {
+    "version": 1,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "originalText": "Sign in with the saved password",
+        "code": "await page.getByLabel('Password').fill(vars.secret('LOGIN_PASSWORD'));"
+      }
+    ]
+  },
+  "referencePolicy": {
+    "version": 2,
+    "steps": [
+      {
+        "stepIndex": 0,
+        "required": {
+          "variables": [
+            "LOGIN_USER"
+          ],
+          "secrets": [
+            "LOGIN_PASSWORD"
+          ]
+        },
+        "allowed": {
+          "variables": [
+            "LOGIN_USER"
+          ],
+          "secrets": [
+            "LOGIN_PASSWORD"
+          ]
+        }
+      }
+    ]
+  }
+}

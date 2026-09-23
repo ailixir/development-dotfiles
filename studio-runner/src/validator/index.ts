@@ -1,12 +1,12 @@
 import type { ReferenceDeclarations, ValidationPolicyInput } from './bounds.js';
 import { resolvePolicy } from './bounds.js';
-import type { Diagnostic, DiagnosticCode } from './diagnostics.js';
+import type { Diagnostic } from './diagnostics.js';
 import { DiagnosticCollector } from './diagnostics.js';
 import { validateArtifactSchema } from './schema.js';
 import { validateStepCode } from './ast.js';
 import type { Operation } from '../executor/operations.js';
 import { VALIDATOR_SCHEMA_VERSION } from '../versions.js';
-import { expectedReferences, operationsCorrespond, parseExpectedIntent } from './expectedIntent.js';
+import { parseReferencePolicy } from './referencePolicy.js';
 
 export interface ValidatedStepResult {
   readonly stepIndex: number;
@@ -35,7 +35,7 @@ export function validateArtifact(
   source: readonly string[],
   references: ReferenceDeclarations,
   policy?: ValidationPolicyInput,
-  expectedIntent?: unknown,
+  referencePolicy?: unknown,
 ): ValidationResult {
   const { bounds } = resolvePolicy(policy);
 
@@ -52,27 +52,25 @@ export function validateArtifact(
     stepCollectors,
   );
 
-  const expected = expectedIntent === undefined
+  // ADR-SC-003: an absent policy keeps the source-token reference rule; a malformed one rejects
+  // the whole artifact rather than silently falling back to it.
+  const parsedPolicy = referencePolicy === undefined
     ? null
-    : parseExpectedIntent(expectedIntent, source.length, bounds.maxArtifactBytes);
-  if (expected !== null && !expected.ok) {
+    : parseReferencePolicy(referencePolicy, source.length, bounds.maxArtifactBytes, bounds.maxReferenceNameLength);
+  if (parsedPolicy !== null && !parsedPolicy.ok) {
     artifactCollector.add({
-      code: expected.code as DiagnosticCode,
-      message: expected.path === undefined ? 'Expected intent is invalid.' : `Expected intent is invalid at ${expected.path}.`,
+      code: 'REFERENCE_POLICY_INVALID',
+      message: parsedPolicy.path === undefined ? 'Reference policy is invalid.' : `Reference policy is invalid at ${parsedPolicy.path}.`,
     });
   }
 
   const operationsByStep = new Map<number, readonly Operation[]>();
-  if (schema.steps !== null && (expected === null || expected.ok)) {
+  if (schema.steps !== null && (parsedPolicy === null || parsedPolicy.ok)) {
     for (const step of schema.steps) {
       const collector = stepCollectors[step.stepIndex];
       if (collector === undefined) continue;
-      const expectedStep = expected?.ok ? expected.intent.steps[step.stepIndex] : undefined;
-      const refs = expectedStep === undefined ? undefined : expectedReferences(expectedStep.operations);
-      const operations = validateStepCode(step, references, bounds, collector, refs);
-      if (operations !== null && expectedStep !== undefined && !operationsCorrespond(operations, expectedStep.operations, policy?.defaultTimeoutMs)) {
-        collector.add({ code: 'EXPECTED_INTENT_MISMATCH', message: 'Parsed operations do not exactly match expected intent.' });
-      }
+      const stepPolicy = parsedPolicy?.ok ? parsedPolicy.steps[step.stepIndex] : undefined;
+      const operations = validateStepCode(step, references, bounds, collector, stepPolicy);
       if (operations !== null && collector.isEmpty) operationsByStep.set(step.stepIndex, operations);
     }
   }
@@ -110,4 +108,4 @@ export type {
 export { DIAGNOSTIC_CODES, isDiagnosticCode } from './diagnostics.js';
 export type { Diagnostic, DiagnosticCode } from './diagnostics.js';
 export type { ArtifactStep } from './schema.js';
-export type { ExpectedIntent, ExpectedIntentStep } from './expectedIntent.js';
+export type { StepReferencePolicy } from './referencePolicy.js';

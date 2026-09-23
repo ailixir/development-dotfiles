@@ -11,12 +11,13 @@ import type { RunOrigin } from '../../src/run/timeline.js';
 import type { RunnerConfig } from '../../src/server/config.js';
 import { CONFIG_PREFIX, loadConfig } from '../../src/server/config.js';
 import { createApplication } from '../../src/server/application.js';
+import { SYNTAX_REFERENCE_VERSION } from '../../src/versions.js';
 import type { EvidenceFileSystem } from '../../src/run/evidenceUpload.js';
-import { createFakeObjectStore } from '../../src/run/objectStore.js';
 import type { ObjectStoreClient } from '../../src/run/objectStore.js';
 import type { RunnerApplication } from '../../src/server/application.js';
 import type { CapacityPool } from '../../src/server/capacity.js';
 import { createRecordingLogSink } from '../../src/server/logging.js';
+import { createFakeObjectStore } from './fakeObjectStore.js';
 import type { RecordingLogSink } from '../../src/server/logging.js';
 import type { FakeScheduler } from './scheduler.js';
 import { createFakeScheduler } from './scheduler.js';
@@ -43,7 +44,7 @@ export const RUNTIME_VERSIONS: Readonly<Record<string, unknown>> = {
   node: 'v22.11.0',
   validatorSchema: '1.0.0',
   executor: '1.0.0',
-  syntaxReference: '1.0.0',
+  syntaxReference: SYNTAX_REFERENCE_VERSION,
 };
 
 export interface HarnessOptions {

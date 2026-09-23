@@ -20,7 +20,6 @@
           "help": "Elements must only use permitted ARIA attributes",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
           "nodes": [
-            "span[aria-label=\"Run\"]",
             "span[aria-label=\"Delete\"]"
           ]
         },
@@ -30,7 +29,6 @@
           "help": "Buttons must have discernible text",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI",
           "nodes": [
-            "span[aria-label=\"Run\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
             "span[aria-label=\"Delete\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root"
           ]
         },
@@ -64,24 +62,6 @@
       "surface": "StudioRunsPage",
       "violations": [
         {
-          "id": "aria-prohibited-attr",
-          "impact": "serious",
-          "help": "Elements must only use permitted ARIA attributes",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
-          "nodes": [
-            "span[aria-label=\"Refresh\"]"
-          ]
-        },
-        {
-          "id": "button-name",
-          "impact": "critical",
-          "help": "Buttons must have discernible text",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI",
-          "nodes": [
-            "button"
-          ]
-        },
-        {
           "id": "region",
           "impact": "moderate",
           "help": "All page content should be contained by landmarks",
@@ -96,65 +76,13 @@
       "surface": "ChecksStudioPage/author",
       "violations": [
         {
-          "id": "aria-prohibited-attr",
-          "impact": "serious",
-          "help": "Elements must only use permitted ARIA attributes",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
-          "nodes": [
-            "li:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            "li:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            "li:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            "li:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            "li:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            "li:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            "li:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            "li:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            "li:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            "li:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            "li:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            "li:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]"
-          ]
-        },
-        {
-          "id": "button-name",
-          "impact": "critical",
-          "help": "Buttons must have discernible text",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI",
-          "nodes": [
-            "span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            "li:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "li:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "li:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "li:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "li:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "li:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "li:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "li:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "li:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            "li:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiOutlinedInput-root > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall"
-          ]
-        },
-        {
           "id": "heading-order",
           "impact": "moderate",
           "help": "Heading levels should only increase by one",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/heading-order?application=axeAPI",
           "nodes": [
-            ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2"
-          ]
-        },
-        {
-          "id": "label",
-          "impact": "critical",
-          "help": "Form elements must have labels",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=axeAPI",
-          "nodes": [
-            "#\\:r10\\:",
-            "#\\:r14\\:",
-            "#\\:r18\\:",
-            "#\\:r1c\\:"
+            ".css-qb4uno-MuiTypography-root",
+            ".css-1uvi6ey-MuiTypography-root"
           ]
         },
         {
@@ -163,20 +91,38 @@
           "help": "All page content should be contained by landmarks",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/region?application=axeAPI",
           "nodes": [
-            ".css-syu8eu > .css-0.MuiBox-root",
-            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(1) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
-            ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
-            ".MuiChip-label",
-            ".css-j3ygch-MuiStack-root > .MuiTypography-caption",
+            "h1",
+            ".css-1dtqmwz-MuiStack-root",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(1) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            ".css-r6rj31.MuiBox-root:nth-child(1)",
+            "#\\:rq\\:-label",
+            "#\\:rq\\:",
+            ".css-150epxh-MuiTypography-root",
             ".MuiTypography-subtitle1",
             ".css-108hs05-MuiTypography-root",
             ".css-1kw3y0a > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
-            "ul",
-            "#\\:rq\\:",
-            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(2) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            "li:nth-child(1) > .css-1aiu069.MuiBox-root",
+            "#\\:r11\\:",
+            "li:nth-child(1) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "li:nth-child(2) > .css-1aiu069.MuiBox-root",
+            "#\\:r15\\:",
+            "li:nth-child(2) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "li:nth-child(3) > .css-1aiu069.MuiBox-root",
+            "#\\:r19\\:",
+            "li:nth-child(3) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "li:nth-child(4) > .css-1aiu069.MuiBox-root",
+            "#\\:r1d\\:",
+            "li:nth-child(4) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "#\\:rs\\:-label",
+            "#\\:rs\\:",
+            "#\\:rs\\:-helper-text",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(2) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".MuiCardHeader-action",
             ".MuiTabs-root",
-            ".css-q72hon"
+            "h2",
+            ".css-108hs05-MuiTypography-root",
+            ".css-1uvi6ey-MuiTypography-root",
+            ".css-1x2kyzf-MuiPaper-root"
           ]
         }
       ]
@@ -185,65 +131,13 @@
       "surface": "ChecksStudioPage/compile-review",
       "violations": [
         {
-          "id": "aria-prohibited-attr",
-          "impact": "serious",
-          "help": "Elements must only use permitted ARIA attributes",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
-          "nodes": [
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]"
-          ]
-        },
-        {
-          "id": "button-name",
-          "impact": "critical",
-          "help": "Buttons must have discernible text",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI",
-          "nodes": [
-            "span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiOutlinedInput-root > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall"
-          ]
-        },
-        {
           "id": "heading-order",
           "impact": "moderate",
           "help": "Heading levels should only increase by one",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/heading-order?application=axeAPI",
           "nodes": [
-            ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2"
-          ]
-        },
-        {
-          "id": "label",
-          "impact": "critical",
-          "help": "Form elements must have labels",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=axeAPI",
-          "nodes": [
-            "#\\:r1n\\:",
-            "#\\:r1r\\:",
-            "#\\:r1v\\:",
-            "#\\:r23\\:"
+            ".css-qb4uno-MuiTypography-root",
+            ".css-1uvi6ey-MuiTypography-root"
           ]
         },
         {
@@ -252,21 +146,36 @@
           "help": "All page content should be contained by landmarks",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/region?application=axeAPI",
           "nodes": [
-            ".css-syu8eu > .css-0.MuiBox-root",
-            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(1) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
-            ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
-            ".MuiChip-label",
-            ".css-ol7wxs-MuiTypography-root",
-            ".css-1kw3y0a > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
-            ".MuiList-root",
-            "#\\:r1h\\:",
-            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(2) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
-            ".MuiCardHeader-action",
-            ".css-1isisa7-MuiTypography-root",
-            ".css-108hs05-MuiTypography-root",
+            "h1",
+            ".css-1dtqmwz-MuiStack-root",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(1) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            ".css-r6rj31.MuiBox-root:nth-child(1)",
+            "#\\:r1i\\:-label",
+            "#\\:r1i\\:",
             ".css-150epxh-MuiTypography-root",
+            ".css-1kw3y0a > .css-h8rzac-MuiTypography-root",
+            "li:nth-child(1) > .css-1aiu069.MuiBox-root",
+            "#\\:r1p\\:",
+            "li:nth-child(1) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "li:nth-child(2) > .css-1aiu069.MuiBox-root",
+            "#\\:r1t\\:",
+            "li:nth-child(2) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "li:nth-child(3) > .css-1aiu069.MuiBox-root",
+            "#\\:r21\\:",
+            "li:nth-child(3) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "li:nth-child(4) > .css-1aiu069.MuiBox-root",
+            "#\\:r25\\:",
+            "li:nth-child(4) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "#\\:r1k\\:-label",
+            "#\\:r1k\\:",
+            "#\\:r1k\\:-helper-text",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(2) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            ".MuiCardHeader-action",
             ".MuiTabs-root",
-            ".css-q72hon"
+            "h2",
+            ".css-108hs05-MuiTypography-root",
+            ".css-1uvi6ey-MuiTypography-root",
+            ".css-1x2kyzf-MuiPaper-root"
           ]
         }
       ]
@@ -275,65 +184,13 @@
       "surface": "ChecksStudioPage/confirm",
       "violations": [
         {
-          "id": "aria-prohibited-attr",
-          "impact": "serious",
-          "help": "Elements must only use permitted ARIA attributes",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
-          "nodes": [
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]"
-          ]
-        },
-        {
-          "id": "button-name",
-          "impact": "critical",
-          "help": "Buttons must have discernible text",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI",
-          "nodes": [
-            "span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiOutlinedInput-root > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall"
-          ]
-        },
-        {
           "id": "heading-order",
           "impact": "moderate",
           "help": "Heading levels should only increase by one",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/heading-order?application=axeAPI",
           "nodes": [
-            ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2"
-          ]
-        },
-        {
-          "id": "label",
-          "impact": "critical",
-          "help": "Form elements must have labels",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=axeAPI",
-          "nodes": [
-            "#\\:r2e\\:",
-            "#\\:r2i\\:",
-            "#\\:r2m\\:",
-            "#\\:r2q\\:"
+            ".css-qb4uno-MuiTypography-root",
+            ".css-1uvi6ey-MuiTypography-root"
           ]
         },
         {
@@ -342,21 +199,36 @@
           "help": "All page content should be contained by landmarks",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/region?application=axeAPI",
           "nodes": [
-            ".css-syu8eu > .css-0.MuiBox-root",
-            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(1) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
-            ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
-            ".MuiChip-label",
-            ".css-ol7wxs-MuiTypography-root",
-            ".css-1kw3y0a > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
-            ".MuiList-root",
-            "#\\:r28\\:",
-            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(2) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
-            ".MuiCardHeader-action",
-            ".css-1isisa7-MuiTypography-root",
-            ".css-108hs05-MuiTypography-root",
+            "h1",
+            ".css-1dtqmwz-MuiStack-root",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(1) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            ".css-r6rj31.MuiBox-root:nth-child(1)",
+            "#\\:r2a\\:-label",
+            "#\\:r2a\\:",
             ".css-150epxh-MuiTypography-root",
+            ".css-1kw3y0a > .css-h8rzac-MuiTypography-root",
+            "li:nth-child(1) > .css-1aiu069.MuiBox-root",
+            "#\\:r2h\\:",
+            "li:nth-child(1) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "li:nth-child(2) > .css-1aiu069.MuiBox-root",
+            "#\\:r2l\\:",
+            "li:nth-child(2) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "li:nth-child(3) > .css-1aiu069.MuiBox-root",
+            "#\\:r2p\\:",
+            "li:nth-child(3) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "li:nth-child(4) > .css-1aiu069.MuiBox-root",
+            "#\\:r2t\\:",
+            "li:nth-child(4) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "#\\:r2c\\:-label",
+            "#\\:r2c\\:",
+            "#\\:r2c\\:-helper-text",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(2) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            ".MuiCardHeader-action",
             ".MuiTabs-root",
-            ".css-q72hon"
+            "h2",
+            ".css-108hs05-MuiTypography-root",
+            ".css-1uvi6ey-MuiTypography-root",
+            ".css-1x2kyzf-MuiPaper-root"
           ]
         }
       ]
@@ -365,76 +237,12 @@
       "surface": "ChecksStudioPage/run-progress",
       "violations": [
         {
-          "id": "aria-progressbar-name",
-          "impact": "serious",
-          "help": "ARIA progressbar nodes must have an accessible name",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-progressbar-name?application=axeAPI",
-          "nodes": [
-            ":root",
-            ".MuiLinearProgress-root",
-            ".css-jhled2-MuiCircularProgress-root"
-          ]
-        },
-        {
-          "id": "aria-prohibited-attr",
-          "impact": "serious",
-          "help": "Elements must only use permitted ARIA attributes",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
-          "nodes": [
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]"
-          ]
-        },
-        {
-          "id": "button-name",
-          "impact": "critical",
-          "help": "Buttons must have discernible text",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI",
-          "nodes": [
-            "span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiOutlinedInput-root > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall"
-          ]
-        },
-        {
           "id": "heading-order",
           "impact": "moderate",
           "help": "Heading levels should only increase by one",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/heading-order?application=axeAPI",
           "nodes": [
-            ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2"
-          ]
-        },
-        {
-          "id": "label",
-          "impact": "critical",
-          "help": "Form elements must have labels",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=axeAPI",
-          "nodes": [
-            "#\\:r35\\:",
-            "#\\:r39\\:",
-            "#\\:r3d\\:",
-            "#\\:r3h\\:"
+            ".css-qb4uno-MuiTypography-root"
           ]
         },
         {
@@ -443,24 +251,34 @@
           "help": "All page content should be contained by landmarks",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/region?application=axeAPI",
           "nodes": [
-            ".css-syu8eu > .css-0.MuiBox-root",
-            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(1) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiPaper-elevation > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
-            ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
-            ".css-1yu2fb4-MuiChip-root > .MuiChip-label.MuiChip-labelSmall.css-wjsjww-MuiChip-label",
-            ".css-ol7wxs-MuiTypography-root",
-            ".css-1kw3y0a > .css-h8rzac-MuiTypography-root.MuiTypography-subtitle2",
+            "h1",
+            ".css-1dtqmwz-MuiStack-root",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(1) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            ".css-r6rj31.MuiBox-root:nth-child(1)",
+            "#\\:r32\\:-label",
+            "#\\:r32\\:",
+            ".css-150epxh-MuiTypography-root",
+            ".css-1kw3y0a > .css-h8rzac-MuiTypography-root",
             ".MuiBadge-badge",
-            ".MuiList-padding",
-            "#\\:r2v\\:",
-            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(2) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiPaper-elevation > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            ".MuiListItem-gutters:nth-child(1) > .css-1aiu069.MuiBox-root",
+            "#\\:r39\\:",
+            ".MuiListItem-gutters:nth-child(1) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            ".css-n9n3sz-MuiListItem-root > .css-1aiu069.MuiBox-root",
+            "#\\:r3d\\:",
+            ".css-n9n3sz-MuiListItem-root > .css-xh9io6-MuiStack-root.MuiStack-root",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(3) > .css-1aiu069.MuiBox-root",
+            "#\\:r3h\\:",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(3) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(4) > .css-1aiu069.MuiBox-root",
+            "#\\:r3l\\:",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(4) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "#\\:r34\\:-label",
+            "#\\:r34\\:",
+            "#\\:r34\\:-helper-text",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(2) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".MuiCardHeader-action",
-            ".css-i3pbo > .css-1yuhvjn.MuiBox-root",
             ".MuiTabs-root",
-            ".css-1isisa7-MuiTypography-root",
-            ".css-108hs05-MuiTypography-root",
-            ".css-q72hon > .css-1qm1lh.MuiBox-root",
-            ".css-1uvi6ey-MuiTypography-root",
-            ".css-1ptqwiy-MuiPaper-root"
+            "#studio-panel-logs"
           ]
         }
       ]
@@ -469,65 +287,12 @@
       "surface": "ChecksStudioPage/video-playback",
       "violations": [
         {
-          "id": "aria-prohibited-attr",
-          "impact": "serious",
-          "help": "Elements must only use permitted ARIA attributes",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
-          "nodes": [
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"]",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"]"
-          ]
-        },
-        {
-          "id": "button-name",
-          "impact": "critical",
-          "help": "Buttons must have discernible text",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI",
-          "nodes": [
-            "span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Move up\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            "span[aria-label=\"Move down\"][data-mui-internal-clone-element=\"true\"] > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root > span[aria-label=\"Remove step\"][data-mui-internal-clone-element=\"true\"] > .MuiIconButton-root.MuiIconButton-sizeSmall.css-1pe4mpk-MuiButtonBase-root-MuiIconButton-root",
-            ".MuiOutlinedInput-root > .Mui-disabled.MuiIconButton-root.MuiIconButton-sizeSmall"
-          ]
-        },
-        {
           "id": "heading-order",
           "impact": "moderate",
           "help": "Heading levels should only increase by one",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/heading-order?application=axeAPI",
           "nodes": [
-            ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root"
-          ]
-        },
-        {
-          "id": "label",
-          "impact": "critical",
-          "help": "Form elements must have labels",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=axeAPI",
-          "nodes": [
-            "#\\:r3s\\:",
-            "#\\:r40\\:",
-            "#\\:r44\\:",
-            "#\\:r48\\:"
+            ".css-qb4uno-MuiTypography-root"
           ]
         },
         {
@@ -536,20 +301,28 @@
           "help": "All page content should be contained by landmarks",
           "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/region?application=axeAPI",
           "nodes": [
-            ".css-syu8eu > .css-0.MuiBox-root",
-            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(1) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiPaper-elevation > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
-            ".css-1jv2z0n-MuiStack-root > .css-h8rzac-MuiTypography-root",
-            ".css-1yu2fb4-MuiChip-root > .MuiChip-label.MuiChip-labelSmall.css-wjsjww-MuiChip-label",
-            ".css-j3ygch-MuiStack-root > .css-ol7wxs-MuiTypography-root.MuiTypography-caption.MuiTypography-root",
+            "h1",
+            ".css-1dtqmwz-MuiStack-root",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(1) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            ".css-r6rj31.MuiBox-root:nth-child(1)",
+            "#\\:r3q\\:-label",
+            "#\\:r3q\\:",
+            ".css-150epxh-MuiTypography-root",
             ".css-1kw3y0a > .css-h8rzac-MuiTypography-root",
-            ".css-10kvjzg-MuiListItem-root > .MuiListItemText-root.MuiListItemText-dense.css-1aya492-MuiListItemText-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(1) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root",
-            ".css-1moh7rl-MuiListItem-root > .MuiListItemText-root.MuiListItemText-dense.css-1aya492-MuiListItemText-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(2) > .MuiListItemSecondaryAction-root.css-518kzi-MuiListItemSecondaryAction-root",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(3)",
-            ".MuiListItem-container.css-oyakqy-MuiListItem-container:nth-child(4)",
-            "#\\:r3m\\:",
-            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-6:nth-child(2) > .MuiPaper-elevation1.css-16vq84g-MuiPaper-root-MuiCard-root.MuiPaper-elevation > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            "#\\:r41\\:",
+            ".css-6rd5yr-MuiListItem-root > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "#\\:r45\\:",
+            ".css-al6v7d-MuiListItem-root > .css-xh9io6-MuiStack-root.MuiStack-root",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(3) > .css-1aiu069.MuiBox-root",
+            "#\\:r49\\:",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(3) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(4) > .css-1aiu069.MuiBox-root",
+            "#\\:r4d\\:",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(4) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "#\\:r3s\\:-label",
+            "#\\:r3s\\:",
+            "#\\:r3s\\:-helper-text",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(2) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
             ".MuiCardHeader-action",
             ".MuiTabs-root"
           ]

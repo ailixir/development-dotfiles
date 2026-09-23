@@ -32,6 +32,7 @@ export type ArgumentKind =
 
 export type OptionValueSchema =
   | { readonly type: 'boolean' }
+  | { readonly type: 'false' }
   | { readonly type: 'integer'; readonly min: number; readonly max: number }
   | { readonly type: 'enum'; readonly values: readonly string[] }
   | { readonly type: 'textMatcher' };
@@ -165,7 +166,7 @@ export const ACTION_METHODS: Readonly<Record<string, MethodSchema>> = {
       clickCount: { type: 'integer', min: 1, max: 3 },
       delay: { type: 'integer', min: 0, max: 5_000 },
       force: { type: 'boolean' },
-      trial: { type: 'boolean' },
+      trial: { type: 'false' },
       timeout: TIMEOUT,
     },
   },
@@ -179,15 +180,15 @@ export const ACTION_METHODS: Readonly<Record<string, MethodSchema>> = {
   },
   check: {
     positional: [],
-    options: { force: { type: 'boolean' }, trial: { type: 'boolean' }, timeout: TIMEOUT },
+    options: { force: { type: 'boolean' }, trial: { type: 'false' }, timeout: TIMEOUT },
   },
   uncheck: {
     positional: [],
-    options: { force: { type: 'boolean' }, trial: { type: 'boolean' }, timeout: TIMEOUT },
+    options: { force: { type: 'boolean' }, trial: { type: 'false' }, timeout: TIMEOUT },
   },
   hover: {
     positional: [],
-    options: { force: { type: 'boolean' }, trial: { type: 'boolean' }, timeout: TIMEOUT },
+    options: { force: { type: 'boolean' }, trial: { type: 'false' }, timeout: TIMEOUT },
   },
   selectOption: {
     positional: ['selectValue'],

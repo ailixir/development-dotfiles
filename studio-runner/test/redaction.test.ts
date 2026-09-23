@@ -7,7 +7,7 @@ import {
   createFakeBrowserAdapter,
   createFakeClock,
   createRecordingStepReporter,
-} from '../src/executor/adapters/fake.js';
+} from './helpers/fakeAdapters.js';
 
 /** A value with characters that change shape under URL and base64 encoding. */
 const CANARY = 'p@ss w0rd/+=';

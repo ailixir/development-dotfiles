@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Accepted for Story 10.42 (2026-09-18) |
+| Status | Superseded by [ADR-SC-003](ADR-SC-003-structural-reference-policy.md) (2026-09-22); originally accepted for Story 10.42 |
 | Author | @architect, reviewed by Astra planning subagent |
 | Source of truth | [ADR-SC-001](ADR-SC-001-runner-owned-intent-correspondence.md), Story 10.41 final gate, Studio context specification |
 | Amends | ADR-SC-001 prohibition on reparsing during dispatch: version-bound verification from immutable revision inputs is permitted before acceptance |

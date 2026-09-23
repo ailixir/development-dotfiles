@@ -256,7 +256,7 @@ Per-step states: `PENDING | RUNNING | PASS | FAIL | SKIPPED`. Return one result 
 | Route | Contract |
 |---|---|
 | `GET /tests`, `GET /tests/{id}` | Typed test DTOs; lists filter all results by readable CSI, even without `csiId` |
-| `POST /tests`, `PUT /tests/{id}` | Registered CSI required; immutable CSI; typed steps/configuration; optimistic revisions; persist draft and enqueue compile without waiting for gateway |
+| `POST /tests`, `PUT /tests/{id}` | Registered CSI required; immutable CSI; typed steps/configuration; optimistic revisions; persist draft only; preparing the saved revision is the Run action's explicit compile request |
 | `DELETE /tests/{id}` | Soft delete; reject new execute/compile; retain authorized history |
 | `POST /tests/{id}/compile` | 202 plus compile request identity; bounded async retry for current source |
 | `POST /tests/{id}/confirm-compile` | Exact revision/hash/source/configuration body from §4.2; 409 on stale candidate |

@@ -203,17 +203,17 @@ class StudioAuthoringRevisionTest {
                 "SELECT intent_derivation_version FROM ui_test_revisions WHERE id=?",
                 String.class,
                 revisionId))
-        .isEqualTo("1.0.0");
+        .isEqualTo("2");
     assertThat(
             jdbc.queryForObject(
                 "SELECT provenance->>'intentDerivationVersion' FROM ui_test_revisions WHERE id=?",
                 String.class,
                 revisionId))
-        .isEqualTo("1.0.0");
+        .isEqualTo("2");
     assertThatThrownBy(
             () ->
                 jdbc.update(
-                    "UPDATE ui_test_revisions SET intent_derivation_version='2.0.0' WHERE id=?",
+                    "UPDATE ui_test_revisions SET intent_derivation_version='3' WHERE id=?",
                     revisionId))
         .hasMessageContaining("immutable");
     try {
@@ -237,17 +237,13 @@ class StudioAuthoringRevisionTest {
   }
 
   @Test
-  void corruptV2ExpectedIntentIsCompileRequiredBeforeAnyExecutionOrLedgerWrite() {
+  void corruptV2ReferencePolicyIsCompileRequiredBeforeAnyExecutionOrLedgerWrite() {
     UUID revisionId = publishAndConfirm(1, 2, "corrupt-intent");
     jdbc.update("ALTER TABLE ui_test_revisions DISABLE TRIGGER trg_ui_test_revisions_write_once");
     try {
       jdbc.update(
-          "UPDATE ui_test_revisions SET expected_intent=jsonb_set(expected_intent,"
-              + " '{steps,0,operations,0,url,value}', '"
-              + '"'
-              + "https://evil.test/"
-              + '"'
-              + "'::jsonb) WHERE id=?",
+          "UPDATE ui_test_revisions SET reference_policy=jsonb_set(reference_policy,"
+              + " '{steps,0,allowed,secrets}', '[\"EVIL_SECRET\"]'::jsonb) WHERE id=?",
           revisionId);
     } finally {
       jdbc.update("ALTER TABLE ui_test_revisions ENABLE TRIGGER trg_ui_test_revisions_write_once");
@@ -280,12 +276,8 @@ class StudioAuthoringRevisionTest {
     jdbc.update("ALTER TABLE ui_test_revisions DISABLE TRIGGER trg_ui_test_revisions_write_once");
     try {
       jdbc.update(
-          "UPDATE ui_test_revisions SET expected_intent=jsonb_set(expected_intent,"
-              + " '{steps,0,operations,0,url,value}', '"
-              + '"'
-              + "https://evil.test/"
-              + '"'
-              + "'::jsonb) WHERE id=?",
+          "UPDATE ui_test_revisions SET reference_policy=jsonb_set(reference_policy,"
+              + " '{steps,0,allowed,secrets}', '[\"EVIL_SECRET\"]'::jsonb) WHERE id=?",
           revisionId);
     } finally {
       jdbc.update("ALTER TABLE ui_test_revisions ENABLE TRIGGER trg_ui_test_revisions_write_once");
@@ -593,27 +585,19 @@ class StudioAuthoringRevisionTest {
         1,
         "{\"environment\":\"Production\"}",
         "{}",
-        "{\"intentDerivationVersion\":\"1.0.0\","
+        "{\"intentDerivationVersion\":\"2\","
             + "\"validatorSchemaVersion\":\"1.0.0\","
             + "\"syntaxReferenceVersion\":\"1.0.0\"}",
         OWNER,
-        "{\"schemaVersion\":1,\"steps\":["
-            + intentStep(0, promoted.steps().get(0).id(), "https://example.test/one")
-            + ","
-            + intentStep(1, promoted.steps().get(1).id(), "https://example.test/two")
-            + "]}",
-        "1.0.0");
+        "{\"version\":2,\"steps\":[" + policyStep(0) + "," + policyStep(1) + "]}",
+        "2");
   }
 
-  private static String intentStep(int index, UUID id, String url) {
+  private static String policyStep(int index) {
     return "{\"stepIndex\":"
         + index
-        + ",\"stepId\":\""
-        + id
-        + "\",\"operations\":[{\"op\":\"goto\",\"url\":{\"kind\":\"literal\","
-        + "\"value\":\""
-        + url
-        + "\"}}]}";
+        + ",\"required\":{\"variables\":[],\"secrets\":[]},"
+        + "\"allowed\":{\"variables\":[],\"secrets\":[]}}";
   }
 
   private UUID publishAndConfirm(long sourceRevision, long configurationRevision, String hash) {
@@ -629,19 +613,16 @@ class StudioAuthoringRevisionTest {
     java.util.Map<String, Object> row =
         jdbc.queryForMap(
             "SELECT source::text source,authoring::text authoring,"
-                + "authoring_revision_inputs::text inputs,csi_id,configuration::text configuration"
-                + " FROM ui_test_revisions WHERE id=?",
+                + "authoring_revision_inputs::text inputs FROM ui_test_revisions WHERE id=?",
             revisionId);
     assertThatCode(
             () ->
                 new com.citi.put.checks.studio.compile.VersionedIntentDeriver()
-                    .deriveRevision(
-                        "1.0.0",
+                    .derive(
+                        com.citi.put.checks.studio.compile.VersionedIntentDeriver.CURRENT_VERSION,
                         String.valueOf(row.get("source")),
                         String.valueOf(row.get("authoring")),
-                        String.valueOf(row.get("inputs")),
-                        String.valueOf(row.get("csi_id")),
-                        String.valueOf(row.get("configuration"))))
+                        String.valueOf(row.get("inputs"))))
         .doesNotThrowAnyException();
     compileStateService.confirm(
         testId, revisionId, candidate.artifactHash(), sourceRevision, configurationRevision, OWNER);

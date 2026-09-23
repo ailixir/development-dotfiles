@@ -17,11 +17,6 @@ import type {
  * `@/types/studio/legacyTestIr`, before they reach this module.
  */
 
-export interface ValidateStepsResponse {
-  isValid: boolean;
-  results: Array<{ stepIndex: number; isValid: boolean; suggestion: string | null }>;
-}
-
 export interface ListTestsParams {
   csiId?: string;
   page?: number;
@@ -91,9 +86,6 @@ export const studioApi = {
    */
   confirmCompile: async (id: string, body: ConfirmCompileRequest): Promise<TestDto> =>
     apiClient.post(`/studio/tests/${id}/confirm-compile`, body),
-
-  validateSteps: async (steps: string[]): Promise<ValidateStepsResponse> =>
-    apiClient.post('/studio/validate-steps', { steps }),
 
   validateVariables: async (
     id: string,

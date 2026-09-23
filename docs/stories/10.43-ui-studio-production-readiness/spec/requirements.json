@@ -1,0 +1,63 @@
+{
+  "storyId": "10.43-ui-studio-production-readiness",
+  "gatheredAt": "2026-09-21T17:00:00Z",
+  "source": "prd",
+  "gatheredBy": "@pm",
+  "elicitationVersion": "2.0",
+  "functional": [
+    {"id":"FR-1","description":"A saved plain-English checklist must compile through the approved R2D2/Vertex gateway into a bounded, schema-valid Playwright artifact without exposing secrets.","priority":"P0","rationale":"PRD §§5.2-5.3 and Epic 10 define compiled Playwright as the only execution truth.","acceptance":["AC-1","AC-2"]},
+    {"id":"FR-2","description":"The user must review and confirm the exact immutable artifact revision and hash that execution will consume.","priority":"P0","rationale":"Exact-revision confirmation prevents review/execution drift.","acceptance":["AC-3","AC-4"]},
+    {"id":"FR-3","description":"A confirmed revision must dispatch durably to the isolated runner exactly once per accepted attempt, with cancellation and recovery preserving honest outcomes.","priority":"P0","rationale":"PRD reliability and Epic 10 dispatch/recovery contracts require durable admission without ambiguous replay.","acceptance":["AC-5","AC-6"]},
+    {"id":"FR-4","description":"The runner must validate the closed Playwright language, execute it in pinned Chromium, and report aligned step results without runtime LLM access.","priority":"P0","rationale":"The security boundary depends on deterministic validation and isolated execution.","acceptance":["AC-7","AC-8"]},
+    {"id":"FR-5","description":"Every normal browser run must finalize native video when possible, upload video and a redacted result manifest, and keep evidence outcome independent from check outcome.","priority":"P0","rationale":"PRD §5.2 defines inspectable video proof and honest partial/unavailable states.","acceptance":["AC-9","AC-10"]},
+    {"id":"FR-6","description":"Authorized users must receive live SSE progress with GET fallback and must be able to seek, range-stream, and download available evidence through the protected API.","priority":"P0","rationale":"PRD live-progress and evidence requirements cover the complete user-visible run.","acceptance":["AC-11","AC-12"]},
+    {"id":"FR-7","description":"The Studio UI must display the exact confirmed Playwright artifact and hash rather than candidate, draft-derived, or client-generated source.","priority":"P0","rationale":"The Code view must show what will actually run.","acceptance":["AC-13"]},
+    {"id":"FR-8","description":"Deployment configuration required by API, worker, and runner must reach each process and fail closed when invalid or ambiguous.","priority":"P0","rationale":"A configured safety control that Kubernetes silently drops is not a control.","acceptance":["AC-14"]}
+  ],
+  "nonFunctional": [
+    {"id":"NFR-1","category":"security","description":"Identity, CSI authorization, secret references, service credentials, runner egress, and evidence access must fail closed and leak no resolved secret.","metric":"Credentialed staging pilot passes authorization, canary, vault and ingress checks with zero secret leakage."},
+    {"id":"NFR-2","category":"reliability","description":"Accepted work, final results and evidence disposition must survive process restarts without automatic replay of an ambiguous browser attempt.","metric":"Integrated restart, duplicate callback, delayed manifest and reaper scenarios pass."},
+    {"id":"NFR-3","category":"performance","description":"Compilation, execution, evidence and streaming must obey explicit byte, time, concurrency and retention bounds.","metric":"All configured bounds are positive, rendered, enforced and measured under staging load."},
+    {"id":"NFR-4","category":"usability","description":"Compile, run, cancellation, partial evidence, unavailable evidence and expiry must be distinguishable in accessible UI text.","metric":"Automated accessibility checks pass and the required manual assistive-technology/browser review is recorded."}
+  ],
+  "constraints": [
+    {"id":"CON-1","type":"technical","description":"Compilation may call the LLM only during authoring; confirmed execution must never call an LLM.","impact":"Compiler and runner remain separate trust zones."},
+    {"id":"CON-2","type":"technical","description":"The production runner uses the pinned Playwright and Chromium image and the closed artifact grammar already present in the repository.","impact":"No arbitrary JavaScript, eval, filesystem, database or gateway access is allowed in artifacts."},
+    {"id":"CON-3","type":"business","description":"Production certification requires the real enterprise R2D2, Core identity/vault, Sonic and cluster ingress/egress services.","impact":"Local mocks and fixtures cannot close staging gates."},
+    {"id":"CON-4","type":"regulatory","description":"Video can contain sensitive target-page content and remains private, CSI-authorized and logically expired after the approved retention window.","impact":"Storage lifecycle and retrieval authorization require Security and platform acceptance."},
+    {"id":"CON-5","type":"technical","description":"All runtime HTTP calls use the centralized frontend API client; MSW is restricted to directly imported test fixtures.","impact":"Frontend integration must preserve the production transport boundary without a browser mock mode."}
+  ],
+  "assumptions": [
+    {"id":"ASM-1","description":"R2D2 remains Vertex-compatible for the configured request/structured-output contract.","risk":"high"},
+    {"id":"ASM-2","description":"Sonic provides the S3-compatible range and lifecycle semantics required by the evidence contracts.","risk":"high"},
+    {"id":"ASM-3","description":"The platform gateway supplies trusted identity and an approved CSRF posture for ambient-session mutations and media.","risk":"high"}
+  ],
+  "domainModel": [
+    {"entity":"Studio draft","description":"Mutable authored checklist and configuration with optimistic revisions.","relationships":["has candidate revision","has confirmed revision","belongs to CSI"]},
+    {"entity":"Compiled revision","description":"Immutable artifact, hash, expected intent and compiler provenance.","relationships":["belongs to Studio draft","is confirmed at most once"]},
+    {"entity":"Execution","description":"Accepted immutable attempt and status/evidence snapshot.","relationships":["uses one confirmed revision","has one dispatch ledger entry","has result manifest and optional video"]},
+    {"entity":"Evidence","description":"Native WebM plus redacted manifest and lifecycle metadata.","relationships":["belongs to execution","authorized by immutable execution CSI"]}
+  ],
+  "interactions": [
+    {"flow":"Compile-confirm-run-proof","description":"Save checklist, compile, review exact artifact, confirm, run, observe progress, inspect video and source.","states":["compiling","needs revision","awaiting confirmation","ready","running","terminal","evidence processing/available/failed/expired"]}
+  ],
+  "edgeCases": [
+    {"scenario":"Gateway unavailable, malformed output or exhausted repair budget","handling":"Keep draft saved; publish bounded STALE or NEEDS_REVISION state and never auto-confirm.","severity":"high"},
+    {"scenario":"Cancel, timeout, pod loss or duplicate callback during a browser attempt","handling":"Stop/reap the process tree, preserve a known outcome, record honest partial/unavailable evidence and never replay ambiguously.","severity":"critical"},
+    {"scenario":"Object store is absent or unreachable","handling":"Distinguish absence from infrastructure failure; never rewrite the check outcome.","severity":"high"},
+    {"scenario":"Candidate differs from the confirmed revision after an edit/recompile","handling":"Run and Code view continue to use the immutable confirmed artifact; candidate review remains separate.","severity":"critical"},
+    {"scenario":"A deployment property produces an invalid or colliding environment name","handling":"Fail Helm rendering before deployment.","severity":"critical"}
+  ],
+  "terminology": [
+    {"term":"candidate revision","definition":"Validated immutable artifact awaiting explicit confirmation.","aliases":[]},
+    {"term":"confirmed revision","definition":"Immutable artifact and hash that execution is authorized to consume.","aliases":[]},
+    {"term":"evidence outcome","definition":"Availability/partiality of video and manifest, independent of check outcome.","aliases":["evidence state"]},
+    {"term":"production-ready","definition":"Local gates are green and all named real-infrastructure staging acceptance gates have passed.","aliases":[]}
+  ],
+  "openQuestions": [
+    {"question":"What production R2D2 endpoint, model, credentials, quotas and structured-output behavior are approved for Studio?","priority":"high","blocksProgress":true},
+    {"question":"Which linked Core identity/vault delivery replaces the remaining production stubs and documents CSRF behavior?","priority":"high","blocksProgress":true},
+    {"question":"Which Sonic endpoint, principals and lifecycle policy have passed real range/read/write/version cleanup tests?","priority":"high","blocksProgress":true},
+    {"question":"Which staging cluster and approved internal target close sandbox, egress, ingress, SSE/media and seek-calibration measurements?","priority":"high","blocksProgress":true}
+  ]
+}

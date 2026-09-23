@@ -38,6 +38,7 @@ err()  { printf "${RED}[✗]${NC} %s\n" "$*"; }
 # The Gradle daemon itself is shared and was not necessarily started here, so it is left alone.
 set -m
 BACKEND_APP_PID=""
+RUNNER_WORK_DIR=""
 CLEANED_UP=false
 
 # Waits up to $2 seconds for the process (or, with a leading "-", the group) $1 to go, then KILLs it.
@@ -98,6 +99,9 @@ cleanup() {
     mv "$GRADLE_WRAPPER_BACKUP" "$GRADLE_WRAPPER_PROPERTIES"
     log "Restored Gradle wrapper configuration"
   fi
+  if [ -n "$RUNNER_WORK_DIR" ] && [[ "$RUNNER_WORK_DIR" == "${TMPDIR:-/tmp}/put-checks-studio-runner."* ]] && [ -d "$RUNNER_WORK_DIR" ]; then
+    rm -rf -- "$RUNNER_WORK_DIR"
+  fi
   log "Done."
 }
 # INT and TERM exit, and the EXIT trap does the work once, whichever way the script ends.
@@ -141,8 +145,8 @@ ${BOLD}Environment:${NC}
   STUDIO_RUNNER_SERVICE_TOKEN   bearer the backend presents to the runner
   STUDIO_CALLBACK_SERVICE_TOKEN bearer the runner presents to the backend
                                 (both generated per session when unset)
-  STUDIO_GATEWAY_ENABLED=true   use the real LLM gateway instead of the local
-                                passthrough (needs the STUDIO_GATEWAY_* settings)
+  STUDIO_GATEWAY_PROVIDER       translation provider: recorded-fixture (local default),
+                                vertex (needs endpoint, project, location) or disabled
 EOF
   exit 0
 }
@@ -337,10 +341,14 @@ if [ "$BACKEND" = true ] && [ "$STUDIO_RUNNER" = true ]; then
   export STUDIO_RUNNER_BASE_URL="http://127.0.0.1:${RUNNER_PORT}"
   # The Studio pages are gated on the UI_TEST source, which is off by default (application-local.yml).
   export CHECKS_SOURCE_UI_TEST="${CHECKS_SOURCE_UI_TEST:-true}"
-  # No R2D2 credentials on a laptop: compile through the passthrough unless the real gateway is on.
-  if [ "${STUDIO_GATEWAY_ENABLED:-false}" != true ]; then
-    export STUDIO_GATEWAY_LOCAL_PASSTHROUGH="${STUDIO_GATEWAY_LOCAL_PASSTHROUGH:-true}"
-  fi
+  # Local Studio uses the real Vertex path. Missing project, endpoint, location, or credentials
+  # must stop startup instead of producing fixture-backed output that looks successful.
+  # Local default is the recorded corpus: it needs no credential, and it answers only the
+  # sources recorded verbatim, so a local run can never be mistaken for proof that
+  # free-form English translates. Set STUDIO_GATEWAY_PROVIDER=vertex (with endpoint,
+  # project and location) to exercise the real provider locally.
+  export STUDIO_GATEWAY_PROVIDER="${STUDIO_GATEWAY_PROVIDER:-recorded-fixture}"
+  export STUDIO_GATEWAY_MODEL="${STUDIO_GATEWAY_MODEL:-gemini-3.8-flash}"
 
   kill_port "$RUNNER_PORT"
   if [ ! -d "$RUNNER_DIR/node_modules" ]; then
@@ -352,6 +360,10 @@ if [ "$BACKEND" = true ] && [ "$STUDIO_RUNNER" = true ]; then
 
   RUNNER_WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/put-checks-studio-runner.XXXXXX")"
   mkdir -p "$RUNNER_WORK_DIR/objects"
+  # The local backend reads the exact directory the runner writes. This makes recording playback
+  # and manifest recovery the real path in local development, not two unrelated local stores.
+  export STUDIO_EVIDENCE_PROVIDER="local"
+  export STUDIO_EVIDENCE_DIRECTORY="$RUNNER_WORK_DIR/objects"
   # scratch/ is a CHILD of the work dir on purpose: the runner removes its scratch root on exit.
   (
     cd "$RUNNER_DIR" && exec env -i \
@@ -364,6 +376,7 @@ if [ "$BACKEND" = true ] && [ "$STUDIO_RUNNER" = true ]; then
       STUDIO_RUNNER_CALLBACK_IDENTITY="$STUDIO_CALLBACK_SERVICE_TOKEN" \
       STUDIO_RUNNER_CALLBACK_BASE_URL="http://127.0.0.1:${BACKEND_PORT}" \
       STUDIO_RUNNER_SCRATCH_DIR="$RUNNER_WORK_DIR/scratch" \
+      STUDIO_RUNNER_OBJECT_STORE_PROVIDER=local \
       STUDIO_RUNNER_OBJECT_STORE_DIR="$RUNNER_WORK_DIR/objects" \
       node dist/main.js >"$RUNNER_WORK_DIR/studio-runner.log" 2>&1
   ) &
@@ -408,7 +421,9 @@ fi
 if [ "$BACKEND" = true ] && [ "$FRONTEND" = true ]; then
   log "Waiting for backend health…"
   for i in $(seq 1 30); do
-    if curl -sf "http://localhost:${BACKEND_PORT}/actuator/health" &>/dev/null; then
+    # `/actuator/health` includes database-backed operational indicators and can legitimately wait
+    # on their own bounds. Local startup only needs proof that the HTTP application is serving.
+    if curl -sf "http://localhost:${BACKEND_PORT}/actuator/info" &>/dev/null; then
       ok "Backend healthy"
       BACKEND_APP_PID="$(backend_app_pid)"
       break
@@ -419,7 +434,7 @@ if [ "$BACKEND" = true ] && [ "$FRONTEND" = true ]; then
     fi
     sleep 2
   done
-  if ! curl -sf "http://localhost:${BACKEND_PORT}/actuator/health" &>/dev/null; then
+  if ! curl -sf "http://localhost:${BACKEND_PORT}/actuator/info" &>/dev/null; then
     warn "Backend not healthy after 60s — starting frontend anyway"
     warn "API calls will fail until backend is ready"
   fi
@@ -454,8 +469,10 @@ if [ "$BACKEND" = true ]; then
   fi
   if [ -n "$RUNNER_PID" ]; then
     ok "Runner:     http://127.0.0.1:${RUNNER_PORT} (Studio runs dispatch here)"
-    if [ "${STUDIO_GATEWAY_LOCAL_PASSTHROUGH:-false}" = true ]; then
-      ok "Compile:    local passthrough — write Studio steps as Playwright statements"
+    if [ "${STUDIO_GATEWAY_PROVIDER}" = "recorded-fixture" ]; then
+      ok "Translate:  recorded-fixture corpus (no model call; recorded sources only)"
+    else
+      ok "Translate:  ${STUDIO_GATEWAY_PROVIDER} (${STUDIO_GATEWAY_MODEL})"
     fi
   else
     warn "Runner:     not started — Studio runs will close ERROR/DISPATCH_FAILED"
@@ -464,6 +481,7 @@ fi
 if [ "$FRONTEND" = true ]; then
   ok "Frontend:   http://localhost:${FRONTEND_PORT}"
   ok "API proxy:  /api/v1/* -> http://localhost:${BACKEND_PORT}/api/v1/*"
+  ok "Studio production alpha: backend + runner connected"
 fi
 log "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 log "Press Ctrl+C to stop all services"

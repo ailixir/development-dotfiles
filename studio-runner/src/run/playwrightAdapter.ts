@@ -37,6 +37,7 @@ import type {
   LocatorHandle,
   ResolvedMatcher,
 } from '../executor/adapters/BrowserAdapter.js';
+import { StepRefusal } from '../executor/refusals.js';
 import type {
   ActionOptions,
   ClickOptions,
@@ -94,6 +95,18 @@ export interface LocatorLike extends QueryRoot {
 export interface PageLike extends QueryRoot {
   goto(url: string, options?: Record<string, unknown>): Promise<unknown>;
   waitForURL(url: string | RegExp, options?: Record<string, unknown>): Promise<void>;
+  /**
+   * Waits for the page's current navigation, if any, to reach `state`.
+   *
+   * Not an operation of the accepted language: the child uses it once, after the last step and
+   * before the recording context is closed, so that a final action whose navigation only
+   * *committed* has painted before the recorder stops (`src/run/childRuntime.ts`, the tail
+   * settle). Bounded by the `timeout` the caller passes; a rejection is the caller's to swallow.
+   */
+  waitForLoadState(
+    state?: 'load' | 'domcontentloaded' | 'networkidle',
+    options?: Record<string, unknown>,
+  ): Promise<void>;
   url(): string;
   title(): Promise<string>;
 }
@@ -121,6 +134,12 @@ export interface PlaywrightAdapterOptions {
    * here, because `fill`'s value is the only position the validator permits one in.
    */
   readonly resolveVariable?: ((name: string) => string) | undefined;
+  /**
+   * The origins each secret may be filled on, by secret id (`scheme://host[:port]`, as
+   * `URL.origin` renders it). A secret with no entry, or an empty one, cannot be filled: absent
+   * is refused, never treated as "anywhere".
+   */
+  readonly secretOrigins?: Readonly<Record<string, readonly string[]>> | undefined;
   readonly sleep?: ((ms: number) => Promise<void>) | undefined;
   /** Monotonic source for the assertion deadlines. Injected so the unit tier need not sleep. */
   readonly now?: (() => number) | undefined;
@@ -172,8 +191,35 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
     ((name: string): string => {
       throw new Error(`Locator variable "${name}" cannot be resolved: no resolver was supplied.`);
     });
+  const secretOrigins = options.secretOrigins ?? {};
   const handles = new Map<number, LocatorLike>();
   let nextHandleId = 0;
+
+  /**
+   * Refuses to type a secret on a page whose origin the secret is not bound to.
+   *
+   * The page's own origin is the right one to check because the run drives exactly one page and
+   * no frames: a second page or popup is closed and fails the run (`childRuntime.ts`, AC-15), so
+   * the document a locator resolves in is the top-level document `page.url()` describes. Were
+   * frames ever permitted, this would have to check the frame the locator resolved in instead.
+   */
+  function requireSecretOrigin(secretId: string): void {
+    const allowed = Object.hasOwn(secretOrigins, secretId) ? secretOrigins[secretId] : undefined;
+    let origin: string | null = null;
+    try {
+      origin = new URL(page.url()).origin;
+    } catch {
+      origin = null;
+    }
+    if (origin === null || allowed?.includes(origin) !== true) {
+      // Names the secret id only: never the value, and not the page URL either, which may carry
+      // author-supplied query text.
+      throw new StepRefusal(
+        'SECRET_ORIGIN_NOT_ALLOWED',
+        `Secret "${secretId}" is not bound to the current page origin; nothing was typed.`,
+      );
+    }
+  }
 
   /** Refuses the operation when the run has become unsupported (AC-15). */
   function guard(): void {
@@ -301,6 +347,7 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
 
     async click(target: LocatorHandle, clickOptions?: ClickOptions): Promise<void> {
       guard();
+      refuseTrial(clickOptions);
       await resolveHandle(target).click({
         button: clickOptions?.button,
         clickCount: clickOptions?.clickCount,
@@ -311,8 +358,14 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
       });
     },
 
-    async fill(target: LocatorHandle, value: string, actionOptions?: ActionOptions): Promise<void> {
+    async fill(
+      target: LocatorHandle,
+      value: string,
+      actionOptions?: ActionOptions,
+      secretId?: string,
+    ): Promise<void> {
       guard();
+      if (secretId !== undefined) requireSecretOrigin(secretId);
       await resolveHandle(target).fill(value, {
         force: actionOptions?.force,
         timeout: timeoutOf(actionOptions?.timeout),
@@ -329,11 +382,13 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
 
     async check(target: LocatorHandle, actionOptions?: ActionOptions): Promise<void> {
       guard();
+      refuseTrial(actionOptions);
       await resolveHandle(target).check(actionOf(actionOptions, timeoutOf(actionOptions?.timeout)));
     },
 
     async uncheck(target: LocatorHandle, actionOptions?: ActionOptions): Promise<void> {
       guard();
+      refuseTrial(actionOptions);
       await resolveHandle(target).uncheck(
         actionOf(actionOptions, timeoutOf(actionOptions?.timeout)),
       );
@@ -341,6 +396,7 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
 
     async hover(target: LocatorHandle, actionOptions?: ActionOptions): Promise<void> {
       guard();
+      refuseTrial(actionOptions);
       await resolveHandle(target).hover(actionOf(actionOptions, timeoutOf(actionOptions?.timeout)));
     },
 
@@ -456,6 +512,12 @@ function actionOf(
   timeout: number,
 ): Record<string, unknown> {
   return { force: actionOptions?.force, trial: actionOptions?.trial, timeout };
+}
+
+function refuseTrial(options: ActionOptions | ClickOptions | undefined): void {
+  if (options?.trial === true) {
+    throw new Error('Playwright trial mode is not executable: it would skip the requested action.');
+  }
 }
 
 /** A locator's text argument after resolution. Secrets never reach a locator (validator AC-13). */

@@ -540,6 +540,8 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
               steps,
               variables: request.variables,
               secrets: request.secrets,
+              // Absent means no secret is bound to any origin, so no secret can be filled.
+              secretOrigins: request.secretOrigins ?? {},
               maxFailureMessageLength:
                 request.maxFailureMessageLength ?? options.maxFailureMessageLength,
             });

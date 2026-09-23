@@ -1,0 +1,274 @@
+{
+  "storyId": "UI-VALIDATION-20260921",
+  "researchedAt": "2026-09-21T23:23:57Z",
+  "researchedBy": "@analyst",
+  "complexity": "STANDARD",
+  "dependencies": [
+    {
+      "name": "Checks UI Studio authoring and execution APIs",
+      "type": "api",
+      "version": "repository-local",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "repository-local",
+        "usageLocations": [
+          "ARCH.md:792",
+          "frontend/src/services/api/studioApi.ts:53",
+          "frontend/src/services/api/studioApi.ts:60",
+          "frontend/src/services/api/studioApi.ts:73",
+          "frontend/src/services/api/studioApi.ts:84",
+          "frontend/src/services/api/studioApi.ts:92"
+        ]
+      },
+      "documentation": {
+        "url": "repository://ARCH.md#ui-test-management",
+        "relevantSections": [
+          "Create and save Studio tests",
+          "Compile and exact-candidate confirmation",
+          "Execute a test",
+          "Read execution history and evidence snapshots"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "visible authoring-to-terminal flow",
+          "description": "Create and save through Studio, compile the current draft, confirm the exact candidate, start execution, then observe the execution snapshot or filtered history until PASSED, FAILED, or ERROR.",
+          "codeExample": "POST /studio/tests -> PUT /studio/tests/{id} -> POST /studio/tests/{id}/compile -> POST /studio/tests/{id}/confirm-compile -> POST /studio/tests/{id}/execute -> GET /studio/executions?testId={id}"
+        },
+        {
+          "name": "auditable run identity",
+          "description": "Retain the Studio test id, execution id, terminal status, per-step results, and evidence state for each of the exactly three created tests.",
+          "codeExample": "GET /studio/executions/{executionId}"
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": [
+          "API-only creation or execution cannot substitute for the required visible Studio workflow."
+        ]
+      }
+    },
+    {
+      "name": "Local passthrough compilation",
+      "type": "service",
+      "version": "local-passthrough",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "local-passthrough",
+        "usageLocations": [
+          "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/LocalPassthroughGatewayClient.java:12",
+          "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/LocalPassthroughGatewayClient.java:55",
+          "backend/README.md:112"
+        ]
+      },
+      "documentation": {
+        "url": "repository://backend/README.md#compile-without-an-llm",
+        "relevantSections": [
+          "Local passthrough profile",
+          "Playwright statement requirement",
+          "Real validator, confirmation, dispatch, runner, and reporting path"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "verbatim local compile",
+          "description": "In the local profile, every authored step must already be a Playwright statement beginning with `await `; the gateway proposes each line verbatim and the real runner validator handles the candidate.",
+          "codeExample": "await page.goto('https://example.com/');"
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [
+          "Enable the real gateway with STUDIO_GATEWAY_ENABLED=true when credentials are available."
+        ],
+        "conflicts": [
+          "Plain-English authoring is rejected locally with GATEWAY_UNAVAILABLE.",
+          "The passthrough is intentionally unavailable outside the local profile."
+        ]
+      }
+    },
+    {
+      "name": "Studio runner and Playwright",
+      "type": "library",
+      "version": "Playwright 1.63.0; Node >=22.11.0 <25.0.0",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "1.63.0",
+        "usageLocations": [
+          "studio-runner/package.json:7",
+          "studio-runner/package.json:11",
+          "studio-runner/src/validator/language.ts:12",
+          "studio-runner/README.md:414"
+        ]
+      },
+      "documentation": {
+        "url": "repository://studio-runner/README.md#accepted-language",
+        "relevantSections": [
+          "Accepted language",
+          "Bounds",
+          "Pinned runtime versions"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "default-deny authored steps",
+          "description": "Use only accepted awaited navigation, locator, action, and assertion calls; URLs must be absolute HTTP or HTTPS URLs.",
+          "codeExample": "await page.getByPlaceholder(/(<var FORM_TEXT>)*Username/).fill(vars.get('FORM_TEXT'));"
+        },
+        {
+          "name": "terminal result vocabulary",
+          "description": "Execution evidence is complete when a run reaches PASSED, FAILED, or ERROR; evidence availability is a separate fact and does not overwrite a known run outcome.",
+          "codeExample": "status in ['PASSED', 'FAILED', 'ERROR']"
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": [
+          "Unsupported Playwright calls, selector-engine extensions, non-HTTP(S) URLs, and undeclared references are rejected by the runner validator."
+        ]
+      }
+    },
+    {
+      "name": "Studio plain-variable resolution",
+      "type": "service",
+      "version": "repository-local",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "repository-local",
+        "usageLocations": [
+          "frontend/src/types/studio/studioTypes.ts:107",
+          "studio-runner/src/validator/arguments.ts:139",
+          "studio-runner/src/validator/references.ts:69",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:358",
+          "studio-runner/src/run/childRuntime.ts:137"
+        ]
+      },
+      "documentation": {
+        "url": "repository://studio-runner/src/validator/references.ts",
+        "relevantSections": [
+          "Declared-reference validation",
+          "vars.get syntax",
+          "Acceptance snapshot",
+          "Dispatch-time runtime resolution"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "declare-reference-resolve",
+          "description": "Declare a Studio variable with kind `plain` and a non-sensitive value, then reference that exact name as `vars.get('NAME')` in an accepted argument position. The accepted artifact authorizes the reference, acceptance snapshots the selected plain value, and the runner resolves it during execution.",
+          "codeExample": "{\"name\":\"FORM_TEXT\",\"kind\":\"plain\",\"value\":\"pipeline-variable-ok\"} -> await page.getByPlaceholder(/(<var FORM_TEXT>)*Username/).fill(vars.get('FORM_TEXT'));"
+        },
+        {
+          "name": "variable proof",
+          "description": "Evidence must show both the persisted plain declaration and the authored `vars.get` use; a passing step that fills the target input proves runtime resolution rather than declaration alone.",
+          "codeExample": "variable FORM_TEXT + fill(vars.get('FORM_TEXT')) + terminal step PASS"
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": [
+          "An undeclared, unvalued, misspelled, or unauthorized variable reference is invalid.",
+          "The variable name is limited to 64 characters and `vars.get` takes exactly one string literal argument."
+        ]
+      }
+    },
+    {
+      "name": "Public validation targets",
+      "type": "service",
+      "version": "live preflight 2026-09-21T23:20Z",
+      "verified": true,
+      "source": "manual",
+      "existing": {
+        "installed": false,
+        "currentVersion": null,
+        "usageLocations": []
+      },
+      "documentation": {
+        "url": "https://www.saucedemo.com/",
+        "relevantSections": [
+          "Wikipedia public landing page: https://www.wikipedia.org/",
+          "SauceDemo public login form: https://www.saucedemo.com/",
+          "Example Domain: https://example.com/"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "current reachability preflight",
+          "description": "A redirect-following HTTPS request returned HTTP 200 and text/html for all three candidate URLs; each final host remained outside citi.com and no credentials were supplied.",
+          "codeExample": "wikipedia.org=200; saucedemo.com=200; example.com=200"
+        },
+        {
+          "name": "low-risk interaction selection",
+          "description": "Use navigation and assertions on Wikipedia and Example Domain, and use SauceDemo's public username input for the plain-variable fill. These interactions do not submit data or mutate external state.",
+          "codeExample": "goto/assert URL; fill public demo username input from vars.get; assert URL"
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [
+          "Select another unauthenticated public non-Citi target only if one of the three current targets becomes unavailable, while preserving an exactly-three created-test set."
+        ],
+        "conflicts": [
+          "Public availability and page structure can change after preflight.",
+          "Any redirect to citi.com or a citi.com subdomain invalidates that target."
+        ]
+      }
+    }
+  ],
+  "unverifiedClaims": [
+    {
+      "claim": "The three public targets will remain reachable and structurally compatible throughout every Studio execution.",
+      "reason": "Reachability was verified at research time, but third-party availability and markup are not controlled by this repository.",
+      "action": "acceptable_risk"
+    },
+    {
+      "claim": "Each newly authored Studio test will reach a terminal outcome in the active local environment.",
+      "reason": "The codebase contract is verified, but a terminal outcome is runtime evidence that must be captured by executing each test through Studio.",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "The variable value is resolved in the real browser run rather than merely persisted.",
+      "reason": "Resolution behavior is verified in source, but this story requires execution evidence from the newly created variable-bearing test.",
+      "action": "needs_validation"
+    }
+  ],
+  "recommendations": [
+    {
+      "type": "prefer",
+      "subject": "the existing local passthrough and pinned runner",
+      "rationale": "They exercise the real validation, confirmation, dispatch, Chromium, reporting, and evidence path without changing product source or adding dependencies."
+    },
+    {
+      "type": "prefer",
+      "subject": "FORM_TEXT as a plain variable on the SauceDemo test",
+      "rationale": "The target exposes a stable username input and the accepted runner language explicitly permits `vars.get` as the `fill` value."
+    },
+    {
+      "type": "prefer",
+      "subject": "terminal API snapshots as supporting evidence after visible UI execution",
+      "rationale": "They provide stable test and execution identifiers, terminal status, per-step outcomes, and evidence state while the UI remains the required authoring and run surface."
+    },
+    {
+      "type": "avoid",
+      "subject": "creating replacement tests for correctable authoring or execution errors",
+      "rationale": "The scope is exactly three newly created tests; correct and rerun the same test to preserve the count and retain failure history."
+    },
+    {
+      "type": "avoid",
+      "subject": "citi.com targets, authentication, submissions, secrets, and sensitive values",
+      "rationale": "They violate the explicit target, accessibility, and security constraints of this validation."
+    }
+  ],
+  "researchNotes": "No new library, API, infrastructure, or product-source change is required. The existing Studio contracts are sufficient. The technical-preferences file referenced by the generic research task is absent in this repository, so compatibility was evaluated against repository architecture, package pins, runner documentation, and the story constraints. The final validation targets were Wikipedia, SauceDemo, and Example Domain; actual Studio browser execution is the authoritative validation evidence."
+}

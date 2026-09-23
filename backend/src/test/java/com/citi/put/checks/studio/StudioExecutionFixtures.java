@@ -188,7 +188,9 @@ public final class StudioExecutionFixtures {
   private static String pinnedProvenance() {
     return "{\"model\":\"fixture-model@1\",\"promptVersion\":\""
         + CompilePins.PROMPT_VERSION
-        + "\",\"syntaxReferenceVersion\":\"1.0.0\",\"validatorSchemaVersion\":\"1.0.0\","
+        + "\",\"syntaxReferenceVersion\":\""
+        + CompilePins.SYNTAX_REFERENCE_VERSION
+        + "\",\"validatorSchemaVersion\":\"1.0.0\","
         + "\"languagePolicyVersion\":\"1.0.0\",\"executorVersion\":\"1.0.0\","
         + "\"playwrightVersion\":\"1.63.0\",\"artifactSchemaVersion\":"
         + CompilePins.SUPPORTED_ARTIFACT_VERSION

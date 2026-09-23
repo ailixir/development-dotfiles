@@ -5,14 +5,12 @@ package com.citi.put.checks.studio.secrets;
  *
  * <p>§9.2's closing sentence is <em>"Secret reference names alone grant no permission"</em>, and
  * `ED-02` names <em>"real vault integration <b>with secret-use authorization</b>"</em> as a thing
- * distinct from identity. §9.1 gives owners and authorized administrators execute; it does not say
- * that executing a draft entitles a principal to every reference the draft names.
+ * distinct from identity. Studio execution is open to every authenticated user, but that does not
+ * entitle a principal to every reference a draft names.
  *
- * <p>So this seam is consulted <b>separately</b> from {@code CsiOwnershipEvaluator} and the
- * acceptance path consults both. An implementation that answered {@code canExecute(auth, csiId)}
- * here would collapse the two decisions back into one and is the mutation AC-4 names; an
- * implementation that returned {@code true} unconditionally would make this a decorative interface
- * and is the other. Both must turn the same named test red, and both are recorded.
+ * <p>So this seam is consulted <b>separately</b> from execution admission. An implementation that
+ * returned {@code true} merely because the principal may execute would make this a decorative
+ * interface and disclose secret material to every user.
  */
 public interface StudioSecretUseAuthorization {
 

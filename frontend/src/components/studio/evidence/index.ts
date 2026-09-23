@@ -5,11 +5,18 @@ export {
   PARTIAL_RECORDING_QUALIFIER,
   PLAYBACK_FAILED_MESSAGE,
   NO_RUN_EVIDENCE_MESSAGE,
-  DOWNLOAD_RECORDING_LABEL,
+  STOPPED_RUN_ERROR_CODES,
+  STOPPED_RUN_RECORDING_STATEMENTS,
+  stoppedRunRecordingStatement,
   videoEvidenceNarrative,
 } from './videoEvidenceNarratives';
-export type { VideoEvidenceNarrative } from './videoEvidenceNarratives';
-export { studioVideoUrl, studioVideoDownloadUrl } from './studioVideoUrl';
-export { seekEligibility, currentTimeForOffset } from './seekEligibility';
+export type { VideoEvidenceNarrative, StoppedRunErrorCode } from './videoEvidenceNarratives';
+export { studioVideoUrl } from './studioVideoUrl';
+export {
+  seekEligibility,
+  currentTimeForOffset,
+  clampCurrentTimeToRecording,
+  UNKNOWN_RECORDING_EXTENT,
+} from './seekEligibility';
 export { useVideoSeek } from './useVideoSeek';
-export type { SeekEligibility } from './seekEligibility';
+export type { SeekEligibility, SeekRefusal, RecordingExtent } from './seekEligibility';

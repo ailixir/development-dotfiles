@@ -24,6 +24,8 @@
  */
 
 import { RUNTIME_INCOMPATIBLE } from '../compat/index.js';
+import { STEP_REFUSAL_CODES } from '../executor/refusals.js';
+import type { StepRefusalCode } from '../executor/refusals.js';
 
 /**
  * Every `outcome.errorCode` this runner may emit, each traced to an observable condition.
@@ -69,6 +71,17 @@ export const RUNNER_ERROR_CODES = {
   RECORDING_FAILED: 'RECORDING_FAILED',
   /** A step's assertion or action failed. The run stops at the first one (§5.2). */
   STEP_FAILED: 'STEP_FAILED',
+  /**
+   * A `goto` whose URL came from a variable resolved to something other than an absolute
+   * `http:`/`https:` URL. The validator checks literal URLs; this is the same rule at resolution.
+   * Spelled once, in `src/executor/refusals.ts`, where the refusal is raised.
+   */
+  URL_SCHEME_NOT_PERMITTED: STEP_REFUSAL_CODES.URL_SCHEME_NOT_PERMITTED,
+  /**
+   * A secret was about to be filled on a page whose origin is not among the origins the secret is
+   * bound to, or the secret is bound to none. Nothing was typed.
+   */
+  SECRET_ORIGIN_NOT_ALLOWED: STEP_REFUSAL_CODES.SECRET_ORIGIN_NOT_ALLOWED,
   /**
    * **Reserved, not emitted here.** §8.2 fixes the parent-enforced total-runtime timeout as
    * `ERROR`/`TIMEOUT`, and it is the single value this set shares with `ExecutionErrorCode`.
@@ -118,6 +131,8 @@ export type RunFailureKind =
   | 'unsupported-multi-page'
   | 'recording'
   | 'step'
+  | 'url-scheme-not-permitted'
+  | 'secret-origin-not-allowed'
   | 'total-timeout'
   | 'cancelled'
   | 'run-fault';
@@ -132,6 +147,8 @@ export const RUN_FAILURE_KINDS: readonly RunFailureKind[] = [
   'unsupported-multi-page',
   'recording',
   'step',
+  'url-scheme-not-permitted',
+  'secret-origin-not-allowed',
   'total-timeout',
   'cancelled',
   'run-fault',
@@ -158,6 +175,10 @@ export function errorCodeFor(kind: RunFailureKind): RunnerErrorCode {
       return RUNNER_ERROR_CODES.RECORDING_FAILED;
     case 'step':
       return RUNNER_ERROR_CODES.STEP_FAILED;
+    case 'url-scheme-not-permitted':
+      return RUNNER_ERROR_CODES.URL_SCHEME_NOT_PERMITTED;
+    case 'secret-origin-not-allowed':
+      return RUNNER_ERROR_CODES.SECRET_ORIGIN_NOT_ALLOWED;
     case 'total-timeout':
       return RUNNER_ERROR_CODES.TIMEOUT;
     case 'cancelled':
@@ -168,8 +189,22 @@ export function errorCodeFor(kind: RunFailureKind): RunnerErrorCode {
 }
 
 /**
+ * The failure kind for a step the executor refused on policy. Exhaustive over the refusal codes,
+ * so a new refusal without a kind does not compile.
+ */
+export function failureKindForRefusal(code: StepRefusalCode): RunFailureKind {
+  switch (code) {
+    case 'URL_SCHEME_NOT_PERMITTED':
+      return 'url-scheme-not-permitted';
+    case 'SECRET_ORIGIN_NOT_ALLOWED':
+      return 'secret-origin-not-allowed';
+  }
+}
+
+/**
  * §8.2: "a step locator or assertion timeout is `FAILED`; a parent-enforced total timeout is
- * `ERROR`". Everything that prevents the run from producing an assertion outcome is `ERROR`.
+ * `ERROR`". Everything that prevents the run from producing an assertion outcome is `ERROR`,
+ * and a policy refusal is one of those: the action was never performed, so nothing was asserted.
  */
 export function resultFor(kind: RunFailureKind): RunFailureResult {
   return kind === 'step' ? 'FAILED' : 'ERROR';

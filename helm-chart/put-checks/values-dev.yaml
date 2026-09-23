@@ -34,10 +34,23 @@ backend:
         - SPRING_DATASOURCE_PASSWORD
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "10"
+    checks.sources.UI_TEST: "false"
     checks.scheduling.min-interval-seconds: "30"
 
   topologySpreadConstraints:
     enabled: false
+
+# Vault-backed secrets are disabled throughout the production alpha. Tests alone select the fake.
+studioVault:
+  provider: none
+
+# Development does not pretend to provide model translation unless a developer opts in with valid
+# Vertex routing. The base chart is production-safe, so dev overrides that selection explicitly.
+studioGateway:
+  environment: local
+  provider: disabled
+  vertexConfigMap:
+    name: ""
 
 worker:
   replicaCount: 1

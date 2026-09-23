@@ -1,0 +1,190 @@
+{
+  "storyId": "UI-VALIDATION-20260921",
+  "gatheredAt": "2026-09-21T23:06:25Z",
+  "source": "user",
+  "gatheredBy": "@pm",
+  "elicitationVersion": "2.0",
+  "functional": [
+    {
+      "id": "FR-1",
+      "description": "Create exactly three distinct UI tests through the Checks UI Studio user interface as part of one full end-to-end validation run.",
+      "priority": "P0",
+      "rationale": "The requested validation must exercise real Studio authoring behavior rather than only inspect existing tests or invoke lower-level APIs.",
+      "acceptance": ["AC-1", "AC-2"]
+    },
+    {
+      "id": "FR-2",
+      "description": "Configure each of the three UI tests to exercise a publicly reachable website that is accessible during validation and is not hosted on any citi.com URL.",
+      "priority": "P0",
+      "rationale": "The user explicitly restricted targets to accessible public sites and excluded citi.com while this validation is performed.",
+      "acceptance": ["AC-3"]
+    },
+    {
+      "id": "FR-3",
+      "description": "At least one of the three UI tests must declare a plain Studio variable, reference that variable from an authored test step, and exercise the resolved value during execution.",
+      "priority": "P0",
+      "rationale": "Variable authoring and resolution are an explicit part of the requested UI validation.",
+      "acceptance": ["AC-4"]
+    },
+    {
+      "id": "FR-4",
+      "description": "Execute each of the exactly three newly created tests end to end from Checks UI Studio and retain the observable terminal result for every run.",
+      "priority": "P0",
+      "rationale": "Creation alone does not satisfy the request; all three authored tests must traverse the Studio execution workflow.",
+      "acceptance": ["AC-5", "AC-6"]
+    },
+    {
+      "id": "FR-5",
+      "description": "Report the three test identities, their non-Citi target URLs, variable usage, and final execution outcomes so the full UI validation can be independently reviewed.",
+      "priority": "P1",
+      "rationale": "A concise validation record makes the requested end-to-end result auditable without changing product source.",
+      "acceptance": ["AC-6"]
+    }
+  ],
+  "nonFunctional": [
+    {
+      "id": "NFR-1",
+      "category": "reliability",
+      "description": "The selected target sites must be reachable from the validation browser at execution time and must not depend on authentication, private network access, or user-specific state.",
+      "metric": "All three target pages load in the execution environment without credentials before their Studio runs are accepted as validation evidence."
+    },
+    {
+      "id": "NFR-2",
+      "category": "usability",
+      "description": "The validation must exercise the visible Checks UI Studio authoring and run workflow with clear, reviewable test names and steps.",
+      "metric": "Exactly three newly created tests are identifiable in Studio and each has an observable run result."
+    },
+    {
+      "id": "NFR-3",
+      "category": "security",
+      "description": "Validation data must use only non-sensitive plain values and must not introduce credentials, secrets, personal data, or Citi production data.",
+      "metric": "The three test drafts and reported evidence contain zero secret references, credentials, personal data, or Citi production data."
+    }
+  ],
+  "constraints": [
+    {
+      "id": "CON-1",
+      "type": "business",
+      "description": "The validation scope is exactly three newly created Checks UI Studio tests, and every one of the three must be executed end to end.",
+      "impact": "Creating fewer or more than three tests, or leaving any created test unexecuted, does not satisfy the request."
+    },
+    {
+      "id": "CON-2",
+      "type": "business",
+      "description": "No target URL may use citi.com or any citi.com subdomain during this validation.",
+      "impact": "Candidate URLs must be inspected before use and replaced if their host is citi.com or ends in .citi.com."
+    },
+    {
+      "id": "CON-3",
+      "type": "technical",
+      "description": "At least one created test must use a variable whose Studio kind is plain rather than a secret reference.",
+      "impact": "The selected test must declare a non-sensitive value and reference its variable name in an authored step using the Studio-supported variable syntax."
+    },
+    {
+      "id": "CON-4",
+      "type": "technical",
+      "description": "The validation must preserve all existing dirty working-tree changes and must not modify product source code.",
+      "impact": "Only spec and validation artifacts may be added; no existing product implementation file may be edited, reverted, or cleaned."
+    },
+    {
+      "id": "CON-5",
+      "type": "technical",
+      "description": "The three tests must be created and run through the available Checks UI Studio end-to-end workflow rather than substituted with unit, component, API-only, or source-level tests.",
+      "impact": "Lower-level checks may support diagnosis but cannot count toward the required set of three UI Studio executions."
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1",
+      "description": "The existing local Checks UI Studio environment is available and already supports creation, persistence, compilation or confirmation when required, and execution of UI tests.",
+      "risk": "high"
+    },
+    {
+      "id": "ASM-2",
+      "description": "Public sites selected at validation time permit the small, non-destructive browser interactions described by the three tests.",
+      "risk": "medium"
+    },
+    {
+      "id": "ASM-3",
+      "description": "A completed validation run can expose a terminal outcome in Studio even when optional evidence such as video is unavailable.",
+      "risk": "medium"
+    }
+  ],
+  "domainModel": [
+    {
+      "entity": "UI Studio test",
+      "description": "A newly authored Studio definition with a unique name, a public non-Citi target, ordered steps, optional plain variables, and execution configuration.",
+      "relationships": ["has many authored steps", "has zero or more plain variables", "has one or more execution attempts"]
+    },
+    {
+      "entity": "Plain variable",
+      "description": "A non-secret named Studio value declared by a test and referenced from at least one authored step.",
+      "relationships": ["belongs to one UI Studio test", "is referenced by one or more authored steps"]
+    },
+    {
+      "entity": "Studio execution",
+      "description": "One end-to-end run of a newly created UI Studio test with observable progress and a terminal outcome.",
+      "relationships": ["belongs to one UI Studio test", "produces one terminal result"]
+    }
+  ],
+  "interactions": [
+    {
+      "flow": "Create-save-run-observe",
+      "description": "For each test, the validator opens Checks UI Studio, authors a distinct public-site scenario, supplies any required configuration and variables, saves and completes required compile or confirmation steps, starts the run, and observes its terminal result.",
+      "states": ["authoring", "saved", "compiling or awaiting confirmation when applicable", "ready", "running", "terminal"]
+    },
+    {
+      "flow": "Plain-variable authoring and execution",
+      "description": "For at least one test, the validator adds a non-sensitive plain variable, references it in a Studio step, saves the test, runs it, and verifies that the resulting browser interaction uses the resolved value.",
+      "states": ["variable declared", "variable referenced", "ready", "running", "resolved in execution", "terminal"]
+    }
+  ],
+  "edgeCases": [
+    {
+      "scenario": "A selected public target is unreachable, blocked, redirects to a citi.com host, or requires authentication.",
+      "handling": "Do not count that target; select another publicly reachable non-Citi site and complete the affected test and run while keeping the total at exactly three.",
+      "severity": "high"
+    },
+    {
+      "scenario": "A plain variable is declared but not referenced, cannot be resolved, or is treated as a secret reference.",
+      "handling": "Correct the test in Studio so the plain variable is explicitly referenced and resolved, then rerun that test before accepting the validation.",
+      "severity": "high"
+    },
+    {
+      "scenario": "A Studio execution fails or never reaches a terminal state.",
+      "handling": "Capture the visible error, correct only test data or configuration within Studio, rerun the same created test, and report both the issue and final outcome without editing product source.",
+      "severity": "high"
+    },
+    {
+      "scenario": "The workspace contains unrelated dirty or untracked changes.",
+      "handling": "Leave them untouched and constrain new filesystem changes to the story specification and validation evidence artifacts.",
+      "severity": "critical"
+    }
+  ],
+  "terminology": [
+    {
+      "term": "full UI validation",
+      "definition": "Authoring, saving, preparing, executing, and observing terminal results for the required UI Studio tests through the visible product workflow.",
+      "aliases": ["end-to-end Studio validation"]
+    },
+    {
+      "term": "plain variable",
+      "definition": "A non-secret Studio variable with kind plain whose value is referenced by an authored step and resolved for execution.",
+      "aliases": ["non-secret variable"]
+    },
+    {
+      "term": "accessible site",
+      "definition": "A publicly reachable website that the validation browser can load without authentication or private network access at execution time.",
+      "aliases": ["public target"]
+    }
+  ],
+  "acceptanceCriteria": [
+    "AC-1: Given the existing Checks UI Studio environment, when validation authoring finishes, then exactly three distinct new UI tests exist and no product source file was modified.",
+    "AC-2: Given each new test, when its saved definition is reviewed, then it contains an ordered end-to-end browser scenario suitable for execution through Studio.",
+    "AC-3: Given the three saved tests, when their targets are inspected and loaded, then all three use publicly reachable sites without authentication and no target host is citi.com or ends in .citi.com.",
+    "AC-4: Given at least one of the three tests, when its definition and execution are reviewed, then it declares a plain non-sensitive variable, references that variable in an authored step, and uses the resolved value during the run.",
+    "AC-5: Given the three newly created tests, when the validation is run, then each test is started through Checks UI Studio and reaches an observable terminal outcome.",
+    "AC-6: Given all executions are complete, when the validation summary is produced, then it records exactly three test identities, target URLs, whether each uses variables, and each final execution outcome, including any corrected-and-rerun failure history."
+  ],
+  "openQuestions": []
+}

@@ -52,7 +52,7 @@ export const EXECUTION_ERROR_NARRATIVES: Readonly<
     browserClaim:
       'The browser started and ran your steps, and was then killed when the run passed the total time allowed for it.',
     remedyOwner:
-      'You can clear this: shorten the test, or raise the configured time cap for it within the limits the server allows.',
+      'You can clear this: shorten the test, or split it into smaller tests, so it finishes inside the total runtime allowed. That allowance is a platform setting an operator can raise within server limits; it is not something this editor sets.',
     offersRerun: false,
   },
   DISPATCH_FAILED: {

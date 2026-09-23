@@ -4,7 +4,6 @@ import type {
   StepResult,
 } from '@/types/studio/studioTypes';
 import {
-  setExecutionTransportSeam,
   type TransportHost,
   type TransportImplementation,
 } from '@/services/api/studioExecutionTransport';
@@ -13,14 +12,8 @@ import { mockExecutions } from './fixtures';
 /**
  * Story 10.11b — the scripted transport scenarios.
  *
- * Two jobs, and they are the same data:
- *
- * 1. **AC-17, the mocked transport scenario on the development path.** The SSE assessment's
- *    *Validation* section asks for one by name. MSW cannot serve a `text/event-stream` to a service
- *    worker in any useful way, so the mock is installed at the transport seam instead of at the
- *    network — which is the honest place for it: the thing a developer needs to see is a sequence of
- *    snapshots arriving as separate frames, and that is what the seam carries.
- * 2. **AC-22, the enumerable fixture matrix.** Every scenario below is an entry in
+ * Test-only scripted transport scenarios. They are injected explicitly by Vitest and are never
+ * installed by the browser application. Every scenario below is an entry in
  *    {@link EXECUTION_SCENARIO_MATRIX}, and `executionScenarioMatrix.test.ts` fails if an entry is
  *    not referenced by a named test. @po's finding on story 10.10's AC-20 is the reason: *"If the
  *    level-2 truncation fixture is never written, AC-7 does not go red; the test simply does not
@@ -307,6 +300,7 @@ export const ALL_SCENARIO_FRAMES: readonly ExecutionSnapshot[] = Object.freeze([
 export function createScriptedTransport(
   frames: readonly ExecutionSnapshot[],
   intervalMs = 900,
+  onDeliver?: (snapshot: ExecutionSnapshot) => void,
 ): (host: TransportHost) => TransportImplementation {
   return (host) => {
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -317,7 +311,9 @@ export function createScriptedTransport(
       if (stopped || host.isClosed() || index >= frames.length) {
         return;
       }
-      host.deliver(frames[index]);
+      const snapshot = frames[index];
+      onDeliver?.(snapshot);
+      host.deliver(snapshot);
       index += 1;
       if (!stopped && !host.isClosed() && index < frames.length) {
         timer = setTimeout(emit, intervalMs);
@@ -340,17 +336,6 @@ export function createScriptedTransport(
       },
     };
   };
-}
-
-/**
- * Installs the scripted scenario at the transport seam. Called from the MSW browser entry point, so
- * it reaches the standalone development mode and nothing else.
- */
-export function installMockedExecutionTransport(): void {
-  setExecutionTransportSeam({
-    primary: createScriptedTransport(DEV_TRANSPORT_SCENARIO),
-    fallback: null,
-  });
 }
 
 export interface ExecutionScenarioMatrixEntry {

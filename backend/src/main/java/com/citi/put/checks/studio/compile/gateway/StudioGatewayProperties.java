@@ -6,34 +6,38 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
- * Deployment configuration for the Citi/R2D2 LLM gateway (Story 10.5, AC-2; architecture
- * &sect;8.5).
+ * Deployment configuration for Vertex AI translation (Story 10.5, AC-2; architecture &sect;8.5).
  *
  * <p>Nothing here is hardcoded to a Citi environment: endpoint, project, location, model and
  * credentials are supplied per deployment. The gateway is off by default, so a stock build never
  * reaches an LLM.
  *
- * @param enabled master switch; {@code false} selects {@link DisabledLlmGatewayClient}
- * @param endpoint R2D2 base URL used as the Vertex SDK endpoint (scheme optional, https assumed)
- * @param project Vertex project identifier as accepted by R2D2
- * @param location Vertex location identifier as accepted by R2D2
- * @param model model identifier as reachable through R2D2
+ * @param endpoint Vertex-compatible SDK endpoint (scheme optional, https assumed)
+ * @param project Vertex AI project identifier
+ * @param location Vertex AI location identifier
+ * @param model Gemini model identifier
  * @param credentials how to obtain the Studio compile workload's service credentials
  * @param requestTimeout total deadline for one gateway call, retries excluded
  * @param maxConcurrency size of the bounded-concurrency semaphore
  * @param maxInputBytes pre-flight limit on the UTF-8 transport payload
- * @param maxOutputBytes post-flight limit on the UTF-8 response text
+ * @param maxOutputBytes post-flight limit on the UTF-8 response text. Matches the runner's {@code
+ *     maxArtifactBytes}, so an over-large proposal is refused here rather than accepted, persisted
+ *     and then refused by the validator. Note this byte cap, not the schema's {@code maxItems}
+ *     times {@code maxLength}, is the binding limit on artifact size: the schema permits step
+ *     counts and line lengths whose product exceeds it
+ * @param maxOutputTokens ceiling on model output tokens; sized so a maximal artifact fits, and sent
+ *     explicitly so a silently truncated answer cannot masquerade as a short one
  * @param structuredOutput whether to ask the gateway for a JSON response
- * @param temperature sampling temperature actually sent
+ * @param temperature legacy bound value; ignored by Gemini 3.8 and never sent
  * @param retry bounded transport-retry policy
  * @param artifactSchema Spring resource location of the artifact JSON schema used for validation
  */
 @ConfigurationProperties(prefix = "studio.compile.gateway")
 public record StudioGatewayProperties(
-    @DefaultValue("false") boolean enabled,
     String endpoint,
     String project,
     String location,
@@ -42,11 +46,75 @@ public record StudioGatewayProperties(
     @DefaultValue("60s") Duration requestTimeout,
     @DefaultValue("4") int maxConcurrency,
     @DefaultValue("262144") int maxInputBytes,
-    @DefaultValue("262144") int maxOutputBytes,
+    @DefaultValue("65536") int maxOutputBytes,
+    @DefaultValue("32768") int maxOutputTokens,
     @DefaultValue("true") boolean structuredOutput,
     @DefaultValue("0") double temperature,
     @DefaultValue TransportRetry retry,
     @DefaultValue("classpath:studio/artifact.schema.json") String artifactSchema) {
+
+  /**
+   * The binding target.
+   *
+   * <p>Named explicitly because this record has a second, shorter constructor: with more than one,
+   * Spring cannot tell which one property binding should use and fails to construct the record at
+   * all. {@code StudioExecutionProperties} carries the same annotation for the same reason.
+   */
+  @ConstructorBinding
+  public StudioGatewayProperties {}
+
+  /**
+   * The twelve-argument form from before {@code max-output-tokens} existed, kept so callers that do
+   * not care about the model's output ceiling need not restate it.
+   *
+   * @param endpoint the Vertex-compatible endpoint
+   * @param project the Vertex project
+   * @param location the Vertex location
+   * @param model the model identifier
+   * @param credentials service credentials for the compile workload
+   * @param requestTimeout per-call deadline
+   * @param maxConcurrency bounded-concurrency permit count
+   * @param maxInputBytes pre-flight transport payload limit
+   * @param maxOutputBytes post-flight response text limit
+   * @param structuredOutput whether to ask for a JSON response
+   * @param temperature legacy bound value, never sent
+   * @param retry bounded transport-retry policy
+   * @param artifactSchema resource location of the artifact schema
+   */
+  @SuppressWarnings("checkstyle:ParameterNumber")
+  public StudioGatewayProperties(
+      String endpoint,
+      String project,
+      String location,
+      String model,
+      Credentials credentials,
+      Duration requestTimeout,
+      int maxConcurrency,
+      int maxInputBytes,
+      int maxOutputBytes,
+      boolean structuredOutput,
+      double temperature,
+      TransportRetry retry,
+      String artifactSchema) {
+    this(
+        endpoint,
+        project,
+        location,
+        model,
+        credentials,
+        requestTimeout,
+        maxConcurrency,
+        maxInputBytes,
+        maxOutputBytes,
+        DEFAULT_MAX_OUTPUT_TOKENS,
+        structuredOutput,
+        temperature,
+        retry,
+        artifactSchema);
+  }
+
+  /** The default output-token ceiling, sized so a maximal artifact fits. */
+  public static final int DEFAULT_MAX_OUTPUT_TOKENS = 32768;
 
   /** Credential sourcing modes. A raw key or user token is never accepted as a property value. */
   public static final String MODE_APPLICATION_DEFAULT = "application-default";
@@ -54,17 +122,14 @@ public record StudioGatewayProperties(
   /** Loads a service-account key from {@code service-account-key-file}. */
   public static final String MODE_SERVICE_ACCOUNT_FILE = "service-account-file";
 
-  /** No credentials at all — only legitimate against a local stub. */
-  public static final String MODE_NONE = "none";
-
   private static final Set<String> CREDENTIAL_MODES =
-      Set.of(MODE_APPLICATION_DEFAULT, MODE_SERVICE_ACCOUNT_FILE, MODE_NONE);
+      Set.of(MODE_APPLICATION_DEFAULT, MODE_SERVICE_ACCOUNT_FILE);
 
   /**
    * Service credentials for the Studio compile workload — never a user token (architecture
    * &sect;9.2).
    *
-   * @param mode one of {@code application-default}, {@code service-account-file}, {@code none}
+   * @param mode one of {@code application-default} or {@code service-account-file}
    * @param serviceAccountKeyFile filesystem path to the key, required by {@code
    *     service-account-file}
    */
@@ -85,15 +150,8 @@ public record StudioGatewayProperties(
       @DefaultValue("2.0") double backoffMultiplier,
       @DefaultValue("0.5") double jitterFactor) {}
 
-  /**
-   * Fails fast with one message listing every missing or invalid value (AC-2).
-   *
-   * @throws IllegalStateException when {@code enabled} is true and configuration is incomplete
-   */
-  public void validateForEnabled() {
-    if (!enabled) {
-      return;
-    }
+  /** Fails fast with every missing or invalid value when the real Vertex provider is selected. */
+  public void validateForVertex() {
     List<String> problems = new ArrayList<>();
     requireText(problems, "endpoint", endpoint);
     requireText(problems, "project", project);
@@ -116,18 +174,15 @@ public record StudioGatewayProperties(
     requirePositive(problems, "max-concurrency", maxConcurrency);
     requirePositive(problems, "max-input-bytes", maxInputBytes);
     requirePositive(problems, "max-output-bytes", maxOutputBytes);
-    if (temperature < 0) {
-      problems.add("temperature must be >= 0 but was " + temperature);
-    }
     if (retry == null || retry.maxRetries() < 0) {
       problems.add("retry.max-retries must be >= 0");
     }
 
     if (!problems.isEmpty()) {
       throw new IllegalStateException(
-          "studio.compile.gateway.enabled=true but the gateway configuration is incomplete: "
+          "studio.compile.gateway.provider=vertex but the gateway configuration is incomplete: "
               + String.join("; ", problems)
-              + ". Set studio.compile.gateway.enabled=false to run without the R2D2 gateway.");
+              + ". Configure Vertex AI or set studio.compile.gateway.provider=disabled.");
     }
   }
 

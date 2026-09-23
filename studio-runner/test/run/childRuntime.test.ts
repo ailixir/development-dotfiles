@@ -11,7 +11,13 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { attachChildRuntime } from '../../src/run/childRuntime.js';
+import {
+  TAIL_SETTLE_BOUND_MS,
+  TAIL_SETTLE_HOLD_MS,
+  TAIL_SETTLE_LOAD_TIMEOUT_MS,
+  attachChildRuntime,
+  failureKindOf,
+} from '../../src/run/childRuntime.js';
 import type { ChildChannel } from '../../src/run/childRuntime.js';
 import { PROTOCOL_VERSION } from '../../src/run/protocol.js';
 import type { ChildMessage, ResultMessage } from '../../src/run/protocol.js';
@@ -22,6 +28,8 @@ interface Driver {
   readonly sent: ChildMessage[];
   readonly exits: number[];
   readonly browsers: FakeBrowserFactory;
+  /** Every wall-clock hold the child asked for, in order. The driver spends none of them. */
+  readonly sleeps: number[];
   send(value: unknown): void;
   /** Resolves once the child has answered `ready` **or** given up, whichever comes first. */
   launched(): Promise<void>;
@@ -34,6 +42,7 @@ interface Driver {
 function createDriver(overrides: { originSource?: Parameters<typeof attachChildRuntime>[0]['originSource'] } = {}): Driver {
   const sent: ChildMessage[] = [];
   const exits: number[] = [];
+  const sleeps: number[] = [];
   const browsers = createFakeBrowserFactory();
   let listener: ((value: unknown) => void) | null = null;
   let resolveResult: ((message: ResultMessage) => void) | null = null;
@@ -77,11 +86,17 @@ function createDriver(overrides: { originSource?: Parameters<typeof attachChildR
         error: null,
         orderlyClose,
       }),
+    // The tail settle's hold is observed, not spent: the unit tier stays sleep-free (AC-25).
+    sleep: (ms) => {
+      sleeps.push(ms);
+      return Promise.resolve();
+    },
   });
 
   return {
     sent,
     exits,
+    sleeps,
     browsers,
     send(value: unknown): void {
       listener?.(value);
@@ -111,7 +126,10 @@ function launchMessage(overrides: Record<string, unknown> = {}): Record<string, 
   };
 }
 
-function executeMessage(steps: unknown[] = defaultSteps()): Record<string, unknown> {
+function executeMessage(
+  steps: unknown[] = defaultSteps(),
+  secretOrigins: Record<string, string[]> = { PW: ['http://127.0.0.1'] },
+): Record<string, unknown> {
   return {
     kind: 'execute',
     protocolVersion: PROTOCOL_VERSION,
@@ -119,6 +137,7 @@ function executeMessage(steps: unknown[] = defaultSteps()): Record<string, unkno
     steps,
     variables: {},
     secrets: { PW: 'canary-secret-value' },
+    secretOrigins,
     maxFailureMessageLength: 400,
   };
 }
@@ -147,10 +166,14 @@ function defaultSteps(): unknown[] {
   ];
 }
 
-async function runOnce(driver: Driver, steps?: unknown[]): Promise<ResultMessage> {
+async function runOnce(
+  driver: Driver,
+  steps?: unknown[],
+  secretOrigins?: Record<string, string[]>,
+): Promise<ResultMessage> {
   driver.send(launchMessage());
   await driver.launched();
-  driver.send(executeMessage(steps));
+  driver.send(executeMessage(steps, secretOrigins));
   return await driver.settled();
 }
 
@@ -416,6 +439,125 @@ describe('AC-5 — the child exits on every path, with the browser closed first'
   });
 });
 
+/**
+ * The tail settle — the recorder runs on, briefly, past the last operation (see
+ * `TAIL_SETTLE_*` in `src/run/childRuntime.ts`).
+ *
+ * The ordinary close used to follow the last operation's resolution instantly. A click that only
+ * *committed* a navigation had not painted, the recorder padded the file with the last frame it
+ * had, and the final step's result was absent from the video. These pin the settle's placement:
+ * after the last step, before the close, never once a stop has been ordered — before it starts and
+ * again after it — so the stop path keeps sole ownership of the close (AC-5a).
+ */
+describe('the tail settle — the recorder outlives the last operation, unless a stop is ordered', () => {
+  const settleCalls = (driver: Driver) =>
+    driver.browsers.page.calls.filter((call) => call.method === 'waitForLoadState');
+
+  it('waits for the load state and holds, after the last step and before the close', async () => {
+    const driver = createDriver();
+    let closedWhenSettling = -1;
+    let stepsFinishedWhenSettling = -1;
+    driver.browsers.page.onCall = (call) => {
+      if (call.method !== 'waitForLoadState') return;
+      closedWhenSettling = driver.browsers.closed;
+      stepsFinishedWhenSettling = driver.sent.filter((m) => m.kind === 'step-finished').length;
+    };
+
+    const result = await runOnce(driver);
+    expect(result.ok).toBe(true);
+
+    const settles = settleCalls(driver);
+    expect(settles).toHaveLength(1);
+    expect(settles[0]?.args).toEqual(['load', { timeout: TAIL_SETTLE_LOAD_TIMEOUT_MS }]);
+    // Placement: every step had finished, and the context was still open.
+    expect(stepsFinishedWhenSettling).toBe(2);
+    expect(closedWhenSettling).toBe(0);
+    expect(driver.sleeps).toEqual([TAIL_SETTLE_HOLD_MS]);
+    // And then the ordinary close, once, with the recording it flushed.
+    expect(driver.browsers.closed).toBe(1);
+    expect(result.recording.state).toBe('PENDING');
+    expect(result.recording.partial).toBe(false);
+  });
+
+  it('settles after a failing step too: the failure state is what the video should end on', async () => {
+    const driver = createDriver();
+    driver.browsers.page.failOn('goto', new Error('NavigationError: refused'));
+    const result = await runOnce(driver);
+    expect(result.ok).toBe(false);
+    expect(settleCalls(driver)).toHaveLength(1);
+    expect(driver.sleeps).toEqual([TAIL_SETTLE_HOLD_MS]);
+  });
+
+  it('a page that never reaches load within the bound changes nothing about the run (AC-8)', async () => {
+    const driver = createDriver();
+    driver.browsers.page.failOn('waitForLoadState', new Error('TimeoutError: still loading'));
+    const result = await runOnce(driver);
+    expect(result.ok).toBe(true);
+    expect(result.failureKind).toBeNull();
+    expect(result.recording.state).toBe('PENDING');
+    // The hold still happens: whatever has painted by then is worth the frames.
+    expect(driver.sleeps).toEqual([TAIL_SETTLE_HOLD_MS]);
+    expect(driver.browsers.closed).toBe(1);
+  });
+
+  it('is skipped entirely when the parent has already ordered a stop', async () => {
+    const driver = createDriver();
+    // The stop lands while the first navigation is in flight: the steps end under the guard, and
+    // the run reaches the point where the settle would start with `stopping` already set.
+    driver.browsers.page.onCall = (call) => {
+      if (call.method === 'goto') driver.send({ kind: 'stop' });
+    };
+    driver.send(launchMessage());
+    await driver.launched();
+    driver.send(executeMessage());
+    const result = await driver.settled();
+    await tick();
+
+    expect(settleCalls(driver)).toEqual([]);
+    expect(driver.sleeps).toEqual([]);
+    // The stop path owned the close and the single result.
+    expect(result.failureMessage).toMatch(/ordered this run to stop/u);
+    expect(driver.browsers.closed).toBe(1);
+    expect(driver.browsers.disposed).toBe(0);
+    expect(driver.sent.filter((m) => m.kind === 'result')).toHaveLength(1);
+    expect(driver.exits).toEqual([0]);
+  });
+
+  it('is abandoned, without the hold, when the stop arrives during it', async () => {
+    const driver = createDriver();
+    driver.browsers.page.onCall = (call) => {
+      if (call.method === 'waitForLoadState') driver.send({ kind: 'stop' });
+    };
+    driver.send(launchMessage());
+    await driver.launched();
+    driver.send(executeMessage());
+    const result = await driver.settled();
+    await tick();
+
+    expect(settleCalls(driver)).toHaveLength(1);
+    // The check after the load wait saw the stop: no hold was spent on a run that is stopping.
+    expect(driver.sleeps).toEqual([]);
+    // Exactly one close and one result, both the stop path's — the ordinary path did not race it.
+    expect(driver.browsers.closed).toBe(1);
+    expect(driver.browsers.disposed).toBe(0);
+    expect(result.failureMessage).toMatch(/ordered this run to stop/u);
+    expect(driver.sent.filter((m) => m.kind === 'result')).toHaveLength(1);
+    expect(driver.exits).toEqual([0]);
+  });
+
+  it('is bounded well inside the parent’s stop grace', () => {
+    // `createChildBrowserLauncher`'s default `stopTimeoutMs` (src/run/launcher.ts). The settle
+    // never delays a stop — it is abandoned on one — but the bound is pinned anyway, so a later
+    // widening cannot quietly approach the grace.
+    const STOP_GRACE_MS = 5_000;
+    expect(TAIL_SETTLE_BOUND_MS).toBe(TAIL_SETTLE_LOAD_TIMEOUT_MS + TAIL_SETTLE_HOLD_MS);
+    expect(TAIL_SETTLE_BOUND_MS).toBeLessThanOrEqual(750);
+    expect(TAIL_SETTLE_BOUND_MS * 4).toBeLessThan(STOP_GRACE_MS);
+    // Several 40 ms frame quanta: fewer than two would not reliably reach the encoder.
+    expect(TAIL_SETTLE_HOLD_MS).toBeGreaterThanOrEqual(3 * 40);
+  });
+});
+
 describe('the child refuses what it cannot accept, and leaves', () => {
   it('refuses a launch message carrying artifact source', async () => {
     const driver = createDriver();
@@ -441,5 +583,38 @@ describe('the child refuses what it cannot accept, and leaves', () => {
     driver.send(executeMessage());
     const result = await driver.settled();
     expect(result.failureMessage).toMatch(/out-of-order/u);
+  });
+});
+
+describe('secret origin binding reaches the adapter and names the refusal', () => {
+  it('fills the secret on a listed origin', async () => {
+    const result = await runOnce(createDriver(), undefined, { PW: ['http://127.0.0.1'] });
+    expect(result.ok).toBe(true);
+    expect(result.failureKind).toBeNull();
+  });
+
+  it('reports secret-origin-not-allowed when the page origin is not listed', async () => {
+    const result = await runOnce(createDriver(), undefined, { PW: ['https://login.app.example'] });
+    expect(result.ok).toBe(false);
+    expect(result.failureKind).toBe('secret-origin-not-allowed');
+  });
+
+  it('refuses a secret bound to no origin', async () => {
+    const result = await runOnce(createDriver(), undefined, {});
+    expect(result.failureKind).toBe('secret-origin-not-allowed');
+  });
+});
+
+describe('failureKindOf', () => {
+  it('names a refused step by its refusal, and an ordinary one as a step failure', () => {
+    const base = { unsupportedPage: false, runFault: null, ok: false } as const;
+    expect(failureKindOf({ ...base, refusal: 'URL_SCHEME_NOT_PERMITTED' })).toBe(
+      'url-scheme-not-permitted',
+    );
+    expect(failureKindOf({ ...base, refusal: 'SECRET_ORIGIN_NOT_ALLOWED' })).toBe(
+      'secret-origin-not-allowed',
+    );
+    expect(failureKindOf({ ...base, refusal: null })).toBe('step');
+    expect(failureKindOf(base)).toBe('step');
   });
 });

@@ -81,12 +81,9 @@ class SecretUseAuthorizationTest {
   /**
    * The mutation that matters (AC-4).
    *
-   * <p>{@code STRANGER} and {@code OWNER} are handed the identical declaration for the identical
-   * CSI and environment. Only the entitlement differs. An implementation that answered {@code
-   * canExecute(auth, csiId)} here would give the same answer to both — which is precisely the
-   * collapse this seam exists to prevent — and a seam returning {@code true} unconditionally would
-   * too. Both turn this pair red, and the pair is what makes that true: a refusal alone would
-   * survive "deny everything".
+   * <p>{@code STRANGER} and {@code OWNER} may both start ordinary executions and are handed the
+   * identical declaration for the identical CSI and environment. Only the secret entitlement
+   * differs. A seam returning {@code true} for every executing user would turn this pair red.
    */
   @Test
   void refusesAPrincipalWhoMayExecuteTheCsiButIsNotEntitledToTheSecret() {
@@ -318,5 +315,49 @@ class SecretUseAuthorizationTest {
           + e.getClass().getSimpleName().toUpperCase(java.util.Locale.ROOT);
     }
     throw new AssertionError("the action was expected to be refused and was not");
+  }
+
+  // ── Secret origin binding: the vault entry's allowedOrigins reaches the job, per secret ─────
+
+  @Test
+  void carriesEachSecretsNormalizedOriginsFromItsVaultEntry() {
+    vault.bindOrigins(
+        StudioVaultProvider.ReferenceKind.SECRET,
+        CSI,
+        ENVIRONMENT,
+        "LOGIN_PW",
+        "HTTPS://Login.App.Example:443, https://sso.app.example:8443");
+
+    try (StudioReferenceResolver.Resolved resolved =
+        resolver.resolve(CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW"))) {
+      assertThat(resolved.secretOrigins())
+          .containsExactly(
+              Map.entry(
+                  "LOGIN_PW",
+                  List.of("https://login.app.example", "https://sso.app.example:8443")));
+    }
+  }
+
+  @Test
+  void aSecretWhoseEntryDeclaresNoOriginsIsCarriedBoundToNone() {
+    try (StudioReferenceResolver.Resolved resolved =
+        resolver.resolve(CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW"))) {
+      assertThat(resolved.secretOrigins()).containsExactly(Map.entry("LOGIN_PW", List.of()));
+    }
+  }
+
+  @Test
+  void aMalformedOriginListBindsTheSecretToNone() {
+    vault.bindOrigins(
+        StudioVaultProvider.ReferenceKind.SECRET,
+        CSI,
+        ENVIRONMENT,
+        "LOGIN_PW",
+        "https://login.app.example,javascript:alert(1)");
+
+    try (StudioReferenceResolver.Resolved resolved =
+        resolver.resolve(CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW"))) {
+      assertThat(resolved.secretOrigins()).containsExactly(Map.entry("LOGIN_PW", List.of()));
+    }
   }
 }

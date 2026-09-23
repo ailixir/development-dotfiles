@@ -32,11 +32,11 @@ import java.util.UUID;
  * <em>"may receive per-run values"</em>, and holding no vault credential is precisely <b>why</b>
  * the worker must hand them over.
  *
- * <p>It carries no approved-target or secret-use policy field. ADR-002 O-6 is still open and SPK-05
- * has not ruled between carrying that policy on the job and enforcing it solely at the egress
- * layer; adding a field to a closed runner-consumed body is §12 Class B, which an architect must
- * rule on first and which a story may propose but not land. What is decidable today — which policy
- * identity this dispatch ran under — is recorded on the execution instead.
+ * <p>It carries no approved-target policy field: ADR-002 O-6 (destination policy on the job versus
+ * at the egress layer) is still open. It does carry {@code secretOrigins}, the per-secret origin
+ * binding read from each secret's own vault entry: the runner refuses to type a secret on a page
+ * whose origin is not listed for it, and refuses a secret bound to none. What else is decidable
+ * today — which policy identity this dispatch ran under — is recorded on the execution.
  *
  * @param executionId the execution
  * @param attemptId this attempt, never reused
@@ -53,6 +53,10 @@ import java.util.UUID;
  * @param deadlines §8.5's admitted-start and runtime values, sent faithfully
  * @param videoKey the server-derived video key (§6.2); deriving a key is not writing an object
  * @param manifestKey the server-derived result manifest key (§5.3, §6.2)
+ * @param referencePolicy the revision's ADR-SC-003 reference policy; {@code null} for legacy
+ *     authoring, which keeps the runner's source-token reference check
+ * @param secretOrigins normalized origins each resolved secret may be filled on, by secret id;
+ *     nonsecret, and a secret absent here cannot be filled
  */
 public record RunJob(
     UUID executionId,
@@ -69,7 +73,47 @@ public record RunJob(
     JobDeadlines deadlines,
     String videoKey,
     String manifestKey,
-    JsonNode expectedIntent) {
+    JsonNode referencePolicy,
+    Map<String, List<String>> secretOrigins) {
+
+  public RunJob {
+    secretOrigins = secretOrigins == null ? Map.of() : Map.copyOf(secretOrigins);
+  }
+
+  public RunJob(
+      UUID executionId,
+      UUID attemptId,
+      UUID revisionId,
+      String artifactHash,
+      JsonNode artifact,
+      List<String> source,
+      JsonNode configuration,
+      String csi,
+      ReferenceDeclarations references,
+      Map<String, String> resolvedVars,
+      Map<String, String> resolvedSecrets,
+      JobDeadlines deadlines,
+      String videoKey,
+      String manifestKey,
+      JsonNode referencePolicy) {
+    this(
+        executionId,
+        attemptId,
+        revisionId,
+        artifactHash,
+        artifact,
+        source,
+        configuration,
+        csi,
+        references,
+        resolvedVars,
+        resolvedSecrets,
+        deadlines,
+        videoKey,
+        manifestKey,
+        referencePolicy,
+        Map.of());
+  }
 
   public RunJob(
       UUID executionId,
@@ -101,7 +145,8 @@ public record RunJob(
         deadlines,
         videoKey,
         manifestKey,
-        null);
+        null,
+        Map.of());
   }
 
   /**

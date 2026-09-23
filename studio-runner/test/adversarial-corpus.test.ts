@@ -6,7 +6,7 @@ import {
   createFakeBrowserAdapter,
   createFakeClock,
   createRecordingStepReporter,
-} from '../src/executor/adapters/fake.js';
+} from './helpers/fakeAdapters.js';
 import { loadAdversarialFixtures } from './helpers/corpus.js';
 
 /**
@@ -24,7 +24,7 @@ describe('adversarial corpus', () => {
         fixture.source,
         fixture.references,
         fixture.policy,
-        fixture.expectedIntent,
+        fixture.referencePolicy,
       );
 
       expect(result.ok).toBe(false);
@@ -61,7 +61,7 @@ describe('adversarial corpus', () => {
         fixture.source,
         fixture.references,
         fixture.policy,
-        fixture.expectedIntent,
+        fixture.referencePolicy,
       );
       for (const step of result.steps) {
         if (step.diagnostics.length > 0) {
@@ -79,7 +79,7 @@ describe('adversarial corpus', () => {
         fixture.source,
         fixture.references,
         fixture.policy,
-        fixture.expectedIntent,
+        fixture.referencePolicy,
       );
       const diagnostics = [
         ...result.diagnostics,

@@ -311,9 +311,23 @@ export function readOperation(code: string): ArtifactOperation {
 
 /** The summary as one line of prose, for a reader rather than for an assertion. */
 export function summaryLine(operation: ReadOperation): string {
+  const detail = operation.detail === null ? null : readableDetail(operation.detail);
   return operation.detail === null
     ? `${operation.action} ${operation.target}`
-    : `${operation.action} ${operation.target}: ${operation.detail}`;
+    : `${operation.action} ${operation.target}: ${detail}`;
+}
+
+/** Turns validated variable references into plain language without resolving or exposing values. */
+function readableDetail(detail: string): string {
+  const variable = /^vars\.get\((['"])([A-Za-z][A-Za-z0-9_]*)\1\)$/u.exec(detail.trim());
+  if (variable) {
+    return `the reusable value ${variable[2]}`;
+  }
+  const secret = /^vars\.secret\((['"])([A-Za-z][A-Za-z0-9_]*)\1\)$/u.exec(detail.trim());
+  if (secret) {
+    return `the saved secret ${secret[2]}`;
+  }
+  return detail;
 }
 
 /**

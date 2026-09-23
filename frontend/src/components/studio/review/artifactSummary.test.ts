@@ -108,7 +108,19 @@ describe('one validated statement is read into an action, a target and an operan
     // There is no resolved value on this contract to leak (architecture §9.2), and this module
     // echoes source text rather than resolving anything — asserted so a future "helpful"
     // rendering that looked one up would land here.
-    expect(summaryLine(operation)).toContain('LOGIN_PW');
+    expect(summaryLine(operation)).toContain('the saved secret LOGIN_PW');
+  });
+
+  it('describes a plain variable as a reusable value instead of exposing internal syntax', () => {
+    const operation = readOperation(
+      "await page.getByLabel('Username').fill(vars.get('FORM_TEXT'));",
+    );
+    expect(operation.recognized).toBe(true);
+    if (!operation.recognized) return;
+    expect(summaryLine(operation)).toBe(
+      "Type into the field labelled 'Username': the reusable value FORM_TEXT",
+    );
+    expect(summaryLine(operation)).not.toContain('vars.get');
   });
 
   it('a page assertion', () => {

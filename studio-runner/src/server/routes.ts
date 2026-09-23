@@ -111,7 +111,7 @@ export function respond(
 const RUN_PATH = /^\/v1\/runs\/([^/]+)$/u;
 
 /** Keys a `/v1/validate` body may carry. Default-deny, like the job envelope. */
-const VALIDATE_KEYS = new Set(['artifact', 'source', 'references', 'expectedIntent']);
+const VALIDATE_KEYS = new Set(['artifact', 'source', 'references', 'referencePolicy']);
 
 const EMPTY_DECLARATIONS: ReferenceDeclarations = { variables: [], secrets: [] };
 
@@ -167,7 +167,7 @@ export function createRequestHandler(
     // Launches nothing, creates no scratch state and — critically — never touches the pool, so a
     // fully saturated runner still answers validate (AC-4).
     const startedAt = options.now();
-    const result = validateArtifact(record.artifact, source, references, undefined, record.expectedIntent);
+    const result = validateArtifact(record.artifact, source, references, undefined, record.referencePolicy);
     const elapsedMs = options.now() - startedAt;
 
     if (elapsedMs > options.validateTimeoutMs) {

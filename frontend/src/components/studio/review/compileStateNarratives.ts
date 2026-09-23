@@ -33,16 +33,16 @@ export const COMPILE_STATE_NARRATIVES: Readonly<Record<CompileStatus, CompileSta
   COMPILING: {
     title: 'Translating your steps',
     whatIsTrue:
-      'Your draft is saved. A translation of the steps shown above is running right now on the server.',
+      'Your draft is saved. A translation of your steps is running right now on the server.',
     whatYouCanDo: 'Wait here — this page checks for the result and stops on its own.',
     whatIsBlocked: 'There is nothing to confirm yet, so this draft cannot be made runnable yet.',
   },
   AWAITING_CONFIRMATION: {
     title: 'Waiting for your confirmation',
     whatIsTrue:
-      'A candidate translation exists for the steps shown above. It is not runnable, and it will not become runnable on its own.',
+      'A candidate translation exists for this draft. It is not runnable, and it will not become runnable on its own.',
     whatYouCanDo:
-      'Read each step below, then confirm this exact revision. Confirming is the only way this draft becomes runnable.',
+      'Review translation details, then confirm this exact revision. Confirming is the only way this draft becomes runnable.',
     whatIsBlocked:
       'Running is blocked until you confirm. Nothing confirms a candidate for you, and no candidate becomes runnable automatically.',
   },
@@ -50,12 +50,12 @@ export const COMPILE_STATE_NARRATIVES: Readonly<Record<CompileStatus, CompileSta
     title: 'Confirmed and runnable',
     whatIsTrue: 'You confirmed a revision of this draft, and that revision is the one that runs.',
     whatYouCanDo: 'Run it, or edit the steps — editing starts a new translation you would review again.',
-    whatIsBlocked: 'Nothing is blocked. The identity of the revision that runs is shown below.',
+    whatIsBlocked: 'Nothing is blocked. This card identifies the revision that runs.',
   },
   NEEDS_REVISION: {
     title: 'Some steps could not be made runnable',
     whatIsTrue:
-      'The translation finished and produced nothing runnable. The reasons are listed against your own steps below.',
+      'The translation finished and produced nothing runnable. Review translation details for the reasons attached to your steps.',
     whatYouCanDo:
       'Edit the steps the reasons point at, then save. Asking for the same translation again without editing will reach the same place.',
     whatIsBlocked:

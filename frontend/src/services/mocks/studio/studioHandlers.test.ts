@@ -32,6 +32,20 @@ describe('list scoping', () => {
     expect(page.data.every((test) => MOCK_READABLE_CSIS.includes(test.csiId!))).toBe(true);
     expect(page.data.map((test) => test.id)).not.toContain(otherCsiTest.id);
     expect(page.totalElements).toBe(page.data.length);
+    expect(
+      page.data.every(
+        (test) =>
+          test.currentCandidateArtifact == null &&
+          test.currentCandidateArtifactHash == null &&
+          test.confirmedRevisionArtifact == null &&
+          test.confirmedRevisionArtifactHash == null &&
+          test.compileDiagnostics == null,
+      ),
+    ).toBe(true);
+
+    const detail = await studioApi.getTest(mockTests[0].id);
+    expect(detail.confirmedRevisionArtifact).not.toBeNull();
+    expect(detail.confirmedRevisionArtifactHash).toHaveLength(64);
   });
 
   it('an unfiltered history list never contains another CSI', async () => {

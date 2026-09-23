@@ -22,8 +22,11 @@ import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
@@ -60,6 +63,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     })
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@ExtendWith(OutputCaptureExtension.class)
 class SseStreamingIT {
 
   private static final String CSI_ID = "60471";
@@ -311,6 +315,29 @@ class SseStreamingIT {
               ExecutionSnapshotDto.class);
       assertThat(settled.streamComplete()).isTrue();
     }
+  }
+
+  @Test
+  void closingACompletedStreamDoesNotReauthorizeTheInternalAsyncDispatch(CapturedOutput output)
+      throws Exception {
+    progressService.apply(executionId, started(1));
+
+    int streamsBefore = registry.openStreamCount();
+    try (SseTestClient client = new SseTestClient()) {
+      client.open(eventsUrl(), readerHeaders());
+      assertThat(client.awaitSnapshots(1, Duration.ofSeconds(10))).isTrue();
+
+      progressService.apply(executionId, terminal(9, RunOutcome.PASSED, RunnerEvidence.STORED));
+      assertThat(client.awaitClosed(Duration.ofSeconds(10))).isTrue();
+    }
+
+    awaitReleased(streamsBefore);
+    Thread.sleep(250);
+
+    assertThat(output.getOut())
+        .doesNotContain(
+            "Unable to handle the Spring Security Exception because the response is already committed")
+        .doesNotContain("Cannot render error page for request");
   }
 
   // ── AC-35: cleanup on every release path, and returned capacity ──────────

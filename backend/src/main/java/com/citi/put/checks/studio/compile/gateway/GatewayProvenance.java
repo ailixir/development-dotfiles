@@ -11,7 +11,7 @@ package com.citi.put.checks.studio.compile.gateway;
  * @param promptVersion prompt version passed through from the {@link CompileRequest}
  * @param sdkVersion version of the Vertex AI SDK that issued the call
  * @param structuredOutput whether a JSON response was requested
- * @param temperature temperature actually sent
+ * @param temperature legacy compatibility field; {@code 0} means no sampling temperature was sent
  */
 public record GatewayProvenance(
     String model,

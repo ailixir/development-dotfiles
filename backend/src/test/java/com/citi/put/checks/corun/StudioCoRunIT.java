@@ -15,6 +15,8 @@ import com.citi.put.checks.studio.compile.gateway.LlmGatewayClient;
 import com.citi.put.checks.studio.compile.validator.RunnerValidationClient;
 import com.citi.put.checks.studio.dispatch.StudioDispatcher;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
+import com.citi.put.checks.studio.dto.VideoEvidence;
+import com.citi.put.checks.studio.evidence.ExecutionVideoService;
 import com.citi.put.checks.studio.evidence.VideoEvidenceFixtures;
 import com.citi.put.checks.studio.recovery.RunnerCancelBudget;
 import com.citi.put.checks.studio.recovery.RunningReaper;
@@ -202,6 +204,9 @@ class StudioCoRunIT {
     registry.add("studio.runner.service-identity-token", ENVIRONMENT::runnerServiceToken);
     registry.add("studio.execution.callback-base-url", ENVIRONMENT::apiBaseUrl);
     registry.add("studio.execution.callback.service-token", ENVIRONMENT::callbackServiceToken);
+    registry.add("studio.execution.video-store.provider", () -> "local");
+    registry.add(
+        "studio.execution.video-store.directory", () -> ENVIRONMENT.objectStoreDir().toString());
     // Driven, never scheduled: the harness calls dispatchOnce() itself so that a red leg names a
     // refusal rather than a timeout, and so that nothing dispatches behind the assertions.
     registry.add("studio.execution.dispatcher.enabled", () -> "false");
@@ -282,6 +287,7 @@ class StudioCoRunIT {
   @Autowired private RunningReaper runningReaper;
   @Autowired private RunnerCancelBudget cancelBudget;
   @Autowired private TestRestTemplate restTemplate;
+  @Autowired private ExecutionVideoService executionVideoService;
 
   @LocalServerPort private int apiPort;
 
@@ -660,6 +666,12 @@ class StudioCoRunIT {
           .extracting(com.citi.put.checks.studio.dto.StepResult::status)
           .containsExactly("PASS", "PASS");
       assertThat(snapshot.endedAt()).as("a settled execution has an end").isNotNull();
+      assertThat(snapshot.video().status()).isEqualTo(VideoEvidence.AVAILABLE);
+      ResponseEntity<byte[]> firstRange =
+          executionVideoService.read(executionId, false, "bytes=0-31", owner);
+      assertThat(firstRange.getStatusCode().value()).isEqualTo(206);
+      assertThat(firstRange.getBody()).hasSize(32);
+      assertThat(firstRange.getHeaders().getFirst("Content-Range")).startsWith("bytes 0-31/");
     }
   }
 
@@ -1192,9 +1204,9 @@ class StudioCoRunIT {
    * Everything a mid-step cancel must leave behind: the outcome, the ledger, no browser process, an
    * evidence disposition on the row that is the one the runner reported, and an idle pod.
    *
-   * <p>The snapshot's video state is deliberately not read: under this harness the API's video
-   * store provider is {@code none}, so the snapshot says {@code UNAVAILABLE} whatever the runner
-   * stored. The persisted row and the runner's own object directory are where honesty is decided.
+   * <p>The persisted row and the runner's own object directory decide honesty here. The passing leg
+   * separately proves the API's local provider reads that same directory through the media route; a
+   * cancelled recording may legitimately be partial or unavailable.
    */
   private void assertHonestCancel(StalledRun run, Timings timings, String leg) throws IOException {
     UUID executionId = run.executionId();

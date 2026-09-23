@@ -30,16 +30,6 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
           <ListItem>
             <ListItemText primary={<Typography variant="body2"><strong>Reports builder</strong>: ⌘S to save draft, ⌘⏎ to generate preview, <code>/</code> to focus check search.</Typography>} />
           </ListItem>
-          {/*
-            MSW serves mock Studio data only in tests and in a development server started with
-            VITE_ENABLE_MSW=true (see `MswGate`). This row appears only in that case, so the help
-            never claims mock behaviour for a build that talks to the real API.
-          */}
-          {process.env.VITE_ENABLE_MSW === 'true' && (
-            <ListItem>
-              <ListItemText primary={<Typography variant="body2"><strong>Mock data</strong>: this development build serves Checks Studio from mock data (MSW), not from the real API.</Typography>} />
-            </ListItem>
-          )}
         </List>
       </DialogContent>
       <DialogActions>
@@ -50,5 +40,4 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
 };
 
 export default HelpDialog;
-
 

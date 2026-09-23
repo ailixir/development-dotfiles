@@ -1,4 +1,5 @@
-import { Alert, Box, Button, Card, CardContent, Stack, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Alert, Box, Button, Card, CardContent, Collapse, Stack, Typography } from '@mui/material';
 import type { TestDto } from '@/types/studio/studioTypes';
 import { narrativeFor } from './compileStateNarratives';
 import { compileErrorNarrative, isDeclaredCompileErrorCode } from './compileErrorCodes';
@@ -29,6 +30,14 @@ export const RECOMPILE_LABEL = 'Ask for the translation again';
 
 export interface CompileReviewPanelProps {
   testId: string;
+  /** Publishes compile and confirmation changes to the surrounding editor. */
+  onTestChange?: (test: TestDto) => void;
+  /**
+   * Test-only seam for the existing detail-focused suites. The application always uses the
+   * compact default, leaving authored steps in the Steps panel until a reader asks to inspect
+   * the server-validated translation.
+   */
+  detailsInitiallyOpen?: boolean;
 }
 
 function needsReconfirmation(test: TestDto): boolean {
@@ -37,9 +46,18 @@ function needsReconfirmation(test: TestDto): boolean {
   return test.confirmedRevisionId !== null && test.compileStatus !== 'READY';
 }
 
-export function CompileReviewPanel({ testId }: CompileReviewPanelProps) {
+export function CompileReviewPanel({
+  testId,
+  onTestChange,
+  detailsInitiallyOpen = false,
+}: CompileReviewPanelProps) {
   const review = useCompileReview(testId);
   const { test } = review;
+  const [detailsOpen, setDetailsOpen] = useState(detailsInitiallyOpen);
+
+  useEffect(() => {
+    if (test) onTestChange?.(test);
+  }, [onTestChange, test]);
 
   if (review.loading && !test) {
     return (
@@ -179,11 +197,26 @@ export function CompileReviewPanel({ testId }: CompileReviewPanelProps) {
         </Alert>
       )}
 
-      <StepReviewList
-        steps={test.steps}
-        stepDiagnostics={test.compileDiagnostics ? test.compileDiagnostics.steps : null}
-        artifact={test.currentCandidateArtifact ?? null}
-      />
+      <Box sx={{ mt: 2 }}>
+        <Button
+          size="small"
+          variant="text"
+          aria-expanded={detailsOpen}
+          aria-controls="translation-review-details"
+          onClick={() => setDetailsOpen((open) => !open)}
+        >
+          {detailsOpen ? 'Hide translation details' : 'Review translation details'}
+        </Button>
+        <Collapse in={detailsOpen} unmountOnExit>
+          <Box id="translation-review-details" sx={{ mt: 1 }}>
+            <StepReviewList
+              steps={test.steps}
+              stepDiagnostics={test.compileDiagnostics ? test.compileDiagnostics.steps : null}
+              artifact={test.currentCandidateArtifact ?? null}
+            />
+          </Box>
+        </Collapse>
+      </Box>
 
       {review.conflict && (
         <Alert

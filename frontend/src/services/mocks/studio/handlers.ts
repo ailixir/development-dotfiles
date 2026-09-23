@@ -62,6 +62,16 @@ export function resetStudioMocks(): void {
 
 const allTests = (): TestDto[] => [...created, ...mockTests];
 
+/** Mirrors the backend's bounded `GET /tests` projection. */
+const forList = (test: TestDto): TestDto => ({
+  ...test,
+  currentCandidateArtifactHash: null,
+  currentCandidateArtifact: null,
+  confirmedRevisionArtifactHash: null,
+  confirmedRevisionArtifact: null,
+  compileDiagnostics: null,
+});
+
 /**
  * Story 10.10's compile-review corpus. Reachable by id from `GET /tests/{id}` — the single-draft
  * read, which is the only route that carries `compileDiagnostics` (ADR-002 §16.5) — and
@@ -205,7 +215,7 @@ export const studioHandlers = [
       // An explicit filter can only narrow the scope, never widen it.
       items = items.filter((test) => test.csiId === csiId);
     }
-    return HttpResponse.json(paginate(items, url));
+    return HttpResponse.json(paginate(items.map(forList), url));
   }),
 
   http.get(`${BASE}/tests/:id`, ({ params }) => {
@@ -362,6 +372,8 @@ export const studioHandlers = [
       ...test,
       compileStatus: 'READY',
       confirmedRevisionId: test.currentCandidateRevisionId,
+      confirmedRevisionArtifactHash: test.currentCandidateArtifactHash ?? null,
+      confirmedRevisionArtifact: test.currentCandidateArtifact ?? null,
       compileError: null,
       compileDiagnostics: null,
     };
@@ -398,8 +410,7 @@ export const studioHandlers = [
     if (key) {
       idempotency.set(key, executionId);
     }
-    acceptedExecutions = [
-      {
+    const pendingExecution: ExecutionSnapshot = {
         executionId,
         testId: test.id,
         csiId: test.csiId,
@@ -431,9 +442,8 @@ export const studioHandlers = [
         },
         revision: 1,
         streamComplete: false,
-      },
-      ...acceptedExecutions,
-    ];
+      };
+    acceptedExecutions = [pendingExecution, ...acceptedExecutions];
     return HttpResponse.json({ executionId, status: 'PENDING' }, { status: 202 });
   }),
 

@@ -2,14 +2,16 @@ import type { ReferenceDeclarations, ValidationBounds } from './bounds.js';
 import type { DiagnosticCollector } from './diagnostics.js';
 import type { ArgumentKind } from './language.js';
 import { SECRET_PERMITTED_ARGUMENT_KINDS } from './language.js';
+import type { StepReferencePolicy } from './referencePolicy.js';
 
 /**
  * Reference rules (AC-9, architecture §4.5 "References", §9.2).
  *
  * A reference is a `vars.get('NAME')` or `vars.secret('ID')` call. Three independent checks
  * apply: the name must be declared for this artifact, a secret may only appear in an approved
- * argument position, and the set of references used by a step must equal the set of reference
- * tokens the corresponding source line mentions.
+ * argument position, and the set of references used by a step must match what the step
+ * authorizes — its structural reference policy when one is supplied (ADR-SC-003), otherwise
+ * exactly the reference tokens the corresponding source line mentions.
  *
  * The validator deliberately does not claim to detect secret *literals*: an inline credential
  * that never goes through `vars.secret` is invisible here and is the backend's concern (10.8).
@@ -110,14 +112,17 @@ export function checkReferenceUse(
 }
 
 /**
- * Cross-checks the references a step used against the tokens its source line mentions (AC-9).
- * Both directions are errors: a token the code ignored, and a reference the line never asked for.
+ * Cross-checks the references a step used against what it authorizes (AC-9, ADR-SC-003).
+ *
+ * Without a policy, both directions are errors against the source line's tokens: a token the
+ * code ignored, and a reference the line never asked for. With a policy, every `required`
+ * reference must be used and every used reference must be `allowed`.
  */
 export function checkStepReferenceAlignment(
   usages: readonly ReferenceUsage[],
   tokens: SourceTokens,
   collector: DiagnosticCollector,
-  expected?: SourceTokens,
+  policy?: StepReferencePolicy,
 ): boolean {
   let ok = true;
   const usedVariables = new Set<string>();
@@ -127,27 +132,29 @@ export function checkStepReferenceAlignment(
     else usedVariables.add(usage.name);
   }
 
-  const authorized = expected ?? tokens;
-  for (const name of authorized.secrets) {
+  const required = policy?.required ?? tokens;
+  const allowed = policy?.allowed ?? tokens;
+  const origin = policy === undefined ? 'The source line mentions' : 'The step requires';
+  for (const name of required.secrets) {
     if (!usedSecrets.has(name)) {
       ok = false;
       collector.add({
         code: 'REFERENCE_MISSING',
-        message: `The source line mentions <secret ${name}> but the step code does not use vars.secret('${name}').`,
+        message: `${origin} <secret ${name}> but the step code does not use vars.secret('${name}').`,
       });
     }
   }
-  for (const name of authorized.variables) {
+  for (const name of required.variables) {
     if (!usedVariables.has(name)) {
       ok = false;
       collector.add({
         code: 'REFERENCE_MISSING',
-        message: `The source line mentions <var ${name}> but the step code does not use vars.get('${name}').`,
+        message: `${origin} <var ${name}> but the step code does not use vars.get('${name}').`,
       });
     }
   }
   for (const name of usedSecrets) {
-    if (!authorized.secrets.has(name)) {
+    if (!allowed.secrets.has(name)) {
       ok = false;
       collector.add({
         code: 'REFERENCE_EXTRA',
@@ -156,7 +163,7 @@ export function checkStepReferenceAlignment(
     }
   }
   for (const name of usedVariables) {
-    if (!authorized.variables.has(name)) {
+    if (!allowed.variables.has(name)) {
       ok = false;
       collector.add({
         code: 'REFERENCE_EXTRA',

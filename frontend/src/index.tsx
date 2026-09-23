@@ -1,12 +1,17 @@
 // Module Federation entry point for remote dev server standalone preview
+import { retireLegacyStudioWorker } from './utils/retireLegacyStudioWorker';
+
 async function bootstrap() {
+  if (await retireLegacyStudioWorker()) return;
   // Ensure default share scope is initialized before consuming shared modules
   try {
     const initSharing = (globalThis as any).__webpack_init_sharing__;
     if (typeof initSharing === 'function') {
       await initSharing('default');
     }
-  } catch {}
+  } catch {
+    // A standalone Webpack preview can start without a host share scope.
+  }
 
   const [ReactNS, ReactDomNS, RouterNS, ModuleNS] = await Promise.all([
     import('react'),

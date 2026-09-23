@@ -5,8 +5,9 @@ import {
   createFakeBrowserAdapter,
   createFakeClock,
   createRecordingStepReporter,
-} from '../src/executor/adapters/fake.js';
-import type { Operation } from '../src/executor/operations.js';
+} from './helpers/fakeAdapters.js';
+import type { FillValue, Operation } from '../src/executor/operations.js';
+import { StepRefusal } from '../src/executor/refusals.js';
 
 const gotoStep = (stepIndex: number, url: string): { stepIndex: number; operations: Operation[] } => ({
   stepIndex,
@@ -196,5 +197,116 @@ describe('trusted executor', () => {
       clock: createFakeClock(),
     });
     expect(result.executorVersion).toMatch(/^\d+\.\d+\.\d+$/u);
+  });
+});
+
+describe('variable-sourced goto URLs are scheme-checked at resolution', () => {
+  const variableGoto = (value: string) =>
+    executeSteps({
+      steps: [{ stepIndex: 0, operations: [{ op: 'goto', url: { kind: 'variable', name: 'TARGET' } }] }],
+      adapter: createFakeBrowserAdapter(),
+      reporter: createRecordingStepReporter(),
+      resolver: createValueResolver({ variables: { TARGET: value } }),
+      clock: createFakeClock(),
+    });
+
+  it.each([
+    ['file:', 'file:///etc/passwd'],
+    ['javascript:', 'javascript:alert(document.cookie)'],
+    ['data:', 'data:text/html,<h1>injected</h1>'],
+    ['relative', '/admin/settings'],
+    ['scheme-relative', '//evil.example/login'],
+    ['empty', ''],
+  ])('refuses a %s value with URL_SCHEME_NOT_PERMITTED and never echoes it', async (_label, value) => {
+    const adapter = createFakeBrowserAdapter();
+    const result = await executeSteps({
+      steps: [{ stepIndex: 0, operations: [{ op: 'goto', url: { kind: 'variable', name: 'TARGET' } }] }],
+      adapter,
+      reporter: createRecordingStepReporter(),
+      resolver: createValueResolver({ variables: { TARGET: value } }),
+      clock: createFakeClock(),
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.refusal).toBe('URL_SCHEME_NOT_PERMITTED');
+    expect(result.steps[0]?.failure).toMatch(/^URL_SCHEME_NOT_PERMITTED: Variable "TARGET"/u);
+    // The value is redacted anyway (it is a known value); the message must not carry it at all.
+    if (value !== '') expect(result.steps[0]?.failure).not.toContain(value);
+    expect(result.steps[0]?.failure).not.toContain('[REDACTED]');
+    // Nothing reached the browser.
+    expect(adapter.calls).toEqual([]);
+  });
+
+  it('lets an absolute https value through unchanged', async () => {
+    const result = await variableGoto('https://app.example/login?next=%2Fhome');
+    expect(result.ok).toBe(true);
+    expect(result.refusal).toBeNull();
+  });
+
+  it('lets an absolute http value through', async () => {
+    expect((await variableGoto('http://127.0.0.1:8080/')).ok).toBe(true);
+  });
+
+  it('reports no refusal for an ordinary step failure', async () => {
+    const adapter = createFakeBrowserAdapter();
+    adapter.failOn('goto', new Error('navigation refused'));
+    const result = await executeSteps({
+      steps: [gotoStep(0, 'https://a.example/')],
+      adapter,
+      reporter: createRecordingStepReporter(),
+      resolver: createValueResolver({}),
+      clock: createFakeClock(),
+    });
+    expect(result.ok).toBe(false);
+    expect(result.refusal).toBeNull();
+  });
+});
+
+describe('a secret fill carries its id to the adapter', () => {
+  const fillWith = (value: FillValue): Operation => ({
+    op: 'fill',
+    locator: { segments: [{ kind: 'getByTestId', testId: { kind: 'literal', value: 'pw' } }] },
+    value,
+  });
+
+  it('passes the secret id for a secret value and nothing for a literal or variable', async () => {
+    const adapter = createFakeBrowserAdapter();
+    const result = await executeSteps({
+      steps: [
+        {
+          stepIndex: 0,
+          operations: [
+            fillWith({ kind: 'secret', id: 'LOGIN_PW' }),
+            fillWith({ kind: 'literal', value: 'plain' }),
+            fillWith({ kind: 'variable', name: 'USER' }),
+          ],
+        },
+      ],
+      adapter,
+      reporter: createRecordingStepReporter(),
+      resolver: createValueResolver({ variables: { USER: 'alice' }, secrets: { LOGIN_PW: 'pw' } }),
+      clock: createFakeClock(),
+    });
+
+    expect(result.ok).toBe(true);
+    expect(adapter.fillSecretIds).toEqual(['LOGIN_PW', undefined, undefined]);
+  });
+
+  it('reports an adapter refusal as the run refusal', async () => {
+    const adapter = createFakeBrowserAdapter();
+    adapter.failOn(
+      'fill',
+      new StepRefusal('SECRET_ORIGIN_NOT_ALLOWED', 'Secret "LOGIN_PW" is not bound to this origin.'),
+    );
+    const result = await executeSteps({
+      steps: [{ stepIndex: 0, operations: [fillWith({ kind: 'secret', id: 'LOGIN_PW' })] }],
+      adapter,
+      reporter: createRecordingStepReporter(),
+      resolver: createValueResolver({ secrets: { LOGIN_PW: 'pw' } }),
+      clock: createFakeClock(),
+    });
+
+    expect(result.refusal).toBe('SECRET_ORIGIN_NOT_ALLOWED');
+    expect(result.steps[0]?.failure).toMatch(/^SECRET_ORIGIN_NOT_ALLOWED: Secret "LOGIN_PW"/u);
   });
 });

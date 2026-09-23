@@ -749,9 +749,8 @@ class StudioContractTest {
                   .forEachRemaining(
                       method -> operations.add(method.toUpperCase(Locale.ROOT) + " " + path));
             });
-    // Routes that exist in the prototype but are not part of the frozen contract: the step
-    // validator endpoints are retired by 10.11 and are deliberately not frozen here.
-    operations.removeIf(operation -> operation.contains("validate-steps"));
+    // Routes that exist in the prototype but are not part of the frozen contract: the variable
+    // validator endpoint is deliberately not frozen here.
     operations.removeIf(operation -> operation.contains("validate-variables"));
     return operations;
   }

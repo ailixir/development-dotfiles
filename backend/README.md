@@ -61,7 +61,7 @@ Five Spring profiles are defined. Activate via `--spring.profiles.active=<name>`
 | Profile | Purpose | State |
 |---|---|---|
 | `local` | Local dev (Zonky embedded Postgres) | Clean schema, no sample data. |
-| `dev` | Local dev + sample data (Zonky embedded Postgres) | Pre-populated with 3 CSIs, 15 checks, ~450 execution results, reports, tags, UI tests. |
+| `dev` | Local dev + sample data (Zonky embedded Postgres) | Pre-populated platform data; Studio starts empty. |
 | `test` | Integration tests (Testcontainers) | Clean schema per test. |
 | `staging` | Staging environment (env-var driven) | Placeholder; ready for 5.x stories. |
 | `prod` | Production (env-var driven) | Placeholder; ready for 5.x stories. |
@@ -76,7 +76,8 @@ Starts the app with Zonky embedded Postgres pre-populated with realistic sample 
 - **3 CSI systems** at different health levels (healthy, degraded, green)
 - **15 checks** (HTTP + TCP) with valid configurations
 - **~450 execution results** spanning 28 days with mixed statuses
-- **12 schedules**, **8 tags**, **3 reports**, **3 UI tests**, **2 secrets**
+- **12 schedules**, **8 tags**, **3 reports**, **2 secrets**
+- **No Studio tests or run history** — those appear only after a real save and run
 - Materialized view `csi_metrics_current` refreshed with live metrics
 
 Use for development, frontend integration, and stakeholder presentations.
@@ -103,33 +104,26 @@ What `dev.sh` wires, and why each piece is needed:
 | `STUDIO_RUNNER_SERVICE_TOKEN` | generated per session; the runner gets the same value as `STUDIO_RUNNER_SERVICE_IDENTITY` | dispatch closes `ERROR`/`DISPATCH_FAILED` naming `studio.runner.service-identity-token` |
 | `STUDIO_CALLBACK_SERVICE_TOKEN` | generated per session; the runner gets it as `STUDIO_RUNNER_CALLBACK_IDENTITY` | the API refuses every runner callback (its callback chain has no token to accept), so nothing the runner reports is recorded |
 | `CHECKS_SOURCE_UI_TEST` | `true` | the Studio pages say "not available in this environment" |
-| `STUDIO_GATEWAY_LOCAL_PASSTHROUGH` | `true` unless `STUDIO_GATEWAY_ENABLED=true` | every compile ends `GATEWAY_UNAVAILABLE`, so nothing is ever runnable |
+| `STUDIO_GATEWAY_PROVIDER` | `vertex` | plain-English steps cannot be compiled |
+| `STUDIO_GATEWAY_ENDPOINT`, `PROJECT`, `LOCATION`, `MODEL` | your Vertex deployment | startup refuses incomplete translation configuration |
+| `STUDIO_GATEWAY_CREDENTIALS_MODE` | `application-default` or `service-account-file` | Vertex authentication fails explicitly |
 
 The `local` profile itself runs the Studio dispatcher and reapers (`studio.execution.dispatcher.enabled`
 defaults to `true` there; the schedulers are gated `worker` or `local & !api`), so one `bootRun` is
 both the API and the worker.
 
-**Compile without an LLM.** A laptop has no R2D2 credentials, so the `local` profile can swap the
-disabled gateway for `LocalPassthroughGatewayClient`: write every step as a Playwright statement and
-it is proposed verbatim, then validated by the real runner, confirmed by you and run for real. An
-English step is refused (the draft shows `GATEWAY_UNAVAILABLE`; the reason is logged at WARN as
-`studio.gateway.failure`). The passthrough refuses to start under any profile other than `local`. For example:
-
-```text
-await page.goto('http://127.0.0.1:5173/');
-await expect(page).toHaveTitle(/Checks/i);
-```
+**Real translation only.** Studio accepts plain-English instructions. Compilation uses Vertex and
+fails visibly when Vertex configuration, credentials, or the model are unavailable. There is no
+passthrough, recorded response, or offline success path.
 
 **Ports.** `DEV_BACKEND_PORT`, `DEV_FRONTEND_PORT` and `DEV_STUDIO_RUNNER_PORT` move the three
 listeners (defaults 8080, 5173, 8090). With a non-default frontend port, `dev.sh` adds that origin to
 `CHECKS_CORS_ALLOWED_ORIGINS`, because otherwise every browser POST gets `403 Invalid CORS request`.
 `--no-studio-runner` skips the runner.
 
-**Known local limits.** The recording is uploaded to the runner's filesystem store, but the API's
-video store is still the in-memory fake, so the Runs page says the recording is available and then
-cannot play it (`GET …/video` answers `404`). Under `--seed` the health endpoint reports `DOWN`
-(`missing_partition: ui_test_executions_<month>`) and `dev.sh` starts the frontend after its 60 s
-wait anyway; Studio runs still work.
+**Evidence.** Local development shares one filesystem evidence directory between the runner and
+API. If that store is unavailable, recording and manifest errors are reported; the application does
+not invent an available recording.
 
 **The automated version.** `../tools/corun.sh` runs `StudioCoRunIT`: the real API and the real
 runner in one JVM session, five legs, the last of which runs a real Chromium against a page the test

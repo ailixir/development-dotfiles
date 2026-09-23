@@ -1,5 +1,6 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
+import { retireLegacyStudioWorker } from './utils/retireLegacyStudioWorker';
 // Lazy import to avoid eager shared consumption during bootstrap
 const loadBootstrap = () => import('./bootstrap');
 console.log('Main.tsx loaded');
@@ -15,13 +16,16 @@ async function startApp() {
   }
 
   try {
+    if (await retireLegacyStudioWorker()) return;
     // Initialize default share scope before consuming shared singletons
     try {
       const initSharing = (globalThis as any).__webpack_init_sharing__;
       if (typeof initSharing === 'function') {
         await initSharing('default');
       }
-    } catch {}
+    } catch {
+      // Vite standalone mode has no Module Federation share scope.
+    }
 
     let root: Root;
     if (!(window as any).__REACT_ROOT__) {

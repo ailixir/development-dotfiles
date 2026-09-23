@@ -130,13 +130,6 @@ public class StudioService {
     }
   }
 
-  /** Owners and explicitly authorized administrators may execute (§9.1). */
-  private void requireExecute(Authentication auth, String csiId) {
-    if (csiId == null || !csiOwnershipEvaluator.canExecute(auth, csiId)) {
-      throw new StudioAccessDeniedException();
-    }
-  }
-
   /**
    * Owners and explicitly authorized administrators may create, save, delete, compile and confirm
    * (§9.1; ADR-002 §27.2). Architecture §9.1 draws no line between those five, so this is the one
@@ -232,16 +225,9 @@ public class StudioService {
       storeAuthoring(test, authoring);
     }
     test = studioRepository.save(test);
-    // §8.3 — "persist draft and enqueue compile without waiting for gateway" (AC-2). The enqueue
-    // is registered as an after-commit synchronisation, so the row is committed and readable from
-    // another connection before the compile reads it, and no gateway or runner call is ever made
-    // inside this transaction or on this thread.
-    //
-    // A draft created with no steps has no source to compile; enqueueing one would spend a gateway
-    // call to be told so. It is left for the author's first save, which is a source change.
-    if (!(authoring == null ? request.steps() : authoring.steps()).isEmpty()) {
-      compilePipeline.enqueueAfterCommit(test.getId(), identity.email());
-    }
+    // Saving does not compile. A new draft is STALE until the author presses Run, which compiles
+    // the saved revision and then executes it; spending a gateway call on every save charged the
+    // author for work they had not asked for, and left a failed compile with no way to retry it.
     return project(test);
   }
 
@@ -373,7 +359,8 @@ public class StudioService {
       Authentication auth) {
     UITest test = lockForAuthoringWrite(id, sourceRevision, configurationRevision, auth);
     validateAuthoring(authoring, test.getCsiId());
-    return persistAuthoring(test, authoring, test.getAuthoring() == null);
+    AuthoringV2Response response = persistAuthoring(test, authoring, test.getAuthoring() == null);
+    return response;
   }
 
   /** Alias matching the existing update naming used by repository/service callers. */
@@ -533,9 +520,6 @@ public class StudioService {
       test.setCompileError(null);
     }
     test.setUpdatedAt(Instant.now());
-    if (change.anyChanged() && auth != null) {
-      compilePipeline.enqueueAfterCommit(id, principalOf(auth));
-    }
     return project(test);
   }
 
@@ -650,7 +634,12 @@ public class StudioService {
         candidateId == null
             ? null
             : revisionRepository.findByIdAndTestId(candidateId, test.getId()).orElse(null);
-    return UITestDto.from(test, candidate);
+    UUID confirmedRevisionId = test.getConfirmedRevisionId();
+    UITestRevision confirmedRevision =
+        confirmedRevisionId == null
+            ? null
+            : revisionRepository.findByIdAndTestId(confirmedRevisionId, test.getId()).orElse(null);
+    return UITestDto.from(test, candidate, confirmedRevision);
   }
 
   private UITest lockForAuthoringWrite(
@@ -874,8 +863,9 @@ public class StudioService {
   /**
    * Accepts an execution (AC-7 – AC-11).
    *
-   * <p>Authorization happens here, on the server, before any work: only an owner or an explicitly
-   * authorized administrator of the draft's CSI may execute it (§9.1).
+   * <p>Studio execution is open to every authenticated application user. Read, authoring and
+   * cancellation permissions remain CSI-scoped; accepting a new run deliberately does not require
+   * CSI ownership or an execute entitlement.
    *
    * <p>The transaction itself belongs to {@link StudioAcceptanceService}. This method is
    * deliberately <em>not</em> transactional: when the durable idempotency index refuses a second
@@ -889,7 +879,6 @@ public class StudioService {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public ExecutionSnapshotDto executeTest(UUID testId, Authentication auth, String idempotencyKey) {
     UITest test = studioRepository.findById(testId).orElseThrow(StudioAccessDeniedException::new);
-    requireExecute(auth, test.getCsiId());
     String principal = principalOf(auth);
 
     UUID executionId;
@@ -930,8 +919,13 @@ public class StudioService {
         executionRepository
             .findByExecutionId(executionId)
             .orElseThrow(StudioAccessDeniedException::new);
-    requireWrite(auth, execution.getCsiId());
     String principal = principalOf(auth);
+    if (execution.getCsiId() == null) {
+      throw new StudioAccessDeniedException();
+    }
+    if (!principal.equals(execution.getPrincipal())) {
+      requireWrite(auth, execution.getCsiId());
+    }
 
     if (ledgerStatements.requestCancel(executionId, principal, Instant.now()).isEmpty()) {
       // Zero rows is the verdict; this only names it. A row whose outcome is known — terminal, or
@@ -970,10 +964,9 @@ public class StudioService {
   }
 
   /**
-   * Reads one execution snapshot, authorized against the <b>execution's own immutable CSI</b> —
-   * never the parent test's current value and never a mutable parent lookup, and equally for a
-   * soft-deleted test, whose history must stay readable to the people who could always read it
-   * (AC-4a, §9.1).
+   * Reads one execution snapshot. The initiating principal may always follow the run the API
+   * accepted for them; other callers are authorized against the execution's immutable CSI — never
+   * the parent test's current value or a mutable parent lookup.
    *
    * <p>A quarantined row (no CSI at all) is unreadable by everyone, including administrators.
    */
@@ -982,7 +975,13 @@ public class StudioService {
         executionRepository
             .findByExecutionId(executionId)
             .orElseThrow(StudioAccessDeniedException::new);
-    requireRead(auth, execution.getCsiId());
+    if (execution.getCsiId() == null) {
+      throw new StudioAccessDeniedException();
+    }
+    String principal = principalOf(auth);
+    if (!principal.equals(execution.getPrincipal())) {
+      requireRead(auth, execution.getCsiId());
+    }
     return snapshotMapper.toSnapshot(execution);
   }
 

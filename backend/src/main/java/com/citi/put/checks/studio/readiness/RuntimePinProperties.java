@@ -34,6 +34,6 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 public record RuntimePinProperties(
     @DefaultValue("1") int artifactSchemaVersion,
     @DefaultValue("1.0.0") String validatorSchemaVersion,
-    @DefaultValue("1.0.0") String syntaxReferenceVersion,
+    @DefaultValue("1.1.0") String syntaxReferenceVersion,
     @DefaultValue("1.0.0") String executorVersion,
     @DefaultValue("1.63.0") String playwrightVersion) {}

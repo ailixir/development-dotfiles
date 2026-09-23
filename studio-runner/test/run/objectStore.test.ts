@@ -18,10 +18,10 @@ import {
   ObjectStorePutError,
   ObjectStoreUnavailableError,
   PERMITTED_OBJECT_STORE_OPERATIONS,
-  createFakeObjectStore,
   createLocalObjectStore,
 } from '../../src/run/objectStore.js';
 import type { ObjectStoreClient } from '../../src/run/objectStore.js';
+import { createFakeObjectStore } from '../helpers/fakeObjectStore.js';
 import {
   openEvidenceWindow,
   uploadRecording,

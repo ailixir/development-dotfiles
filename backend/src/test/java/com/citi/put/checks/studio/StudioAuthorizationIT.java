@@ -138,15 +138,27 @@ class StudioAuthorizationIT {
   // ── AC-4a: readers, owners and the boundaries between them ───────────────
 
   @Test
-  void aReaderMayReadAndMayNotExecute() {
+  void everyAuthenticatedUserMayExecuteRegardlessOfCsiOwnership() throws Exception {
     assertThat(get("/api/v1/studio/tests/" + testId, reader()).getStatusCode().value())
         .isEqualTo(200);
     assertThat(get("/api/v1/studio/executions/" + executionId, reader()).getStatusCode().value())
         .isEqualTo(200);
     assertThat(
             post("/api/v1/studio/tests/" + testId + "/execute", reader()).getStatusCode().value())
-        .as("only owners and explicitly authorized administrators may execute")
-        .isEqualTo(403);
+        .as("a reader needs no separate execute entitlement")
+        .isEqualTo(202);
+    ResponseEntity<String> strangerAccepted =
+        post("/api/v1/studio/tests/" + testId + "/execute", stranger());
+    assertThat(strangerAccepted.getStatusCode().value())
+        .as("CSI ownership is not an execution prerequisite")
+        .isEqualTo(202);
+    UUID strangerExecution = UUID.fromString(json(strangerAccepted).path("executionId").asText());
+    assertThat(
+            get("/api/v1/studio/executions/" + strangerExecution, stranger())
+                .getStatusCode()
+                .value())
+        .as("the initiator can follow the execution that was accepted for them")
+        .isEqualTo(200);
   }
 
   @Test

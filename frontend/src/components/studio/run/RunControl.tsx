@@ -1,31 +1,25 @@
 import React, { useEffect, useRef } from 'react';
-import { Alert, AlertTitle, Box, Button, Stack, Typography } from '@mui/material';
+import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
-import { narrativeFor } from '@/components/studio/review/compileStateNarratives';
-import { useRunGate } from './useRunGate';
+import { compileErrorNarrative } from '../review/compileErrorCodes';
+import { useRunGate, type RunSaveOutcome } from './useRunGate';
 
 /**
- * The Run control, governed by the server's readiness and by nothing else (story 10.11a).
+ * The single Run entry point.
  *
- * AC-1: enabled if and only if `compileStatus === 'READY'`, read from a `GET /tests/{id}` body,
- * over a total mapping with no `default:` branch and no `??` fallback. AC-2: the client's
- * English-grammar validator is not a term in that predicate anywhere — asserted on the requests
- * the mock server observes, because a source scan cannot see a gate reconstructed through a
- * differently-named local. AC-4: every refusal the execute route declares is rendered distinctly,
- * branched on `error` for the `409` and on the status for the `429` and the `503`.
- *
- * **Why this owns the button rather than advising the page.** The page previously computed its own
- * `disabled` expression beside its own `handleRunTest` guard, which is two places for the same
- * rule and is how the two came to disagree. The page now renders this control and passes it a
- * draft id; there is no `disabled` prop to override and no second predicate to drift from.
- *
- * The blocked explanation is story 10.10's, read through `narrativeFor`. Re-wording the five
- * states here would be a second hand-maintained copy of one vocabulary — the arrangement ADR-002
- * §18.3 exists to prevent — and the two surfaces would drift the moment one of them was edited.
+ * Run prepares and then runs: it saves the author's edits if there are any, asks the server to
+ * translate the saved revision if it has no fresh artifact, and then dispatches it. Saving no
+ * longer translates in the background, so there is no state in which the author is told to save
+ * again and wait — the button they already pressed is doing the work, and it says so while it does.
  */
 export const RUN_LABEL = 'Run Test';
 export const STOP_LABEL = 'Stop';
 export const STOPPING_LABEL = 'Stopping…';
+export const SAVING_LABEL = 'Saving…';
+export const PREPARING_LABEL = 'Preparing…';
+export const STARTING_LABEL = 'Starting…';
+/** Shown when a compile started elsewhere is still settling, so Run must wait rather than act. */
+export const WAITING_LABEL = 'Getting ready…';
 
 export interface RunControlProps {
   /** The draft to run. Null while no scenario is selected. */
@@ -40,8 +34,21 @@ export interface RunControlProps {
    */
   readonly isStopping?: boolean;
   readonly onAccepted?: (executionId: string) => void;
+  readonly onPreparingChange?: (preparing: boolean) => void;
   /** Rendered beside the control when the draft has no steps to run. */
   readonly hasSteps?: boolean;
+  /** Visible editor state differs from the saved draft. Run saves it before preparing. */
+  readonly isDirty?: boolean;
+  /**
+   * Persists the author's unsaved edits, so Run never dispatches unsaved content.
+   *
+   * The page owns saving — it holds the draft, its revisions and the conflict alert — so Run asks
+   * it rather than holding a second save with a second idea of the revisions. Without this the
+   * control falls back to refusing a dirty draft, which is the state this story removes.
+   */
+  readonly onSaveBeforeRun?: () => Promise<RunSaveOutcome>;
+  /** Changes after Save so the control refreshes the server-held checklist without remounting. */
+  readonly refreshToken?: string | number;
   /**
    * A programmatic request to run, as a monotonically increasing token.
    *
@@ -65,12 +72,67 @@ export const RunControl: React.FC<RunControlProps> = ({
   onStop,
   isStopping = false,
   onAccepted,
+  onPreparingChange,
   hasSteps = true,
+  isDirty = false,
+  onSaveBeforeRun,
+  refreshToken,
   runRequest = 0,
 }) => {
-  const gate = useRunGate(testId, onAccepted);
-  const blocked = gate.test ? narrativeFor(gate.test.compileStatus) : null;
+  const gate = useRunGate(testId, onAccepted, refreshToken, {
+    saveBeforeRun: onSaveBeforeRun,
+    isDirty,
+  });
   const runnable = gate.canRun && hasSteps;
+
+  /** A compile is settling and this control did not start it — there is nothing to press. */
+  const waiting = gate.action === 'wait' && gate.phase === 'idle';
+
+  const busyLabel = (() => {
+    switch (gate.phase) {
+      case 'saving':
+        return SAVING_LABEL;
+      case 'compiling':
+        return PREPARING_LABEL;
+      case 'starting':
+        return STARTING_LABEL;
+      case 'idle':
+      default:
+        return waiting ? WAITING_LABEL : null;
+    }
+  })();
+
+  const compileMessage = (() => {
+    const outcome = gate.compileOutcome;
+    if (!outcome) return null;
+    switch (outcome.kind) {
+      case 'needsRevision':
+        return {
+          title: 'Some steps need attention',
+          body: 'The translation of your checklist was refused. Check the steps listed below, then run again.',
+        };
+      case 'failed':
+        return {
+          title: 'Your test could not be prepared',
+          body: outcome.error
+            ? compileErrorNarrative(outcome.error.code)
+            : 'Preparing this test did not finish. Your saved checklist is unchanged — run again to retry.',
+        };
+      case 'refused':
+        return { title: 'This test could not be prepared', body: outcome.message };
+      case 'timedOut':
+      default:
+        return {
+          title: 'Preparing took too long',
+          body: 'Your saved checklist is unchanged. Run again to retry.',
+        };
+    }
+  })();
+
+  useEffect(() => {
+    onPreparingChange?.(gate.executeInFlight && !isRunning);
+    return () => onPreparingChange?.(false);
+  }, [gate.executeInFlight, isRunning, onPreparingChange]);
 
   const servedRunRequest = useRef(0);
   useEffect(() => {
@@ -79,28 +141,56 @@ export const RunControl: React.FC<RunControlProps> = ({
     gate.run();
   }, [runRequest, runnable, isRunning, gate]);
 
+  const stopLabel = isStopping ? STOPPING_LABEL : STOP_LABEL;
+
   return (
     <Box>
       <Button
+        aria-label={isRunning ? stopLabel : RUN_LABEL}
         variant="contained"
-        size="large"
-        startIcon={isRunning ? <Stop /> : <PlayArrow />}
+        size="medium"
+        startIcon={
+          isRunning ? (
+            <Stop />
+          ) : busyLabel ? (
+            <CircularProgress aria-label="Preparing test" size={16} color="inherit" />
+          ) : (
+            <PlayArrow />
+          )
+        }
         color={isRunning ? 'error' : 'success'}
         onClick={() => (isRunning ? onStop?.() : gate.run())}
         disabled={isRunning ? isStopping : !runnable}
-        sx={{ minWidth: 140 }}
+        sx={{ minWidth: 132, minHeight: 42, whiteSpace: 'nowrap' }}
       >
-        {isRunning ? (isStopping ? STOPPING_LABEL : STOP_LABEL) : RUN_LABEL}
+        {isRunning ? stopLabel : (busyLabel ?? RUN_LABEL)}
       </Button>
 
-      {!isRunning && blocked && !gate.enablement?.canRun && (
+      {!isRunning && !hasSteps && (
         <Typography
           variant="caption"
           color="text.secondary"
           data-testid="run-blocked-reason"
           sx={{ display: 'block', mt: 1 }}
         >
-          {blocked.whatIsBlocked}
+          Add a step to run this test.
+        </Typography>
+      )}
+
+      {!isRunning && hasSteps && waiting && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          data-testid="run-blocked-reason"
+          sx={{ display: 'block', mt: 1 }}
+        >
+          Getting your saved test ready…
+        </Typography>
+      )}
+
+      {!isRunning && gate.preparationMessage && (
+        <Typography variant="caption" role="status" sx={{ display: 'block', mt: 1 }}>
+          {gate.preparationMessage}
         </Typography>
       )}
 
@@ -113,6 +203,15 @@ export const RunControl: React.FC<RunControlProps> = ({
         >
           {gate.loadError}
         </Typography>
+      )}
+
+      {compileMessage && !gate.refusal && (
+        <Alert severity="warning" role="alert" data-testid="run-compile-outcome" sx={{ mt: 2 }}>
+          <AlertTitle data-testid="run-compile-outcome-title">{compileMessage.title}</AlertTitle>
+          <Typography variant="body2" data-testid="run-compile-outcome-body">
+            {compileMessage.body}
+          </Typography>
+        </Alert>
       )}
 
       {gate.refusal && (

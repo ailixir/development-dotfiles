@@ -13,14 +13,13 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 
 /**
- * Studio v1 gaps: a deployment that sets nothing gets {@code provider: none}, i.e. recordings are
- * reported UNAVAILABLE rather than offered on a route that can only 404. Bound from the shipped
- * {@code application.yml} alone, outside the test task's {@code in-memory} override.
+ * The shipped application default is the fully functional local filesystem adapter. Clustered
+ * deployments select S3 explicitly because private pod filesystems cannot be shared implicitly.
  */
 class VideoStoreProviderDefaultTest {
 
   @Test
-  void theShippedDefaultServesNoRecordings() throws IOException {
+  void theShippedDefaultUsesLocalFilesystemStorage() throws IOException {
     MutablePropertySources sources = new MutablePropertySources();
     for (PropertySource<?> source :
         new YamlPropertySourceLoader()
@@ -35,7 +34,7 @@ class VideoStoreProviderDefaultTest {
     VideoStoreProperties bound =
         binder.bind("studio.execution.video-store", VideoStoreProperties.class).get();
 
-    assertThat(bound.provider()).isEqualTo(VideoStoreProperties.PROVIDER_NONE);
-    assertThat(bound.servesRecordings()).isFalse();
+    assertThat(bound.provider()).isEqualTo(VideoStoreProperties.PROVIDER_LOCAL);
+    assertThat(bound.servesRecordings()).isTrue();
   }
 }

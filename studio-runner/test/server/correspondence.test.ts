@@ -152,3 +152,49 @@ describe('AC-3 — a job whose values do not correspond to its declarations is r
     }
   });
 });
+
+describe('secretOrigins — optional, bound only to declared secrets, canonical origins only', () => {
+  const problemsFor = (secretOrigins: unknown) => {
+    const result = validateEnvelope(validJob({ secretOrigins }));
+    return result.ok ? [] : result.problems;
+  };
+
+  it('accepts canonical http(s) origins for a declared secret, and accepts absence', () => {
+    expect(problemsFor({ PW: ['https://login.app.example', 'http://127.0.0.1:8080'] })).toEqual([]);
+    expect(problemsFor({ PW: [] })).toEqual([]);
+    expect(validateEnvelope(validJob()).ok).toBe(true);
+  });
+
+  it('refuses an origin for a secret the job does not declare, by id only', () => {
+    expect(problemsFor({ OTHER: ['https://login.app.example'] })).toEqual([
+      { code: 'JOB_RESOLVED_NOT_DECLARED', field: 'secretOrigins.OTHER' },
+    ]);
+  });
+
+  it.each([
+    ['a path', 'https://login.app.example/signin'],
+    ['a trailing slash', 'https://login.app.example/'],
+    ['an uppercase host', 'https://Login.App.Example'],
+    ['a default port', 'https://login.app.example:443'],
+    ['a non-http scheme', 'ftp://login.app.example'],
+    ['a non-URL', 'login.app.example'],
+  ])('refuses %s', (_label, origin) => {
+    const problems = problemsFor({ PW: [origin] });
+    expect(problems).toEqual([{ code: 'JOB_FIELD_INVALID', field: 'secretOrigins.PW' }]);
+    // A problem names the field, never the origin.
+    expect(JSON.stringify(problems)).not.toContain(origin);
+  });
+
+  it('refuses a non-record, a non-array entry and an over-long list', () => {
+    expect(problemsFor(['https://login.app.example'])).toEqual([
+      { code: 'JOB_FIELD_INVALID', field: 'secretOrigins' },
+    ]);
+    expect(problemsFor({ PW: 'https://login.app.example' })).toEqual([
+      { code: 'JOB_FIELD_INVALID', field: 'secretOrigins.PW' },
+    ]);
+    const many = Array.from({ length: 17 }, (_, index) => `https://h${String(index)}.example`);
+    expect(problemsFor({ PW: many })).toEqual([
+      { code: 'JOB_FIELD_INVALID', field: 'secretOrigins.PW' },
+    ]);
+  });
+});

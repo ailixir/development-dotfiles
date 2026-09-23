@@ -88,7 +88,21 @@ spec:
             - name: STUDIO_RUNNER_SCRATCH_DIR
               value: {{ $scratch | quote }}
             - name: STUDIO_RUNNER_OBJECT_STORE_DIR
-              value: {{ printf "%s/objects" $scratch | quote }}
+              value: {{ if eq .Values.objectStore.provider "local" }}{{ .Values.objectStore.localDirectory | quote }}{{ else }}{{ printf "%s/objects" $scratch | quote }}{{ end }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_PROVIDER
+              value: {{ .Values.objectStore.provider | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_ENDPOINT
+              value: {{ if eq .Values.objectStore.provider "s3" }}{{ required "objectStore.endpoint is required for provider=s3" .Values.objectStore.endpoint | quote }}{{ else }}{{ .Values.objectStore.endpoint | quote }}{{ end }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_REGION
+              value: {{ .Values.objectStore.region | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_BUCKET
+              value: {{ if eq .Values.objectStore.provider "s3" }}{{ required "objectStore.bucket is required for provider=s3" .Values.objectStore.bucket | quote }}{{ else }}{{ .Values.objectStore.bucket | quote }}{{ end }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_FORCE_PATH_STYLE
+              value: {{ .Values.objectStore.pathStyleAccess | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_ACCESS_KEY_ID_FILE
+              value: {{ printf "%s/accessKeyId" .Values.studioRunner.objectStore.mountPath | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_SECRET_ACCESS_KEY_FILE
+              value: {{ printf "%s/secretAccessKey" .Values.studioRunner.objectStore.mountPath | quote }}
             - name: STUDIO_RUNNER_CALLBACK_BASE_URL
               value: {{ include "put-checks.studioRunner.callbackBaseUrl" . | quote }}
             - name: STUDIO_RUNNER_SERVICE_IDENTITY
@@ -131,9 +145,15 @@ spec:
               mountPath: {{ .Values.studioRunner.scratch.mountPath }}
             - name: dev-shm
               mountPath: /dev/shm
+            {{- if eq .Values.objectStore.provider "s3" }}
             - name: object-store-credentials
               mountPath: {{ .Values.studioRunner.objectStore.mountPath }}
               readOnly: true
+            {{- end }}
+            {{- if eq .Values.objectStore.provider "local" }}
+            - name: local-object-store
+              mountPath: {{ .Values.objectStore.localDirectory }}
+            {{- end }}
           lifecycle:
             preStop:
               # Flip readiness before the drain: the endpoint leaves the Service while admitted
@@ -148,6 +168,7 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: {{ .Values.studioRunner.devShm.sizeLimit }}
+        {{- if eq .Values.objectStore.provider "s3" }}
         - name: object-store-credentials
           # ⚠ Coupled to `shareProcessNamespace` above (QA MED-1). A second container in this pod
           # reads this Secret through /proc/1/root whatever its own mounts say, so the one-container
@@ -160,6 +181,12 @@ spec:
               - key: {{ . }}
                 path: {{ . }}
               {{- end }}
+        {{- end }}
+        {{- if eq .Values.objectStore.provider "local" }}
+        - name: local-object-store
+          persistentVolumeClaim:
+            claimName: {{ include "put-checks.objectStore.localClaim" . }}
+        {{- end }}
       {{- with .Values.studioRunner.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -18,7 +18,9 @@ public class LocalEmbeddedPostgresConfig {
 
   @Bean(destroyMethod = "close")
   public EmbeddedPostgres embeddedPostgres() throws IOException {
-    EmbeddedPostgres instance = EmbeddedPostgres.builder().start();
+    // The downloaded Darwin x86_64 binaries may run under Rosetta on ARM and reject the host's
+    // otherwise valid UTF-8 locale. `C` is portable, while database encoding remains UTF-8.
+    EmbeddedPostgres instance = EmbeddedPostgres.builder().setLocaleConfig("locale", "C").start();
     LOGGER.info(
         "Zonky embedded PostgreSQL started on port {} — jdbc url: {}",
         instance.getPort(),

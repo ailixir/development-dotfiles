@@ -213,7 +213,10 @@ env -i PATH="$PATH" HOME="$HOME" TMPDIR="$WORK" \
 `$WORK` is any directory you own; the scratch root must be a **child** of it, because the runner
 removes its scratch root on exit. The backend side is `STUDIO_RUNNER_BASE_URL=http://127.0.0.1:8090`
 plus the same two tokens (see `backend/README.md`, "Checks Studio end to end on a laptop"). The
-recording lands in `$WORK/objects`; the API cannot serve it yet, so playback is unavailable locally.
+recording and terminal manifest land in `$WORK/objects`; `dev.sh` exports that exact directory as
+the backend's `STUDIO_EVIDENCE_DIRECTORY`, so playback, ranged reads and recovery work locally.
+The default provider is `local`. To activate Sonic, select `s3` and provide its endpoint, region,
+bucket, path-style choice and the two mounted credential-file paths.
 
 `../tools/corun.sh` is the automated form: `StudioCoRunIT` starts this process the same way and its
 leg 4 requires a real run against a loopback page to end `PASSED` with the ledger row `DONE`.

@@ -1,26 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Card, CardContent, Chip, Grid, IconButton, InputAdornment, MenuItem, Pagination, Paper, Select, Stack, TextField, Tooltip, Typography, Skeleton, CircularProgress, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Box, Card, CardContent, Chip, Grid, IconButton, InputAdornment, MenuItem, Pagination, Paper, Select, Stack, TextField, Tooltip, Typography, Skeleton, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, FormHelperText, InputLabel } from '@mui/material';
 import { Add, Delete, PlayArrow, Search, Science } from '@mui/icons-material';
 import studioApi from '@/services/api/studioApi';
 import {
-  subscribeToExecution,
-  type ExecutionSubscription,
-} from '@/services/api/studioTransportWiring';
-import {
   defaultConfiguration,
-  isTerminalExecutionStatus,
-  type ExecutionSnapshot,
   type TestDto,
   type TestRequest,
 } from '@/types/studio/studioTypes';
 import {
-  executeRefusalFor,
   executionStatusLabel,
   executionStatusTone,
-  isCancelledOutcome,
 } from '@/components/studio/run';
 import { useNavigate } from 'react-router-dom';
-import { useAppSelector } from '@/store';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { fetchCSIs } from '@/store/slices/csiSlice';
 
 const pageSize = 9;
 
@@ -29,12 +22,7 @@ const LAST_RUN_FILTERS = ['PASSED', 'FAILED', 'ERROR'] as const;
 const NEVER_RUN = 'NEVER';
 
 function lastRunChipLabel(test: Pick<TestDto, 'lastRunStatus'>): string {
-  return test.lastRunStatus ? `Last run: ${executionStatusLabel(test.lastRunStatus)}` : 'Never run';
-}
-
-/** How the outcome of a run started from this page is announced. */
-function runOutcomeMessage(testName: string, snapshot: Pick<ExecutionSnapshot, 'status' | 'errorCode'>): string {
-  return `${testName}: ${executionStatusLabel(snapshot.status, snapshot.errorCode)}`;
+  return test.lastRunStatus ? `Previous run: ${executionStatusLabel(test.lastRunStatus)}` : 'No run history';
 }
 
 const StudioTestsPage: React.FC = () => {
@@ -44,14 +32,23 @@ const StudioTestsPage: React.FC = () => {
   const [lastRun, setLastRun] = useState('');
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const searchContext = useAppSelector(state => state.dashboard.searchContext);
-  const [running, setRunning] = useState<Record<string, boolean>>({});
-  /** One live subscription per test run from this page. All are closed when the page unmounts. */
-  const subscriptions = useRef<Map<string, ExecutionSubscription>>(new Map());
+  const { data: registeredCsis, loading: csiLoading, error: csiError } = useAppSelector(state => state.csi);
   const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error'; id?: string }>({ open: false, message: '', severity: 'success' });
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [createForm, setCreateForm] = useState({ name: '', environment: 'Development', csiId: '', description: '' });
+  const [createForm, setCreateForm] = useState({ name: '', csiId: '', environment: 'Development', description: '' });
+
+  const suggestedCsiId = useMemo(() => {
+    if (searchContext.csiId && registeredCsis.some((csi) => csi.id === searchContext.csiId)) {
+      return searchContext.csiId;
+    }
+    return registeredCsis.length === 1 ? registeredCsis[0].id : '';
+  }, [registeredCsis, searchContext.csiId]);
+  const selectedCsiIsRegistered = csiLoading === 'succeeded'
+    && !csiError
+    && registeredCsis.some((csi) => csi.id === createForm.csiId);
 
   const load = async () => {
     setLoading(true);
@@ -63,92 +60,18 @@ const StudioTestsPage: React.FC = () => {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    dispatch(fetchCSIs());
+  }, [dispatch]);
 
   useEffect(() => {
-    const open = subscriptions.current;
-    return () => {
-      open.forEach((subscription) => subscription.close());
-      open.clear();
-    };
-  }, []);
-
-  const finishRun = (testId: string) => {
-    subscriptions.current.get(testId)?.close();
-    subscriptions.current.delete(testId);
-    setRunning((r) => ({ ...r, [testId]: false }));
-  };
-
-  /**
-   * Runs a draft and reports its outcome. The outcome comes through the same live transport the
-   * Studio page uses (SSE, with polling as the fallback), and the run counts as ended only on a
-   * status in the shared terminal set. A transport that gives up without a terminal status is
-   * reported as "could not follow the run", not as a failed test.
-   */
-  const runTest = async (test: TestDto) => {
-    setRunning((r) => ({ ...r, [test.id]: true }));
-    let executionId: string;
-    try {
-      executionId = (await studioApi.executeTest(test.id)).executionId;
-    } catch (error: unknown) {
-      const failure = error as {
-        response?: { status?: number; data?: { error?: string; message?: string } };
-        message?: string;
-      };
-      const refusal = executeRefusalFor(
-        failure.response?.status ?? null,
-        failure.response?.data?.error ?? null,
-      );
-      setRunning((r) => ({ ...r, [test.id]: false }));
-      setSnack({
-        open: true,
-        message: `${test.name}: ${refusal?.title ?? failure.message ?? 'the run could not be started'}`,
-        severity: 'error',
-        id: test.id,
-      });
-      return;
-    }
-    let settled = false;
-    subscriptions.current.get(test.id)?.close();
-    const subscription = subscribeToExecution(executionId, {
-      onSnapshot: (snapshot) => {
-        if (settled || !isTerminalExecutionStatus(snapshot.status)) return;
-        settled = true;
-        const outcome = snapshot.status as TestDto['lastRunStatus'];
-        setTests((previous) =>
-          previous.map((candidate) =>
-            candidate.id === test.id
-              ? { ...candidate, lastRunStatus: outcome, lastRunAt: snapshot.endedAt ?? candidate.lastRunAt }
-              : candidate,
-          ),
-        );
-        setSnack({
-          open: true,
-          message: runOutcomeMessage(test.name, snapshot),
-          severity:
-            snapshot.status === 'PASSED' || isCancelledOutcome(snapshot.status, snapshot.errorCode)
-              ? 'success'
-              : 'error',
-          id: test.id,
-        });
-        finishRun(test.id);
-      },
-      onClosed: () => {
-        if (settled) return;
-        settled = true;
-        setSnack({
-          open: true,
-          message: `${test.name}: the run was started, but its outcome could not be followed here. See Runs.`,
-          severity: 'error',
-          id: test.id,
-        });
-        finishRun(test.id);
-      },
+    if (!createOpen || csiLoading !== 'succeeded') return;
+    setCreateForm((form) => {
+      if (registeredCsis.some((csi) => csi.id === form.csiId)) return form;
+      return { ...form, csiId: suggestedCsiId };
     });
-    if (!settled) {
-      subscriptions.current.set(test.id, subscription);
-    }
-  };
+  }, [createOpen, csiLoading, registeredCsis, suggestedCsiId]);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -179,7 +102,10 @@ const StudioTestsPage: React.FC = () => {
           <Button
             variant="contained"
             startIcon={<Add />}
-            onClick={() => setCreateOpen(true)}
+            onClick={() => {
+              setCreateForm((form) => ({ ...form, csiId: suggestedCsiId }));
+              setCreateOpen(true);
+            }}
             size="large"
           >
             Create Test
@@ -224,32 +150,32 @@ const StudioTestsPage: React.FC = () => {
                     <Typography 
                       variant="subtitle1" 
                       fontWeight={600}
-                      onClick={() => !loading && !running[t.id] && navigate(`/checks/studio/${t.id}`)}
+                      onClick={() => !loading && navigate(`/checks/studio/${t.id}`)}
                       sx={{ 
-                        cursor: loading || running[t.id] ? 'default' : 'pointer',
-                        color: loading || running[t.id] ? 'text.primary' : 'primary.main',
+                        cursor: loading ? 'default' : 'pointer',
+                        color: loading ? 'text.primary' : 'primary.main',
                         '&:hover': { 
-                          textDecoration: loading || running[t.id] ? 'none' : 'underline' 
+                          textDecoration: loading ? 'none' : 'underline'
                         }
                       }}
                     >
                       {t.name || <Skeleton width={160} />}
                     </Typography>
                     <Stack direction="row" spacing={0.5}>
-                      <Tooltip title={running[t.id] ? 'Running…' : 'Run'}>
+                      <Tooltip title="Open test">
                         <span>
                           <IconButton
                             size="small"
-                            disabled={loading || !!running[t.id]}
-                            aria-label={`Run ${t.name}`}
-                            onClick={() => { void runTest(t); }}
+                            disabled={loading}
+                            aria-label={`Open ${t.name}`}
+                            onClick={() => navigate(`/checks/studio/${t.id}`)}
                           >
-                            {running[t.id] ? <CircularProgress size={16} /> : <PlayArrow fontSize="small" />}
+                            <PlayArrow fontSize="small" />
                           </IconButton>
                         </span>
                       </Tooltip>
                       <Tooltip title="Delete">
-                        <span><IconButton size="small" disabled={loading || !!running[t.id]} onClick={async () => { try { await studioApi.deleteTest(t.id); await load(); } catch { setSnack({ open: true, message: `${t.name}: could not be deleted`, severity: 'error', id: t.id }); } }}><Delete fontSize="small" /></IconButton></span>
+                        <span><IconButton size="small" disabled={loading} onClick={async () => { try { await studioApi.deleteTest(t.id); await load(); } catch { setSnack({ open: true, message: `${t.name}: could not be deleted`, severity: 'error', id: t.id }); } }}><Delete fontSize="small" /></IconButton></span>
                       </Tooltip>
                     </Stack>
                   </Stack>
@@ -266,6 +192,11 @@ const StudioTestsPage: React.FC = () => {
                     )}
                     <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>Updated {t.updatedAt ? new Date(t.updatedAt).toLocaleString() : ''}</Typography>
                   </Stack>
+                  {!loading && t.lastRunStatus && (
+                    <Typography variant="caption" color="text.secondary">
+                      This is run history and may describe an earlier saved version.
+                    </Typography>
+                  )}
                 </Stack>
               </CardContent>
             </Card>
@@ -276,7 +207,6 @@ const StudioTestsPage: React.FC = () => {
       <Stack alignItems="center" sx={{ mt: 2 }}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           Showing {paged.length} of {filtered.length} tests
-          {searchContext.csiId && ` (filtered by CSI: ${searchContext.csiId})`}
         </Typography>
         <Pagination count={totalPages} page={page} onChange={(_, v) => setPage(v)} size="small" />
       </Stack>
@@ -299,6 +229,31 @@ const StudioTestsPage: React.FC = () => {
         <DialogContent>
           <Stack spacing={2} sx={{ pt: 1 }}>
             <TextField label="Name" fullWidth value={createForm.name} onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))} required />
+            <FormControl fullWidth required error={csiLoading === 'succeeded' && !selectedCsiIsRegistered}>
+              <InputLabel id="studio-test-system-label">System (CSI)</InputLabel>
+              <Select
+                labelId="studio-test-system-label"
+                label="System (CSI)"
+                value={selectedCsiIsRegistered ? createForm.csiId : ''}
+                disabled={csiLoading === 'loading' || registeredCsis.length === 0}
+                onChange={(e) => setCreateForm((form) => ({ ...form, csiId: String(e.target.value) }))}
+              >
+                {registeredCsis.map((csi) => (
+                  <MenuItem key={csi.id} value={csi.id}>{csi.id} — {csi.name}</MenuItem>
+                ))}
+              </Select>
+              <FormHelperText>
+                {csiLoading === 'loading'
+                  ? 'Loading available systems…'
+                  : csiError
+                    ? 'Systems could not be loaded. Please try again.'
+                    : registeredCsis.length === 0
+                      ? 'No systems are available for new tests.'
+                      : !selectedCsiIsRegistered
+                        ? 'Choose the system this test belongs to.'
+                        : 'The test will be saved under this system.'}
+              </FormHelperText>
+            </FormControl>
             <FormControl fullWidth>
               <InputLabel>Environment</InputLabel>
               <Select label="Environment" value={createForm.environment} onChange={(e) => setCreateForm((f) => ({ ...f, environment: e.target.value as string }))}>
@@ -308,18 +263,17 @@ const StudioTestsPage: React.FC = () => {
                 <MenuItem value="Production">Production</MenuItem>
               </Select>
             </FormControl>
-            <TextField label="CSI ID" fullWidth placeholder="123456" value={createForm.csiId} onChange={(e) => setCreateForm((f) => ({ ...f, csiId: e.target.value }))} />
             <TextField label="Description" fullWidth multiline minRows={2} value={createForm.description} onChange={(e) => setCreateForm((f) => ({ ...f, description: e.target.value }))} />
             <Typography variant="caption" color="text.secondary">You can add steps and variables in the Studio editor after creating the test.</Typography>
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
-          <Button variant="contained" disabled={!createForm.name || creating} onClick={async () => {
+          <Button variant="contained" disabled={!createForm.name.trim() || !selectedCsiIsRegistered || creating} onClick={async () => {
             try {
               setCreating(true);
               const payload: TestRequest = {
-                name: createForm.name,
+                name: createForm.name.trim(),
                 csiId: createForm.csiId,
                 description: createForm.description,
                 environment: createForm.environment,
@@ -330,7 +284,7 @@ const StudioTestsPage: React.FC = () => {
               const created = await studioApi.createTest(payload);
               setSnack({ open: true, message: 'Test created', severity: 'success', id: created?.id });
               setCreateOpen(false);
-              setCreateForm({ name: '', environment: 'Development', csiId: '', description: '' });
+              setCreateForm({ name: '', csiId: '', environment: 'Development', description: '' });
               await load();
             } catch (e) {
               setSnack({ open: true, message: 'Failed to create test', severity: 'error' });
@@ -345,5 +299,3 @@ const StudioTestsPage: React.FC = () => {
 };
 
 export default StudioTestsPage;
-
-

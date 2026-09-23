@@ -1,9 +1,13 @@
 package com.citi.put.checks.studio.compile.gateway;
 
-import com.google.api.gax.core.NoCredentialsProvider;
-import com.google.cloud.vertexai.VertexAI;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.genai.Client;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.core.io.ClassPathResource;
@@ -43,12 +47,12 @@ final class GatewayTestSupport {
       int maxOutputBytes,
       int maxRetries) {
     return new StudioGatewayProperties(
-        true,
         endpoint,
         PROJECT,
         LOCATION,
         MODEL,
-        new StudioGatewayProperties.Credentials(StudioGatewayProperties.MODE_NONE, null),
+        new StudioGatewayProperties.Credentials(
+            StudioGatewayProperties.MODE_APPLICATION_DEFAULT, null),
         requestTimeout,
         maxConcurrency,
         maxInputBytes,
@@ -59,8 +63,11 @@ final class GatewayTestSupport {
         "classpath:studio/artifact.schema.json");
   }
 
-  static VertexAI vertexAi(StudioGatewayProperties properties) throws IOException {
-    return VertexAiClientFactory.create(properties, NoCredentialsProvider.create());
+  static Client vertexAi(StudioGatewayProperties properties) throws IOException {
+    GoogleCredentials testCredentials =
+        GoogleCredentials.create(
+            new AccessToken("test-only-token", Date.from(Instant.now().plus(1, ChronoUnit.HOURS))));
+    return VertexAiClientFactory.create(properties, testCredentials);
   }
 
   static GatewayResponseParser parser() {

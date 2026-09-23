@@ -250,7 +250,7 @@ class DeReadyCarryForwardTest {
   void theRuntimePinIsRealConfigurationAndNotASwitch() {
     // Guards the premise of every case above: the gate is comparing something.
     assertThat(pin.validatorSchemaVersion()).isEqualTo("1.0.0");
-    assertThat(pin.syntaxReferenceVersion()).isEqualTo("1.0.0");
+    assertThat(pin.syntaxReferenceVersion()).isEqualTo("1.1.0");
   }
 
   // ── helpers ───────────────────────────────────────────────────────────────

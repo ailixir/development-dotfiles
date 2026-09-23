@@ -8,6 +8,8 @@ export type {
   ExecutionResult,
   StepOutcome,
 } from './executor.js';
+export { STEP_REFUSAL_CODES, StepRefusal, isHttpUrl } from './refusals.js';
+export type { StepRefusalCode } from './refusals.js';
 export { createRedactor, safeMessage, NULL_REDACTOR, REDACTION_PLACEHOLDER } from './redaction.js';
 export type { Redactor } from './redaction.js';
 export type {

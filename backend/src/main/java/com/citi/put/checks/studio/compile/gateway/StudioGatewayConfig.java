@@ -1,14 +1,15 @@
 package com.citi.put.checks.studio.compile.gateway;
 
-import com.google.cloud.vertexai.VertexAI;
+import com.google.genai.Client;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import org.springframework.core.io.Resource;
 
 /**
@@ -18,10 +19,15 @@ import org.springframework.core.io.Resource;
  * bean-ordering, so which implementation is active is decidable from configuration alone.
  */
 @Configuration
-@EnableConfigurationProperties(StudioGatewayProperties.class)
+@EnableConfigurationProperties({
+  StudioGatewayProperties.class,
+  StudioGatewaySelectionProperties.class
+})
 public class StudioGatewayConfig {
 
   private static final String PREFIX = "studio.compile.gateway";
+  private static final String RECORDED_FIXTURES = "classpath*:studio/recorded-fixtures/*.json";
+  private static final Logger LOG = LoggerFactory.getLogger(StudioGatewayConfig.class);
 
   @Bean
   public GatewayAuditLogger gatewayAuditLogger() {
@@ -43,46 +49,77 @@ public class StudioGatewayConfig {
 
   /** Fails startup with one message listing every missing value when the gateway is on (AC-2). */
   @Bean(destroyMethod = "close")
-  @ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true")
-  public VertexAI studioGatewayVertexAi(StudioGatewayProperties properties) throws IOException {
-    properties.validateForEnabled();
+  @ConditionalOnProperty(prefix = PREFIX, name = "provider", havingValue = "vertex")
+  public Client studioGatewayVertexAi(StudioGatewayProperties properties) throws IOException {
+    properties.validateForVertex();
     return VertexAiClientFactory.create(properties);
   }
 
   @Bean
-  @ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true")
+  @ConditionalOnProperty(prefix = PREFIX, name = "provider", havingValue = "vertex")
   public LlmGatewayClient vertexLlmGatewayClient(
       StudioGatewayProperties properties,
-      VertexAI studioGatewayVertexAi,
+      Client studioGatewayVertexAi,
       GatewayResponseParser parser,
       GatewayAuditLogger auditLogger) {
     return new VertexLlmGatewayClient(properties, studioGatewayVertexAi, parser, auditLogger);
   }
 
-  /**
-   * The client when the gateway is off: {@link DisabledLlmGatewayClient}, or — only under the
-   * {@code local} profile and only when {@code local-passthrough=true} — {@link
-   * LocalPassthroughGatewayClient} (Studio v1 WP2). Asking for the passthrough under any other
-   * profile fails startup rather than falling back, the same fail-closed rule as the fake vault.
-   */
   @Bean
   @ConditionalOnProperty(
       prefix = PREFIX,
-      name = "enabled",
-      havingValue = "false",
+      name = "provider",
+      havingValue = "disabled",
       matchIfMissing = true)
-  public LlmGatewayClient disabledLlmGatewayClient(
-      GatewayAuditLogger auditLogger, Environment environment) {
-    if (environment.getProperty(PREFIX + ".local-passthrough", Boolean.class, false)) {
-      if (!environment.acceptsProfiles(Profiles.of("local"))) {
-        throw new IllegalStateException(
-            PREFIX
-                + ".local-passthrough=true is only permitted under the local profile; active"
-                + " profiles are "
-                + String.join(",", environment.getActiveProfiles()));
-      }
-      return new LocalPassthroughGatewayClient(auditLogger);
-    }
+  public LlmGatewayClient disabledLlmGatewayClient(GatewayAuditLogger auditLogger) {
     return new DisabledLlmGatewayClient(auditLogger);
+  }
+
+  /**
+   * Answers recorded sources from a corpus, for local development and CI without a credential.
+   *
+   * <p>Fails startup when the corpus is empty, so a misconfigured local environment is a startup
+   * error rather than a Studio that silently refuses every translation.
+   *
+   * @param auditLogger the gateway audit log
+   * @param applicationContext used to resolve the fixture resources
+   * @return the recorded-fixture client
+   * @throws IOException when the fixture resources cannot be listed
+   */
+  @Bean
+  @ConditionalOnProperty(prefix = PREFIX, name = "provider", havingValue = "recorded-fixture")
+  public LlmGatewayClient recordedFixtureLlmGatewayClient(
+      GatewayAuditLogger auditLogger, ApplicationContext applicationContext) throws IOException {
+    Resource[] fixtures = applicationContext.getResources(RECORDED_FIXTURES);
+    RecordedFixtureCorpus corpus = RecordedFixtureCorpus.load(fixtures);
+    if (corpus.size() == 0) {
+      throw new IllegalStateException(
+          PREFIX
+              + ".provider=recorded-fixture but no fixture was found at "
+              + RECORDED_FIXTURES
+              + "; Studio would refuse every translation");
+    }
+    LOG.info(
+        "studio translation provider is a recorded fixture corpus, not a model: {} recorded"
+            + " sources {}",
+        corpus.size(),
+        corpus.names());
+    return new RecordedFixtureGatewayClient(corpus, auditLogger);
+  }
+
+  /** Fails deployed Studio startup when its core translation dependency is not Vertex AI. */
+  @Bean
+  public Object studioTranslationReadinessGuard(
+      StudioGatewaySelectionProperties selection, Environment environment) {
+    selection.selectedProvider();
+    boolean deployed = environment.acceptsProfiles("staging", "prod");
+    boolean studioEnabled = environment.getProperty("checks.sources.UI_TEST", Boolean.class, false);
+    if (deployed
+        && studioEnabled
+        && selection.selectedProvider() != StudioGatewaySelectionProperties.Provider.VERTEX) {
+      throw new IllegalStateException(
+          "UI_TEST is enabled in a deployed profile but studio.compile.gateway.provider is not vertex");
+    }
+    return new Object();
   }
 }

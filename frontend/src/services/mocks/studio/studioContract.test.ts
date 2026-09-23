@@ -23,11 +23,12 @@ import {
   EXECUTION_DISABLED_NARRATIVE,
   EXECUTION_ERROR_NARRATIVES,
   QUOTA_EXHAUSTED_NARRATIVE,
-  RUN_ENABLEMENT,
-  RUNNABLE_COMPILE_STATUS,
+  RUN_ACTION,
+  EXECUTABLE_COMPILE_STATUS,
+  WAITING_COMPILE_STATUS,
   executeRefusalFor,
   executionErrorNarrative,
-  runEnablementFor,
+  runActionFor,
 } from '@/components/studio/run';
 import { EXECUTION_FIXTURE_MATRIX, executionCorpus } from './executionFixtures';
 import {
@@ -555,20 +556,37 @@ describe('story 10.11a: the execute route’s refusals are read from the documen
 });
 
 describe('story 10.11a: the run gate covers the compile states the document declares', () => {
-  it('every compileStatus maps, and Run is available in exactly one of them', () => {
+  it('every compileStatus maps to an action, and exactly one of them dispatches directly', () => {
     const declared = compileStatusEnum();
     expect(declared.length).toBeGreaterThan(0);
 
-    assertSameSet(declared, Object.keys(RUN_ENABLEMENT), 'run enablement over compileStatus');
+    assertSameSet(declared, Object.keys(RUN_ACTION), 'run action over compileStatus');
 
-    const runnable = declared.filter((status) => runEnablementFor(status).canRun);
-    expect(runnable, 'Run is available in more or fewer than one declared state').toEqual([
-      RUNNABLE_COMPILE_STATUS,
+    const executable = declared.filter((status) => runActionFor(status) === 'execute');
+    expect(executable, 'more or fewer than one state dispatches without preparation').toEqual([
+      EXECUTABLE_COMPILE_STATUS,
     ]);
   });
 
+  it('exactly one state makes Run wait rather than act', () => {
+    const declared = compileStatusEnum();
+    const waiting = declared.filter((status) => runActionFor(status) === 'wait');
+    expect(waiting, 'more or fewer than one state makes Run wait').toEqual([
+      WAITING_COMPILE_STATUS,
+    ]);
+  });
+
+  it('every other declared state is prepared by Run rather than blocking it', () => {
+    const declared = compileStatusEnum();
+    const prepared = declared.filter((status) => runActionFor(status) === 'compile');
+    expect(prepared.length, 'no state is prepared by Run').toBeGreaterThan(0);
+    // The point of the change: a draft without a fresh artifact is not a blocked draft.
+    expect(prepared).toContain('STALE');
+    expect(prepared).toContain('NEEDS_REVISION');
+  });
+
   it('a compileStatus outside the document is an error rather than a permissive default', () => {
-    expect(() => runEnablementFor('SOMETHING_ELSE')).toThrow(/Unknown compileStatus/);
+    expect(() => runActionFor('SOMETHING_ELSE')).toThrow(/Unknown compileStatus/);
   });
 });
 

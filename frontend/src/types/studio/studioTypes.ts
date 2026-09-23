@@ -415,6 +415,10 @@ export interface TestDto {
    */
   currentCandidateArtifact?: SourceArtifact | null;
   confirmedRevisionId: string | null;
+  /** Canonical hash of `confirmedRevisionId`; null on list responses or without confirmation. */
+  confirmedRevisionArtifactHash?: string | null;
+  /** Immutable executable artifact of `confirmedRevisionId`; null on list responses. */
+  confirmedRevisionArtifact?: SourceArtifact | null;
   /**
    * Non-null only with `compileStatus: STALE`. Present on both `GET /tests` and `GET /tests/{id}`
    * (ADR-002 §16.5).

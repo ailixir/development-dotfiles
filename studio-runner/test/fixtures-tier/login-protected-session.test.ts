@@ -12,13 +12,10 @@ import { CHILD_MODULE_PATH } from './globalSetup.js';
 import { untilMs } from './realRunner.js';
 
 const SECRET_CANARY = 'secret-canary-10-41-never-retain'; // gitleaks:allow — synthetic test value
-const STEP_IDS = [
-  '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222',
-  '33333333-3333-4333-8333-333333333333', '44444444-4444-4444-8444-444444444444',
-  '55555555-5555-4555-8555-555555555555', '66666666-6666-4666-8666-666666666666',
-] as const;
 let server: Server;
 let baseUrl = '';
+/** How many times the form was submitted, so a refused fill can be shown to have sent nothing. */
+let loginPosts = 0;
 
 beforeAll(async () => {
   server = createServer((request, response) => {
@@ -29,6 +26,7 @@ beforeAll(async () => {
       return;
     }
     if (path === '/login' && request.method === 'POST') {
+      loginPosts += 1;
       response.writeHead(302, { location: '/home', 'set-cookie': 'session=authenticated; HttpOnly; SameSite=Strict' });
       response.end();
       return;
@@ -55,23 +53,23 @@ beforeAll(async () => {
 
 afterAll(async () => new Promise<void>((resolve) => { server.close(() => { resolve(); }); }));
 
-const literal = (value: string) => ({ kind: 'literal', value });
-const label = (value: string) => ({ segments: [{ kind: 'getByLabel', text: literal(value), options: { exact: true } }] });
-const text = (value: string) => ({ segments: [{ kind: 'getByText', text: literal(value), options: { exact: true } }] });
 
-function boundaryJob(): Record<string, unknown> {
+/**
+ * The login job. `secretOrigins` defaults to the fixture server's own origin — the one the password
+ * is typed on — so the canonical run proves the binding admits the right origin. `null` omits the
+ * field entirely.
+ */
+function boundaryJob(
+  secretOrigins: Record<string, string[]> | null = { LOGIN_PASSWORD: [baseUrl] },
+): Record<string, unknown> {
   const source = [
     'Navigate to login', 'Enter the authorized username', 'Enter the authorized password',
     'Submit and verify authenticated home', 'Navigate to protected reports', 'Verify protected reports',
   ];
-  const operations = [
-    [{ op: 'goto', url: literal(`${baseUrl}/login`) }],
-    [{ op: 'fill', locator: label('Username'), value: { kind: 'variable', name: 'LOGIN_USER' } }],
-    [{ op: 'fill', locator: label('Password'), value: { kind: 'secret', id: 'LOGIN_PASSWORD' } }],
-    [{ op: 'click', locator: text('Sign in') }, { op: 'expectVisible', locator: text('Authenticated home') }],
-    [{ op: 'click', locator: text('Protected reports') }],
-    [{ op: 'expectVisible', locator: text('Protected reports') }],
-  ];
+  // The username and password steps select their references through structured context, not
+  // through <var>/<secret> tokens; the structural policy is what authorizes them (ADR-SC-003).
+  const none = { variables: [], secrets: [] };
+  const selects = [none, { variables: ['LOGIN_USER'], secrets: [] }, { variables: [], secrets: ['LOGIN_PASSWORD'] }, none, none, none];
   const code = [
     `await page.goto('${baseUrl}/login');`,
     `await page.getByLabel('Username', { exact: true }).fill(vars.get('LOGIN_USER'));`,
@@ -83,15 +81,78 @@ function boundaryJob(): Record<string, unknown> {
   return validJob({
     source,
     artifact: { version: 1, steps: source.map((originalText, stepIndex) => ({ stepIndex, originalText, code: code[stepIndex] })) },
-    expectedIntent: { schemaVersion: 1, steps: operations.map((stepOperations, stepIndex) => ({ stepIndex, stepId: STEP_IDS[stepIndex], operations: stepOperations })) },
+    referencePolicy: { version: 2, steps: selects.map((refs, stepIndex) => ({ stepIndex, required: refs, allowed: refs })) },
     references: { variables: ['LOGIN_USER'], secrets: ['LOGIN_PASSWORD'] },
     resolvedVars: { LOGIN_USER: 'alice' },
     resolvedSecrets: { LOGIN_PASSWORD: SECRET_CANARY },
+    ...(secretOrigins === null ? {} : { secretOrigins }),
   });
 }
 
+function realLauncher() {
+  return createChildBrowserLauncher({
+    recording: { width: 1280, height: 720 }, stepTimeoutMs: 15_000,
+    launchTimeoutMs: 45_000, maxFailureMessageLength: 400,
+    seekOriginCalibrationMs: 0,
+    childModulePath: CHILD_MODULE_PATH, stopTimeoutMs: 5_000,
+  });
+}
+
+/** Runs one job through the real runner and returns the FINAL report and everything retained. */
+async function runJob(job: Record<string, unknown>): Promise<{
+  final: Record<string, unknown> | undefined;
+  retained: string;
+  loginPosts: number;
+}> {
+  const scratchRoot = mkdtempSync(join(tmpdir(), 'studio-runner-boundary-'));
+  const harness = createHarness({ launcher: realLauncher(), scratch: createFsScratchStore(scratchRoot) });
+  const postsBefore = loginPosts;
+  try {
+    await harness.start();
+    const response = await post(harness.port, '/v1/runs', JSON.stringify(job), SERVICE_TOKEN);
+    expect(response.status).toBe(202);
+    await untilMs(() => harness.app.coordinator.inFlight === 0, 60_000);
+    const final = harness.http.reportRequests.map((item) => JSON.parse(item.body) as Record<string, unknown>).at(-1);
+    return {
+      final,
+      retained: [JSON.stringify(final), ...harness.sink.lines, response.body].join('\n'),
+      loginPosts: loginPosts - postsBefore,
+    };
+  } finally {
+    await harness.stop();
+    rmSync(scratchRoot, { recursive: true, force: true });
+  }
+}
+
+describe('secret origin binding on real Chromium', () => {
+  it('refuses to type the secret on an origin it is not bound to', async () => {
+    // Same server, different origin: `localhost` is not `127.0.0.1` to the browser.
+    const other = baseUrl.replace('127.0.0.1', 'localhost');
+    const { final, retained, loginPosts: posts } = await runJob(boundaryJob({ LOGIN_PASSWORD: [other] }));
+    expect(final?.outcome, JSON.stringify(final)).toMatchObject({
+      result: 'ERROR',
+      errorCode: 'SECRET_ORIGIN_NOT_ALLOWED',
+    });
+    const steps = final?.steps as { status: string; failure?: string | null }[] | undefined;
+    expect(steps?.map((step) => step.status)).toEqual(['PASS', 'PASS', 'FAIL', 'SKIPPED', 'SKIPPED', 'SKIPPED']);
+    expect(steps?.[2]?.failure).toMatch(/^SECRET_ORIGIN_NOT_ALLOWED: Secret "LOGIN_PASSWORD"/u);
+    // The form was never submitted, and the value appears nowhere.
+    expect(posts).toBe(0);
+    expect(retained).not.toContain(SECRET_CANARY);
+  }, 120_000);
+
+  it('refuses a secret with no declared origins', async () => {
+    const { final, loginPosts: posts } = await runJob(boundaryJob(null));
+    expect(final?.outcome, JSON.stringify(final)).toMatchObject({
+      result: 'ERROR',
+      errorCode: 'SECRET_ORIGIN_NOT_ALLOWED',
+    });
+    expect(posts).toBe(0);
+  }, 120_000);
+});
+
 describe('canonical login and protected page through POST /v1/runs', () => {
-  it('validates intent, preserves the authenticated session and retains no secret', async () => {
+  it('authorizes context-selected references, preserves the authenticated session and retains no secret', async () => {
     const scratchRoot = mkdtempSync(join(tmpdir(), 'studio-runner-boundary-'));
     const launcher = createChildBrowserLauncher({
       recording: { width: 1280, height: 720 }, stepTimeoutMs: 15_000,

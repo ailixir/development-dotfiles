@@ -51,6 +51,8 @@ export const UNNAMED_ERROR_STATEMENT =
 
 export interface ExecutionProgressViewProps {
   readonly snapshot: ExecutionSnapshot | null;
+  /** The Studio Logs tab supplies its own console, so it can suppress this plain log rendering. */
+  readonly showLogs?: boolean;
   /** Offered only where the document clears the condition with *"a new execution"* — AC-6. */
   readonly onRerun?: () => void;
   /**
@@ -125,6 +127,7 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
   snapshot,
   onRerun,
   onSeekStep,
+  showLogs = true,
 }) => {
   if (!snapshot) {
     return (
@@ -234,32 +237,36 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
         ))}
       </List>
 
-      <Typography variant="subtitle2" sx={{ mt: 2, mb: 0.5 }}>
-        Logs
-      </Typography>
-      {snapshot.logsTruncated && (
-        <Typography
-          variant="caption"
-          color="warning.main"
-          data-testid="logs-truncated-statement"
-          sx={{ display: 'block', mb: 0.5 }}
-        >
-          {LOGS_TRUNCATED_STATEMENT}
-        </Typography>
-      )}
-      <Box data-testid="execution-logs">
-        {snapshot.logs.map((entry, index) => (
-          <Typography
-            key={`${entry.at}-${index}`}
-            variant="caption"
-            component="div"
-            data-testid={`log-line-${index}`}
-          >
-            {/* `at` is nullable by contract; a line without a reading shows no time, not "null". */}
-            {[entry.at, entry.level, entry.message].filter((part) => part !== null).join(' ')}
+      {showLogs && (
+        <>
+          <Typography variant="subtitle2" sx={{ mt: 2, mb: 0.5 }}>
+            Logs
           </Typography>
-        ))}
-      </Box>
+          {snapshot.logsTruncated && (
+            <Typography
+              variant="caption"
+              color="warning.main"
+              data-testid="logs-truncated-statement"
+              sx={{ display: 'block', mb: 0.5 }}
+            >
+              {LOGS_TRUNCATED_STATEMENT}
+            </Typography>
+          )}
+          <Box data-testid="execution-logs">
+            {snapshot.logs.map((entry, index) => (
+              <Typography
+                key={`${entry.at}-${index}`}
+                variant="caption"
+                component="div"
+                data-testid={`log-line-${index}`}
+              >
+                {/* `at` is nullable by contract; a line without a reading shows no time, not "null". */}
+                {[entry.at, entry.level, entry.message].filter((part) => part !== null).join(' ')}
+              </Typography>
+            ))}
+          </Box>
+        </>
+      )}
     </Box>
   );
 };

@@ -1,0 +1,18 @@
+{
+  "storyId": "UX-001-studio-review-consolidation",
+  "assessedAt": "2026-09-20T23:44:24Z",
+  "assessedBy": "@architect",
+  "result": "STANDARD",
+  "overridden": false,
+  "dimensions": {
+    "scope": {"score": 3, "notes": "The work spans ChecksStudioPage, CompileReviewPanel, StepReviewList, review state tests, accessibility tests, and likely focused component tests."},
+    "integration": {"score": 1, "notes": "No new API or external integration is permitted; existing Studio API data and the useCompileReview lifecycle remain authoritative."},
+    "infrastructure": {"score": 1, "notes": "No deployment, schema, service, or dependency change is required."},
+    "knowledge": {"score": 3, "notes": "Existing MUI and React patterns are known, but implementation must understand the candidate-artifact, confirmation, diagnostics, and accessibility invariants."},
+    "risk": {"score": 4, "notes": "This affects the confirmation safety control and day-to-day operational workflow. A UX simplification must not weaken exact-revision or artifact-truth guarantees."}
+  },
+  "totalScore": 12,
+  "pipelinePhases": ["gather", "assess", "research", "spec", "critique", "plan"],
+  "flags": ["Preserve server-backed exact-revision confirmation.", "Do not reintroduce client-side translation parsing or code generation.", "Maintain existing diagnostics alignment and accessibility behavior."],
+  "estimatedEffort": "1-3 days"
+}

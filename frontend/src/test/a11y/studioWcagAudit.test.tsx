@@ -79,21 +79,18 @@ const FAILING_IMPACTS = new Set(['critical', 'serious']);
  * A baseline without the last clause is the shape this epic keeps catching: a guard that cannot
  * distinguish "still broken" from "fixed and nobody updated the record".
  *
- * Measured 2026-09-17 with axe-core 4.13.0 on branch `story/10.19`.
+ * Re-measured 2026-09-20 with axe-core 4.13.0 after the two-panel Studio redesign. The Studio
+ * editor surfaces and Runs page now have zero critical/serious violations. One unnamed Tests-page
+ * action remains ticketed by A11Y-1/A11Y-2.
  */
 const PINNED_CRITICAL_SERIOUS: Readonly<Record<string, Readonly<Record<string, number>>>> = {
-  StudioTestsPage: { 'aria-prohibited-attr': 2, 'button-name': 2 },
-  StudioRunsPage: { 'aria-prohibited-attr': 1, 'button-name': 1 },
-  'ChecksStudioPage/author': { 'aria-prohibited-attr': 12, 'button-name': 13, label: 4 },
-  'ChecksStudioPage/compile-review': { 'aria-prohibited-attr': 12, 'button-name': 13, label: 4 },
-  'ChecksStudioPage/confirm': { 'aria-prohibited-attr': 12, 'button-name': 13, label: 4 },
-  'ChecksStudioPage/run-progress': {
-    'aria-progressbar-name': 3,
-    'aria-prohibited-attr': 12,
-    'button-name': 13,
-    label: 4,
-  },
-  'ChecksStudioPage/video-playback': { 'aria-prohibited-attr': 12, 'button-name': 13, label: 4 },
+  StudioTestsPage: { 'aria-prohibited-attr': 1, 'button-name': 1 },
+  StudioRunsPage: {},
+  'ChecksStudioPage/author': {},
+  'ChecksStudioPage/compile-review': {},
+  'ChecksStudioPage/confirm': {},
+  'ChecksStudioPage/run-progress': {},
+  'ChecksStudioPage/video-playback': {},
 };
 
 const bootstrapHandlers = [
@@ -184,9 +181,6 @@ function serveDraft(draft: typeof readyDraft) {
       HttpResponse.json({ data: [draft], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
     ),
     http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(draft)),
-    http.post(`${STUDIO_BASE}/validate-steps`, () =>
-      HttpResponse.json({ isValid: true, results: [] }),
-    ),
     http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
       HttpResponse.json(
         { executionId: TERMINAL_EVIDENCE_SETTLED.executionId, status: 'PENDING' },

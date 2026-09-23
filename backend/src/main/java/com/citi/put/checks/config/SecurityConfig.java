@@ -8,6 +8,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics;
+import jakarta.servlet.DispatcherType;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -149,7 +150,13 @@ public class SecurityConfig {
         .cors(cors -> cors.configurationSource(buildCorsSource(corsProps)))
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers(HttpMethod.OPTIONS, "/**")
+                auth.dispatcherTypeMatchers(DispatcherType.ASYNC)
+                    // A servlet ASYNC dispatch is the container's continuation of a request that
+                    // already passed authorization. Requiring a second identity after an SSE
+                    // emitter completes rejects that internal continuation because the request
+                    // filter has correctly cleared its thread-local identity by then.
+                    .permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**")
                     .permitAll()
                     .requestMatchers("/actuator/**")
                     .permitAll()

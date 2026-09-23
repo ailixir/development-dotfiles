@@ -101,8 +101,7 @@ public class ExecutionReadinessService implements ExecutionReadiness {
              r.source::text AS revision_source_document,
              r.authoring::text AS revision_authoring,
              r.authoring_revision_inputs::text AS revision_authoring_inputs,
-             r.configuration::text AS revision_configuration,
-             r.expected_intent::text AS revision_expected_intent,
+             r.reference_policy::text AS revision_reference_policy,
              r.intent_derivation_version
         FROM ui_tests t
         LEFT JOIN ui_test_revisions r ON r.id = t.confirmed_revision_id
@@ -179,7 +178,8 @@ public class ExecutionReadinessService implements ExecutionReadiness {
               + " running this test.");
     }
 
-    // ADR-003 — every authoring-v2 revision must carry a readable expected-intent v1 snapshot.
+    // ADR-SC-003 — every authoring-v2 revision must carry the reference policy re-derived from its
+    // own immutable authoring under the current derivation version.
     // This is deliberately before every dispatch-side effect: acceptance consults this verdict
     // before creating or claiming a ledger row, resolving values or contacting the runner.
     if (row.get("revision_authoring") != null
@@ -187,14 +187,12 @@ public class ExecutionReadinessService implements ExecutionReadiness {
             string(row.get("revision_source_document")),
             string(row.get("revision_authoring")),
             string(row.get("revision_authoring_inputs")),
-            string(row.get("revision_csi_id")),
-            string(row.get("revision_configuration")),
-            string(row.get("revision_expected_intent")),
+            string(row.get("revision_reference_policy")),
             string(row.get("intent_derivation_version")),
             string(row.get("revision_provenance")))) {
       return ReadinessVerdict.refused(
           ReadinessVerdict.COMPILE_REQUIRED,
-          "The confirmed authoring-v2 revision has no valid expected-intent snapshot. Recompile"
+          "The confirmed authoring-v2 revision has no valid reference policy. Recompile"
               + " and confirm the current steps before running it.");
     }
 

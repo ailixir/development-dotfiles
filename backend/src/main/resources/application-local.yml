@@ -61,26 +61,23 @@ studio:
       enabled: ${STUDIO_DISPATCHER_ENABLED:true}
   # Studio secret resolution (§9.2, story 10.17 AC-9).
   #
-  # `provider` has NO default anywhere — not here, not in application.yml, not in code. A
-  # deployed profile that does not name a provider refuses to start rather than falling back
-  # to anything, and `fake` is confined to the test/local/dev profiles. A silent fallback to a
-  # fake vault is the worst failure mode this path can have.
+  # Vault-backed secrets are unavailable in the production alpha, including local development.
+  # The fake provider is selected by the test profile only.
   secrets:
     vault:
-      provider: fake
+      provider: none
   compile:
     gateway:
-      # Local runs never hold R2D2 credentials; keep the gateway off unless a stub is wired in.
-      enabled: ${STUDIO_GATEWAY_ENABLED:false}
+      # Local Studio translates from a recorded fixture corpus so the authoring, validation,
+      # dispatch, browser and evidence lifecycle can run without a gateway credential. It answers
+      # only sources recorded verbatim, so it can never be read as evidence that free-form English
+      # translates -- that proof belongs to the staging gate against the real provider. Set
+      # STUDIO_GATEWAY_PROVIDER=vertex (with endpoint, project and location) to exercise the real
+      # path locally; a deployed profile refuses anything but vertex.
+      provider: ${STUDIO_GATEWAY_PROVIDER:recorded-fixture}
       credentials:
-        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:none}
-      # With the gateway off, `true` swaps the always-refusing client for LocalPassthroughGateway-
-      # Client: a draft whose every step is already a Playwright statement is proposed verbatim,
-      # and validation, confirmation, dispatch and the run are all the real path. Refused at
-      # startup under any other profile. `dev.sh` turns it on unless STUDIO_GATEWAY_ENABLED=true.
-      local-passthrough: ${STUDIO_GATEWAY_LOCAL_PASSTHROUGH:false}
+        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
 
 logging:
   level:
-    com.google.cloud.vertexai: ${STUDIO_GATEWAY_SDK_LOG_LEVEL:INFO}
-
+    com.google.genai: ${STUDIO_GATEWAY_SDK_LOG_LEVEL:INFO}

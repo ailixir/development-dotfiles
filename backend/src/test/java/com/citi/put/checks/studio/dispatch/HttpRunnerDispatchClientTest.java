@@ -214,10 +214,10 @@ class HttpRunnerDispatchClientTest {
   }
 
   @Test
-  void immutableExpectedIntentSnapshotIsSentWithoutAnyResolvedValueInIt() throws Exception {
+  void immutableReferencePolicyIsSentWithoutAnyResolvedValueInIt() throws Exception {
     wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(202)));
     RunJob base = job();
-    RunJob withIntent =
+    RunJob withPolicy =
         new RunJob(
             base.executionId(),
             base.attemptId(),
@@ -235,11 +235,10 @@ class HttpRunnerDispatchClientTest {
             base.manifestKey(),
             new ObjectMapper()
                 .readTree(
-                    "{\"schemaVersion\":1,\"steps\":[{\"stepIndex\":0,"
-                        + "\"stepId\":\"11111111-1111-4111-8111-111111111111\","
-                        + "\"operations\":[{\"op\":\"goto\",\"url\":{\"kind\":\"literal\","
-                        + "\"value\":\"https://example.test/\"}}]}]}"));
-    assertThat(client.send(withIntent).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
+                    "{\"version\":2,\"steps\":[{\"stepIndex\":0,"
+                        + "\"required\":{\"variables\":[\"REGION\"],\"secrets\":[\"PW\"]},"
+                        + "\"allowed\":{\"variables\":[\"REGION\"],\"secrets\":[\"PW\"]}}]}"));
+    assertThat(client.send(withPolicy).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
     String body =
         wireMock
             .findAll(
@@ -247,9 +246,85 @@ class HttpRunnerDispatchClientTest {
                     urlPathEqualTo("/v1/runs")))
             .get(0)
             .getBodyAsString();
-    assertThat(body).contains("\"expectedIntent\":{\"schemaVersion\":1");
-    assertThat(new ObjectMapper().readTree(body).path("expectedIntent").toString())
+    assertThat(body).doesNotContain("expectedIntent");
+    assertThat(new ObjectMapper().readTree(body).path("referencePolicy").path("version").asInt())
+        .isEqualTo(2);
+    assertThat(new ObjectMapper().readTree(body).path("referencePolicy").toString())
         .doesNotContain("fixture-password", "emea");
+  }
+
+  @Test
+  void eachSecretsAllowedOriginsAreSentBesideButApartFromItsValue() throws Exception {
+    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(202)));
+    RunJob base = job();
+    RunJob withOrigins =
+        new RunJob(
+            base.executionId(),
+            base.attemptId(),
+            base.revisionId(),
+            base.artifactHash(),
+            base.artifact(),
+            base.source(),
+            base.configuration(),
+            base.csi(),
+            base.references(),
+            base.resolvedVars(),
+            base.resolvedSecrets(),
+            base.deadlines(),
+            base.videoKey(),
+            base.manifestKey(),
+            null,
+            java.util.Map.of("LOGIN_PW", List.of("https://login.app.example")));
+
+    assertThat(client.send(withOrigins).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
+    com.fasterxml.jackson.databind.JsonNode body =
+        new ObjectMapper()
+            .readTree(
+                wireMock
+                    .findAll(
+                        com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor(
+                            urlPathEqualTo("/v1/runs")))
+                    .get(0)
+                    .getBodyAsString());
+    assertThat(body.path("secretOrigins").path("LOGIN_PW").isArray()).isTrue();
+    assertThat(body.path("secretOrigins").path("LOGIN_PW").get(0).asText())
+        .isEqualTo("https://login.app.example");
+    assertThat(body.path("secretOrigins").toString()).doesNotContain("fixture-password");
+  }
+
+  @Test
+  void aJobWithoutOriginsSendsAnEmptyMapWhichTheRunnerReadsAsBoundToNone() throws Exception {
+    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(202)));
+    RunJob base = job();
+    // The fourteen-argument constructor: a producer that knows nothing about origins.
+    RunJob withoutOrigins =
+        new RunJob(
+            base.executionId(),
+            base.attemptId(),
+            base.revisionId(),
+            base.artifactHash(),
+            base.artifact(),
+            base.source(),
+            base.configuration(),
+            base.csi(),
+            base.references(),
+            base.resolvedVars(),
+            base.resolvedSecrets(),
+            base.deadlines(),
+            base.videoKey(),
+            base.manifestKey());
+    assertThat(client.send(withoutOrigins).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
+    String body =
+        wireMock
+            .findAll(
+                com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor(
+                    urlPathEqualTo("/v1/runs")))
+            .get(0)
+            .getBodyAsString();
+    com.fasterxml.jackson.databind.JsonNode origins =
+        new ObjectMapper().readTree(body).path("secretOrigins");
+    assertThat(origins.isObject()).isTrue();
+    assertThat(origins.size()).isZero();
   }
 
   @Test

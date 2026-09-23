@@ -26,7 +26,7 @@ export const EXECUTOR_VERSION = '1.0.0';
  * set of examples, so an artifact is never reinterpreted across a change here. Bump it whenever an
  * example is added, removed or changed.
  */
-export const SYNTAX_REFERENCE_VERSION = '1.0.0';
+export const SYNTAX_REFERENCE_VERSION = '1.1.0';
 
 /**
  * Parser backing the validator. Story 10.2 chose the TypeScript compiler API over

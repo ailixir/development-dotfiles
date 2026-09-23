@@ -1,5 +1,6 @@
 package com.citi.put.checks.studio.secrets;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -9,11 +10,9 @@ import java.util.Optional;
  * come from is behind it. That is the point: there is exactly one place to look when asking "where
  * could a value have entered this process", and exactly one place for `ED-02`'s real vault to land.
  *
- * <p><b>No implementation is selected by default.</b> {@link StudioVaultConfiguration} refuses to
- * start the application when {@code studio.secrets.vault.provider} is absent or unrecognised, and
- * the fake is unreachable outside the development and test profiles. A fake vault that can be
- * reached in production is worse than no vault, and it is cheaper to make impossible than to
- * detect.
+ * <p>The production alpha selects the explicit no-call provider {@code none}; tests alone select
+ * test doubles, and a connected deployment must explicitly select {@code hashicorp}. Missing or
+ * unrecognised selections still fail startup.
  *
  * <p>Values are {@code char[]} the whole way, so a caller can erase what it was given. A provider
  * returns a fresh array on every read and retains no reference a caller's {@code close()} could
@@ -24,7 +23,7 @@ public interface StudioVaultProvider {
   /**
    * The provider's name, as it appears in the startup line and on the health surface.
    *
-   * <p>A deployment running on a fake vault says so out loud (AC-9).
+   * <p>The selected production provider is reported at startup (AC-9).
    */
   String name();
 
@@ -58,6 +57,18 @@ public interface StudioVaultProvider {
    * @param versionIdentifier a nonsecret opaque string (§4.2). Never the value and never derived
    *     from it — a rotation of a value to itself still changes it, so it cannot be used to compare
    *     two values
+   * @param allowedOrigins the normalized origins a secret may be filled on ({@link SecretOrigins});
+   *     nonsecret. Empty means none, and a secret bound to none cannot be filled
    */
-  record VaultEntry(char[] value, String versionIdentifier) {}
+  record VaultEntry(char[] value, String versionIdentifier, List<String> allowedOrigins) {
+
+    public VaultEntry {
+      allowedOrigins = allowedOrigins == null ? List.of() : List.copyOf(allowedOrigins);
+    }
+
+    /** An entry bound to no origin: a variable, or a secret whose entry declares none. */
+    public VaultEntry(char[] value, String versionIdentifier) {
+      this(value, versionIdentifier, List.of());
+    }
+  }
 }

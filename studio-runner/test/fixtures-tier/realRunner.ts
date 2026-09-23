@@ -19,6 +19,8 @@ export interface RealRunOptions {
   readonly steps: readonly ExecutableStep[];
   readonly variables?: Readonly<Record<string, string>> | undefined;
   readonly secrets?: Readonly<Record<string, string>> | undefined;
+  /** The origins each secret may be filled on. Absent binds every secret to none. */
+  readonly secretOrigins?: Readonly<Record<string, readonly string[]>> | undefined;
   readonly recording?: { readonly width: number; readonly height: number } | undefined;
   readonly stepTimeoutMs?: number | undefined;
   /** Runs while the browser is up, before the steps. Used to make a popup appear (AC-15). */
@@ -40,6 +42,12 @@ export interface RealRunOutcome {
   readonly dispatchedAtMs: number;
   /** The instant `launch` resolved, on the same monotonic clock as `dispatchedAtMs`. */
   readonly observedStartMs: number;
+  /**
+   * The instant `execute` resolved, on the same clock. The child has closed its recording context
+   * and reported by then, so `executeResolvedMs - observedStartMs` bounds the browser session the
+   * recording is expected to cover (`recording-coverage.test.ts`).
+   */
+  readonly executeResolvedMs: number;
   readonly scratchPath: string;
   /** Kept alive so a test can inspect the recording before it is cleared (AC-7, AC-22). */
   clear(): void;
@@ -104,11 +112,13 @@ export async function runReal(options: RealRunOptions): Promise<RealRunOutcome> 
     steps: options.steps,
     variables: options.variables ?? {},
     secrets: options.secrets ?? {},
+    secretOrigins: options.secretOrigins ?? {},
     reporter: {
       stepStarted: (event) => started.push(event),
       stepFinished: (event) => finished.push(event),
     },
   });
+  const executeResolvedMs = performance.now();
   await session.close();
 
   return {
@@ -120,6 +130,7 @@ export async function runReal(options: RealRunOptions): Promise<RealRunOutcome> 
     calibrationOffsetMs: run.origin.calibrationOffsetMs,
     dispatchedAtMs,
     observedStartMs,
+    executeResolvedMs,
     scratchPath,
     clear(): void {
       rmSync(scratchPath, { recursive: true, force: true });

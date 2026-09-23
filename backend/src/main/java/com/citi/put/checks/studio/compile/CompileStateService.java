@@ -50,7 +50,7 @@ public class CompileStateService {
       INSERT INTO ui_test_revisions (
           test_id, csi_id, source_revision, configuration_revision,
           source, source_hash, artifact, artifact_hash, artifact_schema_version,
-          configuration, "references", provenance, created_by, expected_intent,
+          configuration, "references", provenance, created_by, reference_policy,
           intent_derivation_version)
       VALUES (?, ?, ?, ?,
           CAST(? AS jsonb), ?, CAST(? AS jsonb), ?, ?,
@@ -64,7 +64,8 @@ public class CompileStateService {
       SELECT id FROM ui_test_revisions
        WHERE test_id = ? AND source_revision = ? AND configuration_revision = ?
          AND artifact_hash = ?
-         AND expected_intent IS NOT DISTINCT FROM CAST(? AS jsonb)
+         AND expected_intent IS NULL
+         AND reference_policy IS NOT DISTINCT FROM CAST(? AS jsonb)
          AND intent_derivation_version IS NOT DISTINCT FROM ?
       """;
 
@@ -148,6 +149,78 @@ public class CompileStateService {
       // Unreachable while the guard row lock is held; fail loudly rather than half-publish.
       throw new IllegalStateException(
           "Candidate publication lost its guard for test "
+              + testId
+              + " (request "
+              + request.requestId()
+              + ")");
+    }
+    return PublishResult.PUBLISHED;
+  }
+
+  /**
+   * Stores and accepts a validated candidate produced by a save-triggered compile in one
+   * transaction.
+   *
+   * <p>The same request/revision guard used by {@link #publishCandidate} is locked before a
+   * revision is inserted, so an edit or newer compile discards the result without leaving even an
+   * orphan revision. The reference policy is re-verified from the persisted immutable row before
+   * readiness is granted. This keeps save convenient without weakening the fail-closed execution
+   * gate: only a validated, current and verifiable revision can reach {@code READY}.
+   */
+  @Transactional
+  public PublishResult publishAcceptedCandidate(
+      UUID testId, CompileRequest request, CandidateRevision candidate) {
+    requireCompilable(testId);
+    requireCandidateMatchesRequest(request, candidate);
+    List<Map<String, Object>> guarded = lockCurrentRequest(testId, request);
+    if (guarded.isEmpty()) {
+      logDiscard(testId, request);
+      return PublishResult.DISCARDED_OUT_OF_ORDER;
+    }
+
+    String csiId = (String) guarded.get(0).get("csi_id");
+    UUID revisionId = insertOrReuseRevision(testId, csiId, request.sourceRevision(), candidate);
+    if (!persistedReferencePolicyIsVerified(revisionId, testId)) {
+      throw new IllegalStateException(
+          "Validated revision "
+              + revisionId
+              + " does not carry a verifiable immutable reference policy");
+    }
+
+    jdbc.update(
+        """
+        UPDATE ui_test_revisions
+           SET confirmed_by = ?, confirmed_at = NOW()
+         WHERE id = ? AND test_id = ?
+           AND confirmed_by IS NULL AND confirmed_at IS NULL
+        """,
+        candidate.createdBy(),
+        revisionId,
+        testId);
+
+    int updated =
+        jdbc.update(
+            """
+            UPDATE ui_tests
+               SET current_candidate_revision_id = ?,
+                   confirmed_revision_id         = ?,
+                   compile_status                = 'READY',
+                   compile_started_at            = NULL,
+                   compile_error                 = NULL,
+                   compile_diagnostics           = NULL
+             WHERE id = ? AND compile_request_id = ? AND source_revision = ?
+               AND configuration_revision = ?
+               AND deleted_at IS NULL AND quarantined_at IS NULL
+            """,
+            revisionId,
+            revisionId,
+            testId,
+            request.requestId(),
+            request.sourceRevision(),
+            request.configurationRevision());
+    if (updated != 1) {
+      throw new IllegalStateException(
+          "Accepted candidate publication lost its guard for test "
               + testId
               + " (request "
               + request.requestId()
@@ -257,8 +330,8 @@ public class CompileStateService {
         jdbc.queryForList(
             """
             SELECT source::text AS source, authoring::text AS authoring,
-                   authoring_revision_inputs::text AS authoring_inputs, csi_id,
-                   configuration::text AS configuration, expected_intent::text AS expected_intent,
+                   authoring_revision_inputs::text AS authoring_inputs,
+                   reference_policy::text AS reference_policy,
                    intent_derivation_version, provenance::text AS provenance
               FROM ui_test_revisions
              WHERE id = ? AND test_id = ? AND artifact_hash = ?
@@ -271,10 +344,10 @@ public class CompileStateService {
             artifactHash,
             sourceRevision,
             configurationRevision);
-    if (candidates.isEmpty() || !verifiedIntent(candidates.get(0))) {
+    if (candidates.isEmpty() || !verifiedReferencePolicy(candidates.get(0))) {
       throw new StudioConflictException(
           STALE_CANDIDATE,
-          "Revision " + revisionId + " does not carry verifiable immutable intent");
+          "Revision " + revisionId + " does not carry a verifiable immutable reference policy");
     }
 
     int revisionUpdated =
@@ -331,16 +404,31 @@ public class CompileStateService {
     return revisionId;
   }
 
-  private static boolean verifiedIntent(Map<String, Object> row) {
+  private static boolean verifiedReferencePolicy(Map<String, Object> row) {
     return IntentRevisionVerifier.verify(
         text(row.get("source")),
         text(row.get("authoring")),
         text(row.get("authoring_inputs")),
-        text(row.get("csi_id")),
-        text(row.get("configuration")),
-        text(row.get("expected_intent")),
+        text(row.get("reference_policy")),
         text(row.get("intent_derivation_version")),
         text(row.get("provenance")));
+  }
+
+  private boolean persistedReferencePolicyIsVerified(UUID revisionId, UUID testId) {
+    List<Map<String, Object>> rows =
+        jdbc.queryForList(
+            """
+            SELECT source::text AS source, authoring::text AS authoring,
+                   authoring_revision_inputs::text AS authoring_inputs,
+                   reference_policy::text AS reference_policy,
+                   intent_derivation_version, provenance::text AS provenance
+              FROM ui_test_revisions
+             WHERE id = ? AND test_id = ?
+             FOR UPDATE
+            """,
+            revisionId,
+            testId);
+    return rows.size() == 1 && verifiedReferencePolicy(rows.get(0));
   }
 
   private static String text(Object value) {
@@ -547,7 +635,7 @@ public class CompileStateService {
             candidate.references(),
             candidate.provenance(),
             candidate.createdBy(),
-            candidate.expectedIntent(),
+            candidate.referencePolicy(),
             candidate.intentDerivationVersion());
     if (!inserted.isEmpty()) {
       return inserted.get(0);
@@ -559,7 +647,7 @@ public class CompileStateService {
         sourceRevision,
         candidate.configurationRevision(),
         candidate.artifactHash(),
-        candidate.expectedIntent(),
+        candidate.referencePolicy(),
         candidate.intentDerivationVersion());
   }
 

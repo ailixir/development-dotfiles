@@ -45,7 +45,7 @@ export const mockArtifact: SourceArtifact = {
   ],
 };
 
-export const mockTests: TestDto[] = [
+const mockTestsUnordered: TestDto[] = [
   {
     id: '11111111-1111-1111-1111-111111111111',
     name: 'Citi login smoke',
@@ -73,7 +73,11 @@ export const mockTests: TestDto[] = [
     configurationRevision: 1,
     compileStatus: 'READY',
     currentCandidateRevisionId: '22222222-2222-2222-2222-222222222222',
+    currentCandidateArtifactHash: 'a'.repeat(64),
+    currentCandidateArtifact: mockArtifact,
     confirmedRevisionId: '22222222-2222-2222-2222-222222222222',
+    confirmedRevisionArtifactHash: 'a'.repeat(64),
+    confirmedRevisionArtifact: mockArtifact,
   },
   {
     id: '11111111-1111-1111-1111-111111111112',
@@ -120,6 +124,13 @@ export const mockTests: TestDto[] = [
     currentCandidateRevisionId: null,
     confirmedRevisionId: null,
   },
+];
+
+/** Keep the long-standing contract fixture first; several transport-contract tests bind to it. */
+export const mockTests: TestDto[] = [
+  ...mockTestsUnordered.filter((test) => test.id === '11111111-1111-1111-1111-111111111111'),
+  ...mockTestsUnordered.filter((test) => test.id === '11111111-1111-1111-1111-111111111112'),
+  ...mockTestsUnordered.filter((test) => test.csiId === OTHER_CSI),
 ];
 
 const TEST_ID = mockTests[0].id;
@@ -485,11 +496,15 @@ export const mockExecutions: ExecutionSnapshot[] = [
 /**
  * The bytes `GET /executions/{id}/video` serves in the mock (story 10.16a, AC-13).
  *
- * Small and in memory. It opens with the EBML magic number a WebM file starts with, and the rest is
- * filler: nothing here is a playable recording, and nothing claims to be. The handler computes every
- * length from this array at request time, so no length is transcribed anywhere.
+ * Small and in memory. It is a valid six-second VP8/WebM recording so the development Proof tab can
+ * exercise metadata loading, playback, seeking, byte ranges, and download. The handler computes
+ * every response length from this array at request time, so no length is transcribed anywhere.
  */
+const MOCK_VIDEO_BASE64 =
+  'GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQJChYECGFOAZwEAAAAAAAniEU2bdLpNu4tTq4QVSalmU6yBoU27i1OrhBZUrmtTrIHYTbuMU6uEElTDZ1OsggEmTbuMU6uEHFO7a1OsggmA7AEAAAAAAABZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVSalmsirXsYMPQkBNgI1MYXZmNjIuMTIuMTAxV0GNTGF2ZjYyLjEyLjEwMUSJiEC3cAAAAAAAFlSua8muAQAAAAAAAEDXgQFzxYjYgfuQ7zUv15yBACK1nIN1bmSIgQCGhVZfVlA4g4EBI+ODhAvrwgDgkbCCAUC6gbSagQJVsIRVuYEBElTDZ/xzc6BjwIBnyJpFo4dFTkNPREVSRIeNTGF2ZjYyLjEyLjEwMXNz1mPAi2PFiNiB+5DvNS/XZ8ihRaOHRU5DT0RFUkSHlExhdmM2Mi4yOC4xMDEgbGlidnB4Z8ihRaOIRFVSQVRJT05Eh5MwMDowMDowNi4wMDAwMDAwMDAAH0O2dUct54EAo0CjgQAAgNAPAJ0BKkABtAAARwiFhYiFhIgCAgJ1qgP4A/oCBrak9waBZJ9r25snOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnOHsnLgD++ecD/8LLWzTBn/hZn/4rWHWcX/icQKPXgQDIABEJAA8R/AAYDNDI8a47kAH4SFVWqqtVVqqrVVaqq1VWqqtVVqqrVVaqq1VWqqtVVqqrVVaqq1VWqqtVVqqrVVaqq1VWqqtVVqqrQD/91qSPSSEAo62BAZAA8QIADxFgABgAGG/P9Bf6BgYL/QMAA/CdWJCb/+ux/h4/xsFTqg3wLQCjooECWADRAQAPEWAAGAAYb/QMAAD8aP7Xlf9Bs61E62hR9wCjooEDIADRAQAPEWAAGAAYb/QMAAD8aP7XlGAP9Bs61E62d0Cjr4ED6ADxBAAPEWAAGAAYW9gv6JQSkpKSkpUirzLvvFyoC1Wq1Wq1LBSkpKSkpKAAo0CVgQSwgFAPAJ0BKkABtAAIRwiFhYiFhIgsAgJ1qgIGZmWow9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k2QP7XlfIpFjK3WhaD4ACjqoEFeADxAgAhEWAAGAAYb8/0F/oGBgv9AwAD8J1YkJv8bzea1rBJBvgWgKOxgQZAANECACERYAAYCUAeIWPnPhnoAAvpS/J4HgD+15VzyImkmic8iJpJoq0kvXa+OKNAs4EHCAAxCQAhEWAAGAegXQD7hMgP0A5v2OTTm2UAYohRCiFEKIUQohRCiFEKIUQohRCiFEKIUQohbdG26Nt0bbo23RtujbdG26Nt0bbo223A/td4nRmQwTtgJDQKa2YWfC6rqLMLPhdV1FmFnwuq6izCz4XVdRZhZ8Lquosws+F1XUWYWfC6rqLMLPhdV1FmFmTOXz2FGNBZj57CjGgsx89hRjQWY+ewoxoLMfPYUY0FmPjQo6GBB9AAEQIAIRFgABgAGG+4L+gD8L0zcJcBtGUhBPYbqhCjr4EImADxBAAhEWAAGAAYW9gv6JQSkpKSkpUirzLvvFyoC1Wq1Wq1LBSkpKSkpKAAo0CVgQlggBAPAJ0BKkABtAAIRwiFhYiFhIgsAgJ08jo6tL7XtzZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZOcPZObwD+15W9y0Uivih5rewdMACjqYEKKADRAgAhEWAAGAAYb/QMF/oGBgv6C/oD8QV4/teV/jf6tfJknScAo6GBCvAA0QEAIRFgABgAGG/0DAAA/Gj+144MPuh76vKnMgCjpIELuAARAgAhEWAAGAAYb8/0AAPwnViQm/tT8rPd99zZQJ5oAKOhgQyAABECACERYAAYABhvz/QAA/CdWJCOID8zfhR8nUAAo6+BDUgA8QQAIRFgABgAGFvYL+iUEpKSkpKVIq8y77xcqAtVqtVqtSwUpKSkpKSgAKNAkoEOEIAQDwCdASpAAbQACEcIhYWIhYSILAICdPI6OtRh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jzh7Jsg/teV/jf6tfJknScAo6qBDtgA8QIAIRFgABgAGG/0DBf6BgYL+oP6A/AWHgD+144MPuh76vKnMgCjpIEPoAARAgAhEWAAGAAYb8/0AAPwnViQm/tT8rPd99zZQJ5oAKOhgRBoABECACERYAAYABhvz/QAA/CdWJCOID8zfhR8nUAAo6OBETAAEQIAIRFgABgAGG/P9AAD8J1YkJv+LftH97ZO9j2uAKOvgRH4APEEACERYAAYABhb2C/olBKSkpKSlSKvMu+8XKgLVarVarUsFKSkpKSkoACjQJKBEsCAEA8AnQEqQAG0AAhHCIWFiIWEiCwCAnTyOjq0vte3Nk5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5w9k5vAP7Xjgw+6Hvq8qcyAKOrgROIAPECACERYAAYABhvz/QX+gYGC/oL+gPwnViQm/tT8rPd99zZQJ5oAB9DtnVAoOeCFFCjoYEAAAARAgAhEWAAGAAYb8/0AAPwnViQjiA/M34UfJ1AAKOjgQDIABECACERYAAYABhvz/QAA/CdWJCb/i37R/e2TvY9rgCjoYEBkADRAQAhEWAAGAAYb/QMAAD8aP7Xlf0K9ZffTXQfAKOvgQJYAPEEACERYAAYABhb2C/olBKSkpKSlSKvMu+8XKgLVarVarUsFKSkpKSkoAAcU7tr3buPs4EAt4r3gQHxggGn8IEDu5GzggSwt4v3gQHxggGn8IIBqruRs4IJYLeL94EB8YIBp/CCA6u7kbOCDhC3i/eBAfGCAafwggULu5GzghLAt4v3gQHxggGn8IIGaw==';
+
+/** A valid six-second VP8/WebM proof fixture, decoded once for range-capable mock responses. */
 export const MOCK_VIDEO_BYTES: Uint8Array = Uint8Array.from(
-  { length: 64 },
-  (_, index) => [0x1a, 0x45, 0xdf, 0xa3][index] ?? index,
+  globalThis.atob(MOCK_VIDEO_BASE64),
+  (character) => character.charCodeAt(0),
 );

@@ -1,27 +1,22 @@
 package com.citi.put.checks.studio.compile;
 
 import com.citi.put.checks.studio.StudioRepository;
-import com.citi.put.checks.studio.StudioValidationException;
 import com.citi.put.checks.studio.compile.gateway.CompileResponse;
 import com.citi.put.checks.studio.compile.gateway.GatewayErrorCode;
 import com.citi.put.checks.studio.compile.gateway.GatewayProvenance;
 import com.citi.put.checks.studio.compile.gateway.LlmGatewayClient;
 import com.citi.put.checks.studio.compile.validator.RunnerValidationClient;
 import com.citi.put.checks.studio.compile.validator.ValidationOutcome;
-import com.citi.put.checks.studio.dto.AuthoringDiagnostic;
 import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.readiness.RuntimePinProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Asynchronous compile orchestration: begin, prompt, gateway, parse, validate, publish (Story 10.8,
@@ -30,11 +25,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <h2>The draft is committed before any compile work begins</h2>
  *
  * <p>{@link #compile} is called from the request thread <em>after</em> the draft transaction has
- * committed — from the compile route directly, or through {@link #enqueueAfterCommit} on save. No
- * gateway call, no runner call and no outbound HTTP of any kind happens inside the request thread
- * or inside a database transaction. That is &sect;8.3's "persist draft and enqueue compile without
- * waiting for gateway", and it is what makes a gateway outage a compile failure rather than a lost
- * draft.
+ * committed, and only from the compile route. Saving a draft no longer starts a compile: the Run
+ * action compiles the saved revision and then executes it, so the expensive work is asked for
+ * explicitly and its progress is visible to the author who asked. No gateway call, no runner call
+ * and no outbound HTTP of any kind happens inside the request thread or inside a database
+ * transaction, which is what makes a gateway outage a compile failure rather than a lost draft.
  *
  * <h2>Every transition goes through {@link CompileStateService}</h2>
  *
@@ -56,9 +51,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * at most three {@code propose} calls and at most three {@code /v1/validate} calls, numbered 1, 2,
  * 3 and never repeated. Every attempt — including a repair — passes the {@code
  * SUPPORTED_ARTIFACT_VERSION} pin and {@code /v1/validate} before any publication, and a successful
- * repair is published through {@code publishCandidate} to {@code AWAITING_CONFIRMATION}. There is
- * no path from this loop to {@code CompileStateService.confirm}: a repaired draft is refused {@code
- * 409 COMPILE_REQUIRED} by the readiness gate until a principal calls {@code confirm-compile}.
+ * repair is published through the same state-machine gate as a first-attempt candidate. Explicit
+ * compile requests publish to {@code AWAITING_CONFIRMATION}; save-triggered compiles atomically
+ * accept the validated revision and publish {@code READY}. Invalid or failed attempts never take
+ * either path.
  *
  * <p>The settlement is re-checked between <em>every</em> pair of calls in the loop, not only once
  * per request: the budget now covers the whole request including its repairs, so an expiry can land
@@ -134,6 +130,10 @@ public class CompilePipeline {
    * to {@code COMPILING} and then failed. Only then is the request identity persisted and the
    * attempt submitted.
    *
+   * <p>A candidate that passes validation is accepted for the requesting principal and published
+   * {@code READY} in one transaction. The author asked for this revision to be prepared by pressing
+   * Run, so a second confirmation step would ask the same question twice.
+   *
    * @param testId the draft to compile
    * @param principal the authenticated user
    * @return the persisted compile request identity and the revisions it was started for
@@ -149,23 +149,7 @@ public class CompilePipeline {
             .findById(testId)
             .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + testId));
     CompileInputs inputs = CompileInputs.from(draft, principal);
-    ContextCompileInputs contextInputs;
-    try {
-      contextInputs = ContextCompileInputs.from(draft);
-    } catch (IllegalArgumentException exception) {
-      throw new StudioValidationException(
-          "UNRESOLVED_TYPED_INTENT", "Saved v2 authoring cannot produce closed expected intent");
-    }
-
-    if (contextInputs != null && contextInputs.blocked()) {
-      throw new StudioValidationException(
-          "UNRESOLVED_TYPED_INTENT",
-          "Saved v2 authoring has blocking deterministic intent diagnostics: "
-              + contextInputs.blockingDiagnostics().stream()
-                  .map(diagnostic -> diagnostic.category().name())
-                  .distinct()
-                  .toList());
-    }
+    ContextCompileInputs contextInputs = ContextCompileInputs.from(draft);
 
     authoringLimits.requireWithinLimits(inputs.orderedSource());
     credentialScreen.requireNoInlineCredentials(inputs.orderedSource());
@@ -186,44 +170,6 @@ public class CompilePipeline {
       publishError(testId, request, CompileErrorCode.COMPILE_POOL_SATURATED);
     }
     return request;
-  }
-
-  /**
-   * Enqueues a compile once the current transaction has committed, or immediately when there is
-   * none.
-   *
-   * <p>The commit boundary is the point: {@code POST /tests} and {@code PUT /tests/{id}} must
-   * return without waiting for the gateway, and the row must be readable from another connection
-   * before the compile reads it. Registering the enqueue as an after-commit synchronisation is what
-   * makes both true without the caller having to remember either.
-   *
-   * @param testId the draft to compile
-   * @param principal the authenticated user
-   */
-  public void enqueueAfterCommit(UUID testId, String principal) {
-    if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-      enqueueQuietly(testId, principal);
-      return;
-    }
-    TransactionSynchronizationManager.registerSynchronization(
-        new TransactionSynchronization() {
-          @Override
-          public void afterCommit() {
-            enqueueQuietly(testId, principal);
-          }
-        });
-  }
-
-  private void enqueueQuietly(UUID testId, String principal) {
-    try {
-      compile(testId, principal);
-    } catch (RuntimeException e) {
-      // A save must never fail because its optional compile could not start.
-      // The exception type, not its message: a parse failure's message can quote the very source
-      // or artifact text this path must never log (AC-29).
-      LOGGER.warn(
-          "studio.compile.enqueue_failed testId={} type={}", testId, e.getClass().getName());
-    }
   }
 
   // ── the attempt ────────────────────────────────────────────────────────────
@@ -301,7 +247,7 @@ public class CompilePipeline {
                 inputs.orderedSource(),
                 inputs.variableNames(),
                 inputs.secretNames(),
-                contextInputs == null ? null : contextInputs.expectedIntent());
+                contextInputs == null ? null : contextInputs.referencePolicy());
 
         if (!validation.available()) {
           settleError(
@@ -314,14 +260,10 @@ public class CompilePipeline {
             dropLateResult(inputs.testId(), request, "candidate");
             return;
           }
-          // A repaired candidate is published exactly as a first-attempt one: through
-          // publishCandidate, to AWAITING_CONFIRMATION, never to READY. Nothing in this loop can
-          // reach CompileStateService.confirm.
-          compileStateService.publishCandidate(
-              inputs.testId(),
-              request,
+          CandidateRevision candidate =
               candidate(
-                  inputs, contextInputs, request, artifactJson, response.provenance(), validation));
+                  inputs, contextInputs, request, artifactJson, response.provenance(), validation);
+          compileStateService.publishAcceptedCandidate(inputs.testId(), request, candidate);
           return;
         }
 
@@ -439,19 +381,6 @@ public class CompilePipeline {
         diagnostics);
   }
 
-  private static String correspondenceDiagnostics(
-      List<AuthoringDiagnostic> diagnostics, int attempt, boolean exhausted) {
-    ObjectNode root = MAPPER.createObjectNode();
-    root.put("attempts", attempt);
-    root.put("exhausted", exhausted);
-    root.set("steps", MAPPER.valueToTree(diagnostics));
-    String json = root.toString();
-    if (json.length() > ContextPromptSection.MAX_BYTES) {
-      throw new IllegalArgumentException("typed-intent diagnostics exceed the bounded prompt size");
-    }
-    return json;
-  }
-
   /**
    * The configured repair bound, defensively floored at zero.
    *
@@ -491,12 +420,12 @@ public class CompilePipeline {
         inputs.referencesJson(),
         provenance(gatewayProvenance, validation, contextInputsForCandidate != null),
         inputs.principal(),
-        contextInputsForCandidate == null ? null : contextInputsForCandidate.expectedIntent(),
+        contextInputsForCandidate == null ? null : contextInputsForCandidate.referencePolicy(),
         contextInputsForCandidate == null ? null : VersionedIntentDeriver.CURRENT_VERSION);
   }
 
   private String provenance(
-      GatewayProvenance gateway, ValidationOutcome validation, boolean versionedIntent) {
+      GatewayProvenance gateway, ValidationOutcome validation, boolean versionedReferencePolicy) {
     ObjectNode provenance = MAPPER.createObjectNode();
     provenance.put("model", gateway == null ? null : gateway.model());
     provenance.put("modelVersion", gateway == null ? null : gateway.modelVersion());
@@ -516,7 +445,7 @@ public class CompilePipeline {
     // Recorded for the runner's own ranged revalidation; never compared by this backend (AC-25).
     provenance.put("executorVersion", runtimePin.executorVersion());
     provenance.put("playwrightVersion", runtimePin.playwrightVersion());
-    if (versionedIntent) {
+    if (versionedReferencePolicy) {
       provenance.put("intentDerivationVersion", VersionedIntentDeriver.CURRENT_VERSION);
     }
     return provenance.toString();

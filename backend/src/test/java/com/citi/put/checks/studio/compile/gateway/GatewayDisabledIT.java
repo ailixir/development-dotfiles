@@ -72,7 +72,7 @@ class GatewayDisabledIT {
   @DynamicPropertySource
   static void gatewayProperties(DynamicPropertyRegistry registry) {
     WIRE_MOCK.start();
-    registry.add("studio.compile.gateway.enabled", () -> "false");
+    registry.add("studio.compile.gateway.provider", () -> "disabled");
     registry.add("studio.compile.gateway.endpoint", () -> "http://localhost:" + WIRE_MOCK.port());
   }
 
@@ -114,7 +114,7 @@ class GatewayDisabledIT {
   }
 
   @Test
-  void theDisabledFlagSelectsAClientThatOpensNoSocket() {
+  void theDisabledProviderSelectsAClientThatOpensNoSocket() {
     // The @Primary test bean shadows the production selection, so assert on the real one.
     LlmGatewayClient disabled = new DisabledLlmGatewayClient(new GatewayAuditLogger());
 

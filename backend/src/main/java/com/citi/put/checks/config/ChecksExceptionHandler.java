@@ -11,6 +11,7 @@ import com.citi.put.checks.studio.dispatch.StudioReferenceResolver;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.evidence.ExecutionVideoException;
 import com.citi.put.checks.studio.internal.InternalCallbackException;
+import com.citi.put.checks.studio.secrets.VaultProviderUnavailableException;
 import com.citi.put.checks.studio.sse.WatchedExecutionRegistry;
 import java.util.Map;
 import org.springframework.context.annotation.Profile;
@@ -170,6 +171,17 @@ public class ChecksExceptionHandler {
       String reference, String message) {
     return ResponseEntity.badRequest()
         .body(Map.of("error", "UNKNOWN_REFERENCE", "reference", reference, "message", message));
+  }
+
+  /** A real Vault outage is retryable infrastructure, never an unknown-reference disclosure. */
+  @ExceptionHandler(VaultProviderUnavailableException.class)
+  public ResponseEntity<Map<String, String>> handleVaultUnavailable(
+      VaultProviderUnavailableException ex) {
+    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+        .body(
+            Map.of(
+                "error", "VAULT_UNAVAILABLE",
+                "message", "Studio secret resolution is temporarily unavailable"));
   }
 
   /**

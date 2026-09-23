@@ -15,10 +15,9 @@ import java.util.Set;
  * Article IV violation and a migration this story deliberately does not need. AC-5b is where the
  * real vault's own policy, including the principal dimension, is evaluated.
  *
- * <p>What this <em>does</em> give AC-4 is a decision that is genuinely separate from execute
- * permission: the entitlement is per secret, so a principal who owns the CSI — and for whom {@code
- * canExecute} is therefore {@code true} — can still be refused {@code LOGIN_PW}. That is the
- * decision the seam exists to make, and it is the one the mutations falsify.
+ * <p>What this <em>does</em> give AC-4 is a decision that is genuinely separate from open execution
+ * admission: the entitlement is per secret, so a principal who may start the test can still be
+ * refused {@code LOGIN_PW}. That is the decision the seam exists to make.
  *
  * <p>Fail-closed at every gap: an unknown principal, an unknown CSI, an unknown environment or an
  * empty entitlement set all answer {@code false}.

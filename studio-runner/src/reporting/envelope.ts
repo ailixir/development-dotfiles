@@ -47,8 +47,17 @@ export interface JobEnvelope extends JobIdentity {
   /** Server-derived. The runner never invents or accepts an arbitrary key (architecture §8.4). */
   readonly videoKey: string;
   readonly manifestKey: string;
-  /** Canonical compiler-owned expectation snapshot. Optional only for legacy revisions. */
-  readonly expectedIntent?: unknown;
+  /**
+   * ADR-SC-003 structural reference policy, validated by the artifact validator. Absent for
+   * legacy revisions, which keep the source-token reference rule.
+   */
+  readonly referencePolicy?: unknown;
+  /**
+   * The origins each secret may be filled on, by secret id, as `URL.origin` renders them. Not a
+   * secret. Absent, or missing an id, means that secret is bound to no origin and cannot be filled:
+   * the runner never reads absence as "anywhere".
+   */
+  readonly secretOrigins?: Readonly<Record<string, readonly string[]>>;
 }
 
 /**
@@ -73,7 +82,8 @@ export const ACCEPTED_JOB_KEYS = new Set([
   'deadlines',
   'videoKey',
   'manifestKey',
-  'expectedIntent',
+  'referencePolicy',
+  'secretOrigins',
 ]);
 
 /**
@@ -173,6 +183,56 @@ function validateCorrespondence(
     } else if (!declaredSecrets.has(name)) {
       problems.push({ code: ENVELOPE_CODES.resolvedNotDeclared, field: name });
     }
+  }
+}
+
+/** Upper bound on the origins one secret may be bound to. A list this long is a misconfiguration. */
+export const MAX_ORIGINS_PER_SECRET = 16;
+
+/** Upper bound on one origin's length: a DNS name is at most 253 bytes, plus scheme and port. */
+export const MAX_ORIGIN_LENGTH = 512;
+
+/**
+ * Whether `value` is an http(s) origin in exactly the form `URL.origin` renders — lowercase host,
+ * no default port, no path, no trailing slash. Requiring the canonical form here is what lets the
+ * adapter compare with plain string equality.
+ */
+function isCanonicalOrigin(value: string): boolean {
+  if (value.length > MAX_ORIGIN_LENGTH) return false;
+  try {
+    const parsed = new URL(value);
+    return (
+      (parsed.protocol === 'http:' || parsed.protocol === 'https:') && parsed.origin === value
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * `secretOrigins` is optional; when present it must bind only declared secrets, each to a bounded
+ * list of canonical origins. A problem names the secret id or the field, never an origin.
+ */
+function validateSecretOrigins(
+  value: unknown,
+  declaredSecrets: readonly string[] | null,
+  problems: EnvelopeProblem[],
+): void {
+  if (value === undefined) return;
+  if (!isRecord(value)) {
+    problems.push({ code: ENVELOPE_CODES.invalidField, field: 'secretOrigins' });
+    return;
+  }
+  for (const [id, origins] of Object.entries(value)) {
+    if (declaredSecrets !== null && !declaredSecrets.includes(id)) {
+      problems.push({ code: ENVELOPE_CODES.resolvedNotDeclared, field: `secretOrigins.${id}` });
+      continue;
+    }
+    const ok =
+      Array.isArray(origins) &&
+      origins.length <= MAX_ORIGINS_PER_SECRET &&
+      origins.every((origin) => typeof origin === 'string' && isCanonicalOrigin(origin));
+    if (!ok) problems.push({ code: ENVELOPE_CODES.invalidField, field: `secretOrigins.${id}` });
   }
 }
 
@@ -298,6 +358,12 @@ export function validateEnvelope(body: unknown): EnvelopeResult {
   // Correspondence needs all three shapes to have been established first; a malformed `references`
   // or a non-record resolved map has already been reported and comparing their keys would add
   // noise rather than a second fact.
+  validateSecretOrigins(
+    body.secretOrigins,
+    referencesOk ? (body.references as { secrets: string[] }).secrets : null,
+    problems,
+  );
+
   if (referencesOk && stringRecord(body.resolvedVars) && stringRecord(body.resolvedSecrets)) {
     validateCorrespondence(
       body.references as { variables: string[]; secrets: string[] },

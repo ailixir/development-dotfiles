@@ -105,6 +105,11 @@ export interface ExecuteMessage {
   /** Resolved values, by reference name. Never written to scratch, never in argv or env. */
   readonly variables: Readonly<Record<string, string>>;
   readonly secrets: Readonly<Record<string, string>>;
+  /**
+   * The origins each secret may be filled on, by secret id. Non-secret. A secret with no entry is
+   * bound to no origin and cannot be filled (fail closed).
+   */
+  readonly secretOrigins: Readonly<Record<string, readonly string[]>>;
   readonly maxFailureMessageLength: number;
 }
 
@@ -238,6 +243,7 @@ const ACCEPTED_EXECUTE_KEYS: readonly string[] = [
   'steps',
   'variables',
   'secrets',
+  'secretOrigins',
   'maxFailureMessageLength',
 ];
 
@@ -257,6 +263,15 @@ function isSize(value: unknown): value is RecordingSize {
 
 function isStringRecord(value: unknown): value is Record<string, string> {
   return isRecord(value) && Object.values(value).every((entry) => typeof entry === 'string');
+}
+
+function isStringArrayRecord(value: unknown): value is Record<string, string[]> {
+  return (
+    isRecord(value) &&
+    Object.values(value).every(
+      (entry) => Array.isArray(entry) && entry.every((item) => typeof item === 'string'),
+    )
+  );
 }
 
 /**
@@ -365,6 +380,9 @@ export function parseExecuteMessage(value: unknown): ParseResult<ExecuteMessage>
     if (!isStringRecord(record[field])) {
       problems.push({ code: PROTOCOL_CODES.invalidField, field });
     }
+  }
+  if (!isStringArrayRecord(record.secretOrigins)) {
+    problems.push({ code: PROTOCOL_CODES.invalidField, field: 'secretOrigins' });
   }
 
   const steps = record.steps;

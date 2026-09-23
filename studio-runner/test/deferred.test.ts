@@ -171,8 +171,8 @@ describe('10.18a — blocked criteria, recorded as skipped and never passed', ()
 
     it.skip(
       'AC-13a, AC-16a, AC-18, AC-19a, AC-20, AC-21a, AC-22 and AC-23a are STORY 10.18b’s and are IMPLEMENTED, ' +
-        'not deferred: the streaming Ingress, CORS coherence, the envFrom key-validity check (left RED and ' +
-        'escalated, which is what AC-18 asks for), the three bypass closures with their permit companions, ' +
+        'not deferred: the streaming Ingress, CORS coherence, the envFrom key-validity check, ' +
+        'the three bypass closures with their permit companions, ' +
         'the runbook disclosures, the CSRF finding, the measured backend baseline and the kill switch. This ' +
         'entry was a forward pointer when 10.18a shipped; it is kept, corrected, so that a reader comparing ' +
         'the two halves’ skip counts is not left thinking the edge half deferred its own scope.',
@@ -293,17 +293,12 @@ describe('10.18b — blocked criteria, recorded as skipped and never passed', ()
     );
   });
 
-  describe('Not a skip — a pointer to a criterion that is RED on purpose', () => {
+  describe('Not a skip — resolved configuration-delivery pointer', () => {
     it.skip(
-      'AC-18 IS NOT DEFERRED AND IS NOT PASSING. It is RED, in ' +
-        'test/deployment/envfrom-keys.test.ts, with fifteen keys per value set named in the failure ' +
-        'message: the chart’s configOverrides mechanism renders dotted ConfigMap keys that envFrom cannot ' +
-        'turn into environment variables, and has therefore been inert since it was written. AC-18 says in ' +
-        'as many words that it is "left red and escalated" — allowlisting the keys would produce a guard ' +
-        'that cannot fail, and converting them is a deployment behaviour change in database and scheduler ' +
-        'subsystems a Studio story does not own. OWNER @devops (Gage); MECHANISM DECISION @architect (Aria). ' +
-        'This entry exists so that a reader seeing the deployment tier red knows which failure is intended ' +
-        'and which would not be.',
+      'AC-18 is resolved: test/deployment/envfrom-keys.test.ts is green across all value sets. ' +
+        'The chart converts dotted configOverrides keys to Spring-compatible environment names and ' +
+        'fails rendering on invalid or colliding names. This historical pointer remains to show that ' +
+        'the earlier red escalation was closed rather than allowlisted.',
       () => {
         throw new Error('unreachable: this is a pointer, not a criterion');
       },

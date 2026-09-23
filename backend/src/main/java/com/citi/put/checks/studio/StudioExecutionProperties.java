@@ -2,6 +2,7 @@ package com.citi.put.checks.studio;
 
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 
 /**
  * The one configuration source for Studio execution (Architecture §8.5).
@@ -13,9 +14,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * <p>The values are §8.5's <em>starting</em> values, tuned against staging measurements (§10), not
  * commitments. Queue time and browser runtime are separate budgets on purpose: {@link
  * #pendingSla()} bounds how long an execution may wait for a browser, {@link #startDeadline()}
- * bounds how long an admitted run may take to report a browser start, and {@link #runDeadline()}
- * bounds the browser runtime plus finalization and delivery margins. Sharing one timestamp across
- * those three is the implementation AC-19 exists to fail.
+ * bounds how long an admitted run may take to report a browser start, {@link #totalRuntime()} is
+ * the browser runtime the job carries to the runner, and {@link #runDeadline()} bounds that runtime
+ * plus finalization and delivery margins. Sharing one timestamp across those is the implementation
+ * AC-19 exists to fail.
+ *
+ * <p>{@link #totalRuntime()} and a revision's {@code configuration.timeoutSeconds} are two
+ * different budgets (architecture §5.2: "Default step timeout is 30 seconds and total browser
+ * runtime 120 seconds"). The per-step value travels on the job's configuration and the runner
+ * clamps it per step; the whole-run value travels on {@code deadlines.totalRuntimeMs} and comes
+ * from here. Deriving one from the other made every run die at the per-step value, which is the
+ * defect this property exists to close.
  *
  * @param enabled the kill switch (§8.5). When false, new executions are refused {@code 503
  *     DISPATCH_DISABLED}, queued undispatched work is closed explicitly, and admitted work,
@@ -23,6 +32,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @param pendingSla how long an accepted execution may remain undispatched before it is closed
  * @param startDeadline how long an admitted execution may take to report a browser start
  * @param runDeadline browser runtime cap plus bounded finalization and delivery margins
+ * @param totalRuntime the total browser runtime budget sent on every job (§5.2, §8.5); strictly
+ *     inside {@code runDeadline} so finalization and delivery keep their margin
  * @param admissionTimeout the dispatcher's HTTP timeout on {@code POST /v1/runs}
  */
 @ConfigurationProperties(prefix = "studio.execution")
@@ -31,6 +42,7 @@ public record StudioExecutionProperties(
     Duration pendingSla,
     Duration startDeadline,
     Duration runDeadline,
+    Duration totalRuntime,
     Duration admissionTimeout,
     Duration evidenceRetention,
     String referenceCanary,
@@ -38,6 +50,73 @@ public record StudioExecutionProperties(
     Dispatcher dispatcher,
     Callback callback,
     Sse sse) {
+
+  /** §5.2's total browser runtime, the starting value the runner's own maximum mirrors. */
+  static final Duration DEFAULT_TOTAL_RUNTIME = Duration.ofSeconds(120);
+
+  /** §8.5's run deadline: browser runtime plus finalization and delivery margins. */
+  static final Duration DEFAULT_RUN_DEADLINE = Duration.ofSeconds(600);
+
+  /**
+   * Refuses, at bind time, a total runtime the run deadline cannot contain.
+   *
+   * <p>{@code run-deadline} is what the running reaper closes a run at; a browser budget at or past
+   * it would have the reaper close rows under a live, in-budget runner and refuse its {@code
+   * FINAL}. The check uses the effective values, so an unconfigured deployment (120 s inside 600 s)
+   * binds, and only an explicit misconfiguration is refused.
+   */
+  @ConstructorBinding
+  public StudioExecutionProperties {
+    Duration effectiveTotalRuntime = totalRuntime == null ? DEFAULT_TOTAL_RUNTIME : totalRuntime;
+    Duration effectiveRunDeadline = runDeadline == null ? DEFAULT_RUN_DEADLINE : runDeadline;
+    if (effectiveTotalRuntime.isZero() || effectiveTotalRuntime.isNegative()) {
+      throw new IllegalArgumentException(
+          "studio.execution.total-runtime ("
+              + effectiveTotalRuntime
+              + ") must be greater than zero: it is the browser runtime every job is sent");
+    }
+    if (effectiveTotalRuntime.compareTo(effectiveRunDeadline) >= 0) {
+      throw new IllegalArgumentException(
+          "studio.execution.total-runtime ("
+              + effectiveTotalRuntime
+              + ") must be strictly shorter than studio.execution.run-deadline ("
+              + effectiveRunDeadline
+              + "): the run deadline is the browser runtime plus finalization and delivery"
+              + " margins, and a budget that reaches it leaves the running reaper closing rows"
+              + " under a live, in-budget runner.");
+    }
+  }
+
+  /**
+   * The eleven-argument form from before {@code total-runtime} existed, kept so callers that
+   * construct the record by position keep compiling; the budget takes its default.
+   */
+  public StudioExecutionProperties(
+      Boolean enabled,
+      Duration pendingSla,
+      Duration startDeadline,
+      Duration runDeadline,
+      Duration admissionTimeout,
+      Duration evidenceRetention,
+      String referenceCanary,
+      Quotas quotas,
+      Dispatcher dispatcher,
+      Callback callback,
+      Sse sse) {
+    this(
+        enabled,
+        pendingSla,
+        startDeadline,
+        runDeadline,
+        null,
+        admissionTimeout,
+        evidenceRetention,
+        referenceCanary,
+        quotas,
+        dispatcher,
+        callback,
+        sse);
+  }
 
   /**
    * Pending-row bounds (§5.1.1, §5.4). The per-CSI bound and the global bound are independent: a
@@ -168,7 +247,19 @@ public record StudioExecutionProperties(
   }
 
   public Duration runDeadlineOrDefault() {
-    return runDeadline == null ? Duration.ofSeconds(600) : runDeadline;
+    return runDeadline == null ? DEFAULT_RUN_DEADLINE : runDeadline;
+  }
+
+  /**
+   * The total browser runtime every job carries as {@code deadlines.totalRuntimeMs} (§5.2, §8.5).
+   *
+   * <p>Server configuration, never a per-test value: the runner clamps what it receives to its own
+   * {@code STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS}, so this is the value a deployment asks for and the
+   * runner's maximum is the value it is allowed. Validated against {@link #runDeadlineOrDefault()}
+   * at bind time.
+   */
+  public Duration totalRuntimeOrDefault() {
+    return totalRuntime == null ? DEFAULT_TOTAL_RUNTIME : totalRuntime;
   }
 
   public Duration admissionTimeoutOrDefault() {

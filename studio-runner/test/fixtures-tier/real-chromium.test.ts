@@ -269,6 +269,7 @@ describe('AC-21, AC-22 — the canary, and the only thing the browser may write 
         },
       ],
       secrets: { PW: CANARY },
+      secretOrigins: { PW: [server.baseUrl] },
     });
     try {
       // It reached the intended field: the assertion that the input now holds it passed.
@@ -398,6 +399,7 @@ describe('AC-20 — admission → real Chromium launch → STARTED (closes 10.6 
         ],
       },
       resolvedSecrets: { PW: CANARY },
+      secretOrigins: { PW: [server.baseUrl] },
     });
 
     const dispatchedAt = Date.now();

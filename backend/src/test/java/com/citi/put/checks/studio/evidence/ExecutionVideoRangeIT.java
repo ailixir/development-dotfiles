@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -42,6 +43,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@Import(TestEvidenceStores.class)
 @Testcontainers(disabledWithoutDocker = true)
 class ExecutionVideoRangeIT {
 
@@ -157,6 +159,7 @@ class ExecutionVideoRangeIT {
     assertThat(full.getHeaders().getContentType())
         .isEqualTo(MediaType.parseMediaType("video/webm"));
     assertThat(full.getHeaders().getFirst("Accept-Ranges")).isEqualTo("bytes");
+    assertThat(full.getHeaders().getCacheControl()).isEqualTo("private, no-store");
     assertThat(full.getHeaders().getContentLength()).isEqualTo(measuredSize());
     assertThat(full.getBody())
         .as("the whole array, compared byte for byte — not its length and not a prefix")
@@ -181,6 +184,9 @@ class ExecutionVideoRangeIT {
       assertThat(answer.getHeaders().getContentLength())
           .as("%s: Content-Length", range.name())
           .isEqualTo(last - first + 1);
+      assertThat(answer.getHeaders().getCacheControl())
+          .as("%s: execution video must never be reused from browser/proxy cache", range.name())
+          .isEqualTo("private, no-store");
       assertThat(answer.getBody())
           .as("%s: the bytes returned are not the bytes requested", range.name())
           .isEqualTo(Arrays.copyOfRange(object, (int) first, (int) last + 1));

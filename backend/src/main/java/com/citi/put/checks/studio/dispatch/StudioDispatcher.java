@@ -5,6 +5,7 @@ import com.citi.put.checks.studio.UITestRevisionRepository;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import com.citi.put.checks.studio.entity.UITestRevision;
+import com.citi.put.checks.studio.secrets.VaultProviderUnavailableException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -307,12 +308,22 @@ public class StudioDispatcher {
     DispatchOutcome outcome;
     // Resolution happens here and nowhere else, and the values leave this block only on the wire.
     try (StudioReferenceResolver.Resolved resolved =
-        references.resolve(csiId, environment, principal, declarations)) {
+        references.resolve(csiId, environment, principal, secretsOnly(declarations))) {
       recordDispatchPolicy(executionId, policyIdentity, resolved.secretVersions());
+      Map<String, String> plainVariables = plainVariablesOf(executionId, declarations);
 
       RunJob job;
       try {
-        job = job(executionId, attemptId, testId, csiId, revision, declarations, resolved);
+        job =
+            job(
+                executionId,
+                attemptId,
+                testId,
+                csiId,
+                revision,
+                declarations,
+                plainVariables,
+                resolved);
       } catch (IllegalStateException e) {
         // The revision's artifact or configuration document could not be read. Not a reference
         // condition, so it does not borrow a reference code; it is a dispatch that could not be
@@ -336,6 +347,14 @@ public class StudioDispatcher {
       // A fact about the principal (ADR-002 §15.2). The send never happened.
       LOGGER.warn("Studio dispatch refused for execution {}: {}", executionId, e.getMessage());
       close(executionId, ExecutionErrorCode.AUTHORIZATION_REVOKED, now);
+      return false;
+    } catch (VaultProviderUnavailableException e) {
+      // No attempt was issued and no send occurred. A Vault outage is transient infrastructure,
+      // not proof that the reference vanished; release the claim so the next pass can retry until
+      // the existing pending deadline makes the final decision.
+      LOGGER.warn(
+          "Studio dispatch deferred for execution {} because Vault is unavailable", executionId);
+      transactions.execute(status -> statements.releaseClaim(executionId));
       return false;
     } catch (StudioReferenceResolver.ReferenceUnavailableException e) {
       LOGGER.warn("Studio dispatch refused for execution {}: {}", executionId, e.getMessage());
@@ -410,6 +429,7 @@ public class StudioDispatcher {
       String csiId,
       UITestRevision revision,
       ReferenceDeclarations declarations,
+      Map<String, String> plainVariables,
       StudioReferenceResolver.Resolved resolved) {
     return new RunJob(
         executionId,
@@ -421,32 +441,40 @@ public class StudioDispatcher {
         document(revision.getConfiguration(), "configuration"),
         csiId,
         declarations,
-        text(resolved.variables()),
+        plainVariables,
         text(resolved.secrets()),
         deadlines(revision),
         RunJob.videoKeyFor(csiId, testId, executionId, attemptId),
         RunJob.manifestKeyFor(csiId, testId, executionId, attemptId),
-        expectedIntent(revision));
+        referencePolicy(revision),
+        resolved.secretOrigins());
   }
 
-  private JsonNode expectedIntent(UITestRevision revision) {
+  private JsonNode referencePolicy(UITestRevision revision) {
     if (revision.getAuthoring() == null) {
-      return revision.getExpectedIntent() == null
-          ? null
-          : document(revision.getExpectedIntent(), "expectedIntent");
+      return null;
     }
-    if (revision.getExpectedIntent() == null) {
+    if (revision.getReferencePolicy() == null) {
       throw new IllegalArgumentException("Authoring v2 revision requires recompilation");
     }
-    JsonNode expected = document(revision.getExpectedIntent(), "expectedIntent");
-    if (!expected.isObject() || expected.path("schemaVersion").asInt(-1) != 1) {
-      throw new IllegalArgumentException("Authoring v2 revision expected intent is corrupt");
+    JsonNode policy = document(revision.getReferencePolicy(), "referencePolicy");
+    if (!policy.isObject() || policy.path("version").asInt(-1) != 2) {
+      throw new IllegalArgumentException("Authoring v2 revision reference policy is corrupt");
     }
-    return expected;
+    return policy;
   }
 
   /**
-   * §8.5's admitted-start value and the revision's own browser runtime budget, sent faithfully.
+   * §8.5's admitted-start value and the server's total browser runtime, sent faithfully.
+   *
+   * <p><b>Two budgets, two sources.</b> {@code deadlines.totalRuntimeMs} is the whole-run cap and
+   * comes from {@code studio.execution.total-runtime} (§5.2: "total browser runtime 120 seconds").
+   * The revision's {@code configuration.timeoutSeconds} is the <em>per-step</em> timeout, travels
+   * untouched on the job's configuration, and is what the runner derives {@code stepTimeoutMs}
+   * from. Until this change the total was derived from the per-step value, so every run was killed
+   * at the step timeout — thirty seconds — with an orderly stop and a clean recording that ended
+   * mid-test. The per-step value is still required to be usable here, because the runner's envelope
+   * refuses a job without one and a refusal is cheaper before the send than after.
    *
    * <p>Nothing is clamped here. {@code effectiveRuntimeCapMs(job.deadlines.totalRuntimeMs, maxima)}
    * is the runner's and stays there (10.13 AC-6); two clamps would be two derivations of one bound,
@@ -455,11 +483,12 @@ public class StudioDispatcher {
   private RunJob.JobDeadlines deadlines(UITestRevision revision) {
     long admittedStartMs = properties.startDeadlineOrDefault().toMillis();
     JsonNode configuration = document(revision.getConfiguration(), "configuration");
-    long totalRuntimeMs = configuration.path("timeoutSeconds").asLong(0L) * 1000L;
-    if (totalRuntimeMs <= 0) {
+    long stepTimeoutSeconds = configuration.path("timeoutSeconds").asLong(0L);
+    if (stepTimeoutSeconds <= 0) {
       throw new IllegalStateException(
-          "the confirmed revision's configuration declares no usable runtime budget");
+          "the confirmed revision's configuration declares no usable step timeout");
     }
+    long totalRuntimeMs = properties.totalRuntimeOrDefault().toMillis();
     return new RunJob.JobDeadlines(admittedStartMs, totalRuntimeMs);
   }
 
@@ -486,6 +515,52 @@ public class StudioDispatcher {
     Map<String, String> text = new java.util.LinkedHashMap<>();
     values.forEach((name, value) -> text.put(name, new String(value)));
     return text;
+  }
+
+  /** Reads the immutable plain values snapshotted by acceptance, never the mutable draft. */
+  private Map<String, String> plainVariablesOf(
+      UUID executionId, ReferenceDeclarations declarations) {
+    if (declarations.variables().isEmpty()) {
+      return Map.of();
+    }
+    List<String> found =
+        jdbc.queryForList(
+            """
+            SELECT COALESCE(e.configuration_snapshot -> 'variables', '{}'::jsonb)::text
+              FROM ui_test_executions e
+              JOIN studio_dispatch_ledger l
+                ON l.execution_id = e.id AND l.execution_accepted_at = e.started_at
+             WHERE l.execution_id = ?
+            """,
+            String.class,
+            executionId);
+    if (found.isEmpty()) {
+      throw new StudioReferenceResolver.ReferenceUnavailableException(
+          declarations.variables().get(0));
+    }
+    try {
+      JsonNode values = objectMapper.readTree(found.get(0));
+      if (!values.isObject() || values.size() != declarations.variables().size()) {
+        throw new StudioReferenceResolver.ReferenceUnavailableException(
+            declarations.variables().get(0));
+      }
+      Map<String, String> resolved = new java.util.LinkedHashMap<>();
+      for (String name : declarations.variables()) {
+        JsonNode value = values.get(name);
+        if (value == null || !value.isTextual()) {
+          throw new StudioReferenceResolver.ReferenceUnavailableException(name);
+        }
+        resolved.put(name, value.textValue());
+      }
+      return Map.copyOf(resolved);
+    } catch (com.fasterxml.jackson.core.JsonProcessingException exception) {
+      throw new StudioReferenceResolver.ReferenceUnavailableException(
+          declarations.variables().get(0));
+    }
+  }
+
+  private static ReferenceDeclarations secretsOnly(ReferenceDeclarations declarations) {
+    return new ReferenceDeclarations(List.of(), declarations.secrets());
   }
 
   private String environmentOf(UUID executionId) {

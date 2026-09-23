@@ -48,6 +48,7 @@ function validExecute(overrides: Record<string, unknown> = {}): Record<string, u
     ],
     variables: {},
     secrets: { PW: 'canary' },
+    secretOrigins: { PW: ['https://local'] },
     maxFailureMessageLength: 400,
     ...overrides,
   };

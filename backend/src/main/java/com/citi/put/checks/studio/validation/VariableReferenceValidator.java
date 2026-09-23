@@ -138,6 +138,20 @@ public final class VariableReferenceValidator {
         List.copyOf(unused));
   }
 
+  /** The {@code <var NAME>} names one source line mentions, in first-mention order. */
+  public static Set<String> variableTokens(String text) {
+    Set<String> names = new LinkedHashSet<>();
+    collect(VARIABLE_TOKEN, text, names);
+    return names;
+  }
+
+  /** The {@code <secret ID>} ids one source line mentions, in first-mention order. */
+  public static Set<String> secretTokens(String text) {
+    Set<String> ids = new LinkedHashSet<>();
+    collect(SECRET_TOKEN, text, ids);
+    return ids;
+  }
+
   private static void collect(Pattern pattern, String text, Set<String> into) {
     Matcher matcher = pattern.matcher(text);
     while (matcher.find()) {

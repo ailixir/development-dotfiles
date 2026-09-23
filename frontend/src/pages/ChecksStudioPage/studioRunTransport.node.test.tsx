@@ -114,9 +114,6 @@ async function startServer(): Promise<StudioTestServer> {
       if (request.method === 'GET' && single) {
         return json(res, 200, single[1] === draftB.id ? draftB : draftA);
       }
-      if (request.method === 'POST' && request.path === '/api/v1/studio/validate-steps') {
-        return json(res, 200, { isValid: true, results: [] });
-      }
       const execute = /^\/api\/v1\/studio\/tests\/([^/]+)\/execute$/.exec(request.path);
       if (request.method === 'POST' && execute) {
         executeCount += 1;
@@ -140,7 +137,7 @@ async function loadApp(baseUrl: string) {
   const rtl = await import('@testing-library/react');
   const React = await import('react');
   const { Provider } = await import('react-redux');
-  const { MemoryRouter, Route, Routes } = await import('react-router-dom');
+  const { MemoryRouter, Route, Routes, useNavigate } = await import('react-router-dom');
   const { store } = await import('@/store');
   const { default: ChecksStudioPage } = await import('./ChecksStudioPage');
   const transport = await import('@/services/api/studioTransportWiring');
@@ -153,8 +150,7 @@ async function loadApp(baseUrl: string) {
    */
   const nav: { go: ((to: string) => void) | null } = { go: null };
   const NavHandle = () => {
-    const navigate = (require('react-router-dom') as typeof import('react-router-dom')).useNavigate;
-    nav.go = navigate();
+    nav.go = useNavigate();
     return null;
   };
 
@@ -397,14 +393,14 @@ describe('SCEN-1 (@qa gate): the route effect is a change detector, not a differ
       renderAt(`/studio/tests/${draftB.id}`);
 
       // The route names draftB, but the list does not carry it, so the page settles on draftA.
-      await rtl.screen.findByText(draftA.name, undefined, { timeout: 10000 });
+      await rtl.screen.findByRole('heading', { level: 1, name: draftA.name }, { timeout: 10000 });
       await rtl.screen.findByText(`Test Steps (${draftA.steps.length})`, undefined, {
         timeout: 10000,
       });
 
       // The list changes beneath a route that has not moved.
       listedDrafts = [draftA, draftB];
-      const reload = await rtl.screen.findByRole('button', { name: /reload scenarios/i });
+      const reload = await rtl.screen.findByRole('button', { name: /refresh test information/i });
       await rtl.act(async () => {
         reload.click();
         await new Promise((resolve) => setTimeout(resolve, 400));
@@ -419,7 +415,7 @@ describe('SCEN-1 (@qa gate): the route effect is a change detector, not a differ
 
       // Nothing snapped. The selection and the authored steps are the ones the user was looking at.
       expect(rtl.screen.queryByText(draftB.name)).toBeNull();
-      expect(rtl.screen.queryByText(draftA.name)).not.toBeNull();
+      expect(rtl.screen.queryByRole('heading', { level: 1, name: draftA.name })).not.toBeNull();
       expect(
         rtl.screen.queryByText(`Test Steps (${draftA.steps.length})`),
         'the step list was overwritten by the route’s draft',

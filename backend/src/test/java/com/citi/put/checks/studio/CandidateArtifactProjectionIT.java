@@ -109,6 +109,9 @@ class CandidateArtifactProjectionIT {
     // that branches on presence must see the same shape in both states.
     assertThat(body.has("currentCandidateArtifactHash")).isTrue();
     assertThat(body.has("currentCandidateArtifact")).isTrue();
+    assertThat(body.path("confirmedRevisionId").isNull()).isTrue();
+    assertThat(body.hasNonNull("confirmedRevisionArtifactHash")).isFalse();
+    assertThat(body.hasNonNull("confirmedRevisionArtifact")).isFalse();
   }
 
   /**
@@ -135,6 +138,8 @@ class CandidateArtifactProjectionIT {
         .isEqualTo(candidate.revisionId().toString());
     assertThat(entry.hasNonNull("currentCandidateArtifactHash")).isFalse();
     assertThat(entry.hasNonNull("currentCandidateArtifact")).isFalse();
+    assertThat(entry.hasNonNull("confirmedRevisionArtifactHash")).isFalse();
+    assertThat(entry.hasNonNull("confirmedRevisionArtifact")).isFalse();
     assertThat(entry.hasNonNull("compileDiagnostics")).isFalse();
   }
 
@@ -179,6 +184,12 @@ class CandidateArtifactProjectionIT {
     JsonNode body = getTest();
 
     assertThat(body.path("confirmedRevisionId").asText()).isEqualTo(first.revisionId().toString());
+    assertThat(body.path("confirmedRevisionArtifactHash").asText())
+        .isEqualTo(persistedHash(first.revisionId()));
+    assertThat(body.path("confirmedRevisionArtifact"))
+        .isEqualTo(persistedArtifact(first.revisionId()));
+    assertThat(body.path("confirmedRevisionArtifact").path("steps").get(0).path("code").asText())
+        .isEqualTo(FIRST_CODE);
     assertThat(body.path("currentCandidateRevisionId").asText())
         .isEqualTo(second.revisionId().toString());
     assertThat(body.path("currentCandidateArtifactHash").asText())

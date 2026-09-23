@@ -1,4 +1,4 @@
-<!-- syntaxReferenceVersion: 1.0.0 -->
+<!-- syntaxReferenceVersion: 1.1.0 -->
 
 # Playwright syntax reference (Studio, V1)
 
@@ -26,40 +26,81 @@ await page.goto('https://example.com/login');
 
 | Call | Notes |
 |---|---|
-| `await page.goto(url)` | Absolute `https` URL, or `vars.get('NAME')` |
+| `await page.goto(url)` | Absolute `http` or `https` URL literal, or `vars.get('NAME')` |
 | `await page.goto(url, options)` | `timeout`, `waitUntil` |
-| `await page.waitForURL(url)` | String or regular expression literal |
+| `await page.waitForURL(url)` | String literal, regular expression literal, or `vars.get('NAME')` |
 | `await page.waitForURL(url, options)` | `timeout`, `waitUntil` |
+
+`waitUntil` is one of `'load'`, `'domcontentloaded'`, `'networkidle'`, `'commit'`. Every `timeout`
+is an integer number of milliseconds from 0 to 600000.
 
 ## Locators
 
-Chains start at `page` and use only these segments:
+Chains start at `page` and use only these segments. A segment may follow another segment, so
+`page.getByRole('list').getByText('Invoices')` is a valid chain.
 
-`getByRole(role, options)`, `getByText(text, options)`, `getByLabel(text, options)`,
-`getByPlaceholder(text, options)`, `getByTestId(id)`, `locator(cssSelector)`.
+| Segment | Options |
+|---|---|
+| `getByRole(role, options)` | `name` (string, regular expression or `vars.get`), `exact`, `checked`, `disabled`, `expanded`, `selected`, `pressed` (booleans), `level` (integer 1–6) |
+| `getByText(text, options)` | `exact` |
+| `getByLabel(text, options)` | `exact` |
+| `getByPlaceholder(text, options)` | `exact` |
+| `getByTestId(id)` | none |
+| `locator(cssSelector)` | none |
 
-Options are limited to `name`, `exact`, `checked`, `selected`, `pressed`, `expanded`.
+`role` is a standard ARIA role name. `text` is a string literal, a regular expression literal, or
+`vars.get('NAME')`. `locator()` takes a plain CSS selector literal only: Playwright selector-engine
+syntax such as `>>`, `:has-text(`, `:text(`, `:has(`, `:visible` or `:nth-match(` is rejected.
 
 ```js
 await page.getByRole('button', { name: 'Sign in' }).click();
+await page.getByRole('heading', { name: /welcome/i, level: 1 }).click();
 await page.locator('#search-field').fill('invoices');
 ```
 
 ## Actions
 
-`click`, `fill`, `press`, `check`, `uncheck`, `selectOption`, `hover` — each awaited, each on a
-locator chain, each with at most the documented option keys (`timeout`, `force`, `delay`, `button`,
-`clickCount`, `noWaitAfter`).
+Each action is awaited, called on a locator chain, and takes at most the option keys listed for
+it.
+
+| Call | Options |
+|---|---|
+| `click()` | `button` (`'left'`, `'right'`, `'middle'`), `clickCount` (integer 1–3), `delay` (integer 0–5000), `force`, `trial` (only `false`), `timeout` |
+| `fill(value)` | `force`, `timeout` |
+| `press(key)` | `delay` (integer 0–5000), `timeout` |
+| `check()` | `force`, `trial` (only `false`), `timeout` |
+| `uncheck()` | `force`, `trial` (only `false`), `timeout` |
+| `hover()` | `force`, `trial` (only `false`), `timeout` |
+| `selectOption(value)` | `force`, `timeout` |
+
+`fill` takes a string literal, `vars.get('NAME')` or `vars.secret('ID')`. `selectOption` takes a
+string literal or `vars.get('NAME')`. `press` takes a key name literal such as `'Enter'`.
 
 ## Assertions
 
+| Call | Options |
+|---|---|
+| `expect(locator).toBeVisible()` | `timeout` |
+| `expect(locator).toContainText(text)` | `timeout`, `ignoreCase`, `useInnerText` |
+| `expect(locator).toHaveValue(text)` | `timeout` |
+| `expect(page).toHaveURL(url)` | `timeout`, `ignoreCase` |
+| `expect(page).toHaveTitle(text)` | `timeout` |
+
+The expected `text` of `toContainText`, `toHaveValue` and `toHaveTitle`, and the expected `url` of
+`toHaveURL`, is a string literal, a regular expression literal, or `vars.get('NAME')`.
+
 ```js
 await expect(page.getByText('Welcome')).toBeVisible();
-await expect(page.getByTestId('total')).toContainText('120.00');
+await expect(page.getByTestId('total')).toContainText('120.00', { ignoreCase: true });
 await expect(page.getByLabel('Email')).toHaveValue('a@example.com');
 await expect(page).toHaveURL('https://example.com/dashboard');
 await expect(page).toHaveTitle('Dashboard');
 ```
+
+## Regular expressions
+
+Wherever a regular expression literal is accepted, only the flags `i`, `m`, `s` and `u` are
+permitted. Keep patterns short and simple: long or potentially catastrophic patterns are rejected.
 
 ## References — values are never inlined
 

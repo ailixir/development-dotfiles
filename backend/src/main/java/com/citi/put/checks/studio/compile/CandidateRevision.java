@@ -19,6 +19,8 @@ package com.citi.put.checks.studio.compile;
  * @param provenance model, prompt, language-policy, syntax-reference, validator, executor and
  *     runtime-compatibility versions
  * @param createdBy principal that produced the candidate
+ * @param referencePolicy canonical ADR-SC-003 reference policy, {@code null} for legacy authoring
+ * @param intentDerivationVersion version that derived {@code referencePolicy}
  */
 public record CandidateRevision(
     long configurationRevision,
@@ -31,7 +33,7 @@ public record CandidateRevision(
     String references,
     String provenance,
     String createdBy,
-    String expectedIntent,
+    String referencePolicy,
     String intentDerivationVersion) {
 
   public CandidateRevision(
@@ -71,7 +73,7 @@ public record CandidateRevision(
       String references,
       String provenance,
       String createdBy,
-      String expectedIntent) {
+      String referencePolicy) {
     this(
         configurationRevision,
         source,
@@ -83,7 +85,7 @@ public record CandidateRevision(
         references,
         provenance,
         createdBy,
-        expectedIntent,
+        referencePolicy,
         null);
   }
 }

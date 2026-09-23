@@ -19,7 +19,7 @@ import {
   createFakeBrowserAdapter,
   createFakeClock,
   createRecordingStepReporter,
-} from '../../src/executor/adapters/fake.js';
+} from '../helpers/fakeAdapters.js';
 import { createValueResolver } from '../../src/executor/executor.js';
 import {
   systemOriginSource,

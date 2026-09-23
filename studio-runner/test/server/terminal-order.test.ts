@@ -40,8 +40,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { createChildOwnedAdapter } from '../../src/run/launcher.js';
 import { takeRunOrigin } from '../../src/run/timeline.js';
-import { createFakeObjectStore } from '../../src/run/objectStore.js';
-import type { FakeObjectStoreOptions, ObjectStoreClient } from '../../src/run/objectStore.js';
+import type { ObjectStoreClient } from '../../src/run/objectStore.js';
+import { createFakeObjectStore } from '../helpers/fakeObjectStore.js';
+import type { FakeObjectStoreOptions } from '../helpers/fakeObjectStore.js';
 import type { ReportBody } from '../../src/reporting/snapshot.js';
 import type {
   BrowserLauncher,

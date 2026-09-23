@@ -8,6 +8,7 @@ import com.citi.put.checks.studio.UITestExecutionRepository;
 import com.citi.put.checks.studio.UITestRevisionRepository;
 import com.citi.put.checks.studio.dto.ExecutionStatus;
 import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
+import com.citi.put.checks.studio.dto.StudioVariable;
 import com.citi.put.checks.studio.entity.StudioDispatchLedger;
 import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.entity.UITestExecution;
@@ -166,9 +167,12 @@ public class StudioAcceptanceService {
       throw new StudioDispatchDisabledException("Studio execution is currently disabled");
     }
 
+    // Hold the draft row across readiness and execution snapshot creation. Confirmation and
+    // authoring writes update this same row, so the lock prevents readiness from validating one
+    // confirmed revision while the execution persists another from an earlier entity snapshot.
     UITest test =
         tests
-            .findById(testId)
+            .findByIdForUpdate(testId)
             .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + testId));
     if (test.getDeletedAt() != null) {
       throw new StudioConflictException("TEST_DELETED", "Test " + testId + " has been deleted");
@@ -210,22 +214,21 @@ public class StudioAcceptanceService {
           "This revision declares " + steps.size() + " steps; the bound is " + maxSteps);
     }
 
-    // Names only, typed. Values are resolved at dispatch (§5.1.3) and nowhere else.
+    // Names are taken from the immutable confirmed revision. Plain values are already persisted on
+    // the draft and are snapshotted with this accepted execution; Vault is reserved for secrets.
     //
-    // Two decisions are made here and they are deliberately separate (AC-4): the route's CSI
-    // check has already established that this principal may execute for this CSI, and the
-    // resolver additionally consults StudioSecretUseAuthorization per declared secret. §9.2 is
-    // explicit that "Secret reference names alone grant no permission", and executing a draft does
-    // not entitle a principal to every reference the draft names.
+    // Execution is open to every authenticated application user. Secret use remains a separate,
+    // narrower decision: the resolver consults StudioSecretUseAuthorization for each declared
+    // secret. A user's ability to start an ordinary run does not grant access to secret material.
     //
     // The declaration is read from the confirmed revision the execution is about to snapshot,
     // never from the draft's current `variables` and never from the request (AC-5a). An
     // unreadable declaration is terminal rather than an empty set (AC-10).
+    ReferenceDeclarations declarations =
+        ExecutionReferences.declared(objectMapper, revision.getReferences());
+    Map<String, String> plainVariables = plainVariableValues(test, declarations);
     references.preflight(
-        test.getCsiId(),
-        test.getEnvironment(),
-        principal,
-        ExecutionReferences.declared(objectMapper, revision.getReferences()));
+        test.getCsiId(), test.getEnvironment(), principal, secretsOnly(declarations));
 
     enforcePendingQuotas(test.getCsiId());
 
@@ -235,7 +238,7 @@ public class StudioAcceptanceService {
     execution.setPrincipal(principal);
     execution.setEnvironment(test.getEnvironment());
     execution.setRevisionId(revision.getId());
-    execution.setConfigurationSnapshot(configurationSnapshot(test, revision));
+    execution.setConfigurationSnapshot(configurationSnapshot(test, revision, plainVariables));
     execution.setStepResults(pendingStepResults(steps));
     execution = executions.save(execution);
 
@@ -352,8 +355,9 @@ public class StudioAcceptanceService {
     material.append('|').append(value.length()).append(':').append(value);
   }
 
-  /** The nonsecret configuration snapshot taken at acceptance (§8.1). Never a resolved value. */
-  private String configurationSnapshot(UITest test, UITestRevision revision) {
+  /** The immutable nonsecret configuration and plain-variable snapshot taken at acceptance. */
+  private String configurationSnapshot(
+      UITest test, UITestRevision revision, Map<String, String> plainVariables) {
     Map<String, Object> snapshot = new LinkedHashMap<>();
     snapshot.put("browser", test.getBrowser());
     snapshot.put("viewportWidth", test.getViewportWidth());
@@ -364,7 +368,30 @@ public class StudioAcceptanceService {
     snapshot.put("sourceRevision", revision.getSourceRevision());
     snapshot.put("configurationRevision", revision.getConfigurationRevision());
     snapshot.put("artifactHash", revision.getArtifactHash());
+    snapshot.put("variables", plainVariables);
     return writeJson(snapshot);
+  }
+
+  private static Map<String, String> plainVariableValues(
+      UITest test, ReferenceDeclarations declarations) {
+    Map<String, String> available = new LinkedHashMap<>();
+    for (StudioVariable variable : LegacyStudioAdapter.parseVariables(test.getVariables())) {
+      if (StudioVariable.KIND_PLAIN.equals(variable.kind()) && variable.value() != null) {
+        available.put(variable.name(), variable.value());
+      }
+    }
+    Map<String, String> selected = new LinkedHashMap<>();
+    for (String name : declarations.variables()) {
+      if (!available.containsKey(name)) {
+        throw new StudioReferenceResolver.UnknownReferenceException(name);
+      }
+      selected.put(name, available.get(name));
+    }
+    return Map.copyOf(selected);
+  }
+
+  private static ReferenceDeclarations secretsOnly(ReferenceDeclarations declarations) {
+    return new ReferenceDeclarations(List.of(), declarations.secrets());
   }
 
   /**

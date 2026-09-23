@@ -1,5 +1,13 @@
 # Checks Studio — WCAG conformance audit
 
+> **Revalidation — 2026-09-20:** The two-panel Studio redesign removed all pinned
+> critical/serious violations from the five `ChecksStudioPage` states and from `StudioRunsPage`.
+> `StudioTestsPage` retains one `button-name` and one `aria-prohibited-attr` node. The automated
+> guard has been re-anchored to those current counts, with `A11Y-3` and `A11Y-4` closed and
+> `A11Y-1`/`A11Y-2` narrowed in the acceptance register. The historical 2026-09-17 measurement
+> below is retained as the original audit record. Manual assistive-technology, contrast, and
+> target-size validation remain outstanding.
+
 **Story:** [10.19](../../stories/10.19.story.md) AC-12, closing story 10.10 AC-18(b).
 **Date:** 2026-09-17 · **Branch:** `story/10.19` at integration head `d3700f23d`
 **Scope:** the standalone / MSW-backed build. **Not staging.** No `ED-*` or `SPK-*` id gates this

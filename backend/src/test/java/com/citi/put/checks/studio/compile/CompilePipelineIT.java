@@ -10,11 +10,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.citi.put.checks.studio.StudioConflictException;
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
+import com.citi.put.checks.studio.StudioValidationException;
 import com.citi.put.checks.studio.compile.gateway.CompileResponse;
 import com.citi.put.checks.studio.compile.gateway.GatewayErrorCode;
 import com.citi.put.checks.studio.compile.gateway.GatewayOutcome;
 import com.citi.put.checks.studio.compile.gateway.GatewayProvenance;
 import com.citi.put.checks.studio.compile.gateway.LlmGatewayClient;
+import com.citi.put.checks.studio.dto.AuthoringStep;
+import com.citi.put.checks.studio.dto.AuthoringV2Request;
+import com.citi.put.checks.studio.dto.GlobalAuthoringContext;
+import com.citi.put.checks.studio.dto.StepAuthoringContext;
 import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.readiness.ExecutionReadinessService;
@@ -259,18 +264,21 @@ class CompilePipelineIT {
     transactions.executeWithoutResult(
         status -> {
           insertDraft(id, STEPS);
-          pipeline.enqueueAfterCommit(id, OWNER);
           assertThat(gateway.calls.get())
-              .as("no outbound HTTP of any kind may happen inside the database transaction")
+              .as("saving reaches no gateway at all: the compile is a separate, later request")
               .isZero();
         });
     long saveMs = (System.nanoTime() - before) / 1_000_000L;
+    // Run asks for the preparation after the draft's transaction has committed. That ordering is
+    // the property; it used to be produced by an after-commit hook on save, and is now produced by
+    // the compile route being a second request.
+    pipeline.compile(id, OWNER);
 
     assertThat(inGateway.await(20, TimeUnit.SECONDS))
         .as("the compile must have started after the commit")
         .isTrue();
     assertThat(saveMs)
-        .as("the save must return without waiting for the gateway (§8.3)")
+        .as("the save must return without reaching the gateway at all (§8.3)")
         .isLessThan(5_000L);
 
     // A second connection, outside the saving transaction, can see the committed row while the
@@ -285,25 +293,27 @@ class CompilePipelineIT {
     assertThat(compileStatus(id)).isEqualTo("COMPILING");
 
     release.countDown();
-    awaitCompileStatus(id, "AWAITING_CONFIRMATION");
+    awaitCompileStatus(id, "READY");
   }
 
   /**
-   * AC-2, T-10.8.1 — <b>the save routes themselves enqueue</b>, which is the half the test above
-   * cannot see.
+   * AC-2, T-10.8.1 — <b>the save routes compile nothing</b>, and the Run action's compile does.
    *
-   * <p>{@code theDraftIsCommittedAndReadableFromASecondConnectionWhileTheCompileIsStillInFlight}
-   * proves the commit-then-enqueue helper behaves, by calling it directly. It would keep passing if
-   * {@code createTest} and {@code updateTest} never called it at all — which was exactly the state
-   * of the branch at the end of phase 1, when {@code FOC-03} held these two files back. So this
-   * drives the service methods and asserts a compile actually started for the draft they saved.
+   * <p>This test used to assert the opposite, because saving registered an after-commit compile.
+   * That charged the author a gateway call for every save they made, hid the cost behind a status
+   * they had not asked to change, and — when the attempt failed — left the draft {@code STALE} with
+   * no way to ask again, since re-saving identical content is not a change and enqueued nothing. It
+   * drives the service methods and asserts no attempt started for the draft they saved.
    */
   @Test
-  void savingADraftThroughTheServiceIsWhatStartsTheCompile() {
+  void savingADraftThroughTheServiceStartsNoCompile() {
     UITestDto created =
-        studioService.createTest(draftRequest("Enqueue on create", null, null), owner());
-    awaitCompileStatus(created.id(), "AWAITING_CONFIRMATION");
-    assertThat(gateway.calls.get()).as("create enqueued exactly one attempt").isEqualTo(1);
+        studioService.createTest(draftRequest("No compile on create", null, null), owner());
+    assertThat(compileStatus(created.id())).isEqualTo("STALE");
+    assertThat(gateway.calls.get()).as("create reaches no gateway at all").isZero();
+    assertThat(readiness.evaluate(created.id()).ready())
+        .as("a saved draft with no artifact is not runnable")
+        .isFalse();
 
     UITestDto reloaded = studioService.findTestById(created.id());
     UITestRequest edit =
@@ -322,8 +332,58 @@ class CompilePipelineIT {
             reloaded.configurationRevision());
     studioService.updateTest(created.id(), edit, owner());
 
-    awaitCompileStatus(created.id(), "AWAITING_CONFIRMATION");
-    assertThat(gateway.calls.get()).as("the edit enqueued a second attempt").isEqualTo(2);
+    assertThat(compileStatus(created.id())).isEqualTo("STALE");
+    assertThat(gateway.calls.get()).as("the edit reaches no gateway either").isZero();
+
+    // What the author pressing Run does, and the only thing that compiles.
+    pipeline.compile(created.id(), OWNER);
+    awaitCompileStatus(created.id(), "READY");
+    assertThat(readiness.evaluate(created.id()).ready()).isTrue();
+    assertThat(gateway.calls.get())
+        .as("exactly one attempt, the one that was asked for")
+        .isEqualTo(1);
+  }
+
+  @Test
+  void savingV2AuthoringPreparesNothingUntilTheCompileIsAskedFor() {
+    AuthoringV2Request initial =
+        new AuthoringV2Request(
+            2,
+            GlobalAuthoringContext.empty(),
+            List.of(
+                new AuthoringStep(UUID.randomUUID(), STEPS.get(0), StepAuthoringContext.empty()),
+                new AuthoringStep(UUID.randomUUID(), STEPS.get(1), StepAuthoringContext.empty())));
+    StudioService.AuthoringDraft created =
+        studioService.createAuthoringDraft(draftRequest("V2 save", null, null), initial, owner());
+    assertThat(compileStatus(created.test().id())).isEqualTo("STALE");
+
+    AuthoringV2Request edited =
+        new AuthoringV2Request(
+            2,
+            GlobalAuthoringContext.empty(),
+            List.of(
+                initial.steps().get(0),
+                initial.steps().get(1),
+                new AuthoringStep(
+                    UUID.randomUUID(), "Click the \"Next\" button", StepAuthoringContext.empty())));
+    UITestDto current = studioService.findTestById(created.test().id());
+    studioService.updateAuthoringDraft(
+        created.test().id(),
+        draftRequest("V2 save", current.sourceRevision(), current.configurationRevision()),
+        edited,
+        owner());
+
+    assertThat(compileStatus(created.test().id()))
+        .as("a v2 save persists the draft and prepares nothing")
+        .isEqualTo("STALE");
+    assertThat(gateway.calls.get()).as("neither v2 save reached the gateway").isZero();
+
+    pipeline.compile(created.test().id(), OWNER);
+    awaitCompileStatus(created.test().id(), "READY");
+    ReadinessVerdict verdict = readiness.evaluate(created.test().id());
+    assertThat(verdict.ready()).isTrue();
+    assertThat(verdict.revisionId()).isNotNull();
+    assertThat(gateway.calls.get()).as("one attempt, the one that was asked for").isEqualTo(1);
   }
 
   /**
@@ -334,7 +394,8 @@ class CompilePipelineIT {
   @Test
   void aNameOnlyEditEnqueuesNothing() {
     UITestDto created = studioService.createTest(draftRequest("Named draft", null, null), owner());
-    awaitCompileStatus(created.id(), "AWAITING_CONFIRMATION");
+    pipeline.compile(created.id(), OWNER);
+    awaitCompileStatus(created.id(), "READY");
     int afterCreate = gateway.calls.get();
 
     UITestDto reloaded = studioService.findTestById(created.id());
@@ -346,23 +407,27 @@ class CompilePipelineIT {
     assertThat(gateway.calls.get())
         .as("name/description changes invalidate no confirmation and compile nothing")
         .isEqualTo(afterCreate);
-    assertThat(compileStatus(created.id())).isEqualTo("AWAITING_CONFIRMATION");
+    assertThat(compileStatus(created.id())).isEqualTo("READY");
   }
 
   @Test
-  void aFailedEnqueueNeverFailsTheSave() {
+  void aRefusedCompileLeavesTheDraftSaved() {
     UUID id = UUID.randomUUID();
 
-    transactions.executeWithoutResult(
-        status -> {
-          insertDraft(id, List.of("x".repeat(2_000)));
-          // Over the line-length bound: the enqueue will be rejected.
-          pipeline.enqueueAfterCommit(id, OWNER);
-        });
+    transactions.executeWithoutResult(status -> insertDraft(id, List.of("x".repeat(2_000))));
+
+    // Over the line-length bound: the compile is refused on the request thread, before any
+    // compile state moves. Saving already happened and is not undone by it.
+    assertThatThrownBy(() -> pipeline.compile(id, OWNER))
+        .as("a bound is refused before the draft is moved to COMPILING")
+        .isInstanceOf(StudioValidationException.class);
 
     assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM ui_tests WHERE id = ?", Integer.class, id))
-        .as("a draft must persist even when its optional compile cannot start")
+        .as("a draft must persist even when the compile it is asked for cannot start")
         .isEqualTo(1);
+    assertThat(compileStatus(id))
+        .as("a refused compile changes no compile state")
+        .isEqualTo("STALE");
   }
 
   // ── AC-4: out-of-order completion, including two compiles of the same text ─
@@ -405,7 +470,7 @@ class CompilePipelineIT {
     holdAtEntry.countDown();
 
     releaseB.countDown();
-    awaitCompileStatus(testId, "AWAITING_CONFIRMATION");
+    awaitCompileStatus(testId, "READY");
     UUID currentAfterB = candidateRevisionId(testId);
 
     releaseA.countDown();
@@ -441,11 +506,11 @@ class CompilePipelineIT {
       stubValidatorAcceptingSteps(source.size());
 
       pipeline.compile(id, OWNER);
-      awaitAnyOf(id, List.of("AWAITING_CONFIRMATION", "NEEDS_REVISION", "STALE"));
+      awaitAnyOf(id, List.of("READY", "NEEDS_REVISION", "STALE"));
 
       assertThat(compileStatus(id))
           .as("%s must compile to a confirmable candidate", example.getFileName())
-          .isEqualTo("AWAITING_CONFIRMATION");
+          .isEqualTo("READY");
       assertThat(candidateRevisionId(id)).isNotNull();
     }
   }
@@ -456,15 +521,10 @@ class CompilePipelineIT {
   void nothingCanBeConfirmedOnceTheDraftIsNeedsRevision() {
     // A genuine confirmed revision first, so case (b) has a real previously-confirmed id to use.
     pipeline.compile(testId, OWNER);
-    awaitCompileStatus(testId, "AWAITING_CONFIRMATION");
+    // The compile route accepts a valid candidate for its caller, so this is
+    // already a confirmed, runnable revision — there is nothing left to confirm.
+    awaitCompileStatus(testId, "READY");
     UUID firstCandidate = candidateRevisionId(testId);
-    states.confirm(
-        testId,
-        firstCandidate,
-        artifactHash(firstCandidate),
-        sourceRevision(testId),
-        configurationRevision(testId),
-        OWNER);
 
     // A second compile supersedes it with a different artifact, and is then superseded itself.
     CompileRequest superseded = states.beginCompile(testId);
@@ -545,7 +605,7 @@ class CompilePipelineIT {
       release.countDown();
     }
     for (UUID id : blocked) {
-      awaitCompileStatus(id, "AWAITING_CONFIRMATION");
+      awaitCompileStatus(id, "READY");
     }
   }
 
@@ -556,15 +616,10 @@ class CompilePipelineIT {
     // A separate test, confirmed and unedited before the outage starts.
     UUID confirmed = seedTest(STEPS);
     pipeline.compile(confirmed, OWNER);
-    awaitCompileStatus(confirmed, "AWAITING_CONFIRMATION");
+    // The compile route accepts a valid candidate for its caller, so this is
+    // already a confirmed, runnable revision — there is nothing left to confirm.
+    awaitCompileStatus(confirmed, "READY");
     UUID revisionId = candidateRevisionId(confirmed);
-    states.confirm(
-        confirmed,
-        revisionId,
-        artifactHash(revisionId),
-        sourceRevision(confirmed),
-        configurationRevision(confirmed),
-        OWNER);
     assertThat(readiness.evaluate(confirmed).ready()).isTrue();
 
     gateway.failing = true;
@@ -604,15 +659,10 @@ class CompilePipelineIT {
 
     UUID edited = seedTest(STEPS);
     pipeline.compile(edited, OWNER);
-    awaitCompileStatus(edited, "AWAITING_CONFIRMATION");
+    // The compile route accepts a valid candidate for its caller, so this is
+    // already a confirmed, runnable revision — there is nothing left to confirm.
+    awaitCompileStatus(edited, "READY");
     UUID editedRevision = candidateRevisionId(edited);
-    states.confirm(
-        edited,
-        editedRevision,
-        artifactHash(editedRevision),
-        sourceRevision(edited),
-        configurationRevision(edited),
-        OWNER);
     jdbc.update("UPDATE ui_tests SET source_revision = source_revision + 1 WHERE id = ?", edited);
     refusable.add(edited);
 
@@ -958,9 +1008,9 @@ class CompilePipelineIT {
     vault.throwing = true;
 
     UUID id = seedTest(STEPS);
-    transactions.executeWithoutResult(status -> pipeline.enqueueAfterCommit(id, OWNER));
+    pipeline.compile(id, OWNER);
 
-    awaitCompileStatus(id, "AWAITING_CONFIRMATION");
+    awaitCompileStatus(id, "READY");
     assertThat(vault.calls).as("the compile path reached the vault").isEmpty();
   }
 
@@ -989,8 +1039,8 @@ class CompilePipelineIT {
     vault.calls.clear();
 
     UUID id = seedTest(STEPS);
-    transactions.executeWithoutResult(status -> pipeline.enqueueAfterCommit(id, OWNER));
-    awaitCompileStatus(id, "AWAITING_CONFIRMATION");
+    pipeline.compile(id, OWNER);
+    awaitCompileStatus(id, "READY");
 
     String validatorBodies =
         runner.findAll(postRequestedFor(urlEqualTo("/v1/validate"))).stream()

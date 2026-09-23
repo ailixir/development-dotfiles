@@ -6,8 +6,9 @@
 # stubbed and the runner's object store on the filesystem, and drives a draft through compile,
 # confirm and dispatch across the seam between them.
 #
-# It does NOT yet cover the media route's ranged read: the API's video store provider is `none`
-# under the co-run. See StudioCoRunIT for the eleven legs it does cover: legs 0-3 cross the seam
+# It also points the API's local evidence reader at the runner's exact object directory and proves
+# a real recording is served through an inclusive ranged read. See StudioCoRunIT for the eleven
+# legs it covers: legs 0-3 cross the seam
 # in each direction, leg 4 runs a real Chromium against a loopback page to PASSED/DONE, legs 5-9
 # cancel over the public HTTP route (control read, DELETE relay, queued, before admission, right
 # after admission) with a real browser and assert the signal, the ledger, the pids and the

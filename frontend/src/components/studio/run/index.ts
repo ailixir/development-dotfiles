@@ -25,10 +25,23 @@ export {
   executionErrorNarrative,
 } from './executionErrorNarratives';
 export type { ExecutionErrorNarrative } from './executionErrorNarratives';
-export { RUN_ENABLEMENT, RUNNABLE_COMPILE_STATUS, runEnablementFor } from './runEnablement';
-export type { RunEnablement } from './runEnablement';
+export {
+  RUN_ACTION,
+  EXECUTABLE_COMPILE_STATUS,
+  WAITING_COMPILE_STATUS,
+  runActionFor,
+  runAvailableFor,
+} from './runEnablement';
+export type { RunAction } from './runEnablement';
 export { useRunGate } from './useRunGate';
-export type { RunGateState, RunRefusalState } from './useRunGate';
+export type {
+  RunGateState,
+  RunRefusalState,
+  RunPhase,
+  RunSaveOutcome,
+  RunCompileOutcome,
+  RunGateOptions,
+} from './useRunGate';
 export {
   EXECUTION_STATUS_LABELS,
   CANCELLED_LABEL,

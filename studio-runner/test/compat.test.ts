@@ -22,7 +22,7 @@ import {
   createFakeBrowserAdapter,
   createFakeClock,
   createRecordingStepReporter,
-} from '../src/executor/adapters/fake.js';
+} from './helpers/fakeAdapters.js';
 import { validateArtifact } from '../src/validator/index.js';
 import { EXECUTOR_VERSION, SYNTAX_REFERENCE_VERSION, VALIDATOR_SCHEMA_VERSION } from '../src/versions.js';
 import { loadReferenceFixtures } from './helpers/corpus.js';
@@ -193,7 +193,7 @@ describe('loadRuntimeVersions', () => {
       `${JSON.stringify({
         playwright: '1.63.0',
         validatorSchema: '1.0.0',
-        syntaxReference: '1.0.0',
+        syntaxReference: SYNTAX_REFERENCE_VERSION,
         executor: '1.0.0',
         chromiumBuild: null,
         image: null,

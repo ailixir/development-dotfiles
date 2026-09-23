@@ -65,9 +65,9 @@ backend:
   #       different fact from a drafting gate and does not reinstate one.
   #
   # Corrected by @po on 2026-09-17 (closure plan, Phase 0 — record truing). **Only these two claims
-  # were touched.** The three warnings above — that the bypass code paths still exist, that the
-  # vault is still a stub, and the pilot prohibition itself — were **not re-verified by this
-  # change** and are left exactly as they stood. No rendered value in this file was altered.
+  # were touched.** The bypass paths still exist. The real Studio Vault adapter now exists but is
+  # default-off and unconnected; the legacy `SecretsService` remains a `REDACTED` stub. The pilot
+  # prohibition remains until ED-02 has a linked completed delivery.
   #
   # See `docs/runbooks/studio-runner.md` §9 for what an operator may and may not do with these.
   identityBypass:
@@ -83,6 +83,7 @@ backend:
 
   configOverrides:
     spring.datasource.hikari.maximum-pool-size: "15"
+    checks.sources.UI_TEST: "true"
     checks.scheduling.min-interval-seconds: "60"
 
 worker:
@@ -146,6 +147,8 @@ frontend:
 # in staging before templating production".
 # ---------------------------------------------------------------------------
 studioRunner:
+  # UAT currently uses the chart's shared local RWX claim. Switch objectStore.provider to `s3`
+  # when Sonic is connected; API, worker and runner then move together from the same values key.
   enabled: true
   replicaCount: 2
   resources:
@@ -167,3 +170,13 @@ studioRunner:
     credentialsSecret: checks-studio-runner-object-store-uat
 objectStore:
   credentialsSecret: checks-api-object-store-uat
+
+# Plain-English authoring is a product capability in staging, so it uses the real Vertex AI
+# provider. Endpoint, project and location are environment-owned ConfigMap values; workload
+# identity supplies ADC. Recorded fixtures are rejected for this profile by the chart.
+studioGateway:
+  environment: staging
+  provider: vertex
+  model: gemini-3.8-flash
+  vertexConfigMap:
+    name: checks-studio-vertex-uat

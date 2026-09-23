@@ -1,76 +1,252 @@
-import React from 'react';
-import { Alert, AlertTitle, Box, Paper, Stack, Typography } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, AlertTitle, Box, CircularProgress, Paper, Stack, Typography } from '@mui/material';
+import studioApi from '@/services/api/studioApi';
+import type { TestDto } from '@/types/studio/studioTypes';
+import { artifactDivergence } from './review/artifactSummary';
+import { compileErrorNarrative } from './review/compileErrorCodes';
 
 /**
- * The Code view, saying what it does not have rather than showing something else
- * (story 10.11a, AC-3a).
+ * The Code view renders only the runnable artifact prepared from the saved test. Current editor
+ * text and the retired client-side generator are never used as substitutes.
  *
- * This tab used to be titled *"Generated Python (Playwright)"* and rendered the output of
- * `@/utils/studio/codegen/pythonGenerator`, regenerated in the browser on every step change. PRD
- * §5.3 retires Python export from the Studio plan; architecture §8.3 retires client Python
- * generation as an authoritative path; architecture §4.4 makes the server's artifact the only
- * executable truth. The page was inviting a reader to review one language and run another.
+ * ## What "complete" means here
  *
- * **It renders an explicit unavailable state and it keeps the tab.** @po ruled open question 2:
- * keep the tab, name the blocker. Hiding the tab would make the blocker invisible at exactly the
- * moment its gate changed, and a blocker nobody can see is a blocker nobody moves. It is the same
- * shape story 10.10 landed for its summary slot (its AC-16a) and for the same reason: a fabricated
- * rendering of *"the code that will run"* is worse than an absent one, because it is the precise
- * confusion the confirmation step exists to prevent.
+ * There is no standalone script to show, and inventing one would be a lie. An artifact step is a
+ * single awaited call in Studio's bounded step language; the runner parses each one into a typed
+ * operation and its child process refuses any message carrying source text at all. `page`,
+ * `expect` and `vars` are bindings the runner supplies, and the output contract forbids imports,
+ * declarations and comments. So the honest maximum is *every* step, index-aligned, each shown
+ * beside the English it was translated from, under the identity of the one revision it came from —
+ * not a fabricated `import`/`test(...)` wrapper, which would be client-generated source the server
+ * never produced and never ran (ADR-002; story 10.11a retired exactly that).
  *
- * **The blocker named is the new one, not the one that has landed.** ADR-002 §21 ruled candidate A
- * and it did **not** unblock this view: §21.2 exposes `currentCandidateArtifactHash` and
- * `currentCandidateArtifact` — the **candidate's** — while this view needs the **confirmed**
- * revision's, which §21.3 records as a *"third additive property on the same body"* that nobody has
- * ruled. Rendering the candidate instead was refused: in `needsRevision` the artifact and the
- * draft's current steps disagree **by design** (§21.7), so a Code view showing the candidate under
- * a heading that claims otherwise shows source the server will not run. Story 10.11c files that
- * Class C escalation (its AC-32); this view does not approximate around it.
- *
- * Nothing on this path imports the generator or the legacy grammar parser, and that is asserted
- * over the module text as the weaker supplement to the rendering assertions — a gate rebuilt
- * through a differently-named local passes a grep, which is the fourth catalogued vacuity shape.
+ * Rendering the `code` strings joined by newlines, as this tab used to, produced N bare `await`
+ * lines with no numbering, no English and no revision identity — which reads as a fragment of a
+ * file someone forgot to finish.
  */
 
 /** The accessible name of the unavailable state. Asserted by AC-3(a). */
-export const CODE_VIEW_UNAVAILABLE_TITLE = 'The source that will run is not available to this page';
+export const CODE_VIEW_UNAVAILABLE_TITLE = 'Source is not available yet';
 
-/** The blocker, named so it cannot be closed without the gate moving. */
-export const CODE_VIEW_BLOCKER =
-  'The API returns no confirmed revision’s source or artifact from any declared response. ADR-002 §21 added the current candidate’s artifact and hash; the confirmed revision’s is a further additive property, escalated by story 10.11c as a Class C amendment and not yet ruled.';
+/** Honest empty state for drafts that have never had a confirmed artifact. */
+export const CODE_VIEW_BLOCKER = 'Press Run to prepare this test, and the source will appear here.';
 
 export const CODE_VIEW_WHY_NOT_THE_CANDIDATE =
-  'Showing the current candidate instead was refused rather than overlooked. A draft that needs revision has a candidate that disagrees with its steps by design, so displaying it under this heading would show source the server will not run.';
+  'This tab shows only the source that the saved test will run.';
 
 export const CODE_VIEW_WHAT_IS_TRUE =
-  'What runs is the artifact the server compiled and you confirmed. This page has never been able to read it, and until this story it showed Python it generated in your browser, which the server neither produced nor runs.';
+  'Run prepares the browser instructions from your saved checklist.';
 
-const CodeTab: React.FC = () => (
-  <Box>
-    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-        Source
-      </Typography>
-    </Stack>
-    <Paper variant="outlined" sx={{ p: 0 }}>
-      <Alert severity="info" role="note" aria-label={CODE_VIEW_UNAVAILABLE_TITLE}>
-        <AlertTitle data-testid="code-view-unavailable-title">
-          {CODE_VIEW_UNAVAILABLE_TITLE}
-        </AlertTitle>
-        <Stack spacing={1}>
-          <Typography variant="body2" data-testid="code-view-what-is-true">
-            {CODE_VIEW_WHAT_IS_TRUE}
-          </Typography>
-          <Typography variant="body2" data-testid="code-view-blocker">
-            {CODE_VIEW_BLOCKER}
-          </Typography>
-          <Typography variant="body2" data-testid="code-view-why-not-candidate">
-            {CODE_VIEW_WHY_NOT_THE_CANDIDATE}
-          </Typography>
-        </Stack>
-      </Alert>
-    </Paper>
-  </Box>
-);
+/**
+ * What the reader is looking at, so a bounded step list is not misread as a truncated file.
+ * Asserted by AC-3(a): the tab must not claim to be a runnable script.
+ */
+export const CODE_VIEW_LANGUAGE_NOTE =
+  'Each line below is one instruction in Studio\u2019s step language \u2014 this is exactly what ' +
+  'runs, not a file you can run elsewhere. The browser, the checks and your saved values are ' +
+  'supplied by Studio when the test runs.';
+
+export interface CodeTabProps {
+  readonly testId?: string | null;
+  /** Fetch only when the tab is visible; toggling false → true refreshes after compile/run. */
+  readonly active?: boolean;
+  /** Changes when the same test may have acquired a new confirmed revision. */
+  readonly refreshToken?: string | number;
+}
+
+const CodeTab: React.FC<CodeTabProps> = ({ testId = null, active = true, refreshToken }) => {
+  const [test, setTest] = useState<TestDto | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let current = true;
+    let pollTimer: ReturnType<typeof setTimeout> | undefined;
+    if (!testId) {
+      setTest(null);
+      setLoading(false);
+      setError(null);
+      return () => {
+        current = false;
+      };
+    }
+    if (!active) {
+      return () => {
+        current = false;
+      };
+    }
+    setLoading(true);
+    setTest(null);
+    setError(null);
+    const load = async () => {
+      try {
+        const body = await studioApi.getTest(testId);
+        if (!current) return;
+        setTest(body);
+        setLoading(false);
+        if (body.compileStatus === 'COMPILING') {
+          pollTimer = setTimeout(() => void load(), 600);
+        }
+      } catch (reason: unknown) {
+        if (!current) return;
+        setTest(null);
+        setLoading(false);
+        setError((reason as { message?: string })?.message ?? 'The saved source could not be loaded.');
+      }
+    };
+    void load();
+    return () => {
+      current = false;
+      if (pollTimer) clearTimeout(pollTimer);
+    };
+  }, [active, refreshToken, testId]);
+
+  /** The confirmed revision's steps, in artifact order. Never the draft's English. */
+  const steps = useMemo(
+    () => (test?.id === testId ? test.confirmedRevisionArtifact?.steps ?? null : null),
+    [test, testId],
+  );
+
+  /** Said plainly when the draft has moved on since this revision was translated. */
+  const divergence = useMemo(
+    () =>
+      test?.id === testId
+        ? artifactDivergence(test.confirmedRevisionArtifact, test.steps ?? [])
+        : null,
+    [test, testId],
+  );
+
+  /** Why there is no newer revision, when the last attempt to make one did not produce it. */
+  const staleness = useMemo(() => {
+    if (!test || test.id !== testId) return null;
+    if (test.compileStatus === 'NEEDS_REVISION') {
+      return 'The last attempt to prepare this test was refused. Check the steps flagged on the Steps tab, then run again.';
+    }
+    if (test.compileStatus === 'STALE' && test.compileError) {
+      return compileErrorNarrative(test.compileError.code);
+    }
+    return null;
+  }, [test, testId]);
+
+  /** Eight characters is enough to tell two revisions apart; the full hash is never rendered. */
+  const revisionLabel = useMemo(() => {
+    const hash = test?.confirmedRevisionArtifactHash;
+    return hash ? hash.slice(0, 8) : null;
+  }, [test]);
+
+  return (
+    <Box>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+          Saved test source
+        </Typography>
+      </Stack>
+      <Paper variant="outlined" sx={{ p: 0 }}>
+        {loading ? (
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ p: 2 }} role="status">
+            <CircularProgress size={18} />
+            <Typography variant="body2">Loading saved source…</Typography>
+          </Stack>
+        ) : error ? (
+          <Alert severity="error" role="alert">
+            {error}
+          </Alert>
+        ) : steps &&
+          steps.length > 0 &&
+          test?.confirmedRevisionId &&
+          test.confirmedRevisionArtifactHash ? (
+          <Stack spacing={1.5} sx={{ p: 2 }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="baseline"
+              justifyContent="space-between"
+              flexWrap="wrap"
+            >
+              <Typography variant="body2" data-testid="code-view-step-count">
+                {steps.length === 1 ? '1 step' : `${steps.length} steps`}
+              </Typography>
+              {revisionLabel && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  data-testid="code-view-revision"
+                  sx={{ fontFamily: 'monospace' }}
+                >
+                  {`revision ${revisionLabel}`}
+                </Typography>
+              )}
+            </Stack>
+
+            <Typography variant="caption" color="text.secondary" data-testid="code-view-language-note">
+              {CODE_VIEW_LANGUAGE_NOTE}
+            </Typography>
+
+            {divergence && (
+              <Alert severity="warning" role="status" data-testid="code-view-divergence">
+                {divergence}
+              </Alert>
+            )}
+
+            {staleness && (
+              <Alert severity="warning" role="status" data-testid="code-view-staleness">
+                {staleness}
+              </Alert>
+            )}
+
+            <Stack spacing={1} data-testid="confirmed-playwright-source">
+              {steps.map((step, index) => (
+                <Stack key={`${step.stepIndex}-${index}`} spacing={0.25}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    data-testid="code-view-step-text"
+                  >
+                    {`${index + 1}. ${step.originalText}`}
+                  </Typography>
+                  <Box
+                    component="pre"
+                    data-testid="code-view-step-code"
+                    sx={{
+                      m: 0,
+                      p: 1.5,
+                      overflow: 'auto',
+                      bgcolor: 'grey.900',
+                      color: 'grey.100',
+                      borderRadius: 1,
+                      whiteSpace: 'pre-wrap',
+                      overflowWrap: 'anywhere',
+                      fontFamily: 'monospace',
+                      fontSize: '0.8rem',
+                    }}
+                  >
+                    {step.code}
+                  </Box>
+                </Stack>
+              ))}
+            </Stack>
+          </Stack>
+        ) : (
+          <Alert severity="info" role="note" aria-label={CODE_VIEW_UNAVAILABLE_TITLE}>
+            <AlertTitle data-testid="code-view-unavailable-title">
+              {CODE_VIEW_UNAVAILABLE_TITLE}
+            </AlertTitle>
+            <Stack spacing={1}>
+              <Typography variant="body2" data-testid="code-view-what-is-true">
+                {CODE_VIEW_WHAT_IS_TRUE}
+              </Typography>
+              <Typography variant="body2" data-testid="code-view-blocker">
+                {CODE_VIEW_BLOCKER}
+              </Typography>
+              <Typography variant="body2" data-testid="code-view-why-not-candidate">
+                {CODE_VIEW_WHY_NOT_THE_CANDIDATE}
+              </Typography>
+            </Stack>
+          </Alert>
+        )}
+      </Paper>
+    </Box>
+  );
+};
 
 export default CodeTab;

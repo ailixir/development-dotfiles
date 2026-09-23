@@ -1,20 +1,8 @@
 package com.citi.put.checks.studio.compile;
 
 import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
-import com.citi.put.checks.studio.context.ExplicitStepIntent;
-import com.citi.put.checks.studio.context.IntentParseResult;
-import com.citi.put.checks.studio.context.ResolutionPolicy;
-import com.citi.put.checks.studio.context.ResolvedAuthoringContext;
-import com.citi.put.checks.studio.context.ScopedContextResolver;
-import com.citi.put.checks.studio.context.SupportedEnglishIntentParser;
-import com.citi.put.checks.studio.dto.AuthoringDiagnostic;
-import com.citi.put.checks.studio.dto.AuthoringEvidenceReference;
 import com.citi.put.checks.studio.dto.AuthoringRevisionInputs;
-import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
-import com.citi.put.checks.studio.dto.ResolvedOperation;
-import com.citi.put.checks.studio.dto.ResolvedStepReview;
-import com.citi.put.checks.studio.dto.TargetHint;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.StreamReadFeature;
@@ -25,16 +13,18 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
-/** Pure, bounded and version-selected immutable authoring-to-expected-intent derivation. */
+/**
+ * Pure, bounded and version-selected immutable authoring-to-reference-policy derivation.
+ *
+ * <p>Version {@code 2} derives the structural reference policy of ADR-SC-003. Revisions persisted
+ * under version {@code 1} (the retired English-derived expected intent) are no longer derivable and
+ * therefore fall into the ordinary recompile path.
+ */
 public final class VersionedIntentDeriver {
 
-  public static final String CURRENT_VERSION = "1.0.0";
+  public static final String CURRENT_VERSION = "2";
   private static final int MAX_INPUT_BYTES = 256 * 1024;
   private static final int MAX_STEPS = 100;
   private static final int MAX_COLLECTION = 500;
@@ -42,14 +32,9 @@ public final class VersionedIntentDeriver {
   private static final ObjectMapper MAPPER = strictMapper();
 
   public Derivation derive(
-      String version,
-      String sourceJson,
-      String authoringJson,
-      String revisionInputsJson,
-      String csiId,
-      String environment) {
+      String version, String sourceJson, String authoringJson, String revisionInputsJson) {
     if (!CURRENT_VERSION.equals(version)) {
-      throw new DerivationException("Unsupported intent derivation version");
+      throw new DerivationException("Unsupported reference policy derivation version");
     }
     requireBounded(sourceJson, "source");
     requireBounded(authoringJson, "authoring");
@@ -72,66 +57,15 @@ public final class VersionedIntentDeriver {
           throw new DerivationException("Authoring and source text do not match");
         }
       }
-      IntentParseResult parsed = new SupportedEnglishIntentParser().parse(authoring.steps());
-      List<ExplicitStepIntent> scoped = withSavedScope(authoring, parsed.intents());
-      ResolvedAuthoringContext resolved =
-          new ScopedContextResolver()
-              .resolve(
-                  authoring,
-                  scoped,
-                  List.of(),
-                  csiId,
-                  environment,
-                  ResolutionPolicy.compilerLanguage());
-      Map<UUID, List<ResolvedOperation.Kind>> sequences = new LinkedHashMap<>();
-      scoped.forEach(intent -> sequences.put(intent.stepId(), intent.requestedSequence()));
-      Map<UUID, String> scopes = targetScopes(authoring);
-      List<AuthoringDiagnostic> blocking = new ArrayList<>(parsed.diagnostics());
-      blocking.addAll(resolved.diagnostics());
-      String expected =
-          blocking.isEmpty()
-              ? new ExpectedIntentAssembler().assemble(resolved.steps(), sequences, scopes)
-              : null;
       return new Derivation(
           List.copyOf(source),
           authoring,
           identity,
-          resolved.steps(),
-          Map.copyOf(sequences),
-          Map.copyOf(scopes),
-          List.copyOf(blocking),
-          expected);
+          new StepReferencePolicyDeriver().derive(authoring));
     } catch (DerivationException exception) {
       throw exception;
     } catch (Exception exception) {
       throw new DerivationException("Immutable authoring inputs are invalid", exception);
-    }
-  }
-
-  public Derivation deriveRevision(
-      String version,
-      String sourceJson,
-      String authoringJson,
-      String revisionInputsJson,
-      String csiId,
-      String configurationJson) {
-    requireBounded(configurationJson, "configuration");
-    try {
-      JsonNode configuration = MAPPER.readTree(configurationJson);
-      if (!configuration.isObject() || !configuration.path("environment").isTextual()) {
-        throw new DerivationException("Immutable revision environment is invalid");
-      }
-      return derive(
-          version,
-          sourceJson,
-          authoringJson,
-          revisionInputsJson,
-          csiId,
-          configuration.path("environment").textValue());
-    } catch (DerivationException exception) {
-      throw exception;
-    } catch (Exception exception) {
-      throw new DerivationException("Immutable revision configuration is invalid", exception);
     }
   }
 
@@ -178,63 +112,14 @@ public final class VersionedIntentDeriver {
     return count;
   }
 
-  private static Map<UUID, String> targetScopes(AuthoringV2Request authoring) {
-    Map<UUID, String> scopes = new LinkedHashMap<>();
-    authoring
-        .steps()
-        .forEach(
-            step ->
-                step.context().entries().stream()
-                    .filter(TargetHint.class::isInstance)
-                    .map(TargetHint.class::cast)
-                    .filter(hint -> hint.scope() != null && !hint.scope().isBlank())
-                    .findFirst()
-                    .ifPresent(hint -> scopes.put(step.id(), hint.scope())));
-    return scopes;
-  }
-
-  private static List<ExplicitStepIntent> withSavedScope(
-      AuthoringV2Request authoring, List<ExplicitStepIntent> intents) {
-    Map<UUID, AuthoringStep> steps = new LinkedHashMap<>();
-    authoring.steps().forEach(step -> steps.put(step.id(), step));
-    return intents.stream()
-        .map(
-            intent -> {
-              AuthoringStep step = steps.get(intent.stepId());
-              List<AuthoringEvidenceReference> evidence = new ArrayList<>();
-              evidence.addAll(authoring.globalContext().evidenceReferences());
-              if (step != null) {
-                evidence.addAll(step.context().evidenceReferences());
-              }
-              AuthoringEvidenceReference scope =
-                  evidence.stream()
-                      .filter(item -> item.stepId().equals(intent.stepId()))
-                      .findFirst()
-                      .orElse(null);
-              return scope == null
-                  ? intent
-                  : new ExplicitStepIntent(
-                      intent.stepId(),
-                      intent.operation(),
-                      intent.target(),
-                      intent.input(),
-                      intent.assertions(),
-                      scope.route(),
-                      scope.state(),
-                      intent.requestedSequence());
-            })
-        .toList();
-  }
-
+  /**
+   * @param referencePolicy canonical {@link StepReferencePolicyDeriver} document
+   */
   public record Derivation(
       List<String> source,
       AuthoringV2Request authoring,
       AuthoringRevisionInputs identity,
-      List<ResolvedStepReview> resolvedIntent,
-      Map<UUID, List<ResolvedOperation.Kind>> requestedSequences,
-      Map<UUID, String> targetScopes,
-      List<AuthoringDiagnostic> blockingDiagnostics,
-      String expectedIntent) {}
+      String referencePolicy) {}
 
   public static final class DerivationException extends RuntimeException {
     private static final long serialVersionUID = 1L;

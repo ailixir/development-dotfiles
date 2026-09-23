@@ -11,7 +11,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.google.cloud.vertexai.VertexAI;
+import com.google.genai.Client;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
@@ -38,7 +38,7 @@ class GatewayAuditTest {
 
   private ListAppender<ILoggingEvent> auditAppender;
   private ListAppender<ILoggingEvent> diagnosticAppender;
-  private VertexAI vertexAi;
+  private Client vertexAi;
 
   @BeforeAll
   static void startWireMock() {
@@ -210,7 +210,7 @@ class GatewayAuditTest {
 
     assertThat(response.outcome()).isEqualTo(GatewayOutcome.TRANSPORT);
     assertThat(response.failureReason())
-        .startsWith("InvalidArgumentException (status=INVALID_ARGUMENT)")
+        .startsWith("ClientException (status=400)")
         .doesNotContain(GatewayTestSupport.SECRET_PLACEHOLDER);
     assertThat(logged(diagnosticAppender)).doesNotContain(GatewayTestSupport.SECRET_PLACEHOLDER);
     assertThat(logged(auditAppender)).contains("outcome=TRANSPORT");

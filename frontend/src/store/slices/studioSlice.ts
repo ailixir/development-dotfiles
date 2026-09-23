@@ -54,7 +54,7 @@ const studioSlice = createSlice({
           status: 'PENDING',
           timestamp: new Date().toISOString(),
         }));
-        state.currentStep = 0;
+        state.currentStep = -1;
       }
     },
 
@@ -151,5 +151,4 @@ export const {
 } = studioSlice.actions;
 
 export default studioSlice.reducer;
-
 

@@ -6,6 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -193,38 +194,43 @@ class CompilePipelineTest {
     restoreLevels.forEach((name, level) -> context.getLogger(name).setLevel(level));
   }
 
-  // ── AC-16: a successful compile becomes AWAITING_CONFIRMATION, never READY ─
+  // ── AC-16: a successful compile is accepted for its caller and becomes READY ─
 
   @Test
-  void aSuccessfulCompileAwaitsConfirmationAndNeverConfirmsItself() {
+  void aSuccessfulCompileIsAcceptedForTheCallerThatAskedForIt() {
+    // Saving no longer compiles: a compile happens because the author pressed Run, and Run means
+    // "prepare this and run it". Parking the result in AWAITING_CONFIRMATION asked the same
+    // question twice, so the validated candidate is accepted for the requesting principal in the
+    // same transaction that publishes it.
     pipeline.compile(testId, OWNER);
 
-    awaitCompileStatus("AWAITING_CONFIRMATION");
-    assertThat(column("current_candidate_revision_id", UUID.class)).isNotNull();
+    awaitCompileStatus("READY");
+    UUID candidate = column("current_candidate_revision_id", UUID.class);
+    assertThat(candidate).isNotNull();
     assertThat(column("confirmed_revision_id", UUID.class))
-        .as("no path in this story sets READY; only CompileStateService.confirm does")
-        .isNull();
+        .as("the accepted candidate is the confirmed revision")
+        .isEqualTo(candidate);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT confirmed_by FROM ui_test_revisions WHERE id = ?", String.class, candidate))
+        .as("accepted on behalf of the principal that asked, never anonymously")
+        .isEqualTo(OWNER);
   }
 
   @Test
-  void arecompileOfAnAlreadyConfirmedTestLeavesTheConfirmedRevisionAlone() {
+  void arecompileOfUnchangedSourceResolvesToTheSameConfirmedRevision() {
     pipeline.compile(testId, OWNER);
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
     UUID candidate = column("current_candidate_revision_id", UUID.class);
-    states.confirm(
-        testId,
-        candidate,
-        artifactHash(candidate),
-        sourceRevision(),
-        configurationRevision(),
-        OWNER);
     assertThat(column("confirmed_revision_id", UUID.class)).isEqualTo(candidate);
 
+    // A second compile of byte-identical source issues a second gateway call (there is no cache)
+    // but resolves to the same immutable revision, so the confirmed revision does not move.
     pipeline.compile(testId, OWNER);
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
 
     assertThat(column("confirmed_revision_id", UUID.class))
-        .as("a recompile proposes; it does not approve")
+        .as("an identical artifact is the same revision, so nothing was re-approved")
         .isEqualTo(candidate);
   }
 
@@ -233,7 +239,7 @@ class CompilePipelineTest {
   @Test
   void theCandidateRevisionCarriesTheVersionsSectionEightPointOneRequires() throws Exception {
     pipeline.compile(testId, OWNER);
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
 
     JsonNode provenance =
         MAPPER.readTree(
@@ -276,35 +282,40 @@ class CompilePipelineTest {
             + "\",\"text\":\"Go to \\\"https://example.com/login\\\"\","
             + "\"context\":{\"entries\":[],\"evidenceReferences\":[]}},{\"id\":\""
             + second
-            + "\",\"text\":\"Click the \\\"Sign in\\\" button\","
+            + "\",\"text\":\"Verify the page heading says Example Domain\","
             + "\"context\":{\"entries\":[],\"evidenceReferences\":[]}}]}";
     String inputs =
         MAPPER.writeValueAsString(
             AuthoringRevisionIdentity.create(
                 MAPPER.readValue(authoring, AuthoringV2Request.class), Map.of()));
+    // A plain-English step outside the retired grammar reaches the model (ADR-SC-003).
     jdbc.update(
         "UPDATE ui_tests SET authoring=CAST(? AS jsonb),"
-            + " authoring_revision_inputs=CAST(? AS jsonb) WHERE id=?",
+            + " authoring_revision_inputs=CAST(? AS jsonb), steps=CAST(? AS jsonb) WHERE id=?",
         authoring,
         inputs,
+        MAPPER.writeValueAsString(
+            List.of(
+                "Go to \"https://example.com/login\"",
+                "Verify the page heading says Example Domain")),
         testId);
 
     pipeline.compile(testId, OWNER);
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
     Map<String, Object> row =
         jdbc.queryForMap(
             "SELECT intent_derivation_version,provenance::text provenance,"
-                + "expected_intent::text expected_intent FROM ui_test_revisions WHERE id="
+                + "reference_policy::text reference_policy FROM ui_test_revisions WHERE id="
                 + " (SELECT current_candidate_revision_id FROM ui_tests WHERE id=?)",
             testId);
-    assertThat(row.get("intent_derivation_version")).isEqualTo("1.0.0");
+    assertThat(row.get("intent_derivation_version")).isEqualTo("2");
     assertThat(
             MAPPER
                 .readTree(String.valueOf(row.get("provenance")))
                 .path("intentDerivationVersion")
                 .asText())
-        .isEqualTo("1.0.0");
-    assertThat(MAPPER.readTree(String.valueOf(row.get("expected_intent"))).path("steps"))
+        .isEqualTo("2");
+    assertThat(MAPPER.readTree(String.valueOf(row.get("reference_policy"))).path("steps"))
         .hasSize(2);
   }
 
@@ -317,7 +328,7 @@ class CompilePipelineTest {
         testId);
 
     pipeline.compile(testId, OWNER);
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
 
     String references =
         jdbc.queryForObject(
@@ -459,9 +470,9 @@ class CompilePipelineTest {
   @Test
   void twoCompilesOfByteIdenticalSourceIssueTwoGatewayCallsBecauseThereIsNoCache() {
     pipeline.compile(testId, OWNER);
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
     pipeline.compile(testId, OWNER);
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
 
     assertThat(gateway.calls())
         .as(
@@ -473,11 +484,11 @@ class CompilePipelineTest {
   @Test
   void insertOrReuseRevisionResolvesAnIdenticalArtifactAfterTheGatewayAnsweredAndIsNotACache() {
     pipeline.compile(testId, OWNER);
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
     UUID first = column("current_candidate_revision_id", UUID.class);
 
     pipeline.compile(testId, OWNER);
-    awaitCompileStatus("AWAITING_CONFIRMATION");
+    awaitCompileStatus("READY");
     UUID second = column("current_candidate_revision_id", UUID.class);
 
     assertThat(second)
@@ -575,7 +586,7 @@ class CompilePipelineTest {
     gateway.answer(request -> ok(artifactWithCanaryCode(sourceOf(request))));
 
     pipeline.compile(id, OWNER);
-    awaitCompileStatus(id, "AWAITING_CONFIRMATION");
+    awaitCompileStatus(id, "READY");
 
     // Non-vacuity: all three values really travelled the compile path on this attempt.
     assertThat(runner.getAllServeEvents().get(0).getRequest().getBodyAsString())
@@ -667,11 +678,14 @@ class CompilePipelineTest {
     overLimit.add("Go to \"https://example.com/" + SOURCE_CANARY + "\"");
     UUID id = seedTest(overLimit);
 
-    pipeline.enqueueAfterCommit(id, OWNER);
+    // The refusal travels to the caller as a 400 now that Run asks for the compile directly, so
+    // there is no swallowed-and-logged enqueue failure to inspect. What must still hold is that
+    // refusing the request logs none of the source it refused.
+    Throwable refusal = catchThrowable(() -> pipeline.compile(id, OWNER));
 
-    assertThat(captured())
-        .as("the enqueue really did fail and log, so the assertion below is not vacuous")
-        .contains("studio.compile.enqueue_failed");
+    assertThat(refusal)
+        .as("the compile really was refused, so the assertion below is not vacuous")
+        .isNotNull();
     assertNothingSecretReachedTheLogSink();
   }
 

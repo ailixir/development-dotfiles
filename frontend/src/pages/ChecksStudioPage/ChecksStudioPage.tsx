@@ -10,12 +10,9 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Divider,
   Chip,
   List,
   ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
   Avatar,
   Stack,
   LinearProgress,
@@ -51,16 +48,16 @@ import {
   CheckCircle,
   Error,
   Save,
-  Settings,
   ListAlt,
   PlaylistAdd,
   Refresh,
   KeyboardArrowUp,
   KeyboardArrowDown,
   HelpOutline,
+  PlayArrow,
 } from '@mui/icons-material';
-import CodeTab from '@/components/studio/CodeTab';
 import OnboardingCoach from '@/components/studio/OnboardingCoach';
+import CodeTab from '@/components/studio/CodeTab';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '@/store';
 import { selectIsSourceEnabled } from '@store/slices/sourcesSlice';
@@ -82,9 +79,9 @@ import {
   type ExecutionSubscription,
   type TransportStatus,
 } from '@/services/api/studioTransportWiring';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SecretInput from '@/components/studio/SecretInput';
-import { CompileReviewPanel } from '@/components/studio/review';
+import { STUDIO_CAPABILITIES } from '@/utils/config/studioCapabilities';
 import {
   ExecutionProgressView,
   RunControl,
@@ -92,6 +89,7 @@ import {
   executionStatusTone,
 } from '@/components/studio/run';
 import { VideoEvidencePanel, useVideoSeek } from '@/components/studio/evidence';
+import { PRODUCTION_ALPHA_TEMPLATES, type QuickStartTemplate } from '@/components/studio/templates';
 
 /** One row of the Variables dialog. `secret` rows hold a reference id, never a secret value. */
 type EditableVariable = {
@@ -123,6 +121,25 @@ function toContractVariables(rows: EditableVariable[]): StudioVariable[] {
     );
 }
 
+/** Optional opposite-kind fields are serialized as null by Java and omitted by some clients. */
+function comparableVariables(variables: StudioVariable[]): StudioVariable[] {
+  return variables.map((variable) =>
+    variable.kind === 'secretRef'
+      ? {
+          name: variable.name,
+          kind: variable.kind,
+          value: null,
+          secretId: variable.secretId ?? null,
+        }
+      : {
+          name: variable.name,
+          kind: variable.kind,
+          value: variable.value ?? '',
+          secretId: null,
+        },
+  );
+}
+
 export const SAVE_CONFLICT_TITLE = 'This test changed after you opened it';
 export const SAVE_CONFLICT_STATEMENT =
   'A newer version of this test was saved (in another tab, or by someone else) after this page loaded it. Nothing was saved. Reload to get the latest version. Edits on this page that are not saved will be replaced.';
@@ -138,6 +155,39 @@ const StudioUnavailable: React.FC = () => (
   </Box>
 );
 
+function formatExecutionTime(durationMs: number): string {
+  const totalSeconds = Math.max(0, durationMs) / 1000;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds - minutes * 60;
+  return minutes > 0
+    ? `${minutes}:${seconds.toFixed(1).padStart(4, '0')}`
+    : `${seconds.toFixed(1)}s`;
+}
+
+const ExecutionTime: React.FC<{ snapshot: ExecutionSnapshot; running: boolean }> = ({ snapshot, running }) => {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!running || snapshot.durationMs !== null) return undefined;
+    const timer = window.setInterval(() => setNow(Date.now()), 250);
+    return () => window.clearInterval(timer);
+  }, [running, snapshot.durationMs]);
+
+  const started = Date.parse(snapshot.startedAt ?? snapshot.acceptedAt);
+  const elapsed = snapshot.durationMs ?? (Number.isFinite(started) ? now - started : 0);
+  return (
+    <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+      <Typography variant="subtitle2">Execution</Typography>
+      <Chip
+        size="small"
+        variant="outlined"
+        label={`Time ${formatExecutionTime(elapsed)}`}
+        aria-label={`Execution time ${formatExecutionTime(elapsed)}`}
+        data-testid="execution-time"
+      />
+    </Stack>
+  );
+};
+
 const ChecksStudioPageInner: React.FC = () => {
   const theme = useTheme();
   const [scenarios, setScenarios] = useState<TestDto[] | null>(null);
@@ -145,7 +195,7 @@ const ChecksStudioPageInner: React.FC = () => {
   const [scenariosLoading, setScenariosLoading] = useState<boolean>(true);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
   const isRunning = useAppSelector((s: any) => s.studio.isExecuting);
-  const currentStep = Math.max(0, useAppSelector((s: any) => s.studio.currentStep));
+  const currentStep = useAppSelector((s: any) => s.studio.currentStep);
   const [testSteps, setTestSteps] = useState<string[]>([]);
   const [newStep, setNewStep] = useState('');
   const reduxLogs = useAppSelector((s: any) => s.studio.executionLogs);
@@ -170,6 +220,8 @@ const ChecksStudioPageInner: React.FC = () => {
     return map;
   }, [stepResultsArr]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(false);
+  const editorLocked = isRunning || isPreparing;
   /** The last snapshot the API returned, rendered by `ExecutionProgressView` (AC-18, AC-19). */
   const [snapshot, setSnapshot] = useState<ExecutionSnapshot | null>(null);
   /** Programmatic run requests: `?autorun=1` and the terminal-error surface's re-run. */
@@ -181,10 +233,8 @@ const ChecksStudioPageInner: React.FC = () => {
   const [isStopping, setIsStopping] = useState(false);
   const [stopError, setStopError] = useState<string | null>(null);
   // Removed legacy interval-based simulator in favor of API polling
-  const [validation,
-    setValidation] = useState<{ results: Array<{ stepIndex: number; isValid: boolean; suggestion: string | null }>; isValid: boolean; loading: boolean; error?: string }>
-    ({ results: [], isValid: true, loading: false });
   const [variablesList, setVariablesList] = useState<EditableVariable[]>([]);
+  const [environment, setEnvironment] = useState('');
   const [rightTab, setRightTab] = useState(0);
   const [coachStep, setCoachStep] = useState<number>(() => {
     try {
@@ -207,6 +257,7 @@ const ChecksStudioPageInner: React.FC = () => {
     if (coachStep === 2 && !isRunning && (stepResultsArr || []).length > 0) setCoachStep(99);
   }, [coachStep, isRunning, stepResultsArr]);
   const location = useLocation();
+  const navigate = useNavigate();
   const params = useParams();
   const selectedScenarioData = scenarios?.find(s => s.id === selectedScenario) || null;
   const dispatch = useDispatch();
@@ -215,7 +266,66 @@ const ChecksStudioPageInner: React.FC = () => {
   const loadDraftIntoEditor = useCallback((test: TestDto) => {
     setTestSteps(test.steps || []);
     setVariablesList(toEditableVariables(test.variables));
+    setEnvironment(test.environment);
   }, []);
+
+  const isDirty = useMemo(() => {
+    if (!selectedScenarioData) return false;
+    return (
+      JSON.stringify(testSteps) !== JSON.stringify(selectedScenarioData.steps ?? []) ||
+      JSON.stringify(comparableVariables(toContractVariables(variablesList))) !==
+        JSON.stringify(comparableVariables(selectedScenarioData.variables ?? [])) ||
+      environment !== selectedScenarioData.environment
+    );
+  }, [environment, selectedScenarioData, testSteps, variablesList]);
+
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const pendingNavigationRef = useRef<(() => void) | null>(null);
+
+  /**
+   * Puts a Quick Start template into the editor.
+   *
+   * Steps are replaced; reference rows are **merged**. A template declares the `<var>` / `<secret>`
+   * names its steps mention so the first compile does not fail on an undeclared reference, but a
+   * row the author already configured (a chosen vault entry, a filled-in value) is left exactly as
+   * it is. The template names what is needed, it does not overwrite what is already known.
+   */
+  const applyTemplate = useCallback((template: QuickStartTemplate) => {
+    setTestSteps([...template.steps]);
+    setVariablesList((rows) => {
+      const known = new Set(rows.map((row) => row.name.trim()));
+      const added = template.variables
+        .filter((variable) => !known.has(variable.name))
+        .map((variable) => ({
+          id: `tpl_${template.id}_${variable.name}`,
+          name: variable.name,
+          type: variable.type,
+          value: variable.type === 'plain' ? variable.value ?? '' : undefined,
+          secretId: undefined,
+        }));
+      return [...rows, ...added];
+    });
+    setTemplatesOpen(false);
+  }, []);
+
+  const requestNavigation = useCallback((action: () => void) => {
+    if (!isDirty) {
+      action();
+      return;
+    }
+    pendingNavigationRef.current = action;
+    setLeaveDialogOpen(true);
+  }, [isDirty]);
+
+  useEffect(() => {
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warnBeforeUnload);
+    return () => window.removeEventListener('beforeunload', warnBeforeUnload);
+  }, [isDirty]);
 
   const replaceScenario = useCallback((updated: TestDto) => {
     setScenarios((previous) =>
@@ -223,8 +333,8 @@ const ChecksStudioPageInner: React.FC = () => {
     );
   }, []);
 
-  // Load the drafts from `GET /studio/tests`. This is the real API, or MSW when the standalone dev
-  // server runs with `VITE_ENABLE_MSW=true` (see `MswGate`).
+  // Load drafts from the real `GET /studio/tests` API. Fixtures are test-only and never install a
+  // browser service worker or replace this page's transport at runtime.
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -313,9 +423,7 @@ const ChecksStudioPageInner: React.FC = () => {
    */
   const beginRun = useCallback((executionId: string) => {
     dispatch(setExecuting(true));
-    dispatch(setCurrentStepAction(0));
     dispatch(clearLogs());
-    dispatch(setExecutionLogs([{ timestamp: new Date().toISOString(), level: 'info', message: 'Starting UI test execution' } as any]));
     setSnapshot(null);
     currentExecutionIdRef.current = executionId;
     closeSubscription();
@@ -330,7 +438,7 @@ const ChecksStudioPageInner: React.FC = () => {
         }
         const runningIndex = exec.stepResults?.findIndex((r) => r.status === 'RUNNING') ?? -1;
         const passedCount = exec.stepResults?.filter((r) => r.status === 'PASS').length ?? 0;
-        dispatch(setCurrentStepAction(runningIndex >= 0 ? runningIndex : Math.max(0, passedCount - 1)));
+        dispatch(setCurrentStepAction(runningIndex >= 0 ? runningIndex : passedCount - 1));
         if (Array.isArray(exec.logs)) {
           dispatch(setExecutionLogs(toStudioLogLines(exec.logs)));
         }
@@ -374,21 +482,6 @@ const ChecksStudioPageInner: React.FC = () => {
   useEffect(() => {
     try { localStorage.setItem('studio:coachStep', String(coachStep)); } catch { /* storage unavailable: the coach just restarts */ }
   }, [coachStep]);
-
-  // Debounced validation on steps change
-  useEffect(() => {
-    let cancelled = false;
-    const id = setTimeout(async () => {
-      try {
-        setValidation((v) => ({ ...v, loading: true, error: undefined }));
-        const res = await studioApi.validateSteps(testSteps);
-        if (!cancelled) setValidation({ results: res.results, isValid: res.isValid, loading: false });
-      } catch (err: any) {
-        if (!cancelled) setValidation({ results: [], isValid: false, loading: false, error: err?.message || 'Validation failed' });
-      }
-    }, 250);
-    return () => { cancelled = true; clearTimeout(id); };
-  }, [testSteps]);
 
   const handleScenarioSelect = (scenarioId: string) => {
     // AC-13: a scenario switch performed **while a stream is open** must leave no connection
@@ -445,8 +538,8 @@ const ChecksStudioPageInner: React.FC = () => {
   const handleSeekStep = useCallback(
     (offsetMs: number) => {
       seekToOffset(offsetMs);
-      // The player lives on the Proof tab; show it so the reader sees the moment they asked for.
-      setRightTab(2);
+      // The player lives on the Proof tab; show it when a reader asks to seek.
+      setRightTab(1);
     },
     [seekToOffset],
   );
@@ -468,7 +561,7 @@ const ChecksStudioPageInner: React.FC = () => {
       name: test.name,
       description: test.description ?? null,
       csiId: test.csiId,
-      environment: test.environment,
+      environment,
       steps: testSteps,
       variables: toContractVariables(variablesList),
       configuration: { ...defaultConfiguration(), ...test.configuration, browser: CANONICAL_BROWSER },
@@ -499,7 +592,7 @@ const ChecksStudioPageInner: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [replaceScenario, selectedScenarioData, testSteps, variablesList]);
+  }, [environment, replaceScenario, selectedScenarioData, testSteps, variablesList]);
 
   /** The conflict's way out: read the draft again and put the server's version in the editor. */
   const reloadSelectedTest = useCallback(async () => {
@@ -555,62 +648,109 @@ const ChecksStudioPageInner: React.FC = () => {
 
   return (
     <Box>
-      {/* Enhanced Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-          <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-              <Avatar sx={{ bgcolor: 'success.main', width: 48, height: 48 }}>
-                <Science sx={{ fontSize: 28 }} />
-              </Avatar>
-              <Box>
-                <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                  Checks Studio
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Scope-aware UI tests. Your current CSI/tag scope is applied across the module.
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-          <Stack direction="row" spacing={2}>
-            {/* New Scenario moved to Studio Tests page (+) */}
-            
+      <Paper
+        variant="outlined"
+        sx={{
+          mb: 3,
+          px: { xs: 2, md: 3 },
+          py: 2,
+          display: 'flex',
+          flexDirection: { xs: 'column', lg: 'row' },
+          alignItems: { xs: 'stretch', lg: 'center' },
+          justifyContent: 'space-between',
+          gap: 2,
+        }}
+      >
+        <Stack direction="row" spacing={1.5} alignItems="center" minWidth={0}>
+          <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+            <Science aria-hidden="true" />
+          </Avatar>
+          <Box minWidth={0}>
             <Button
-              variant="text"
               size="small"
-              onClick={() => setTemplatesOpen(true)}
+              variant="text"
+              onClick={() => requestNavigation(() => navigate('/checks/studio/tests'))}
+              sx={{ px: 0, minWidth: 0 }}
             >
-              Templates
+              Studio Tests
             </Button>
-            <Tooltip title="Show guide">
-              <IconButton
+            <Typography variant="h5" component="h1" fontWeight={700} noWrap>
+              {selectedScenarioData?.name ?? 'Checks Studio'}
+            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+              {environment && <Chip size="small" variant="outlined" label={environment} />}
+              <Chip
                 size="small"
-                onClick={() => {
-                  setForceCoach(true);
-                  setCoachStep(0);
-                  try { localStorage.removeItem('studio:coachStep'); } catch { /* storage unavailable */ }
-                }}
-                aria-label="Show guide"
-              >
-                <HelpOutline />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        </Box>
+                color={isDirty ? 'warning' : 'success'}
+                variant={isDirty ? 'filled' : 'outlined'}
+                label={isDirty ? 'Unsaved changes' : 'Saved'}
+                data-testid="studio-save-state"
+              />
+            </Stack>
+          </Box>
+        </Stack>
 
-        {/* Removed status banner per request */}
-      </Box>
+        <Stack direction="row" spacing={1} alignItems="flex-start" justifyContent="flex-end" flexWrap="wrap" useFlexGap>
+          <Button
+            variant="text"
+            size="small"
+            onClick={() => setTemplatesOpen(true)}
+            disabled={editorLocked}
+            sx={{ minHeight: 42, whiteSpace: 'nowrap' }}
+          >
+            Templates
+          </Button>
+          <Tooltip title="Show guide">
+            <IconButton
+              size="small"
+              onClick={() => {
+                setForceCoach(true);
+                setCoachStep(0);
+                try { localStorage.removeItem('studio:coachStep'); } catch { /* storage unavailable */ }
+              }}
+              aria-label="Show guide"
+              sx={{ width: 42, height: 42 }}
+            >
+              <HelpOutline />
+            </IconButton>
+          </Tooltip>
+          <Button
+            variant={isDirty ? 'contained' : 'outlined'}
+            startIcon={<Save />}
+            disabled={editorLocked || isSaving || !selectedScenarioData}
+            onClick={() => { void saveDraft(); }}
+            sx={{ minHeight: 42, whiteSpace: 'nowrap' }}
+          >
+            {isSaving ? 'Saving…' : 'Save'}
+          </Button>
+          <RunControl
+            testId={selectedScenarioData?.id ?? null}
+            refreshToken={`${selectedScenarioData?.sourceRevision ?? 0}:${selectedScenarioData?.configurationRevision ?? 0}:${selectedScenarioData?.compileStatus ?? ''}:${selectedScenarioData?.confirmedRevisionId ?? ''}`}
+            isRunning={isRunning}
+            onPreparingChange={setIsPreparing}
+            isDirty={isDirty}
+            onSaveBeforeRun={saveDraft}
+            hasSteps={testSteps.length > 0}
+            runRequest={runRequest}
+            onAccepted={(executionId) => {
+              setRightTab(0);
+              beginRun(executionId);
+            }}
+            onStop={handleStop}
+            isStopping={isStopping}
+          />
+        </Stack>
+      </Paper>
 
-      {/* Two-Panel Interface (Proof as a tab in the middle panel) */}
+      {/* Two-panel Studio: checklist/configuration on the left, run evidence on the right. */}
       <Grid container spacing={3} sx={{ minHeight: '600px' }}>
         {/* Left Panel - Test Scenarios & Steps */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} lg={6}>
           <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <CardHeader
               avatar={<ListAlt sx={{ color: 'primary.main' }} />}
-              title="Steps"
-              subheader="Your testing checklist"
+              title="Test setup"
+              subheader="Write your steps in plain English, then press Run"
             />
             <CardContent sx={{ flex: 1, overflow: 'auto', p: 0 }}>
               {/* Current Test Summary */}
@@ -619,17 +759,16 @@ const ChecksStudioPageInner: React.FC = () => {
                   <Typography variant="body2" color="text.secondary">Loading test…</Typography>
                 ) : selectedScenarioData ? (
                   <Stack spacing={0.5}>
-                    <Stack direction="row" alignItems="center" justifyContent="space-between">
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{selectedScenarioData.name}</Typography>
-                      <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1} flexWrap="wrap">
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, minWidth: 0, overflowWrap: 'anywhere' }}>{selectedScenarioData.name}</Typography>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
                         <Chip
-                          label={selectedScenarioData.lastRunStatus ? `Last run: ${executionStatusLabel(selectedScenarioData.lastRunStatus)}` : 'Never run'}
+                          label={selectedScenarioData.lastRunStatus ? `Previous run: ${executionStatusLabel(selectedScenarioData.lastRunStatus)}` : 'No run history'}
                           size="small"
                           color={selectedScenarioData.lastRunStatus ? executionStatusTone(selectedScenarioData.lastRunStatus) : 'default'}
                           data-testid="test-last-run-status"
                           sx={{ fontSize: 11 }}
                         />
-                        <Button size="small" variant="text" onClick={() => { window.location.href = '/checks/studio/tests'; }}>Change…</Button>
                       </Stack>
                     </Stack>
                     {selectedScenarioData.description && (
@@ -642,9 +781,41 @@ const ChecksStudioPageInner: React.FC = () => {
                 ) : (
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Typography variant="body2">No test selected.</Typography>
-                    <Button size="small" variant="contained" onClick={() => { window.location.href = '/checks/studio/tests'; }}>Open Tests</Button>
+                    <Button size="small" variant="contained" onClick={() => navigate('/checks/studio/tests')}>Open Tests</Button>
                   </Stack>
                 )}
+              </Box>
+
+              <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ sm: 'stretch' }}>
+                  <TextField
+                    select
+                    fullWidth
+                    size="small"
+                    label="Environment"
+                    value={environment}
+                    disabled={editorLocked || !selectedScenarioData}
+                    onChange={(event) => setEnvironment(event.target.value)}
+                    sx={{ flex: '1 1 260px', minWidth: 0 }}
+                  >
+                    {['Development', 'Staging', 'Production'].map((option) => (
+                      <MenuItem key={option} value={option}>{option}</MenuItem>
+                    ))}
+                  </TextField>
+                  <Button
+                    aria-label="Variables"
+                    variant="outlined"
+                    size="medium"
+                    onClick={() => setVariablesOpen(true)}
+                    disabled={editorLocked || !selectedScenarioData}
+                    sx={{ flex: '0 0 auto', whiteSpace: 'nowrap', minHeight: 40 }}
+                  >
+                    Variables
+                  </Button>
+                </Stack>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                  Plain variables are available. Vault-backed secrets are disabled in this alpha.
+                </Typography>
               </Box>
 
               {/* Test Steps */}
@@ -660,8 +831,7 @@ const ChecksStudioPageInner: React.FC = () => {
                     Test Steps ({testSteps.length})
                   </Typography>
                   <Stack direction="row" spacing={1} alignItems="center">
-                    <Button size="small" variant="outlined" onClick={() => setVariablesOpen(true)}>Variables</Button>
-                    <Badge badgeContent={isRunning ? `${currentStep + 1}/${testSteps.length}` : null} color="primary">
+                    <Badge badgeContent={isRunning && currentStep >= 0 ? `${currentStep + 1}/${testSteps.length}` : null} color="primary">
                       <PlaylistAdd sx={{ color: 'text.secondary' }} />
                     </Badge>
                   </Stack>
@@ -671,7 +841,12 @@ const ChecksStudioPageInner: React.FC = () => {
                   <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
                     <Typography variant="body2" fontWeight={600}>Add your first step</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Examples: Go to &quot;https://put.internal.citi.com&quot; <br />• Click &quot;Sign On&quot; <br />• Type &quot;&lt;var USERNAME&gt;&quot; in the &quot;User ID&quot; field <br />• Wait for &quot;Welcome&quot; (use tokens: &lt;var NAME&gt;, &lt;secret SECRET_ID&gt;)
+                      Name every control in quotes and finish with something to check:
+                      <br />• Go to &quot;https://www.saucedemo.com/&quot;
+                      <br />• Type &quot;&lt;var USERNAME&gt;&quot; in the &quot;Username&quot; field
+                      <br />• Click the &quot;Login&quot; button
+                      <br />• Check that the URL contains &quot;/inventory.html&quot;
+                      <br />A name in &lt;var NAME&gt; or &lt;secret NAME&gt; has to match a row in Variables.
                     </Typography>
                   </Paper>
                 )}
@@ -691,30 +866,32 @@ const ChecksStudioPageInner: React.FC = () => {
                   {testSteps.map((step, index) => {
                     const stepResult = stepResultsMap[index];
                     const isCurrentStep = index === currentStep;
-                    const validationEntry = validation.results.find((r) => r.stepIndex === index);
-                    const isInvalid = validationEntry ? !validationEntry.isValid : false;
                     
                     return (
                       <ListItem
                         key={index}
                         sx={{
                           border: '1px solid',
-                          borderColor: isInvalid ? 'error.main' : isCurrentStep && isRunning ? 'primary.main' : 
+                          borderColor: isCurrentStep && isRunning ? 'primary.main' : 
                                        stepResult === 'passed' ? 'success.main' :
                                        stepResult === 'failed' ? 'error.main' : 'divider',
                           borderRadius: 1,
                           mb: 1,
                           bgcolor: isCurrentStep && isRunning ? alpha(theme.palette.primary.main, 0.08) : 
                                    stepResult === 'passed' ? alpha(theme.palette.success.main, 0.05) :
-                                   stepResult === 'failed' ? alpha(theme.palette.error.main, 0.05) : isInvalid ? alpha(theme.palette.error.main, 0.03) : 'transparent',
+                                   stepResult === 'failed' ? alpha(theme.palette.error.main, 0.05) : 'transparent',
                           transition: 'all 0.3s ease',
+                          alignItems: 'flex-start',
+                          gap: 1,
+                          px: 1.5,
+                          py: 1,
                         }}
                       >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5, flexShrink: 0 }}>
                           <Avatar sx={{ 
-                            width: 28, 
-                            height: 28, 
-                            fontSize: 12,
+                            width: 32,
+                            height: 32,
+                            fontSize: 13,
                             bgcolor: stepResult === 'passed' ? 'success.main' :
                                      stepResult === 'failed' ? 'error.main' :
                                      isCurrentStep && isRunning ? 'primary.main' : 'grey.300',
@@ -722,47 +899,47 @@ const ChecksStudioPageInner: React.FC = () => {
                           }}>
                             {stepResult === 'passed' ? <CheckCircle sx={{ fontSize: 16 }} /> : 
                              stepResult === 'failed' ? <Error sx={{ fontSize: 16 }} /> :
-                             isCurrentStep && isRunning ? <CircularProgress size={16} sx={{ color: 'white' }} /> :
+                             isCurrentStep && isRunning ? <CircularProgress aria-label={`Running step ${index + 1}`} size={16} sx={{ color: 'white' }} /> :
                              index + 1}
                           </Avatar>
                         </Box>
-                        <ListItemText 
-                          sx={{ pr: 12 }}
-                          primary={
-                            <TextField
-                              variant="standard"
-                              fullWidth
-                              value={step}
-                              onChange={(e) => {
-                                const next = [...testSteps];
-                                next[index] = e.target.value;
-                                setTestSteps(next);
-                              }}
-                              onBlur={() => {
-                                // Optional: trigger validation/save on blur
-                              }}
-                              InputProps={{
-                                disableUnderline: false,
-                                sx: {
-                                  fontSize: '0.875rem',
-                                  fontWeight: isCurrentStep && isRunning ? 600 : 400,
-                                  color: stepResult === 'passed' ? 'success.main' :
-                                         stepResult === 'failed' ? 'error.main' : isInvalid ? 'error.main' :
-                                         isCurrentStep ? 'primary.main' : 'text.primary',
-                                }
-                              }}
-                            />
-                          }
-                          secondary={isInvalid ? (validationEntry?.suggestion || 'Invalid step') : undefined}
-                          secondaryTypographyProps={{
-                            variant: 'caption',
-                            sx: { color: 'text.secondary' }
-                          }}
-                        />
-                        <ListItemSecondaryAction>
+                        <Box sx={{ flex: '1 1 auto', minWidth: 0 }}>
+                          <TextField
+                            variant="standard"
+                            fullWidth
+                            multiline
+                            minRows={2}
+                            maxRows={8}
+                            inputProps={{ 'aria-label': `Step ${index + 1}` }}
+                            value={step}
+                            disabled={editorLocked}
+                            onChange={(e) => {
+                              const next = [...testSteps];
+                              next[index] = e.target.value;
+                              setTestSteps(next);
+                            }}
+                            InputProps={{
+                              disableUnderline: false,
+                              sx: {
+                                alignItems: 'flex-start',
+                                fontSize: '0.875rem',
+                                lineHeight: 1.45,
+                                fontWeight: isCurrentStep && isRunning ? 600 : 400,
+                                color: stepResult === 'passed' ? 'success.main' :
+                                       stepResult === 'failed' ? 'error.main' :
+                                       isCurrentStep ? 'primary.main' : 'text.primary',
+                              }
+                            }}
+                          />
+                        </Box>
+                        <Stack
+                          direction="row"
+                          spacing={0.25}
+                          sx={{ flexShrink: 0, '& .MuiIconButton-root': { width: 36, height: 36 } }}
+                        >
                           <Tooltip title="Move up">
                             <span>
-                              <IconButton size="small" disabled={index === 0} onClick={(e) => {
+                              <IconButton aria-label={`Move step ${index + 1} up`} size="small" disabled={editorLocked || index === 0} onClick={(e) => {
                                 e.stopPropagation();
                                 const next = [...testSteps];
                                 const [moved] = next.splice(index, 1);
@@ -775,7 +952,7 @@ const ChecksStudioPageInner: React.FC = () => {
                           </Tooltip>
                           <Tooltip title="Move down">
                             <span>
-                              <IconButton size="small" disabled={index === testSteps.length - 1} onClick={(e) => {
+                              <IconButton aria-label={`Move step ${index + 1} down`} size="small" disabled={editorLocked || index === testSteps.length - 1} onClick={(e) => {
                                 e.stopPropagation();
                                 const next = [...testSteps];
                                 const [moved] = next.splice(index, 1);
@@ -789,18 +966,19 @@ const ChecksStudioPageInner: React.FC = () => {
                           <Tooltip title="Remove step">
                             <span>
                               <IconButton 
+                                aria-label={`Remove step ${index + 1}`}
                                 size="small" 
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   removeTestStep(index);
                                 }}
-                                disabled={isRunning}
+                                disabled={editorLocked}
                               >
                                 <Delete sx={{ fontSize: 16 }} />
                               </IconButton>
                             </span>
                           </Tooltip>
-                        </ListItemSecondaryAction>
+                        </Stack>
                       </ListItem>
                     );
                   })}
@@ -811,284 +989,194 @@ const ChecksStudioPageInner: React.FC = () => {
                   <TextField
                     fullWidth
                     size="small"
+                    multiline
+                    minRows={2}
+                    maxRows={6}
+                    label="Add a test step"
                     placeholder="Add new test step..."
                     value={newStep}
+                    disabled={editorLocked}
                     onChange={(e) => setNewStep(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addTestStep()}
+                    helperText="Press Ctrl+Enter (or Cmd+Enter) to add the step."
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+                        event.preventDefault();
+                        addTestStep();
+                      }
+                    }}
                     InputProps={{
                       endAdornment: (
-                        <IconButton size="small" onClick={addTestStep} disabled={!newStep.trim()}>
+                        <IconButton aria-label="Add step" size="small" onClick={addTestStep} disabled={editorLocked || !newStep.trim()}>
                           <Add />
                         </IconButton>
                       )
                     }}
                   />
-                  {!validation.isValid && (
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                      {validation.results.filter((r) => !r.isValid).length} step(s) this editor does not
-                      recognise. This is a hint while you write; whether the draft can run is the
-                      server&apos;s decision and is shown on the Run control.
-                    </Typography>
-                  )}
                 </Box>
               </Box>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Middle Panel - Control Tower (Run, Logs, Code, Proof) */}
-        <Grid item xs={12} md={6}>
+        {/* Right panel - Logs, Proof, and Source */}
+        <Grid item xs={12} lg={6}>
           <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <CardHeader
-              avatar={<Settings sx={{ color: 'warning.main' }} />}
-              title="Control Tower"
-              subheader="Test execution & monitoring"
+              avatar={<PlayArrow sx={{ color: 'primary.main' }} />}
+              title="Run & proof"
+              subheader="Execution and evidence"
               action={
-                <Stack direction="row" spacing={1}>
-                  <Tooltip title="Reload scenarios">
-                    <span>
-                      <IconButton size="small" onClick={reloadScenarios} disabled={scenariosLoading} aria-label="Reload scenarios">
-                        <Refresh />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                </Stack>
+                <Tooltip title="Refresh test information">
+                  <span>
+                    <IconButton size="small" onClick={reloadScenarios} disabled={scenariosLoading} aria-label="Refresh test information">
+                      <Refresh />
+                    </IconButton>
+                  </span>
+                </Tooltip>
               }
             />
-            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
-              {/* Control Buttons */}
-              <Box sx={{ mb: 3 }}>
-                {coachStep === 1 && (
-                  <OnboardingCoach step={1} onNext={() => setCoachStep(2)} onDismiss={() => setCoachStep(99)} />)
-                }
-                <Stack direction="row" spacing={2} justifyContent="center">
-                   {null}
-                  <RunControl
-                    testId={selectedScenarioData?.id ?? null}
-                    isRunning={isRunning}
-                    hasSteps={testSteps.length > 0}
-                    runRequest={runRequest}
-                    onAccepted={beginRun}
-                    onStop={handleStop}
-                    isStopping={isStopping}
-                  />
-                  <Button
-                    variant="outlined"
-                    startIcon={<Save />}
-                    disabled={isRunning || isSaving || !selectedScenarioData}
-                    onClick={() => { void saveDraft(); }}
-                  >
-                    Save
-                  </Button>
-                </Stack>
-
-                {saveConflict !== null && (
-                  <Box sx={{ mt: 2 }}>
-                    <Alert
-                      severity="warning"
-                      role="alert"
-                      data-testid="save-conflict"
-                      action={
-                        <Button color="inherit" size="small" onClick={() => { void reloadSelectedTest(); }}>
-                          {RELOAD_TEST_LABEL}
-                        </Button>
-                      }
-                    >
-                      <AlertTitle>
-                        {saveConflict.code === 'STALE_REVISION' ? SAVE_CONFLICT_TITLE : SAVE_REFUSED_TITLE}
-                      </AlertTitle>
-                      {saveConflict.code === 'STALE_REVISION'
-                        ? SAVE_CONFLICT_STATEMENT
-                        : saveConflict.message || 'The save conflicts with the test as the server holds it.'}
-                    </Alert>
-                  </Box>
-                )}
-                {stopError !== null && (
-                  <Box sx={{ mt: 2 }}>
-                    <Alert severity="error" role="alert" data-testid="stop-error">
-                      {stopError}
-                    </Alert>
-                  </Box>
-                )}
-
-                {/*
-                  * AC-11(i): the transport's own state, labelled as transport. A dropped connection
-                  * is not a failed test, so this region's accessible name is deliberately distinct
-                  * from every `ExecutionStatus` narrative — `studioTransport.node.test.ts` asserts
-                  * that rather than assuming it.
-                  */}
-                {accessDenied !== null && (
-                  <Box sx={{ mt: 2 }}>
-                    <Alert severity="error" role="status" aria-label="Live progress feed access refused">
-                      <AlertTitle>Live progress feed access refused</AlertTitle>
-                      The server refused this browser access to the run&apos;s progress
-                      ({accessDenied}). Nothing further is requested. Ask the CSI owner for access.
-                    </Alert>
-                  </Box>
-                )}
-                {accessDenied === null &&
-                  transportStatus !== null &&
-                  (transportStatus.phase === 'reconnecting' ||
-                    transportStatus.phase === 'falling-back') && (
-                    <Box sx={{ mt: 2 }}>
-                      <Alert severity="info" role="status" aria-label={transportStatus.label}>
-                        {transportStatus.label}
-                      </Alert>
-                    </Box>
-                  )}
-
-                {/* Progress */}
-                {isRunning && (
-                  <Box sx={{ mt: 2 }}>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={(currentStep / testSteps.length) * 100}
-                      sx={{ 
-                        height: 8,
-                        borderRadius: 4,
-                        bgcolor: alpha(theme.palette.primary.main, 0.1),
-                        '& .MuiLinearProgress-bar': {
-                          borderRadius: 4,
-                        }
-                      }}
-                    />
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block', textAlign: 'center' }}>
-                      Step {currentStep + 1} of {testSteps.length}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-
-              {/*
-                Story 10.10 — review and confirmation, in the Control Tower beside Run (PRD §5.2).
-                A fourth right-panel tab would put the review behind Proof, where a reader reaches
-                Run without having passed it. The prop surface is one draft id on purpose: 10.11
-                rewrites this file's transport and should not have to rewrite the review panel.
-              */}
-              {selectedScenarioData?.id && (
-                <Box sx={{ mb: 2 }}>
-                  {/* Keyed by revision: a save changes the draft on the server, so the review re-reads it. */}
-                  <CompileReviewPanel
-                    key={`${selectedScenarioData.id}:${selectedScenarioData.sourceRevision}:${selectedScenarioData.configurationRevision}`}
-                    testId={selectedScenarioData.id}
-                  />
-                </Box>
-              )}
-
-              <Divider sx={{ mb: 2 }} />
-
-              <Tabs value={rightTab} onChange={(_, v) => setRightTab(v)} sx={{ mb: 1 }}>
-                <Tab label="Logs" />
-                <Tab label="Code" />
-                <Tab label="Proof" />
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 0 }}>
+              <Tabs
+                value={rightTab}
+                onChange={(_, value) => setRightTab(value)}
+                variant="scrollable"
+                scrollButtons="auto"
+                aria-label="Execution details"
+                sx={{ px: 2, borderBottom: '1px solid', borderColor: 'divider' }}
+              >
+                <Tab label="Logs" id="studio-tab-logs" aria-controls="studio-panel-logs" />
+                <Tab label="Proof" id="studio-tab-proof" aria-controls="studio-panel-proof" />
+                <Tab label="Code" id="studio-tab-code" aria-controls="studio-panel-code" />
               </Tabs>
 
-              {/* Execution Logs */}
-              <Box sx={{ flex: 1, display: rightTab === 0 ? 'block' : 'none' }}>
-                {coachStep === 2 && (
-                  <OnboardingCoach step={2} onNext={() => setCoachStep(99)} onDismiss={() => setCoachStep(99)} />
+              <Box sx={{ p: 2, flex: 1 }}>
+                {saveConflict !== null && (
+                  <Alert
+                    severity="warning"
+                    role="alert"
+                    data-testid="save-conflict"
+                    sx={{ mb: 2 }}
+                    action={<Button color="inherit" size="small" onClick={() => { void reloadSelectedTest(); }}>{RELOAD_TEST_LABEL}</Button>}
+                  >
+                    <AlertTitle>{saveConflict.code === 'STALE_REVISION' ? SAVE_CONFLICT_TITLE : SAVE_REFUSED_TITLE}</AlertTitle>
+                    {saveConflict.code === 'STALE_REVISION'
+                      ? SAVE_CONFLICT_STATEMENT
+                      : saveConflict.message || 'The save conflicts with the test as the server holds it.'}
+                  </Alert>
                 )}
-                {/*
-                  Story 10.11a — what the snapshot says, rendered without turning a bounded report
-                  into a false one: step timings exactly as they arrive (AC-19), the retained-log
-                  bound stated (AC-18), and a terminal `ERROR` that names what happened to the
-                  browser and who can clear it (AC-6). The snapshot is a prop, so story 10.11b
-                  substitutes the transport above this without touching the renderer.
-                */}
-                <Box sx={{ mb: 2 }}>
-                  <ExecutionProgressView
-                    snapshot={snapshot}
-                    onRerun={() => setRunRequest((token) => token + 1)}
-                    onSeekStep={hasPlayableRecording ? handleSeekStep : undefined}
+                {stopError !== null && <Alert severity="error" sx={{ mb: 2 }}>{stopError}</Alert>}
+                {accessDenied !== null && (
+                  <Alert severity="error" role="status" aria-label="Live progress feed access refused" sx={{ mb: 2 }}>
+                    <AlertTitle>Live progress unavailable</AlertTitle>
+                    Access to this run&apos;s progress was refused ({accessDenied}). Reload the test or contact support.
+                  </Alert>
+                )}
+                {accessDenied === null && transportStatus !== null &&
+                  (transportStatus.phase === 'reconnecting' || transportStatus.phase === 'falling-back') && (
+                    <Alert severity="info" role="status" aria-label={transportStatus.label} sx={{ mb: 2 }}>
+                      The run is continuing. Reconnecting to live progress…
+                    </Alert>
+                  )}
+
+                <Box
+                  role="tabpanel"
+                  id="studio-panel-logs"
+                  aria-labelledby="studio-tab-logs"
+                  hidden={rightTab !== 0}
+                >
+                  {isDirty ? (
+                    <Alert severity="warning" sx={{ mb: 2 }}>
+                      <AlertTitle>Save before running</AlertTitle>
+                      Run always uses the saved checklist. Save these changes to make Run available.
+                    </Alert>
+                  ) : !snapshot && !isRunning ? (
+                    <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', mb: 2 }}>
+                      <PlayArrow color="primary" sx={{ fontSize: 44 }} />
+                      <Typography variant="h6" component="h2">
+                        Run your test
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        Run saves your steps, prepares them, and records proof.
+                      </Typography>
+                      {selectedScenarioData?.lastRunStatus && (
+                        <Stack spacing={0.5} alignItems="center" sx={{ mt: 2 }}>
+                          <Chip
+                            size="small"
+                            color={executionStatusTone(selectedScenarioData.lastRunStatus)}
+                            label={`Previous run: ${executionStatusLabel(selectedScenarioData.lastRunStatus)}`}
+                          />
+                          <Typography variant="caption" color="text.secondary">
+                            Run history may describe an earlier saved version.
+                          </Typography>
+                        </Stack>
+                      )}
+                    </Paper>
+                  ) : null}
+
+                  {isRunning && currentStep < 0 && (
+                    <Box sx={{ mb: 2 }}>
+                      <LinearProgress aria-label="Waiting for execution progress" />
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                        Run accepted. Waiting for the browser to start.
+                      </Typography>
+                    </Box>
+                  )}
+                  {isRunning && currentStep >= 0 && (
+                    <Box sx={{ mb: 2 }}>
+                      <LinearProgress
+                        aria-label="Test execution progress"
+                        variant="determinate"
+                        value={testSteps.length ? ((currentStep + 1) / testSteps.length) * 100 : 0}
+                        sx={{ height: 8, borderRadius: 4 }}
+                      />
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                        Running step {Math.min(currentStep + 1, testSteps.length)} of {testSteps.length}
+                      </Typography>
+                    </Box>
+                  )}
+                  {snapshot && (
+                    <Box sx={{ mb: 2 }}>
+                      <ExecutionTime snapshot={snapshot} running={isRunning} />
+                      <ExecutionProgressView
+                        snapshot={snapshot}
+                        showLogs={false}
+                        onRerun={() => setRunRequest((token) => token + 1)}
+                        onSeekStep={hasPlayableRecording ? handleSeekStep : undefined}
+                      />
+                    </Box>
+                  )}
+                  <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Code sx={{ fontSize: 18 }} /> Live execution logs
+                  </Typography>
+                  <Paper variant="outlined" sx={{ minHeight: 360, maxHeight: 520, overflow: 'auto', bgcolor: 'grey.900', color: 'white', fontFamily: 'monospace', fontSize: '0.8rem', p: 1.5 }}>
+                    {executionLogs.map((log: { timestamp: string; message: string; type: 'info' | 'error' | 'success' }, index: number) => (
+                      <Box key={`${log.timestamp}-${index}`} sx={{ mb: 0.75, display: 'flex', gap: 1 }}>
+                        <Typography component="span" sx={{ color: 'grey.400', minWidth: 64, fontFamily: 'inherit', fontSize: 'inherit' }}>{log.timestamp}</Typography>
+                        <Typography component="span" sx={{ color: log.type === 'error' ? 'error.light' : 'white', fontFamily: 'inherit', fontSize: 'inherit' }}>{log.message}</Typography>
+                      </Box>
+                    ))}
+                    {executionLogs.length === 0 && <Box sx={{ color: 'grey.400' }}>No logs yet. Run the test to see live output.</Box>}
+                  </Paper>
+                </Box>
+
+                <Box role="tabpanel" id="studio-panel-proof" aria-labelledby="studio-tab-proof" hidden={rightTab !== 1}>
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <VideoEvidencePanel ref={videoRef} snapshot={snapshot} />
+                  </Paper>
+                </Box>
+
+                <Box role="tabpanel" id="studio-panel-code" aria-labelledby="studio-tab-code" hidden={rightTab !== 2}>
+                  <CodeTab
+                    testId={selectedScenarioData?.id ?? null}
+                    active={rightTab === 2}
+                    refreshToken={`${selectedScenarioData?.sourceRevision ?? 0}:${selectedScenarioData?.configurationRevision ?? 0}:${selectedScenarioData?.compileStatus ?? ''}`}
                   />
                 </Box>
 
-                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Code sx={{ fontSize: 18 }} />
-                  Live Execution Logs
-                </Typography>
-                
-                <Paper 
-                  variant="outlined" 
-                  sx={{ 
-                    height: 480, 
-                    overflow: 'auto', 
-                    bgcolor: 'grey.900',
-                    color: 'white',
-                    fontFamily: 'monospace',
-                    fontSize: '0.8rem',
-                    p: 1
-                  }}
-                >
-                  {validation.loading && (
-                    <Box sx={{ mb: 0.5, color: 'info.light' }}>Validating steps…</Box>
-                  )}
-                  {validation.error && (
-                    <Box sx={{ mb: 0.5, color: 'error.light' }}>Validation error: {validation.error}</Box>
-                  )}
-                   {executionLogs.map((log: { timestamp: string; message: string; type: 'info' | 'error' | 'success' }, index: number) => (
-                    <Box key={index} sx={{ mb: 0.5, display: 'flex', gap: 1 }}>
-                      <Typography 
-                        component="span" 
-                        sx={{ 
-                          color: 'grey.400',
-                          minWidth: 60,
-                          fontFamily: 'monospace',
-                          fontSize: 'inherit'
-                        }}
-                      >
-                        {log.timestamp}
-                      </Typography>
-                      <Typography 
-                        component="span"
-                        sx={{ 
-                          color: log.type === 'success' ? 'success.light' : 
-                                 log.type === 'error' ? 'error.light' : 'white',
-                          fontFamily: 'monospace',
-                          fontSize: 'inherit'
-                        }}
-                      >
-                        {log.message}
-                      </Typography>
-                    </Box>
-                  ))}
-                  {isRunning && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'primary.light' }}>
-                      <CircularProgress size={12} sx={{ color: 'primary.light' }} />
-                      <Typography sx={{ fontFamily: 'monospace', fontSize: 'inherit' }}>
-                        Executing...
-                      </Typography>
-                    </Box>
-                  )}
-                  {executionLogs.length === 0 && !isRunning && !validation.loading && (
-                    <Box sx={{ color: 'grey.400' }}>No logs yet. Run the test to see live output.</Box>
-                  )}
-                </Paper>
               </Box>
-
-              {/* Code Tab */}
-               <Box sx={{ mt: 2, display: rightTab === 1 ? 'block' : 'none' }}>
-                <CodeTab />
-              </Box>
-
-              {/* Proof Tab */}
-              <Box sx={{ mt: 2, display: rightTab === 2 ? 'block' : 'none' }}>
-                {/*
-                  Story 10.16a — the run's evidence state, and the page's only media element (AC-2, AC-4,
-                  AC-21). It renders from the snapshot's `video` and `videoPath`, never from the
-                  check outcome and never from the store.
-                */}
-                <Paper variant="outlined" sx={{ p: 2 }}>
-                  <VideoEvidencePanel ref={videoRef} snapshot={snapshot} />
-                </Paper>
-              </Box>
-
-              {/* Variables inline panel removed in favor of Variables dialog */}
             </CardContent>
           </Card>
         </Grid>
-
-        {/* Right Panel removed: Proof is integrated as a tab */}
       </Grid>
 
       {/* Global CSS for animations - Using MUI's GlobalStyles */}
@@ -1113,17 +1201,17 @@ const ChecksStudioPageInner: React.FC = () => {
         <DialogTitle>Variables</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Configure variables referenced in your steps using &lt;var NAME&gt; or &lt;secret SECRET_ID&gt;.
-            Variables are saved with the test, together with its steps. A secret is stored as a
-            reference only; its value never reaches this page.
+            Configure variables referenced in your steps using &lt;var NAME&gt;. Variables are saved
+            with the test, together with its steps. Vault-backed secret references are unavailable
+            in this production alpha.
           </Typography>
-          <Paper variant="outlined" sx={{ p: 1 }}>
-            <Table size="small">
+          <Paper variant="outlined" sx={{ p: 1, overflowX: 'auto' }}>
+            <Table size="small" sx={{ minWidth: 720 }}>
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ width: 180 }}>Name</TableCell>
                   <TableCell sx={{ width: 140 }}>Type</TableCell>
-                  <TableCell>Value / Secret</TableCell>
+                  <TableCell>Value</TableCell>
                   <TableCell align="right" sx={{ width: 80 }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -1131,7 +1219,7 @@ const ChecksStudioPageInner: React.FC = () => {
                 {variablesList.map((v, i) => (
                   <TableRow key={v.id} hover>
                     <TableCell>
-                      <TextField size="small" value={v.name} onChange={(e) => {
+                      <TextField inputProps={{ 'aria-label': `Variable ${i + 1} name` }} size="small" value={v.name} onChange={(e) => {
                         const next = [...variablesList];
                         next[i] = { ...v, name: e.target.value.toUpperCase() };
                         setVariablesList(next);
@@ -1139,33 +1227,39 @@ const ChecksStudioPageInner: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <FormControl size="small" fullWidth>
-                        <Select value={v.type} onChange={(e) => {
+                        <Select inputProps={{ 'aria-label': `Variable ${i + 1} type` }} value={v.type} onChange={(e) => {
                           const next = [...variablesList];
                           next[i] = { ...v, type: e.target.value as 'plain' | 'secret' };
                           setVariablesList(next);
                         }}>
                           <MenuItem value="plain">Plain</MenuItem>
-                          <MenuItem value="secret">Secret</MenuItem>
+                          {STUDIO_CAPABILITIES.vaultSecrets && (
+                            <MenuItem value="secret">Secret</MenuItem>
+                          )}
                         </Select>
                       </FormControl>
                     </TableCell>
                     <TableCell>
                       {v.type === 'plain' ? (
-                        <TextField size="small" value={v.value || ''} onChange={(e) => {
+                        <TextField inputProps={{ 'aria-label': `Variable ${i + 1} value` }} size="small" value={v.value || ''} onChange={(e) => {
                           const next = [...variablesList];
                           next[i] = { ...v, value: e.target.value };
                           setVariablesList(next);
                         }} placeholder="value" fullWidth />
                       ) : (
-                        <SecretInput label="Select secret" value={v.secretId ? { id: v.secretId } : null} onChange={(ref) => {
-                          const next = [...variablesList];
-                          next[i] = { ...v, secretId: ref?.id };
-                          setVariablesList(next);
-                        }} />
+                        STUDIO_CAPABILITIES.vaultSecrets ? (
+                          <SecretInput label="Select secret" value={v.secretId ? { id: v.secretId } : null} onChange={(ref) => {
+                            const next = [...variablesList];
+                            next[i] = { ...v, secretId: ref?.id };
+                            setVariablesList(next);
+                          }} />
+                        ) : (
+                          <Alert severity="info">Vault secrets are unavailable in this alpha.</Alert>
+                        )
                       )}
                     </TableCell>
                     <TableCell align="right">
-                      <IconButton size="small" onClick={() => {
+                      <IconButton aria-label={`Remove variable ${v.name || i + 1}`} size="small" onClick={() => {
                         const next = variablesList.filter((_, idx) => idx !== i);
                         setVariablesList(next);
                       }}>
@@ -1177,7 +1271,7 @@ const ChecksStudioPageInner: React.FC = () => {
                 <TableRow>
                   <TableCell colSpan={4}>
                     <Button size="small" startIcon={<Add />} onClick={() => setVariablesList((prev) => [...prev, { id: `var_${Date.now()}`, name: '', type: 'plain', value: '' }])}>Add variable</Button>
-                    <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>Use in steps as: &lt;var NAME&gt; or &lt;secret SECRET_ID&gt;</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>Use in steps as: &lt;var NAME&gt;</Typography>
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -1188,7 +1282,7 @@ const ChecksStudioPageInner: React.FC = () => {
           <Button onClick={() => setVariablesOpen(false)}>Close</Button>
           <Button
             variant="contained"
-            disabled={isSaving || isRunning || !selectedScenarioData}
+            disabled={isSaving || editorLocked || !selectedScenarioData}
             onClick={async () => {
               // One save path: the whole draft goes through `PUT /tests/{id}`. A conflict closes
               // the dialog so the page's conflict message and its Reload action are visible.
@@ -1205,36 +1299,97 @@ const ChecksStudioPageInner: React.FC = () => {
       <Dialog open={templatesOpen} onClose={() => setTemplatesOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Quick Start Templates</DialogTitle>
         <DialogContent>
-          <Stack spacing={1} mt={1}>
-            <Button
-              variant="outlined"
-              onClick={() => {
-                setTestSteps([
-                  'Go to "https://online.citi.com"',
-                  'Click "Sign On"',
-                  'Type "<var USERNAME>" in the "User ID" field',
-                  'Type "<secret sec_abc123>" in the "Password" field',
-                  'Click "Continue"',
-                  'Wait for "Welcome"',
-                ]);
-                setTemplatesOpen(false);
-              }}
-            >Login flow</Button>
-            <Button
-              variant="outlined"
-              onClick={() => {
-                setTestSteps([
-                  'Go to "https://put.internal.citi.com"',
-                  'Wait for "Dashboard"',
-                  'Check url contains "dashboard"',
-                ]);
-                setTemplatesOpen(false);
-              }}
-            >Content check</Button>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            A starting checklist you edit, not a finished test. Each one names the controls it
+            expects and ends by checking something, so a run that passes has actually proved
+            something. Replace the addresses and labels with your application&apos;s own.
+          </Typography>
+          <Stack spacing={1} mt={2}>
+            {PRODUCTION_ALPHA_TEMPLATES.map((template) => (
+              <Paper key={template.id} variant="outlined" sx={{ p: 2 }}>
+                <Typography variant="subtitle2" fontWeight={700}>{template.title}</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  {template.purpose}
+                </Typography>
+                <Box component="ol" sx={{ pl: 2.5, my: 1.5 }}>
+                  {template.steps.map((step, index) => (
+                    <Typography
+                      key={`${template.id}-${index}`}
+                      component="li"
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: 'list-item', fontFamily: 'monospace' }}
+                    >
+                      {step}
+                    </Typography>
+                  ))}
+                </Box>
+                {template.variables.length > 0 && (
+                  <Stack direction="row" spacing={1} sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
+                    {template.variables.map((variable) => (
+                      <Chip
+                        key={variable.name}
+                        size="small"
+                        variant="outlined"
+                        color={variable.type === 'secret' ? 'warning' : 'default'}
+                        label={
+                          variable.type === 'secret'
+                            ? `${variable.name} (point this at a vault entry)`
+                            : `${variable.name} (needs a value)`
+                        }
+                      />
+                    ))}
+                  </Stack>
+                )}
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => requestNavigation(() => applyTemplate(template))}
+                >
+                  Use this template
+                </Button>
+              </Paper>
+            ))}
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTemplatesOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={leaveDialogOpen} onClose={() => setLeaveDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Save changes before continuing?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Your latest checklist, environment, or secret-reference changes have not been saved.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="error"
+            onClick={() => {
+              setLeaveDialogOpen(false);
+              const action = pendingNavigationRef.current;
+              pendingNavigationRef.current = null;
+              action?.();
+            }}
+          >
+            Discard changes
+          </Button>
+          <Button onClick={() => setLeaveDialogOpen(false)}>Keep editing</Button>
+          <Button
+            variant="contained"
+            onClick={async () => {
+              const outcome = await saveDraft();
+              if (outcome !== 'saved') return;
+              setLeaveDialogOpen(false);
+              const action = pendingNavigationRef.current;
+              pendingNavigationRef.current = null;
+              action?.();
+            }}
+          >
+            Save and continue
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

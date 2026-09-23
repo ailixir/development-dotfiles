@@ -49,6 +49,11 @@ export interface SessionRunRequest {
   readonly steps: readonly ExecutableStep[];
   readonly variables: Readonly<Record<string, string>>;
   readonly secrets: Readonly<Record<string, string>>;
+  /**
+   * The origins each secret may be filled on, by secret id. Non-secret. Absent or missing an id
+   * means that secret is bound to no origin and the adapter refuses to fill it.
+   */
+  readonly secretOrigins?: Readonly<Record<string, readonly string[]>> | undefined;
   /** 10.6's `RunReporter`, reached unchanged from inside or outside the process (AC-16). */
   readonly reporter: StepReporter;
   readonly maxFailureMessageLength?: number | undefined;

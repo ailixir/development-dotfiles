@@ -1,4 +1,4 @@
-import type { VideoStatus } from '@/types/studio/studioTypes';
+import type { ExecutionErrorCode, VideoStatus } from '@/types/studio/studioTypes';
 
 /**
  * What each `VideoStatus` must tell the reader, and what it must not, written **independently** of
@@ -60,3 +60,37 @@ export const PINNED_VIDEO_EVIDENCE_FACTS: Readonly<Record<VideoStatus, PinnedVid
 
 /** Below this length a pinned phrase stops discriminating. `''` would make every `toContain` true. */
 export const MIN_PINNED_VIDEO_PHRASE_LENGTH = 6;
+
+/**
+ * The stopped-run line, pinned the same way: a second copy, derived from nothing.
+ *
+ * Both codes must say the recording **ends where the run was stopped** (`endsPhrase`), and each must
+ * name its own cause (`causePhrase`), so a rendering that swaps the two codes' lines cannot pass.
+ * `deniedClaims` are what the line must not say: the partial qualifier's claims (partiality is the
+ * recorder's, not the run's — ADR-002 §17.4), the failure states' claims, and the other code's
+ * cause. The key set is written against the contract's own vocabulary, so a code that leaves
+ * `EXECUTION_ERROR_CODES` leaves this record too, as a type-check failure.
+ */
+export interface PinnedStoppedRunRecordingFacts {
+  /** Must appear in the rendered line, for both codes alike. */
+  readonly endsPhrase: string;
+  /** Must appear in the rendered line, and names this code's cause and no other's. */
+  readonly causePhrase: string;
+  /** Must not appear in the rendered line. */
+  readonly deniedClaims: readonly string[];
+}
+
+export const PINNED_STOPPED_RUN_RECORDING_FACTS: Readonly<
+  Record<Extract<ExecutionErrorCode, 'TIMEOUT' | 'CANCELLED'>, PinnedStoppedRunRecordingFacts>
+> = {
+  TIMEOUT: {
+    endsPhrase: 'ends where the run was stopped',
+    causePhrase: 'total time cap',
+    deniedClaims: ['partial', 'recorder', 'orderly', 'failed', 'no recording', 'expired', 'on request'],
+  },
+  CANCELLED: {
+    endsPhrase: 'ends where the run was stopped',
+    causePhrase: 'on request',
+    deniedClaims: ['partial', 'recorder', 'orderly', 'failed', 'no recording', 'expired', 'time cap'],
+  },
+};

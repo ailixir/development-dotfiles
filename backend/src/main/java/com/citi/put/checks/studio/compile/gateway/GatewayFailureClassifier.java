@@ -1,7 +1,6 @@
 package com.citi.put.checks.studio.compile.gateway;
 
-import com.google.api.gax.rpc.ApiException;
-import com.google.api.gax.rpc.StatusCode;
+import com.google.genai.errors.ApiException;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -30,7 +29,7 @@ final class GatewayFailureClassifier {
     }
     for (Throwable current = throwable; current != null; current = current.getCause()) {
       if (current instanceof ApiException apiException) {
-        return isRetryableStatus(apiException.getStatusCode());
+        return apiException.code() == 429 || apiException.code() == 503;
       }
       if (current instanceof ConnectException) {
         return true;
@@ -66,9 +65,7 @@ final class GatewayFailureClassifier {
       if (current instanceof SocketTimeoutException || current instanceof TimeoutException) {
         return true;
       }
-      if (current instanceof ApiException apiException
-          && apiException.getStatusCode() != null
-          && apiException.getStatusCode().getCode() == StatusCode.Code.DEADLINE_EXCEEDED) {
+      if (current instanceof ApiException apiException && apiException.code() == 504) {
         return true;
       }
       String message = current.getMessage();
@@ -77,20 +74,6 @@ final class GatewayFailureClassifier {
       }
     }
     return false;
-  }
-
-  private static boolean isRetryableStatus(StatusCode statusCode) {
-    if (statusCode == null) {
-      return false;
-    }
-    return switch (statusCode.getCode()) {
-        // HTTP 503 and connection-level unavailability.
-      case UNAVAILABLE -> true;
-        // HTTP 429. The Vertex SDK's httpjson transport does not surface the Retry-After header, so
-        // the client applies its own bounded jittered backoff instead of the server's hint.
-      case RESOURCE_EXHAUSTED -> true;
-      default -> false;
-    };
   }
 
   private static boolean isReset(SocketException exception) {
