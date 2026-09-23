@@ -87,8 +87,17 @@ spec:
             # same key, compared to each other in the assertion rather than each to a literal.
             - name: STUDIO_RUNNER_SCRATCH_DIR
               value: {{ $scratch | quote }}
+            # The object store follows `objectStore.provider`, the same key the API and worker read:
+            # `local` writes to the shared RWX claim at `objectStore.localDirectory`; `s3` requires a
+            # real endpoint and bucket (the render fails without them) and reads its credentials
+            # from the mounted write-only Secret. No shipped value set selects `s3` yet.
+            #
+            # In s3 mode the directory is a SIBLING of the scratch directory inside the same
+            # `scratch` emptyDir, not a child of it: the loader refuses an object-store directory
+            # nested inside scratch ("Object storage and scratch directories must be disjoint;
+            # scratch is deleted on restart"). `dev.sh` already lays the two out this way.
             - name: STUDIO_RUNNER_OBJECT_STORE_DIR
-              value: {{ if eq .Values.objectStore.provider "local" }}{{ .Values.objectStore.localDirectory | quote }}{{ else }}{{ printf "%s/objects" $scratch | quote }}{{ end }}
+              value: {{ if eq .Values.objectStore.provider "local" }}{{ .Values.objectStore.localDirectory | quote }}{{ else }}{{ printf "%s/objects" (trimSuffix "/" .Values.studioRunner.scratch.mountPath) | quote }}{{ end }}
             - name: STUDIO_RUNNER_OBJECT_STORE_PROVIDER
               value: {{ .Values.objectStore.provider | quote }}
             - name: STUDIO_RUNNER_OBJECT_STORE_ENDPOINT
@@ -120,15 +129,15 @@ spec:
           # which is precisely the open half SEC-2 exploits: the enumerated list above is the only
           # way a variable reaches this container.
           readinessProbe:
-            httpGet:
-              path: {{ .Values.studioRunner.probes.readinessPath }}
-              port: http
+            exec:
+              command: ["node", "dist/probe.js", {{ .Values.studioRunner.probes.readinessPath | quote }}]
+            timeoutSeconds: 3
             initialDelaySeconds: {{ .Values.studioRunner.probes.initialDelaySeconds }}
             periodSeconds: {{ .Values.studioRunner.probes.periodSeconds }}
           livenessProbe:
-            httpGet:
-              path: {{ .Values.studioRunner.probes.livenessPath }}
-              port: http
+            exec:
+              command: ["node", "dist/probe.js", {{ .Values.studioRunner.probes.livenessPath | quote }}]
+            timeoutSeconds: 3
             initialDelaySeconds: {{ .Values.studioRunner.probes.initialDelaySeconds }}
             periodSeconds: {{ .Values.studioRunner.probes.periodSeconds }}
           resources:

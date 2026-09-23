@@ -1,13 +1,12 @@
-import React from 'react';
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { store } from '@/store';
-import { ThemeProvider, CssBaseline } from '@mui/material';
-import theme from '@/theme';
-import { MemoryRouter } from 'react-router-dom';
-import { ChecksLayout } from './ChecksLayout';
 import { LayoutProvider } from '@/components/layout/LayoutProvider';
+import { store } from '@/store';
+import theme from '@/theme';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
+import { describe, expect, it } from 'vitest';
+import { ChecksLayout } from './ChecksLayout';
 
 describe('ChecksLayout accessibility', () => {
   it('renders skip link and main landmark', async () => {
@@ -27,6 +26,10 @@ describe('ChecksLayout accessibility', () => {
     );
     // Skip link present
     expect(screen.getByText(/Skip to main content/i)).toBeInTheDocument();
+    const skip=screen.getByRole('link',{name:'Skip to main content'});
+    expect(skip).toHaveAttribute('href','#checks-main');
+    fireEvent.click(skip);
+    expect(screen.getByRole('main')).toHaveFocus();
   });
 });
 

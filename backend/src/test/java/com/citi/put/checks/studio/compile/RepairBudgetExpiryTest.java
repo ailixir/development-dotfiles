@@ -100,7 +100,7 @@ class RepairBudgetExpiryTest {
         com.citi.put.checks.studio.compile.gateway.CompileRequest request) {
       calls.incrementAndGet();
       if (request.attempt() == 1) {
-        return ok();
+        return ProposalFixtures.fromArtifact(request, ok());
       }
       enteredRepair.countDown();
       try {
@@ -111,7 +111,7 @@ class RepairBudgetExpiryTest {
         Thread.currentThread().interrupt();
         throw new IllegalStateException(e);
       }
-      return ok();
+      return ProposalFixtures.fromArtifact(request, ok());
     }
 
     int calls() {
@@ -159,7 +159,7 @@ class RepairBudgetExpiryTest {
                     .withStatus(200)
                     .withHeader("content-type", "application/json")
                     .withBody(
-                        "{\"ok\":false,\"validatorSchemaVersion\":\"1.0.0\",\"diagnostics\":[],"
+                        "{\"ok\":false,\"validatorSchemaVersion\":\"2.0.0\",\"diagnostics\":[],"
                             + "\"steps\":[{\"stepIndex\":0,\"ok\":false,\"diagnostics\":"
                             + "[{\"code\":\"DENIED_NODE\",\"stepIndex\":0,\"message\":\"no\","
                             + "\"node\":\"ForStatement\",\"excerpt\":\"for(;;)\"}]}]}")));

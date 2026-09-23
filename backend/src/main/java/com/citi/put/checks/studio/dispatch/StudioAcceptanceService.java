@@ -235,6 +235,7 @@ public class StudioAcceptanceService {
     Instant acceptedAt = clock.instant();
     UITestExecution execution =
         new UITestExecution(testId, ExecutionStatus.PENDING, acceptedAt, test.getCsiId());
+    execution.markFullExecution();
     execution.setPrincipal(principal);
     execution.setEnvironment(test.getEnvironment());
     execution.setRevisionId(revision.getId());

@@ -70,6 +70,15 @@ dialog or portal rendering outside that container is not silently unscanned.
 | `ChecksStudioPage/run-progress` | `button-name` ×13, `label` ×4 | `aria-progressbar-name` ×3, `aria-prohibited-attr` ×12 | `heading-order` ×1, `region` ×18 |
 | `ChecksStudioPage/video-playback` | `button-name` ×13, `label` ×4 | `aria-prohibited-attr` ×12 | `heading-order` ×1, `region` ×16 |
 
+**Re-measured 2026-09-20 on `main` (`cd2ab3001`), after the Epic 10 / Studio v1 fold.** Two rows above changed; the table is left as measured on 2026-09-17 and the pins in `studioWcagAudit.test.tsx` were re-anchored to these:
+
+| Surface | critical | serious | moderate |
+|---|---|---|---|
+| `StudioTestsPage` | `button-name` ×1 | `aria-prohibited-attr` ×1 | `heading-order` ×1, `region` ×7 |
+| `StudioRunsPage` | — | — | `region` ×1 |
+
+The cause is Studio v1 WP5 (`2e06d0b5d`), which added an `aria-label` to the runs page's Refresh `IconButton` and to the tests page's Run button. The five `ChecksStudioPage` rows were unchanged by WP5; the later two-panel redesign cleared them (see the 2026-09-20 revalidation note at the top, which is what the current pins and `axe-results.json` record).
+
 ### 1.3 The four ticketed critical/serious findings
 
 Each is `A11Y-N` in the register, with an owner and a severity.

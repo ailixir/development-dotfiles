@@ -115,9 +115,9 @@ public final class ConfirmFixtures {
     provenance.put("model", "stub-model@1");
     provenance.put("promptVersion", CompilePins.PROMPT_VERSION);
     provenance.put("syntaxReferenceVersion", CompilePins.SYNTAX_REFERENCE_VERSION);
-    provenance.put("validatorSchemaVersion", "1.0.0");
-    provenance.put("languagePolicyVersion", "1.0.0");
-    provenance.put("executorVersion", "1.0.0");
+    provenance.put("validatorSchemaVersion", "2.0.0");
+    provenance.put("languagePolicyVersion", "2.0.0");
+    provenance.put("executorVersion", "2.0.0");
     provenance.put("playwrightVersion", "1.63.0");
     provenance.put("artifactSchemaVersion", CompilePins.SUPPORTED_ARTIFACT_VERSION);
     return provenance.toString();

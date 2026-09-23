@@ -9,6 +9,11 @@ plugins {
     jacoco
 }
 
+// Keep every Testcontainers module on the explicitly selected version; Boot otherwise
+// managed JDBC/core at 1.19.8 beside the declared PostgreSQL/JUnit 1.20.2 modules.
+val testcontainersVersion = "1.20.2"
+extra["testcontainers.version"] = testcontainersVersion
+
 group = "com.citi.put"
 version = "0.1.0-SNAPSHOT"
 description = "PUT Checks — backend service"
@@ -45,9 +50,10 @@ dependencies {
     implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.16.0")
 
-    // Current Google Gen AI SDK in Vertex AI mode. This replaces the retired
-    // google-cloud-vertexai generative surface.
-    implementation("com.google.genai:google-genai:1.72.0")
+    // Current Google Gen AI SDK in Vertex AI mode (GenAiLlmGatewayClient). This replaces the retired
+    // google-cloud-vertexai generative surface. SPK-01 still gates live R2D2 enablement.
+    implementation("com.google.api:gax:2.76.0")
+    implementation("com.google.genai:google-genai:1.71.0")
 
     // Runtime artifact-schema validation for the LLM gateway response parser (Story 10.5, AC-7).
     implementation("com.networknt:json-schema-validator:1.4.0")
@@ -56,7 +62,12 @@ dependencies {
     // local filesystem remains the shipped application default. The URLConnection transport is
     // deliberate: this service needs bounded synchronous Head/Get calls, not Netty or CRT.
     implementation(platform("software.amazon.awssdk:bom:2.55.1"))
-    implementation("software.amazon.awssdk:s3")
+    implementation("software.amazon.awssdk:s3") {
+        // Keep Spring's existing HTTP client selection; Apache 5 otherwise adds automatic 429 retries.
+        exclude(group = "software.amazon.awssdk", module = "apache5-client")
+        exclude(group = "software.amazon.awssdk", module = "apache-client")
+        exclude(group = "software.amazon.awssdk", module = "netty-nio-client")
+    }
     implementation("software.amazon.awssdk:url-connection-client")
 
     implementation("org.flywaydb:flyway-core")
@@ -71,8 +82,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.assertj:assertj-core")
     testImplementation("io.zonky.test:embedded-database-spring-test:2.5.1")
-    testImplementation("org.testcontainers:postgresql:1.20.2")
-    testImplementation("org.testcontainers:junit-jupiter:1.20.2")
+    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
     testImplementation("org.wiremock:wiremock-standalone:3.3.1")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("com.icegreen:greenmail-junit5:2.0.1")
@@ -101,12 +112,8 @@ tasks.withType<Test>().configureEach {
     jvmArgs("-Xmx1g")
     forkEvery = 12
 
-    // The Testcontainers JDBC driver stops its container when the connection count for a URL
-    // reaches zero. Spring's context cache defaults to 32 entries, and story 10.7 pushed the
-    // suite past that: evicting a context closes its Hikari pool, the count hits zero, the
-    // container stops, and every other cached context is left pointed at a dead port. The symptom
-    // is "Connection refused" in tests that pass in isolation and fail in the suite. Raising the
-    // cache keeps the contexts — and therefore the container — alive for the fork's lifetime.
+    // Keep context reuse bounded and efficient. The test profile explicitly uses TC_DAEMON=true,
+    // so connection/pool churn cannot stop its shared database while cached contexts still use it.
     systemProperty("spring.test.context.cache.maxSize", "64")
 
 }
@@ -312,3 +319,18 @@ tasks.check {
     dependsOn("rdsParityLint")
     dependsOn("antiRegressionCheck")
 }
+
+// Mixed JDBC/core/database modules caused intermittent initialization retries in the full suite.
+tasks.register("testcontainersAlignmentCheck") {
+    group = "verification"
+    doLast {
+        val modules = configurations["testRuntimeClasspath"].resolvedConfiguration.resolvedArtifacts
+            .map { it.moduleVersion.id }
+            .filter { it.group == "org.testcontainers" }
+        check(modules.isNotEmpty() && modules.all { it.version == testcontainersVersion }) {
+            "Testcontainers modules must all resolve to $testcontainersVersion: ${modules.joinToString()}"
+        }
+        logger.lifecycle("testcontainersAlignmentCheck: ${modules.size} modules aligned at $testcontainersVersion")
+    }
+}
+tasks.named("check") { dependsOn("testcontainersAlignmentCheck") }

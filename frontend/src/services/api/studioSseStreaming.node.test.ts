@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DEV_TRANSPORT_SCENARIO } from '@/services/mocks/studio/executionScenarios';
 import {
   startStudioTestServer,
   until,
@@ -7,7 +7,7 @@ import {
   type StudioTestServer,
 } from '@/test/studioStreamServer';
 import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
-import { DEV_TRANSPORT_SCENARIO } from '@/services/mocks/studio/executionScenarios';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 /**
  * Story 10.11b — **AC-9**, the criterion the SSE assessment wrote in advance:

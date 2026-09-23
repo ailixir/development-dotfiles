@@ -72,9 +72,93 @@ public class CompileStateService {
   private final JdbcTemplate jdbc;
   private final StudioRepository studioRepository;
 
+  @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
+
   public CompileStateService(JdbcTemplate jdbc, StudioRepository studioRepository) {
     this.jdbc = jdbc;
     this.studioRepository = studioRepository;
+  }
+
+  /** Input and request identity captured under one draft lock, before network work. */
+  public record Capture(
+      CompileRequest request,
+      CompileInputs inputs,
+      List<com.citi.put.checks.studio.compile.incremental.CompilationPlanner.Step> steps,
+      com.citi.put.checks.studio.compile.incremental.CompilationPlanner.Plan plan,
+      com.citi.put.checks.studio.compile.incremental.CompilationPlanner.Baseline baseline,
+      String authoringHash,
+      String fingerprint,
+      String baselineProvenance) {}
+
+  /** Commits the capture before pipeline dispatch, including after-commit save callbacks. */
+  @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+  public Capture captureForCompilation(
+      UUID testId,
+      String principal,
+      AuthoringLimits limits,
+      CredentialPatternScreen screen,
+      String fingerprint,
+      Duration duration,
+      String requestedMode,
+      boolean incrementalEnabled,
+      Long expectedSource,
+      Long expectedConfiguration,
+      String expectedAuthoringHash) {
+    return capture(
+        testId,
+        principal,
+        limits,
+        screen,
+        fingerprint,
+        duration,
+        requestedMode,
+        incrementalEnabled,
+        expectedSource,
+        expectedConfiguration,
+        expectedAuthoringHash);
+  }
+
+  /** Atomic state operation; callers performing composed database work own their transaction. */
+  @Transactional
+  public Capture capture(
+      UUID testId,
+      String principal,
+      AuthoringLimits limits,
+      CredentialPatternScreen screen,
+      String fingerprint,
+      Duration duration,
+      String requestedMode,
+      boolean incrementalEnabled,
+      Long expectedSource,
+      Long expectedConfiguration,
+      String expectedAuthoringHash) {
+    requireCompilable(testId);
+    var draft =
+        studioRepository
+            .findByIdForUpdate(testId)
+            .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + testId));
+    entityManager.refresh(draft);
+    CompileInputs inputs = CompileInputs.from(draft, principal);
+    limits.requireWithinLimits(inputs.orderedSource());
+    screen.requireNoInlineCredentials(inputs.orderedSource());
+    if (expectedSource != null
+        && (draft.getSourceRevision() != expectedSource
+            || expectedConfiguration == null
+            || draft.getConfigurationRevision() != expectedConfiguration
+            || !java.util.Objects.equals(
+                expectedAuthoringHash,
+                jdbc.queryForObject(
+                    "SELECT authoring_hash FROM ui_tests WHERE id = ?", String.class, testId)))) {
+      throw new StudioConflictException("STALE_REVISION", "Reload the current authoring snapshot");
+    }
+    InferenceCaptureStore store = new InferenceCaptureStore(jdbc);
+    if (expectedSource != null && !store.requestIdentityAvailable()) {
+      throw new StudioConflictException(
+          "INFERENCE_CUTOVER_REQUIRED",
+          "Versioned compilation requires the compatible publisher cutover");
+    }
+    return store.persist(
+        beginCompile(testId), inputs, fingerprint, duration, requestedMode, incrementalEnabled);
   }
 
   /**
@@ -119,14 +203,23 @@ public class CompileStateService {
       UUID testId, CompileRequest request, CandidateRevision candidate) {
     requireCompilable(testId);
     requireCandidateMatchesRequest(request, candidate);
+    if (!boundPublicationStatements(request)) {
+      logDiscard(testId, request);
+      return PublishResult.DISCARDED_OUT_OF_ORDER;
+    }
     List<Map<String, Object>> guarded = lockCurrentRequest(testId, request);
     if (guarded.isEmpty()) {
       logDiscard(testId, request);
       return PublishResult.DISCARDED_OUT_OF_ORDER;
     }
     String csiId = (String) guarded.get(0).get("csi_id");
-    UUID revisionId = insertOrReuseRevision(testId, csiId, request.sourceRevision(), candidate);
+    requirePublicationBudget(request);
+    UUID revisionId =
+        new InferenceCaptureStore(jdbc).requestIdentityAvailable()
+            ? insertCapturedRevision(testId, request, candidate)
+            : insertOrReuseRevision(testId, csiId, request.sourceRevision(), candidate);
 
+    requirePublicationBudget(request);
     int updated =
         jdbc.update(
             """
@@ -139,6 +232,9 @@ public class CompileStateService {
              WHERE id = ? AND compile_request_id = ? AND source_revision = ?
                AND configuration_revision = ?
                AND deleted_at IS NULL AND quarantined_at IS NULL
+               AND NOT EXISTS (SELECT 1 FROM ui_test_compile_requests r
+                 WHERE r.request_id = ui_tests.compile_request_id
+                   AND r.deadline_at <= clock_timestamp())
             """,
             revisionId,
             testId,
@@ -146,13 +242,8 @@ public class CompileStateService {
             request.sourceRevision(),
             request.configurationRevision());
     if (updated != 1) {
-      // Unreachable while the guard row lock is held; fail loudly rather than half-publish.
-      throw new IllegalStateException(
-          "Candidate publication lost its guard for test "
-              + testId
-              + " (request "
-              + request.requestId()
-              + ")");
+      // Throwing rolls back any inserted revision together with the failed final CAS.
+      throw new java.util.concurrent.CancellationException("Publication deadline or guard expired");
     }
     return PublishResult.PUBLISHED;
   }
@@ -235,6 +326,7 @@ public class CompileStateService {
    */
   @Transactional
   public PublishResult publishInvalid(UUID testId, CompileRequest request, String diagnosticsJson) {
+    boundSettlementStatements();
     requireCompilable(testId);
     int updated =
         jdbc.update(
@@ -273,6 +365,7 @@ public class CompileStateService {
    */
   @Transactional
   public PublishResult publishError(UUID testId, CompileRequest request, String errorJson) {
+    boundSettlementStatements();
     requireCompilable(testId);
     int updated =
         jdbc.update(
@@ -325,6 +418,7 @@ public class CompileStateService {
       long configurationRevision,
       String principal) {
     requireCompilable(testId);
+    jdbc.queryForObject("SELECT id FROM ui_tests WHERE id = ? FOR UPDATE", UUID.class, testId);
 
     List<Map<String, Object>> candidates =
         jdbc.queryForList(
@@ -433,6 +527,47 @@ public class CompileStateService {
 
   private static String text(Object value) {
     return value == null ? null : String.valueOf(value);
+  }
+
+  /**
+   * Confirms a candidate whose captured compile-request identity must still match (story 10.23).
+   */
+  @Transactional
+  public UUID confirmVersioned(
+      UUID testId,
+      UUID requestId,
+      UUID revisionId,
+      String artifactHash,
+      long sourceRevision,
+      long configurationRevision,
+      String authoringHash,
+      String principal) {
+    requireCompilable(testId);
+    List<Map<String, Object>> current =
+        jdbc.queryForList(
+            """
+        SELECT t.id FROM ui_tests t JOIN ui_test_revisions r
+          ON r.id = t.current_candidate_revision_id AND r.test_id = t.id
+         WHERE t.id = ? AND t.compile_request_id = ? AND r.compile_request_id = ?
+           AND t.authoring_hash = ? AND r.authoring_hash = ? AND r.id = ?
+           AND t.source_revision = ? AND t.configuration_revision = ?
+           AND t.deleted_at IS NULL AND t.quarantined_at IS NULL
+         FOR UPDATE OF t
+        """,
+            testId,
+            requestId,
+            requestId,
+            authoringHash,
+            authoringHash,
+            revisionId,
+            sourceRevision,
+            configurationRevision);
+    if (current.isEmpty()) {
+      throw new StudioConflictException(
+          STALE_CANDIDATE, "Candidate identity or authoring snapshot changed");
+    }
+    return confirm(
+        testId, revisionId, artifactHash, sourceRevision, configurationRevision, principal);
   }
 
   /**
@@ -574,12 +709,15 @@ public class CompileStateService {
          WHERE id = ? AND compile_request_id = ? AND source_revision = ?
            AND configuration_revision = ?
            AND deleted_at IS NULL AND quarantined_at IS NULL
+           AND NOT EXISTS (SELECT 1 FROM ui_test_compile_requests r
+               WHERE r.request_id = ? AND r.deadline_at <= clock_timestamp())
            FOR UPDATE
         """,
         testId,
         request.requestId(),
         request.sourceRevision(),
-        request.configurationRevision());
+        request.configurationRevision(),
+        request.requestId());
   }
 
   /**
@@ -649,6 +787,107 @@ public class CompileStateService {
         candidate.artifactHash(),
         candidate.referencePolicy(),
         candidate.intentDerivationVersion());
+  }
+
+  /** Append-only attempt result; retrying a terminal write cannot replace earlier evidence. */
+  @Transactional
+  public void recordOutcome(
+      UUID requestId, String state, String errorCode, String diagnostics, String usage) {
+    boundSettlementStatements();
+    jdbc.update(
+        """
+        INSERT INTO ui_test_compile_outcomes(request_id,outcome)
+        SELECT request_id, jsonb_build_object('state',?, 'stage','COMPLETE',
+          'errorCode',CAST(? AS text),'diagnostics',CAST(? AS jsonb),'usage',CAST(? AS jsonb),
+          'revisionId',(SELECT id FROM ui_test_revisions WHERE compile_request_id = r.request_id),
+          'artifactHash',(SELECT artifact_hash FROM ui_test_revisions WHERE compile_request_id = r.request_id))
+          FROM ui_test_compile_requests r WHERE request_id = ?
+        ON CONFLICT(request_id) DO NOTHING
+        """,
+        state,
+        errorCode,
+        diagnostics,
+        usage,
+        requestId);
+  }
+
+  private void requirePublicationBudget(CompileRequest request) {
+    if (!boundPublicationStatements(request)) {
+      throw new java.util.concurrent.CancellationException("Publication deadline expired");
+    }
+  }
+
+  private boolean boundPublicationStatements(CompileRequest request) {
+    List<Long> remaining =
+        jdbc.queryForList(
+            """
+        SELECT greatest(0,floor(extract(epoch FROM deadline_at-clock_timestamp())*1000))::bigint
+        FROM ui_test_compile_requests WHERE request_id = ?
+        """,
+            Long.class,
+            request.requestId());
+    if (remaining.isEmpty()) {
+      return true;
+    } // Historical pre-capture state-service callers.
+    if (remaining.getFirst() <= 0) {
+      return false;
+    }
+    jdbc.queryForObject(
+        "SELECT set_config('statement_timeout',?,true)", String.class, remaining.getFirst() + "ms");
+    return true;
+  }
+
+  private void boundSettlementStatements() {
+    jdbc.queryForObject("SELECT set_config('statement_timeout','2000ms',true)", String.class);
+  }
+
+  private UUID insertCapturedRevision(
+      UUID testId, CompileRequest request, CandidateRevision candidate) {
+    UUID allocatedRevision = UUID.randomUUID();
+    String provenance;
+    try {
+      var document = MAPPER.readTree(candidate.provenance());
+      for (var step : document.path("steps")) {
+        if (request.requestId().toString().equals(step.path("originalCompileRequestId").asText())
+            && step.path("originalRevisionId").isNull()) {
+          ((ObjectNode) step).put("originalRevisionId", allocatedRevision.toString());
+        }
+      }
+      provenance = document.toString();
+    } catch (java.io.IOException e) {
+      throw new IllegalArgumentException("Invalid candidate provenance", e);
+    }
+    List<UUID> inserted =
+        jdbc.queryForList(
+            """
+        INSERT INTO ui_test_revisions
+          (id,test_id,csi_id,source_revision,configuration_revision,source,source_hash,
+           artifact,artifact_hash,artifact_schema_version,configuration,"references",provenance,
+           created_by,compile_request_id,authoring_snapshot,authoring_hash,scope_reviewed_by,
+           scope_reviewed_at,compilation_fingerprint,baseline_revision_id)
+        SELECT ?,test_id,csi_id,source_revision,configuration_revision,source,source_hash,
+           CAST(? AS jsonb),?,?,configuration,"references",CAST(? AS jsonb),created_by,
+           request_id,authoring_snapshot,authoring_hash,scope_reviewed_by,scope_reviewed_at,
+           compilation_fingerprint,baseline_revision_id
+          FROM ui_test_compile_requests WHERE request_id = ? AND test_id = ?
+        ON CONFLICT (compile_request_id) DO NOTHING RETURNING id
+        """,
+            UUID.class,
+            allocatedRevision,
+            candidate.artifact(),
+            candidate.artifactHash(),
+            candidate.artifactSchemaVersion(),
+            provenance,
+            request.requestId(),
+            testId);
+    if (!inserted.isEmpty()) {
+      return inserted.getFirst();
+    }
+    return jdbc.queryForObject(
+        "SELECT id FROM ui_test_revisions WHERE compile_request_id = ? AND test_id = ?",
+        UUID.class,
+        request.requestId(),
+        testId);
   }
 
   private static long asLong(Object value) {

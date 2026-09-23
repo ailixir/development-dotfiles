@@ -46,6 +46,14 @@ management:
   endpoint:
     health:
       show-details: always
+  health:
+    mail:
+      # `spring.mail.host` above defaults to a public SMTP host. Spring's MailHealthIndicator opens a
+      # real SMTP connection on every /actuator/health call, and JavaMail sets no connect timeout, so
+      # on a machine with no route to that host the health endpoint hangs instead of answering
+      # (WorkerProfileIT, BffFilterHappyPathIT and GatewayHeadersTrustIT time out). Mail delivery is
+      # not what `local` health is for; the deployed profiles keep the indicator.
+      enabled: false
 
 studio:
   # The local e2e path (Studio v1 WP2): one bootRun is both the API and the worker, so the
@@ -59,6 +67,9 @@ studio:
   execution:
     dispatcher:
       enabled: ${STUDIO_DISPATCHER_ENABLED:true}
+    # Local runs read the recordings and manifests the local runner writes to the shared directory.
+    video-store:
+      provider: ${STUDIO_EVIDENCE_PROVIDER:local}
   # Studio secret resolution (§9.2, story 10.17 AC-9).
   #
   # Vault-backed secrets are unavailable in the production alpha, including local development.

@@ -1,5 +1,8 @@
 # Studio runner — operations runbook (V1)
 
+Current integration setup: [local filesystem and remote AWS S3](studio-integrations.md).
+That guide supersedes the earlier Sonic/fake-store setup notes below; cloud provisioning remains deferred.
+
 | Field | Value |
 |---|---|
 | **Status** | **COMPLETE for V1, and assembled once.** 10.18a drafted the three pod sections; **story 10.18b drafted the edge sections and assembled them here**, as @po's split mandated — a runbook split into two halves is two half-runbooks. All seven subjects AC-24 names are covered: Chromium and the sandbox (§1), egress and approved destinations (§2), evidence expiry (§3), signals/drain/reaping (§4), stuck runs (§5), the kill switch (§6), SSE (§7) and manifest recovery (§8). §§9-11 carry the three open prerequisites this deployment must not be read without. **§12 (rollback) was added by story 10.19 (AC-9); the epic had never written one down.** |
@@ -41,8 +44,11 @@
 >    `ED-02`'s owner read TBD — is **spent**, corrected 2026-09-17 by story 10.19's own audit. That
 >    drafting gate was lifted on 2026-09-16 when the owner was assigned; 10.19 is drafted and
 >    validated GO 8/10. The **pilot** gate in the first half of this line is untouched by that.)*
-> 4. **Cookie-authenticated mutations have no CSRF control** (§10). The former
->    `configOverrides` delivery defect is resolved and guarded in §11.
+> 4. **Cookie-authenticated mutations have no CSRF control** (§10). It is a recorded finding with a
+>    named owner, it is not fixed here, and it is not this story's to fix.
+>    *(The second finding recorded on this line — that the chart's `configOverrides` mechanism had
+>    never reached a process — was resolved by story 10.27, which renders it into mounted
+>    `*-properties` ConfigMaps; see §11.)*
 > 5. **Nothing about the streaming route has crossed a real proxy** (§7): not buffering, not the
 >    idle timeout, not the cookie route in federated mode, not cross-replica reconnect. `ED-06` /
 >    **SPK-02**, OPEN.
@@ -548,22 +554,50 @@ class of change ADR-002 §12 reserves for a ruling.
 route and of the CSRF control that route provides, and whether the application must add one.
 `ED-06`, OPEN.
 
-## 11. Configuration delivery — resolved
+## 11. Spring configuration delivery
 
-*Story 10.18b, AC-18.*
+Story 10.27 resolves the AC-18 escalation from story 10.18b. Backend and worker
+`configOverrides` now render into separate `*-properties` ConfigMaps containing
+`application.yaml`, mounted read-only at `/etc/put-checks/config`. The containers load the
+mandatory file `/etc/put-checks/config/application.yaml` through `SPRING_CONFIG_ADDITIONAL_LOCATION`; the chart reserves this selector
+against replacement through generic `env` or `envFromSecrets` values.
 
-The earlier escalation was valid: dotted keys were legal ConfigMap keys but invalid names when the
-same ConfigMap was consumed through `envFrom`, so Kubernetes silently skipped them. The chart now
-converts each operator-facing dotted/hyphenated key to Spring Boot's uppercase underscore relaxed-
-binding form before rendering it. For example,
-`spring.datasource.hikari.maximum-pool-size` becomes
-`SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE` (dots become underscores; dashes are removed).
+Dotted property names, hyphens, nested values, and case-sensitive map entries are preserved.
+The original `*-config` ConfigMaps still supply valid environment entries such as `SERVER_PORT`.
+Frontend configuration and secret environment references keep their existing delivery mechanism.
 
-The template fails closed when a source key cannot produce a valid environment name or when two
-source keys collapse to the same name. `studio-runner/test/deployment/envfrom-keys.test.ts` renders
-all four value sets, asserts zero invalid consumed keys, verifies representative API/worker values,
-and mutation-tests both new dotted keys and collisions. This repair makes the former intentionally
-red deployment tier green without allowlisting any bad key.
+Spring loads the mounted file in addition to its packaged defaults. Canonically named Spring
+environment properties take precedence over this file. A custom `${ENV_ALIAS:default}` placeholder
+in packaged configuration is different: an override of its containing property can replace the
+placeholder. The chart rejects overrides of its managed identity bypasses, CORS origins/Core service URL, execution/dispatcher
+switches, evidence retention, SSE bounds, runner/callback identity, and storage wiring (both
+`studio.storage.*` and `studio.execution.video-store.*`), the Studio Vault client
+(`studio.secrets.vault.*`) and the compile gateway selection (`studio.compile.gateway.*`), as well as
+profile/configuration imports. Use the dedicated chart values or Secret references for these
+controls (`env` for the CORS/Core service URLs). For other aliased properties, configure the alias through `env`/`envFromSecrets` and
+avoid also setting its property in `configOverrides`.
+
+Changing `configOverrides` changes the existing pod checksum and rolls the workload.
+Use `configOverrides` for non-secret Spring properties; keep credentials in Secret references.
+
+This activates the previously ineffective database pool, scheduler, and executor overrides.
+Review the rendered values for the target environment before rollout: for example, production
+worker concurrency is 250, its pool size is 30, and scheduling batch size is 500. Values are
+operator configuration, not newly measured capacity recommendations.
+
+`studio-runner/test/deployment/envfrom-keys.test.ts` now requires every envFrom-consumed key to
+conform and verifies each mounted property against the effective chart values in all four value
+sets. Dotted-property mutations must survive delivery; an invalid frontend envFrom key must still
+trigger the detector. There is no expected-red exception or key allowlist.
+
+**OWNER: @devops. MECHANISM: @architect.** Profile activation (including include/default/groups),
+configuration import/location selectors, and JSON property injection cannot bypass the chart-owned
+profile/source through generic environment or secret entries. Dedicated remote profiles also reject
+`local` and `test`. The same rules apply to flat, nested and relaxed property spellings.
+**No key story 10.18b added is affected**: `STUDIO_SSE_*`, `CHECKS_BYPASS_*`,
+`STUDIO_EXECUTION_ENABLED`, `STUDIO_DISPATCHER_ENABLED` and every `STUDIO_RUNNER_*` key render as
+container `env` entries with conforming names, and that is asserted separately so this escalation
+cannot be read as covering for them.
 
 ---
 
@@ -635,15 +669,18 @@ studio-runner-deployment,studio-runner-service,studio-runner-networkpolicy,servi
    to be auditable from the manifest rather than from a default somebody may change, and a rollback
    moves you to a manifest you have not read today.
 
-**A rollback to a chart before the §11 repair makes `configOverrides` inert again.** Re-run the
-deployment tier after any rollback and do not deploy while the env-name gate is red.
+**`configOverrides` rolls back with the chart.** Since story 10.27 it is rendered into the release's
+own `*-properties` ConfigMaps and mounted into the container (§11), so it is part of what a chart
+rollback restores rather than something outside it.
 
 <!-- ROLLBACK-C-FORWARD-ONLY-MIGRATIONS -->
 ### (c) The database does **not** roll back — every Studio schema change is forward-only
 
-Architecture §8.1: *"Add forward-only migrations."* Studio's own migrations are `V12` through `V17`
-(`backend/src/main/resources/db/migration/`), and there is no down-migration for any of them because
-Flyway is not configured to have one and the architecture does not ask for one.
+Architecture §8.1: *"Add forward-only migrations."* Studio's own migrations are `V12` through `V18`
+and `V20` through `V23` (`backend/src/main/resources/db/migration/`), and there is no down-migration
+for any of them because Flyway is not configured to have one and the architecture does not ask for
+one. `V19` is deliberately not on that classpath: it is staged by hand from `backend/db/cutover/`,
+and [`studio-inference-rollout.md`](studio-inference-rollout.md) is the procedure for it.
 
 **Say this in plain words so nobody has to infer it: a chart rollback moves the application
 backwards and leaves the schema where it is.** The consequences an operator should expect:

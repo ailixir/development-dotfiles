@@ -234,13 +234,11 @@ npm run test:deployment
   10.18b evidence for **AC-13a**, **AC-16a**, **AC-18**, **AC-19a** (rendered half) and **AC-23a**
   (rendered half).
 
-> #### Configuration-delivery gate
->
-> `test/deployment/envfrom-keys.test.ts` must be green. The chart converts dotted
-> `configOverrides` properties to Spring Boot's uppercase underscore relaxed-binding form before
-> they enter an `envFrom`-consumed ConfigMap. The template fails on invalid or colliding converted
-> names, and the test verifies all value sets plus conversion/collision mutations. Details:
-> `docs/runbooks/studio-runner.md` §11.
+**AC-18 configuration delivery is repaired in story 10.27.** Backend/worker Spring
+`configOverrides` are mounted as `application.yaml`, preserving property spelling and environment
+precedence. `envfrom-keys.test.ts` verifies all consumed environment names and the complete mounted
+configuration for all value sets, with mutation controls. No test in this stage is expected red.
+See `docs/runbooks/studio-runner.md` §11 for the deployment behavior change.
 
 **This stage fails closed, and the reason is a finding rather than a preference.** Story 10.18a's
 first version ran this tier in stage 4 with `describe.skipIf(!HELM)` and `it.skipIf(!DOCKER)`. QA

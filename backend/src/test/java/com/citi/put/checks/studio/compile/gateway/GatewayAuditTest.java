@@ -2,6 +2,7 @@ package com.citi.put.checks.studio.compile.gateway;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,6 +36,7 @@ class GatewayAuditTest {
   private static final String GENERATE_CONTENT_PATH = ".*generateContent";
 
   private static WireMockServer wireMock;
+  private static final String ROUTE_MARKER = "audit-owned-server";
 
   private ListAppender<ILoggingEvent> auditAppender;
   private ListAppender<ILoggingEvent> diagnosticAppender;
@@ -42,7 +44,8 @@ class GatewayAuditTest {
 
   @BeforeAll
   static void startWireMock() {
-    wireMock = new WireMockServer(WireMockConfiguration.options().dynamicPort());
+    wireMock =
+        new WireMockServer(WireMockConfiguration.options().bindAddress("127.0.0.1").dynamicPort());
     wireMock.start();
   }
 
@@ -72,7 +75,7 @@ class GatewayAuditTest {
   void auditLineCarriesExactlyTheAgreedFields() throws Exception {
     stubOk(GatewayTestSupport.VALID_ARTIFACT);
 
-    client().propose(GatewayTestSupport.request());
+    assertLocalSuccess(client().propose(GatewayTestSupport.request()));
 
     String line = onlyAuditLine();
     assertThat(line)
@@ -97,7 +100,7 @@ class GatewayAuditTest {
     CompileRequest request = GatewayTestSupport.requestWithCanaryInSource();
     assertCanaryIsReallyInTheRequest(request);
 
-    client().propose(request);
+    assertLocalSuccess(client().propose(request));
 
     String line = onlyAuditLine();
     assertThat(line)
@@ -114,7 +117,7 @@ class GatewayAuditTest {
     CompileRequest request = GatewayTestSupport.requestWithCanaryInSource();
     assertCanaryIsReallyInTheRequest(request);
 
-    client().propose(request);
+    assertLocalSuccess(client().propose(request));
 
     String captured =
         wireMock.getAllServeEvents().stream()
@@ -148,6 +151,7 @@ class GatewayAuditTest {
 
     CompileResponse response = client().propose(request);
 
+    wireMock.verify(1, postRequestedFor(urlPathMatching(GENERATE_CONTENT_PATH)));
     assertThat(response.outcome()).isEqualTo(GatewayOutcome.TRANSPORT);
     assertThat(response.failureReason()).doesNotContain(GatewayTestSupport.CANARY);
     assertThat(logged(diagnosticAppender)).doesNotContain(GatewayTestSupport.CANARY);
@@ -165,7 +169,9 @@ class GatewayAuditTest {
 
     CompileResponse response = client().propose(request);
 
+    wireMock.verify(1, postRequestedFor(urlPathMatching(GENERATE_CONTENT_PATH)));
     assertThat(response.outcome()).isEqualTo(GatewayOutcome.PARSE_FAILURE);
+    assertThat(response.provenance().modelVersion()).isEqualTo(ROUTE_MARKER);
     assertThat(response.failureReason()).doesNotContain(GatewayTestSupport.CANARY);
     assertThat(logged(diagnosticAppender)).doesNotContain(GatewayTestSupport.CANARY);
     assertThat(logged(auditAppender)).doesNotContain(GatewayTestSupport.CANARY);
@@ -208,6 +214,7 @@ class GatewayAuditTest {
 
     CompileResponse response = client().propose(request);
 
+    wireMock.verify(1, postRequestedFor(urlPathMatching(GENERATE_CONTENT_PATH)));
     assertThat(response.outcome()).isEqualTo(GatewayOutcome.TRANSPORT);
     assertThat(response.failureReason())
         .startsWith("ClientException (status=400)")
@@ -266,7 +273,7 @@ class GatewayAuditTest {
 
   private LlmGatewayClient client() throws Exception {
     StudioGatewayProperties properties =
-        GatewayTestSupport.properties("http://localhost:" + wireMock.port());
+        GatewayTestSupport.properties("http://127.0.0.1:" + wireMock.port());
     vertexAi = GatewayTestSupport.vertexAi(properties);
     return new VertexLlmGatewayClient(
         properties, vertexAi, GatewayTestSupport.parser(), new GatewayAuditLogger());
@@ -279,7 +286,15 @@ class GatewayAuditTest {
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
-                    .withBody(GatewayTestSupport.generateContentBody(modelText))));
+                    .withBody(
+                        GatewayTestSupport.generateContentBody(modelText)
+                            .replace("stub-model-001", ROUTE_MARKER))));
+  }
+
+  private void assertLocalSuccess(CompileResponse response) {
+    wireMock.verify(1, postRequestedFor(urlPathMatching(GENERATE_CONTENT_PATH)));
+    assertThat(response.outcome()).isEqualTo(GatewayOutcome.OK);
+    assertThat(response.provenance().modelVersion()).isEqualTo(ROUTE_MARKER);
   }
 
   private String onlyAuditLine() {

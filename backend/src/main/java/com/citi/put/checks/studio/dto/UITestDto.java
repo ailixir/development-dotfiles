@@ -92,9 +92,13 @@ public record UITestDto(
    *     same transaction, or {@code null} when the draft has no candidate
    * @return the full representation returned by {@code GET /tests/{id}} and the write routes
    */
-  public static UITestDto from(
-      UITest entity, UITestRevision candidate, UITestRevision confirmedRevision) {
-    return from(entity, candidate, confirmedRevision, true);
+  public static UITestDto from(UITest entity, UITestRevision candidate) {
+    return from(entity, candidate, null, true);
+  }
+
+  /** The candidate and confirmed revisions are resolved independently by their persisted IDs. */
+  public static UITestDto from(UITest entity, UITestRevision candidate, UITestRevision confirmed) {
+    return from(entity, candidate, confirmed, true);
   }
 
   /**
@@ -118,10 +122,7 @@ public record UITestDto(
   }
 
   private static UITestDto from(
-      UITest entity,
-      UITestRevision candidate,
-      UITestRevision confirmedRevision,
-      boolean withDiagnostics) {
+      UITest entity, UITestRevision candidate, UITestRevision confirmed, boolean withDiagnostics) {
     // The hash and the artifact travel together, and **this method is not what makes that true**.
     //
     // An earlier version read the artifact first and then withheld the hash when the artifact came
@@ -141,10 +142,6 @@ public record UITestDto(
     JsonNode candidateArtifact =
         candidate == null ? null : parse(candidate.getArtifact(), JsonNode.class);
     String candidateArtifactHash = candidate == null ? null : candidate.getArtifactHash();
-    JsonNode confirmedArtifact =
-        confirmedRevision == null ? null : parse(confirmedRevision.getArtifact(), JsonNode.class);
-    String confirmedArtifactHash =
-        confirmedRevision == null ? null : confirmedRevision.getArtifactHash();
 
     return new UITestDto(
         entity.getId(),
@@ -173,8 +170,8 @@ public record UITestDto(
         candidateArtifactHash,
         candidateArtifact,
         entity.getConfirmedRevisionId(),
-        confirmedArtifactHash,
-        confirmedArtifact,
+        confirmed == null ? null : confirmed.getArtifactHash(),
+        confirmed == null ? null : parse(confirmed.getArtifact(), JsonNode.class),
         parse(entity.getCompileError(), CompileErrorDto.class),
         withDiagnostics
             ? parse(entity.getCompileDiagnostics(), CompileDiagnosticsDto.class)

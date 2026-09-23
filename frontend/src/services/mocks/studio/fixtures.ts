@@ -100,6 +100,10 @@ const mockTestsUnordered: TestDto[] = [
     compileStatus: 'STALE',
     currentCandidateRevisionId: null,
     confirmedRevisionId: '22222222-2222-2222-2222-222222222223',
+    confirmedRevisionArtifactHash: 'b'.repeat(64),
+    confirmedRevisionArtifact: { version: 1, steps: [
+      {stepIndex:0,originalText:'Open the previously confirmed statement page',code:"await page.goto('https://www.citi.com/previous-statements');"},
+    ]},
   },
   {
     // Belongs to a CSI the mock principal cannot read. No list handler may ever return it.

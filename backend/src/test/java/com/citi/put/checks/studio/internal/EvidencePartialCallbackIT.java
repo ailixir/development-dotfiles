@@ -8,6 +8,7 @@ import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.StepResult;
+import com.citi.put.checks.studio.evidence.TestEvidenceStores;
 import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
@@ -51,6 +53,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = "studio.execution.callback.service-token=partial-callback-token")
 @ActiveProfiles("test")
+@Import(TestEvidenceStores.class)
 @Testcontainers(disabledWithoutDocker = true)
 class EvidencePartialCallbackIT {
 

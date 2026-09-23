@@ -1,51 +1,47 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import CheckTypeSelector from '@/components/checks/wizard/CheckTypeSelector';
+import { AppDynamicsConfig, GrafanaConfig, HttpConfig, ItrsConfig, SplunkConfig, TcpConfig, UiTestConfig } from '@/components/checks/wizard/configs';
+import ReviewStep from '@/components/checks/wizard/ReviewStep';
+import WizardHeader from '@/components/checks/wizard/WizardHeader';
+import ScheduleEditor from '@/components/reports/ScheduleEditor';
+import { schedulesApi } from '@/services/api/schedulesApi';
+import { addNotification } from '@/store/slices/uiSlice';
+import { frequencyToCron, parseCron } from '@/utils/cronNextRun';
 import {
-  Box,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControlLabel,
-  Checkbox,
-  Button,
-  Stepper,
-  Step,
-  StepLabel,
-  Grid,
-  Chip,
-  Autocomplete,
-  Card,
-  CardContent,
+  NavigateBefore as BackIcon,
+  CheckCircleOutline,
+  NavigateNext as NextIcon,
+  PlayArrow,
+  Save as SaveIcon,
+} from '@mui/icons-material';
+import {
   Alert,
   AlertTitle,
-  Paper,
-  Stack,
-  Snackbar,
-  Fade,
-  Typography,
+  Autocomplete,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
   Divider,
-  useTheme,
+  Fade,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Snackbar,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
+  TextField,
+  Typography
 } from '@mui/material';
-import {
-  Save as SaveIcon,
-  NavigateNext as NextIcon,
-  NavigateBefore as BackIcon,
-  PlayArrow,
-  CheckCircleOutline,
-} from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@store/index';
+import { createCheck, fetchCheckById, updateCheck } from '@store/slices/checksSlice';
 import { fetchCSIs } from '@store/slices/csiSlice';
-import { createCheck, updateCheck, fetchCheckById } from '@store/slices/checksSlice';
-import { addNotification } from '@/store/slices/uiSlice';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
-import WizardHeader from '@/components/checks/wizard/WizardHeader';
-import CheckTypeSelector from '@/components/checks/wizard/CheckTypeSelector';
-import { HttpConfig, TcpConfig, SplunkConfig, GrafanaConfig, ItrsConfig, AppDynamicsConfig, UiTestConfig } from '@/components/checks/wizard/configs';
-import ReviewStep from '@/components/checks/wizard/ReviewStep';
-import ScheduleEditor from '@/components/reports/ScheduleEditor';
-import { parseCron, frequencyToCron } from '@/utils/cronNextRun';
-import { schedulesApi } from '@/services/api/schedulesApi';
 
 const WIZARD_FREQUENCIES = new Set(['hourly', 'daily', 'weekly', 'monthly', 'custom']);
 
@@ -62,7 +58,6 @@ const environments = ['Development', 'Staging', 'Production', 'UAT'];
 const steps = ['Basic Information', 'Check Configuration', 'Scheduling', 'Review'];
 
 const CreateCheckPage: React.FC = () => {
-  const theme = useTheme();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { data: csiEntities, loading: csiLoading } = useAppSelector(state => state.csi);
@@ -101,7 +96,7 @@ const CreateCheckPage: React.FC = () => {
           const data = res?.data || res || [];
           setAvailableUITests(data.map((t: any) => ({ id: t.id, name: t.name })));
         }
-      } catch {}
+      } catch { /* Optional prefill data is unavailable; retain the current editable form. */ }
     })();
   }, [formData.checkType]);
 
@@ -129,7 +124,7 @@ const CreateCheckPage: React.FC = () => {
             });
           }
         }
-      } catch {}
+      } catch { /* Optional prefill data is unavailable; retain the current editable form. */ }
     })();
   }, [(formData as any).uiTestId, formData.checkType]);
 
@@ -141,13 +136,13 @@ const CreateCheckPage: React.FC = () => {
     if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current);
     setSaveHint('saving');
     saveTimeoutRef.current = window.setTimeout(() => {
-      try { localStorage.setItem('checks:create:draft', JSON.stringify(formData)); setSaveHint('saved'); setTimeout(() => setSaveHint('idle'), 1200); } catch {}
+      try { localStorage.setItem('checks:create:draft', JSON.stringify(formData)); setSaveHint('saved'); setTimeout(() => setSaveHint('idle'), 1200); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
     }, 400);
     return () => { if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current); };
   }, [formData, autosaveEnabled]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { try { const raw = localStorage.getItem('checks:create:draft'); if (raw) { const d = JSON.parse(raw); if (d && typeof d === 'object') setFormData((p) => ({ ...p, ...d })); } } catch {} }, []);
+  useEffect(() => { try { const raw = localStorage.getItem('checks:create:draft'); if (raw) { const d = JSON.parse(raw); if (d && typeof d === 'object') setFormData((p) => ({ ...p, ...d })); } } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ } }, []);
 
   useEffect(() => {
     (async () => {
@@ -182,12 +177,12 @@ const CreateCheckPage: React.FC = () => {
             ...(s.daysOfMonth?.length ? { daysOfMonth: s.daysOfMonth } : {}),
           }));
         }
-      } catch {}
+      } catch { /* Optional prefill data is unavailable; retain the current editable form. */ }
     })();
   }, [editId, checksData, dispatch]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { try { const raw = localStorage.getItem('checks:create:draft'); if (!raw) return; const d = JSON.parse(raw); if (d && d.__fromTemplate && !snackbar.open) { setSnackbar({ open: true, message: `Prefilled from template: ${d.__fromTemplate}`, severity: 'success' }); delete d.__fromTemplate; localStorage.setItem('checks:create:draft', JSON.stringify(d)); } } catch {} }, []);
+  useEffect(() => { try { const raw = localStorage.getItem('checks:create:draft'); if (!raw) return; const d = JSON.parse(raw); if (d && d.__fromTemplate && !snackbar.open) { setSnackbar({ open: true, message: `Prefilled from template: ${d.__fromTemplate}`, severity: 'success' }); delete d.__fromTemplate; localStorage.setItem('checks:create:draft', JSON.stringify(d)); } } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ } }, []);
 
   const handleFieldChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -253,15 +248,15 @@ const CreateCheckPage: React.FC = () => {
           } else {
             await schedulesApi.create(buildSchedulePayload(editId));
           }
-        } catch {}
+        } catch { /* The check save remains successful when optional schedule synchronization fails. */ }
         dispatch(addNotification({ type: 'success', title: 'Update', message: 'Check updated successfully' }));
         navigate(`/checks/details/${editId}`);
       } else {
         const created = await dispatch(createCheck(buildCheckPayload() as any)).unwrap();
-        try { localStorage.removeItem('checks:create:draft'); } catch {}
+        try { localStorage.removeItem('checks:create:draft'); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
         try {
           await schedulesApi.create(buildSchedulePayload(created.id));
-        } catch {}
+        } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
         dispatch(addNotification({ type: 'success', title: 'Create', message: 'Check created successfully' }));
         navigate(`/checks/details/${created.id}`);
       }

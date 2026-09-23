@@ -630,7 +630,9 @@ export function readOptions(
       ok = false;
       ctx.collector.add({
         code: 'OPTION_UNKNOWN_KEY',
-        message: `Unknown option key "${key}"; permitted keys are ${Object.keys(schema).join(', ') || '(none)'}.`,
+        message: key === 'trial'
+          ? 'The trial option is not supported: it skips the action. Remove trial to perform the reviewed action.'
+          : `Unknown option key "${key}"; permitted keys are ${Object.keys(schema).join(', ') || '(none)'}.`,
         node: nodeName(property.name),
         excerpt,
       });

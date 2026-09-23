@@ -194,6 +194,8 @@ resilience4j:
 # (Story 10.7, architecture §8.5). Every value here is a §8.5 STARTING value tuned against staging
 # measurements (§10), not a commitment, and every bound AC-38 inventories has its name here.
 studio:
+  authoring:
+    v2-enabled: ${STUDIO_AUTHORING_V2_ENABLED:false}
   secrets:
     vault:
       # Vault-backed secrets are unavailable throughout the production alpha. Tests override this
@@ -296,6 +298,8 @@ studio:
   # Studio compile translation. Vertex AI is the only translating provider. Disabled keeps draft
   # saving available but always reports compilation as unavailable; it never invents an artifact.
   compile:
+    incremental:
+      enabled: ${STUDIO_INCREMENTAL_ENABLED:false}
     gateway:
       provider: ${STUDIO_GATEWAY_PROVIDER:disabled}
       endpoint: ${STUDIO_GATEWAY_ENDPOINT:}
@@ -309,6 +313,7 @@ studio:
       max-concurrency: ${STUDIO_GATEWAY_MAX_CONCURRENCY:4}
       max-input-bytes: ${STUDIO_GATEWAY_MAX_INPUT_BYTES:262144}
       max-output-bytes: ${STUDIO_GATEWAY_MAX_OUTPUT_BYTES:262144}
+      max-output-tokens: ${STUDIO_GATEWAY_MAX_OUTPUT_TOKENS:32768}
       structured-output: ${STUDIO_GATEWAY_STRUCTURED_OUTPUT:true}
       retry:
         max-retries: 2
@@ -324,17 +329,9 @@ studio:
     pipeline:
       # Fixed pool, NO queue: attempt concurrency+1 is refused, not parked.
       concurrency: ${STUDIO_COMPILE_CONCURRENCY:4}
-      # Total wall-clock for the WHOLE compile request, repairs included (story 10.9 raised this
-      # from 180s and widened its meaning). Two constraints, both checked at startup:
-      #   - strictly greater than gateway.request-timeout, or a slow gateway call would be
-      #     abandoned by this budget before the gateway gave up and the recorded code would name
-      #     the wrong bound;
-      #   - strictly greater than (1 + repair.max-attempts) x (gateway.request-timeout +
-      #     runner.validate-timeout) = 3 x (60s + 10s) = 210s, or a healthy repair loop would be
-      #     abandoned mid-repair by arithmetic nobody checked.
-      # Raising it costs observable pool saturation, not correctness: a worst-case request now
-      # holds one of four pool threads for 240s instead of 180s, and saturation is already routed
-      # to STALE COMPILE_POOL_SATURATED, retryable.
+      # One monotonic deadline covers authentication, inference retries, repairs and validation.
+      # Every call is capped by remaining time; configured retries need not all fit in this bound.
+      # Expiry cancels active transports and prevents publication. Saturation is retryable STALE.
       attempt-budget: ${STUDIO_COMPILE_ATTEMPT_BUDGET:240s}
     # The bounded repair loop (§4.3 "a maximum of two repair attempts"). This is a bound the
     # architecture fixes, not a tuning parameter: at most 3 propose calls and 3 /v1/validate calls
@@ -397,9 +394,9 @@ studio:
   runtime:
     pin:
       artifact-schema-version: 1
-      validator-schema-version: ${STUDIO_RUNTIME_VALIDATOR_SCHEMA_VERSION:1.0.0}
-      syntax-reference-version: ${STUDIO_RUNTIME_SYNTAX_REFERENCE_VERSION:1.1.0}
-      executor-version: ${STUDIO_RUNTIME_EXECUTOR_VERSION:1.0.0}
+      validator-schema-version: ${STUDIO_RUNTIME_VALIDATOR_SCHEMA_VERSION:2.0.0}
+      syntax-reference-version: ${STUDIO_RUNTIME_SYNTAX_REFERENCE_VERSION:2.1.0}
+      executor-version: ${STUDIO_RUNTIME_EXECUTOR_VERSION:2.0.0}
       playwright-version: ${STUDIO_RUNTIME_PLAYWRIGHT_VERSION:1.63.0}
 
 springdoc:

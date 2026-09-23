@@ -11,10 +11,10 @@
 export const ARTIFACT_VERSION = 1;
 
 /** Version of the accepted-language schema + parser pair. */
-export const VALIDATOR_SCHEMA_VERSION = '1.0.0';
+export const VALIDATOR_SCHEMA_VERSION = '2.0.0';
 
 /** Version of the trusted executor's operation contract. */
-export const EXECUTOR_VERSION = '1.0.0';
+export const EXECUTOR_VERSION = '2.0.0';
 
 /**
  * Version of the pinned syntax reference: the corpus in `fixtures/reference/` together with the
@@ -26,7 +26,7 @@ export const EXECUTOR_VERSION = '1.0.0';
  * set of examples, so an artifact is never reinterpreted across a change here. Bump it whenever an
  * example is added, removed or changed.
  */
-export const SYNTAX_REFERENCE_VERSION = '1.1.0';
+export const SYNTAX_REFERENCE_VERSION = '2.1.0';
 
 /**
  * Parser backing the validator. Story 10.2 chose the TypeScript compiler API over

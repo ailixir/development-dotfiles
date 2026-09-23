@@ -8,26 +8,17 @@ metadata:
     {{- include "put-checks.api.selectorLabels" . | nindent 4 }}
 data:
   SERVER_PORT: {{ .Values.backend.service.port | quote }}
-  {{- $backendEnvNames := dict "SERVER_PORT" true "SPRING_PROFILES_ACTIVE" true "STUDIO_EXECUTION_ENABLED" true "STUDIO_DISPATCHER_ENABLED" true "STUDIO_SSE_HEARTBEAT" true "STUDIO_SSE_LIFETIME" true "CHECKS_BYPASS_CORE_SERVICE" true "CHECKS_BYPASS_IDENTITY_HEADERS" true "CHECKS_BYPASS_CSI_READ" true "STUDIO_CALLBACK_SERVICE_TOKEN" true "STUDIO_RUNNER_BASE_URL" true "STUDIO_RUNNER_SERVICE_TOKEN" true "STUDIO_EVIDENCE_RETENTION" true "STUDIO_EVIDENCE_PROVIDER" true "STUDIO_EVIDENCE_DIRECTORY" true "STUDIO_EVIDENCE_ENDPOINT" true "STUDIO_EVIDENCE_REGION" true "STUDIO_EVIDENCE_BUCKET" true "STUDIO_EVIDENCE_PATH_STYLE_ACCESS" true "STUDIO_EVIDENCE_ACCESS_KEY_ID_FILE" true "STUDIO_EVIDENCE_SECRET_ACCESS_KEY_FILE" true "STUDIO_EVIDENCE_CONNECT_TIMEOUT" true "STUDIO_EVIDENCE_REQUEST_TIMEOUT" true "STUDIO_VAULT_PROVIDER" true "STUDIO_VAULT_ADDRESS" true "STUDIO_VAULT_NAMESPACE" true "STUDIO_VAULT_MOUNT" true "STUDIO_VAULT_PATH_TEMPLATE" true "STUDIO_VAULT_VALUE_KEY" true "STUDIO_VAULT_TOKEN_FILE" true "STUDIO_VAULT_CONNECT_TIMEOUT" true "STUDIO_VAULT_REQUEST_TIMEOUT" true "STUDIO_VAULT_MAX_RESPONSE_BYTES" true "STUDIO_GATEWAY_PROVIDER" true "STUDIO_GATEWAY_ENDPOINT" true "STUDIO_GATEWAY_PROJECT" true "STUDIO_GATEWAY_LOCATION" true "STUDIO_GATEWAY_MODEL" true "STUDIO_GATEWAY_CREDENTIALS_MODE" true "STUDIO_GATEWAY_CREDENTIALS_KEY_FILE" true }}
-  {{- range $key, $_ := .Values.backend.env }}
-  {{- $_ := set $backendEnvNames $key true }}
-  {{- end }}
-  {{- range .Values.backend.envFromSecrets }}
-  {{- range .keys }}
-  {{- $_ := set $backendEnvNames . true }}
-  {{- end }}
-  {{- end }}
-  {{- range $key, $val := .Values.backend.configOverrides }}
-  {{- $envName := $key | upper | replace "." "_" | replace "-" "" }}
-  {{- if not (regexMatch "^[A-Z_][A-Z0-9_]*$" $envName) }}
-  {{- fail (printf "backend.configOverrides key %q cannot be converted to a valid environment variable name" $key) }}
-  {{- end }}
-  {{- if hasKey $backendEnvNames $envName }}
-  {{- fail (printf "backend.configOverrides key %q collides with another rendered environment variable %q" $key $envName) }}
-  {{- end }}
-  {{- $_ := set $backendEnvNames $envName true }}
-  {{ $envName }}: {{ $val | quote }}
-  {{- end }}
+---
+# Spring property names belong in configuration data, not environment-variable names.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.api.fullname" . }}-properties
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+data:
+  application.yaml: |
+    {{- .Values.backend.configOverrides | toYaml | nindent 4 }}
 {{- end }}
 {{- if .Values.worker.enabled }}
 ---
@@ -40,26 +31,17 @@ metadata:
     {{- include "put-checks.worker.selectorLabels" . | nindent 4 }}
 data:
   SERVER_PORT: {{ .Values.worker.service.port | quote }}
-  {{- $workerEnvNames := dict "SERVER_PORT" true "SPRING_PROFILES_ACTIVE" true "MANAGEMENT_SERVER_PORT" true "STUDIO_RUNNER_BASE_URL" true "STUDIO_RUNNER_SERVICE_TOKEN" true "STUDIO_RUNNER_ADMISSION_TIMEOUT_MS" true "STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS" true "STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS" true "STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS" true "STUDIO_EXECUTION_ENABLED" true "STUDIO_DISPATCHER_ENABLED" true "STUDIO_EVIDENCE_RETENTION" true "STUDIO_EVIDENCE_PROVIDER" true "STUDIO_EVIDENCE_DIRECTORY" true "STUDIO_EVIDENCE_ENDPOINT" true "STUDIO_EVIDENCE_REGION" true "STUDIO_EVIDENCE_BUCKET" true "STUDIO_EVIDENCE_PATH_STYLE_ACCESS" true "STUDIO_EVIDENCE_ACCESS_KEY_ID_FILE" true "STUDIO_EVIDENCE_SECRET_ACCESS_KEY_FILE" true "STUDIO_EVIDENCE_CONNECT_TIMEOUT" true "STUDIO_EVIDENCE_REQUEST_TIMEOUT" true "STUDIO_VAULT_PROVIDER" true "STUDIO_VAULT_ADDRESS" true "STUDIO_VAULT_NAMESPACE" true "STUDIO_VAULT_MOUNT" true "STUDIO_VAULT_PATH_TEMPLATE" true "STUDIO_VAULT_VALUE_KEY" true "STUDIO_VAULT_TOKEN_FILE" true "STUDIO_VAULT_CONNECT_TIMEOUT" true "STUDIO_VAULT_REQUEST_TIMEOUT" true "STUDIO_VAULT_MAX_RESPONSE_BYTES" true }}
-  {{- range $key, $_ := .Values.worker.env }}
-  {{- $_ := set $workerEnvNames $key true }}
-  {{- end }}
-  {{- range .Values.worker.envFromSecrets }}
-  {{- range .keys }}
-  {{- $_ := set $workerEnvNames . true }}
-  {{- end }}
-  {{- end }}
-  {{- range $key, $val := .Values.worker.configOverrides }}
-  {{- $envName := $key | upper | replace "." "_" | replace "-" "" }}
-  {{- if not (regexMatch "^[A-Z_][A-Z0-9_]*$" $envName) }}
-  {{- fail (printf "worker.configOverrides key %q cannot be converted to a valid environment variable name" $key) }}
-  {{- end }}
-  {{- if hasKey $workerEnvNames $envName }}
-  {{- fail (printf "worker.configOverrides key %q collides with another rendered environment variable %q" $key $envName) }}
-  {{- end }}
-  {{- $_ := set $workerEnvNames $envName true }}
-  {{ $envName }}: {{ $val | quote }}
-  {{- end }}
+---
+# Spring property names belong in configuration data, not environment-variable names.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.worker.fullname" . }}-properties
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+data:
+  application.yaml: |
+    {{- .Values.worker.configOverrides | toYaml | nindent 4 }}
 {{- end }}
 {{- if .Values.frontend.enabled }}
 ---

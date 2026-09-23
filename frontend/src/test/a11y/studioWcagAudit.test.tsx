@@ -79,9 +79,16 @@ const FAILING_IMPACTS = new Set(['critical', 'serious']);
  * A baseline without the last clause is the shape this epic keeps catching: a guard that cannot
  * distinguish "still broken" from "fixed and nobody updated the record".
  *
+ * Measured 2026-09-17 with axe-core 4.13.0 on branch `story/10.19`.
+ *
+ * Re-anchored 2026-09-20 on `main` (`cd2ab3001`) after the Epic 10 / Studio v1 fold. Studio v1 WP5
+ * (`2e06d0b5d`) gave the runs page's Refresh `IconButton` and the tests page's Run button an
+ * `aria-label`: `StudioRunsPage` no longer produces any critical or serious violation, and
+ * `StudioTestsPage` went from 2 + 2 nodes to 1 + 1.
+ *
  * Re-measured 2026-09-20 with axe-core 4.13.0 after the two-panel Studio redesign. The Studio
- * editor surfaces and Runs page now have zero critical/serious violations. One unnamed Tests-page
- * action remains ticketed by A11Y-1/A11Y-2.
+ * editor surfaces (`ChecksStudioPage/*`) and Runs page now have zero critical/serious violations.
+ * One unnamed Tests-page action remains ticketed by A11Y-1/A11Y-2.
  */
 const PINNED_CRITICAL_SERIOUS: Readonly<Record<string, Readonly<Record<string, number>>>> = {
   StudioTestsPage: { 'aria-prohibited-attr': 1, 'button-name': 1 },

@@ -44,15 +44,15 @@ class ReportDeliveryDispatcherIT {
   @DynamicPropertySource
   static void configureProperties(DynamicPropertyRegistry registry) {
     wireMock.start();
-    greenMail = new GreenMail(new ServerSetup(3025, "localhost", ServerSetup.PROTOCOL_SMTP));
+    greenMail = new GreenMail(new ServerSetup(0, "127.0.0.1", ServerSetup.PROTOCOL_SMTP));
     greenMail.start();
     greenMail.getManagers().getUserManager().setAuthRequired(false);
 
     registry.add("checks.core-service.base-url", wireMock::baseUrl);
     registry.add("checks.reports.delivery-enabled", () -> "true");
     registry.add("checks.reports.initial-delay-ms", () -> "300000");
-    registry.add("spring.mail.host", () -> "localhost");
-    registry.add("spring.mail.port", () -> "3025");
+    registry.add("spring.mail.host", () -> "127.0.0.1");
+    registry.add("spring.mail.port", () -> greenMail.getSmtp().getPort());
     registry.add("spring.mail.username", () -> "");
     registry.add("spring.mail.password", () -> "");
   }
@@ -68,9 +68,10 @@ class ReportDeliveryDispatcherIT {
   private UUID reportId;
 
   @BeforeEach
-  void setUp() {
+  void setUp() throws Exception {
     wireMock.resetAll();
-    greenMail.reset();
+    // Purge messages without restarting the ephemeral listener captured by JavaMailSender.
+    greenMail.purgeEmailFromAllMailboxes();
     jdbc.update("DELETE FROM report_executions");
     jdbc.update("DELETE FROM reports WHERE name LIKE 'Delivery IT%'");
     jdbc.update(
@@ -86,14 +87,14 @@ class ReportDeliveryDispatcherIT {
             .willReturn(
                 okJson(
                     """
-        {
-          "user_id": "delivery-user",
-          "email": "delivery-owner@citi.com",
-          "name": "Delivery Owner",
-          "roles": ["checks-admin"],
-          "csi_ownership": [{"csi_id": "80001", "role": "owner"}]
-        }
-        """)));
+                    {
+                      "user_id": "delivery-user",
+                      "email": "delivery-owner@citi.com",
+                      "name": "Delivery Owner",
+                      "roles": ["checks-admin"],
+                      "csi_ownership": [{"csi_id": "80001", "role": "owner"}]
+                    }
+                    """)));
   }
 
   @Test

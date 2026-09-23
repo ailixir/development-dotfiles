@@ -1,91 +1,76 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { checksApi } from '@/services/api/checksApi';
+import reportsApi from '@/services/api/reportsApi';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { createReport, fetchReports, generatePreview } from '@/store/slices/reportsSlice';
 import {
+  AccessTime,
+  Add,
+  Analytics,
+  Assessment,
+  AutoGraph,
+  CheckCircle,
+  DataUsage,
+  Download,
+  Edit,
+  Email,
+  FileCopy,
+  Preview,
+  Refresh,
+  Save,
+  Schedule,
+  Search,
+  Send,
+  Settings,
+  ShowChart,
+  Timeline,
+  TrendingUp,
+  Visibility
+} from '@mui/icons-material';
+import {
+  Alert,
+  alpha,
+  Avatar,
   Box,
-  Typography,
-  Paper,
-  Grid,
+  Button,
   Card,
   CardContent,
   CardHeader,
-  Button,
-  IconButton,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Chip,
-  Avatar,
-  Stack,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction,
+  MenuItem,
+  Paper,
+  Select,
+  Snackbar,
+  Stack,
   Switch,
-  FormControlLabel,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Checkbox,
-  FormGroup,
-  Tabs,
   Tab,
-  LinearProgress,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Tabs,
+  TextField,
   Tooltip,
-  Badge,
-  useTheme,
-  alpha,
+  Typography,
+  useTheme
 } from '@mui/material';
-import {
-  AutoGraph,
-  Schedule,
-  Email,
-  Add,
-  Edit,
-  Delete,
-  Share,
-  Download,
-  Preview,
-  Send,
-  Settings,
-  CheckCircle,
-  Error,
-  Warning,
-  BarChart,
-  PieChart,
-  TrendingUp,
-  CalendarToday,
-  AccessTime,
-  Group,
-  Visibility,
-  Assessment,
-  Dashboard,
-  DataUsage,
-  Timeline,
-  Analytics,
-  InsertChart,
-  ShowChart,
-  DonutLarge,
-  Refresh,
-  Save,
-  FileCopy,
-  Search,
-} from '@mui/icons-material';
-import { Alert, Snackbar } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
-import reportsApi from '@/services/api/reportsApi';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { fetchReports, createReport, generatePreview } from '@/store/slices/reportsSlice';
-import { checksApi } from '@/services/api/checksApi';
-import type { ReportEntity } from '@/types/reports/reportTypes';
+import React, { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 // Deprecated component. Keeping for backward-compat in demos; replaced by pages in `pages/Reports/`.
 
@@ -133,10 +118,9 @@ const ReportsPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const params = useParams();
-  const navigate = useNavigate();
   const { data: reports, loading: reportsLoading, previewContent, generatingPreview } = useAppSelector((s) => s.reports);
   const [selectedTab, setSelectedTab] = useState(0);
-  const [selectedReport, setSelectedReport] = useState<string | null>(null);
+  const [, setSelectedReport] = useState<string | null>(null);
   const [showNewReportDialog, setShowNewReportDialog] = useState(false);
   const [reportConfig, setReportConfig] = useState({
     name: '',
@@ -156,7 +140,6 @@ const ReportsPage: React.FC = () => {
   const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
   const [saving, setSaving] = useState(false);
 
-  const selectedReportData: ReportEntity | undefined = useMemo(() => reports.find(r => r.id === selectedReport), [reports, selectedReport]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -192,7 +175,7 @@ const ReportsPage: React.FC = () => {
           setReportConfig((rc) => ({ ...rc, ...parsed }));
         }
       }
-    } catch {}
+    } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
   }, []);
 
   useEffect(() => {
@@ -208,7 +191,7 @@ const ReportsPage: React.FC = () => {
         template: reportConfig.template,
         checks: reportConfig.checks,
       }));
-    } catch {}
+    } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
   }, [reportConfig]);
 
   useEffect(() => {
@@ -302,7 +285,7 @@ const ReportsPage: React.FC = () => {
           template: reportConfig.template,
           checks: reportConfig.checks,
         } as any);
-      } catch {}
+      } catch { /* Keep the current report configuration when optional preview enrichment fails. */ }
     }
     try {
       await dispatch(generatePreview(id)).unwrap();
@@ -689,7 +672,7 @@ const ReportsPage: React.FC = () => {
                       <Typography variant="body2" color="text.secondary">Generating preview…</Typography>
                     ) : previewContent ? (
                       <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: 'background.paper' }}>
-                        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace' }}>{previewContent}</pre>
+                        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>{previewContent}</pre>
                       </Paper>
                     ) : (
                       <Box sx={{ flex: 1 }}>

@@ -157,7 +157,7 @@ class DeReadyCarryForwardTest {
     states.publishInvalid(
         testId,
         recompile,
-        "{\"validatorSchemaVersion\":\"1.0.0\",\"artifact\":[],\"steps\":[],"
+        "{\"validatorSchemaVersion\":\"2.0.0\",\"artifact\":[],\"steps\":[],"
             + "\"truncated\":false}");
 
     assertThat(compileStatus()).isEqualTo(CompileState.NEEDS_REVISION.name());
@@ -249,8 +249,8 @@ class DeReadyCarryForwardTest {
   @Test
   void theRuntimePinIsRealConfigurationAndNotASwitch() {
     // Guards the premise of every case above: the gate is comparing something.
-    assertThat(pin.validatorSchemaVersion()).isEqualTo("1.0.0");
-    assertThat(pin.syntaxReferenceVersion()).isEqualTo("1.1.0");
+    assertThat(pin.validatorSchemaVersion()).isEqualTo("2.0.0");
+    assertThat(pin.syntaxReferenceVersion()).isEqualTo("2.1.0");
   }
 
   // ── helpers ───────────────────────────────────────────────────────────────

@@ -45,32 +45,32 @@ import { packageRoot } from './helpers/corpus.js';
  * unaudited packages inside the browser-facing process to save writing a `switch`.
  */
 const ALLOWED_PRODUCTION_PACKAGES: Readonly<Record<string, string>> = {
-  '@aws-sdk/client-s3': 'Sonic S3-compatible write-only PutObject adapter.',
-  '@aws-sdk/checksums': 'Pinned transitive checksum support for the Sonic S3 adapter.',
-  '@aws-sdk/core': 'Pinned AWS SDK core used by the Sonic S3 adapter.',
-  '@aws-sdk/credential-provider-env': 'Pinned SDK transitive; production supplies an explicit file provider.',
-  '@aws-sdk/credential-provider-http': 'Pinned SDK transitive; not selected by runner configuration.',
-  '@aws-sdk/credential-provider-ini': 'Pinned SDK transitive; not selected by runner configuration.',
-  '@aws-sdk/credential-provider-login': 'Pinned SDK transitive; not selected by runner configuration.',
-  '@aws-sdk/credential-provider-node': 'Pinned SDK transitive; explicit credentials override its chain.',
-  '@aws-sdk/credential-provider-process': 'Pinned SDK transitive; not selected by runner configuration.',
-  '@aws-sdk/credential-provider-sso': 'Pinned SDK transitive; not selected by runner configuration.',
-  '@aws-sdk/credential-provider-web-identity': 'Pinned SDK transitive; not selected by runner configuration.',
-  '@aws-sdk/middleware-sdk-s3': 'Pinned S3 request middleware.',
-  '@aws-sdk/nested-clients': 'Pinned SDK transitive required by the S3 client.',
-  '@aws-sdk/signature-v4-multi-region': 'Pinned SigV4 signing used by the S3 client.',
-  '@aws-sdk/token-providers': 'Pinned SDK transitive; not selected by runner configuration.',
-  '@aws-sdk/types': 'Pinned SDK transport and credential types.',
-  '@aws-sdk/xml-builder': 'Pinned S3 protocol serializer.',
-  '@aws/lambda-invoke-store': 'Pinned SDK transitive required by the current S3 client release.',
-  '@smithy/core': 'Pinned protocol core used by the S3 client.',
-  '@smithy/credential-provider-imds': 'Pinned SDK transitive; explicit credentials prevent selection.',
-  '@smithy/fetch-http-handler': 'Pinned SDK transport support.',
-  '@smithy/node-http-handler': 'Pinned Node streaming transport used for PutObject.',
-  '@smithy/signature-v4': 'Pinned SigV4 signer for Sonic S3 requests.',
-  '@smithy/types': 'Pinned Smithy transport types.',
-  bowser: 'Pinned SDK runtime capability detector.',
-  tslib: 'Pinned TypeScript runtime helpers used by the SDK.',
+  '@aws-sdk/checksums': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/client-s3': 'Remote evidence upload to AWS S3 or S3-compatible Sonic; the runner adapter exposes only PutObject.',
+  '@aws-sdk/core': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-env': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-http': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-ini': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-login': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-node': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-process': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-sso': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/credential-provider-web-identity': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/middleware-sdk-s3': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/nested-clients': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/signature-v4-multi-region': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/token-providers': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/types': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws-sdk/xml-builder': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@aws/lambda-invoke-store': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/core': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/credential-provider-imds': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/fetch-http-handler': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/node-http-handler': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/signature-v4': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  '@smithy/types': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  'bowser': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
+  'tslib': 'AWS S3 SDK transitive runtime: signing, credential resolution, checksums or HTTP transport.',
   playwright: 'ADR-001 §4.2 — the pinned browser library; the whole point of the component.',
   'playwright-core':
     "playwright's own engine, pulled in transitively at the same exact version by the same pin.",
@@ -140,11 +140,7 @@ describe('AC-22a — allowlist over the resolved production dependency closure',
     // ADR-001 §5 permitted this story one HTTP server library. It took none.
     const serverSource = readFileSync(join(packageRoot, 'src', 'server', 'server.ts'), 'utf8');
     expect(serverSource).toContain("from 'node:http'");
-    expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual([
-      '@aws-sdk/client-s3',
-      'playwright',
-      'typescript',
-    ]);
+    expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual(['@aws-sdk/client-s3', 'playwright', 'typescript']);
   });
 
   it('holds no credential for a database, vault, CSI or LLM gateway anywhere in the closure', () => {
@@ -165,7 +161,10 @@ describe('AC-22c — the configuration surface rejects what it does not enumerat
     const config = loadConfig(validEnv());
     expect(config.callbackBaseUrl).toBe('https://api.internal.example');
     expect(config.poolSize).toBe(1);
-    expect(config.objectStoreProvider).toBe('local');
+    expect(config.objectStoreProvider).toBe('filesystem');
+    expect(
+      loadConfig({ ...validEnv(), [`${CONFIG_PREFIX}OBJECT_STORE_PROVIDER`]: 'local' }).objectStoreProvider,
+    ).toBe('local');
   });
 
   it('requires the complete Sonic S3 configuration and keeps credentials file-based', () => {

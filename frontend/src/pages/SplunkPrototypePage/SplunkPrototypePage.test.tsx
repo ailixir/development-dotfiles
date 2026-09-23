@@ -1,10 +1,9 @@
-import React from 'react';
-import { describe, expect, it } from 'vitest';
+import { theme } from '@/theme';
+import { CssBaseline, ThemeProvider } from '@mui/material';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
-import { theme } from '@/theme';
+import { describe, expect, it } from 'vitest';
 import SplunkPrototypePage from './SplunkPrototypePage';
 
 const renderPage = () =>

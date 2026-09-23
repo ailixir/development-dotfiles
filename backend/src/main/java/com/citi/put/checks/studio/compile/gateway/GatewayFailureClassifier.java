@@ -1,6 +1,7 @@
 package com.citi.put.checks.studio.compile.gateway;
 
 import com.google.genai.errors.ApiException;
+import java.io.InterruptedIOException;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -62,7 +63,10 @@ final class GatewayFailureClassifier {
 
   private static boolean isTimeout(Throwable throwable) {
     for (Throwable current = throwable; current != null; current = current.getCause()) {
-      if (current instanceof SocketTimeoutException || current instanceof TimeoutException) {
+      if (current instanceof SocketTimeoutException
+          || current instanceof TimeoutException
+          || (current instanceof InterruptedIOException
+              && "timeout".equalsIgnoreCase(current.getMessage()))) {
         return true;
       }
       if (current instanceof ApiException apiException && apiException.code() == 504) {

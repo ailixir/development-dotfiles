@@ -1,11 +1,11 @@
+import { Box, CssBaseline } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import { store } from '@store/index';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { ThemeProvider } from '@mui/material/styles';
-import { CssBaseline, Box } from '@mui/material';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { store } from '@store/index';
-import { theme } from './theme';
 import App from './App';
+import { theme } from './theme';
 
 // Use the Vite app's route configuration to ensure identical routes
 

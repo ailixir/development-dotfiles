@@ -1,3 +1,4 @@
+import { studioInferenceHandlers, resetInferenceMocks, inferenceMockTests } from './inferenceHandlers';
 import { http, HttpResponse } from 'msw';
 import { createAuthoringHandlers } from './authoringHandlers';
 import { resetAuthoringMocks } from './authoringState';
@@ -55,12 +56,16 @@ const idempotency = new Map<string, string>();
 
 export function resetStudioMocks(): void {
   resetAuthoringMocks();
+  resetInferenceMocks();
   created = [];
   acceptedExecutions = [];
   idempotency.clear();
 }
 
-const allTests = (): TestDto[] => [...created, ...mockTests];
+const allTests = (): TestDto[] => {
+  const inference = inferenceMockTests();
+  return [...inference, ...created, ...mockTests].filter((test,index,all) => all.findIndex(item => item.id === test.id) === index);
+};
 
 /** Mirrors the backend's bounded `GET /tests` projection. */
 const forList = (test: TestDto): TestDto => ({
@@ -207,6 +212,7 @@ export const studioHandlers = [
     get: id => allTests().find(test => test.id === id) ?? reviewDraft(id),
     put: test => { created = [test, ...created.filter(candidate => candidate.id !== test.id)]; },
   }),
+  ...studioInferenceHandlers,
   http.get(`${BASE}/tests`, ({ request }) => {
     const url = new URL(request.url);
     const csiId = url.searchParams.get('csiId');

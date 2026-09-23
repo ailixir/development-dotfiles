@@ -1,57 +1,55 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import type { BackendScheduleDto } from '@/services/api/mappers/scheduleMapper';
+import { schedulesApi } from '@/services/api/schedulesApi';
+import type { ApiResponse } from '@/types/common/commonTypes';
+import { formatNextCronRun, parseCron } from '@/utils/cronNextRun';
 import {
+  Delete,
+  FilterList,
+  OpenInNew,
+  Refresh,
+  Schedule,
+  Search,
+} from '@mui/icons-material';
+import {
+  Alert,
   Box,
-  Typography,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  MenuItem,
   Paper,
+  Select,
+  Skeleton,
+  Stack,
+  Switch,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  Chip,
-  IconButton,
-  Stack,
-  Switch,
-  Tooltip,
-  Skeleton,
-  Alert,
-  Button,
-  TextField,
-  InputAdornment,
-  FormControl,
-  Select,
-  MenuItem,
   TablePagination,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography,
   alpha,
   useTheme,
 } from '@mui/material';
-import {
-  Search,
-  Refresh,
-  Delete,
-  OpenInNew,
-  Schedule,
-  FilterList,
-} from '@mui/icons-material';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { schedulesApi } from '@/services/api/schedulesApi';
-import { useAppSelector } from '@/store';
-import type { BackendScheduleDto } from '@/services/api/mappers/scheduleMapper';
-import type { ApiResponse } from '@/types/common/commonTypes';
-import { formatNextCronRun, parseCron } from '@/utils/cronNextRun';
 
 type EnabledFilter = 'all' | 'enabled' | 'disabled';
 
 const SchedulesPage: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const searchContext = useAppSelector((s) => s.dashboard.searchContext);
 
   const [data, setData] = useState<BackendScheduleDto[]>([]);
   const [loading, setLoading] = useState(true);

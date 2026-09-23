@@ -192,9 +192,9 @@ describe('loadRuntimeVersions', () => {
     const file = writeRuntimeFile(
       `${JSON.stringify({
         playwright: '1.63.0',
-        validatorSchema: '1.0.0',
+        validatorSchema: '2.0.0',
         syntaxReference: SYNTAX_REFERENCE_VERSION,
-        executor: '1.0.0',
+        executor: '2.0.0',
         chromiumBuild: null,
         image: null,
       })}\n`,
@@ -230,9 +230,9 @@ describe('loadRuntimeVersions', () => {
   it('reads the record once and re-reads only after a reset', () => {
     const record = {
       playwright: '1.63.0',
-      validatorSchema: '1.0.0',
-      syntaxReference: '1.0.0',
-      executor: '1.0.0',
+      validatorSchema: '2.0.0',
+      syntaxReference: '2.0.0',
+      executor: '2.0.0',
     };
     const first = writeRuntimeFile(`${JSON.stringify(record)}\n`);
     const second = writeRuntimeFile(`${JSON.stringify({ ...record, playwright: '1.62.0' })}\n`);

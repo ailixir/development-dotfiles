@@ -194,7 +194,42 @@ public class StudioService {
   @Transactional
   public UITestDto createTest(
       UITestRequest request, AuthoringV2Request authoring, Authentication auth) {
+    return createTest(request, authoring, auth, true, StudioService::noInitializer);
+  }
+
+  /** Saves versioned drafts without implicitly issuing a model call. */
+  @Transactional
+  public UITestDto createTest(UITestRequest request, Authentication auth, boolean enqueueCompile) {
+    return createTest(request, null, auth, enqueueCompile, StudioService::noInitializer);
+  }
+
+  /** No-op initializer for drafts without versioned metadata. */
+  private static void noInitializer(UITest test) {}
+
+  /** Initializes versioned metadata before the entity's first INSERT. */
+  @Transactional
+  public UITestDto createTest(
+      UITestRequest request,
+      Authentication auth,
+      boolean enqueueCompile,
+      java.util.function.Consumer<UITest> initialize) {
+    return createTest(request, null, auth, enqueueCompile, initialize);
+  }
+
+  /**
+   * The one implementation behind every {@code createTest} overload above. The authorization order
+   * is ADR-002 §27.2's and is not affected by which overload was called.
+   */
+  private UITestDto createTest(
+      UITestRequest request,
+      AuthoringV2Request authoring,
+      Authentication auth,
+      boolean enqueueCompile,
+      java.util.function.Consumer<UITest> initialize) {
     UserIdentity identity = extractIdentity(auth);
+    if (request.csiId() == null || request.csiId().isBlank()) {
+      throw new IllegalArgumentException("csiId is required");
+    }
     requireRegisteredCsi(request.csiId());
     requireWrite(auth, request.csiId());
     if (authoring != null) {
@@ -224,10 +259,13 @@ public class StudioService {
     if (authoring != null) {
       storeAuthoring(test, authoring);
     }
+    initialize.accept(test);
     test = studioRepository.save(test);
     // Saving does not compile. A new draft is STALE until the author presses Run, which compiles
     // the saved revision and then executes it; spending a gateway call on every save charged the
     // author for work they had not asked for, and left a failed compile with no way to retry it.
+    // `enqueueCompile` is retained on the overloads for API compatibility and is deliberately
+    // ignored: no save path issues a model call.
     return project(test);
   }
 
@@ -426,6 +464,17 @@ public class StudioService {
    */
   @Transactional
   public UITestDto updateTest(UUID id, UITestRequest request, Authentication auth) {
+    return updateTest(id, request, auth, true, false);
+  }
+
+  /** Versioned authoring holds the same row lock and supplies structured metadata atomically. */
+  @Transactional
+  public UITestDto updateTest(
+      UUID id,
+      UITestRequest request,
+      Authentication auth,
+      boolean enqueueCompile,
+      boolean preserveAuthoring) {
     if (request.sourceRevision() == null || request.configurationRevision() == null) {
       throw new IllegalArgumentException(
           "sourceRevision and configurationRevision are required on update");
@@ -505,7 +554,15 @@ public class StudioService {
       storeAuthoring(test, persistedAuthoring);
     }
 
-    if (change.sourceChanged()) {
+    boolean invalidateAuthoring =
+        !preserveAuthoring && change.anyChanged() && test.getAuthoringSnapshot() != null;
+    if (invalidateAuthoring) {
+      test.setAuthoringSnapshot(null);
+      test.setAuthoringHash(null);
+      test.setScopeReviewedBy(null);
+      test.setScopeReviewedAt(null);
+    }
+    if (change.sourceChanged() || invalidateAuthoring) {
       test.setSourceRevision(test.getSourceRevision() + 1);
     }
     if (change.configurationChanged()) {
@@ -634,12 +691,18 @@ public class StudioService {
         candidateId == null
             ? null
             : revisionRepository.findByIdAndTestId(candidateId, test.getId()).orElse(null);
-    UUID confirmedRevisionId = test.getConfirmedRevisionId();
-    UITestRevision confirmedRevision =
-        confirmedRevisionId == null
+    UUID confirmedId = test.getConfirmedRevisionId();
+    UITestRevision confirmed =
+        confirmedId == null
             ? null
-            : revisionRepository.findByIdAndTestId(confirmedRevisionId, test.getId()).orElse(null);
-    return UITestDto.from(test, candidate, confirmedRevision);
+            : revisionRepository
+                .findByIdAndTestId(confirmedId, test.getId())
+                .filter(revision -> java.util.Objects.equals(revision.getCsiId(), test.getCsiId()))
+                .filter(
+                    revision ->
+                        revision.getConfirmedAt() != null && revision.getConfirmedBy() != null)
+                .orElse(null);
+    return UITestDto.from(test, candidate, confirmed);
   }
 
   private UITest lockForAuthoringWrite(

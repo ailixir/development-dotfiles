@@ -31,7 +31,7 @@ public class VertexLlmGatewayClient implements LlmGatewayClient {
    * Recorded in provenance when the SDK jar carries no manifest version, for example on an exploded
    * test classpath. Must match the pin in {@code build.gradle.kts}.
    */
-  static final String PINNED_SDK_VERSION = "1.72.0";
+  static final String PINNED_SDK_VERSION = GenAiLlmGatewayClient.SDK_VERSION;
 
   private final StudioGatewayProperties properties;
   private final GatewayResponseParser parser;

@@ -19,4 +19,30 @@ public record GatewayProvenance(
     String promptVersion,
     String sdkVersion,
     boolean structuredOutput,
-    double temperature) {}
+    double temperature,
+    Integer maxOutputTokens,
+    String finishReason,
+    Integer inputTokens,
+    Integer outputTokens,
+    boolean usageAvailable) {
+  public GatewayProvenance(
+      String model,
+      String modelVersion,
+      String promptVersion,
+      String sdkVersion,
+      boolean structuredOutput,
+      double temperature) {
+    this(
+        model,
+        modelVersion,
+        promptVersion,
+        sdkVersion,
+        structuredOutput,
+        temperature,
+        null,
+        null,
+        null,
+        null,
+        false);
+  }
+}

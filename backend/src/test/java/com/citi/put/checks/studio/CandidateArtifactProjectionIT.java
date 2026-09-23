@@ -190,6 +190,10 @@ class CandidateArtifactProjectionIT {
         .isEqualTo(persistedArtifact(first.revisionId()));
     assertThat(body.path("confirmedRevisionArtifact").path("steps").get(0).path("code").asText())
         .isEqualTo(FIRST_CODE);
+    assertThat(body.path("confirmedRevisionArtifact"))
+        .isNotEqualTo(persistedArtifact(second.revisionId()));
+    assertThat(listEntry().path("confirmedRevisionArtifact").isNull()).isTrue();
+    assertThat(listEntry().path("confirmedRevisionArtifactHash").isNull()).isTrue();
     assertThat(body.path("currentCandidateRevisionId").asText())
         .isEqualTo(second.revisionId().toString());
     assertThat(body.path("currentCandidateArtifactHash").asText())
@@ -236,6 +240,45 @@ class CandidateArtifactProjectionIT {
     assertThat(dataType("artifact"))
         .as("jsonb is why the artifact column cannot hold text that fails to parse")
         .isEqualTo("jsonb");
+  }
+
+  @Test
+  void failedRecompilePreservesConfirmedCodeAndUnconfirmedDraftHasNoConfirmedPair()
+      throws IOException {
+    assertThat(getTest().path("confirmedRevisionArtifact").isNull()).isTrue();
+    assertThat(getTest().path("confirmedRevisionArtifactHash").isNull()).isTrue();
+    var first = ConfirmFixtures.awaitConfirmation(states, jdbc, testId, SOURCE, FIRST_CODE);
+    states.confirm(
+        testId,
+        first.revisionId(),
+        first.artifactHash(),
+        first.sourceRevision(),
+        first.configurationRevision(),
+        OWNER);
+    var request = states.beginCompile(testId);
+    states.publishError(testId, request, "{\"code\":\"GATEWAY_UNAVAILABLE\"}");
+    JsonNode body = getTest();
+    assertThat(body.path("currentCandidateArtifact").isNull()).isTrue();
+    assertThat(body.path("confirmedRevisionArtifact"))
+        .isEqualTo(persistedArtifact(first.revisionId()));
+    assertThat(body.path("confirmedRevisionArtifactHash").asText()).isEqualTo(first.artifactHash());
+  }
+
+  @Test
+  void foreignConfirmedRevisionLinkNeverExposesAnotherTestsCode() throws IOException {
+    UUID other = ConfirmFixtures.seedTest(jdbc, CSI_ID, OWNER, SOURCE);
+    var foreign = ConfirmFixtures.awaitConfirmation(states, jdbc, other, SOURCE, FIRST_CODE);
+    states.confirm(
+        other,
+        foreign.revisionId(),
+        foreign.artifactHash(),
+        foreign.sourceRevision(),
+        foreign.configurationRevision(),
+        OWNER);
+    jdbc.update(
+        "UPDATE ui_tests SET confirmed_revision_id=? WHERE id=?", foreign.revisionId(), testId);
+    assertThat(getTest().path("confirmedRevisionArtifact").isNull()).isTrue();
+    assertThat(getTest().path("confirmedRevisionArtifactHash").isNull()).isTrue();
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────

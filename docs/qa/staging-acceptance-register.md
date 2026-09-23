@@ -205,7 +205,7 @@ is joined by a new one.
 
 | Ticket | Severity | Status | Owner | Finding |
 |---|---|---|---|---|
-| `A11Y-1` | **critical** (`button-name`, WCAG 4.1.2 A) | **Partially resolved 2026-09-20** | **@po routes; @ux-design-expert advises.** | The redesigned Studio names every editor step action and the Runs-page action. One unnamed action remains on `StudioTestsPage`; the pinned count is now 1. |
+| `A11Y-1` | **critical** (`button-name`, WCAG 4.1.2 A) | **Partially resolved 2026-09-20** | **@po routes; @ux-design-expert advises.** | The redesigned Studio names every editor step action; the Runs-page Refresh action was named by Studio v1 WP5 (`2e06d0b5d`). One unnamed action remains on `StudioTestsPage`; the pinned count is now 1. |
 | `A11Y-2` | **serious** (`aria-prohibited-attr`, WCAG 4.1.2 A) | **Partially resolved 2026-09-20** | as `A11Y-1` | Wrapper-based labels were removed from the Studio editor and Runs page. One prohibited wrapper label remains on `StudioTestsPage`; the pinned count is now 1. |
 | `A11Y-3` | **critical** (`label`, WCAG 1.3.1 / 3.3.2 A) | **Closed 2026-09-20** | — | Every Studio editor field now has a programmatic label. Re-scan: zero `label` violations across all five `ChecksStudioPage` states. |
 | `A11Y-4` | **serious** (`aria-progressbar-name`, WCAG 4.1.2 A) | **Closed 2026-09-20** | — | Execution progress and the active-step spinner now have accessible names. Re-scan: zero `aria-progressbar-name` violations. |

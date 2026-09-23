@@ -5,6 +5,11 @@ info:
   description: |
     Frozen contract for the Checks Studio UI-testing surface (story 10.1).
 
+    Compiler amendment 2026-09-16: `docs/architecture/studio-inference-contract-v1.md`
+    and sibling `inference.openapi.yaml` declare not-yet-implemented v2 authoring and
+    corrected compiler behavior. Existing v1/internal shapes remain defined here;
+    the separate inference proposal schema is never an executable runner artifact.
+
     Normative source: `docs/architecture/studio-execution.md` v2.1 — §4.4 (source artifact),
     §5 (execution and snapshot), §5.5 (SSE parity), §6.1 (evidence state), §8.2 (status
     vocabulary), §8.3 (public API and legacy adapters), §8.4 (internal contracts), and
@@ -854,16 +859,15 @@ paths:
         Authorized against the execution's immutable CSI. Object storage keys are never exposed;
         `videoPath` on the snapshot is this API path.
 
-        **Refusal order (ADR-002 §24).** Authentication, then authorization, then evidence state,
-        then the store. `401` and `403` are decided before anything about the recording is read,
-        so an unknown execution id and an execution on a CSI the caller may not read both answer
-        `403 STUDIO_FORBIDDEN`, exactly as `getExecution` does. `404`, `410`, `416` and `503` are
-        reachable only after authorization and disclose nothing to a caller who could not read
-        the snapshot.
+        Refusal order (ADR-002 §§24, 25, 31): session authentication, execution/CSI authorization,
+        evidence state, then object storage. An unknown execution and an unreadable CSI both
+        answer `403 STUDIO_FORBIDDEN`, before any recording details are read. `404`, `410`,
+        `416`, and the store's `503 VIDEO_STORE_UNAVAILABLE` occur only after authorization.
+        An authentication-service `503` can instead occur before Studio authorization.
 
-        Branch on the status, never on the body. A `<video>` element and a download navigation
-        expose neither, and the `401` body is the platform envelope, not `ErrorResponse`
-        (ADR-002 §25).
+        Authentication errors use the nested platform envelope; Studio refusals use flat
+        `ErrorResponse`. Clients use the HTTP status for behavior. Native video/download
+        navigation does not expose an error body to the UI; it must not infer a specific cause.
       parameters:
         - { $ref: '#/components/parameters/ExecutionId' }
         - name: download
@@ -920,17 +924,30 @@ paths:
                   value: { error: RANGE_NOT_SATISFIABLE, message: 'The requested range cannot be served' }
         '503':
           description: |
-            The evidence store could not be reached, so the recording's disposition is unknown.
-            Deliberately not `404`, which would state a fact about the run that the API has not
-            observed. Transient: a later request may succeed. The body names nothing about the
-            store — no bucket, endpoint or key. A `503` written by the platform authentication
-            layer before authorization carries that layer's envelope instead (ADR-002 §25).
+            VIDEO_STORE_UNAVAILABLE means the authorized request could not reach object storage;
+            the recording's disposition is unknown. It is not missing evidence (404), and the
+            body exposes no bucket, endpoint, or object key. The authentication filter can also
+            answer 503 AUTH_TEMPORARILY_UNAVAILABLE before authorization, using the nested
+            platform envelope. These are distinct producers of the same status (ADR-002 §31).
+          headers:
+            Retry-After:
+              description: Present with value 5 on the authentication-service failure only; the store failure does not promise this header.
+              schema: { type: integer, enum: [5] }
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              schema:
+                oneOf:
+                  - { $ref: '#/components/schemas/ErrorResponse' }
+                  - { $ref: '#/components/schemas/PlatformErrorResponse' }
               examples:
                 storeUnavailable:
                   value: { error: VIDEO_STORE_UNAVAILABLE, message: "The evidence store could not be reached; the recording's disposition is unknown" }
+                authenticationUnavailable:
+                  value:
+                    error:
+                      code: AUTH_TEMPORARILY_UNAVAILABLE
+                      message: Authentication service temporarily unavailable
+                      traceId: 4bf92f3577b34da6a3ce929d0e0e4736
 
   # ────────────────────────────────────────────────────────────────────────────────────────────
   # Internal surface, architecture §8.4, in the order that section tabulates it.
@@ -1197,9 +1214,9 @@ paths:
                   runtimeVersions:
                     playwright: 1.63.0
                     node: v22.11.0
-                    validatorSchema: 1.0.0
-                    executor: 1.0.0
-                    syntaxReference: 1.1.0
+                    validatorSchema: 2.0.0
+                    executor: 2.0.0
+                    syntaxReference: 2.1.0
       responses:
         '200':
           description: Admission owned by this identity (duplicate identical admission is idempotent)
@@ -1337,9 +1354,9 @@ paths:
                   runtimeVersions:
                     playwright: 1.63.0
                     node: v22.11.0
-                    validatorSchema: 1.0.0
-                    executor: 1.0.0
-                    syntaxReference: 1.1.0
+                    validatorSchema: 2.0.0
+                    executor: 2.0.0
+                    syntaxReference: 2.1.0
                   outcome: null
                   evidence: null
               final:
@@ -1368,9 +1385,9 @@ paths:
                   runtimeVersions:
                     playwright: 1.63.0
                     node: v22.11.0
-                    validatorSchema: 1.0.0
-                    executor: 1.0.0
-                    syntaxReference: 1.1.0
+                    validatorSchema: 2.0.0
+                    executor: 2.0.0
+                    syntaxReference: 2.1.0
                   outcome: { result: PASSED, errorCode: null, errorMessage: null }
                   evidence:
                     videoKey: studio/60406/11111111-1111-1111-1111-111111111111/44444444-4444-4444-4444-444444444444/55555555-5555-5555-5555-555555555555.webm
@@ -2120,17 +2137,22 @@ components:
           type: string
           minLength: 64
           maxLength: 64
+          pattern: '^[0-9a-f]{64}$'
           nullable: true
           description: |
-            The canonical hash of the immutable revision `confirmedRevisionId` names. Null when
-            there is no confirmed revision and always null on `GET /tests`.
+            Canonical artifact hash of exactly confirmedRevisionId, read with the draft and its
+            confirmed revision in one transaction (ADR-002 section 29). Independent of the current
+            candidate. Null when no readable retained confirmed revision exists; always null on
+            GET /tests. Never synthesized from draft steps or substituted from the candidate.
         confirmedRevisionArtifact:
           type: object
           nullable: true
           description: |
-            The exact immutable artifact that execution uses for `confirmedRevisionId`. Its
-            normative schema is `docs/specs/studio/artifact.schema.json`. Null when there is no
-            confirmed revision and always null on `GET /tests`.
+            Immutable validated artifact of exactly confirmedRevisionId, read in the same transaction
+            as confirmedRevisionArtifactHash. Its normative schema is artifact.schema.json, as for
+            currentCandidateArtifact. Null when no readable retained confirmed revision exists;
+            always null on GET /tests. Edits and failed compiles do not replace this artifact with
+            candidate source. A stale draft cannot execute merely because historical source exists.
         compileError: { $ref: '#/components/schemas/CompileError' }
         compileDiagnostics: { $ref: '#/components/schemas/CompileDiagnostics' }
 

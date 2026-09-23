@@ -13,13 +13,14 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 
 /**
- * The shipped application default is the fully functional local filesystem adapter. Clustered
- * deployments select S3 explicitly because private pod filesystems cannot be shared implicitly.
+ * The shipped application default stores nothing: storage is off until an environment selects it.
+ * The local profile selects the filesystem adapter and the Helm chart always sets the provider, so
+ * a deployment never inherits storage it did not ask for.
  */
 class VideoStoreProviderDefaultTest {
 
   @Test
-  void theShippedDefaultUsesLocalFilesystemStorage() throws IOException {
+  void theShippedDefaultStoresNothingUntilAnEnvironmentSelectsAProvider() throws IOException {
     MutablePropertySources sources = new MutablePropertySources();
     for (PropertySource<?> source :
         new YamlPropertySourceLoader()
@@ -34,7 +35,7 @@ class VideoStoreProviderDefaultTest {
     VideoStoreProperties bound =
         binder.bind("studio.execution.video-store", VideoStoreProperties.class).get();
 
-    assertThat(bound.provider()).isEqualTo(VideoStoreProperties.PROVIDER_LOCAL);
-    assertThat(bound.servesRecordings()).isTrue();
+    assertThat(bound.provider()).isEqualTo(VideoStoreProperties.PROVIDER_NONE);
+    assertThat(bound.servesRecordings()).isFalse();
   }
 }

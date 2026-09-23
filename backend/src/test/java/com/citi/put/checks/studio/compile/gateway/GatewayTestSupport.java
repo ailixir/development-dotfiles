@@ -51,8 +51,8 @@ final class GatewayTestSupport {
         PROJECT,
         LOCATION,
         MODEL,
-        new StudioGatewayProperties.Credentials(
-            StudioGatewayProperties.MODE_APPLICATION_DEFAULT, null),
+        // Loopback stubs only: `none` is refused for any non-loopback endpoint.
+        new StudioGatewayProperties.Credentials(StudioGatewayProperties.MODE_NONE, null),
         requestTimeout,
         maxConcurrency,
         maxInputBytes,

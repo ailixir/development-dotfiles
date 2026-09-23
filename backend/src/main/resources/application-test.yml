@@ -5,10 +5,20 @@ spring:
   datasource:
     # Testcontainers-JDBC magic URL: spins up a real postgres:15-alpine on first request.
     # @Testcontainers(disabledWithoutDocker = true) on the IT classes guards against missing Docker.
-    url: jdbc:tc:postgresql:15-alpine:///checks
+    # Cached Spring contexts share this URL. Closing a transient/last connection must not
+    # stop the database underneath another pool; Testcontainers cleans it up at JVM exit.
+    url: jdbc:tc:postgresql:15-alpine:///checks?TC_DAEMON=true
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     username: test
     password: test
+    # Every cached Spring context keeps its own pool against this ONE container (max_connections
+    # 100). Hikari's default of 10 per context exhausts it after ~10 distinct contexts and the next
+    # context hangs on "too many clients". Small pools plus the context-cache cap in
+    # src/test/resources/spring.properties keep the whole suite under the limit.
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 0
+      idle-timeout: 10000
 
 logging:
   level:

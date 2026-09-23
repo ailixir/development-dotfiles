@@ -1,7 +1,7 @@
 package com.citi.put.checks.studio.compile.gateway;
 
 /**
- * The default client when {@code studio.compile.gateway.enabled=false} (Story 10.5, AC-6).
+ * The default client when {@code studio.compile.gateway.provider=disabled} (Story 10.5, AC-6).
  *
  * <p>Opens no socket and holds no SDK state, so a stock deployment cannot reach an LLM by accident.
  * Draft persistence must remain independent of this outcome (architecture &sect;4.7).
@@ -20,7 +20,7 @@ public class DisabledLlmGatewayClient implements LlmGatewayClient {
         CompileResponse.failure(
             GatewayOutcome.DISABLED,
             GatewayErrorCode.GATEWAY_UNAVAILABLE,
-            "studio.compile.gateway.enabled=false",
+            "studio.compile.gateway.provider=disabled",
             null,
             0,
             0L,

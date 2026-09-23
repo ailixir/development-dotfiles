@@ -153,7 +153,7 @@ class RepairRedactionTest extends AbstractRepairPipelineTest {
   void theReferenceTravelsAndTheValueDoesNot() {
     jdbc.update(
         "UPDATE ui_tests SET steps = CAST(? AS jsonb), variables = CAST(? AS jsonb) WHERE id = ?",
-        "[\"Type <secret LOGIN_PW> into the password field\"]",
+        "[\"Type <secret LOGIN_PW> into the password field\",\"Check the password field is visible\"]",
         "[{\"name\":\"PASSWORD\",\"kind\":\"secretRef\",\"secretId\":\"LOGIN_PW\","
             + "\"value\":\""
             + SECRET_CANARY

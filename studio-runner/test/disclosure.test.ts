@@ -153,16 +153,10 @@ describe('AC-20 — the runbook states plainly what is still open', () => {
     ]);
   });
 
-  it('records the resolved envFrom delivery control (AC-18)', () => {
+  it('records the corrected Spring configuration delivery and its owner (AC-18)', () => {
     assertClaims(runbook, RUNBOOK, [
-      {
-        what: 'the canonical Spring environment-name conversion',
-        needles: [/dots become underscores/iu, /dashes are removed/iu],
-      },
-      {
-        what: 'the fail-closed collision control',
-        needles: [/fails closed/iu, /collap(se|sing).*same name/iu],
-      },
+      { what: 'the mounted configuration mechanism', needles: ['SPRING_CONFIG_ADDITIONAL_LOCATION', '/etc/put-checks/config/application.yaml', /read.only/iu] },
+      { what: 'the owner', needles: [/OWNER: @devops/u, /MECHANISM: @architect/u] },
     ]);
   });
 

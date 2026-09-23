@@ -131,7 +131,7 @@ class CompilePipelineIT {
       String fallback = defaultAnswer == null ? artifactFor(STEPS, "a") : defaultAnswer;
       String artifact = answers.getOrDefault(request.compileRequestId(), fallback);
       return CompileResponse.ok(
-          artifact,
+          ProposalFixtures.envelope(request, artifact),
           new GatewayProvenance(
               "stub-model@1", "001", CompilePins.PROMPT_VERSION, "1.52.0", true, 0),
           0,
@@ -330,6 +330,8 @@ class CompilePipelineIT {
             com.citi.put.checks.studio.dto.TestConfiguration.defaults(),
             reloaded.sourceRevision(),
             reloaded.configurationRevision());
+    gateway.defaultAnswer = artifactFor(edit.steps(), "edit");
+    stubValidatorAcceptingSteps(edit.steps().size());
     studioService.updateTest(created.id(), edit, owner());
 
     assertThat(compileStatus(created.id())).isEqualTo("STALE");
@@ -378,6 +380,8 @@ class CompilePipelineIT {
         .isEqualTo("STALE");
     assertThat(gateway.calls.get()).as("neither v2 save reached the gateway").isZero();
 
+    // The validator verdict must cover exactly the steps it was sent.
+    stubValidatorAcceptingSteps(edited.steps().size());
     pipeline.compile(created.test().id(), OWNER);
     awaitCompileStatus(created.test().id(), "READY");
     ReadinessVerdict verdict = readiness.evaluate(created.test().id());
@@ -842,7 +846,7 @@ class CompilePipelineIT {
                     .withStatus(200)
                     .withHeader("content-type", "application/json")
                     .withBody(
-                        "{\"ok\":true,\"validatorSchemaVersion\":\"1.0.0\",\"diagnostics\":[],"
+                        "{\"ok\":true,\"validatorSchemaVersion\":\"2.0.0\",\"diagnostics\":[],"
                             + "\"steps\":["
                             + steps
                             + "]}")));

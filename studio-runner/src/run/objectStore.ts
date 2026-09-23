@@ -35,11 +35,10 @@
  * and the diagnostic says which one happened.
  */
 import { createReadStream } from 'node:fs';
-import { mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises';
+import { mkdir, rename, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve, sep } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 /** What the caller hands the client. Never a `Buffer` of a recording (AC-5). */
 export type ObjectBody =
@@ -62,6 +61,8 @@ export interface PutObjectRequest {
    * cannot be called with a key the job did not supply because no code path here builds one.
    */
   readonly key: string;
+  /** Deadline shared by video and manifest upload. */
+  readonly signal?: AbortSignal;
   readonly body: ObjectBody;
   readonly contentType: string;
 }
@@ -102,10 +103,8 @@ export interface LocalObjectStoreOptions {
   /**
    * Filesystem root the local compatible store writes under.
    *
-   * `ED-03` (Sonic) is open: the real endpoint, its credentials and its lifecycle rules are story
-   * 10.18's and 10.19's. Until then this is the compatible store the epic's `ED-03` fallback
-   * names, and it is a real implementation rather than a stub — it streams, it is idempotent on
-   * the same key and it fails the way a bucket fails.
+   * Local development shares this directory with the API and worker. Remote deployments use
+   * the AWS S3 adapter instead. Keep this directory outside disposable runner scratch.
    */
   readonly root: string;
 }
@@ -136,9 +135,9 @@ export function createLocalObjectStore(options: LocalObjectStoreOptions): Object
       const staging = `${target}.partial`;
       try {
         if (request.body.kind === 'bytes') {
-          await writeFile(staging, request.body.data);
+          await writeFile(staging, request.body.data, { signal: request.signal });
         } else {
-          await pipeline(createReadStream(request.body.path), createWriteStream(staging));
+          await pipeline(createReadStream(request.body.path), createWriteStream(staging), { signal: request.signal });
         }
         await rename(staging, target);
       } catch (error) {
@@ -148,114 +147,6 @@ export function createLocalObjectStore(options: LocalObjectStoreOptions): Object
       }
     },
   };
-}
-
-export interface S3ObjectStoreOptions {
-  readonly endpoint: string;
-  readonly region: string;
-  readonly bucket: string;
-  readonly forcePathStyle: boolean;
-  readonly accessKeyIdFile: string;
-  readonly secretAccessKeyFile: string;
-  readonly requestTimeoutMs: number;
-}
-
-/**
- * Sonic/S3 writer. Its public surface remains the one-operation {@link ObjectStoreClient}; SDK
- * retries are disabled because the evidence uploader already owns the bounded retry window.
- * Credentials are re-read from mounted files for every SDK refresh, allowing rotation without
- * placing secret material in the process environment or configuration object.
- */
-export function createS3ObjectStore(options: S3ObjectStoreOptions): ObjectStoreClient {
-  const client = new S3Client({
-    endpoint: options.endpoint,
-    region: options.region,
-    forcePathStyle: options.forcePathStyle,
-    maxAttempts: 1,
-    // S3-compatible stores do not universally implement AWS's optional aws-chunked trailer
-    // checksums. Sign the request normally, but send the actual file bytes unless required.
-    requestChecksumCalculation: 'WHEN_REQUIRED',
-    responseChecksumValidation: 'WHEN_REQUIRED',
-    credentials: async () => ({
-      accessKeyId: await readCredential(options.accessKeyIdFile, 'access key id'),
-      secretAccessKey: await readCredential(options.secretAccessKeyFile, 'secret access key'),
-    }),
-  });
-
-  return {
-    async put(request: PutObjectRequest): Promise<void> {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => {
-        controller.abort();
-      }, options.requestTimeoutMs);
-      try {
-        const contentLength =
-          request.body.kind === 'file' ? (await stat(request.body.path)).size : request.body.data.length;
-        await client.send(
-          new PutObjectCommand({
-            Bucket: options.bucket,
-            Key: request.key,
-            Body:
-              request.body.kind === 'file'
-                ? createReadStream(request.body.path)
-                : request.body.data,
-            ContentLength: contentLength,
-            ContentType: request.contentType,
-          }),
-          { abortSignal: controller.signal },
-        );
-      } catch (error) {
-        if (isUnreachable(error)) {
-          throw new ObjectStoreUnavailableError('The object store is unreachable.', {
-            cause: error,
-          });
-        }
-        throw new ObjectStorePutError(`The object at key ${request.key} was not written.`, {
-          cause: error,
-        });
-      } finally {
-        clearTimeout(timeout);
-      }
-    },
-  };
-}
-
-async function readCredential(path: string, label: string): Promise<string> {
-  try {
-    const value = (await readFile(path, 'utf8')).trim();
-    if (value === '') throw new Error('empty credential file');
-    return value;
-  } catch (error) {
-    throw new ObjectStoreUnavailableError(`The mounted object-store ${label} is unavailable.`, {
-      cause: error,
-    });
-  }
-}
-
-function isUnreachable(error: unknown): boolean {
-  const unavailable = new Set([
-    'AbortError',
-    'TimeoutError',
-    'CredentialsProviderError',
-    'ECONNREFUSED',
-    'ECONNRESET',
-    'ENOTFOUND',
-    'EAI_AGAIN',
-  ]);
-  let current: unknown = error;
-  for (let depth = 0; depth < 8 && current !== undefined && current !== null; depth += 1) {
-    if (current instanceof ObjectStoreUnavailableError) return true;
-    if (typeof current !== 'object') return false;
-    const shaped = current as { readonly name?: unknown; readonly code?: unknown; readonly cause?: unknown };
-    if (
-      (typeof shaped.name === 'string' && unavailable.has(shaped.name)) ||
-      (typeof shaped.code === 'string' && unavailable.has(shaped.code))
-    ) {
-      return true;
-    }
-    current = shaped.cause;
-  }
-  return false;
 }
 
 /** Resolves a key under the root and refuses one that would escape it. */

@@ -1,6 +1,5 @@
 package com.citi.put.checks.studio.compile.gateway;
 
-import com.google.genai.Client;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,22 +46,18 @@ public class StudioGatewayConfig {
     return new GatewayResponseParser(schema);
   }
 
-  /** Fails startup with one message listing every missing value when the gateway is on (AC-2). */
+  /**
+   * The Vertex AI provider: the maintained Google Gen AI SDK in Vertex mode, with no legacy
+   * fallback. Configuration is validated before any client is built.
+   */
   @Bean(destroyMethod = "close")
   @ConditionalOnProperty(prefix = PREFIX, name = "provider", havingValue = "vertex")
-  public Client studioGatewayVertexAi(StudioGatewayProperties properties) throws IOException {
-    properties.validateForVertex();
-    return VertexAiClientFactory.create(properties);
-  }
-
-  @Bean
-  @ConditionalOnProperty(prefix = PREFIX, name = "provider", havingValue = "vertex")
-  public LlmGatewayClient vertexLlmGatewayClient(
+  public GenAiLlmGatewayClient vertexLlmGatewayClient(
       StudioGatewayProperties properties,
-      Client studioGatewayVertexAi,
       GatewayResponseParser parser,
-      GatewayAuditLogger auditLogger) {
-    return new VertexLlmGatewayClient(properties, studioGatewayVertexAi, parser, auditLogger);
+      GatewayAuditLogger auditLogger)
+      throws IOException {
+    return new GenAiLlmGatewayClient(properties, parser, auditLogger);
   }
 
   @Bean

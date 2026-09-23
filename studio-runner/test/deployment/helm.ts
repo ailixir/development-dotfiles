@@ -254,8 +254,8 @@ export interface Container {
     readonly limits?: Record<string, string>;
     readonly requests?: Record<string, string>;
   };
-  readonly readinessProbe?: { readonly httpGet?: { readonly path?: string } };
-  readonly livenessProbe?: { readonly httpGet?: { readonly path?: string } };
+  readonly readinessProbe?: { readonly httpGet?: { readonly path?: string }; readonly exec?: { readonly command?: readonly string[] } };
+  readonly livenessProbe?: { readonly httpGet?: { readonly path?: string }; readonly exec?: { readonly command?: readonly string[] } };
   readonly lifecycle?: Record<string, unknown>;
 }
 

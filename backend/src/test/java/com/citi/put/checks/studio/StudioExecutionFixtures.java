@@ -190,8 +190,8 @@ public final class StudioExecutionFixtures {
         + CompilePins.PROMPT_VERSION
         + "\",\"syntaxReferenceVersion\":\""
         + CompilePins.SYNTAX_REFERENCE_VERSION
-        + "\",\"validatorSchemaVersion\":\"1.0.0\","
-        + "\"languagePolicyVersion\":\"1.0.0\",\"executorVersion\":\"1.0.0\","
+        + "\",\"validatorSchemaVersion\":\"2.0.0\","
+        + "\"languagePolicyVersion\":\"2.0.0\",\"executorVersion\":\"2.0.0\","
         + "\"playwrightVersion\":\"1.63.0\",\"artifactSchemaVersion\":"
         + CompilePins.SUPPORTED_ARTIFACT_VERSION
         + "}";

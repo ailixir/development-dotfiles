@@ -51,8 +51,7 @@ describe('locator argument schemas', () => {
     ["await page.getByRole('wizard').click();", ['ARGUMENT_VALUE_NOT_PERMITTED']],
     ["await page.getByRole(role).click();", ['ARGUMENT_TYPE']],
     ["await page.getByTestId('a').fill(`plain template`);", []],
-    ["await page.getByText('x').check({ trial: false, force: false });", []],
-    ["await page.getByText('x').check({ trial: true });", ['OPTION_VALUE_TYPE']],
+    ["await page.getByText('x').check({ force: false });", []],
     ["await page.getByLabel('x').press('Control+Shift+A');", []],
     ["await page.getByLabel('x').press('DoTheThing');", ['ARGUMENT_VALUE_NOT_PERMITTED']],
     ["await page.getByLabel('x').press('Enter', { delay: 10 });", []],
@@ -184,4 +183,23 @@ describe('executor barrel', () => {
     expect(executorBarrel.REDACTION_PLACEHOLDER).toBe('[REDACTED]');
     expect(executorBarrel.NULL_REDACTOR.redact('unchanged')).toBe('unchanged');
   });
+});
+
+
+describe('trial actions are never executable', () => {
+  it.each(['click', 'check', 'uncheck', 'hover', 'fill', 'press', 'selectOption'])(
+    'rejects the trial key with either boolean for %s', (method) => {
+      const argument = ['fill', 'press', 'selectOption'].includes(method) ? "'Enter', " : '';
+      for (const value of ['true', 'false']) {
+        const code = `await page.getByTestId('target').${method}(${argument}{ trial: ${value} });`;
+        const result = validateArtifact(
+          { version: 1, steps: [{ stepIndex: 0, originalText: LINE, code }] }, [LINE], EMPTY_REFERENCES,
+        );
+        expect(result.ok).toBe(false);
+        expect(result.steps[0]?.diagnostics.some((diagnostic) =>
+          diagnostic.code === 'OPTION_UNKNOWN_KEY' && diagnostic.message.includes('Remove trial'),
+        )).toBe(true);
+      }
+    },
+  );
 });

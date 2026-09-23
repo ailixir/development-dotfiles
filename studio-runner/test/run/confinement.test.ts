@@ -238,12 +238,16 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
    */
   // Re-anchored by the production-alpha UI validation after the execute route was deliberately
   // opened to every authenticated user. The confirmed-artifact projection and the `trial: false`
-  // execution-safety constraint remain part of the same reviewed contract.
+  // execution-safety constraint remain part of the same reviewed contract (validator 2.0.0 now
+  // rejects the `trial` key outright rather than only `trial: true`).
   // Re-anchored by story 10.44 (ADR-SC-003): `ExpectedIntent` was replaced by `ReferencePolicy`
   // on the validate and run-job bodies.
   // Re-anchored for secret origin binding: `RunJob.secretOrigins` and the two refusal codes
   // (`URL_SCHEME_NOT_PERMITTED`, `SECRET_ORIGIN_NOT_ALLOWED`) in `x-runner-error-codes`.
-  const BASE_SHA256 = '395eaeeb3ddca072a2107a3b0f8edeb9ece928c3d4318d30ee143fa99ed3fe6d';
+  // Story 10.20 C0 adds an architect-owned inference amendment link; runner body remains closed.
+  // Story 10.27 / ADR-002 §30 adds the confirmed artifact pair on public reads only.
+  // Re-pinned after merging origin/main (Epic 10 / Studio v1) into the story 10.44 branch.
+  const BASE_SHA256 = 'c6b891387d939131f38b68971e51cecccebfa6fd4b3af09ac34a121477171088';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
@@ -309,11 +313,7 @@ describe('AC-24 — production dependencies remain explicit and exact-pinned', (
     const pkg = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')) as {
       dependencies?: Record<string, string>;
     };
-    expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual([
-      '@aws-sdk/client-s3',
-      'playwright',
-      'typescript',
-    ]);
+    expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual(['@aws-sdk/client-s3', 'playwright', 'typescript']);
     // Anything a real browser needs beyond the pinned library is a signal the design drifted.
     expect(pkg.dependencies?.playwright).toBe('1.63.0');
     expect(pkg.dependencies?.['@aws-sdk/client-s3']).toBe('3.1136.0');

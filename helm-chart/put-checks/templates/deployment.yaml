@@ -1,4 +1,5 @@
 {{- if .Values.backend.enabled }}
+{{- include "put-checks.springConfig.validate" (index .Values "backend") }}
 {{- $gatewayProvider := required "studioGateway.provider is required" .Values.studioGateway.provider -}}
 {{- if not (has $gatewayProvider (list "disabled" "vertex")) -}}
 {{- fail (printf "studioGateway.provider must be one of disabled, vertex; got %q" $gatewayProvider) -}}
@@ -100,6 +101,8 @@ spec:
               containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
           env:
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/etc/put-checks/config/application.yaml"
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.backend.springProfile | quote }}
             # The same single retention key as the worker and the object-store lifecycle
@@ -282,6 +285,9 @@ spec:
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           volumeMounts:
+            - name: spring-config
+              mountPath: /etc/put-checks/config
+              readOnly: true
             - name: tmp
               mountPath: /tmp
             # **The read-only store principal**, and a *different* Kubernetes Secret from the
@@ -313,6 +319,9 @@ spec:
               exec:
                 command: ["sh", "-c", "sleep 5"]
       volumes:
+        - name: spring-config
+          configMap:
+            name: {{ include "put-checks.api.fullname" . }}-properties
         - name: tmp
           emptyDir: {}
         {{- if eq .Values.objectStore.provider "s3" }}
@@ -360,6 +369,7 @@ spec:
       {{- end }}
 {{- end }}
 {{- if .Values.worker.enabled }}
+{{- include "put-checks.springConfig.validate" (index .Values "worker") }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -420,6 +430,8 @@ spec:
               containerPort: {{ .Values.worker.service.port }}
               protocol: TCP
           env:
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/etc/put-checks/config/application.yaml"
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.worker.springProfile | quote }}
             # **Actuator on the container port the probes use.** `application-worker.yml` sets
@@ -553,6 +565,9 @@ spec:
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}
           volumeMounts:
+            - name: spring-config
+              mountPath: /etc/put-checks/config
+              readOnly: true
             - name: tmp
               mountPath: /tmp
             {{- if eq .Values.objectStore.provider "s3" }}
@@ -574,6 +589,9 @@ spec:
               exec:
                 command: ["sh", "-c", "sleep 10"]
       volumes:
+        - name: spring-config
+          configMap:
+            name: {{ include "put-checks.worker.fullname" . }}-properties
         - name: tmp
           emptyDir: {}
         {{- if eq .Values.objectStore.provider "s3" }}

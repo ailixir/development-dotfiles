@@ -125,6 +125,79 @@ public class GatewayResponseParser {
     return ParseResult.valid(node.toString());
   }
 
+  /** Strict proposal envelope acceptance; never extracts JSON from prose or fences. */
+  public ParseResult parseProposal(String text, String kind, java.util.List<java.util.UUID> ids) {
+    if (text == null || text.isBlank()) {
+      return ParseResult.invalid("empty model envelope");
+    }
+    try {
+      ObjectMapper strict = new ObjectMapper();
+      strict.enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+      strict.enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+      JsonNode root = strict.readTree(text);
+      if (!keys(root, Set.of("version", "kind", "steps"))
+          || !root.path("version").isIntegralNumber()
+          || !root.path("version").canConvertToInt()
+          || root.path("version").intValue() != 1
+          || !root.path("kind").isTextual()
+          || !kind.equals(root.path("kind").textValue())
+          || !root.path("steps").isArray()
+          || root.path("steps").size() != ids.size()
+          || ids.isEmpty()
+          || ids.size() > 100) {
+        return ParseResult.invalid("invalid model envelope shape or coverage");
+      }
+      java.util.Set<java.util.UUID> seen = new java.util.HashSet<>();
+      for (int i = 0; i < ids.size(); i++) {
+        JsonNode step = root.path("steps").get(i);
+        if (!step.path("stepId").isTextual()
+            || !ids.get(i).toString().equals(step.path("stepId").textValue())
+            || !seen.add(ids.get(i))) {
+          return ParseResult.invalid("invalid model step identity or order");
+        }
+        String status = step.path("status").textValue();
+        boolean generated = "GENERATED".equals(status);
+        if (generated) {
+          if (!keys(step, Set.of("stepId", "status", "code"))
+              || !boundedText(step.path("code"), 2000)) {
+            return ParseResult.invalid("invalid generated step");
+          }
+        } else {
+          String expected =
+              "UNSUPPORTED".equals(status)
+                  ? "UNSUPPORTED_CAPABILITY"
+                  : "CLARIFICATION".equals(status) ? "AMBIGUOUS_INTENT" : null;
+          if (expected == null
+              || !keys(step, Set.of("stepId", "status", "reason", "message"))
+              || !expected.equals(step.path("reason").textValue())
+              || !boundedText(step.path("message"), 400)) {
+            return ParseResult.invalid("invalid unsupported or clarification step");
+          }
+        }
+      }
+      return ParseResult.valid(root.toString());
+    } catch (JsonProcessingException | IllegalArgumentException e) {
+      return ParseResult.invalid("malformed model envelope");
+    }
+  }
+
+  private static boolean keys(JsonNode node, Set<String> expected) {
+    if (!node.isObject() || node.size() != expected.size()) {
+      return false;
+    }
+    java.util.Iterator<String> fields = node.fieldNames();
+    while (fields.hasNext()) {
+      if (!expected.contains(fields.next())) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static boolean boundedText(JsonNode node, int limit) {
+    return node.isTextual() && !node.textValue().isEmpty() && node.textValue().length() <= limit;
+  }
+
   /**
    * Finds the artifact document inside an answer that may be pure JSON, a fenced block or prose
    * with an embedded object. Brace scanning is string- and escape-aware so a brace inside {@code

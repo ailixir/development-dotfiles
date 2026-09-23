@@ -1,6 +1,5 @@
+import { Autocomplete, Chip, Stack, TextField, Typography } from '@mui/material';
 import React, { useMemo, useState } from 'react';
-import { Autocomplete, Chip, Stack, TextField, Typography, Button } from '@mui/material';
-import reportsApi from '@/services/api/reportsApi';
 
 interface RecipientsEditorProps {
   value: string[];
@@ -17,10 +16,9 @@ const COMMON_RECIPIENTS = [
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const RecipientsEditor: React.FC<RecipientsEditorProps> = ({ value, onChange, reportId }) => {
+const RecipientsEditor: React.FC<RecipientsEditorProps> = ({ value, onChange }) => {
   const [input, setInput] = useState<string>('');
   const suggestions = useMemo(() => COMMON_RECIPIENTS.filter((e) => !value?.includes(e)), [value]);
-  const [sending, setSending] = useState(false);
 
   const add = (email: string) => {
     const trimmed = email.trim();
@@ -48,13 +46,6 @@ const RecipientsEditor: React.FC<RecipientsEditorProps> = ({ value, onChange, re
     e.stopPropagation();
   };
 
-  const sendTest = async () => {
-    if (!reportId) return;
-    try {
-      setSending(true);
-      await reportsApi.sendTest(reportId, value[0]);
-    } finally { setSending(false); }
-  };
 
   return (
     <Stack spacing={1.5}>

@@ -185,7 +185,7 @@ class ExecutionReadinessTest {
         ReadinessFixtures.candidate(
             STEPS,
             request.configurationRevision(),
-            ReadinessFixtures.provenance(CompilePins.SYNTAX_REFERENCE_VERSION, "1.0.0"),
+            ReadinessFixtures.provenance(CompilePins.SYNTAX_REFERENCE_VERSION, "2.0.0"),
             CompilePins.SUPPORTED_ARTIFACT_VERSION));
 
     ReadinessVerdict verdict = readiness.evaluate(testId);
@@ -291,15 +291,16 @@ class ExecutionReadinessTest {
 
   // ── AC-25: runtime compatibility, exact-match terms only ──────────────────
 
-  @Test
-  void anOlderValidatorSchemaVersionIsRefusedAndTheRevisionIsPreserved() {
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"0.9.0", "1.0.0"})
+  void anOlderValidatorSchemaVersionIsRefusedAndTheRevisionIsPreserved(String olderVersion) {
     UUID revisionId =
         ReadinessFixtures.confirm(
             states,
             jdbc,
             testId,
             STEPS,
-            ReadinessFixtures.provenance(CompilePins.SYNTAX_REFERENCE_VERSION, "0.9.0"),
+            ReadinessFixtures.provenance(CompilePins.SYNTAX_REFERENCE_VERSION, olderVersion),
             CompilePins.SUPPORTED_ARTIFACT_VERSION);
 
     ReadinessVerdict verdict = readiness.evaluate(testId);
@@ -307,8 +308,8 @@ class ExecutionReadinessTest {
     assertThat(verdict.code()).isEqualTo(ReadinessVerdict.RUNTIME_INCOMPATIBLE);
     assertThat(verdict.message())
         .as("the message must name the differing field and both values")
-        .contains("validatorSchemaVersion recorded 0.9.0")
-        .contains("this runtime runs 1.0.0");
+        .contains("validatorSchemaVersion recorded " + olderVersion)
+        .contains("this runtime runs 2.0.0");
     assertThat(
             jdbc.queryForObject(
                 "SELECT COUNT(*) FROM ui_test_revisions WHERE id = ?", Integer.class, revisionId))
@@ -323,7 +324,7 @@ class ExecutionReadinessTest {
         jdbc,
         testId,
         STEPS,
-        ReadinessFixtures.provenance("0.9.0", "1.0.0"),
+        ReadinessFixtures.provenance("0.9.0", "2.0.0"),
         CompilePins.SUPPORTED_ARTIFACT_VERSION);
 
     ReadinessVerdict verdict = readiness.evaluate(testId);
@@ -339,7 +340,7 @@ class ExecutionReadinessTest {
         jdbc,
         testId,
         STEPS,
-        ReadinessFixtures.provenance(CompilePins.SYNTAX_REFERENCE_VERSION, "1.0.0"),
+        ReadinessFixtures.provenance(CompilePins.SYNTAX_REFERENCE_VERSION, "2.0.0"),
         2);
 
     ReadinessVerdict verdict = readiness.evaluate(testId);
@@ -356,9 +357,11 @@ class ExecutionReadinessTest {
   @Test
   void theBackendDoesNotCompareTheRangedPlaywrightOrExecutorTerms() {
     String provenance =
-        ReadinessFixtures.provenance(CompilePins.SYNTAX_REFERENCE_VERSION, "1.0.0")
-            .replace("\"executorVersion\":\"1.0.0\"", "\"executorVersion\":\"0.1.0\"")
+        ReadinessFixtures.provenance(CompilePins.SYNTAX_REFERENCE_VERSION, "2.0.0")
+            .replace("\"executorVersion\":\"2.0.0\"", "\"executorVersion\":\"0.1.0\"")
             .replace("\"playwrightVersion\":\"1.63.0\"", "\"playwrightVersion\":\"1.40.0\"");
+    assertThat(provenance).contains("\"executorVersion\":\"0.1.0\"");
+    assertThat(provenance).contains("\"playwrightVersion\":\"1.40.0\"");
     ReadinessFixtures.confirm(
         states, jdbc, testId, STEPS, provenance, CompilePins.SUPPORTED_ARTIFACT_VERSION);
 

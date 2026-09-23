@@ -76,6 +76,12 @@ class AcceptanceIT {
 
     assertThat(accepted.status()).isEqualTo("PENDING");
     assertThat(accepted.csiId()).isEqualTo(CSI_ID);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT execution_scope FROM ui_test_executions WHERE id = ?",
+                String.class,
+                accepted.executionId()))
+        .isEqualTo("FULL");
     assertThat(accepted.revisionId()).as("the confirmed revision is snapshotted").isNotNull();
     assertThat(
             jdbc.queryForObject(

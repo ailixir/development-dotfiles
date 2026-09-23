@@ -2,6 +2,8 @@
 
 **Version:** 2.1 · **Date:** 2026-09-10 · **Status:** Design baseline; staging validation outstanding
 
+**Compiler amendment (2026-09-16):** [Studio inference contract v1](studio-inference-contract-v1.md) supersedes affected §§4/8 compiler decisions for the remediation stories: explicit unsupported outcomes, strict verdicts, atomic request/candidate identity, bounded inference, and versioned full/incremental authoring. Its [versioned OpenAPI](../specs/studio/inference.openapi.yaml) is declared, not yet deployed. Existing positional runner artifacts/routes remain unchanged.
+
 This document defines component ownership and technical contracts. [PRD §5.2](../../PRD.md#52-ui-testing-feature-checks-studio) and the [BRD](../brd/checks-ui-studio.brd.md) define product scope and GA criteria; [Epic 10](../epics/EPIC-10-EXECUTION.yaml) and its stories contain implementation order and acceptance tests. The [review](studio-execution-review.md) and [SSE assessment](studio-sse-viability.md) retain decision rationale.
 
 ## 1. Overview

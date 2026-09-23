@@ -1,4 +1,4 @@
-<!-- syntaxReferenceVersion: 1.1.0 -->
+<!-- syntaxReferenceVersion: 2.1.0 -->
 
 # Playwright syntax reference (Studio, V1)
 
@@ -65,16 +65,18 @@ it.
 
 | Call | Options |
 |---|---|
-| `click()` | `button` (`'left'`, `'right'`, `'middle'`), `clickCount` (integer 1–3), `delay` (integer 0–5000), `force`, `trial` (only `false`), `timeout` |
+| `click()` | `button` (`'left'`, `'right'`, `'middle'`), `clickCount` (integer 1–3), `delay` (integer 0–5000), `force`, `timeout` |
 | `fill(value)` | `force`, `timeout` |
 | `press(key)` | `delay` (integer 0–5000), `timeout` |
-| `check()` | `force`, `trial` (only `false`), `timeout` |
-| `uncheck()` | `force`, `trial` (only `false`), `timeout` |
-| `hover()` | `force`, `trial` (only `false`), `timeout` |
+| `check()` | `force`, `timeout` |
+| `uncheck()` | `force`, `timeout` |
+| `hover()` | `force`, `timeout` |
 | `selectOption(value)` | `force`, `timeout` |
 
 `fill` takes a string literal, `vars.get('NAME')` or `vars.secret('ID')`. `selectOption` takes a
 string literal or `vars.get('NAME')`. `press` takes a key name literal such as `'Enter'`.
+
+The trial option is rejected, including `trial: false`: a trial skips the reviewed action.
 
 ## Assertions
 
@@ -88,6 +90,13 @@ string literal or `vars.get('NAME')`. `press` takes a key name literal such as `
 
 The expected `text` of `toContainText`, `toHaveValue` and `toHaveTitle`, and the expected `url` of
 `toHaveURL`, is a string literal, a regular expression literal, or `vars.get('NAME')`.
+
+String `toContainText` and `toHaveTitle` expectations trim and collapse whitespace on both
+sides (including removal of zero-width spaces and soft hyphens). Regex expectations match raw
+text. `toHaveValue` strings remain literal. For `toContainText` and `toHaveURL`, an explicit
+boolean `ignoreCase` overrides a regex's `i` flag; omission preserves it. URL string expectations
+use absolute URL canonicalization; relative or invalid values remain literal (Studio does not
+configure a base URL). Regex URLs remain raw patterns.
 
 ```js
 await expect(page.getByText('Welcome')).toBeVisible();

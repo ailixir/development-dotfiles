@@ -15,14 +15,11 @@ import org.springframework.context.ConfigurableApplicationContext;
  * two beans in one context share caches, one Hibernate session factory and one JVM's worth of
  * in-memory state, so a guard that is really a private field passes anyway.
  *
- * <p><b>The datasource is resolved from the first context rather than from configuration.</b> The
- * obvious construction — start a second context on the same {@code test} profile and let it read
- * the same {@code jdbc:tc:...} URL — produces a <em>second container</em>: the Testcontainers JDBC
- * driver hands out a fresh database, and the second context then sees an empty schema. A test built
- * that way passes or fails for reasons that have nothing to do with the guard under test, and it
- * would have "proved" cross-replica behaviour against two unrelated databases. So the live URL is
- * read off the first context's connection and handed to the second, and Flyway is off on the second
- * because the schema is already there.
+ * <p>Both contexts use the same test-profile JDBC URL, cached by the aligned Testcontainers driver
+ * within this JVM. The test profile keeps that container alive across connection/pool churn with
+ * {@code TC_DAEMON=true}; each context still owns its own pool and services. The cross-replica test
+ * compares actual JDBC URLs to verify that both reach the same database. Neither context enables
+ * the local profile, which would create an independent embedded database.
  */
 public final class SecondApplicationContext implements AutoCloseable {
 

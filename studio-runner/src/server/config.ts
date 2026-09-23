@@ -1,3 +1,5 @@
+import { isAbsolute, relative, resolve } from 'node:path';
+
 /**
  * Runner configuration (AC-22c, architecture §8.5).
  *
@@ -42,20 +44,20 @@ export interface RunnerConfig {
   /** Per-run scratch root, cleared at startup and on every exit path (AC-12, AC-21). */
   readonly scratchDir: string;
   /**
-   * Filesystem root of the local, S3-shaped **compatible** object store (`ED-03`).
-   *
-   * Sonic's real endpoint, its write-only runner credentials and its lifecycle rules are story
-   * 10.18's and 10.19's. Until then the runner writes real objects to a real store — this one —
-   * rather than to a stub, so the upload path, its bounded retry and its idempotency are exercised
-   * by everything that runs the runner rather than only by tests that mock it.
+   * Explicit provider; remote deployment selects s3. `filesystem` (alias `local`) is for local
+   * runs and for a shared volume.
    */
+  readonly objectStoreProvider: 'filesystem' | 'local' | 's3';
+  /** Persistent evidence directory, disjoint from scratch. */
   readonly objectStoreDir: string;
-  /** `local` is the default; `s3` enables the Sonic-compatible adapter. */
-  readonly objectStoreProvider: 'local' | 's3';
-  readonly objectStoreEndpoint: string;
-  readonly objectStoreRegion: string;
   readonly objectStoreBucket: string;
+  readonly objectStoreRegion: string;
+  /** S3-compatible (Sonic) endpoint. Empty selects the SDK's default AWS endpoint resolution. */
+  readonly objectStoreEndpoint: string;
   readonly objectStoreForcePathStyle: boolean;
+  /** Mounted directory with `accessKeyId`, `secretAccessKey` and optional `sessionToken`. */
+  readonly objectStoreCredentialsDirectory: string;
+  /** Explicit mounted credential files; an alternative to the directory above, never both. */
   readonly objectStoreAccessKeyIdFile: string;
   readonly objectStoreSecretAccessKeyFile: string;
   /** Attempts per object, the first included. Bounded on both axes with the window below. */
@@ -182,7 +184,7 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
     field: 'objectStoreProvider',
     kind: 'string',
     required: false,
-    fallback: 'local',
+    fallback: 'filesystem',
   },
   OBJECT_STORE_ENDPOINT: {
     field: 'objectStoreEndpoint',
@@ -194,7 +196,7 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
     field: 'objectStoreRegion',
     kind: 'string',
     required: false,
-    fallback: 'us-east-1',
+    fallback: '',
   },
   OBJECT_STORE_BUCKET: {
     field: 'objectStoreBucket',
@@ -206,7 +208,13 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
     field: 'objectStoreForcePathStyle',
     kind: 'boolean',
     required: false,
-    fallback: true,
+    fallback: false,
+  },
+  OBJECT_STORE_CREDENTIALS_DIRECTORY: {
+    field: 'objectStoreCredentialsDirectory',
+    kind: 'string',
+    required: false,
+    fallback: '',
   },
   OBJECT_STORE_ACCESS_KEY_ID_FILE: {
     field: 'objectStoreAccessKeyIdFile',
@@ -507,34 +515,45 @@ export function loadConfig(env: Readonly<Record<string, string | undefined>>): R
   }
 
   const objectStoreProvider = draft.objectStoreProvider;
-  if (objectStoreProvider !== 'local' && objectStoreProvider !== 's3') {
+  if (objectStoreProvider !== 'filesystem' && objectStoreProvider !== 'local' && objectStoreProvider !== 's3') {
     problems.push(
-      `${CONFIG_PREFIX}OBJECT_STORE_PROVIDER must be local or s3; got ${JSON.stringify(objectStoreProvider)}.`,
+      `${CONFIG_PREFIX}OBJECT_STORE_PROVIDER must be filesystem or s3 (local is an alias of filesystem); got ${JSON.stringify(objectStoreProvider)}.`,
     );
   }
   if (objectStoreProvider === 's3') {
-    for (const field of [
-      'objectStoreEndpoint',
-      'objectStoreRegion',
-      'objectStoreBucket',
-      'objectStoreAccessKeyIdFile',
-      'objectStoreSecretAccessKeyFile',
-    ] as const) {
-      if (typeof draft[field] !== 'string' || draft[field].trim() === '') {
-        problems.push(`${CONFIG_PREFIX}${camelToUpperSnake(field)} is required for the s3 provider.`);
-      }
+    if (!draft.objectStoreBucket || !draft.objectStoreRegion) {
+      problems.push(`S3 requires ${CONFIG_PREFIX}OBJECT_STORE_BUCKET and ${CONFIG_PREFIX}OBJECT_STORE_REGION.`);
     }
     if (typeof draft.objectStoreEndpoint === 'string' && draft.objectStoreEndpoint !== '') {
       validateObjectStoreEndpoint(draft.objectStoreEndpoint, problems);
+    }
+    const accessKeyIdFile = draft.objectStoreAccessKeyIdFile !== '';
+    const secretAccessKeyFile = draft.objectStoreSecretAccessKeyFile !== '';
+    if (accessKeyIdFile !== secretAccessKeyFile) {
+      problems.push(
+        `${CONFIG_PREFIX}OBJECT_STORE_ACCESS_KEY_ID_FILE and ${CONFIG_PREFIX}OBJECT_STORE_SECRET_ACCESS_KEY_FILE must be set together.`,
+      );
+    }
+    if (accessKeyIdFile && draft.objectStoreCredentialsDirectory !== '') {
+      problems.push(
+        `${CONFIG_PREFIX}OBJECT_STORE_CREDENTIALS_DIRECTORY and the explicit credential files are mutually exclusive.`,
+      );
+    }
+  }
+  if (objectStoreProvider === 'filesystem' || objectStoreProvider === 'local') {
+    const scratch = resolve(String(draft.scratchDir));
+    const objects = resolve(String(draft.objectStoreDir));
+    const contains = (parent: string, child: string): boolean => {
+      const rel = relative(parent, child);
+      return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel));
+    };
+    if (contains(scratch, objects) || contains(objects, scratch)) {
+      problems.push('Object storage and scratch directories must be disjoint; scratch is deleted on restart.');
     }
   }
 
   if (problems.length > 0) throw new ConfigurationError(problems);
   return draft as unknown as RunnerConfig;
-}
-
-function camelToUpperSnake(value: string): string {
-  return value.replace(/[A-Z]/gu, (letter) => `_${letter}`).toUpperCase();
 }
 
 function validateObjectStoreEndpoint(endpoint: string, problems: string[]): void {

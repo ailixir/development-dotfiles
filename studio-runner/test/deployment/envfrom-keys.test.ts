@@ -1,12 +1,11 @@
-/**
- * Every ConfigMap key consumed through `envFrom` must be a valid environment-variable name.
- * Spring Boot's relaxed binding accepts the uppercase underscore form, so the chart converts
- * operator-friendly dotted `configOverrides` keys at render time and fails on invalid or colliding
- * results. These tests exercise the rendered manifest, not the source values.
- */
+/** Story 10.27: lossless mounted Spring configuration and valid envFrom names. */
 import { describe, expect, it } from 'vitest';
 
-import { byKind, render, renderOutcome, VALUE_SETS, valueSetName } from './helm.js';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { parse } from 'yaml';
+
+import { byKind, CHART_DIR, deploymentNamed, envValues, one, podSpec, render, renderOutcome, soleContainer, VALUE_SETS, valueSetName } from './helm.js';
 import type { Container, K8sDocument, RenderOutcome } from './helm.js';
 
 /**
@@ -86,82 +85,138 @@ function describeViolations(violations: readonly Violation[]): string {
     .join('\n');
 }
 
-describe('AC-18 — every envFrom-consumed key is a valid environment-variable name', () => {
+function springProperties(outcome: RenderOutcome, role: 'api' | 'worker'): Record<string, unknown> {
+  const deployment = deploymentNamed(outcome, `-${role}`);
+  const container = soleContainer(deployment);
+  const mount = container.volumeMounts?.find((entry) => entry.name === 'spring-config');
+  expect(mount).toMatchObject({ mountPath: '/etc/put-checks/config', readOnly: true });
+  expect(envValues(container)['SPRING_CONFIG_ADDITIONAL_LOCATION']).toBe(
+    'file:/etc/put-checks/config/application.yaml',
+  );
+  const volume = podSpec(deployment).volumes?.find((entry) => entry.name === mount?.name);
+  const configMap = one(byKind(outcome, 'ConfigMap').filter((entry) => entry.metadata?.name === volume?.configMap?.name), 'mounted Spring config');
+  expect(container.envFrom?.some((source) =>
+    (source.configMapRef as { name?: string } | undefined)?.name === configMap.metadata?.name,
+  )).toBe(false);
+  const yaml = configMap.data?.['application.yaml'];
+  expect(typeof yaml).toBe('string');
+  return parse(yaml ?? '') as Record<string, unknown>;
+}
+
+interface ChartValues {
+  backend: { configOverrides: Record<string, unknown> };
+  worker: { configOverrides: Record<string, unknown> };
+}
+const base = parse(readFileSync(join(CHART_DIR, 'values.yaml'), 'utf8')) as ChartValues;
+
+describe('AC-18 — envFrom names and lossless Spring configuration delivery', () => {
   for (const valuesFile of VALUE_SETS) {
     const label = valueSetName(valuesFile);
-
-    it(`${label}: every consumed ConfigMap key is a valid environment-variable name`, () => {
+    it(`${label}: all consumed envFrom keys are valid environment names`, () => {
       const violations = envFromViolations(render({ valuesFile }), label);
       expect(violations, describeViolations(violations)).toEqual([]);
     });
-
-    it(`${label}: dotted properties are delivered with Spring-compatible relaxed-binding names`, () => {
+    it(`${label}: every configured Spring key reaches the read-only mounted source unchanged`, () => {
+      const overlay = valuesFile === null ? undefined : parse(readFileSync(join(CHART_DIR, valuesFile), 'utf8')) as Partial<ChartValues>;
       const outcome = render({ valuesFile });
-      const maps = byKind(outcome, 'ConfigMap');
-      const api = maps.find((item) => (item.metadata?.name ?? '').endsWith('-api-config'));
-      const worker = maps.find((item) => (item.metadata?.name ?? '').endsWith('-worker-config'));
-      expect(api?.data?.SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE).toBeDefined();
-      expect(api?.data?.CHECKS_SCHEDULING_MININTERVALSECONDS).toBeDefined();
-      expect(worker?.data?.CHECKS_EXECUTOR_MAXCONCURRENCY).toBeDefined();
-      expect(worker?.data?.CHECKS_EXECUTOR_SOURCELIMITS_UI_TEST).toBeDefined();
-      expect(worker?.data?.CHECKS_SCHEDULING_SHUTDOWNTIMEOUTSEC).toBeDefined();
+      for (const [component, role] of [['backend', 'api'], ['worker', 'worker']] as const) {
+        const expected = { ...base[component].configOverrides, ...overlay?.[component]?.configOverrides };
+        expect(Object.keys(expected).length).toBeGreaterThan(0);
+        expect(springProperties(outcome, role)).toEqual(expected);
+      }
     });
   }
-
-  it('converts a newly added dotted property inside the rendered measurement window', () => {
-    const outcome = render({
-      args: ['--set', 'backend.configOverrides.checks\\.studio\\.qa-probe-7255=1'],
+  for (const property of ['studio.sse.heartbeat', 'checks.studio.qa-probe-7255']) {
+    it(`new dotted property ${property} is delivered without env-name conversion`, () => {
+      const outcome = render({ args: ['--set-string', `backend.configOverrides.${property.replaceAll('.', '\\.')}=probe-value`] });
+      expect(envFromViolations(outcome, 'mutation')).toEqual([]);
+      expect(springProperties(outcome, 'api')[property]).toBe('probe-value');
     });
-    const api = byKind(outcome, 'ConfigMap').find((item) =>
-      (item.metadata?.name ?? '').endsWith('-api-config'),
-    );
-    expect(api?.data?.CHECKS_STUDIO_QAPROBE7255).toBe('1');
-    expect(envFromViolations(outcome, 'mutated')).toEqual([]);
+  }
+  it('detects invalid envFrom names outside any Studio prefix (negative control)', () => {
+    const outcome = render({ args: ['--set-string', 'frontend.env.checks\\.qa-probe=1'] });
+    const violations = envFromViolations(outcome, 'negative-control');
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.key).toBe('checks.qa-probe');
   });
-
-  it('fails the render when two source properties collapse to the same environment name', () => {
-    const outcome = renderOutcome({
-      args: [
-        '--set',
-        'backend.configOverrides.checks\\.studio\\.qa-probe=1',
-        '--set',
-        'backend.configOverrides.checks\\.studio\\.qaprobe=2',
-      ],
+  it('preserves nested maps, lists and escaped scalar content in the mounted source', () => {
+    const outcome = render({ args: ['--set-json', 'backend.configOverrides={"custom.map":{"HTTP":"a:b # quoted"},"custom.list":["one","two"],"custom.enabled":true}'] });
+    expect(springProperties(outcome, 'api')).toMatchObject({
+      'custom.map': { HTTP: 'a:b # quoted' }, 'custom.list': ['one', 'two'], 'custom.enabled': true,
     });
-    expect(outcome.ok).toBe(false);
-    expect(outcome.error).toContain(
-      'collides with another rendered environment variable "CHECKS_STUDIO_QAPROBE"',
-    );
   });
-
-  for (const collision of [
-    {
-      label: 'the API profile emitted explicitly by the Deployment',
-      argument: 'backend.configOverrides.spring\\.profiles\\.active=evil',
-      expected: 'SPRING_PROFILES_ACTIVE',
-    },
-    {
-      label: 'the worker management port emitted explicitly by the Deployment',
-      argument: 'worker.configOverrides.management\\.server\\.port=9999',
-      expected: 'MANAGEMENT_SERVER_PORT',
-    },
-    {
-      label: 'an API value from backend.env',
-      argument: 'backend.configOverrides.java\\.opts=evil',
-      expected: 'JAVA_OPTS',
-    },
-    {
-      label: 'a worker value derived from a Secret',
-      argument: 'worker.configOverrides.spring\\.datasource\\.url=evil',
-      expected: 'SPRING_DATASOURCE_URL',
-    },
-  ] as const) {
-    it(`fails the render when configOverrides collides with ${collision.label}`, () => {
-      const outcome = renderOutcome({ args: ['--set', collision.argument] });
+  for (const component of ['backend', 'worker']) {
+    it(`${component}: mounted-source selector cannot be replaced through generic environment`, () => {
+      const outcome = renderOutcome({ set: { [`${component}.env.SPRING_CONFIG_ADDITIONAL_LOCATION`]: 'file:/missing.yaml' } });
       expect(outcome.ok).toBe(false);
-      expect(outcome.error).toContain(
-        `collides with another rendered environment variable "${collision.expected}"`,
-      );
+      expect(outcome.error).toContain('SPRING_CONFIG_ADDITIONAL_LOCATION is managed by the chart');
+    });
+    it(`${component}: mounted-source selector cannot be replaced through secret environment`, () => {
+      const outcome = renderOutcome({ args: ['--set-json', `${component}.envFromSecrets=[{"secretName":"probe","keys":["SPRING_CONFIG_ADDITIONAL_LOCATION"]}]`] });
+      expect(outcome.ok).toBe(false);
+      expect(outcome.error).toContain('SPRING_CONFIG_ADDITIONAL_LOCATION is managed by the chart');
     });
   }
+  it('changing mounted properties changes the workload rollout checksum', () => {
+    const original = render();
+    const changed = render({ args: ['--set-string', 'backend.configOverrides.checks\\.scheduling\\.min-interval-seconds=123'] });
+    const annotation = (outcome: RenderOutcome): unknown => (deploymentNamed(outcome, '-api').spec?.template as { metadata: { annotations: Record<string, unknown> } }).metadata.annotations['checksum/config'];
+    expect(annotation(original)).not.toBe(annotation(changed));
+  });
+  for (const property of [
+    'checks.cors.allowed-origins', 'checks.core-service.base-url',
+    'checks.security.bypass.core-service', 'checks.security.bypass.identity-headers',
+    'checks.security.bypass.csi-read', 'studio.execution.enabled',
+    'studio.execution.dispatcher.enabled', 'studio.execution.evidence-retention',
+    'studio.execution.callback.service-token', 'studio.execution.sse.heartbeat',
+    'studio.execution.sse.lifetime', 'studio.runner.base-url',
+    'studio.runner.service-identity-token', 'studio.storage.provider', 'studio.storage.bucket',
+    'studio.storage.region', 'studio.storage.credentials-directory', 'spring.profiles.active',
+    'spring.config.import',
+  ]) {
+    it(`additional properties cannot override chart-managed ${property}`, () => {
+      for (const component of ['backend', 'worker']) {
+        const outcome = renderOutcome({ args: ['--set-string', `${component}.configOverrides.${property.replaceAll('.', '\\.')}=override`] });
+        expect(outcome.ok).toBe(false);
+        expect(outcome.error).toContain('is managed by the chart');
+      }
+    });
+  }
+  it('nested and relaxed property spellings cannot bypass the chart-managed guards', () => {
+    for (const value of [
+      '{"studio":{"execution":{"dispatcher":{"enabled":true}}}}',
+      '{"checks.security.bypass.identityHeaders":true}',
+      '{"studio.storage.credentialsDirectory":"/override"}',
+    ]) {
+      const outcome = renderOutcome({ args: ['--set-json', `backend.configOverrides=${value}`] });
+      expect(outcome.ok).toBe(false);
+      expect(outcome.error).toContain('is managed by the chart');
+    }
+  });
+
+  it('all profile activation mechanisms are reserved across flat and nested properties', () => {
+    for (const component of ['backend', 'worker']) {
+      for (const values of [
+        '{"spring.profiles.include":"local"}',
+        '{"spring.profiles.default":"test"}',
+        '{"spring.profiles.group.prod":["local"]}',
+        '{"spring":{"profiles":{"group":{"prod":["local"]}}}}',
+        '{"SPRING_PROFILES_INCLUDE":"local"}',
+      ]) {
+        expect(renderOutcome({ args: ['--set-json', `${component}.configOverrides=${values}`] }).ok).toBe(false);
+      }
+    }
+  });
+  it('environment and secret selectors cannot activate development profiles indirectly', () => {
+    for (const component of ['backend', 'worker']) {
+      for (const key of ['SPRING_PROFILES_ACTIVE', 'SPRING_PROFILES_INCLUDE', 'SPRING_PROFILES_DEFAULT',
+        'SPRING_PROFILES_GROUP_PROD', 'SPRING_APPLICATION_JSON', 'SPRING_CONFIG_IMPORT', 'SPRING_CONFIG_LOCATION']) {
+        expect(renderOutcome({ args: ['--set-string', `${component}.env.${key}=local`] }).ok).toBe(false);
+        expect(renderOutcome({ args: ['--set-json', `${component}.envFromSecrets=[{"secretName":"probe","keys":["${key}"]}]`] }).ok).toBe(false);
+      }
+      expect(renderOutcome({ args: ['--set-string', `${component}.springProfile=local`] }).ok).toBe(false);
+      expect(renderOutcome({ args: ['--set-string', `${component}.springProfile=test`] }).ok).toBe(false);
+    }
+  });
+
 });

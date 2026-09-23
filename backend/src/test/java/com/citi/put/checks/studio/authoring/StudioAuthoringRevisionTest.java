@@ -585,19 +585,30 @@ class StudioAuthoringRevisionTest {
         1,
         "{\"environment\":\"Production\"}",
         "{}",
+        // The two runtime pins must equal RuntimePinProperties' defaults (studio-runner
+        // src/versions.ts). The derivation version is VersionedIntentDeriver.CURRENT_VERSION.
         "{\"intentDerivationVersion\":\"2\","
-            + "\"validatorSchemaVersion\":\"1.0.0\","
-            + "\"syntaxReferenceVersion\":\"1.0.0\"}",
+            + "\"validatorSchemaVersion\":\"2.0.0\","
+            + "\"syntaxReferenceVersion\":\"2.1.0\"}",
         OWNER,
-        "{\"version\":2,\"steps\":[" + policyStep(0) + "," + policyStep(1) + "]}",
-        "2");
+        referencePolicy(source),
+        com.citi.put.checks.studio.compile.VersionedIntentDeriver.CURRENT_VERSION);
   }
 
-  private static String policyStep(int index) {
-    return "{\"stepIndex\":"
-        + index
-        + ",\"required\":{\"variables\":[],\"secrets\":[]},"
-        + "\"allowed\":{\"variables\":[],\"secrets\":[]}}";
+  /** The policy the draft's saved authoring derives, exactly as compilation would persist it. */
+  private String referencePolicy(String source) {
+    java.util.Map<String, Object> draft =
+        jdbc.queryForMap(
+            "SELECT authoring::text authoring, authoring_revision_inputs::text inputs"
+                + " FROM ui_tests WHERE id=?",
+            testId);
+    return new com.citi.put.checks.studio.compile.VersionedIntentDeriver()
+        .derive(
+            com.citi.put.checks.studio.compile.VersionedIntentDeriver.CURRENT_VERSION,
+            source,
+            String.valueOf(draft.get("authoring")),
+            String.valueOf(draft.get("inputs")))
+        .referencePolicy();
   }
 
   private UUID publishAndConfirm(long sourceRevision, long configurationRevision, String hash) {

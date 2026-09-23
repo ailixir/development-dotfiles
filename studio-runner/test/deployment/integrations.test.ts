@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { parse } from 'yaml';
 
 import {
   byKind,
@@ -10,6 +11,19 @@ import {
   runnerDeployment,
   soleContainer,
 } from './helm.js';
+
+/**
+ * The API's Spring `configOverrides` as delivered: story 10.27 mounts them read-only as
+ * `application.yaml` (volume `spring-config`) instead of converting them into `envFrom` names.
+ */
+function apiSpringProperties(outcome: ReturnType<typeof render>): Record<string, unknown> {
+  const deployment = deploymentNamed(outcome, '-api');
+  const volume = podSpec(deployment).volumes?.find((entry) => entry.name === 'spring-config');
+  const configMap = byKind(outcome, 'ConfigMap').find(
+    (item) => item.metadata?.name === volume?.configMap?.name,
+  );
+  return parse(configMap?.data?.['application.yaml'] ?? '') as Record<string, unknown>;
+}
 
 describe('production integration provider wiring', () => {
   it('ships production-safe Vertex translation and an enabled UI_TEST source by default', () => {
@@ -25,10 +39,7 @@ describe('production integration provider wiring', () => {
     expect(worker.STUDIO_VAULT_PROVIDER).toBe('none');
     expect(api.STUDIO_GATEWAY_PROVIDER).toBe('vertex');
     expect(api.STUDIO_GATEWAY_MODEL).toBe('gemini-3.8-flash');
-    const apiConfig = byKind(outcome, 'ConfigMap').find((item) =>
-      (item.metadata?.name ?? '').endsWith('-api-config'),
-    );
-    expect(apiConfig?.data?.CHECKS_SOURCES_UI_TEST).toBe('true');
+    expect(apiSpringProperties(outcome)['checks.sources.UI_TEST']).toBe('true');
 
     const deployments = [
       deploymentNamed(outcome, '-api'),
@@ -136,10 +147,7 @@ describe('production integration provider wiring', () => {
       expect(api.STUDIO_GATEWAY_PROVIDER).toBe('vertex');
       expect(api.STUDIO_GATEWAY_MODEL).toBe('gemini-3.8-flash');
       expect(api.STUDIO_GATEWAY_CREDENTIALS_MODE).toBe('application-default');
-      const apiConfig = byKind(outcome, 'ConfigMap').find((item) =>
-        (item.metadata?.name ?? '').endsWith('-api-config'),
-      );
-      expect(apiConfig?.data?.CHECKS_SOURCES_UI_TEST).toBe('true');
+      expect(apiSpringProperties(outcome)['checks.sources.UI_TEST']).toBe('true');
 
       const gatewayEnv = new Map((apiContainer.env ?? []).map((entry) => [entry.name, entry]));
       for (const [name, key] of [

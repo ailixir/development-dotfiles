@@ -46,79 +46,42 @@ export const CODE_VIEW_LANGUAGE_NOTE =
   'runs, not a file you can run elsewhere. The browser, the checks and your saved values are ' +
   'supplied by Studio when the test runs.';
 
-export interface CodeTabProps {
-  readonly testId?: string | null;
-  /** Fetch only when the tab is visible; toggling false → true refreshes after compile/run. */
-  readonly active?: boolean;
-  /** Changes when the same test may have acquired a new confirmed revision. */
-  readonly refreshToken?: string | number;
+/** Shown when the draft has moved on and the rendered source is the last confirmed revision. */
+export const CODE_VIEW_PREVIOUSLY_CONFIRMED =
+  'Previously confirmed source. Current changes must be prepared and confirmed before they can run.';
+
+export interface ConfirmedSourceProps {
+  /** The single-test detail read. List projections carry no artifact and render the unavailable state. */
+  readonly test: TestDto | null;
+  readonly loading?: boolean;
+  readonly error?: string | null;
 }
 
-const CodeTab: React.FC<CodeTabProps> = ({ testId = null, active = true, refreshToken }) => {
-  const [test, setTest] = useState<TestDto | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let current = true;
-    let pollTimer: ReturnType<typeof setTimeout> | undefined;
-    if (!testId) {
-      setTest(null);
-      setLoading(false);
-      setError(null);
-      return () => {
-        current = false;
-      };
-    }
-    if (!active) {
-      return () => {
-        current = false;
-      };
-    }
-    setLoading(true);
-    setTest(null);
-    setError(null);
-    const load = async () => {
-      try {
-        const body = await studioApi.getTest(testId);
-        if (!current) return;
-        setTest(body);
-        setLoading(false);
-        if (body.compileStatus === 'COMPILING') {
-          pollTimer = setTimeout(() => void load(), 600);
-        }
-      } catch (reason: unknown) {
-        if (!current) return;
-        setTest(null);
-        setLoading(false);
-        setError((reason as { message?: string })?.message ?? 'The saved source could not be loaded.');
-      }
-    };
-    void load();
-    return () => {
-      current = false;
-      if (pollTimer) clearTimeout(pollTimer);
-    };
-  }, [active, refreshToken, testId]);
-
+/**
+ * Renders only the independently read confirmed pair (revision id, artifact, canonical hash) —
+ * never the current candidate and never the editable draft (ADR-002 §21).
+ */
+export const ConfirmedSource: React.FC<ConfirmedSourceProps> = ({
+  test,
+  loading = false,
+  error = null,
+}) => {
   /** The confirmed revision's steps, in artifact order. Never the draft's English. */
   const steps = useMemo(
-    () => (test?.id === testId ? test.confirmedRevisionArtifact?.steps ?? null : null),
-    [test, testId],
+    () => (test?.confirmedRevisionArtifact?.steps ?? null),
+    [test],
   );
 
   /** Said plainly when the draft has moved on since this revision was translated. */
   const divergence = useMemo(
     () =>
-      test?.id === testId
-        ? artifactDivergence(test.confirmedRevisionArtifact, test.steps ?? [])
-        : null,
-    [test, testId],
+      test ? artifactDivergence(test.confirmedRevisionArtifact, test.steps ?? []) : null,
+    [test],
   );
 
   /** Why there is no newer revision, when the last attempt to make one did not produce it. */
   const staleness = useMemo(() => {
-    if (!test || test.id !== testId) return null;
+    if (!test) return null;
     if (test.compileStatus === 'NEEDS_REVISION') {
       return 'The last attempt to prepare this test was refused. Check the steps flagged on the Steps tab, then run again.';
     }
@@ -126,7 +89,11 @@ const CodeTab: React.FC<CodeTabProps> = ({ testId = null, active = true, refresh
       return compileErrorNarrative(test.compileError.code);
     }
     return null;
-  }, [test, testId]);
+  }, [test]);
+
+  const readableHash =
+    typeof test?.confirmedRevisionArtifactHash === 'string' &&
+    /^[0-9a-f]{64}$/u.test(test.confirmedRevisionArtifactHash);
 
   /** Eight characters is enough to tell two revisions apart; the full hash is never rendered. */
   const revisionLabel = useMemo(() => {
@@ -154,7 +121,7 @@ const CodeTab: React.FC<CodeTabProps> = ({ testId = null, active = true, refresh
         ) : steps &&
           steps.length > 0 &&
           test?.confirmedRevisionId &&
-          test.confirmedRevisionArtifactHash ? (
+          readableHash ? (
           <Stack spacing={1.5} sx={{ p: 2 }}>
             <Stack
               direction="row"
@@ -185,6 +152,12 @@ const CodeTab: React.FC<CodeTabProps> = ({ testId = null, active = true, refresh
             {divergence && (
               <Alert severity="warning" role="status" data-testid="code-view-divergence">
                 {divergence}
+              </Alert>
+            )}
+
+            {test.compileStatus !== 'READY' && test.compileStatus !== 'COMPILING' && (
+              <Alert severity="info" role="status" data-testid="code-view-previously-confirmed">
+                {CODE_VIEW_PREVIOUSLY_CONFIRMED}
               </Alert>
             )}
 
@@ -246,6 +219,66 @@ const CodeTab: React.FC<CodeTabProps> = ({ testId = null, active = true, refresh
         )}
       </Paper>
     </Box>
+  );
+};
+
+export interface CodeTabProps {
+  readonly testId?: string | null;
+  /** Fetch only when the tab is visible; toggling false → true refreshes after compile/run. */
+  readonly active?: boolean;
+  /** Changes when the same test may have acquired a new confirmed revision. */
+  readonly refreshToken?: string | number;
+}
+
+const CodeTab: React.FC<CodeTabProps> = ({ testId = null, active = true, refreshToken }) => {
+  const [test, setTest] = useState<TestDto | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let current = true;
+    let pollTimer: ReturnType<typeof setTimeout> | undefined;
+    if (!testId) {
+      setTest(null);
+      setLoading(false);
+      setError(null);
+      return () => {
+        current = false;
+      };
+    }
+    if (!active) {
+      return () => {
+        current = false;
+      };
+    }
+    setLoading(true);
+    setTest(null);
+    setError(null);
+    const load = async () => {
+      try {
+        const body = await studioApi.getTest(testId);
+        if (!current) return;
+        setTest(body);
+        setLoading(false);
+        if (body.compileStatus === 'COMPILING') {
+          pollTimer = setTimeout(() => void load(), 600);
+        }
+      } catch (reason: unknown) {
+        if (!current) return;
+        setTest(null);
+        setLoading(false);
+        setError((reason as { message?: string })?.message ?? 'The saved source could not be loaded.');
+      }
+    };
+    void load();
+    return () => {
+      current = false;
+      if (pollTimer) clearTimeout(pollTimer);
+    };
+  }, [active, refreshToken, testId]);
+
+  return (
+    <ConfirmedSource test={test?.id === testId ? test : null} loading={loading} error={error} />
   );
 };
 

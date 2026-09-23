@@ -19,9 +19,11 @@ import org.springframework.test.context.DynamicPropertySource;
 
 /**
  * Studio v1 gaps: {@code dev.sh --seed} starts {@code local,dev}, whose Flyway locations include
- * the seed. The seed writes current-month {@code ui_test_executions} during migration, before any
- * partition bootstrap, so they land in DEFAULT — and the current month's partition could then never
- * be created, leaving {@code partitions} DOWN. This is that exact start, on an embedded database.
+ * the seed. An earlier seed wrote current-month {@code ui_test_executions} during migration, before
+ * any partition bootstrap, so they landed in DEFAULT and the current month's partition could never
+ * be created, leaving {@code partitions} DOWN. The seed no longer writes Studio history (results
+ * must come from real runs); {@link PartitionDefaultRowsIT} covers rows already in DEFAULT
+ * directly. This keeps the seeded start itself honest, on an embedded database.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"local", "dev"})
@@ -51,9 +53,6 @@ class SeededStartPartitionHealthIT {
         "ui_test_executions_"
             + YearMonth.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy_MM"));
 
-    assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM ui_test_executions", Integer.class))
-        .as("the seed ran")
-        .isPositive();
     assertThat(jdbc.queryForObject("SELECT to_regclass(?) IS NOT NULL", Boolean.class, current))
         .as("%s exists after a seeded start", current)
         .isTrue();

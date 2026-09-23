@@ -10,7 +10,7 @@ import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createFetchHttpClient } from '../../src/reporting/httpClient.js';
 import type { HttpRequest } from '../../src/reporting/httpClient.js';
@@ -120,19 +120,19 @@ describe('fetch-backed HTTP client', () => {
   );
 
   it('reports a timeout as ambiguous, not as a failure to send', async () => {
-    const responder = await listen(() => {
-      // Never responds. The client's deadline is what ends this.
-    });
-
-    const outcome = await createFetchHttpClient().send({
-      ...request(responder.port),
-      timeoutMs: 25,
-    });
-
-    expect(outcome).toEqual({ kind: 'timeout' });
-    // The request did reach the server: this is the dangerous case, where admission may have
-    // been granted and the runner will never know (AC-9).
-    expect(responder.hits).toHaveLength(1);
+    let arrived: () => void = () => { /* Replaced before issuing the request. */ };
+    const received = new Promise<void>((resolve) => { arrived = resolve; });
+    const responder = await listen(() => { arrived(); /* Deliberately never responds. */ });
+    // Advance the deadline only after the real server has the bytes. A cold connection must
+    // not turn this ambiguity test into a different before-send timeout under parallel load.
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const sent = createFetchHttpClient().send({ ...request(responder.port), timeoutMs: 25 });
+      await received;
+      await vi.advanceTimersByTimeAsync(25);
+      expect(await sent).toEqual({ kind: 'timeout' });
+      expect(responder.hits).toHaveLength(1);
+    } finally { vi.useRealTimers(); }
   });
 
   it('reports a connection failure as a transport outcome', async () => {

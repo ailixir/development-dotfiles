@@ -116,7 +116,7 @@ class CompilePipelineTest {
         com.citi.put.checks.studio.compile.gateway.CompileRequest request) {
       calls.incrementAndGet();
       seenRequestIds.add(request.compileRequestId());
-      return script.get().apply(request);
+      return ProposalFixtures.fromArtifact(request, script.get().apply(request));
     }
 
     void answer(
@@ -218,20 +218,27 @@ class CompilePipelineTest {
   }
 
   @Test
-  void arecompileOfUnchangedSourceResolvesToTheSameConfirmedRevision() {
+  void arecompileOfUnchangedSourceIsItsOwnAttemptAndLeavesThePriorRevisionIntact() {
     pipeline.compile(testId, OWNER);
     awaitCompileStatus("READY");
-    UUID candidate = column("current_candidate_revision_id", UUID.class);
-    assertThat(column("confirmed_revision_id", UUID.class)).isEqualTo(candidate);
+    UUID first = column("current_candidate_revision_id", UUID.class);
+    assertThat(column("confirmed_revision_id", UUID.class)).isEqualTo(first);
 
-    // A second compile of byte-identical source issues a second gateway call (there is no cache)
-    // but resolves to the same immutable revision, so the confirmed revision does not move.
+    // Every compile is its own captured attempt (compile_request_id is unique per revision), so a
+    // second compile of byte-identical source publishes its own immutable revision, which Run then
+    // accepts for the caller. The earlier revision is never rewritten.
     pipeline.compile(testId, OWNER);
     awaitCompileStatus("READY");
+    UUID second = column("current_candidate_revision_id", UUID.class);
 
     assertThat(column("confirmed_revision_id", UUID.class))
-        .as("an identical artifact is the same revision, so nothing was re-approved")
-        .isEqualTo(candidate);
+        .as("the caller's own attempt is the one accepted")
+        .isEqualTo(second);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT confirmed_by FROM ui_test_revisions WHERE id = ?", String.class, first))
+        .as("the prior revision keeps its own approval record")
+        .isEqualTo(OWNER);
   }
 
   // ── AC-11a: the provenance §8.1 requires ──────────────────────────────────
@@ -253,11 +260,11 @@ class CompilePipelineTest {
     assertThat(provenance.path("promptVersion").asText()).isEqualTo(CompilePins.PROMPT_VERSION);
     assertThat(provenance.path("syntaxReferenceVersion").asText())
         .isEqualTo(CompilePins.SYNTAX_REFERENCE_VERSION);
-    assertThat(provenance.path("languagePolicyVersion").asText()).isEqualTo("1.0.0");
+    assertThat(provenance.path("languagePolicyVersion").asText()).isEqualTo("2.0.0");
     assertThat(provenance.path("validatorSchemaVersion").asText())
         .as("the version the validator reported it actually ran, not the one we hoped for")
-        .isEqualTo("1.0.0");
-    assertThat(provenance.path("executorVersion").asText()).isEqualTo("1.0.0");
+        .isEqualTo("2.0.0");
+    assertThat(provenance.path("executorVersion").asText()).isEqualTo("2.0.0");
     assertThat(provenance.path("playwrightVersion").asText()).isEqualTo("1.63.0");
     assertThat(provenance.path("artifactSchemaVersion").asInt())
         .isEqualTo(CompilePins.SUPPORTED_ARTIFACT_VERSION);
@@ -481,25 +488,6 @@ class CompilePipelineTest {
         .isEqualTo(2);
   }
 
-  @Test
-  void insertOrReuseRevisionResolvesAnIdenticalArtifactAfterTheGatewayAnsweredAndIsNotACache() {
-    pipeline.compile(testId, OWNER);
-    awaitCompileStatus("READY");
-    UUID first = column("current_candidate_revision_id", UUID.class);
-
-    pipeline.compile(testId, OWNER);
-    awaitCompileStatus("READY");
-    UUID second = column("current_candidate_revision_id", UUID.class);
-
-    assertThat(second)
-        .as("identical artifact identity resolves to the same row rather than duplicating it")
-        .isEqualTo(first);
-    assertThat(revisionCount(testId)).isEqualTo(1);
-    assertThat(gateway.calls())
-        .as("and the gateway was still asked both times — that is the whole difference")
-        .isEqualTo(2);
-  }
-
   // ── AC-6: limits are enforced before a compile request is begun ───────────
 
   @Test
@@ -584,6 +572,14 @@ class CompilePipelineTest {
         "[{\"name\":\"USERNAME\",\"kind\":\"plain\",\"value\":\"" + RESOLVED_VALUE_CANARY + "\"}]",
         id);
     gateway.answer(request -> ok(artifactWithCanaryCode(sourceOf(request))));
+    runner.stubFor(
+        post(urlEqualTo("/v1/validate"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withBody(
+                        "{\"ok\":true,\"validatorSchemaVersion\":\"2.0.0\",\"diagnostics\":[],"
+                            + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]}]}")));
 
     pipeline.compile(id, OWNER);
     awaitCompileStatus(id, "READY");
@@ -780,7 +776,7 @@ class CompilePipelineTest {
                     .withStatus(200)
                     .withHeader("content-type", "application/json")
                     .withBody(
-                        "{\"ok\":false,\"validatorSchemaVersion\":\"1.0.0\",\"diagnostics\":[],"
+                        "{\"ok\":false,\"validatorSchemaVersion\":\"2.0.0\",\"diagnostics\":[],"
                             + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]},"
                             + "{\"stepIndex\":1,\"ok\":false,\"diagnostics\":"
                             + "[{\"code\":\"DENIED_NODE\",\"stepIndex\":1,\"message\":\"no\","
@@ -836,7 +832,7 @@ class CompilePipelineTest {
                     .withBody(
                         "{\"ok\":"
                             + ok
-                            + ",\"validatorSchemaVersion\":\"1.0.0\",\"diagnostics\":[],"
+                            + ",\"validatorSchemaVersion\":\"2.0.0\",\"diagnostics\":[],"
                             + "\"steps\":[{\"stepIndex\":0,\"ok\":true,\"diagnostics\":[]},"
                             + "{\"stepIndex\":1,\"ok\":true,\"diagnostics\":[]}]}")));
   }
@@ -850,7 +846,7 @@ class CompilePipelineTest {
                     .withStatus(200)
                     .withHeader("content-type", "application/json")
                     .withBody(
-                        "{\"ok\":false,\"validatorSchemaVersion\":\"1.0.0\","
+                        "{\"ok\":false,\"validatorSchemaVersion\":\"2.0.0\","
                             + "\"diagnostics\":[{\"code\":\"ARTIFACT_STEP_COUNT\","
                             + "\"stepIndex\":null,\"message\":\"step count\",\"node\":null,"
                             + "\"excerpt\":null}],"
