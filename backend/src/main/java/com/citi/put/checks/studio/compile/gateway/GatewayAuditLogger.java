@@ -48,10 +48,15 @@ public class GatewayAuditLogger {
       fields.put("sdkVersion", provenance.sdkVersion());
       fields.put("temperature", provenance.temperature());
       fields.put("maxOutputTokens", provenance.maxOutputTokens());
+      fields.put("thinkingLevel", provenance.thinkingLevel());
       fields.put("finishReason", provenance.finishReason());
       fields.put("usageAvailable", provenance.usageAvailable());
       fields.put("inputTokens", provenance.inputTokens());
       fields.put("outputTokens", provenance.outputTokens());
+      // Counts only, logged as reported: an unreported count prints "null", never 0.
+      fields.put("thoughtsTokens", provenance.thoughtsTokens());
+      fields.put("cachedContentTokens", provenance.cachedContentTokens());
+      fields.put("totalTokens", provenance.totalTokens());
     }
 
     StringJoiner line = new StringJoiner(" ", "studio.gateway.call ", "");

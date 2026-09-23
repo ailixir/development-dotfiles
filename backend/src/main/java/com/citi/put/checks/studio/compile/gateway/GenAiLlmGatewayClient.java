@@ -326,8 +326,13 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
                         ? value
                         : "UNKNOWN")
             .orElse("MISSING");
-    Integer inputTokens = raw.usageMetadata().flatMap(u -> u.promptTokenCount()).orElse(null);
-    Integer outputTokens = raw.usageMetadata().flatMap(u -> u.candidatesTokenCount()).orElse(null);
+    // Every count is copied as reported; an absent count stays null, never 0 (Story 10.45 AC 4).
+    var usage = raw.usageMetadata();
+    Integer inputTokens = usage.flatMap(u -> u.promptTokenCount()).orElse(null);
+    Integer outputTokens = usage.flatMap(u -> u.candidatesTokenCount()).orElse(null);
+    Integer thoughtsTokens = usage.flatMap(u -> u.thoughtsTokenCount()).orElse(null);
+    Integer cachedContentTokens = usage.flatMap(u -> u.cachedContentTokenCount()).orElse(null);
+    Integer totalTokens = usage.flatMap(u -> u.totalTokenCount()).orElse(null);
     GatewayProvenance provenance =
         new GatewayProvenance(
             properties.model(),
@@ -340,7 +345,11 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
             finish,
             inputTokens,
             outputTokens,
-            inputTokens != null && outputTokens != null);
+            inputTokens != null && outputTokens != null,
+            thoughtsTokens,
+            cachedContentTokens,
+            totalTokens,
+            properties.effectiveThinkingLevel());
     if (!"STOP".equals(finish)) {
       return CompileResponse.parseFailure(
           "unusable model finish reason", provenance, retries, elapsed(start), inputBytes, 0);
