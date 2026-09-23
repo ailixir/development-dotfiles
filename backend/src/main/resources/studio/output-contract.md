@@ -1,4 +1,4 @@
-# Output contract — prompt version 2.1.0
+# Output contract — prompt version 2.2.0
 
 Return one JSON document only. No prose, markdown fence or trailing commentary.
 The requested proposal kind and writable step IDs are supplied separately by the server.

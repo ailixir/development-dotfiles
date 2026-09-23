@@ -7,10 +7,17 @@ label: LIVE-AFFECTING
 gate: CONCERNS
 reviewer: Quinn (@qa)
 reviewed_at: 2026-09-23
-reviewed_revision: commit:f7175f5a7 (range b784657cb..f7175f5a7, four commits)
+reviewed_revision: commit:4d127fc52 (iteration 1 re-review; initial review covered b784657cb..f7175f5a7)
+qa_loop_iteration: 1
 
 status_reason: >-
-  All ten acceptance criteria are implemented and each has a test that would turn red if its
+  Iteration 1 (commit 4d127fc52): ISSUE-1, ISSUE-4 and ISSUE-5 are resolved, each with a test or a
+  written definition, and the compile package is green in the reviewer's run (348 tests, 0 failures).
+  The verdict stays CONCERNS for two reasons. ISSUE-2 (harness before live, medium) is still open and
+  is carried forward by agreement. The new ISSUE-6 is a required one-line fix: the static prefix
+  pinned as 2.2.0 still names itself "prompt version 2.1.0". See iteration_1 below. The text that
+  follows is the initial review.
+  Initial review: All ten acceptance criteria are implemented and each has a test that would turn red if its
   behaviour regressed (mutation reasoning per AC below; no source was mutated, because this review
   is read-only). The studio compile package is green in the reviewer's own run. Four things keep
   this off PASS. (1) The global context is sent once, but as a sibling key of step 0's envelope.
@@ -184,8 +191,83 @@ issues:
       Keep the core-count semantics, which stay meaningful while caching is below its minimum. Record
       the interpretation in the spec or in C0 so B1's per-Run sums do not read it as full coverage.
 
+  - id: ISSUE-6
+    severity: low
+    category: requirements
+    status: open (required fix)
+    raised_in: iteration 1
+    location: backend/src/main/resources/studio/output-contract.md:1
+    description: >-
+      The contract heading reads "prompt version 2.1.0", but CompilePins.PROMPT_VERSION is 2.2.0, and
+      the contract text changed under 2.2.0 in both f7175f5a7 and 4d127fc52. The heading is part of
+      the static systemInstruction bytes that the pin identifies. The pinned artifact now names the
+      wrong version to the model, to any prompt dump or audit reader, and to the 10.26 harness
+      comparison. No code parses the heading (grep over backend/src and studio-runner), so this
+      affects documentation and provenance only, not behaviour.
+    recommendation: >-
+      Change line 1 to "prompt version 2.2.0" now. 2.2.0 is not yet in production, so the byte change
+      is free. After deploy it would need a 2.2.1 bump. Optionally add an assertion in
+      PromptLayoutTest or CompileFingerprintTest that the heading contains CompilePins.PROMPT_VERSION,
+      so the two cannot drift again.
+
+iteration_1:
+  reviewed_at: 2026-09-23
+  commit: 4d127fc52
+  verdict: CONCERNS
+  tests_run_by_reviewer:
+    command: "cd backend && ./gradlew test --rerun --tests 'com.citi.put.checks.studio.compile.*'"
+    result: >-
+      BUILD SUCCESSFUL in 1m 29s. JUnit XML: 50 classes, 348 tests, 0 failures, 0 errors, 1 skipped
+      (timestamps 2026-09-23T21:28). That is 345 + 3 new tests. PromptLayoutTest 6/6,
+      RepairRedactionTest 8/8, CompilePipelineIT 15/15, NoRuntimeLlmTest 3/3, RunnerPinDriftTest 5/5.
+    caveat: >-
+      Working tree. The only uncommitted file under studio/compile is still the pre-existing
+      CompilePipelineIT.java edit. ./gradlew check was not re-run. CodeRabbit was still SKIPPED (no
+      CLI on this Darwin host).
+  resolutions:
+    ISSUE-1: >-
+      RESOLVED. Line 0 now carries `untrustedGlobalContext: {appliesTo: "every step", context: ...}`
+      as its leading key. It is inside the JSON fence, and step 0's `untrustedContext` holds only step
+      0's own context. output-contract.md now lists the global context among the untrusted DATA and
+      states its request-wide scope. PromptLayoutTest.theGlobalContextIsLabelledUntrustedAndScopedToEveryStep
+      fails if any of these regress: the key name, the leading position, a reappearing bare
+      `globalContext`, the appliesTo value, the marker leaking into step 0's untrustedContext, the key
+      on line 1, or the contract wording.
+    ISSUE-1_placement_ruling: >-
+      Line 0 is ACCEPTABLE. The fenced lines map one to one onto the source steps: the "N: " index
+      prefix, RecordedFixtureGatewayClient.unfence, and the repair's copy of attempt 1's lines all
+      rely on that. A separate leading line would break the mapping or need special-casing in each of
+      them. The dev's wording ("one writable step ID per fenced line") is loose. Writable IDs come from
+      plan.writableIds(), and the invariant is the line-to-step correspondence. The conclusion holds
+      either way. The explicit label, the scope and the contract sentence close the misreading risk
+      that ISSUE-1 raised. The remaining deviation from spec §3.2.6 part (a) (a separate part rather
+      than a leading key) is a presentation difference. No test shows a behaviour change from it.
+    ISSUE-4: >-
+      RESOLVED. WHOLE_PRIVATE_KEY_BLOCK redacts from BEGIN through END. With no footer it redacts to
+      the closing quote of the JSON string. Unicode escapes are decoded before any pattern runs, and
+      an escaped backslash is kept as a pair. The two new RepairRedactionTest cases cover: a key body
+      with escaped newlines, text after the footer that is kept, the no-footer case, and AWS, GitHub
+      and PEM-header values written entirely as \u escapes. Observation, not a defect: the decoded text
+      is what the model sees, so a non-credential \u0022 becomes a bare quote inside the shown
+      proposal. It is still re-encoded by TextNode, so the fence cannot break. Also, the no-footer
+      alternative stops early if a decoded quote sits inside the key body. Both need model-invented
+      input and are low risk.
+    ISSUE-5: >-
+      RESOLVED. The GatewayProvenance javadoc defines usageAvailable as "both core counts reported",
+      says it says nothing about thoughts, cached and total tokens, and says readers must null-check
+      each count on its own.
+    ISSUE-2: "CARRY-FORWARD (not reopened): the enablement and measurement decision is pending the user."
+    ISSUE-3: "CARRY-FORWARD (not reopened): the fingerprint caller is owned by B1."
+  regressions: >-
+    None found. The fix touches only ContextPromptSection, RepairPromptAssembler, the
+    GatewayProvenance javadoc and output-contract.md. The static prefix is still byte-identical
+    across tests (PromptLayoutTest green), and the repair still copies attempt 1's lines.
+    NoRuntimeLlmTest and RunnerPinDriftTest are green.
+  required_fixes:
+    - "ISSUE-6: backend/src/main/resources/studio/output-contract.md:1 — heading 2.1.0 -> 2.2.0"
+
 waiver: { active: false }
 
-top_issues_summary: "2 medium (global-context labelling/scope; harness-before-live), 3 low (fingerprint unwired, redaction gaps, usageAvailable semantics)"
+top_issues_summary: "Iteration 1: ISSUE-1/4/5 resolved; open = ISSUE-6 (low, required: contract heading 2.1.0 vs pin 2.2.0), ISSUE-2 (medium, carry-forward), ISSUE-3 (low, carry-forward, B1). Initial: 2 medium (global-context labelling/scope; harness-before-live), 3 low (fingerprint unwired, redaction gaps, usageAvailable semantics)"
 
 next_status: Done
