@@ -36,6 +36,11 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * @param temperature legacy bound value; ignored by Gemini 3.8 and never sent
  * @param retry bounded transport-retry policy
  * @param artifactSchema Spring resource location of the artifact JSON schema used for validation
+ * @param thinkingLevel the thinking level sent explicitly on every request and recorded in the
+ *     compilation settings (Story 10.45 AC 6). Pinned {@code MEDIUM}, inferred to equal the
+ *     gemini-3.8-flash default; SPK-01 verifies it for Vertex/R2D2. {@code MINIMAL} is not
+ *     representable, so binding it fails
+ * @param providerFeatures request fields the R2D2 proxy is trusted to accept (EC-17 degradation)
  */
 @ConfigurationProperties(prefix = "studio.compile.gateway")
 public record StudioGatewayProperties(
@@ -52,7 +57,9 @@ public record StudioGatewayProperties(
     @DefaultValue("true") boolean structuredOutput,
     @DefaultValue("0") double temperature,
     @DefaultValue TransportRetry retry,
-    @DefaultValue("classpath:studio/artifact.schema.json") String artifactSchema) {
+    @DefaultValue("classpath:studio/artifact.schema.json") String artifactSchema,
+    @DefaultValue("MEDIUM") ThinkingLevel thinkingLevel,
+    @DefaultValue ProviderFeatures providerFeatures) {
 
   /**
    * The binding target.
@@ -62,7 +69,10 @@ public record StudioGatewayProperties(
    * all. {@code StudioExecutionProperties} carries the same annotation for the same reason.
    */
   @ConstructorBinding
-  public StudioGatewayProperties {}
+  public StudioGatewayProperties {
+    thinkingLevel = thinkingLevel == null ? DEFAULT_THINKING_LEVEL : thinkingLevel;
+    providerFeatures = providerFeatures == null ? ProviderFeatures.ALL : providerFeatures;
+  }
 
   /**
    * The twelve-argument form from before {@code max-output-tokens} existed, kept so callers that do
@@ -111,7 +121,58 @@ public record StudioGatewayProperties(
         structuredOutput,
         temperature,
         retry,
-        artifactSchema);
+        artifactSchema,
+        DEFAULT_THINKING_LEVEL,
+        ProviderFeatures.ALL);
+  }
+
+  /** The pinned thinking level (spec &sect;3.2.6); a harness A/B may later pin {@code LOW}. */
+  public static final ThinkingLevel DEFAULT_THINKING_LEVEL = ThinkingLevel.MEDIUM;
+
+  /**
+   * Thinking levels gemini-3.8-flash accepts (research Q1: low, medium and high).
+   *
+   * <p>{@code MINIMAL} is deliberately absent: gemini-3.8-flash rejects it, so a deployment that
+   * configures it fails at property binding rather than on every compile. {@code
+   * THINKING_LEVEL_UNSPECIFIED} is absent too, because the level is always sent explicitly.
+   */
+  public enum ThinkingLevel {
+    LOW,
+    MEDIUM,
+    HIGH
+  }
+
+  /**
+   * EC-17 degradation switches, set by configuration after SPK-01 and never auto-detected at
+   * runtime. Both default to {@code true}.
+   *
+   * @param systemInstruction when {@code false}, the identical static prefix is sent as the leading
+   *     text of {@code contents[0]} instead of as {@code systemInstruction}, keeping static-first
+   *     order
+   * @param thinkingConfig when {@code false}, {@code thinkingConfig} is omitted and the compilation
+   *     settings record {@code thinkingLevel:"PROVIDER_DEFAULT"}
+   */
+  public record ProviderFeatures(
+      @DefaultValue("true") boolean systemInstruction,
+      @DefaultValue("true") boolean thinkingConfig) {
+
+    /** Both fields sent: the approved request contract. */
+    public static final ProviderFeatures ALL = new ProviderFeatures(true, true);
+  }
+
+  /** The value the compilation settings record when {@code thinkingConfig} is not sent. */
+  public static final String PROVIDER_DEFAULT_THINKING_LEVEL = "PROVIDER_DEFAULT";
+
+  /**
+   * The thinking level as recorded in the compilation settings.
+   *
+   * @return the configured level, or {@value #PROVIDER_DEFAULT_THINKING_LEVEL} when {@code
+   *     thinkingConfig} is switched off
+   */
+  public String effectiveThinkingLevel() {
+    return providerFeatures.thinkingConfig()
+        ? thinkingLevel.name()
+        : PROVIDER_DEFAULT_THINKING_LEVEL;
   }
 
   /** The default output-token ceiling, sized so a maximal artifact fits. */

@@ -4,13 +4,18 @@ import com.citi.put.checks.studio.compile.CompileBudget;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.genai.Client;
 import com.google.genai.types.ClientOptions;
+import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.HttpOptions;
 import com.google.genai.types.HttpRetryOptions;
+import com.google.genai.types.Part;
+import com.google.genai.types.ThinkingConfig;
+import com.google.genai.types.ThinkingLevel;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
@@ -122,6 +127,10 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
     settings.put("sdkVersion", SDK_VERSION);
     settings.put("temperature", properties.temperature());
     settings.put("maxOutputTokens", properties.maxOutputTokens());
+    // The level actually requested, or PROVIDER_DEFAULT when thinkingConfig is switched off
+    // (Story 10.45 AC 6/7). The systemInstruction switch is deliberately not recorded: it moves
+    // the identical static bytes, and the spec's fingerprint inputs do not include it.
+    settings.put("thinkingLevel", properties.effectiveThinkingLevel());
     settings.put("envelopeVersion", 1);
     settings.put("providerSchemaVersion", 1);
     try {
@@ -139,8 +148,17 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
   @Override
   public CompileResponse propose(CompileRequest request, CompileBudget budget) {
     long start = System.nanoTime();
-    String payload = GatewayPayloadSerializer.serialize(request);
-    int bytes = GatewayPayloadSerializer.utf8Size(payload);
+    boolean systemInstruction = properties.providerFeatures().systemInstruction();
+    String staticPrefix = GatewayPayloadSerializer.staticPrefix(request);
+    // With systemInstruction the static prefix leaves as its own field; without it (EC-17) the
+    // identical bytes lead the single user part. Either way the count is what leaves the process.
+    String payload =
+        systemInstruction
+            ? GatewayPayloadSerializer.requestContents(request)
+            : GatewayPayloadSerializer.serialize(request);
+    int bytes =
+        GatewayPayloadSerializer.utf8Size(payload)
+            + (systemInstruction ? GatewayPayloadSerializer.utf8Size(staticPrefix) : 0);
     CompileResponse response;
     if (bytes > properties.maxInputBytes()) {
       response =
@@ -181,18 +199,7 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
                         Math.min(
                             Integer.MAX_VALUE, budget.cap(properties.requestTimeout()).toMillis()));
             GenerateContentConfig config =
-                // No sampling temperature is sent: Gemini 3.x is tuned for its default and the
-                // configured value is a legacy bound recorded on provenance only.
-                GenerateContentConfig.builder()
-                    .maxOutputTokens(properties.maxOutputTokens())
-                    .responseMimeType("application/json")
-                    .responseJsonSchema(providerSchema(request))
-                    .httpOptions(
-                        HttpOptions.builder()
-                            .timeout(timeout)
-                            .retryOptions(HttpRetryOptions.builder().attempts(1).build())
-                            .build())
-                    .build();
+                generationConfig(request, systemInstruction ? staticPrefix : null, timeout);
             GenerateContentResponse raw =
                 client.models.generateContent(properties.model(), payload, config);
             budget.remaining();
@@ -251,6 +258,45 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
     }
     audit.audit(request, properties.model(), response);
     return response;
+  }
+
+  /**
+   * The generation config for one transport attempt.
+   *
+   * <p>No sampling temperature is sent: Gemini 3.x is tuned for its default and the configured
+   * value is a legacy bound recorded on provenance only. The thinking level is always sent
+   * explicitly unless the EC-17 switch is off, and a thinking budget is never sent, because the
+   * provider rejects a request that carries both (Story 10.45 AC 6).
+   *
+   * @param request the compile request
+   * @param staticPrefix the static prefix to send as {@code systemInstruction}, or {@code null}
+   *     when it travels inside the user part instead
+   * @param timeoutMillis the per-attempt transport timeout
+   * @return the config
+   */
+  GenerateContentConfig generationConfig(
+      CompileRequest request, String staticPrefix, int timeoutMillis) {
+    GenerateContentConfig.Builder config =
+        GenerateContentConfig.builder()
+            .maxOutputTokens(properties.maxOutputTokens())
+            .responseMimeType("application/json")
+            .responseJsonSchema(providerSchema(request))
+            .httpOptions(
+                HttpOptions.builder()
+                    .timeout(timeoutMillis)
+                    .retryOptions(HttpRetryOptions.builder().attempts(1).build())
+                    .build());
+    if (staticPrefix != null) {
+      config.systemInstruction(Content.fromParts(Part.fromText(staticPrefix)));
+    }
+    if (properties.providerFeatures().thinkingConfig()) {
+      config.thinkingConfig(
+          ThinkingConfig.builder()
+              .thinkingLevel(
+                  new ThinkingLevel(ThinkingLevel.Known.valueOf(properties.thinkingLevel().name())))
+              .build());
+    }
+    return config.build();
   }
 
   private CompileResponse interpret(
@@ -322,56 +368,51 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
         parsed.artifactJson(), provenance, retries, elapsed(start), inputBytes, bytes);
   }
 
-  /** Provider-supported subset only; the strict local envelope validator is authoritative. */
+  /**
+   * Provider-supported subset only; the strict local envelope validator is authoritative.
+   *
+   * <p>Every map is insertion-ordered (Story 10.45 AC 5). {@code Map.of} iterates in an order that
+   * depends on a per-JVM random salt, so the serialized schema bytes used to differ between JVMs
+   * and replicas. The schema content is unchanged; only its key order is now fixed.
+   */
   static Map<String, Object> providerSchema(CompileRequest request) {
-    Map<String, Object> step =
-        Map.of(
-            "type",
-            "object",
-            "required",
-            List.of("stepId", "status"),
-            "properties",
-            Map.of(
-                "stepId",
-                Map.of(
-                    "type",
-                    "string",
-                    "enum",
-                    request.writableStepIds().stream().map(Object::toString).toList()),
-                "status",
-                Map.of(
-                    "type", "string", "enum", List.of("GENERATED", "UNSUPPORTED", "CLARIFICATION")),
-                "code",
-                Map.of("type", "string"),
-                "reason",
-                Map.of(
-                    "type",
-                    "string",
-                    "enum",
-                    List.of("UNSUPPORTED_CAPABILITY", "AMBIGUOUS_INTENT")),
-                "message",
-                Map.of("type", "string")));
-    return Map.of(
-        "type",
-        "object",
-        "required",
-        List.of("version", "kind", "steps"),
-        "properties",
-        Map.of(
-            "version",
-            Map.of("type", "integer", "minimum", 1, "maximum", 1),
-            "kind",
-            Map.of("type", "string", "enum", List.of(request.proposalKind())),
-            "steps",
-            Map.of(
-                "type",
-                "array",
-                "minItems",
-                request.writableStepIds().size(),
-                "maxItems",
-                request.writableStepIds().size(),
-                "items",
-                step)));
+    Map<String, Object> stepProperties = new LinkedHashMap<>();
+    stepProperties.put(
+        "stepId",
+        typed("string", "enum", request.writableStepIds().stream().map(Object::toString).toList()));
+    stepProperties.put(
+        "status", typed("string", "enum", List.of("GENERATED", "UNSUPPORTED", "CLARIFICATION")));
+    stepProperties.put("code", typed("string"));
+    stepProperties.put(
+        "reason", typed("string", "enum", List.of("UNSUPPORTED_CAPABILITY", "AMBIGUOUS_INTENT")));
+    stepProperties.put("message", typed("string"));
+    Map<String, Object> step = typed("object", "required", List.of("stepId", "status"));
+    step.put("properties", stepProperties);
+
+    Map<String, Object> version = typed("integer", "minimum", 1);
+    version.put("maximum", 1);
+    Map<String, Object> steps = typed("array", "minItems", request.writableStepIds().size());
+    steps.put("maxItems", request.writableStepIds().size());
+    steps.put("items", step);
+    Map<String, Object> envelopeProperties = new LinkedHashMap<>();
+    envelopeProperties.put("version", version);
+    envelopeProperties.put("kind", typed("string", "enum", List.of(request.proposalKind())));
+    envelopeProperties.put("steps", steps);
+    Map<String, Object> envelope = typed("object", "required", List.of("version", "kind", "steps"));
+    envelope.put("properties", envelopeProperties);
+    return envelope;
+  }
+
+  private static Map<String, Object> typed(String type) {
+    Map<String, Object> node = new LinkedHashMap<>();
+    node.put("type", type);
+    return node;
+  }
+
+  private static Map<String, Object> typed(String type, String key, Object value) {
+    Map<String, Object> node = typed(type);
+    node.put(key, value);
+    return node;
   }
 
   private static boolean retryable(Throwable error) {
