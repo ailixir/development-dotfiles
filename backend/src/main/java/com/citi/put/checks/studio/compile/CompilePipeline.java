@@ -347,6 +347,73 @@ public class CompilePipeline {
     }
   }
 
+  /**
+   * The compilation fingerprint: one canonical hash over everything that changes what a compile
+   * would generate (Story 10.45, AC 2 and 6; spec &sect;3.2.6 "Fingerprint", C0 &sect;6).
+   *
+   * <p>Inputs: the gateway's nonsecret settings (model, {@code maxOutputTokens} and the effective
+   * {@code thinkingLevel}, which is {@code PROVIDER_DEFAULT} when {@code thinkingConfig} is
+   * switched off), {@code PROMPT_VERSION}, the syntax-reference version, the validator/runtime
+   * pins, {@code VersionedIntentDeriver.CURRENT_VERSION} and {@code
+   * StepReferencePolicyDeriver.POLICY_VERSION}. The gateway settings are canonicalized, so their
+   * key order does not matter.
+   *
+   * <p>Deliberately <b>not</b> an input:
+   *
+   * <ul>
+   *   <li>The {@code provider-features.system-instruction} fallback. Spec &sect;3.2.6 lists the
+   *       inputs and does not name it, and its "Degradation" clause gives only the thinking
+   *       fallback a fingerprint record. The fallback moves the identical static bytes, in the same
+   *       static-first order, from {@code systemInstruction} to the head of {@code contents[0]}.
+   *   <li>The writable-anchor switch. The spec names it, but it only exists once INCREMENTAL does
+   *       (Story B2), which adds it here.
+   * </ul>
+   *
+   * @param gatewaySettings {@link LlmGatewayClient#compilationSettings()}
+   * @param pin the configured runtime pin
+   * @return 64 lowercase hex characters
+   */
+  static String compilationFingerprint(String gatewaySettings, RuntimePinProperties pin) {
+    return compilationFingerprint(
+        gatewaySettings,
+        pin,
+        CompilePins.PROMPT_VERSION,
+        CompilePins.SYNTAX_REFERENCE_VERSION,
+        VersionedIntentDeriver.CURRENT_VERSION,
+        StepReferencePolicyDeriver.POLICY_VERSION);
+  }
+
+  /**
+   * The fingerprint with the code-pinned versions passed explicitly, so each named input can be
+   * shown to change the result on its own ({@code CompileFingerprintTest}).
+   */
+  static String compilationFingerprint(
+      String gatewaySettings,
+      RuntimePinProperties pin,
+      String promptVersion,
+      String syntaxReferenceVersion,
+      String intentDerivationVersion,
+      int referencePolicyVersion) {
+    ObjectNode identity = MAPPER.createObjectNode();
+    try {
+      identity.set(
+          "gateway",
+          gatewaySettings == null ? MAPPER.createObjectNode() : MAPPER.readTree(gatewaySettings));
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException("Invalid gateway compilation settings", e);
+    }
+    identity.put("promptVersion", promptVersion);
+    identity.put("syntaxReferenceVersion", syntaxReferenceVersion);
+    identity.put("artifactSchemaVersion", pin.artifactSchemaVersion());
+    identity.put("configuredSyntaxReferenceVersion", pin.syntaxReferenceVersion());
+    identity.put("validatorSchemaVersion", pin.validatorSchemaVersion());
+    identity.put("executorVersion", pin.executorVersion());
+    identity.put("playwrightVersion", pin.playwrightVersion());
+    identity.put("intentDerivationVersion", intentDerivationVersion);
+    identity.put("referencePolicyVersion", referencePolicyVersion);
+    return ArtifactCanonicalizer.hash(identity.toString());
+  }
+
   private com.citi.put.checks.studio.compile.gateway.CompileRequest assemblePrompt(
       CompileInputs inputs, ContextCompileInputs contextInputs, UUID requestId) {
     if (contextInputs == null) {
@@ -435,7 +502,31 @@ public class CompilePipeline {
     if (versionedReferencePolicy) {
       provenance.put("intentDerivationVersion", VersionedIntentDeriver.CURRENT_VERSION);
     }
+    putGenerationUsage(provenance, gateway);
     return provenance.toString();
+  }
+
+  /**
+   * Records the accepted proposal's actual generation settings and vendor usage (Story 10.45, AC 4;
+   * spec &sect;3.2.6 "Usage").
+   *
+   * <p>Every count is copied as reported. A count the vendor did not report is stored as JSON
+   * {@code null}, never {@code 0}, and {@code usageAvailable} is {@code false} whenever the core
+   * counts are missing. {@code cachedContentTokenCount} is recorded for observation only and is not
+   * evidence of a caching saving (NFR-2). Every proposal, including a rejected one, is also on the
+   * gateway audit line; the revision carries the proposal that produced it.
+   */
+  static void putGenerationUsage(ObjectNode provenance, GatewayProvenance gateway) {
+    provenance.put("maxOutputTokens", gateway == null ? null : gateway.maxOutputTokens());
+    provenance.put("thinkingLevel", gateway == null ? null : gateway.thinkingLevel());
+    ObjectNode usage = provenance.putObject("usage");
+    usage.put("promptTokenCount", gateway == null ? null : gateway.inputTokens());
+    usage.put("candidatesTokenCount", gateway == null ? null : gateway.outputTokens());
+    usage.put("thoughtsTokenCount", gateway == null ? null : gateway.thoughtsTokens());
+    usage.put("cachedContentTokenCount", gateway == null ? null : gateway.cachedContentTokens());
+    usage.put("totalTokenCount", gateway == null ? null : gateway.totalTokens());
+    usage.put("finishReason", gateway == null ? null : gateway.finishReason());
+    usage.put("usageAvailable", gateway != null && gateway.usageAvailable());
   }
 
   private static boolean isSupportedArtifactVersion(String artifactJson) {

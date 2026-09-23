@@ -26,8 +26,16 @@ public final class CompilePins {
    */
   public static final String SYNTAX_REFERENCE_VERSION = "2.1.0";
 
-  /** Version of the prompt assembly — fencing rule, reference framing and output contract. */
-  public static final String PROMPT_VERSION = "2.1.0";
+  /**
+   * Version of the prompt assembly — fencing rule, reference framing, output contract and request
+   * layout.
+   *
+   * <p>{@code 2.2.0} (Story 10.45, AC 2): static prefix in {@code systemInstruction}, global
+   * context once per request, reference names and writable IDs after the static blocks, and repair
+   * carrying the rejected proposal. Advanced exactly once for that layout, before any
+   * v2/incremental baseline exists (spec &sect;9, OQ-10).
+   */
+  public static final String PROMPT_VERSION = "2.2.0";
 
   /**
    * The only artifact schema version this backend can hand to the runner.

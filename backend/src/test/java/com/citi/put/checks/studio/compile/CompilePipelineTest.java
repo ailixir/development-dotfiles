@@ -268,6 +268,13 @@ class CompilePipelineTest {
     assertThat(provenance.path("playwrightVersion").asText()).isEqualTo("1.63.0");
     assertThat(provenance.path("artifactSchemaVersion").asInt())
         .isEqualTo(CompilePins.SUPPORTED_ARTIFACT_VERSION);
+    // Story 10.45 AC 4: the stub reports no vendor usage, so the persisted counts are null, never
+    // 0.
+    JsonNode usage = provenance.path("usage");
+    assertThat(usage.get("thoughtsTokenCount").isNull()).isTrue();
+    assertThat(usage.get("cachedContentTokenCount").isNull()).isTrue();
+    assertThat(usage.get("promptTokenCount").isNull()).isTrue();
+    assertThat(usage.path("usageAvailable").asBoolean()).isFalse();
 
     assertThat(
             jdbc.queryForObject(
