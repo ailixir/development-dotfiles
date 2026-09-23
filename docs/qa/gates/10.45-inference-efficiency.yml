@@ -1,0 +1,191 @@
+schema: 1
+story: '10.45'
+story_title: Inference efficiency — static-first prompt, deterministic schema, explicit thinking config, complete usage accounting
+epic: EPIC-10
+label: LIVE-AFFECTING
+
+gate: CONCERNS
+reviewer: Quinn (@qa)
+reviewed_at: 2026-09-23
+reviewed_revision: commit:f7175f5a7 (range b784657cb..f7175f5a7, four commits)
+
+status_reason: >-
+  All ten acceptance criteria are implemented and each has a test that would turn red if its
+  behaviour regressed (mutation reasoning per AC below; no source was mutated, because this review
+  is read-only). The studio compile package is green in the reviewer's own run. Four things keep
+  this off PASS. (1) The global context is sent once, but as a sibling key of step 0's envelope.
+  Before this story it sat inside `untrustedContext`. Now it has no untrusted label of its own and no
+  statement that it applies to every step. The spec lays it out as its own part (a), ahead of the
+  steps. (2) AC-11.2 says the 10.26 harness must cover the change "before enablement". This story
+  has no flag, so merging and deploying it is the enablement. (3) `compilationFingerprint` has no
+  production caller, so for now the thinking level reaches the fingerprint only in unit tests.
+  (4) Redaction of the rejected proposal reuses detection regexes, which catch the shape of a
+  credential but may not cover all of it. None of these is a defect in shipped behaviour that a
+  test shows to be wrong, so the verdict is CONCERNS, not FAIL.
+
+evidence:
+  tests_run_by_reviewer:
+    - command: "cd backend && ./gradlew test --rerun --tests 'com.citi.put.checks.studio.compile.*'"
+      result: "BUILD SUCCESSFUL in 1m 32s — 50 classes, 345 tests, 0 failures, 0 errors, 1 skipped (JUnit XML, timestamps 2026-09-23T21:18–21:19)"
+      named_classes: >-
+        PromptLayoutTest 5, RepairRedactionTest 6, RepairLoopTest 10, RepairBoundsTest 7,
+        RepairExhaustionTest 5, CompileFingerprintTest 8, ProvenanceUsageTest 4, UsageCaptureTest 7,
+        ProviderSchemaDeterminismTest 4, GenAiLlmGatewayClientTest 13, StudioGatewayPropertiesTest 8,
+        NoRuntimeLlmTest 3, RunnerPinDriftTest 5, ArtifactVersionPinTest 4, CompilePipelineTest 19,
+        CompilePipelineIT 15, ContextPromptSectionTest 3, ContextAggregateBudgetTest 3,
+        GatewayAuditTest 10, GenAiGatewayAuditTest 1 — all 0 failures
+      caveat: >-
+        Ran against the working tree. The only uncommitted file under studio/compile is
+        CompilePipelineIT.java (pre-existing, unrelated modification). No main-source file named in
+        this review differs from f7175f5a7.
+    - command: "cd studio-runner && ./node_modules/.bin/vitest run test/syntax-reference-drift.test.ts --coverage.enabled=false"
+      result: "1 file, 9/9 passed"
+  not_run_by_reviewer:
+    - "./gradlew check — not re-run; @dev reports BUILD SUCCESSFUL (1386 tests, 0 failures) on the whole working tree"
+    - "CodeRabbit — SKIPPED, not passed: CLI not installed on this Darwin host (installation_mode: wsl, skip_if_not_installed: true)"
+
+ac_trace:
+  AC1_FR11_static_prefix: >-
+    MET. The static prefix (outputContract + "\n\n" + syntaxReference) is sent as systemInstruction.
+    GenAiLlmGatewayClientTest.twoDifferentTestsSendByteIdenticalSystemInstructions and
+    PromptLayoutTest (all three assembly paths) assert the bytes are identical and contain no
+    IDs, kind, references or global context. A mutation that appends any per-test text to the
+    contract turns them red. Not verified: the SDK's JSON field order on the wire. AC-11.1 is proven
+    at the systemInstruction level, not as raw request bytes.
+  AC2_FR11_pin: >-
+    MET for merge. PROMPT_VERSION is 2.2.0 and CompileFingerprintTest pins the literal. The harness
+    clause is a concern: see issue ISSUE-2.
+  AC3_FR12_global_once: >-
+    MET literally. PromptLayoutTest counts one occurrence of the marker in 6 steps and places it
+    before step 0. The layout deviates from the spec: see issue ISSUE-1.
+  AC4_FR13_usage: >-
+    MET. Thoughts, cached and total token counts are recorded on the gateway provenance, on the
+    audit line and in the revision provenance `usage` object. Absent counts are null, never 0:
+    UsageCaptureTest checks the audit line with doesNotContain("Tokens=0"), ProvenanceUsageTest
+    checks the JSON, and CompilePipelineTest checks the stub end to end on PostgreSQL. A mutation to
+    orElse(0) turns them red. usageAvailable means that both core counts (prompt and candidates)
+    were reported. A missing cachedContentTokenCount leaves it true. See ISSUE-5.
+  AC5_schema: >-
+    MET. Every schema map is a LinkedHashMap. ProviderSchemaDeterminismTest walks the tree and fails
+    deterministically on any other map type, so a revert to Map.of is caught without depending on the
+    hash salt. A golden-bytes test backs this up. Schema content is unchanged.
+  AC6_thinking: >-
+    MET. thinkingLevel is always sent, a budget never is, and MINIMAL and UNSPECIFIED fail at binding.
+    compilationSettings carries the level, and the fingerprint changes on LOW, MEDIUM and
+    PROVIDER_DEFAULT. The fingerprint has no production caller yet: see ISSUE-3.
+  AC7_degradation: >-
+    MET. Both switches are bound properties that default to true. With system-instruction=false the
+    identical bytes lead contents[0] (tested byte-exact). With thinking-config=false the field is
+    omitted and PROVIDER_DEFAULT is recorded.
+  AC8_repair: >-
+    MET. The repair is built from the attempt-1 request, so the kind, the writable IDs (and with them
+    the schema enum) and the fenced lines are copied. The write set is identical by construction.
+    RepairLoopTest asserts containsExactlyElementsOf, and that attempt N carries proposal N-1 only.
+    RepairRedactionTest asserts that no canary or resolved value reaches the repair, and that AWS and
+    GitHub tokens are replaced by labels. The 3-proposal / 3-of-9 bounds are unchanged
+    (RepairBoundsTest, RepairExhaustionTest green). The proposal cap is 64 KiB, measured after
+    redaction and before fencing, and never splits a code point.
+  AC9_size_cap: "MET. Measured after dedup; CONTEXT_TOO_LARGE; accepted context sent whole (PromptLayoutTest)."
+  AC10_no_caching_claim: >-
+    MET. No savings claim appears in code, javadoc or the story. cachedContentTokenCount is
+    documented as observation only (NFR-2). The LIVE-AFFECTING label is in the story header.
+
+focus_rulings:
+  global_context_placement: >-
+    Only partly faithful. It satisfies "exactly once" and "precedes every step". It does not
+    satisfy the spec's separate part (a) ahead of the reference names and steps. It also removes the
+    `untrustedContext` wrapper that labelled global context before this story. output-contract.md:30
+    lists the untrusted categories without naming context. The fenced line as a whole still counts as
+    a "source line", which limits the trust regression. Nothing tells the model that the value under
+    step 0 applies to all steps. That is a plausible step-1-only misreading, not verified either
+    way, and it is live on merge. See ISSUE-1.
+  rejected_proposal_leak: >-
+    A resolved value cannot leak. The model never receives one: RepairPromptAssembler has no fields
+    and the source is screened by CredentialPatternScreen before assembly. The proposal is model
+    output built from that input, so redaction is defence in depth. Two gaps (ISSUE-4):
+    PRIVATE_KEY_BLOCK matches only the BEGIN header, so the key body survives redaction. A
+    credential written with JSON \u escapes in the raw artifact text escapes every regex. Risk is low
+    because such material could only be invented by the model. It was not supplied to the model.
+    The cap is a byte bound taken before JSON escaping. Worst case: 64 KiB proposal + 64 KiB
+    diagnostics + ≤32 KiB context + ~9 KiB prefix, under max-input-bytes 262144 unless the proposal
+    escapes heavily. If it does, the gateway pre-flight refuses it and the compile ends as a gateway
+    error, not NEEDS_REVISION. The size stays bounded.
+  fingerprint_system_instruction_switch: >-
+    Acceptable for Story A. The spec's input list and the Degradation clause omit it. The live v1
+    path neither persists nor compares a fingerprint, so no reuse decision can depend on it yet. It
+    must be decided before B2 reuse relies on the fingerprint (carry-forward ISSUE-3).
+  usage_null_semantics: >-
+    Holds on both the audit path and the provenance path, and is tested. usageAvailable
+    semantics are defensible but differ from the literal spec text (ISSUE-5).
+  pin_drift: >-
+    Holds. RunnerPinDriftTest guards SYNTAX_REFERENCE_VERSION only (2.1.0 on both sides:
+    CompilePins and studio-runner/src/versions.ts:29). PROMPT_VERSION is backend-only and the runner
+    does not reference it. The runner drift vitest passes 9/9, and no syntax-reference resource
+    changed in the range.
+  no_runtime_llm: "NoRuntimeLlmTest 3/3 green and unmodified in the range. Nothing on the Run path gained an LLM call."
+
+issues:
+  - id: ISSUE-1
+    severity: medium
+    category: requirements
+    location: backend/src/main/java/com/citi/put/checks/studio/compile/ContextPromptSection.java:89-90; backend/src/main/resources/studio/output-contract.md:30
+    description: >-
+      The global context is emitted as a top-level `globalContext` key of step 0's envelope. It is
+      outside `untrustedContext` and carries no statement of scope. The spec §3.2.6 layout part (a)
+      puts it ahead of the steps as its own part. Before this story it sat inside
+      `untrustedContext` for every step.
+    recommendation: >-
+      Label it untrusted and scoped. Either nest it as `untrustedContext.globalContext` on step 0 or
+      emit a dedicated leading line. Name "global context (applies to every step)" in the
+      output-contract untrusted list. Add a PromptLayoutTest assertion for the label. PROMPT_VERSION
+      2.2.0 is not yet in production, so this needs no second pin bump.
+  - id: ISSUE-2
+    severity: medium
+    category: process
+    location: docs/stories/10.45.story.md AC 2
+    description: >-
+      AC-11.2 requires 10.26 harness coverage "before enablement". The story ships with no flag, so
+      deploying it enables it, while the PO note moves the harness to GATE-ENABLE. The prompt layout
+      change and the explicit MEDIUM thinking level would reach production compiles unmeasured.
+    recommendation: >-
+      Before the production deploy, either run the 10.26 harness on 2.2.0 or record an explicit
+      @po/@architect acceptance that A goes live unmeasured.
+  - id: ISSUE-3
+    severity: low
+    category: code
+    location: backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java:376
+    description: >-
+      compilationFingerprint has no production caller, so AC 6's "included in the fingerprint"
+      holds only in unit tests. The systemInstruction fallback is deliberately excluded from it.
+    recommendation: >-
+      B1 must wire it into capture-for-all with a test that the persisted fingerprint uses
+      client.compilationSettings(). B2 must decide whether the systemInstruction switch becomes an
+      input before reuse depends on the fingerprint.
+  - id: ISSUE-4
+    severity: low
+    category: security
+    location: backend/src/main/java/com/citi/put/checks/studio/compile/RepairPromptAssembler.java:154-160
+    description: >-
+      Redaction reuses detection patterns. PRIVATE_KEY_BLOCK replaces only the header, and the regexes
+      run on raw JSON text, where \u escapes defeat them. No real secret can reach the proposal
+      through this path (see focus_rulings), so the risk is low.
+    recommendation: >-
+      Redact from BEGIN to END PRIVATE KEY, and run the patterns on the JSON-decoded code strings.
+      Add both cases to RepairRedactionTest.
+  - id: ISSUE-5
+    severity: low
+    category: docs
+    location: backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java:348
+    description: >-
+      usageAvailable is true when the prompt and candidates counts are present, even if the cached
+      or thoughts count is absent. Spec §3.2.6 reads "an absent field is stored as null with
+      usageAvailable:false".
+    recommendation: >-
+      Keep the core-count semantics, which stay meaningful while caching is below its minimum. Record
+      the interpretation in the spec or in C0 so B1's per-Run sums do not read it as full coverage.
+
+waiver: { active: false }
+
+top_issues_summary: "2 medium (global-context labelling/scope; harness-before-live), 3 low (fingerprint unwired, redaction gaps, usageAvailable semantics)"
+
+next_status: Done
