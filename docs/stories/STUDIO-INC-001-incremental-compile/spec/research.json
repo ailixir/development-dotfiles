@@ -1,0 +1,358 @@
+{
+  "storyId": "STUDIO-INC-001-incremental-compile",
+  "researchedAt": "2026-09-23T18:00:00Z",
+  "researchedBy": "@analyst",
+  "complexity": "COMPLEX",
+  "baseline": {
+    "branch": "brunobuger/ui-studio",
+    "commit": "1f3c56a59",
+    "worktreeNote": "The worktree has uncommitted changes (studio/dispatch/*, studio/secrets/*, untracked V25__drop_plaintext_secrets.sql). In-repo findings were read from the worktree. Where HEAD and the worktree differ for a cited file, that is stated."
+  },
+  "bindingInputs": "decisions.md (OQ-1..OQ-5) is binding. OQ-4 = restore the v2 stack and mount InferenceStudio, rebuilt on the current pipeline. That supersedes complexity.json's assessedDirection ('extend live v1 page'). OQ-2 = derived forward scope with no author checkbox. OQ-3 = Run auto-accepts.",
+  "legend": {
+    "VERIFIED": "Read in code or git, inspected in the SDK jar with javap, or quoted from an official doc page fetched on 2026-09-23.",
+    "INFERRED": "Reasoned from verified facts. Not executed or observed.",
+    "UNKNOWN": "No evidence found."
+  },
+
+  "dependencies": [
+    {
+      "name": "com.google.genai:google-genai (Google Gen AI Java SDK)",
+      "type": "library",
+      "version": "1.71.0",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "1.71.0",
+        "usageLocations": [
+          "backend/build.gradle.kts:56 implementation(\"com.google.genai:google-genai:1.71.0\") (matches GenAiLlmGatewayClient.SDK_VERSION = \"1.71.0\", GenAiLlmGatewayClient.java:24)",
+          "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java:90-104 Client.builder().vertexAI(true) ... HttpOptions.apiVersion(\"v1\"), baseUrl = properties.endpoint() (R2D2 proxy)",
+          "GenAiLlmGatewayClient.java:183-197 GenerateContentConfig: maxOutputTokens, responseMimeType=application/json, responseJsonSchema(providerSchema(request)). No systemInstruction, no thinkingConfig, no temperature.",
+          "GenAiLlmGatewayClient.java:283-284 reads only usageMetadata.promptTokenCount and candidatesTokenCount"
+        ]
+      },
+      "documentation": {
+        "url": "https://ai.google.dev/gemini-api/docs/thinking ; https://ai.google.dev/gemini-api/docs/caching ; https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash",
+        "relevantSections": ["GenerateContentConfig", "ThinkingConfig", "GenerateContentResponseUsageMetadata", "CachedContent"]
+      },
+      "apiSurfaceVerified": {
+        "method": "VERIFIED with javap against ~/.gradle/caches/.../google-genai-1.71.0.jar",
+        "GenerateContentConfig": ["systemInstruction(): Optional<Content>", "thinkingConfig(): Optional<ThinkingConfig>", "cachedContent(): Optional<String>", "labels(): Optional<Map<String,String>>", "serviceTier()"],
+        "ThinkingConfig": ["thinkingLevel(): Optional<ThinkingLevel>", "thinkingBudget(): Optional<Integer>", "includeThoughts(): Optional<Boolean>"],
+        "ThinkingLevel.Known": ["THINKING_LEVEL_UNSPECIFIED", "MINIMAL", "LOW", "MEDIUM", "HIGH"],
+        "GenerateContentResponseUsageMetadata": ["promptTokenCount", "candidatesTokenCount", "thoughtsTokenCount", "cachedContentTokenCount", "cacheTokensDetails", "promptTokensDetails", "totalTokenCount", "toolUsePromptTokenCount", "trafficType"],
+        "CreateCachedContentConfig": "present (explicit caching API exists in the SDK)"
+      },
+      "patterns": [
+        {
+          "name": "Static prefix as systemInstruction",
+          "description": "Put the output contract and syntax reference (byte-stable at the same pins) in GenerateContentConfig.systemInstruction. Put only the per-request lines (proposal kind, writable IDs, fenced source, repair context) in contents. Illustrative only, not production code.",
+          "codeExample": "GenerateContentConfig.builder()\n  .systemInstruction(Content.fromParts(Part.fromText(outputContract + SEP + syntaxReference)))\n  .thinkingConfig(ThinkingConfig.builder().thinkingLevel(new ThinkingLevel(ThinkingLevel.Known.LOW)).build())\n  .responseMimeType(\"application/json\").responseJsonSchema(schema).build();"
+        },
+        {
+          "name": "Null-not-zero usage capture",
+          "description": "Read thoughtsTokenCount and cachedContentTokenCount as Optional. Store null plus usageAvailable:false when a field is absent (FR-13). Absence through the R2D2 proxy is plausible and must not be recorded as 0.",
+          "codeExample": "Integer thoughts = raw.usageMetadata().flatMap(u -> u.thoughtsTokenCount()).orElse(null);\nInteger cached  = raw.usageMetadata().flatMap(u -> u.cachedContentTokenCount()).orElse(null);"
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": [
+          "The SDK exposes the fields, but whether the R2D2 proxy (custom baseUrl, apiVersion v1) forwards systemInstruction and thinkingConfig and returns thoughtsTokenCount/cachedContentTokenCount is UNKNOWN. SPK-01/OQ-9 must prove it live (CON-8)."
+        ]
+      }
+    },
+    {
+      "name": "Vertex AI Gemini gemini-3.8-flash: thinking configuration",
+      "type": "api",
+      "version": "gemini-3.8-flash (stable per Gemini API model page, last updated 2026-09-02)",
+      "verified": true,
+      "source": "manual",
+      "existing": { "installed": true, "currentVersion": "model id from StudioGatewayProperties.model()", "usageLocations": ["GenAiLlmGatewayClient.java:197"] },
+      "documentation": {
+        "url": "https://ai.google.dev/gemini-api/docs/thinking ; https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash ; https://ai.google.dev/gemini-api/docs/gemini-3 ; https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/thinking",
+        "relevantSections": ["thinking_level", "thinking_budget (legacy)", "thought signatures", "pricing of thinking tokens"]
+      },
+      "findings": [
+        "VERIFIED (Gemini API docs, updated 2026-09-23): Gemini 3 uses thinking_level. gemini-3.8-flash and gemini-3.7-flash default to 'medium'.",
+        "VERIFIED (Gemini API model page for gemini-3.8-flash): thinking levels low, medium and high are supported. 'minimal' returns an error on 3.8 Flash. MINIMAL existed on Gemini 3 Flash / 3.1 Flash-Lite and is not portable.",
+        "VERIFIED (Gemini 3 developer guide, via search result snippets): thinking_budget is still accepted for backward compatibility but not recommended. Sending both thinking_budget and thinking_level in one request returns an error. Community bug reports (cline #7957) show the same error text.",
+        "VERIFIED (Gemini API thinking doc): 'Response pricing is the sum of output tokens and thinking tokens.' Thinking tokens are billed like output and reported separately.",
+        "VERIFIED (docs): thought signatures matter for multi-turn and function calling continuity. This compile is single-turn with no tools, so signatures are INFERRED to be irrelevant.",
+        "UNKNOWN: whether the Vertex v1 surface behind R2D2 accepts thinkingConfig.thinkingLevel. The Vertex doc pages returned navigation only to WebFetch, so the Vertex-specific text could not be quoted. The Vertex nav does list Gemini 3.5-3.8 Flash.",
+        "INFERRED: the live request sends no thinkingConfig, so every compile runs at the model default (MEDIUM) and pays hidden thinking tokens that are not recorded today (brief). For constrained code emission against a pinned syntax reference, LOW is the obvious candidate. Its quality impact must be measured on the 10.26 harness before it is pinned, and the level must enter the compilation fingerprint (FR-13)."
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": ["Leave the default (MEDIUM) and only record thoughtsTokenCount, if the harness shows LOW regresses quality"],
+        "conflicts": ["Never send thinkingBudget and thinkingLevel together. Never send MINIMAL to gemini-3.8-flash."]
+      }
+    },
+    {
+      "name": "Vertex AI implicit context caching",
+      "type": "service",
+      "version": "n/a (on by default for Gemini 2.5+)",
+      "verified": true,
+      "source": "manual",
+      "existing": { "installed": true, "currentVersion": "implicitly on; not measured (cachedContentTokenCount not read)", "usageLocations": [] },
+      "documentation": {
+        "url": "https://ai.google.dev/gemini-api/docs/caching ; https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/context-cache/context-cache-overview",
+        "relevantSections": ["Implicit caching", "Minimum input token count", "Discount"]
+      },
+      "findings": [
+        "VERIFIED (Gemini API caching doc, updated 2026-09-02): implicit caching is enabled by default for Gemini 2.5 and newer. Minimum input token count is 4,096 for Gemini 3.5/3.6/3.7/3.8 Flash and 3.1 Pro, and 2,048 for 2.5 Flash/Pro. Guidance: 'put large and common contents at the beginning of your prompt'. A request hits the cache when it shares a common prefix with a recent request.",
+        "VERIFIED (Vertex overview, via search snippet of the official page): implicit caching is on for all Google Cloud projects and gives a 90% discount on cached tokens versus standard input tokens. Hits are more likely when requests with the same prefix arrive close together. The Gemini 3 minimum is 4,096 tokens.",
+        "VERIFIED (docs): the hit size is reported as usageMetadata.cachedContentTokenCount.",
+        "Prefix must be at the start: VERIFIED in substance. Caching matches a common prefix, so any byte that varies before the static block breaks the hit for everything after it. This confirms the brief's finding that 'Required envelope kind' and 'Writable step IDs' (GatewayPayloadSerializer.java:22-28) sit between the output contract and the syntax reference and cap any hit at the 2.4 KB contract.",
+        "Does systemInstruction count as prefix: INFERRED yes, MEDIUM confidence. Evidence: python-genai issue #1880 (Vertex, gemini-2.5-flash) reports that identical system instructions reliably cache on the second call. It also reports erratic hit rates (~42%) when system prompts share a ~10K-token prefix but differ in suffix. Google docs do not state the serialization order explicitly.",
+        "Reliability caveats (VERIFIED as reported bugs, not as Vertex behavior): python-genai #2064 (Gemini API, gemini-3-flash-preview) reports a 'dead zone' where cachedContentTokenCount drops to 0 for prompts of ~9K-17K tokens despite a byte-identical prefix, with ~2K-token cache granularity below ~8K. Implicit hits are best-effort and cannot be relied on for a numeric target.",
+        "Size check, INFERRED: output-contract.md is 2,436 B and syntax-reference.md is 6,766 B (VERIFIED), 9,202 B together, which is roughly 2,300-2,700 tokens at 3.4-4 chars/token (not tokenized). The static prefix alone is BELOW the 4,096-token minimum. A hit therefore needs the whole request to be at least 4,096 tokens, and even then only the static ~2.5K tokens are shared across different tests. Only same-test repair attempts and repeated compiles share more (the fenced source).",
+        "Additional prefix-instability risk, INFERRED from VERIFIED code: providerSchema() (GenAiLlmGatewayClient.java:326-374) embeds the per-request writable step IDs and kind in responseJsonSchema. It is built with Map.of, whose iteration order is randomized per JVM (JDK ImmutableCollections SALT), so the schema's JSON key order can differ between replicas and restarts. Whether Vertex places the response schema inside the cacheable prefix is UNKNOWN. If it does, both effects defeat caching. Fix cheaply with deterministic (sorted/LinkedHashMap) schema construction.",
+        "Expected value, INFERRED: with FR-11 applied, a hit saves about 90% of ~2.5K input tokens per call. That is small next to output plus thinking tokens for a multi-step FULL compile. The main efficiency levers are (1) INCREMENTAL output scaling with suffix length (NFR-1), (2) thinking level, and (3) deduplicating global context (FR-12). Caching is a secondary, best-effort gain and should be measured, not promised."
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": ["Explicit cachedContent (see next entry; not recommended)"],
+        "conflicts": ["Behind R2D2, whether the proxy preserves the billing and caching path and returns cachedContentTokenCount is UNKNOWN (SPK-01)."]
+      }
+    },
+    {
+      "name": "Vertex AI explicit context caching (cachedContent)",
+      "type": "service",
+      "version": "n/a",
+      "verified": true,
+      "source": "manual",
+      "existing": { "installed": false, "currentVersion": null, "usageLocations": [] },
+      "documentation": {
+        "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/context-cache/context-cache-overview ; https://oneuptime.com/blog/post/2026-02-17-how-to-implement-context-caching-with-gemini-on-vertex-ai-to-reduce-token-costs/view",
+        "relevantSections": ["Create a context cache", "Use a context cache", "Pricing"]
+      },
+      "findings": [
+        "VERIFIED (SDK jar): GenerateContentConfig.cachedContent(String) and CreateCachedContentConfig exist in 1.71.0.",
+        "VERIFIED (docs table): the same per-model minimum applies, 4,096 tokens for Gemini 3.x. The ~2.5K-token static prefix (INFERRED size) is too small to be an explicit cache unless padded. Padding defeats the purpose.",
+        "VERIFIED (reported API error text in search results): 'CachedContent cannot be used with GenerateContent request setting system_instruction, tools or tool_config'. The system instruction has to live inside the cache, which couples the cache resource to the prompt pin.",
+        "VERIFIED (third-party article, MEDIUM credibility): explicit caches carry TTL-based storage charges per token-hour and must be created, refreshed and deleted as a regional resource.",
+        "INFERRED: operational cost (create/TTL/refresh per model, region and prompt pin; storage billing; an extra endpoint through R2D2 that may not be allowlisted) outweighs the gain for a sub-minimum prefix. Implicit caching already gives the same 90% discount on hits."
+      ],
+      "compatibility": {
+        "preferred": false,
+        "alternatives": ["Implicit caching with a byte-stable leading prefix (FR-11)"],
+        "conflicts": ["Mutually exclusive with request-level systemInstruction.", "Prefix below the 4,096-token minimum."]
+      }
+    },
+    {
+      "name": "Archived v2 stack (commit 51ade0f1f) and its collision with Story 10.44",
+      "type": "infrastructure",
+      "version": "51ade0f1f (2026-09-19, parent ff0513385); dropped by fold merge ec94e9585",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": false,
+        "currentVersion": "partially: components kept, wiring and REST dropped",
+        "usageLocations": [
+          "git show 51ade0f1f --stat: 261 files, +14,526 / -1,653 overall (includes studio-runner, helm, FE)",
+          "Dropped and must be re-ported: studio/authoring/AuthoringDtos.java (111 lines), StudioAuthoringController.java (67; /api/v2/studio: POST /tests, GET/PUT /tests/{id}, POST /tests/{id}/compile, POST /tests/{id}/confirm-compile, GET /tests/{id}/compiles/{compileRequestId}), StudioAuthoringService.java (455); tests StudioAuthoringIT (239), StudioAuthoringServiceTest (219), StudioVersionedCompilationIT (270); CompileFingerprintTest (49 lines added in archive; went with compileVersioned per ec94e9585)",
+          "Archived CompilePipeline.java 658 lines (compile() delegating to compileVersioned at 99-101; compileVersioned 106-186; compilationFingerprint; captured runAttempt 216-442; repairContext(diagnostics, rejected) 456). Live CompilePipeline.java 495 lines (compile 144-175, runAttempt 177-336, assemblePrompt 338-389). git diff 51ade0f1f..HEAD: +283/-446.",
+          "Kept byte-identical to archive (git diff empty): InferenceCaptureStore (263), CompilationPlanner (122), IncrementalAssembler (140), CompileBudget (155), docs/specs/studio/inference.openapi.yaml (650), FE InferenceStudio.tsx (211), studioInferenceApi.ts (16), inferenceHandlers.ts (126). Kept tests: InferenceMigrationIT, InferenceCaptureIntegrationTest, CompilationPlannerTest, CompileBudgetTest, CandidateArtifactProjectionIT.",
+          "Archived authoring service dependencies all exist live (BffAuthenticationToken, CsiOwnershipEvaluator, StudioRepository, ArtifactCanonicalizer, AuthoringLimits, CredentialPatternScreen, LegacyStudioAdapter, CompileStateService.captureForCompilation / confirmVersioned). Only pipeline.compileVersioned(...) is missing."
+        ]
+      },
+      "documentation": {
+        "url": "git show ec94e9585 (fold rulings), docs/architecture/studio-inference-contract-v1.md, docs/runbooks/studio-inference-rollout.md",
+        "relevantSections": ["Compile pipeline: ours", "V18/V19 reservation", "Expansion, compatibility barrier and cutover"]
+      },
+      "collisions": [
+        {
+          "id": "COL-1",
+          "severity": "BLOCKING",
+          "status": "VERIFIED",
+          "title": "Two parallel authoring-v2 stores",
+          "detail": "The archived capture path reads V18 columns ui_tests.authoring_snapshot / authoring_hash / scope_reviewed_* (InferenceCaptureStore.java:44-52). The baseline query requires r.authoring_snapshot IS NOT NULL (line ~94). The live Save path (Story 10.35) writes V21 ui_tests.authoring / authoring_revision_inputs (AuthoringV2Request: authoringSchemaVersion=2, globalContext, steps[{id UUID, text, context}]). The live code never writes authoring_snapshot, only nulls it (StudioService.java:558-560). Restoring the v2 stack as archived would create a second, divergent v2 write model. Recommendation: rebase capture/planner/baseline onto V21 `authoring` (it already has stable step UUIDs) and treat V18 authoring_snapshot as deprecated or a mirror. The archived AuthoringDtos {steps[{id,text}], scope} must be reconciled with AuthoringV2Request (context entries, globalContext). Per OQ-2 the scope field becomes audit-only (DERIVED_FORWARD)."
+        },
+        {
+          "id": "COL-2",
+          "severity": "BLOCKING",
+          "status": "VERIFIED (code) / INFERRED (runtime effect)",
+          "title": "Planner change detection ignores 10.35 context and 10.44 reference policy",
+          "detail": "CompilationPlanner.Step is (UUID id, String text), and the changed-prefix scan uses Step.equals (CompilationPlanner.java:17, 81-84). A change that is only in a step's context entries (VariableReference / SecretReference / ContextualDefault) or in globalContext leaves text equal. The planner would then call the step unchanged and could select REUSE (UNCHANGED_SOURCE) or lock a step whose meaning changed. This matters directly for the user's scenario ('step 2 uses a different username variable') when the variable is bound via step context rather than a <var> token in the text. Required: per-step equality over text + step context + that step's reference_policy entry (StepReferencePolicyDeriver output). Any globalContext change or change to globally allowed defaults selects FULL (a structural, non-English signal)."
+        },
+        {
+          "id": "COL-3",
+          "severity": "BLOCKING",
+          "status": "VERIFIED (code) / INFERRED (runtime effect)",
+          "title": "Captured publication drops 10.35/10.44 revision columns",
+          "detail": "CompileStateService.insertCapturedRevision (lines ~844-890) inserts from ui_test_compile_requests and does NOT write authoring, authoring_revision_inputs, reference_policy or intent_derivation_version. The live INSERT_REVISION (lines 48-60) and SELECT_REVISION_BY_IDENTITY do. The V24 CHECK (authoring IS NULL OR reference_policy IS NOT NULL) is satisfied only because authoring is left NULL. Captured candidates would therefore lose the structural reference policy the live validator uses (RunnerValidationClient.validate(..., referencePolicy), CompilePipeline.java:250) and the identity readiness verifies (IntentRevisionVerifier, CompileStateService.java:502-506). V24's comment says NULL policy is treated as COMPILE_REQUIRED. ui_test_compile_requests (V18) has no authoring/reference_policy columns, so fixing this needs a forward migration (next free number: V26, because V25 is the untracked secrets migration and V19 is reserved). Owner: @data-engineer (CON-9)."
+        },
+        {
+          "id": "COL-4",
+          "severity": "BLOCKING",
+          "status": "VERIFIED (code) / INFERRED (runtime effect)",
+          "title": "V19 cutover breaks the live FULL path unless every compile is captured",
+          "detail": "publishCandidate switches to insertCapturedRevision whenever InferenceCaptureStore.requestIdentityAvailable() is true, i.e. once V19's trigger exists (CompileStateService.java ~214-217). The live compile() calls beginCompile only and never persists a ui_test_compile_requests row. After V19, INSERT...SELECT would return nothing and the fallback SELECT would throw, so every live compile would end COMPILE_INTERNAL_ERROR. Conversely, incremental eligibility needs V19: the baseline query requires r.compile_request_id IS NOT NULL, which only captured publication sets, and captureForCompilation raises INFERENCE_CUTOVER_REQUIRED for versioned requests without V19 (CompileStateService.java:155-158). Order is forced: (1) route ALL compiles, FULL included, through capture; (2) deploy; (3) drain; (4) apply V19; (5) enable the flag."
+        },
+        {
+          "id": "COL-5",
+          "severity": "HIGH",
+          "status": "VERIFIED",
+          "title": "V18 'future columns protected by default' immutability regressed",
+          "detail": "V18 replaced ui_test_revisions_write_once() with a whole-row check (to_jsonb(NEW) - confirmed_* IS DISTINCT FROM to_jsonb(OLD) - confirmed_*). V21, V22, V23 and finally V24 re-created it with an explicit column list. That list omits the V18 columns compile_request_id, authoring_snapshot, authoring_hash, scope_reviewed_by, scope_reviewed_at, compilation_fingerprint and baseline_revision_id, so these columns are no longer write-once on the live schema. NFR-3 byte identity and baseline provenance rely on them. A forward migration should restore the whole-row form. Owner: @data-engineer."
+        },
+        {
+          "id": "COL-6",
+          "severity": "HIGH",
+          "status": "VERIFIED",
+          "title": "Attempt loops diverge. This is a re-port, not a cherry-pick.",
+          "detail": "Archived: gatewayClient.propose(prompt, settlement.budget()); validate(artifact, source, vars, secrets, budget); IncrementalAssembler merge; repairContext carries the rejected proposal; REUSE skips the gateway; per-proposal usage including thinkingTokens (null) and outcome recording. Live: propose(prompt) + AggregateUsage call/byte caps; isSupportedArtifactVersion gate; validate(..., referencePolicy); ContextPromptSection (10.35) prompt; RepairPromptAssembler; VersionedIntentDeriver.CURRENT_VERSION in the candidate and provenance. The spec must name one loop that is the union: captured inputs + planner + IncrementalAssembler + rejected-proposal repair, and also live AggregateUsage + artifact-version gate + reference-policy validation + context section. Live has no compilationFingerprint(); the archived one (gateway settings + PROMPT_VERSION + syntax + runtime pins) must return and gain thinkingLevel (FR-13)."
+        },
+        {
+          "id": "COL-7",
+          "severity": "MEDIUM",
+          "status": "VERIFIED",
+          "title": "assembleCaptured is not prefix-stable and lacks locked/writable marking",
+          "detail": "PromptAssembler.assembleCaptured (lines 96-133) appends 'Declared opaque references: <json>' to outputContract. That puts per-test content inside the first static block and breaks FR-11. It gives baselineCode to every step with no read-only vs writable label and does not carry the 10.35 ContextPromptSection. FR-5/FR-11/FR-12 need a new captured assembly, not reuse as-is."
+        },
+        {
+          "id": "COL-8",
+          "severity": "MEDIUM",
+          "status": "VERIFIED",
+          "title": "decisions.md vs CON-6 / planner on structural edits",
+          "detail": "decisions.md OQ-2 item 2 says insertions, deletions and reorders count as changes at the earliest affected position. CON-6 says structural edits select FULL in this release, and CompilationPlanner returns FULL/STRUCTURAL_CHANGE when the ordered ID list differs (lines 76-80). The spec must pick one. Suggested reading: user decisions are binding, but CON-6 plus C0 keep FULL for this release as the lower-risk interpretation. Record it as an explicit decision for @pm/@architect."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": ["COL-1..COL-8 above"]
+      }
+    },
+    {
+      "name": "Flyway migrations V18 / V19 / V24 (+ V25 adjacency)",
+      "type": "infrastructure",
+      "version": "PostgreSQL via Flyway forward-only",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "Flyway classpath: V1-V18, V20-V24 committed; V25__drop_plaintext_secrets.sql untracked (in-flight secrets work). V19 lives outside the classpath in backend/db/cutover/.",
+        "usageLocations": [
+          "V18__studio_inference_capture.sql: on classpath, last touched in 51ade0f1f. Adds ui_tests.authoring_snapshot/authoring_hash/scope_reviewed_*; ui_test_step_identities; ui_test_compile_requests (append-only); ui_test_compile_outcomes; revision columns compile_request_id, compilation_fingerprint, baseline_revision_id; idx_ui_test_revisions_eligible; capture-consistency trigger; whole-row write-once trigger (later regressed, COL-5).",
+          "backend/db/cutover/V19__studio_inference_candidate_identity.sql: MANUAL, last touched dbea458a3. Requires SET LOCAL checks.inference_publishers_drained='true'. Drops uq_ui_test_revisions_identity in either form (the ELSE DROP INDEX branch covers the V22/V23/V24 index form, so it mechanically handles V24; INFERRED, not executed). Installs trg_ui_test_revision_require_request (rejects revisions without compile_request_id). Status: NOT applied anywhere by the app. See COL-4 for why it cannot be applied yet.",
+          "V24__studio_reference_policy.sql (Story 10.44, 554277fcb): adds ui_test_revisions.reference_policy; CHECK ck_ui_test_revisions_v2_reference_policy (authoring IS NULL OR reference_policy IS NOT NULL) NOT VALID; re-creates uq_ui_test_revisions_identity including COALESCE(reference_policy::text,''); re-creates write-once trigger with an explicit column list (COL-5).",
+          "docs/runbooks/studio-inference-rollout.md:64-78: V19 is forward-only, and after it old binaries cannot be restored."
+        ]
+      },
+      "documentation": { "url": "docs/runbooks/studio-inference-rollout.md", "relevantSections": ["Expansion, compatibility barrier and cutover"] },
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": [
+          "New DDL for this story must start at V26 (V25 is taken by untracked work; coordinate numbering at merge).",
+          "V19 is valid SQL after V24 but operationally unsafe until COL-4's ordering is met.",
+          "The CON-9 owner is @data-engineer."
+        ]
+      }
+    }
+  ],
+
+  "researchQuestions": {
+    "Q1_genai_vertex": {
+      "summary": "The SDK supports systemInstruction, thinkingConfig (thinkingLevel/thinkingBudget) and both usage fields (VERIFIED in the jar). For gemini-3.8-flash: default thinking MEDIUM; LOW/MEDIUM/HIGH allowed; MINIMAL errors; never send budget and level together (VERIFIED, Gemini API docs). Implicit caching is on by default at a 90% discount, with a 4,096-token minimum for Gemini 3.x (VERIFIED). The prefix must lead the request. systemInstruction is INFERRED to be part of the cacheable prefix. Explicit cachedContent is NOT worth it: the ~9.2 KB static prefix is ~2.3-2.7K tokens, below the 4,096 minimum, it is exclusive with request systemInstruction, and it adds storage/TTL operations.",
+      "unknowns": [
+        "R2D2 proxy pass-through of systemInstruction, thinkingConfig, and usage fields (SPK-01)",
+        "Whether responseJsonSchema is part of the cached prefix",
+        "Vertex-specific thinking doc text (pages not renderable by the fetcher)",
+        "Exact token count of the static prefix (not tokenized; use countTokens in SPK-01)"
+      ]
+    },
+    "Q2_prompt_design_prior_code": {
+      "summary": "No study was found that directly measures 'prior code for the writable step as a diff anchor' in NL-to-code regeneration. The available evidence is indirect: (a) instructional code-editing benchmarks (CanItEdit, arXiv 2312.12450) show models can edit provided code well when the instruction states the change, which supports the anchor; (b) anchoring-bias studies on LLMs (arXiv 2412.06593) find that initial and authoritative-looking information disproportionately sways outputs, and a 2026 code-review study (arXiv 2603.18740) found explicit debiasing instructions recover most of the loss; (c) Olausson et al. (ICLR 2024, arXiv 2306.09896) find repair gains are modest and bottlenecked by feedback quality, which supports giving the rejected proposal plus precise diagnostics on repair (FR-10) rather than blind retries.",
+      "recommendation": "INFERRED design. (1) Locked prefix: always send English + baseline code, marked READ-ONLY / 'already executed, page state after these steps'. This is low bias risk and needed for selector/state continuity (decisions OQ-2 item 3). (2) Writable steps whose text is unchanged (for example step 3 in the user's example): send prior code as a 'last known good for this exact text' anchor. That is lower risk because the intent is unchanged. (3) The edited step(s): send English only by default, or prior code labeled 'SUPERSEDED — written for different text: <old text>'. The 10.26 harness should compare arm A (no anchor) vs arm B (labeled anchor) on the edited step, with a planted-mutation metric that counts stale-identifier carry-over (for example the old variable name surviving). Keep whichever wins, and pin the choice in PROMPT_VERSION.",
+      "confidence": "LOW-MEDIUM (indirect evidence only)"
+    },
+    "Q3_restore_sizing": {
+      "summary": "About 900 lines of main code (Controller 67 + Service 455 + DTOs 111 + a new compileVersioned-equivalent of ~80 lines, plus a merged attempt loop of ~250 lines) and ~730 lines of tests (3 archived test files) must be re-ported, not cherry-picked. Planner/assembler/capture store/budget and the FE v2 UI are already on the branch unchanged. Collisions COL-1..COL-5 are data-model and migration issues that the archive never faced because it predates V21-V24. They, not the REST layer, are the critical path.",
+      "migrationStatus": {
+        "V18": "Committed on the Flyway classpath; applied by normal startup.",
+        "V19": "Manual cutover script, not on the classpath, not applied. Needs the drain attestation. Mechanically compatible with the V24 index form (INFERRED), but it must not run before all compiles are captured (COL-4).",
+        "V24": "Committed (Story 10.44). Captured publication does not satisfy its intent (COL-3). Its write-once trigger regressed the V18 protection (COL-5).",
+        "V25": "Untracked in the worktree (secrets). Next free number for this story is V26."
+      }
+    },
+    "Q4_dependency_detector": {
+      "precedent": [
+        "C0 already names GLOBAL_OR_FORWARD_SCOPE as a FULL reason and says 'A model/heuristic may flag uncertainty but cannot establish trust or enlarge its own write set' (studio-inference-contract-v1.md:22, 51). A detector that only escalates to FULL is C0-conformant. The default forward trust (OQ-2 item 1) is the part that needs the C0 amendment signed by Aria (CON-2).",
+        "Lexicon and NL-pattern detection of cross-references is established in requirements and legal engineering: Adedjouma, Sabetzadeh, Briand RE'14 and Sannier et al., Requirements Engineering 2017 (detection and resolution of legal cross-references with NL patterns).",
+        "Lexicon detection of universal quantifiers ('all', 'every', 'always') is a known 'requirements smell': Femmer et al., JSS 2017. Reported average precision 59% at recall 82%, with high variation. Expect a similar FP-heavy, FN-nonzero profile."
+      ],
+      "minimalLexicon": {
+        "scope": "Apply only to the text of changed steps (after Unicode NFKC + lowercase). A hit escalates to FULL with reason GLOBAL_OR_FORWARD_SCOPE (logged as ESCALATED_FULL, with the matched rule id, never the text).",
+        "rules": [
+          { "id": "STEP_NUMBER_REF", "pattern": "\\bsteps?\\s*(?:#|no\\.?|number)?\\s*\\d+\\b", "note": "'step 1', 'step #2'. Backward only if the number is below the step's own index. Otherwise it is forward, which is fine because the suffix is regenerated anyway." },
+          { "id": "RELATIVE_STEP_REF", "pattern": "\\b(previous|prior|earlier|preceding|first|above|last)\\s+steps?\\b|\\bstep\\s+(above|before)\\b" },
+          { "id": "GLOBAL_QUANTIFIER", "pattern": "\\b(all|every|each)\\s+(steps?|pages?|screens?)\\b|\\bthroughout\\b|\\b(entire|whole)\\s+(test|flow|run)\\b|\\bglobally\\b|\\bfrom the (start|beginning)\\b" },
+          { "id": "RETROACTIVE_EDIT", "pattern": "\\binstead of (the )?(previous|earlier|step)\\b|\\bgo back to step\\b|\\b(re-?do|repeat|undo|replace)\\s+step\\b|\\bchange (the )?(earlier|previous|first) step\\b" },
+          { "id": "BACKWARD_VALUE_REF", "pattern": "\\bsame\\s+\\w+\\s+as\\s+(before|earlier|in step|above)\\b|\\b(value|text|url|user(name)?)\\s+from\\s+(step|earlier|before)\\b" }
+        ],
+        "deliberatelyExcluded": [
+          "'again' (for example 'log in again' is a normal forward step, very high FP)",
+          "bare 'above' / 'below' (spatial locators: 'the button above the table')",
+          "bare 'all' / 'every' (for example 'check all checkboxes')",
+          "'go back' alone (navigation intent is expressed via page.goto; excluding it avoids FP)"
+        ]
+      },
+      "risks": {
+        "falsePositives": "Moderate. Numbered references to later steps and quantifiers over UI elements that happen to match noun lists. Cost: an unnecessary FULL, which is visible and correct but slower. Mitigate by requiring the step noun/number relation and by logging rule ids to tune from telemetry.",
+        "falseNegatives": "Unavoidable. Paraphrase ('use the account from the login'), implicit semantic backward dependency (step 2 now needs a different start URL that step 1 sets), and non-English text. The nets are the model PREFIX_IMPACT outcome, the whole-artifact validator, FULL_REBUILD_REQUIRED on reused-code failure, and always-FULL execution from step 1 (CON-1). A runtime failure caused by an FN shows up as a red run, and 'Rebuild all steps' is the recovery. The spec should state this residual risk explicitly (NFR-6).",
+        "evaluation": "Build a labeled edit corpus in the 10.26 harness (for example 50 edits, including planted backward dependencies). Report detector precision/recall and PREFIX_IMPACT agreement. Treat numbers as proposed targets pending Pax/Aria (CON-10)."
+      },
+      "confidence": "MEDIUM for the design; LOW for any numeric accuracy until measured"
+    }
+  },
+
+  "unverifiedClaims": [
+    { "claim": "ASM-2: Gemini implicit prefix caching applies through the Citi GenAI gateway/R2D2 proxy.", "reason": "The proxy's behavior is not observable from docs. The static prefix (~2.5K tokens, INFERRED) is below the 4,096-token Gemini 3.x minimum, so hits depend on total request size and best-effort caching.", "action": "needs_validation" },
+    { "claim": "NFR-2: the static prompt prefix must be cacheable by the provider.", "reason": "Cacheability is provider best-effort (bug reports #1880, #2064). Byte stability is testable; cache hits are not guaranteed.", "action": "needs_validation" },
+    { "claim": "systemInstruction is part of the implicit-cache prefix.", "reason": "Supported only by community issue evidence (#1880). Not stated in the docs.", "action": "acceptable_risk" },
+    { "claim": "gemini-3.8-flash on Vertex v1 accepts thinkingConfig.thinkingLevel=LOW and reports thoughtsTokenCount.", "reason": "Verified for the Gemini API docs and the SDK surface only. Vertex page text could not be fetched, and the R2D2 path is untested.", "action": "needs_validation" },
+    { "claim": "ASM-1: 51ade0f1f is a viable starting point.", "reason": "True for the REST layer, planner, assembler and capture store. False for persistence: COL-1..COL-5 require data-model rebasing onto V21/V24 and new DDL.", "action": "needs_validation" },
+    { "claim": "ASM-5: the V18 capture schema is present.", "reason": "VERIFIED present, but its write-once protection was regressed by V21-V24 (COL-5), and capture columns are populated only via the V19-gated captured publication.", "action": "needs_validation" },
+    { "claim": "complexity.json: 'V18 JSONB plan/outcome columns can probably hold FR-13/FR-14 telemetry without new DDL'.", "reason": "Plausible for telemetry. COL-3 (reference_policy/authoring on captured revisions) still needs DDL on ui_test_compile_requests, so 'no new DDL' does not hold for the story overall.", "action": "needs_validation" }
+  ],
+
+  "recommendations": [
+    { "type": "prefer", "subject": "Rebase capture/planner/baseline onto V21 `authoring` (10.35 AuthoringV2Request with stable step UUIDs)", "rationale": "Avoids a second v2 write model (COL-1). The live Save already sends step IDs whenever the v2 body is used. The planner must compare text + step context + per-step reference policy (COL-2)." },
+    { "type": "prefer", "subject": "Route ALL compiles (FULL included) through capture before V19; order: capture-for-all -> deploy -> drain -> V19 -> flag", "rationale": "COL-4. V19 otherwise breaks live publication, and incremental eligibility requires V19." },
+    { "type": "prefer", "subject": "New migration V26 (@data-engineer): captured request/revision carry authoring, authoring_revision_inputs, reference_policy, intent_derivation_version; restore whole-row write-once trigger", "rationale": "COL-3 and COL-5; CON-9." },
+    { "type": "prefer", "subject": "FR-11 as systemInstruction = outputContract + syntaxReference (byte-stable); all variable content in contents; deterministic responseJsonSchema key order", "rationale": "Maximizes the implicit-cache prefix and removes cross-replica schema variance. Ship first, per OQ-10, to take the single baseline invalidation once." },
+    { "type": "consider", "subject": "thinkingLevel=LOW for gemini-3.8-flash, pinned in the compilation fingerprint, after a 10.26 harness A/B against the default MEDIUM", "rationale": "Thinking tokens bill as output and are currently unmeasured. MINIMAL is not available on 3.8 Flash." },
+    { "type": "avoid", "subject": "Explicit cachedContent", "rationale": "The prefix is below the 4,096-token minimum, it is exclusive with request systemInstruction, and it adds TTL/storage operations. Implicit caching gives the same 90% discount on hits." },
+    { "type": "avoid", "subject": "Reusing PromptAssembler.assembleCaptured as-is", "rationale": "It injects per-test references into the static contract block and lacks read-only marking and the 10.35 context section (COL-7)." },
+    { "type": "consider", "subject": "Deterministic backward/global detector (5 rules above) + PREFIX_IMPACT, escalating to a visible ESCALATED_FULL", "rationale": "C0-conformant as an uncertainty flag. Residual FN risk is covered by the validator, FULL execution and 'Rebuild all steps'." },
+    { "type": "consider", "subject": "Resolve decisions.md OQ-2 item 2 vs CON-6 (structural edits)", "rationale": "COL-8: the binding decision text and the constraint/planner disagree." }
+  ],
+
+  "sources": [
+    "https://ai.google.dev/gemini-api/docs/caching",
+    "https://ai.google.dev/gemini-api/docs/thinking",
+    "https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash",
+    "https://ai.google.dev/gemini-api/docs/gemini-3",
+    "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/context-cache/context-cache-overview",
+    "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/thinking",
+    "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/3-flash",
+    "https://github.com/googleapis/python-genai/issues/1880",
+    "https://github.com/googleapis/python-genai/issues/2064",
+    "https://github.com/cline/cline/issues/7957",
+    "https://oneuptime.com/blog/post/2026-02-17-how-to-implement-context-caching-with-gemini-on-vertex-ai-to-reduce-token-costs/view",
+    "https://arxiv.org/abs/2312.12450",
+    "https://arxiv.org/abs/2306.09896",
+    "https://arxiv.org/html/2412.06593v1",
+    "https://arxiv.org/html/2603.18740v1",
+    "https://people.svv.lu/sabetzadeh/pub/RE14.pdf",
+    "https://link.springer.com/article/10.1007/s00766-015-0241-3",
+    "https://arxiv.org/abs/1611.08847"
+  ],
+
+  "researchNotes": "Tools: WebSearch/WebFetch (no Context7/EXA in this session), javap on the Gradle-cached SDK jar, git show/diff, direct file reads. Vertex docs.cloud.google.com pages returned navigation only to WebFetch. Vertex-specific facts (90% discount, 4,096 minimum) therefore come from search snippets of the official page and are corroborated by the Gemini API docs. Nothing was executed against Vertex or the database. All runtime effects in COL-2/3/4 are inferred from code. The attached synapse-diagnostics and tech-search skill instructions were not run: they conflict with this mission's 'write only research.json' constraint."
+}

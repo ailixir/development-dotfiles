@@ -1,0 +1,244 @@
+{
+  "storyId": "STUDIO-INC-001-incremental-compile",
+  "critiquedAt": "2026-09-23T20:00:00Z",
+  "critiquedBy": "@qa (Quinn)",
+  "specVersion": 1,
+  "baseline": "brunobuger/ui-studio @ 1f3c56a59 + worktree (V25 untracked). Spot-checks read from the worktree.",
+
+  "verdict": "NEEDS_REVISION",
+  "verdictReason": "The spec implements decisions.md faithfully: forward scope, write set from p, prior steps always in context, visible escalation, Run auto-accept, and the v2 restore. Its traceability and evidence discipline are strong. However, code spot-checks found two HIGH defects in the locked-prefix identity. (1) The step identity hash names only 3 of the 6 StepContextEntry kinds and omits evidenceReferences. A LiteralInput or TargetHint edit would therefore leave a step 'unchanged', so its stale code could be locked or REUSEd. (2) authoringHash, one of the six confirm/publish identity fields, is left undefined once the V18 authoring_hash is deprecated. Live confirmVersioned compares it to ui_tests.authoring_hash, which live Save nulls. Several MEDIUM gaps also need fixes: the provider schema cannot emit PREFIX_IMPACT; Q2 creation semantics are missing; nothing stops re-escalation on every later Run; the V21 trigger overwrites captured authoring; the anchor switch is not in the fingerprint; and test coverage is missing for several ACs. All of these are spec-text fixes, not architectural dead ends.",
+
+  "autoDecisions": [
+    "[AUTO-DECISION] Verdict rule conflict? The task file says any HIGH means BLOCKED, while the lead's thresholds are score-based (APPROVED >=4.0, NEEDS_REVISION 3.0-3.9, BLOCKED <3.0). -> NEEDS_REVISION (reason: the lead's thresholds were given explicitly for this run, and both HIGH issues are bounded spec-text fixes in §3.2.1/§3.2.2 that need no escalation to @architect. The spec must NOT proceed to plan until CRIT-1 and CRIT-2 are closed.)",
+    "[AUTO-DECISION] Score decisions.md amendments to C0? -> No (reason: binding per the lead). Only the correctness and safety of their implementation were judged.",
+    "[AUTO-DECISION] Run the attached synapse/coderabbit/checklist skills? -> No (reason: the mission says to write only critique.json and make no code edits. CodeRabbit reviews code diffs, and none exist for a spec critique.)"
+  ],
+
+  "verifiedEvidence": [
+    "StepContextEntry permits ContextText, LiteralInput, VariableReference, SecretReference, TargetHint and ContextualDefault. StepAuthoringContext also carries evidenceReferences (dto/StepContextEntry.java, dto/StepAuthoringContext.java). Spec §3.2.2 lists only VariableReference / SecretReference / ContextualDefault.",
+    "Live v2 save: step-context and globalContext changes advance configurationRevision, NOT sourceRevision. Only {id,text} changes advance sourceRevision (StudioService.persistAuthoring ~733-750; stepIdentity/contextIdentity 762-780).",
+    "Live planner: an unchanged Step(id,text) list yields REUSE UNCHANGED_SOURCE, re-labelled CONFIGURATION_ONLY when configurationRevision differs (CompilationPlanner.java; InferenceCaptureStore.persist). The config-only baseline branch needs no passing execution (InferenceCaptureStore.java ~99).",
+    "CompileStateService.captureForCompilation (~146-151) and confirmVersioned (~552) compare ui_tests.authoring_hash / r.authoring_hash (V18). Live StudioService nulls these columns (~558-560).",
+    "V21 BEFORE INSERT trigger trg_ui_test_revisions_capture_authoring copies ui_tests.authoring into every new revision, overwriting any value the INSERT supplies. The V18 consistency trigger (trg_ui_test_revision_capture) fires first (alphabetical order) and does not compare V21 columns.",
+    "StepReferencePolicyDeriver emits a per-step entry containing stepIndex (a position). Its 'allowed' set includes global defaults.",
+    "GenAiLlmGatewayClient.providerSchema: the status enum is [GENERATED, UNSUPPORTED, CLARIFICATION] and the reason enum is [UNSUPPORTED_CAPABILITY, AMBIGUOUS_INTENT]. The schema is built with Map.of and embeds the writable step IDs.",
+    "IncrementalAssembler: artifact stepIndex is 0-based. The reused-prefix guard compares CompilationPlanner.Step(id,text) only.",
+    "AggregateUsage is constructed per compile() call, so each request gets its own budget. Escalation therefore allows up to 2x the per-request budget per Run.",
+    "GatewayPayloadSerializer order confirmed: outputContract, then kind/writable IDs, then syntaxReference, then source, then repair diagnostics. ContextPromptSection.from copies globalContext into every step section. Both brief findings hold."
+  ],
+
+  "scores": {
+    "accuracy": 3.5,
+    "completeness": 3,
+    "consistency": 3,
+    "feasibility": 3.5,
+    "alignment": 4,
+    "average": 3.35,
+    "weighting": "accuracy 25%, completeness 25%, consistency 20%, feasibility 15%, alignment 15%"
+  },
+
+  "focusAssessment": {
+    "1_stale_locked_prefix": "NOT SAFE as written. The p-formula and the insert/delete/reorder table are correct: prefix positions 1..p-1 are identical by construction, and I traced every row. The reference-set rule is safe; the jsonb array compare is order-sensitive, which is stricter than 'set' equality and fails safe. The hole is the identity hash: CRIT-1 (context kinds omitted) lets a changed step count as unchanged, and the REUSE/CONFIGURATION_ONLY path then reuses stale code with no passing-run requirement. CRIT-5 (the V21 trigger) can desynchronize a revision's authoring from its artifact, and that revision becomes the next baseline B.",
+    "2_escalated_full": "Mostly bounded. A FULL request can never escalate, so the chain has at most 2 requests, each with its own C0 §5 budget. Detector hits select FULL before any model call, and rule IDs are logged without text. Gaps: the provider schema cannot emit PREFIX_IMPACT (CRIT-3); Q2 creation lacks rules for a moved draft, slot release and restart (CRIT-4); nothing stops re-escalation on every later Run (CRIT-6); and there is no escalation-rate telemetry (CRIT-7).",
+    "3_efficiency_evidence": "Good discipline. There are no numeric targets, caching is explicitly unclaimed, and the token estimate is labelled inferred. Unaccounted costs: INCREMENTAL adds locked baseline code to the input, and an escalated Q1 is pure waste. 'MEDIUM ... so quality does not change' is an inference from Gemini API docs, not Vertex/R2D2 (CRIT-7).",
+    "4_acs": "AC-1 is the user's scenario and is well formed. Missing: FR-2 AC-2.1/2.2, FR-5 AC-5.2 CONTEXT_TOO_LARGE, a CRIT-1 regression (literal/targetHint edit), PREFIX_IMPACT on a repair attempt, EC-12 during escalation, and FE component/a11y tests for badges/diff (NFR-6). The AC-4 stepIndex base is ambiguous (CRIT-10, CRIT-11).",
+    "5_migrations": "The V19 sequencing (capture-for-all, deploy, drain, V19, flag) is correct and matches COL-4. The whole-row write-once restore is right. Gaps: V26 must also extend the V18 capture-consistency trigger to the new columns and neutralize the V21 draft-copy trigger for captured inserts (CRIT-5). An IT must also show that no live UPDATE path breaks under the whole-row trigger (CRIT-12).",
+    "6_traceability": "Strong. Every rule carries FR/CON/DEC/COL/R-Q tags. New inventions (TAIL_DELETION, one escalation per Run, poll renewal, confirmationSource) are marked 'derived' and parked as OQ-S*. No phantom features found.",
+    "7_slicing": "A, B, C ordering is coherent and follows OQ-10. However, B is labelled 'Dark' while capture-for-all and the V26 whole-row trigger change the live FULL path for every compile regardless of flags (CRIT-9)."
+  },
+
+  "issues": [
+    {
+      "id": "CRIT-1",
+      "severity": "HIGH",
+      "category": "accuracy",
+      "check": "acc-1 / NFR-3",
+      "description": "The step identity hash is incomplete, so a stale locked prefix or a stale REUSE is possible. §3.2.2 defines contextCanonical as '(VariableReference / SecretReference / ContextualDefault)'. The live StepContextEntry also has ContextText, LiteralInput and TargetHint, and StepAuthoringContext has evidenceReferences. An edit to only a LiteralInput value ('alice' -> 'bob') or a TargetHint in step 1 or 2 leaves the hash equal. The step is then locked with code generated for the old input, or, if no step 'changed', REUSE/CONFIGURATION_ONLY republishes stale code. Live save classifies these edits as configurationRevision changes only, which lands exactly on the CONFIGURATION_ONLY branch, and that branch requires no passing run. IncrementalAssembler's defensive guard also compares Step(id,text) only.",
+      "location": "spec.md#3.2.2, #3.2.4 (plan order rule 5), #5.2 (IncrementalAssembler row)",
+      "suggestion": "(a) Define contextCanonical as the canonical JSON of the ENTIRE StepAuthoringContext (all entries of every StepContextEntry subtype, plus evidenceReferences). It must fail closed: an unknown or new subtype makes the step count as changed. (b) State that UNCHANGED_SOURCE / CONFIGURATION_ONLY REUSE requires every stepIdentityHash and globalContext to be equal. A configurationRevision advance caused by step-context or global-context edits is never CONFIGURATION_ONLY. (c) Change the IncrementalAssembler reused-prefix guard to compare full StepIdentity (hash + id + position), not Step(id,text). (d) Add to §6.1 and AC-3: 'LiteralInput-only edit on s2 -> s2 changed, INCREMENTAL [s2,s3]', 'TargetHint-only edit on s1 -> FULL ALL_STEPS_AFFECTED', 'context-only edit on every step is never REUSE'.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-2",
+      "severity": "HIGH",
+      "category": "consistency",
+      "check": "con-4 / feas-2",
+      "description": "authoringHash is undefined after the V18 deprecation. §3.2.1 and §3.3 say V18 ui_tests.authoring_hash is 'not read and not written'. Yet §3.2.8 and C0-A3 keep authoringHash as one of the six confirm identity fields, and C0 §2 freezes it at capture and guards publication with it. Live captureForCompilation and confirmVersioned compare ui_tests.authoring_hash, which live Save sets to NULL. As specified, `t.authoring_hash = ?` is never true, so every v2 confirm, including the Run auto-accept, would fail STALE_CANDIDATE. Otherwise an implementer would silently drop the authoring binding.",
+      "location": "spec.md#3.2.1, #3.2.8, #3.3, #3.4 C0-A6",
+      "suggestion": "Add a normative definition. authoringHash = SHA-256 of the canonical V21 `authoring` JSON (ArtifactCanonicalizer), covering globalContext, all steps and all step contexts, and state explicitly whether authoring_revision_inputs are included. State where it is stored: ui_tests, ui_test_compile_requests and ui_test_revisions, either as V26 columns or as a computed compare. State that captureForCompilation, publication, confirmVersioned and the V18 capture-consistency trigger all use it. Add a unit/IT row: 'confirm with RUN source succeeds against a V21-only draft; a context-only save between compile and confirm -> STALE_CANDIDATE'.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-3",
+      "severity": "MEDIUM",
+      "category": "feasibility",
+      "check": "feas-2",
+      "description": "Signal 2 cannot fire under structured output. providerSchema() restricts status to [GENERATED, UNSUPPORTED, CLARIFICATION] and reason to [UNSUPPORTED_CAPABILITY, AMBIGUOUS_INTENT]. §3.2.5 and §5.2 add PREFIX_IMPACT only to the parser and the local JSON Schema. The model is constrained by the provider schema, so it can never emit PREFIX_IMPACT, and AC-8 would pass only with a stub gateway.",
+      "location": "spec.md#3.2.5, #3.2.6 (Provider schema), #5.2 (gateway row)",
+      "suggestion": "State that providerSchema adds status PREFIX_IMPACT and reason LOCKED_STEP_CHANGE_REQUIRED only when kind=PATCH (kind-dependent schema), and that output-contract.md documents the variant as PATCH-only. Add a unit test: the provider schema for PATCH contains PREFIX_IMPACT and the schema for FULL does not. Clarify precedence: a PATCH containing PREFIX_IMPACT plus any other envelope violation is INVALID_MODEL_RESPONSE, not ESCALATED_FULL.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-4",
+      "severity": "MEDIUM",
+      "category": "completeness",
+      "check": "comp-1",
+      "description": "Q2 (escalated FULL) creation semantics are missing. The spec says only 'the server then creates a new captured compile request'. Unspecified: (a) whether Q2 re-captures the current draft or reuses Q1's frozen source, and what happens if sourceRevision/configurationRevision/authoringHash moved since Q1 (EC-12), where Q2 must not be created and Q1 records DISCARDED semantics; (b) that Q1 settles and releases its executor/bulkhead slot before Q2 is enqueued (C0 §5 'cannot launch replacement work while its old transport still consumes the same limited slot'); (c) authorization/CSI recheck and the principal recorded on Q2; (d) crash/restart between Q1 settling and Q2 capture (the abandonment sweeper) and idempotency, so a given Q1 gets at most one Q2; (e) whether PREFIX_IMPACT is honoured on repair attempts 2 and 3.",
+      "location": "spec.md#3.2.5 (Signal 2), #3.4 C0-A2",
+      "suggestion": "Add a 'Q2 creation' sub-list. Q2 is captured under the draft lock from Q1's frozen inputs only if the draft revisions and authoringHash still equal Q1's; otherwise there is no Q2 and the Run gate reports STALE. Q2 is enqueued only after Q1's outcome row commits and its slot is released. A unique escalated_from constraint (or equivalent) in the plan/outcome enforces one Q2 per Q1. Authorization is rechecked. PREFIX_IMPACT is accepted on any attempt within the 3-proposal limit. Add IT rows for the moved-draft and restart cases.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-5",
+      "severity": "MEDIUM",
+      "category": "feasibility",
+      "check": "feas-2 / migration safety",
+      "description": "V26(a) will not do what it says. The V21 BEFORE INSERT trigger trg_ui_test_revisions_capture_authoring overwrites NEW.authoring and authoring_revision_inputs with the CURRENT draft (ui_tests), so 'insertCapturedRevision writes all four onto ui_test_revisions' is silently replaced for authoring. The V18 capture-consistency trigger (which runs first) does not compare the V21/V24 columns. The only protection is the publication guard on source/config revisions. If that guard ever misses, a revision's authoring (the next baseline B) no longer describes its artifact, and the next compile locks code generated for different text.",
+      "location": "spec.md#3.3 (V26 row)",
+      "suggestion": "Add V26 items. (d) Change the V21 authoring-capture trigger so it does not overwrite when NEW.compile_request_id IS NOT NULL; the captured value is authoritative. (e) Extend studio_inference_revision_capture to require that authoring, authoring_revision_inputs, reference_policy, intent_derivation_version and the new authoringHash equal the compile-request row. Add an IT: a captured insert whose authoring differs from the request is rejected, and a draft edited after capture does not leak into the revision.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-6",
+      "severity": "MEDIUM",
+      "category": "completeness",
+      "check": "comp-1 (bounded escalation)",
+      "description": "Re-escalation across Runs is unbounded. 'At most one escalation per Run' bounds a single Run. If Q2 ends NEEDS_REVISION/STALE, or the author clicks Run again with the same draft, the planner again selects INCREMENTAL against the same baseline, the model again returns PREFIX_IMPACT, and Q1+Q2 repeat. Every Run then pays a wasted incremental request on top of FULL.",
+      "location": "spec.md#3.2.4 (plan order), #3.2.5",
+      "suggestion": "Add a planner rule. If a prior request for the same test, same authoringHash, same baseline revision and same fingerprint ended ESCALATED_FULL, select FULL directly with reason PREFIX_IMPACT (reasonDetail PRIOR_ESCALATION) and issue no incremental request. Add a unit test and an AC-8 step: 'second Run on the same draft -> FULL PREFIX_IMPACT, no PATCH sent'.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-7",
+      "severity": "MEDIUM",
+      "category": "accuracy",
+      "check": "acc-4 (NFR-1) / Article IV",
+      "description": "The efficiency accounting omits known costs. (a) INCREMENTAL adds every locked step's baseline code to the input, which FULL does not send, so input tokens can grow while output shrinks. (b) An escalated Q1 is wasted spend, and detector or PREFIX_IMPACT false positives add FULL cost. (c) '§3.2.6 Thinking: MEDIUM ... is the model's current implicit default, so quality does not change' is an inference from Gemini API docs (research: Vertex/R2D2 behaviour UNKNOWN), yet it is stated as fact. No invented numbers exist, but the claimed 'main efficiency levers' are unmeasured for net effect.",
+      "location": "spec.md#1 (Overview), #2.2 NFR-1, #3.2.6 (Thinking, Caching claim)",
+      "suggestion": "Change NFR-1's metric to require the 10.26 harness to report NET per-Run cost (input + output + thinking tokens across all requests of the Run, including an escalated Q1) for FULL vs INCREMENTAL. Add telemetry fields escalationRate and detectorHitRate by ruleId. Relabel the MEDIUM claim as '(inferred; Gemini API docs; to be confirmed by SPK-01)'.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-8",
+      "severity": "MEDIUM",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "Two identity statements contradict the code or each other. (a) §3.2.2 says 'the position is excluded from the hash', but referencePolicyEntryCanonical is StepReferencePolicyDeriver's entry, which contains stepIndex. Every shifted step after an insert or delete therefore counts as 'changed': it is scanned by the detector (spurious FULL) and it gets the SUPERSEDED rather than the 'last known good' anchor label under LABELED. (b) §3.2.6 makes the writable anchor a runtime property (studio.compile.prompt.writable-anchor), yet says the value 'is pinned in PROMPT_VERSION' and the fingerprint only covers PROMPT_VERSION. Flipping the property without a version bump would let baselines compiled under one prompt shape be reused under another (C0 §6 pin agreement).",
+      "location": "spec.md#3.2.2, #3.2.6 (Writable-step anchor switch, Fingerprint)",
+      "suggestion": "(a) Define referencePolicyEntryCanonical as the entry with stepIndex removed. (b) Add the writable-anchor value, and StepReferencePolicyDeriver.POLICY_VERSION, to the compilation fingerprint explicitly. Alternatively, drop the runtime property and make the anchor a compile-time constant tied to PROMPT_VERSION. Add a fingerprint unit test for each.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-9",
+      "severity": "MEDIUM",
+      "category": "feasibility",
+      "check": "feas-3 (slicing)",
+      "description": "The slicing mislabels B's blast radius. §9 marks story B as 'Dark (incremental.enabled=false, authoring.v2-enabled=false)'. But B includes capture-for-all (every live FULL/v1 compile now writes ui_test_compile_requests), the V26 whole-row write-once trigger, and the captured-publication changes. All of these are live for every compile regardless of flags. B also bundles data, REST, planner, detector and escalation, which puts about 25+ files in one story.",
+      "location": "spec.md#9",
+      "suggestion": "Make the B1/B2 split mandatory. B1 = V26 + capture-for-all + the authoringHash definition, marked 'LIVE-AFFECTING', with its own rollback note (capture-for-all binary = rollback floor before V19) and the existing FULL suites as the regression gate. B2 = planner/detector/escalation + v2 REST, dark. Put the V19 cutover as an explicit runbook step between B1 and enablement.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-10",
+      "severity": "MEDIUM",
+      "category": "completeness",
+      "check": "comp-2",
+      "description": "Some FRs and edge cases have no test scenario: FR-2 AC-2.1 (IDs kept across edits) and AC-2.2 (exact no-op save keeps the snapshot, no compile); FR-5 AC-5.2 (CONTEXT_TOO_LARGE, never truncated, now measured after dedup); FR-8 AC-8.1 and NFR-6 (FE component and accessibility tests for badges, diff and escalation text; §6 has only the useRunGate test); EC-12 (save during Q1 or Q2); EC-16 (late old-run completion); PREFIX_IMPACT on a repair attempt; and the FULL_REBUILD_REQUIRED -> Rebuild all steps UI path.",
+      "location": "spec.md#6.1, #6.2, #6.3",
+      "suggestion": "Add §6 rows or Gherkin scenarios for each item listed, including a Vitest/RTL component test asserting accessible names for REUSED/REGENERATED badges and the escalation banner.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-11",
+      "severity": "LOW",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "Three factual slips. (a) AC-4 'server-derived stepIndex 4 and 5': artifact stepIndex is 0-based (IncrementalAssembler), so 1-based positions 4 and 5 are stepIndex 3 and 4. (b) §3.5 step 2 'PUT v2 -> sourceRevision advances' is wrong for the step-context variant of AC-1/AC-3, which advances only configurationRevision. (c) §3.2.1 rebases only the `authoring_snapshot IS NOT NULL` predicate, but the config-only branch also compares `r.authoring_snapshot = CAST(? AS jsonb)` (InferenceCaptureStore ~99) and must be rebased to V21 authoring equality too.",
+      "location": "spec.md#6.3 AC-4, #3.5, #3.2.1",
+      "suggestion": "State that the table uses 1-based positions and 0-based stepIndex (AC-4: stepIndex 3 and 4). Write '§3.5: sourceRevision (text) or configurationRevision (context) advances'. List every InferenceCaptureStore predicate that references V18 columns and give its V21 replacement.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-12",
+      "severity": "LOW",
+      "category": "completeness",
+      "check": "comp-5 / migration safety",
+      "description": "The whole-row write-once restore (V26 b) has no regression guard for legitimate updates. to_jsonb(NEW)-confirmed_* blocks every future UPDATE on ui_test_revisions except confirmation. The spec does not verify that no live path (execution linking, sweeper, backfill) updates revision rows.",
+      "location": "spec.md#3.3 (V26 b), #6.2 WriteOnceWholeRowIT",
+      "suggestion": "Add to the plan: grep and IT evidence that the full existing backend IT suite passes with V26 applied, plus a positive case that the first confirmation still succeeds.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-13",
+      "severity": "LOW",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "Plan order vs C0 §3 rule 2. The spec's order lists INCREMENTAL_DISABLED at position 2 without C0's parenthetical '(source-independent configuration reuse remains allowed)'. As written, a flag-off execution-configuration-only change (e.g. viewport) would go FULL, which regresses the live planner behaviour. The spec also does not say whether TAIL_DELETION REUSE requires a PASSED baseline execution. It is a source change, so it should.",
+      "location": "spec.md#3.2.4 (Plan order)",
+      "suggestion": "Carry C0's parenthetical into rule 2. State that TAIL_DELETION requires the full eligibility of rule 3 (PASSED FULL baseline), unlike CONFIGURATION_ONLY.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-14",
+      "severity": "LOW",
+      "category": "accuracy",
+      "check": "acc-4 (NFR-2)",
+      "description": "The prefix-stability fix is partial. providerSchema embeds per-request writable step IDs (enum) and kind, and the spec fixes only key order. Research says it is UNKNOWN whether responseJsonSchema is part of the cached prefix. If it is, per-request IDs defeat the prefix anyway. The spec neither notes this nor schedules SPK-01 to check it.",
+      "location": "spec.md#3.2.6 (Provider schema), #4.1",
+      "suggestion": "Add a note that responseJsonSchema placement in the cached prefix is UNKNOWN (SPK-01 item). Keep writable IDs in the schema for correctness, but record that any caching benefit is conditional on it.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-15",
+      "severity": "LOW",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "Escalation vocabulary differs between signals. decisions.md OQ-2.4 says either signal is 'logged as ESCALATED_FULL with the reason'. The spec maps a detector hit to a plain FULL plan (GLOBAL_OR_FORWARD_SCOPE + escalation.source=DETECTOR) and reserves ESCALATED_FULL for PREFIX_IMPACT. This is better in substance (no wasted request) but should be stated as the chosen interpretation so that UI copy and telemetry queries agree.",
+      "location": "spec.md#3.2.5, #3.4 C0-A2 (iv)",
+      "suggestion": "Add one sentence: 'Detector hits are pre-inference and produce no ESCALATED_FULL request; both signals surface to the UI as \"Escalated to full rebuild: <reason>\" and are queryable via escalation.source ∈ {DETECTOR, MODEL}.'",
+      "autoFixable": true
+    }
+  ],
+
+  "summary": {
+    "highIssues": 2,
+    "mediumIssues": 8,
+    "lowIssues": 5,
+    "autoFixable": 9
+  },
+
+  "nextAction": "Return to @pm (*write-spec, iteration 2) with this critique. CRIT-1 and CRIT-2 must be closed before re-critique; CRIT-3..CRIT-10 should be. Loop @data-engineer in on CRIT-2/CRIT-5 (V26 scope) and @architect on CRIT-8b (fingerprint) as part of the OQ-S1 sign-off. Then run critique_2 per complexity.json pipelinePhases.",
+
+  "autoFixes": [
+    {
+      "issueId": "CRIT-11",
+      "location": "spec.md:431 (AC-4)",
+      "original": "And s3 and s4 keep their IDs with server-derived stepIndex 4 and 5",
+      "suggested": "And s3 and s4 keep their IDs and move to positions 4 and 5 (server-derived 0-based stepIndex 3 and 4)"
+    },
+    {
+      "issueId": "CRIT-11",
+      "location": "spec.md:294 (§3.5 step 2)",
+      "original": "2. PUT v2 → sourceRevision advances.",
+      "suggested": "2. PUT v2 → sourceRevision advances (text/token edit) or configurationRevision advances (step-context edit); either way the step's identity hash changes (§3.2.2)."
+    },
+    {
+      "issueId": "CRIT-7",
+      "location": "spec.md:232 (§3.2.6 Thinking)",
+      "original": "Initial pinned value: `MEDIUM`, which is the model's current implicit default, so quality does not change.",
+      "suggested": "Initial pinned value: `MEDIUM`, which Gemini API docs state is the gemini-3.8-flash default (inferred to hold on Vertex behind R2D2; SPK-01 confirms), so quality is expected not to change."
+    },
+    {
+      "issueId": "CRIT-8",
+      "location": "spec.md:141 (§3.2.2)",
+      "original": "- `referencePolicyEntryCanonical` = that step's entry from `StepReferencePolicyDeriver` (10.44).",
+      "suggested": "- `referencePolicyEntryCanonical` = that step's entry from `StepReferencePolicyDeriver` (10.44) with its positional `stepIndex` field removed."
+    },
+    {
+      "issueId": "CRIT-13",
+      "location": "spec.md:188 (§3.2.4 plan order rule 2)",
+      "original": "2. `INCREMENTAL_DISABLED` (flag off)",
+      "suggested": "2. `INCREMENTAL_DISABLED` (flag off; source-independent CONFIGURATION_ONLY reuse remains allowed per C0 §3)"
+    }
+  ]
+}

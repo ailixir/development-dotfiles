@@ -1,0 +1,103 @@
+{
+  "storyId": "STUDIO-INC-001-incremental-compile",
+  "assessedAt": "2026-09-23T12:00:00Z",
+  "assessedBy": "@architect",
+
+  "result": "COMPLEX",
+  "overridden": false,
+
+  "assessedDirection": {
+    "summary": "Recommended direction: bind studio.compile.incremental.enabled (default false) and re-integrate the captured/planner/incremental compile path into the LIVE CompilePipeline; extend the live v1 Studio page (ChecksStudioPage + useRunGate) to send the v2 authoring body with stable step IDs and a compile mode, rather than restoring /api/v2 and mounting InferenceStudio.tsx.",
+    "openQuestionsAssumed": {
+      "OQ-1": "Pending. Assessed as NOT amended: reference-set equality stays; the user's 'new variable' variant falls back to FULL (NO_ELIGIBLE_BASELINE).",
+      "OQ-2": "Pending. Assessed as C0-conformant: the live editor gains an explicit STEP_SCOPED affirmation (FR-15).",
+      "OQ-3": "Pending. Assessed as C0-conformant: an explicit confirmation step exists on the Run path for INCREMENTAL candidates.",
+      "OQ-4": "Pending. Assessed for 'extend live v1 page'. Note this conflicts with C0 §1 ('legacy v1 callers always select FULL'), so it needs a C0 amendment reviewed by Aria (CON-2).",
+      "OQ-5": "RESOLVED (verified: `git log -1 ec94e9585`). The v2 REST stack was dropped because its only entry point CompilePipeline.compileVersioned did not exist on the ui-studio side. The same message also says the archived CompilePipeline rewrite (capture/planner/budget attempt loop) and the live one (typed intent, V21-V23) are 'incompatible reimplementations of the same method, so ours is kept whole'. There is no recorded correctness defect, but a restore is a RE-PORT, not a cherry-pick."
+    },
+    "verifiedFacts": [
+      "ASM-5 validated: backend/src/main/resources/db/migration/V18__studio_inference_capture.sql is on the Flyway path (V1-V18, V20-V25); V19 is staged manually in backend/db/cutover/.",
+      "Archived backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java @51ade0f1f is 658 lines with public compileVersioned(...) and a captured runAttempt(capture, settlement). The live file is 495 lines with only compile(UUID, String) and uses VersionedIntentDeriver.",
+      "The live tree has moved on since the archive: V24__studio_reference_policy.sql (Story 10.44) adds ui_test_revisions.reference_policy, a CHECK (authoring IS NULL OR reference_policy IS NOT NULL) and re-creates uq_ui_test_revisions_identity with reference_policy. The live CompileStateService revision insert writes reference_policy; the archived captured publication path predates it.",
+      "backend/db/cutover/V19__studio_inference_candidate_identity.sql handles the V22/V23 index forms. It does not mention V24's reference_policy index form (inferred from reading its header; not executed).",
+      "InferenceCaptureStore.java:96 baseline predicate `r.\"references\" = CAST(? AS jsonb)` confirms Gap 1 (OQ-1).",
+      "Only CompilationPlannerTest and InferenceCaptureIntegrationTest reference the orphaned components (grep over src/main + src/test). They have no production caller.",
+      "V18 compile_plan (ui_test_compile_requests) and outcome (ui_test_compile_outcomes) are JSONB. FR-13/FR-14 telemetry can probably be stored without new DDL (inferred).",
+      "application.yml:199 binds studio.authoring.v2-enabled only as a property value. studio.compile.incremental.enabled has no reader in src/main (per the brief)."
+    ]
+  },
+
+  "dimensions": {
+    "scope": {
+      "score": 5,
+      "notes": "Estimated 25-40 production and test files across 3 layers. BACKEND (~12-15 main): compile/CompilePipeline.java (re-port captured attempt loop), CompileStateService.java (captureForCompilation/confirmVersioned onto the live publication with reference_policy + intent version), PromptAssembler.java (assembleCaptured + FR-11 order), InferenceCaptureStore.java, incremental/CompilationPlanner.java, incremental/IncrementalAssembler.java, gateway/GatewayPayloadSerializer.java (FR-11), ContextPromptSection (FR-12), gateway/GenAiLlmGatewayClient.java + GatewayResponseParser (FR-13 usage/thinking), StudioCompileProperties/StudioCompileConfig (flag binding), StudioController + StudioService (v2 PUT on the page path, compile body with mode, mode/reason in the response), compile DTOs. CONTRACT: docs/specs/studio/openapi.yaml `/tests/{id}/compile` (request body + response fields). FRONTEND (~8-10): pages/ChecksStudioPage/ChecksStudioPage.tsx (step IDs, scope affirmation), components/studio/run/useRunGate.ts (mode, confirm, surfaced reason), studio API client + types, review panel (reused/regenerated badges + diff, Rebuild all), MSW handlers/fixtures for INCREMENTAL/FULL/REUSE. TESTS: re-port of the archived StudioVersionedCompilationIT-style ITs plus the CompileBounds/RepairBounds/RepairRedaction/CompileBudgetExpiry suites on the captured path, planner byte-identity tests, and FE component and run-gate tests. This is cross-cutting (BE pipeline + persistence + contract + FE), which clearly exceeds 20 files."
+    },
+    "integration": {
+      "score": 3,
+      "notes": "No new external system. Vertex gemini-3.8-flash through the Citi GenAI gateway (GenAiLlmGatewayClient) and studio-runner POST /v1/validate are both already wired. The request shape changes (prefix reorder, optional systemInstruction/thinkingConfig, usage fields), and those capabilities are unverified behind the R2D2 proxy (CON-8, OQ-9, SPK-01), so graceful degradation must be designed. The internal API contract changes: compile gains a body with mode, and the response gains selectedMode/reason/writable/reused IDs. That counts as 'new internal API' behavior. It is not 4 because there are no webhooks/events and no new system."
+    },
+    "infrastructure": {
+      "score": 4,
+      "notes": "V18 is present and its JSONB plan/outcome columns can probably hold the FR-13/FR-14 telemetry, so no new table is likely (inferred). Database/schema remains on the critical path: (a) the captured publication must satisfy V24's reference_policy CHECK and identity index, which the archived path predates; (b) the V19 candidate-identity cutover (manual, writer-drain barrier, docs/runbooks/studio-inference-rollout.md) was written before V24 and may need re-anchoring by @data-engineer (CON-9); (c) OQ-1, if amended, changes the baseline query and possibly idx_ui_test_revisions_eligible. Flags: bind studio.compile.incremental.enabled via env (helm configmap), default false. No new container or service. It is not 5 because studio-runner and the artifact version are unchanged (CON-4)."
+    },
+    "knowledge": {
+      "score": 4,
+      "notes": "The components and tests exist (10.24/10.25/10.26), and C0 is a precise design. The hard part is not in any existing pattern: reconciling two divergent attempt loops. One is the archived capture/budget/planner loop (51ade0f1f). The other is the live typed-intent to Story 10.44 structural reference-policy loop (VersionedIntentDeriver, V21-V24). The fold author explicitly declined this bridge as 'inventing behaviour'. Other open knowledge: Gemini implicit prefix caching and thinkingConfig behavior behind the R2D2 proxy (SPK-01, ASM-2), and fingerprint/pin semantics when the prompt layout changes (ASM-6, C0 §6). It is not 5 because the domain is well documented (C0, implementation plan, review docs in 51ade0f1f)."
+    },
+    "risk": {
+      "score": 4,
+      "notes": "This changes the compile path that every Studio test goes through. Correctness invariants: a byte-identical locked prefix, and no out-of-scope PATCH acceptance (NFR-3). Security: CSI/authorization boundaries on baseline reuse, and 10.24 AC-8 is still open (OQ-12). Prompts and repair context must stay free of resolved secrets/variables (NFR-5), and this branch also has in-flight secrets/vault changes. FR-11/FR-12 are NOT covered by the incremental flag: they change the live FULL prompt for all users, advance the prompt pin and invalidate every baseline once (ASM-6). The incremental path itself is dark-launched (CON-3), which bounds the blast radius and keeps rollback (flag off selects FULL) cheap. It is not 5 because execution/runner stay untouched (CON-1, NoRuntimeLlmTest) and the flag default is false."
+    }
+  },
+
+  "totalScore": 20,
+
+  "pipelinePhases": ["gather", "assess", "research", "spec", "critique_1", "revise", "critique_2", "plan"],
+
+  "flags": [
+    "COMPLEX: architectural review required. OQ-4's recommended direction (live v1 page + mode) contradicts C0 §1 and needs a C0 amendment signed by Aria before the spec is written (CON-2).",
+    "RE-PORT, NOT RESTORE: 51ade0f1f's CompilePipeline and captured publication cannot be cherry-picked. They must be re-expressed on top of the live typed-intent/reference-policy pipeline (V21-V24, Story 10.44). Research should diff archived runAttempt vs live compile() before the spec fixes an integration seam.",
+    "DATA: @data-engineer must confirm that V19 (backend/db/cutover) is still valid after V24, and whether mixed-provenance candidates need V19 applied before enablement (CON-9).",
+    "BLAST RADIUS: FR-11/FR-12 (prompt reorder, global-context dedup) affect all compiles regardless of the incremental flag and advance the prompt pin. Gate them on the 10.26 harness (AC-11.2) and decide OQ-10 (ship first, to avoid a second baseline invalidation).",
+    "SECURITY: 10.24 AC-8 (cross-CSI/revoked baseline reuse, confirmation binding) is open. Recommend making it a precondition for flag enablement (OQ-12). Extend RepairRedactionTest to the captured repair context, which now carries the rejected proposal (FR-10).",
+    "CONTRACT: changing /tests/{id}/compile in docs/specs/studio/openapi.yaml triggers the pinned-contract re-anchor (tools/epic10-fold/pin-contract.sh, confinement.test.ts digest) and the MSW handler update (CON-11).",
+    "WORKTREE: 69 uncommitted paths on brunobuger/ui-studio touch adjacent code (studio/dispatch/*, studio/secrets/*, StudioReferenceResolver). Sequence this story after that work lands.",
+    "SPLIT RECOMMENDED: (A) inference efficiency FR-11/12/13, standalone ~STANDARD, ship first per OQ-10; (B) backend incremental re-port behind the flag, FR-3..7/10/14; (C) live-page UX FR-2/8/9/15 + MSW. FR-1 (engine map) is documentation for the spec itself."
+  ],
+
+  "alternativesImpact": [
+    {
+      "alternative": "OQ-4: restore /api/v2 authoring stack + mount InferenceStudio.tsx (the C0-conformant path)",
+      "scoreDelta": "0 to +1 (scope 5, knowledge 4, risk 4; integration stays 3)",
+      "notes": "No C0 amendment. It still needs a compileVersioned-equivalent entry point on the live pipeline, so the core re-port cost is unchanged. It adds a second authoring surface, contract docs/specs/studio/inference.openapi.yaml, route mounting and a v1/v2 coexistence rule ('never silently falls back to v1 writes'). Total about 20-21, COMPLEX."
+    },
+    {
+      "alternative": "OQ-1 amended: additive reference changes not used by locked steps stay eligible",
+      "scoreDelta": "+0 to +1 (risk may reach 5)",
+      "notes": "Baseline query + possibly idx_ui_test_revisions_eligible change (@data-engineer), plus a C0 §3 amendment. It needs a per-step reference-usage proof, which the Story 10.44 reference_policy may supply. Research needed. This fits the user's literal 'different username variable' scenario."
+    },
+    {
+      "alternative": "OQ-2 amended: inferred/default STEP_SCOPED instead of explicit affirmation",
+      "scoreDelta": "-1 scope (FE), +1 risk",
+      "notes": "Removes the UI affirmation but contradicts C0's 'a model/heuristic cannot establish trust'. The trust boundary moves into the planner. Net about 20, COMPLEX."
+    },
+    {
+      "alternative": "OQ-3 amended: clicking Run counts as confirmation",
+      "scoreDelta": "~0 (FE scope slightly down, risk flat to up)",
+      "notes": "Keeps the live run-gate shape but weakens C0 §7 review of reused-vs-regenerated diffs. It also requires a confirmation-binding change in confirmVersioned."
+    },
+    {
+      "alternative": "Descope to efficiency only (FR-1, FR-11, FR-12, FR-13), no incremental wiring",
+      "scoreDelta": "total ~12 (scope 3, integration 3, infrastructure 1, knowledge 2, risk 3)",
+      "notes": "STANDARD. The user's core locked-prefix scenario is not delivered, so it is only valid as split story A."
+    }
+  ],
+
+  "autoDecisions": [
+    "[AUTO-DECISION] Which OQ-1..OQ-4 answers to assess? -> The lead's recommended direction, with the C0-conformant option for OQ-1/2/3 (reason: the spawn prompt specifies the direction; the unanswered C0 conflicts are scored as conformant to avoid inventing amendments, Article IV).",
+    "[AUTO-DECISION] Treat 51ade0f1f as restorable? -> No; score it as a re-port (reason: ec94e9585's message calls the two CompilePipeline versions incompatible reimplementations, and V24 postdates the archive).",
+    "[AUTO-DECISION] Score infrastructure 3 or 4? -> 4 (reason: V24 constraint compatibility and V19 cutover re-validation put schema/@data-engineer on the critical path, even if no new DDL turns out to be needed)."
+  ],
+
+  "estimatedEffort": "3+ dias (COMPLEX). As one story it exceeds a single SDC cycle; split into A/B/C as flagged."
+}

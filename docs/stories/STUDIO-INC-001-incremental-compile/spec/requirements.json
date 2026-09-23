@@ -1,0 +1,640 @@
+{
+  "storyId": "STUDIO-INC-001-incremental-compile",
+  "gatheredAt": "2026-09-23T00:00:00Z",
+  "source": "user",
+  "gatheredBy": "@pm",
+  "elicitationVersion": "2.0",
+  "elicitationMode": "YOLO/autonomous - no user elicitation available; decisions recorded under autoDecisions, unresolved items under openQuestions",
+  "baseline": {
+    "branch": "brunobuger/ui-studio",
+    "commit": "1f3c56a59",
+    "note": "Facts about current behavior are cited from discovery-brief.md (verified at this commit). They were not re-derived during Gather."
+  },
+  "sourceDocuments": {
+    "USER": "User request (verbatim intent), discovery-brief.md 'User request' section",
+    "BRIEF": "docs/stories/STUDIO-INC-001-incremental-compile/spec/discovery-brief.md",
+    "C0": "docs/architecture/studio-inference-contract-v1.md",
+    "S10.24": "docs/stories/10.24.story.md (InReview, AC-8 open)",
+    "S10.25": "docs/stories/10.25.story.md (Ready, FE/MSW only)",
+    "S10.26": "docs/stories/10.26.story.md (InProgress, AC-3 open)"
+  },
+
+  "functional": [
+    {
+      "id": "FR-1",
+      "description": "The spec MUST include a map of the translation engine as it works today and as it will work after this story, covering Save, Run (run gate), Compile (plan, prompt assembly, model proposal, validation, publication, repair) and Execute. For each stage it states whether the LLM is called and whether a browser runs.",
+      "priority": "P1",
+      "rationale": "The user explicitly asked to 'map the translation engine (Save + Run)'. The brief's 'Current live flow' section is the verified current-state input; the spec adds the target state.",
+      "trace": ["USER", "BRIEF: Current live flow", "C0 §1"],
+      "acceptance": [
+        "AC-1.1: Given the spec, when a reader follows Save, then it states that Save persists and marks compile_status=STALE without compiling (BRIEF: StudioService.java:264/574) and describes the target behavior.",
+        "AC-1.2: Given the spec, when a reader follows Run on an edited test, then every call (save, compile with requested mode, poll, confirm if required, execute) is listed in order, with the LLM and browser boundaries marked."
+      ]
+    },
+    {
+      "id": "FR-2",
+      "description": "The live Studio editor MUST persist stable per-step identity ({id, text} ordered steps). IDs are kept across text edits so the server can tell which step changed. Today the page sends a v1 body (steps: string[]) without step IDs.",
+      "priority": "P0",
+      "rationale": "Incremental planning needs a stable step identity to find the earliest changed step. Without IDs, C0 selects FULL with LEGACY_MAPPING.",
+      "trace": ["BRIEF: Save; ChecksStudioPage.tsx:557-595; StudioController.java:91-96", "C0 §2", "S10.24 AC-3", "S10.25 AC-1"],
+      "acceptance": [
+        "AC-2.1: Given a saved 3-step test, when the author edits the text of step 2 and saves, then steps 1-3 keep their prior IDs and sourceRevision advances.",
+        "AC-2.2: Given an exact no-op save, then the existing snapshot and review stamp are kept and no compile is triggered (C0 §2)."
+      ]
+    },
+    {
+      "id": "FR-3",
+      "description": "Wire incremental compilation into the production compile path. The existing CompilationPlanner, IncrementalAssembler, InferenceCaptureStore, CompileStateService.captureForCompilation, PromptAssembler.assembleCaptured and confirmVersioned are currently called only from tests. They MUST be reachable from the live compile request, behind studio.compile.incremental.enabled.",
+      "priority": "P0",
+      "rationale": "The brief shows these components were built and tested (10.24) but are disconnected: the production wiring existed in archived commit 51ade0f1f and was dropped by fold merge ec94e9585. Reusing them follows the constraint to reuse the C0 design.",
+      "trace": ["BRIEF: Incremental compilation - designed, built, disconnected", "C0 §3, §7", "S10.24 AC-1, AC-4, AC-5"],
+      "acceptance": [
+        "AC-3.1: Given studio.compile.incremental.enabled=true and an eligible baseline, when a compile is requested in AUTO mode, then the production path calls the planner and records a selected mode and reason.",
+        "AC-3.2: Given the flag is false, then the plan reason is INCREMENTAL_DISABLED and FULL is selected (C0 §3 reason 2)."
+      ]
+    },
+    {
+      "id": "FR-4",
+      "description": "When the plan is INCREMENTAL, the server MUST lock steps 1..N-1. N is the earliest changed step and the lock is at compile time. Those steps' source text and compiled code are reused byte for byte from the baseline revision. Only steps N..end form the writable set that is sent for generation.",
+      "priority": "P0",
+      "rationale": "This is the user's core scenario: '1 open site, 2 login, 3 validate page - change step 2's username variable -> step 1 locked, 2 and 3 regenerated'. It matches C0 SCOPED_SUFFIX.",
+      "trace": ["USER (example)", "C0 §3 reason 6 SCOPED_SUFFIX; 'Reused source/code must remain byte-identical'", "S10.24 AC-4, AC-5"],
+      "acceptance": [
+        "AC-4.1: Given a 3-step test with an eligible passing baseline and STEP_SCOPED scope, when only step 2's text changes, then the selected mode is INCREMENTAL, writable IDs = {step2, step3}, reused IDs = {step1}, and step 1 code in the new candidate is byte-identical to the baseline.",
+        "AC-4.2: Given edits to steps 2 and 5 of a 6-step test, then the writable set is steps 2..6 (earliest changed step to end).",
+        "AC-4.3: Given only the last step changed, then only the last step is generated (S10.24 AC-4).",
+        "AC-4.4: Given step 1 changed, then FULL with reason ALL_STEPS_AFFECTED (C0 §3)."
+      ]
+    },
+    {
+      "id": "FR-5",
+      "description": "An INCREMENTAL prompt MUST give the model context about the prior (locked) steps: the full current English of all steps, the declared reference names and the baseline code needed as context. All of it is fenced as data. The model may write only the frozen writable IDs. Resolved variable or secret values never enter the prompt.",
+      "priority": "P0",
+      "rationale": "The user requires that the model 'still be given context about the prior steps'. C0 §3 already specifies this context set.",
+      "trace": ["USER", "C0 §3 'The full current English, reference names, baseline code required for context, and permitted IDs are fenced as data'", "BRIEF: C0 summary"],
+      "acceptance": [
+        "AC-5.1: Given an INCREMENTAL plan for step 2 of 3, then the assembled prompt contains step 1's English and baseline code marked as read-only context, and lists only step2/step3 as writable IDs.",
+        "AC-5.2: Given a complete context that exceeds the size cap, then the compile is rejected with CONTEXT_TOO_LARGE and nothing is silently truncated (C0 §3)."
+      ]
+    },
+    {
+      "id": "FR-6",
+      "description": "The server MUST accept only a PATCH envelope that covers each writable ID exactly once and no other ID. It merges the patch with the reused prefix, derives stepIndex and originalText itself, and validates the whole merged artifact through the runner before publication.",
+      "priority": "P0",
+      "rationale": "A compile-time lock is only safe if the model cannot write outside its scope and the merged artifact is validated as a whole.",
+      "trace": ["C0 §1, §3, §4", "S10.24 AC-5"],
+      "acceptance": [
+        "AC-6.1: Given a PATCH that includes step1's ID (out of scope), then it is rejected as INVALID_MODEL_RESPONSE and consumes a repair within the shared limit.",
+        "AC-6.2: Given a valid PATCH, then runner POST /v1/validate receives the complete merged artifact (all steps), not just the suffix."
+      ]
+    },
+    {
+      "id": "FR-7",
+      "description": "When incremental compilation is not eligible, the server MUST select FULL (or REUSE where C0 permits) and record the first applicable C0 reason. Reasons: EXPLICIT_FULL, INCREMENTAL_DISABLED, NO_ELIGIBLE_BASELINE, LEGACY_MAPPING, STRUCTURAL_CHANGE, FINGERPRINT_CHANGE, SCOPE_UNKNOWN, GLOBAL_OR_FORWARD_SCOPE, UNCHANGED_SOURCE, CONFIGURATION_ONLY, SCOPED_SUFFIX, ALL_STEPS_AFFECTED. The reason MUST be returned to the client.",
+      "priority": "P0",
+      "rationale": "The user must be able to understand why an edit did or did not reuse locked steps. C0 defines the reason vocabulary and its order.",
+      "trace": ["C0 §3 plan reason vocabulary", "S10.24 AC-3", "S10.25 AC-2"],
+      "acceptance": [
+        "AC-7.1: Given any compile, then the response and persisted audit record contain requestedMode, selectedMode and reason.",
+        "AC-7.2: Given the user inserts, deletes or reorders a step, then FULL with STRUCTURAL_CHANGE (C0 §2)."
+      ]
+    },
+    {
+      "id": "FR-8",
+      "description": "The Studio UI MUST show, for each compile, which steps were locked/reused and which were regenerated, and the selected mode and reason. It MUST also offer an explicit 'rebuild all steps' (FULL) action.",
+      "priority": "P1",
+      "rationale": "This makes the lock visible and auditable to the author. It exists in the unmounted InferenceStudio.tsx (10.25).",
+      "trace": ["S10.25 AC-2", "BRIEF: FE v2 UI InferenceStudio.tsx not mounted", "C0 §1 AUTO/FULL; Implementation review amendments 'Compile changes/Rebuild all steps'"],
+      "acceptance": [
+        "AC-8.1: Given an INCREMENTAL candidate, then each step shows a reused or regenerated badge, and regenerated steps show a code diff against the baseline.",
+        "AC-8.2: Given the author picks Rebuild all steps, then requestedMode=FULL and reason EXPLICIT_FULL."
+      ]
+    },
+    {
+      "id": "FR-9",
+      "description": "On the live Run path, the run gate MUST send a compile request that carries the requested mode (AUTO by default) instead of the current body-less POST /tests/{id}/compile. It then proceeds to execution only for the resulting confirmed revision.",
+      "priority": "P0",
+      "rationale": "Today every edited test triggers a full recompile with no mode (BRIEF: useRunGate.ts:267-355). The user's scenario starts from Run.",
+      "trace": ["BRIEF: Run", "C0 §1 'requested mode is AUTO (default) or FULL'", "C0 §7 confirmation"],
+      "acceptance": [
+        "AC-9.1: Given an edited, previously green test, when the user clicks Run, then the compile request carries mode AUTO and the selected mode/reason is surfaced before execution starts.",
+        "AC-9.2: Given an unedited READY test, when the user clicks Run, then no compile and no LLM call occur (preserves current behavior, BRIEF: Run)."
+      ]
+    },
+    {
+      "id": "FR-10",
+      "description": "Repair attempts on an INCREMENTAL compile MUST stay within the frozen writable set. Each attempt MUST include explicit correction instructions plus bounded, redacted rejected content and diagnostics. The live path today resends the whole prompt without the rejected proposal and regenerates all steps. A validator failure inside reused (locked) code MUST end as NEEDS_REVISION with FULL_REBUILD_REQUIRED. There is no automatic regeneration of locked steps.",
+      "priority": "P0",
+      "rationale": "This keeps the lock intact under failure and makes repair both cheaper and more informed. The archived captured path passed the rejected proposal via repairContext.",
+      "trace": ["C0 §3 'A repair never expands the write set'", "C0 §4 repair rules", "BRIEF: Repair is blind and full-width", "S10.24 AC-6"],
+      "acceptance": [
+        "AC-10.1: Given an INCREMENTAL compile whose first PATCH fails AST validation on step 3, then the repair request lists only the writable IDs and includes the bounded, redacted rejected proposal and diagnostics.",
+        "AC-10.2: Given the runner flags an error in reused step 1, then the outcome is NEEDS_REVISION with FULL_REBUILD_REQUIRED and no further proposal is made."
+      ]
+    },
+    {
+      "id": "FR-11",
+      "description": "Reorder the model request so that static content comes first and variable content last. The output contract and syntax reference form a contiguous, byte-stable prefix, identical across requests at the same pins. The mode/writable-ID lines and source come after that prefix. The legacy path MUST NOT derive writable step IDs from the random compileRequestId in a way that varies the static prefix.",
+      "priority": "P1",
+      "rationale": "The brief found the variable 'Required envelope kind'/'Writable step IDs' line between the two static blocks (2.4 KB and 6.8 KB). This stops Gemini implicit prefix caching from covering the syntax reference. The user asked to 'make LLM inference efficient/optimized'.",
+      "trace": ["USER", "BRIEF: Prefix-cache-hostile prompt order (GatewayPayloadSerializer.serialize)"],
+      "acceptance": [
+        "AC-11.1: Given two compile requests for different tests at the same prompt/policy pins, then the serialized request bytes before the first request-specific field are identical.",
+        "AC-11.2: Given the reorder, then the prompt version pin advances (C0 §6 coordinated pins) and the change is covered by the 10.26 harness before enablement."
+      ]
+    },
+    {
+      "id": "FR-12",
+      "description": "Global context MUST appear once per request and MUST NOT be copied into every step envelope. Today ContextPromptSection.from makes the prompt size O(steps x global).",
+      "priority": "P1",
+      "rationale": "The duplication wastes input tokens and trips the 32 KiB CONTEXT_TOO_LARGE cap early.",
+      "trace": ["USER", "BRIEF: Global context duplicated per step (ContextPromptSection.from)", "C0 §3 'Reject an oversized complete context; never silently truncate'"],
+      "acceptance": [
+        "AC-12.1: Given a test with G bytes of global context and S steps, then the serialized prompt contains the global context exactly once."
+      ]
+    },
+    {
+      "id": "FR-13",
+      "description": "Record complete per-proposal usage: prompt, candidate, thoughts (thoughtsTokenCount) and cached (cachedContentTokenCount) token counts, finish reason, and the actual generation settings including any thinking configuration. A field the vendor did not report is stored as null with usageAvailable:false, never as zero. If a thinking/reasoning budget is set, it is explicit in the compilation fingerprint.",
+      "priority": "P1",
+      "rationale": "Efficiency cannot be shown without measurement. Today accounting records prompt/candidate tokens only and no thinking config is sent (Gemini 3.x default).",
+      "trace": ["BRIEF: No thinking config sent; usage accounting records prompt/candidate tokens only (GenAiLlmGatewayClient.interpret)", "C0 §5 usage, fingerprint and audit metadata"],
+      "acceptance": [
+        "AC-13.1: Given a gateway response with usageMetadata including thoughts and cached tokens, then both are persisted in attempt telemetry.",
+        "AC-13.2: Given a response without cachedContentTokenCount, then the stored value is null, not 0."
+      ]
+    },
+    {
+      "id": "FR-14",
+      "description": "Persist per-compile audit metadata so incremental efficiency can be measured and audited. It covers: requested/selected mode and reason; baseline revision and execution identity; writable and reused IDs; proposal, transport and repair counts; stage latencies; and per-step generation origin (generated in this request vs reused from revision X).",
+      "priority": "P1",
+      "rationale": "C0 §5 requires this metadata. The 10.26 harness needs it to report full-vs-incremental cost and latency.",
+      "trace": ["C0 §5 'Persist/audit metadata'", "S10.24 AC-7 mixed provenance", "S10.26 AC-3"],
+      "acceptance": [
+        "AC-14.1: Given an INCREMENTAL candidate, then step 1's origin references the baseline revision and steps 2-3 reference the current compileRequestId."
+      ]
+    },
+    {
+      "id": "FR-15",
+      "description": "Where the live product needs it, the author MUST be able to give or renew the STEP_SCOPED scope declaration for the edited snapshot, following the C0 rules: renewed after each semantic edit, and reviewer/time recorded by the server. Missing or UNKNOWN scope selects FULL with SCOPE_UNKNOWN.",
+      "priority": "P0",
+      "rationale": "C0 makes STEP_SCOPED a precondition for INCREMENTAL. The user's scenario does not mention an explicit declaration, so this requirement is conditional on the answer to OQ-2.",
+      "trace": ["C0 §2 scope", "BRIEF: Gap 2", "S10.24 AC-3", "S10.25 AC-1"],
+      "acceptance": [
+        "AC-15.1: Given the author edits step 2 without renewing scope, then FULL with SCOPE_UNKNOWN.",
+        "AC-15.2: Given the author renews STEP_SCOPED for the edited snapshot, then the reviewer and time come from the authenticated principal and server clock."
+      ]
+    }
+  ],
+
+  "nonFunctional": [
+    {
+      "id": "NFR-1",
+      "category": "performance",
+      "description": "An INCREMENTAL compile generates only the writable suffix. Generated step count and output tokens scale with (steps - N + 1), not with the total step count.",
+      "metric": "For an S-step test with earliest edit at step N: generated step entries = S - N + 1, verified in unit/IT tests. Output-token and latency reduction vs FULL is measured by the 10.26 harness. The numeric target is TBD (OQ-8); C0 §7 keeps numeric objectives 'proposed pending Pax/Aria agreement'.",
+      "trace": ["USER", "C0 §3, §7", "S10.26 AC-3"]
+    },
+    {
+      "id": "NFR-2",
+      "category": "performance",
+      "description": "The static prompt prefix (output contract + syntax reference) must be cacheable by the provider across requests at the same pins.",
+      "metric": "Deterministic check: byte-identical prefix across requests (FR-11 AC-11.1). Live check, only after SPK-01: cachedContentTokenCount > 0 on repeat requests within the provider's cache window. Stub evidence does not count (C0 §5).",
+      "trace": ["BRIEF: prefix-cache finding", "C0 §5 'No unsupported endpoint/model/parameter assumption is inferred from stub success'"]
+    },
+    {
+      "id": "NFR-3",
+      "category": "reliability",
+      "description": "Locked steps are immutable within a compile. Reused source and code in any published INCREMENTAL candidate are byte-identical to the baseline revision.",
+      "metric": "Byte-equality assertion on every reused step in tests. Zero accepted out-of-scope patches in the planted-mutation controls (C0 §7 hard correctness invariants).",
+      "trace": ["C0 §3, §7", "S10.24 AC-5"]
+    },
+    {
+      "id": "NFR-4",
+      "category": "reliability",
+      "description": "Inference bounds are unchanged by incremental mode: at most 3 proposals (1 + 2 repairs), 3 transport attempts per proposal and 9 in total, one monotonic deadline (240 s compile ceiling as the starting bound), and no retry after the deadline.",
+      "metric": "Existing CompileBounds/RepairBounds/CompileBudgetExpiry test classes pass on the INCREMENTAL path.",
+      "trace": ["C0 §5", "S10.24 AC-6"]
+    },
+    {
+      "id": "NFR-5",
+      "category": "security",
+      "description": "No resolved variable or secret values appear in prompts, repair context or ordinary logs. Only reference names are sent. Baseline eligibility never crosses test, CSI or authorization boundaries, and revoked access cannot reuse a baseline.",
+      "metric": "RepairRedactionTest-style assertions extended to the INCREMENTAL/captured path. Cross-CSI baseline query tests return no eligible baseline.",
+      "trace": ["C0 §3, §5", "S10.24 AC-8 (open)"]
+    },
+    {
+      "id": "NFR-6",
+      "category": "usability",
+      "description": "The author can always tell whether a compile reused locked steps, why a FULL fallback happened, and which revision a historical green result belongs to.",
+      "metric": "Component tests assert that the mode, reason and per-step reused/regenerated badges are rendered and exposed accessibly (MUI/WCAG patterns, 10.25 AC-5).",
+      "trace": ["S10.25 AC-2, AC-3, AC-5"]
+    },
+    {
+      "id": "NFR-7",
+      "category": "scalability",
+      "description": "Prompt size grows linearly with step count and is not multiplied by global context size.",
+      "metric": "Serialized prompt bytes = static prefix + global context (once) + sum(step payloads) +/- bounded framing. Unit test asserts a single occurrence of the global context.",
+      "trace": ["BRIEF: Global context duplicated per step"]
+    }
+  ],
+
+  "constraints": [
+    {
+      "id": "CON-1",
+      "type": "technical",
+      "description": "The lock is compile-time only. Execution always runs all steps from step 1 in a fresh browser (execution_scope FULL, no resume/offset). Run never calls the LLM, and compile never runs a browser.",
+      "impact": "No runner changes for partial execution. Step 2 depends on page state produced by step 1. NoRuntimeLlmTest must keep passing.",
+      "trace": ["USER constraint (lead)", "BRIEF: Correctness clarification; Execute", "C0 §1, §7"]
+    },
+    {
+      "id": "CON-2",
+      "type": "technical",
+      "description": "Reuse the C0 design: modes, planner reasons, envelope, eligibility, identity and transaction rules. Any change to C0 needs Aria (@architect) review. No agent may loosen C0 to fit its producer.",
+      "impact": "Conflicts between the user's scenario and C0 are raised as open questions (OQ-1..OQ-4), not resolved inside the spec.",
+      "trace": ["C0 §7 'No subagent may loosen this contract ... without Aria review'", "Article IV"]
+    },
+    {
+      "id": "CON-3",
+      "type": "technical",
+      "description": "studio.compile.incremental.enabled stays default false, independent of gateway enablement. It is enabled only after evaluation evidence (10.26) and live gates. Disabling it selects the corrected FULL path without rewriting confirmed artifacts.",
+      "impact": "Delivery is dark-launched. The spec must define flag-off behavior and rollback.",
+      "trace": ["C0 §7", "S10.24 AC-9", "S10.26 AC-5", "BRIEF: Flags bound by nothing"]
+    },
+    {
+      "id": "CON-4",
+      "type": "technical",
+      "description": "Runner artifact.version stays 1 (stepIndex, exact originalText, code). The backend alone assembles it. The model may not supply source text, indexes, dependency proofs or validation verdicts.",
+      "impact": "No runner artifact-format change. The merge happens server-side.",
+      "trace": ["C0 §1, §4"]
+    },
+    {
+      "id": "CON-5",
+      "type": "technical",
+      "description": "There is no force-incremental bypass. The client may request only AUTO or FULL, and the server selects FULL, INCREMENTAL or REUSE.",
+      "impact": "The UI cannot offer a 'lock these steps' override.",
+      "trace": ["C0 §1"]
+    },
+    {
+      "id": "CON-6",
+      "type": "technical",
+      "description": "Structural edits (insert, delete, reorder, duplicate) select FULL in this release.",
+      "impact": "The user's scenario (text edit to an existing step) is in scope. Structural incremental compilation is out of scope.",
+      "trace": ["C0 §2"]
+    },
+    {
+      "id": "CON-7",
+      "type": "technical",
+      "description": "The baseline must be a confirmed revision of the same test and CSI, with a retained successful FULL execution of that exact revision, configuration and runtime at a compatible fingerprint. It is queried from revision-linked execution records, not lastRunStatus. Legacy whole-context artifacts are never retroactively eligible.",
+      "impact": "Existing green tests need one v2 FULL compile, confirmation and passing run before their first INCREMENTAL edit (see OQ-11).",
+      "trace": ["C0 §2, §3", "BRIEF: Gap 3"]
+    },
+    {
+      "id": "CON-8",
+      "type": "technical",
+      "description": "Provider, SDK and model capabilities (Vertex gemini-3.8-flash via the Google Gen AI SDK adapter, systemInstruction, thinking config, implicit/explicit caching) must not be assumed from stub success. Shared enablement is gated by SPK-01 live evidence.",
+      "impact": "The FR-11/FR-13 efficiency gains are unproven until SPK-01. The spec must degrade gracefully if a capability is unsupported by the R2D2 proxy.",
+      "trace": ["C0 §5", "BRIEF: Compile (model)"]
+    },
+    {
+      "id": "CON-9",
+      "type": "technical",
+      "description": "Schema changes follow Flyway forward-only migrations owned by @data-engineer. V18/V19 are reserved to Dara, and V19 needs an explicit incompatible-writer cutover.",
+      "impact": "Any change to the baseline query (e.g. reference-set rules, OQ-1) or to persistence goes through @data-engineer.",
+      "trace": ["C0 §2", "CLAUDE.md backend layout"]
+    },
+    {
+      "id": "CON-10",
+      "type": "business",
+      "description": "Numeric quality, latency and cost objectives stay 'proposed pending Pax/Aria agreement' before live results are observed. Quinn owns measurement definitions and held-out cases.",
+      "impact": "This spec can require measurement but cannot invent numeric efficiency targets.",
+      "trace": ["C0 §7", "S10.26 AC-3"]
+    },
+    {
+      "id": "CON-11",
+      "type": "technical",
+      "description": "Frontend changes use the centralized API client and MSW-first development with MUI patterns. V2 UI stays disabled until compatible server/schema capability exists and never silently falls back to v1 writes.",
+      "impact": "MSW handlers for the live Run path must model INCREMENTAL/FULL/REUSE outcomes.",
+      "trace": ["CLAUDE.md Development Rules", "S10.25 PO readiness"]
+    }
+  ],
+
+  "assumptions": [
+    {
+      "id": "ASM-1",
+      "description": "The archived production wiring in commit 51ade0f1f (CompilePipeline.compileVersioned, captured runAttempt, /api/v2 authoring stack and ITs) is a viable starting point for restoration. The reason it was dropped in fold merge ec94e9585 is not recorded in the inputs.",
+      "risk": "medium",
+      "risk_if_wrong": "If it was dropped for a correctness or conflict reason, restoring it reintroduces that defect. The spec would need a different integration seam.",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-2",
+      "description": "Gemini implicit prefix caching applies to requests routed through the Citi GenAI gateway/R2D2 proxy for the configured model. Byte-stable prefixes therefore reduce billed or processed input tokens.",
+      "risk": "medium",
+      "risk_if_wrong": "FR-11 still costs nothing to do but yields no measurable token saving. NFR-2's live metric would be unmet.",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-3",
+      "description": "'Previously green' means a successful FULL execution recorded against the exact confirmed revision, not the lastRunStatus field. Every execution is FULL, so a run of an INCREMENTAL-compiled revision also qualifies as baseline evidence for the next edit.",
+      "risk": "low",
+      "risk_if_wrong": "Chained incremental edits would fall back to FULL more often than expected.",
+      "validation_needed": false
+    },
+    {
+      "id": "ASM-4",
+      "description": "Regenerating the whole suffix (N..end), rather than only the changed step, is acceptable to the user. The user's example regenerates step 3 even though its text did not change.",
+      "risk": "low",
+      "risk_if_wrong": "The user wanted unchanged suffix steps kept, which needs a C0 amendment (see OQ-6).",
+      "validation_needed": false
+    },
+    {
+      "id": "ASM-5",
+      "description": "The V18 capture schema that InferenceCaptureStore depends on is present on this branch after the fold.",
+      "risk": "medium",
+      "risk_if_wrong": "A migration must be added or restored before wiring, which puts CON-9 ownership on the critical path.",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-6",
+      "description": "Changing the prompt layout (FR-11/FR-12) advances the prompt pin. That changes the compilation fingerprint and makes existing baselines ineligible once, so the first compile after deployment is FULL with FINGERPRINT_CHANGE.",
+      "risk": "low",
+      "risk_if_wrong": "Without a fingerprint change, a baseline could be reused across incompatible prompt versions, which violates C0 §6 pin agreement.",
+      "validation_needed": true
+    }
+  ],
+
+  "domainModel": [
+    {
+      "id": "DM-1",
+      "entity": "StudioTest (draft, UITest)",
+      "description": "The editable test with ordered steps, declared references, configuration, sourceRevision and configurationRevision, and compile_status.",
+      "attributes": ["id", "csi", "steps[{id,text}]", "references[]", "scope", "sourceRevision", "configurationRevision", "compileStatus"],
+      "relationships": ["has_many Step", "has_many AuthoringSnapshot", "has_many CompileRequest", "has_many CandidateRevision"]
+    },
+    {
+      "id": "DM-2",
+      "entity": "Step",
+      "description": "One plain-English instruction with a stable UUID that is kept across text edits (C0 §2).",
+      "attributes": ["id (UUID)", "text", "position (server-derived)"],
+      "relationships": ["belongs_to StudioTest"]
+    },
+    {
+      "id": "DM-3",
+      "entity": "AuthoringSnapshot",
+      "description": "An immutable {version:2, steps, scope} record with a canonical SHA-256 authoringHash. The reviewer and time are stored alongside it, outside the hash.",
+      "attributes": ["authoringHash", "scope{policyVersion, declaration}", "reviewer", "reviewedAt"],
+      "relationships": ["belongs_to StudioTest"]
+    },
+    {
+      "id": "DM-4",
+      "entity": "CompileRequest (capture)",
+      "description": "One immutable captured attempt. It freezes the source, authoring hash, reference names, configuration identity, baseline/evidence, requested and selected mode, writable set, fingerprint and budget before any network call.",
+      "attributes": ["compileRequestId", "requestedMode (AUTO|FULL)", "selectedMode (FULL|INCREMENTAL|REUSE)", "reason", "writableIds[]", "reusedIds[]", "baselineRevisionId", "baselineExecutionId", "fingerprint"],
+      "relationships": ["belongs_to StudioTest", "has_one CandidateRevision", "references CandidateRevision (baseline)"]
+    },
+    {
+      "id": "DM-5",
+      "entity": "CandidateRevision",
+      "description": "A complete, immutable, validated artifact published from one compile request. It must be explicitly confirmed and carries per-step generation origin (mixed provenance).",
+      "attributes": ["revisionId", "artifactHash", "steps[{stepId, code, origin}]", "confirmedAt", "confirmedBy"],
+      "relationships": ["belongs_to CompileRequest", "has_many Execution"]
+    },
+    {
+      "id": "DM-6",
+      "entity": "Execution (UITestExecution)",
+      "description": "A FULL browser run of a confirmed revision. A successful one is baseline evidence for incremental eligibility.",
+      "attributes": ["id", "startedAt", "revisionId", "executionScope=FULL", "status"],
+      "relationships": ["belongs_to CandidateRevision"]
+    },
+    {
+      "id": "DM-7",
+      "entity": "InferenceEnvelope",
+      "description": "The model response {version:1, kind: FULL|PATCH, steps[]}. Each entry is GENERATED, UNSUPPORTED or CLARIFICATION.",
+      "attributes": ["kind", "steps[{stepId,status,code|reason,message}]"],
+      "relationships": ["produced_for CompileRequest"]
+    },
+    {
+      "id": "DM-8",
+      "entity": "Reference",
+      "description": "A declared variable or secret name used by steps. Only names enter prompts. Today the ordered JSON array of all declared references is part of baseline equality (BRIEF gap 1).",
+      "attributes": ["name", "kind (variable|secret)"],
+      "relationships": ["belongs_to StudioTest"]
+    }
+  ],
+
+  "interactions": [
+    {
+      "id": "INT-1",
+      "flow": "Edit a step of a green test and Run (primary scenario)",
+      "trigger": "The author edits step 2 of a 3-step test that passed, then clicks Run.",
+      "description": "Save (v2 body with step IDs and scope) -> compile AUTO -> plan INCREMENTAL (SCOPED_SUFFIX, writable {2,3}, reused {1}) -> PATCH proposal with prior-step context -> merge -> full-artifact validation -> candidate shown with reused/regenerated badges -> confirmation (see OQ-3) -> FULL execution from step 1.",
+      "steps": ["save", "compile(AUTO)", "poll", "review candidate", "confirm", "execute FULL"],
+      "states": {
+        "loading": "Compiling: shows selected mode and 'Regenerating steps 2-3; step 1 locked'",
+        "error": "NEEDS_REVISION with per-step diagnostic, or FULL_REBUILD_REQUIRED with a Rebuild all steps action; STALE for transport/deadline",
+        "empty": "n/a"
+      }
+    },
+    {
+      "id": "INT-2",
+      "flow": "Run an unedited READY test",
+      "trigger": "The author clicks Run without edits.",
+      "description": "No compile and no LLM call. Execute the confirmed revision FULL (current behavior, preserved).",
+      "steps": ["GET test", "execute FULL"],
+      "states": {"loading": "Running", "error": "existing run error handling", "empty": "n/a"}
+    },
+    {
+      "id": "INT-3",
+      "flow": "Ineligible edit falls back to FULL",
+      "trigger": "An edit where scope is unknown, the baseline is missing, the change is structural or the fingerprint changed.",
+      "description": "The compile proceeds FULL, and the UI shows a readable reason from the C0 vocabulary.",
+      "steps": ["save", "compile(AUTO)", "plan FULL + reason", "FULL proposal", "validate", "confirm", "execute"],
+      "states": {"loading": "Compiling all steps - reason: <reason>", "error": "as INT-1", "empty": "n/a"}
+    },
+    {
+      "id": "INT-4",
+      "flow": "Explicit rebuild",
+      "trigger": "The author chooses Rebuild all steps.",
+      "description": "requestedMode=FULL, reason EXPLICIT_FULL. This is a new compile request, not a budget reset of a prior one (C0 §3).",
+      "steps": ["compile(FULL)", "validate", "confirm", "execute"],
+      "states": {"loading": "Rebuilding all steps", "error": "as INT-1", "empty": "n/a"}
+    }
+  ],
+
+  "edgeCases": [
+    {"id": "EC-1", "scenario": "The step 2 edit introduces a NEW variable that was not previously declared (e.g. a different username variable added to the test).", "handling": "Current C0 implementation: the reference-set equality in the InferenceCaptureStore baseline query finds no baseline, so FULL with NO_ELIGIBLE_BASELINE. This may contradict the user's scenario; see OQ-1.", "severity": "high"},
+    {"id": "EC-2", "scenario": "The step 2 edit switches to a variable that is ALREADY declared.", "handling": "The reference set is unchanged, so the edit stays eligible. INCREMENTAL if the other preconditions hold (BRIEF gap 1).", "severity": "low"},
+    {"id": "EC-3", "scenario": "Step 1 is edited.", "handling": "FULL with ALL_STEPS_AFFECTED.", "severity": "low"},
+    {"id": "EC-4", "scenario": "Non-contiguous edits (steps 2 and 5).", "handling": "Writable set = 2..end.", "severity": "low"},
+    {"id": "EC-5", "scenario": "A step is inserted, deleted, reordered or duplicated.", "handling": "FULL with STRUCTURAL_CHANGE.", "severity": "medium"},
+    {"id": "EC-6", "scenario": "Scope was not renewed after the edit, or is UNKNOWN, GLOBAL or FORWARD.", "handling": "FULL with SCOPE_UNKNOWN or GLOBAL_OR_FORWARD_SCOPE.", "severity": "medium"},
+    {"id": "EC-7", "scenario": "The baseline's last run failed, its execution evidence expired, or only lastRunStatus says green.", "handling": "FULL with NO_ELIGIBLE_BASELINE. Pass status is never inferred.", "severity": "medium"},
+    {"id": "EC-8", "scenario": "Model, prompt, policy or runtime pins changed since the baseline (including this story's prompt reorder).", "handling": "FULL with FINGERPRINT_CHANGE.", "severity": "medium"},
+    {"id": "EC-9", "scenario": "The model returns a PATCH that touches a locked step ID, omits a writable ID or duplicates an ID.", "handling": "INVALID_MODEL_RESPONSE. A repair within the shared limit, then NEEDS_REVISION. No partial candidate.", "severity": "high"},
+    {"id": "EC-10", "scenario": "Merged-artifact validation fails inside reused (locked) code.", "handling": "NEEDS_REVISION with FULL_REBUILD_REQUIRED. No automatic scope widening.", "severity": "high"},
+    {"id": "EC-11", "scenario": "The model returns UNSUPPORTED or CLARIFICATION for a suffix step.", "handling": "NEEDS_REVISION with a bounded step diagnostic. Terminal; no coercion retry.", "severity": "medium"},
+    {"id": "EC-12", "scenario": "The author saves again while a compile is in flight.", "handling": "The superseded attempt is recorded as DISCARDED and cannot change the latest draft.", "severity": "medium"},
+    {"id": "EC-13", "scenario": "Deadline, saturation, transport failure, or an unavailable/malformed validator.", "handling": "STALE with an error code only. No format repair.", "severity": "medium"},
+    {"id": "EC-14", "scenario": "Step text is reverted to the baseline text after intervening revisions.", "handling": "REUSE (UNCHANGED_SOURCE) with fresh validation, confirmation and evidence. Not a no-op.", "severity": "low"},
+    {"id": "EC-15", "scenario": "The complete context with prior steps exceeds the size cap.", "handling": "Reject with CONTEXT_TOO_LARGE and never truncate. FR-12 reduces how often this happens.", "severity": "medium"},
+    {"id": "EC-16", "scenario": "A late completion of an old run arrives after a newer revision exists.", "handling": "It cannot mark the newer draft green and stays as history for its own revision.", "severity": "medium"},
+    {"id": "EC-17", "scenario": "The gateway/proxy rejects systemInstruction or thinkingConfig, or omits usage fields.", "handling": "Fall back to the supported request shape. Missing usage is stored as null with usageAvailable:false. Enablement stays blocked if the approved contract cannot be met (C0 §4/§5).", "severity": "medium"}
+  ],
+
+  "terminology": [
+    {"term": "Locked step", "definition": "A step in the prefix 1..N-1 whose source and compiled code are reused byte for byte from the baseline during an INCREMENTAL compile. The lock applies at compile time only; the step still executes on every run.", "synonyms": ["reused step", "protected step", "prefix step"], "avoid": ["skipped step", "cached execution"]},
+    {"term": "Writable set", "definition": "The frozen step IDs N..end that the model may generate in one compile request.", "synonyms": ["suffix", "affected suffix", "permitted IDs"], "avoid": []},
+    {"term": "Baseline", "definition": "A confirmed revision, with a retained successful FULL execution at a compatible fingerprint, from which locked steps are reused.", "synonyms": ["previously green revision"], "avoid": ["lastRunStatus"]},
+    {"term": "Green", "definition": "A successful FULL execution recorded against an exact confirmed revision and configuration.", "synonyms": ["passing run"], "avoid": []},
+    {"term": "Requested mode / selected mode", "definition": "The client requests AUTO or FULL. The server selects FULL, INCREMENTAL or REUSE and records a reason.", "synonyms": [], "avoid": ["force incremental"]},
+    {"term": "STEP_SCOPED", "definition": "The author's explicit, audited statement that each step's meaning depends only on its own text, preceding steps and declared references. It is not a proof.", "synonyms": ["scope declaration"], "avoid": ["verified independence"]},
+    {"term": "Compile vs Execute", "definition": "Compile turns English into validated Playwright code using the LLM and no browser. Execute runs the confirmed code in a browser with no LLM.", "synonyms": ["translate/generate vs run"], "avoid": []},
+    {"term": "Fingerprint", "definition": "The identity of the model, prompt, policy, validator and runtime pins plus the generation settings. A mismatch makes a baseline ineligible.", "synonyms": ["compilation fingerprint"], "avoid": []},
+    {"term": "Candidate / confirmation", "definition": "A candidate is an immutable, validated, published artifact. Confirmation is the explicit act that makes it executable.", "synonyms": ["revision"], "avoid": []},
+    {"term": "Reference", "definition": "The declared name of a variable or secret. Values are resolved only at execution and never enter prompts.", "synonyms": ["variable", "secret reference"], "avoid": []}
+  ],
+
+  "openQuestions": [
+    {
+      "id": "OQ-1",
+      "question": "Reference-set equality: the InferenceCaptureStore baseline query requires r.references = the current full declared reference list. When the user's step 2 edit declares a new username variable, no baseline exists and FULL is selected. Should eligibility allow additive reference changes that locked prefix steps do not use? That needs a C0 §3 amendment ('Unknown reference impact ... selects FULL') and a baseline-query change. Or is the scenario limited to switching among already-declared variables?",
+      "priority": "high",
+      "blocking": true,
+      "blocksProgress": true,
+      "assignedTo": "@architect (Aria) + @data-engineer (Dara)",
+      "trace": ["BRIEF: Gap 1", "C0 §3"]
+    },
+    {
+      "id": "OQ-2",
+      "question": "STEP_SCOPED requirement: C0 requires an explicit author scope affirmation, renewed after every semantic edit, or else FULL. The user's scenario does not mention one. Should the live editor expose the scope checkbox (as InferenceStudio.tsx does), or should C0 be amended to allow an inferred or default scope? C0 says a model/heuristic 'cannot establish trust'.",
+      "priority": "high",
+      "blocking": true,
+      "blocksProgress": true,
+      "assignedTo": "@architect (Aria) + @po (Pax) + @ux-design-expert (Uma)",
+      "trace": ["BRIEF: Gap 2", "C0 §2"]
+    },
+    {
+      "id": "OQ-3",
+      "question": "Confirmation on Run: C0 requires every candidate to be explicitly confirmed (AWAITING_CONFIRMATION) before execution. The live v1 run gate goes straight from compile to execute. Does clicking Run count as confirmation of the resulting candidate, or must the INCREMENTAL candidate (reused vs regenerated diff) be reviewed and confirmed before execution?",
+      "priority": "high",
+      "blocking": true,
+      "blocksProgress": true,
+      "assignedTo": "@architect (Aria) + @po (Pax)",
+      "trace": ["C0 §1, §7", "BRIEF: Run"]
+    },
+    {
+      "id": "OQ-4",
+      "question": "Delivery vehicle: restore the /api/v2 authoring stack and mount InferenceStudio (the C0 path; C0 §1 says legacy v1 callers always select FULL)? Or extend the v1 page, PUT (which already accepts a v2 body) and v1 compile with a mode? The latter conflicts with C0 §1.",
+      "priority": "high",
+      "blocking": true,
+      "blocksProgress": true,
+      "assignedTo": "@architect (Aria)",
+      "trace": ["BRIEF: v2 REST stack dropped; StudioController.java:91-96", "C0 §1"]
+    },
+    {
+      "id": "OQ-5",
+      "question": "Why did fold merge ec94e9585 deliberately drop the production wiring and v2 stack from 51ade0f1f? Is restoring it safe relative to Story 10.44 (plain-English translation path, structural reference policy)?",
+      "priority": "high",
+      "blocking": true,
+      "blocksProgress": true,
+      "assignedTo": "@architect (Aria) / @dev (Dex) investigation",
+      "trace": ["BRIEF: archived commit 51ade0f1f, fold ec94e9585", "ASM-1"]
+    },
+    {
+      "id": "OQ-6",
+      "question": "Should an 'unchanged, keep' outcome be allowed for suffix steps after N (e.g. step 3 whose text did not change)? C0 regenerates the whole suffix, and the user's example also regenerates step 3. Adding it would further reduce output tokens but needs a C0 envelope/planner amendment.",
+      "priority": "low",
+      "blocking": false,
+      "blocksProgress": false,
+      "assignedTo": "@architect (Aria)",
+      "trace": ["BRIEF: Gap 4", "C0 §3, §4"]
+    },
+    {
+      "id": "OQ-7",
+      "question": "Should assembleCaptured send baselineCode for writable (changed) steps? It helps as a diff anchor but may bias the model toward stale code. This needs 10.26 harness evidence.",
+      "priority": "medium",
+      "blocking": false,
+      "blocksProgress": false,
+      "assignedTo": "@qa (Quinn) + @analyst",
+      "trace": ["BRIEF: [inferred] baselineCode finding", "S10.26"]
+    },
+    {
+      "id": "OQ-8",
+      "question": "What are the numeric efficiency targets for INCREMENTAL vs FULL (output tokens, input tokens after caching, p50/p95 latency)? C0 §7 leaves them pending Pax/Aria agreement before live results are observed.",
+      "priority": "medium",
+      "blocking": false,
+      "blocksProgress": false,
+      "assignedTo": "@po (Pax) + @architect (Aria); measurement @qa (Quinn)",
+      "trace": ["C0 §7", "S10.26 AC-3"]
+    },
+    {
+      "id": "OQ-9",
+      "question": "Does the Citi GenAI gateway/R2D2 proxy support systemInstruction, thinkingConfig (e.g. a lower thinking budget for code generation), implicit prefix caching and/or explicit cachedContent for the configured model? Does it report thoughtsTokenCount and cachedContentTokenCount? This is part of SPK-01.",
+      "priority": "high",
+      "blocking": false,
+      "blocksProgress": false,
+      "assignedTo": "@architect (Aria) + @devops (Gage)",
+      "trace": ["BRIEF: No thinking config; usage accounting", "C0 §5 SPK-01", "ASM-2"]
+    },
+    {
+      "id": "OQ-10",
+      "question": "Should the prompt reorder (FR-11/FR-12) ship before or with incremental wiring? It advances the prompt pin, which invalidates all baselines once (ASM-6). Shipping it first avoids a second invalidation.",
+      "priority": "medium",
+      "blocking": false,
+      "blocksProgress": false,
+      "assignedTo": "@pm (Bob) + @architect (Aria)",
+      "trace": ["C0 §6 pins", "ASM-6"]
+    },
+    {
+      "id": "OQ-11",
+      "question": "Migration UX: existing green tests (v1, no step IDs) are never retroactively eligible (C0 §2). Their first edit after release is FULL, and incremental starts only after a v2 FULL compile, confirmation and passing run. Is that acceptable, and should the UI explain it (LEGACY_MAPPING)?",
+      "priority": "medium",
+      "blocking": false,
+      "blocksProgress": false,
+      "assignedTo": "@po (Pax) + @ux-design-expert (Uma)",
+      "trace": ["C0 §2", "CON-7"]
+    },
+    {
+      "id": "OQ-12",
+      "question": "Story 10.24 AC-8 (cross-CSI/revoked access cannot reuse baselines; confirmation binding) is still open, and external entitlement revocation depends on the platform auth contract (BFF-propagated identity). Must AC-8 close before STUDIO-INC-001 enables the flag?",
+      "priority": "medium",
+      "blocking": false,
+      "blocksProgress": false,
+      "assignedTo": "@po (Pax) + @architect (Aria)",
+      "trace": ["S10.24 AC-8", "C0 §3"]
+    }
+  ],
+
+  "autoDecisions": [
+    "[AUTO-DECISION] Source classification? -> 'user' with existing docs as grounding (reason: the requirement originates from the user's request; C0 and stories supply the design, and the schema enum has no mixed value).",
+    "[AUTO-DECISION] Is the 'map the engine' ask a code deliverable? -> No. It is a spec section (FR-1) built on the brief's verified flow (reason: mapping is documentation; the brief already holds the verified current state and no new planning doc was requested).",
+    "[AUTO-DECISION] Regenerate the whole suffix or only changed steps? -> The whole suffix N..end, per C0 and the user's example; the alternative is recorded as OQ-6 (reason: CON-2 reuse C0; the user example regenerates step 3).",
+    "[AUTO-DECISION] Include the inference-efficiency items (prompt order, global-context dedup, usage/thinking accounting, scoped repair)? -> Yes, as P1 FR-10..FR-13 (reason: the user asked to 'make LLM inference efficient/optimized' and each item traces to a verified brief finding).",
+    "[AUTO-DECISION] Partial execution from step N? -> Excluded (reason: the lead's constraint, the brief's correctness clarification and C0 §7 all require FULL execution from step 1).",
+    "[AUTO-DECISION] Numeric performance targets? -> Not set; measurement is required and targets are deferred to OQ-8 (reason: C0 §7 forbids fixing targets without Pax/Aria agreement; Article IV)."
+  ],
+
+  "outOfScope": [
+    "Partial or resumed browser execution (CON-1).",
+    "Incremental compilation for structural edits: insert, delete, reorder (CON-6).",
+    "A force-incremental or manual 'lock this step' override (CON-5).",
+    "Changing the runner artifact version or routes (CON-4).",
+    "Live enablement, deployment or live model-quality claims (CON-3, CON-8)."
+  ],
+
+  "complexityHints": {
+    "note": "Input for @architect Phase 2 (Assess); not a score.",
+    "scope": "Backend compile pipeline, capture store/baseline query, authoring API, frontend run gate and editor, MSW, prompt serializer, gateway client telemetry.",
+    "integration": "Vertex/Gemini via the GenAI gateway (capability unverified, SPK-01); studio-runner validate.",
+    "infrastructure": "Feature flags; possible Flyway change if OQ-1 alters the baseline query.",
+    "knowledge": "Components exist and have tests (10.24/10.25/10.26); archived wiring exists.",
+    "risk": "Correctness of the locked prefix and the authorization boundaries; four blocking C0-conflict questions (OQ-1..OQ-4) plus OQ-5."
+  },
+
+  "nextPhase": {
+    "agent": "@architect",
+    "command": "*assess-complexity",
+    "input": "docs/stories/STUDIO-INC-001-incremental-compile/spec/requirements.json"
+  }
+}

@@ -1,0 +1,820 @@
+# Implementation plan — STUDIO-INC-001-incremental-compile
+# Spec Pipeline Phase 6 (Plan). Task: .aiox-core/development/tasks/plan-create-implementation.md
+# Output path is spec/implementation.yaml per the lead's mission (overrides the task default plan/).
+
+gate:
+  result: APPROVED
+  checkedAt: "2026-09-23"
+  checkedBy: "@architect (Aria)"
+  basis: >-
+    critique-round2.json (NEEDS_REVISION, 3.98) listed three required fixes: CRIT-16, CRIT-17, CRIT-18.
+    I checked spec.md iteration 3 (§3.2.1, §3.2.3, §3.2.4 rule 4a, §3.2.5, §5.2, §6.2, §6.3, §9) against
+    the worktree code at 1f3c56a59. All three hold.
+  checks:
+    CRIT-16:
+      verdict: HOLDS
+      evidence: >-
+        §3.2.5 step 2 is now in this order: (a) lock + idempotency, (b) non-throwing predicates, (c) exactly
+        ONE Q1 outcome (ESCALATED_FULL or DISCARDED), (d) Q2 only in the ESCALATED_FULL branch. That matches
+        the code fact that makes write order matter: recordOutcome is INSERT ... ON CONFLICT(request_id) DO
+        NOTHING (CompileStateService.java:793-812). The spec also forbids throwing guards inside the
+        transaction (requireCompilable :685 would roll back the DISCARDED row). EscalationCreationIT (1)(2) and
+        AC-8/AC-8b assert "exactly one outcome row".
+    CRIT-17:
+      verdict: HOLDS
+      evidence: >-
+        Q2 gets a forced plan via persist(forcedPlan) and never reaches CompilationPlanner.plan (called
+        unconditionally today at InferenceCaptureStore.java:135). Rule 4a is limited to
+        escalated_from_request_id IS NULL. The transaction boundary is verified: captureForCompilation is
+        REQUIRES_NEW (CompileStateService.java:94), capture is @Transactional (:122), and CompilePipeline.java
+        has no @Transactional. escalateToFull (REQUIRED) is entered through the proxy from the executor thread,
+        which has no transaction, and it self-invokes a private capture core, so everything is one
+        transaction. The reason label changed from the critique's suggestion (ESCALATED_FULL + reasonDetail
+        PREFIX_IMPACT instead of reason PREFIX_IMPACT). That is a recorded AUTO-DECISION traced to DEC-OQ2.4,
+        and it still separates source MODEL from PRIOR_ESCALATION, which was the substance of the finding.
+        It goes to GATE-C0 for sign-off.
+    CRIT-18:
+      verdict: HOLDS
+      evidence: >-
+        §3.2.3, §5.2, §9 B1 and AC-B1-1 now name both publish paths. Code confirms the gap the spec closes:
+        CompilePipeline.java:266 -> publishAcceptedCandidate (:262) -> insertOrReuseRevision (:273), then the
+        self-confirm UPDATE (:283). publishCandidate (:202) branches on requestIdentityAvailable() (:218), and
+        insertCapturedRevision handles only ON CONFLICT (compile_request_id) (:873). The spec also closes the
+        consequence it found: V24's uq_ui_test_revisions_identity would reject a byte-identical recompile, so
+        the shared captured insert uses an untargeted ON CONFLICT DO NOTHING with request-id then identity
+        reselect (INSERT_REVISION :58 already does this). V19's trg_ui_test_revision_require_request
+        (db/cutover/V19:33-44) only rejects compile_request_id IS NULL, so B1 publications cannot trip it.
+  nonBlockingFindings:
+    - id: PLAN-N1
+      note: >-
+        Today's live compile does NOT capture. CompilePipeline.compile calls beginCompile directly (:157) and
+        writes no ui_test_compile_requests row. Capture-for-all therefore changes compile() itself.
+        StudioService.compileTest is @Transactional(NOT_SUPPORTED) (:609), so calling the REQUIRES_NEW
+        captureForCompilation there cannot deadlock on the draft row lock. Subtask 2.6 records this.
+    - id: PLAN-N2
+      note: >-
+        Capture writes deadline_at, so v1 compiles gain a real request deadline. boundPublicationStatements
+        then stops taking its "historical pre-capture" early return (:829-831, "Historical pre-capture state-service callers") for v1 requests, and
+        the sweeper and publishCandidate deadline predicates start to apply. The capture duration must equal
+        the executor's attempt budget so v1 timing does not change. Covered by subtask 2.6 and AC-B1-1.
+    - id: PLAN-N3
+      note: >-
+        CompileExecutor uses a SynchronousQueue with abort policy, so a thread is the "slot". An after-commit
+        callback that runs on Q1's worker thread still holds Q1's slot, so submitting Q2 there can be refused
+        (COMPILE_POOL_SATURATED) on a busy or 1-thread pool. §3.2.5 step 1 requires the slot to be released
+        first. Q2 must be handed off after runAttempt returns (subtask 4.9, EscalationCreationIT (4)).
+    - id: PLAN-N4
+      note: >-
+        Versioned (v2) capture throws INFERENCE_CUTOVER_REQUIRED until V19 is applied
+        (CompileStateService.java:155-159). So B2's versioned ITs must apply V19 in the test schema (as
+        InferenceMigrationIT already does). The 10.26 live harness (it calls /api/v2/studio) cannot produce
+        evidence until B2 is deployed AND the V19 runbook is done. That puts V19 on the critical path to
+        enablement.
+    - id: PLAN-N5
+      note: >-
+        ESCALATED_FULL is now both a request OUTCOME (Q1) and a plan REASON (Q2). This is a vocabulary
+        overload to confirm explicitly at GATE-C0 (C0-A2 iii).
+    - id: PLAN-N6
+      note: >-
+        B2 changes the static prefix again: output-contract.md documents PREFIX_IMPACT, and the captured
+        layout adds READ-ONLY locked steps. So PROMPT_VERSION advances a second time. That is harmless: no
+        eligible v2 baseline can exist before B2 is enabled, and legacy revisions are never eligible
+        (CON-7). OQ-10's "one invalidation" intent still holds in effect.
+
+storyId: STUDIO-INC-001-incremental-compile
+createdAt: "2026-09-23T23:30:00Z"
+createdBy: "@architect"
+status: pending
+complexity: COMPLEX
+estimatedEffort: >-
+  About 22 person-days of build work across 4 stories and 1 runbook step (inferred; complexity.json says
+  "3+ days" for the whole). It excludes calendar time for the V19 observation window, SPK-01 and the 10.26
+  harness runs. A ~3d, B1 ~5d, V19 runbook ~1d plus an observation window, B2 ~8d, C ~5d.
+
+inputs:
+  binding: docs/stories/STUDIO-INC-001-incremental-compile/spec/decisions.md
+  spec: docs/stories/STUDIO-INC-001-incremental-compile/spec/spec.md (iteration 3)
+  others: [requirements.json, complexity.json, research.json, critique.json, critique-round2.json, discovery-brief.md]
+
+autoDecisions:
+  - "[AUTO-DECISION] Plan path spec/implementation.yaml vs the task default plan/implementation.yaml -> spec/ (reason: explicit lead instruction)."
+  - "[AUTO-DECISION] Step 8 'elicit approval' -> skipped; the plan is emitted pending (reason: autonomous YOLO mission; approval stays with the lead/user)."
+  - "[AUTO-DECISION] storyId pattern in the task schema (^[A-Z]+-\\d+$) does not match -> keep the pipeline's storyId verbatim (reason: every spec artifact uses it)."
+  - "[AUTO-DECISION] thinkingLevel is a bound gateway property (StudioGatewayProperties), pinned MEDIUM, and included in compilationSettings() -> yes (reason: §3.2.6 lists it as a gateway setting in the fingerprint. The 10.26 harness must run MEDIUM and LOW arms without a code change, as it does for the anchor switch)."
+  - "[AUTO-DECISION] Story A per-Run telemetry key -> compileRequestId for v1 (one v1 Run = one request, no escalation exists on the v1 path). runCorrelationId enters the plan JSON in B1 (defaulting to the request id), and Q2 inherits Q1's in B2 (reason: A has no ui_test_compile_requests row to hold it)."
+  - "[AUTO-DECISION] Package manager -> pnpm exec on the existing node_modules, never pnpm install (reason: user prefers pnpm, but frontend/ and studio-runner/ are locked with package-lock.json. pnpm install would create a second lockfile)."
+  - "[AUTO-DECISION] Attached synapse-diagnostics skill -> not run (reason: out of scope for a Phase 6 plan with a single-file output)."
+
+verificationConventions:
+  backend: "cd backend && ./gradlew test --tests '<FQCN>' [--tests '<FQCN>' ...]   # the Test task includes *Test and *IT (build.gradle.kts:102); ITs use Zonky/Testcontainers Postgres"
+  backendGate: "cd backend && ./gradlew check   # spotless, checkstyle, spotbugs, jacoco and crossReplicaTest; use at story end only"
+  frontend: "cd frontend && pnpm exec vitest run <file>   # plus pnpm exec tsc --noEmit and pnpm exec eslint <files>"
+  studioRunner: "cd studio-runner && pnpm exec vitest run <file>"
+  note: >-
+    Narrowest-first. Each subtask runs only its named classes. The full backend suite is used only where the
+    spec requires it (CRIT-12 regression guard, AC-B1-3 rollback).
+
+gates:
+  - id: GATE-SPEC
+    status: PASSED
+    before: plan
+    description: "Critique round-2 required fixes CRIT-16/17/18 verified (see gate block)."
+  - id: GATE-WORKTREE
+    status: OPEN
+    before: phase-2 (B1)
+    owner: "@dev + @data-engineer"
+    description: >-
+      The in-flight secrets/dispatch worktree changes, including V25__drop_plaintext_secrets.sql, are merged,
+      and V26 is confirmed as the first free Flyway number at merge time (CPLX WORKTREE flag, spec §4.2).
+  - id: GATE-C0
+    status: OPEN
+    before: phase-4 (B2) start
+    owner: "@architect (Aria)"
+    description: >-
+      Aria signs off C0-A1..A6 (spec §3.4, OQ-S1, CON-2) in a separate change to
+      docs/architecture/studio-inference-contract-v1.md. The same sign-off settles: OQ-S2 envelope version
+      (default bump to 2, with the provider schema version bound moving too), OQ-S3 TAIL_DELETION -> REUSE,
+      OQ-S5 scope.policyVersion value for DERIVED_FORWARD, and PLAN-N5 (the ESCALATED_FULL outcome/reason
+      overload). B2 must not start until this is recorded.
+    blocks: ["4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "4.10", "4.11", "4.12"]
+  - id: GATE-V19-GO
+    status: OPEN
+    before: phase-3 step 3.3 (apply V19)
+    owner: "@data-engineer (Dara) + @devops (Gage)"
+    description: >-
+      B1 runs on ALL replicas. The go/no-go compares the live compile error rate and STALE rate before
+      vs after B1. There is no numeric threshold (CON-10): the comparison itself is the gate (AC-B1-4).
+  - id: GATE-1026-ANCHOR
+    status: OPEN
+    before: enabling studio.compile.incremental.enabled
+    owner: "@qa + @analyst (harness), @architect (decision record)"
+    description: >-
+      Decides the prior-code anchor, studio.compile.prompt.writable-anchor = NONE | LABELED (OQ-7, DEC-OQ2.3).
+      It is decided by the 10.26 harness arm A/B measuring stale-identifier carry-over. The default stays
+      NONE until the harness decides. The value is a fingerprint input, so flipping it invalidates baselines
+      compiled under the other value.
+    requires: [phase-4 deployed, V19 applied (PLAN-N4), SPK-01]
+  - id: GATE-1026-THINKING
+    status: OPEN
+    before: enabling studio.compile.incremental.enabled
+    owner: "@qa + @analyst (harness), @architect (decision record)"
+    description: >-
+      Decides the thinking level: keep MEDIUM or pin LOW (spec §3.2.6). LOW becomes the pin only if the 10.26
+      A/B shows no quality regression. The level is in the fingerprint, and MINIMAL is never allowed.
+    requires: [phase-1 deployed, phase-4 deployed, V19 applied, SPK-01]
+  - id: GATE-ENABLE
+    status: OPEN
+    before: enabling studio.compile.incremental.enabled (and studio.authoring.v2-enabled for users)
+    owner: "@po + @architect (+ @devops for the flag change)"
+    description: >-
+      Every one of these is required: GATE-1026-ANCHOR, GATE-1026-THINKING, SPK-01 (OQ-9: R2D2 pass-through
+      of systemInstruction, thinkingConfig and usage fields), 10.24 AC-8 closed (OQ-12, cross-CSI/revoked
+      baseline), 10.26 detector precision/recall on the labeled corpus, the NFR-1 net per-Run cost report
+      (FULL vs INCREMENTAL, including escalated Q1 and locked-prefix input), the V19 cutover done (phase 3),
+      and phases 1, 2, 4 and 5 merged and deployed. This story performs no live enablement (CON-3, CON-8).
+
+stories:
+  - key: A
+    title: "Inference efficiency (ships without incremental)"
+    phase: phase-1
+    liveAffecting: true
+    effort: "~3 person-days"
+    valueStatement: >-
+      Story A is worth shipping even if incremental compilation never ships. It restructures the one live
+      model request every compile makes today. The request stops sending the global context once per step
+      and sends it once. It puts the static contract and syntax reference first, in systemInstruction, so
+      the prefix is byte-stable across tests. The response schema is built with a deterministic key order,
+      so its bytes match across JVMs and replicas. The thinking level is sent explicitly and recorded in the
+      fingerprint, instead of silently following the provider default. Usage is recorded completely:
+      thoughts, cached, total and finish reason, with null (not 0) when a field is absent. That makes the
+      cost paid today visible for the first time. Repair also carries the bounded, redacted rejected
+      proposal instead of repairing blind. SAVINGS ARE UNMEASURED. No saving is claimed until SPK-01 shows
+      what the R2D2 proxy forwards and returns, and the live 10.26 evaluation measures it. Implicit caching
+      is not expected at all, because the static prefix (~2.3-2.7K tokens, inferred) is below the
+      4,096-token minimum. MEDIUM is inferred, not verified, to equal today's default behaviour.
+    dependsOn: [GATE-WORKTREE (soft; A touches no migration)]
+    ships: "Before any v2 baseline exists (OQ-10). It advances PROMPT_VERSION once."
+  - key: B1
+    title: "Capture and data integrity"
+    phase: phase-2
+    liveAffecting: true
+    label: "LIVE-AFFECTING, not dark"
+    effort: "~5 person-days (Dara ~1.5, Dex ~2.5, Quinn ~1)"
+    dependsOn: [A, GATE-WORKTREE]
+    acceptance: [AC-B1-1, AC-B1-2, AC-B1-3, AC-B1-4, AC-B1-5, AC-13, AC-14 (unversioned + confirmVersioned rebase)]
+  - key: RB-V19
+    title: "V19 cutover runbook step"
+    phase: phase-3
+    liveAffecting: true
+    effort: "~1 person-day plus an observation window for the before/after comparison"
+    dependsOn: [B1 deployed on all replicas, GATE-V19-GO]
+    note: "Forward-only. Can run in parallel with B2/C. Required before any v2 compile works and before the 10.26 harness can run (PLAN-N4)."
+  - key: B2
+    title: "Incremental planning and escalation (dark)"
+    phase: phase-4
+    liveAffecting: false
+    effort: "~8 person-days"
+    dependsOn: [B1 merged, GATE-C0]
+    flags: {studio.compile.incremental.enabled: false, studio.authoring.v2-enabled: false}
+  - key: C
+    title: "v2 stack restore UX + InferenceStudio mount"
+    phase: phase-5
+    liveAffecting: false
+    effort: "~5 person-days"
+    dependsOn: ["B2 OpenAPI frozen (subtask 4.11); C can build on MSW once the contract merges"]
+    flags: {studioAuthoringV2: false}
+
+criticalPath:
+  toMergeComplete: "GATE-WORKTREE -> A (phase 1) -> B1 (phase 2) -> GATE-C0 -> B2 (phase 4) -> 4.11 contract -> C (phase 5)"
+  toEnablement: >-
+    A -> B1 -> deploy B1 to all replicas -> GATE-V19-GO -> V19 applied (phase 3) -> [B2 deployed dark] ->
+    SPK-01 + 10.26 harness arms (GATE-1026-ANCHOR, GATE-1026-THINKING, NFR-1, detector P/R) + OQ-12 ->
+    GATE-ENABLE. C runs in parallel with B2 after 4.11 and is off the critical path unless it slips past
+    the harness.
+  longestPoles: [B2 attempt-loop union (4.8) and escalateToFull (4.9), the V19 observation window, 10.26 live runs]
+
+dependencies:
+  - name: com.google.genai:google-genai
+    version: "1.71.0 (installed; no change)"
+    purpose: "systemInstruction, ThinkingConfig.thinkingLevel, usage fields. R2D2 pass-through is unverified (SPK-01)"
+  - name: studio-runner POST /v1/validate
+    version: "artifact v1 (no change, CON-4)"
+    purpose: "Whole merged-artifact validation"
+
+phases:
+  # ═══════════════════════════════ STORY A ═══════════════════════════════
+  - id: phase-1
+    name: "Story A - Inference efficiency (LIVE-AFFECTING)"
+    description: >-
+      FR-11/12/13 on the live FULL path, deterministic schema, thinking config + fingerprint, usage,
+      rejected-proposal repair. No schema change. The v1 compile contract is unchanged.
+    subtasks:
+      - id: "1.1"
+        description: "Build providerSchema() with a deterministic key order (LinkedHashMap/sorted) instead of Map.of so schema bytes are identical across JVMs"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/gateway/ProviderSchemaDeterminismTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.gateway.ProviderSchemaDeterminismTest' --tests 'com.citi.put.checks.studio.compile.gateway.GenAiLlmGatewayClientTest'"
+        status: pending
+        notes: "The FULL schema content is unchanged here. The kind-dependent PREFIX_IMPACT arm arrives in 4.5. Assert byte equality across two serializations with different hash seeds (e.g. fork the JVM twice or compare against a golden string)."
+      - id: "1.2"
+        description: "Send the static prefix (output-contract.md + separator + syntax-reference.md) as systemInstruction and send thinkingConfig.thinkingLevel explicitly (never with thinkingBudget, never MINIMAL); add thinkingLevel to compilationSettings()"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java
+          - backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayPayloadSerializer.java
+          - backend/src/main/java/com/citi/put/checks/studio/compile/gateway/StudioGatewayProperties.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.gateway.GenAiLlmGatewayClientTest' --tests 'com.citi.put.checks.studio.compile.gateway.StudioGatewayPropertiesTest' --tests 'com.citi.put.checks.studio.compile.gateway.GatewayAuditTest'"
+        status: pending
+        dependencies: ["1.1"]
+        notes: >-
+          Pin MEDIUM (inferred to equal the gemini-3.8-flash default; SPK-01 confirms). Implement the EC-17
+          degradation switches: if the proxy rejects systemInstruction, send the same static bytes as the
+          leading text of contents[0]. If it rejects thinkingConfig, omit the field and record
+          thinkingLevel:"PROVIDER_DEFAULT". Reject MINIMAL at property binding.
+      - id: "1.3"
+        description: "Record complete per-proposal usage (prompt, candidates, thoughts, cachedContent, total, finishReason, actual settings) with null + usageAvailable:false for absent fields"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayProvenance.java
+          - backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/gateway/UsageCaptureTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.gateway.UsageCaptureTest' --tests 'com.citi.put.checks.studio.compile.gateway.GenAiGatewayAuditTest'"
+        status: pending
+        dependencies: ["1.2"]
+        notes: "Usage goes into revision provenance and GatewayAuditLogger fields. v1 per-Run key = compileRequestId (AUTO-DECISION). IDs only, never step text (NFR-5)."
+      - id: "1.4"
+        description: "Restructure live prompt assembly static-first: nothing per-test in the static block, global context exactly once, reference NAMES and writable IDs after the static blocks, size cap measured after dedup (CONTEXT_TOO_LARGE, never truncate)"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/PromptAssembler.java
+          - backend/src/main/java/com/citi/put/checks/studio/compile/ContextPromptSection.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/PromptLayoutTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.PromptLayoutTest' --tests 'com.citi.put.checks.studio.compile.PromptAssemblyTest' --tests 'com.citi.put.checks.studio.compile.ContextPromptSectionTest' --tests 'com.citi.put.checks.studio.compile.ContextAggregateBudgetTest'"
+        status: pending
+        dependencies: ["1.2"]
+        notes: "AC-12 and NFR-7: two different tests at the same pins produce identical systemInstruction bytes containing no IDs, references or mode. Bump CompilePins.PROMPT_VERSION in 1.6, not here."
+      - id: "1.5"
+        description: "Repair carries explicit correction instructions plus the bounded, redacted rejected proposal and diagnostics, same kind, never widening the set"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/RepairPromptAssembler.java
+          - backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.RepairRedactionTest' --tests 'com.citi.put.checks.studio.compile.RepairLoopTest' --tests 'com.citi.put.checks.studio.compile.RepairBoundsTest' --tests 'com.citi.put.checks.studio.compile.RepairExhaustionTest'"
+        status: pending
+        dependencies: ["1.4"]
+        notes: "Extend RepairRedactionTest to the rejected proposal (CPLX SECURITY flag): no resolved values and no secret material. Keep the 3-proposal / 3-of-9 transport bounds (NFR-4)."
+      - id: "1.6"
+        description: "Advance CompilePins.PROMPT_VERSION for the new layout and add fingerprint unit coverage for thinkingLevel and PROMPT_VERSION"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/CompilePins.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/CompileFingerprintTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.CompileFingerprintTest' --tests 'com.citi.put.checks.studio.compile.ArtifactVersionPinTest' --tests 'com.citi.put.checks.studio.compile.RunnerPinDriftTest'"
+        status: pending
+        dependencies: ["1.2", "1.4", "1.5"]
+        notes: "Re-port CompileFingerprintTest from 51ade0f1f and adapt it. The AC-11.2 harness coverage happens at GATE-ENABLE, not at A's merge (requirements AC-11.2 'before enablement')."
+      - id: "1.7"
+        description: "Confirm the runner-side syntax reference is untouched by the systemInstruction move and run Story A's regression set"
+        service: backend
+        executor: "@qa"
+        files:
+          - studio-runner/test/syntax-reference-drift.test.ts
+          - backend/src/test/java/com/citi/put/checks/studio/compile/NoRuntimeLlmTest.java
+        verification:
+          type: command
+          command: "cd studio-runner && pnpm exec vitest run test/syntax-reference-drift.test.ts && cd ../backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.NoRuntimeLlmTest' --tests 'com.citi.put.checks.studio.compile.CompilePipelineTest' --tests 'com.citi.put.checks.studio.compile.CompilePipelineIT' --tests 'com.citi.put.checks.studio.compile.CompileBoundsTest' && ./gradlew check"
+        status: pending
+        dependencies: ["1.6"]
+        notes: "Read-only verification, no edits expected. The story is marked LIVE-AFFECTING in its header."
+
+  # ═══════════════════════════════ STORY B1 ═══════════════════════════════
+  - id: phase-2
+    name: "Story B1 - Capture and data integrity (LIVE-AFFECTING, not dark)"
+    description: >-
+      V26, capture for all compiles with no new v1 rejection, authoringHash = contextDigest, every V18
+      predicate rebased, both publish paths on one captured insert, CRIT-12 guard, tested rollback. It is
+      ungated by design (spec §9 AUTO-DECISION), and acceptable only while AC-B1-1..5 all hold. V19 is NOT
+      part of this deploy.
+    subtasks:
+      - id: "2.1"
+        description: "V26 (a)(c)(f): add captured authoring, authoring_revision_inputs, reference_policy, intent_derivation_version to ui_test_compile_requests; escalated_from_request_id UUID NULL UNIQUE FK; rule-4a index; rebase idx_ui_test_revisions_eligible if needed"
+        service: database
+        executor: "@data-engineer"
+        files:
+          - backend/src/main/resources/db/migration/V26__studio_captured_authoring.sql
+          - backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.InferenceMigrationIT' --tests 'com.citi.put.checks.studio.compile.ReferencePolicyMigrationIT' --tests 'com.citi.put.checks.smoke.SchemaSmokeTest' --tests 'com.citi.put.checks.smoke.IndexCatalogTest'"
+        status: pending
+        dependencies: [GATE-WORKTREE]
+        notes: "Dara may split into V26/V27. The file name is illustrative. Forward-only, additive. The append-only trigger on ui_test_compile_requests stays. SchemaSmokeTest/IndexCatalogTest are modified in the worktree today (secrets work), so rebase after GATE-WORKTREE."
+      - id: "2.2"
+        description: "V26 (b)(d)(e): restore whole-row write-once trigger on ui_test_revisions; V21 capture trigger no-op when compile_request_id IS NOT NULL; extend studio_inference_revision_capture() to V21/V24 columns"
+        service: database
+        executor: "@data-engineer"
+        files:
+          - backend/src/main/resources/db/migration/V26__studio_captured_authoring.sql
+          - backend/src/test/java/com/citi/put/checks/studio/compile/CapturedAuthoringTriggerIT.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/WriteOnceWholeRowIT.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.CapturedAuthoringTriggerIT' --tests 'com.citi.put.checks.studio.compile.WriteOnceWholeRowIT' --tests 'com.citi.put.checks.studio.compile.ConfirmationWriteOnceIT'"
+        status: pending
+        dependencies: ["2.1"]
+        notes: "Trigger name order matters: trg_ui_test_revision_capture fires before trg_ui_test_revisions_capture_authoring. WriteOnceWholeRowIT includes the positive first-confirmation case and the publishAcceptedCandidate self-confirm UPDATE on a captured revision (CRIT-12 item 3)."
+      - id: "2.3"
+        description: "CRIT-12 item 1: inventory every UPDATE ui_test_revisions and every JPA save of UITestRevision (main + seed), classify each as confirmation-only or removed, record in the B1 story file"
+        service: database
+        executor: "@data-engineer"
+        files:
+          - docs/stories/STUDIO-INC-001-incremental-compile/B1.story.md
+        verification:
+          type: command
+          command: "grep -rn 'UPDATE ui_test_revisions' backend/src/main backend/src/main/resources/db; grep -rln 'UITestRevisionRepository\\|revisionRepository.save' backend/src/main"
+        status: pending
+        dependencies: ["2.2"]
+        notes: "Known at 1f3c56a59: CompileStateService.java:283 (self-confirm) and :450 (confirm). Repository users: StudioService, StudioAcceptanceService, StudioDispatcher, UITestRevisionRepository. The story file is created by @sm. Dara appends the table."
+      - id: "2.4"
+        description: "Rebase every InferenceCaptureStore V18 predicate onto V21 (spec §3.2.1 table), write V21/V24 columns + runCorrelationId into the request row, and make unversioned capture never reject (absent/invalid pair -> FULL LEGACY_MAPPING, text guard only when the pair is valid)"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/InferenceCaptureStore.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/InferenceCaptureIntegrationTest.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/UnversionedCaptureIT.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.UnversionedCaptureIT' --tests 'com.citi.put.checks.studio.compile.InferenceCaptureIntegrationTest'"
+        status: pending
+        dependencies: ["2.1", "2.2"]
+        notes: "The STEP_SCOPED/scope compare and the SCOPE_UNKNOWN override (:143-153) are removed in B2 (4.4), not here. B1 keeps planner behaviour and only rebases data sources. UnversionedCaptureIT covers AC-B1-2 cases (i)(ii)(iii)."
+      - id: "2.5"
+        description: "CompileStateService: one shared captured insert (untargeted ON CONFLICT DO NOTHING -> select by compile_request_id -> select by identity) used by BOTH publishAcceptedCandidate and publishCandidate; authoringHash compares rebased to contextDigest in capture and confirmVersioned; unversioned capture adds no rejection"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/AuthoringHashConfirmIT.java
+          - backend/src/test/java/com/citi/put/checks/studio/CompileStateServiceTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.AuthoringHashConfirmIT' --tests 'com.citi.put.checks.studio.CompileStateServiceTest' --tests 'com.citi.put.checks.studio.compile.ExactConfirmationIT' --tests 'com.citi.put.checks.studio.compile.NoAutoConfirmTest'"
+        status: pending
+        dependencies: ["2.4"]
+        notes: >-
+          Keep publishAcceptedCandidate's semantics byte-for-byte: same lockCurrentRequest guard, same
+          persistedReferencePolicyIsVerified check, same self-confirm UPDATE, same READY transition.
+          Extend requireCandidateMatchesRequest so candidate.referencePolicy/intentDerivationVersion equal
+          the request row's (the trigger in 2.2 would otherwise reject with an opaque 23514). A reused
+          pre-V19 revision keeps its original compile_request_id, which is allowed only while the identity
+          index exists.
+      - id: "2.6"
+        description: "Capture for all: CompilePipeline.compile goes through captureForCompilation (FULL/LEGACY_MAPPING for v1) instead of bare beginCompile, computes the compilation fingerprint from compilationSettings() + pins, and sets the capture duration equal to the executor attempt budget"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java
+          - backend/src/main/java/com/citi/put/checks/studio/compile/StudioCompileProperties.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.CompilePipelineIT' --tests 'com.citi.put.checks.studio.compile.CompilePipelineTest' --tests 'com.citi.put.checks.studio.compile.AbandonedCompileSweepIT' --tests 'com.citi.put.checks.studio.compile.CompileBudgetExpiryTest' --tests 'com.citi.put.checks.studio.compile.CompileBoundsTest'"
+        status: pending
+        dependencies: ["2.5"]
+        notes: "PLAN-N1: compileTest is NOT_SUPPORTED, so REQUIRES_NEW is safe. PLAN-N2: v1 requests now have deadline_at, so keep v1 timing identical. Error mapping: capture's 400/409 cases must surface exactly as today's compile() refusals (TEST_DELETED/QUARANTINED 409, bound/credential 400, no state moved)."
+      - id: "2.7"
+        description: "AC-B1-1 capture-for-all IT: v1 compile via publishAcceptedCandidate writes a request row and a revision with non-null compile_request_id whose V21/V24 columns equal the request's; byte-identical recompile reuses; with V19 applied in the test schema a v1 compile publishes"
+        service: backend
+        executor: "@qa"
+        files:
+          - backend/src/test/java/com/citi/put/checks/studio/compile/CaptureForAllIT.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.CaptureForAllIT'"
+        status: pending
+        dependencies: ["2.6"]
+        notes: "Covers AC-13 rows 1, 2 and 4 too. Apply db/cutover/V19 in a dedicated schema as InferenceMigrationIT does."
+      - id: "2.8"
+        description: "CRIT-12 item 2 regression gate: full backend suite + build gate with V26 applied (execution linking, sweeper, seed/backfill paths)"
+        service: backend
+        executor: "@qa"
+        files:
+          - backend/build.gradle.kts
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test && ./gradlew check"
+        status: pending
+        dependencies: ["2.7", "2.3"]
+        notes: "This is the one place a full suite is required by the spec. build.gradle.kts is listed as the reference and is not edited."
+      - id: "2.9"
+        description: "AC-B1-3 tested rollback: run the pre-B1 commit's backend suite against a schema migrated through V26"
+        service: infra
+        executor: "@qa"
+        files:
+          - backend/src/main/resources/db/migration/V26__studio_captured_authoring.sql
+        verification:
+          type: command
+          command: "git worktree add ../pre-b1 <PRE_B1_SHA> && cp backend/src/main/resources/db/migration/V26__*.sql ../pre-b1/backend/src/main/resources/db/migration/ && (cd ../pre-b1/backend && ./gradlew test); git worktree remove --force ../pre-b1"
+        status: pending
+        dependencies: ["2.8"]
+        notes: "Local proof by @qa. Wiring it as a standing CI job is @devops-owned (CI/CD is exclusive), so hand off. The pre-B1 binary never writes a captured revision, so V26 (d)/(e) must be inert for it. This test proves that."
+      - id: "2.10"
+        description: "Runbook + label: add the B1-before-V19 order and the before/after compile error/STALE go/no-go step; carry 'LIVE-AFFECTING, not dark' in the B1 story header and PR body"
+        service: infra
+        executor: "@data-engineer"
+        files:
+          - docs/runbooks/studio-inference-rollout.md
+          - docs/stories/STUDIO-INC-001-incremental-compile/B1.story.md
+        verification:
+          type: manual
+          instructions: "Review: the runbook has the go/no-go step (no numeric threshold, CON-10). The B1 PR diff contains no db/cutover/V19 change (AC-B1-4). The header and PR body carry the label (AC-B1-5). @devops checks this at pre-push review."
+        status: pending
+        dependencies: ["2.8"]
+
+  # ═══════════════════════════════ RUNBOOK V19 ═══════════════════════════════
+  - id: phase-3
+    name: "Runbook step - V19 cutover (forward-only)"
+    description: "Spec §3.3 steps (1)-(4). Parallel with B2/C. Must precede any v2 compile, the 10.26 harness and enablement."
+    subtasks:
+      - id: "3.1"
+        description: "Re-anchor and re-validate db/cutover/V19 against V24 and V26 (identity index drop, require-request trigger, drain barrier) without adding it to the Flyway classpath"
+        service: database
+        executor: "@data-engineer"
+        files:
+          - backend/db/cutover/V19__studio_inference_candidate_identity.sql
+          - backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.InferenceMigrationIT' --tests 'com.citi.put.checks.studio.compile.CaptureForAllIT' --tests 'com.citi.put.checks.studio.compile.InferenceCaptureIntegrationTest'"
+        status: pending
+        dependencies: ["2.9"]
+      - id: "3.2"
+        description: "Operational: confirm B1 on all replicas, collect before/after-B1 compile error and STALE rates, record go/no-go (GATE-V19-GO), drain incompatible publishers"
+        service: infra
+        executor: "@data-engineer"
+        files:
+          - docs/runbooks/studio-inference-rollout.md
+        verification:
+          type: manual
+          instructions: "The runbook record shows every replica on the B1 build, the before/after comparison and a signed go/no-go. Deployment actions are @devops (Gage)."
+        status: pending
+        dependencies: ["3.1", "B1 deployed"]
+      - id: "3.3"
+        description: "Apply V19 via the runbook with checks.inference_publishers_drained='true'; record that the capture binary is now the rollback floor"
+        service: database
+        executor: "@data-engineer"
+        files:
+          - docs/runbooks/studio-inference-rollout.md
+        verification:
+          type: manual
+          instructions: "After apply: requestIdentityAvailable() is true (identity index gone, trg_ui_test_revision_require_request present). A v1 compile in the target environment publishes READY. The compile error rate does not step up vs the 3.2 baseline."
+        status: pending
+        dependencies: ["3.2"]
+
+  # ═══════════════════════════════ STORY B2 ═══════════════════════════════
+  - id: phase-4
+    name: "Story B2 - Incremental planning and escalation (dark)"
+    description: >-
+      Spec §3.2.2-§3.2.7, C0-A1..A6, v2 REST re-port, run-accept confirm, contracts. Starts only after
+      GATE-C0. With both flags off, the live path is unchanged relative to B1. Versioned ITs apply V19 in the
+      test schema (PLAN-N4).
+    gates: [GATE-C0]
+    subtasks:
+      - id: "4.1"
+        description: "StepIdentity {id, text, contextCanonical from stored JSON, referencePolicyEntry minus stepIndex} with SHA-256 hash, fail-closed on unknown kind/field, permits-enumeration fixture test"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/incremental/StepIdentity.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/incremental/StepContextIdentityTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.incremental.StepContextIdentityTest'"
+        status: pending
+        dependencies: [GATE-C0, "2.8"]
+        notes: "The StepIdentity type may live inside CompilationPlanner. A separate file is a suggestion. Include LiteralInput/TargetHint/ContextText/evidenceReferences-only edits (AC-3) and the shifted-step policy case (CRIT-8a)."
+      - id: "4.2"
+        description: "Rewrite CompilationPlanner: earliest affected position p, prefix lock on id+hash+position, §3.2.4 edit table incl. TAIL_DELETION, reason order with rule 2 CONFIGURATION_ONLY, rule 4a hook, REUSE preconditions, SCOPE_UNKNOWN never emitted"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/incremental/CompilationPlanner.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/incremental/CompilationPlannerTest.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/incremental/StepIdentityPlannerTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.incremental.CompilationPlannerTest' --tests 'com.citi.put.checks.studio.compile.incremental.StepIdentityPlannerTest'"
+        status: pending
+        dependencies: ["4.1"]
+        notes: "1-based positions, 0-based stepIndex. Every row of the §3.2.4 table is a parameterized case. STRUCTURAL_CHANGE stays only for flag-off audit parity."
+      - id: "4.3"
+        description: "DependencyDetector: NFKC + lowercase over changed steps only; rules STEP_NUMBER_REF (backward only), RELATIVE_STEP_REF, GLOBAL_QUANTIFIER, RETROACTIVE_EDIT, BACKWARD_VALUE_REF with R-Q4 exclusions; logs rule IDs only; detectorVersion"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/incremental/DependencyDetector.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/incremental/DependencyDetectorTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.incremental.DependencyDetectorTest'"
+        status: pending
+        dependencies: [GATE-C0]
+        notes: "Lexicon comes only from research.json R-Q4.minimalLexicon. Add no rules beyond it (Article IV)."
+      - id: "4.4"
+        description: "InferenceCaptureStore: StepIdentity inputs, detector wiring, rule 4a single indexed lookup (escalated_from_request_id IS NULL only), CONFIGURATION_ONLY relabel restricted to full authoringHash equality, remove scope compare, nullable forcedPlan that bypasses baseline/planner/4a/relabel"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/InferenceCaptureStore.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/InferenceCaptureIntegrationTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.InferenceCaptureIntegrationTest' --tests 'com.citi.put.checks.studio.compile.UnversionedCaptureIT' --tests 'com.citi.put.checks.studio.compile.CaptureForAllIT'"
+        status: pending
+        dependencies: ["4.2", "4.3"]
+        notes: "Add the cross-CSI/revoked baseline case (NFR-5) and rule 4a cases, including a value-only edit re-opening INCREMENTAL once (CRIT-20c). Re-run B1's ITs to prove the v1 path is unchanged."
+      - id: "4.5"
+        description: "PREFIX_IMPACT envelope: kind-dependent provider schema (PATCH only adds PREFIX_IMPACT/LOCKED_STEP_CHANGE_REQUIRED), parser pairing, precedence (with any other violation -> INVALID_MODEL_RESPONSE), local proposal schema + version bound per GATE-C0 OQ-S2"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java
+          - backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayResponseParser.java
+          - docs/specs/studio/inference-proposal.schema.json
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.gateway.GatewayResponseParserTest' --tests 'com.citi.put.checks.studio.compile.gateway.InferenceEnvelopeTest' --tests 'com.citi.put.checks.studio.compile.gateway.ProviderSchemaDeterminismTest'"
+        status: pending
+        dependencies: [GATE-C0, "1.1"]
+        notes: "Also document the PATCH-only variant in backend/src/main/resources/studio/output-contract.md, and bump PROMPT_VERSION (PLAN-N6). FULL schema bytes stay deterministic."
+      - id: "4.6"
+        description: "IncrementalAssembler: merge after structural edits with server-derived stepIndex/originalText, reused-prefix guard on full StepIdentity (mismatch -> STALE, nothing published), PREFIX_IMPACT pair"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/incremental/IncrementalAssembler.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/incremental/IncrementalAssemblerTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.incremental.IncrementalAssemblerTest'"
+        status: pending
+        dependencies: ["4.1", "4.5"]
+      - id: "4.7"
+        description: "Captured prompt assembly: static systemInstruction unchanged; contents[0] = global context once, reference names, locked steps READ-ONLY with English + baseline code, writable steps with anchor switch NONE|LABELED, kind + frozen writable IDs; anchor value, POLICY_VERSION and CURRENT_VERSION in the fingerprint"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/PromptAssembler.java
+          - backend/src/main/java/com/citi/put/checks/studio/compile/StudioCompileProperties.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/CompileFingerprintTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.CompileFingerprintTest' --tests 'com.citi.put.checks.studio.compile.PromptLayoutTest' --tests 'com.citi.put.checks.studio.compile.PromptAssemblyTest'"
+        status: pending
+        dependencies: ["4.1", "1.6"]
+        notes: "Default anchor NONE (GATE-1026-ANCHOR decides). Bind studio.compile.prompt.writable-anchor and studio.compile.incremental.enabled (default false) in application.yml. Oversized complete context -> CONTEXT_TOO_LARGE."
+      - id: "4.8"
+        description: "Unified attempt loop (compileVersioned equivalent): captured inputs + planner + REUSE skipping the gateway + assembler + rejected-proposal repair within the frozen writable IDs + live AggregateUsage/version gate/referencePolicy validation; reused-code failure -> NEEDS_REVISION FULL_REBUILD_REQUIRED"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java
+          - backend/src/main/java/com/citi/put/checks/studio/compile/CompileErrorCode.java
+          - backend/src/test/java/com/citi/put/checks/studio/authoring/StudioVersionedCompilationIT.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.authoring.StudioVersionedCompilationIT' --tests 'com.citi.put.checks.studio.compile.CompilePipelineTest' --tests 'com.citi.put.checks.studio.compile.RepairBoundsTest' --tests 'com.citi.put.checks.studio.compile.CompileBudgetExpiryTest' --tests 'com.citi.put.checks.studio.compile.RepairRedactionTest'"
+        status: pending
+        dependencies: ["4.4", "4.6", "4.7"]
+        notes: "Re-port from 51ade0f1f, do not cherry-pick (COL-6). One loop. The v1 compile() keeps routing FULL through it with identical behaviour. Existing live suites and the re-ported ITs must both pass."
+      - id: "4.9"
+        description: "escalateToFull (@Transactional REQUIRED): lock -> idempotency -> non-throwing predicates -> exactly one Q1 outcome -> forced-plan Q2 via private capture core shared with capture; after-commit Q2 enqueue that runs only after Q1's executor slot is released"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java
+          - backend/src/main/java/com/citi/put/checks/studio/compile/CompileExecutor.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/EscalationCreationIT.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.EscalationCreationIT' --tests 'com.citi.put.checks.studio.compile.AbandonedCompileSweepIT'"
+        status: pending
+        dependencies: ["4.4", "4.8"]
+        notes: "PLAN-N3: SynchronousQueue executor. Hand Q2 off after runAttempt returns, not from a callback on Q1's thread. Never call captureForCompilation. EscalationCreationIT cases (1)-(7) including (3b) ABANDONED and (3c) double call."
+      - id: "4.10"
+        description: "PREFIX_IMPACT end-to-end in the pipeline: valid PATCH with PREFIX_IMPACT on any attempt -> ESCALATED_FULL, no candidate/repair, escalateToFull; FULL cannot escalate; runCorrelationId inherited"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java
+          - backend/src/test/java/com/citi/put/checks/studio/compile/PrefixImpactEscalationIT.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.PrefixImpactEscalationIT' --tests 'com.citi.put.checks.studio.compile.EscalationCreationIT'"
+        status: pending
+        dependencies: ["4.9"]
+      - id: "4.11"
+        description: "Re-port v2 REST stack from 51ade0f1f reconciled to V21: AuthoringDtos (server-derived audit-only scope DERIVED_FORWARD), StudioAuthoringService (PUT persists only, no-op keeps snapshot, ID allocation/400 INVALID_STEP_ID), controller routes incl. GET compiles/{id} with escalatedFrom/To and derived ABANDONED; confirm-compile with confirmationSource"
+        service: backend
+        executor: "@dev"
+        files:
+          - backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringDtos.java
+          - backend/src/main/java/com/citi/put/checks/studio/authoring/StudioAuthoringService.java
+          - backend/src/main/java/com/citi/put/checks/studio/authoring/StudioAuthoringController.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.authoring.StudioAuthoringIT' --tests 'com.citi.put.checks.studio.authoring.StudioAuthoringServiceTest' --tests 'com.citi.put.checks.studio.compile.AuthoringHashConfirmIT' --tests 'com.citi.put.checks.config.StudioV2IdempotencyFilterTest'"
+        status: pending
+        dependencies: ["4.8", "4.10"]
+        notes: "Re-port the test classes StudioAuthoringIT/StudioAuthoringServiceTest from 51ade0f1f as well (they count as follow-on files for this subtask). Bind studio.authoring.v2-enabled (default false). AC-2.1/2.2. Routes are 404 or disabled when the flag is off."
+      - id: "4.12"
+        description: "Contracts: inference.openapi.yaml compile {mode}, response selectedMode/reason/reasonDetail/escalation/escalatedFrom/To/writableIds/reusedIds/per-step origin, confirm confirmationSource; freeze for Story C"
+        service: backend
+        executor: "@dev"
+        files:
+          - docs/specs/studio/inference.openapi.yaml
+          - backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.StudioContractTest' --tests 'com.citi.put.checks.studio.compile.CompileRouteContractDivergenceTest'"
+        status: pending
+        dependencies: ["4.11"]
+        notes: "The v1 docs/specs/studio/openapi.yaml should NOT change. If it does, re-anchor the pin with tools/epic10-fold/pin-contract.sh and run 'cd studio-runner && pnpm exec vitest run test/run/confinement.test.ts' (CPLX CONTRACT flag). This subtask is the C start trigger."
+      - id: "4.13"
+        description: "B2 acceptance sweep: Gherkin AC-1..AC-15 backend side, late-completion EC-16, bounds on the captured path, NoRuntimeLlm, whole merged artifact through the runner validator contract"
+        service: backend
+        executor: "@qa"
+        files:
+          - backend/src/test/java/com/citi/put/checks/studio/authoring/StudioVersionedCompilationIT.java
+          - studio-runner/test/validator-api.test.ts
+        verification:
+          type: command
+          command: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.authoring.*' --tests 'com.citi.put.checks.studio.compile.*' --tests 'com.citi.put.checks.studio.readiness.*' && cd ../studio-runner && pnpm exec vitest run test/validator-api.test.ts && cd ../backend && ./gradlew check"
+        status: pending
+        dependencies: ["4.12"]
+        notes: "Flags-off parity: with both flags false, the B1 suites (CaptureForAllIT, UnversionedCaptureIT) are unchanged. The runner is not modified (CON-4). The validator test confirms the merged-artifact shape stays valid."
+
+  # ═══════════════════════════════ STORY C ═══════════════════════════════
+  - id: phase-5
+    name: "Story C - v2 stack restore UX + InferenceStudio mount"
+    description: >-
+      Spec §3.2.8, §3.2.9 FE. Behind studioAuthoringV2. The v1 ChecksStudioPage and its RunControl/useRunGate
+      behaviour stay unchanged when the flag is off (CON-11: no silent v1 write from the v2 page).
+    subtasks:
+      - id: "5.1"
+        description: "studioInferenceApi: compile {mode:AUTO|FULL}, typed compile resource (selectedMode, reason, reasonDetail, escalation, escalatedFrom/To, writableIds, reusedIds, per-step origin, ABANDONED/DISCARDED), confirm-compile with confirmationSource via the centralized apiClient"
+        service: frontend
+        executor: "@dev"
+        files:
+          - frontend/src/services/api/studioInferenceApi.ts
+          - frontend/src/services/api/studioInferenceApi.test.ts
+        verification:
+          type: command
+          command: "cd frontend && pnpm exec vitest run src/services/api/studioInferenceApi.test.ts && pnpm exec tsc --noEmit"
+        status: pending
+        dependencies: ["4.12"]
+      - id: "5.2"
+        description: "MSW inferenceHandlers model INCREMENTAL / FULL / REUSE / ESCALATED_FULL (Q1->Q2) / DISCARDED / ABANDONED / NEEDS_REVISION+FULL_REBUILD_REQUIRED"
+        service: frontend
+        executor: "@dev"
+        files:
+          - frontend/src/services/mocks/studio/inferenceHandlers.ts
+          - frontend/src/services/mocks/studio/inferenceHandlers.test.ts
+        verification:
+          type: command
+          command: "cd frontend && pnpm exec vitest run src/services/mocks/studio/inferenceHandlers.test.ts src/services/mocks/studio/studioContract.test.ts"
+        status: pending
+        dependencies: ["5.1"]
+      - id: "5.3"
+        description: "v2 Run gate: AUTO -> poll (one C0 compile ceiling + margin per request, renewed once on escalation) -> follow escalatedTo once -> confirm-compile RUN with the six identity fields -> execute; stop on DISCARDED/ABANDONED/STALE; never auto-accept NEEDS_REVISION"
+        service: frontend
+        executor: "@dev"
+        files:
+          - frontend/src/components/studio/run/useRunGate.ts
+          - frontend/src/components/studio/run/runGate.test.tsx
+        verification:
+          type: command
+          command: "cd frontend && pnpm exec vitest run src/components/studio/run/runGate.test.tsx src/components/studio/run/refusals.test.tsx src/components/studio/run/progress.test.tsx"
+        status: pending
+        dependencies: ["5.2"]
+        notes: "useRunGate is consumed by RunControl on the v1 page. Keep the v1 path (no body, fixed 330 s poll) byte-identical when not in v2 mode. The existing runGate tests must pass unchanged. OQ-S4 margin: @dev + @architect."
+      - id: "5.4"
+        description: "Rebuild InferenceStudio on the current pipeline: 10.35 step context + global context + declared references, 10.44 translation path; remove scope checkbox; keep add/remove/reorder/duplicate; Rebuild all steps (FULL)"
+        service: frontend
+        executor: "@dev"
+        files:
+          - frontend/src/components/studio/inference/InferenceStudio.tsx
+          - frontend/src/components/studio/inference/InferenceStudio.test.tsx
+        verification:
+          type: command
+          command: "cd frontend && pnpm exec vitest run src/components/studio/inference/InferenceStudio.test.tsx && pnpm exec tsc --noEmit"
+        status: pending
+        dependencies: ["5.3"]
+      - id: "5.5"
+        description: "Run log: REUSED (from revision R) / REGENERATED badges with accessible names (not color-only), code diff for regenerated steps, mode + reason/reasonDetail, escalation banner in a live region, FULL_REBUILD_REQUIRED -> Rebuild all steps"
+        service: frontend
+        executor: "@dev"
+        files:
+          - frontend/src/components/studio/inference/InferenceStudio.tsx
+          - frontend/src/components/studio/inference/InferenceStudio.test.tsx
+          - frontend/src/test/a11y/studioWcagAudit.test.tsx
+        verification:
+          type: command
+          command: "cd frontend && pnpm exec vitest run src/components/studio/inference/InferenceStudio.test.tsx src/test/a11y/studioWcagAudit.test.tsx src/components/studio/review/accessibility.test.tsx"
+        status: pending
+        dependencies: ["5.4"]
+        notes: "AC-8.1, AC-15, NFR-6, 10.25 AC-5 (axe). A Run-log subcomponent may be extracted if InferenceStudio.tsx grows. Keep WCAG pins re-anchored only for v2 surfaces."
+      - id: "5.6"
+        description: "Mount: studio and studio/:id routes render InferenceStudio when studioAuthoringV2 is on, ChecksStudioPage otherwise (both standalone and federated route blocks)"
+        service: frontend
+        executor: "@dev"
+        files:
+          - frontend/src/App.tsx
+          - frontend/src/utils/constants/appConfig.ts
+        verification:
+          type: command
+          command: "cd frontend && pnpm exec tsc --noEmit && pnpm exec eslint src/App.tsx src/components/studio/inference src/components/studio/run src/services/api/studioInferenceApi.ts && pnpm exec vitest run src/components/studio/inference/InferenceStudio.test.tsx"
+        status: pending
+        dependencies: ["5.5"]
+        notes: "App.tsx has two route blocks (:110/:113 and :138/:141). Change both."
+      - id: "5.7"
+        description: "Parity and flow check: InferenceStudio vs ChecksStudioPage (context, references, translation path, secrets input) on MSW; flag-off page unchanged"
+        service: frontend
+        executor: "@qa"
+        files:
+          - frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx
+        verification:
+          type: manual
+          instructions: "Run 'cd frontend && pnpm exec vitest run src/pages/ChecksStudioPage src/components/studio' (flag-off regression), then use the v2 page in 'pnpm exec vite --port 5173' with MSW. Walk AC-1, AC-7, AC-8, AC-8b, AC-10, AC-11 and AC-15 in the UI and record the parity checklist in the C story."
+        status: pending
+        dependencies: ["5.6"]
+
+validation:
+  subtaskFileLimit: "All subtasks list at most 3 files. 4.11 re-ports two test classes as follow-on files (noted)."
+  singleService: true
+  specFileCoverage: >-
+    Every §5.1 and §5.2 file maps to a subtask. application*.yml is bound in 4.7/4.11. output-contract.md is in
+    4.5 (notes). ContextPromptSection is in 1.4. The V19 cutover is in 3.1.
+  acCoverage: "AC-1..AC-15 + AC-8b (4.x, 5.x). AC-B1-1 (2.7), AC-B1-2 (2.4), AC-B1-3 (2.9), AC-B1-4 (2.10/3.2), AC-B1-5 (2.10), AC-13 (2.2/2.7), AC-14 (2.5/4.11)."
+  noCycles: true
+  outOfScope: "Live enablement, deployments, CI job wiring and git push are for @devops. The C0 text edit is for @architect at GATE-C0."

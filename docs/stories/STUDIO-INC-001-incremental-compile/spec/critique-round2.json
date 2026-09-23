@@ -1,0 +1,160 @@
+{
+  "storyId": "STUDIO-INC-001-incremental-compile",
+  "critiquedAt": "2026-09-23T22:00:00Z",
+  "critiquedBy": "@qa (Quinn)",
+  "specVersion": 2,
+  "round": 2,
+  "previousCritique": "spec/critique.json (round 1, NEEDS_REVISION, 3.35)",
+  "baseline": "brunobuger/ui-studio @ 1f3c56a59 + worktree. Code spot-checks read from the worktree on 2026-09-23.",
+
+  "verdict": "NEEDS_REVISION",
+  "verdictReason": "All 15 round-1 findings are genuinely addressed, including both HIGHs. CRIT-2 holds against the code: live Save persists contextDigest via AuthoringRevisionIdentity.create in StudioService.storeAuthoring, and the digest covers ordered (id,text), the globalContext hash, every whole-step-context hash, nonsecret value hashes and evidence. CRIT-5 holds: the V21 trigger overwrites NEW.authoring unconditionally, and trg_ui_test_revision_capture fires first by name order, so V26 (d)+(e) is the right fix. The revision introduced new defects, though. In the Q2 creation transaction, Q1's write-once outcome is inserted as ESCALATED_FULL before the preconditions are checked, which contradicts the later 'instead written as DISCARDED'. Q2's plan is unspecified: the 'normal capture path' re-runs the planner, which would hit rule 4a and label Q2 PRIOR_ESCALATION. The B1 capture-for-all scope misses the live v1 publish path, publishAcceptedCandidate -> insertOrReuseRevision, which bypasses captured insertion entirely. These are bounded spec-text fixes. There are no HIGH issues, and the weighted score is 3.98.",
+
+  "autoDecisions": [
+    "[AUTO-DECISION] Verdict rule: task file (any MEDIUM -> NEEDS_REVISION) vs the lead's score thresholds? -> NEEDS_REVISION (reason: both rules agree this round. There are 3 MEDIUMs, and the weighted average is 3.98 < 4.0).",
+    "[AUTO-DECISION] Full re-critique again after iteration 3? -> No, a delta check only (reason: every open item is a localized text fix in §3.2.5 'Q2 creation', §3.2.1/§3.3 and §9 B1. The rest of the spec is stable).",
+    "[AUTO-DECISION] Run the attached synapse-diagnostics / coderabbit-review / checklist-runner skills? -> No (reason: the mission restricts output to critique-round2.json with no code edits. There is no code diff to review, and diagnostics are out of scope for a spec critique)."
+  ],
+
+  "verifiedEvidence": [
+    "AuthoringRevisionIdentity.create/contextDigest (authoring/AuthoringRevisionIdentity.java:36-49, 204-219): material = orderedSteps [(id,text)], globalContext hash, stepContexts [(stepId, hashJson(step.context()))], nonsecretReferencedValues [(referenceId, hash(value))], selectedEvidenceReferences. The AuthoringRevisionInputs record serializes this field as 'contextDigest'.",
+    "StudioService.storeAuthoring (:837-841) writes authoring + authoring_revision_inputs. It is called from create (:260), the v1 update when authoring exists (:554, after setVariables, so plain-value changes are re-hashed), and the v2 persistAuthoring (:741). Legacy tests without V21 authoring keep authoring_revision_inputs NULL.",
+    "CompileStateService.capture (:141-153) compares expectedAuthoringHash with ui_tests.authoring_hash only when expectedSource != null (versioned callers). captureForCompilation is @Transactional(REQUIRES_NEW) (:94), while capture is @Transactional (joins).",
+    "V21 capture_ui_test_revision_authoring() (V21:30-43) copies ui_tests.authoring/authoring_revision_inputs INTO NEW.* unconditionally. BEFORE INSERT order: 'trg_ui_test_revision_capture' < 'trg_ui_test_revisions_capture_authoring' ('_' 0x5F < 's' 0x73), so the V18 consistency check runs first and its V18-only compare (V18:139-161) never sees V21 columns.",
+    "The live compile publishes through CompilePipeline:266 -> publishAcceptedCandidate, which always calls insertOrReuseRevision (CompileStateService:273) and then self-confirms. Only publishCandidate branches to insertCapturedRevision when requestIdentityAvailable() (the V19 marker). No main-code caller of captureForCompilation exists today.",
+    "sweepAbandoned (:631-666) only resets ui_tests (COMPILING -> STALE, compile_error COMPILE_BUDGET_EXCEEDED). It writes no ui_test_compile_outcomes row. recordOutcome inserts with ON CONFLICT(request_id) DO NOTHING (:794-812). Outcomes/requests are append-only (V18 studio_inference_append_only).",
+    "beginCompile (:170-192) sets a new compile_request_id, COMPILING and compile_started_at=NOW(), so a committed but unenqueued Q2 is swept like any abandoned request.",
+    "requirements.json EC-12 defines DISCARDED ('superseded attempt is recorded as DISCARDED'), so the §3.2.5 DISCARDED outcome is traceable."
+  ],
+
+  "roundOneResolution": {
+    "CRIT-1":  {"status": "RESOLVED", "note": "Whole stored context JSON (all six kinds + evidenceReferences) hashed, fail-closed on unknown kinds/fields, permits-enumeration test, REUSE preconditions bound to identity/authoringHash, full-StepIdentity assembler guard, AC-3 LiteralInput/TargetHint rows."},
+    "CRIT-2":  {"status": "RESOLVED (code-verified)", "note": "contextDigest is persisted by every live Save path that has V21 authoring and covers text, IDs, global and step contexts, value hashes and evidence. Remaining nuance: legacy tests have NULL inputs, which is fine because the versioned compare only runs for v2 callers. The unversioned capture behaviour is CRIT-19."},
+    "CRIT-3":  {"status": "RESOLVED", "note": "Kind-dependent provider schema, precedence rule, pairing-check extension, version bound tied to OQ-S2, AC-8 schema assertion."},
+    "CRIT-4":  {"status": "PARTIALLY RESOLVED", "note": "The structure is right: slot release first, lock, preconditions, after-commit enqueue, unique escalated_from. New defects are CRIT-16, CRIT-17 and CRIT-20."},
+    "CRIT-5":  {"status": "RESOLVED (code-verified)", "note": "(d) no-op for compile_request_id IS NOT NULL plus (e) V21/V24 columns in the consistency trigger. Trigger order confirmed, and CapturedAuthoringTriggerIT covers it."},
+    "CRIT-6":  {"status": "RESOLVED with caveats", "note": "Rule 4a closes cross-Run re-escalation. Caveats: it interacts with Q2's own planning (CRIT-17). Its key includes nonsecret value hashes, so a value-only edit reopens INCREMENTAL once. That fails safe, costs one wasted Q1, and needs a note only (CRIT-20)."},
+    "CRIT-7":  {"status": "RESOLVED", "note": "Net per-Run cost, runCorrelationId, escalationRate/detectorHitRate, MEDIUM relabelled as inferred."},
+    "CRIT-8":  {"status": "RESOLVED", "note": "stepIndex stripped from the policy entry; anchor value and POLICY_VERSION are explicit fingerprint inputs with unit tests."},
+    "CRIT-9":  {"status": "RESOLVED conditionally", "note": "The B1/B2 split is mandatory and B1 is LIVE-AFFECTING. See ungatedCaptureAssessment for the conditions. CRIT-18 is the concrete gap."},
+    "CRIT-10": {"status": "RESOLVED", "note": "AC-2.1/2.2, AC-5.2, NFR-6 component + axe, EC-12 (AC-8b), EC-16, PREFIX_IMPACT on repair, Rebuild-all path (AC-15)."},
+    "CRIT-11": {"status": "RESOLVED", "note": "1-based vs 0-based stated, AC-4 fixed, §3.5 fixed, full V18 predicate table."},
+    "CRIT-12": {"status": "RESOLVED", "note": "Grep + full IT suite + positive first-confirmation IT. Extension for the rollback claim is in ungatedCaptureAssessment condition 3."},
+    "CRIT-13": {"status": "RESOLVED", "note": "Rule 2 parenthetical; TAIL_DELETION requires PASSED FULL."},
+    "CRIT-14": {"status": "RESOLVED", "note": "Caching benefit conditional on responseJsonSchema placement; SPK-01."},
+    "CRIT-15": {"status": "RESOLVED", "note": "Vocabulary paragraph; escalation.source in {DETECTOR, MODEL, PRIOR_ESCALATION}."}
+  },
+
+  "ungatedCaptureAssessment": {
+    "judgement": "ACCEPTABLE WITH CONDITIONS",
+    "rationale": "The AUTO-DECISION reasoning holds. V19 requires every replica to capture every compile. The V26 schema parts cannot be flagged. After V19, a flag-off replica would fail publication (the require-request trigger), so a flag would be a trap rather than a kill switch. Before V19, redeploying the pre-B1 binary is a valid rollback. Ungated is acceptable only if B1 is complete and its rollback claim is tested.",
+    "conditions": [
+      "1. B1 must switch EVERY live publish path to captured insertion, naming publishAcceptedCandidate (CompilePipeline:266 -> insertOrReuseRevision, CompileStateService:273) as well as publishCandidate. The v1 publish-and-accept semantics (READY without a separate confirm) stay unchanged. Today's spec text does not cover this path (CRIT-18).",
+      "2. Capture for unversioned (v1) callers must add no new rejection mode. An absent or invalid V21 pair is captured as stored and plans FULL LEGACY_MAPPING, never 409. The InferenceCaptureStore.persist 'Authoring snapshot differs from captured source' IllegalStateException is rebased or cannot fire on this path (CRIT-19).",
+      "3. The rollback claim is tested, not asserted. The pre-B1 binary's backend IT suite passes against a schema with V26 applied (the whole-row trigger and the extended consistency trigger), in addition to the new binary's full suite.",
+      "4. V19 is not part of B1's deploy. B1 runs on all replicas before the separate V19 runbook step, and the runbook has a go/no-go that compares compile error/STALE rates before and after B1 (no numeric target invented; the comparison is the gate).",
+      "5. The B1 story header and PR description carry 'LIVE-AFFECTING, not dark' so that the @devops pre-push review treats it as a live change."
+    ]
+  },
+
+  "scores": {
+    "accuracy": 4.5,
+    "completeness": 3.5,
+    "consistency": 3.5,
+    "feasibility": 4,
+    "alignment": 4.5,
+    "average": 3.98,
+    "weighting": "accuracy 25%, completeness 25%, consistency 20%, feasibility 15%, alignment 15%"
+  },
+
+  "issues": [
+    {
+      "id": "CRIT-16",
+      "severity": "MEDIUM",
+      "category": "consistency",
+      "check": "con-4 (escalation atomicity)",
+      "description": "The Q2 creation step order contradicts write-once outcomes. §3.2.5 step 2 inserts Q1's outcome as ESCALATED_FULL in (a), checks the preconditions in (b), and in (d) says Q1's outcome 'is instead written as DISCARDED'. ui_test_compile_outcomes is append-only and recordOutcome uses ON CONFLICT(request_id) DO NOTHING, so the DISCARDED write after (a) is silently dropped. An implementer following the text records ESCALATED_FULL with no Q2. The Run gate then sees ESCALATED_FULL, finds no escalatedTo, and cannot reach the specified 'stops, asks to Run again' state.",
+      "location": "spec.md#3.2.5 (Q2 creation, step 2)",
+      "suggestion": "Reorder step 2: (a) check the preconditions; (b) insert exactly ONE Q1 outcome, ESCALATED_FULL if they hold, otherwise DISCARDED with its reasonDetail; (c) capture Q2 only in the ESCALATED_FULL branch. Add to EscalationCreationIT: in the DISCARDED case, Q1 has exactly one outcome row and it is DISCARDED.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-17",
+      "severity": "MEDIUM",
+      "category": "completeness",
+      "check": "comp-1 (Q2 plan derivation)",
+      "description": "Q2's plan is asserted, not derived. Step 2(c) says Q2 is captured 'through the normal capture path' with selectedMode FULL / reason PREFIX_IMPACT. The normal path (capture -> InferenceCaptureStore.persist) runs the planner. With Q1's ESCALATED_FULL outcome already inserted in the same transaction, rule 4a fires, so Q2 gets reasonDetail PRIOR_ESCALATION and escalation.source=PRIOR_ESCALATION. That contradicts AC-8 and skews escalationRate by source. If instead requestedMode FULL is passed, the reason becomes EXPLICIT_FULL. Separately, the 'normal capture path' entry point captureForCompilation is REQUIRES_NEW, which would break step 2's single-transaction atomicity. Only capture (@Transactional, joins) preserves it.",
+      "location": "spec.md#3.2.5 (Q2 creation 2(c)), #3.2.4 rule 4a",
+      "suggestion": "State that Q2 is captured via the joining CompileStateService.capture with an explicit plan override {selectedMode FULL, reason PREFIX_IMPACT, escalation.source MODEL, escalatedFrom Q1} that bypasses the planner, and that rule 4a applies only to user-initiated compiles (escalated_from_request_id IS NULL). Add a unit/IT assertion: Q2.plan.escalation.source = MODEL, not PRIOR_ESCALATION.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-18",
+      "severity": "MEDIUM",
+      "category": "feasibility",
+      "check": "feas-2 (B1 live path coverage)",
+      "description": "Capture-for-all misses the live publish path. The live compile publishes through CompilePipeline:266 -> CompileStateService.publishAcceptedCandidate, which unconditionally calls insertOrReuseRevision (:273). Only publishCandidate branches to insertCapturedRevision. The spec's B1 ('captured publication writes the V21/V24 columns', §5.2 CompileStateService row) never names publishAcceptedCandidate. Left unchanged, v1 revisions bypass V26 (a)/(e), and once V19's require-request trigger is applied every live v1 compile fails at publication, which is exactly the COL-4 outage the sequencing is meant to prevent.",
+      "location": "spec.md#3.2.3 (Capture for all), #3.3 V19, #5.2, #9 B1",
+      "suggestion": "In §3.2.3/§5.2 and the §9 B1 scope, list both publish paths and require that publishAcceptedCandidate use captured insertion (keeping its publish-and-accept semantics). Add to the capture-for-all IT: a v1 compile produces a revision with non-null compile_request_id whose V21/V24 columns equal its request's.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-19",
+      "severity": "LOW",
+      "category": "completeness",
+      "check": "comp-1 (unversioned capture failure modes)",
+      "description": "§3.2.1 defines 409 STALE_REVISION only for versioned capture with an invalid V21 pair. Nothing says what capture-for-all does for v1 callers whose V21 pair is absent (legacy) or fails AuthoringRevisionIdentity.valid, or when InferenceCaptureStore.persist's 'Authoring snapshot differs from captured source' guard trips. Any of these could turn today's working v1 compile into a new failure on the ungated live path.",
+      "location": "spec.md#3.2.1 (Integrity), #3.2.3",
+      "suggestion": "Add: 'For unversioned callers, capture never rejects on authoring identity. It stores the V21 columns as found (possibly NULL) and plans FULL LEGACY_MAPPING. The persist text/snapshot guard is rebased to V21 or skipped for this path.' Add one IT row.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-20",
+      "severity": "LOW",
+      "category": "accuracy",
+      "check": "acc (code-fact precision)",
+      "description": "Three small claims do not match the code. (a) 'The existing abandonment sweeper settles Q1 as retryable STALE': sweepAbandoned only resets ui_tests and writes no outcome row, so Q1 stays unsettled. This fails safe for rule 4a, but GET /compiles/{Q1} must render it. (b) 'A second insert fails and the existing Q2 is returned': in PostgreSQL a failed INSERT aborts the transaction, so idempotency needs INSERT ... ON CONFLICT (escalated_from_request_id) DO NOTHING followed by a select. (c) Rule 4a's key authoringHash includes nonsecret value hashes, so a value-only edit reopens INCREMENTAL once. That fails safe at the cost of one wasted Q1, and should be stated.",
+      "location": "spec.md#3.2.5 (steps 4-5), #3.2.4 rule 4a",
+      "suggestion": "Reword (a) to 'the sweeper returns the draft to STALE; Q1 has no outcome row and the compile resource reports it as abandoned'. Specify ON CONFLICT for (b). Add a one-line note for (c).",
+      "autoFixable": true
+    }
+  ],
+
+  "summary": {
+    "roundOneResolved": 14,
+    "roundOnePartiallyResolved": 1,
+    "highIssues": 0,
+    "mediumIssues": 3,
+    "lowIssues": 2,
+    "autoFixable": 4
+  },
+
+  "nextAction": "Return to @pm for iteration 3, a narrow text revision: CRIT-16, CRIT-17 and CRIT-18 are required, and CRIT-19 and CRIT-20 are recommended. Fold the five ungatedCaptureAssessment conditions into §9 B1 and the runbook. Then @qa does a delta-only re-critique of §3.2.3, §3.2.5, §5.2 and §9. The spec is expected to reach APPROVED once these land.",
+
+  "autoFixes": [
+    {
+      "issueId": "CRIT-16",
+      "location": "spec.md:244-247 (§3.2.5 step 2)",
+      "original": "(a) Insert Q1's write-once outcome row ... (b) Check the Q2 preconditions ... (d) If any precondition fails, no Q2 is created. Q1's outcome is instead written as DISCARDED",
+      "suggested": "(a) Check the Q2 preconditions ... (b) Insert exactly one Q1 outcome row: ESCALATED_FULL if (a) holds, otherwise DISCARDED with reasonDetail DRAFT_CHANGED_BEFORE_ESCALATION / ACCESS_REVOKED / lifecycle code. (c) Only in the ESCALATED_FULL branch, capture Q2 ..."
+    },
+    {
+      "issueId": "CRIT-17",
+      "location": "spec.md:246 (§3.2.5 step 2(c))",
+      "original": "capture Q2 through the normal capture path from the current draft.",
+      "suggested": "capture Q2 through CompileStateService.capture (the joining @Transactional method, never the REQUIRES_NEW captureForCompilation) from the current draft, with an explicit plan override {FULL, PREFIX_IMPACT, escalation.source MODEL} that bypasses the planner. Rule 4a applies only to requests with escalated_from_request_id IS NULL."
+    },
+    {
+      "issueId": "CRIT-20",
+      "location": "spec.md:250 (§3.2.5 step 5)",
+      "original": "the existing abandonment sweeper settles Q1 as retryable STALE, and no Q2 is created.",
+      "suggested": "the existing abandonment sweeper returns the draft to STALE (it writes no outcome row), Q1 remains without an outcome and is reported as abandoned, and no Q2 is created."
+    },
+    {
+      "issueId": "CRIT-20",
+      "location": "spec.md:250 (§3.2.5 step 5)",
+      "original": "a second insert fails and the existing Q2 is returned.",
+      "suggested": "the Q2 insert uses ON CONFLICT (escalated_from_request_id) DO NOTHING and then selects the existing Q2, so a retry returns it without aborting the transaction."
+    }
+  ]
+}
