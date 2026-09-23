@@ -11,13 +11,35 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Bounded untrusted context, structurally paired one-to-one with source steps. */
-public record ContextPromptSection(List<JsonNode> perStep, int encodedBytes) {
+/**
+ * Bounded untrusted context, structurally paired one-to-one with source steps.
+ *
+ * <h2>Global context once (Story 10.45, FR-12, NFR-7)</h2>
+ *
+ * <p>The test-level global context is held once, not copied into every step section, and {@link
+ * #fenceWithSource} emits it exactly once: as the leading {@code globalContext} key of the first
+ * step's envelope, so it precedes every step in the request contents (spec &sect;3.2.6 part (a)).
+ * The prompt is therefore linear in steps, not {@code steps x globalContext}. The step count of the
+ * fenced lines is unchanged, which keeps one fenced line per writable step.
+ *
+ * <h2>Size cap after deduplication (FR-5 AC-5.2, EC-15)</h2>
+ *
+ * <p>{@link #MAX_BYTES} is unchanged at 32 KiB. What it measures is the deduplicated context: the
+ * global context counted once plus every step section. A complete context over the cap is refused
+ * with {@code CONTEXT_TOO_LARGE}; it is never truncated.
+ *
+ * @param globalContext the test-level context, sent once
+ * @param perStep one section per source step: its {@code stepId} and {@code stepContext}
+ * @param encodedBytes UTF-8 bytes of the deduplicated context the cap is measured on
+ */
+public record ContextPromptSection(
+    JsonNode globalContext, List<JsonNode> perStep, int encodedBytes) {
 
   public static final int MAX_BYTES = 32 * 1024;
   private static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
 
   public ContextPromptSection {
+    globalContext = globalContext == null ? MAPPER.createObjectNode() : globalContext;
     perStep = List.copyOf(perStep);
     if (encodedBytes > MAX_BYTES) {
       throw new StudioValidationException(
@@ -26,20 +48,37 @@ public record ContextPromptSection(List<JsonNode> perStep, int encodedBytes) {
     }
   }
 
+  /**
+   * A section with no global context.
+   *
+   * @param perStep one section per source step
+   * @param encodedBytes UTF-8 bytes the cap is measured on
+   */
+  public ContextPromptSection(List<JsonNode> perStep, int encodedBytes) {
+    this(null, perStep, encodedBytes);
+  }
+
   public static ContextPromptSection from(AuthoringV2Request authoring) {
+    JsonNode global = MAPPER.valueToTree(authoring.globalContext());
+    int bytes = utf8(global.toString());
     List<JsonNode> sections = new ArrayList<>();
-    int bytes = 0;
     for (AuthoringStep step : authoring.steps()) {
       ObjectNode section = MAPPER.createObjectNode();
       section.put("stepId", step.id().toString());
-      section.set("globalContext", MAPPER.valueToTree(authoring.globalContext()));
       section.set("stepContext", MAPPER.valueToTree(step.context()));
       sections.add(section);
-      bytes += section.toString().getBytes(StandardCharsets.UTF_8).length;
+      bytes += utf8(section.toString());
     }
-    return new ContextPromptSection(sections, bytes);
+    return new ContextPromptSection(global, sections, bytes);
   }
 
+  /**
+   * Fences each source line with its own step context; the first line alone also carries the global
+   * context, as its leading key.
+   *
+   * @param orderedSource the draft's steps in author order
+   * @return one fenced line per source step
+   */
   public List<String> fenceWithSource(List<String> orderedSource) {
     if (orderedSource.size() != perStep.size()) {
       throw new IllegalArgumentException("source and context step counts must match");
@@ -47,6 +86,9 @@ public record ContextPromptSection(List<JsonNode> perStep, int encodedBytes) {
     List<String> fenced = new ArrayList<>(orderedSource.size());
     for (int index = 0; index < orderedSource.size(); index++) {
       ObjectNode envelope = MAPPER.createObjectNode();
+      if (index == 0) {
+        envelope.set("globalContext", globalContext);
+      }
       envelope.put("source", orderedSource.get(index));
       envelope.set("untrustedContext", perStep.get(index));
       fenced.add(index + ": " + envelope);
@@ -55,10 +97,17 @@ public record ContextPromptSection(List<JsonNode> perStep, int encodedBytes) {
   }
 
   public String json() {
+    ObjectNode root = MAPPER.createObjectNode();
+    root.set("globalContext", globalContext);
+    root.set("steps", MAPPER.valueToTree(perStep));
     try {
-      return MAPPER.writeValueAsString(perStep);
+      return MAPPER.writeValueAsString(root);
     } catch (JsonProcessingException exception) {
       throw new IllegalStateException("context prompt section is not serializable", exception);
     }
+  }
+
+  private static int utf8(String value) {
+    return value.getBytes(StandardCharsets.UTF_8).length;
   }
 }

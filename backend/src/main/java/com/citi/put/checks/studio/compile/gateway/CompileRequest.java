@@ -22,11 +22,11 @@ import java.util.UUID;
  * @param syntaxReferenceVersion version identifier of that reference
  * @param outputContract the output/allowed-language contract text
  * @param promptVersion pinned prompt version, recorded in provenance and audit
- * @param repairDiagnostics the bounded, redacted diagnostics of the attempt that just failed, or
- *     {@code null} on attempt 1. Story 10.9, architecture &sect;4.3: a repair carries the reasons
- *     the previous artifact was refused and nothing else. It is the document {@code
- *     DiagnosticsBounder} already produced, so it is inside the same caps and carries the same
- *     redaction — never a resolved value, never a raw validator body.
+ * @param repairDiagnostics the repair context of a repair attempt, or {@code null} on attempt 1:
+ *     explicit correction instructions, the bounded, redacted rejected proposal and the document
+ *     {@code DiagnosticsBounder} already produced (Story 10.9, architecture &sect;4.3; Story 10.45,
+ *     FR-10). Built by {@code RepairPromptAssembler} — never a resolved value, never a raw
+ *     validator body.
  */
 public record CompileRequest(
     UUID testId,

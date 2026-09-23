@@ -184,6 +184,8 @@ public class CompilePipeline {
       int maxAttempts = 1 + repairAttempts();
       int stepCount = inputs.orderedSource().size();
       String lastDiagnostics = null;
+      String lastRejectedProposal = null;
+      com.citi.put.checks.studio.compile.gateway.CompileRequest firstPrompt = null;
 
       for (int attempt = 1; attempt <= maxAttempts; attempt++) {
         if (settlement.isSettled()) {
@@ -193,8 +195,17 @@ public class CompilePipeline {
           return;
         }
 
+        // A repair is built from the first attempt's request, so its kind and writable step IDs
+        // are frozen: it carries the rejected proposal and the diagnostics, never a wider write
+        // set (Story 10.45, FR-10, spec §3.2.6 "Repair").
         com.citi.put.checks.studio.compile.gateway.CompileRequest prompt =
-            assemblePrompt(inputs, contextInputs, request.requestId(), attempt, lastDiagnostics);
+            attempt == 1
+                ? assemblePrompt(inputs, contextInputs, request.requestId())
+                : repairPromptAssembler.assemble(
+                    firstPrompt, attempt, lastDiagnostics, lastRejectedProposal);
+        if (attempt == 1) {
+          firstPrompt = prompt;
+        }
 
         if (!aggregate.canStart()) {
           settleError(
@@ -272,6 +283,7 @@ public class CompilePipeline {
         // this turns out to be the last attempt — one bounding path, so the byte cap stays true.
         lastDiagnostics =
             diagnosticsBounder.bound(validation, stepCount, attempt, attempt >= maxAttempts);
+        lastRejectedProposal = artifactJson;
       }
 
       // Exhausted repair yields NEEDS_REVISION (§4.7), carrying the FINAL attempt's diagnostics
@@ -336,49 +348,24 @@ public class CompilePipeline {
   }
 
   private com.citi.put.checks.studio.compile.gateway.CompileRequest assemblePrompt(
-      CompileInputs inputs,
-      ContextCompileInputs contextInputs,
-      UUID requestId,
-      int attempt,
-      String diagnostics) {
+      CompileInputs inputs, ContextCompileInputs contextInputs, UUID requestId) {
     if (contextInputs == null) {
-      return attempt == 1
-          ? promptAssembler.assemble(
-              inputs.testId(),
-              inputs.csiId(),
-              inputs.principal(),
-              requestId,
-              attempt,
-              inputs.orderedSource())
-          : repairPromptAssembler.assemble(inputs, requestId, attempt, diagnostics);
+      return promptAssembler.assemble(
+          inputs.testId(),
+          inputs.csiId(),
+          inputs.principal(),
+          requestId,
+          1,
+          inputs.orderedSource());
     }
-    com.citi.put.checks.studio.compile.gateway.CompileRequest prompt =
-        promptAssembler.assemble(
-            inputs.testId(),
-            inputs.csiId(),
-            inputs.principal(),
-            requestId,
-            attempt,
-            inputs.orderedSource(),
-            contextInputs.promptSection());
-    if (attempt == 1) {
-      return prompt;
-    }
-    if (diagnostics == null || diagnostics.isBlank()) {
-      throw new IllegalArgumentException("repair requires bounded diagnostics");
-    }
-    return new com.citi.put.checks.studio.compile.gateway.CompileRequest(
-        prompt.testId(),
-        prompt.csiId(),
-        prompt.principal(),
-        prompt.compileRequestId(),
-        prompt.attempt(),
-        prompt.fencedSourceLines(),
-        prompt.syntaxReference(),
-        prompt.syntaxReferenceVersion(),
-        prompt.outputContract(),
-        prompt.promptVersion(),
-        diagnostics);
+    return promptAssembler.assemble(
+        inputs.testId(),
+        inputs.csiId(),
+        inputs.principal(),
+        requestId,
+        1,
+        inputs.orderedSource(),
+        contextInputs.promptSection());
   }
 
   /**

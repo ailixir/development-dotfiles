@@ -194,13 +194,66 @@ class RepairRedactionTest extends AbstractRepairPipelineTest {
                 assertThat(f.getType().getName())
                     .as("PromptAssembler.%s", f.getName())
                     .isIn("java.lang.String"));
-    assertThat(RepairPromptAssembler.class.getDeclaredFields())
-        .as("the repair assembler holds only the prompt assembler it delegates to")
-        .allSatisfy(
-            f ->
-                assertThat(f.getType())
-                    .as("RepairPromptAssembler.%s", f.getName())
-                    .isEqualTo(PromptAssembler.class));
+    assertThat(
+            java.util.Arrays.stream(RepairPromptAssembler.class.getDeclaredFields())
+                .filter(f -> !java.lang.reflect.Modifier.isStatic(f.getModifiers())))
+        .as("the repair assembler holds no instance state and no collaborator at all")
+        .isEmpty();
+    assertThat(RepairPromptAssembler.class.getDeclaredConstructors())
+        .allSatisfy(c -> assertThat(c.getParameterTypes()).isEmpty());
+  }
+
+  /**
+   * Story 10.45 AC 8 (NFR-5, CPLX SECURITY) — the repair now carries the <b>rejected proposal</b>,
+   * and that proposal is redacted: no stored resolved value and no credential-shaped material
+   * reaches any repair payload through it.
+   *
+   * <p>Non-vacuity: the proposal marker proves attempt 1's proposal really is in each repair, and
+   * the redaction token proves the credential really was in it and was replaced, not dropped with
+   * the rest of the proposal.
+   */
+  @Test
+  void theRejectedProposalInEveryRepairIsRedactedAndCarriesNoResolvedValue() {
+    String proposalMarker = "rejected-proposal-marker-3d9a";
+    String awsKey = "AKIAIOSFODNN7EXAMPLE";
+    String githubToken = "ghp_" + "a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8";
+    jdbc.update(
+        "UPDATE ui_tests SET variables = CAST(? AS jsonb) WHERE id = ?",
+        "[{\"name\":\"PASSWORD\",\"kind\":\"secretRef\",\"secretId\":\"LOGIN_PW\","
+            + "\"value\":\""
+            + SECRET_CANARY
+            + "\"}]",
+        testId);
+    stubValidatorSequence(false, false, false);
+    gateway.answer(
+        request ->
+            ScriptedRepairGateway.ok(
+                artifactFor(
+                    SOURCE,
+                    "await page.goto('https://example.com/"
+                        + proposalMarker
+                        + "?k="
+                        + awsKey
+                        + "&t="
+                        + githubToken
+                        + "');")));
+
+    pipeline.compile(testId, OWNER);
+    awaitCompileStatus("NEEDS_REVISION");
+
+    assertThat(gateway.attempts()).containsExactly(1, 2, 3);
+    for (var request : gateway.seen().subList(1, 3)) {
+      String repair = request.repairDiagnostics();
+      assertThat(repair)
+          .as("attempt %s carries the rejected proposal", request.attempt())
+          .contains(proposalMarker)
+          .contains("Rejected proposal")
+          .contains("[REDACTED:AWS_ACCESS_KEY_ID]")
+          .contains("[REDACTED:GITHUB_TOKEN]")
+          .doesNotContain(awsKey)
+          .doesNotContain(githubToken);
+      assertNoCanary("the attempt " + request.attempt() + " repair context", repair);
+    }
   }
 
   /**

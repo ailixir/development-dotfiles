@@ -27,6 +27,16 @@ import org.springframework.stereotype.Component;
  * fence: quotes, backslashes, newlines and control characters inside the line are escaped, so a
  * line cannot terminate its own delimiter and cannot introduce a new one. A fence built from a
  * sentinel token ({@code <<<}, {@code ---}) is only a fence until a user pastes the sentinel.
+ *
+ * <h2>Static-first layout (Story 10.45, FR-11, FR-12, NFR-7)</h2>
+ *
+ * <p>The {@code outputContract} and {@code syntaxReference} this class puts on a request are the
+ * pinned resource bodies, byte for byte, and nothing else: no reference list, no mode, no IDs and
+ * no per-test text is ever appended to them. The transport sends those two as the static {@code
+ * systemInstruction}, so two different tests at the same pins share it byte for byte. Everything
+ * per request travels in the fenced lines, which follow it: the global context exactly once (see
+ * {@link ContextPromptSection}), declared reference names, the ordered steps, and then, added by
+ * the transport, the envelope kind and the writable step IDs.
  */
 @Component
 public class PromptAssembler {
@@ -112,7 +122,9 @@ public class PromptAssembler {
               + new TextNode(step.text())
               + (baselineCode == null ? "" : " baselineCode=" + new TextNode(baselineCode)));
     }
-    String references = "\nDeclared opaque references: " + capture.inputs().referencesJson();
+    // Reference NAMES are per test, so they lead the per-request contents rather than being
+    // appended to the static output contract (spec §3.2.6 part (b)).
+    fenced.add(0, "references: " + capture.inputs().referencesJson());
     return new CompileRequest(
         capture.inputs().testId(),
         capture.inputs().csiId(),
@@ -122,7 +134,7 @@ public class PromptAssembler {
         fenced,
         syntaxReference,
         CompilePins.SYNTAX_REFERENCE_VERSION,
-        outputContract + references,
+        outputContract,
         CompilePins.PROMPT_VERSION,
         diagnostics,
         capture.plan().mode()

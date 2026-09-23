@@ -143,6 +143,48 @@ class RepairLoopTest extends AbstractRepairPipelineTest {
         .contains("DENIED_NODE");
   }
 
+  /**
+   * Story 10.45 AC 8 (FR-10, spec §6.1 "writable IDs unchanged") — every repair keeps the first
+   * attempt's kind and exactly its writable step IDs, in the same order, and carries the proposal
+   * the attempt just before it returned: attempt 3 repairs attempt 2's proposal, not attempt 1's.
+   */
+  @Test
+  void everyRepairKeepsTheSameKindAndWritableIdsAndCarriesThePreviousRejectedProposal() {
+    stubValidatorSequence(false, false, false);
+    gateway.answer(
+        request ->
+            ScriptedRepairGateway.ok(
+                artifactFor(
+                    SOURCE,
+                    "await page.goto('https://example.com/proposal-of-attempt-"
+                        + request.attempt()
+                        + "');")));
+
+    pipeline.compile(testId, OWNER);
+    awaitCompileStatus("NEEDS_REVISION");
+
+    List<com.citi.put.checks.studio.compile.gateway.CompileRequest> seen = gateway.seen();
+    assertThat(seen).hasSize(3);
+    var first = seen.get(0);
+    for (var repair : seen.subList(1, 3)) {
+      assertThat(repair.writableStepIds())
+          .as("attempt %s asks for exactly the first attempt's writable IDs", repair.attempt())
+          .containsExactlyElementsOf(first.writableStepIds());
+      assertThat(repair.proposalKind()).isEqualTo(first.proposalKind());
+      assertThat(repair.fencedSourceLines()).isEqualTo(first.fencedSourceLines());
+    }
+    assertThat(seen.get(1).repairDiagnostics())
+        .contains("proposal-of-attempt-1")
+        .doesNotContain("proposal-of-attempt-2");
+    assertThat(seen.get(2).repairDiagnostics())
+        .contains("proposal-of-attempt-2")
+        .doesNotContain("proposal-of-attempt-1");
+    assertThat(storedDiagnosticsText())
+        .as("the persisted diagnostics stay the bounded document, without the proposal")
+        .doesNotContain("proposal-of-attempt")
+        .doesNotContain(RepairPromptAssembler.INSTRUCTIONS);
+  }
+
   // ── AC-12: a repaired draft goes back through the same gate ──────────────
 
   /**

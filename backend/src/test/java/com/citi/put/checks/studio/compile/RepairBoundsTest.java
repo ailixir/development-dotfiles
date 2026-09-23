@@ -235,6 +235,30 @@ class RepairBoundsTest extends AbstractRepairPipelineTest {
     }
   }
 
+  /**
+   * Story 10.45 AC 8 — the rejected proposal a repair carries is bounded at {@link
+   * RepairPromptAssembler#MAX_REJECTED_PROPOSAL_BYTES} UTF-8 bytes, with the same explicit
+   * truncation marker the diagnostics use, and a proposal under the cap is carried whole.
+   */
+  @Test
+  void theRejectedProposalIsCappedWithAnExplicitMarkerAndNeverSplitsACharacter() {
+    int cap = RepairPromptAssembler.MAX_REJECTED_PROPOSAL_BYTES;
+    // Four-byte code points, so a byte-naive cut would split one.
+    String oversized = "\uD83D\uDE00".repeat(cap);
+
+    String bounded = RepairPromptAssembler.boundRejectedProposal(oversized);
+
+    assertThat(bounded.getBytes(java.nio.charset.StandardCharsets.UTF_8).length)
+        .isLessThanOrEqualTo(cap);
+    assertThat(bounded).endsWith(DiagnosticsBounder.TRUNCATION_MARKER);
+    String kept =
+        bounded.substring(0, bounded.length() - DiagnosticsBounder.TRUNCATION_MARKER.length());
+    assertThat(kept.codePoints()).allMatch(codePoint -> codePoint == 0x1F600);
+
+    String small = "{\"version\":1,\"kind\":\"FULL\",\"steps\":[]}";
+    assertThat(RepairPromptAssembler.boundRejectedProposal(small)).isEqualTo(small);
+  }
+
   private long gatewayRequestTimeoutMs() {
     // The autowired bean, not the record defaults: the gateway is disabled in this profile, but its
     // properties bean still carries the deadline application.yml configured, and that is the value
