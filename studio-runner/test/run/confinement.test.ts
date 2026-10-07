@@ -254,7 +254,8 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   // STUDIO-SCHED-001 re-anchors the reviewed public scheduling operations and optional public
   // execution provenance. Runner request/report/job schemas are unchanged by this amendment;
   // test/contract.test.ts independently checks the current runtime producers against them.
-  const BASE_SHA256 = '5e5477fce65bdac45029056f2636ebebd18c9daae6c174c6bbffcd2777f070ac';
+  // Re-anchored for 10.27's gate finding: description cross-ref "section 29" → "§30" only.
+  const BASE_SHA256 = 'cbacad742c634dde26a8ce2aa8c14d7bef2276de7417890272078e1b1b3f3cc8';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the

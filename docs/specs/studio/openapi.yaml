@@ -3024,7 +3024,7 @@ components:
           nullable: true
           description: |
             Canonical artifact hash of exactly confirmedRevisionId, read with the draft and its
-            confirmed revision in one transaction (ADR-002 section 29). Independent of the current
+            confirmed revision in one transaction (ADR-002 §30). Independent of the current
             candidate. Null when no readable retained confirmed revision exists; always null on
             GET /tests. Never synthesized from draft steps or substituted from the candidate.
         confirmedRevisionArtifact:

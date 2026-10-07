@@ -148,3 +148,28 @@ Local contract verification on 2026-09-16: proposal schema compiled with AJV 202
 Unknown live/recovered proposal, repair, transport and elapsed counters are nullable; known refused work records zero. A committed request-linked candidate is recoverable even when the process stopped before writing its outcome. Expired attempts without a candidate resolve failed; neither case invents token usage or overwrites write-once telemetry. Final candidate publication rechecks the captured deadline at the last CAS and rolls back the entire transaction after expiry.
 
 V2 mutations inherit the existing public idempotency filter. This filter is replica-local for authoring requests, as for v1; it does not claim durable cross-replica compile idempotency. Execution retains its separate durable ledger identity. V2 save persists only; the explicit Compile changes/Rebuild all steps actions invoke generation, preventing duplicate save-triggered requests.
+
+### Persistence ruling — `execution_scope` is fixed at insert (2026-10-06, story 10.23 defect D2)
+
+**Ruling.** `ui_test_executions.execution_scope` is written once, by the `INSERT` that creates the execution row, and never changes after that. The database must reject any `UPDATE` that changes it, in either direction (`NULL→FULL`, `FULL→NULL`), whatever the row's status. `DELETE` stays allowed: retention may remove evidence, and missing evidence already means FULL (§3). This amends §3. "Truthful FULL marker" now means one written at insert by the acceptance writer and protected by the database, not only by the JPA mapping (`updatable = false`).
+
+**Why at insert and not "once set" or "once terminal".**
+- "Once set" leaves the forgery path open. On a legacy row the stored value is `NULL`, and `NULL→FULL` is exactly the relabel that would forge a baseline (§3 picks baselines from successful FULL executions of the exact revision).
+- "Once terminal" leaves a window open. The acceptance writer (`StudioAcceptanceService`, `markFullExecution()` before the first save) already writes `FULL` on the `PENDING` row. Nothing between acceptance and the terminal state has any legitimate reason to change the scope. A row relabelled while `PENDING`/`RUNNING` that then finishes `PASSED` is the same forgery.
+- The scope is fixed when the run is accepted. §7 says fresh execution is always FULL in a fresh browser, so there is no later event that could truthfully change it.
+
+**Is `NULL→FULL` on legacy rows ever legitimate? No, and that includes the V19 cutover.** Checked on 2026-10-06: `backend/db/cutover/V19__studio_inference_candidate_identity.sql` does not write `execution_scope`. The rollout runbook says old rows stay `NULL`. `InferenceMigrationIT`/`InferenceMigrationLatestIT` assert that no historical FULL marker is made up. Legacy runs probably did execute every step (inference, not verified per row). Even so, the marker is the acceptance writer's statement, made at acceptance, that the run was accepted under this contract's identity rules, and nobody can make that statement after the fact. Leaving a legacy row ineligible costs one FULL compile, which fails safe. If legacy history ever has to become eligible, that needs a contract amendment and a separate marker value. A relabel to `FULL` is never the way.
+
+**Trade-offs and limits.**
+- The guard stops relabelling through ordinary DML: operational fix-up scripts, a well-meant backfill, future code that drops `updatable = false`.
+- It does not stop someone with DDL rights, who could drop the trigger or insert a forged new row. Getting the value right at insert remains the acceptance writer's job.
+- Backward compatible. No released binary updates this column: the JPA mapping is `updatable = false`, and a 2026-10-06 search found no native `UPDATE` of it. Hibernate updates that list the column with an unchanged value still pass, because the guard compares values rather than checking whether the column appears in the `SET` list. The rollback floor is unchanged.
+
+**What the forward migration (V28, number allocated by the coordinator) must enforce.**
+1. A new function of its own, for example `studio_execution_scope_immutable()`, that raises `SQLSTATE 23514` with a message containing `execution_scope is immutable` when `NEW.execution_scope IS DISTINCT FROM OLD.execution_scope`. It follows V26's `studio_execution_trigger_guard` precedent. `InferenceMigrationLatestIT` checks that the message contains `immutable`.
+2. A `BEFORE UPDATE … FOR EACH ROW` trigger on the partitioned parent `ui_test_executions`, so that it is cloned to every existing partition, the default partition and future partitions, as V26's trigger is.
+3. It must not `CREATE OR REPLACE` or extend V26's `studio_execution_trigger_guard()` or any other existing function. Separate functions stop one migration from overwriting another's guard, which is what caused D1.
+4. No data change: no backfill, no `UPDATE` of any row. No change to `ck_ui_test_execution_scope`, to `idx_ui_test_exec_full_baseline`, or to `INSERT`/`DELETE` behaviour. Already-applied migrations V18–V26 are not edited.
+5. Tests (Dara): `historicalExecutionCannotBeRelabelledAsFullEvidence` turns green unchanged. Add `FULL→NULL` rejected, plus a negative control in which a `FULL` row goes through `PENDING→RUNNING→PASSED` and keeps its other lifecycle updates. Fresh/upgraded catalog parity must still hold.
+
+D1's fix is in its own file: `V27__studio_revision_immutability_restore.sql`, which was uncommitted when this was written. It acts on `ui_test_revisions` and does not touch `ui_test_executions`, so V28 neither depends on it nor conflicts with it. V28 must be ordered after V27.
