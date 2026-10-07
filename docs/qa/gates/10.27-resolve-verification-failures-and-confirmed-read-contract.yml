@@ -1,0 +1,128 @@
+schema: 1
+story: '10.27'
+story_title: Resolve verification failures and finish the Studio read contract
+epic: EPIC-10
+work_package: remediation
+
+gate: CONCERNS
+status_reason: >-
+  All six ACs are met on targeted reviewer-run evidence. 73/77 backend tests across 14 classes passed;
+  the 4 failures are the known pre-existing ExecutionVideoContractTest pins broken by STUDIO-SCHED-001
+  attributions, not this story. Frontend targeted 130/130 and typecheck clean. The confirmed-source
+  contract, producer and Code view are correct and independently joined. CONCERNS because the Class C
+  edit has no ADR-002 §13 amendment-log row, which the dependent 10.11 AC-3(b) names as its gate, and
+  because section cross-references drifted. A full-gate rerun is still owed.
+
+reviewer: Aria (@architect, quality gate for @dev executor)
+updated: '2026-10-06T00:00:00Z'
+branch: brunobuger/ui-studio
+head_sha: b40be10d0
+worktree: /Users/brunobuger/orca/workspaces/put-checks/ui-studio
+
+waiver:
+  active: false
+
+evidence:
+  backend_targeted:
+    command: >-
+      gradle-locked.sh test --console=plain --tests '*.CheckCrudIT' --tests 'com.citi.put.checks.reports.Reports*IT'
+      --tests '*.ReportDeliveryDispatcherIT' --tests '*.CandidateArtifactProjectionIT' --tests '*.StudioApiIT'
+      --tests '*.StudioContractTest' --tests '*.MountedSpringConfigurationTest' --tests '*.TestDatabaseLifetimeIT'
+      --tests '*.GatewayFailureClassifierTest' --tests '*.GenAiGatewayAuditTest' --tests '*.ExecutionVideoContractTest'
+      --tests '*.ExecutionVideoContractEscalationTest'
+    result: FAIL (pre-existing, not attributable)
+    detail: >-
+      77 tests completed, 4 failed (BUILD FAILED in 2m 31s). All 4 are in ExecutionVideoContractTest
+      (attribution reader, 401 count 15→23, x-implemented-by pin, attribution names a manifest story).
+      The assertion messages name STUDIO-SCHED-001, which comes from the scheduling WIP. Passing: CheckCrudIT 3,
+      Reports*IT 11, ReportDeliveryDispatcherIT 2, CandidateArtifactProjectionIT 7, StudioApiIT 7,
+      StudioContractTest 14, MountedSpringConfigurationTest 3, TestDatabaseLifetimeIT 1,
+      GatewayFailureClassifierTest 7, GenAiGatewayAuditTest 3, ExecutionVideoContractEscalationTest 2.
+      0 skips.
+  frontend_targeted:
+    command: cd frontend && npx vitest run src/components/studio/confirmedSource.test.tsx src/services/mocks/studio/studioContract.test.ts src/pages/ChecksStudioPage/
+    result: PASS
+    detail: confirmedSource 4 + studioContract 76 = 80/80; ChecksStudioPage directory 50/50 across 8 files (incl. confirmedSource).
+  frontend_static:
+    command: cd frontend && npx tsc --noEmit && npx eslint src/components/studio/CodeTab.tsx src/pages/ChecksStudioPage/ChecksStudioPage.tsx src/services/api/studioApi.ts
+    result: PASS
+    detail: tsc exit 0. eslint 0 errors, 9 pre-existing no-explicit-any warnings.
+  not_run:
+    - Full ./gradlew check, which currently carries known scheduling-WIP failures. The 2026-09-17 full pass is executor evidence on wt/epic.
+    - Full frontend suite and build (known pre-existing failures in StudioTestsPage, studioWcagAudit, InferenceStudio).
+    - Runner unit/fixture/deployment suites and Helm mutation renders (VF1 recheck evidence is Quinn's).
+
+prior_findings:
+  VF1:
+    source: docs/qa/verification-failures-review.md
+    verdict: ACCEPTED (not re-rendered by this reviewer)
+    detail: Quinn rendered 28 rejected negative mutations plus a positive default. Not re-executed here.
+
+ac_coverage:
+  total: 6
+  verified: 6
+  unmet: 0
+  detail:
+    AC-1: PASS - CRUD/report ITs green on rerun. Author mirroring stays behind CSI write authorization (CheckService.create, per review).
+    AC-2: PASS (targeted) - dispatcher/SMTP, DB lifetime and mounted configuration tests green. The full check was not rerun.
+    AC-3: >-
+      PASS - openapi.yaml:3019-3038 declares nullable confirmedRevisionArtifactHash/confirmedRevisionArtifact,
+      null on GET /tests (:150). StudioService.project reads the confirmed revision by its own id, filtered on
+      test, CSI and confirmed_at/by (StudioService.java:705-716), with no candidate fallback.
+      UITestDto.java:76-77,173-174. ConfirmedSource renders only the confirmed steps and a validated 64-hex hash
+      (CodeTab.tsx:71,95-96). Ruled in ADR-002 §30 (lines 2768-2793). Escalation tests are unchanged and green.
+    AC-4: PASS (targeted) - typecheck clean, scoped lint 0 errors, targeted suites green.
+    AC-5: PASS - ADR-002 §31 video 401/403/503. Escalation assertions are unchanged (2/2). The current video pin failures belong to STUDIO-SCHED-001.
+    AC-6: PASS - docs/qa/verification-failures-remediation.md records root causes, changes and results. No skips/relabels found.
+
+question_10_11_ac3b:
+  answer: Substantively YES, formally INCOMPLETE.
+  detail: >-
+    10.11 AC-3(b) (10.11.story.md:208-229) and 10.34 AC-24 (10.34.story.md:172) wait for a Class C
+    amendment that puts the confirmed revision's artifact and hash on a declared 2xx response, with an
+    ADR-002 §13 log line. ADR-002 §30 is that architect ruling and says it "resolves the 10.11c AC-32
+    escalation". It was landed with openapi TestDto fields, an independent producer and a confirmed-only
+    Code view. But §13 has no row for it, and 10.11:229 says "a green here without that entry is a
+    defect". 10.11/10.34 still record the criterion as unruled with no carrier.
+
+top_issues:
+  - id: V-1
+    severity: medium
+    finding: >-
+      The ADR-002 §13 amendment log has no row for the Class C TestDto additions
+      confirmedRevisionArtifact/confirmedRevisionArtifactHash (§30). Only the video landing has a row (line 325).
+    impact: >-
+      The dependent 10.11 AC-3(b) and 10.34 AC-24 cannot be closed by their own stated gate. The
+      contract-change audit trail is incomplete.
+    suggested_action: '@architect adds the §13 row (date, change, class C, story 10.27, contract-test evidence).'
+    ac_refs: [AC-3]
+  - id: V-2
+    severity: low
+    finding: >-
+      Section cross-references drifted after Cancel became §29. openapi.yaml:3027 cites "ADR-002 section 29"
+      for the confirmed hash (now §30). The §13 video row cites §30 (now §31). verification-failures-review.md
+      uses the old numbers.
+    impact: Readers are routed to the Cancel section. Documentation only.
+    suggested_action: Correct the references. The openapi text edit needs a runner BASE_SHA256 re-anchor in the same change.
+    ac_refs: [AC-3, AC-5]
+  - id: V-3
+    severity: low
+    finding: 10.11 (status row, AC-3(b)) and 10.34 AC-24 still say the amendment is unruled and has no named carrier.
+    impact: Epic closure records are stale.
+    suggested_action: '@po transfers AC-3(b)/AC-24 to 10.27 by name, citing ADR-002 §30, once V-1 lands.'
+    ac_refs: [AC-3]
+  - id: V-4
+    severity: low
+    finding: The full backend/frontend gates were not rerun at this HEAD. Both carry known scheduling-WIP failures.
+    impact: AC-2/AC-4 "full suite" claims rest on the 2026-09-17 executor evidence.
+    suggested_action: Rerun full check / full frontend suite after the scheduling failures are diagnosed.
+    ac_refs: [AC-2, AC-4]
+
+recommendations:
+  immediate:
+    - V-1
+  future:
+    - V-2, V-3, V-4
+
+quality_score: 80
+expires: '2026-10-20T00:00:00Z'

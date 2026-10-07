@@ -1,0 +1,121 @@
+schema: 1
+story: '10.22'
+story_title: Bounded schema-constrained inference gateway
+epic: EPIC-10
+work_package: 'B: F5/F7/F8/F9'
+
+gate: PASS
+status_reason: >-
+  All five ACs are implemented and backed by reviewer-run evidence. The run covered 156 backend tests
+  in 24 classes (gateway package, CompileBudget, repair bounds/expiry/redaction), with 0 failures,
+  errors or skips. That includes the QF4 credential-refresh regression on real Google service-account
+  and ADC-user refresh against a held local server. The remaining findings are low (legacy test-scope
+  client, hard-coded credential budgets, record drift). Live SPK-01, R2D2 compatibility and enablement
+  are explicitly out of this gate.
+
+reviewer: Aria (@architect, quality gate for @dev executor)
+updated: '2026-10-06T00:00:00Z'
+branch: brunobuger/ui-studio
+head_sha: b40be10d0
+worktree: /Users/brunobuger/orca/workspaces/put-checks/ui-studio
+
+waiver:
+  active: false
+
+evidence:
+  backend_targeted:
+    command: >-
+      gradle-locked.sh test --console=plain --tests 'com.citi.put.checks.studio.compile.gateway.*'
+      --tests '*.CompileBudgetTest' --tests '*.CompileBudgetExpiryTest' --tests '*.CompileBudgetPropagationTest'
+      --tests '*.ContextAggregateBudgetTest' --tests '*.RepairBoundsTest' --tests '*.RepairBudgetExpiryTest'
+      --tests '*.RepairRedactionTest' --tests '*.RepairLoopTest' --tests '*.RepairExhaustionTest'
+    result: PASS
+    detail: >-
+      BUILD SUCCESSFUL in 1m 32s (after lock wait). 24 classes, 156 tests, 0 failures/errors/skips, read
+      from the copied TEST-*.xml. Included GenAiLlmGatewayClientTest 17, CredentialBudgetTest 4,
+      GatewayResponseParserTest 14, RepairLoopTest 14, VertexLlmGatewayClientTest 12 (legacy).
+  not_run:
+    - CompileBoundsTest and CompilePipelineSourceAdmissionTest (executor saturation), which were not in the batch.
+    - Full ./gradlew check (static gates and coverage).
+    - Live gateway / SPK-01. No live model call was made.
+
+prior_findings:
+  QF4:
+    source: docs/qa/studio-inference-implementation-review.md (QF4, re-review table)
+    verdict: CONFIRMED FIXED
+    detail: >-
+      The SDK receives static credentials (GenAiLlmGatewayClient.java:86-98). The bearer token comes
+      from BoundedCredentialProvider.token(budget) (:214). That provider refreshes synchronously through
+      BudgetedAuthTransport, which caps each call by the remaining budget and registers socket cancellation
+      on the same CompileBudget (BoundedCredentialProvider.java:78-106). Unsupported providers fail closed
+      (:69-71). CredentialBudgetTest passed 4/4 on this rerun.
+
+ac_coverage:
+  total: 5
+  verified: 5
+  unmet: 0
+  detail:
+    AC-1: >-
+      PASS - maintained google-genai 1.71.0 (build.gradle.kts:56). Each attempt sends maxOutputTokens and
+      a per-request responseJsonSchema with SDK attempts=1 (GenAiLlmGatewayClient.java:106,304-327,454-491).
+      Any finish reason other than STOP is rejected before the text is read, and so are oversize and
+      malformed outputs (:380-416). A test proves truncation is rejected even when the text has a valid envelope.
+    AC-2: >-
+      PASS - one CompileBudget per request (3 proposals / 9 transports, CompileBudget.java:91-105) is
+      threaded from CompileExecutor (:132) through CompilePipeline (:249) into the gateway. The per-call
+      timeout is min(requestTimeout, remaining) (GenAiLlmGatewayClient.java:222-227). The interceptor
+      re-checks expiry and registers call cancellation (:62-67). onCancel on an expired budget cancels
+      at once (CompileBudget.java:116-123). Backoff is woken by cancel (:129-154). Capacity is released in
+      finally (GenAiLlmGatewayClient.java:279-283).
+    AC-3: >-
+      PASS - the repair keeps the first request's kind and writable IDs (CompilePipeline.java:215-228).
+      The rejected proposal is capped at 64 KiB and fenced as a JSON string (RepairPromptAssembler.java:71).
+      Diagnostics are bounded by DiagnosticsBounder, and the repair runs on the same shared budget.
+    AC-4: >-
+      PASS - provenance holds the model, modelVersion, sdkVersion, temperature, maxOutputTokens,
+      finishReason, prompt/candidate/thoughts/cached/total tokens (null, never 0, when absent) and
+      thinkingLevel (GenAiLlmGatewayClient.java:357-379). Settings add endpoint/project/location
+      (:142-162). The audit line is a fixed allow-list with no prompt or body fields
+      (GatewayAuditLogger.java:31-68).
+    AC-5: >-
+      PASS - local wire tests cover a slow response past OkHttp's default read timeout, bounded
+      429/503 retry, cancellation with single-permit recovery, a deadline-capped call that does not
+      retry a timeout, an expired budget that never starts transport, and the schema shape. The gateway
+      provider defaults to disabled (application.yml:313). SPK-01 is kept as a separate gate.
+
+top_issues:
+  - id: G-1
+    severity: low
+    finding: >-
+      The legacy VertexLlmGatewayClient (resilience4j retry/bulkhead, no CompileBudget) and
+      VertexAiClientFactory live under src/test/java/.../gateway/ as non-test classes and are still
+      exercised by VertexLlmGatewayClientTest. The story File List names them as gateway sources.
+    impact: >-
+      They are not on the production classpath, so there is no runtime exposure. They leave an
+      unbounded client pattern in the tree and add 12 tests that verify retired behaviour.
+    suggested_action: Delete them and their test, or move them to a clearly named legacy fixture package. Correct the File List.
+    ac_refs: [AC-2]
+  - id: G-2
+    severity: low
+    finding: >-
+      Credential bounds are hard-coded: a 15 s discovery budget in the BoundedCredentialProvider
+      constructor (:28) and a 30 s per-call cap in BudgetedAuthTransport.
+    impact: Both are still capped by the request budget at call time. They are just not configurable.
+    suggested_action: Move both to StudioGatewayProperties.credentials when that file is next edited.
+    ac_refs: [AC-2]
+  - id: G-3
+    severity: low
+    finding: >-
+      Story record drift. The Dev Agent Record cites non-durable /tmp logs and the wt/epic baseline,
+      and has typos ("AI1.71.0", "in14tests").
+    impact: Documentation only.
+    suggested_action: '@po/@sm may annotate. No code change.'
+    ac_refs: []
+
+recommendations:
+  immediate: []
+  future:
+    - The R2D2 proxy's support for anyOf in responseJsonSchema is unverified (noted in source, Story 10.45). Include it in SPK-01.
+
+quality_score: 90
+expires: '2026-10-20T00:00:00Z'
