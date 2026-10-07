@@ -1,0 +1,101 @@
+schema: 1
+story: '10.20'
+story_title: Inference contracts and independent evaluation specification
+epic: EPIC-10
+label: SPEC-ONLY
+
+gate: CONCERNS
+reviewer: Morgan (@pm, quality_gate per story Executor Assignment)
+reviewed_at: 2026-10-06
+reviewed_revision: commit:829a56f02
+
+status_reason: >-
+  All five ACs are met by docs/architecture/studio-inference-contract-v1.md,
+  docs/qa/studio-inference-evaluation-spec.md, docs/specs/studio/inference.openapi.yaml and
+  docs/specs/studio/inference-proposal.schema.json. The machine-readable contracts pass the
+  reviewer's own re-validation. A spot-check of 10.21-10.26 code found it consistent with the frozen
+  contract, with one exception: the planner's reason precedence while the incremental flag is off
+  (ISSUE-1, medium). The selected mode is still correct, so safety is not affected, but the API and
+  telemetry report the wrong reason. Three low documentation-currency items remain. The
+  verdict is CONCERNS, not FAIL, because no safety invariant is contradicted. This gate is not release readiness, live
+  evidence or approval of the eval spec's §7 numerical targets.
+
+evidence:
+  checks_run_by_reviewer:
+    - check: "AJV 8.20.0 (draft 2020-12, strict:true, ajv-formats) compile of inference-proposal.schema.json + 11 envelope cases (GENERATED, PATCH/UNSUPPORTED, CLARIFICATION valid; code-on-unsupported, message-on-generated, extra root key, stepIndex, version 2, empty steps, non-UUID id, empty code invalid)"
+      result: "11/11 matched expectation, 0 mismatches"
+    - check: "inference.openapi.yaml parsed with yaml uniqueKeys; every $ref resolved (internal and ./openapi.yaml external)"
+      result: "48 refs (19 internal, 29 external), 0 unresolved; 6 unique operationIds, all x-not-yet-implemented:false"
+  not_run: "No Gradle, runner or frontend suites run (gate constraint). Downstream conformance is a static spot-check only."
+  scratch_script: "session scratchpad c0check.cjs (not committed)"
+
+acceptance_criteria:
+  AC1: "PASS. Contract §1, §4 and §6 cover the FULL/PATCH envelope, its closed variants and the outcome table (with the VAL-019 amendment), plus the strict ValidateResponse. Runner artifact.version stays 1."
+  AC2: "PASS. §2 covers server-allocated step UUIDs, the scope {policyVersion 1.0.0, UNKNOWN|STEP_SCOPED}, reaffirmation/revocation and the rule that unknown/stale/global/forward scope selects FULL."
+  AC3: "PASS. §2 covers compileRequestId vs revisionId, the immutable authoring snapshot and hash, publication guards and V18 expand / V19 staged cutover (backend/db/cutover). §3 covers the baseline query."
+  AC4: "PASS. §5 covers the shared CompileBudget (monotonic deadline plus cancellation), the 3 proposals / 3 transports per proposal / 9 total transports caps, maxOutputTokens and the repair interface."
+  AC5: "PASS. Eval spec §2 defines the independent oracle and the M1-M7 controls, which must all be detected before any T3 score. §7 targets are labelled proposed pending Pax/Aria."
+
+downstream_spot_check:
+  consistent:
+    - "backend/.../compile/CompileBudget.java:93,101 — 3 proposal / 9 transport hard caps"
+    - "backend/.../compile/InferenceCaptureStore.java:91,99 — baseline ordering (started_at DESC,id DESC)/(created_at DESC,id DESC), FULL+PASSED revision-linked execution"
+    - "backend/.../compile/validator/RunnerValidationClient.java:50-51,328-345 — duplicate/trailing rejection, exact keys, version pin, stepIndex==position"
+    - "backend/.../compile/gateway/GatewayResponseParser.java:33-41 — strict duplicate-key and trailing-token envelope parse"
+    - "backend/.../compile/RepairPromptAssembler.java:79-82 — parser-rejected repair never echoes output (VAL-019 D1)"
+    - "studio-runner/src/validator/arguments.ts:633 and src/run/playwrightAdapter.ts:1052 — trial key rejected (F6)"
+    - "frontend/src/services/mocks/studio/inferenceHandlers.ts:34-39,94-96 — strict scope object and AUTO|FULL compile body"
+  deviations:
+    - "ISSUE-1"
+
+issues:
+  - id: ISSUE-1
+    severity: medium
+    category: requirements
+    description: >-
+      backend/src/main/java/com/citi/put/checks/studio/compile/incremental/CompilationPlanner.java:62-79
+      returns LEGACY_MAPPING, FINGERPRINT_CHANGE or STRUCTURAL_CHANGE before INCREMENTAL_DISABLED
+      while the incremental flag is off. Contract §3 makes INCREMENTAL_DISABLED the second applicable
+      reason, right after EXPLICIT_FULL. The selected mode is FULL either way. Plan.reason (API) and the
+      eval fallback telemetry differ from the contract. A grep of backend/src/test finds no test that
+      asserts INCREMENTAL_DISABLED.
+    recommendation: >-
+      Story 10.24 owner: move the disabled-flag check ahead of the mapping, fingerprint and structural
+      checks. Keep REUSE reachable while the flag is off, as §3 allows, and add planner tests. Alternatively,
+      Aria records a contract amendment that adopts the implemented order.
+  - id: ISSUE-2
+    severity: low
+    category: docs
+    description: >-
+      Contract §6 coordinates executor, syntax reference and prompt at 2.0.0. The code has executor
+      2.1.0 (studio-runner/src/versions.ts:17), syntax 2.1.0 (versions.ts:29 = CompilePins.java:27)
+      and prompt 2.3.0 (CompilePins.java:42). The only amendment in the contract is VAL-019.
+    recommendation: "Aria: add a dated amendment listing the pin progression and its rationale, or reword §6 as the C0 baseline pins."
+  - id: ISSUE-3
+    severity: low
+    category: docs
+    description: >-
+      The contract header says "New routes are explicitly unimplemented", and the C0 evidence paragraph
+      says "53 OpenAPI references ... six operation IDs ... marked unimplemented". The OpenAPI now has
+      48 refs and marks all six operations x-not-yet-implemented:false.
+    recommendation: "Aria: label these statements as point-in-time 2026-09-16, or update them."
+  - id: ISSUE-4
+    severity: low
+    category: requirements
+    description: >-
+      The Plan.reason enum includes GLOBAL_OR_FORWARD_SCOPE, but the scope declaration has only
+      UNKNOWN and STEP_SCOPED, so no input can produce it. The backend never emits it; only a
+      frontend label exists (InferenceStudio.tsx:18).
+    recommendation: "Aria: mark it reserved for a future declaration kind, or remove it from the §3 vocabulary and the OpenAPI."
+
+required_changes:
+  - "ISSUE-1: reconcile planner reason precedence with contract §3 (code fix in 10.24 or contract amendment)"
+  - "ISSUE-2: contract amendment for runtime/prompt pin versions"
+  - "ISSUE-3: mark C0 implementation-status/evidence statements as point-in-time"
+  - "ISSUE-4: reserve or remove GLOBAL_OR_FORWARD_SCOPE"
+
+waiver: { active: false }
+
+top_issues_summary: "1 medium (planner reason precedence vs §3 while flag off; mode unaffected), 3 low doc/vocabulary currency items"
+
+next_status: Done
