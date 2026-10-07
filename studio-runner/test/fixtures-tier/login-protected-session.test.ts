@@ -16,10 +16,34 @@ let server: Server;
 let baseUrl = '';
 /** How many times the form was submitted, so a refused fill can be shown to have sent nothing. */
 let loginPosts = 0;
+/** Every value the off-origin capture page saw typed into its password field (10.44 S-1). */
+const captured: string[] = [];
 
 beforeAll(async () => {
   server = createServer((request, response) => {
     const path = new URL(request.url ?? '/', 'http://localhost').pathname;
+    // 10.44 S-1: a bound-origin page with no password field that redirects, while the fill is
+    // still waiting for its target, to a page on another origin that does have one.
+    if (path === '/lure') {
+      const target = (request.headers.host ?? '').replace('127.0.0.1', 'localhost');
+      response.setHeader('content-type', 'text/html; charset=utf-8');
+      response.end(`<h1>Loading</h1><script>setTimeout(() => { location.href = 'http://${target}/capture'; }, 1500);</script>`);
+      return;
+    }
+    if (path === '/capture') {
+      response.setHeader('content-type', 'text/html; charset=utf-8');
+      response.end(`<label>Password<input aria-label="Password" type="password"></label><p id="ack"></p><script>document.querySelector('input').addEventListener('input', (event) => { fetch('/typed', { method: 'POST', body: event.target.value }).then(() => { document.getElementById('ack').textContent = 'Captured'; }); });</script>`);
+      return;
+    }
+    if (path === '/typed' && request.method === 'POST') {
+      const chunks: Buffer[] = [];
+      request.on('data', (chunk: Buffer) => chunks.push(chunk));
+      request.on('end', () => {
+        captured.push(Buffer.concat(chunks).toString('utf8'));
+        response.end();
+      });
+      return;
+    }
     if (path === '/login' && request.method === 'GET') {
       response.setHeader('content-type', 'text/html; charset=utf-8');
       response.end(`<form method="post" action="/login"><label>Username<input aria-label="Username" name="user"></label><label>Password<input aria-label="Password" name="password" type="password"></label><button>Sign in</button></form>`);
@@ -148,6 +172,48 @@ describe('secret origin binding on real Chromium', () => {
       errorCode: 'SECRET_ORIGIN_NOT_ALLOWED',
     });
     expect(posts).toBe(0);
+  }, 120_000);
+});
+
+/**
+ * 10.44 gate S-1 (time-of-check / time-of-use). The page is on the bound origin when the fill
+ * starts and on another origin by the time its target exists. The secret must not be typed there.
+ */
+describe('secret origin binding holds across a navigation during the wait', () => {
+  function redirectJob(): Record<string, unknown> {
+    const source = ['Open the lure page', 'Enter the password', 'Wait for the capture'];
+    const none = { variables: [], secrets: [] };
+    const selects = [none, { variables: [], secrets: ['LOGIN_PASSWORD'] }, none];
+    const code = [
+      `await page.goto('${baseUrl}/lure');`,
+      `await page.getByLabel('Password', { exact: true }).fill(vars.secret('LOGIN_PASSWORD'));`,
+      `await expect(page.getByText('Captured', { exact: true })).toBeVisible();`,
+    ];
+    return validJob({
+      source,
+      artifact: { version: 1, steps: source.map((originalText, stepIndex) => ({ stepIndex, originalText, code: code[stepIndex] })) },
+      referencePolicy: { version: 2, steps: selects.map((refs, stepIndex) => ({ stepIndex, required: refs, allowed: refs })) },
+      references: { variables: [], secrets: ['LOGIN_PASSWORD'] },
+      resolvedVars: {},
+      resolvedSecrets: { LOGIN_PASSWORD: SECRET_CANARY },
+      // Bound to the lure's origin only; the capture page is on `localhost`, a different origin.
+      secretOrigins: { LOGIN_PASSWORD: [baseUrl] },
+    });
+  }
+
+  it('refuses when the page redirects off the bound origin before the target appears', async () => {
+    const before = captured.length;
+    const { final, retained } = await runJob(redirectJob());
+    const typed = captured.slice(before);
+    expect(typed.some((value) => value.includes(SECRET_CANARY)), 'the secret reached the off-origin page').toBe(false);
+    expect(typed).toEqual([]);
+    expect(final?.outcome, JSON.stringify(final)).toMatchObject({
+      result: 'ERROR',
+      errorCode: 'SECRET_ORIGIN_NOT_ALLOWED',
+    });
+    const steps = final?.steps as { status: string; failure?: string | null }[] | undefined;
+    expect(steps?.map((step) => step.status)).toEqual(['PASS', 'FAIL', 'SKIPPED']);
+    expect(retained).not.toContain(SECRET_CANARY);
   }, 120_000);
 });
 

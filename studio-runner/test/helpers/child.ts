@@ -10,7 +10,12 @@
  * real one, and keeping them out of `src/` keeps them out of the coverage gate.
  */
 import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest } from '../../src/run/browserFactory.js';
-import type { LocatorLike, PageLike, QueryRoot } from '../../src/run/playwrightAdapter.js';
+import type {
+  ElementHandleLike,
+  LocatorLike,
+  PageLike,
+  QueryRoot,
+} from '../../src/run/playwrightAdapter.js';
 import type {
   ChildProcessHandle,
   ChildSpawnRequest,
@@ -56,6 +61,11 @@ export interface FakePage extends PageLike {
   hiddenOf: ((path: string) => number) | null;
   /** Every `count()` call, by locator path, in order. Kept apart from `calls` on purpose. */
   readonly counts: string[];
+  /**
+   * The URL of the frame a pinned element handle reports (10.44 S-1). `undefined` — the default —
+   * means the page's own URL; `null` means the element's document is gone.
+   */
+  elementFrameUrl: string | null | undefined;
 }
 
 /** The path suffix of a `filter({ visible: true })` locator (VAL-040). */
@@ -84,6 +94,7 @@ export function createFakePage(): FakePage {
     countOf: null,
     hiddenOf: null,
     counts: [] as string[],
+    elementFrameUrl: undefined,
     failOn(method: string, error: Error): void {
       failures.set(method, error);
     },
@@ -234,6 +245,25 @@ export function createFakeLocator(
         return Promise.resolve(Math.max(0, total - (page.hiddenOf?.(base) ?? 0)));
       }
       return Promise.resolve(page.countOf?.(path) ?? 1);
+    },
+    elementHandle(options?: Record<string, unknown>): Promise<ElementHandleLike | null> {
+      record('elementHandle', options);
+      const handle: ElementHandleLike = {
+        ownerFrame(): Promise<{ url(): string } | null> {
+          const url = page.elementFrameUrl === undefined ? page.currentUrl : page.elementFrameUrl;
+          return Promise.resolve(url === null ? null : { url: () => url });
+        },
+        fill(value: string, fillOptions?: Record<string, unknown>): Promise<void> {
+          record('elementHandle.fill', value, fillOptions);
+          page.value = value;
+          return Promise.resolve();
+        },
+        dispose(): Promise<void> {
+          record('elementHandle.dispose');
+          return Promise.resolve();
+        },
+      };
+      return Promise.resolve(handle);
     },
     // Not recorded as a call: it narrows a locator, it is not a segment of the authored chain.
     filter(): LocatorLike {

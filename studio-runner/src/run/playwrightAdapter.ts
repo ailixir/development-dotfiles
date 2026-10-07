@@ -96,12 +96,26 @@ export interface LocatorLike extends QueryRoot {
   /** A locator matching either this one or `other`. Text-entry equivalence only. */
   or(other: LocatorLike): LocatorLike;
   /**
+   * The one element this locator resolves to, pinned to the document it was found in. Secret
+   * fills only (10.44 S-1): a handle cannot follow a navigation, so the origin checked against it
+   * is the origin the value is typed on.
+   */
+  elementHandle(options?: Record<string, unknown>): Promise<ElementHandleLike | null>;
+  /**
    * This locator narrowed to its visible matches (Playwright ≥1.51). Visible-only resolution of
    * the action operations only (VAL-040); assertions never use it.
    */
   filter(options: { readonly visible: boolean }): LocatorLike;
   /** A string selector, or (VAL-041 gate only) another locator, resolved inside this one. */
   locator(selector: string | LocatorLike): LocatorLike;
+}
+
+/** The slice of a Playwright `ElementHandle` a secret fill uses (10.44 S-1). */
+export interface ElementHandleLike {
+  /** The frame whose document holds the element; `null` once that document is gone. */
+  ownerFrame(): Promise<{ url(): string } | null>;
+  fill(value: string, options?: Record<string, unknown>): Promise<void>;
+  dispose(): Promise<void>;
 }
 
 export interface PageLike extends QueryRoot {
@@ -487,11 +501,11 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
    * the document a locator resolves in is the top-level document `page.url()` describes. Were
    * frames ever permitted, this would have to check the frame the locator resolved in instead.
    */
-  function requireSecretOrigin(secretId: string): void {
+  function requireSecretOrigin(secretId: string, url: string | null = page.url()): void {
     const allowed = Object.hasOwn(secretOrigins, secretId) ? secretOrigins[secretId] : undefined;
     let origin: string | null = null;
     try {
-      origin = new URL(page.url()).origin;
+      origin = url === null ? null : new URL(url).origin;
     } catch {
       origin = null;
     }
@@ -502,6 +516,47 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
         'SECRET_ORIGIN_NOT_ALLOWED',
         `Secret "${secretId}" is not bound to the current page origin; nothing was typed.`,
       );
+    }
+  }
+
+  /**
+   * Types a secret only into an element whose document is on an allowed origin (10.44 S-1).
+   *
+   * The up-front check in `fill` runs before the target wait, and a locator re-resolves in
+   * whatever document is current, so a navigation during the wait would otherwise put the value
+   * on an origin nobody checked. Here the target is pinned to one element handle first, the
+   * origin of the frame holding that element (and of the page) is checked, and the fill goes to
+   * that handle. A handle does not follow a navigation: if the document changes after the check,
+   * the fill fails on a detached element instead of typing into the new document.
+   *
+   * Residual, inferred from Playwright's implementation and not reproduced: Playwright's own fill
+   * focuses the element and then inserts text through the page keyboard in two protocol calls, so
+   * a navigation landing exactly between those two calls is outside what the adapter can see.
+   */
+  async function fillSecretPinned(
+    secretId: string,
+    value: string,
+    resolved: { readonly locator: LocatorLike; readonly timeout: number },
+    timeout: number,
+    force: boolean | undefined,
+  ): Promise<void> {
+    const start = now();
+    const element = await act('fill', timeout, () =>
+      resolved.locator.elementHandle({ timeout: resolved.timeout }),
+    );
+    if (element === null) {
+      requireSecretOrigin(secretId, null);
+      return;
+    }
+    try {
+      const frame = await element.ownerFrame();
+      requireSecretOrigin(secretId, frame === null ? null : frame.url());
+      requireSecretOrigin(secretId);
+      guard();
+      const remaining = Math.max(1, Math.floor(resolved.timeout - (now() - start)));
+      await act('fill', timeout, () => element.fill(value, { force, timeout: remaining }));
+    } finally {
+      await element.dispose().catch(() => undefined);
     }
   }
 
@@ -832,6 +887,7 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
       secretId?: string,
     ): Promise<void> {
       guard();
+      // Checked up front so a page already on the wrong origin is refused without waiting.
       if (secretId !== undefined) requireSecretOrigin(secretId);
       const timeout = timeoutOf(actionOptions?.timeout);
       const resolved = await resolveActionTarget(
@@ -840,9 +896,13 @@ export function createPlaywrightAdapter(options: PlaywrightAdapterOptions): Brow
         timeout,
         actionOptions?.force,
       );
-      await act('fill', timeout, () =>
-        resolved.locator.fill(value, { force: actionOptions?.force, timeout: resolved.timeout }),
-      );
+      if (secretId === undefined) {
+        await act('fill', timeout, () =>
+          resolved.locator.fill(value, { force: actionOptions?.force, timeout: resolved.timeout }),
+        );
+        return;
+      }
+      await fillSecretPinned(secretId, value, resolved, timeout, actionOptions?.force);
     },
 
     async press(target: LocatorHandle, key: string, pressOptions?: PressOptions): Promise<void> {

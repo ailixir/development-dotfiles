@@ -903,6 +903,49 @@ describe('a secret is filled only on an origin it is bound to', () => {
     expect(fills(page)).toHaveLength(0);
   });
 
+  // 10.44 gate S-1: the origin is checked again against the element the value is typed into.
+  it('refuses when the page navigates off the bound origin while the fill waits', async () => {
+    const page = createFakePage();
+    page.currentUrl = 'https://login.app.example/';
+    // The target is found only after the page has moved to another origin.
+    page.countOf = () => {
+      page.currentUrl = 'https://evil.example/capture';
+      return 1;
+    };
+    const adapter = adapterFor(page, { secretOrigins: { LOGIN_PW: ['https://login.app.example'] } });
+    const handle = await adapter.locate(chain({ kind: 'locator', selector: '#pw' }));
+    const attempt = adapter.fill(handle, SECRET, undefined, 'LOGIN_PW');
+    await expect(attempt).rejects.toMatchObject({ name: 'SECRET_ORIGIN_NOT_ALLOWED' });
+    await expect(attempt).rejects.not.toThrow(SECRET);
+    expect(fills(page)).toHaveLength(0);
+    expect(page.calls.some((call) => call.method.endsWith('elementHandle.dispose'))).toBe(true);
+  });
+
+  it.each([
+    ['another origin', 'https://evil.example/'],
+    ['a detached document', null],
+  ])('refuses when the pinned element sits in %s', async (_label, frameUrl) => {
+    const page = createFakePage();
+    page.currentUrl = 'https://login.app.example/';
+    page.elementFrameUrl = frameUrl;
+    const adapter = adapterFor(page, { secretOrigins: { LOGIN_PW: ['https://login.app.example'] } });
+    const handle = await adapter.locate(chain({ kind: 'locator', selector: '#pw' }));
+    await expect(adapter.fill(handle, SECRET, undefined, 'LOGIN_PW')).rejects.toMatchObject({
+      name: 'SECRET_ORIGIN_NOT_ALLOWED',
+    });
+    expect(fills(page)).toHaveLength(0);
+  });
+
+  it('types the secret into the pinned element, never through the re-resolving locator', async () => {
+    const { page, attempt } = await fillSecret('https://login.app.example/', {
+      LOGIN_PW: ['https://login.app.example'],
+    });
+    await attempt;
+    const methods = fills(page).map((call) => call.method);
+    expect(methods).toHaveLength(1);
+    expect(methods[0]).toMatch(/\.elementHandle\.fill$/u);
+  });
+
   it('leaves a non-secret fill unchecked', async () => {
     const page = createFakePage();
     page.currentUrl = 'https://anywhere.example/';
