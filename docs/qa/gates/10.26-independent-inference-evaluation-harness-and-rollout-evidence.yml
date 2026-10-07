@@ -6,8 +6,8 @@ epic: EPIC-10
 gate: CONCERNS
 reviewer: Aria (@architect, quality_gate per story Executor Assignment)
 reviewed_at: 2026-10-07T01:19:10Z
-updated: '2026-10-07T01:19:10Z'
-reviewed_revision: commit:8e9c7bf54
+updated: '2026-10-07T01:23:29Z'
+reviewed_revision: commit:f3f526cbe  # re-review 1 (QA loop iteration 2); original review at commit:8e9c7bf54, see re_reviews below
 
 status_reason: >-
   The local halves of AC-1 to AC-5 are met, and the AC-3 report keeps planned, refused and
@@ -134,3 +134,77 @@ external_blockers:
   - "Spec section 7 numerical targets are not frozen by Pax/Aria. A release-sized held-out corpus and typed assertion-origin evidence are still open."
 
 waiver: { active: false }
+
+# History: the fields above (status_reason, evidence, acceptance_criteria, top_issues) are the original
+# review at commit:8e9c7bf54 and are kept unchanged. Re-reviews append below.
+re_reviews:
+  - iteration: 2
+    reviewer: Aria (@architect, quality_gate)
+    reviewed_at: 2026-10-07T01:23:29Z
+    reviewed_revision: commit:f3f526cbe
+    gate: CONCERNS
+    story_status_decision: >-
+      InReview (unchanged). The AC-3 live half is still BLOCKED on SPK-01, and TEST-001 is still open.
+      Under EPIC-10 (10.19 Definition of done) the story is not closed around a blocked criterion.
+    checks_run_by_reviewer:
+      - check: "cd studio-runner && npx vitest run test/evaluation --coverage.enabled=false"
+        result: "2 files / 13 tests passed (report.test.ts 10, fixture-run.test.ts 3)"
+      - check: "cd studio-runner && node --test evaluation/oracle.test.mjs evaluation/lifecycle.test.mjs"
+        result: "20/20 passed, 0 skipped"
+      - check: "cd studio-runner && node --test evaluation/browser-oracle.test.mjs (existing dist, no rebuild)"
+        result: "6/6 passed (correct-save, M1-M5)"
+      - check: "cd studio-runner && npx eslint evaluation test/evaluation && npm run -s typecheck"
+        result: "clean"
+      - check: "REL-001 re-probe: buildReport with planned ['a','b'] as plain ids and only 'a' recorded (scratchpad script, no repo file written)"
+        result: >-
+          behavioralCorrectness 1/2 (rate 0.5), supportedCoverage 1/2, falseSuccess.perSupportedTrial denominator 2,
+          UNSUPPORTED/CLARIFICATION correctNonExecutable 0/1, evidence gap 'planned trials without expected class', exit 2.
+      - check: "Edge probes"
+        result: >-
+          An observed trial with no expectedClass is rejected by oracle.summarize ('Invalid trial identity/outcome'),
+          so UNKNOWN never inflates a numerator. The typed-plan path is unchanged (1/2, no UNKNOWN). With 3 plain ids, one
+          false-success trial and two unseen: falseSuccess.perSupportedTrial 1/3 (see REL-002).
+    not_run: "Gradle, full runner npm test, frontend suites, CodeRabbit (not available on macOS host), any live gateway call, dist rebuild."
+    findings:
+      - id: REQ-001
+        status: RESOLVED
+        note: "The AC-3 parent task is unticked; the local half stays [x] and the live half stays [ ] BLOCKED on SPK-01."
+      - id: REQ-002
+        status: RESOLVED
+        note: >-
+          The tier is now derived: 'scripted-transport' for an injected transport, 'T3-unverified' for the default fetch.
+          The CLI calls runEvaluation without a transport, so real runs get 'T3-unverified'. Any wrapper around fetch falls back to
+          'scripted-transport', which errs in the safe direction. fixture-run.test.ts asserts no /^T3\b/ label in
+          summary.json, report.md and run-manifest.json.
+      - id: REL-001
+        status: RESOLVED
+        note: >-
+          Unseen plain-id trials are UNKNOWN and enter every class denominator as not handled. The definitions say so, and
+          exit 2 plus the evidence gap remain. A regression test was added (report.test.ts REL-001 case). The probe reports 2 as the denominator.
+      - id: DOC-001
+        status: RESOLVED
+        note: "pins.inference {generation, model, prompt} is now literally 'unavailable' in report.mjs, report.d.mts and report.md. The Dev Agent Record and README match the code."
+      - id: TEST-001
+        status: OPEN (process item, owner @qa)
+        note: "Recorded as an unticked AC-4 sub-task. Quinn has not re-reviewed report.mjs, lifecycle.mjs or test/evaluation/**. This must happen before any SPK-01-enabled run."
+      - id: PERF-001
+        status: OPEN (low, explicitly deferred by @dev)
+      - id: ARCH-001
+        status: OPEN (low, explicitly deferred by @dev)
+    new_findings:
+      - id: REL-002
+        severity: low
+        finding: >-
+          For failure-rate metrics (falseSuccess.perSupportedTrial, the per-class wrongAcceptance), counting unseen/UNKNOWN
+          trials in the denominator without a numerator dilutes the rate. The probe gives 1/3 where the observed rate is 1/1, and
+          one UNKNOWN trial sits in three class denominators at once. The definition text says "count as not handled", which
+          reads as conservative for success rates but not for failure rates. This is mitigated: it occurs only on the plain-id
+          `summarize` path, always with exit 2 and an evidence gap. Known-class incomplete trials had the same dilution by design before this fix.
+        suggested_action: >-
+          Before any live run, either null the failure-rate metrics when any planned trial is UNKNOWN, or add an explicit
+          upper-bound variant that counts unseen trials as failures. Fold this into Quinn's TEST-001 review.
+    regressions: "None found. The typed-plan run path, the browser mutation controls and the oracle/lifecycle self-tests are unchanged and green."
+    status_reason: >-
+      All four requested code/record fixes are resolved and test-backed. CONCERNS remains only because of the
+      external SPK-01 blocker (the AC-3 live half is not passed), the open TEST-001 Quinn review, and low items
+      PERF-001, ARCH-001 and REL-002.
