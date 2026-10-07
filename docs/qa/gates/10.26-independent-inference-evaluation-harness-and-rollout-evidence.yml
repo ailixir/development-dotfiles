@@ -1,0 +1,136 @@
+schema: 1
+story: '10.26'
+story_title: Independent inference evaluation harness and rollout evidence
+epic: EPIC-10
+
+gate: CONCERNS
+reviewer: Aria (@architect, quality_gate per story Executor Assignment)
+reviewed_at: 2026-10-07T01:19:10Z
+updated: '2026-10-07T01:19:10Z'
+reviewed_revision: commit:8e9c7bf54
+
+status_reason: >-
+  The local halves of AC-1 to AC-5 are met, and the AC-3 report keeps planned, refused and
+  ceiling-stopped trials in its denominators on the run path. The live half of AC-3 (approved
+  Vertex/proxy evidence) is blocked on external gate SPK-01 and is not passed. Under Epic 10's rule
+  (10.19 Definition of done) the story stays InReview and is not Done. There are also four medium
+  honesty/record issues below.
+
+story_status_decision: >-
+  InReview (unchanged). This deliberately departs from story-lifecycle.md (CONCERNS -> Done) and
+  follows EPIC-10's rule that a Blocked criterion is never ticked and the story is never closed around
+  it (docs/stories/10.19.story.md, Definition of done).
+
+evidence:
+  checks_run_by_reviewer:
+    - check: "cd studio-runner && npx vitest run test/evaluation --coverage.enabled=false"
+      result: "2 files / 12 tests passed (report.test.ts 9, fixture-run.test.ts 3)"
+    - check: "cd studio-runner && node --test evaluation/oracle.test.mjs evaluation/lifecycle.test.mjs"
+      result: "20/20 passed, 0 skipped"
+    - check: "cd studio-runner && node --test evaluation/browser-oracle.test.mjs (existing dist, built 2026-10-06 21:08, after last src commit)"
+      result: "6/6 passed: correct-save, M1-reversed-negative, M2-wrong-account, M3-omitted-action, M4-trial, M5-weakened-case"
+    - check: "cd studio-runner && node evaluation/cli.mjs validate-manifest evaluation/example-manifest.json"
+      result: "Manifest valid, exit 0"
+    - check: "cd studio-runner && npx eslint evaluation test/evaluation; npm run -s typecheck"
+      result: "no output (clean)"
+    - check: "inline node probe of buildReport (no file written)"
+      result: >-
+        With planned ['a','b'] as plain ids and only trial 'a' recorded: behavioralCorrectness 1/1
+        (rate 1), evidenceGaps lists 'planned trials without expected class', exit 2 (see REL-001).
+        An incomplete trial's 900 input tokens do not appear in any token total (see PERF-001).
+  not_run: >-
+    Gradle, full runner `npm test`, frontend suites, CodeRabbit (not available on this macOS host),
+    and any live gateway call. No build was run; the browser oracle used the existing dist.
+
+acceptance_criteria:
+  AC1: >-
+    PASS (local). The versioned CLI (validate-manifest, oracle-self-test, run, summarize; schema 1
+    manifest, schema 2 report) runs against the QA-owned example manifest. Paired FULL/AUTO
+    workflows run fixture-backed with no cloud access. The corpus is still a three-family
+    development smoke set, and the release-sized held-out corpus is open, as the story records.
+  AC2: >-
+    PASS (local T2). The real-Chromium mutation controls M1-M5 pass, and the pure-oracle suite covers
+    stale identity and contamination. Executor PASS cannot override a mismatched app-state oracle.
+  AC3: >-
+    LOCAL HALF MET WITH CONCERNS; LIVE HALF BLOCKED (SPK-01), NOT PASSED. Every metric carries a
+    numerator, a denominator and a denominator definition: correctness/coverage, per-class
+    unsupported/clarification handling and wrong acceptance, false success per supported trial and
+    per PASS, p50/p95 with missing samples at configured and observed-peak concurrency,
+    tokens/transport against ceilings and stoppedBy, repair entry/yield, admission refusal and
+    recovery, and declared/observed pins. Refused and ceiling-stopped planned trials stay in the
+    denominators (fixture-run tests 2 and 3). Cost, regressions, post-deadline calls and deadline
+    slot recovery are honestly 'unavailable'. Gaps: REL-001, DOC-001 and PERF-001. Spec section 6
+    items not yet reported are uncertainty intervals, step-length/edit-position/repetition
+    breakdowns and paired FULL/AUTO efficiency deltas. These go to the live half.
+  AC4: >-
+    PARTIAL. Quinn's recorded review (docs/qa/studio-inference-implementation-review.md) predates
+    8e9c7bf54. report.mjs and the lifecycle changes are unreviewed by Quinn, so a re-review is
+    required before any live evaluation. Separating live evidence from stubs relies on report text
+    and releaseReady:false. The emitted tier label contradicts it (REQ-002).
+  AC5: >-
+    PASS (local). docs/runbooks/studio-inference-rollout.md records SPK-01 and the remaining external
+    prerequisites. It covers V18/V19 rollout/rollback, separate STUDIO_GATEWAY_PROVIDER,
+    STUDIO_AUTHORING_V2_ENABLED and STUDIO_INCREMENTAL_ENABLED enablement, and the local
+    filesystem / AWS S3 storage decision with remote provisioning deferred.
+
+top_issues:
+  - id: REQ-001
+    severity: medium
+    finding: >-
+      The story's Tasks tick the parent 'Implement and verify AC-3' [x] while its live half is
+      [ ] BLOCKED on SPK-01. This breaks EPIC-10's 'a Blocked criterion is never ticked'.
+    suggested_action: "@dev: untick the AC-3 parent (keep the local-half sub-item ticked) until SPK-01 evidence lands or @pm moves the live half to a 10.34+ story."
+  - id: REQ-002
+    severity: medium
+    finding: >-
+      evaluation/lifecycle.mjs runContext hard-codes tier 'T3'. The scripted fixture-run tests
+      (synthetic approvedGatewayEvidence 'synthetic-fixture') therefore emit 'tier T3' in
+      summary.json and report.md, although spec section 1 reserves T3 for a real approved gateway.
+      This weakens AC-4's live-versus-stub separation.
+    suggested_action: >-
+      Derive the tier from verified prerequisite provenance, or label it as unverified inference
+      (for example 'T3-lifecycle; inference provenance unverified'). Add a test that a scripted
+      transport never yields a plain 'T3' label.
+  - id: REL-001
+    severity: medium
+    finding: >-
+      In report.mjs normalisePlan, `summarize` given plain plannedIds turns unseen planned trials into
+      UNKNOWN, which silently drops them from the SUPPORTED/UNSUPPORTED/CLARIFICATION denominators.
+      The probe gave 1/1 = 100% with 2 planned. Exit 2 and evidenceGaps mitigate this, but the
+      headline ratio's denominatorDefinition ('all planned SUPPORTED trials') becomes false. The run
+      path is unaffected because it passes typed plan objects.
+    suggested_action: "Null class-scoped rates (or count UNKNOWN conservatively as failures in every class denominator) when any planned trial has no class; add a report.test case."
+  - id: DOC-001
+    severity: medium
+    finding: >-
+      The Dev Agent Record says generation/model/prompt pins are reported as 'unavailable'. A grep
+      shows report.mjs and report.d.mts emit no such field: pins carry only declared config pins and
+      observed validator/executor/playwright runtime.
+    suggested_action: "Emit explicit generation/model/prompt pin fields set to 'unavailable', or correct the Dev Agent Record and README."
+  - id: TEST-001
+    severity: medium
+    finding: "AC-4 requires Quinn's independent review of the harness before any live evaluation. Quinn has not reviewed the 8e9c7bf54 report/lifecycle changes."
+    suggested_action: "@qa (Quinn) re-review report.mjs, the lifecycle.mjs capacity/stoppedBy changes and test/evaluation/** before any SPK-01-enabled run."
+  - id: PERF-001
+    severity: low
+    finding: >-
+      Token totals cover completed trials only. Usage consumed by incomplete or refused trials
+      (including their baselines) is invisible. The monetary ceiling (quotaUsd) sits in
+      run-manifest.json but not in the report budgets. Legacy schema-1 top-level fields
+      (supportedTrials from observed trials only, cost:null, p50Ms) coexist with schema-2 fields.
+    suggested_action: >-
+      Report consumed usage across all planned trials separately from the completed-trial totals.
+      Surface quotaUsd as the cost ceiling. Drop or namespace the legacy fields.
+  - id: ARCH-001
+    severity: low
+    finding: >-
+      Capacity 'recovery' means the time to the next accepted admission from any worker. That is a
+      proxy, not the reclaimed slot of spec section 6. Any 503 on compile POST counts as admission
+      refusal, even when it comes from gateway unavailability.
+    suggested_action: "Name the metric 'next accepted admission after refusal' in the report, and separate 429 from 503 by reason before live load runs."
+
+external_blockers:
+  - "SPK-01: live R2D2/Vertex auth/model/schema/quota evidence. It gates the AC-3 live half; local fixtures and stubs cannot close it."
+  - "Spec section 7 numerical targets are not frozen by Pax/Aria. A release-sized held-out corpus and typed assertion-origin evidence are still open."
+
+waiver: { active: false }
