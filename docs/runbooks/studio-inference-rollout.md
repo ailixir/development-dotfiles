@@ -75,6 +75,8 @@ V19 is forward-only. Disabling incremental selects the corrected full path and p
 
 ### Compatible rollback floor
 
+> **⚠️ DO NOT APPLY V19 (2026-10-07).** The "Head + V19" row below is wrong for the V1 compile path. `beginCompile` stores no compile request, and `publishAcceptedCandidate` writes revisions through `insertOrReuseRevision` with no request id, which V19's trigger rejects. Applying V19 would therefore break every Run compile, and it cannot be undone except by restoring the pre-V19 snapshot. We confirmed this by reading the code and `InferenceMigrationLatestIT:695-699`; we did not run it. It is safe only after the §35 fix story stores a compile request for every V1 compile and a test reaches READY with V19 applied. See `docs/stories/STUDIO-INC-001-incremental-compile/spec/decisions.md` (2026-10-07) and ADR-002 §35.
+
 The ordinary Flyway path now runs V18, then V20–V28; V19 stays staged. The floor is stated against the head schema (V28), not V18. Source: `InferenceMigrationLatestIT` 13/13 and the reviewer-run QA gate at `91ac82b00` (146/146 targeted tests, 2026-10-06).
 
 | Schema state | Lowest restorable binary | Evidence |

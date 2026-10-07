@@ -818,3 +818,19 @@ validation:
   acCoverage: "AC-1..AC-15 + AC-8b (4.x, 5.x). AC-B1-1 (2.7), AC-B1-2 (2.4), AC-B1-3 (2.9), AC-B1-4 (2.10/3.2), AC-B1-5 (2.10), AC-13 (2.2/2.7), AC-14 (2.5/4.11)."
   noCycles: true
   outOfScope: "Live enablement, deployments, CI job wiring and git push are for @devops. The C0 text edit is for @architect at GATE-C0."
+
+# ═══════════════════ SUPERSEDED BY 2026-10-07 DECISION (append-only note) ═══════════════════
+supersessionNote:
+  date: "2026-10-07"
+  by: "@architect (Aria), delegated by user"
+  decision: "decisions.md section '2026-10-07 — V1+ scope decision (delegated by user)'"
+  summary: >-
+    This plan is no longer the execution order. Phase-1 (Story A) shipped as story 10.45 (Done). Its
+    subtask statuses above still read 'pending' and were not edited. Phases 2 (B1), 3 (V19 runbook),
+    4 (B2) and 5 (C) are DEFERRED behind trigger T-INC. The one exception is the minimal V1
+    compile-request capture: it moves into the ADR-002 §35.5 fix story, together with a V19-safety IT
+    and a runbook floor correction.
+  staleFacts:
+    - "Migration numbers: V26 (studio_scheduling), V27 and V28 are taken. The next free Flyway number at HEAD ccf3b9743 is V29. Every 'V26__studio_captured_authoring.sql' reference above is illustrative and stale."
+    - "GATE-1026-THINKING: superseded in practice. thinking LOW was applied from the 2026-10-04 benchmark (VAL-007; application.yml thinking-level default LOW)."
+    - "gate.basis claim that B1 publications cannot trip V19's require-request trigger: true only for a writer that persists compile_request_id. The HEAD live writer (publishAcceptedCandidate -> insertOrReuseRevision) does not, so applying V19 at HEAD breaks V1 compiles. See the decision record, section 2."
