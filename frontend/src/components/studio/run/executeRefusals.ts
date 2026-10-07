@@ -125,6 +125,22 @@ export const EXECUTION_DISABLED_NARRATIVE: ExecuteRefusalNarrative = {
 };
 
 /**
+ * `403`, keyed on the status (story 10.48, ADR-002 O-22). Only owners of the test's CSI and
+ * explicitly authorized administrators may start a run, and the server gives every other caller the
+ * same `403` it gives an unknown id, so there is no code to branch on and nothing more to say about
+ * the test. Worded so a refusal never degrades to the generic "could not be started".
+ */
+export const EXECUTE_FORBIDDEN_NARRATIVE: ExecuteRefusalNarrative = {
+  title: 'You do not have permission to run tests for this CSI',
+  explanation:
+    'Only owners of this CSI and authorized administrators can run its tests. Nothing was started and nothing was changed.',
+  whoClearsIt:
+    'An owner of this CSI can run it, or can grant you the owner role. Retrying will not help until that changes.',
+  callerCanRetry: false,
+  scope: 'draft',
+};
+
+/**
  * A `409` carrying a code the document does not declare. Shown rather than swallowed, and never
  * folded into one of the five: a sixth code the deployed API starts sending must be visibly
  * unhandled, because the alternative is a UI quietly telling an author the wrong remedy.
@@ -142,13 +158,16 @@ export const UNDECLARED_EXECUTE_REFUSAL: ExecuteRefusalNarrative = {
 /**
  * The whole refusal branch, in one place.
  *
- * `status` is the first key because two of the three refusals have no code to branch on. Only the
+ * `status` is the first key because three of the four refusals have no code to branch on. Only the
  * `409` reads `error`, and it reads it as an exact key — never as a substring of the message.
  */
 export function executeRefusalFor(
   status: number | null,
   code: string | null,
 ): ExecuteRefusalNarrative | null {
+  if (status === 403) {
+    return EXECUTE_FORBIDDEN_NARRATIVE;
+  }
   if (status === 429) {
     return QUOTA_EXHAUSTED_NARRATIVE;
   }

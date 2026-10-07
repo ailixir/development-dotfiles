@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import type { ExecutionSnapshot, TestDto } from '@/types/studio/studioTypes';
 import type { ScheduleCapabilities, ScheduleEnable, ScheduleOccurrence, ScheduleWrite, StudioSchedule } from '@/types/studio/studioScheduling';
-import { MOCK_READABLE_CSIS } from './fixtures';
+import { MOCK_EXECUTE_DENIED_CSIS, MOCK_READABLE_CSIS } from './fixtures';
 import { mockSchedulePreview, MOCK_SCHEDULE_POLICY } from './schedulePreview';
 
 const BASE = '*/api/v1/studio';
@@ -48,8 +48,11 @@ export function createSchedulingHandlers(storage: { getTest: (id: string) => Tes
   };
   return [
     http.get(`${BASE}/tests/:id/schedule/capabilities`, ({ params }) => {
-      if (!testFor(String(params.id))) return error('STUDIO_FORBIDDEN', 403);
-      const capabilities: ScheduleCapabilities = { enabled: true, canManage: true, availableExecutionPrincipals: ['studio-local'], localAuthorizationOnly: true, policy: MOCK_SCHEDULE_POLICY };
+      const test = testFor(String(params.id));
+      if (!test) return error('STUDIO_FORBIDDEN', 403);
+      // Story 10.48: `canManage` is `canWrite` on the test's CSI, so a read-only CSI answers false.
+      const canManage = !(test.csiId && MOCK_EXECUTE_DENIED_CSIS.has(test.csiId));
+      const capabilities: ScheduleCapabilities = { enabled: true, canManage, availableExecutionPrincipals: ['studio-local'], localAuthorizationOnly: true, policy: MOCK_SCHEDULE_POLICY };
       return HttpResponse.json(capabilities);
     }),
     http.get(`${BASE}/tests/:id/schedule`, ({ params }) => {

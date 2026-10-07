@@ -19,6 +19,15 @@ import {
   passedExecution,
 } from '@/services/mocks/studio/executionFixtures';
 import { EXECUTION_ERROR_CODES } from '@/types/studio/studioTypes';
+import studioApi from '@/services/api/studioApi';
+import { studioSchedulesApi } from '@/services/api/studioSchedulesApi';
+import {
+  MOCK_EXECUTE_DENIED_CSIS,
+  MOCK_READABLE_CSIS,
+  STUDIO_FORBIDDEN_BODY,
+  mockTests,
+} from '@/services/mocks/studio/fixtures';
+import { EXECUTE_FORBIDDEN_NARRATIVE, executeRefusalFor } from './executeRefusals';
 import { RunControl, RUN_LABEL } from './RunControl';
 import { ExecutionProgressView, RERUN_LABEL } from './ExecutionProgressView';
 import {
@@ -156,6 +165,64 @@ describe('AC-4: every declared refusal of the execute route is handled distinctl
     expect(screen.getByTestId('run-refusal-explanation').textContent).toMatch(
       /across the platform|not about your test/i,
     );
+  });
+});
+
+describe('Story 10.48 AC-10a: a 403 on execute is worded, never the generic failure', () => {
+  it('maps a 403 to its own narrative whatever code it carries, and leaves the others alone', () => {
+    // The server answers every refused caller with the same 403 it gives an unknown id
+    // (ADR-002 O-22), so the status is the key and the code is not read.
+    expect(executeRefusalFor(403, 'STUDIO_FORBIDDEN')).toBe(EXECUTE_FORBIDDEN_NARRATIVE);
+    expect(executeRefusalFor(403, null)).toBe(EXECUTE_FORBIDDEN_NARRATIVE);
+    expect(executeRefusalFor(403, 'COMPILE_REQUIRED')).toBe(EXECUTE_FORBIDDEN_NARRATIVE);
+    expect(EXECUTE_FORBIDDEN_NARRATIVE.title).toBe(
+      'You do not have permission to run tests for this CSI',
+    );
+    expect(EXECUTE_FORBIDDEN_NARRATIVE.callerCanRetry).toBe(false);
+    expect(executeRefusalFor(400, 'BAD_REQUEST')).toBeNull();
+  });
+
+  it('renders the permission narrative through the Run gate, not "The run could not be started"', async () => {
+    await refuse(STUDIO_FORBIDDEN_BODY, 403);
+
+    const title = await screen.findByTestId('run-refusal-title');
+    expect(title.textContent).toBe(EXECUTE_FORBIDDEN_NARRATIVE.title);
+    expect(screen.getByRole('alert', { name: EXECUTE_FORBIDDEN_NARRATIVE.title })).toBeInTheDocument();
+    expect(screen.getByTestId('run-refusal-explanation').textContent).toMatch(/owners/i);
+    expect(screen.queryByTestId('run-load-error')).toBeNull();
+    expect(document.body.textContent).not.toMatch(/could not be started/i);
+    // The server's prose is still shown so it can be quoted.
+    expect(screen.getByTestId('run-refusal-server-message').textContent).toContain(
+      STUDIO_FORBIDDEN_BODY.message,
+    );
+  });
+});
+
+describe('Story 10.48: the mock server refuses execute and reports canManage false on a read-only CSI', () => {
+  const runnable = mockTests.find(
+    (test) => test.compileStatus === 'READY' && test.csiId !== null && MOCK_READABLE_CSIS.includes(test.csiId),
+  );
+
+  it('answers the backend 403 body before readiness, and capabilities canManage false', async () => {
+    expect(runnable, 'fixture: a READY test in a readable CSI').toBeDefined();
+    const id = runnable!.id;
+    expect((await studioSchedulesApi.capabilities(id)).canManage).toBe(true);
+
+    MOCK_EXECUTE_DENIED_CSIS.add(runnable!.csiId!);
+
+    const failure = await studioApi.executeTest(id).then(
+      () => null,
+      (error: { response?: { status?: number; data?: unknown } }) => error.response,
+    );
+    expect(failure?.status).toBe(403);
+    expect(failure?.data).toEqual(STUDIO_FORBIDDEN_BODY);
+    expect((await studioSchedulesApi.capabilities(id)).canManage).toBe(false);
+  });
+
+  it('is cleared by resetStudioMocks', async () => {
+    MOCK_EXECUTE_DENIED_CSIS.add(runnable!.csiId!);
+    resetStudioMocks();
+    expect(MOCK_EXECUTE_DENIED_CSIS.size).toBe(0);
   });
 });
 

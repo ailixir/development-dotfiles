@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
 
+import com.citi.put.checks.studio.StudioAccessDeniedException;
 import com.citi.put.checks.studio.StudioConflictException;
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
@@ -43,6 +44,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -277,6 +279,78 @@ class StudioScheduleApiIT {
     assertThat(service.occurrences(testId, 0, 20, owner).totalElements()).isZero();
     assertThat(service.read(testId, owner).nextDueAt()).isEqualTo(s.nextDueAt());
     assertThat(processor.process(testId)).isEqualTo("ACCEPTED");
+  }
+
+  /**
+   * Story 10.48 AC-7a: schedule create and enable stay {@code canWrite}-gated. A viewer and a
+   * contributor (read roles, not write) are refused with the nondisclosing {@code 403}, and nothing
+   * is written; the owner's create and enable are the controls.
+   */
+  @Test
+  void aViewerOrAContributorMayNotCreateOrEnableASchedule() {
+    for (String role : List.of("viewer", "contributor")) {
+      Authentication reader =
+          StudioExecutionFixtures.identity("schedule-" + role + "@citi.com", csi, role);
+      assertThatThrownBy(
+              () ->
+                  service.create(
+                      testId, new StudioScheduleDtos.Create("* * * * *", "UTC", PRINCIPAL), reader))
+          .as("%s: create", role)
+          .isInstanceOf(StudioAccessDeniedException.class);
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_schedules WHERE test_id=?", Integer.class, testId))
+          .as("%s: no schedule row", role)
+          .isZero();
+    }
+    var created = create();
+    for (String role : List.of("viewer", "contributor")) {
+      Authentication reader =
+          StudioExecutionFixtures.identity("schedule-" + role + "@citi.com", csi, role);
+      assertThatThrownBy(
+              () ->
+                  service.enabled(
+                      testId,
+                      new StudioScheduleDtos.Enabled(
+                          created.version(), true, revisionId, List.of()),
+                      reader))
+          .as("%s: enable", role)
+          .isInstanceOf(StudioAccessDeniedException.class);
+      assertThat(service.read(testId, owner).requestedEnabled())
+          .as("%s: still paused", role)
+          .isFalse();
+    }
+    assertThat(
+            service
+                .enabled(
+                    testId,
+                    new StudioScheduleDtos.Enabled(created.version(), true, revisionId, List.of()),
+                    owner)
+                .requestedEnabled())
+        .as("control: the owner enables")
+        .isTrue();
+  }
+
+  /**
+   * Story 10.48 AC-7b: the manual execute check is not on the scheduled path. An occurrence fires
+   * under the schedule's execution principal and its background grant, with no request {@link
+   * Authentication} at all, and is still accepted.
+   */
+  @Test
+  void aScheduledOccurrenceIsAcceptedWithNoRequestAuthentication() {
+    var schedule = enable();
+    due(schedule);
+    SecurityContextHolder.clearContext();
+    assertThat(SecurityContextHolder.getContext().getAuthentication())
+        .as("fixture: no human is in the security context")
+        .isNull();
+
+    assertThat(processor.process(testId)).isEqualTo("ACCEPTED");
+
+    var occurrence = service.occurrences(testId, 0, 20, owner).data().get(0);
+    assertThat(occurrence.executionId()).isNotNull();
+    assertThat(studio.findExecutionById(occurrence.executionId(), owner).triggerSource())
+        .isEqualTo("SCHEDULED");
   }
 
   @Test

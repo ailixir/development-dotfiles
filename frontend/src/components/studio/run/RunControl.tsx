@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
@@ -23,6 +23,12 @@ export const PREPARING_LABEL = 'Preparing…';
 export const STARTING_LABEL = 'Starting…';
 /** Shown when a compile started elsewhere is still settling, so Run must wait rather than act. */
 export const WAITING_LABEL = 'Getting ready…';
+/**
+ * Shown beside a disabled Run when the server said this caller may not run the test (story 10.48,
+ * ADR-002 O-22). Visible text, tied to the button with `aria-describedby`, never a tooltip alone.
+ */
+export const RUN_NOT_PERMITTED_REASON =
+  'You do not have permission to run tests for this CSI. Only its owners and authorized administrators can run them.';
 
 export interface RunControlProps {
   /** The draft to run. Null while no scenario is selected. */
@@ -112,6 +118,9 @@ export const RunControl: React.FC<RunControlProps> = ({
     isRunning,
   });
   const runnable = gate.canRun && hasSteps;
+  /** Story 10.48: the server said no, so Run is disabled and says why. Never hidden. */
+  const notPermitted = gate.executePermission === 'denied' && !isRunning;
+  const notPermittedId = `${useId()}-run-not-permitted`;
 
   /** A compile is settling and this control did not start it — there is nothing to press. */
   const waiting = gate.action === 'wait' && gate.phase === 'idle';
@@ -249,6 +258,7 @@ export const RunControl: React.FC<RunControlProps> = ({
     <Box>
       <Button
         aria-label={isRunning ? stopLabel : RUN_LABEL}
+        aria-describedby={notPermitted ? notPermittedId : undefined}
         variant="contained"
         size="medium"
         startIcon={
@@ -267,6 +277,18 @@ export const RunControl: React.FC<RunControlProps> = ({
       >
         {isRunning ? stopLabel : (busyLabel ?? RUN_LABEL)}
       </Button>
+
+      {notPermitted && (
+        <Typography
+          id={notPermittedId}
+          variant="caption"
+          color="text.secondary"
+          data-testid="run-not-permitted"
+          sx={{ display: 'block', mt: 1 }}
+        >
+          {RUN_NOT_PERMITTED_REASON}
+        </Typography>
+      )}
 
       {!isRunning && !hasSteps && (
         <Typography

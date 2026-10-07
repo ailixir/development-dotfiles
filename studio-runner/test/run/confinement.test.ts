@@ -255,7 +255,8 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   // execution provenance. Runner request/report/job schemas are unchanged by this amendment;
   // test/contract.test.ts independently checks the current runtime producers against them.
   // Re-anchored for 10.27's gate finding: description cross-ref "section 29" → "§30" only.
-  const BASE_SHA256 = 'cbacad742c634dde26a8ce2aa8c14d7bef2276de7417890272078e1b1b3f3cc8';
+  // Re-anchored by 10.48 (ADR-002 §13, O-22 execute check): `executeTest` description text only.
+  const BASE_SHA256 = 'bc1869b563dc13cecbf101c34303ec46ff11be85bf28e613efed4130864741e1';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the

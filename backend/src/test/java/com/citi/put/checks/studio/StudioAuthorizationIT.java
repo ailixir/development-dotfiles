@@ -1,6 +1,7 @@
 package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.internal.ProgressReportService;
@@ -29,6 +30,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -58,6 +60,7 @@ class StudioAuthorizationIT {
   private static final String READER = "authz-reader@citi.com";
   private static final String STRANGER = "authz-stranger@citi.com";
   private static final String CONTRIBUTOR = "authz-contributor@citi.com";
+  private static final String ADMIN = "authz-admin@citi.com";
   private static final String DRAFT_STEP = "Go to the home page";
   private static final String TOKEN = "test-service-identity-token";
 
@@ -137,28 +140,194 @@ class StudioAuthorizationIT {
 
   // ── AC-4a: readers, owners and the boundaries between them ───────────────
 
+  /**
+   * Story 10.48 AC-1, AC-2, AC-11 (ADR-002 O-22): this test used to assert the opposite ({@code
+   * everyAuthenticatedUserMayExecuteRegardlessOfCsiOwnership}, a viewer and a stranger {@code
+   * 202}). Architecture §9.1 says owners and explicitly authorized administrators execute; the read
+   * assertions it carried are kept.
+   */
   @Test
-  void everyAuthenticatedUserMayExecuteRegardlessOfCsiOwnership() throws Exception {
+  void onlyOwnersAndAdministratorsMayExecuteAndReadersStillRead() throws Exception {
     assertThat(get("/api/v1/studio/tests/" + testId, reader()).getStatusCode().value())
         .isEqualTo(200);
     assertThat(get("/api/v1/studio/executions/" + executionId, reader()).getStatusCode().value())
         .isEqualTo(200);
-    assertThat(
-            post("/api/v1/studio/tests/" + testId + "/execute", reader()).getStatusCode().value())
-        .as("a reader needs no separate execute entitlement")
+
+    SoftAssertions softly = new SoftAssertions();
+    for (Caller caller : callersWithoutExecute()) {
+      ResponseEntity<String> refused =
+          post("/api/v1/studio/tests/" + testId + "/execute", caller.headers());
+      softly
+          .assertThat(refused.getStatusCode().value())
+          .as(
+              "%s may not start a run of a CSI it does not own (body: %s)",
+              caller, refused.getBody())
+          .isEqualTo(403);
+    }
+    softly.assertAll();
+
+    assertThat(post("/api/v1/studio/tests/" + testId + "/execute", owner()).getStatusCode().value())
+        .as("the owner of the test's CSI executes")
         .isEqualTo(202);
-    ResponseEntity<String> strangerAccepted =
-        post("/api/v1/studio/tests/" + testId + "/execute", stranger());
-    assertThat(strangerAccepted.getStatusCode().value())
-        .as("CSI ownership is not an execution prerequisite")
+    fixtures.seedUser(ADMIN);
+    ResponseEntity<String> adminAccepted =
+        post("/api/v1/studio/tests/" + testId + "/execute", administrator());
+    assertThat(adminAccepted.getStatusCode().value())
+        .as(
+            "an administrator executes on a CSI it owns nothing on (body: %s)",
+            adminAccepted.getBody())
         .isEqualTo(202);
-    UUID strangerExecution = UUID.fromString(json(strangerAccepted).path("executionId").asText());
+    UUID adminExecution = UUID.fromString(json(adminAccepted).path("executionId").asText());
     assertThat(
-            get("/api/v1/studio/executions/" + strangerExecution, stranger())
+            get("/api/v1/studio/executions/" + adminExecution, administrator())
                 .getStatusCode()
                 .value())
         .as("the initiator can follow the execution that was accepted for them")
         .isEqualTo(200);
+  }
+
+  /**
+   * Story 10.48 AC-1: the refusal is the same {@code 403} as for an unknown id, byte for byte, it
+   * names neither the test nor its CSI, and it writes nothing: no history row, no ledger row, no
+   * idempotency record.
+   */
+  @Test
+  void aRefusedExecuteIsByteIdenticalToAnUnknownIdAndWritesNothing() {
+    SoftAssertions softly = new SoftAssertions();
+    for (Caller caller : callersWithoutExecute()) {
+      String key = UUID.randomUUID().toString();
+      int historyBefore = executionsOf(testId);
+      int ledgerBefore = ledgerRowsOf(testId);
+
+      ResponseEntity<String> refused =
+          postWithKey("/api/v1/studio/tests/" + testId + "/execute", caller.headers(), key);
+      ResponseEntity<String> unknown =
+          postWithKey(
+              "/api/v1/studio/tests/" + UUID.randomUUID() + "/execute",
+              caller.headers(),
+              UUID.randomUUID().toString());
+
+      softly.assertThat(refused.getStatusCode().value()).as("%s: status", caller).isEqualTo(403);
+      softly.assertThat(unknown.getStatusCode().value()).as("%s: unknown", caller).isEqualTo(403);
+      softly
+          .assertThat(refused.getBody())
+          .as("%s: a refusal must not disclose existence: identical to an unknown id", caller)
+          .isEqualTo(unknown.getBody());
+      softly
+          .assertThat(refused.getBody())
+          .as("%s: names neither the test nor its CSI", caller)
+          .contains(StudioAccessDeniedException.CODE)
+          .doesNotContain(testId.toString())
+          .doesNotContain(CSI_ID);
+      softly
+          .assertThat(executionsOf(testId))
+          .as("%s: no history row", caller)
+          .isEqualTo(historyBefore);
+      softly
+          .assertThat(ledgerRowsOf(testId))
+          .as("%s: no ledger row", caller)
+          .isEqualTo(ledgerBefore);
+      softly.assertThat(ledgerRowsKeyed(key)).as("%s: no idempotency record", caller).isZero();
+    }
+    softly.assertAll();
+  }
+
+  /**
+   * Story 10.48 AC-4: authorization is decided first. A caller without execute rights learns
+   * nothing about readiness, quota or another principal's key. Each refusal has its owner control,
+   * so the {@code 403} is not the route refusing everyone.
+   *
+   * <p>On the key (@po, validation): idempotency is principal-scoped, so without the guard a
+   * non-owner replaying an owner's key gets a <em>new</em> {@code 202}, not the owner's id. This
+   * case proves the refusal comes first; it does not prove key isolation.
+   */
+  @Test
+  void authorizationIsDecidedBeforeReadinessQuotaAndIdempotency() throws Exception {
+    UUID notReady = fixtures.seedTest("Not ready", CSI_ID, OWNER, List.of(DRAFT_STEP));
+    ResponseEntity<String> ownerNotReady =
+        post("/api/v1/studio/tests/" + notReady + "/execute", owner());
+    assertThat(ownerNotReady.getStatusCode().value())
+        .as("control: the owner is told 409 (body: %s)", ownerNotReady.getBody())
+        .isEqualTo(409);
+    assertThat(json(ownerNotReady).path("error").asText()).isEqualTo("COMPILE_REQUIRED");
+
+    String key = UUID.randomUUID().toString();
+    ResponseEntity<String> ownerKeyed =
+        postWithKey("/api/v1/studio/tests/" + testId + "/execute", owner(), key);
+    assertThat(ownerKeyed.getStatusCode().value()).as("control: owner, key K").isEqualTo(202);
+    String ownersExecution = json(ownerKeyed).path("executionId").asText();
+
+    SoftAssertions softly = new SoftAssertions();
+    for (Caller caller : callersWithoutExecute()) {
+      ResponseEntity<String> onNotReady =
+          post("/api/v1/studio/tests/" + notReady + "/execute", caller.headers());
+      softly
+          .assertThat(onNotReady.getStatusCode().value())
+          .as("%s on a test that is not READY: 403, never COMPILE_REQUIRED", caller)
+          .isEqualTo(403);
+      softly.assertThat(onNotReady.getBody()).doesNotContain("COMPILE_REQUIRED");
+
+      ResponseEntity<String> replay =
+          postWithKey("/api/v1/studio/tests/" + testId + "/execute", caller.headers(), key);
+      softly
+          .assertThat(replay.getStatusCode().value())
+          .as("%s replaying the owner's key: 403", caller)
+          .isEqualTo(403);
+      softly
+          .assertThat(replay.getBody())
+          .as("%s: never the owner's executionId, never IDEMPOTENCY_KEY_REUSED", caller)
+          .doesNotContain(ownersExecution)
+          .doesNotContain("IDEMPOTENCY_KEY_REUSED");
+    }
+
+    fillCsiToItsQuota(CSI_ID);
+    assertThat(post("/api/v1/studio/tests/" + testId + "/execute", owner()).getStatusCode().value())
+        .as("control: the owner is told the CSI is full")
+        .isEqualTo(429);
+    for (Caller caller : callersWithoutExecute()) {
+      softly
+          .assertThat(
+              post("/api/v1/studio/tests/" + testId + "/execute", caller.headers())
+                  .getStatusCode()
+                  .value())
+          .as("%s on a full CSI: 403, never 429", caller)
+          .isEqualTo(403);
+    }
+    softly.assertAll();
+  }
+
+  /**
+   * Story 10.48 AC-5b: the check runs on every call, before the idempotency lookup. An owner who
+   * accepted a run with key K and was then demoted to viewer replays K and is refused, rather than
+   * handed the stored execution.
+   *
+   * <p>Asserted on {@link StudioService#executeTest}, where the AC places the check, and not over
+   * HTTP. Measured while this story was implemented: {@code IdempotencyFilter} keeps an in-memory
+   * response cache keyed on {@code X-User-Id + Idempotency-Key} and replays a cached {@code 202}
+   * before the controller runs, so over HTTP the same principal's replay inside that cache's window
+   * never reaches this check. That filter is outside this story's confinement (AC-12) and is
+   * reported in the Dev Agent Record rather than encoded here as expected behaviour.
+   */
+  @Test
+  void aDemotedOwnerReplayingTheirOwnKeyIsRefusedNotHandedTheStoredRun() {
+    String key = UUID.randomUUID().toString();
+    UUID stored =
+        studioService
+            .executeTest(testId, StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"), key)
+            .executionId();
+    assertThat(
+            studioService
+                .executeTest(testId, StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"), key)
+                .executionId())
+        .as("control: while still an owner, the replay resolves to the stored run")
+        .isEqualTo(stored);
+
+    Authentication demoted = StudioExecutionFixtures.identity(OWNER, CSI_ID, "viewer");
+
+    assertThatThrownBy(() -> studioService.executeTest(testId, demoted, key))
+        .as("the demoted owner's replay is refused, not resolved to %s", stored)
+        .isExactlyInstanceOf(StudioAccessDeniedException.class);
+    assertThat(ledgerRowsKeyed(key)).as("still exactly the one keyed row").isEqualTo(1);
   }
 
   @Test
@@ -695,6 +864,55 @@ class StudioAuthorizationIT {
   }
 
   /**
+   * Story 10.48 AC-1's four identities without execute on {@code CSI_ID}: a viewer, a contributor,
+   * no ownership at all, and an owner of a different CSI.
+   */
+  private static List<Caller> callersWithoutExecute() {
+    return List.of(
+        new Caller("viewer", reader()),
+        new Caller("contributor", contributor()),
+        new Caller("stranger", stranger()),
+        new Caller("owner of another CSI", identity(STRANGER, "", OTHER_CSI_ID + ":owner")));
+  }
+
+  private int executionsOf(UUID test) {
+    return jdbc.queryForObject(
+        "SELECT COUNT(*) FROM ui_test_executions WHERE ui_test_id = ?", Integer.class, test);
+  }
+
+  private int ledgerRowsOf(UUID test) {
+    return jdbc.queryForObject(
+        "SELECT COUNT(*) FROM studio_dispatch_ledger WHERE test_id = ?", Integer.class, test);
+  }
+
+  private int ledgerRowsKeyed(String key) {
+    return jdbc.queryForObject(
+        "SELECT COUNT(*) FROM studio_dispatch_ledger WHERE idempotency_key = ?",
+        Integer.class,
+        key);
+  }
+
+  /** Fills the CSI's pending bound with queued ledger rows, as {@code AcceptanceIT} does. */
+  private void fillCsiToItsQuota(String csiId) {
+    UUID filler = fixtures.seedTest("Quota filler " + csiId, csiId, OWNER, List.of(DRAFT_STEP));
+    for (int index = 0; index < 20; index++) {
+      jdbc.update(
+          "INSERT INTO studio_dispatch_ledger (execution_id, execution_accepted_at, test_id,"
+              + " csi_id, state) VALUES (?, NOW(), ?, ?, 'QUEUED')",
+          UUID.randomUUID(),
+          filler,
+          csiId);
+    }
+  }
+
+  private ResponseEntity<String> postWithKey(String path, HttpHeaders headers, String key) {
+    HttpHeaders keyed = new HttpHeaders();
+    keyed.putAll(headers);
+    keyed.set("Idempotency-Key", key);
+    return post(path, keyed);
+  }
+
+  /**
    * A draft on {@code CSI_ID} in a state a successful save visibly changes: confirmed, {@code
    * READY}, with a candidate. A save that moves a revision returns it to {@code STALE} and clears
    * the candidate (Architecture §4.2).
@@ -926,5 +1144,10 @@ class StudioAuthorizationIT {
 
   private static HttpHeaders admin() {
     return identity(OWNER, "checks-admin", "");
+  }
+
+  /** Story 10.48 AC-2: an administrator who is not the owner and owns nothing. */
+  private static HttpHeaders administrator() {
+    return identity(ADMIN, "checks-admin", "");
   }
 }

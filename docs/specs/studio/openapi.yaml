@@ -690,9 +690,10 @@ paths:
         digest is `409 IDEMPOTENCY_KEY_REUSED`. The response is returned only after commit.
 
         Story 10.1 persists the accepted `PENDING` execution and its ledger row. Live dispatch
-        arrives with 10.7. Any authenticated application user may start a Studio execution;
-        CSI ownership and a separate execute entitlement are not required. Secret-reference use,
-        when that capability is enabled, remains independently authorized.
+        arrives with 10.7. Only owners of the test's CSI and explicitly authorized
+        administrators may start a Studio execution; every other caller receives the same `403`
+        as for an unknown test id. Secret-reference use, when that capability is enabled, remains
+        independently authorized.
       parameters:
         - { $ref: '#/components/parameters/TestId' }
         - name: Idempotency-Key

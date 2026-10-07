@@ -13,7 +13,14 @@ import {
   type TestDto,
   type TestRequest,
 } from '@/types/studio/studioTypes';
-import { MOCK_READABLE_CSIS, MOCK_VIDEO_BYTES, mockExecutions, mockTests } from './fixtures';
+import {
+  MOCK_EXECUTE_DENIED_CSIS,
+  MOCK_READABLE_CSIS,
+  MOCK_VIDEO_BYTES,
+  STUDIO_FORBIDDEN_BODY,
+  mockExecutions,
+  mockTests,
+} from './fixtures';
 import { demoExecutions, demoTests } from './demoFixtures';
 import {
   EXECUTION_STATUS_FILTERS,
@@ -115,6 +122,7 @@ export function resetStudioMocks(): void {
   deletedTestIds.clear();
   acceptedExecutions = [];
   idempotency.clear();
+  MOCK_EXECUTE_DENIED_CSIS.clear();
 }
 
 const allTests = (): TestDto[] => {
@@ -488,6 +496,14 @@ export const studioHandlers = [
     const test = readable(allTests()).find((candidate) => candidate.id === params.id);
     if (!test) {
       return badRequest('BAD_REQUEST', `UI Test not found: ${params.id}`);
+    }
+    /*
+     * Story 10.48 — only owners and authorized administrators execute (ADR-002 O-22), and the
+     * server decides that before readiness, so a caller who may only read gets the backend's `403`
+     * whatever the draft's state.
+     */
+    if (test.csiId && MOCK_EXECUTE_DENIED_CSIS.has(test.csiId)) {
+      return HttpResponse.json(STUDIO_FORBIDDEN_BODY, { status: 403 });
     }
     /*
      * Story 10.11a — the mock refuses an unconfirmed draft, because the server does.

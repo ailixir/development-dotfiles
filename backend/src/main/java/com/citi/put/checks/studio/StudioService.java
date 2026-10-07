@@ -138,6 +138,13 @@ public class StudioService {
     }
   }
 
+  /** Owners and explicitly authorized administrators may execute (§9.1; Story 10.48, O-22). */
+  private void requireExecute(Authentication auth, String csiId) {
+    if (csiId == null || !csiOwnershipEvaluator.canExecute(auth, csiId)) {
+      throw new StudioAccessDeniedException();
+    }
+  }
+
   /**
    * Owners and explicitly authorized administrators may create, save, delete, compile and confirm
    * (§9.1; ADR-002 §27.2). Architecture §9.1 draws no line between those five, so this is the one
@@ -943,9 +950,13 @@ public class StudioService {
   /**
    * Accepts an execution (AC-7 – AC-11).
    *
-   * <p>Studio execution is open to every authenticated application user. Read, authoring and
-   * cancellation permissions remain CSI-scoped; accepting a new run deliberately does not require
-   * CSI ownership or an execute entitlement.
+   * <p>Authorization happens here, on the server, before any work: only an owner or an explicitly
+   * authorized administrator of the draft's CSI may execute it (§9.1), decided by {@link
+   * CsiOwnershipEvaluator#canExecute} as everywhere else. Every other caller gets the same {@code
+   * 403} as an unknown id, before readiness, quota, idempotency or the race resolution below are
+   * reached (Story 10.48, ADR-002 O-22). The check lives here and not in {@link
+   * StudioAcceptanceService}: its {@code acceptCore} is shared with scheduled runs, which have no
+   * request {@link Authentication} and are authorized by their background grant instead.
    *
    * <p>The transaction itself belongs to {@link StudioAcceptanceService}. This method is
    * deliberately <em>not</em> transactional: when the durable idempotency index refuses a second
@@ -959,6 +970,7 @@ public class StudioService {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public ExecutionSnapshotDto executeTest(UUID testId, Authentication auth, String idempotencyKey) {
     UITest test = studioRepository.findById(testId).orElseThrow(StudioAccessDeniedException::new);
+    requireExecute(auth, test.getCsiId());
     String principal = principalOf(auth);
 
     UUID executionId;

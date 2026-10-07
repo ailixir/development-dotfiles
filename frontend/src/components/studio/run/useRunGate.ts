@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import studioApi from '@/services/api/studioApi';
+import { studioSchedulesApi } from '@/services/api/studioSchedulesApi';
 import type { CompileDiagnostics, CompileError, TestDto } from '@/types/studio/studioTypes';
 import { runActionFor, runAvailableFor, type RunAction } from './runEnablement';
 import { executeRefusalFor, type ExecuteRefusalNarrative } from './executeRefusals';
@@ -108,8 +109,16 @@ export interface RunGateOptions {
   readonly isRunning?: boolean;
 }
 
+/**
+ * Whether the caller may start a run of this test, as far as the server has said (story 10.48).
+ * `unknown` while the read is pending or after it failed: the server stays the authority, so only an
+ * explicit `denied` disables Run.
+ */
+export type ExecutePermission = 'allowed' | 'denied' | 'unknown';
+
 export interface RunGateState {
   readonly test: TestDto | null;
+  readonly executePermission: ExecutePermission;
   readonly loading: boolean;
   readonly loadError: string | null;
   /** The total, fallback-free action for the draft's declared state. */
@@ -186,6 +195,7 @@ export function useRunGate(
   const [preparationMessage, setPreparationMessage] = useState<string | null>(null);
   const [compileStartedAt, setCompileStartedAt] = useState<number | null>(null);
   const [compileOutcome, setCompileOutcome] = useState<RunCompileOutcome | null>(null);
+  const [executePermission, setExecutePermission] = useState<ExecutePermission>('unknown');
 
   /**
    * Set synchronously, before the first `await`. AC-2 counts requests at the mock server, so the
@@ -272,8 +282,47 @@ export function useRunGate(
     };
   }, [refreshToken, testId]);
 
+  /*
+   * Story 10.48 (ADR-002 O-22): may this caller run the test at all? Read once per selected test.
+   *
+   * The signal is `GET /tests/{id}/schedule/capabilities` → `canManage`, ruled by @po at
+   * validation: no field on the Studio read model says whether the caller may execute, and
+   * `canManage` is computed server-side as `canWrite` on the test's CSI whether or not scheduling
+   * is enabled. The field is named for scheduling and stands in for execute ONLY while the server's
+   * `canExecute == canWrite`, which `StudioServiceExecuteAuthorizationTest` (AC-7a) pins: if execute
+   * is ever split from write, that test fails and this read must move to a dedicated field.
+   *
+   * A failed, pending or absent read is `unknown` and never disables Run. The server answers a
+   * refused execute with `403`, which `executeRefusalFor` words.
+   */
+  useEffect(() => {
+    let current = true;
+    setExecutePermission('unknown');
+    if (!testId) {
+      return () => {
+        current = false;
+      };
+    }
+    studioSchedulesApi
+      .capabilities(testId)
+      .then((capabilities) => {
+        if (!current || typeof capabilities?.canManage !== 'boolean') return;
+        setExecutePermission(capabilities.canManage ? 'allowed' : 'denied');
+      })
+      .catch(() => {
+        // Unknown, not denied: the read is advisory and the server decides on execute.
+      });
+    return () => {
+      current = false;
+    };
+  }, [testId]);
+
   const action = test ? runActionFor(test.compileStatus) : null;
-  const canRun = test !== null && runAvailableFor(test.compileStatus) && phase === 'idle';
+  const canRun =
+    test !== null &&
+    runAvailableFor(test.compileStatus) &&
+    phase === 'idle' &&
+    executePermission !== 'denied';
 
   /**
    * Waits for a compile to settle, publishing each body it reads.
@@ -343,6 +392,8 @@ export function useRunGate(
     if (inFlight.current) return;
     if (!test || !testId) return;
     if (!runAvailableFor(test.compileStatus)) return;
+    // The server said this caller may not run it: send nothing (story 10.48, AC-10b).
+    if (executePermission === 'denied') return;
 
     inFlight.current = true;
     setPhase(runOptions.current?.isDirty === true ? 'saving' : 'compiling');
@@ -453,10 +504,11 @@ export function useRunGate(
         }
       }
     })();
-  }, [prepare, releaseLatch, test, testId]);
+  }, [executePermission, prepare, releaseLatch, test, testId]);
 
   return {
     test,
+    executePermission,
     loading,
     loadError,
     action,

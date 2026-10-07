@@ -392,3 +392,29 @@ describe('VAL-042: the first Run press on a freshly opened saved test acts', () 
     expect(requestsTo('PUT', /\/studio\/tests\/[^/]+$/u)).toHaveLength(0);
   }, PAGE_TEST_TIMEOUT_MS);
 });
+
+describe('Story 10.48 AC-10b: on the page, a caller who may not run sees why before pressing Run', () => {
+  it('canManage false disables the page’s Run with on-page text and sends no execute', async () => {
+    serveList(readyDraft);
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id/schedule/capabilities`, () =>
+        HttpResponse.json({
+          enabled: false,
+          canManage: false,
+          availableExecutionPrincipals: [],
+          localAuthorizationOnly: true,
+          policy: null,
+        }),
+      ),
+    );
+    renderPage();
+
+    const reason = await screen.findByTestId('run-not-permitted', undefined, pageWait);
+    const control = screen.getByRole('button', { name: 'Run Test' });
+    expect(control).toBeVisible();
+    expect(control).toBeDisabled();
+    expect(control).toHaveAccessibleDescription(reason.textContent ?? '');
+    expect(reason.textContent).toMatch(/do not have permission to run tests for this CSI/i);
+    expect(executeRequests()).toHaveLength(0);
+  }, PAGE_TEST_TIMEOUT_MS);
+});

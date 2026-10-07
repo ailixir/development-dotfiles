@@ -167,7 +167,11 @@ public class StudioController {
     return ResponseEntity.noContent().build();
   }
 
-  /** Accepts an execution (AC-7 – AC-11) from any authenticated application user. */
+  /**
+   * Accepts an execution (AC-7 – AC-11). Owners and explicitly authorized administrators of the
+   * test's CSI may execute (§9.1); every other caller receives the same {@code 403} as for an
+   * unknown test id (Story 10.48, ADR-002 O-22).
+   */
   @PostMapping("/tests/{id}/execute")
   public ResponseEntity<Map<String, Object>> executeTest(
       @PathVariable UUID id,

@@ -24,6 +24,21 @@ import { DEMO_CSIS } from './demoFixtures';
  */
 export const MOCK_READABLE_CSIS: string[] = [...DEMO_CSIS];
 
+/**
+ * Story 10.48 (ADR-002 O-22): readable CSIs on which the mock principal may **not** execute, as a
+ * viewer or contributor would be. Empty by default, so the demo is unchanged; a test adds a CSI and
+ * `resetStudioMocks()` clears it. The execute handler then answers the backend's own `403`, and the
+ * scheduling capabilities handler answers `canManage: false`, because both are `canWrite` on the
+ * server today.
+ */
+export const MOCK_EXECUTE_DENIED_CSIS = new Set<string>();
+
+/** The backend's `403` body for a Studio refusal, byte for byte (`ChecksExceptionHandler`). */
+export const STUDIO_FORBIDDEN_BODY = {
+  error: 'STUDIO_FORBIDDEN',
+  message: 'You do not have access to this Studio resource',
+} as const;
+
 export const OTHER_CSI = '60499';
 
 const VIDEO_PATH = (executionId: string) => `/api/v1/studio/executions/${executionId}/video`;

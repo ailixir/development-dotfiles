@@ -1,6 +1,6 @@
 import React from 'react';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import fs from 'node:fs';
@@ -342,5 +342,98 @@ describe('AC-3(a): client-generated Python is retired, and the Code view says wh
     const rendered = render(<CodeTab />).container.textContent ?? '';
     expect(rendered).not.toMatch(/Generated Python/i);
     expect(rendered).not.toMatch(/Auto-sync/i);
+  });
+});
+
+describe('Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run', () => {
+  const capabilityReads = () =>
+    observed.filter((entry) => entry.method === 'GET' && entry.url.includes('/schedule/capabilities'));
+
+  function serveCapabilities(response: () => Response | Promise<Response>) {
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(readyDraft)),
+      http.get(`${STUDIO_BASE}/tests/:id/schedule/capabilities`, response),
+    );
+  }
+
+  const capabilities = (canManage: boolean) =>
+    HttpResponse.json({
+      enabled: false,
+      canManage,
+      availableExecutionPrincipals: [],
+      localAuthorizationOnly: true,
+      policy: null,
+    });
+
+  it('canManage false: Run stays visible, disabled, described by on-page text, and sends nothing', async () => {
+    serveCapabilities(() => capabilities(false));
+    render(<RunControl testId={readyDraft.id} />);
+
+    const reason = await screen.findByTestId('run-not-permitted');
+    const control = screen.getByRole('button', { name: RUN_LABEL });
+    expect(control).toBeVisible();
+    expect(control).toBeDisabled();
+    expect(reason).toBeVisible();
+    expect(reason.textContent).toMatch(/do not have permission to run tests for this CSI/i);
+    // Screen readers: the reason is the button's accessible description, not a tooltip.
+    expect(control).toHaveAttribute('aria-describedby', reason.id);
+    expect(control).toHaveAccessibleDescription(reason.textContent ?? '');
+
+    // Keyboard: tabbing and pressing Enter or Space reaches no execute and no compile.
+    await userEvent.tab();
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
+    // A pointer click on the disabled control (MUI sets pointer-events: none, so dispatch it).
+    fireEvent.click(control);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(executeRequests()).toHaveLength(0);
+    expect(compileRequests()).toHaveLength(0);
+  });
+
+  it('canManage true: Run is enabled and carries no reason', async () => {
+    serveCapabilities(() => capabilities(true));
+    render(<RunControl testId={readyDraft.id} />);
+
+    const control = await screen.findByRole('button', { name: RUN_LABEL });
+    await waitFor(() => expect(capabilityReads()).toHaveLength(1));
+    await waitFor(() => expect(control).not.toBeDisabled());
+    expect(screen.queryByTestId('run-not-permitted')).toBeNull();
+    expect(control).not.toHaveAttribute('aria-describedby');
+  });
+
+  it('a failed capabilities read is unknown, never a denial: Run stays enabled', async () => {
+    serveCapabilities(() => HttpResponse.json({ error: 'BOOM', message: 'down' }, { status: 500 }));
+    render(<RunControl testId={readyDraft.id} />);
+
+    const control = await screen.findByRole('button', { name: RUN_LABEL });
+    await waitFor(() => expect(capabilityReads().length).toBeGreaterThan(0));
+    await waitFor(() => expect(control).not.toBeDisabled());
+    expect(screen.queryByTestId('run-not-permitted')).toBeNull();
+  });
+
+  it('a pending capabilities read does not disable Run', async () => {
+    serveCapabilities(() => new Promise<Response>(() => {}));
+    render(<RunControl testId={readyDraft.id} />);
+
+    const control = await screen.findByRole('button', { name: RUN_LABEL });
+    await waitFor(() => expect(control).not.toBeDisabled());
+    expect(screen.queryByTestId('run-not-permitted')).toBeNull();
+  });
+
+  it('reads the capability once per selected test, not once per render or refresh', async () => {
+    // Its own id, so a GET retry the failed-read case above leaves behind (apiClient retries 5xx
+    // GETs with backoff) cannot be counted here under load.
+    const selected = { ...readyDraft, id: 'a0000000-0000-0000-0000-00000000c4b1' };
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(selected)),
+      http.get(`${STUDIO_BASE}/tests/:id/schedule/capabilities`, () => capabilities(false)),
+    );
+    const readsOfSelected = () => capabilityReads().filter((entry) => entry.url.includes(selected.id));
+    const view = render(<RunControl testId={selected.id} refreshToken={1} />);
+    await screen.findByTestId('run-not-permitted');
+    view.rerender(<RunControl testId={selected.id} refreshToken={2} />);
+    view.rerender(<RunControl testId={selected.id} refreshToken={3} isDirty />);
+    await waitFor(() => expect(screen.getByRole('button', { name: RUN_LABEL })).toBeDisabled());
+    expect(readsOfSelected()).toHaveLength(1);
   });
 });
