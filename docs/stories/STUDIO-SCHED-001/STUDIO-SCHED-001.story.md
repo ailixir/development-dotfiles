@@ -157,6 +157,7 @@ Expected configured QA self-healing: full mode, up to three iterations/30 minute
 | 2026-10-05 | 0.1.3 | PO GO (9/10) against final spec and APPROVED critique; Draft → Ready. Production gates remain open. | Pax (@po) |
 | 2026-10-05 | 0.2.0 | Local implementation and QA fixes; InProgress → InReview. Scoped tests pass; baseline failures and production gates recorded separately. | Dex / Dara / Orion |
 | 2026-10-05 | 0.2.1 | QA Gate CONCERNS — Status: InReview → Done. Local default-off delivery complete; baseline failures, full global checks and external production evidence remain explicit. | @qa |
+| 2026-10-07 | 0.2.2 | Fixed 7 backend failures introduced by WIP checkpoint e2179f50b (none failed at 13ec11d1c). (1) `ExecutionVideoContractTest` ×4: the guards had to learn about the reviewed scheduling attributions. Standalone stories (`docs/stories/{ID}/{ID}.story.md` headed `# Story {ID}`) are now accepted next to the Epic 10 manifest ids. The 8 scheduling operations were added to both pinned sets, and the public-401 total went from 15 to 23. The `99.9` control still fails. `openapi.yaml` is unchanged, so the runner pin did not move. (2) `StudioServiceWriteAuthorizationTest` (a): the product change is intended. Soft-delete now takes the restricted authoring row lock that `StudioScheduleInvalidation` requires. The fixture stubs that lock, and the test now also checks that only the authorized owner reaches the lock. The `never findCsiIdIncludingWithheld` assertion is unchanged. (3) `NoAutoConfirmTest`: a WIP reformat of the `CompileStateService` SQL text blocks put a double space into both `SET confirmed_by = ?, confirmed_at = NOW()` statements. That product text is restored. The bound parameter and the confirm semantics are unchanged. (4) `SharedSchedulingIT.ordinaryLeadership…`: the test passed alone, in the package run and in the full run. The baseline failure was a 10s `eventually` timeout (line 424). No code was changed for it; it is recorded as load-sensitive. Full `test`: 1544 tests, 0 failed, 7 skipped. `spotlessJavaCheck` is red only on the concurrently edited `corun/StudioCoRunIT.java`, which is outside this change. | Dex (@dev) |
 
 ## Dev Agent Record
 
@@ -230,6 +231,8 @@ Actual feature files and modified integration seams are listed below. Several mo
 - `docs/architecture/ADR-002-internal-contract-surface.md`
 - `docs/architecture/studio-execution.md`
 - `backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java`
+- `backend/src/test/java/com/citi/put/checks/studio/evidence/ExecutionVideoContractTest.java`
+- `backend/src/test/java/com/citi/put/checks/studio/StudioServiceWriteAuthorizationTest.java`
 - `studio-runner/test/run/confinement.test.ts`
 - `.aiox/studio-scheduling-spec-state.json`
 

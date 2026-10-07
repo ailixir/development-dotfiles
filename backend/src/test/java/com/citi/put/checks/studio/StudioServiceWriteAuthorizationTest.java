@@ -125,7 +125,12 @@ class StudioServiceWriteAuthorizationTest {
   @DisplayName("(a) softDeleteTest(id, auth) never reads findCsiIdIncludingWithheld")
   void theDeleteNeverReadsThroughTheVisibilityRestriction() {
     UUID owned = UUID.randomUUID();
-    when(tests.findById(owned)).thenReturn(Optional.of(draft()));
+    UITest draft = draft();
+    when(tests.findById(owned)).thenReturn(Optional.of(draft));
+    // STUDIO-SCHED-001: the delete now takes the authoring row lock (a restricted entity query,
+    // as updateTest does) so schedule invalidation runs under it. Only the authorized owner
+    // reaches it.
+    when(tests.findByIdForUpdate(owned)).thenReturn(Optional.of(draft));
     service.softDeleteTest(owned, owner());
     assertThatThrownBy(() -> service.softDeleteTest(owned, stranger()))
         .isInstanceOf(StudioAccessDeniedException.class);
@@ -138,6 +143,8 @@ class StudioServiceWriteAuthorizationTest {
     verify(tests, never()).findCsiIdIncludingWithheld(any());
     verify(tests, times(2)).findById(owned);
     verify(tests).findById(absent);
+    verify(tests).findByIdForUpdate(owned);
+    verify(tests, never()).findByIdForUpdate(absent);
   }
 
   // ── (b) AC-8 step 4: the draft disappeared between the visible read and the lock ─────────────

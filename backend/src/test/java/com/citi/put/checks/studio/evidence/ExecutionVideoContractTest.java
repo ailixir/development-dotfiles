@@ -34,6 +34,13 @@ class ExecutionVideoContractTest {
   private static final Path MANIFEST = Path.of("..", "docs", "epics", "EPIC-10-EXECUTION.yaml");
 
   /**
+   * Where a story outside every epic manifest is declared: {@code docs/stories/{ID}/{ID}.story.md},
+   * headed {@code # Story {ID}}. STUDIO-SCHED-001 is such a story and attributes the scheduling
+   * operations; reading only @pm's Epic 10 manifest would call a real story unknown.
+   */
+  private static final Path STORIES = Path.of("..", "docs", "stories");
+
+  /**
    * The operations that carry a planning attribution today, pinned as a <b>deliberate second
    * copy</b>.
    *
@@ -54,7 +61,17 @@ class ExecutionVideoContractTest {
               "claimAdmission",
               "reportProgress",
               "runnerHealth",
-              "runnerReadiness"));
+              "runnerReadiness",
+              // STUDIO-SCHED-001 (standalone story), the eight scheduling operations, added
+              // deliberately; StudioContractTest pins each one's value.
+              "studioScheduleCapabilities",
+              "readStudioSchedule",
+              "createStudioSchedule",
+              "updateStudioSchedule",
+              "removeStudioSchedule",
+              "enableStudioSchedule",
+              "previewStudioSchedule",
+              "listStudioScheduleOccurrences"));
 
   /** {@code $ref} targets, spelled once so a typo cannot make two assertions agree by accident. */
   private static final String SESSION_UNAUTHORIZED = "#/components/responses/SessionUnauthorized";
@@ -95,7 +112,17 @@ class ExecutionVideoContractTest {
               // studio-vault-secrets (ADR-002 §32), the fourteenth and fifteenth, added
               // deliberately.
               "listTestSecrets",
-              "createTestSecret"));
+              "createTestSecret",
+              // STUDIO-SCHED-001, the sixteenth to twenty-third, added deliberately: all eight are
+              // session-authenticated public routes.
+              "studioScheduleCapabilities",
+              "readStudioSchedule",
+              "createStudioSchedule",
+              "updateStudioSchedule",
+              "removeStudioSchedule",
+              "enableStudioSchedule",
+              "previewStudioSchedule",
+              "listStudioScheduleOccurrences"));
 
   /**
    * The two internal callbacks, whose {@code 401} comes from {@code
@@ -237,6 +264,12 @@ class ExecutionVideoContractTest {
     assertThat(storyIds)
         .as("the manifest reader found no story ids at all; the assertion below would be vacuous")
         .hasSizeGreaterThan(10);
+    Set<String> standalone = standaloneStoryIds(STORIES);
+    assertThat(standalone)
+        .as("the standalone-story reader no longer finds the story that attributes scheduling")
+        .contains("STUDIO-SCHED-001")
+        .doesNotContain("99.9");
+    storyIds.addAll(standalone);
 
     assertThat(unknownAttributions(document, storyIds))
         .as(
@@ -266,6 +299,7 @@ class ExecutionVideoContractTest {
   void theAttributionReaderCanActuallyFindABadValue() throws IOException {
     Path scratch = scratchCopy("x-implemented-by: '10.15'", "x-implemented-by: '99.9'");
     Set<String> storyIds = manifestStoryIds(MANIFEST);
+    storyIds.addAll(standaloneStoryIds(STORIES));
 
     assertThat(unknownAttributions(ContractDocument.loadFrom(scratch), storyIds))
         .as("the reader did not notice a story id that does not exist")
@@ -456,7 +490,7 @@ class ExecutionVideoContractTest {
     // Each total on its own. A set comparison alone is satisfied by two collections that stopped
     // collecting together, and a correctly-added thirteenth public operation passes every
     // comparison above.
-    assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(15);
+    assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(23);
     assertThat(callbackRefs)
         .as("the number of internal callbacks declaring a 401 moved")
         .hasSize(3);
@@ -699,6 +733,29 @@ class ExecutionVideoContractTest {
     Set<String> ids = new LinkedHashSet<>();
     while (matcher.find()) {
       ids.add(matcher.group("id"));
+    }
+    return ids;
+  }
+
+  /**
+   * Ids of stories declared outside any epic manifest: a directory {@code {ID}} holding {@code
+   * {ID}.story.md} whose first line is {@code # Story {ID}}. A directory of loose QA or validation
+   * notes, with no such file, declares nothing.
+   */
+  private static Set<String> standaloneStoryIds(Path stories) throws IOException {
+    Set<String> ids = new TreeSet<>();
+    try (var dirs = Files.list(stories)) {
+      for (Path dir : dirs.filter(Files::isDirectory).toList()) {
+        String id = dir.getFileName().toString();
+        Path story = dir.resolve(id + ".story.md");
+        if (Files.isRegularFile(story)
+            && Files.readAllLines(story, StandardCharsets.UTF_8).stream()
+                .findFirst()
+                .filter(line -> line.startsWith("# Story " + id + " "))
+                .isPresent()) {
+          ids.add(id);
+        }
+      }
     }
     return ids;
   }

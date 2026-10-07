@@ -287,7 +287,7 @@ public class CompileStateService {
     jdbc.update(
         """
         UPDATE ui_test_revisions
-        SET confirmed_by = ?,  confirmed_at = NOW()
+        SET confirmed_by = ?, confirmed_at = NOW()
         WHERE id = ? AND test_id = ?
         AND confirmed_by IS NULL AND confirmed_at IS NULL
         """,
@@ -454,7 +454,7 @@ public class CompileStateService {
         jdbc.update(
             """
             UPDATE ui_test_revisions
-            SET confirmed_by = ?,  confirmed_at = NOW()
+            SET confirmed_by = ?, confirmed_at = NOW()
             WHERE id = ? AND test_id = ? AND artifact_hash = ?
             AND source_revision = ? AND configuration_revision = ?
             AND confirmed_by IS NULL AND confirmed_at IS NULL
