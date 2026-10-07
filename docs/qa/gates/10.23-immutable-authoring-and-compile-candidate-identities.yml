@@ -1,0 +1,134 @@
+schema: 1
+story: '10.23'
+story_title: Immutable authoring and compile candidate identities
+epic: EPIC-10
+work_package: C persistence
+
+gate: CONCERNS
+status_reason: >-
+  The D1/D2/D3 fixes are correct and green (146/146 tests across 21 suites, reviewer-run). The story stays
+  InReview and is not Done. The runbook's rollback floor still describes the pre-fix state, and AC-5 is ticked
+  while its shared-environment rehearsal and production-volume item is blocked on an external environment.
+
+reviewer: Quinn (@qa, independent gate; executor != gate because @dev wrote D3)
+reviewed_revision: 'commit:91ac82b00'
+updated: '2026-10-06T22:15:00-04:00'
+branch: brunobuger/ui-studio
+status_decision: >-
+  Stays InReview, not Done. The Epic 10 rule says a criterion blocked on an external item is never ticked and the
+  story is not closed around it. This overrides qa-gate.md's default CONCERNS -> Done transition.
+
+evidence:
+  backend_targeted:
+    command: >-
+      gradle-locked.sh test --tests '*InferenceMigration*' --tests '*Migration*IT' --tests '*Execution*IT'
+      --tests '*InferenceCaptureIntegrationTest' --tests '*CompileStateServiceTest'
+    result: PASS
+    detail: >-
+      BUILD SUCCESSFUL in 1m 46s, exit 0. JUnit XML from this run: 21 suites, 146 tests, 0 failures, 0 errors,
+      0 skipped. InferenceMigrationLatestIT 13/13, InferenceMigrationIT 7/7, InferenceCaptureIntegrationTest
+      10/10, CompileStateServiceTest 22/22, all Execution*IT and Migration*IT suites green.
+  not_run:
+    - spotlessJavaCheck / full ./gradlew check (outside the requested single invocation)
+    - CodeRabbit (not part of this gate run)
+
+acceptance_criteria:
+  AC-1: >-
+    MET. V18 tables/columns plus V27 (V27__studio_revision_immutability_restore.sql:19-43) restore the
+    deny-by-default revision guard. Verified by
+    InferenceMigrationLatestIT.everyRevisionColumnExceptFirstConfirmationIsImmutableOnTheHeadSchema (:290-326),
+    which reads the column list from information_schema.
+  AC-2: >-
+    MET. uq_ui_test_revisions_compile_request (V18:83). insertCapturedRevision uses ON CONFLICT(compile_request_id)
+    DO NOTHING (CompileStateService.java:878-912). Verified by mixedWriterCutoverOnHeadSchema (:655-723): distinct
+    requests confirm independently and a same-request publication is a no-op.
+  AC-3: >-
+    MET locally. Query at InferenceCaptureStore.java:68-98 is scoped by test, CSI and fingerprint, requires
+    PASSED + FULL and an exact snapshot/runtime match, and orders by (created_at, id). The indexes are
+    idx_ui_test_revisions_eligible and idx_ui_test_exec_full_baseline. Verified by
+    baselineSelectionIsScopedDeterministicAndFallsBackWhenEvidenceExpires and a local EXPLAIN (80,001 rows).
+    Production volume is not measured (external).
+  AC-4: >-
+    MET. Stale-publication CAS uses FOR UPDATE plus STALE_CANDIDATE (CompileStateService.java:427-577). The
+    originalRevisionId provenance patch is at :863-874. Covered by CompileStateServiceTest (22) and
+    InferenceCaptureIntegrationTest (10).
+  AC-5: >-
+    PARTIAL. Local tests are green: fresh/upgrade parity, tampering, baseline selection, mixed-writer cutover and
+    D3. The rollback-floor documentation is stale (DOC-001), and the external rehearsal and production-volume
+    item is open (REQ-001).
+
+challenges:
+  a_v27_deny_by_default: >-
+    Confirmed. The only permitted change is NULL -> value on confirmed_by/confirmed_at
+    (V27:21-28 jsonb diff minus the pair). V12's CHECK ((confirmed_by IS NULL) = (confirmed_at IS NULL)) forces
+    both to be set together. Overwriting or clearing an existing confirmation is rejected by V27:30-38.
+    TEST gap: the head schema has no overwrite test. That case is asserted only at V12
+    (RevisionMigrationIT:217-235) and V18 (InferenceMigrationIT:191).
+  b_v28_update_paths: >-
+    None break. Every native UPDATE of ui_test_executions (StudioDispatchLedgerStatements.java:358, 422, 509,
+    600, 676, 834, 901, 959; StudioDispatcher.java:608; V14) omits execution_scope. JPA maps the column
+    updatable=false (UITestExecution.java:69), FULL is set only before the first save
+    (StudioAcceptanceService.java:319), and V19 does not write the column. Partitions:
+    scopeGuardCoversExistingAndFuturePartitions proves the trigger on month, DEFAULT and post-migration
+    partitions. PartitionManager's DEFAULT -> month move is DELETE+INSERT and keeps the value. Requires PG13+ in
+    every environment (tests use 15; prod version not verified).
+  c_d3_writer_parity: >-
+    Parity holds for the shared value columns. Both writers now bind candidate.referencePolicy() and
+    intentDerivationVersion(), and both leave expected_intent NULL. The rows are intentionally not
+    byte-identical: the captured writer copies source/configuration/references/csi from the request (enforced by
+    the V18 capture trigger), writes the six capture columns plus compile_request_id, and patches
+    provenance.originalRevisionId. reference_policy is not part of the capture-equality trigger, the same as the
+    legacy writer.
+  d_rollback_floor: >-
+    The floor rule still holds, but the text is wrong after the fixes. V27/V28 do not raise it: no released binary
+    UPDATEs those columns, and Flyway ignores future migrations by default. The runbook (lines 78-87, 104-114)
+    still says "Head (V26)", "HEAD is not yet a valid post-V19 floor", "do not apply V19", and that D1-D3 remain
+    open. It also never names 571e779e1 as the new post-V19 floor: binaries from 51ade0f1f up to that commit
+    break context-aware publication after V19. The V28 header rollback (DROP TRIGGER on the parent, which cascades
+    to the clones, then DROP FUNCTION) is mechanically safe but re-opens D2 against the architect ruling. V27 has
+    no rollback note.
+  e_external_items: >-
+    The sub-item is correctly unticked (story line 34). However, the AC-5 parent box (line 28) is ticked
+    "(local scope)" while that sub-item is blocked. Per the Epic 10 rule it must not be ticked.
+
+top_issues:
+  - id: DOC-001
+    severity: medium
+    finding: >-
+      docs/runbooks/studio-inference-rollout.md rollback floor and head-schema verification sections are stale
+      (last changed 701f98f30). They describe V26 as head, D1-D3 as open, 16 tests / 3 failed, and V19 as
+      not-yet-applicable. They do not name 571e779e1 (D3 fix) as the minimum post-V19 binary, and they do not
+      state that V27/V28 leave the floor unchanged.
+    suggested_action: >-
+      Dara: update the floor table to Head = V28. Set the post-V19 floor to the first release containing
+      571e779e1. State that V27/V28 do not raise the floor. Remove the "do not apply V19" blocker text and record
+      the current results.
+  - id: REQ-001
+    severity: medium
+    finding: >-
+      The AC-5 task box is ticked while its shared-environment cutover rehearsal and production-volume item is
+      blocked on an external environment.
+    suggested_action: >-
+      Dara/@dev: untick AC-5 until the external item closes, or have @po explicitly re-scope AC-5. The story stays
+      InReview until then.
+  - id: TEST-001
+    severity: low
+    finding: Head schema has no confirmation-overwrite/clear test after V27. It is covered only at V12/V18.
+    suggested_action: Add a head-schema case for confirmed revision -> second confirmer and -> NULL pair.
+  - id: DOC-002
+    severity: low
+    finding: >-
+      The V28 header rollback re-opens D2, and V27 has no rollback note. Neither header says that rolling back
+      re-opens the defect.
+    suggested_action: >-
+      In the runbook, note that these guards should never be rolled back, and that any removal requires a
+      contract amendment.
+  - id: MNT-001
+    severity: low
+    finding: >-
+      Pre-existing: requestIdentityAvailable() pg_constraint clause is always true on the head schema, because the
+      identity has been an index since V22. The probe relies on the V19 trigger alone.
+    suggested_action: Track under 10.24 / backend; not introduced by this story.
+
+waiver:
+  active: false
