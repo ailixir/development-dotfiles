@@ -1,0 +1,77 @@
+schema: 1
+story: '10.48'
+story_title: 'Restore the CSI execute check on Studio POST /tests/{id}/execute (O-22)'
+gate: PASS
+status_reason: 'canExecute guard restored at the top of StudioService.executeTest, before acceptance, readiness, quota and the idempotency race; refusal is status/header/body-identical to an unknown id and the guard-removal mutation turns 10 tests red. Only low, advisory findings remain (pre-existing IdempotencyFilter replay, a11y nuance, header equality not pinned).'
+reviewer: 'Quinn (Test Architect)'
+reviewed_revision: 'commit:bc44dc45ada3bdc51a76cc53397b4026f3ce472d'
+updated: '2026-10-07T20:10:00Z'
+
+top_issues:
+  - id: 'SEC-001'
+    severity: low
+    finding: >-
+      IdempotencyFilter (config/IdempotencyFilter.java:98-105) replays a cached 2xx keyed on
+      userId + Idempotency-Key (Caffeine, expireAfterWrite 5 min, per replica, SecurityConfig.java:62-66)
+      before the controller. A demoted owner replaying their own key on the same replica within 5 min
+      gets the cached 202. The replay never calls chain.doFilter, so it creates no execution, no
+      ledger row and re-triggers nothing; it only returns bytes (an executionId) the caller already
+      received. On another replica or after expiry the request reaches requireExecute and gets 403.
+      Pre-existing, outside AC-12 confinement; AC-5b holds at the service where the AC places it.
+    suggested_action: >-
+      Track as a follow-up (owner @architect/@dev): either exclude POST /tests/{id}/execute from the
+      in-memory filter (the service already has durable principal-scoped idempotency) or re-authorize
+      before replay; also consider adding method+path to the filter cache key.
+  - id: 'TEST-001'
+    severity: low
+    finding: >-
+      Committed tests assert status and body identity for the refusal vs an unknown id, not headers.
+      QA verified headers with a temporary test (removed): identical apart from Date for all four
+      refused callers.
+    suggested_action: 'Optionally add a header-equality assertion (excluding Date) to aRefusedExecuteIsByteIdenticalToAnUnknownIdAndWritesNothing.'
+  - id: 'MNT-001'
+    severity: low
+    finding: >-
+      Run uses native disabled, so the button leaves the tab order; its aria-describedby reason is
+      reachable by screen readers in browse mode and is visible on page, but not on keyboard focus.
+      Consistent with the other disabled Run states in RunControl (dev AUTO-DECISION).
+    suggested_action: 'Consider aria-disabled + focusable for all disabled Run states in a UX pass; not specific to this story.'
+
+waiver: { active: false }
+
+evidence:
+  ac_trace:
+    AC-1: 'PASS — StudioService.java:973 requireExecute after findById; :142-146 null CSI or !canExecute -> StudioAccessDeniedException. IT aRefusedExecuteIsByteIdenticalToAnUnknownIdAndWritesNothing (viewer, contributor, stranger, owner of other CSI; no history/ledger/key rows). QA temp test: status, headers (minus Date) and body identical.'
+    AC-2: 'PASS — onlyOwnersAndAdministratorsMayExecuteAndReadersStillRead: owner 202, non-owning checks-admin 202; StudioIdempotencyIT 5/5, AcceptanceIT green.'
+    AC-3: 'PASS — canExecute only (unit test verifies canWrite never consulted); null CSI refused even for admin.'
+    AC-4: 'PASS — authorizationIsDecidedBeforeReadinessQuotaAndIdempotency with owner controls (409 COMPILE_REQUIRED, 429, keyed 202).'
+    AC-5: 'PASS — guard precedes accept and the IdempotencyRaceException branch (StudioService.java:973 vs :978-981); unit test verifies neither accept nor resolveIdempotencyRace invoked; demoted-owner replay refused at service level; race control green. See SEC-001 for the HTTP filter.'
+    AC-6: 'PASS — reproduced by QA: guard line deleted (sha 341f194c…87ee -> 8f59fc12…01f8), 10 failed / 71 (5 story IT + collateral listsAreScoped… + QA temp + 4 unit); restored to 341f194c…87ee, identical to the commit.'
+    AC-7: 'PASS — scheduled path untouched; acceptScheduled only called by StudioScheduleProcessor.java:304; aScheduledOccurrenceIsAcceptedWithNoRequestAuthentication; viewer/contributor refused on create and enable; canExecute==canWrite matrix pinned.'
+    AC-8: 'PASS — javadocs restored; openapi.yaml executeTest description only (4+/3-); sha256 bc1869b5…41e1 == BASE_SHA256; confinement.test.ts 19/19.'
+    AC-9: 'PASS — ADR-002 §13 row "Closes O-22" names execute check, user decision, 554277fcb, Class C; §35.4 one-line pointer; disambiguates secrets-disclaimer O-22.'
+    AC-10: 'PASS — executeRefusalFor(403) -> EXECUTE_FORBIDDEN_NARRATIVE; Run disabled with on-page reason + aria-describedby on canManage false, unknown never disables, one capabilities read per test, no execute/compile request sent; MSW 403 body matches ChecksExceptionHandler.'
+    AC-11: 'PASS — only the open-policy test used non-owners; inverted, not deleted.'
+    AC-12: 'PASS — git show --stat bc44dc45a: 18 files, all within the allowed list; no migration, evaluator, acceptance service, scheduler, dispatcher, cancel, read or compile change.'
+  bypass_search: >-
+    Only StudioAcceptanceService.accept/resolveIdempotencyRace (StudioService.java:978,981) and
+    acceptScheduled (StudioScheduleProcessor.java:304) call into acceptance; the only UITestExecution
+    construction for Studio is StudioAcceptanceService.java:318. No batch/rerun/resume/retry execute
+    endpoint exists in Studio controllers (POST/PUT/PATCH mappings enumerated); schedule enable is
+    canWrite-gated (== canExecute, pinned). Internal /internal/studio/executions routes are runner
+    callbacks on existing executions. No human bypass found.
+  commands:
+    - 'gradle-locked.sh test --tests *StudioAuthorizationIT --tests *StudioServiceExecuteAuthorizationTest --tests *StudioScheduleApiIT --tests *Idempotency* -> BUILD SUCCESSFUL (StudioAuthorizationIT 28/28 incl. QA temp header test, unit 6/6, StudioScheduleApiIT 21/21, StudioIdempotencyIT 5/5, IdempotencyFilterIT 5/5, other Idempotency* green)'
+    - 'Mutation (guard removed) same command -> 71 tests, 10 failed; source restored, sha256 identical; temp IT test removed, sha256 6cabb5b0…6f96 identical'
+    - 'frontend: npx vitest run src/components/studio/run src/pages/ChecksStudioPage -> 15 files, 122/122'
+    - 'frontend: npm run type-check -> clean; eslint on 9 touched files -> 0 errors, 2 pre-existing warnings'
+    - 'studio-runner: npx vitest run test/run/confinement.test.ts --coverage.enabled=false -> 19/19'
+    - 'Not run: full ./gradlew check, full studio suite (dev reports 1217/0/7), CodeRabbit (CLI absent; skipped, not passed)'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Resolve SEC-001 (IdempotencyFilter replay before authorization on execute)'
+      refs: ['backend/src/main/java/com/citi/put/checks/config/IdempotencyFilter.java']
+    - action: 'Pin refusal header equality (TEST-001)'
+      refs: ['backend/src/test/java/com/citi/put/checks/studio/StudioAuthorizationIT.java']
