@@ -1,0 +1,70 @@
+schema: 1
+story: '10.47'
+story_title: 'Realign the co-run harness to the compile-to-READY flow (OBS-H1)'
+gate: PASS
+status_reason: 'All eight ACs verified by running, not by reading the Dev Agent Record: co-run 11/11 on committed HEAD 27775249b with a clean tree, leg-1 red-first reproduced independently with a different mutation and restored byte-identical. Only low observations remain; none blocks.'
+reviewer: 'Quinn'
+reviewed_revision: 'commit:27775249b0df35ca2009f23f2b6e890c195a8d22'
+updated: '2026-10-07T17:40:00Z'
+top_issues: []
+waiver: { active: false }
+
+evidence:
+  ac7_closing_run:
+    sha: '27775249b0df35ca2009f23f2b6e890c195a8d22'
+    git_status_short: ['?? .aiox/', '?? .claude/agent-memory/']
+    command: 'tools/corun.sh (full wrapper, under the scratchpad gradle lock)'
+    wrapper_line: 'legs executed: 11 · failures: 0 · errors: 0 · skipped: 0'
+    xml: 'tests="11" skipped="0" failures="0" errors="0" time="49.628" timestamp="2026-10-07T17:28:00" (after the 17:27:27Z commit)'
+    exit_code: 0
+    uncommitted_files_readable_by_corun: 'none. .aiox/ and .claude/agent-memory/ are agent runtime/memory, not on any Gradle or runner classpath. OBS-H5 check: ls backend/build/resources/main/db/migration equals backend/src/main/resources/db/migration.'
+  ac3_legs_0_2_3_untouched:
+    method: 'git show -U0 HEAD hunk ranges vs leg markers in HEAD^ (leg 0 :345-389, leg 2 :451-531, leg 3 :532-572)'
+    result: 'no hunk inside legs 0, 2 or 3. Hunks: imports/field (:9, :41, :282), leg 1 (:408-431, :436-448), passing-test helper (:605-633), startStalledRun javadoc (:962), confirmedStallTest (:1048-1063), new helper (:1594), query helpers (:1641-1656).'
+  ac4_red_first_independent:
+    sha256_before: '4100d61f33aca013e83ab214064fb8dedca713f7ec448bc0542c31ae2716870a'
+    mutation: 'leg 1: gateway.answerWith(artifact) -> gateway.answerWith(artifact.replace("await page.", "await page.}{")) (different from @dev''s "((("; one line)'
+    command: "STUDIO_CORUN=1 ./gradlew test --tests '...StudioCoRunIT.theApiCompilesADraftThroughTheRealRunnerValidateRoute' --rerun"
+    result: 'tests=1 failures=1. CoRunFailure: refused : the draft did not become READY — compile_status is NEEDS_REVISION; detail: gateway calls=3, validator calls=3, compile_error=null; at awaitCompiledToReadyAndAccepted(StudioCoRunIT.java:1573)'
+    sha256_after: '4100d61f33aca013e83ab214064fb8dedca713f7ec448bc0542c31ae2716870a (equal; git status clean afterwards)'
+  ac6_confinement:
+    stat: 'StudioCoRunIT.java 156 +/-, docs/stories/10.47.story.md 58 +/-, tools/corun.sh 5 +/- (3 files, 119+, 100-)'
+    changed_in_package: 'StudioCoRunIT.java only; CoRunEnvironment, CoRunFailure, RunnerProcess, CallbackProxy, FixturePage, BlackHolePage unchanged'
+    corun_sh: 'header comment only (lines 6-8)'
+    corun_report_mjs: 'unchanged since 3857bcecb'
+  ac5_no_production_change: 'HEAD touches nothing under backend/src/main, studio-runner, frontend, docs/architecture or openapi.yaml. Note: 5f9023268..HEAD also includes 036b31e4e (STUDIO-SCHED-001, another story) with a whitespace-only change inside an SQL string in CompileStateService.java; not this story''s diff and cannot change a leg outcome.'
+  ac2_grep: 'grep -rn "states\.confirm\|AWAITING_CONFIRMATION\|confirmable" corun/ -> one hit, the helper javadoc (:1561). Wait set is Set.of("READY","NEEDS_REVISION","STALE").'
+  ac8_guards: 'G1 (STUDIO_CORUN=1 set by the wrapper; corun-report.mjs fails tests==0 or tests==skipped) and G2 (wrapper execs corun-report.mjs on the XML, never the gradle exit code; rm -f of the XML before the run; --rerun) unchanged. skipped: 0.'
+  style: 'gradle-locked.sh spotlessJavaCheck checkstyleTest -> BUILD SUCCESSFUL'
+  coderabbit: 'skipped, not passed (standing Epic 10 ruling: WSL CLI absent on Darwin host)'
+
+acceptance_criteria:
+  AC-1: 'PASS — all eleven legs pass on a committed tree; none retired.'
+  AC-2: 'PASS — one helper waits on READY/NEEDS_REVISION/STALE, throws CoRunFailure unless READY, asserts candidate exists, confirmed_revision_id == candidate, ui_test_revisions.confirmed_by == OWNER; leg 1 keeps validator-called-once; no states.confirm left.'
+  AC-3: 'PASS — zero lines changed inside legs 0, 2, 3 (hunk ranges checked).'
+  AC-4: 'PASS — reproduced independently by QA with a different mutation; red names compile_status NEEDS_REVISION; sha256 equal.'
+  AC-5: 'PASS — no production file in the story commit; no product defect surfaced.'
+  AC-6: 'PASS — confinement as listed above.'
+  AC-7: 'PASS — closed by this QA run at 27775249b (the @dev closing run was on 036b31e4e + uncommitted files).'
+  AC-8: 'PASS — G1/G2 unchanged; skipped: 0.'
+
+observations:
+  - id: 'ARCH-OBS-1'
+    severity: low
+    finding: 'The harness now asserts auto-accept as an expected property (compile alone sets confirmed_revision_id and confirmed_by), which is what the user asked for. It would NOT hide a future fix toward C0-A3 (Run as the confirming act, trigger=RUN): compile would stop at AWAITING_CONFIRMATION, the helper would not find READY and legs 1 and 4-10 would go red with "did not become READY — compile_status is AWAITING_CONFIRMATION". Two caveats: (a) AWAITING_CONFIRMATION is not in the wait set, so that red arrives only after the 60 s timeout per leg (about 8 minutes total), not fast; (b) the helper javadoc (StudioCoRunIT.java:1555-1565) states the auto-accept as settled fact ("there is no AWAITING_CONFIRMATION step left") without pointing to the open @architect question (10.47 PO ruling 1), so a reader may take the harness as evidence that the contract is decided.'
+    suggested_action: 'When @architect rules on C0-A3 vs the unconditional auto-accept, the fix story realigns this helper (per PO ruling 1). Optionally, in that or any later touch: add AWAITING_CONFIRMATION to the wait set as a failing terminal status (fails fast, still never accepted), and cite the open ruling in the javadoc.'
+  - id: 'TEST-OBS-2'
+    severity: low
+    finding: 'Leg 1 comment (pre-existing, unchanged) explains failure shapes using "validator calls = 1", but a NEEDS_REVISION compile retries and reports calls=3 (seen in both @dev''s and QA''s red runs). The attribution text is still correct; the comment is imprecise.'
+    suggested_action: 'Reword the comment when the file is next touched. Out of scope here.'
+  - id: 'DOC-OBS-3'
+    severity: low
+    finding: 'Story Status row still describes the closing run as "036b31e4e + this story''s two uncommitted files"; AC-7 is now closed by the QA run at 27775249b.'
+    suggested_action: 'Recorded in QA Results; no action.'
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 3 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - 'Open @architect question: unconditional auto-accept vs C0-A3, compile/README.md, CompilePipeline class javadoc, NoAutoConfirmTest.'
