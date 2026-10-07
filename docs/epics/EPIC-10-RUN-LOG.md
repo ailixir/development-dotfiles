@@ -2616,3 +2616,5 @@ decision record defers "C (v2 stack, `InferenceStudio` mount)" in §3 row 7. It 
   | 10.26 | REL-002 | Denominator dilution |
   | 10.21 | SR-001…SR-003 | — |
   | 10.20 | ISSUE-2…ISSUE-4 | Low |
+
+- **Later, @po:** 10.35 closed administratively (Status `Done` preserved; `[closure-key: 10.35:commit:0d93a9bf1]`; Task 2 met by the 10.47 co-run 11/11 at `27775249b`, which contains `a19112afb` and `e79178666`). The `10.35 → 10.34` edge is REMOVED (10.35 `blocks: []`, 10.34 `depends_on: []`); 10.34 stays blocked by the fold and the twelve external gates. Both "owed" items above are discharged.

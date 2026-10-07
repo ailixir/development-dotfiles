@@ -182,6 +182,8 @@ closure:
           correct, NOT that the story is dispatchable: every one of its criteria is Blocked and the
           story cannot start.
         blocked_on: "the fold; all twelve external gates; and story 10.35 (see below)"
+        # @po 2026-10-07: the 10.35 part of blocked_on is satisfied (10.35 Done, DEF-05 fixed, edge
+        # removed from stories[10.34].depends_on). Left verbatim as @pm's closure-time record.
       - id: "10.35"
         title: "Dispatch service identity (DEF-05) — acceptance spec"
         carries: >-
@@ -1397,7 +1399,8 @@ stories:
     # depends_on names stories in THIS manifest, and 10.35 is one. The story's other two
     # dependencies are not stories at all and are recorded as external_blocker rather than invented
     # as story ids.
-    depends_on: ["10.35"]
+    # @po 2026-10-07: was ["10.35"]; edge removed (see 10.35 `blocks`). 10.35 is Done and DEF-05 fixed.
+    depends_on: []
     external_blocker: >-
       TWO, both outside this repository, and both unmet at closure. (1) THE FOLD — every criterion
       runs against a merged, deployed tree that does not exist; EPIC-10-CLOSURE-PLAN.md section 8
@@ -1459,6 +1462,9 @@ stories:
 
   - id: "10.35"
     title: "Dispatch service identity (DEF-05) — acceptance spec"
+    # @po 2026-10-07 close-story: story Done (gate PASS, Quinn, reviewed_revision 0d93a9bf1,
+    # docs/qa/gates/10.35-dispatch-service-identity-def-05.yml; Task 2 met by the 10.47 co-run 11/11 at
+    # 27775249b, which contains a19112afb and e79178666). Administrative only. [closure-key: 10.35:commit:0d93a9bf1]
     size: XS
     # ADDED BY @po 2026-09-17 (po-close). Until now the manifest mentioned neither DEF-05 nor 10.35;
     # the story's own header row said so and raised it as its Open question 1. See integration_defects.DEF-05.
@@ -1480,7 +1486,12 @@ stories:
       harness against that program's live uncommitted tree would be informative and would NOT be
       authoritative: that tree changed shape three times on 2026-09-17 alone (263 to 241 to 263, and
       241 again when @po recomputed at 23:19 EDT).
-    blocks: ["10.34"]
+    blocks: []
+    # @po re-ruling 2026-10-07 (asked for by the 10.35 re-gate and recommended by @qa): edge REMOVED.
+    # Its only ground was "while DEF-05 stands"; DEF-05 is fixed (a19112afb + e79178666) and gated by
+    # running, so 10.34's dispatch-dependent criteria are reachable. 10.34 stays blocked, but by the fold
+    # and the twelve external gates (its external_blocker), not by 10.35. History of the edge below.
+    # Was: blocks: ["10.34"]
     # @po ruling 2026-09-17: 10.34's Group A (its AC-1, AC-2, AC-4 and AC-6, inherited from 10.19
     # AC-1/AC-2/AC-4/AC-6) each require a run that was actually DISPATCHED and admitted. While DEF-05
     # stands, the API cannot dispatch at all, so no amount of staging infrastructure arriving would let
@@ -2308,6 +2319,7 @@ integration_defects:
     # Not changed by this closure: 10.35's `blocks: ["10.34"]` edge. The gate asks @po to re-rule it
     # ("the dispatch half is now reachable"); that re-ruling is still owed and is listed as an open item
     # in EPIC-10-RUN-LOG.md (2026-10-07 session entry).
+    # @po 2026-10-07, later: re-ruled. Edge removed; see stories[10.35].blocks.
     # `open` is literal and is NOT a stale field of the DEF-01/DEF-02 kind that closure-plan step 0.2
     # had to true up. The fix is not in this repository's history at all. It exists only as an
     # uncommitted edit in the separate studio-inference program's wt/epic working tree. This field
