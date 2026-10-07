@@ -350,6 +350,7 @@ An architect amending the contract still never edits a story's Title, Acceptance
 | 2026-10-04 | **VAL-027 / VAL-024 / gate QA-5 — save and compile `400` codes documented.** Description text only, on `createTest` (operation description and `400` description), `updateTest` (operation description; its `400` stays the shared `BadRequest` `$ref`) and `compileTest` (`400` description). They now list the codes the server returns: `INVALID_STEPS` (blank step on save; no steps or a blank step at compile), `INVALID_CONFIGURATION` for `timeoutSeconds` outside 1..120, and `SOURCE_TOO_MANY_STEPS` / `SOURCE_LINE_TOO_LONG` at save as well as at compile (VAL-024 moved those two checks forward with the same codes and messages). Behaviour change stated in the document: an out-of-range `timeoutSeconds` (e.g. `0`) used to be coerced to `30` and is now `400`, which is what the declared `minimum: 1, maximum: 120` already said. No status, schema, enum, `required` list, example or route moved | **C** — **RULED 2026-10-05 by @architect (§34)**, correcting the `A` @dev recorded. Public routes, and the edit records a status-code behaviour change for clients (`201` → `400` for `timeoutSeconds: 0`, blank steps and over-bound drafts at save); §12 assigns authority by class of change, not by edit type. Content ratified unchanged; not a loosening | @dev, UI-STUDIO-VALIDATION-20261004 (edit); @architect (class ruling, §34) | `confinement.test.ts` 19/19 after re-anchoring `BASE_SHA256` to `43fe0bb46cb40011ae3f19e05071e16fbe6ffd437e6fb785c0b36586a7c47898` (was `5571bee0…0f629`). `StudioContractTest` 14/14 after (before not measured; no assertion reads these descriptions) |
 | 2026-10-06 (landed 2026-09-16; committed in `51ade0f1f` and `554277fcb`) | **Story 10.27: readable confirmed source (§30).** This row was added retroactively to close gate finding 10.27 V-1. `TestDto` gains two nullable fields: `confirmedRevisionArtifactHash` (64 lowercase hex characters, `pattern: '^[0-9a-f]{64}$'`) and `confirmedRevisionArtifact` (normative `artifact.schema.json`). Both describe exactly `confirmedRevisionId`. They are read together with the draft and its independently joined confirmed revision in one transaction, never recomputed by a client, and never substituted from `currentCandidateArtifact*`. `GET /tests` always returns both as `null`, on §16.5's precedent. The `getTest` example carries the pair. This puts the **confirmed** revision's artifact and hash on a declared `2xx` response (`GET /tests/{id}` and every `TestDto`-returning mutation). It is the Class C amendment that **10.11 AC-3(b)** (`10.11.story.md:229`) and **10.34 AC-24** wait for, and it resolves 10.11c's AC-32 escalation. No route, status, `required` list or runner-produced body moved. Same date, text only: `openapi.yaml:3027` cross-reference changed from "ADR-002 section 29" (now Cancel) to "§30", and the 2026-09-17 video row above changed from "§30" to "§31" | C | Ruled by @architect (§30); **landed by story 10.27**. Row and cross-reference fixes by @architect, 2026-10-06 | 10.27 gate (HEAD `b40be10d0`): `StudioContractTest` 14/14, `StudioApiIT` 7/7, `CandidateArtifactProjectionIT` 7/7; frontend `confirmedSource` 4/4 and `studioContract` 76/76. The before-landing state was not measured. **The 3027 text fix changes the document digest:** `BASE_SHA256` in `studio-runner/test/run/confinement.test.ts` must be re-anchored from `5e5477fc…070ac` to `cbacad742c634dde26a8ce2aa8c14d7bef2276de7417890272078e1b1b3f3cc8` (measured with `shasum -a 256`). **AUTHORIZED, NOT YET LANDED** for the pin. Owner: the coordinating @dev change that carries this docs edit (§19). Not run here |
 | 2026-10-06 (landed 2026-09-22 in `554277fcb`) | **Story 10.44 / ADR-SC-003: structural reference policy and secret-origin binding.** This row was added retroactively to close gate finding 10.44 S-2. **Class B, ruled in ADR-SC-003 Decision 5:** (1) `referencePolicy` (new closed `ReferencePolicy` `{version: 2, steps[{stepIndex, required, allowed}]}` and `ReferencePolicySet` `{variables, secrets}`, names only) replaces `expectedIntent` on the validate request and on `RunJob`. The `ExpectedIntent`/`ExpectedOperation`/`Expected*` schemas are removed. (2) `RunJob.secretOrigins`: a map from secret id to at most 16 normalized `http(s)` origins, fail closed when absent or empty. **Ratified here, 2026-10-06:** `x-runner-error-codes` gains `URL_SCHEME_NOT_PERMITTED` and `SECRET_ORIGIN_NOT_ALLOWED`. That is within §15.6's narrowing of §14.7, because the same PR lands their only emitters (`studio-runner/src/run/errors.ts:179,181`, `executor.ts:204`, `playwrightAdapter.ts:516`) and adds no other code. No code was removed from that list, and `ExecutionErrorCode`/`x-assigned-by` did not move. `/validate-steps` was removed from the backend and frontend; it was never declared in this document, so the document did not change for it. Not ruled by this row: the other text edits committed in the same commit (`confirmCompile` deprecated, compile accepts for the requester, the execute-authorization sentence). They came from the UI-VALIDATION-20260921 work, not from 10.44, and remain an open §13 gap | B (the two fields); B within the §15.6 narrowing (the two codes) | Ruled by @architect (ADR-SC-003 §5; codes ratified here); **landed by story 10.44** | 10.44 gate (HEAD `b40be10d0`): runner unit 270/270, including `confinement.test.ts`; real-Chromium secret-origin fixtures 3/3; backend 147 tests, 0 failures. The digest was re-anchored when this landed. The before-landing state was not measured |
+| 2026-10-07 (landed 2026-09-22 in `554277fcb`) | **Run auto-accept and the other UI-VALIDATION-20260921 text edits (§35).** Closes the open gap in the row above. Three description edits landed in `554277fcb` without a ruling: (1) `compileTest` (`openapi.yaml:562-565`): a validated candidate is accepted for the requesting principal and published `READY`; (2) `confirmCompile` (`:629-635`): `deprecated: true`, "no caller in the UI"; (3) `executeTest` (`:693-695`): any authenticated user may start a Studio execution, with no CSI ownership or execute entitlement. **Rulings:** (1) **ratified in intent, not as written.** Run as the confirming act is the user's DEC-OQ3 and C0-A3. The implementation is a non-conformant interim: it has no server-captured trigger, no `confirmationSource`, no deadline recheck and no capture linkage. The text must also say that the acceptance is recorded as a Run confirmation without prior review. (2) **Not ratified.** Under C0-A3 `confirm-compile` is still the manual-confirmation route. The flag must be removed, and the description must say only that the v1 UI has no caller today. (3) **Not ratified.** This loosens architecture §9.1 (`requireExecute`/`canExecute` was removed in the same commit). It is recorded as **O-22**, reserved for a user/security decision. Recommendation: restore `canExecute`. **No document edit was made by this ruling.** The fix story lands all three text changes | C (all three: status/authorization semantics on public routes) | @architect, this ruling (§35). Text edits are owed by the §35.5 fix story | Not run. No `openapi.yaml` byte changed here, so `BASE_SHA256` does not move for this row. The fix story re-anchors it when it lands the text |
 
 The two `@dev, story 10.7` rows above are one story's amendment, recorded against §12's four
 requirements (this amendment's own record is in §15.10):
@@ -2973,3 +2974,139 @@ Unchanged by this ruling: `confinement.test.ts` 19/19 and `StudioContractTest` 1
 the §13 row. No test reads this ADR's bytes. A repository search found no hash or content anchor on
 `docs/architecture/ADR-002-internal-contract-surface.md`. The only tooling reference is
 `tools/epic10-fold/guards.sh`, which checks for merge-conflict markers.
+
+## 35. Run auto-accept against C0-A3 and the trust principle (2026-10-07)
+
+Asked by @po while validating story 10.47 (`docs/stories/10.47.story.md`, PO Readiness ruling 1).
+The ruling is docs-only and user-approved. Facts were read at HEAD `0a7289de3`. No code, test or
+`openapi.yaml` byte was changed by this section.
+
+### 35.1 What the code does today (read, not run)
+
+1. **Save never compiles.** `StudioService.java:274-278`.
+2. **One compile entry, issued by Run.** `POST /tests/{id}/compile` → `StudioService.compileTest`
+   (`:621-623`, `requireWrite` on the draft's CSI) → `CompilePipeline.compile(testId, principal)`
+   (`CompilePipeline.java:158,165`). In the shipped UI, its only caller is the Run gate:
+   `useRunGate.ts:315` compiles, `:333` returns when `READY`, and `:413` calls `POST /execute` in
+   the same user activation. `CompileReviewPanel` (the manual review/confirm UI) is mounted only in
+   `reviewTestHarness.tsx:5`, not in production. `runEnablement.ts:38` maps a legacy
+   `AWAITING_CONFIRMATION` to `compile`, not to review.
+3. **Every validated compile is auto-accepted.** `CompilePipeline.java:369` calls
+   `publishAcceptedCandidate` with no condition on how the compile was triggered.
+   `CompileStateService.java:268-327` inserts the revision. It writes
+   `confirmed_by = candidate.createdBy()`, `confirmed_at = NOW()` (`:288-296`), and then sets
+   `confirmed_revision_id` and `READY` (`:298-312`). The confirmer is the principal that requested
+   the compile. That principal holds CSI write, but nothing records that this confirmation had no
+   review.
+4. **No human is shown the artifact before it executes.** Within one Run, compile → READY →
+   execute happens with no display step. Afterwards the exact executed bytes and hash can be read in
+   the Code tab (`CodeTab.tsx:71`, ADR-002 §30).
+5. **Three further deviations in `publishAcceptedCandidate`, compared with `publishCandidate`
+   (`:208-256`).** (a) There is no deadline recheck. `publishCandidate` has one at `:212`, `:222`,
+   `:228` and the `deadline_at` term at `:243`, and C0's 2026-09-16 implementation amendment
+   requires it. (b) It always calls `insertOrReuseRevision` and never `insertCapturedRevision`
+   (compare `:224-225`), so an accepted revision is not linked to its compile request. *Inferred,
+   not measured:* `recordOutcome`'s `revisionId` lookup by `compile_request_id` is then null.
+   (c) Its javadoc (`:258-266`) says "save-triggered", but no save path compiles.
+6. **The guard that should catch this does not.** `NoAutoConfirmTest` (10.9 AC-21) skips
+   `CompileStateService` itself (`NoAutoConfirmTest.java:107,252`), and the auto-accept is inline
+   SQL in that file. Its `contains("SET confirmed_by = ?, confirmed_at = NOW()")` check is satisfied
+   by either statement. The test is green while the property it names is false.
+7. **Other stale documents.** `compile/README.md:3-5,20,30,105` and the `CompilePipeline` class
+   javadoc `:66-69` both say an explicit compile publishes `AWAITING_CONFIRMATION`. In practice an
+   explicit compile publishes `READY`, and save does not compile at all.
+
+### 35.2 Ruling — (c), middle ground
+
+**The contract is right: Run is the confirming act.** The user decided this
+(`STUDIO-INC-001…/spec/decisions.md:10`, DEC-OQ3, "Keep Run auto-accept"), and C0-A3 approved it on
+2026-09-23. Restoring a mandatory `AWAITING_CONFIRMATION` stop would reverse a user decision, so
+option (b) is rejected.
+
+**The implementation is not a conformant interim of C0-A3, so option (a) is rejected.** C0-A3's
+approval was conditional, and the code meets only the principal half of the condition:
+
+| C0-A3 condition | Today |
+|---|---|
+| Confirmer = the principal that created the request | **Met**. `candidate.createdBy()` |
+| Only a server-captured `trigger = RUN` auto-accepts. Other compiles stay `AWAITING_CONFIRMATION` | **Not met**. No trigger exists, and every compile auto-accepts |
+| `confirmationSource` stored server-side, so the audit can tell a reviewed confirmation from a Run confirmation | **Not met**. Both write the same two columns |
+| Identity binding and no stale prefix | **Met** for v1 FULL: request/revision guard (`lockCurrentRequest`) and reference policy verified (`:278-284`) |
+| Publication rechecks the deadline at the last CAS (C0 2026-09-16) | **Not met** (§35.1 item 5a) |
+
+**The amended trust principle.** The old principle was "the author confirms exactly the artifact
+that will run, before it runs" (10.10, 10.27, §30). It becomes: **an explicit, authenticated author
+action authorizes exactly one immutable artifact, the audit says truthfully whether that
+authorization came with prior review, and the author can always read exactly the bytes that ran.**
+Four things replace the pre-execution human look:
+
+1. **An explicit act.** Run is pressed by a CSI writer and bound by request identity to that
+   request's candidate only.
+2. **Exactness.** The revision is immutable, and readiness and dispatch re-verify it (unchanged).
+3. **Machine gates that never depended on review.** `/v1/validate`, the reference policy, secret
+   origins and URL scheme refusal.
+4. **Truthful audit and post-hoc visibility.** `confirmationSource = RUN` (owed, §35.5), plus the
+   §30 confirmed pair.
+
+**The residual risk is accepted by the user (DEC-OQ3), not by this ADR.** A validator-legal but
+semantically wrong generated step executes once before the author sees it.
+
+### 35.3 C0-A3 clarified for v1
+
+The v1 `POST /tests/{id}/compile` takes no body. The openapi document defines it as the Run action's
+preparation (`:562-565`), so **the server stamps `trigger = RUN` on every v1 compile request.** The
+route is the trigger. This is not a client label, so it satisfies C0-A3's auditability condition.
+v2 *Compile changes* and *Rebuild all steps* (STUDIO-INC-001) must capture their own trigger and
+publish `AWAITING_CONFIRMATION`. Auto-accept may happen inside the compile's publication
+transaction. It does not have to be a client call to `confirm-compile` carrying
+`confirmationSource:"RUN"`, provided the four conditions above hold. The C0 contract records this in
+§7, "Run auto-accept ruling (2026-10-07)".
+
+### 35.4 The other `554277fcb` text edits
+
+- **`confirmCompile` `deprecated: true`: not ratified.** Under C0-A3 it is the manual-confirmation
+  route, and it must keep working, because `confirm` is still exact and write-once. The fix story
+  removes the flag and says only that the v1 UI has no caller today.
+- **"Any authenticated application user may start a Studio execution": not ratified. Security
+  flag.** `554277fcb` removed `requireExecute`/`canExecute` and so loosened architecture §9.1
+  ("owners … may … execute"). Checks execution still enforces `canExecute`
+  (`CheckExecuteController.java:67`). Confirmation integrity is not affected, because the
+  auto-accepting principal is still a CSI writer. What it does is let any authenticated user spend a
+  CSI's runner capacity, and drive its test accounts, through any confirmed test. No user or
+  security decision authorizing this was found. It is recorded as **O-22**, owned by the user (with
+  security). Recommendation: restore `canExecute`. The as-built document stays until the user
+  decides.
+
+### 35.5 What the fix story must do (to be drafted by @sm; DDL detail delegated to @data-engineer)
+
+1. **Forward-only migration.**
+   - `ui_test_compile_requests.trigger`: immutable, set by the server, `RUN` for every v1 compile.
+   - `ui_test_revisions.confirmation_source` (`RUN` | `MANUAL`): write-once, written together with
+     `confirmed_by`. The V12 write-once trigger must allow it as confirmation bookkeeping.
+   - Rows auto-accepted before the fix stay `NULL` ("unknown"). They are never backfilled as
+     `MANUAL`.
+2. **`publishAcceptedCandidate`.**
+   - Auto-accept only when the request's `trigger = RUN` and the confirmer equals the request's
+     `created_by`. Otherwise publish through `publishCandidate`.
+   - Add `publishCandidate`'s deadline recheck and `insertCapturedRevision` branch. Reusing that
+     path and adding the two confirmation statements is the expected shape.
+   - Write `RUN`. The manual `confirm` writes `MANUAL`.
+3. **Tests.**
+   - Rewrite `NoAutoConfirmTest` to the new property: exactly two confirmation writers (manual
+     `confirm` and Run auto-accept). The scan includes SQL inside `CompileStateService`, which closes
+     the vacuity.
+   - Add a behavioural test that a non-RUN trigger publishes `AWAITING_CONFIRMATION`.
+   - Add a deadline-expiry test for the accepted path.
+   - 10.9 AC-21 is superseded by this ruling. Its owner records that; this ADR does not edit the
+     story.
+4. **Documents.**
+   - `compile/README.md`, the `CompilePipeline` class javadoc and the `publishAcceptedCandidate`
+     javadoc are rewritten to this model.
+   - `openapi.yaml`: the `compileTest` text says that acceptance is recorded as a Run confirmation
+     without prior review; the `confirmCompile` flag is removed; `executeTest` follows the O-22
+     decision.
+   - Re-anchor `BASE_SHA256` from `shasum -a 256` and add a §13 row. Public `confirmationSource`
+     exposure is optional. If it is added, that is a further Class C row.
+5. **Harness.** The `StudioCoRunIT.awaitCompiledToReadyAndAccepted` javadoc cites this section. Make
+   `AWAITING_CONFIRMATION` a fast-failing terminal status, and assert
+   `confirmation_source = RUN`.

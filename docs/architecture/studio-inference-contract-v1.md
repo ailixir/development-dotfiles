@@ -149,6 +149,20 @@ Unknown live/recovered proposal, repair, transport and elapsed counters are null
 
 V2 mutations inherit the existing public idempotency filter. This filter is replica-local for authoring requests, as for v1; it does not claim durable cross-replica compile idempotency. Execution retains its separate durable ledger identity. V2 save persists only; the explicit Compile changes/Rebuild all steps actions invoke generation, preventing duplicate save-triggered requests.
 
+### Run auto-accept ruling (2026-10-07, ADR-002 §35)
+
+C0-A3 (`c0-amendment-review.md` §4, DEC-OQ3) is in force, and this section clarifies it. Run is an explicit confirming act. §1's "explicitly confirmed" is satisfied by Run's confirmation of the candidate that Run's own compile request produced. The binding conditions are:
+- The compile request carries a server-captured, immutable `trigger`. The v1 `POST /tests/{id}/compile` takes no body and is the Run action's preparation, so the server records `RUN` for every v1 compile. The route is the trigger, not a client label.
+- Auto-accept happens only for `trigger = RUN`, and only when the confirmer is the request's `created_by`.
+- The revision stores a write-once `confirmationSource` (`RUN` | `MANUAL`). `RUN` means "confirmed by Run without prior review".
+- Publication keeps every guard of manual publication: request identity, both revisions, the reference policy and the final-CAS deadline recheck.
+
+Acceptance may take place inside the compile's publication transaction; a client call to `confirm-compile` is not required. The manual `confirm-compile` route remains the confirmation path for every other trigger, including v2 Compile changes/Rebuild all steps, and records `MANUAL`.
+
+The 2026-09-16 paragraph above is amended to read: "Compile changes, Rebuild all steps and Run invoke generation. Only Run confirms automatically."
+
+The as-built code at `554277fcb` is a **non-conformant interim**. It has no trigger and no `confirmationSource`, it auto-accepts every compile, and it skips the deadline recheck. The fix is specified in ADR-002 §35.5. Revisions auto-accepted before the fix keep a `NULL` source ("unknown") and are never relabelled as reviewed.
+
 ### Persistence ruling — `execution_scope` is fixed at insert (2026-10-06, story 10.23 defect D2)
 
 **Ruling.** `ui_test_executions.execution_scope` is written once, by the `INSERT` that creates the execution row, and never changes after that. The database must reject any `UPDATE` that changes it, in either direction (`NULL→FULL`, `FULL→NULL`), whatever the row's status. `DELETE` stays allowed: retention may remove evidence, and missing evidence already means FULL (§3). This amends §3. "Truthful FULL marker" now means one written at insert by the acceptance writer and protected by the database, not only by the JPA mapping (`updatable = false`).
