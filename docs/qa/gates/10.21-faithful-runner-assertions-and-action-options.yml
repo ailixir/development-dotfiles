@@ -1,0 +1,134 @@
+schema: 1
+story: '10.21'
+story_title: Faithful runner assertions and action options
+epic: EPIC-10
+work_package: 'A: F4/F6'
+
+gate: PASS
+status_reason: >-
+  All four ACs are implemented and backed by independently rerun evidence: 29/29 real-Chromium cases
+  agree with pinned Playwright 1.63 (positive and negative companions, including the QF1 late-read
+  timing case), and 199/199 adapter/language/compat unit tests pass. The remaining findings are low
+  severity (dead trial-era schema branch, asymmetric defensive adapter guard, story record drift).
+
+reviewer: Aria (@architect, quality gate for @dev executor)
+updated: '2026-10-06T00:00:00Z'
+branch: brunobuger/ui-studio
+head_sha: 829a56f02
+worktree: /Users/brunobuger/orca/workspaces/put-checks/ui-studio
+
+waiver:
+  active: false
+
+scope_note: >-
+  Reviewed only the story's write set (studio-runner/src/run/playwrightAdapter.ts, src/validator/**,
+  matching tests, pins and syntax reference). studio-runner/evaluation/** is being edited concurrently
+  by another agent; it was not reviewed here and none of its changes are attributed to this story.
+
+# Commands run by the reviewer (not developer claims)
+evidence:
+  unit_targeted:
+    command: cd studio-runner && npx vitest run test/run/adapter.test.ts test/language-surface.test.ts test/compat.test.ts --coverage.enabled=false
+    result: PASS
+    detail: 3 files, 199 passed (adapter 115, language-surface 62, compat 22). Coverage disabled because a subset run cannot meet global thresholds.
+  browser_oracle:
+    command: cd studio-runner && npx vitest run --config vitest.fixtures.config.ts test/fixtures-tier/assertion-semantics.test.ts
+    result: PASS
+    detail: 1 file, 29 passed, real sandboxed Chromium, globalSetup rebuilt dist/. Includes the trial-rejection case and detached/recreated element at 150 ms (pass) and 500 ms (fail) against a 300 ms timeout, each matched to pinned playwright/test.
+  pins:
+    command: cd studio-runner && npm run check:pins
+    result: PASS
+    detail: check:pins OK; Playwright 1.63.0 agrees across package.json, lock, Dockerfile and dist/runtime-versions.json. Image/browser build NOT ASSERTED outside the pinned image (ED-05), as before.
+  type_check:
+    command: cd studio-runner && npm run type-check
+    result: PASS
+    detail: exit 0
+  lint_scoped:
+    command: cd studio-runner && npx eslint src/run/playwrightAdapter.ts src/validator test/fixtures-tier/assertion-semantics.test.ts test/language-surface.test.ts test/run/adapter.test.ts
+    result: PASS
+    detail: exit 0. Package-wide lint not run, to avoid attributing concurrent evaluation/** edits.
+  not_run:
+    - Full runner suite (npm test) and full fixtures tier - lead reports baseline green at 1191 passed / 29 skipped; not independently rerun in this gate.
+    - Backend Gradle - excluded by the gate instructions; backend pin values were read, not built.
+
+prior_findings:
+  QF1:
+    source: docs/qa/studio-inference-implementation-review.md (QF1, re-review table)
+    verdict: CONFIRMED FIXED
+    detail: >-
+      pollUntil computes one deadline, caps each read by the remaining time, re-runs guard() after the
+      read and accepts a match only while now() < deadline; sleep is capped by the remaining time
+      (playwrightAdapter.ts:727-763, accept condition at :754). The 150 ms / 500 ms detached-element
+      companions passed on this rerun.
+
+ac_coverage:
+  total: 4
+  verified: 4
+  unmet: 0
+  detail:
+    AC-1: >-
+      PASS - normalizeWhitespace (playwrightAdapter.ts:239-241) matches the installed Playwright
+      normalizeWhiteSpace byte for byte (node_modules/playwright-core/lib/coreBundle.js:518: strip
+      U+200B/U+00AD, trim, collapse \s+). matches() (:243-267) normalizes both sides only for strings;
+      regexes are tested raw, ignoreCase true adds i, false strips i, absence keeps the flags (:253-255).
+      Applied to toContainText (:943-947) and toHaveTitle (:1004-1014); toHaveValue stays literal; URL
+      strings are canonicalized through new URL() with no inferred base (:986-991). Oracle cases at
+      assertion-semantics.test.ts:51-79 cover both override directions for text and URL.
+    AC-2: >-
+      PASS - trial was removed from every action schema (language.ts:161-196). Any trial key, true or
+      false, is OPTION_UNKNOWN_KEY with the actionable message "Remove trial to perform the reviewed
+      action" (arguments.ts:629-638). language-surface.test.ts:189-204 checks all 7 actions with both
+      booleans. The adapter also has its own defensive refusal (playwrightAdapter.ts:1051-1055, called at
+      :809/:859/:874/:889), and actionOf forwards only force/timeout (:1040-1045).
+    AC-3: >-
+      PASS - 29 real-Chromium cases compare the Studio adapter verdict to the independent playwright/test
+      verdict. Each fixed false positive or false negative has a negative or positive companion (for
+      example, text collapse vs differing words, regex raw whitespace vs \s+, value literal vs normalized,
+      relative URL with no base, late read). The trial case confirms the validator refuses the artifact
+      and that the page effect stays unchanged until a real accepted click.
+    AC-4: >-
+      PASS (with record drift, see SR-003) - the syntax reference documents trial rejection and the
+      normalization/ignoreCase rules (backend syntax-reference.md:79, :94-97). Runner pins
+      (versions.ts: validator 2.0.0, executor 2.1.0, syntax 2.1.0, artifact 1) agree with
+      RuntimePinProperties.java:36-38 and CompilePins.java:27. Executor/syntax 2.1.0 came from the later
+      Story 10.44 bump, not this story. type-check, scoped lint, pins, unit and browser checks were
+      rerun as listed above.
+
+top_issues:
+  - id: SR-001
+    severity: low
+    finding: >-
+      Dead trial-era schema branch. OptionValueSchema still declares { type: 'false' }
+      (language.ts:35), and readOptionValue handles it with a trial-specific message
+      (arguments.ts:660-668). No schema uses the type any more, so the branch is unreachable.
+    impact: None at runtime. It does leave a misleading path if someone reintroduces a false-only option.
+    suggested_action: Remove the 'false' variant and its case, or give the message a generic wording.
+    ac_refs: [AC-2]
+  - id: SR-002
+    severity: low
+    finding: >-
+      The adapter's defensive refuseTrial rejects only trial === true (playwrightAdapter.ts:1052).
+      The frozen C0 §6 rule is "reject the trial key even when false".
+    impact: >-
+      Not exploitable: the validator rejects both values, and actionOf never forwards trial. The only
+      issue is that the defence-in-depth layer is weaker than the contract it documents.
+    suggested_action: Refuse when the key is present (`'trial' in options`), and extend adapter.test.ts:183-189 to cover trial:false.
+    ac_refs: [AC-2]
+  - id: SR-003
+    severity: low
+    finding: >-
+      Story record drift. The pre-gate QA Results held an unattributed paragraph with run-on
+      counts ("971 unit +118 browser"). Dev Notes still describe the wt/epic checkout and pins "at
+      2.0.0", but executor and syntax are now 2.1.0 after Story 10.44.
+    impact: Documentation only. Neither the code nor the pins are inconsistent.
+    suggested_action: '@po/@sm may annotate the Dev Notes pin statement as superseded by 10.44; no code change.'
+    ac_refs: [AC-4]
+
+recommendations:
+  immediate: []
+  future:
+    - SR-001 and SR-002 can go into the next studio-runner hardening pass. Neither blocks this story.
+    - Optional oracle additions with no defect behind them, raised only for completeness. A regex with useInnerText, and a whitespace-only title.
+
+quality_score: 92
+expires: '2026-10-20T00:00:00Z'
