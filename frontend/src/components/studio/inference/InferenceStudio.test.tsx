@@ -58,8 +58,8 @@ describe('versioned inference authoring',()=>{
     expect(saved.authoring?.steps.map(step=>step.id)).toEqual(baseline.authoring?.steps.map(step=>step.id));
     expect(saved.test.description).toBe('Keep description'); expect(saved.test.configuration).toEqual(baseline.test.configuration);
     await compile();
-    expect(screen.getByText('Step 1 — Reused')).toBeInTheDocument();
-    expect(screen.getByText('Step 3 — Recompiled')).toBeInTheDocument();
+    expect(screen.getByText('Step 1: Reused')).toBeInTheDocument();
+    expect(screen.getByText('Step 3: Recompiled')).toBeInTheDocument();
     expect(screen.getByText('Code changes')).toBeInTheDocument();
     expect(screen.getByText('Not run for this revision')).toBeInTheDocument();
     expect(screen.getByText(/Previous result: PASSED/)).toBeInTheDocument();
@@ -77,13 +77,13 @@ describe('versioned inference authoring',()=>{
   });
   it('regenerates the middle suffix and preserves only the earlier step',async()=>{
     await open(); await edit(2); await compile();
-    expect(screen.getByText('Step 1 — Reused')).toBeInTheDocument();
-    expect(screen.getByText('Step 2 — Recompiled')).toBeInTheDocument();
-    expect(screen.getByText('Step 3 — Recompiled')).toBeInTheDocument();
+    expect(screen.getByText('Step 1: Reused')).toBeInTheDocument();
+    expect(screen.getByText('Step 2: Recompiled')).toBeInTheDocument();
+    expect(screen.getByText('Step 3: Recompiled')).toBeInTheDocument();
   });
   it('unknown/global scope rebuilds fully and never runs the historical revision',async()=>{
     await open(); await edit(2,false); await compile();
-    expect(screen.queryByText(/Step \d — Reused/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Step \d: Reused/)).not.toBeInTheDocument();
     expect(screen.getByText('All steps rebuilt because step dependencies are unknown.')).toBeInTheDocument();
     expect(screen.getByRole('button',{name:'Run all 3 steps'})).toBeDisabled();
   });
@@ -91,7 +91,7 @@ describe('versioned inference authoring',()=>{
     const request=vi.spyOn(studioInferenceApi,'compile');
     await open(); await edit(3); await compile(true);
     expect(request.mock.calls[0][1].mode).toBe('FULL');
-    expect(screen.queryByText(/Step \d — Reused/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Step \d: Reused/)).not.toBeInTheDocument();
   });
   it('scope-only edits invalidate confirmation; a no-op save preserves it',async()=>{
     await open(); await click(screen.getByRole('button',{name:'Save steps'}));
@@ -145,13 +145,13 @@ describe('versioned inference authoring',()=>{
   it('missing passing evidence falls back to a full rebuild',async()=>{
     resetStudioMocks(); baseline.test.lastRunStatus=null;seedInferenceMock(baseline);
     await open(); await edit(3); await compile();
-    expect(screen.queryByText(/Step \d — Reused/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Step \d: Reused/)).not.toBeInTheDocument();
   });
   it('identical regenerated code is labeled regenerated and never a reused step',async()=>{
     await open(); await compile(true);
     expect(screen.getAllByText('Code is identical; this step was regenerated. Review the updated wording.')).toHaveLength(3);
-    expect(screen.getByText('Step 3 — Recompiled')).toBeInTheDocument();
-    expect(screen.queryByText(/Step \d — Reused/)).not.toBeInTheDocument();
+    expect(screen.getByText('Step 3: Recompiled')).toBeInTheDocument();
+    expect(screen.queryByText(/Step \d: Reused/)).not.toBeInTheDocument();
   });
   it('reordering retains identity and clears scope',async()=>{
     await open(); await click(screen.getByRole('button',{name:'Move step 3 up'}));

@@ -369,7 +369,7 @@ describe('AC-12(a): axe-core conformance scan of the seven named Studio surfaces
     const control = await screen.findByRole('button', { name: 'Run Test' });
     await waitFor(() => expect(control).not.toBeDisabled());
     await userEvent.click(control);
-    await screen.findByTestId('step-seek-1');
+    await screen.findByTestId('step-watch-failure-1');
     await userEvent.click(screen.getByRole('tab', { name: 'Proof' }));
     expect(document.querySelectorAll('video')).toHaveLength(1);
     const drift = await scan('ChecksStudioPage/video-playback');

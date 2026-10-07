@@ -267,6 +267,65 @@
           ]
         }
       ]
+    },
+    {
+      "surface": "ChecksStudioPage/video-playback",
+      "violations": [
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "help": "Heading levels should only increase by one",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/heading-order?application=axeAPI",
+          "nodes": [
+            ".css-qb4uno-MuiTypography-root"
+          ]
+        },
+        {
+          "id": "region",
+          "impact": "moderate",
+          "help": "All page content should be contained by landmarks",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/region?application=axeAPI",
+          "nodes": [
+            "h1",
+            ".css-1dtqmwz-MuiStack-root",
+            "body > div > .css-0.MuiBox-root > .css-1qm1lh.MuiBox-root",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(1) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            ".css-r6rj31.MuiBox-root:nth-child(1)",
+            "#\\:r3r\\:-label",
+            "#\\:r3r\\:",
+            ".css-150epxh-MuiTypography-root",
+            ".css-1kw3y0a > .css-h8rzac-MuiTypography-root",
+            "#studio-step-input-0",
+            ".css-6rd5yr-MuiListItem-root > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "#studio-step-input-1",
+            ".css-al6v7d-MuiListItem-root > .css-xh9io6-MuiStack-root.MuiStack-root",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(3) > .css-1aiu069.MuiBox-root",
+            "#studio-step-input-2",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(3) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(4) > .css-1aiu069.MuiBox-root",
+            "#studio-step-input-3",
+            ".css-ptm34w-MuiListItem-root.MuiListItem-gutters:nth-child(4) > .css-xh9io6-MuiStack-root.MuiStack-root",
+            "#\\:r3t\\:-label",
+            "#\\:r3t\\:",
+            "#\\:r3t\\:-helper-text",
+            ".MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-lg-6:nth-child(2) > .MuiPaper-elevation1.MuiCard-root.css-16vq84g-MuiPaper-root-MuiCard-root > .MuiCardHeader-root.css-185gdzj-MuiCardHeader-root > .MuiCardHeader-content.css-1qbkelo-MuiCardHeader-content",
+            ".MuiCardHeader-action",
+            ".MuiTabs-root",
+            ".css-tuecwl-MuiStack-root",
+            ".css-sw1t3l-MuiStack-root",
+            ".css-11zrtk2-MuiTypography-root",
+            "p[data-testid=\"step-text-0\"]",
+            "span[data-testid=\"step-status-0\"]",
+            ".MuiListItem-alignItemsFlexStart.css-1xxxk77-MuiListItem-root:nth-child(1) > .css-v52ga5-MuiStack-root.MuiStack-root > .css-pl8gqh-MuiStack-root.MuiStack-root",
+            "p[data-testid=\"step-text-1\"]",
+            "span[data-testid=\"step-status-1\"]",
+            ".MuiListItem-alignItemsFlexStart.css-1xxxk77-MuiListItem-root:nth-child(2) > .css-v52ga5-MuiStack-root.MuiStack-root > .css-pl8gqh-MuiStack-root.MuiStack-root",
+            "p[data-testid=\"step-text-2\"]",
+            "span[data-testid=\"step-status-2\"]",
+            ".MuiListItem-alignItemsFlexStart.css-1xxxk77-MuiListItem-root:nth-child(3) > .css-v52ga5-MuiStack-root.MuiStack-root > .css-pl8gqh-MuiStack-root.MuiStack-root"
+          ]
+        }
+      ]
     }
   ]
 }
