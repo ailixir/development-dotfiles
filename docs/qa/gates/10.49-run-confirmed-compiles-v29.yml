@@ -1,0 +1,106 @@
+schema: 1
+story: '10.49'
+story_title: 'Run-confirmed compiles: ADR-002 §35 fix, V1 compile-request capture and V19-safety proof'
+gate: PASS
+status_reason: 'All 26 ACs verified against code at 4fdfc4d42: every V1 compile writes a RUN-stamped request row, auto-accept is gated on trigger=RUN plus requester with the deadline in the final CAS, confirmation_source is write-once under the V27 deny-by-default contract, and the live V1 chain reaches READY after V19 in a rolled-back transaction. Both mutations reproduced (each turns a named test red), source restored byte-identical; only low, advisory findings remain.'
+reviewer: 'Quinn (Test Architect)'
+reviewed_revision: 'commit:4fdfc4d421d9c97d4071f83a8d0e3927479be9df'
+updated: '2026-10-07T21:30:00Z'
+
+evidence_run_by_qa:
+  backend_studio_and_migration: "gradle-locked.sh test --tests 'com.citi.put.checks.studio.*' --tests '*Migration*' -> 1233 tests, 0 failures, 0 errors, 7 skipped (152 classes). RunConfirmationTest 8/8, RunCompileAfterV19Test 2/2, NoAutoConfirmTest 8/8, InferenceMigrationLatestIT 16/16, CompileStateServiceTest 22/22, RepairLoopTest 14/14, StudioContractTest 14/14, ExecutionVideoContractTest 17/17, PromptAssemblyTest 11/11, PromptLayoutTest 6/6; *Migration* classes 72 tests in 12 classes."
+  ac18_output: '[10.49 AC-18] after V19: result=PUBLISHED, capability=true, compile_request_id=requestId, compile_status=READY, accepted=true, confirmation_source=RUN, outcomeRevisionId non-null'
+  spotless: 'spotlessJavaCheck BUILD SUCCESSFUL'
+  corun: 'tools/corun.sh under lock: legs executed 11, failures 0, errors 0, skipped 0 (GREEN)'
+  runner: 'studio-runner confinement.test.ts 19/19'
+  frontend: 'frontend src/components/studio + src/pages/ChecksStudioPage 39 files / 415 tests passed; studioContract.test.ts 76/76'
+  openapi_digest: 'shasum -a 256 docs/specs/studio/openapi.yaml = ca98f80c...fa57 = BASE_SHA256'
+  mutation_b: 'RUN_TRIGGER.equals(...) removed from runConfirms -> RunConfirmationTest.aCompileWhoseRequestTriggerIsNotRunPublishesAwaitingConfirmation FAILED (RunConfirmationTest.java:160); NoAutoConfirmTest 8/8 stayed GREEN (developer claim reproduced).'
+  mutation_a: "third writer (UPDATE ui_test_revisions SET confirmed_by = 'system') in publishInvalid -> NoAutoConfirmTest.exactlyTwoConfirmationWritersExistTheManualConfirmAndTheRunAutoAccept FAILED; other 7 passed."
+  restore_checksum: 'CompileStateService.java sha256 8734a1c03af6698e8bc8c5cce59f36d9d13437c3a01e7fa99f30a6d4974c7881 before and after both mutations; git status clean apart from pre-existing untracked .aiox/ and .claude/agent-memory/'
+  not_run_by_qa: 'Red-first run on unmodified HEAD (AC-11/19) not re-executed; plausibility assessed by reading the pre-change publishAcceptedCandidate (insertOrReuseRevision, no request id). Full ./gradlew check not run. CodeRabbit skipped (CLI absent on this Darwin host), not passed.'
+
+top_issues:
+  - id: 'REQ-001'
+    severity: low
+    finding: >-
+      ui_test_compile_requests."trigger" is nullable for new rows (V29:30-32). QA checked whether NULL is
+      reachable for a new V1 compile: the only INSERT is InferenceCaptureStore.persist (:208), and its
+      only src/main caller with a non-null trigger is beginCompile(UUID, CompileInputs, String, Duration)
+      (CompileStateService:237-243, RUN). The null-trigger caller is capture()/captureForCompilation
+      (CompileStateService:104,166-177), which has no src/main caller. So NULL is not reachable for any
+      V1 compile today, and NULL fails closed (runConfirms:378 requires RUN, so it publishes
+      AWAITING_CONFIRMATION). The developer's argument against a DEFAULT is sound. The argument against
+      NOT NULL only covers pre-V29 rows; PostgreSQL can enforce new rows only, with
+      CHECK ("trigger" IS NOT NULL) NOT VALID (existing rows are not scanned, and V18's immutability
+      trigger means they can never be updated into violation).
+    suggested_action: >-
+      Follow-up (owner @data-engineer, before any v2 caller of capture() exists): V30 adding
+      CHECK ("trigger" IS NOT NULL) NOT VALID, and make capture() take a required trigger so that v2
+      flows have to state their own (ADR-002 §35.3). Not blocking, because the system fails closed.
+  - id: 'REL-001'
+    severity: low
+    finding: >-
+      On the V1 Run path a publication refused by the deadline (requirePublicationBudget or the final
+      CAS, CompileStateService:301-357) throws CancellationException after settlement.claim()
+      (CompilePipeline:375-382). The executor expiry callback then cannot publish STALE, so the draft
+      stays COMPILING until CompileAbandonmentSweeper runs. RunConfirmationTest:142 pins COMPILING. This
+      pattern already existed for publishCandidate, and this story makes it reachable on the V1 path.
+      deadline_at is taken at NOW() in beginCompile's transaction, a few ms before the executor budget
+      starts, so the window is narrow.
+    suggested_action: >-
+      Consider publishError(COMPILE_BUDGET_EXCEEDED) when publication is cancelled after the claim, or
+      give the executor budget a small margin below deadline_at. Track it as a follow-up.
+  - id: 'DOC-001'
+    severity: low
+    finding: >-
+      docs/runbooks/studio-inference-rollout.md:80 still says the ordinary Flyway path runs "V20–V28"
+      and states the floor against "head schema (V28)". It does not say that V29 does not raise the
+      rollback floor. By inference from V29 it does not: both columns are nullable, there is no default
+      and no new NOT NULL, and pre-10.49 INSERT/UPDATE statements satisfy both CHECKs.
+    suggested_action: 'Add a V29 bullet next to the V27/V28 note: additive, nullable, and the floor is unchanged.'
+  - id: 'DOC-002'
+    severity: low
+    finding: >-
+      The V29 rollback note (V29:24-27) has the right order: restore V27's function body before dropping
+      the columns, because plpgsql resolves NEW.confirmation_source at runtime. It does not say two
+      things: (a) a 10.49+ binary fails after the rollback, because its INSERT names "trigger" and its
+      UPDATEs set confirmation_source; (b) the rollback erases the RUN/MANUAL audit data.
+    suggested_action: 'Append both caveats to the rollback comment in a later doc-only change, or record them in the runbook. Do not edit the applied migration file if checksums are validated.'
+  - id: 'TEST-001'
+    severity: low
+    finding: >-
+      NoAutoConfirmTest pins only the presence of the runConfirms( gate, not its RUN term. Mutation B is
+      caught only by the behavioural RunConfirmationTest. This is disclosed in the Dev Agent Record, and
+      AC-16 accepts "or".
+    suggested_action: 'Optional: assert in NoAutoConfirmTest that the runConfirms body contains RUN_TRIGGER.equals and created_by.'
+
+ac_trace:
+  AC-1: 'V29:30-32 CHECK IN (RUN,COMPILE_CHANGES,REBUILD_ALL); immutability via V18 trigger; InferenceMigrationLatestIT:775 rejects UPDATE of every value incl. NULL, rejects SCHEDULED/MANUAL/run'
+  AC-2: 'V29:41-61 deny-by-default kept (to_jsonb(NEW) - ARRAY[...]), confirmation_source added to the exclusion array (:43-44) and the write-once term (:55); allow-list InferenceMigrationLatestIT:305; IT :830 asserts 23514'
+  AC-3: 'No UPDATE/backfill in V29; InferenceMigrationLatestIT:878 legacy confirmed row reads NULL, zero non-null source/trigger rows'
+  AC-4: 'V29 touches no cutover file (git diff HEAD~1 -- backend/db/cutover empty); *Migration* 72/72'
+  AC-5: 'CompileStateService:237-243 same @Transactional; CompilePipeline:180-184; RunConfirmationTest:58,89'
+  AC-6: 'no prompt/gateway file in diff; PromptAssemblyTest 11/11, PromptLayoutTest 6/6'
+  AC-7: 'captured writer when capability present (:302-305); AC-7 measurement printed (pre-V19 null, post-V19 non-null)'
+  AC-8: 'runConfirms :367-379 (rows==1, RUN, createdBy equals created_by)'
+  AC-9: 'deadline rechecked at :290,:301,:314,:328 and final CAS :343-345; captured branch :302-305'
+  AC-10: "RUN writer :319, MANUAL writer :511; tests :110,:180"
+  AC-11: 'RunConfirmationTest:126 real request row, past deadline, no revision, COMPILING'
+  AC-12: 'RunConfirmationTest:153 seeds COMPILE_CHANGES (domain value)'
+  AC-13: 'RunConfirmationTest:167'
+  AC-14: 'lockCurrentRequest unchanged (:766-782); CompileStateServiceTest 22/22'
+  AC-15: 'NoAutoConfirmTest:128 scans CompileStateService, distinguishes MANUAL/RUN statements'
+  AC-16: 'QA reproduced mutations A and B; checksum identical'
+  AC-17: 'Change Log 0.4.0 records the supersession'
+  AC-18: 'RunCompileAfterV19Test:95 live chain, SET LOCAL attestation, rolled back; :142 head intact'
+  AC-19: 'Dev-quoted red message; plausible from the pre-change code, not re-run by QA'
+  AC-20: 'mixedWriterCutoverOnHeadSchema unchanged; LEGACY_WRITER javadoc reconciled'
+  AC-21: 'runbook:78 banner resolved, says it "does not authorise applying V19 to any shared environment"; Head+V19 row corrected'
+  AC-22: 'README:1-50, CompilePipeline javadoc :64-72, :150-155, publishAcceptedCandidate javadoc; no "save-triggered" left in compile/'
+  AC-23: 'StudioCoRunIT:1572 AWAITING_CONFIRMATION terminal, :1587 asserts RUN; co-run 11/11 run by QA'
+  AC-24: 'openapi hunks only in compileTest (:552) and confirmCompile (:630); deprecated flag + "(deprecated)" summary removed; executeTest untouched'
+  AC-25: 'BASE_SHA256 matches shasum; ADR-002 §13 row added'
+  AC-26: 'diff touches only listed files plus CompilePipelineSourceAdmissionTest (one verify line, a Studio backend test, justified); no frontend, cutover, prompt, CsiOwnershipEvaluator, executor or dispatcher change'
+
+waiver: { active: false }
