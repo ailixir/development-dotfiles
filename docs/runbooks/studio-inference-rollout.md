@@ -71,7 +71,20 @@ The partial indexes are `idx_ui_test_revisions_eligible` and `idx_ui_test_exec_f
 6. Verify the actual capability before enabling the new publisher: the old `uq_ui_test_revisions_identity` constraint is absent, `uq_ui_test_revisions_compile_request` remains, and `trg_ui_test_revision_require_request` is installed/enabled. Check the intended schema explicitly. A feature flag alone is not proof of cutover. First publication inserts a new revision; repeating the same request uses `ON CONFLICT(compile_request_id) DO NOTHING` and retrieves/verifies that request's existing revision. Different requests may now produce equal bytes without sharing confirmation/provenance.
 7. Run the actual backend integration/confirmation/race tests, then enable v2 and full inference only after their independent environment/live gates. Incremental has a separate gate. Existing policy-1 artifacts do not become policy-2-compatible through this database change.
 
-V19 is forward-only. Before V19, rollback to the prior application is possible only while new authoring remains disabled and its behavior is verified. After V19, rollback stops at the compatible writer release: old binaries have an invalid `ON CONFLICT` target and cannot be restored. Disabling incremental selects the corrected full path and preserves history. Do not re-add old uniqueness after distinct requests have produced equal artifacts; repair through a new forward migration. Remote credentials, Vertex approval and AWS S3 provisioning remain separate prerequisites.
+V19 is forward-only. Disabling incremental selects the corrected full path and preserves history. Do not re-add old uniqueness after distinct requests have produced equal artifacts; repair through a new forward migration. Remote credentials, Vertex approval and AWS S3 provisioning remain separate prerequisites.
+
+### Compatible rollback floor
+
+The ordinary Flyway path now runs V18 then V20–V26; V19 stays staged. The floor is therefore stated against the head schema, not V18 (verified by `InferenceMigrationLatestIT`, 2026-10-06):
+
+| Schema state | Lowest restorable binary | Evidence |
+| --- | --- | --- |
+| Head (V26) without V19 | The release that shipped the applied Flyway head. Schema is forward-only, so older binaries are excluded regardless of V18. Pre-V22 publishers are also proven broken: their `ON CONFLICT(test_id, source_revision, configuration_revision, artifact_hash)` target has no matching unique index since V22 (`no unique or exclusion constraint`). | `mixedWriterCutoverOnHeadSchema` |
+| Head + V19 | The capability-gated writer: `InferenceCaptureStore.requestIdentityAvailable()` selecting `CompileStateService.insertCapturedRevision` (present at `b40be10d0`; first archived in `51ade0f1f`). A binary without it fails every publication with `new candidate requires immutable compile request after V19`. It fails loudly; it does not silently deduplicate. | `mixedWriterCutoverOnHeadSchema` |
+
+**V19 cutover is currently blocked by a writer defect.** At `b40be10d0`, `insertCapturedRevision` does not write `reference_policy` or `intent_derivation_version`. For any draft that carries V21 `ui_tests.authoring`, V21's capture trigger copies that authoring into the revision, and `ck_ui_test_revisions_v2_derivation_version` (V23) then rejects the insert. Before V19 this path is never selected. After V19 it is the only path, so context-aware drafts could not publish. HEAD is therefore **not** yet a valid post-V19 floor. Do not apply V19 to any environment until that writer is fixed and `capturedPublisherAcceptsContextAwareDraftAfterCutover` passes. Owner: backend Dex (Java).
+
+Rollback below the floor is not possible. Restoring the pre-V19 database snapshot is the only way back, and it discards every post-cutover candidate.
 
 ## Verification and outstanding integration
 
@@ -80,6 +93,27 @@ V19 is forward-only. Before V19, rollback to the prior application is possible o
 The migration slice does not implement API captures, planner eligibility, final baseline query/runtime filtering, current-request CAS, v2 capability flags or complete mixed-provenance JSON production; these belong to backend story 10.24. Its tests and measured baseline query are required before claiming the integrated story accepted. No shared database, live gateway or deployment was changed by creating these artifacts.
 
 Local verification on 2026-09-16: all 7 `InferenceMigrationIT` cases passed on PostgreSQL 15 via Testcontainers, with zero skips. Build completed in 16 seconds using Java 21. This evidence covers the migration slice only; final repository-query measurement and application concurrency/integration remain required.
+
+### Head-schema verification (AC-5, 2026-10-06)
+
+`InferenceMigrationIT` only migrates to V18. `InferenceMigrationLatestIT` re-runs the AC-5 obligations on the current Flyway head, with every case in a rolled-back transaction. It covers:
+
+- a fresh V1→head install;
+- a V17→head upgrade that carries a confirmed legacy revision and a matching legacy PASSED run;
+- catalog parity (columns, indexes, triggers, constraints, function bodies) between the fresh and upgraded databases;
+- tampering on every V18 column, plus the append-only and authoring guards;
+- `execution_scope` relabelling;
+- baseline selection that mirrors the HEAD `InferenceCaptureStore` query (CSI/test scoping, `(created_at, id)` tie-break, FAILED/unmarked/runtime-drift/unconfirmed/other-fingerprint exclusion, fallback after evidence expiry, then FULL);
+- a local-volume EXPLAIN;
+- the mixed-writer V19 cutover on the head index form.
+
+Result: 16 tests, 3 failed, 0 skipped (`InferenceMigrationIT` 7/7; `InferenceMigrationLatestIT` 6/9). All three failures are product defects, not test errors. They remain open, and no migration was changed:
+
+1. **Head schema lost V18 revision immutability (migration defect, Dara).** V21, V22, V23 and V24 each `CREATE OR REPLACE` `ui_test_revisions_write_once()` with an explicit column list. That replaced V18's generic `to_jsonb(NEW) - confirmation` guard. On the head schema, plain `UPDATE` succeeds on `compile_request_id` (to a sibling request or NULL), `authoring_snapshot`, `authoring_hash`, `scope_reviewed_by`, `scope_reviewed_at`, `compilation_fingerprint` and `baseline_revision_id`. This breaks AC-1 "database-enforced immutability" on every database beyond V18. The fix needs a new forward migration, with its number allocated by the coordinator, that restores the generic guard. Applied V21–V24 must not be edited.
+2. **Historical runs can be relabelled as FULL evidence (contract gap, Aria/Dara decision).** `UPDATE ui_test_executions SET execution_scope='FULL'` on a NULL historical row is accepted. Only the JPA mapping (`updatable=false`) prevents it. C0 §3 makes untruthful FULL markers ineligible, so a DB guard that allows `execution_scope` only at insert is recommended in the same forward migration.
+3. **Post-V19 captured writer rejects V21 authoring drafts (Java defect, Dex).** See the rollback-floor section above.
+
+Local-volume query evidence (not production volume): 40 tests × 50 confirmed request-linked revisions × 40 executions = 80,001 execution rows, all in the DEFAULT partition. `EXPLAIN (ANALYZE, BUFFERS)` used `idx_ui_test_revisions_eligible` and the partition copy of `idx_ui_test_exec_full_baseline`. Execution time was about 0.1 ms. The sequential scans shown are on the empty V7 month partitions (cost 0). Representative production history volume and the shared-environment cutover rehearsal still need a real environment and remain **blocked (external)**.
 
 ## Configuration and local verification
 
