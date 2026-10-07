@@ -6,7 +6,6 @@ import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.compile.CompilePins;
 import com.citi.put.checks.studio.compile.CompilePipeline;
-import com.citi.put.checks.studio.compile.CompileStateService;
 import com.citi.put.checks.studio.compile.gateway.CompileResponse;
 import com.citi.put.checks.studio.compile.gateway.GatewayErrorCode;
 import com.citi.put.checks.studio.compile.gateway.GatewayOutcome;
@@ -39,6 +38,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.AfterAll;
@@ -279,7 +279,6 @@ class StudioCoRunIT {
 
   @Autowired private StudioService studioService;
   @Autowired private CompilePipeline pipeline;
-  @Autowired private CompileStateService states;
   @Autowired private StudioDispatcher dispatcher;
   @Autowired private RunnerValidationClient validationClient;
   @Autowired private CorpusGateway gateway;
@@ -405,47 +404,30 @@ class StudioCoRunIT {
     long mark = runner.logMark();
 
     pipeline.compile(testId, OWNER);
-    awaitCompileStatusIn(testId, Set.of("AWAITING_CONFIRMATION", "NEEDS_REVISION", "STALE"));
-    List<String> duringCompile = runner.logSince(mark);
-
-    String status = compileStatus(testId);
-    if (!"AWAITING_CONFIRMATION".equals(status)) {
-      // The three shapes this leg can fail in, and the two numbers that tell them apart. `validator
-      // calls = 0` means the pipeline never reached the runner, so the fault is upstream of the
-      // seam — the gateway, or the pipeline's own gate. `validator calls = 1` with the runner
-      // recording an identity refusal means the credential is wrong. `validator calls = 1` with the
-      // runner recording nothing means the runner was reached and objected to the body: the API's
-      // compile_error collapses both of the latter into VALIDATOR_UNAVAILABLE, so the runner's own
-      // account of the window is the only thing that separates them.
-      throw new CoRunFailure(
-          "studio-runner (POST /v1/validate) or the API's compile pipeline",
-          "the draft did not become confirmable — compile_status is " + status,
-          "gateway calls="
-              + gateway.calls()
-              + ", validator calls="
-              + (validationClient.callCount() - callsBefore)
-              + ", compile_error="
-              + compileError(testId)
-              + "; what the runner recorded while the compile was in flight:\n"
-              + quoted(duringCompile));
-    }
+    // The three shapes this leg can fail in, and the two numbers that tell them apart. `validator
+    // calls = 0` means the pipeline never reached the runner, so the fault is upstream of the
+    // seam — the gateway, or the pipeline's own gate. `validator calls = 1` with the runner
+    // recording an identity refusal means the credential is wrong. `validator calls = 1` with the
+    // runner recording nothing means the runner was reached and objected to the body: the API's
+    // compile_error collapses both of the latter into VALIDATOR_UNAVAILABLE, so the runner's own
+    // account of the window is the only thing that separates them.
+    awaitCompiledToReadyAndAccepted(
+        testId,
+        "studio-runner (POST /v1/validate) or the API's compile pipeline",
+        "the draft",
+        () ->
+            "gateway calls="
+                + gateway.calls()
+                + ", validator calls="
+                + (validationClient.callCount() - callsBefore)
+                + ", compile_error="
+                + compileError(testId)
+                + "; what the runner recorded while the compile was in flight:\n"
+                + quoted(runner.logSince(mark)));
 
     assertThat(validationClient.callCount() - callsBefore)
         .as("the compile must have consulted the REAL runner exactly once, not a cached verdict")
         .isEqualTo(1L);
-    assertThat(candidateRevisionId(testId)).as("a candidate revision must exist").isNotNull();
-
-    UUID candidate = candidateRevisionId(testId);
-    states.confirm(
-        testId,
-        candidate,
-        artifactHash(candidate),
-        sourceRevision(testId),
-        configurationRevision(testId),
-        OWNER);
-    assertThat(confirmedRevisionId(testId))
-        .as("the confirmed revision is what makes the draft runnable")
-        .isEqualTo(candidate);
   }
 
   // ── Leg 2: API to runner, the dispatch path ──────────────────────────────
@@ -602,9 +584,9 @@ class StudioCoRunIT {
   }
 
   /**
-   * Compiles, confirms, dispatches and runs a two-step test against a page served here, and fails
-   * with an attribution unless it ends {@code PASSED} with its ledger {@code DONE}. Leg 4 is this
-   * alone; leg 10 is this after every cancel leg has run.
+   * Compiles to READY (accepted), dispatches and runs a two-step test against a page served here,
+   * and fails with an attribution unless it ends {@code PASSED} with its ledger {@code DONE}. Leg 4
+   * is this alone; leg 10 is this after every cancel leg has run.
    */
   private void runATrivialPassingTestToPassed(String name) throws IOException {
     try (FixturePage page = FixturePage.start()) {
@@ -615,22 +597,11 @@ class StudioCoRunIT {
       gateway.answerWith(passingArtifact(page.url(), gotoLine, clickLine));
 
       pipeline.compile(passingTest, OWNER);
-      awaitCompileStatusIn(passingTest, Set.of("AWAITING_CONFIRMATION", "NEEDS_REVISION", "STALE"));
-      if (!"AWAITING_CONFIRMATION".equals(compileStatus(passingTest))) {
-        throw new CoRunFailure(
-            "co-run harness or studio-runner (POST /v1/validate)",
-            "the passing test did not become confirmable — compile_status is "
-                + compileStatus(passingTest),
-            "compile_error=" + compileError(passingTest));
-      }
-      UUID candidate = candidateRevisionId(passingTest);
-      states.confirm(
+      awaitCompiledToReadyAndAccepted(
           passingTest,
-          candidate,
-          artifactHash(candidate),
-          sourceRevision(passingTest),
-          configurationRevision(passingTest),
-          OWNER);
+          "co-run harness or studio-runner (POST /v1/validate)",
+          "the passing test",
+          () -> "compile_error=" + compileError(passingTest));
 
       awaitRunnerIdle();
       UUID executionId = studioService.executeTest(passingTest, owner, null).executionId();
@@ -959,8 +930,8 @@ class StudioCoRunIT {
   }
 
   /**
-   * Compiles, confirms and dispatches the stalling test, and returns once its browser is inside
-   * step 1's navigation with its pids snapshotted.
+   * Compiles to READY (accepted) and dispatches the stalling test, and returns once its browser is
+   * inside step 1's navigation with its pids snapshotted.
    */
   private StalledRun startStalledRun(String name) throws IOException {
     UUID testId = confirmedStallTest(name);
@@ -1045,22 +1016,11 @@ class StudioCoRunIT {
     gateway.answerWith(root.toString());
 
     pipeline.compile(testId, OWNER);
-    awaitCompileStatusIn(testId, Set.of("AWAITING_CONFIRMATION", "NEEDS_REVISION", "STALE"));
-    if (!"AWAITING_CONFIRMATION".equals(compileStatus(testId))) {
-      throw new CoRunFailure(
-          "co-run harness or studio-runner (POST /v1/validate)",
-          "the stalling test did not become confirmable — compile_status is "
-              + compileStatus(testId),
-          "compile_error=" + compileError(testId));
-    }
-    UUID candidate = candidateRevisionId(testId);
-    states.confirm(
+    awaitCompiledToReadyAndAccepted(
         testId,
-        candidate,
-        artifactHash(candidate),
-        sourceRevision(testId),
-        configurationRevision(testId),
-        OWNER);
+        "co-run harness or studio-runner (POST /v1/validate)",
+        "the stalling test",
+        () -> "compile_error=" + compileError(testId));
     return testId;
   }
 
@@ -1592,6 +1552,37 @@ class StudioCoRunIT {
     return snapshot;
   }
 
+  /**
+   * Waits for a compile to settle and fails with an attribution unless it published {@code READY}
+   * with the revision already accepted.
+   *
+   * <p>Since story 10.44 a validated compile stores and accepts its candidate in one transaction
+   * ({@code CompileStateService.publishAcceptedCandidate}); there is no {@code
+   * AWAITING_CONFIRMATION} step left for the harness to drive. What the harness's old explicit
+   * confirm used to prove is asserted directly instead: an accepted revision exists, it is the
+   * test's {@code confirmed_revision_id}, and it was confirmed by the test owner. {@code
+   * NEEDS_REVISION} and {@code STALE} are still waited for so a bad compile fails fast with its own
+   * attribution rather than as a timeout.
+   */
+  private void awaitCompiledToReadyAndAccepted(
+      UUID id, String component, String subject, Supplier<String> detail) {
+    awaitCompileStatusIn(id, Set.of("READY", "NEEDS_REVISION", "STALE"));
+    String status = compileStatus(id);
+    if (!"READY".equals(status)) {
+      throw new CoRunFailure(
+          component, subject + " did not become READY — compile_status is " + status, detail.get());
+    }
+
+    UUID candidate = candidateRevisionId(id);
+    assertThat(candidate).as("a candidate revision must exist").isNotNull();
+    assertThat(confirmedRevisionId(id))
+        .as("the accepted revision is what makes the draft runnable")
+        .isEqualTo(candidate);
+    assertThat(confirmedBy(candidate))
+        .as("the accepted revision must be confirmed by the test owner")
+        .isEqualTo(OWNER);
+  }
+
   private void awaitCompileStatusIn(UUID id, Set<String> accepted) {
     long deadline = System.nanoTime() + Duration.ofSeconds(60).toNanos();
     while (System.nanoTime() < deadline) {
@@ -1638,22 +1629,9 @@ class StudioCoRunIT {
         "SELECT confirmed_revision_id FROM ui_tests WHERE id = ?", UUID.class, id);
   }
 
-  private String artifactHash(UUID revisionId) {
+  private String confirmedBy(UUID revisionId) {
     return jdbc.queryForObject(
-        "SELECT artifact_hash FROM ui_test_revisions WHERE id = ?", String.class, revisionId);
-  }
-
-  private int sourceRevision(UUID id) {
-    Integer value =
-        jdbc.queryForObject("SELECT source_revision FROM ui_tests WHERE id = ?", Integer.class, id);
-    return value == null ? 0 : value;
-  }
-
-  private int configurationRevision(UUID id) {
-    Integer value =
-        jdbc.queryForObject(
-            "SELECT configuration_revision FROM ui_tests WHERE id = ?", Integer.class, id);
-    return value == null ? 0 : value;
+        "SELECT confirmed_by FROM ui_test_revisions WHERE id = ?", String.class, revisionId);
   }
 
   private UUID admissionId(UUID executionId) {

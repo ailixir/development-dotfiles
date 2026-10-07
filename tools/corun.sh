@@ -3,8 +3,9 @@
 # tools/corun.sh — the local co-run.
 #
 # Starts the REAL put-checks API and the REAL studio-runner in one session, with the LLM gateway
-# stubbed and the runner's object store on the filesystem, and drives a draft through compile,
-# confirm and dispatch across the seam between them.
+# stubbed and the runner's object store on the filesystem, and drives a draft through compile
+# (which publishes READY with the revision already accepted — there is no separate confirm step)
+# and dispatch across the seam between them.
 #
 # It also points the API's local evidence reader at the runner's exact object directory and proves
 # a real recording is served through an inclusive ranged read. See StudioCoRunIT for the eleven
