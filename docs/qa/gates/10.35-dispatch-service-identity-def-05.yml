@@ -4,11 +4,17 @@ story_title: Dispatch service identity (DEF-05), acceptance spec
 epic: EPIC-10
 label: ACCEPTANCE-SPEC
 
-gate: FAIL
+gate: PASS
 reviewer: Quinn (@qa)
 reviewed_at: 2026-10-06
-reviewed_revision: commit:b40be10d0
-fix_under_gate: commit:a19112afb (ancestor of HEAD, verified with git merge-base --is-ancestor)
+reviewed_revision: commit:0d93a9bf1 (re-review, QA loop iteration 2; see re_reviews below)
+fix_under_gate: commit:a19112afb (identity) + commit:e79178666 (AC-3 runner refusal line)
+gate_history:
+  - {iteration: 1, gate: FAIL, revision: 'commit:b40be10d0', required_fix: AC3-RUNNER-SILENT-ON-BODY-REFUSAL}
+  - {iteration: 2, gate: PASS, revision: 'commit:0d93a9bf1', required_fix_resolved: AC3-RUNNER-SILENT-ON-BODY-REFUSAL}
+
+# Everything from status_reason down to blocks_still is the ITERATION-1 record (FAIL at b40be10d0),
+# kept verbatim as history. The current verdict and its evidence are in re_reviews[0].
 
 status_reason: >-
   The identity fix works. The DEF-01 observability guarantee, which the story says is the
@@ -197,3 +203,165 @@ def_05_closure: >-
   its own defect. That is a scope ruling for @po; this gate does not make it.
 unblocks: []
 blocks_still: ['10.34 (blocks: ["10.34"] per manifest — the dispatch half is now reachable; @po to re-rule)']
+
+re_reviews:
+  - iteration: 2
+    gate: PASS
+    reviewed_at: 2026-10-06
+    reviewed_revision: commit:0d93a9bf1
+    fix_under_review: >-
+      commit:e79178666 (studio-runner routes.ts recordRunRefusal + 6 tests in routes.test.ts + story).
+      Ancestor of HEAD. 0d93a9bf1 (10.44, runner fill-time secret check) sits above it and was in
+      the build.
+    status_reason: >-
+      AC3-RUNNER-SILENT-ON-BODY-REFUSAL is resolved by running. In the same session and on
+      byte-identical source, the manifestKey-dropped co-run made the runner write one
+      `runs.refused` warn line. The harness classifier now reports the THIRD shape ("objected to WHAT
+      it was sent"), not the identity shape and not the "recorded NOTHING / suspect the address"
+      shape. The line carries no body value. AC-1/2/4/5/7 re-confirmed by the same commands as
+      iteration 1. AC-6 still holds. The 8 red legs are harness drift (OBS-H1), not 10.35.
+    evidence:
+      commands:
+        - cmd: "studio-runner: npx vitest run test/server/routes.test.ts --coverage.enabled=false"
+          result: "41/41 passed (the 6 'Story 10.35 AC-3' tests included)"
+        - cmd: >-
+            same, with logger.record('warn','runs.refused',...) short-circuited (void 0 && ...)
+          result: >-
+            5 of the 6 AC-3 tests red (the 6th asserts NO line for an admitted job, so it stays
+            green by design). Restored; routes.ts sha256 e96934eb…bbe7 before == after.
+        - cmd: "studio-runner: npx tsc -p . --noEmit; npx eslint src/server/routes.ts test/server/routes.test.ts"
+          result: "both clean (exit 0, no output)"
+        - cmd: >-
+            ONE held gradle lock (mkdir lock, scratchpad qa1035-corun.sh, rmdir on EXIT):
+            (a) tools/corun.sh  [baseline, QA_1035_DROP_KEY unset], then
+            (b) QA_1035_DROP_KEY=manifestKey tools/corun.sh --skip-build  [mutated]
+          result: >-
+            (a) 21:48-21:57 EDT: legs executed 11, failures 8, errors 0 (514 s). Green: leg 0, leg 2,
+            leg 3. (b) 21:57-22:05 EDT: legs executed 11, failures 10, errors 0 (481 s). Green: leg 0.
+            Leg 2 red with the shape-3 attribution; leg 3 'could not start' (leg 2 never dispatched),
+            as expected. Legs 1 and 4-10 red in both runs on 'compile_status is READY' (OBS-H1).
+        - cmd: "gradle-locked.sh test --tests 'com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest' --rerun"
+          result: "BUILD SUCCESSFUL; XML tests=14 skipped=0 failures=0 errors=0"
+      instrumentation: >-
+        Same as iteration 1, gate-only, restored by sha256 (HttpRunnerDispatchClient.java
+        edba7f9a…4af0, StudioCoRunIT.java bfa7f5aa…bc95; both equal before/after, the same hashes as
+        iteration 1). The client printed the runner RESPONSE (status, headers, body), never the
+        request body. body() removed the key named by env QA_1035_DROP_KEY. Leg 2 printed
+        dispatched/admission_id/ledger, SELECT status,error_code FROM ui_test_executions, the
+        runner window and the classifier text before its existing check.
+      baseline_artefact_same_session:
+        response: >-
+          HTTP 202; headers {cache-control:[no-store], connection:[keep-alive], content-length:[19],
+          content-type:[application/json], keep-alive:[timeout=5]}; body {"code":"ADMITTED"}
+        ledger: "dispatched=1 admission_id=08438980-fa6a-441f-9e9a-0803eb83b9ed ledger=ADMITTED"
+        db: "[{status=PENDING, error_code=null}]"
+        runner_window: >-
+          1 line: {"level":"info","event":"admission.admitted","executionId":"5f513916-…","attemptId":
+          "3386603e-…","admissionId":"08438980-…","runnerInstanceId":"runner-muxg8dm8-gp5r3wox"}
+      mutated_artefact:
+        response: >-
+          HTTP 400; headers {cache-control:[no-store], connection:[keep-alive], content-length:[84],
+          content-type:[application/json], keep-alive:[timeout=5]}; body
+          {"code":"JOB_INVALID","detail":[{"code":"JOB_FIELD_MISSING","field":"manifestKey"}]}
+        ledger: "dispatched=1 admission_id=null ledger=DONE"
+        db: "[{status=ERROR, error_code=DISPATCH_FAILED}]"
+        runner_window: >-
+          1 line: {"ts":"2026-10-07T01:58:35.118Z","level":"warn","event":"runs.refused",
+          "route":"/v1/runs","status":400,"code":"JOB_INVALID","problemCodes":"JOB_FIELD_MISSING",
+          "problemFields":"manifestKey"}
+        harness_output_verbatim: >-
+          component : studio-runner (POST /v1/runs), as reached by the API's HttpRunnerDispatchClient |
+          refused   : the job was never admitted — no admission_id on the ledger; state DONE, execution
+          ERROR/DISPATCH_FAILED | detail    : the runner is up and accepts the credential the API was
+          configured with (leg 0, against http://127.0.0.1:63747), and the same API is admitted on POST
+          /v1/validate (leg 1). The API was admitted as a caller and the runner objected to WHAT it was
+          sent. What the runner recorded while the dispatch was in flight:
+          {"ts":"2026-10-07T01:58:35.118Z","level":"warn","event":"runs.refused","route":"/v1/runs","status":400,"code":"JOB_INVALID","problemCodes":"JOB_FIELD_MISSING","problemFields":"manifestKey"}
+    ac_verdicts:
+      AC-1: {verdict: PASS, evidence: "baseline co-run leg 2 green (0.258 s); admission_id 08438980-…, ledger ADMITTED, runner admission.admitted with the same id"}
+      AC-2: {verdict: PASS, evidence: "leg 0 green in both co-runs. e79178666 adds logging only, AFTER the identity check in handleRuns; the identity path (request.unauthenticated) is unchanged"}
+      AC-3:
+        verdict: PASS
+        evidence: >-
+          Three-way distinguishable. (1) vs baseline: 400/84 bytes/JOB_INVALID vs 202/19
+          bytes/ADMITTED, and the runner line is runs.refused vs admission.admitted. (2) vs identity:
+          the line has no request.unauthenticated, so the classifier does not take the identity
+          branch, and leg 0's 401 IDENTITY_MISSING shape is different on the wire. (3) vs wrong
+          address: the window is non-empty (1 line), so the "recorded NOTHING" branch is not
+          taken. Classifier output is the third shape, verbatim above. Redaction: the line's keys
+          are exactly ts, level, event, route, status, code, problemCodes, problemFields. No
+          executionId, attemptId, revisionId, csi, object key, resolved var/secret or token is
+          present (contrast with the baseline's admission line, which does carry ids). That
+          matches the runner tests asserting no body value, which go red when the line is removed.
+      AC-4: {verdict: PASS, evidence: "baseline co-run leg 3 green (0.688 s), reached because leg 2 dispatched"}
+      AC-5: {verdict: PASS, evidence: "HttpRunnerDispatchClientTest 14/14 green; client source sha256 unchanged since iteration 1 (edba7f9a…4af0), so iteration 1's guard-mutation red stands for the same bytes"}
+      AC-6:
+        verdict: PASS
+        evidence: >-
+          The identity fix a19112afb is unchanged. NOTED: e79178666 touches studio-runner code,
+          which AC-6's falsification row lists as a finding. It is the fix this gate required, it is
+          confined to routes.ts handleRuns logging plus its tests, and it changes no response,
+          status or auth decision (read: every added line is a recordRunRefusal call or its
+          helper/constants). Not a weakening.
+      AC-7:
+        verdict: PASS
+        evidence: >-
+          (i) The mutated co-run (b) above (QA_1035_DROP_KEY=manifestKey, 01:58:35Z) gives
+          ui_test_executions status=ERROR, error_code=DISPATCH_FAILED (by direct JDBC SELECT).
+          Baseline (a) gives PENDING/null. (ii) e79178666 touches none of the five named files.
+          (iii) Neither OBS-1 nor OBS-2 is claimed closed. OBS-1 is still real: the persisted
+          error_code cannot tell a body refusal from an identity refusal. Only the runner log
+          can, now.
+    observations:
+      - id: OBS-H1
+        severity: medium
+        category: tests
+        title: StudioCoRunIT harness drift from the auto-accept compile flow (NOT 10.35)
+        description: >-
+          Re-observed in both co-runs. Leg 1 (theApiCompilesADraftThroughTheRealRunnerValidateRoute)
+          and legs 4-10 fail with 'did not become confirmable — compile_status is READY',
+          compile_error=null, gateway calls=1, validator calls=1. The compile succeeds; the harness
+          waits for AWAITING_CONFIRMATION, a state the pipeline no longer produces (publishes READY via
+          CompileStateService.publishAcceptedCandidate; line history 554277fcb [10.44], e2179f50b).
+          Leg 2 is unaffected because confirmed_revision_id is set by the auto-accept. As a result
+          the harness's leg-4 PASSED/DONE run, the cancel legs 5-9 and the leg-10 recovery proof are
+          currently UNVERIFIED on this tree, not proven broken.
+        owner_suggestion: >-
+          @po to rule scope (10.35 puts harness edits out of scope). @sm drafts a small
+          harness-realignment story. @dev, as the owner of the 10.44 compile-flow change, implements it:
+          move leg 1 and the compile helpers of legs 4-10 to the READY flow (or record the intended
+          contract if AWAITING_CONFIRMATION is meant to return). Gate it with tools/corun.sh at 11/11.
+      - id: OBS-H4
+        severity: low
+        category: tests
+        description: >-
+          whatTheRunnerSaidAboutTheDispatch picks shape 3 for ANY non-empty window without
+          request.unauthenticated. It does not key on runs.refused (the baseline's admission line
+          also prints shape 3 when fed to it; harmless because leg 2 only calls it on failure). An
+          unrelated line landing in the window would therefore read as "objected to WHAT". Harness
+          design, not 10.35. Optional hardening for the OBS-H1 story: require event runs.refused
+          for shape 3.
+      - id: OBS-H5
+        severity: low
+        category: process
+        description: >-
+          Working-tree confounder, recorded per the DoD's "committed tree" rule. Both co-runs ran
+          with another agent's UNCOMMITTED, untracked V28__studio_execution_scope_immutable.sql in
+          build/resources (copied 21:47:04, before run (a) started at 21:48:36). Inferred, not
+          verified by query: Flyway applied it. It is an additive BEFORE UPDATE guard on
+          execution_scope only. Every file 10.35's criteria exercise (client, IT, routes.ts) is
+          committed and sha-verified. Inferred: this cannot turn a red green for AC-1..AC-4/AC-7.
+      - id: OBS-H3
+        severity: low
+        category: process
+        description: "CodeRabbit still not run (WSL-only CLI, Darwin host), unchanged from iteration 1."
+    top_issues: []
+    required_fixes: []
+    def_05_closure: >-
+      CLOSABLE. The DoD condition ("DEF-05 stays open ... until this gate passes"; AC-1..AC-7 each
+      executed and passed against a committed tree) is met at 0d93a9bf1, subject to OBS-H5.
+      Closing is @po's action: DEF-05 in docs/epics/EPIC-10-EXECUTION.yaml (:2160, status: open) is
+      a @po-owned manifest entry, and its own comment reserves "fixed" for this gate. Record
+      fixed_by a19112afb (identity) + e79178666 (AC-3 observability). OBS-1 stays routed to @pm and
+      is not closed by this.
+    unblocks: ['10.34 dispatch half — @po to re-rule the blocks: ["10.34"] edge']
