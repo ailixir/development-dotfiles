@@ -1547,6 +1547,41 @@ stories:
         implementation.yaml subtask 1.5); FR-10's AC-10.1/AC-10.2 remain B2 scope. See the story's PO
         Readiness note for should-fix items handed to @dev.
 
+  - id: "10.47"
+    title: "Realign the co-run harness to the compile-to-READY flow (OBS-H1)"
+    # ADDED BY @po 2026-10-07 at validation. Same pattern as 10.35 and 10.45: the story's own Epic row
+    # flagged the missing entry for @po. Source: 10.35 gate OBS-H1
+    # (docs/qa/gates/10.35-dispatch-service-identity-def-05.yml). 10.44 and 10.46 still have no entries;
+    # observed, NOT fixed here (@pm's manifest).
+    #
+    # size S is the story's own row, labelled inferred there; the source finding gives no estimate.
+    size: S
+    # wave: null as for 10.34/10.35/10.45: post-closure harness repair, not schedulable in the wave sequence.
+    wave: null
+    # depends_on is EMPTY: 10.35 is Done and 10.44 has no entry in this manifest to point at.
+    depends_on: []
+    # blocks 10.19 by the user's direction (2026-10-07) as CLOSURE SEQUENCING, not by criterion: no 10.19
+    # or 10.34 criterion cites the co-run, 10.19 AC-19 builds com.citi.put.checks.studio.* and the co-run
+    # (com.citi.put.checks.corun) is skipped without STUDIO_CORUN=1. The drafter's "10.19 AC-19" was
+    # corrected at validation. Contrast 10.35's blocks, which is criterion-backed.
+    blocks: ["10.19"]
+    story_context:
+      shape: >-
+        TEST-HARNESS ONLY. Leg 1 and legs 4-10 of StudioCoRunIT wait for AWAITING_CONFIRMATION and call
+        states.confirm, but since 554277fcb [10.44] CompilePipeline publishes READY with the revision
+        already accepted (CompileStateService.publishAcceptedCandidate). 8 of 11 legs red on
+        'compile_status is READY'. The story realigns the harness to the code as it behaves; it changes no
+        production code and does not rule on the contract.
+      open_for_architect: >-
+        Whether the unconditional auto-accept is a conformant interim of C0-A3 "Run auto-accept"
+        (APPROVED_WITH_CHANGES 2026-09-23, requiring a server-captured trigger = RUN bound to the
+        principal) or a defect against it; and so whether compile/README.md, the CompilePipeline class
+        javadoc and NoAutoConfirmTest (10.9 AC-21) or the code are stale. 10.44's story text does not
+        record the auto-accept. Recorded at 10.47 validation, not answered.
+      po_validation: >-
+        GO, 9/10, @po 2026-10-07, Draft → Ready. Blocks row corrected (sequencing, not 10.19 AC-19);
+        git log -S claim given its path filter. See the story's PO Readiness section.
+
 # ─────────────────────────────────────────────────────────────
 # File-ownership conflicts (wave planning must serialize or single-own)
 # ─────────────────────────────────────────────────────────────
