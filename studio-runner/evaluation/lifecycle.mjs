@@ -2,7 +2,8 @@
 import { performance } from 'node:perf_hooks';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile, writeFile, appendFile } from 'node:fs/promises';
-import { evaluateOracle, summarize, validateManifest } from './oracle.mjs';
+import { evaluateOracle, validateManifest } from './oracle.mjs';
+import { buildReport, renderReport, reportExitCode } from './report.mjs';
 
 const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -37,18 +38,24 @@ export async function runEvaluation(config, manifest, directory, transport = fet
   const started = performance.now();
   let calls = 0;
   let reservedModelCalls = 0;
+  let stoppedBy = null;
+  let inFlightCompiles = 0;
+  let peakInFlightCompiles = 0;
+  // Harness-observed admission outcomes (ms since run start) for capacity/recovery reporting.
+  const capacityEvents = [];
+  const exhausted = (reason, message) => { stoppedBy ??= reason; return new Error(message); };
   const remaining = () => {
     const left = config.maxElapsedMs - (performance.now() - started);
-    if (left <= 0) throw new Error('Evaluation time budget exhausted');
+    if (left <= 0) throw exhausted('maxElapsedMs','Evaluation time budget exhausted');
     return left;
   };
   const request = async (base, path, method = 'GET', body) => {
-    if (++calls > config.maxApiCalls) throw new Error('Evaluation API call budget exhausted');
+    if (++calls > config.maxApiCalls) throw exhausted('maxApiCalls','Evaluation API call budget exhausted');
     const url = new URL(base.toString().replace(/\/$/, '') + path);
     const token = base === fixture ? fixtureToken : apiToken;
     const response = await transport(url, {method, redirect:'error', signal:AbortSignal.timeout(Math.max(1,Math.ceil(Math.min(30_000,remaining())))),
       headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'}, ...(body === undefined ? {} : {body:JSON.stringify(body)})});
-    if (!response.ok) throw new Error('Evaluation endpoint refused request');
+    if (!response.ok) throw Object.assign(new Error('Evaluation endpoint refused request'), {status:response.status});
     const text = await response.text();
     if (text.length > 2_000_000) throw new Error('Evaluation response exceeds bound');
     return text ? JSON.parse(text) : null;
@@ -62,28 +69,46 @@ export async function runEvaluation(config, manifest, directory, transport = fet
     }
   }
   if (!jobs.length) throw new Error('No selected cases');
+  const planned = jobs.map(j=>({id:j.id,expectedClass:j.entry.expectedClass,requestedMode:j.mode,family:j.entry.family}));
+  const runContext = {tier:'T3',purpose:'development',concurrency,pins:config.pins,sourceCommit:config.sourceCommit,
+    dirtyBaselineDigest:config.dirtyBaselineDigest,manifestDigest:digest(manifest),fixtureVersion:config.fixtureVersion??null,
+    budgets:{maxApiCalls:config.maxApiCalls,maxTransportCalls:config.maxTransportCalls,maxElapsedMs:config.maxElapsedMs}};
   await writeFile(directory+'/run-manifest.json',JSON.stringify({schemaVersion:1,tier:'T3',purpose:'development',releaseReady:false,
-    plannedIds:jobs.map(j=>j.id),manifestDigest:digest(manifest),sourceCommit:config.sourceCommit,dirtyBaselineDigest:config.dirtyBaselineDigest,
-    pins:config.pins,repetitions:config.repetitions,orderSeed:config.orderSeed,maxApiCalls:config.maxApiCalls,
+    plannedIds:jobs.map(j=>j.id),planned,manifestDigest:runContext.manifestDigest,sourceCommit:config.sourceCommit,dirtyBaselineDigest:config.dirtyBaselineDigest,
+    pins:config.pins,fixtureVersion:runContext.fixtureVersion,repetitions:config.repetitions,orderSeed:config.orderSeed,maxApiCalls:config.maxApiCalls,
     maxTransportCalls:config.maxTransportCalls,maxElapsedMs:config.maxElapsedMs,concurrency,quotaUsd:prerequisite.quotaUsd},null,2)+'\n',{flag:'wx'});
   await writeFile(directory+'/trials.jsonl','',{flag:'wx'});
   const trials=[];
   const compile = async (view, mode) => {
     const compileStarted = performance.now();
     // Reserve the complete per-request maximum before starting any inference. No optimistic call accounting.
-    if (reservedModelCalls + 9 > config.maxTransportCalls) throw new Error('Evaluation model-call budget exhausted');
+    if (reservedModelCalls + 9 > config.maxTransportCalls) throw exhausted('maxTransportCalls','Evaluation model-call budget exhausted');
     reservedModelCalls += 9;
-    const accepted = await request(v2,`/tests/${view.test.id}/compile`,'POST',{mode,sourceRevision:view.test.sourceRevision,
-      configurationRevision:view.test.configurationRevision,authoringHash:view.authoringHash});
-    for (;;) {
-      const next = await request(v2,`/tests/${view.test.id}`);
-      if (next.compileAttempt?.compileRequestId !== accepted.compileRequestId
-          || next.test.sourceRevision !== view.test.sourceRevision
-          || next.test.configurationRevision !== view.test.configurationRevision
-          || next.authoringHash !== view.authoringHash) throw new Error('Compile identity changed');
-      if (next.test.compileStatus !== 'COMPILING') return {...next,evaluationCompileMs:performance.now()-compileStarted};
-      await pause(Math.min(500,remaining()));
+    let accepted;
+    try {
+      accepted = await request(v2,`/tests/${view.test.id}/compile`,'POST',{mode,sourceRevision:view.test.sourceRevision,
+        configurationRevision:view.test.configurationRevision,authoringHash:view.authoringHash});
+    } catch (error) {
+      // 429/503 is the admission pool refusing work (no queue); recorded, never retried here.
+      if (error.status === 429 || error.status === 503) {
+        capacityEvents.push({type:'REFUSED',atMs:performance.now()-started,httpStatus:error.status});
+        error.admissionRefused = true;
+      }
+      throw error;
     }
+    capacityEvents.push({type:'ACCEPTED',atMs:performance.now()-started});
+    peakInFlightCompiles = Math.max(peakInFlightCompiles, ++inFlightCompiles);
+    try {
+      for (;;) {
+        const next = await request(v2,`/tests/${view.test.id}`);
+        if (next.compileAttempt?.compileRequestId !== accepted.compileRequestId
+            || next.test.sourceRevision !== view.test.sourceRevision
+            || next.test.configurationRevision !== view.test.configurationRevision
+            || next.authoringHash !== view.authoringHash) throw new Error('Compile identity changed');
+        if (next.test.compileStatus !== 'COMPILING') return {...next,evaluationCompileMs:performance.now()-compileStarted};
+        await pause(Math.min(500,remaining()));
+      }
+    } finally { inFlightCompiles--; }
   };
   const confirmAndRun = async view => {
     const attempt=view.compileAttempt;
@@ -149,6 +174,8 @@ export async function runEvaluation(config, manifest, directory, transport = fet
         view=await compile(view,job.mode);
       }
       trial.compileRequestId=view.compileAttempt?.compileRequestId??null;
+      trial.candidateProduced=view.compileAttempt?.state==='CANDIDATE';
+      trial.selectedMode=view.compileAttempt?.plan?.selectedMode??null;
       trial.plan=view.compileAttempt?.plan??null;
       trial.inputTokens=view.compileAttempt?.usage?.inputTokens??null;
       trial.outputTokens=view.compileAttempt?.usage?.outputTokens??null;
@@ -177,7 +204,7 @@ export async function runEvaluation(config, manifest, directory, transport = fet
         // Configuration association is verified by immutable revision ID; never accept a different revision.
         if(result.configurationRevision===undefined && result.revisionId===expected.revisionId) observed.configurationRevision=expected.configurationRevision;
         trial.oracle=evaluateOracle(expected,observed);
-        trial.executionId=result.executionId;trial.revisionId=result.revisionId;trial.runtime=result.runtime;
+        trial.executionId=result.executionId;trial.revisionId=result.revisionId;trial.runtime=result.runtime;trial.executionStatus=result.status;
         for (const pin of ['validator','executor','playwright']) {
           if(typeof config.pins[pin]!=='string' || result.runtime?.[pin]!==config.pins[pin]) {
             trial.oracle.correct=false;trial.oracle.failures.push('runtime-pin-mismatch');
@@ -193,8 +220,10 @@ export async function runEvaluation(config, manifest, directory, transport = fet
         }
       }
       trial.complete=true;
-    } catch {
-      trial.incompleteReason='Endpoint, prerequisite, budget, baseline, or lifecycle prevented completion';
+    } catch (error) {
+      if (error?.admissionRefused) trial.admissionRefused=true;
+      trial.incompleteReason=error?.admissionRefused ? 'Compile admission refused (capacity)'
+        : 'Endpoint, prerequisite, budget, baseline, or lifecycle prevented completion';
     }
     trial.elapsedMs=performance.now()-begin;
     trials.push(trial);evidenceWrite=evidenceWrite.then(()=>appendFile(directory+'/trials.jsonl',JSON.stringify(trial)+'\n'));await evidenceWrite;
@@ -202,11 +231,11 @@ export async function runEvaluation(config, manifest, directory, transport = fet
   }
   };
   await Promise.all(Array.from({length:concurrency},()=>worker()));
-  const summary=summarize(trials,jobs.map(j=>j.id));
-  summary.byRequestedMode=Object.fromEntries(['FULL','AUTO'].filter(mode=>jobs.some(j=>j.mode===mode)).map(mode=>[
-    mode,summarize(trials.filter(t=>t.requestedMode===mode),jobs.filter(j=>j.mode===mode).map(j=>j.id))]));
+  if (!stoppedBy && trials.length < jobs.length) stoppedBy = calls >= config.maxApiCalls ? 'maxApiCalls' : 'maxElapsedMs';
+  const run={...runContext,apiCalls:calls,reservedTransportCalls:reservedModelCalls,elapsedMs:performance.now()-started,stoppedBy,peakInFlightCompiles};
+  const summary=buildReport({trials,planned,run,capacityEvents});
   summary.apiCalls=calls;summary.reservedTransportCalls=reservedModelCalls;
   await writeFile(directory+'/summary.json',JSON.stringify(summary,null,2)+'\n',{flag:'wx'});
-  await writeFile(directory+'/report.md',`# Studio inference development evaluation\n\nCompleted ${summary.completedTrials}/${summary.plannedTrials}; correct ${summary.correctTrials}; false successes ${summary.falseSuccesses}.\n\nRelease readiness remains unproven. See immutable trial records and missing prerequisites.\n`,{flag:'wx'});
-  return summary.missingTrials?2:(summary.incorrectTrials || summary.falseSuccesses)?1:0;
+  await writeFile(directory+'/report.md',renderReport(summary),{flag:'wx'});
+  return reportExitCode(summary);
 }
