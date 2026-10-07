@@ -1,0 +1,163 @@
+schema: 1
+story: '10.33'
+story_title: Refuse malformed store-bootstrap payloads (PROD-1)
+epic: EPIC-10
+story_file: docs/stories/10.33.story.md
+closure_plan_step: 'EPIC-10-CLOSURE-PLAN.md §8 step 2.7 (and §8a)'
+
+gate: PASS
+
+status_reason: >-
+  The studio-inference program's slices guard, landed at 51ade0f1f and folded at ec94e9585/b22055dda,
+  meets AC-1 to AC-5 when run. @qa wrote the red-first tests the story specifies. They were observed RED
+  in a throwaway worktree with both guard hunks reverted: 20 failed / 15 passed across the two slice
+  files and the page test. The page-level reproduction in that tree threw the exact PROD-1 crash strings,
+  `Cannot read properties of undefined (reading 'find')` and `(reading 'length')`. The same tests are
+  GREEN against HEAD. FOC-08 holds with no setup.ts edit: two full frontend runs gave
+  `5 failed | 940 passed (945)`, which is exactly the five known pre-existing failures, with zero
+  "did not settle" lines, and bootstrapIsolation.test.ts stayed green with zero edits. F-3 was verified
+  with the squeeze instrument. On the reverted base (444a785d) it reads `1 failed | 5 passed (6)` 3/3.
+  On the landed file (5bbb147e) under the same squeeze it reads `6 passed (6)` 3/3. The 20-run sweep was
+  not used.
+
+reviewer: Quinn (@qa)
+reviewed_revision: 'commit:829a56f02'
+updated: '2026-10-06T21:30:00-04:00'
+branch: brunobuger/ui-studio
+head_sha: 829a56f02
+guard_commit: 51ade0f1f
+fold_commits: [ec94e9585, b22055dda]
+gated_files_sha256:
+  frontend/src/store/slices/sourcesSlice.ts: 99c950e65e4db1e5dbc9986a922495f2e3f081bb5746854a6d4e42df13c4d85c
+  frontend/src/store/slices/featuresSlice.ts: abf8f218e8e68500ba2de06755e38e1e1ae975591ec613df1d949dc809043a0b
+  frontend/src/test/setup.ts: dabdafb0e257c99281757481f4091b73bf18f82368d21e6372da4d5a783977dd
+  frontend/src/test/bootstrapIsolation.test.ts: 142386e57f898190fe291eed61102cc53ef17de58bc9f897b612ca2f951e899d
+  studio-runner/test/reporting/httpClient.test.ts: 5bbb147ef1ef9cfa5ae38a9b0381d7b4803dc4848a1242639f801ed804dc7909
+  note: >-
+    All five digests were identical at the start and at the end of the gate. No production file or
+    studio-runner file in the main tree was written.
+
+harness: >-
+  Red-first runs and every mutation were done in a throwaway detached worktree at HEAD under the
+  session scratchpad (`git worktree add --detach`), with node_modules symlinked from the main tree.
+  The worktree was removed (`git worktree remove --force` + `prune`) after use. The main tree's
+  production files were never edited (see the digests above). The F-3 squeeze copies were made in that
+  worktree too, never in the shared studio-runner/, where another agent is working.
+
+new_tests_written_by_qa:
+  - path: frontend/src/store/slices/sourcesSlice.test.ts
+    added: >-
+      A describe block that dispatches the real fetchSources() thunk over HTTP (MSW → apiClient → axios).
+      Malformed bodies: HTML login page, empty body, {}, [], { sources: 'not-an-array' }. Also an
+      undefined response via spy. Controls: { sources: [] } and a non-empty body both fulfil unchanged,
+      and a 404 still rejects and fails open. 9 new tests.
+  - path: frontend/src/store/slices/featuresSlice.test.ts
+    added: >-
+      The same shape for fetchFeatures(). Malformed bodies: HTML, empty, {}, [], sources non-array,
+      features non-array, features missing. Also undefined via spy. Same three controls. 11 new tests.
+  - path: frontend/src/test/pageBootstrapShape.test.tsx
+    added: >-
+      New file. It uses the real singleton store, the real thunks and studioMockServer. State (i) serves
+      HTML on */checks/sources; state (ii) serves HTML on */features. It then mounts
+      <CheckTypeSelector/> and <FeatureGate featureKey="STUDIO"><ChecksStudioPage/></FeatureGate>,
+      the way App.tsx mounts them. 2 tests.
+    deviation: >-
+      [AUTO-DECISION] Story Scope names pages/ChecksStudioPage/pageBootstrapShape.test.tsx. The gate's
+      write ownership was frontend/src/store/slices/*.test.ts and frontend/src/test/**, so the file was
+      placed in src/test/ instead. The file uses only absolute imports, so its subject does not change.
+      Moving it is a rename with no content change.
+
+ac_verdicts:
+  AC-1:
+    verdict: PASS
+    evidence: >-
+      Green at HEAD: every malformed body on */checks/sources rejects with
+      'Invalid check sources response', and a well-formed body (including { sources: [] }) fulfils
+      unchanged. Red with the guard hunk removed: all 5 HTTP malformed cases fail at
+      `fetchSources.rejected.match(result)` ("expected false to be true"). The pre-existing {} test also
+      fails. The `undefined`-response case stays green even without the guard, because
+      `undefined.sources` already throws natively. That test therefore guards against regression only;
+      it is not a red-first test. Recorded so it is not miscounted.
+  AC-2:
+    verdict: PASS
+    evidence: >-
+      Green at HEAD: all 7 HTTP malformed bodies and undefined reject with
+      'Invalid feature flags response'. Red with the guard hunk removed: all 8 fail, plus the 4
+      pre-existing tests from the inference program. Per Open Question 1, the landed per-item field
+      checks exceed the bar and are not measured here.
+  AC-3:
+    verdict: PASS
+    evidence: >-
+      Each malformed outcome is asserted `toEqual` to `reducer(undefined, fetchX.rejected(new Error(msg)))`.
+      That is the rejected branch's exact state: loading false, fetched true, error non-empty, and the
+      7-item list or DEFAULT_SOURCES/DEFAULT_FEATURES. Mutation (backfill `if` → `if (false)` in both
+      rejected cases, throwaway tree, guard intact): 21 failed / 10 passed, including every malformed
+      case and both 404 controls. So the assertions check the specific fail-open shape and not just
+      "is an array". The 404 controls are green at HEAD, and bootstrapIsolation.test.ts is green with
+      zero edits.
+  AC-4:
+    verdict: PASS
+    evidence: >-
+      Page level, at HEAD: both states render without throwing. FeatureGate lets the page through (no
+      "Feature Unavailable"), and the wizard renders its options. Page level, guard reverted, with the
+      action-match assertions stripped in the throwaway copy so the render is reached: state (i) throws
+      `TypeError: Cannot read properties of undefined (reading 'length')` (CheckTypeSelector), and
+      `(reading 'find')` is also logged (ChecksStudioPage selectIsSourceEnabled). State (ii) throws
+      `TypeError: Cannot read properties of undefined (reading 'find')` (FeatureGate →
+      selectIsFeatureEnabled). With the assertions intact, both page tests are red at the
+      rejected/fulfilled match. Selector level: selectSources, selectFeatures and selectFeatureSources
+      are non-empty arrays after every malformed case. That covers all four consumers: ChecksStudioPage,
+      FeatureGate and CheckTypeSelector are rendered, and AllChecksPage is covered by the selectSources
+      assertion only.
+  AC-5:
+    verdict: PASS
+    evidence: >-
+      FOC-08: `npx vitest run` (whole frontend) was run twice, with these tests included. Both runs gave
+      `Test Files 3 failed | 73 passed (76)` and `Tests 5 failed | 940 passed (945)`. The failures are
+      exactly the five known pre-existing ones (StudioTestsPage delete fallback, studioWcagAudit
+      surface 7, and three in InferenceStudio.test.tsx). `grep -c "did not settle"` = 0 on both logs.
+      bootstrapIsolation.test.ts was green on both runs, unmodified. setup.ts is unmodified (digest
+      above), so the "setup.ts in the same commit" rule is not triggered. The story's cited 541/2
+      baseline is stale and was not used.
+
+f3_squeeze:
+  instrument: >-
+    A narrow deterministic squeeze. Recording on the "reports a timeout as ambiguous" test's own
+    responder is paused by a real 100 ms timer (real setTimeout captured before any fake timers);
+    the client deadline is 25 ms. It was applied identically to two scratch copies in the throwaway
+    worktree. Counts were read from the reporter's summary line, never from the exit code.
+  calibration_base: "7357082e3 file (sha256 444a785d…): `Tests  1 failed | 5 passed (6)` ×3, each failing exactly the F-3 test with `expected [] to have a length of 1 but got +0`"
+  landed_fix: "51ade0f1f file (sha256 5bbb147e…): `Tests  6 passed (6)` ×3"
+  unmodified_file: "`Tests  6 passed (6)` ×3"
+  ruling: >-
+    F-3 is closed on this line. The instrument reproduces the defect on the base every time and is
+    green on the landed fix. The 20-run sweep was deliberately not run.
+
+other_checks:
+  type_check: '`npx tsc --noEmit` exit 0, no errors. The story''s expected two TS2307 errors no longer occur on this tree.'
+  lint: >-
+    `npx eslint` on the three touched test files: 0 errors, 6 warnings. All 6 are
+    no-explicit-any on pre-existing lines 10–45 of sourcesSlice.test.ts and none is in a new line.
+    The whole-repo `npm run lint` was not run.
+
+observations:
+  - severity: low
+    category: tests
+    description: >-
+      There is a fifth reader of the slices outside the four named consumers:
+      utils/navigation/navigationSetup.ts:7-8 reads `state.sources?.data ?? []` and
+      `state.features?.features ?? []` inline. This is the "different path" the story's Weakest
+      criterion warns about. It is defended locally by `?? []`, so it is safe today with or without the
+      guard.
+    recommendation: None required. Noted for the record of the consumer survey.
+  - severity: low
+    category: process
+    description: >-
+      The three test files are uncommitted in the working tree. The guard under gate is committed
+      (829a56f02 contains 51ade0f1f). The tests must land in a commit for this gate's evidence to
+      persist.
+    recommendation: Lead commits the three test files with the story/gate records.
+
+top_issues: []
+required_fixes: []
+unblocks: ['10.19 (depends_on 10.33)']
