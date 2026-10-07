@@ -1,0 +1,199 @@
+schema: 1
+story: '10.35'
+story_title: Dispatch service identity (DEF-05), acceptance spec
+epic: EPIC-10
+label: ACCEPTANCE-SPEC
+
+gate: FAIL
+reviewer: Quinn (@qa)
+reviewed_at: 2026-10-06
+reviewed_revision: commit:b40be10d0
+fix_under_gate: commit:a19112afb (ancestor of HEAD, verified with git merge-base --is-ancestor)
+
+status_reason: >-
+  The identity fix works. The DEF-01 observability guarantee, which the story says is the
+  criterion that matters (Definition of done: "If only one criterion can be run, it is AC-3"), does
+  not hold as specified. Legs 0, 2 and 3 of StudioCoRunIT are green on the real runner, and
+  admission_id is written by the runner's CAS (AC-1, AC-2, AC-4). The AC-5 unit tests are green and
+  go red when the pre-flight guard is removed. The fix diff is confined to the dispatch client and
+  its wiring (AC-6), and AC-7 is recorded. AC-3 FAILS. With manifestKey dropped from the dispatch
+  body, the runner answers 400 JOB_INVALID {JOB_FIELD_MISSING, manifestKey}, which is different on
+  the wire from both the 202 baseline and a 401 identity refusal. But the runner writes no log line
+  for that refusal, so the harness's own account (whatTheRunnerSaidAboutTheDispatch) reports the
+  SECOND shape: "recorded NOTHING ... suspect the address or the connection, not the job". AC-3
+  forbids exactly that outcome. The persisted product state cannot tell this refusal from an
+  identity refusal either: ui_test_executions.error_code is DISPATCH_FAILED (OBS-1, unchanged). As a
+  result, a malformed body is still attributed to the wrong component by every observer except
+  someone reading the raw HTTP response.
+
+evidence:
+  commands:
+    - cmd: "gradle-locked.sh test --tests 'com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest' --rerun"
+      result: "BUILD SUCCESSFUL; XML tests=14 skipped=0 failures=0 errors=0"
+    - cmd: "same, with send()'s guard neutralised (misconfiguration = null), under the gradle lock"
+      result: >-
+        BUILD FAILED; anUnconfiguredRunnerIsATerminalNamedRefusalAndSendsNothing NullPointerException
+        @:198; dispatchCarriesTheRunnerIdentityAndMissingIdentitySendsNothing AssertionError @:83;
+        aMissingServiceIdentityIsATerminalNamedRefusalAndSendsNothing AssertionFailedError @:233.
+        Restored; sha256 edba7f9a…4af0 before == after.
+    - cmd: "tools/corun.sh (run 1, unmodified tree, held under the gradle lock)"
+      result: >-
+        legs executed: 11 · failures: 8 · errors: 0 · skipped: 0 (526 s). Green: leg 0, leg 2, leg 3.
+        Red: leg 1 and legs 4-10, all 'compile_status is READY' (not AWAITING_CONFIRMATION); see OBS-H1.
+    - cmd: >-
+        STUDIO_CORUN=1 gradlew test --tests StudioCoRunIT.{theRunnerIsUp*,theApiCompiles*,theApiDispatches*}
+        twice back to back on identical instrumented source: baseline, then QA_1035_DROP_KEY=manifestKey
+      result: "see ac_verdicts AC-3 / AC-7; both instrumented files restored, sha256 equal before/after"
+  instrumentation: >-
+    Temporary, gate-only, restored by sha256 (HttpRunnerDispatchClient.java edba7f9a…4af0,
+    StudioCoRunIT.java bfa7f5aa…bc95). The client logged the runner RESPONSE (status, headers, body),
+    never the request body, which carries resolved secrets. body() dropped the key named by the env
+    var QA_1035_DROP_KEY when it was set, so the baseline and the mutation ran from byte-identical
+    source. Leg 2 printed the ledger, admission_id, the snapshot, SELECT status,error_code FROM
+    ui_test_executions, the raw runner window and the classifier's verdict before its existing assert.
+  auto_decision_same_session: >-
+    [AUTO-DECISION] "Capture the baseline in the same harness session" was read as two consecutive Gradle runs of
+    legs 0-2 inside one held lock on byte-identical source, differing only in the env toggle (~1 min
+    apart). Reason: a second dispatch inside one JVM would need a new harness leg, and the story puts
+    harness changes out of scope.
+
+ac_verdicts:
+  AC-1:
+    verdict: PASS
+    evidence: >-
+      corun run 1: theApiDispatchesAConfirmedRevisionToTheRealRunner green (0.425 s). The predicate is
+      unchanged and is still admission_id IS NOT NULL via admissionId(executionId) (StudioCoRunIT:515-530,
+      :1659). The instrumented baseline (same predicate) gave dispatched=1,
+      admission_id=6e50e974-8d30-4cdc-8d00-2ca3fe593827, ledger ADMITTED; runner line
+      event=admission.admitted with the same admissionId. Before/after falsification as the story
+      defines it: the recorded pre-fix red (IDENTITY_MISSING, no admission_id) is EPIC-10-RUN-LOG
+      :2183-2198. It was not re-run.
+  AC-2:
+    verdict: PASS
+    evidence: >-
+      Leg 0 green in all three harness runs. Its four assertions are unchanged at StudioCoRunIT:367-387
+      (401 /health unauth, 200 /health auth, 401 IDENTITY_MISSING POST /v1/runs unauth, 400
+      JOB_INVALID auth+empty). a19112afb touches no studio-runner file.
+  AC-3:
+    verdict: FAIL
+    evidence: >-
+      Same-session baseline (unmutated): HTTP 202, headers {cache-control:no-store,
+      content-type:application/json, content-length:19, connection:keep-alive}, body
+      {"code":"ADMITTED"}; runner window 1 line, event admission.admitted. Mutated (manifestKey
+      dropped): HTTP 400, content-length 84, body
+      {"code":"JOB_INVALID","detail":[{"code":"JOB_FIELD_MISSING","field":"manifestKey"}]}; runner
+      window 0 lines; classifier: "The runner recorded NOTHING while the dispatch was in flight, so the
+      request most likely never reached it: suspect the address or the connection, not the job."
+      This passes the "not byte-identical to the baseline" half. It fails the named discriminator:
+      the second shape is reported, which AC-3 says must never happen. Root cause (read-verified):
+      studio-runner/src/server/runCoordinator.ts:1111-1113 returns 400 JOB_INVALID with no
+      logger call, and routes.ts:196-226 (handleRuns) responds without logging. The only /v1/runs
+      refusal the runner records is identity (routes.ts:235). This also applies to
+      ARTIFACT_INVALID, BODY_NOT_JSON and the bounded-body refusal (inferred from the same handler;
+      not run).
+  AC-4:
+    verdict: PASS
+    evidence: >-
+      corun run 1: theRunnerReportsBackAndTheApiAcceptsWhatItSends green (0.668 s). The snapshot left
+      PENDING and revisionId equals confirmed_revision_id. Before the fix this leg was UNREACHED, not
+      red: the guard at StudioCoRunIT:546-552 throws 'blocked, not failing on its own account' while
+      dispatchedExecutionId is null (EPIC-10-RUN-LOG :2253-2255). This run is the first time it was
+      reached.
+  AC-5:
+    verdict: PASS
+    evidence: >-
+      The tests already exist, written in the fix commit a19112afb and labelled 'Story 10.35 AC-5':
+      anUnconfiguredRunnerIsATerminalNamedRefusalAndSendsNothing (base URL null/""/blank) and
+      aMissingServiceIdentityIsATerminalNamedRefusalAndSendsNothing (token null/""/blank, against both
+      the WireMock stub and a closed local port). They assert DEFINITE_REFUSAL, retryable()==false,
+      detail == RUNNER_NOT_CONFIGURED / SERVICE_IDENTITY_NOT_CONFIGURED, and zero serve events. No new
+      test was needed. Green 14/14. The guard mutation reddens 3 tests (see evidence.commands).
+  AC-6:
+    verdict: PASS
+    evidence: >-
+      git show --stat a19112afb: 7 files, +169/-14. Production: HttpRunnerDispatchClient.java,
+      StudioRunnerProperties.java (adds RUNS_PATH, runsUrl(), hasServiceIdentity(); validateUrl()
+      refactored onto a shared trimmedBaseUrl(), with the same behaviour by reading),
+      application.yml (removes studio.execution.runner-base-url; comment). Tests:
+      HttpRunnerDispatchClientTest, InternalBodyContractConformanceTest and JobBodyLeakTest
+      (constructor change only: a StudioRunnerProperties replaces the URL string), and StudioCoRunIT
+      (removes the one coRunWiring line studio.execution.runner-base-url, which is now unread, so
+      the harness's wiring is not weakened). It does not touch RunnerValidationClient.java,
+      openapi.yaml or any studio-runner file. NOTE (per @po): StudioRunnerProperties is shared with
+      the validate route. Its change is additive plus a behaviour-preserving extraction, and leg 1's
+      validator call count of 1 shows the validate route still reaches the runner.
+  AC-7:
+    verdict: PASS
+    evidence: >-
+      (i) Recorded, with its source run: the AC-3 mutated run (QA_1035_DROP_KEY=manifestKey, ~21:36
+      EDT) gave ui_test_executions status=ERROR, error_code=DISPATCH_FAILED; ledger DONE;
+      admission_id null. The unmutated baseline gave status=PENDING, error_code=null. As expected,
+      DISPATCH_FAILED carries nothing to distinguish this refusal from an identity refusal (OBS-1,
+      unchanged). (ii) a19112afb touches none of StudioDispatcher, DispatchOutcome,
+      StudioDispatchLedgerStatements, CompilePipeline or CompileErrorCode. (iii) Neither gap is
+      reported closed.
+
+observations:
+  - id: OBS-H1
+    severity: medium
+    category: tests
+    description: >-
+      StudioCoRunIT has drifted from the compile flow. CompilePipeline now publishes READY directly
+      through CompileStateService.publishAcceptedCandidate (javadoc CompilePipeline:148-149, "a
+      second confirmation step would ask the same question twice"; line history 554277fcb [10.44],
+      e2179f50b). Leg 1 and legs 4-10 still wait for AWAITING_CONFIRMATION, so all 8 are red with
+      'compile_status is READY'. Leg 2 runs anyway because confirmed_revision_id is set by the
+      auto-accept rather than by leg 1's states.confirm. Not a 10.35/DEF-05 defect. It was not
+      verified whether this shares a cause with the known NoAutoConfirmTest failure.
+    recommendation: >-
+      Route to the owner of the 10.44 fold. Update leg 1 (and the compile helpers of legs 4-10) to the
+      READY flow, or record the intended contract.
+  - id: OBS-H2
+    severity: low
+    category: tests
+    description: >-
+      Under the guard mutation, the AC-5(ii) test goes red at its first target (the WireMock stub:
+      DEFINITE_REFUSAL 'runner 404', so the detail assertion fails). Its closed-port iteration, the
+      'no network attempt / not AMBIGUOUS' half, is therefore never independently reddened.
+    recommendation: Optional. Put the closed-port target first, or in its own test.
+  - id: OBS-H3
+    severity: low
+    category: process
+    description: >-
+      The CodeRabbit review was not run. installation_mode is wsl, the host is Darwin, and the CLI is
+      absent (the house convention cited in the story header).
+
+top_issues:
+  - id: AC3-RUNNER-SILENT-ON-BODY-REFUSAL
+    severity: high
+    category: requirements
+    description: >-
+      The runner logs nothing when it refuses a job body (400 JOB_INVALID), so the co-run harness
+      attributes a malformed-body dispatch to "the request most likely never reached it — suspect the
+      address". DEF-01's defect class is observable on the wire but is misattributed by the harness
+      and indistinguishable in persisted state.
+    repro: >-
+      Hold the gradle lock. In HttpRunnerDispatchClient.body(), drop "manifestKey". Run STUDIO_CORUN=1
+      ./gradlew test --tests 'com.citi.put.checks.corun.StudioCoRunIT.theRunnerIsUp*' --tests
+      '...theApiCompiles*' --tests '...theApiDispatches*' --rerun (studio-runner/dist built). Leg 2's
+      CoRunFailure detail reads "The runner recorded NOTHING while the dispatch was in flight".
+      Restore by sha256.
+    required_fix: >-
+      Owner @dev (studio-runner). In handleRuns / RunCoordinator.submit, write one structured
+      warn line for every pre-admission refusal of POST /v1/runs: JOB_INVALID, ARTIFACT_INVALID,
+      BODY_NOT_JSON and the bounded-body code. Carry route, status, code and the problem codes/field
+      NAMES only, never a value (the body carries resolved secrets). Pin it with a runner unit test
+      that goes red when the line is removed. Then re-run AC-3. The window must contain that line,
+      the classifier must report the third shape, and the AC-1/2/4 runs stay green. An alternative
+      that @po must rule on, because the story puts harness changes out of scope: the harness
+      discriminates on the HTTP status rather than on log silence.
+
+required_fixes:
+  - AC3-RUNNER-SILENT-ON-BODY-REFUSAL
+def_05_closure: >-
+  NOT closable under this story's Definition of done ("DEF-05 stays open … until this gate passes").
+  The identity defect itself is verified fixed by running (AC-1, AC-2, AC-4, AC-5). The gate fails on
+  AC-3, which the DoD makes the deciding criterion. @po may rule to close DEF-05 and track AC-3 as
+  its own defect. That is a scope ruling for @po; this gate does not make it.
+unblocks: []
+blocks_still: ['10.34 (blocks: ["10.34"] per manifest — the dispatch half is now reachable; @po to re-rule)']
