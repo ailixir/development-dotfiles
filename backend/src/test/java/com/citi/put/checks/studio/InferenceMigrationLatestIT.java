@@ -23,7 +23,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Story 10.23 AC-5 on the <em>current</em> Flyway head rather than V18: V18 is followed by V20–V26
+ * Story 10.23 AC-5 on the <em>current</em> Flyway head rather than V18: V18 is followed by V20–V27
  * in the ordinary startup path while V19 remains manually staged, so the additive guarantees, the
  * baseline query and the writer cutover are re-proven against the schema a real deployment actually
  * reaches. Every case runs in a transaction that is rolled back.
@@ -279,6 +279,65 @@ class InferenceMigrationLatestIT {
       assertThat(accepted).as("V18 revision columns writable on the head schema").isEmpty();
       c.rollback();
     }
+  }
+
+  /**
+   * D1 regression guard (V27): enumerates the head schema's columns rather than a hand-kept list,
+   * so a later migration that adds a column or redefines {@code ui_test_revisions_write_once()}
+   * with an enumerated list fails here instead of silently re-opening history to plain UPDATE.
+   */
+  @Test
+  void everyRevisionColumnExceptFirstConfirmationIsImmutableOnTheHeadSchema() throws SQLException {
+    List<String> mutableByDesign = List.of("confirmed_by", "confirmed_at");
+    try (Connection c = transaction();
+        Statement s = c.createStatement()) {
+      UUID request = insertRequest(c, TEST_ID, CSI, 2, LEGACY_REVISION, FINGERPRINT);
+      UUID revision = UUID.randomUUID();
+      s.executeUpdate(candidate(revision, request, "d".repeat(64), PROVENANCE, null));
+      List<String> columns =
+          rows(
+              c,
+              "SELECT column_name||':'||data_type FROM information_schema.columns"
+                  + " WHERE table_schema=current_schema() AND table_name='ui_test_revisions'"
+                  + " ORDER BY ordinal_position");
+      assertThat(columns).isNotEmpty();
+      List<String> accepted = new ArrayList<>();
+      for (String column : columns) {
+        String name = column.substring(0, column.indexOf(':'));
+        if (mutableByDesign.contains(name)) {
+          continue;
+        }
+        String quoted = "\"" + name + "\"";
+        String sql =
+            "UPDATE ui_test_revisions SET "
+                + quoted
+                + "=CASE WHEN "
+                + quoted
+                + " IS NULL THEN "
+                + tamperValue(column.substring(column.indexOf(':') + 1))
+                + " ELSE NULL END WHERE id='"
+                + revision
+                + "'";
+        if (!rejected(c, sql, "immutable")) {
+          accepted.add(sql);
+        }
+      }
+      assertThat(accepted).as("ui_test_revisions columns writable on the head schema").isEmpty();
+      c.rollback();
+    }
+  }
+
+  private static String tamperValue(String dataType) {
+    return switch (dataType) {
+      case "uuid" -> "gen_random_uuid()";
+      case "character varying", "text" -> "'tampered'";
+      case "bigint", "integer" -> "999";
+      case "jsonb" -> "'{\"tampered\":true}'::jsonb";
+      case "timestamp with time zone" -> "NOW()-INTERVAL '1 day'";
+      default ->
+          throw new IllegalStateException(
+              "Add a tamper value for ui_test_revisions column type " + dataType);
+    };
   }
 
   @Test
@@ -586,9 +645,17 @@ class InferenceMigrationLatestIT {
               + TEST_ID
               + "'");
       UUID request = insertRequest(c, TEST_ID, CSI, 2, null, FINGERPRINT);
-      // Column list of CompileStateService.insertCapturedRevision at HEAD (no reference_policy).
-      boolean published =
-          !rejected(c, candidate(UUID.randomUUID(), request, HASH, PROVENANCE, null), "");
+      // Column list of CompileStateService.insertCapturedRevision after the D3 fix: the captured
+      // writer also persists the candidate's reference policy and derivation version.
+      String captured =
+          candidate(UUID.randomUUID(), request, HASH, PROVENANCE, null)
+              .replace(
+                  "baseline_revision_id) SELECT",
+                  "baseline_revision_id,reference_policy,intent_derivation_version) SELECT")
+              .replace(
+                  "r.baseline_revision_id FROM",
+                  "r.baseline_revision_id,'{\"policyVersion\":2,\"steps\":[]}','2' FROM");
+      boolean published = !rejected(c, captured, "");
       assertThat(published)
           .as("captured insert for a V21 authoring draft after V19 (HEAD writer column list)")
           .isTrue();
