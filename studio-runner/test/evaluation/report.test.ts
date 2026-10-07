@@ -38,6 +38,19 @@ describe('evaluation report denominators', () => {
     expect(reportExitCode(report)).toBe(2);
   });
 
+  it('keeps planned-but-never-seen trials from plain planned IDs in every class denominator (REL-001)', () => {
+    const report = buildReport({ trials: [pass('a')], planned: ['a', 'b'], run: RUN, capacityEvents: [] });
+    expect(report.coverage.plannedByClass).toMatchObject({ SUPPORTED: 1, UNKNOWN: 1 });
+    expect(report.correctness.behavioralCorrectness).toMatchObject({ numerator: 1, denominator: 2, rate: 0.5 });
+    expect(report.coverage.supportedCoverage).toMatchObject({ numerator: 1, denominator: 2 });
+    expect(report.falseSuccess.perSupportedTrial.denominator).toBe(2);
+    expect(report.unsupportedOutcomes.UNSUPPORTED.correctNonExecutable).toMatchObject({ numerator: 0, denominator: 1 });
+    expect(report.unsupportedOutcomes.CLARIFICATION.correctNonExecutable).toMatchObject({ numerator: 0, denominator: 1 });
+    expect(report.correctness.behavioralCorrectness.denominatorDefinition).toContain('never observed');
+    expect(report.evidenceGaps).toContain('planned trials without expected class');
+    expect(reportExitCode(report)).toBe(2);
+  });
+
   it('reports false success per supported trial and per PASS execution, excluding correct deliberate failures', () => {
     const report = buildReport({
       trials: [pass('a'), pass('b', { oracle: { correct: false, falseSuccess: true, failures: ['domain-events'] } }),
@@ -114,10 +127,12 @@ describe('evaluation report denominators', () => {
   it('without run context the pins are unavailable, the gap is listed and the exit is incomplete', () => {
     const report = buildReport({ trials: [pass('a')], planned: ['a'] });
     expect(report.pins.declared).toBe('unavailable');
+    expect(report.pins.inference).toEqual({ generation: 'unavailable', model: 'unavailable', prompt: 'unavailable' });
     expect(report.evidenceGaps).toContain('run context (pins, budgets, concurrency) unavailable');
     expect(reportExitCode(report)).toBe(2);
     const markdown = renderReport(report);
     expect(markdown).toContain('Declared: unavailable');
+    expect(markdown).toContain('Generation/model/prompt pins: unavailable');
     expect(markdown).toContain('releaseReady: false');
   });
 

@@ -109,6 +109,8 @@ export interface EvaluationReport extends OutcomeMetrics {
   readonly pins: {
     /** Each field is the literal `'unavailable'` when the run context was not supplied. */
     readonly declared: Record<string, string> | Unavailable;
+    /** Not exposed by the API; always the literal `'unavailable'`, never inferred. */
+    readonly inference: { readonly generation: Unavailable; readonly model: Unavailable; readonly prompt: Unavailable };
     readonly sourceCommit: string;
     readonly dirtyBaselineDigest: string;
     readonly manifestDigest: string;

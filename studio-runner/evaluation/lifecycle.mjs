@@ -70,10 +70,14 @@ export async function runEvaluation(config, manifest, directory, transport = fet
   }
   if (!jobs.length) throw new Error('No selected cases');
   const planned = jobs.map(j=>({id:j.id,expectedClass:j.entry.expectedClass,requestedMode:j.mode,family:j.entry.family}));
-  const runContext = {tier:'T3',purpose:'development',concurrency,pins:config.pins,sourceCommit:config.sourceCommit,
+  // Spec §1 reserves T3 for a real approved gateway. The harness cannot verify that provenance itself (the
+  // gateway evidence file is an operator declaration), so a real transport is 'T3-unverified' and an
+  // injected (scripted) transport is never labelled as live inference evidence.
+  const tier = transport === fetch ? 'T3-unverified' : 'scripted-transport';
+  const runContext = {tier,purpose:'development',concurrency,pins:config.pins,sourceCommit:config.sourceCommit,
     dirtyBaselineDigest:config.dirtyBaselineDigest,manifestDigest:digest(manifest),fixtureVersion:config.fixtureVersion??null,
     budgets:{maxApiCalls:config.maxApiCalls,maxTransportCalls:config.maxTransportCalls,maxElapsedMs:config.maxElapsedMs}};
-  await writeFile(directory+'/run-manifest.json',JSON.stringify({schemaVersion:1,tier:'T3',purpose:'development',releaseReady:false,
+  await writeFile(directory+'/run-manifest.json',JSON.stringify({schemaVersion:1,tier,purpose:'development',releaseReady:false,
     plannedIds:jobs.map(j=>j.id),planned,manifestDigest:runContext.manifestDigest,sourceCommit:config.sourceCommit,dirtyBaselineDigest:config.dirtyBaselineDigest,
     pins:config.pins,fixtureVersion:runContext.fixtureVersion,repetitions:config.repetitions,orderSeed:config.orderSeed,maxApiCalls:config.maxApiCalls,
     maxTransportCalls:config.maxTransportCalls,maxElapsedMs:config.maxElapsedMs,concurrency,quotaUsd:prerequisite.quotaUsd},null,2)+'\n',{flag:'wx'});

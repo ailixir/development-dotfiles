@@ -8,6 +8,8 @@ import { summarize } from './oracle.mjs';
 export const REPORT_SCHEMA_VERSION = 2;
 export const UNAVAILABLE = 'unavailable';
 const CLASSES = ['SUPPORTED','UNSUPPORTED','CLARIFICATION'];
+/** Planned trials never observed have no known class; each class denominator includes them as not handled. */
+const UNSEEN = '; planned trials never observed (class unknown) are included in every class and count as not handled';
 
 const ratio = (numerator, denominator, denominatorDefinition) =>
   ({numerator, denominator, rate: denominator ? numerator / denominator : null, denominatorDefinition});
@@ -50,7 +52,7 @@ function normalisePlan(planned, trials) {
 
 function outcomeMetrics(plan, trials) {
   const byId = new Map(trials.map(t => [t.id, t]));
-  const of = cls => plan.filter(p => p.expectedClass === cls).map(p => ({plan: p, trial: byId.get(p.id)}));
+  const of = cls => plan.filter(p => p.expectedClass === cls || p.expectedClass === 'UNKNOWN').map(p => ({plan: p, trial: byId.get(p.id)}));
   const supported = of('SUPPORTED');
   const complete = supported.filter(({trial}) => trial?.complete);
   const correct = complete.filter(({trial}) => trial.oracle?.correct === true);
@@ -67,30 +69,30 @@ function outcomeMetrics(plan, trials) {
     const rows = of(cls);
     return {
       correctNonExecutable: ratio(rows.filter(({trial}) => trial?.complete && trial.oracle?.correct === true).length, rows.length,
-        `all planned ${cls} trials (incomplete trials count as not handled)`),
+        `all planned ${cls} trials (incomplete trials count as not handled)${UNSEEN}`),
       wrongAcceptance: ratio(rows.filter(({trial}) => trial?.candidateProduced === true).length, rows.length,
-        `all planned ${cls} trials; a produced executable candidate is a failure`),
+        `all planned ${cls} trials; a produced executable candidate is a failure${UNSEEN}`),
       incomplete: rows.filter(({trial}) => !trial?.complete).length,
     };
   };
   return {
     correctness: {
       behavioralCorrectness: ratio(correct.length, supported.length,
-        'all planned SUPPORTED trials; incomplete, refused or timed-out trials count as incorrect'),
+        `all planned SUPPORTED trials; incomplete, refused or timed-out trials count as incorrect${UNSEEN}`),
       completion: ratio(plan.filter(p => byId.get(p.id)?.complete).length, plan.length, 'all planned trials, every class'),
       incompleteSupported: supported.length - complete.length,
     },
     coverage: {
       supportedCoverage: ratio(supported.filter(({trial}) => trial?.candidateProduced === true).length, supported.length,
-        'all planned SUPPORTED trials yielding a complete statically valid candidate (rejecting everything scores 0)'),
+        `all planned SUPPORTED trials yielding a complete statically valid candidate (rejecting everything scores 0)${UNSEEN}`),
       familyCorrectness: ratio([...families.values()].filter(f => f.correct === f.planned).length, families.size,
-        'planned SUPPORTED families; a family counts only when every planned trial in it is correct'),
+        `planned SUPPORTED families; a family counts only when every planned trial in it is correct${UNSEEN}`),
       plannedByClass: Object.fromEntries([...CLASSES, 'UNKNOWN'].map(cls => [cls, plan.filter(p => p.expectedClass === cls).length])),
     },
     unsupportedOutcomes: {UNSUPPORTED: nonExecutable('UNSUPPORTED'), CLARIFICATION: nonExecutable('CLARIFICATION')},
     falseSuccess: {
       count: falseSuccess.length,
-      perSupportedTrial: ratio(falseSuccess.length, supported.length, 'all planned SUPPORTED trials'),
+      perSupportedTrial: ratio(falseSuccess.length, supported.length, `all planned SUPPORTED trials${UNSEEN}`),
       perPassExecution: ratio(falseSuccess.length, passes.length, 'completed SUPPORTED trials whose execution reported PASSED'),
     },
   };
@@ -187,6 +189,8 @@ function pinMetrics(trials, run) {
   }
   return {
     declared: run?.pins ?? UNAVAILABLE,
+    // Spec §5 asks for generation/model/prompt pins; the API does not return them, so they are never inferred.
+    inference: {generation: UNAVAILABLE, model: UNAVAILABLE, prompt: UNAVAILABLE},
     sourceCommit: run?.sourceCommit ?? UNAVAILABLE,
     dirtyBaselineDigest: run?.dirtyBaselineDigest ?? UNAVAILABLE,
     manifestDigest: run?.manifestDigest ?? UNAVAILABLE,
@@ -249,6 +253,7 @@ export function renderReport(report) {
     ...(report.evidenceGaps.length ? ['', `Evidence gaps: ${report.evidenceGaps.join('; ')}.`] : []),
     '', '## Pins',
     `- Declared: ${val(report.pins.declared)}`,
+    `- Generation/model/prompt pins: ${UNAVAILABLE} (not exposed by the API)`,
     `- Source commit: ${val(report.pins.sourceCommit)}; dirty baseline digest: ${val(report.pins.dirtyBaselineDigest)}`,
     `- Manifest digest: ${val(report.pins.manifestDigest)}; fixture version: ${val(report.pins.fixtureVersion)}`,
     `- Observed runtime: ${report.pins.observedRuntime.map(r => `${JSON.stringify(r.runtime)} ×${r.executions}`).join(', ') || 'none'}`,

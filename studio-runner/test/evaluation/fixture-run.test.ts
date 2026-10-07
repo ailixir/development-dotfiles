@@ -54,7 +54,7 @@ afterAll(async () => {
   }
 });
 
-interface RunResult { exit: number; report: EvaluationReport; markdown: string; trials: string }
+interface RunResult { exit: number; report: EvaluationReport; markdown: string; trials: string; runManifest: { tier: string } }
 let runCount = 0;
 async function evaluate(cases: Record<string, unknown>[], options: ScriptOptions, overrides: Record<string, unknown> = {}): Promise<RunResult> {
   const dir = join(temp, `run-${String(++runCount)}`);
@@ -74,14 +74,20 @@ async function evaluate(cases: Record<string, unknown>[], options: ScriptOptions
     report: JSON.parse(await readFile(join(evidence, 'summary.json'), 'utf8')) as EvaluationReport,
     markdown: await readFile(join(evidence, 'report.md'), 'utf8'),
     trials: await readFile(join(evidence, 'trials.jsonl'), 'utf8'),
+    runManifest: JSON.parse(await readFile(join(evidence, 'run-manifest.json'), 'utf8')) as { tier: string },
   };
 }
 
 describe('fixture-backed evaluation report (AC-3 local half)', () => {
   it('a clean fixture run reports every AC-3 metric with denominators and pins, and exits 0', async () => {
-    const { exit, report, markdown } = await evaluate([supported('save-target', 'save'), PAIRED, UNSUPPORTED, AMBIGUOUS], {});
+    const { exit, report, markdown, runManifest } = await evaluate([supported('save-target', 'save'), PAIRED, UNSUPPORTED, AMBIGUOUS], {});
     expect(exit).toBe(0);
     expect(report.releaseReady).toBe(false);
+    // REQ-002: a scripted transport is never labelled as live T3 inference evidence.
+    expect(report.tier).not.toMatch(/^T3\b/);
+    expect(report.tier).toBe('scripted-transport');
+    expect(markdown).toContain('tier scripted-transport;');
+    expect(runManifest.tier).toBe('scripted-transport');
     expect(report.evidenceGaps).toEqual([]);
     expect(report.correctness.behavioralCorrectness).toMatchObject({ numerator: 3, denominator: 3, rate: 1 });
     expect(report.coverage.supportedCoverage).toMatchObject({ numerator: 3, denominator: 3 });
