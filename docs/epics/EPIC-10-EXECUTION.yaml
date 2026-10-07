@@ -1581,6 +1581,31 @@ stories:
       po_validation: >-
         GO, 9/10, @po 2026-10-07, Draft → Ready. Blocks row corrected (sequencing, not 10.19 AC-19);
         git log -S claim given its path filter. See the story's PO Readiness section.
+  - id: "10.48"
+    title: "Restore the CSI execute check on Studio POST /tests/{id}/execute (O-22)"
+    # ADDED BY @po 2026-10-07 at validation. Same pattern as 10.35, 10.45, 10.47: the story's own Epic row
+    # flagged the missing entry for @po. Source: ADR-002 §35.4 and the §13 row of 2026-10-07 (O-22, ruled by
+    # @architect "not ratified"); user decision 2026-10-07 "restore the execute check now". Security priority.
+    #
+    # size S-M is the story's own row, labelled inferred there.
+    size: "S-M"
+    # wave: null as for 10.34/10.35/10.45/10.47: post-closure security fix, not schedulable in the wave sequence.
+    wave: null
+    # depends_on is EMPTY: 10.44 (which removed the check in 554277fcb) is Done and has no entry here.
+    depends_on: []
+    # blocks is EMPTY: no story criterion depends on this one. The ADR-002 §35.5 fix story (not drafted) also
+    # edits openapi.yaml and re-anchors BASE_SHA256: coordination only, whichever lands second re-anchors.
+    blocks: []
+    story_context:
+      shape: >-
+        SECURITY FIX. Reinstate canExecute at the top of StudioService.executeTest (before
+        StudioAcceptanceService.accept, never in acceptCore, which the scheduler shares), same non-oracle
+        403. Revert the executeTest openapi description, re-anchor BASE_SHA256, add the ADR-002 §13 row
+        closing O-22. Scheduled runs unchanged (STUDIO-SCHED-001 background authorization), pinned by tests.
+      po_validation: >-
+        GO, 9/10, @po 2026-10-07, Draft → Ready. UI signal ruled: reuse the existing public
+        schedule/capabilities.canManage (= canWrite = canExecute today; no Class C change). Resume split out
+        of scope. See the story's PO Readiness section.
 
 # ─────────────────────────────────────────────────────────────
 # File-ownership conflicts (wave planning must serialize or single-own)
