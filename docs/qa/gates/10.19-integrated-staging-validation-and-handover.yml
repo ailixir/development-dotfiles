@@ -757,3 +757,94 @@ before_merge:
     narrative, both of which state that the 20-run recipe "does not reproduce this race" and that the
     full tier does. This gate's evidence is the other way round in both halves; the honest statement
     is that neither natural protocol is a reliable detector and only the squeeze is.
+
+rereview_2026_10_07:
+  reviewer: Quinn (@qa)
+  scope: AC-19 and AC-14 only; AC-1..AC-7 untouched and still skipped — blocked
+  head_sha: 530c3ea2a
+  branch: brunobuger/ui-studio
+  contains_10_19_merge: 833b45da4
+  top_level_gate: unchanged (CONCERNS)
+  decision: NEEDS_WORK
+  story_status: Ready for Review (unchanged; blocked criteria forbid Done)
+  ticked: []
+  environment: >-
+    Clean tree (untracked .aiox/ and .claude/agent-memory/ only), still clean after all runs. A user
+    bootRun and a continuous `gradle -t classes` were live on the same checkout. Gradle runs were
+    serialized through gradle-locked.sh, with load 2.2 at the start of the backend run.
+  ac_19:
+    verdict: NOT MET
+    backend_narrow:
+      command: ./gradlew test --rerun-tasks --tests "com.citi.put.checks.studio.*"
+      result: BUILD SUCCESSFUL in 11m 16s
+      counts: {passed: 1199, failed: 0, skipped: 7, total: 1206}
+      method: JUnit XML aggregation (148 suites, none zero-length), corroborated by 1199 PASSED lines
+    backend_full:
+      command: ./gradlew test --rerun-tasks
+      result: BUILD SUCCESSFUL in 14m 12s
+      counts: {passed: 1537, failed: 0, skipped: 18, total: 1555}
+    skipped_18_vs_7: >-
+      Scope difference, not a behaviour change. The full suite still skips 18: 11 StudioCoRunIT
+      (com.citi.put.checks.corun, @EnabledIfEnvironmentVariable STUDIO_CORUN=1, driven by
+      tools/corun.sh) plus 7 (ExternallyGatedCriteriaTest x3, ExecutionVideoExternallyGatedCriteriaTest
+      x2, TargetPolicyGapTest, ExecutionReadinessTest). The studio.* filter excludes the corun
+      package, so it shows 7. No test stopped being skipped. Expected.
+    frontend:
+      vitest: {passed: 940, failed: 5, total: 945, files: 76, runs: 2, identical_failures: true}
+      type_check: exit 0, 0 errors (ENV-1(a) TS2307s no longer reproduce; the local symlink resolves)
+      lint: >-
+        exit 0, 0 errors / 303 warnings. ESLint starts; ENV-1(b) no longer reproduces. Reported as a
+        fact; the epic rule against reporting lint as passed is @po's to retire.
+    studio_runner:
+      default: {passed: 1214, failed: 0, skipped: 29, total: 1243}
+      fixtures: {passed: 154, skipped: 10, total: 164}
+      deployment: {passed: 313, failed: 0, total: 313, note: the 4 earlier envfrom-keys reds are gone}
+      type_check: exit 0
+      lint: exit 0
+    registration_guard: PASS, exit 0
+    f3_ac_19c:
+      landed_version: >-
+        Another version, sha256 5bbb147e..., from 51ade0f1f. Fake timers advance the 25 ms deadline only
+        after the responder has received the request.
+      squeeze: >-
+        3/3 green (100 ms real-timer delay before recording, applied to a temporary copy that was then
+        deleted). The same squeeze on the 7357082e3 base goes RED, so the instrument discriminates.
+      under_load: 20/20 green, file alone, 8 spinners, load 5.8 -> 10.9
+      ruling: F-3 closed on this line (BL-10.19-5 can close)
+    gradle_check: not run — AC-19 does not name it
+    failures:
+      - id: FE-10.19-RR-1
+        tests: InferenceStudio.test.tsx x3
+        root_cause: >-
+          Copy drift. e2179f50b changed InferenceStudio.tsx:181 from `Step N — Reused` to
+          `Step N: Reused`. The tests from 51ade0f1f still expect the em dash.
+        owner: 10.25 / inference program (v2 deferral decision pending with the user)
+      - id: FE-10.19-RR-2
+        tests: studioWcagAudit.test.tsx surface 7
+        root_cause: >-
+          Stale anchor in this story's own AC-12(a) harness. VAL-025 (e2179f50b) renders a failed
+          step's seek as step-watch-failure-N instead of step-seek-N (ExecutionProgressView.tsx:265).
+          The fixture's step index 1 fails, so step-seek-1 no longer exists; the DOM has step-seek-0
+          and step-seek-2.
+        owner: 10.19 AC-12(a) harness (@dev), triggered by VAL-025 (UI-STUDIO-VALIDATION-20261004)
+      - id: FE-10.19-RR-3
+        tests: StudioTestsPage.test.tsx "falls back a page when deleting the last row of the last page"
+        root_cause: >-
+          Load timing. It hits the 15 s timeout only in the full parallel suite (2/2). Run alone it
+          takes 6.1 s, and the file passes 27/27 three times at load ~7. No product defect shown.
+          Same family as FE-FLAKE-1 (inferred).
+        owner: Studio list page (e2179f50b) / test budget
+  ac_14:
+    verdict: FIX VERIFIED, CRITERION NOT MET — not ticked
+    evidence:
+      - a36b06c9c is an ancestor of HEAD. The skip link is the first child of the layout Box, before
+        PlatformSidebar, with href="#checks-main". The id sits on <main tabIndex={-1}>, and an onClick
+        focuses it.
+      - ChecksLayout.a11y.test.tsx now collects and passes 2/2 (it failed at file level before).
+      - >-
+        A temporary probe, deleted afterwards, confirmed the behaviour: the first userEvent.tab()
+        focuses the skip link, the second focuses the sidebar Home button, and Enter on the link
+        focuses <main>.
+    missing: >-
+      There is no committed keyboard-order (first-Tab) test, which AC-14 requires. ENV-1(a) no longer
+      blocks writing one, so BL-10.19-8 is actionable now. Route to @dev.
