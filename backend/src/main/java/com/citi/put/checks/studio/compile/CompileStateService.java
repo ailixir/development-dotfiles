@@ -882,14 +882,16 @@ public class CompileStateService {
             "references", provenance,
             created_by, compile_request_id, authoring_snapshot, authoring_hash,
             scope_reviewed_by,
-            scope_reviewed_at, compilation_fingerprint, baseline_revision_id)
+            scope_reviewed_at, compilation_fingerprint, baseline_revision_id,
+            reference_policy, intent_derivation_version)
             SELECT ?, test_id, csi_id, source_revision, configuration_revision,
             source, source_hash,
             CAST(? AS jsonb), ?, ?, configuration, "references", CAST(? AS
             jsonb), created_by,
             request_id, authoring_snapshot, authoring_hash, scope_reviewed_by,
             scope_reviewed_at,
-            compilation_fingerprint, baseline_revision_id
+            compilation_fingerprint, baseline_revision_id,
+            CAST(? AS jsonb), ?
             FROM ui_test_compile_requests WHERE request_id = ? AND test_id = ?
             ON CONFLICT (compile_request_id) DO NOTHING RETURNING id
             """,
@@ -899,6 +901,8 @@ public class CompileStateService {
             candidate.artifactHash(),
             candidate.artifactSchemaVersion(),
             provenance,
+            candidate.referencePolicy(),
+            candidate.intentDerivationVersion(),
             request.requestId(),
             testId);
     if (!inserted.isEmpty()) {

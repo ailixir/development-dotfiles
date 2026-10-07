@@ -185,6 +185,49 @@ class InferenceCaptureIntegrationTest {
   }
 
   @Test
+  void cutoverPublisherPersistsReferencePolicyForContextAwareDraft() {
+    // Story 10.23 D3: after V19 the captured writer must carry the V24 reference policy and the V23
+    // derivation version, or a V21-authored draft (whose authoring the V21 trigger copies into the
+    // revision) violates ck_ui_test_revisions_v2_derivation_version and cannot publish.
+    withCutover(
+        () -> {
+          jdbc.update(
+              "UPDATE ui_tests SET authoring='{\"authoringSchemaVersion\":\"2\",\"steps\":[]}'"
+                  + " WHERE id=?",
+              testId);
+          var captured = capture("FULL", false);
+          var plain = candidate(captured);
+          String policy = "{\"policyVersion\":2,\"steps\":[]}";
+          var candidate =
+              new CandidateRevision(
+                  plain.configurationRevision(),
+                  plain.source(),
+                  plain.sourceHash(),
+                  plain.artifact(),
+                  plain.artifactHash(),
+                  plain.artifactSchemaVersion(),
+                  plain.configuration(),
+                  plain.references(),
+                  plain.provenance(),
+                  plain.createdBy(),
+                  policy,
+                  VersionedIntentDeriver.CURRENT_VERSION);
+          assertThat(states.publishCandidate(testId, captured.request(), candidate))
+              .isEqualTo(PublishResult.PUBLISHED);
+          var row =
+              jdbc.queryForMap(
+                  "SELECT reference_policy = CAST(? AS jsonb) AS policy,"
+                      + " intent_derivation_version AS version, compile_request_id"
+                      + " FROM ui_test_revisions WHERE id=?",
+                  policy,
+                  revision());
+          assertThat(row.get("policy")).isEqualTo(Boolean.TRUE);
+          assertThat(row.get("version")).isEqualTo(VersionedIntentDeriver.CURRENT_VERSION);
+          assertThat(row.get("compile_request_id")).isEqualTo(captured.request().requestId());
+        });
+  }
+
+  @Test
   void passingFullEvidencePermitsOnlyChangedSuffixAndMissingRuntimeEvidenceDoesNot() {
     withCutover(
         () -> {
