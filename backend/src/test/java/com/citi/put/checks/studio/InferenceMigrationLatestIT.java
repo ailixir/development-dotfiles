@@ -400,6 +400,99 @@ class InferenceMigrationLatestIT {
   }
 
   @Test
+  void fullExecutionCannotBeRelabelledToNull() throws SQLException {
+    try (Connection c = transaction()) {
+      UUID full = pass(c, TEST_ID, CSI, LEGACY_REVISION, 1, "0 days", "FULL", "PASSED");
+      reject(
+          c,
+          "UPDATE ui_test_executions SET execution_scope=NULL WHERE id='" + full + "'",
+          "execution_scope is immutable");
+      assertThat(
+              scalar(c, "SELECT execution_scope FROM ui_test_executions WHERE id='" + full + "'"))
+          .isEqualTo("FULL");
+      c.rollback();
+    }
+  }
+
+  @Test
+  void scopeGuardAllowsNormalLifecycleUpdatesWithUnchangedScope() throws SQLException {
+    try (Connection c = transaction();
+        Statement s = c.createStatement()) {
+      UUID full = pass(c, TEST_ID, CSI, LEGACY_REVISION, 1, "0 days", "FULL", "PENDING");
+      String where = " WHERE id='" + full + "'";
+      s.executeUpdate("UPDATE ui_test_executions SET status='RUNNING',ended_at=NULL" + where);
+      assertThat(scalar(c, "SELECT status FROM ui_test_executions" + where)).isEqualTo("RUNNING");
+      // A full-row update that re-lists the column with the same value (Hibernate style) passes.
+      s.executeUpdate(
+          "UPDATE ui_test_executions SET status='PASSED',ended_at=NOW(),execution_scope='FULL'"
+              + where);
+      assertThat(scalar(c, "SELECT status||':'||execution_scope FROM ui_test_executions" + where))
+          .isEqualTo("PASSED:FULL");
+      c.rollback();
+    }
+  }
+
+  @Test
+  void scopeGuardCoversExistingAndFuturePartitions() throws SQLException {
+    try (Connection c = transaction();
+        Statement s = c.createStatement()) {
+      // Every existing leaf partition (month partitions + DEFAULT) carries the cloned trigger.
+      assertThat(
+              scalar(
+                  c,
+                  "SELECT count(*) FROM pg_inherits i WHERE i.inhparent='ui_test_executions'::regclass"
+                      + " AND NOT EXISTS (SELECT 1 FROM pg_trigger t WHERE t.tgrelid=i.inhrelid"
+                      + " AND t.tgname='trg_studio_execution_scope_immutable')"))
+          .isEqualTo("0");
+      UUID existing = UUID.randomUUID();
+      s.executeUpdate(
+          execution(existing, TEST_ID, CSI, LEGACY_REVISION, 1, HASH, null)
+              .replace(
+                  "NOW(),NOW()",
+                  "TIMESTAMPTZ '2026-06-15 12:00Z',TIMESTAMPTZ '2026-06-15 12:00Z'"));
+      assertThat(
+              scalar(
+                  c,
+                  "SELECT tableoid::regclass::text FROM ui_test_executions WHERE id='"
+                      + existing
+                      + "'"))
+          .isEqualTo("ui_test_executions_2026_06");
+      reject(
+          c,
+          "UPDATE ui_test_executions_2026_06 SET execution_scope='FULL' WHERE id='"
+              + existing
+              + "'",
+          "execution_scope is immutable");
+
+      s.execute(
+          "CREATE TABLE ui_test_executions_2030_01 PARTITION OF ui_test_executions"
+              + " FOR VALUES FROM ('2030-01-01') TO ('2030-02-01')");
+      UUID future = UUID.randomUUID();
+      s.executeUpdate(
+          execution(future, TEST_ID, CSI, LEGACY_REVISION, 1, HASH, "FULL")
+              .replace(
+                  "NOW(),NOW()",
+                  "TIMESTAMPTZ '2030-01-15 12:00Z',TIMESTAMPTZ '2030-01-15 12:00Z'"));
+      assertThat(
+              scalar(
+                  c,
+                  "SELECT tableoid::regclass::text FROM ui_test_executions WHERE id='"
+                      + future
+                      + "'"))
+          .isEqualTo("ui_test_executions_2030_01");
+      reject(
+          c,
+          "UPDATE ui_test_executions SET execution_scope=NULL WHERE id='" + future + "'",
+          "execution_scope is immutable");
+      reject(
+          c,
+          "UPDATE ui_test_executions_2030_01 SET execution_scope=NULL WHERE id='" + future + "'",
+          "execution_scope is immutable");
+      c.rollback();
+    }
+  }
+
+  @Test
   void baselineSelectionIsScopedDeterministicAndFallsBackWhenEvidenceExpires() throws Exception {
     try (Connection c = transaction();
         Statement s = c.createStatement()) {
