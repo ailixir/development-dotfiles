@@ -278,7 +278,10 @@ describe('Tests page — rows', { timeout: 15_000 }, () => {
 describe('Tests page — delete', { timeout: 15_000 }, () => {
   async function openDelete(name: string) {
     await user.click(await screen.findByRole('button', { name: `Actions for ${name}` }, WAIT));
-    await user.click(screen.getByRole('menuitem', { name: 'Delete' }));
+    // Not `getByRole('menuitem', { name })`: naming the "Open" item (an <a>) runs jsdom's
+    // getComputedStyle on an anchor, which re-resolves the base URL for every CSS rule — ~1 s alone,
+    // several times that under full-suite load. The menu is still found by role.
+    await user.click(within(screen.getByRole('menu')).getByText('Delete'));
     return screen.getByRole('dialog');
   }
 
@@ -340,9 +343,13 @@ describe('Tests page — delete', { timeout: 15_000 }, () => {
     const dialog = await openDelete('Test last');
     await user.click(within(dialog).getByRole('button', { name: 'Delete' }));
 
-    expect(await screen.findByRole('link', { name: 'Test first' }, WAIT)).toBeInTheDocument();
+    // Wait on the page-1 row itself, then check the accessible link once the dialog has gone, rather
+    // than polling a document-wide link-name query (each poll pays the anchor style cost above).
+    const row = await screen.findByTestId('test-row-first', {}, WAIT);
     expect(lastRequest().get('page')).toBe('0');
     expect(search().get('page')).toBeNull();
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), WAIT);
+    expect(within(row).getByRole('link', { name: 'Test first' })).toBeInTheDocument();
   });
 });
 
