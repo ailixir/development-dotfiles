@@ -347,3 +347,128 @@ describe('AC-3 — the callback destination is deployment configuration only', (
     expect(runner.http.requests).toEqual([]);
   });
 });
+
+/**
+ * Story 10.35 AC-3 (gate FAIL `AC3-RUNNER-SILENT-ON-BODY-REFUSAL`). The co-run harness tells
+ * "refused the body" from "never reached" by whether the runner wrote anything while the dispatch
+ * was in flight. A pre-admission refusal of `POST /v1/runs` must therefore write exactly one line,
+ * and that line carries codes and field NAMES only: the body holds resolved secrets and job keys.
+ */
+describe('Story 10.35 AC-3 — a refused run body is recorded, by code and field name only', () => {
+  const CANARIES = [
+    'canary-secret-value',
+    'exec-1',
+    'attempt-1',
+    'rev-1',
+    'sha256:abc',
+    'CSI-1234',
+    'studio/exec-1',
+    'example.com',
+    SERVICE_TOKEN,
+  ];
+
+  interface RefusalLine {
+    level: string;
+    event: string;
+    route: string;
+    status: number;
+    code: string;
+    problemCodes?: string;
+    problemFields?: string;
+  }
+
+  async function refusalWindow(
+    runner: Harness,
+    body: string,
+  ): Promise<{ status: number; lines: string[] }> {
+    const mark = runner.sink.lines.length;
+    const response = await post(runner.port, '/v1/runs', body, SERVICE_TOKEN);
+    return { status: response.status, lines: runner.sink.lines.slice(mark) };
+  }
+
+  function onlyRefusal(lines: readonly string[]): RefusalLine {
+    expect(lines).toHaveLength(1);
+    const line = JSON.parse(lines[0] ?? '{}') as RefusalLine;
+    expect(line.event).toBe('runs.refused');
+    expect(line.level).toBe('warn');
+    expect(line.route).toBe('/v1/runs');
+    // Never the identity shape: the harness would read that as "refused on IDENTITY".
+    expect(lines[0]).not.toContain('request.unauthenticated');
+    for (const canary of CANARIES) expect(lines[0]).not.toContain(canary);
+    return line;
+  }
+
+  it('records a missing required key as one JOB_INVALID line naming the field', async () => {
+    const runner = await start();
+    const job = validJob();
+    delete job.manifestKey;
+    const window = await refusalWindow(runner, JSON.stringify(job));
+    expect(window.status).toBe(400);
+    const line = onlyRefusal(window.lines);
+    expect(line).toMatchObject({
+      status: 400,
+      code: 'JOB_INVALID',
+      problemCodes: 'JOB_FIELD_MISSING',
+      problemFields: 'manifestKey',
+    });
+    expect(runner.app.logger.counters.snapshot()['runner.runs.refused']).toBe(1);
+  });
+
+  it('names an unknown key but never writes the value it carried', async () => {
+    const runner = await start();
+    const window = await refusalWindow(
+      runner,
+      JSON.stringify(validJob({ webhookUrl: 'https://attacker.example/canary-secret-value' })),
+    );
+    const line = onlyRefusal(window.lines);
+    expect(line.code).toBe('JOB_INVALID');
+    expect(line.problemFields?.split(',')).toContain('webhookUrl');
+    expect(window.lines[0]).not.toContain('attacker');
+  });
+
+  it('records an artifact the validator refuses as one ARTIFACT_INVALID line', async () => {
+    const runner = await start();
+    const job = validJob();
+    const window = await refusalWindow(
+      runner,
+      JSON.stringify({
+        ...job,
+        artifact: {
+          version: 1,
+          steps: [{ stepIndex: 0, originalText: 'x', code: 'process.exit(1); // canary-secret-value' }],
+        },
+        source: ['x'],
+        references: { variables: [], secrets: [] },
+        resolvedSecrets: {},
+      }),
+    );
+    expect(window.status).toBe(400);
+    const line = onlyRefusal(window.lines);
+    expect(line.code).toBe('ARTIFACT_INVALID');
+    expect(line.problemFields).toMatch(/^artifact(,artifact)*$/u);
+  });
+
+  it('records a body that is not JSON as one BODY_NOT_JSON line without echoing it', async () => {
+    const runner = await start();
+    const window = await refusalWindow(runner, 'not json canary-secret-value');
+    expect(window.status).toBe(400);
+    expect(onlyRefusal(window.lines)).toMatchObject({ status: 400, code: 'BODY_NOT_JSON' });
+  });
+
+  it('records an oversized body as one BODY_TOO_LARGE line', async () => {
+    const runner = await start({ env: { STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES: '512' } });
+    const window = await refusalWindow(
+      runner,
+      JSON.stringify(validJob({ pad: 'canary-secret-value'.repeat(200) })),
+    );
+    expect(window.status).toBe(413);
+    expect(onlyRefusal(window.lines)).toMatchObject({ status: 413, code: 'BODY_TOO_LARGE' });
+  });
+
+  it('writes no refusal line for a job it admits', async () => {
+    const runner = await start();
+    const window = await refusalWindow(runner, JSON.stringify(validJob()));
+    expect(window.status).toBe(202);
+    expect(window.lines.some((line) => line.includes('runs.refused'))).toBe(false);
+  });
+});

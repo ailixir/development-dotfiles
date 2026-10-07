@@ -115,6 +115,10 @@ const VALIDATE_KEYS = new Set(['artifact', 'source', 'references', 'referencePol
 
 const EMPTY_DECLARATIONS: ReferenceDeclarations = { variables: [], secrets: [] };
 
+/** Bounds on a refusal line (10.35 AC-3): it names problems, it does not reproduce the body. */
+const MAX_LOGGED_PROBLEMS = 10;
+const MAX_LOGGED_FIELD_NAME = 64;
+
 export function createRequestHandler(
   options: RouteOptions,
 ): (request: IncomingMessage, response: ServerResponse) => void {
@@ -193,9 +197,39 @@ export function createRequestHandler(
     });
   }
 
+  /**
+   * One line per pre-admission refusal of `POST /v1/runs` (story 10.35 AC-3).
+   *
+   * Without it the runner is silent when it refuses a body, and an observer reading its log
+   * cannot tell "refused what it was sent" from "never reached". The line carries the route, the
+   * status, the code and the problem codes and field NAMES — never a value: the body carries
+   * resolved secrets and job keys, and nothing read from it other than a name is passed here.
+   */
+  function recordRunRefusal(
+    status: number,
+    code: string,
+    problems?: readonly { readonly code: string; readonly field: string }[],
+  ): void {
+    const bounded = (problems ?? []).slice(0, MAX_LOGGED_PROBLEMS);
+    logger.record('warn', 'runs.refused', 'runner.runs.refused', {
+      route: '/v1/runs',
+      status,
+      code,
+      ...(bounded.length === 0
+        ? {}
+        : {
+            problemCodes: bounded.map((problem) => problem.code).join(','),
+            problemFields: bounded
+              .map((problem) => problem.field.slice(0, MAX_LOGGED_FIELD_NAME))
+              .join(','),
+          }),
+    });
+  }
+
   async function handleRuns(request: IncomingMessage, response: ServerResponse): Promise<void> {
     const body = await readBoundedBody(request, options.maxRequestBodyBytes);
     if (!body.ok) {
+      recordRunRefusal(body.status, body.code);
       respond(response, body.status, { code: body.code });
       return;
     }
@@ -204,12 +238,17 @@ export function createRequestHandler(
     try {
       parsed = JSON.parse(body.text);
     } catch {
+      recordRunRefusal(400, 'BODY_NOT_JSON');
       respond(response, 400, { code: 'BODY_NOT_JSON' });
       return;
     }
 
     // From here to the slot acquire inside `submit` there is no `await` (AC-10).
     const decision = await coordinator.submit(parsed);
+    if (decision.status === 400) {
+      // JOB_INVALID / ARTIFACT_INVALID: refused before any slot, admission or API call.
+      recordRunRefusal(decision.status, decision.code, decision.detail);
+    }
     const headers =
       decision.retryAfterSeconds === undefined
         ? {}
