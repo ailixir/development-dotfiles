@@ -229,6 +229,39 @@ class GenAiLlmGatewayClientTest {
     }
   }
 
+  /** VAL-004: socket deadlines come from request-timeout, never OkHttp's 10s defaults. */
+  @Test
+  void transportSocketTimeoutsDeriveFromRequestTimeout() {
+    StudioGatewayProperties base =
+        GatewayTestSupport.properties(
+            server.baseUrl(), Duration.ofSeconds(60), 1, 262144, 262144, 2);
+    okhttp3.OkHttpClient http = GenAiLlmGatewayClient.transportBuilder(base).build();
+    assertThat(http.connectTimeoutMillis()).isEqualTo(60_000);
+    assertThat(http.readTimeoutMillis()).isEqualTo(60_000);
+    assertThat(http.writeTimeoutMillis()).isEqualTo(60_000);
+    assertThat(http.callTimeoutMillis()).isEqualTo(60_000);
+    assertThat(http.retryOnConnectionFailure()).isFalse();
+  }
+
+  /** VAL-004: a model answer slower than OkHttp's 10s read default still succeeds. */
+  @Test
+  void responseSlowerThanOkHttpDefaultReadTimeoutSucceeds() throws Exception {
+    CompileRequest request = request();
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .willReturn(
+                okJson(GatewayTestSupport.generateContentBody(proposal(request)))
+                    .withFixedDelay(11_000)));
+    StudioGatewayProperties base =
+        GatewayTestSupport.properties(
+            server.baseUrl(), Duration.ofSeconds(30), 1, 262144, 262144, 2);
+    try (GenAiLlmGatewayClient client = client(base)) {
+      CompileResponse response = client.propose(request, new CompileBudget(Duration.ofSeconds(30)));
+      assertThat(response.outcome()).isEqualTo(GatewayOutcome.OK);
+      server.verify(1, postRequestedFor(urlPathMatching(".*generateContent")));
+    }
+  }
+
   @Test
   void recordsPresentVendorUsageAcrossTheSharedRequest() throws Exception {
     CompileRequest request = request();
@@ -370,5 +403,30 @@ class GenAiLlmGatewayClientTest {
         .isEqualTo("MEDIUM");
     assertThat(new ObjectMapper().readTree(low).path("thinkingLevel").asText()).isEqualTo("LOW");
     assertThat(low).isNotEqualTo(medium);
+  }
+
+  @Test
+  void compilationSettingsRecordProviderSchemaVersionTwo() throws Exception {
+    try (GenAiLlmGatewayClient client = client()) {
+      assertThat(
+              new ObjectMapper()
+                  .readTree(client.compilationSettings())
+                  .path("providerSchemaVersion")
+                  .asInt())
+          .isEqualTo(2);
+    }
+  }
+
+  @Test
+  void theWireSchemaIsThePerStatusAnyOf() throws Exception {
+    JsonNode items =
+        wireBody(properties(StudioGatewayProperties.ThinkingLevel.LOW, true, true), request())
+            .at("/generationConfig/responseJsonSchema/properties/steps/items");
+
+    assertThat(items.has("anyOf")).isTrue();
+    assertThat(items.path("anyOf").get(0).path("required").toString())
+        .isEqualTo("[\"stepId\",\"status\",\"code\"]");
+    assertThat(items.path("anyOf").get(1).path("required").toString())
+        .isEqualTo("[\"stepId\",\"status\",\"reason\",\"message\"]");
   }
 }

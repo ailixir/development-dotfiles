@@ -46,13 +46,23 @@ public class StudioController {
     this.authoringMapper = authoringMapper;
   }
 
+  /**
+   * Drafts the caller may read. {@code q}, {@code environment}, {@code lastRun} and {@code sort}
+   * (Story 10.46) are optional; an unknown {@code lastRun} or {@code sort} is {@code 400
+   * INVALID_QUERY}. Default order {@code updatedAt,desc}, ties broken by id.
+   */
   @GetMapping("/tests")
   public ResponseEntity<Map<String, Object>> listTests(
       @RequestParam(required = false) String csiId,
+      @RequestParam(required = false) String environment,
+      @RequestParam(required = false) String q,
+      @RequestParam(required = false) String lastRun,
+      @RequestParam(required = false) String sort,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size,
       Authentication auth) {
-    Page<UITestDto> result = studioService.listTests(csiId, page, size, auth);
+    StudioListQuery.Tests query = StudioListQuery.Tests.parse(csiId, environment, q, lastRun, sort);
+    Page<UITestDto> result = studioService.listTests(query, page, size, auth);
     return ResponseEntity.ok(toEnvelope(result));
   }
 
@@ -175,7 +185,7 @@ public class StudioController {
   @GetMapping("/executions/{id}")
   public ResponseEntity<ExecutionSnapshotDto> findExecutionById(
       @PathVariable UUID id, Authentication auth) {
-    return ResponseEntity.ok(studioService.findExecutionById(id, auth));
+    return ResponseEntity.ok(studioService.readExecution(id, auth));
   }
 
   /**
@@ -191,14 +201,24 @@ public class StudioController {
     return ResponseEntity.accepted().body(studioService.cancelExecution(id, auth));
   }
 
-  /** {@code testId} is optional; every result is scoped by the execution's own CSI (AC-14). */
+  /**
+   * Every filter is optional; every result is scoped by the execution's own CSI (AC-14), and {@code
+   * csiId} only narrows that scope. An unknown {@code status} or {@code sort} is {@code 400
+   * INVALID_QUERY}. Default order {@code acceptedAt,desc}, ties broken by id (Story 10.46).
+   */
   @GetMapping("/executions")
   public ResponseEntity<Map<String, Object>> listExecutions(
       @RequestParam(required = false) UUID testId,
+      @RequestParam(required = false) String csiId,
+      @RequestParam(required = false) String status,
+      @RequestParam(required = false) String q,
+      @RequestParam(required = false) String sort,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size,
       Authentication auth) {
-    Page<ExecutionSnapshotDto> result = studioService.listExecutions(testId, page, size, auth);
+    StudioListQuery.Executions query =
+        StudioListQuery.Executions.parse(testId, csiId, status, q, sort);
+    Page<ExecutionSnapshotDto> result = studioService.listExecutions(query, page, size, auth);
     return ResponseEntity.ok(toExecutionEnvelope(result));
   }
 

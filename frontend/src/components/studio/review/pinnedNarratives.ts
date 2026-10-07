@@ -29,7 +29,7 @@ export const PINNED_STATE_TITLES: Readonly<Record<string, string>> = {
   AWAITING_CONFIRMATION: 'Waiting for your confirmation',
   READY: 'Confirmed and runnable',
   NEEDS_REVISION: 'Some steps could not be made runnable',
-  STALE: 'Translation was interrupted — not something you did',
+  STALE: 'Translation was interrupted: not something you did',
 };
 
 /**

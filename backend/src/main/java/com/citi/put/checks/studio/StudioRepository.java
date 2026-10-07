@@ -3,10 +3,9 @@ package com.citi.put.checks.studio;
 import com.citi.put.checks.studio.entity.UITest;
 import jakarta.persistence.LockModeType;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -17,33 +16,39 @@ import org.springframework.data.repository.query.Param;
  *
  * <p>Deleted and quarantined rows are excluded from every entity query by the {@code
  * &#64;SQLRestriction} on {@link UITest} — that annotation is the single quarantine predicate
- * reused by every list/get path (AC-3). {@link #findLifecycleState(UUID)} deliberately bypasses it
- * so the service can tell "unknown test" from "deleted" or "quarantined".
+ * reused by every list/get path (AC-3), including {@link StudioRepositoryCustom#findPage}. {@link
+ * #findLifecycleState(UUID)} deliberately bypasses it so the service can tell "unknown test" from
+ * "deleted" or "quarantined".
  */
-public interface StudioRepository extends JpaRepository<UITest, UUID> {
-
-  @Query(
-      """
-      SELECT t FROM UITest t
-      WHERE (:csiId IS NULL OR t.csiId = :csiId)
-      """)
-  Page<UITest> findAllFiltered(@Param("csiId") String csiId, Pageable pageable);
+public interface StudioRepository extends JpaRepository<UITest, UUID>, StudioRepositoryCustom {
 
   /**
-   * Same listing, additionally scoped to the CSIs the caller may read. The scope is applied in SQL,
-   * before paging, so page counts never leak the existence of other CSIs' drafts (AC-14,
-   * Architecture §9.1).
+   * Names of the visible drafts among {@code ids}, for labelling one page of execution history
+   * (Story 10.46). One statement per page, never one per row. A deleted or quarantined draft is
+   * hidden by the {@code &#64;SQLRestriction} and therefore simply absent from the result.
+   *
+   * @param ids the drafts a page of executions refers to
+   * @return id and name of each visible one
    */
-  @Query(
-      """
-      SELECT t FROM UITest t
-      WHERE (:csiId IS NULL OR t.csiId = :csiId)
-        AND t.csiId IN :readableCsiIds
-      """)
-  Page<UITest> findAllFilteredScoped(
-      @Param("csiId") String csiId,
-      @Param("readableCsiIds") Collection<String> readableCsiIds,
-      Pageable pageable);
+  @Query("SELECT t.id AS id, t.name AS name FROM UITest t WHERE t.id IN :ids")
+  List<TestName> findNamesByIdIn(@Param("ids") Collection<UUID> ids);
+
+  /**
+   * The current name of one visible draft, or null when it is deleted, quarantined or absent.
+   *
+   * @param id the draft
+   * @return its name, or null
+   */
+  default String findVisibleName(UUID id) {
+    return findNamesByIdIn(List.of(id)).stream().findFirst().map(TestName::getName).orElse(null);
+  }
+
+  /** Id and name of a draft. */
+  interface TestName {
+    UUID getId();
+
+    String getName();
+  }
 
   /**
    * Loads a visible draft and locks its row for the rest of the transaction, so two concurrent

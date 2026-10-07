@@ -9,6 +9,8 @@ import com.citi.put.checks.studio.dispatch.StudioReferenceResolver;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -45,6 +47,8 @@ class SecretUseAuthorizationTest {
   private static final String OTHER_ENVIRONMENT = "dev";
   private static final String OWNER = "owner@citi.com";
   private static final String STRANGER = "stranger@citi.com";
+  private static final UUID TEST_ID = UUID.fromString("7d0c5e2a-3b1f-4c8e-9a6d-2f4b8e1c0a11");
+  private static final UUID OTHER_TEST_ID = UUID.fromString("0a9e4b61-5c2d-4e7f-8b3a-6d1c9f2e4b22");
 
   /** A distinctive value, so every "does not contain" below has something to not contain. */
   private static final String CANARY = "VaUlT-Canary-8f3a1c-do-not-persist";
@@ -56,11 +60,22 @@ class SecretUseAuthorizationTest {
   @BeforeEach
   void setUp() {
     vault = new FakeStudioVaultProvider(Map.of());
-    vault.rotate(StudioVaultProvider.ReferenceKind.SECRET, CSI, ENVIRONMENT, "LOGIN_PW", CANARY);
-    vault.rotate(StudioVaultProvider.ReferenceKind.VARIABLE, CSI, ENVIRONMENT, "REGION", "emea");
+    vault.rotate(
+        StudioVaultProvider.ReferenceKind.SECRET,
+        VaultScope.of(CSI, ENVIRONMENT, TEST_ID),
+        "LOGIN_PW",
+        CANARY);
+    vault.rotate(
+        StudioVaultProvider.ReferenceKind.VARIABLE,
+        VaultScope.of(CSI, ENVIRONMENT, TEST_ID),
+        "REGION",
+        "emea");
     // Entitled in `dev` only, to make AC-5a's environment half decidable.
     vault.rotate(
-        StudioVaultProvider.ReferenceKind.SECRET, CSI, OTHER_ENVIRONMENT, "DEV_ONLY", "dev-value");
+        StudioVaultProvider.ReferenceKind.SECRET,
+        VaultScope.of(CSI, OTHER_ENVIRONMENT, TEST_ID),
+        "DEV_ONLY",
+        "dev-value");
 
     entitlements =
         new ConfiguredSecretUseAuthorization(
@@ -88,14 +103,15 @@ class SecretUseAuthorizationTest {
   @Test
   void refusesAPrincipalWhoMayExecuteTheCsiButIsNotEntitledToTheSecret() {
     assertThatThrownBy(
-            () -> resolver.preflight(CSI, ENVIRONMENT, STRANGER, secretsOnly("LOGIN_PW")))
+            () -> resolver.preflight(CSI, ENVIRONMENT, TEST_ID, STRANGER, secretsOnly("LOGIN_PW")))
         .isInstanceOf(StudioReferenceResolver.SecretUseNotAuthorizedException.class)
         .hasMessageContaining("LOGIN_PW");
   }
 
   @Test
   void permitsTheEntitledPrincipalForTheSameSecretOnTheSameCsi() {
-    assertThatCode(() -> resolver.preflight(CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW")))
+    assertThatCode(
+            () -> resolver.preflight(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW")))
         .doesNotThrowAnyException();
   }
 
@@ -114,12 +130,14 @@ class SecretUseAuthorizationTest {
       assertThat(entitlements.mayUse(role, CSI, ENVIRONMENT, "LOGIN_PW"))
           .as("the role name '%s' must not be an entitlement", role)
           .isFalse();
-      assertThatThrownBy(() -> resolver.preflight(CSI, ENVIRONMENT, role, secretsOnly("LOGIN_PW")))
+      assertThatThrownBy(
+              () -> resolver.preflight(CSI, ENVIRONMENT, TEST_ID, role, secretsOnly("LOGIN_PW")))
           .as("a principal named after an admin role must still be refused", role)
           .isInstanceOf(StudioReferenceResolver.SecretUseNotAuthorizedException.class);
     }
     // …and the entitled principal, who holds none of those roles, still succeeds.
-    assertThatCode(() -> resolver.preflight(CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW")))
+    assertThatCode(
+            () -> resolver.preflight(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW")))
         .doesNotThrowAnyException();
   }
 
@@ -128,17 +146,22 @@ class SecretUseAuthorizationTest {
   @Test
   void refusesTheSameSecretForADifferentCsiAndPermitsItForItsOwn() {
     assertThatThrownBy(
-            () -> resolver.preflight(OTHER_CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW")))
+            () ->
+                resolver.preflight(OTHER_CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW")))
         .isInstanceOf(StudioReferenceResolver.SecretUseNotAuthorizedException.class);
-    assertThatCode(() -> resolver.preflight(CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW")))
+    assertThatCode(
+            () -> resolver.preflight(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW")))
         .doesNotThrowAnyException();
   }
 
   @Test
   void refusesAReferenceEntitledOnlyInAnotherEnvironmentAndPermitsItInItsOwn() {
-    assertThatThrownBy(() -> resolver.preflight(CSI, ENVIRONMENT, OWNER, secretsOnly("DEV_ONLY")))
+    assertThatThrownBy(
+            () -> resolver.preflight(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("DEV_ONLY")))
         .isInstanceOf(StudioReferenceResolver.SecretUseNotAuthorizedException.class);
-    assertThatCode(() -> resolver.preflight(CSI, OTHER_ENVIRONMENT, OWNER, secretsOnly("DEV_ONLY")))
+    assertThatCode(
+            () ->
+                resolver.preflight(CSI, OTHER_ENVIRONMENT, TEST_ID, OWNER, secretsOnly("DEV_ONLY")))
         .doesNotThrowAnyException();
   }
 
@@ -149,6 +172,7 @@ class SecretUseAuthorizationTest {
                 resolver.preflight(
                     CSI,
                     ENVIRONMENT,
+                    TEST_ID,
                     OWNER,
                     new ReferenceDeclarations(List.of("NOT_A_REFERENCE"), List.of())))
         .isInstanceOf(StudioReferenceResolver.UnknownReferenceException.class);
@@ -157,6 +181,7 @@ class SecretUseAuthorizationTest {
                 resolver.preflight(
                     CSI,
                     ENVIRONMENT,
+                    TEST_ID,
                     OWNER,
                     new ReferenceDeclarations(List.of("REGION"), List.of())))
         .doesNotThrowAnyException();
@@ -169,6 +194,7 @@ class SecretUseAuthorizationTest {
                 resolver.preflight(
                     CSI,
                     ENVIRONMENT,
+                    TEST_ID,
                     OWNER,
                     new ReferenceDeclarations(List.of("LOGIN_PW"), List.of("LOGIN_PW"))))
         .isInstanceOf(StudioReferenceResolver.UnknownReferenceException.class);
@@ -177,6 +203,7 @@ class SecretUseAuthorizationTest {
                 resolver.preflight(
                     CSI,
                     ENVIRONMENT,
+                    TEST_ID,
                     OWNER,
                     new ReferenceDeclarations(List.of("REGION"), List.of("LOGIN_PW"))))
         .doesNotThrowAnyException();
@@ -197,7 +224,7 @@ class SecretUseAuthorizationTest {
     // The control: the value is real, it is in the vault, and it is resolvable. Without this the
     // absences below could all be true because nothing was ever there.
     try (StudioReferenceResolver.Resolved resolved =
-        resolver.resolve(CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW"))) {
+        resolver.resolve(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW"))) {
       assertThat(new String(resolved.secrets().get("LOGIN_PW")))
           .as("the canary must be resolvable, or the negatives below prove nothing")
           .isEqualTo(CANARY);
@@ -216,7 +243,7 @@ class SecretUseAuthorizationTest {
                     messageOf(
                             () ->
                                 resolver.preflight(
-                                    CSI, ENVIRONMENT, STRANGER, secretsOnly("LOGIN_PW")))
+                                    CSI, ENVIRONMENT, TEST_ID, STRANGER, secretsOnly("LOGIN_PW")))
                         + "::LOGIN_PW",
                 "unknown reference",
                     messageOf(
@@ -224,6 +251,7 @@ class SecretUseAuthorizationTest {
                                 resolver.preflight(
                                     CSI,
                                     ENVIRONMENT,
+                                    TEST_ID,
                                     OWNER,
                                     new ReferenceDeclarations(
                                         List.of("NOT_A_REFERENCE"), List.of())))
@@ -234,6 +262,7 @@ class SecretUseAuthorizationTest {
                                 resolver.preflight(
                                     CSI,
                                     ENVIRONMENT,
+                                    TEST_ID,
                                     OWNER,
                                     new ReferenceDeclarations(
                                         List.of("LOGIN_PW"), List.of("LOGIN_PW"))))
@@ -244,6 +273,7 @@ class SecretUseAuthorizationTest {
                                 resolver.preflight(
                                     CSI,
                                     ENVIRONMENT,
+                                    TEST_ID,
                                     OWNER,
                                     new ReferenceDeclarations(List.of(), List.of("SMUGGLED"))))
                         + "::SMUGGLED",
@@ -252,10 +282,10 @@ class SecretUseAuthorizationTest {
                             () -> {
                               vault.delete(
                                   StudioVaultProvider.ReferenceKind.SECRET,
-                                  CSI,
-                                  ENVIRONMENT,
+                                  VaultScope.of(CSI, ENVIRONMENT, TEST_ID),
                                   "LOGIN_PW");
-                              resolver.resolve(CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW"));
+                              resolver.resolve(
+                                  CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW"));
                             })
                         + "::LOGIN_PW"));
 
@@ -293,6 +323,7 @@ class SecretUseAuthorizationTest {
                 withoutCanary.preflight(
                     CSI,
                     ENVIRONMENT,
+                    TEST_ID,
                     OWNER,
                     new ReferenceDeclarations(List.of("REGION"), List.of())));
 
@@ -323,13 +354,12 @@ class SecretUseAuthorizationTest {
   void carriesEachSecretsNormalizedOriginsFromItsVaultEntry() {
     vault.bindOrigins(
         StudioVaultProvider.ReferenceKind.SECRET,
-        CSI,
-        ENVIRONMENT,
+        VaultScope.of(CSI, ENVIRONMENT, TEST_ID),
         "LOGIN_PW",
         "HTTPS://Login.App.Example:443, https://sso.app.example:8443");
 
     try (StudioReferenceResolver.Resolved resolved =
-        resolver.resolve(CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW"))) {
+        resolver.resolve(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW"))) {
       assertThat(resolved.secretOrigins())
           .containsExactly(
               Map.entry(
@@ -341,7 +371,7 @@ class SecretUseAuthorizationTest {
   @Test
   void aSecretWhoseEntryDeclaresNoOriginsIsCarriedBoundToNone() {
     try (StudioReferenceResolver.Resolved resolved =
-        resolver.resolve(CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW"))) {
+        resolver.resolve(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW"))) {
       assertThat(resolved.secretOrigins()).containsExactly(Map.entry("LOGIN_PW", List.of()));
     }
   }
@@ -350,14 +380,97 @@ class SecretUseAuthorizationTest {
   void aMalformedOriginListBindsTheSecretToNone() {
     vault.bindOrigins(
         StudioVaultProvider.ReferenceKind.SECRET,
-        CSI,
-        ENVIRONMENT,
+        VaultScope.of(CSI, ENVIRONMENT, TEST_ID),
         "LOGIN_PW",
         "https://login.app.example,javascript:alert(1)");
 
     try (StudioReferenceResolver.Resolved resolved =
-        resolver.resolve(CSI, ENVIRONMENT, OWNER, secretsOnly("LOGIN_PW"))) {
+        resolver.resolve(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW"))) {
       assertThat(resolved.secretOrigins()).containsExactly(Map.entry("LOGIN_PW", List.of()));
     }
+  }
+
+  // ── Test scope (V3, V4): a secret belongs to the test it was saved for ─────────────────────────
+
+  /**
+   * AC-V3-3 / AC-V4-2, resolver side: the same name under the same CSI and environment, stored for
+   * test A, is unknown to test B at acceptance and unavailable to it at dispatch — and still
+   * resolves for test A.
+   */
+  @Test
+  void aSecretStoredForOneTestIsAbsentForAnotherTestWithTheSameCsiAndEnvironment() {
+    assertThatThrownBy(
+            () ->
+                resolver.preflight(CSI, ENVIRONMENT, OTHER_TEST_ID, OWNER, secretsOnly("LOGIN_PW")))
+        .isInstanceOf(StudioReferenceResolver.UnknownReferenceException.class)
+        .hasMessageContaining("LOGIN_PW");
+    assertThatThrownBy(
+            () -> resolver.resolve(CSI, ENVIRONMENT, OTHER_TEST_ID, OWNER, secretsOnly("LOGIN_PW")))
+        .isInstanceOf(StudioReferenceResolver.ReferenceUnavailableException.class);
+
+    assertThatCode(
+            () -> resolver.preflight(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW")))
+        .doesNotThrowAnyException();
+    try (StudioReferenceResolver.Resolved resolved =
+        resolver.resolve(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW"))) {
+      assertThat(new String(resolved.secrets().get("LOGIN_PW"))).isEqualTo(CANARY);
+    }
+  }
+
+  /**
+   * D9: a declared id that is not a valid secret name — a legacy {@code vault://…} id — is refused
+   * as a reference fault before the provider is called, even for a principal entitled to it. Were
+   * the provider called, its path-safety check would report a Vault outage instead.
+   */
+  @Test
+  void aDeclaredIdThatIsNotASecretNameIsRefusedBeforeTheProviderIsCalled() {
+    String legacy = "vault://studio/pilot-pw";
+    AtomicInteger reads = new AtomicInteger();
+    StudioVaultProvider counting =
+        new StudioVaultProvider() {
+          @Override
+          public String name() {
+            return "counting";
+          }
+
+          @Override
+          public java.util.Optional<VaultEntry> read(
+              ReferenceKind kind, VaultScope scope, String referenceName) {
+            reads.incrementAndGet();
+            return vault.read(kind, scope, referenceName);
+          }
+
+          @Override
+          public String create(VaultScope scope, String name, char[] value, List<String> origins) {
+            throw new AssertionError("not used");
+          }
+
+          @Override
+          public List<String> listSecretNames(VaultScope scope) {
+            throw new AssertionError("not used");
+          }
+        };
+    VaultStudioReferenceResolver guarded =
+        new VaultStudioReferenceResolver(
+            counting,
+            new ConfiguredSecretUseAuthorization(
+                Map.of(
+                    ConfiguredSecretUseAuthorization.key(OWNER, CSI, ENVIRONMENT),
+                    Set.of(legacy, "LOGIN_PW"))));
+
+    assertThatThrownBy(
+            () -> guarded.preflight(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly(legacy)))
+        .isInstanceOf(StudioReferenceResolver.UnknownReferenceException.class)
+        .hasMessageContaining(legacy);
+    assertThatThrownBy(() -> guarded.resolve(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly(legacy)))
+        .isInstanceOf(StudioReferenceResolver.ReferenceUnavailableException.class)
+        .hasMessageContaining(legacy);
+    assertThat(reads).as("the provider must never be asked for an invalid name").hasValue(0);
+
+    // The permit companion: a valid name through the same guarded resolver does reach the provider.
+    assertThatCode(
+            () -> guarded.preflight(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW")))
+        .doesNotThrowAnyException();
+    assertThat(reads).hasValue(1);
   }
 }

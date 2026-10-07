@@ -14,7 +14,7 @@ export const ARTIFACT_VERSION = 1;
 export const VALIDATOR_SCHEMA_VERSION = '2.0.0';
 
 /** Version of the trusted executor's operation contract. */
-export const EXECUTOR_VERSION = '2.0.0';
+export const EXECUTOR_VERSION = '2.1.0';
 
 /**
  * Version of the pinned syntax reference: the corpus in `fixtures/reference/` together with the

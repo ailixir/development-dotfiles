@@ -1,0 +1,30 @@
+{
+  "updatedAt": "2026-10-05T03:02:17.573546+00:00",
+  "source": "User scope refinement: Download is no longer needed. Assess effort, risk and disruption for changing a specific code step.",
+  "activeScope": {
+    "sourceDownload": false,
+    "sourceEditing": false,
+    "implementationAuthorized": false
+  },
+  "supersedes": [
+    "FR-2 source-download requirement",
+    "Source-export/download portions of the original plan"
+  ],
+  "assessment": "step-edit-effort-assessment.md",
+  "priorArtifacts": {
+    "spec.md": "Historical broader proposal version 2; download requirements are withdrawn by this amendment",
+    "plan.json": "Historical broader 41-task plan; not the estimate or active scope for the focused step-edit slice",
+    "critique.json": "Quality approval applies to historical spec version 2, not automatically to the narrower design"
+  },
+  "recommendationStatus": "Discarded by user; no implementation planned",
+  "planningEstimate": {
+    "featureEngineerDays": "4\u20136",
+    "integrationAllowanceEngineerDays": "1\u20133",
+    "totalEngineerDays": "5\u20139",
+    "conditions": "Existing captured-request regime usable; audit actual deployed schema/publishers before commitment"
+  },
+  "assessmentSha256": "b7021b42d187963899637baffde7583886b2353a13c6ff59ef7b2a4addef20e7",
+  "checkedAt": "2026-10-05T03:03:43.494384+00:00",
+  "status": "discarded",
+  "discardedAt": "2026-10-05T03:05:01.190127+00:00"
+}

@@ -1,5 +1,6 @@
 package com.citi.put.checks.studio.dto;
 
+import com.citi.put.checks.studio.StudioValidationException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -117,10 +118,12 @@ public record UITestRequest(
       Integer height =
           viewport.isObject() ? asInt(viewport.path("height")) : asInt(node.path("viewportHeight"));
 
+      // Read as submitted, never coerced: an out-of-range value must reach validateForWrite and
+      // be refused there (VAL-023). Only an absent value takes the default.
       Integer timeoutSeconds =
           configuration.isObject() && !configuration.path("timeoutSeconds").isMissingNode()
-              ? asInt(configuration.path("timeoutSeconds"))
-              : asInt(node.path("timeoutSeconds"));
+              ? asTimeout(configuration.path("timeoutSeconds"))
+              : asTimeout(node.path("timeoutSeconds"));
       String waitStrategy =
           configuration.isObject() && configuration.path("waitStrategy").isTextual()
               ? configuration.path("waitStrategy").textValue()
@@ -136,9 +139,7 @@ public record UITestRequest(
           new TestConfiguration(
               LegacyStudioAdapter.normalizeBrowser(browser),
               LegacyStudioAdapter.viewport(width, height),
-              timeoutSeconds == null || timeoutSeconds <= 0
-                  ? TestConfiguration.DEFAULT_TIMEOUT_SECONDS
-                  : timeoutSeconds,
+              timeoutSeconds == null ? TestConfiguration.DEFAULT_TIMEOUT_SECONDS : timeoutSeconds,
               waitStrategy == null ? TestConfiguration.DEFAULT_WAIT_STRATEGY : waitStrategy),
           asLong(node.path("sourceRevision")),
           asLong(node.path("configurationRevision")));
@@ -150,6 +151,26 @@ public record UITestRequest(
 
     private static Integer asInt(JsonNode node) {
       return node == null || !node.isNumber() ? null : node.intValue();
+    }
+
+    /**
+     * A submitted timeout as an int. A fraction or a value outside the int range is refused rather
+     * than truncated, since truncation could turn an invalid value into an in-range one.
+     */
+    private static Integer asTimeout(JsonNode node) {
+      if (node == null || !node.isNumber()) {
+        return null;
+      }
+      if (!node.isIntegralNumber() || !node.canConvertToInt()) {
+        throw new StudioValidationException(
+            "INVALID_CONFIGURATION",
+            "timeoutSeconds must be a whole number between "
+                + TestConfiguration.MIN_TIMEOUT_SECONDS
+                + " and "
+                + TestConfiguration.MAX_TIMEOUT_SECONDS
+                + " seconds.");
+      }
+      return node.intValue();
     }
 
     private static Long asLong(JsonNode node) {

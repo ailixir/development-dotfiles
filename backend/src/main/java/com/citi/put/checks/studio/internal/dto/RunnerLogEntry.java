@@ -13,6 +13,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * anchors the timeline.
  *
  * @param level the runner's lower-case vocabulary ({@code info|warn|error}); the API upper-cases it
+ * @param stepIndex the 0-based position of the step the line is <b>about</b>, in the same index
+ *     space as {@code RunnerStepState.stepIndex}; {@code null} on run-level lines and whenever the
+ *     runner omits the field (a runner that predates it). Optional, not required (ADR-002 §33,
+ *     O-17). A non-null value outside the confirmed revision's steps is {@code INVALID_REPORT}.
  */
 @JsonIgnoreProperties(ignoreUnknown = false)
-public record RunnerLogEntry(Double atMs, String level, String message) {}
+public record RunnerLogEntry(Double atMs, String level, String message, Integer stepIndex) {
+
+  /**
+   * A run-level line, or a line from a runner that does not send {@code stepIndex}. Keeps the
+   * pre-§33 call sites compiling unchanged.
+   */
+  public RunnerLogEntry(Double atMs, String level, String message) {
+    this(atMs, level, message, null);
+  }
+}

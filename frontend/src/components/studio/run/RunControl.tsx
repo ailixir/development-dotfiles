@@ -1,8 +1,11 @@
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 import { compileErrorNarrative } from '../review/compileErrorCodes';
-import { useRunGate, type RunSaveOutcome } from './useRunGate';
+import { refusalNarrative } from '../review/compileDiagnosticNarratives';
+import { CompileElapsed } from '../review/CompileElapsed';
+import { useRunGate, type RunCompileOutcome, type RunSaveOutcome } from './useRunGate';
 
 /**
  * The single Run entry point.
@@ -64,6 +67,28 @@ export interface RunControlProps {
    * the draft is runnable.
    */
   readonly runRequest?: number;
+  /**
+   * Moves the author to a step the translator refused (VAL-009), so the refusal is linked to the
+   * line it is about. Without it the refusal is still listed, just not linked.
+   */
+  readonly onShowStep?: (stepIndex: number) => void;
+  /**
+   * Where the compile-outcome and refusal alerts render (VAL-038). The control sits in the page
+   * header, and a full alert there squeezes the title and pushes the actions around, so the page
+   * gives it a full-width slot below the header. Without one the alerts render under the button.
+   */
+  readonly alertsContainer?: HTMLElement | null;
+}
+
+/** The model's per-step refusals in a `NEEDS_REVISION` outcome, in step order. */
+function refusalsOf(outcome: RunCompileOutcome | null) {
+  if (outcome?.kind !== 'needsRevision' || !outcome.diagnostics) return [];
+  return outcome.diagnostics.steps.flatMap((entry) =>
+    entry.diagnostics.flatMap((diagnostic) => {
+      const text = refusalNarrative(diagnostic);
+      return text === null ? [] : [{ stepIndex: entry.stepIndex, text }];
+    }),
+  );
 }
 
 export const RunControl: React.FC<RunControlProps> = ({
@@ -78,10 +103,13 @@ export const RunControl: React.FC<RunControlProps> = ({
   onSaveBeforeRun,
   refreshToken,
   runRequest = 0,
+  onShowStep,
+  alertsContainer,
 }) => {
   const gate = useRunGate(testId, onAccepted, refreshToken, {
     saveBeforeRun: onSaveBeforeRun,
     isDirty,
+    isRunning,
   });
   const runnable = gate.canRun && hasSteps;
 
@@ -116,7 +144,7 @@ export const RunControl: React.FC<RunControlProps> = ({
           title: 'Your test could not be prepared',
           body: outcome.error
             ? compileErrorNarrative(outcome.error.code)
-            : 'Preparing this test did not finish. Your saved checklist is unchanged — run again to retry.',
+            : 'Preparing this test did not finish. Your saved checklist is unchanged. Run again to retry.',
         };
       case 'refused':
         return { title: 'This test could not be prepared', body: outcome.message };
@@ -128,6 +156,8 @@ export const RunControl: React.FC<RunControlProps> = ({
         };
     }
   })();
+
+  const refusals = refusalsOf(gate.compileOutcome);
 
   useEffect(() => {
     onPreparingChange?.(gate.executeInFlight && !isRunning);
@@ -142,6 +172,78 @@ export const RunControl: React.FC<RunControlProps> = ({
   }, [runRequest, runnable, isRunning, gate]);
 
   const stopLabel = isStopping ? STOPPING_LABEL : STOP_LABEL;
+
+  const alerts = (
+    <>
+      {compileMessage && !gate.refusal && (
+        <Alert severity="warning" role="alert" data-testid="run-compile-outcome" sx={{ mt: 2 }}>
+          <AlertTitle data-testid="run-compile-outcome-title">{compileMessage.title}</AlertTitle>
+          <Typography variant="body2" data-testid="run-compile-outcome-body">
+            {compileMessage.body}
+          </Typography>
+          {refusals.length > 0 && (
+            <Stack component="ul" spacing={0.5} sx={{ pl: 2, mt: 1, mb: 0 }} data-testid="run-compile-refusals">
+              {refusals.map((refusal, position) => (
+                <Box component="li" key={`${refusal.stepIndex}-${position}`}>
+                  <Typography
+                    variant="body2"
+                    data-testid={`run-compile-refusal-${refusal.stepIndex}`}
+                    sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}
+                  >
+                    {refusal.text}
+                  </Typography>
+                  {onShowStep && (
+                    <Button
+                      size="small"
+                      variant="text"
+                      onClick={() => onShowStep(refusal.stepIndex)}
+                      sx={{ px: 0, minWidth: 0 }}
+                    >
+                      {`Go to step ${refusal.stepIndex + 1}`}
+                    </Button>
+                  )}
+                </Box>
+              ))}
+            </Stack>
+          )}
+        </Alert>
+      )}
+
+      {gate.refusal && (
+        <Alert
+          severity={gate.refusal.narrative.scope === 'platform' ? 'warning' : 'error'}
+          role="alert"
+          aria-label={gate.refusal.narrative.title}
+          data-testid={
+            gate.refusal.narrative.scope === 'platform'
+              ? 'run-refusal-platform-banner'
+              : 'run-refusal'
+          }
+          sx={{ mt: 2 }}
+        >
+          <AlertTitle data-testid="run-refusal-title">{gate.refusal.narrative.title}</AlertTitle>
+          <Stack spacing={0.5}>
+            <Typography variant="body2" data-testid="run-refusal-explanation">
+              {gate.refusal.narrative.explanation}
+            </Typography>
+            <Typography variant="body2" data-testid="run-refusal-remedy">
+              {gate.refusal.narrative.whoClearsIt}
+            </Typography>
+            {gate.refusal.serverMessage && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                data-testid="run-refusal-server-message"
+              >
+                {`The server said: ${gate.refusal.serverMessage}`}
+              </Typography>
+            )}
+          </Stack>
+        </Alert>
+      )}
+    </>
+  );
+
 
   return (
     <Box>
@@ -189,9 +291,17 @@ export const RunControl: React.FC<RunControlProps> = ({
       )}
 
       {!isRunning && gate.preparationMessage && (
-        <Typography variant="caption" role="status" sx={{ display: 'block', mt: 1 }}>
-          {gate.preparationMessage}
-        </Typography>
+        <Box data-testid="run-preparation" sx={{ mt: 1 }}>
+          <Typography variant="caption" role="status" component="span">
+            {gate.preparationMessage}
+          </Typography>
+          {gate.phase === 'compiling' && gate.compileStartedAt !== null && (
+            <>
+              {' '}
+              <CompileElapsed key={gate.compileStartedAt} startedAt={gate.compileStartedAt} />
+            </>
+          )}
+        </Box>
       )}
 
       {gate.loadError && !gate.refusal && (
@@ -205,47 +315,7 @@ export const RunControl: React.FC<RunControlProps> = ({
         </Typography>
       )}
 
-      {compileMessage && !gate.refusal && (
-        <Alert severity="warning" role="alert" data-testid="run-compile-outcome" sx={{ mt: 2 }}>
-          <AlertTitle data-testid="run-compile-outcome-title">{compileMessage.title}</AlertTitle>
-          <Typography variant="body2" data-testid="run-compile-outcome-body">
-            {compileMessage.body}
-          </Typography>
-        </Alert>
-      )}
-
-      {gate.refusal && (
-        <Alert
-          severity={gate.refusal.narrative.scope === 'platform' ? 'warning' : 'error'}
-          role="alert"
-          aria-label={gate.refusal.narrative.title}
-          data-testid={
-            gate.refusal.narrative.scope === 'platform'
-              ? 'run-refusal-platform-banner'
-              : 'run-refusal'
-          }
-          sx={{ mt: 2 }}
-        >
-          <AlertTitle data-testid="run-refusal-title">{gate.refusal.narrative.title}</AlertTitle>
-          <Stack spacing={0.5}>
-            <Typography variant="body2" data-testid="run-refusal-explanation">
-              {gate.refusal.narrative.explanation}
-            </Typography>
-            <Typography variant="body2" data-testid="run-refusal-remedy">
-              {gate.refusal.narrative.whoClearsIt}
-            </Typography>
-            {gate.refusal.serverMessage && (
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                data-testid="run-refusal-server-message"
-              >
-                {`The server said: ${gate.refusal.serverMessage}`}
-              </Typography>
-            )}
-          </Stack>
-        </Alert>
-      )}
+      {alertsContainer ? createPortal(alerts, alertsContainer) : alerts}
     </Box>
   );
 };

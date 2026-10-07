@@ -129,7 +129,7 @@ public final class RunnerReportProjection {
 
     String terminalErrorCode = terminalErrorCode(report, cancelRequested);
     List<StepResult> stepResults = projectSteps(report, original, terminalErrorCode);
-    List<ExecutionLogEntry> logs = projectLogs(report);
+    List<ExecutionLogEntry> logs = projectLogs(report, original.size());
     RuntimeVersions runtime = projectRuntime(report.runtimeVersions());
 
     String status = null;
@@ -361,8 +361,12 @@ public final class RunnerReportProjection {
    * atMs = null} yields {@code at = null} and is never rendered as the epoch and never as the
    * browser start. Where {@code browserStartedAt} is itself null there is no input to the
    * derivation, and validation has already refused any report that carried a reading anyway.
+   *
+   * <p>{@code stepIndex} is carried through as reported (ADR-002 §33). A non-null index outside
+   * {@code [0, stepCount)} is a divergence, exactly as a step index the revision does not have is
+   * in {@link #projectSteps}: refused, never silently nulled.
    */
-  private static List<ExecutionLogEntry> projectLogs(RunnerReport report) {
+  private static List<ExecutionLogEntry> projectLogs(RunnerReport report, int stepCount) {
     Instant origin = report.browserStartedAt();
     List<ExecutionLogEntry> projected = new ArrayList<>();
     for (RunnerLogEntry entry : logs(report)) {
@@ -370,8 +374,19 @@ public final class RunnerReportProjection {
       if (entry.atMs() != null && origin != null) {
         at = origin.plusMillis(Math.round(entry.atMs()));
       }
+      Integer stepIndex = entry.stepIndex();
+      if (stepIndex != null && (stepIndex < 0 || stepIndex >= stepCount)) {
+        throw new StudioValidationException(
+            "INVALID_REPORT",
+            "Log stepIndex "
+                + stepIndex
+                + " is outside the confirmed revision's "
+                + stepCount
+                + " steps");
+      }
       projected.add(
-          new ExecutionLogEntry(at, entry.level().toUpperCase(Locale.ROOT), entry.message(), null));
+          new ExecutionLogEntry(
+              at, entry.level().toUpperCase(Locale.ROOT), entry.message(), stepIndex));
     }
     return List.copyOf(projected);
   }
@@ -383,7 +398,8 @@ public final class RunnerReportProjection {
     }
     return new RuntimeVersions(
         text(reported, "playwright"),
-        text(reported, "chromium"),
+        // ADR-001 names the runner's key `chromiumBuild`; the public field stays `chromium`.
+        text(reported, "chromiumBuild"),
         text(reported, "validator", "validatorSchema"),
         text(reported, "executor"),
         text(reported, "image"));

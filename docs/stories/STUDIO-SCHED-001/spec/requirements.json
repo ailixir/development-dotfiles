@@ -1,0 +1,639 @@
+{
+  "storyId": "STUDIO-SCHED-001",
+  "gatheredAt": "2026-10-06T00:23:13.003205+00:00",
+  "source": "existing",
+  "gatheredBy": "@pm",
+  "elicitationVersion": "2.0",
+  "status": "Revised working implementation requirements; independent critique iteration2 pending; no production approval",
+  "userAuthorization": "User instructed root to implement scheduling using the spec pipeline. Prior planning defaults are the working implementation scope unless the user steers them; not represented as separately approved policy answers.",
+  "sources": [
+    "docs/specs/studio/scheduling/discovery.md",
+    "docs/specs/studio/scheduling/requirements.md",
+    "docs/specs/studio/scheduling/architecture.md",
+    "docs/specs/studio/scheduling/database-review.md",
+    "docs/specs/studio/scheduling/ux.md",
+    "docs/specs/studio/scheduling/implementation-plan.md",
+    "PRD.md",
+    "docs/brd/checks-ui-studio.brd.md",
+    "docs/architecture/studio-execution.md",
+    "docs/stories/STUDIO-SCHED-001/spec/implementation-contract.md",
+    "docs/stories/STUDIO-SCHED-001/spec/complexity.json",
+    "docs/stories/STUDIO-SCHED-001/spec/research.json",
+    "docs/stories/STUDIO-SCHED-001/spec/critique-1.json"
+  ],
+  "functional": [
+    {
+      "id": "FR-01",
+      "description": "Support at most one recurring operational schedule per individual saved Studio test using its registered CSI and persisted environment/configuration, without creating a catalog check.",
+      "priority": "P0",
+      "rationale": "Individual-test MVP bounds the requested scheduling enhancement.",
+      "acceptance": [
+        "AC-01"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md"
+    },
+    {
+      "id": "FR-02",
+      "description": "Expose typed schedule create/read/update/pause/resume/remove operations through the Studio API, with CSI read/write authorization, nondisclosing resource denial and optimistic schedule-version conflicts. Create paused by default.",
+      "priority": "P0",
+      "rationale": "Existing check schedule CRUD cannot target a Studio test ID.",
+      "acceptance": [
+        "AC-01",
+        "AC-02",
+        "AC-09"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md"
+    },
+    {
+      "id": "FR-03",
+      "description": "Normalize five-field cron to six fields with zero seconds for minute granularity; persist an explicit valid IANA timezone or UTC default. Server preview and due selection share one recurrence resolver and return absolute UTC/local/offset times.",
+      "priority": "P0",
+      "rationale": "Existing dialog relative estimates do not establish actual due time.",
+      "acceptance": [
+        "AC-03"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md"
+    },
+    {
+      "id": "FR-04",
+      "description": "Every due occurrence reuses Studio readiness, deletion/quarantine, reference, runtime, authorization and global/per-CSI pending-quota checks. Never compile or confirm from scheduled work; record COMPILE_REQUIRED before acceptance when readiness requires it.",
+      "priority": "P0",
+      "rationale": "Inherited Studio scheduling and trust requirements.",
+      "acceptance": [
+        "AC-04",
+        "AC-05"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md"
+    },
+    {
+      "id": "FR-05",
+      "description": "Activate or explicitly Resume against the exact current confirmed executable revision. Execution-affecting edits durably require Resume after preparation/confirmation; confirmation alone does not resume. Preserve author enabled/paused intent and already accepted immutable inputs.",
+      "priority": "P0",
+      "rationale": "Unattended changes require explicit renewed activation intent.",
+      "acceptance": [
+        "AC-05"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md"
+    },
+    {
+      "id": "FR-06",
+      "description": "Give each nominal due occurrence durable identity and decision. Deduplicate concurrent polling/restarts/replicas, persist occurrence disposition plus accepted execution/ledger and schedule advancement atomically, and independently suppress duplicate repeated local-clock slots across schedule edits/activation/removal recreation.",
+      "priority": "P0",
+      "rationale": "Prevent duplicate browser effects or lost accepted work.",
+      "acceptance": [
+        "AC-06",
+        "AC-07"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md"
+    },
+    {
+      "id": "FR-07",
+      "description": "Persist and expose bounded paginated occurrence outcomes ACCEPTED, REFUSED, SKIPPED or DEFERRED with due time, stable reason and optional actual execution link. A refusal creates no synthetic browser run or video.",
+      "priority": "P0",
+      "rationale": "COMPILE_REQUIRED and other unaccepted outcomes must remain visible.",
+      "acceptance": [
+        "AC-04",
+        "AC-08"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md"
+    },
+    {
+      "id": "FR-08",
+      "description": "Skip historical catch-up, consider at most the latest eligible due slot inside configurable grace, and defer the same not-yet-accepted occurrence on capacity/temporary outage until grace expiry. Record skipped-range/expired decisions without unbounded slot enumeration. Lifecycle interruption atomically settles any outstanding DEFERRED occurrence before pause, schedule configuration update, removal or input/revision/lifecycle invalidation supersedes its cursor, preserving immutable identity/audit and preventing orphan deferred history. While scheduling capability is off, persisted deferred work remains inspectable as suspended/expired; on reenable process that identity first, settle expired as GRACE_EXPIRED without send and advance future-only, or accept the same identity once if still within grace and all gates pass.",
+      "priority": "P0",
+      "rationale": "Avoid historical browser-effect replay and unbounded backlog.",
+      "acceptance": [
+        "AC-07",
+        "AC-08"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md",
+      "revisionSource": "spec/critique-1.json CRIT-1/CRIT-2 and revised implementation-contract.md"
+    },
+    {
+      "id": "FR-09",
+      "description": "Pause/removal stop future schedule acceptance after commit and retain audit. They do not cancel already accepted runs; explicit existing run cancellation remains separate. Test deletion/quarantine preserves existing pre-send lifecycle denial. Global Studio execution disable stops new scheduled acceptance independently.",
+      "priority": "P0",
+      "rationale": "Pause intent must serialize with durable acceptance while preserving existing lifecycle behavior.",
+      "acceptance": [
+        "AC-09"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md"
+    },
+    {
+      "id": "FR-10",
+      "description": "Add immutable scheduled trigger, schedule/occurrence/version/activation and nominal due provenance to existing Studio run history/details, linking actual accepted executions and protected evidence. Distinguish due, acceptance and browser-start times; legacy attribution stays Unknown. Every successful activation/Resume creates an immutable human activator/time event linked to occurrences, including clean activations with no uncertainty; subsequent edit, Resume or removal/recreation never rewrites prior actor/principal/environment/revision provenance.",
+      "priority": "P0",
+      "rationale": "Scheduling evidence reuses existing Studio history without inventing results.",
+      "acceptance": [
+        "AC-10"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md",
+      "revisionSource": "spec/critique-1.json CRIT-1/CRIT-2 and revised implementation-contract.md"
+    },
+    {
+      "id": "FR-11",
+      "description": "Use an approved CSI/environment background service principal or platform-approved renewable delegation with a separately recorded human activator. Verify current execution/secret grants at activation, acceptance and pre-send; missing/unwired/revoked authorization fails closed. Never retain login JWTs or secret values. Server-derived activation actor/time is recorded for every successful Resume in an immutable activation event, independently of uncertainty acknowledgment rows.",
+      "priority": "P0",
+      "rationale": "Current authenticated manual-user permission is not an unattended production grant.",
+      "acceptance": [
+        "AC-11"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md",
+      "revisionSource": "spec/critique-1.json CRIT-1/CRIT-2 and revised implementation-contract.md"
+    },
+    {
+      "id": "FR-12",
+      "description": "Operate and verify schedule management, recurrence, due acceptance, health and outcomes through API/terminal clients without requiring the frontend. Extend saved-test editor and Tests menu using centralized client, typed contracts and MSW-backed schedule scenarios.",
+      "priority": "P0",
+      "rationale": "Repository mock-first delivery and AIOX CLI-first operation.",
+      "acceptance": [
+        "AC-01",
+        "AC-12"
+      ],
+      "source": "docs/specs/studio/scheduling/requirements.md"
+    },
+    {
+      "id": "FR-13",
+      "description": "Skip scheduled acceptance while any run for the same test has a non-DONE ledger state, including manual, finalizing and ambiguous attempts. Check under the test lock without locking existing ledger rows. Do not implicitly narrow or serialize manual execution policy.",
+      "priority": "P0",
+      "rationale": "Bound unattended overlap without callback lock inversion.",
+      "acceptance": [
+        "AC-13"
+      ],
+      "source": "docs/specs/studio/scheduling/architecture.md"
+    },
+    {
+      "id": "FR-14",
+      "description": "After a relevant manual or scheduled run closes with DISPATCH_UNKNOWN, START_TIMEOUT or STALE, durably block recurrence until operator investigation and explicitly audited authorized Resume acknowledges uncertainty. Resume schedules future slots only; never automatically replay an ambiguous attempt.",
+      "priority": "P0",
+      "rationale": "A terminal ledger state does not establish known browser side effects.",
+      "acceptance": [
+        "AC-14"
+      ],
+      "source": "docs/stories/STUDIO-SCHED-001/spec/research.json#recommendations:Uncertaintyset"
+    },
+    {
+      "id": "FR-15",
+      "description": "Skip nonexistent spring-forward slots and execute once per matching repeated fallback local-clock slot using its earlier offset. Apply the same policy to preview, dispatch and schedule-version changes.",
+      "priority": "P0",
+      "rationale": "Actual Spring runtime returns both offsets; once-per-slot suppression must be explicit.",
+      "acceptance": [
+        "AC-03",
+        "AC-07"
+      ],
+      "source": "docs/specs/studio/scheduling/architecture.md"
+    },
+    {
+      "id": "FR-16",
+      "description": "Provide schedule status/next due/reason surfaces, authoritative preview, separate pause/removal, explicit Resume and retained values on errors/conflicts. Dirty authoring drafts cannot ambiguously create or enable a saved schedule. Scheduling never implicitly saves, compiles or confirms draft changes.",
+      "priority": "P0",
+      "rationale": "Preserve the Studio review trust model and understandable operator actions.",
+      "acceptance": [
+        "AC-02",
+        "AC-05",
+        "AC-12"
+      ],
+      "source": "docs/specs/studio/scheduling/architecture.md"
+    }
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "AC-01",
+      "description": "Given an authorized reader/writer and a saved confirmed Studio test, when the user creates a valid schedule, then one typed Paused schedule is persisted without a catalog check and can be managed by terminal/API and Studio UI."
+    },
+    {
+      "id": "AC-02",
+      "description": "Given a paused schedule or a concurrent editor, when explicit Resume acknowledges the current confirmed revision or an update uses a stale version, then activation is fully validated or returns a defined conflict without unintended enabling; retry cannot duplicate a schedule. Every successful Resume, including empty uncertainty acknowledgment, atomically records an immutable activation event."
+    },
+    {
+      "id": "AC-03",
+      "description": "Given aligned cron and an explicit timezone, when preview and dispatcher resolve the same reference time, then next UTC/local/offset occurrences match, skip DST gaps and choose only the first fallback slot; invalid grammar/zone/nonzero seconds are rejected."
+    },
+    {
+      "id": "AC-04",
+      "description": "Given a due unready or forbidden test, when the worker decides the occurrence, then durable COMPILE_REQUIRED or the specific denial is visible without compile, confirmation, browser execution or fake video."
+    },
+    {
+      "id": "AC-05",
+      "description": "Given active and author-paused schedules, when affecting inputs change and are reconfirmed, then neither resumes implicitly; explicit Resume acknowledges the exact new revision while already accepted run snapshots remain unchanged. Metadata edits and failed optional unchanged-input recompiles do not falsely revoke readiness."
+    },
+    {
+      "id": "AC-06",
+      "description": "Given two workers and injected crashes across persistence boundaries, when they process the same nominal occurrence, then at most one accepted execution/ledger linkage exists and occurrence decision plus advancement are committed atomically or all roll back."
+    },
+    {
+      "id": "AC-07",
+      "description": "Given fallback DST, schedule-version change/removal recreation or years of missed slots, when recurrence is resolved, then stable local-slot uniqueness prevents repeat effects and missed work is summarized with bounded processing rather than replayed."
+    },
+    {
+      "id": "AC-08",
+      "description": "Given capacity or temporary pre-acceptance outage, when one nominal occurrence is retried within grace, then it retains identity/cursor and creates at most one run; after expiry it is settled visibly and future recurrence advances without catch-up. Pause/update/removal and affecting invalidation settle an outstanding deferred slot atomically with explicit lifecycle reason and no send; Resume never revives it. Capability-off history shows disabled/expired truthfully; on reenable expired deferred identity settles GRACE_EXPIRED without send before future advancement, while within-grace identity can be accepted once."
+    },
+    {
+      "id": "AC-09",
+      "description": "Given acceptance racing pause/remove/delete or a global disable, when transactions settle, then only serialized eligible acceptance occurs; pause/remove preserve accepted work while test lifecycle/global disable retains existing dispatcher denial and explicit cancel behavior."
+    },
+    {
+      "id": "AC-10",
+      "description": "Given accepted/refused/legacy occurrences and expired evidence, when authorized operators read paginated history/details, then actual scheduled provenance and run links are honest, legacy source is Unknown, and unavailable video never rewrites execution outcome. Clean Resume creates immutable human actor/time provenance and occurrences retain that activation after later actors edit, Resume or recreate the schedule. Run GET/list/SSE and withTestName preserve activationId/activatedBy/activatedAt from the accepted occurrence event; manual/legacy activation metadata remains null."
+    },
+    {
+      "id": "AC-11",
+      "description": "Given missing production authorization wiring or grant/secret permission revoked before acceptance or send, when schedule work attempts execution, then it fails closed; no token/secret value is stored or logged and local fixtures are not production approval."
+    },
+    {
+      "id": "AC-12",
+      "description": "Given MSW-backed editor/list flows and network/readiness/version errors, when keyboard-only users create/view/edit/pause/resume/remove, then labelled controls retain input, state explanations/preview are truthful and focus/status announcements work without implicit authoring actions."
+    },
+    {
+      "id": "AC-13",
+      "description": "Given a non-DONE manual or scheduled ledger row for the test, when a due scheduled occurrence is considered, then it is skipped for overlap without locking that ledger row or modifying existing manual-run permission."
+    },
+    {
+      "id": "AC-14",
+      "description": "Given terminal DISPATCH_UNKNOWN, START_TIMEOUT or STALE relevant to the test, when future recurrence is considered, then it remains durably blocked until investigation plus audited uncertainty acknowledgment and Resume; only future slots can execute."
+    }
+  ],
+  "nonFunctional": [
+    {
+      "id": "NFR-01",
+      "category": "performance",
+      "description": "Bound due selection/processing and preserve ordinary REST/check responsiveness; scheduled and manual executions share existing global/per-CSI active quotas and runner admission.",
+      "metric": "No quota overrun; bounded batch and per-CSI attempts; representative load evidence required before production."
+    },
+    {
+      "id": "NFR-02",
+      "category": "reliability",
+      "description": "One occurrence cannot accept duplicate browser executions across replica races or crash/restart; no ambiguous execution is automatically replayed.",
+      "metric": "At most one durable accepted ledger link per occurrence/local slot; crash-boundary integration cases."
+    },
+    {
+      "id": "NFR-03",
+      "category": "reliability",
+      "description": "Use injected clocks and deterministic shared recurrence with bounded iteration, including DST, irregular cron and long outage boundaries.",
+      "metric": "Preview/due parity and bounded long-gap test cases pass; no unbounded slot loop."
+    },
+    {
+      "id": "NFR-04",
+      "category": "security",
+      "description": "Current execution and separate secret-use permissions fail closed; immutable source/evidence protection and transient secret handling remain.",
+      "metric": "Authorization denial at activation/acceptance/send; no resolved secret/token persistence or log leakage."
+    },
+    {
+      "id": "NFR-05",
+      "category": "usability",
+      "description": "Paginated bounded schedule history, keyboard-operable accessible management and responsive summaries preserve current Studio list patterns.",
+      "metric": "Meaningful MSW/Playwright keyboard/focus/error and pagination scenarios pass."
+    },
+    {
+      "id": "NFR-06",
+      "category": "scalability",
+      "description": "Rotate bounded due selection across CSIs, skipping saturated/deferred targets within the pass; retain bounded-cardinality metrics and no guaranteed browser-start SLA by assumption.",
+      "metric": "Saturated-CSI integration scenario permits other eligible CSI work; metrics do not label each UUID."
+    },
+    {
+      "id": "NFR-07",
+      "category": "reliability",
+      "description": "Deploy additive forward-only migrations, preserve legacy inert scheduling metadata and immutable audit/dedup anchors independently of history/video retention.",
+      "metric": "Fresh/upgrade migration and retention/recreation duplicate tests pass; no unintended activation."
+    },
+    {
+      "id": "NFR-08",
+      "category": "security",
+      "description": "Production scheduling is default off and cannot activate with provisional/local principal authorization; accepted-run recovery/cancellation remain operable when due producer is disabled.",
+      "metric": "Unwired production denies authorization; profile/feature-flag tests and rollback rehearsal demonstrate no new scheduled acceptance."
+    }
+  ],
+  "constraints": [
+    {
+      "id": "CON-01",
+      "type": "technical",
+      "description": "Existing generic schedules require a check ID; use typed Studio schedules/occurrences and reuse existing worker/ShedLock plus Studio acceptance/ledger/dispatcher. Do not create dummy checks or introduce Quartz/another queue.",
+      "impact": "Preserve distinct schedule target and execution contracts."
+    },
+    {
+      "id": "CON-02",
+      "type": "technical",
+      "description": "Use current Java 21/Spring/PostgreSQL and frontend React/TypeScript/MUI dependencies and centralized API client; do not upgrade stack as part of scheduling.",
+      "impact": "Research verifies current manifests instead of trusting historic prose."
+    },
+    {
+      "id": "CON-03",
+      "type": "technical",
+      "description": "Use one-test-per-transaction test -> schedule -> existing occurrence -> global quota -> CSI quota lock order, with nonlocking overlap ledger reads; preserve callbacks and manual admission idempotency.",
+      "impact": "Prevents lock inversion and regression of manual execution."
+    },
+    {
+      "id": "CON-04",
+      "type": "technical",
+      "description": "Use DB-enforced scheduled occurrence identity: unique nullable ledger occurrence FK, with scheduled manual key/digest null; history partition locator is soft and accepted linkage targets durable ledger.",
+      "impact": "Public arbitrary manual keys cannot collide via prefixes; retention is compatible."
+    },
+    {
+      "id": "CON-05",
+      "type": "business",
+      "description": "Exclude suites, bulk/multiple schedules, environment matrices, unified catalog/dashboard/report projections, notifications/remediation, implicit compile/confirmation and automatic ambiguous browser retry.",
+      "impact": "Bound authorized MVP to individual saved-test scheduling."
+    },
+    {
+      "id": "CON-06",
+      "type": "business",
+      "description": "Established real on-demand trust and approved live background identity/vault grants are release gates; no per-test prior-PASS admission guard is added.",
+      "impact": "Local fail-closed implementation/demos can complete without claiming production readiness."
+    },
+    {
+      "id": "CON-07",
+      "type": "technical",
+      "description": "Preserve dirty pre-existing code, existing manual permissions, pagination/deep links/evidence semantics and inert legacy schedule string; no automatic migration to enabled schedules.",
+      "impact": "Implementation diffs must be attributable to scheduling and backward compatible."
+    },
+    {
+      "id": "CON-08",
+      "type": "technical",
+      "description": "Mock-first frontend consumes matching typed Studio/OpenAPI/MSW contracts; operational schedule functions must remain API/terminal-usable independently of UI.",
+      "impact": "Independent frontend work must not bypass readiness/production gates."
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-01",
+      "description": "Working defaults: individual test, one schedule, create paused then explicit Resume, current confirmed activation revision, zero-second minute cron, UTC fallback, fixed 60-second minimum in this increment and configurable grace defaulting to 300 seconds.",
+      "risk": "medium",
+      "risk_if_wrong": "Scope/recurrence contracts and tests change.",
+      "validation_needed": false,
+      "status": "Adopted working engineering defaults by root; user may steer; production sizing not approved."
+    },
+    {
+      "id": "ASM-02",
+      "description": "Production chooses an approved CSI/environment service principal unless PUT Core requires renewable human delegation; local deterministic grants never enable production.",
+      "risk": "high",
+      "risk_if_wrong": "Identity adapter contract must change; production remains blocked.",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-03",
+      "description": "Typed standalone Studio tables and durable ledger linkage are accepted integration direction; exact linkage constraints and retention will be finalized in architect research.",
+      "risk": "medium",
+      "risk_if_wrong": "Migration/admission sequencing must change before implementation.",
+      "validation_needed": false,
+      "status": "Technical choices closed by implementation-contract.md and research.json, subject independent critique."
+    },
+    {
+      "id": "ASM-04",
+      "description": "No numerical throughput, browser-start SLA, delivery date or retention period is promised; capacity and retention configuration require pilot operations review.",
+      "risk": "medium",
+      "risk_if_wrong": "Operational configuration and acceptance envelope require explicit change.",
+      "validation_needed": true
+    }
+  ],
+  "domainModel": [
+    {
+      "entity": "Saved Studio test",
+      "description": "Test with immutable CSI, saved configuration and confirmed executable revision.",
+      "relationships": [
+        "has_one operational schedule",
+        "has_many confirmed revisions",
+        "has_many accepted executions"
+      ]
+    },
+    {
+      "entity": "Studio schedule",
+      "description": "Stable per-test schedule/tombstone with cron/zone, author intent, effective blocked state, version, activation revision/principal and independent nominal due/poll cursor.",
+      "relationships": [
+        "belongs_to saved Studio test",
+        "has_many occurrences",
+        "has_many activation audit records"
+      ]
+    },
+    {
+      "entity": "Studio schedule occurrence",
+      "description": "Durable nominal UTC and local slot identity with immutable target/activation attribution, decision and optional accepted execution.",
+      "relationships": [
+        "belongs_to schedule",
+        "has_one nullable linked durable ledger execution"
+      ]
+    },
+    {
+      "entity": "Studio execution ledger",
+      "description": "Existing globally identified accepted work owns dispatch/recovery and scheduled FK identity; partitioned execution history/evidence are linked separately.",
+      "relationships": [
+        "belongs_to saved Studio test",
+        "belongs_to nullable scheduled occurrence",
+        "has_one immutable revision execution snapshot"
+      ]
+    },
+    {
+      "entity": "Background execution grant",
+      "description": "Approved service-principal/delegation reference with current CSI/environment execution and separate secret entitlement, never copied login JWT.",
+      "relationships": [
+        "referenced_by schedule activation",
+        "authorized_for target CSI/environment"
+      ]
+    },
+    {
+      "entity": "Studio schedule activation",
+      "description": "Immutable event created on every successful Resume with server-derived human actor/time, schedule version, owned test/CSI/confirmed revision and environment/principal snapshots.",
+      "relationships": [
+        "belongs_to stable schedule",
+        "has_many attributed occurrences",
+        "referenced_by uncertainty acknowledgments"
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "flow": "Create then activate",
+      "description": "Saved test editor or row menu opens schedule form; authoritative preview; create Paused; explicit Resume acknowledges revision/principal and next future due.",
+      "states": [
+        "loading",
+        "paused",
+        "active",
+        "blocked",
+        "ready to resume",
+        "validation error",
+        "version conflict",
+        "permission denied"
+      ]
+    },
+    {
+      "flow": "Edit affecting test inputs",
+      "description": "Save changes through existing authoring; schedule intent persists but effective dispatch blocks; prepare/review/confirm; explicit Resume is required.",
+      "states": [
+        "unsaved draft",
+        "needs preparation",
+        "needs confirmation",
+        "ready to resume",
+        "author paused"
+      ]
+    },
+    {
+      "flow": "Pause/remove/history",
+      "description": "Pause or remove stops future acceptance, preserves accepted work/audit, offers actual run links for accepted occurrences and reason-only rows for refusals.",
+      "states": [
+        "mutation pending",
+        "paused",
+        "removed/no schedule",
+        "accepted/refused/skipped/deferred occurrence",
+        "evidence unavailable"
+      ]
+    }
+  ],
+  "edgeCases": [
+    {
+      "scenario": "Two replicas or crash after partial persistence",
+      "handling": "Atomic transaction/DB occurrence identity resolves one accepted execution or rollback; recover from durable ledger.",
+      "severity": "critical"
+    },
+    {
+      "scenario": "Affecting edits/reconfirmation race due acceptance",
+      "handling": "Test-first locking and exact activation revision reject changed inputs; no implicit Resume or altered accepted snapshot.",
+      "severity": "critical"
+    },
+    {
+      "scenario": "DST fallback across schedule edit/recreation",
+      "handling": "Shared earlier-offset resolver and stable version-independent local-slot dedup prevent repeat effects.",
+      "severity": "high"
+    },
+    {
+      "scenario": "Long downtime, capacity or temporary authorization lookup outage",
+      "handling": "Bounded missed-range audit and latest eligible within grace; defer same pre-acceptance occurrence or deny fail-closed; settle expiry visibly.",
+      "severity": "high"
+    },
+    {
+      "scenario": "Manual run closes with uncertain outcome",
+      "handling": "DISPATCH_UNKNOWN, START_TIMEOUT or STALE durably blocks until investigated/audited exact uncertainty acknowledgment and future-only Resume.",
+      "severity": "critical"
+    },
+    {
+      "scenario": "Forbidden management, revoked background/secret grant or missing production integration",
+      "handling": "Non-disclosing reads and current fail-closed authorization; no scheduled runner send.",
+      "severity": "critical"
+    },
+    {
+      "scenario": "Pause/remove/global disable races accepted browser work",
+      "handling": "Serialize future acceptance; preserve accepted snapshot/recovery and existing queued-vs-admitted lifecycle; cancel explicitly.",
+      "severity": "high"
+    },
+    {
+      "scenario": "Legacy inert JSON or expired partitioned execution/evidence",
+      "handling": "Never autoactivate; source Unknown and honest expired link behavior; preserve durable duplicate/audit anchors.",
+      "severity": "high"
+    },
+    {
+      "scenario": "Deferred slot superseded by lifecycle mutation",
+      "handling": "Under test/schedule/occurrence locks settle without execution as SKIPPED/SCHEDULE_PAUSED, SCHEDULE_UPDATED or SCHEDULE_REMOVED; affecting test/revision/lifecycle invalidation uses REFUSED existing specific code; retain nominal/grace/activation audit.",
+      "severity": "high"
+    }
+  ],
+  "terminology": [
+    {
+      "term": "Scheduled due time",
+      "definition": "Nominal recurring slot instant, distinct from acceptance and browser start.",
+      "aliases": [
+        "scheduled_at",
+        "next_due_at"
+      ]
+    },
+    {
+      "term": "Activation",
+      "definition": "Explicit authorization acknowledging confirmed revision, grant and any investigated uncertainty for future unattended recurrence.",
+      "aliases": [
+        "Resume"
+      ]
+    },
+    {
+      "term": "Occurrence",
+      "definition": "Durable scheduled-slot decision; may exist without an accepted browser execution.",
+      "aliases": [
+        "schedule occurrence"
+      ]
+    },
+    {
+      "term": "Author intent",
+      "definition": "Enabled or paused choice preserved independently of readiness/authorization effective block.",
+      "aliases": [
+        "requested_enabled"
+      ]
+    },
+    {
+      "term": "Local slot",
+      "definition": "Timezone and local scheduled date/time without offset; duplicate protection spans schedule versions and repeated DST offsets.",
+      "aliases": [
+        "local_scheduled_at"
+      ]
+    },
+    {
+      "term": "Deferred",
+      "definition": "Same not-yet-accepted occurrence waits within bounded grace; it is not a new execution retry.",
+      "aliases": [
+        "pre-acceptance deferral"
+      ]
+    }
+  ],
+  "openQuestions": [
+    {
+      "id": "OQ-01",
+      "question": "Will any later user steering change the root-adopted individual-test scope or conservative engineering defaults?",
+      "priority": "medium",
+      "blocksProgress": false,
+      "assignedTo": "@pm",
+      "gate": "Nonblocking steering; root proceeding on stated defaults after optional response opportunity."
+    },
+    {
+      "id": "OQ-02",
+      "question": "Closed: ledger-derived JOIN linkage, composite ownership FKs, deferred ACCEPTED consistency trigger, stable version-independent local-slot identity and zero-second minute grammar chosen in implementation-contract/research.",
+      "priority": "high",
+      "blocksProgress": false,
+      "assignedTo": "@architect",
+      "gate": "Research/contract resolved; independent QA critique remains.",
+      "resolved": true
+    },
+    {
+      "id": "OQ-03",
+      "question": "What real PUT Core background grant/principal and Vault live entitlement/revocation adapter is approved?",
+      "priority": "high",
+      "blocksProgress": false,
+      "assignedTo": "@architect with Security/PUT Core",
+      "gate": "Production release blocker; local contract/stub denied by default and deterministic local profile may proceed."
+    },
+    {
+      "id": "OQ-04",
+      "question": "What production capacity/grace/batch and duplicate/audit/detail retention values does the pilot validate? A higher minimum cadence is a future explicitly validated policy change, not a configurable local floor.",
+      "priority": "high",
+      "blocksProgress": false,
+      "assignedTo": "@devops with operations/data engineer",
+      "gate": "Production sizing/retention gate; local cadence is fixed60s, grace configurable default300s, no SLA promise."
+    },
+    {
+      "id": "OQ-05",
+      "question": "Is current real on-demand Studio trust evidence accepted for the scheduling pilot?",
+      "priority": "high",
+      "blocksProgress": false,
+      "assignedTo": "@qa with @devops",
+      "gate": "Release blocker only; do not invent per-test prior-PASS admission guard."
+    },
+    {
+      "id": "OQ-06",
+      "question": "Closed: uncertainty set DISPATCH_UNKNOWN, START_TIMEOUT, STALE; actual runner starts before detached STARTED callback, so missing start confirmation can include effects.",
+      "priority": "medium",
+      "blocksProgress": false,
+      "assignedTo": "@architect",
+      "gate": "Research-derived root adoption; independent QA critique remains.",
+      "resolved": true
+    }
+  ],
+  "gatherNote": "All nine task taxonomy categories are extracted from existing artifact evidence. source=existing avoids falsely claiming completed new source=user elicitation. Root may incorporate pending optional user answers before spec write. Spec awaits complexity/research and QA critique; production integration and approval are not established.",
+  "revisionHistory": [
+    {
+      "iteration": 2,
+      "revisedAt": "2026-10-06T00:33:57.891547+00:00",
+      "source": "spec/critique-1.json",
+      "changes": [
+        "CRIT-1 immutable clean-activation actor/time and occurrence link",
+        "CRIT-2 atomic interrupted DEFERRED settlement",
+        "CRIT-3 fixed60 local cadence, configurable grace default300"
+      ],
+      "qaVerdict": "Pending independent critique2; no self-approval"
+    }
+  ]
+}

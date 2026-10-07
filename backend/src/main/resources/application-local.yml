@@ -72,11 +72,12 @@ studio:
       provider: ${STUDIO_EVIDENCE_PROVIDER:local}
   # Studio secret resolution (§9.2, story 10.17 AC-9).
   #
-  # Vault-backed secrets are unavailable in the production alpha, including local development.
-  # The fake provider is selected by the test profile only.
+  # Off by default, including local development. Connecting a Vault takes environment variables
+  # only (STUDIO_VAULT_PROVIDER, STUDIO_VAULT_ADDRESS, STUDIO_VAULT_TOKEN_FILE; see
+  # application.yml). The fake provider is selected by the test profile only.
   secrets:
     vault:
-      provider: none
+      provider: ${STUDIO_VAULT_PROVIDER:none}
   compile:
     gateway:
       # Local Studio translates from a recorded fixture corpus so the authoring, validation,

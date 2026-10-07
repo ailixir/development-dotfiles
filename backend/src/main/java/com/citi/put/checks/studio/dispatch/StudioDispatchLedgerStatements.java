@@ -843,11 +843,12 @@ public class StudioDispatchLedgerStatements {
                WHERE e.id = o.execution_id
                  AND e.started_at = o.execution_accepted_at
                  AND e.status IN ('PENDING', 'RUNNING')
-              RETURNING e.id
+              RETURNING e.id, e.error_code, e.ended_at
             ),
             ledger AS (
               UPDATE studio_dispatch_ledger d
-                 SET state = 'DONE', updated_at = now()
+                 SET state = 'DONE', terminal_error_code = h.error_code,
+                     terminal_error_at = h.ended_at, updated_at = now()
                 FROM owner o, history h
                WHERE d.execution_id = o.execution_id
                  AND h.id = o.execution_id
@@ -855,10 +856,10 @@ public class StudioDispatchLedgerStatements {
             """
                 + TRANSITION_MATRIX
                 + """
-              RETURNING d.execution_id
-            )
-            SELECT count(*) FROM ledger
-            """,
+                    RETURNING d.execution_id
+                  )
+                  SELECT count(*) FROM ledger
+                  """,
             Integer.class,
             executionId,
             cancelledIfRequested,

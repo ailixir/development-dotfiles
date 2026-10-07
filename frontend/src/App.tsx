@@ -110,6 +110,7 @@ const App: React.FC = () => {
         <Route path="studio" element={<FeatureGate featureKey="STUDIO"><ChecksStudioPage /></FeatureGate>} />
         <Route path="studio/tests" element={<FeatureGate featureKey="STUDIO"><StudioTestsPage /></FeatureGate>} />
         <Route path="studio/runs" element={<FeatureGate featureKey="STUDIO"><StudioRunsPage /></FeatureGate>} />
+        <Route path="studio/runs/:executionId" element={<FeatureGate featureKey="STUDIO"><StudioRunsPage /></FeatureGate>} />
         <Route path="studio/:id" element={<FeatureGate featureKey="STUDIO"><ChecksStudioPage /></FeatureGate>} />
         <Route path="reports" element={<FeatureGate featureKey="REPORTS"><ReportsHome /></FeatureGate>} />
         <Route path="reports/new" element={<FeatureGate featureKey="REPORTS"><ReportBuilder /></FeatureGate>} />
@@ -138,6 +139,7 @@ const App: React.FC = () => {
         <Route path="studio" element={<FeatureGate featureKey="STUDIO"><ChecksStudioPage /></FeatureGate>} />
         <Route path="studio/tests" element={<FeatureGate featureKey="STUDIO"><StudioTestsPage /></FeatureGate>} />
         <Route path="studio/runs" element={<FeatureGate featureKey="STUDIO"><StudioRunsPage /></FeatureGate>} />
+        <Route path="studio/runs/:executionId" element={<FeatureGate featureKey="STUDIO"><StudioRunsPage /></FeatureGate>} />
         <Route path="studio/:id" element={<FeatureGate featureKey="STUDIO"><ChecksStudioPage /></FeatureGate>} />
 
         {/* Reports */}

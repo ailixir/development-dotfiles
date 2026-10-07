@@ -162,8 +162,45 @@ paths:
         artifact it names and beside the revisions it is confirmed against: confirmation reads
         `GET /tests/{id}`, whose four fields come from one transaction (§21.3), and a hash carried
         on a list entry would invite a client to assemble that body out of two reads.
+
+        **Search, filter and sort (story 10.46).** `q`, `environment`, `lastRun` and `sort` are
+        optional and combine with `csiId` and with the caller's scope in one query, before
+        pagination; none of them can widen the scope. A blank value is treated as absent. The
+        order is always completed by the draft `id` in the same direction, so drafts with equal
+        sort keys page deterministically. An unsupported `lastRun` or `sort` is `400` with
+        `error: INVALID_QUERY`.
       parameters:
         - { $ref: '#/components/parameters/CsiIdQuery' }
+        - name: environment
+          in: query
+          required: false
+          description: Exact environment of the draft.
+          schema: { type: string, maxLength: 50 }
+        - name: q
+          in: query
+          required: false
+          description: |
+            Case-insensitive substring of the draft's name or description. `%` and `_` match
+            themselves.
+          schema: { type: string }
+        - name: lastRun
+          in: query
+          required: false
+          description: |
+            Outcome of the draft's last finished run (`lastRunStatus`). `NEVER` selects drafts
+            with no finished run (`lastRunStatus: null`). Case-insensitive.
+          schema: { type: string, enum: [PASSED, FAILED, ERROR, NEVER] }
+        - name: sort
+          in: query
+          required: false
+          description: |
+            `<field>,<direction>` with field `name` (case-insensitive), `updatedAt` or
+            `lastRunAt`, and direction `asc` or `desc` (default `asc` when omitted). Drafts that
+            have never run sort last by `lastRunAt` in both directions. Ties are broken by `id`.
+          schema:
+            type: string
+            pattern: '^(name|updatedAt|lastRunAt)(,(asc|desc|ASC|DESC))?$'
+            default: 'updatedAt,desc'
         - { $ref: '#/components/parameters/Page' }
         - { $ref: '#/components/parameters/Size' }
       responses:
@@ -172,6 +209,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TestPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/SessionUnauthorized' }
     post:
       tags: [tests]
@@ -180,6 +218,19 @@ paths:
       description: |
         `csiId` is required, must be a registered CSI, and can never be changed afterwards.
         Clients submit English steps only; the server generates the executable artifact.
+
+        Save-time `400` codes (VAL-022, VAL-023, VAL-024), shared by `POST /tests` and
+        `PUT /tests/{id}`. Each message names the 1-based step number and never quotes the text:
+        - `INVALID_STEPS`: a blank or whitespace-only step. An empty `steps` list is accepted,
+          because a draft is created empty and filled in the editor. It is refused at compile.
+        - `SOURCE_TOO_MANY_STEPS` (more than 100 steps) and `SOURCE_LINE_TOO_LONG` (a step longer
+          than 1024 characters): the compile bounds, with the same codes and messages as
+          `POST /tests/{id}/compile`. The total-size bound (`SOURCE_TOO_LARGE`) is checked at
+          compile only.
+        - `INVALID_CONFIGURATION`: a `browser` other than `chromium`, or a
+          `configuration.timeoutSeconds` outside 1..120. **Behaviour change:** an out-of-range
+          `timeoutSeconds` (for example `0`) used to be coerced to `30` and saved. It is now
+          refused with `400`, which is what the declared `minimum: 1, maximum: 120` always said.
       requestBody:
         required: true
         content:
@@ -199,7 +250,7 @@ paths:
                     - Check that the URL contains "dashboard"
                   variables:
                     - { name: USER_ID, kind: plain, value: pilot-user }
-                    - { name: LOGIN_PW, kind: secretRef, secretId: vault://studio/pilot-pw }
+                    - { name: LOGIN_PW, kind: secretRef, secretId: LOGIN_PW }
                   configuration:
                     browser: chromium
                     viewport: { width: 1920, height: 1080 }
@@ -249,7 +300,11 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/TestDto' }
         '400':
-          description: Invalid payload, unregistered CSI, or rejected browser engine
+          description: |
+            Invalid payload, unregistered CSI, rejected browser engine, `timeoutSeconds` outside
+            1..120 (`INVALID_CONFIGURATION`), a blank step (`INVALID_STEPS`), or a step count or
+            step length over the compile bound (`SOURCE_TOO_MANY_STEPS`, `SOURCE_LINE_TOO_LONG`).
+            See the operation description.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -415,6 +470,11 @@ paths:
         unknown id, a soft-deleted or quarantined draft, and a draft on a CSI the caller may not
         write all answer the same `403 STUDIO_FORBIDDEN` before any revision is compared, and
         nothing is written. `400` is reserved for a malformed request (ADR-002 §27).
+
+        The `400` codes are the same as on `POST /tests`: `INVALID_STEPS`,
+        `SOURCE_TOO_MANY_STEPS`, `SOURCE_LINE_TOO_LONG` and `INVALID_CONFIGURATION` (including
+        `timeoutSeconds` outside 1..120, which is no longer coerced to `30`). See that operation's
+        description.
       requestBody:
         required: true
         content:
@@ -526,10 +586,11 @@ paths:
                     configurationRevision: 1
         '400':
           description: |
-            The draft is over an authoring bound, or carries an inline credential. Refused on the
-            request thread before the gateway is called and before any compile state moves
-            (§4.3): `SOURCE_TOO_MANY_STEPS`, `SOURCE_LINE_TOO_LONG`, `SOURCE_TOO_LARGE`,
-            `INLINE_CREDENTIAL`. The message names the offending step index, never its text.
+            The draft is over an authoring bound, has no steps or a blank step, or carries an
+            inline credential. Refused on the request thread before the gateway is called and
+            before any compile state moves (§4.3): `INVALID_STEPS` (no steps, or a blank step),
+            `SOURCE_TOO_MANY_STEPS`, `SOURCE_LINE_TOO_LONG`, `SOURCE_TOO_LARGE`,
+            `INLINE_CREDENTIAL`. The message names the offending step number, never its text.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -695,6 +756,125 @@ paths:
                 dispatchDisabled:
                   value: { error: DISPATCH_DISABLED, message: 'Studio execution is currently disabled' }
 
+  # ADR-002 §32 (studio-vault-secrets): a test's secrets, stored in Vault KV v2 only, at
+  # `studio/{csiId}/{environment}/{testId}/secrets/{name}`. The CSI, environment and test id come
+  # from the persisted draft, never from the request.
+  /tests/{id}/secrets:
+    parameters:
+      - { $ref: '#/components/parameters/TestId' }
+    get:
+      tags: [tests]
+      operationId: listTestSecrets
+      summary: List a test's secret names
+      description: |
+        The names stored in Vault for this test, sorted. Names only: a value is never returned.
+        Requires read access to the draft's CSI; an unknown id and an unreadable CSI answer the
+        same `403 STUDIO_FORBIDDEN`. `400` is a malformed test id, rejected before any handler runs.
+
+        A test's environment is read when the list is made, so secrets saved under an earlier
+        environment of the same test are not listed and do not resolve.
+      responses:
+        '200':
+          description: The stored secret names
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StudioSecretList' }
+              examples:
+                twoSecrets:
+                  value: { data: [ { name: LOGIN_PW }, { name: SSO_TOTP_SEED } ] }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '503':
+          description: |
+            No Vault is connected in this deployment (`VAULT_NOT_CONFIGURED`), or Vault could not
+            be reached or refused the call (`VAULT_UNAVAILABLE`). The two are different answers,
+            and neither falls back to another store.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                vaultNotConfigured:
+                  value: { error: VAULT_NOT_CONFIGURED, message: 'Vault is not connected for this environment' }
+                vaultUnavailable:
+                  value: { error: VAULT_UNAVAILABLE, message: 'Studio secret resolution is temporarily unavailable' }
+    post:
+      tags: [tests]
+      operationId: createTestSecret
+      summary: Store a new secret for a test
+      description: |
+        Writes the value to Vault only (a create-only KV v2 write) and returns the stored name,
+        version and normalized origins. The value is write-only: it is never returned, logged or
+        stored anywhere else. Studio cannot rotate, replace or delete a secret; fix it in Vault or
+        create a new name.
+
+        Requires write access to the draft's CSI. Authorization is decided **before** the body is
+        read: a caller who may not write gets `403` whatever the body holds. The body is closed: a
+        field it does not name (including `label`, `scope`, `csiId` or `environment`) is
+        `400 INVALID_SECRET_REQUEST`.
+
+        The stored name is the `secretId` a `secretRef` variable carries and the `<secret NAME>`
+        a step references.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateStudioSecretRequest' }
+            examples:
+              loginPassword:
+                value:
+                  name: LOGIN_PW
+                  value: '********'
+                  allowedOrigins: [ 'https://login.app.example' ]
+      responses:
+        '201':
+          description: |
+            Stored. No `Location` header: there is no single-secret read to point at.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StudioSecret' }
+              examples:
+                created:
+                  value: { name: LOGIN_PW, version: '1', allowedOrigins: [ 'https://login.app.example' ] }
+        '400':
+          description: |
+            A malformed test id, a platform `INVALID_IDEMPOTENCY_KEY` (the platform filter's), or a
+            refused body: `INVALID_SECRET_REQUEST` (empty, not JSON, over 64 KiB, or a field the
+            schema does not name), `INVALID_SECRET_NAME`, `INVALID_SECRET_VALUE` or
+            `INVALID_SECRET_ORIGINS`. `403` is decided before any `400` of this list. No message
+            carries the value or quotes the body.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                invalidRequest:
+                  value: { error: INVALID_SECRET_REQUEST, message: 'The body must be a JSON object with exactly name, value and allowedOrigins' }
+                invalidName:
+                  value: { error: INVALID_SECRET_NAME, message: "name must be 1 to 64 characters of A-Z, a-z, 0-9, '_', '.' or '-', and not '.' or '..'" }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: A secret with this name is already stored for this test. It is left unchanged.
+          x-conflict-codes: [SECRET_ALREADY_EXISTS]
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                secretAlreadyExists:
+                  value: { error: SECRET_ALREADY_EXISTS, message: 'A secret with this name already exists for this test' }
+        '503':
+          description: |
+            No Vault is connected in this deployment (`VAULT_NOT_CONFIGURED`), or Vault could not
+            be reached or refused the write (`VAULT_UNAVAILABLE`).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                vaultNotConfigured:
+                  value: { error: VAULT_NOT_CONFIGURED, message: 'Vault is not connected for this environment' }
+                vaultUnavailable:
+                  value: { error: VAULT_UNAVAILABLE, message: 'Studio secret resolution is temporarily unavailable' }
+
   /executions:
     get:
       tags: [executions]
@@ -704,11 +884,47 @@ paths:
         `testId` is optional. Results are filtered by the caller's readable CSIs using the
         execution's own immutable `csiId` — never the parent test's — **before** pagination.
         Executions whose `csiId` is null (quarantined legacy history) are never returned.
+
+        **Search, filter and sort (story 10.46).** `csiId`, `status`, `q` and `sort` are optional
+        and combine with the caller's scope in one query, before pagination. `csiId` is one more
+        equality on the execution's own CSI, so it intersects with the scope and never widens it.
+        A blank value is treated as absent. The order is always completed by the execution `id` in
+        the same direction. An unsupported `status` or `sort` is `400` with
+        `error: INVALID_QUERY`. Each item carries `testName`, resolved for the whole page.
       parameters:
         - name: testId
           in: query
           required: false
           schema: { type: string, format: uuid }
+        - { $ref: '#/components/parameters/CsiIdQuery' }
+        - name: status
+          in: query
+          required: false
+          description: |
+            `PENDING`, `RUNNING`, `PASSED` and `FAILED` match the status. `CANCELLED` matches
+            `status: ERROR` with `errorCode: CANCELLED`, and `ERROR` matches every other `ERROR`,
+            so the two never overlap — the same distinction the MFE draws when it names a run
+            "Cancelled". Case-insensitive.
+          schema: { type: string, enum: [PENDING, RUNNING, PASSED, FAILED, ERROR, CANCELLED] }
+        - name: q
+          in: query
+          required: false
+          description: |
+            Case-insensitive substring of the test's current name. Runs of a deleted or
+            quarantined test have no name and never match. `%` and `_` match themselves.
+          schema: { type: string }
+        - name: sort
+          in: query
+          required: false
+          description: |
+            `<field>,<direction>` with field `acceptedAt` or `durationMs`, and direction `asc` or
+            `desc` (default `asc` when omitted). Runs without a duration sort last by
+            `durationMs` in both directions, newest accepted first among themselves. Ties are
+            broken by `id`.
+          schema:
+            type: string
+            pattern: '^(acceptedAt|durationMs)(,(asc|desc|ASC|DESC))?$'
+            default: 'acceptedAt,desc'
         - { $ref: '#/components/parameters/Page' }
         - { $ref: '#/components/parameters/Size' }
       responses:
@@ -717,6 +933,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ExecutionPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/SessionUnauthorized' }
 
   /executions/{id}:
@@ -1516,6 +1733,298 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ReadinessResponse' }
 
+  /tests/{id}/schedule/capabilities:
+    parameters:
+      - $ref: '#/components/parameters/TestId'
+    get:
+      tags:
+        - studio-scheduling
+      operationId: studioScheduleCapabilities
+      summary: Read test-scoped scheduling capability and approved principal references
+      x-served-by: api
+      x-implemented-by: STUDIO-SCHED-001
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioScheduleCapabilities'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/SessionUnauthorized'
+        '403':
+          description: CSI permission or current background authorization denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /tests/{id}/schedule:
+    parameters:
+      - $ref: '#/components/parameters/TestId'
+    get:
+      tags:
+        - studio-scheduling
+      operationId: readStudioSchedule
+      summary: Read schedule; JSON null if absent or removed
+      x-served-by: api
+      x-implemented-by: STUDIO-SCHED-001
+      responses:
+        '200':
+          description: Schedule or JSON null.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioSchedule'
+                nullable: true
+        '401':
+          $ref: '#/components/responses/SessionUnauthorized'
+        '403':
+          description: CSI permission or current background authorization denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - studio-scheduling
+      operationId: createStudioSchedule
+      summary: Create a paused schedule; recreate retains its stable audit anchor
+      x-served-by: api
+      x-implemented-by: STUDIO-SCHED-001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudioScheduleWrite'
+      responses:
+        '201':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioSchedule'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/SessionUnauthorized'
+        '403':
+          description: CSI permission or current background authorization denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Schedule version, lifecycle, readiness or uncertainty conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          x-conflict-codes:
+            - SCHEDULE_EXISTS
+        '503':
+          description: SCHEDULING_DISABLED or background authority unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - studio-scheduling
+      operationId: updateStudioSchedule
+      summary: Update versioned schedule; changed settings require explicit Resume
+      x-served-by: api
+      x-implemented-by: STUDIO-SCHED-001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudioScheduleUpdate'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioSchedule'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/SessionUnauthorized'
+        '403':
+          description: CSI permission or current background authorization denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Schedule version, lifecycle, readiness or uncertainty conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          x-conflict-codes:
+            - SCHEDULE_NOT_FOUND
+            - SCHEDULE_VERSION_CONFLICT
+        '503':
+          description: SCHEDULING_DISABLED or background authority unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - studio-scheduling
+      operationId: removeStudioSchedule
+      summary: Remove future scheduling without cancelling accepted work
+      x-served-by: api
+      x-implemented-by: STUDIO-SCHED-001
+      responses:
+        '204':
+          description: Removed; accepted executions remain intact.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/SessionUnauthorized'
+        '403':
+          description: CSI permission or current background authorization denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Schedule version, lifecycle, readiness or uncertainty conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          x-conflict-codes:
+            - SCHEDULE_NOT_FOUND
+            - SCHEDULE_VERSION_CONFLICT
+        '503':
+          description: SCHEDULING_DISABLED or background authority unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+        - name: expectedVersion
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+  /tests/{id}/schedule/enabled:
+    parameters:
+      - $ref: '#/components/parameters/TestId'
+    patch:
+      tags:
+        - studio-scheduling
+      operationId: enableStudioSchedule
+      summary: Pause or explicitly Resume against exact confirmed revision and uncertainty acknowledgments
+      x-served-by: api
+      x-implemented-by: STUDIO-SCHED-001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudioScheduleEnabled'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioSchedule'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/SessionUnauthorized'
+        '403':
+          description: CSI permission or current background authorization denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Schedule version, lifecycle, readiness or uncertainty conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          x-conflict-codes:
+            - SCHEDULE_NOT_FOUND
+            - SCHEDULE_VERSION_CONFLICT
+            - ACTIVATION_REVISION_MISMATCH
+            - UNCERTAINTY_ACKNOWLEDGEMENT_REQUIRED
+            - COMPILE_REQUIRED
+            - RUNTIME_INCOMPATIBLE
+        '503':
+          description: SCHEDULING_DISABLED or background authority unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /schedules/preview:
+    post:
+      tags:
+        - studio-scheduling
+      operationId: previewStudioSchedule
+      summary: Preview next five timezone-aware occurrences using the dispatch recurrence policy
+      x-served-by: api
+      x-implemented-by: STUDIO-SCHED-001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudioSchedulePreviewRequest'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioSchedulePreview'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/SessionUnauthorized'
+  /tests/{id}/schedule/occurrences:
+    parameters:
+      - $ref: '#/components/parameters/TestId'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Size'
+    get:
+      tags:
+        - studio-scheduling
+      operationId: listStudioScheduleOccurrences
+      summary: Read bounded occurrence history including refused work and retained removed schedules
+      x-served-by: api
+      x-implemented-by: STUDIO-SCHED-001
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioScheduleOccurrencePage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/SessionUnauthorized'
+        '403':
+          description: CSI permission or current background authorization denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
 components:
   securitySchemes:
     serviceIdentity:
@@ -1601,6 +2110,380 @@ components:
           schema: { $ref: '#/components/schemas/RunnerProblem' }
 
   schemas:
+    StudioSchedulePolicy:
+      type: object
+      required:
+        - minIntervalSeconds
+        - misfireGraceSeconds
+        - overlap
+        - dstOverlap
+      properties:
+        minIntervalSeconds:
+          type: integer
+          format: int64
+        misfireGraceSeconds:
+          type: integer
+          format: int64
+        overlap:
+          type: string
+          enum:
+            - SKIP
+        dstOverlap:
+          type: string
+          enum:
+            - EARLIER_OFFSET
+    StudioScheduleOccurrence:
+      type: object
+      required:
+        - id
+        - scheduleId
+        - scheduleVersion
+        - testId
+        - csiId
+        - scheduledAt
+        - localScheduledAt
+        - timeZone
+        - offsetSeconds
+        - decision
+        - code
+        - executionId
+        - acceptedAt
+        - retryAt
+        - graceExpiresAt
+        - createdAt
+        - updatedAt
+        - missedFrom
+        - missedUntil
+        - missedCount
+      properties:
+        environment:
+          type: string
+        executionPrincipal:
+          type: string
+        activationId:
+          type: string
+          format: uuid
+          nullable: true
+        activatedRevisionId:
+          type: string
+          format: uuid
+          nullable: true
+        activatedBy:
+          type: string
+          nullable: true
+        activatedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+        id:
+          type: string
+          format: uuid
+        scheduleId:
+          type: string
+          format: uuid
+        scheduleVersion:
+          type: integer
+          format: int64
+        testId:
+          type: string
+          format: uuid
+        csiId:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        localScheduledAt:
+          type: string
+        timeZone:
+          type: string
+        offsetSeconds:
+          type: integer
+          format: int64
+        decision:
+          type: string
+          enum:
+            - ACCEPTED
+            - REFUSED
+            - SKIPPED
+            - DEFERRED
+        code:
+          type: string
+        executionId:
+          type: string
+          format: uuid
+          nullable: true
+        acceptedAt:
+          type: string
+          format: date-time
+          nullable: true
+        retryAt:
+          type: string
+          format: date-time
+          nullable: true
+        graceExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        missedFrom:
+          type: string
+          format: date-time
+          nullable: true
+        missedUntil:
+          type: string
+          format: date-time
+          nullable: true
+        missedCount:
+          type: integer
+          format: int64
+          nullable: true
+    StudioSchedule:
+      type: object
+      required:
+        - id
+        - testId
+        - csiId
+        - version
+        - cronExpression
+        - timeZone
+        - executionPrincipal
+        - state
+        - requestedEnabled
+        - blockedCode
+        - activatedRevisionId
+        - nextDueAt
+        - pollAfterAt
+        - deletedAt
+        - createdAt
+        - updatedAt
+        - unacknowledgedUncertaintyExecutionIds
+        - latestOccurrence
+      properties:
+        activationId:
+          type: string
+          format: uuid
+          nullable: true
+        activatedBy:
+          type: string
+          nullable: true
+        activatedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+        id:
+          type: string
+          format: uuid
+        testId:
+          type: string
+          format: uuid
+        csiId:
+          type: string
+        version:
+          type: integer
+          format: int64
+        cronExpression:
+          type: string
+        timeZone:
+          type: string
+        executionPrincipal:
+          type: string
+        state:
+          type: string
+          enum:
+            - PAUSED
+            - ENABLED
+            - BLOCKED
+        requestedEnabled:
+          type: boolean
+        blockedCode:
+          type: string
+          nullable: true
+        activatedRevisionId:
+          type: string
+          format: uuid
+          nullable: true
+        nextDueAt:
+          type: string
+          format: date-time
+          nullable: true
+        pollAfterAt:
+          type: string
+          format: date-time
+          nullable: true
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        unacknowledgedUncertaintyExecutionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        latestOccurrence:
+          $ref: '#/components/schemas/StudioScheduleOccurrence'
+          nullable: true
+    StudioScheduleWrite:
+      type: object
+      required:
+        - cronExpression
+        - executionPrincipal
+      properties:
+        cronExpression:
+          type: string
+        timeZone:
+          type: string
+          nullable: true
+          default: UTC
+          description: Omitted or null defaults to UTC; responses always persist an explicit validated zone.
+        executionPrincipal:
+          type: string
+
+    StudioScheduleUpdate:
+      type: object
+      required:
+        - expectedVersion
+        - cronExpression
+        - executionPrincipal
+      properties:
+        expectedVersion:
+          type: integer
+          format: int64
+        cronExpression:
+          type: string
+        timeZone:
+          type: string
+          nullable: true
+          default: UTC
+          description: Omitted or null defaults to UTC; responses always persist an explicit validated zone.
+        executionPrincipal:
+          type: string
+
+    StudioScheduleEnabled:
+      type: object
+      required:
+        - expectedVersion
+        - enabled
+      properties:
+        expectedVersion:
+          type: integer
+          format: int64
+        enabled:
+          type: boolean
+        confirmedRevisionId:
+          type: string
+          format: uuid
+          nullable: true
+        acknowledgedUncertaintyExecutionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    StudioSchedulePreviewRequest:
+      type: object
+      required:
+        - cronExpression
+      properties:
+        cronExpression:
+          type: string
+        timeZone:
+          type: string
+          nullable: true
+          default: UTC
+          description: Omitted or null defaults to UTC; responses always persist an explicit validated zone.
+
+    StudioSchedulePreview:
+      type: object
+      required:
+        - normalizedCronExpression
+        - timeZone
+        - occurrences
+        - policy
+      properties:
+        normalizedCronExpression:
+          type: string
+        timeZone:
+          type: string
+        occurrences:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items:
+            type: object
+            required:
+              - scheduledAt
+              - localScheduledAt
+              - offsetSeconds
+            properties:
+              scheduledAt:
+                type: string
+                format: date-time
+              localScheduledAt:
+                type: string
+              offsetSeconds:
+                type: integer
+                format: int64
+        policy:
+          $ref: '#/components/schemas/StudioSchedulePolicy'
+    StudioScheduleCapabilities:
+      type: object
+      required:
+        - enabled
+        - canManage
+        - availableExecutionPrincipals
+        - localAuthorizationOnly
+        - policy
+      properties:
+        enabled:
+          type: boolean
+        canManage:
+          type: boolean
+        availableExecutionPrincipals:
+          type: array
+          items:
+            type: string
+        localAuthorizationOnly:
+          type: boolean
+        policy:
+          $ref: '#/components/schemas/StudioSchedulePolicy'
+    StudioScheduleOccurrencePage:
+      type: object
+      required:
+        - data
+        - page
+        - size
+        - totalElements
+        - totalPages
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudioScheduleOccurrence'
+        page:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int64
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int64
+
     ErrorResponse:
       type: object
       required: [error, message]
@@ -2271,8 +3154,10 @@ components:
         `browserStartedAt` is the wall-clock reading of that same origin (ADR-002 §INT-5).
 
         `at` is null where the runner held no reading and the derivation therefore has no input.
-        `stepIndex` has no runner-side source today and is null for runner-produced lines; it is
-        retained for API-produced entries (reaper and evidence updates, §5.3). See ADR-002 §INT-1.
+        `stepIndex` is the 0-based position of the step the line is about, in the same index
+        space as `StepResult.stepIndex`, copied from `RunnerLogEntry.stepIndex` (ADR-002 §33). It
+        is null on run-level lines, on lines from a runner that does not send it, and on
+        API-produced entries (reaper and evidence updates, §5.3). See ADR-002 §INT-1.
       properties:
         at: { type: string, format: date-time, nullable: true }
         level: { type: string, enum: [DEBUG, INFO, WARN, ERROR] }
@@ -2317,8 +3202,52 @@ components:
          durationMs, stepResults, logs, logsTruncated, video, videoPath, runtime, revision,
          streamComplete]
       properties:
+        activationId:
+          type: string
+          format: uuid
+          nullable: true
+        activatedBy:
+          type: string
+          nullable: true
+        activatedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+        triggerSource:
+          type: string
+          nullable: true
+          enum:
+            - MANUAL
+            - SCHEDULED
+          description: Immutable trigger attribution; null for pre-scheduling legacy history.
+        scheduleId:
+          type: string
+          format: uuid
+          nullable: true
+        scheduleVersion:
+          type: integer
+          format: int64
+          nullable: true
+        occurrenceId:
+          type: string
+          format: uuid
+          nullable: true
+        scheduledAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Nominal scheduled instant; distinct from acceptance and browser start.
+
         executionId: { type: string, format: uuid }
         testId: { type: string, format: uuid }
+        testName:
+          type: string
+          nullable: true
+          description: |
+            The test's current name (story 10.46), on `GET /executions/{id}`, the items of
+            `GET /executions` and the SSE `execution.snapshot` frames alike. Null when the test
+            is deleted or quarantined. Not part of `required`, so earlier payloads remain valid.
         csiId:
           type: string
           nullable: true
@@ -2541,6 +3470,63 @@ components:
       properties:
         executionId: { type: string, format: uuid }
         status: { $ref: '#/components/schemas/ExecutionStatus' }
+
+    # ADR-002 §32 (studio-vault-secrets). The list item and the create answer are different
+    # shapes on purpose: one record would emit `version: null` in the list.
+    StudioSecretName:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name: { type: string, pattern: '^[A-Za-z0-9_.-]{1,64}$' }
+
+    StudioSecretList:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/StudioSecretName' }
+
+    StudioSecret:
+      type: object
+      additionalProperties: false
+      required: [name, version, allowedOrigins]
+      properties:
+        name: { type: string, pattern: '^[A-Za-z0-9_.-]{1,64}$' }
+        version:
+          type: string
+          description: The stored entry's nonsecret Vault version. Never derived from the value.
+        allowedOrigins:
+          type: array
+          items: { type: string }
+          description: The normalized origins the value may be filled on.
+
+    CreateStudioSecretRequest:
+      type: object
+      additionalProperties: false
+      required: [name, value, allowedOrigins]
+      properties:
+        name:
+          type: string
+          pattern: '^[A-Za-z0-9_.-]{1,64}$'
+          description: Also the `secretId` a step references. `.` and `..` are refused.
+        value:
+          type: string
+          format: password
+          writeOnly: true
+          minLength: 1
+          maxLength: 8192
+          description: Stored in Vault only. Never returned, logged or persisted elsewhere.
+        allowedOrigins:
+          type: array
+          minItems: 1
+          maxItems: 16
+          items: { type: string, maxLength: 512 }
+          description: |
+            Distinct `http`/`https` origins, with no path, query or credentials. Normalized to
+            `scheme://host[:port]` before they are stored.
 
     # ──────────────────────────────────────────────────────────────────────────────────────────
     # Internal surface schemas (architecture §8.4).
@@ -2945,7 +3931,9 @@ components:
         Whatever the build recorded in `runtime-versions.json` (ADR-001 §4.2) — Playwright and
         Chromium builds, Node, validator schema, executor, syntax reference, image digest. Left
         open because the recorded set is the image's business and grows with the pin; the API
-        keeps the §4.6 subset on the execution as `RuntimeVersions`.
+        keeps the §4.6 subset on the execution as `RuntimeVersions`, read from the keys
+        `playwright`, `chromiumBuild` (→ `chromium`), `validator` or `validatorSchema`
+        (→ `validator`), `executor` and `image`.
       additionalProperties: true
 
     RunnerStepState:
@@ -3033,6 +4021,18 @@ components:
             The runner's levels. The API upper-cases them onto the public `ExecutionLogEntry.level`
             vocabulary, whose `DEBUG` has no runner-side producer.
         message: { type: string, maxLength: 2000 }
+        stepIndex:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: |
+            The 0-based position of the step this line is **about**, in the same index space as
+            `RunnerStepState.stepIndex`. Set on the `step N started` and `step N PASS|FAIL|SKIPPED`
+            lines; `null` on run-level lines (browser start, run outcome, deadline, upload,
+            evidence). Never inferred from message text. Optional: a runner that predates it omits
+            it and the API reads `null` (ADR-002 §33; promotion to `required` is O-17). A non-null
+            value outside the confirmed revision's steps is `400 INVALID_REPORT`, as an unknown
+            `RunnerStepState.stepIndex` is.
 
     RunOutcome:
       type: object
@@ -3158,6 +4158,7 @@ components:
         | — | `stepResults[].originalText` | The API holds the confirmed source; the runner does not resend it |
         | `logs[].atMs` | `logs[].at` | Run-timeline offset vs. `browserStartedAt + atMs` (§INT-1) |
         | `logs[].level` (lower) | `logs[].level` (upper) | Case normalized by the API |
+        | `logs[].stepIndex` | `logs[].stepIndex` | Copied; absent reads as `null` (ADR-002 §33) |
         | `outcome.result` | `status` | Same vocabulary (§8.2); the API also owns `PENDING`/`RUNNING` |
         | `outcome.errorCode` | `errorCode` | Disjoint sets except `TIMEOUT` and `CANCELLED`: `ExecutionErrorCode` is API-assigned (§5.4); the API assigns `CANCELLED` only against a cancel it recorded (ADR-002 §29) |
         | `evidence.state` | `video.status` | The runner reports storage; the API reports availability (§6.1) |

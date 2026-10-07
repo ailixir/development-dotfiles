@@ -1,6 +1,18 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { APP_CONFIG } from '@utils/constants/appConfig';
 
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    /**
+     * The request body carries a value that must not leave this client in any other form (a Studio
+     * secret). The debug log omits it, and a rejected request's error keeps no copy of it.
+     */
+    redactBody?: boolean;
+    /** Skip the GET retry below: the caller wants the first answer. */
+    __doNotRetry?: boolean;
+  }
+}
+
 class ApiClient {
   private instance: AxiosInstance;
 
@@ -31,7 +43,7 @@ class ApiClient {
         if (APP_CONFIG.debugMode) {
           console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`, {
             params: config.params,
-            data: config.data,
+            data: config.redactBody ? '[redacted]' : config.data,
           });
         }
 
@@ -83,7 +95,7 @@ class ApiClient {
         }
 
         // Lightweight retry/backoff for idempotent GET requests
-        const originalConfig = error.config as (AxiosRequestConfig & { __retryCount?: number; __doNotRetry?: boolean });
+        const originalConfig = error.config as (AxiosRequestConfig & { __retryCount?: number });
         const shouldRetry = !originalConfig?.__doNotRetry && (originalConfig?.method || 'get').toLowerCase() === 'get';
         const retriableStatus = !error.response || (error.response.status >= 500 && error.response.status < 600);
         if (shouldRetry && retriableStatus) {
@@ -100,8 +112,12 @@ class ApiClient {
         const normalized = new Error(
           error.response?.data?.error || error.response?.data?.message || error.message || 'Request failed'
         );
-        // Preserve response for callers who need it
-        (normalized as any).response = error.response;
+        // Preserve response for callers who need it. For a redacted request the response keeps no
+        // `config.data`, which is the serialized request body.
+        (normalized as any).response =
+          error.config?.redactBody && error.response
+            ? { ...error.response, config: { ...error.response.config, data: undefined } }
+            : error.response;
         return Promise.reject(normalized);
       }
     );

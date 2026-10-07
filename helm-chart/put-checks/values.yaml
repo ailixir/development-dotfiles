@@ -635,12 +635,14 @@ objectStore:
   retention: 30d
 
 # Real Vault KV v2 is implemented but explicitly off until the platform endpoint is connected.
+# `pathTemplate` must contain {csiId}, {environment}, {testId}, {kind} and end with
+# /{referenceName}: the api and worker refuse to start with `hashicorp` otherwise.
 studioVault:
   provider: none
   address: ""
   namespace: ""
   mount: secret
-  pathTemplate: "studio/{csiId}/{environment}/{kind}/{referenceName}"
+  pathTemplate: "studio/{csiId}/{environment}/{testId}/{kind}/{referenceName}"
   valueKey: value
   tokenSecret: checks-studio-vault-token
   tokenKey: token

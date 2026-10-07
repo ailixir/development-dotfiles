@@ -16,83 +16,68 @@ import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 
 /**
- * Story 10.9 AC-13 — <b>the bounds the repair loop must stay inside, and the arithmetic that keeps
- * them honest.</b>
+ * Story 10.9 AC-13 — <b>the bounds the repair loop must stay inside.</b>
  *
- * <h2>Where the 210 seconds comes from</h2>
+ * <h2>One full attempt must fit; the repairs need not</h2>
  *
- * <p>AC-13 names a threshold without saying what feeds it, so it is derived here rather than
- * restated. The worst case for one compile request is every attempt taking its full deadline:
+ * <p>The budget is shared by every proposal, repair and validation of one request, and each gateway
+ * call is capped at {@code min(request-timeout, remaining)} and cancelled when the budget expires
+ * (C0 &sect;5, VAL-007). So the rule is no longer the worst case of every attempt taking its full
+ * deadline, {@code (1 + repairs) x (request-timeout + validate-timeout)}, which C0 &sect;5 orders
+ * removed. It is that one complete attempt fits:
  *
  * <pre>
- *   (1 + studio.compile.repair.max-attempts) x (gateway.request-timeout + runner.validate-timeout)
- *   = (1 + 2) x (60s + 10s)
- *   = 210s
+ *   gateway.request-timeout + runner.validate-timeout &lt; pipeline.attempt-budget
+ *   150s + 10s &lt; 240s
  * </pre>
  *
- * <p>All three inputs are deployment configuration, and none of them is written as a literal in
- * this file: the boundary below is computed from the shipped {@code @DefaultValue} declarations and
- * driven at exactly that point, so a test that still passed after somebody changed the repair bound
- * or a timeout would be impossible. 240s is the starting budget and it clears 210s by 30s.
+ * <p>None of the inputs is a literal here: the shipped values are bound from the records' own
+ * {@code @DefaultValue}s and the configured values from {@code application.yml}.
  */
 class RepairBoundsTest extends AbstractRepairPipelineTest {
 
   /**
-   * The startup validation, driven at the real boundary.
-   *
-   * <p>Exactly the worst case must fail and one millisecond more must pass. A test that used a
-   * value far from the boundary would pass against an implementation that compared against
-   * something else entirely.
+   * The shipped defaults: one full attempt fits, and the startup validation does not demand the
+   * removed all-repairs arithmetic.
    */
   @Test
-  void theBudgetMustStrictlyExceedTheRepairArithmeticAtExactlyThatBoundary() {
+  void oneFullAttemptFitsTheShippedBudgetAndTheRemovedArithmeticIsNotEnforced() {
     StudioCompileProperties shipped = shippedCompile();
     StudioGatewayProperties gateway = shippedGateway();
     StudioRunnerProperties runner = shippedRunner();
 
-    long worstCaseMs =
-        (1L + shipped.repair().maxAttempts())
-            * (gateway.requestTimeout().toMillis() + runner.validateTimeout().toMillis());
+    long oneAttemptMs = gateway.requestTimeout().toMillis() + runner.validateTimeout().toMillis();
+    long allRepairsMs = (1L + shipped.repair().maxAttempts()) * oneAttemptMs;
 
-    assertThatCode(
-            () -> withBudget(shipped, Duration.ofMillis(worstCaseMs)).validate(gateway, runner))
-        .as("the overall deadline bounds actual work, not hypothetical retry arithmetic")
-        .doesNotThrowAnyException();
-
-    assertThatCode(
-            () -> withBudget(shipped, Duration.ofMillis(worstCaseMs + 1)).validate(gateway, runner))
-        .as("and one millisecond above it is usable")
-        .doesNotThrowAnyException();
-
-    assertThatCode(() -> shipped.validate(gateway, runner))
-        .as("the shipped defaults must satisfy their own rule")
-        .doesNotThrowAnyException();
     assertThat(shipped.pipeline().attemptBudget().toMillis())
-        .as("and clear the worst case the bounds themselves describe")
-        .isGreaterThan(worstCaseMs);
+        .as("the shipped budget must fit one full attempt of %dms", oneAttemptMs)
+        .isGreaterThan(oneAttemptMs);
+    assertThatCode(() -> shipped.validate(gateway, runner))
+        .as("the shipped defaults must satisfy their own startup rules")
+        .doesNotThrowAnyException();
+    assertThatCode(
+            () ->
+                withBudget(shipped, Duration.ofMillis(oneAttemptMs + 1)).validate(gateway, runner))
+        .as("a budget that fits one attempt but not %dms of repairs still starts", allRepairsMs)
+        .doesNotThrowAnyException();
   }
 
   /**
    * The running deployment's own values, not the record defaults.
    *
    * <p>This context binds {@code application.yml}, so it is the configured budget that is checked
-   * against the configured timeouts and the configured repair bound. The record-default test above
-   * would keep passing if {@code application.yml} diverged from the defaults; this one would not.
+   * against the configured timeouts. The record-default test above would keep passing if {@code
+   * application.yml} diverged from the defaults; this one would not.
    */
   @Test
-  void theConfiguredDeploymentSatisfiesTheSameArithmetic() {
-    long worstCaseMs =
-        (1L + properties.repair().maxAttempts())
-            * (gatewayRequestTimeoutMs() + runnerProperties.validateTimeout().toMillis());
+  void theConfiguredDeploymentFitsOneFullAttemptInTheBudget() {
+    long oneAttemptMs = gatewayRequestTimeoutMs() + runnerProperties.validateTimeout().toMillis();
 
     assertThat(properties.pipeline().attemptBudget().toMillis())
         .as(
-            "the deployed budget must exceed (1 + %d) x (%dms + %dms) = %dms",
-            properties.repair().maxAttempts(),
-            gatewayRequestTimeoutMs(),
-            runnerProperties.validateTimeout().toMillis(),
-            worstCaseMs)
-        .isGreaterThan(worstCaseMs);
+            "the deployed budget must exceed one full attempt: %dms + %dms = %dms",
+            gatewayRequestTimeoutMs(), runnerProperties.validateTimeout().toMillis(), oneAttemptMs)
+        .isGreaterThan(oneAttemptMs);
   }
 
   /** AC-18 — the sweep threshold must strictly exceed the budget, at exactly that boundary. */
@@ -160,6 +145,10 @@ class RepairBoundsTest extends AbstractRepairPipelineTest {
    *
    * <p>Driven across the whole {@code GatewayErrorCode} enum rather than a chosen few, so a code
    * added later is covered the day it is added.
+   *
+   * <p>The {@code GATEWAY_PARSE_FAILURE} driven here carries no parser rejection code, as an
+   * unusable finish reason does not, so it stays terminal. A strict-parser envelope rejection is
+   * the one parse failure that consumes a repair (VAL-019b); {@code RepairLoopTest} covers it.
    */
   @Test
   void everyGatewayFailureModeOnARepairIsARetryableStaleCarryingThatCode() {

@@ -75,7 +75,8 @@ public class ExecutionEventsController {
 
     // Authorized against the execution's immutable CSI, before anything is opened, and by the same
     // code path the GET snapshot route uses — which is what makes the two statuses identical.
-    ExecutionSnapshotDto current = studioService.findExecutionById(id, auth);
+    // readExecution is that read, labelled with the test name, so the frame equals the GET body.
+    ExecutionSnapshotDto current = studioService.readExecution(id, auth);
 
     SseEmitter emitter = new SseEmitter(properties.sseOrDefault().lifetimeOrDefault().toMillis());
     StreamSubscription subscription =

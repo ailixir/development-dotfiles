@@ -65,7 +65,7 @@ export const EXECUTION_ERROR_NARRATIVES: Readonly<
   DISPATCH_UNKNOWN: {
     title: 'We cannot tell whether a browser ran',
     browserClaim:
-      'Unknown. The send neither succeeded nor failed cleanly, and nothing since has resolved it — you must assume neither that a browser ran nor that it did not.',
+      'Unknown. The send neither succeeded nor failed cleanly, and nothing since has resolved it; you must assume neither that a browser ran nor that it did not.',
     remedyOwner:
       'Nobody can clear this automatically. Someone has to look at what happened; starting another run is a decision a person makes deliberately, not a button this page offers.',
     offersRerun: false,

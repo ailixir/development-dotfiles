@@ -62,6 +62,20 @@ export interface BrowserAdapter {
   ): Promise<void>;
   expectUrl(expected: ResolvedMatcher, options?: HaveUrlOptions): Promise<void>;
   expectTitle(expected: ResolvedMatcher, options?: TimeoutOptions): Promise<void>;
+  /**
+   * Where the browser is, read once when a step fails (VAL-013). Not an operation of the accepted
+   * language — no step can call it — and optional, so an adapter with no page has nothing to say.
+   *
+   * Returns the **raw** reading. The executor reduces it to `origin + pathname`, redacts it and
+   * bounds the wait (`src/executor/pageLocation.ts`); an adapter must not be trusted to.
+   */
+  pageLocation?(): Promise<PageLocation | null>;
+}
+
+/** The page the browser was on, as read. Raw: may carry a query, a fragment or userinfo. */
+export interface PageLocation {
+  readonly url: string;
+  readonly title: string | null;
 }
 
 /**

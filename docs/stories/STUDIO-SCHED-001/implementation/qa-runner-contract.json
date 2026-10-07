@@ -1,0 +1,32 @@
+{
+  "storyId": "STUDIO-SCHED-001",
+  "reviewer": "@qa",
+  "scope": "Authorized test-only reviewed public OpenAPI amendment and current runner producer conformance",
+  "previousOpenApiPin": "43fe0bb46cb40011ae3f19e05071e16fbe6ffd437e6fb785c0b36586a7c47898",
+  "reviewedOpenApiSha256": "5e5477fce65bdac45029056f2636ebebd18c9daae6c174c6bbffcd2777f070ac",
+  "testEdits": [
+    "backend StudioContractTest: preserve old 23 explicit status sets, add 8 independently enumerated scheduling operations, pin total 31 and their STUDIO-SCHED-001 implementation markers",
+    "runner confinement test: update reviewed file pin with attributed public amendment comment; retain the original whole-document hash assertion"
+  ],
+  "executedByQa": [
+    {
+      "directory": "studio-runner",
+      "command": "npm run test -- test/run/confinement.test.ts test/contract.test.ts",
+      "testsPassed": 35,
+      "testFilesPassed": 2,
+      "exitCode": 1,
+      "reason": "Filtered tests all passed; enabled whole-repository coverage thresholds cannot be satisfied by this subset. This is not reported as a passing full runner quality gate."
+    },
+    {
+      "directory": "studio-runner",
+      "command": "npm run test -- test/run/confinement.test.ts test/contract.test.ts --coverage.enabled=false",
+      "testsPassed": 35,
+      "testFilesPassed": 2,
+      "exitCode": 0,
+      "assertions": "19 confinement tests retain byte pin and constraints; 16 contract tests verify actual runner request/response producers against current internal schemas. No global coverage claim."
+    }
+  ],
+  "historicalComparisonLimit": "Root did not archive pre-amendment dirty OpenAPI bytes. No claim of an independent historical byte comparison against the old pin is made; current runtime producer/internal schema compatibility was executed, and the root-authorized scheduling amendment affects public scheduling/optional public provenance.",
+  "applicationCodeChangedByQa": false,
+  "productionActivation": false
+}

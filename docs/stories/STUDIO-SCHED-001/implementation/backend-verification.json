@@ -1,0 +1,186 @@
+{
+  "storyId": "STUDIO-SCHED-001",
+  "recordedAt": "2026-10-06T01:17:36.876688+00:00",
+  "recordedBy": "@dev (Dex), backend execution",
+  "scope": "Feature implementation and focused real PostgreSQL/unit/regression evidence; independent QA owns the verdict",
+  "finalFocusedRun": {
+    "command": "./gradlew test --tests '*studio.scheduling.*' --tests '*StudioContractTest' --tests '*scheduling.ScheduleCrudIT' --tests '*scheduling.ScheduleEnableDisableIT' --tests '*scheduling.BackpressureIntegrationIT'",
+    "status": "PASS",
+    "tests": 63,
+    "failures": 0,
+    "skipped": 0,
+    "suites": [
+      {
+        "name": "com.citi.put.checks.scheduling.BackpressureIntegrationIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:00"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ScheduleCrudIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:11"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ScheduleEnableDisableIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:20"
+      },
+      {
+        "name": "com.citi.put.checks.studio.StudioContractTest",
+        "tests": "14",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:33"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioCronResolverTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:40"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+        "tests": "19",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:50"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioSchedulingIsolationTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:52"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioSchedulingSchemaIT",
+        "tests": "20",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:54"
+      }
+    ]
+  },
+  "additionalExecutedRegression": {
+    "AcceptanceIT": {
+      "tests": 11,
+      "status": "PASS",
+      "evidence": "Actual two independent application-context manual idempotency and quotas"
+    },
+    "DispatcherIT": {
+      "tests": 26,
+      "status": "PASS"
+    },
+    "RecoveryIT": {
+      "tests": 25,
+      "status": "PASS"
+    },
+    "genericScheduling": {
+      "CronDispatcherIT": 1,
+      "ShedLockCronDispatcherIT": 2,
+      "RetryDispatcherIT": 3,
+      "ReportDeliveryDispatcherIT": 2,
+      "status": "PASS"
+    }
+  },
+  "staticGates": {
+    "command": "./gradlew spotlessJavaCheck checkstyleMain checkstyleTest spotbugsMain spotbugsTest",
+    "spotlessJavaCheck": "PASS",
+    "checkstyleMain": "PASS",
+    "checkstyleTest": "PASS",
+    "spotbugsMain": "PASS",
+    "spotbugsTest": "SKIPPED: existing build.gradle.kts explicitly enabled=false"
+  },
+  "notRun": [
+    "Unfiltered ./gradlew test",
+    "Full ./gradlew check including whole-repository Jacoco coverage verification",
+    "Real production principal/vault revocation, real scheduled browser pilot/load, approved restore/retention review"
+  ],
+  "validationHighlights": [
+    "Late Vault/preflight and actual advisory quota waits crossing grace or grant revocation create zero accepted writes",
+    "Real PostgreSQL duplicate-worker threads, edit/admission race and injected history/ledger/cursor boundary failures preserve atomicity",
+    "Version-independent local-slot ownership/ledger/activation constraints and durable uncertainty after history pruning",
+    "Immutable human activation provenance across later operators/removal/recreation and matching GET/list/SSE DTO schema",
+    "Bounded separate worker executor, SQL-failure and deadline CSI fairness; manual execution authorization/idempotency unchanged",
+    "Feature-off deferred expiry, pause/update/removal/input settlement, default-deny production grants and inspectable APIs"
+  ],
+  "createdFiles": [
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/ConfiguredBackgroundAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioBackgroundAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioCronResolver.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleController.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleDtos.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleException.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleInvalidation.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulePoller.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleRepository.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledDispatchAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulingHealthIndicator.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulingProperties.java",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioCronResolverTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingIsolationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingSchemaIT.java",
+    "backend/src/main/resources/db/migration/V26__studio_scheduling.sql"
+  ],
+  "modifiedFeatureSeams": [
+    "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionSnapshotDto.java",
+    "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java",
+    "backend/src/main/java/com/citi/put/checks/studio/entity/StudioDispatchLedger.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java"
+  ],
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/ConfiguredBackgroundAuthorization.java": "c6df57434e9f0889bd311cc6e08cca79a821deddb78a46c9d8c2e2f4b7421926",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioBackgroundAuthorization.java": "84c2b6203236e7aa6c887fa6eb5978cc32313ec06859988b92ca9d575185bc61",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioCronResolver.java": "6c509479b05728a2fb1d12f294155e400002e68c1f3be014d809c7ea4d210062",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleController.java": "16740822336d9e02e46d1df585953067f0a06e663cd66bc987c06f9a15e0c6d5",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleDtos.java": "d79f6428f1f9dfe45fccf46e55f262a99e10d847bff13b9e385ddafac0dde065",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleException.java": "9f084febfab66fc0ba6626713459b99ff54ffa9b95a6ed1db85bfdbd491ccd63",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleInvalidation.java": "44c6ac4b299944d40b585b0f3b100a4c1a04a9ba6d00f93fc1499573b69a60f1",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulePoller.java": "c70680908d9485118595eb55bd0230b20ad08dcf72057b7ac892e6da6cf13d57",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java": "cf5f9a3261867aa22a48fa560e204d43ac87df4d641435014156ed0c56dfbcf7",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleRepository.java": "4cb6d01d3616c352c1e261fe5c1fc0f08edef10304917df6f07fa8e69ab42b2f",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleService.java": "75ca902e3b29bdce422728a191ebf60749903508dd6cd16498851f0886de59d7",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledDispatchAuthorization.java": "b95edd3d9cb94d6a668fc13644a86d1114eeda4f6d32eb490c4306ebd43cc957",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulingHealthIndicator.java": "b5a524e3cd1249079146631adcbee8cd8d43ee33d0fb2d8b4dd91d7d10c74e3a",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulingProperties.java": "7577ce9e142d579a7e3f9a10072a0d347a3c5c2f463beff56bf655b6fd09f4fe",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioService.java": "f5655202d5e6e626bd3e36ac008163db50309f63e8d4d5f5e1b5aaa381499c97",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java": "ac5ab85f3b989ae4cd1d8e6525b063d2b6994fd33708d2827514b2f0badd82e0",
+    "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java": "9b57e332bc80e7ba2e241a79b6d739e8397c568ff351a0a37bdc5cb49d46cdac",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionSnapshotDto.java": "13a0bdfaa3712bcabbab3a9d100ac525540f63861c2066d83947369a5adab016",
+    "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java": "b469e3dd18cc28614f9eb5265314d7e964b4643b3dc10a6bb09b1dedf011900d",
+    "backend/src/main/java/com/citi/put/checks/studio/entity/StudioDispatchLedger.java": "149fe8a8972d9ddbb6de7f13adfac0945d1d2f186d6c7c8756271f63df7fe44d",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java": "df0fe385a51159778ad95d8a71a6ff90ecdbde539f6db43075185ba88aef9104",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java": "dffd129663d5644798045549941692118374f553a1fee9b9d8552fe88dd08c02",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java": "3da9f5b25e98f28097c587488a408abb149deee2496a9cb440d9710fa27111b0",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioCronResolverTest.java": "992ab5407b00fa2a4e84c378933b93d40ca886ba9306e1bfbbb3fd086c349037",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java": "bf254400c1af11224971bcb7a0f62eaa7c0147d8198741c1040f9a8105da8c20",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingIsolationTest.java": "31e32aeaa03705d5a52c516b17d5bdec3d26ac91c2a50bc7d351a02c1d1e6e9f",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingSchemaIT.java": "091a35cd0e0320ed9beb774099d82c0390ebe1f289dec5aa9b7f685c0c707240",
+    "backend/src/main/resources/db/migration/V26__studio_scheduling.sql": "42593d19e7d2b5febe8bca4b2cbf6bc6088bd24e2b4355e9c426eb52a0a5fb4f"
+  },
+  "preservation": "Existing dirty baseline retained; formatter targeted scheduling-owned/new/modified feature files only; no broad spotlessApply or git operations",
+  "releaseBoundary": "Scheduling producer default-off. Local/test allowlists are fixture policy, not approved production grants. No whole-repository green or production approval claim."
+}

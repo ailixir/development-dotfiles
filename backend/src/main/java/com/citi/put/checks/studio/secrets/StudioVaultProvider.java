@@ -2,6 +2,7 @@ package com.citi.put.checks.studio.secrets;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * The one seam a resolved variable or secret value comes through (§9.2, AC-9).
@@ -28,21 +29,67 @@ public interface StudioVaultProvider {
   String name();
 
   /**
-   * Reads one declared reference for one CSI and environment.
+   * The one secret-name rule (D3): the endpoint that saves a secret, the resolver that reads one
+   * and the provider that lists them all apply it.
    *
-   * <p>The CSI and the environment are the execution's own immutable values (§8.1, §9.1 —
+   * <p>It deliberately equals the capture group of the {@code <secret ID>} step token, so a name
+   * that can be saved is a name a step can reference, and a stored key that fails it is one no step
+   * can reach.
+   */
+  Pattern SECRET_NAME = Pattern.compile("^[A-Za-z0-9_.-]{1,64}$");
+
+  /**
+   * Whether {@code name} is a valid secret name: {@link #SECRET_NAME}, and not {@code .} or {@code
+   * ..}, which are not path-safe Vault segments.
+   */
+  static boolean isValidSecretName(String name) {
+    return name != null
+        && SECRET_NAME.matcher(name).matches()
+        && !".".equals(name)
+        && !"..".equals(name);
+  }
+
+  /**
+   * Reads one declared reference for one test scope.
+   *
+   * <p>The scope is (the execution's own CSI, the environment snapshotted at acceptance, the test
+   * id). The CSI and the environment are the execution's own immutable values (§8.1, §9.1 —
    * <em>"Historical access uses execution CSI, not a mutable parent lookup"</em>), so moving or
    * editing the parent draft between acceptance and dispatch changes nothing here.
    *
    * @param kind whether this is a {@code vars.get} name or a {@code vars.secret} id
-   * @param csiId the execution's own CSI
-   * @param environment the environment snapshotted at acceptance
+   * @param scope where the test's references live
    * @param referenceName the declared name
    * @return the value and its nonsecret version identifier, or empty when there is no such
-   *     reference for this CSI and environment
+   *     reference for this scope
    */
-  Optional<VaultEntry> read(
-      ReferenceKind kind, String csiId, String environment, String referenceName);
+  Optional<VaultEntry> read(ReferenceKind kind, VaultScope scope, String referenceName);
+
+  /**
+   * Stores a new secret for one test scope, create-only.
+   *
+   * <p>A name that already exists is refused and the stored entry is left untouched. The caller
+   * owns {@code value} and erases it; a provider keeps no reference to it after returning.
+   *
+   * @param scope the test the secret belongs to
+   * @param name a name that passes {@link #isValidSecretName}
+   * @param value the secret value
+   * @param origins the normalized origins the secret may be filled on ({@link SecretOrigins})
+   * @return the stored entry's nonsecret version identifier
+   * @throws SecretAlreadyExistsException when the name is already stored for this scope
+   * @throws VaultNotConfiguredException when no vault is connected
+   * @throws VaultProviderUnavailableException when the vault could not be reached or refused
+   */
+  String create(VaultScope scope, String name, char[] value, List<String> origins);
+
+  /**
+   * The names of the secrets stored for one test scope. Names only, never a value.
+   *
+   * @return the valid names ({@link #isValidSecretName}), sorted; empty when none are stored
+   * @throws VaultNotConfiguredException when no vault is connected
+   * @throws VaultProviderUnavailableException when the vault could not be reached or refused
+   */
+  List<String> listSecretNames(VaultScope scope);
 
   /** Which of the two declaration arrays a name came from. */
   enum ReferenceKind {

@@ -1,0 +1,63 @@
+schema: 1
+story: '10.46'
+story_title: 'UI Studio Tests & Runs: premium, production-ready lists'
+gate: CONCERNS
+status_reason: 'AC1-5 and AC7 are met and verified; three defects found in review were fixed with regression tests. Remaining items are low/medium (story bookkeeping, per-frame SSE name lookup, mock/contract nits, B.3 consolidation not done); AC6 deferred by user direction.'
+reviewer: 'Quinn'
+reviewed_revision: 'commit:13ec11d1c + uncommitted working tree (2026-10-05)'
+updated: '2026-10-05T19:45:00Z'
+scope_note: 'Accessibility and keyboard shortcuts out of scope (user direction); AC6 deferred, not assessed.'
+top_issues:
+  - id: 'DOC-001'
+    severity: medium
+    finding: 'Story bookkeeping incomplete: Track A and B subtasks unchecked, Dev Agent Record File List omits Tracks A and B, status left at Ready (never InProgress/InReview).'
+    suggested_action: '@dev ticks A.1-A.7 and B.1-B.5 (except B.3 consolidation) and adds the A/B files to the File List.'
+  - id: 'PERF-001'
+    severity: low
+    finding: 'SnapshotBroadcaster.read (sse/SnapshotBroadcaster.java:105) runs one extra name query (findVisibleName) per broadcast frame per watched execution.'
+    suggested_action: 'Resolve the name once per subscription, or cache it per executionId for the stream lifetime.'
+  - id: 'TEST-001'
+    severity: low
+    finding: 'No test asserts testName on SSE frames (SnapshotBroadcaster/ExecutionEventsController); only GET list and single read are covered (StudioListQueryIT).'
+    suggested_action: 'Add one assertion to an existing SSE IT that the first frame carries testName.'
+  - id: 'REQ-001'
+    severity: low
+    finding: 'B.3 not done: duplicate relative-time/duration formatters remain in components/home/TriageDrawer.tsx, components/home/AttentionPanel.tsx and pages/ActivityPage/ActivityPage.tsx.'
+    suggested_action: 'Move them to utils/time in a follow-up, or record the descope in the story.'
+  - id: 'MNT-001'
+    severity: low
+    finding: 'MSW vs backend: mock GET /executions/:id answers 400 for an unknown id (handlers.ts:600), backend 404, so the standalone drawer shows "could not be loaded" instead of "Run not found". Mock lastRun/status filters are case-sensitive (handlers.ts:288, 619); backend and openapi text are case-insensitive, while openapi also declares an uppercase enum.'
+    suggested_action: 'Return 404 from the mock, uppercase the mock filter values, and drop "Case-insensitive" or the enum in openapi.yaml.'
+  - id: 'MNT-002'
+    severity: low
+    finding: 'TestRow.tsx:111 always shows "May describe an earlier saved version" under every last run, because TestDto has no last-run revision to compare against.'
+    suggested_action: 'Show it only when a last-run revision id exists and differs (needs an API field). Until then, consider a tooltip instead of a visible line.'
+fixed_during_review:
+  - id: 'REL-F1'
+    finding: 'Runs page past-the-end fallback and CSI-change reset pushed history entries, so Back returned to the empty page, which redirected again (back-button trap, AC1).'
+    fix: 'useUrlListState.setPage(page, { replace }) added; StudioRunsPage uses replace for both corrective moves.'
+    test: 'StudioRunsPage.test.tsx "falls back from a page past the end without leaving a history entry Back would bounce on (QA 10.46)". Fails without the fix.'
+  - id: 'REL-F2'
+    finding: 'The MSW durationMs sort ordered null-duration runs by id only. The backend orders them acceptedAt desc, then id (as openapi documents).'
+    fix: 'sortBy in services/mocks/studio/handlers.ts takes an optional order for rows where both keys are null; the executions route passes acceptedAt desc.'
+    test: 'studioContract.test.ts "executions: unfinished runs order newest accepted first in both duration directions (QA 10.46)". Fails without the fix.'
+  - id: 'REL-F3'
+    finding: 'Found by the orchestrator in the browser check: the debounced search used a stale update closure, so a sort or filter changed during the 300 ms debounce was overwritten.'
+    fix: 'updateRef in hooks/useUrlListState.ts (fixed by the orchestrator; not re-edited by QA).'
+    test: 'useUrlListState.test.tsx "a pending search keeps a sort or filter changed while it was debouncing"'
+evidence:
+  fe_vitest: 'npx vitest run src/pages/StudioTestsPage src/pages/StudioRunsPage src/components/studio src/services/mocks/studio src/utils/time src/hooks -> Test Files 1 failed | 44 passed (45); Tests 3 failed | 682 passed (685). The only failures are 3 pre-existing InferenceStudio tests, not in this story.'
+  fe_wcag: 'studioWcagAudit -> 1 failed | 6 passed (7). surface 7 ChecksStudioPage is pre-existing and out of scope.'
+  type_check: 'npm run type-check -> exit 0'
+  lint: 'npm run lint -- --quiet -> exit 0'
+  be_tests: "./gradlew test --tests '*StudioListQuery*' -> BUILD SUCCESSFUL; StudioListQueryControllerTest 19/19, StudioListQueryIT 19/19"
+  be_check: 'gradlew check not rerun by QA (dev reported 1473 tests, 0 failures)'
+  coderabbit: 'skipped: CLI not installed (Epic 10 standing ruling)'
+review_notes:
+  sql_safety: 'Both custom repositories build JPQL from fixed fragments. Sort comes from enums, every value is a bound parameter, and LIKE escapes %, _ and ! with ESCAPE.'
+  csi_scope: 'readableCsiIds is applied in the same statement before paging, csiId only adds an equality, and an empty scope returns an empty page. Not widened.'
+  n_plus_1: 'List testName is one batch query per page (findNamesByIdIn). Single read adds one query. SSE adds one per frame (PERF-001).'
+  fe_races: 'Tests: AbortController plus sequence guard. Runs: abort-previous plus sequence; silent polls do not dim the list or surface errors. Merge by revision; dedupe by id in studioApi.'
+  polling: 'Polls only while a visible row is PENDING or RUNNING and no error. Paused on visibilitychange hidden, with an immediate read on return. Cleared on unmount.'
+  drawer: 'The subscription is keyed by executionId, closed on unmount or run change, and opened only for non-terminal runs. Off-page runs are loaded through getExecution with a cancel guard.'
+waiver: { active: false }

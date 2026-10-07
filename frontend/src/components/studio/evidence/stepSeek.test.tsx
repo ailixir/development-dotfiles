@@ -45,6 +45,12 @@ function video(): HTMLVideoElement {
   return screen.getByTestId('video-evidence-player') as HTMLVideoElement;
 }
 
+/** Each step has one recording action; failed steps use the failure-specific label. */
+function stepSeekControl(stepIndex: number): HTMLElement {
+  return screen.queryByTestId(`step-seek-${stepIndex}`)
+    ?? screen.getByTestId(`step-watch-failure-${stepIndex}`);
+}
+
 /** A FAILED run with an AVAILABLE recording, a FAIL, and a SKIPPED step after it. */
 const failedWithSkipped = mockExecutions.find(
   (execution) =>
@@ -63,7 +69,7 @@ describe('AC-8: a step seek sets currentTime to offsetMs / 1000 and nothing else
 
     render(<SeekHarness snapshot={TERMINAL_EVIDENCE_SETTLED} />);
     video().currentTime = SENTINEL_SECONDS;
-    await userEvent.click(screen.getByTestId(`step-seek-${first.stepIndex}`));
+    await userEvent.click(stepSeekControl(first.stepIndex));
     expect(video().currentTime).toBe(first.offsetMs! / 1000);
   });
 
@@ -72,7 +78,7 @@ describe('AC-8: a step seek sets currentTime to offsetMs / 1000 and nothing else
     const attempted = TERMINAL_EVIDENCE_SETTLED.stepResults.filter((step) => step.offsetMs !== null);
     expect(attempted.length).toBeGreaterThan(1);
     for (const step of [...attempted].reverse()) {
-      await userEvent.click(screen.getByTestId(`step-seek-${step.stepIndex}`));
+      await userEvent.click(stepSeekControl(step.stepIndex));
       expect(video().currentTime).toBe(step.offsetMs! / 1000);
     }
   });
@@ -81,7 +87,7 @@ describe('AC-8: a step seek sets currentTime to offsetMs / 1000 and nothing else
     const onSeek = vi.fn();
     render(<SeekHarness snapshot={TERMINAL_EVIDENCE_SETTLED} onSeek={onSeek} />);
     const step = TERMINAL_EVIDENCE_SETTLED.stepResults[1];
-    await userEvent.click(screen.getByTestId(`step-seek-${step.stepIndex}`));
+    await userEvent.click(stepSeekControl(step.stepIndex));
     expect(onSeek).toHaveBeenCalledTimes(1);
     expect(onSeek).toHaveBeenCalledWith(step.offsetMs);
   });
@@ -99,7 +105,7 @@ describe('AC-9: a step with a null offsetMs offers no working seek', () => {
     render(<SeekHarness snapshot={failedWithSkipped} onSeek={onSeek} />);
     video().currentTime = SENTINEL_SECONDS;
 
-    const control = screen.getByTestId(`step-seek-${skipped.stepIndex}`);
+    const control = stepSeekControl(skipped.stepIndex);
     expect(control).toBeDisabled();
     expect(control.getAttribute('aria-label')).toContain(NOT_ATTEMPTED);
 
@@ -118,7 +124,7 @@ describe('AC-9: a step with a null offsetMs offers no working seek', () => {
     )!;
     render(<ExecutionProgressView snapshot={running} onSeekStep={() => undefined} />);
     for (const step of running.stepResults.filter((candidate) => candidate.offsetMs === null)) {
-      expect(screen.getByTestId(`step-seek-${step.stepIndex}`)).toBeDisabled();
+      expect(stepSeekControl(step.stepIndex)).toBeDisabled();
     }
   });
 });
@@ -136,7 +142,7 @@ describe('AC-10: a wait or assertion step seeks to its recorded start', () => {
     expect(assertion.durationMs).not.toBe(assertion.offsetMs);
 
     render(<SeekHarness snapshot={passedExecution} />);
-    await userEvent.click(screen.getByTestId(`step-seek-${assertion.stepIndex}`));
+    await userEvent.click(stepSeekControl(assertion.stepIndex));
     expect(video().currentTime).toBe(assertion.offsetMs! / 1000);
     expect(video().currentTime).not.toBe((assertion.offsetMs! + assertion.durationMs!) / 1000);
     expect(video().currentTime).not.toBe(assertion.durationMs! / 1000);
@@ -147,7 +153,7 @@ describe('AC-20: seek controls are keyboard-operable and distinctly named per st
   it('Tab reaches an attempted step’s control, and Enter and Space both seek', async () => {
     render(<SeekHarness snapshot={TERMINAL_EVIDENCE_SETTLED} />);
     const [first, second] = TERMINAL_EVIDENCE_SETTLED.stepResults;
-    const target = screen.getByTestId(`step-seek-${second.stepIndex}`);
+    const target = stepSeekControl(second.stepIndex);
 
     let reached = false;
     for (let presses = 0; presses < 20 && !reached; presses += 1) {
@@ -159,7 +165,7 @@ describe('AC-20: seek controls are keyboard-operable and distinctly named per st
     await userEvent.keyboard('{Enter}');
     expect(video().currentTime).toBe(second.offsetMs! / 1000);
 
-    const firstControl = screen.getByTestId(`step-seek-${first.stepIndex}`);
+    const firstControl = stepSeekControl(first.stepIndex);
     firstControl.focus();
     await userEvent.keyboard(' ');
     expect(video().currentTime).toBe(first.offsetMs! / 1000);
@@ -168,7 +174,7 @@ describe('AC-20: seek controls are keyboard-operable and distinctly named per st
   it('a disabled control is out of the tab order', async () => {
     render(<SeekHarness snapshot={failedWithSkipped} />);
     const skipped = failedWithSkipped.stepResults.find((step) => step.offsetMs === null)!;
-    const control = screen.getByTestId(`step-seek-${skipped.stepIndex}`);
+    const control = stepSeekControl(skipped.stepIndex);
     for (let presses = 0; presses < 20; presses += 1) {
       await userEvent.tab();
       expect(document.activeElement).not.toBe(control);
@@ -178,7 +184,7 @@ describe('AC-20: seek controls are keyboard-operable and distinctly named per st
   it('every step’s control has its own accessible name', () => {
     render(<SeekHarness snapshot={failedWithSkipped} />);
     const names = failedWithSkipped.stepResults.map(
-      (step) => screen.getByTestId(`step-seek-${step.stepIndex}`).getAttribute('aria-label') ?? '',
+      (step) => stepSeekControl(step.stepIndex).getAttribute('aria-label') ?? '',
     );
     expect(names.every((name) => name.length > 0)).toBe(true);
     expect(new Set(names).size).toBe(names.length);

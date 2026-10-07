@@ -13,9 +13,8 @@ import com.citi.put.checks.scheduling.entity.Schedule;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,14 +25,13 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -45,7 +43,7 @@ import org.springframework.transaction.support.TransactionTemplate;
     name = "checks.scheduling.dispatcher-enabled",
     havingValue = "true",
     matchIfMissing = true)
-public class CronDispatcher implements SmartLifecycle {
+public class CronDispatcher implements SmartLifecycle, ScheduledTarget {
 
   private static final Logger LOG = LoggerFactory.getLogger(CronDispatcher.class);
 
@@ -67,6 +65,39 @@ public class CronDispatcher implements SmartLifecycle {
   private final AtomicInteger inFlightCount = new AtomicInteger(0);
   private final AtomicInteger dueGauge = new AtomicInteger(0);
   private volatile boolean running = true;
+  private CronRecurrence recurrence = new CronRecurrence();
+
+  @Value("${checks.scheduling.poll-interval-ms:10000}")
+  private String pollIntervalMs = "10000";
+
+  @Value("${checks.scheduling.initial-delay-ms:5000}")
+  private String initialDelayMs = "5000";
+
+  @Autowired
+  public void initializeRecurrence(CronRecurrence value) {
+    recurrence = value;
+  }
+
+  @Override
+  public String targetId() {
+    return "checks";
+  }
+
+  @Override
+  public boolean enabled() {
+    return running;
+  }
+
+  @Override
+  public Duration pollInterval() {
+    return SchedulingDelays.positive(pollIntervalMs);
+  }
+
+  @Override
+  public Duration initialDelay() {
+    Duration delay = SchedulingDelays.parse(initialDelayMs);
+    return delay.isNegative() ? Duration.ZERO : delay;
+  }
 
   public CronDispatcher(
       ScheduleRepository scheduleRepository,
@@ -137,9 +168,6 @@ public class CronDispatcher implements SmartLifecycle {
     return Integer.MAX_VALUE - 100;
   }
 
-  @Scheduled(
-      fixedDelayString = "${checks.scheduling.poll-interval-ms:10000}",
-      initialDelayString = "${checks.scheduling.initial-delay-ms:5000}")
   @SchedulerLock(name = "cronDispatcher", lockAtMostFor = "2m", lockAtLeastFor = "10s")
   public void pollAndDispatch() {
     if (!running) {
@@ -329,20 +357,20 @@ public class CronDispatcher implements SmartLifecycle {
     }
   }
 
-  // Spring CronExpression.next() handles DST correctly: spring-forward skips the gap, fall-back
-  // never duplicates.
+  // Preserve ordinary stored-base advancement and Spring's actual instant-sequence DST policy.
   private void advanceNextExecution(Schedule schedule) {
     if (schedule.getCronExpression() == null) {
       return;
     }
-    CronExpression expr = CronExpression.parse(schedule.getCronExpression());
-    ZoneId zone = ZoneId.of(schedule.getTimezone());
-    ZonedDateTime base =
-        schedule.getNextExecutionAt() != null
-            ? schedule.getNextExecutionAt().atZone(zone)
-            : ZonedDateTime.now(zone);
-    ZonedDateTime next = expr.next(base);
-    schedule.setNextExecutionAt(next != null ? next.toInstant() : null);
+    Instant base =
+        schedule.getNextExecutionAt() != null ? schedule.getNextExecutionAt() : Instant.now();
+    var next =
+        recurrence.next(
+            schedule.getCronExpression(),
+            recurrence.zone(schedule.getTimezone(), CronRecurrence.ZonePolicy.ANY_ZONE_ID),
+            base,
+            CronRecurrence.Overlap.INSTANT_SEQUENCE);
+    schedule.setNextExecutionAt(next != null ? next.scheduledAt() : null);
   }
 
   public int getInFlightCount() {

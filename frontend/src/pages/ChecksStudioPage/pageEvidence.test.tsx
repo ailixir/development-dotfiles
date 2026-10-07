@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
@@ -69,7 +69,11 @@ beforeAll(() => {
   // The store's import-time bootstrap is settled in-process by the shared setup (ENV-2, see
   // `src/test/setup.ts`), so this file no longer waits for it here.
 });
+// No per-action timer: interaction speed is not under test, and each delayed action cost a
+// macrotask, which pushed these full-page runs past the 5s default under full-suite load (VAL-032).
+let user: ReturnType<typeof userEvent.setup>;
 beforeEach(() => {
+  user = userEvent.setup({ delay: null });
   window.localStorage.clear();
   studioMockServer.use(...bootstrapHandlers);
   store.dispatch(
@@ -106,7 +110,7 @@ async function runWithFrames(frames: readonly ExecutionSnapshot[]) {
   );
   const control = await screen.findByRole('button', { name: 'Run Test' });
   await waitFor(() => expect(control).not.toBeDisabled());
-  await userEvent.click(control);
+  await user.click(control);
 }
 
 describe('AC-21: the page has exactly one playback path', () => {
@@ -120,13 +124,15 @@ describe('AC-21: the page has exactly one playback path', () => {
       </Provider>,
     );
     await screen.findByRole('button', { name: 'Run Test' });
-    expect(screen.getByRole('tab', { name: 'Logs' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Proof', 'Logs', 'Code']);
+    expect(screen.getByRole('tab', { name: 'Proof' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.queryByRole('tab', { name: 'Run' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Change…' })).toBeNull();
     // The legacy region rendered a fallback player whenever the store held a source.
     expect(document.querySelectorAll('video')).toHaveLength(0);
     expect(screen.getByTestId('video-evidence-empty')).toBeInTheDocument();
-  });
+    // A full page render with no interaction to trim; bounded like the run tests below.
+  }, 15000);
 
   it('an AVAILABLE snapshot mounts exactly one <video>, and step index 1 seeks to 1.51, not 10', async () => {
     const step = TERMINAL_EVIDENCE_SETTLED.stepResults[1];
@@ -135,7 +141,10 @@ describe('AC-21: the page has exactly one playback path', () => {
     expect(step.offsetMs).not.toBe(step.stepIndex * 10 * 1000);
 
     await runWithFrames([TERMINAL_EVIDENCE_SETTLED]);
-    const seek = await screen.findByTestId('step-seek-1');
+    const seek = await screen.findByTestId('step-watch-failure-1');
+    const proof = screen.getByRole('tabpanel', { name: 'Proof' });
+    expect(within(proof).getByTestId('execution-progress')).toBeInTheDocument();
+    expect(within(proof).getByTestId('video-evidence-player')).toBeInTheDocument();
     expect(screen.getByTestId('execution-time')).toHaveTextContent(
       `Time ${(TERMINAL_EVIDENCE_SETTLED.durationMs! / 1000).toFixed(1)}s`,
     );
@@ -147,20 +156,48 @@ describe('AC-21: the page has exactly one playback path', () => {
     );
     expect(videos[0].getAttribute('src')).not.toMatch(/\.mp4/u);
 
-    await userEvent.click(seek);
+    await user.click(seek);
     expect((document.querySelector('video') as HTMLVideoElement).currentTime).toBe(1.51);
     // The seek also brings the player's tab forward.
+    expect(screen.getByRole('tab', { name: 'Proof' })).toHaveAttribute('aria-selected', 'true');
+
+    await user.click(screen.getByRole('tab', { name: 'Logs' }));
+    const logs = screen.getByRole('tabpanel', { name: 'Logs' });
+    expect(within(logs).getByText('Live execution logs')).toBeInTheDocument();
+    expect(within(logs).queryByTestId('execution-progress')).toBeNull();
+    expect(within(logs).queryByTestId('execution-time')).toBeNull();
+    expect(within(logs).queryByTestId('video-evidence-player')).toBeNull();
+    expect(within(logs).queryByRole('button', { name: /recording/i })).toBeNull();
+    expect(within(logs).getByText(TERMINAL_EVIDENCE_SETTLED.logs[0].message)).toBeInTheDocument();
+  }, 15000);
+
+  it('VAL-025: a failed step links to the recording at that step, on the Proof tab', async () => {
+    const failed: ExecutionSnapshot = {
+      ...TERMINAL_EVIDENCE_SETTLED,
+      status: 'FAILED',
+      stepResults: TERMINAL_EVIDENCE_SETTLED.stepResults.map((step) =>
+        step.stepIndex === 1 ? { ...step, status: 'FAIL', message: 'fill failed: no element matched.' } : step,
+      ),
+    };
+    expect(failed.video.status).toBe('AVAILABLE');
+
+    await runWithFrames([failed]);
+    const watch = await screen.findByTestId('step-watch-failure-1');
+    await user.click(watch);
+
+    expect((document.querySelector('video') as HTMLVideoElement).currentTime).toBe(1.51);
     expect(screen.getByRole('tab', { name: 'Proof' })).toHaveAttribute('aria-selected', 'true');
   }, 15000);
 
   it('a terminal run whose evidence is still PROCESSING mounts no <video> and offers no seek', async () => {
     await runWithFrames([TERMINAL_EVIDENCE_PROCESSING]);
     await screen.findByText(executionStatusLabel(TERMINAL_EVIDENCE_PROCESSING.status), { selector: '[data-testid="execution-status"] *' });
-    await userEvent.click(screen.getByRole('tab', { name: 'Proof' }));
+    await user.click(screen.getByRole('tab', { name: 'Proof' }));
     await screen.findByRole('region', { name: VIDEO_EVIDENCE_NARRATIVES.PROCESSING.title });
     expect(document.querySelectorAll('video')).toHaveLength(0);
     expect(screen.queryByTestId('step-seek-1')).toBeNull();
-  });
+    // A full page render plus a scripted run, the same flow its AVAILABLE sibling bounds at 15s.
+  }, 15000);
 
   it('the page source no longer carries the retired player, its fallback or its store source', () => {
     /*

@@ -220,6 +220,50 @@ class DiagnosticsExposureEscalationTest {
     assertThat(listedStale.path("compileError").path("code").asText()).isEqualTo("GATEWAY_TIMEOUT");
   }
 
+  /**
+   * VAL-033 — a refusal message that carries a known credential shape reaches the route redacted,
+   * because {@code DiagnosticsBounder} redacts before it bounds and the route returns what was
+   * stored.
+   */
+  @Test
+  void aRefusalMessageIsReturnedByTheRouteWithItsCredentialRedacted() throws IOException {
+    String awsKey = "AKIA" + "ABCDEFGHIJKLMNOP";
+    String bearer = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.SflKxwRJSMeKKF2QT4fwpMeJf36P";
+    ValidationOutcome refusal =
+        ValidationOutcome.verdict(
+            false,
+            "2.0.0",
+            List.of(),
+            List.of(
+                new ValidationOutcome.StepVerdict(
+                    1,
+                    false,
+                    List.of(
+                        new RunnerDiagnostic(
+                            "UNSUPPORTED_CAPABILITY",
+                            1,
+                            "Sign in with key " + awsKey + " and token " + bearer,
+                            null,
+                            null)))));
+    CompileRequest request = states.beginCompile(testId);
+    states.publishInvalid(testId, request, bounder.bound(refusal, 2, 1, false));
+
+    String body = getTest(testId).getBody();
+    assertThat(body).doesNotContain(awsKey).doesNotContain(bearer);
+    JsonNode message =
+        MAPPER
+            .readTree(body)
+            .path("compileDiagnostics")
+            .path("steps")
+            .get(1)
+            .path("diagnostics")
+            .get(0)
+            .path("message");
+    assertThat(message.asText())
+        .isEqualTo(
+            "Sign in with key [REDACTED:AWS_ACCESS_KEY_ID] and token [REDACTED:JSON_WEB_TOKEN]");
+  }
+
   // ── helpers ──────────────────────────────────────────────────────────────
 
   private void assertExactlyOne(ResponseEntity<String> response, String expected)

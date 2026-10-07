@@ -25,6 +25,10 @@ import com.citi.put.checks.studio.internal.dto.RunnerEvidence;
 import com.citi.put.checks.studio.internal.dto.RunnerLogEntry;
 import com.citi.put.checks.studio.internal.dto.RunnerReport;
 import com.citi.put.checks.studio.internal.dto.RunnerStepState;
+import com.citi.put.checks.studio.secrets.CreateStudioSecretRequest;
+import com.citi.put.checks.studio.secrets.StudioSecretDto;
+import com.citi.put.checks.studio.secrets.StudioSecretListDto;
+import com.citi.put.checks.studio.secrets.StudioSecretNameDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -321,30 +325,43 @@ class StudioContractTest {
     expected.put("POST /executions/{id}/cancel", "202,400,401,403,409");
     // ADR-002 §29.4: the owning runner's control read.
     expected.put("GET /internal/studio/executions/{id}/control", "200,400,401,403,404");
-    expected.put("GET /executions", "200,401");
+    // Story 10.46: the list routes validate their new search/filter/sort parameters (400).
+    expected.put("GET /executions", "200,400,401");
     expected.put("GET /executions/{id}", "200,400,401,403");
     expected.put("GET /executions/{id}/events", "200,401,403");
     expected.put("GET /executions/{id}/video", "200,206,401,403,404,410,416,503");
     expected.put("GET /health", "200,401,403");
     expected.put("GET /ready", "200,401,403,503");
-    expected.put("GET /tests", "200,401");
+    expected.put("GET /tests", "200,400,401");
     expected.put("GET /tests/{id}", "200,400,401,403");
+    // ADR-002 §32 (studio-vault-secrets): a test's Vault-backed secrets, names only on read.
+    expected.put("GET /tests/{id}/secrets", "200,400,401,403,503");
     expected.put("POST /internal/studio/executions/{id}/admission", "200,400,401,403,409");
     expected.put("POST /internal/studio/executions/{id}/progress", "200,400,401,403,409,413");
     expected.put("POST /tests", "201,400,401,403");
     expected.put("POST /tests/{id}/compile", "202,400,401,403,409");
     expected.put("POST /tests/{id}/confirm-compile", "200,400,401,403,409");
     expected.put("POST /tests/{id}/execute", "202,400,401,403,409,429,503");
+    expected.put("POST /tests/{id}/secrets", "201,400,401,403,409,503");
     expected.put("POST /v1/runs", "202,400,401,403,409,429,503");
     expected.put("POST /v1/validate", "200,400,401,403,413,503");
     expected.put("PUT /tests/{id}", "200,400,401,403,409");
+    // STUDIO-SCHED-001 adds these eight operations; the prior 23 status sets stay pinned.
+    expected.put("GET /tests/{id}/schedule", "200,401,403");
+    expected.put("GET /tests/{id}/schedule/capabilities", "200,400,401,403");
+    expected.put("GET /tests/{id}/schedule/occurrences", "200,400,401,403");
+    expected.put("POST /tests/{id}/schedule", "201,400,401,403,409,503");
+    expected.put("PUT /tests/{id}/schedule", "200,400,401,403,409,503");
+    expected.put("PATCH /tests/{id}/schedule/enabled", "200,400,401,403,409,503");
+    expected.put("DELETE /tests/{id}/schedule", "204,400,401,403,409,503");
+    expected.put("POST /schedules/preview", "200,400,401");
 
     Map<String, String> declared = declaredStatusSets();
 
     // The total, asserted separately. Without it, both comparisons below could agree on a set that
     // had silently shrunk to nothing on both sides at once.
-    assertThat(declared).as("the document declares a different number of operations").hasSize(21);
-    assertThat(expected).hasSize(21);
+    assertThat(declared).as("the document declares a different number of operations").hasSize(31);
+    assertThat(expected).hasSize(31);
 
     assertThat(declared.keySet())
         .as("an operation the document declares that this copy does not name")
@@ -354,15 +371,38 @@ class StudioContractTest {
         .containsExactlyElementsOf(declared.keySet());
     assertThat(declared)
         .as(
-            "an operation's response status set moved. The ONLY movement story 10.31 authorizes "
-                + "is GET /executions/{id}/video gaining 401, 403 and 503 by ADR-002 §24's ruling "
-                + "(ESC-1, ESC-2). Every other row is unchanged, and a row that moves without a "
-                + "ruling is the drift this copy exists to catch")
+            "an operation's response status set moved. The ONLY movements authorized are story "
+                + "10.31's GET /executions/{id}/video gaining 401, 403 and 503 by ADR-002 §24's "
+                + "ruling (ESC-1, ESC-2), and studio-vault-secrets adding GET and POST "
+                + "/tests/{id}/secrets by ADR-002 §32's ruling, and story 10.46's GET /tests and "
+                + "GET /executions gaining 400 for their validated list parameters, and "
+                + "STUDIO-SCHED-001's eight public scheduling operations. Every earlier "
+                + "row remains pinned, and a "
+                + "row that moves without a ruling is the drift this copy exists to catch")
         .isEqualTo(expected);
 
     assertThat(pendingOperations())
         .as("story 10.15 removed the last x-not-yet-implemented; none came back here")
         .isEmpty();
+    for (String operation :
+        List.of(
+            "GET /tests/{id}/schedule",
+            "GET /tests/{id}/schedule/capabilities",
+            "GET /tests/{id}/schedule/occurrences",
+            "POST /tests/{id}/schedule",
+            "PUT /tests/{id}/schedule",
+            "PATCH /tests/{id}/schedule/enabled",
+            "DELETE /tests/{id}/schedule",
+            "POST /schedules/preview")) {
+      String[] route = operation.split(" ", 2);
+      assertThat(operationFlag(route[1], route[0].toLowerCase(Locale.ROOT), "x-implemented-by"))
+          .as("%s must retain its reviewed scheduling implementation attribution", operation)
+          .isEqualTo("STUDIO-SCHED-001");
+      assertThat(
+              operationFlag(route[1], route[0].toLowerCase(Locale.ROOT), "x-not-yet-implemented"))
+          .as("%s is implemented rather than a pending contract promise", operation)
+          .isNull();
+    }
   }
 
   /** Every declared operation, keyed {@code METHOD /path}, valued as its sorted status set. */
@@ -409,6 +449,11 @@ class StudioContractTest {
     assertSchemaMatchesRecord("CompileDiagnostic", CompileDiagnosticDto.class);
     assertSchemaMatchesRecord("CompileStepDiagnostics", CompileStepDiagnosticsDto.class);
     assertSchemaMatchesRecord("CompileDiagnostics", CompileDiagnosticsDto.class);
+    // ADR-002 §32 (studio-vault-secrets).
+    assertSchemaMatchesRecord("StudioSecretName", StudioSecretNameDto.class);
+    assertSchemaMatchesRecord("StudioSecretList", StudioSecretListDto.class);
+    assertSchemaMatchesRecord("StudioSecret", StudioSecretDto.class);
+    assertSchemaMatchesRecord("CreateStudioSecretRequest", CreateStudioSecretRequest.class);
   }
 
   /**

@@ -3,6 +3,11 @@ import studioApi from '@/services/api/studioApi';
 import type { CompileDiagnostics, CompileError, TestDto } from '@/types/studio/studioTypes';
 import { runActionFor, runAvailableFor, type RunAction } from './runEnablement';
 import { executeRefusalFor, type ExecuteRefusalNarrative } from './executeRefusals';
+import {
+  COMPILE_WATCH_WINDOW_MS,
+  compilePollSchedule,
+  RUN_POLL_SHAPE,
+} from '../review/compilePollBounds';
 
 /**
  * The Run control's one source of truth (story 10.11a, AC-1, AC-2, AC-4).
@@ -32,11 +37,32 @@ import { executeRefusalFor, type ExecuteRefusalNarrative } from './executeRefusa
  * the surface exactly as it was, and saying so is the whole content of the narratives.
  */
 
-/** How long Run waits for a compile before giving up: the attempt budget plus a sweep interval. */
-const COMPILE_WAIT_BUDGET_MS = 330_000;
+/**
+ * How long Run waits for a compile before giving up (VAL-007 G4): the Code tab's watch window,
+ * `studio.compile.abandonment.threshold` (300s) plus one `interval-ms` sweep pass (15s) = 315s.
+ *
+ * Not the attempt budget (240s): the server enforces that, and a compile that outlives it ends as
+ * a declared state rather than as a silence. The case Run must outwait is the one where the server
+ * itself went quiet — and a `COMPILING` row is swept to `STALE` at most one pass after it crosses
+ * the threshold, so by the end of this window the server has answered. Giving up earlier reports
+ * "took too long" moments before the answer; waiting longer watches for a transition that has
+ * happened. `compileWaitBudget.test.ts` pins it to the window and to the shipped config.
+ */
+export const COMPILE_WAIT_BUDGET_MS = COMPILE_WATCH_WINDOW_MS;
 
-/** The poll interval while a compile settles. Matches the Code tab's, deliberately. */
-const COMPILE_POLL_MS = 600;
+/**
+ * The delays between Run's reads while a compile settles (VAL-007 G3): 600ms, backing off ×1.6 to
+ * a 5s ceiling, restarting for every compile. Derived from the same window it is bounded by.
+ */
+export const RUN_COMPILE_POLL_DELAYS_MS: readonly number[] = compilePollSchedule(
+  COMPILE_WAIT_BUDGET_MS,
+  RUN_POLL_SHAPE,
+);
+
+/** The delay before the read after `attempt` reads, holding at the ceiling once it is reached. */
+function runPollDelay(attempt: number): number {
+  return RUN_COMPILE_POLL_DELAYS_MS[Math.min(attempt, RUN_COMPILE_POLL_DELAYS_MS.length - 1)];
+}
 
 export interface RunRefusalState {
   /** The wording, chosen by status and — for a `409` — by `error`. Never by the message. */
@@ -74,6 +100,12 @@ export interface RunGateOptions {
   readonly saveBeforeRun?: () => Promise<RunSaveOutcome>;
   /** Whether the editor holds edits the server has not seen. */
   readonly isDirty?: boolean;
+  /**
+   * Whether the caller shows an accepted run as running (VAL-039). When given, an accepted
+   * activation keeps the gate closed until the caller has shown that run and seen it end, so no
+   * second activation can slip into the moment between acceptance and the caller's re-render.
+   */
+  readonly isRunning?: boolean;
 }
 
 export interface RunGateState {
@@ -88,6 +120,8 @@ export interface RunGateState {
   readonly executeInFlight: boolean;
   readonly phase: RunPhase;
   readonly preparationMessage: string | null;
+  /** `Date.now()` when Run began waiting on the current compile, or null outside that phase. */
+  readonly compileStartedAt: number | null;
   /** Set when a Run-started compile did not produce something runnable. */
   readonly compileOutcome: RunCompileOutcome | null;
   readonly run: () => void;
@@ -114,7 +148,15 @@ const sleep = (ms: number): Promise<void> =>
   });
 
 /**
- * A fresh key per activation, so Run's own retry cannot start a second run.
+ * How long an accepted activation holds the gate closed when the caller never reports the run as
+ * running (VAL-039). The caller normally releases it sooner, when the run it showed ends.
+ */
+export const ACCEPTED_LATCH_MS = 3000;
+
+/**
+ * A fresh key per user activation (VAL-039): created once when Run is pressed and sent on that
+ * activation's execute. Only the compile-then-retry after a `409 COMPILE_REQUIRED` /
+ * `RUNTIME_INCOMPATIBLE` takes a key of its own, because the first one was answered with a refusal.
  *
  * The server's `IdempotencyFilter` refuses anything that is not a UUID with
  * `400 INVALID_IDEMPOTENCY_KEY`, so the fallback for environments without `crypto.randomUUID`
@@ -142,6 +184,7 @@ export function useRunGate(
   const [refusal, setRefusal] = useState<RunRefusalState | null>(null);
   const [phase, setPhase] = useState<RunPhase>('idle');
   const [preparationMessage, setPreparationMessage] = useState<string | null>(null);
+  const [compileStartedAt, setCompileStartedAt] = useState<number | null>(null);
   const [compileOutcome, setCompileOutcome] = useState<RunCompileOutcome | null>(null);
 
   /**
@@ -156,6 +199,33 @@ export function useRunGate(
   const runOptions = useRef(options);
   runOptions.current = options;
 
+  /**
+   * VAL-039: after acceptance the gate stays closed (`inFlight` held) until the caller has shown
+   * the accepted run and seen it end. `accepted` → caller shows it → `running` → it ends → release.
+   */
+  const acceptedLatch = useRef<'none' | 'accepted' | 'running'>('none');
+  const latchTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const releaseLatch = useCallback(() => {
+    if (latchTimer.current) clearTimeout(latchTimer.current);
+    latchTimer.current = undefined;
+    if (acceptedLatch.current === 'none') return;
+    acceptedLatch.current = 'none';
+    inFlight.current = false;
+  }, []);
+  const callerRunning = options?.isRunning;
+  useEffect(() => {
+    if (callerRunning === true && acceptedLatch.current === 'accepted') {
+      acceptedLatch.current = 'running';
+      if (latchTimer.current) clearTimeout(latchTimer.current);
+      latchTimer.current = undefined;
+    } else if (callerRunning === false && acceptedLatch.current === 'running') {
+      releaseLatch();
+    }
+  }, [callerRunning, releaseLatch]);
+  useEffect(() => () => {
+    if (latchTimer.current) clearTimeout(latchTimer.current);
+  }, []);
+
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -166,6 +236,7 @@ export function useRunGate(
   useEffect(() => {
     let current = true;
     let pollTimer: ReturnType<typeof setTimeout> | undefined;
+    let pollAttempt = 0;
     if (!testId) {
       setTest(null);
       setLoading(false);
@@ -183,7 +254,8 @@ export function useRunGate(
         setTest(body);
         setLoading(false);
         if (body.compileStatus === 'COMPILING') {
-          pollTimer = setTimeout(() => void load(false), COMPILE_POLL_MS);
+          pollTimer = setTimeout(() => void load(false), runPollDelay(pollAttempt));
+          pollAttempt += 1;
         }
       } catch (error: unknown) {
         if (!current) return;
@@ -211,12 +283,13 @@ export function useRunGate(
    */
   const awaitCompileSettled = useCallback(async (id: string): Promise<TestDto | null> => {
     const deadline = Date.now() + COMPILE_WAIT_BUDGET_MS;
-    for (;;) {
+    for (let attempt = 0; ; attempt += 1) {
       const body = await studioApi.getTest(id);
       if (mounted.current) setTest(body);
       if (body.compileStatus !== 'COMPILING') return body;
-      if (Date.now() >= deadline) return null;
-      await sleep(COMPILE_POLL_MS);
+      // The schedule fits inside the budget; the clock also counts the time the reads took.
+      if (attempt >= RUN_COMPILE_POLL_DELAYS_MS.length || Date.now() >= deadline) return null;
+      await sleep(RUN_COMPILE_POLL_DELAYS_MS[attempt]);
     }
   }, []);
 
@@ -233,6 +306,8 @@ export function useRunGate(
       current: TestDto,
     ): Promise<{ ready: TestDto } | { outcome: RunCompileOutcome }> => {
       let body = current;
+      // The elapsed clock restarts for every compile, including the one a 409 asks for.
+      setCompileStartedAt(Date.now());
       if (runActionFor(body.compileStatus) === 'compile') {
         setPhase('compiling');
         setPreparationMessage('Preparing your test…');
@@ -275,11 +350,35 @@ export function useRunGate(
     setLoadError(null);
     setCompileOutcome(null);
 
+    // One key per user activation, created before anything is awaited (VAL-039).
+    const activationKey = idempotencyKey();
+
     const settle = () => {
       inFlight.current = false;
       if (!mounted.current) return;
       setPhase('idle');
       setPreparationMessage(null);
+      setCompileStartedAt(null);
+    };
+
+    /** Settles an accepted activation, keeping the gate closed while the caller shows the run. */
+    const settleAccepted = (executionId: string) => {
+      const latched = runOptions.current?.isRunning !== undefined;
+      if (latched) {
+        acceptedLatch.current = 'accepted';
+        latchTimer.current = setTimeout(() => {
+          if (acceptedLatch.current === 'accepted') releaseLatch();
+        }, ACCEPTED_LATCH_MS);
+      }
+      accepted.current?.(executionId);
+      if (!latched) {
+        settle();
+        return;
+      }
+      if (!mounted.current) return;
+      setPhase('idle');
+      setPreparationMessage(null);
+      setCompileStartedAt(null);
     };
 
     void (async () => {
@@ -308,11 +407,11 @@ export function useRunGate(
         body = prepared.ready;
 
         setPhase('starting');
+        setCompileStartedAt(null);
         setPreparationMessage('Starting the browser…');
         try {
-          const acceptedRun = await studioApi.executeTest(testId, idempotencyKey());
-          accepted.current?.(acceptedRun.executionId);
-          settle();
+          const acceptedRun = await studioApi.executeTest(testId, activationKey);
+          settleAccepted(acceptedRun.executionId);
           return;
         } catch (error: unknown) {
           const failure = readFailure(error);
@@ -331,10 +430,11 @@ export function useRunGate(
             return;
           }
           setPhase('starting');
+          setCompileStartedAt(null);
           setPreparationMessage('Starting the browser…');
+          // The first key was answered with a refusal, so the retry carries its own.
           const acceptedRun = await studioApi.executeTest(testId, idempotencyKey());
-          accepted.current?.(acceptedRun.executionId);
-          settle();
+          settleAccepted(acceptedRun.executionId);
           return;
         }
       } catch (error: unknown) {
@@ -342,6 +442,7 @@ export function useRunGate(
         if (!mounted.current) return;
         setPhase('idle');
         setPreparationMessage(null);
+        setCompileStartedAt(null);
         const failure = readFailure(error);
         const narrative = executeRefusalFor(failure.status, failure.code);
         setRefusal(
@@ -352,7 +453,7 @@ export function useRunGate(
         }
       }
     })();
-  }, [prepare, test, testId]);
+  }, [prepare, releaseLatch, test, testId]);
 
   return {
     test,
@@ -364,6 +465,7 @@ export function useRunGate(
     executeInFlight: phase !== 'idle',
     phase,
     preparationMessage,
+    compileStartedAt,
     compileOutcome,
     run,
   };

@@ -47,8 +47,6 @@ class IndexCatalogTest {
           "idx_check_tags_check",
           "idx_check_tags_tag",
           "idx_csi_tags_csi",
-          "idx_secrets_owner",
-          "idx_secrets_scope",
           "idx_csi_metrics_current_csi");
 
   @Autowired private JdbcTemplate jdbc;

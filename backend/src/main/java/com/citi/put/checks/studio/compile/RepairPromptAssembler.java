@@ -2,6 +2,7 @@ package com.citi.put.checks.studio.compile;
 
 import com.citi.put.checks.config.logging.SecretMasker;
 import com.citi.put.checks.studio.compile.gateway.CompileRequest;
+import com.citi.put.checks.studio.compile.gateway.GatewayResponseParser;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -74,6 +75,18 @@ public class RepairPromptAssembler {
           + " of the same kind for exactly the same writable step IDs, in the same order. Address"
           + " the diagnostics below. Do not add, remove or reorder step IDs.";
 
+  /**
+   * The fixed correction instruction for a repair after the strict envelope parser rejected the
+   * previous output (VAL-019b; user decision D2, 2026-10-04). Only this text and the closed
+   * rejection code with its 0-based position follow it: the rejected output itself is never sent
+   * back, raw or redacted, because the scrubber cannot vouch for model text.
+   */
+  static final String ENVELOPE_INSTRUCTIONS =
+      "Repair request: the previous output was rejected before validation because it was not a"
+          + " valid proposal envelope. Return exactly one JSON envelope that follows the output"
+          + " contract, of the same kind, for exactly the same writable step IDs, in the same"
+          + " order. Do not add, remove or reorder step IDs, and add no other fields or text.";
+
   private static final Map<String, Pattern> CREDENTIAL_PATTERNS =
       CredentialPatternScreen.patternClasses();
 
@@ -137,6 +150,68 @@ public class RepairPromptAssembler {
   }
 
   /**
+   * Assembles one repair request after the strict envelope parser rejected the previous output
+   * (VAL-019b).
+   *
+   * <p>Same frozen kind and writable IDs as {@link #assemble}. The repair context is {@link
+   * #ENVELOPE_INSTRUCTIONS} plus the closed rejection code and, when known, its 0-based position in
+   * {@code steps} — nothing the model wrote.
+   *
+   * @param firstAttempt the attempt-1 request of this compile request
+   * @param attempt the 1-based attempt number; a repair is always at least 2
+   * @param rejection the parser's closed reason; must be {@linkplain
+   *     GatewayResponseParser.ProposalRejection#repairable() repairable}
+   * @param rejectStepIndex 0-based position of the rejected entry, or {@code null}
+   * @return the transport request
+   * @throws IllegalArgumentException on attempt 1, from a request that is not attempt 1, or for a
+   *     rejection that may not be repaired
+   */
+  public CompileRequest assembleAfterRejectedEnvelope(
+      CompileRequest firstAttempt,
+      int attempt,
+      GatewayResponseParser.ProposalRejection rejection,
+      Integer rejectStepIndex) {
+    if (attempt < 2) {
+      throw new IllegalArgumentException("a repair attempt is at least 2 but was " + attempt);
+    }
+    if (firstAttempt.attempt() != 1 || firstAttempt.repairDiagnostics() != null) {
+      throw new IllegalArgumentException("a repair is built from the first attempt's request");
+    }
+    if (rejection == null || !rejection.repairable()) {
+      throw new IllegalArgumentException("only a parser-detected envelope rejection is repaired");
+    }
+    return new CompileRequest(
+        firstAttempt.testId(),
+        firstAttempt.csiId(),
+        firstAttempt.principal(),
+        firstAttempt.compileRequestId(),
+        attempt,
+        firstAttempt.fencedSourceLines(),
+        firstAttempt.syntaxReference(),
+        firstAttempt.syntaxReferenceVersion(),
+        firstAttempt.outputContract(),
+        firstAttempt.promptVersion(),
+        envelopeRepairContext(rejection, rejectStepIndex),
+        firstAttempt.proposalKind(),
+        firstAttempt.writableStepIds());
+  }
+
+  /**
+   * The envelope repair context: the fixed instruction and the closed code only.
+   *
+   * @param rejection the closed reason
+   * @param rejectStepIndex 0-based position, or {@code null}
+   * @return the text the transport appends after the per-request contents
+   */
+  static String envelopeRepairContext(
+      GatewayResponseParser.ProposalRejection rejection, Integer rejectStepIndex) {
+    return ENVELOPE_INSTRUCTIONS
+        + "\nRejection code: "
+        + rejection.name()
+        + (rejectStepIndex == null ? "" : " at steps[" + rejectStepIndex + "]");
+  }
+
+  /**
    * The repair context: instructions, the fenced rejected proposal, then the diagnostics.
    *
    * @param boundedDiagnostics the bounded diagnostics document
@@ -165,13 +240,30 @@ public class RepairPromptAssembler {
    * @return the redacted text, at most {@link #MAX_REJECTED_PROPOSAL_BYTES} UTF-8 bytes
    */
   static String boundRejectedProposal(String rejectedProposal) {
-    String redacted = decodeUnicodeEscapes(rejectedProposal);
-    redacted = WHOLE_PRIVATE_KEY_BLOCK.matcher(redacted).replaceAll("[REDACTED:PRIVATE_KEY_BLOCK]");
+    return truncateUtf8(
+        redactCredentials(decodeUnicodeEscapes(rejectedProposal)), MAX_REJECTED_PROPOSAL_BYTES);
+  }
+
+  /**
+   * The credential redaction shared by the rejected proposal and the stored diagnostics (VAL-033):
+   * whole private-key blocks, every {@link CredentialPatternScreen} pattern class, then the shared
+   * {@link SecretMasker} patterns. It does not bound and does not decode escapes; callers bound
+   * after redacting, so a credential cut in half by a cap cannot survive as an unrecognised
+   * fragment.
+   *
+   * @param text text that may have come from the model, or {@code null}
+   * @return the text with known credential shapes replaced, or {@code null} for {@code null}
+   */
+  static String redactCredentials(String text) {
+    if (text == null || text.isEmpty()) {
+      return text;
+    }
+    String redacted =
+        WHOLE_PRIVATE_KEY_BLOCK.matcher(text).replaceAll("[REDACTED:PRIVATE_KEY_BLOCK]");
     for (Map.Entry<String, Pattern> entry : CREDENTIAL_PATTERNS.entrySet()) {
       redacted = entry.getValue().matcher(redacted).replaceAll("[REDACTED:" + entry.getKey() + "]");
     }
-    redacted = SecretMasker.mask(redacted);
-    return truncateUtf8(redacted, MAX_REJECTED_PROPOSAL_BYTES);
+    return SecretMasker.mask(redacted);
   }
 
   /**

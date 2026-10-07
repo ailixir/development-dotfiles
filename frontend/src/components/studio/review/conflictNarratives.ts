@@ -26,7 +26,7 @@ export interface ConflictNarrative {
 export const CONFIRM_CONFLICT_NARRATIVES: Readonly<Record<string, ConflictNarrative>> = {
   STALE_CANDIDATE: {
     explanation:
-      'The candidate you were reading is no longer the current one, so nothing was confirmed. The screen below has been refreshed to what the draft holds now — read it and confirm again if you still want to.',
+      'The candidate you were reading is no longer the current one, so nothing was confirmed. The screen below has been refreshed to what the draft holds now. Read it and confirm again if you still want to.',
     callerCanClear: true,
   },
   TEST_DELETED: {

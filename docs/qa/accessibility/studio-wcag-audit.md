@@ -79,6 +79,12 @@ dialog or portal rendering outside that container is not silently unscanned.
 
 The cause is Studio v1 WP5 (`2e06d0b5d`), which added an `aria-label` to the runs page's Refresh `IconButton` and to the tests page's Run button. The five `ChecksStudioPage` rows were unchanged by WP5; the later two-panel redesign cleared them (see the 2026-09-20 revalidation note at the top, which is what the current pins and `axe-results.json` record).
 
+**Re-measured 2026-10-04 after the compact Tests and Runs lists.** Both list surfaces now have
+zero critical/serious violations. The Tests-page Delete button has its own `aria-label`, search
+fields have programmatic names, and tooltip wrappers use `describeChild` instead of putting
+labels on generic spans. The Tests-page pins are now empty; A11Y-1 and A11Y-2 are resolved in
+the automated scan. This does not close the outstanding manual assistive-technology pass.
+
 ### 1.3 The four ticketed critical/serious findings
 
 Each is `A11Y-N` in the register, with an owner and a severity.

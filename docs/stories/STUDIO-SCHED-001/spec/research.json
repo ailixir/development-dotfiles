@@ -1,0 +1,335 @@
+{
+  "storyId": "STUDIO-SCHED-001",
+  "researchedAt": "2026-10-06T00:26:29Z",
+  "researchedBy": "@analyst with @architect",
+  "complexity": "COMPLEX",
+  "toolFallback": "Context7 and EXA are not available in enabled tools; used web primary sources and authoritative installed dependencies/codebase. No new runtime dependencies.",
+  "dependencies": [
+    {
+      "name": "Spring Framework CronExpression",
+      "type": "library",
+      "version": "6.1.14",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "6.1.14",
+        "usageLocations": [
+          "backend/build.gradle.kts:3",
+          "backend/src/main/java/com/citi/put/checks/scheduling/ScheduleService.java:190",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:164"
+        ]
+      },
+      "documentation": {
+        "url": "https://docs.spring.io/spring-framework/docs/6.1.14/javadoc-api/org/springframework/scheduling/support/CronExpression.html",
+        "relevantSections": [
+          "Six-field parser",
+          "next(Temporal)"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "Normalized minute granularity",
+          "description": "Prepend zero seconds to five fields; require canonical second field exactly0; reject invalid/no-future expressions. Shared resolver handles every preview/due candidate."
+        },
+        {
+          "name": "Earlier-offset suppression",
+          "description": "Installed6.1.14 JShell probe produced both 2026-11-01 01:30-04 and01:30-05 in America/New_York; getValidOffsets(local) + chosen earlier offset rejects the latter. Spring gap skips2026-03-08 02:30 toMar9."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [
+          "No Quartz/newcron dependency"
+        ],
+        "conflicts": [
+          "CronDispatcher comment claims fall-back never duplicates; tests only increasing UTC instants"
+        ]
+      }
+    },
+    {
+      "name": "Spring transaction management",
+      "type": "library",
+      "version": "6.1.14",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "6.1.14",
+        "usageLocations": [
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:164",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:279"
+        ]
+      },
+      "documentation": {
+        "url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html",
+        "versionNote": "Current primary reference is7.0.9; stable REQUIRED rollback-only mechanism crosschecked against current6.1 source usage; no library upgrade."
+      },
+      "patterns": [
+        {
+          "name": "Shared nonproxied core",
+          "description": "Scheduler transaction calls a plain core returning expected business outcomes; throwing REQUIRED proxy cannot be caught then committed. Preserve manual transactional adapter and fresh-transaction unique race resolution."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [
+          "Fresh separately locked refusal transaction after failed unit, more complex"
+        ],
+        "conflicts": [
+          "Do not catch persistence failure in poisoned transaction",
+          "No blanket noRollbackFor"
+        ]
+      }
+    },
+    {
+      "name": "PostgreSQL",
+      "type": "infrastructure",
+      "version": "15-compatible existing",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "Local embedded binaries BOM15.6.0",
+        "usageLocations": [
+          "backend/build.gradle.kts:79",
+          "backend/src/main/resources/db/migration/V13__studio_dispatch_ledger.sql",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java:153",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java:821"
+        ]
+      },
+      "documentation": {
+        "url": "https://www.postgresql.org/docs/15/sql-select.html",
+        "additionalUrls": [
+          "https://www.postgresql.org/docs/15/explicit-locking.html"
+        ],
+        "relevantSections": [
+          "FOR UPDATE OF / SKIP LOCKED",
+          "Data-modifying CTE RETURNING",
+          "Row lock compatibility"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "One-test atomic occurrence",
+          "description": "test\u2192schedule\u2192occurrence\u2192global quota\u2192CSI quota; nonlocking active-ledger EXISTS under test lock; unique local slot acrossversions; ledger-owned occurrence identity."
+        },
+        {
+          "name": "Durable terminal summary",
+          "description": "Reaper close history RETURNING code/time feeds ledger summary in same SQL; no callback schedule write/testlock inversion. Backfill retained historical data only."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [
+          "No new broker"
+        ],
+        "conflicts": [
+          "No FK from occurrences to partitioned history",
+          "Cannot infer already-pruned/restore-lost outcomes"
+        ]
+      }
+    },
+    {
+      "name": "Java ZoneRules",
+      "type": "library",
+      "version": "Java21",
+      "verified": true,
+      "source": "manual",
+      "existing": {
+        "installed": true,
+        "currentVersion": "Gradle toolchainJDK21",
+        "usageLocations": [
+          "backend/src/main/java/com/citi/put/checks/scheduling/CronDispatcher.java:338"
+        ]
+      },
+      "documentation": {
+        "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/zone/ZoneRules.html",
+        "relevantSections": [
+          "getValidOffsets(LocalDateTime)"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "Local slot canonicalization",
+          "description": "getValidOffsets gives gap/normal/overlap choices; canonical earlier-offset policy and version-independent local uniqueness are additional product rules."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": []
+      }
+    },
+    {
+      "name": "ShedLock",
+      "type": "library",
+      "version": "5.16.0",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "5.16.0",
+        "usageLocations": [
+          "backend/build.gradle.kts:50",
+          "backend/src/main/java/com/citi/put/checks/scheduling/CronDispatcher.java:143"
+        ]
+      },
+      "documentation": {
+        "url": "https://github.com/lukas-krecan/ShedLock/blob/shedlock-parent-5.16.0/README.md",
+        "relevantSections": [
+          "lockAtMostFor",
+          "Scheduled method locking"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "Poll efficiency only",
+          "description": "Existing worker scheduler infrastructure reused; lease expiry can allow concurrent workers. Atomic DB occurrence identity remains authority."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [
+          "Quartz historical direction deferred"
+        ],
+        "conflicts": [
+          "Lease is not occurrence deduplication"
+        ]
+      }
+    },
+    {
+      "name": "React/MUI/MSW",
+      "type": "library",
+      "version": "React18 / MUI5 / MSW2.15.0 manifest",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "react^18.2.0,@mui/material^5.15.0,msw2.15.0",
+        "usageLocations": [
+          "frontend/package.json:27",
+          "frontend/package.json:35",
+          "frontend/package.json:69",
+          "frontend/src/services/api/studioApi.ts",
+          "frontend/src/services/mocks/studio/handlers.ts"
+        ]
+      },
+      "documentation": {
+        "url": "repository:frontend/package.json",
+        "relevantSections": [
+          "Installed dependencies",
+          "Existing Studio centralized clients/MSW patterns"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "Mockfirst typed controls",
+          "description": "Use matching API/MSW contract then MUI editor/list actions and honest occurrence/run source. No stack upgrade; actual manifest isMUI5 despite overview prose saying7."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": [
+          "Do not build against presumedMUI7-only APIs"
+        ]
+      }
+    },
+    {
+      "name": "PUT Core background identity authorization",
+      "type": "api",
+      "version": "Unwired production",
+      "verified": false,
+      "source": "codebase",
+      "existing": {
+        "installed": false,
+        "currentVersion": "Configured dev-only secret entitlement seam",
+        "usageLocations": [
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java:33",
+          "backend/src/main/java/com/citi/put/checks/studio/secrets/ConfiguredSecretUseAuthorization.java:8"
+        ]
+      },
+      "documentation": {
+        "url": "repository:docs/specs/studio/scheduling/architecture.md#7-background-execution-identity-and-secrets"
+      },
+      "patterns": [
+        {
+          "name": "Failclosed seam",
+          "description": "Default denial; explicit local/test CSI/environment principal allowlist, scoped capabilities, authorization activation/admission/send; never enable production with local adapter."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [
+          "Platformapproved renewable human delegation"
+        ],
+        "conflicts": [
+          "Manual authenticated eligibility does not equal unattended grant",
+          "Missing policy is denial not permission"
+        ]
+      }
+    }
+  ],
+  "unverifiedClaims": [
+    {
+      "claim": "Production background grant/secret revocation policy is integrated",
+      "reason": "Repository expressly documents development-only entitlements; production identity owners must supply approved adapter/evidence.",
+      "action": "blocked"
+    },
+    {
+      "claim": "Production capacity and retention horizon are approved",
+      "reason": "No pilot evidence; retain durable identity anchors without cleanup and ship producerdefaultoff; real operational sizing remains releasegate.",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "Backfill can recover already-pruned uncertainty",
+      "reason": "Missing historical effects cannot be reconstructed; operator reconciliation/restore gate required, not fabricated clean states.",
+      "action": "blocked"
+    }
+  ],
+  "recommendations": [
+    {
+      "type": "prefer",
+      "subject": "Dedicated Studio schedules/occurrences and ledgerJOIN linkage",
+      "rationale": "Closes checkFK mismatch and circular link ambiguity with stable anchors, composite ownership, deferred ACCEPTED consistency constraint."
+    },
+    {
+      "type": "prefer",
+      "subject": "Uncertaintyset DISPATCH_UNKNOWN/START_TIMEOUT/STALE",
+      "rationale": "START_TIMEOUT follows admission without start confirmation; runner sends STARTED detached after actual launch (reportingStepReporter.ts:71,94,107), so no confirmed start is not no effects. Root adopts conservative research-derived addition."
+    },
+    {
+      "type": "avoid",
+      "subject": "GenericRetryDispatcher for Studio attempts",
+      "rationale": "Creates new execution and can repeat sideeffects; existing definite refusal/pre-send retry and runnerrecovery remain authoritative."
+    }
+  ],
+  "resolvedOpenQuestions": [
+    {
+      "id": "OQ-02",
+      "resolution": "Ledger-owned nullable unique scheduled_occurrence_id with nullmanualfieldsCHECK; executionlink derivedJOIN; composite test/CSI/revisionownership; version-independent local uniqueness; stable anchor; minutegranularity proves60s firstimplementationfloor; exact wire frozen in implementation-contract.md."
+    },
+    {
+      "id": "OQ-06",
+      "resolution": "Adopt DISPATCH_UNKNOWN,START_TIMEOUT,STALE as explicit uncertaintyset. Known runner TIMEOUT and intentional CANCELLED remain existing behavior; no genericautomatic replay. Production cancellation-stop uncertainty needs real release review if owners extend semantics."
+    }
+  ],
+  "entryGates": {
+    "E01": "Root adopted conservative implementationdefaults under user request; productionpolicyapproval not claimed.",
+    "E02": "Concrete schema/API/lock/outcome/retention decisions frozen in implementation-contract.md, subject independentQA.",
+    "E03": "Defaultdeny + explicit local/test principal seam chosen; real principal/livegrants releasegated.",
+    "E04": "Parent/PM must create associated story and PO validate after speccritique; no implementationbeforegate."
+  },
+  "researchNotes": "Task-required technical-preferences path development/data missing; actual .aiox-core/data/technical-preferences.md found. Its activeNextJS preset differs repo; explicit AGENTS/project React+Java stack wins. Installed manifests/source and primarydocs verified. No application edits by research. Exact dependency DST probe performed previously and recorded in scheduling/architecture.md. No new performance/concurrency/production test pass claimed.",
+  "contractRevision": {
+    "date": "2026-10-05",
+    "reason": "QA critique1 high/medium findings",
+    "decisions": [
+      "Immutable studio_schedule_activations events retain server-derived human actor/time, schedule/version/test/CSI/revision/environment/execution principal; current schedule/occurrence and scheduled run projections link immutable event",
+      "Occurrence stores immutable environment; deferred accepted-link trigger validates test/CSI/principal/revision/environment, not only count",
+      "Pause/update/removal atomically settle DEFERRED as SKIPPED SCHEDULE_PAUSED/SCHEDULE_UPDATED/SCHEDULE_REMOVED; executable invalidation/lifecycle settles specific REFUSED code; no orphan DEFERRED",
+      "Minimum is fixed60s in first implementation with no unsupported minimum configuration property; grace alone configurabledefault300s"
+    ]
+  }
+}

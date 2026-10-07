@@ -9,7 +9,6 @@ import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -17,13 +16,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.support.CronExpression;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -40,6 +39,12 @@ public class ScheduleService {
   private final CheckRepository checkRepository;
   private final CsiOwnershipEvaluator ownershipEvaluator;
   private final int minIntervalSeconds;
+  private CronRecurrence recurrence = new CronRecurrence();
+
+  @Autowired
+  public void initializeRecurrence(CronRecurrence value) {
+    recurrence = value;
+  }
 
   public ScheduleService(
       ScheduleRepository scheduleRepository,
@@ -188,35 +193,23 @@ public class ScheduleService {
   }
 
   static String normalizeCron(String cron) {
-    if (cron == null) {
-      return null;
-    }
-    String trimmed = cron.strip();
-    if (trimmed.split("\\s+").length == 5) {
-      return "0 " + trimmed;
-    }
-    return trimmed;
+    return CronRecurrence.normalizeCompatible(cron);
   }
 
   private void validateCronExpression(String cron) {
     if (cron == null || cron.isBlank()) {
       throw new ScheduleValidationException("Cron expression is required");
     }
-    CronExpression expr;
     try {
-      expr = CronExpression.parse(cron);
+      recurrence.parse(cron);
     } catch (IllegalArgumentException e) {
       throw new ScheduleValidationException("Invalid cron expression: " + cron);
     }
-    ZonedDateTime next1 = expr.next(REFERENCE_TIME);
-    if (next1 == null) {
+    var gap = recurrence.sampledUtcGap(cron, REFERENCE_TIME.toInstant());
+    if (gap.isEmpty()) {
       return;
     }
-    ZonedDateTime next2 = expr.next(next1);
-    if (next2 == null) {
-      return;
-    }
-    long gapSeconds = Duration.between(next1, next2).getSeconds();
+    long gapSeconds = gap.getAsLong();
     if (gapSeconds < minIntervalSeconds) {
       throw new ScheduleValidationException(
           "Schedule interval too short: "
@@ -230,7 +223,7 @@ public class ScheduleService {
   private String resolveTimezone(String timezone) {
     String tz = timezone != null ? timezone : "UTC";
     try {
-      ZoneId.of(tz);
+      recurrence.zone(tz, CronRecurrence.ZonePolicy.ANY_ZONE_ID);
     } catch (Exception e) {
       throw new ScheduleValidationException("Invalid timezone: " + tz);
     }
@@ -241,10 +234,13 @@ public class ScheduleService {
     if (cron == null) {
       return null;
     }
-    CronExpression expr = CronExpression.parse(cron);
-    ZonedDateTime now = ZonedDateTime.now(ZoneId.of(timezone));
-    ZonedDateTime next = expr.next(now);
-    return next != null ? next.toInstant() : null;
+    var next =
+        recurrence.next(
+            cron,
+            recurrence.zone(timezone, CronRecurrence.ZonePolicy.ANY_ZONE_ID),
+            Instant.now(),
+            CronRecurrence.Overlap.INSTANT_SEQUENCE);
+    return next != null ? next.scheduledAt() : null;
   }
 
   private void requireRead(Authentication auth, String csiId) {

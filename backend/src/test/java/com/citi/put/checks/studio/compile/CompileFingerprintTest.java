@@ -40,6 +40,17 @@ class CompileFingerprintTest {
         .isEqualTo(first);
   }
 
+  /**
+   * VAL-031: the executor 2.0.0 &rarr; 2.1.0 pin bump is a fingerprint change, which is why it
+   * ships in the same release as the {@code thinking-level: LOW} default (one recompile, not two).
+   */
+  @Test
+  void theExecutor210PinBumpChangesTheFingerprint() {
+    assertThat(
+            fingerprint(SETTINGS, new RuntimePinProperties(1, "2.0.0", "2.0.0", "2.1.0", "1.63.0")))
+        .isNotEqualTo(fingerprint(SETTINGS, PIN));
+  }
+
   @Test
   void theDefaultOverloadUsesTheCurrentCodePins() {
     assertThat(fingerprint(SETTINGS, PIN))
@@ -107,7 +118,8 @@ class CompileFingerprintTest {
 
   @Test
   void thePromptVersionAdvancedPastThePre1045Layout() {
-    assertThat(CompilePins.PROMPT_VERSION).isEqualTo("2.2.0");
+    // 2.3.0: VAL-019b's envelope-repair instruction (prompt text only).
+    assertThat(CompilePins.PROMPT_VERSION).isEqualTo("2.3.0");
   }
 
   @Test

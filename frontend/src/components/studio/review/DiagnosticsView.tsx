@@ -1,5 +1,6 @@
 import { Alert, Box, Chip, Stack, Typography } from '@mui/material';
 import type { CompileDiagnostic, CompileDiagnostics } from '@/types/studio/studioTypes';
+import { refusalNarrative } from './compileDiagnosticNarratives';
 
 /**
  * The parts of the diagnostics document that belong to no single step (story 10.10, AC-6..AC-8).
@@ -23,10 +24,17 @@ export const UNCLAMPED_TEXT_SX = {
 };
 
 export function DiagnosticDetail({ diagnostic }: { diagnostic: CompileDiagnostic }) {
+  // A model refusal (VAL-009) reads as an instruction to the author; the model's own words stay in
+  // it as plain text. Every other code keeps the server's message unchanged.
+  const refusal = refusalNarrative(diagnostic);
   return (
     <Box sx={{ mb: 1 }}>
-      <Typography variant="body2" sx={UNCLAMPED_TEXT_SX}>
-        {diagnostic.message}
+      <Typography
+        variant="body2"
+        sx={UNCLAMPED_TEXT_SX}
+        data-testid={refusal ? `step-refusal-${diagnostic.stepIndex}` : undefined}
+      >
+        {refusal ?? diagnostic.message}
       </Typography>
       {diagnostic.excerpt !== null && diagnostic.excerpt !== '' && (
         <Typography
@@ -67,7 +75,7 @@ export function DiagnosticsSummary({ diagnostics }: DiagnosticsSummaryProps) {
         </Stack>
         <Typography variant="body2" sx={{ mt: 0.5 }}>
           {diagnostics.exhausted
-            ? 'It has now tried as many times as it is allowed and the result is still not runnable. Asking again will reach the same place — the way forward is editing the steps named below.'
+            ? 'It has now tried as many times as it is allowed and the result is still not runnable. Asking again will reach the same place. The way forward is editing the steps named below.'
             : 'It has not used up the tries it is allowed. What is listed below is the last try only, not a history.'}
         </Typography>
       </Box>

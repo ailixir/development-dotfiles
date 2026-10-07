@@ -28,7 +28,7 @@ export type ArtifactHashResult =
   | { readonly available: false; readonly reason: string };
 
 export const ARTIFACT_HASH_UNAVAILABLE_REASON =
-  'Confirming needs the fingerprint of the translated steps, and this draft did not come back with one. That happens when there is no translated candidate to confirm yet. Nothing is computed here in its place — the fingerprint is the server’s statement about what it produced, and a guess would defeat the check that confirmation exists to make.';
+  'Confirming needs the fingerprint of the translated steps, and this draft did not come back with one. That happens when there is no translated candidate to confirm yet. Nothing is computed here in its place. The fingerprint is the server’s statement about what it produced, and a guess would defeat the check that confirmation exists to make.';
 
 export function readArtifactHash(test: TestDto): ArtifactHashResult {
   const declared = test.currentCandidateArtifactHash;

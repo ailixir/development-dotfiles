@@ -434,6 +434,57 @@ URLs must be absolute `http`/`https`; `locator()` rejects Playwright selector-en
 (`text=`, `xpath=`, `>>`, `:has-text(...)`, …); regular expressions reject backreferences,
 lookbehind, unpermitted flags and quantifier nesting beyond the configured depth.
 
+### Text-entry role equivalence (executor 2.1.0, VAL-031)
+
+The compiler cannot see the page, so the role of a text field is a guess: `searchbox`, `textbox`
+and `combobox` are all things "the search field" can be. For `fill` and `press` only, when the
+chain's **terminal** segment is `getByRole` with one of those three roles and options limited to
+`name`/`exact`/`disabled`, `src/run/playwrightAdapter.ts` resolves the target like this:
+
+1. The authored role is tried first on every poll. If it matches any visible element (see
+   visible-only resolution below), it is used, strict mode included.
+2. Only after it has matched nothing for `min(2 s, timeout/4)` are the other two roles counted,
+   with the same options, as one `.or()` union. Exactly one match is acted on with the remaining
+   timeout. Several are refused with a fixed message (`no <role> matched; N other text-entry
+   controls did — refusing to choose`). `.first()` is never used. If nothing matches by the
+   deadline, the usual "no element matched" failure is reported.
+3. `guard()` and the secret-origin check run before any of this.
+4. Each use writes one line to the child's stderr, which the output relay redacts and bounds:
+   `text-entry-equivalence: authored=<role> resolved=<role> step=<i>`.
+
+`click`, `hover`, `check`, the assertions, other roles, non-terminal segments and any role with
+`checked`/`expanded`/`selected`/`pressed`/`level` are unchanged. The step report does not yet name
+the resolved role; adding it is an ADR-002 Class B change.
+
+### Visible-only resolution of actions (executor 2.1.0, VAL-040)
+
+Real pages carry hidden twins of their controls. Wikipedia's search input has hidden copies with
+the same placeholder, so `getByPlaceholder('Search Wikipedia')` matched 2 elements. Google's
+`getByLabel('Search')` matched 6, most of them hidden. Strict mode refused both, even though a
+hidden element can't be acted on anyway. For the action operations (`click`, `fill`, `press`,
+`check`, `uncheck`, `hover`, `selectOption`), the adapter narrows the authored locator with
+`locator.filter({ visible: true })` and polls its count until the step timeout:
+
+| Visible matches | Outcome |
+|---|---|
+| ≥ 2 | The VAL-028 strict-mode failure, with N the **visible** count: `<action> failed: the locator matched N elements; make the step more specific.` `.first()` is never used. |
+| exactly 1 | The action runs on it with the remaining timeout. |
+| 0 until the deadline | `<action> failed: the element was not visible within <t>ms.` if the authored locator matched hidden elements, otherwise `… no element matched the locator within <t>ms.` |
+
+- **Assertions are unchanged.** `toBeVisible`, `toContainText` and `toHaveValue` resolve the
+  unfiltered locator, so their strict-mode and visibility semantics are the same as before.
+- **With text-entry equivalence**, the authored role and the alternatives' `.or()` union are both
+  narrowed the same way. A hidden-only authored match therefore counts as no match, and the
+  settle-window fallback above applies.
+- **`force: true` opts out.** The author asked to skip actionability, so the authored locator is
+  used unfiltered, exactly as before.
+- `guard()` and the secret-origin check still run first.
+- When the filter changed the outcome (the one visible element had hidden twins, so total > 1),
+  the child writes one stderr line through the output relay: `visible-only-resolution: step=<i>
+  total=<n>`. It carries counts only, never the locator text.
+
+This is part of the same unreleased executor 2.1.0 as VAL-031. There is no further version bump.
+
 ## Fixture corpora
 
 | Directory | Purpose |

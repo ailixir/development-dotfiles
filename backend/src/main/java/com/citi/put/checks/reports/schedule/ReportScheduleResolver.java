@@ -1,15 +1,25 @@
 package com.citi.put.checks.reports.schedule;
 
+import com.citi.put.checks.scheduling.CronRecurrence;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.StringJoiner;
-import org.springframework.scheduling.support.CronExpression;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ReportScheduleResolver {
+  private final CronRecurrence recurrence;
+
+  public ReportScheduleResolver() {
+    this(new CronRecurrence());
+  }
+
+  @Autowired
+  public ReportScheduleResolver(CronRecurrence recurrence) {
+    this.recurrence = recurrence;
+  }
 
   private static final String[] SPRING_DAYS = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
 
@@ -22,7 +32,7 @@ public class ReportScheduleResolver {
       case "monthly" -> buildMonthlyCron(schedule);
       case "custom" -> {
         String cron = requireField(schedule, "cron").asText();
-        CronExpression.parse(cron);
+        recurrence.parse(cron);
         yield cron;
       }
       default -> throw new IllegalArgumentException("Unknown frequency: " + frequency);
@@ -32,18 +42,20 @@ public class ReportScheduleResolver {
   public Instant nextDelivery(JsonNode schedule) {
     String cron = toCronExpression(schedule);
     ZoneId zone = resolveTimezone(schedule);
-    CronExpression expr = CronExpression.parse(cron);
-    ZonedDateTime next = expr.next(ZonedDateTime.now(zone));
-    return next != null ? next.toInstant() : null;
+    var next = recurrence.next(cron, zone, Instant.now(), CronRecurrence.Overlap.INSTANT_SEQUENCE);
+    return next != null ? next.scheduledAt() : null;
   }
 
   public Instant nextDeliveryFrom(JsonNode schedule, Instant base) {
     String cron = toCronExpression(schedule);
     ZoneId zone = resolveTimezone(schedule);
-    CronExpression expr = CronExpression.parse(cron);
-    ZonedDateTime baseZoned = base != null ? base.atZone(zone) : ZonedDateTime.now(zone);
-    ZonedDateTime next = expr.next(baseZoned);
-    return next != null ? next.toInstant() : null;
+    var next =
+        recurrence.next(
+            cron,
+            zone,
+            base != null ? base : Instant.now(),
+            CronRecurrence.Overlap.INSTANT_SEQUENCE);
+    return next != null ? next.scheduledAt() : null;
   }
 
   private String buildHourlyCron() {
@@ -129,7 +141,7 @@ public class ReportScheduleResolver {
   private ZoneId resolveTimezone(JsonNode schedule) {
     JsonNode tz = schedule.get("timezone");
     String tzText = tz != null && !tz.isNull() ? tz.asText() : "UTC";
-    return ZoneId.of(tzText, ZoneId.SHORT_IDS);
+    return recurrence.zone(tzText, CronRecurrence.ZonePolicy.SHORT_IDS);
   }
 
   private int[] parseTime(String time) {

@@ -26,6 +26,20 @@ public class GatewayResponseParser {
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private static final int MAX_REASON_LENGTH = 300;
 
+  /** Envelope parse stage 1: syntax only. */
+  private static final ObjectMapper LENIENT = new ObjectMapper();
+
+  /** Envelope parse stage 2: syntax plus duplicate-key detection. */
+  private static final ObjectMapper DUPLICATE_STRICT =
+      new ObjectMapper()
+          .enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+
+  /** Envelope parse stage 3: the full strict acceptance, adding trailing-token detection. */
+  private static final ObjectMapper STRICT =
+      new ObjectMapper()
+          .enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+          .enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+
   /**
    * The only artifact schema version this backend can hand to the runner.
    *
@@ -59,23 +73,87 @@ public class GatewayResponseParser {
   }
 
   /**
+   * Why a proposal envelope, or the attempt built from it, was rejected (VAL-019a).
+   *
+   * <p>A closed vocabulary, one value per check, so a rejection can be logged and fed back to a
+   * repair without quoting any model text: the reason strings carried beside it may echo the
+   * model's output and are never logged. The step index that may accompany a value is the 0-based
+   * position in {@code steps}, never a model-supplied value.
+   *
+   * <p>Only the values the strict envelope parser itself detects are {@linkplain #repairable()
+   * repairable}: a malformed envelope is model variance, so it may consume one repair from the
+   * shared bound (C0 &sect;4). An unusable finish reason, an assembler failure and the artifact
+   * version gate stay terminal.
+   */
+  public enum ProposalRejection {
+    EMPTY(true),
+    MALFORMED_JSON(true),
+    DUPLICATE_KEY(true),
+    TRAILING_CONTENT(true),
+    ENVELOPE_KEYS(true),
+    VERSION(true),
+    KIND_MISMATCH(true),
+    STEPS_NOT_ARRAY(true),
+    STEP_COUNT(true),
+    STEP_ID_MISMATCH(true),
+    STATUS_UNKNOWN(true),
+    GENERATED_KEYS(true),
+    CODE_EMPTY_OR_TOO_LONG(true),
+    REJECTION_KEYS(true),
+    REJECTION_REASON_MISMATCH(true),
+    MESSAGE_EMPTY_OR_TOO_LONG(true),
+    /** The model stopped for a reason other than {@code STOP}; detected by the adapter. */
+    FINISH_REASON(false),
+    /** The server-side assembler refused an envelope the parser accepted; pipeline-side. */
+    ASSEMBLY_FAILED(false),
+    /** The assembled or returned artifact declares an unsupported version; pipeline-side. */
+    ARTIFACT_VERSION(false);
+
+    private final boolean repairable;
+
+    ProposalRejection(boolean repairable) {
+      this.repairable = repairable;
+    }
+
+    /**
+     * Whether this rejection may consume one repair from the shared bound.
+     *
+     * @return true for parser-detected envelope defects only
+     */
+    public boolean repairable() {
+      return repairable;
+    }
+  }
+
+  /**
    * Result of one parse: either an artifact document or a reason, never both.
    *
    * @param artifactJson canonical artifact JSON when valid
    * @param failureReason scrubbed reason, prefixed with the failing schema path when applicable
+   * @param rejection the closed rejection reason for a proposal envelope; {@code null} when valid
+   *     or when produced by the legacy artifact {@link #parse}
+   * @param rejectStepIndex 0-based position in {@code steps} of the rejected entry, or {@code null}
    */
-  public record ParseResult(String artifactJson, String failureReason) {
+  public record ParseResult(
+      String artifactJson,
+      String failureReason,
+      ProposalRejection rejection,
+      Integer rejectStepIndex) {
 
     public boolean isValid() {
       return artifactJson != null;
     }
 
     static ParseResult valid(String artifactJson) {
-      return new ParseResult(artifactJson, null);
+      return new ParseResult(artifactJson, null, null, null);
     }
 
     static ParseResult invalid(String reason) {
-      return new ParseResult(null, reason);
+      return new ParseResult(null, reason, null, null);
+    }
+
+    static ParseResult rejected(String reason, ProposalRejection rejection, Integer stepIndex) {
+      return new ParseResult(null, reason, rejection, stepIndex);
     }
   }
 
@@ -125,60 +203,108 @@ public class GatewayResponseParser {
     return ParseResult.valid(node.toString());
   }
 
-  /** Strict proposal envelope acceptance; never extracts JSON from prose or fences. */
+  /**
+   * Strict proposal envelope acceptance; never extracts JSON from prose or fences.
+   *
+   * <p>Each check yields its own {@link ProposalRejection}. Duplicate keys and trailing content are
+   * told apart from malformed JSON by which of three parses fails — lenient, then with duplicate
+   * detection, then with trailing-token detection — never by reading an exception message, which
+   * can quote the model's text.
+   *
+   * @param text the model's response text
+   * @param kind the requested envelope kind
+   * @param ids the writable step IDs, in order
+   * @return the accepted envelope, or the rejection with its closed reason
+   */
   public ParseResult parseProposal(String text, String kind, java.util.List<java.util.UUID> ids) {
     if (text == null || text.isBlank()) {
-      return ParseResult.invalid("empty model envelope");
+      return ParseResult.rejected("empty model envelope", ProposalRejection.EMPTY, null);
+    }
+    JsonNode root;
+    try {
+      LENIENT.readTree(text);
+    } catch (JsonProcessingException | IllegalArgumentException e) {
+      return ParseResult.rejected(
+          "malformed model envelope", ProposalRejection.MALFORMED_JSON, null);
     }
     try {
-      ObjectMapper strict = new ObjectMapper();
-      strict.enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
-      strict.enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
-      JsonNode root = strict.readTree(text);
-      if (!keys(root, Set.of("version", "kind", "steps"))
-          || !root.path("version").isIntegralNumber()
-          || !root.path("version").canConvertToInt()
-          || root.path("version").intValue() != 1
-          || !root.path("kind").isTextual()
-          || !kind.equals(root.path("kind").textValue())
-          || !root.path("steps").isArray()
-          || root.path("steps").size() != ids.size()
-          || ids.isEmpty()
-          || ids.size() > 100) {
-        return ParseResult.invalid("invalid model envelope shape or coverage");
-      }
-      java.util.Set<java.util.UUID> seen = new java.util.HashSet<>();
-      for (int i = 0; i < ids.size(); i++) {
-        JsonNode step = root.path("steps").get(i);
-        if (!step.path("stepId").isTextual()
-            || !ids.get(i).toString().equals(step.path("stepId").textValue())
-            || !seen.add(ids.get(i))) {
-          return ParseResult.invalid("invalid model step identity or order");
-        }
-        String status = step.path("status").textValue();
-        boolean generated = "GENERATED".equals(status);
-        if (generated) {
-          if (!keys(step, Set.of("stepId", "status", "code"))
-              || !boundedText(step.path("code"), 2000)) {
-            return ParseResult.invalid("invalid generated step");
-          }
-        } else {
-          String expected =
-              "UNSUPPORTED".equals(status)
-                  ? "UNSUPPORTED_CAPABILITY"
-                  : "CLARIFICATION".equals(status) ? "AMBIGUOUS_INTENT" : null;
-          if (expected == null
-              || !keys(step, Set.of("stepId", "status", "reason", "message"))
-              || !expected.equals(step.path("reason").textValue())
-              || !boundedText(step.path("message"), 400)) {
-            return ParseResult.invalid("invalid unsupported or clarification step");
-          }
-        }
-      }
-      return ParseResult.valid(root.toString());
+      DUPLICATE_STRICT.readTree(text);
     } catch (JsonProcessingException | IllegalArgumentException e) {
-      return ParseResult.invalid("malformed model envelope");
+      return ParseResult.rejected(
+          "malformed model envelope", ProposalRejection.DUPLICATE_KEY, null);
     }
+    try {
+      root = STRICT.readTree(text);
+    } catch (JsonProcessingException | IllegalArgumentException e) {
+      return ParseResult.rejected(
+          "malformed model envelope", ProposalRejection.TRAILING_CONTENT, null);
+    }
+    ProposalRejection envelope = envelopeRejection(root, kind, ids);
+    if (envelope != null) {
+      return ParseResult.rejected("invalid model envelope shape or coverage", envelope, null);
+    }
+    java.util.Set<java.util.UUID> seen = new java.util.HashSet<>();
+    for (int i = 0; i < ids.size(); i++) {
+      JsonNode step = root.path("steps").get(i);
+      if (!step.path("stepId").isTextual()
+          || !ids.get(i).toString().equals(step.path("stepId").textValue())
+          || !seen.add(ids.get(i))) {
+        return ParseResult.rejected(
+            "invalid model step identity or order", ProposalRejection.STEP_ID_MISMATCH, i);
+      }
+      String status = step.path("status").textValue();
+      if ("GENERATED".equals(status)) {
+        if (!keys(step, Set.of("stepId", "status", "code"))) {
+          return ParseResult.rejected(
+              "invalid generated step", ProposalRejection.GENERATED_KEYS, i);
+        }
+        if (!boundedText(step.path("code"), 2000)) {
+          return ParseResult.rejected(
+              "invalid generated step", ProposalRejection.CODE_EMPTY_OR_TOO_LONG, i);
+        }
+        continue;
+      }
+      String expected =
+          "UNSUPPORTED".equals(status)
+              ? "UNSUPPORTED_CAPABILITY"
+              : "CLARIFICATION".equals(status) ? "AMBIGUOUS_INTENT" : null;
+      ProposalRejection rejection =
+          expected == null
+              ? ProposalRejection.STATUS_UNKNOWN
+              : !keys(step, Set.of("stepId", "status", "reason", "message"))
+                  ? ProposalRejection.REJECTION_KEYS
+                  : !expected.equals(step.path("reason").textValue())
+                      ? ProposalRejection.REJECTION_REASON_MISMATCH
+                      : !boundedText(step.path("message"), 400)
+                          ? ProposalRejection.MESSAGE_EMPTY_OR_TOO_LONG
+                          : null;
+      if (rejection != null) {
+        return ParseResult.rejected("invalid unsupported or clarification step", rejection, i);
+      }
+    }
+    return ParseResult.valid(root.toString());
+  }
+
+  /** The first envelope-level defect, in the order the checks have always run; null if none. */
+  private static ProposalRejection envelopeRejection(
+      JsonNode root, String kind, java.util.List<java.util.UUID> ids) {
+    if (!keys(root, Set.of("version", "kind", "steps"))) {
+      return ProposalRejection.ENVELOPE_KEYS;
+    }
+    JsonNode version = root.path("version");
+    if (!version.isIntegralNumber() || !version.canConvertToInt() || version.intValue() != 1) {
+      return ProposalRejection.VERSION;
+    }
+    if (!root.path("kind").isTextual() || !kind.equals(root.path("kind").textValue())) {
+      return ProposalRejection.KIND_MISMATCH;
+    }
+    if (!root.path("steps").isArray()) {
+      return ProposalRejection.STEPS_NOT_ARRAY;
+    }
+    if (root.path("steps").size() != ids.size() || ids.isEmpty() || ids.size() > 100) {
+      return ProposalRejection.STEP_COUNT;
+    }
+    return null;
   }
 
   private static boolean keys(JsonNode node, Set<String> expected) {

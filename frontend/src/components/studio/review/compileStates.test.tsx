@@ -166,7 +166,7 @@ describe('AC-2: each state says what is true, what you may do, and what is block
     await renderState(staleDraft);
     const region = await screen.findByTestId('compile-state-region');
     const text = region.textContent ?? '';
-    expect(region.getAttribute('aria-label')).toBe('Translation was interrupted — not something you did');
+    expect(region.getAttribute('aria-label')).toBe('Translation was interrupted: not something you did');
     expect(text).toMatch(/translation was interrupted on our side before it finished/i);
     expect(text).toMatch(/recompile/i);
     const recompile = await screen.findByTestId('recompile-control');

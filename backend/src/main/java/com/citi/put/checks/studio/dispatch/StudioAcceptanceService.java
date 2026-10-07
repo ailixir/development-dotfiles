@@ -13,8 +13,12 @@ import com.citi.put.checks.studio.entity.StudioDispatchLedger;
 import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.entity.UITestExecution;
 import com.citi.put.checks.studio.entity.UITestRevision;
+import com.citi.put.checks.studio.scheduling.StudioScheduleException;
+import com.citi.put.checks.studio.secrets.VaultProviderUnavailableException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -76,8 +80,56 @@ public class StudioAcceptanceService {
   private final ObjectMapper objectMapper;
   private final JdbcTemplate jdbc;
   private final Clock clock;
+  @PersistenceContext private EntityManager entityManager;
 
-  @Autowired
+  /** Trusted internal identity, independent of client-supplied manual idempotency strings. */
+  public record ScheduledIdentity(
+      UUID occurrenceId,
+      UUID scheduleId,
+      long scheduleVersion,
+      UUID activationId,
+      Instant scheduledAt,
+      UUID revisionId) {}
+
+  public record ScheduledResult(UUID executionId, String decision, String code) {}
+
+  /**
+   * Expected refusals are caught inside this non-proxied core path; SQL failures still roll back.
+   */
+  public ScheduledResult acceptScheduled(
+      UUID testId, String principal, ScheduledIdentity identity, Runnable beforeWrite) {
+    if (!org.springframework.transaction.support.TransactionSynchronizationManager
+        .isActualTransactionActive()) {
+      throw new IllegalStateException("Scheduled acceptance requires its occurrence transaction");
+    }
+    try {
+      return new ScheduledResult(
+          acceptCore(testId, principal, null, identity, beforeWrite), "ACCEPTED", "ACCEPTED");
+    } catch (StudioConflictException ex) {
+      return new ScheduledResult(
+          null,
+          java.util.Set.of("GRACE_EXPIRED", "DISPATCH_DISABLED").contains(ex.getCode())
+              ? "SKIPPED"
+              : "REFUSED",
+          ex.getCode());
+    } catch (StudioQuotaExceededException ex) {
+      return new ScheduledResult(null, "DEFERRED", ex.getCode());
+    } catch (StudioDispatchDisabledException ex) {
+      return new ScheduledResult(null, "SKIPPED", "DISPATCH_DISABLED");
+    } catch (StudioReferenceResolver.SecretUseNotAuthorizedException ex) {
+      return new ScheduledResult(null, "REFUSED", "BACKGROUND_AUTHORIZATION_DENIED");
+    } catch (StudioReferenceResolver.UnknownReferenceException ex) {
+      return new ScheduledResult(null, "REFUSED", "REFERENCE_UNAVAILABLE");
+    } catch (VaultProviderUnavailableException ex) {
+      return new ScheduledResult(null, "DEFERRED", "VAULT_UNAVAILABLE");
+    } catch (StudioScheduleException ex) {
+      return new ScheduledResult(
+          null, ex.getStatus() == 503 ? "DEFERRED" : "REFUSED", ex.getCode());
+    } catch (StudioValidationException ex) {
+      return new ScheduledResult(null, "REFUSED", ex.getCode());
+    }
+  }
+
   @SuppressWarnings("checkstyle:ParameterNumber")
   public StudioAcceptanceService(
       StudioRepository tests,
@@ -102,6 +154,7 @@ public class StudioAcceptanceService {
         Clock.systemUTC());
   }
 
+  @Autowired
   @SuppressWarnings("checkstyle:ParameterNumber")
   StudioAcceptanceService(
       StudioRepository tests,
@@ -163,6 +216,22 @@ public class StudioAcceptanceService {
   // calls this inside a transaction, so the two are equivalent there.
   @Transactional
   public UUID accept(UUID testId, String principal, String idempotencyKey) {
+    return acceptCore(
+        testId,
+        principal,
+        idempotencyKey,
+        null,
+        () -> {
+          /* Manual requests have no scheduling deadline. */
+        });
+  }
+
+  private UUID acceptCore(
+      UUID testId,
+      String principal,
+      String idempotencyKey,
+      ScheduledIdentity scheduled,
+      Runnable beforeWrite) {
     if (!properties.enabledOrDefault()) {
       throw new StudioDispatchDisabledException("Studio execution is currently disabled");
     }
@@ -174,6 +243,10 @@ public class StudioAcceptanceService {
         tests
             .findByIdForUpdate(testId)
             .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + testId));
+    if (entityManager != null) {
+      entityManager.flush();
+      entityManager.refresh(test);
+    }
     if (test.getDeletedAt() != null) {
       throw new StudioConflictException("TEST_DELETED", "Test " + testId + " has been deleted");
     }
@@ -195,6 +268,10 @@ public class StudioAcceptanceService {
     ExecutionReadiness.Verdict verdict = readiness.evaluate(test);
     if (!verdict.ready()) {
       throw new StudioConflictException(verdict.errorCode(), verdict.message());
+    }
+    if (scheduled != null && !scheduled.revisionId().equals(test.getConfirmedRevisionId())) {
+      throw new StudioConflictException(
+          "ACTIVATION_REVISION_MISMATCH", "The activated revision changed before admission");
     }
 
     UITestRevision revision =
@@ -228,9 +305,13 @@ public class StudioAcceptanceService {
         ExecutionReferences.declared(objectMapper, revision.getReferences());
     Map<String, String> plainVariables = plainVariableValues(test, declarations);
     references.preflight(
-        test.getCsiId(), test.getEnvironment(), principal, secretsOnly(declarations));
+        test.getCsiId(), test.getEnvironment(), test.getId(), principal, secretsOnly(declarations));
 
     enforcePendingQuotas(test.getCsiId());
+
+    // Quota locks or Vault preflight may wait across grace expiry or a grant withdrawal.
+    // The schedule supplies a fresh injected-clock/grant check at the final write boundary.
+    beforeWrite.run();
 
     Instant acceptedAt = clock.instant();
     UITestExecution execution =
@@ -239,6 +320,20 @@ public class StudioAcceptanceService {
     execution.setPrincipal(principal);
     execution.setEnvironment(test.getEnvironment());
     execution.setRevisionId(revision.getId());
+    execution.setTriggerSource(scheduled == null ? "MANUAL" : "SCHEDULED");
+    if (scheduled != null) {
+      execution.setScheduleId(scheduled.scheduleId());
+      execution.setScheduleVersion(scheduled.scheduleVersion());
+      execution.setOccurrenceId(scheduled.occurrenceId());
+      execution.setScheduledAt(scheduled.scheduledAt());
+      execution.setActivationId(scheduled.activationId());
+      Map<String, Object> activation =
+          jdbc.queryForMap(
+              "SELECT activated_by,activated_at FROM studio_schedule_activations WHERE id=?",
+              scheduled.activationId());
+      execution.setActivatedBy((String) activation.get("activated_by"));
+      execution.setActivatedAt(((java.sql.Timestamp) activation.get("activated_at")).toInstant());
+    }
     execution.setConfigurationSnapshot(configurationSnapshot(test, revision, plainVariables));
     execution.setStepResults(pendingStepResults(steps));
     execution = executions.save(execution);
@@ -255,6 +350,9 @@ public class StudioAcceptanceService {
     // Queue time and browser runtime are separate budgets (AC-19): this is the pending SLA, and
     // start/run deadlines are assigned by the admission CAS from a different origin.
     row.setPendingDeadlineAt(acceptedAt.plus(properties.pendingSlaOrDefault()));
+    if (scheduled != null) {
+      row.setScheduledOccurrenceId(scheduled.occurrenceId());
+    }
     try {
       ledger.saveAndFlush(row);
     } catch (DataIntegrityViolationException e) {

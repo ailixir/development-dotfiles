@@ -1,0 +1,148 @@
+{
+  "storyId": "STUDIO-SCHED-001",
+  "critiquedAt": "2026-10-06T00:35:48Z",
+  "critiquedBy": "@qa",
+  "specVersion": 2,
+  "iteration": 2,
+  "verdict": "APPROVED",
+  "verdictReason": "All three critique1 findings are resolved in the revised requirements, specification, architect contract/research and associated Draft story. Every activation now has immutable human attribution, deferred interruptions and capability suspension have exact no-replay settlement rules, and fixed 60-second cadence is distinguished from configurable grace. Approved for the local default-off implementation after PO story readiness; no implementation test or production approval is claimed.",
+  "scores": {
+    "accuracy": 5,
+    "completeness": 5,
+    "consistency": 5,
+    "feasibility": 4,
+    "alignment": 5,
+    "average": 4.85
+  },
+  "issues": [],
+  "summary": {
+    "highIssues": 0,
+    "mediumIssues": 0,
+    "lowIssues": 0,
+    "autoFixable": 0,
+    "checksEvaluated": 21,
+    "checksPassed": 21,
+    "dimensionChecks": {
+      "accuracy": {
+        "passed": [
+          "acc-1",
+          "acc-2",
+          "acc-3",
+          "acc-4"
+        ],
+        "failed": []
+      },
+      "completeness": {
+        "passed": [
+          "comp-1",
+          "comp-2",
+          "comp-3",
+          "comp-4",
+          "comp-5"
+        ],
+        "failed": []
+      },
+      "consistency": {
+        "passed": [
+          "con-1",
+          "con-2",
+          "con-3",
+          "con-4"
+        ],
+        "failed": []
+      },
+      "feasibility": {
+        "passed": [
+          "feas-1",
+          "feas-2",
+          "feas-3",
+          "feas-4"
+        ],
+        "failed": []
+      },
+      "alignment": {
+        "passed": [
+          "align-1",
+          "align-2",
+          "align-3",
+          "align-4"
+        ],
+        "failed": []
+      }
+    }
+  },
+  "resolvedIssues": [
+    {
+      "issueId": "CRIT-1",
+      "status": "RESOLVED",
+      "evidence": [
+        "spec.md sections 3.3–3.4 and 6.2/AC-02/AC-10",
+        "implementation-contract.md API and Storage sections",
+        "requirements.json FR-10/FR-11 and AC-02/AC-10",
+        "associated story AC-02/AC-10 and A.1/A.3/C.3"
+      ],
+      "resolution": "Immutable studio_schedule_activations stores server-derived actor/time with owned schedule/version/confirmed revision/environment/principal for every successful Resume, including empty uncertainty. Current schedule and occurrences link exact activation events; run/list/snapshot/SSE/withTestName projects immutable activationId/activatedBy/activatedAt. Historical events survive later actors, edits, Resume and recreation; commit linkage verifies immutable matching provenance."
+    },
+    {
+      "issueId": "CRIT-2",
+      "status": "RESOLVED",
+      "evidence": [
+        "spec.md section 3.5 lifecycle/capability paragraphs and 6.2/AC-08",
+        "implementation-contract.md Deferred lifecycle settlement and Capability disable/reenable",
+        "requirements.json FR-08/AC-08 and lifecycle edge case",
+        "associated story AC-08/C.3/Dev Notes"
+      ],
+      "resolution": "Under test→schedule→occurrence locking, lifecycle interruption atomically settles deferred identity with explicit SKIPPED/SCHEDULE_PAUSED|UPDATED|REMOVED or specific REFUSED invalidation code; no orphan or revival on Resume. Capability disable preserves original grace/cursor and truthful suspended/expired presentation; reenable processes existing identity first, expires without send then advances future-only, or accepts same still-eligible identity once. Feature-off authoring hooks remain effective."
+    },
+    {
+      "issueId": "CRIT-3",
+      "status": "RESOLVED",
+      "evidence": [
+        "spec.md section 2.4/3.5/OQ-04 and revision record",
+        "implementation-contract.md Adopted implementation defaults",
+        "requirements.json ASM-01/OQ-04",
+        "research.json revised cadence decision",
+        "associated story adopted local defaults"
+      ],
+      "resolution": "Local minimum is fixed 60 seconds from zero-second minute grammar. Grace is independently configurable with 300-second default. A higher minimum requires a separate validated future policy; no unsupported configurable-minimum property is promised."
+    }
+  ],
+  "nextAction": "Complete independent PO story validation/Ready gate, then follow architect implementation plan and associated tracks. Preserve the dirty baseline, default-off capability, fail-closed production adapter, real PostgreSQL atomicity tests and independent implementation QA. Do not enable unattended production until external release evidence closes.",
+  "autoFixes": [],
+  "evidence": {
+    "inputHashes": {
+      "spec.md": "7f5b73428a8277cc1aefba24a495dc46079475635e76db114ebab68eb97360de",
+      "requirements.json": "65421f72b7ce3067782d853d49c4703578b4c2dd0dbeb6bfae0cf2788af4924e",
+      "implementation-contract.md": "3c2aed07202112ab9a7582bae4b59a7d07393505968239ff5ba51f43b7c11518",
+      "research.json": "bc6cac4d2395d5cecea9f457564652bac096f98573f448bebf8ce82ef07bf533"
+    },
+    "requirementCoverage": {
+      "functional": 16,
+      "nonFunctional": 8,
+      "constraints": 8,
+      "acceptanceCriteria": 14
+    },
+    "checksPerformed": [
+      "Read revised spec, requirements, contract, research and associated story against critique1 findings.",
+      "Checked all FR/NFR/CON IDs are present, exact actor/time/environment projection and lifecycle codes agree, and COMPLEX iteration2 metadata is recorded.",
+      "Reviewed source-established lock/transaction/readiness/dispatch/uncertainty constraints and prior planning specialist evidence.",
+      "Validated critique output shape, counts and weighted score."
+    ],
+    "notPerformed": [
+      "No application suite, PostgreSQL migration/concurrency experiment, browser test, production grant/secret revocation test, load test or deployment was run by specification critique.",
+      "Aria's previous installed-dependency DST probe was reviewed, not rerun by Quinn."
+    ],
+    "limits": [
+      "Real PostgreSQL deferred constraint, replica/race/rollback and retention evidence remains mandatory implementation validation; sound specification is not proof of implementation.",
+      "Production principal/live grants/vault, on-demand trust, sizing/retention and restore reconciliation remain release gates.",
+      "The declared spec-quality-checklist.md was absent; self-critique used all 21 explicit checks and verdict rules in declared spec-critique.md."
+    ]
+  },
+  "selfCritique": {
+    "performed": true,
+    "framework": ".aiox-core/development/tasks/spec-critique.md",
+    "referencedChecklistAvailable": false,
+    "verdictRulesApplied": "No HIGH or MEDIUM issues; all dimensions >=3; weighted average 4.85 >=4.0; APPROVED.",
+    "scopeDistinction": "Local specification gate only. No story lifecycle change, implementation verdict or production enablement approval."
+  }
+}

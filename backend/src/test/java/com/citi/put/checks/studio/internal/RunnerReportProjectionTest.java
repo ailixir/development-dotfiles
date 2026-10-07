@@ -313,6 +313,82 @@ class RunnerReportProjectionTest {
   }
 
   @Test
+  void theRunnersChromiumBuildKeyProjectsOntoRuntimeChromium() {
+    // VAL-018: the runner reports ADR-001's `chromiumBuild`; reading `chromium` left the public
+    // `runtime.chromium` null even in the pinned image.
+    RunnerReport report =
+        new RunnerReport(
+            EXECUTION,
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "studio-runner-0",
+            RunnerReport.PROGRESS,
+            2L,
+            NOW,
+            ORIGIN,
+            List.of(),
+            List.of(),
+            false,
+            Map.of("playwright", "1.63.0", "chromiumBuild", "141.0.7390.37"),
+            null,
+            null,
+            null);
+
+    assertThat(project(report).runtime().chromium()).isEqualTo("141.0.7390.37");
+    assertThat(serialize(project(report).runtime()))
+        .contains("\"chromium\":\"141.0.7390.37\"")
+        .doesNotContain("chromiumBuild");
+  }
+
+  // ── logs[].stepIndex (ADR-002 §33, VAL-012) ──────────────────────────────
+
+  @Test
+  void stepLinesProjectTheirStepIndexAndRunLevelLinesStayNull() {
+    RunnerReport report =
+        progress(
+            List.of(),
+            List.of(
+                new RunnerLogEntry(0.0, "info", "browser started", null),
+                new RunnerLogEntry(10.0, "info", "step 1 started", 1),
+                new RunnerLogEntry(20.0, "info", "step 1 PASS", 1),
+                new RunnerLogEntry(30.0, "info", "run PASSED")));
+
+    List<Integer> indexes =
+        project(report).logs().stream()
+            .map(com.citi.put.checks.studio.dto.ExecutionLogEntry::stepIndex)
+            .toList();
+
+    assertThat(indexes).containsExactly(null, 1, 1, null);
+  }
+
+  @Test
+  void aBodyWithoutStepIndexIsAnOlderRunnerAndDeserializesToNull() throws Exception {
+    RunnerLogEntry entry =
+        objectMapper.readValue(
+            "{\"atMs\":1.0,\"level\":\"info\",\"message\":\"step 0 started\"}",
+            RunnerLogEntry.class);
+
+    assertThat(entry.stepIndex()).isNull();
+    assertThat(project(progress(List.of(), List.of(entry))).logs().get(0).stepIndex()).isNull();
+  }
+
+  @Test
+  void aLogStepIndexTheRevisionDoesNotHaveIsA400() {
+    RunnerReport pastTheEnd =
+        progress(
+            List.of(), List.of(new RunnerLogEntry(1.0, "info", "step 3 started", original.size())));
+    RunnerReport negative =
+        progress(List.of(), List.of(new RunnerLogEntry(1.0, "info", "step -1 started", -1)));
+
+    assertThatThrownBy(() -> project(pastTheEnd))
+        .isInstanceOf(StudioValidationException.class)
+        .hasMessageContaining("Log stepIndex 3");
+    assertThatThrownBy(() -> project(negative))
+        .isInstanceOf(StudioValidationException.class)
+        .hasMessageContaining("Log stepIndex -1");
+  }
+
+  @Test
   void runnerSequenceIsNeverTheRevision() {
     RunnerReportProjection.Projected projected = project(terminal(RunOutcome.PASSED, null, null));
 

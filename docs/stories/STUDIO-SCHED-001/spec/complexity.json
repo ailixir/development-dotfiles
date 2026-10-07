@@ -1,0 +1,50 @@
+{
+  "storyId": "STUDIO-SCHED-001",
+  "assessedAt": "2026-10-06T00:26:29Z",
+  "assessedBy": "@architect",
+  "result": "COMPLEX",
+  "overridden": false,
+  "dimensions": {
+    "scope": {
+      "score": 5,
+      "notes": "More than 20 files across Studio storage/admission/readiness/authoring/dispatch/history, worker configuration, OpenAPI, frontend API/MSW/management/history, and real concurrency tests."
+    },
+    "integration": {
+      "score": 3,
+      "notes": "New internal Studio schedule APIs and background authorization seam integrate existing Vault, immutable revisions and runner dispatch; real external principal integration stays a release gate."
+    },
+    "infrastructure": {
+      "score": 4,
+      "notes": "Forward-only V26 adds owned schedule/occurrence/ack tables, ownership constraints, scheduled ledger identity, durable uncertainty and partition-safe trigger attribution; no new service."
+    },
+    "knowledge": {
+      "score": 2,
+      "notes": "Existing Java21/Spring/JDBC/PostgreSQL/React/MUI patterns reused; new atomic occurrence, DST suppression and failclosed background authorization composition verified by source and primary docs."
+    },
+    "risk": {
+      "score": 5,
+      "notes": "Duplicate UI effects, lost atomic acceptance, callback lock inversions, revoked unattended grants and ambiguity after history pruning are core trust risks requiring PostgreSQL race and rollback evidence."
+    }
+  },
+  "totalScore": 19,
+  "pipelinePhases": [
+    "gather",
+    "assess",
+    "research",
+    "spec",
+    "critique_1",
+    "revise",
+    "critique_2",
+    "plan"
+  ],
+  "flags": [
+    "Architectural and independent QA review required",
+    "Use dependency-ordered slices inside associated implementation story",
+    "No product code before approved spec and Ready story",
+    "Production background grants and real Studio pilot remain release gates",
+    "Preserve existing dirty baseline and manual behavior"
+  ],
+  "estimatedEffort": "3+ days typical complexity band; advisory, not a delivery promise",
+  "inputRequirements": "docs/stories/STUDIO-SCHED-001/spec/requirements.json",
+  "implementationContract": "docs/stories/STUDIO-SCHED-001/spec/implementation-contract.md"
+}

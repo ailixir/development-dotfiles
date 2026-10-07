@@ -152,13 +152,13 @@ All values live in one configuration source, under `studio.*` in `application.ym
 | Total source bytes | `studio.compile.authoring.max-source-bytes` | 65536 | `400 SOURCE_TOO_LARGE` |
 | Pipeline concurrency | `studio.compile.pipeline.concurrency` | 4, no queue | refuse → `STALE COMPILE_POOL_SATURATED` |
 | Per-request budget | `studio.compile.pipeline.attempt-budget` | 240s | abandon → `STALE COMPILE_BUDGET_EXCEEDED`; late result dropped |
-| Repair attempts | `studio.compile.repair.max-attempts` | 2 | exhaustion → `NEEDS_REVISION` with `exhausted: true` |
+| Repair attempts | `studio.compile.repair.max-attempts` | 2 | validator exhaustion → `NEEDS_REVISION` with `exhausted: true`; parser-rejected envelope exhaustion → `STALE GATEWAY_PARSE_FAILURE` (VAL-019b) |
 | Sweep threshold | `studio.compile.abandonment.threshold` | 300s | older `COMPILING` rows → `STALE COMPILE_BUDGET_EXCEEDED`, retryable |
 | Sweep batch size | `studio.compile.abandonment.batch-size` | 200 | the run stops at the cap; the next run continues |
 | Sweep interval | `studio.compile.abandonment.interval-ms` | 15000 | one bounded statement per replica per interval, `FOR UPDATE SKIP LOCKED` |
 | `/v1/validate` timeout | `studio.runner.validate-timeout` | 10s | one call, no retry → `STALE VALIDATOR_UNAVAILABLE` |
 | Gateway input/output bytes | `studio.compile.gateway.max-{input,output}-bytes` | 262144 | `COMPILE_INPUT_TOO_LARGE` / `GATEWAY_OUTPUT_TOO_LARGE` |
-| Gateway request timeout | `studio.compile.gateway.request-timeout` | 60s | `GATEWAY_TIMEOUT` |
+| Gateway request timeout | `studio.compile.gateway.request-timeout` | 150s, capped by the remaining budget | `GATEWAY_TIMEOUT` |
 | Gateway concurrency | `studio.compile.gateway.max-concurrency` | 4 | `GATEWAY_BUSY`; never queued |
 | Gateway transport retry | `studio.compile.gateway.retry.max-retries` | 2 | `GATEWAY_TRANSPORT` after exhaustion |
 | Diagnostics per step | `studio.compile.diagnostics.max-per-step` | 10 | truncate with an explicit marker |
@@ -166,16 +166,13 @@ All values live in one configuration source, under `studio.*` in `application.ym
 | `compile_diagnostics` total | `studio.compile.diagnostics.max-total-bytes` | 65536 | truncate with an explicit marker |
 | Compile cache | — | **disabled in V1** | no cache exists |
 
-Three startup rules, all checked during context refresh so a misconfigured deployment fails to
-start rather than failing its first compile:
-
-1. `pipeline.attempt-budget > gateway.request-timeout` — or a slow gateway call would be abandoned
-   by the budget before the gateway gave up and the recorded code would name the wrong bound.
-2. `pipeline.attempt-budget > (1 + repair.max-attempts) × (gateway.request-timeout +
-   runner.validate-timeout)` — **3 × (60s + 10s) = 210s**, cleared by 240s. Without it a healthy
-   repair loop could be abandoned mid-repair by arithmetic nobody had done.
-3. `sweep.threshold > pipeline.attempt-budget` — or the sweep could take a compile that is still
-   legitimately running.
+The startup check enforces `sweep.threshold > pipeline.attempt-budget`, or the sweep could take a
+compile that is still legitimately running. The budget is shared by every proposal, repair and
+validation of one request, and each gateway call is capped at `min(request-timeout, remaining)` and
+cancelled by the deadline timer (C0 §5, VAL-007), so it is not required to fit every repair. The
+earlier `(1 + repairs) × (request-timeout + validate-timeout)` claim was removed; `RepairBoundsTest`
+instead checks that one full attempt fits: `request-timeout + validate-timeout < attempt-budget`
+(150s + 10s < 240s).
 
 Raising the budget from 180s to 240s costs observable **saturation**, not correctness: the pool is
 four threads with no queue, so a worst-case request now holds a slot for 240s instead of 180s. That

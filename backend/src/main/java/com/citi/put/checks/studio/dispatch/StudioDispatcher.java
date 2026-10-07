@@ -308,7 +308,7 @@ public class StudioDispatcher {
     DispatchOutcome outcome;
     // Resolution happens here and nowhere else, and the values leave this block only on the wire.
     try (StudioReferenceResolver.Resolved resolved =
-        references.resolve(csiId, environment, principal, secretsOnly(declarations))) {
+        references.resolve(csiId, environment, testId, principal, secretsOnly(declarations))) {
       recordDispatchPolicy(executionId, policyIdentity, resolved.secretVersions());
       Map<String, String> plainVariables = plainVariablesOf(executionId, declarations);
 

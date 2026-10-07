@@ -1,0 +1,680 @@
+schema: 1
+story: ui-studio-validation-20261004
+story_title: UI Studio live validation, Phase 8 close-out (VAL-001..031)
+spec: docs/stories/UI-STUDIO-VALIDATION-20261004/validation-plan.md
+inputs:
+  - docs/stories/UI-STUDIO-VALIDATION-20261004/VAL-006-design.md
+  - docs/stories/UI-STUDIO-VALIDATION-20261004/VAL-012-014-017-rulings.md
+  - docs/stories/UI-STUDIO-VALIDATION-20261004/VAL-019-007-rulings.md
+  - docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/{report.md,summary.json,results.jsonl}
+reviewer: '@qa (Quinn)'
+reviewed_at: '2026-10-04'
+scope: >-
+  Uncommitted working tree on brunobuger/ui-studio at HEAD 13ec11d1c (127 status paths at review
+  time). It holds the vault-secrets work, already gated PASS in studio-vault-secrets.yml and not
+  re-reviewed here, plus today's VAL fixes in backend, studio-runner, frontend and docs.
+mode: YOLO, read-only on source. No source or test edits, no commits.
+
+gate: CONCERNS
+status_reason: >-
+  Every VAL item marked fixed traces to code and a test. The targeted backend classes passed
+  fresh (150/150), the runner unit tier passed (1153 pass, 29 skipped), and the live
+  spot-checks matched the log for VAL-006, -012, -021, -022, -023, -029 and -030. No secret, URL
+  query or fragment, or model text leaked in the paths I checked. The openapi anchor matches.
+  It is not a PASS for three reasons. (1) The full frontend vitest suite, run for the first time
+  today (VAL-003), is not green: 716/717 in two consecutive runs. One test, in a file this diff
+  does not touch, times out under suite load. (2) No Docker integration test ran, including the
+  ones that cover today's contract and save-path changes (StudioContractTest, ProgressCallbackIT,
+  CompilePipelineIT, StudioApiIT). (3) The VAL-030 provider schema (anyOf) is unverified on the
+  R2D2 proxy and has no fallback switch, so a proxy that rejects it would stop every compile.
+  None of these is a known defect in today's code, so the verdict is CONCERNS rather than FAIL.
+  Items 1 and 2 must be closed before push. Item 3 must be closed before any R2D2 deployment.
+
+verification:
+  ran:
+    - cmd: 'frontend: pnpm exec tsc --noEmit'
+      result: exit 0, no diagnostics
+    - cmd: 'frontend: pnpm exec vitest run (FULL suite, run twice, the second time with nothing else running)'
+      result: >-
+        Both runs: 60 files, 716 passed and 1 failed (717). The failure is StudioTestsPage.test.tsx >
+        "requires a registered system instead of silently sending a stale default", timed out at
+        5000ms. Run alone, the file passes 3/3 and that test takes 2349ms. The file was last
+        changed in 554277fcb (Story 10.44) and is not in today's diff. About 5,000 "not wrapped in
+        act" warnings per run (VAL-005).
+    - cmd: 'frontend: pnpm exec eslint <20 changed or new .ts/.tsx files under src/>'
+      result: 0 errors, 24 warnings (all @typescript-eslint/no-explicit-any)
+    - cmd: 'studio-runner: npm run type-check'
+      result: exit 0
+    - cmd: 'studio-runner: npm run lint'
+      result: exit 0, 0 problems
+    - cmd: 'studio-runner: ./node_modules/.bin/vitest run --coverage.enabled=false (unit tier)'
+      result: 58 files passed and 1 skipped; 1153 tests passed and 29 skipped. Matches the 1153 the log records for VAL-029.
+    - cmd: >-
+        backend: ./gradlew test --tests LiveProposalPipelineTest --tests CompileBudgetPropagationTest
+        --tests RepairLoopTest --tests RepairBoundsTest --tests GatewayResponseParserTest --tests
+        GenAiGatewayAuditTest --tests GenAiLlmGatewayClientTest --tests ProviderSchemaDeterminismTest
+        --tests StudioGatewayPropertiesTest --tests RunnerReportProjectionTest --tests CompileBoundsTest
+        --tests LegacyStudioAdapterTest --tests StudioWriteValidationControllerTest --tests
+        CompilePipelineSourceAdmissionTest --tests InternalBodyContractConformanceTest --tests
+        ExecutionVideoContractTest
+      result: >-
+        BUILD SUCCESSFUL. JUnit XML timestamps are 2026-10-05T03:22Z, after the run started at
+        03:22:00Z, so the results are fresh. 150 tests, 0 failures, 0 errors, 0 skipped. Per class:
+        LiveProposal 4, BudgetPropagation 1, RepairLoop 14, RepairBounds 7, ResponseParser 14,
+        GenAiAudit 3, GenAiClient 17, SchemaDeterminism 6, GatewayProperties 9,
+        RunnerReportProjection 22, CompileBounds 15, LegacyAdapter 11, WriteValidationController 5,
+        SourceAdmission 2, InternalBodyConformance 3, ExecutionVideoContract 17.
+    - cmd: 'backend: ./gradlew spotlessCheck checkstyleMain checkstyleTest'
+      result: BUILD SUCCESSFUL. spotlessCheck was UP-TO-DATE (cached clean); checkstyleMain and checkstyleTest executed with no violations.
+    - cmd: shasum -a 256 docs/specs/studio/openapi.yaml
+      result: 5571bee00e563ed20bfce80edfc407aefc85e2aef2ed74e9d0518adbeca0f629, equal to BASE_SHA256 at studio-runner/test/run/confinement.test.ts:254
+    - cmd: live API, csiId 178672, 3 Vertex calls (budget was 15)
+      result: >-
+        VAL-021: POST steps [] → 201, then compile → 400 INVALID_STEPS "This test has no steps…".
+        VAL-022: POST with a blank step 2 → 400 INVALID_STEPS "Step 2 is blank…". PUT with a "\t "
+        step → 400.
+        VAL-023: timeoutSeconds 0 → 400 and 121 → 400 INVALID_CONFIGURATION; 120 → 201.
+        VAL-006: 2-step example.com test → READY in 4s on 1 attempt. The artifact has
+        stepIndex 0..1 and originalText matching the source byte for byte, with no
+        kind/stepId/status keys.
+        VAL-030: "Check the server CPU is below 50%" → NEEDS_REVISION in 4s, attempts=1,
+        UNSUPPORTED_CAPABILITY at stepIndex 1, not GATEWAY_PARSE_FAILURE.
+        VAL-012: that test's run PASSED. Step log lines carry stepIndex 0/1, and the
+        browser-started and run lines carry null. Video AVAILABLE, partial=false.
+        VAL-029: goto to https://qagate-val029.invalid/reset/path?token=QAGATESECRET42&x=1#fragQA
+        → FAILED "goto failed: the address could not be reached (net::ERR_NAME_NOT_RESOLVED).
+        (page: about:blank)". The token and fragment appear only in stepResults[0].originalText,
+        which is the author's own step. They are not in any message, not in any log line, and not
+        in the backend dev log.
+        Audit lines show promptVersion=2.3.0, syntaxReferenceVersion=2.1.0, thinkingLevel=LOW,
+        rejectReason=null and rejectStepIndex=null. No model text appears in them.
+  not_run:
+    - 'Docker is down, so no Testcontainers IT ran. Not run is not passed. These cover today''s changes: StudioContractTest (schema-to-record parity for RunnerLogEntry.stepIndex), ProgressCallbackIT and EvidencePartialCallbackIT (VAL-012 end to end), CompilePipelineIT and StudioCoRunIT (compile pipeline on Postgres), StudioApiIT and StudioAuthoringApiIT (VAL-021/022/023 save path), AcceptanceIT and DispatcherIT. The vault ITs (StudioSecretsControllerIT, PlaintextSecretsDropMigrationIT) were last run green on 2026-09-23 per studio-vault-secrets.yml.'
+    - 'full ./gradlew test / check, not run on instruction. A devtools restart was accepted, but compileJava was UP-TO-DATE, so the live JVM was not recompiled.'
+    - 'studio-runner deployment tier (helm/docker/image) and fixtures tier.'
+    - 'VAL-019b live: a parser rejection followed by a repair cannot be forced on Vertex. It is covered by unit tests only (RepairLoopTest: aParserRejectedEnvelopeConsumesOneRepairAndTheRepairPublishes, parserRejectionsOnEveryAttempt…EndStale…, aParserRejectionOnARepair…; GenAiGatewayAuditTest: aStepRejectionIsAuditedAsACodeAndPositionWithoutTheModelText).'
+    - 'VAL-020 and VAL-028 live: I did not reproduce them. Google /sorry is not deterministic, and the strict-mode locator from the log no longer occurs. Unit tests cover both (executor.test.ts sorry-page cases; adapter.test.ts describeActionFailure/describeNavigationFailure/sanitizeTitle). The VAL-020 live claim in the log is the lead''s, not mine.'
+    - 'R2D2 proxy path: no access. The anyOf schema was verified on direct Vertex only.'
+    - 'CodeRabbit: the skill needs WSL, and this host is darwin. Not run.'
+
+ac_trace:
+  VAL-002: {status: FIXED, evidence: 'SecretInput.test.tsx passed in both full-suite runs. The same load-sensitivity now shows in another file (QA-1).'}
+  VAL-003: {status: PARTIAL, evidence: 'Full FE suite now run: 716/717. Runner deployment tier and backend ITs are still not run.'}
+  VAL-004: {status: FIXED, evidence: 'GenAiLlmGatewayClient.transportBuilder sets connect, read, write and call timeouts from request-timeout. GenAiLlmGatewayClientTest 17/17. Live calls returned OK in 1.8–2.4s (LOW).'}
+  VAL-006: {status: FIXED, evidence: 'CompilePipeline assembles via IncrementalAssembler when returnsProposalEnvelope(). lastRejectedProposal stays the envelope. UNSUPPORTED/CLARIFICATION ends NEEDS_REVISION with no validator call. LiveProposalPipelineTest 4/4. Live READY with an artifact-shaped document.'}
+  VAL-007: {status: 'APPLIED (perf item stays open as UX)', evidence: 'application.yml thinking-level ${..:LOW}, request-timeout 150s. Request budget passed to propose(prompt, settlement.budget()). CompileBudgetPropagationTest 1/1, RepairBoundsTest 7/7 with the arithmetic rule replaced. Live audit thinkingLevel=LOW, about 2s per call.'}
+  VAL-011: {status: FIXED, evidence: 'describeLastReading uses only the error name. Covered in the runner unit tier.'}
+  VAL-012: {status: 'FIXED (unit + live); Docker parity not run', evidence: 'RunnerLogEntry.stepIndex is optional and nullable. Projection range-checks it, and RunnerReportProjectionTest passed 22/22. Runner bounds/reporter copy it. openapi and ADR-002 §33 updated and anchor re-hashed. Live: step lines 0/1, run lines null.'}
+  VAL-013: {status: FIXED, evidence: 'pageLocation.ts emits origin+path only, redacts before cutting, and takes at most 500ms. Live: "(page: about:blank)" suffix.'}
+  VAL-017: {status: 'FIXED (superseded design)', evidence: 'ChecksStudioPage.tsx:573 forces DEFAULT_STEP_TIMEOUT_SECONDS. pageStepTimeout.test.tsx passed in the full suite. See QA-8.'}
+  VAL-018: {status: FIXED (unit), evidence: 'RunnerReportProjection reads chromiumBuild. Covered by RunnerReportProjectionTest. Cannot be observed live (local chromiumBuild is null).'}
+  VAL-019: {status: FIXED (unit), evidence: 'ProposalRejection is a closed enum. Duplicate keys and trailing content are told apart by which parse stage fails, never by the exception message. Audit adds rejectReason and rejectStepIndex only. A parser rejection consumes one repair with ENVELOPE_INSTRUCTIONS plus the enum and position, never model text. Exhaustion ends STALE GATEWAY_PARSE_FAILURE (D1). FINISH_REASON, ASSEMBLY_FAILED and ARTIFACT_VERSION stay terminal. PROMPT_VERSION is 2.3.0, and output-contract.md changed by only its header line (diff 1+/1-). RepairLoopTest 14/14, GatewayResponseParserTest 14/14, GenAiGatewayAuditTest 3/3, all with a canary negative control.'}
+  VAL-020: {status: FIXED (unit; live per log), evidence: 'sanitizeTitle reduces every URL-like token to origin+path before redaction. Covered by the executor.test.ts sorry-page cases.'}
+  VAL-021: {status: FIXED (verified live by @qa), evidence: 'AuthoringLimits refuses empty source with INVALID_STEPS. CompileBoundsTest 15/15, CompilePipelineSourceAdmissionTest 2/2.'}
+  VAL-022: {status: FIXED (verified live by @qa), evidence: 'LegacyStudioAdapter.validateForWrite and the compile check share blankStepMessage. LegacyStudioAdapterTest 11/11, StudioWriteValidationControllerTest 5/5.'}
+  VAL-023: {status: FIXED (verified live by @qa), evidence: 'INVALID_CONFIGURATION outside 1..120, with no coercion. Same tests as VAL-022.'}
+  VAL-026: {status: FIXED (unit), evidence: 'CompileElapsed/formatElapsed and the backoff schedule. compileWait.test.tsx passed in the full suite. I did not look at it live.'}
+  VAL-028: {status: FIXED (unit only), evidence: 'describeActionFailure emits fixed phrases and parses the match count as an integer only. Runner unit tier green.'}
+  VAL-029: {status: FIXED (verified live by @qa), evidence: 'describeNavigationFailure keeps only a whole net::ERR_* token. Live message carried no query, fragment or host.'}
+  VAL-030: {status: 'FIXED on Vertex (verified live by @qa); R2D2 unverified', evidence: 'providerSchema is a per-status anyOf and PROVIDER_SCHEMA_VERSION=2. ProviderSchemaDeterminismTest 6/6, plus compilationSettingsRecordProviderSchemaVersionTwo. Live refusal returned NEEDS_REVISION on 1 attempt.'}
+  by_design_or_deferred: 'VAL-008 (dev env), VAL-014 (deferred, rule-7 text ready), VAL-015 (by design)'
+  open: 'VAL-001, VAL-005, VAL-009, VAL-010, VAL-016, VAL-024, VAL-025, VAL-027, VAL-031'
+
+security_checks:
+  model_text_never_logged: >-
+    PASS. Audit and WARN lines carry the enum and integer only, and the reason string is never
+    logged. GenAiGatewayAuditTest and RepairLoopTest assert the canary is absent. In the live
+    audit lines, rejectReason and rejectStepIndex are null and no text appears.
+  model_text_never_fed_back: >-
+    PASS. envelopeRepairContext is ENVELOPE_INSTRUCTIONS plus the enum name and steps[i] only.
+    RepairLoopTest asserts doesNotContain(canary).
+  runner_failure_text: >-
+    PASS. Action and navigation failures are fixed phrases (VAL-028/029), and the page suffix is
+    origin+path with the title sanitized and redacted before it is cut (VAL-013/020). Live VAL-029
+    check was clean. Residuals: QA-6 and QA-7.
+  redaction_ordering: >-
+    PASS. formatPageLocation: locationOf, then redactor.redact, then cut. The title goes through
+    sanitizeTitle, then redact, then cut. failureWithLocation never cuts the suffix below half the
+    budget.
+  contract_anchor: PASS. The openapi sha256 equals BASE_SHA256. ADR-002 §13 row and §33 are present for VAL-012/018.
+  version_pins: >-
+    PASS with impact. PROMPT_VERSION 2.3.0, providerSchemaVersion 2 and thinkingLevel LOW are all
+    fingerprint inputs, so every test does one FULL recompile (FINGERPRINT_CHANGE) the first time
+    it is compiled after release. Release all three together so that this happens once.
+    SYNTAX_REFERENCE_VERSION is unchanged at 2.1.0 (CompilePins.java:27, live audit), so
+    confirmed revisions stay runtime-compatible and scheduled runs are not invalidated.
+
+findings:
+  - id: QA-1
+    severity: MEDIUM
+    owner: '@dev'
+    type: test reliability (blocks a green full FE suite)
+    location: frontend/src/pages/StudioTestsPage/StudioTestsPage.test.tsx:113
+    basis: verified, 2 of 2 full-suite runs
+    issue: >-
+      "requires a registered system instead of silently sending a stale default" times out at
+      5000ms in the full suite. It takes 2349ms alone. This is the same load-sensitivity class as
+      VAL-002, in a file the diff does not touch. My inference is that it is pre-existing. I did
+      not check it at HEAD without the diff.
+    recommendation: Apply the VAL-002 remedy (userEvent.setup({delay:null}) and paste-based fill) to this test, then re-run the full suite to green.
+
+  - id: QA-2
+    severity: HIGH
+    owner: '@dev + @devops (R2D2 owner)'
+    type: release risk (availability)
+    location: backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java:310,450-477
+    basis: verified by reading; the R2D2 behaviour itself is unknown
+    issue: >-
+      responseJsonSchema now sends a per-status anyOf on every call. No property switches it,
+      because structured-output does not gate the schema. Whether the R2D2 proxy accepts anyOf is
+      untested. If it rejects it, every compile on that path fails, and the only remedy is a code
+      revert.
+    recommendation: Before any R2D2 deployment, run one probe call through the proxy with the v2 schema. Alternatively, add a ProviderFeatures switch that falls back to the v1 schema. That fallback would bring back the VAL-030 refusal loss, so it is a degraded mode, not a fix.
+
+  - id: QA-3
+    severity: MEDIUM
+    owner: '@qa / @devops'
+    type: coverage gap
+    location: backend ITs (see verification.not_run)
+    basis: Docker down, verified
+    issue: >-
+      StudioContractTest parity for the closed RunnerLogEntry, ProgressCallbackIT end to end,
+      CompilePipelineIT and the save-path ITs have not run against today's diff. ADR-002 §13
+      records that parity was checked by reading only.
+    recommendation: Run ./gradlew check with Docker up before @devops pushes. Treat any IT failure as a gate re-open.
+
+  - id: QA-4
+    severity: MEDIUM
+    owner: '@devops'
+    type: release constraint
+    location: ADR-002 §33.3; backend RunnerLogEntry (ignoreUnknown=false)
+    basis: ruling (inferred by @architect from ignoreUnknown=false; not executed)
+    issue: >-
+      A new runner talking to an old backend sends stepIndex. The old backend rejects every
+      progress and final report, and runs get reaped. Nothing technical enforces the
+      backend-first order.
+    recommendation: Deploy the backend before studio-runner, or ship both in one release with the backend rolled out first. Put this in the release checklist.
+
+  - id: QA-5
+    severity: LOW
+    owner: '@dev (@architect for the class call)'
+    type: contract documentation drift
+    location: docs/specs/studio/openapi.yaml (POST/PUT /tests 400, POST /tests/{id}/compile 400)
+    basis: verified by grep
+    issue: >-
+      The openapi 400 descriptions do not list INVALID_STEPS on POST, PUT or compile. They mention
+      INVALID_CONFIGURATION only for a non-chromium engine, not for timeoutSeconds outside 1..120.
+      API behaviour changed for clients: timeoutSeconds 0 used to be coerced to 30 and is now 400.
+      The schema already declared 1..120, so the server now conforms to it. This widens VAL-027.
+    recommendation: Document the codes under VAL-027. Any openapi edit has to re-anchor BASE_SHA256 from shasum.
+
+  - id: QA-6
+    severity: LOW
+    owner: '@dev'
+    type: defence in depth
+    location: backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java (rejectionOutcome); DiagnosticsBounder.java:15
+    basis: verified by reading
+    issue: >-
+      The model's UNSUPPORTED/CLARIFICATION message (up to 400 chars) is stored in
+      compileDiagnostics and shown to the author. Nothing runs it through SecretMasker, and
+      DiagnosticsBounder only bounds it, although its javadoc says "Bounds and redacts". The
+      model's input is author source that has already passed the inline-credential screen, so my
+      inference is that the real risk is low.
+    recommendation: Pass the message through the same masker used for repair context, or correct the javadoc.
+
+  - id: QA-7
+    severity: INFO
+    owner: '@dev (runner)'
+    type: consistency
+    location: studio-runner/src/executor/pageLocation.ts; studio-runner/src/run/playwrightAdapter.ts (describeLastReading)
+    basis: verified by reading
+    issue: >-
+      The VAL-013 suffix keeps the non-URL part of the page title, which is page text. The
+      assertion path still emits `last seen "<observed text>"`. The VAL-028 row says the assertion
+      path "deliberately suppresses page text", but that is only true for Playwright error
+      messages, not for the observed value. Both are bounded and redacted, and both are
+      pre-existing or ruled design.
+    recommendation: Correct the wording in the log. No code change is required.
+
+  - id: QA-8
+    severity: INFO
+    owner: '@ux / user'
+    type: behaviour note
+    location: frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:573
+    issue: >-
+      Every UI save rewrites configuration.timeoutSeconds to 30. A value an API client set (for
+      example the 10 on "VAL nav failure 2") is reset without notice. This is the user's VAL-017
+      decision, recorded here so that it is not reported as a bug later.
+
+  - id: QA-9
+    severity: INFO
+    owner: '@architect'
+    type: doc consistency
+    location: docs/architecture/ADR-002-internal-contract-surface.md §13 row 2026-10-04
+    issue: The ADR names the stepIndex promotion item O-21. The ruling file names it O-17. One of them should be aligned.
+
+  - id: QA-10
+    severity: INFO
+    owner: lead
+    type: scope hygiene
+    location: frontend/src/services/api/studioApi.ts (M), frontend/src/components/studio/list/ (new)
+    basis: verified (mtime 23:21 local, during this gate)
+    issue: >-
+      These paths changed while the gate was running and are not in the VAL log. I did not review
+      them. The second full FE run may have included them.
+    recommendation: Gate them with their own story before the push.
+
+top_issues:
+  - {id: QA-2, severity: HIGH, owner: '@dev + @devops', summary: 'anyOf provider schema unverified on R2D2, no fallback'}
+  - {id: QA-1, severity: MEDIUM, owner: '@dev', summary: 'full FE suite 716/717 (load timeout)'}
+  - {id: QA-3, severity: MEDIUM, owner: '@qa/@devops', summary: 'Docker ITs not run against today''s diff'}
+  - {id: QA-4, severity: MEDIUM, owner: '@devops', summary: 'backend-before-runner deploy order (VAL-012)'}
+  - {id: ED-02, severity: MEDIUM, owner: 'ED-02 owner (PUT Core)', summary: 'credentialed pilot gate still open (application.yml:129); unchanged by this work'}
+
+release_constraints:
+  - Backend deploys before studio-runner (VAL-012, ADR-002 §33.3).
+  - Ship PROMPT_VERSION 2.3.0, providerSchemaVersion 2 and thinking LOW together, so tests recompile once.
+  - No R2D2 rollout until QA-2 is probed.
+  - No credentialed pilot until ED-02 closes.
+
+waiver: {active: false}
+recommendations:
+  immediate:
+    - 'QA-1: fix the timeout and re-run the full FE suite to 717/717.'
+    - 'QA-3: run ./gradlew check with Docker up.'
+  before_r2d2_release:
+    - 'QA-2: probe the proxy with the v2 schema, or add a fallback switch.'
+  future:
+    - QA-5 / VAL-027, document the 400 codes
+    - QA-6, mask or correct the javadoc
+    - 'open items: VAL-001 (runtime secrets flag story), VAL-005, VAL-009, VAL-010, VAL-016, VAL-024, VAL-025, VAL-027, VAL-031'
+
+# ---------------------------------------------------------------------------------------------
+# Re-gate. The first verdict above (CONCERNS) is kept as history; this section supersedes it.
+# ---------------------------------------------------------------------------------------------
+regate_2026-10-04b:
+  reviewer: '@qa (Quinn)'
+  reviewed_at: '2026-10-05T04:15Z (session of 2026-10-04 local)'
+  scope: >-
+    Same uncommitted tree on brunobuger/ui-studio at HEAD 13ec11d1c (169 status paths at the end).
+    Fixes since the first gate: VAL-009, -024, -025, -027, -031, -032, -033. The frontend tree was
+    being edited by @dev during this gate (VAL-035..039 "in fix"); every frontend result below is
+    pinned to one snapshot, sha256 of (git diff src + untracked src) = 3e0feb05d755..., unchanged
+    across tsc, eslint and both vitest runs. Backend and studio-runner sources did not change
+    after the backend check started (find -newer, verified).
+  mode: YOLO, read-only on source. No commits. Docker 27.4.0 up.
+
+  gate: CONCERNS
+  status_reason: >-
+    The two conditions the first gate set for PASS are met and verified fresh: the full backend
+    ./gradlew check is green with every Testcontainers IT (1435 tests, 0 failures, 0 errors), and
+    the full frontend suite is green twice (770/770). The runner unit, fixtures and deployment
+    tiers are green. The contract anchor matches. Live, VAL-024, VAL-027 (server half) and
+    executor 2.1.0 behave as logged, and a pre-compiled Wikipedia revision PASSED on executor
+    2.1.0. It is still not a PASS, for three reasons. (1) Five issues found after the first gate
+    (VAL-035..039) are "in fix". Their fixes and tests are in the snapshot I ran and are green,
+    but I have not reviewed them, and VAL-039 (one Run click, two executions) is a HIGH defect
+    that needs a live re-test. (2) The openapi amendment for VAL-027/QA-5 is recorded in ADR-002
+    §13 as Class A. Under §12 it is Class C, which needs an @architect ruling, and that ruling has
+    not been made. (3) A fresh Wikipedia compile today produced an ambiguous getByPlaceholder
+    locator and FAILED at step 2. This is the third occurrence of VAL-014, which is deferred by
+    user decision. None of these is a defect in the VAL fixes under review, so the verdict is
+    CONCERNS, not FAIL.
+
+  verification:
+    ran:
+      - cmd: 'backend: ./gradlew check --console=plain (started 2026-10-05T03:49:51Z)'
+        result: >-
+          BUILD SUCCESSFUL in 14m10s, exit 0. spotlessCheck, checkstyleMain/Test, spotbugsMain,
+          test, jacocoTestReport and jacocoTestCoverageVerification all executed. spotbugsTest
+          is SKIPPED by build configuration. JUnit XML (written 04:03Z, after the start, so
+          fresh): 259 classes, 1435 tests, 0 failures, 0 errors, 18 skipped. The skips are
+          StudioCoRunIT 11 (@EnabledIfEnvironmentVariable STUDIO_CORUN=1; it is run by
+          tools/corun.sh and is outside check by design), ExternallyGatedCriteriaTest 3,
+          ExecutionVideoExternallyGatedCriteriaTest 2, TargetPolicyGapTest 1 and
+          ExecutionReadinessTest 1, which are externally gated by design. There were no
+          environmental failures: GreenMail port 3025 had no listener before the run (lsof),
+          and no BindException appears in the log.
+        key_its: >-
+          StudioContractTest 14, ProgressCallbackIT 16, EvidencePartialCallbackIT 16,
+          CompilePipelineIT 15, StudioApiIT 7, StudioAuthoringApiIT 5, OptimisticSaveIT 3,
+          DispatcherIT 26, AcceptanceIT 11, StudioSecretsControllerIT 12,
+          PlaintextSecretsDropMigrationIT 2, DiagnosticsExposureEscalationTest 5 (VAL-033),
+          LiveProposalPipelineTest 5, CompileFingerprintTest 9. All have 0 failures.
+      - cmd: 'frontend: pnpm exec tsc --noEmit (run twice, before and at the pinned snapshot)'
+        result: exit 0 both times
+      - cmd: 'frontend: pnpm exec vitest run (FULL suite, twice, back to back, snapshot unchanged)'
+        result: >-
+          Run 1: 67 files, 770/770 in 69.7s. Run 2: 67 files, 770/770 in 74.4s. Both exit 0.
+          About 6,600 "not wrapped in act" warnings per run (VAL-005, deferred). The 770
+          include @dev's in-flight VAL-035..039 tests (runActivation.test.tsx,
+          pageAuthoringUx.test.tsx, evidenceExpiry.test.tsx).
+      - cmd: 'frontend: pnpm exec eslint <42 changed or new .ts/.tsx under src/, at the snapshot>'
+        result: 0 errors, 28 warnings (26 no-explicit-any, 2 react-refresh/only-export-components in DiagnosticsView.tsx:19 and ExecutionProgressView.tsx:91)
+      - cmd: 'studio-runner: npm run type-check; npx eslint .'
+        result: both exit 0
+      - cmd: 'studio-runner: vitest run --coverage.enabled=false (unit tier)'
+        result: 58 files passed and 1 skipped; 1173 passed and 29 skipped. This matches the 1173 the log records for VAL-031.
+      - cmd: 'studio-runner: vitest run --config vitest.fixtures.config.ts (rebuilds dist from unchanged source)'
+        result: 12 files, 144 passed and 10 skipped, in 161s, including text-entry-equivalence.test.ts in real Chromium. The live runner (node dist/main.js) kept serving afterwards.
+      - cmd: 'studio-runner: vitest run --config vitest.deployment.config.ts'
+        result: >-
+          8 files, 313/313, exit 0 (chart 110, edge 69, envfrom-keys 39, backend-env 36, scaling
+          33, integrations 15, cancel-budget-env 7, sec2 4). Caveat: STUDIO_RUNNER_IMAGE was unset,
+          so SEC-2 ran against the default put-checks-studio-runner:10.18a-local, built
+          2026-09-16. That image predates executor 2.1.0. The image-bound half therefore proves
+          nothing about today's runner code. I did not build an image, as instructed.
+      - cmd: shasum -a 256 docs/specs/studio/openapi.yaml
+        result: 43fe0bb46cb40011ae3f19e05071e16fbe6ffd437e6fb785c0b36586a7c47898. It equals BASE_SHA256 at studio-runner/test/run/confinement.test.ts:254.
+      - cmd: live API, csiId 178672, 1 Vertex call (budget 10)
+        result: >-
+          VAL-024: POST with a 1035-char step gave 400 SOURCE_LINE_TOO_LONG "Step 1 is 1035
+          characters long; the maximum is 1024…". POST with 101 steps gave 400
+          SOURCE_TOO_MANY_STEPS. PUT with a 1025-char step 2 gave 400 SOURCE_LINE_TOO_LONG.
+          VAL-027 (server half): PUT with a blank step 2 gave 400 INVALID_STEPS "Step 2 is blank.
+          Write what the step should do, or remove it." That is the message saveErrorMessage.ts
+          passes to the toast. apiClient keeps error.response, verified by reading
+          (apiClient.ts:115-120). I did not see the toast in a browser.
+          Wikipedia, fresh compile (22f1031e…): READY in about 6s, 1 call. Step 2 compiled to
+          getByPlaceholder('Search Wikipedia'), and execution 10eb12d9 FAILED at step 2 with
+          "fill failed: the locator matched 2 elements; make the step more specific. (page:
+          https://en.wikipedia.org/wiki/Ma…". runtime.executor=2.1.0. This live-confirms the
+          VAL-028 fixed phrase (no markup), and it is VAL-014's third occurrence.
+          Wikipedia, pre-compiled revision (c06df877…, getByRole('searchbox')), re-run with no
+          Vertex call: execution ca2b469a PASSED in 996ms, 3/3 steps, executor 2.1.0, video
+          AVAILABLE partial=false, log stepIndex 0/1/2 on step lines and null on run lines.
+          Idempotency (VAL-039, server half): two concurrent POST /execute with the same UUID
+          Idempotency-Key returned the same executionId 4a9ecad2. A non-UUID key gives
+          400 INVALID_IDEMPOTENCY_KEY.
+    not_run:
+      - 'VAL-033 live: not triggerable on demand. Author source passes the inline-credential screen at save, so the model would have to invent a credential. Covered by DiagnosticsExposureEscalationTest 5/5 and LiveProposalPipelineTest 5/5 in the check run. I verified by reading that DiagnosticsBounder.redactThenClamp (line 172) redacts before it clamps.'
+      - 'StudioCoRunIT (real runner and API co-run via tools/corun.sh). It is env-gated and outside check by design. The live stack exercised the same path (VAL-012 stepIndex live).'
+      - 'VAL-031 C07 benchmark rerun, and a live combobox-equivalence run. The fixtures-tier real-Chromium test is the evidence.'
+      - 'The VAL-027 toast, VAL-009 copy and VAL-025 "watch" link in a browser. Unit-tested only, and green in the suite.'
+      - 'VAL-035..039: not reviewed. Their tests ran green as part of the 770.'
+      - 'R2D2 path (QA-2), unchanged. CodeRabbit (WSL-only skill; host is darwin).'
+
+  closed_from_first_gate:
+    QA-1: CLOSED. FE full suite is 770/770, twice (VAL-032).
+    QA-3: CLOSED. ./gradlew check with every IT is green (1435/0/0).
+    QA-5: 'CLOSED on content (codes documented, anchor re-hashed). Re-opened on process as QA-R2.'
+    QA-6: CLOSED. VAL-033 redaction is in place and tested.
+    QA-9: not re-checked
+    QA-10: superseded by VAL-034 (attributed separately below)
+
+  ac_trace_delta:
+    VAL-009: {status: 'FIXED (unit)', evidence: 'compileDiagnosticNarratives.ts:20-22. refusalDiagnostics.test.tsx and refusalOutcome.test.tsx are green in both full runs.'}
+    VAL-024: {status: FIXED (verified live by @qa), evidence: 'POST and PUT refuse line >1024 and >100 steps with the compile codes. The residual (65536-byte total checked at compile only) is documented in openapi.'}
+    VAL-025: {status: 'FIXED (unit)', evidence: 'ExecutionProgressView.tsx:139,272 WatchFailureControl. watchFailure.test.tsx is green.'}
+    VAL-027: {status: 'FIXED (server message verified live; toast unit-tested); contract class mis-recorded (QA-R2)', evidence: 'saveErrorMessage.ts branches on status+code and never on prose. saveErrorMessage.test.ts is green. openapi anchor is 43fe0bb4…'}
+    VAL-031: {status: 'FIXED (unit + real-Chromium fixtures); live runtime.executor=2.1.0', evidence: 'Runner unit 1173, fixtures tier 144 incl. text-entry-equivalence. Backend pin is 2.1.0 (application.yml:415). executorVersion is a fingerprint input (CompilePipeline.java:504, verified).'}
+    VAL-032: {status: FIXED, evidence: 770/770 twice}
+    VAL-033: {status: 'FIXED (unit)', evidence: 'DiagnosticsBounder.java:172 runs redactCredentials before clamp. DiagnosticsExposureEscalationTest 5/5.'}
+    VAL-003: {status: 'FIXED except co-run and the current-image SEC-2', evidence: 'All four tiers plus the backend check ran.'}
+
+  contract_class_ruling_check:
+    recorded: Class A (ADR-002 §13 row 2026-10-04, VAL-027/VAL-024/QA-5, flagged "@architect to confirm")
+    correct_class: C
+    basis: >-
+      ADR-002 §12 defines Class A as "defects no producer or consumer could ever have satisfied"
+      (a truncated or malformed description, missing content, a bad servers base or $ref).
+      The old 400 descriptions were satisfiable. They became incomplete because the server's
+      behaviour changed. Class C is "routes, security schemes, tags, servers, status-code
+      semantics, and anything on the public surface. Architect, always." POST /tests,
+      PUT /tests/{id} and POST /tests/{id}/compile are public routes, and the edit records a
+      status-code behaviour change for clients: timeoutSeconds 0 went from 201 (coerced to 30)
+      to 400, and blank steps and over-bound drafts went from 201 to 400 at save. §12 sets
+      authority by class of change, not by edit type, so "description text only" does not
+      make it Class A. The edit is also not a loosening (the bounds were already declared), so
+      the content itself is sound. What is missing is the @architect ruling.
+
+  findings:
+    - id: QA-R1
+      severity: HIGH
+      owner: '@dev → user (live re-test) → @qa'
+      type: open defect in the validation scope
+      location: frontend/src/components/studio/run/useRunGate.ts:104-203,353; ChecksStudioPage.tsx:581
+      basis: >-
+        Verified: the fix and its tests exist in the snapshot and are green. Verified live: the server
+        dedupes the same UUID key. Not verified: the UI no longer double-submits, and I did not
+        review the diff.
+      issue: >-
+        VAL-039 (one Run click gives two executions) and VAL-035/036/037/038 are still "in fix" in
+        the log. They are being edited while this gate runs.
+      recommendation: >-
+        Finish them. Have the user re-test VAL-036 and VAL-039 live. Give @qa a scoped review of
+        that diff before push.
+    - id: QA-R2
+      severity: MEDIUM
+      owner: '@architect'
+      type: contract governance
+      location: docs/architecture/ADR-002-internal-contract-surface.md:349 (§13 row); docs/specs/studio/openapi.yaml
+      basis: verified by reading §12
+      issue: The VAL-027 openapi amendment is recorded as Class A. It is Class C, which is architect-only, and no ruling exists.
+      recommendation: >-
+        @architect rules on it and corrects the §13 row to Class C. If the ruling changes any text,
+        BASE_SHA256 has to be re-anchored again.
+    - id: QA-R3
+      severity: MEDIUM
+      owner: '@architect (prompt) / user'
+      type: translation reliability
+      location: live execution 10eb12d9 (test 22f1031e)
+      basis: verified live
+      issue: >-
+        The same 3 Wikipedia steps compiled to getByRole('searchbox') earlier today (PASSED) and to
+        getByPlaceholder('Search Wikipedia') now (FAILED, 2 matches). This is VAL-014's third
+        occurrence. VAL-031's equivalence does not cover non-role locators. The run fails closed
+        with a clear, author-fixable message, so it is a quality issue, not a safety issue.
+      recommendation: >-
+        The user should re-decide the VAL-014 deferral. The rule-7 text is ready, but it needs a
+        prompt bump (2.4.0), which recompiles everything again.
+    - id: QA-R4
+      severity: MEDIUM
+      owner: 'author of the VAL-034 work (unattributed; not part of this validation)'
+      type: production risk (performance), in-progress third-party work
+      location: frontend/src/services/api/studioApi.ts:35-50,86-87; StudioRunsPage.tsx:45-51; StudioTestsPage.tsx:64
+      basis: verified by reading
+      issue: >-
+        readAllPages walks every page (size 100) one after another, with no cap. The Runs page calls
+        listAllExecutions() with no csiId filter and listAllTests() with no csiId filter, so it reads
+        the whole executions table and every test across all CSIs on every mount. The requestId
+        guard drops stale results but does not stop the walk: an unmount or CSI change leaves the
+        remaining pages fetching. Offset paging over a list that grows during the walk can
+        duplicate or skip rows. Each page also inherits apiClient's GET retry on 5xx. Load grows
+        linearly with execution history.
+      recommendation: >-
+        Before production: server-side search/filter and paging (or a hard page cap with a
+        "refine your search" notice), csiId scoping on the Runs page, and an AbortSignal. Gate it
+        with its own story. This finding does not block this validation's verdict. It does block
+        any push that includes these files until that story is gated.
+    - id: QA-R5
+      severity: LOW
+      owner: '@devops'
+      type: evidence gap
+      location: studio-runner/test/deployment/image.ts:13
+      issue: SEC-2 ran on a 2026-09-16 image, so the runner image built from this tree (executor 2.1.0) has never been through the deployment tier.
+      recommendation: Pipeline stage 9 with STUDIO_RUNNER_IMAGE set to the stage-7 tag of this tree before release.
+    - id: QA-R6
+      severity: INFO
+      owner: '@dev'
+      type: copy
+      location: AuthoringLimits SOURCE_TOO_MANY_STEPS message
+      issue: The save-time 400 says "Split it into smaller tests before compiling." It now fires at save, so "before compiling" reads oddly. Codes and messages are deliberately shared with compile, so this is cosmetic.
+
+  release_sequence:
+    conflict: >-
+      VAL-012 needs the backend first: the new runner sends RunnerLogEntry.stepIndex, and the old
+      backend (ignoreUnknown=false) rejects every progress and final report. VAL-031 needs the
+      runner first: the backend pin is recorded on provenance, and a 2.0.0 runner refuses
+      2.1.0-provenance revisions with RUNTIME_INCOMPATIBLE. One backend artifact carries both the
+      stepIndex acceptance and the 2.1.0 default pin, so neither "backend first" nor "runner first"
+      is safe on its own.
+    safe_sequence:
+      - '1. Deploy the backend with STUDIO_RUNTIME_EXECUTOR_VERSION=2.0.0 (override; application.yml:415). The new code accepts stepIndex, and new revisions carry 2.0.0 provenance, which both runners accept.'
+      - '2. Deploy studio-runner with executor 2.1.0. stepIndex is now accepted. Revisions with 2.0.0 provenance run on 2.1.0, because the executor is a backwardCompatibleMinor (compatibility.ts:64).'
+      - '3. Remove the override, so the pin becomes 2.1.0, and restart the backend.'
+      - 'Rollback in reverse: pin back to 2.0.0, then runner 2.0.0 (2.1.0-provenance revisions are refused until recompiled), then backend code.'
+    cost: >-
+      executorVersion is a fingerprint input (CompilePipeline.java:504), so step 3 changes the
+      fingerprint a second time. A test compiled between steps 1 and 3 recompiles FULL twice. Run
+      steps 1-3 in one window to keep that set small. Runbook §12(e) and gate QA-4 each state only
+      half of this ordering and should be amended to this three-step form.
+    other:
+      - 'Ship PROMPT 2.3.0, providerSchemaVersion 2 and thinking LOW in step 1 (one recompile).'
+      - No R2D2 rollout until QA-2 is probed.
+      - No credentialed pilot until ED-02 closes.
+
+  conditions_for_pass:
+    - 'QA-R1: VAL-035..039 fixed, VAL-039 and VAL-036 re-tested live, and a scoped @qa review of that diff, with the full FE suite still green.'
+    - 'QA-R2: @architect ruling recorded as Class C (re-anchor if the text changes).'
+    - 'VAL-034 (QA-R4) is excluded from the push, or gated by its own story. It does not block this validation.'
+  not_conditions_but_release_gates:
+    - QA-2 (R2D2 probe), QA-R5 (current-image deployment tier), ED-02, release_sequence above
+  open_items: 'VAL-001 (story), VAL-005, VAL-010, VAL-014 (QA-R3), VAL-016, VAL-034 (QA-R4), VAL-035..039 (QA-R1)'
+  waiver: {active: false}
+
+final_2026-10-05:
+  reviewer: '@qa (Quinn)'
+  reviewed_at: '2026-10-05T04:55Z'
+  scope: >-
+    Same uncommitted tree on brunobuger/ui-studio at HEAD 13ec11d1c (170 status paths). Since the
+    re-gate: VAL-035..039 fixed, VAL-040 (visible-only action resolution) and VAL-041 (re-render
+    gate), both runner-side on executor 2.1.0, VAL-042 closed as an automation artifact, QA-R2
+    ruled, runbook §12(e) amended, and runner images rebuilt. The source snapshot hash (modified
+    and untracked files under frontend/src, studio-runner/src and backend/src) was 681dbbf46ea3 at
+    the start and at the end of the gate.
+  mode: YOLO, read-only on source. No commits. Docker up.
+
+  gate: PASS
+  status_reason: >-
+    Both re-gate conditions are met. QA-R1: I reviewed the VAL-035..039 code, the full FE suite
+    is green twice, and Orion re-tested 036/037/038/039 live. QA-R2: @architect ruled Class C
+    (ADR-002 §34) and corrected the §13 row. QA-R3 is superseded by VAL-040/041: 8/8 fresh
+    Wikipedia compiles passed for Orion, and 1/1 fresh compile passed here on the exact fill+press
+    searchbox path VAL-041 fixes. Every suite ran fresh and is green. The remaining items are
+    release conditions or LOW observations, not defects in the validation scope.
+
+  verification:
+    ran:
+      - cmd: 'backend: ./gradlew check --rerun-tasks --console=plain (started 04:34:12Z)'
+        result: >-
+          BUILD SUCCESSFUL in 13m56s, exit 0. A first plain `check` was all UP-TO-DATE (7s), so it
+          was re-run with --rerun-tasks so that the run would count as fresh. spotlessCheck,
+          checkstyleMain/Test, spotbugsMain, test, crossReplicaTest, jacocoTestReport and
+          jacocoTestCoverageVerification all executed (spotbugsTest is SKIPPED by configuration).
+          JUnit XML, every file newer than the start: 260 classes, 1437 tests, 0 failures,
+          0 errors, 18 skipped. The skips are by design: StudioCoRunIT 11 (env-gated),
+          ExternallyGatedCriteriaTest 3, ExecutionVideoExternallyGatedCriteriaTest 2,
+          TargetPolicyGapTest 1, ExecutionReadinessTest 1. There is no BindException in the log.
+          Key ITs: StudioContractTest 14, ProgressCallbackIT 16, CompilePipelineIT 15, StudioApiIT 7,
+          StudioAuthoringApiIT 5, DispatcherIT 26, AcceptanceIT 11, LiveProposalPipelineTest 5,
+          DiagnosticsExposureEscalationTest 5, CompileFingerprintTest 9. Side effect: the recompile
+          triggered a devtools restart, which wiped the embedded DB (VAL-008, accepted).
+      - cmd: 'frontend: pnpm exec tsc --noEmit'
+        result: exit 0
+      - cmd: 'frontend: pnpm exec vitest run (FULL, twice)'
+        result: 'Run 1: 67 files, 772/772 in 97.9s. Run 2: 67 files, 772/772. Both exit 0.'
+      - cmd: 'frontend: pnpm exec eslint <42 changed or new .ts/.tsx under src/>'
+        result: 0 errors, 28 warnings (26 no-explicit-any, 2 react-refresh/only-export-components). Unchanged from the re-gate.
+      - cmd: 'studio-runner: tsc -p tsconfig.json --noEmit; eslint . (local node_modules/.bin, because the package pins npm and pnpm refuses it)'
+        result: both exit 0
+      - cmd: 'studio-runner: vitest run (unit tier)'
+        result: 58 files passed and 1 skipped; 1191 passed and 29 skipped. This matches the 1191 the log records for VAL-041.
+      - cmd: 'studio-runner: vitest run --config vitest.fixtures.config.ts (rebuilds dist)'
+        result: >-
+          14 files, 153 passed and 10 skipped, exit 0. This includes visible-only-resolution 6/6 and
+          rerender-resolution 3/3 in real Chromium.
+      - cmd: 'studio-runner: node scripts/check-pins.mjs'
+        result: check:pins OK
+      - cmd: 'image staleness: docker image inspect, plus source mtimes'
+        result: >-
+          put-checks-studio-runner:val-20261005-local (sha256:0f763431…, created 04:10:58Z) is
+          STALE. playwrightAdapter.ts was last modified at 04:21:55Z, after the build. The image has
+          VAL-040 but not VAL-041: its dist adapter has 2 `.or(` call sites against 4 in the current
+          build, and its md5 differs. Orion rebuilt the image as put-checks-studio-runner:val-20261005b-local
+          (sha256:22bebf35…, created 04:31:51Z). No runner source file is newer than that build.
+          Its /app/dist/run/playwrightAdapter.js, childRuntime.js and versions.js are byte-identical
+          (md5) to the dist that the fixtures tier built from this tree.
+      - cmd: 'studio-runner: STUDIO_RUNNER_IMAGE=<tag> vitest run --config vitest.deployment.config.ts, for both tags'
+        result: >-
+          val-20261005b-local (current): 8 files, 313/313, 45.4s, with SEC-2 4/4 run (not skipped).
+          val-20261005-local (stale): also 313/313. The deployment tier cannot tell the two images
+          apart (QA-F1). Only the b tag is valid evidence for this tree.
+      - cmd: shasum -a 256 docs/specs/studio/openapi.yaml
+        result: 43fe0bb46cb40011ae3f19e05071e16fbe6ffd437e6fb785c0b36586a7c47898, which equals BASE_SHA256 at studio-runner/test/run/confinement.test.ts:254.
+      - cmd: 'live API, csiId 178672, 2 Vertex calls (budget 6)'
+        result: >-
+          The live runner (node dist/main.js, pid 69064) started at 04:22:58Z, after the last
+          adapter edit, so it serves VAL-041.
+          Wikipedia, fresh compile (test efc22cb5): READY in about 6s, 1 call. Step 2 compiled to
+          getByRole('searchbox',{name:'Search Wikipedia'}) .fill then .press('Enter'), which is the
+          VAL-041 race path. Execution 97e35ce3 PASSED in 1196ms, 3/3 steps,
+          runtime.executor=2.1.0, video AVAILABLE with partial=false, and the step log lines carry
+          stepIndex 0/1/2.
+          Refusal ("Check the server CPU is below 50%"): NEEDS_REVISION, UNSUPPORTED_CAPABILITY at
+          stepIndex 1, "Checking server CPU usage is not supported.", attempts 1, exhausted false.
+          Save 400: a PUT with a blank step 2 returned 400 INVALID_STEPS "Step 2 is blank. Write
+          what the step should do, or remove it." A PUT with timeoutSeconds 0 returned 400
+          INVALID_CONFIGURATION "timeoutSeconds is 0; it must be between 1 and 120 seconds."
+      - cmd: 'docs: ADR-002 §13 row and §34; runbook studio-runner.md §12(e)'
+        result: >-
+          The §13 row reads "C — RULED 2026-10-05 by @architect (§34)", and §34.1 to §34.3 exist. The
+          runbook (lines 815-850) has the 3-step order with STUDIO_RUNTIME_EXECUTOR_VERSION=2.0.0
+          as the override, rollback in reverse, the single-window rule and the recompile counts.
+    not_run:
+      - 'VAL-039 double-submit in a real browser by @qa. The code was reviewed, and Orion re-tested it live (1 PUT, 1 compile, 1 execute).'
+      - 'A live hidden-twin run, i.e. VAL-040 on getByPlaceholder. Orion saw 3 visible-only-resolution lines live. Here it is covered by unit tests and real-Chromium fixtures.'
+      - 'R2D2 path (QA-2). StudioCoRunIT (env-gated). CodeRabbit (WSL-only; host is darwin). The SYNAPSE diagnostics skill, which is out of mission scope.'
+
+  code_review:
+    VAL-040_041: >-
+      Reviewed studio-runner/src/run/playwrightAdapter.ts:527-639 (resolveActionTarget) and its
+      callers at 807-921.
+      Strictness: when visible matches are ≥2, the code raises the fixed strict failure with N equal
+      to the visible count (line 592), and it never uses .first(). On the gate path, a swap that
+      leaves ≥2 visible alternates is refused by Playwright's own strict mode on the `.or()` union.
+      I infer this from Playwright semantics; it has no real-Chromium test (QA-F3).
+      Assertions: expectVisible, expectContainText, expectValue, expectUrl and expectTitle use
+      resolveHandle, which is unfiltered (lines 923-1004). adapter.test.ts:1429 and
+      visible-only-resolution.test.ts:123 pin this.
+      Whether it can act on an element the author didn't mean: the visible filter only removes
+      elements that an action could not act on anyway, because every action except press requires
+      visibility. The `.or()` gate (lines 601-604) can only match once the authored role has NO
+      visible match on the page (`:root` hasNot authored). It then matches only text-entry roles
+      in the closed set {textbox, searchbox, combobox}, with the same name, exact and disabled
+      options, and the visibility filter still applies. That is the same equivalence VAL-031
+      already ruled, minus the settle window. While the authored element is present, behaviour is
+      identical to before. When both the old and the new control coexist, the authored one wins
+      (rerender-resolution.test.ts:169). Residual risks are LOW and listed below as QA-F2 to QA-F4.
+    VAL-035_039: >-
+      VAL-039: useRunGate.ts creates one idempotency key per press before any await. Run returns
+      early while inFlight is set. An accepted run holds the latch until isRunning has been shown
+      and has ended, with a 3s safety release. Only the retry after a 409 refusal takes a new key.
+      The design is sound. The root cause stays unconfirmed (mitigated, and the server dedupes the
+      same key). VAL-036: Enter adds a step, Shift+Enter and IME composition do not
+      (ChecksStudioPage.tsx:1045). saveDraft folds in pending text, so the text is not lost if the
+      save is refused. VAL-035: formatEvidenceInstant falls back to the raw string for an
+      unparseable value. VAL-037/038 are copy and layout changes, unit-tested. None of these is a
+      blocking issue.
+
+  closed_from_regate:
+    QA-R1: CLOSED (code reviewed; FE 772/772 twice; Orion live re-test)
+    QA-R2: CLOSED (ADR-002 §34, Class C; §13 row corrected; anchor unchanged)
+    QA-R3: 'CLOSED as superseded by VAL-040/041 (8/8 live for Orion plus 1/1 here). VAL-014 stays deferred for the next output-contract bump.'
+    QA-R5: 'CLOSED for this tree on the b tag. The earlier val-20261005-local tag is stale and must not be used (see conditions).'
+    QA-R4: still open, attributed to VAL-034. It is a release condition, not a blocker for this validation.
+
+  findings:
+    - {id: QA-F1, severity: LOW, owner: '@devops', issue: 'The deployment tier passes 313/313 on an image without VAL-041, so a green tier does not prove the image is current.', recommendation: 'In the release checklist, compare the image dist hash or build time against the source, or rely on the CI IMAGE_TAG build.'}
+    - {id: QA-F2, severity: LOW, owner: '@architect (note)', issue: 'press always resolves visible-only (force is never passed, line 851). Playwright press has no actionability check, so pressing a key on a hidden but focusable element now times out as "not visible".', recommendation: 'Accept and document in the VAL-040 ruling, or allow force on press.'}
+    - {id: QA-F3, severity: LOW, owner: '@dev', issue: 'No real-Chromium test covers a mid-action swap that leaves two visible same-name alternates. Strictness relies on Playwright strict mode for .or().', recommendation: 'Add one fixture asserting the fixed strict failure.'}
+    - {id: QA-F4, severity: LOW, owner: '@dev', issue: 'A role swap through the VAL-041 gate is not disclosed in the operator log (documented at adapter :553-554).', recommendation: 'Optional. Disclose when the authored role is gone after the action.'}
+
+  release_conditions:
+    - 'Image: release only from a CI-built image with IMAGE_TAG set (stage 7/9) from this source. Do not use put-checks-studio-runner:val-20261005-local (stale: has VAL-040, lacks VAL-041). val-20261005b-local matches this tree, but it is local only.'
+    - 'Deploy order: runbook §12(e), all 3 steps in one window. (1) Backend with STUDIO_RUNTIME_EXECUTOR_VERSION=2.0.0, together with PROMPT 2.3.0, providerSchemaVersion 2 and thinking LOW. (2) Runner with executor 2.1.0. (3) Drop the override. Roll back in reverse.'
+    - 'R2D2 (QA-2): probe that the R2D2 proxy accepts the anyOf provider schema (VAL-030) before any R2D2 rollout. No fallback flag exists.'
+    - 'ED-02: no credentialed pilot until it closes.'
+    - 'VAL-034 (QA-R4, third-party): the unbounded listAll* paging must be excluded from the push, or gated by its own story and review.'
+  open_items: 'VAL-001 (story), VAL-005, VAL-010, VAL-014 (deferred), VAL-016, VAL-034, QA-F1..F4 (LOW)'
+  waiver: {active: false}

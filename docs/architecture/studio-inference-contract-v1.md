@@ -84,7 +84,8 @@ Outcome mapping:
 | --- | --- | --- |
 | Whole artifact validated | AWAITING_CONFIRMATION | One candidate; explicit confirmation required |
 | UNSUPPORTED / CLARIFICATION | NEEDS_REVISION | No candidate; actionable bounded step diagnostic; no model retry to coerce supported output |
-| Invalid model envelope / generated syntax | Repairs within shared limit, then NEEDS_REVISION | Final bounded diagnostics, no partial candidate |
+| Invalid model envelope (strict parser rejection) | Repairs within shared limit, then STALE | GATEWAY_PARSE_FAILURE; no partial candidate (amended 2026-10-04, see note below) |
+| Invalid generated syntax (validator verdict) | Repairs within shared limit, then NEEDS_REVISION | Final bounded diagnostics, no partial candidate |
 | Reused code invalid | NEEDS_REVISION | FULL_REBUILD_REQUIRED; no scope expansion |
 | Deadline, saturation, transport, unavailable/malformed validator | STALE | Error code only; never format-repair transport/refusal |
 | Safety block / truncation / unusable finish reason | STALE | GATEWAY_PARSE_FAILURE with explicit bounded finish classification in attempt telemetry; no candidate and no automatic retry |
@@ -93,6 +94,8 @@ Outcome mapping:
 For legacy diagnostics before runner validation, `validatorSchemaVersion` is the reserved literal `not-run` rather than a fabricated runtime version, and no candidate provenance exists. New diagnostic codes `UNSUPPORTED_CAPABILITY`, `AMBIGUOUS_INTENT`, `INVALID_MODEL_RESPONSE`, and `FULL_REBUILD_REQUIRED` use the existing bounded per-source-step diagnostic shape. An unattempted/generated step in an all-or-nothing rejection must not be described as semantically valid. V2 attempt result separately records stage and reason. Existing v1 clients may display these codes as strings; no runner diagnostic enum is broadened by this authoring outcome.
 
 Malformed/schema-invalid envelopes may consume a repair; they do not cause a fresh independent compile. Supply explicit correction instructions and bounded, redacted rejected content plus diagnostics; if safe bounded context cannot be retained, terminate clearly instead of dumping raw model payloads. UNSUPPORTED/CLARIFICATION remains terminal. All repairs traverse the identical ID/schema/AST/runtime gate.
+
+**Amendment — VAL-019, user decision 2026-10-04 (D1, D2).** An envelope the strict local parser rejects consumes one repair from the shared limit (one plus two proposals, the one deadline). The repair carries a fixed correction instruction plus the closed rejection code and its 0-based `steps` position only; the rejected output is never sent back, raw or redacted, because redaction cannot vouch for model text. When the limit is exhausted on parser rejections the request ends `STALE` with `GATEWAY_PARSE_FAILURE`, not `NEEDS_REVISION`: retrying the same unedited source is the remedy, so the NEEDS_REVISION "edit your steps" narrative would be false. An unusable finish reason, an over-size output, a server-side assembly failure and the artifact version gate stay terminal with no repair. The closed rejection code is recorded on the gateway audit line and a WARN line only; no public contract field changes.
 
 ## 5. Shared inference bounds and observable interfaces
 

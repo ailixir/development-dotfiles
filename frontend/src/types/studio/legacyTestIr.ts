@@ -10,6 +10,7 @@
 import {
   CANONICAL_BROWSER,
   defaultConfiguration,
+  DEFAULT_STEP_TIMEOUT_SECONDS,
   type StudioVariable,
   type TestConfiguration,
   type TestRequest,
@@ -130,7 +131,7 @@ export function toConfiguration(ir: Pick<TestIR, 'configuration'>): TestConfigur
       width: legacy.viewport?.width ?? 1920,
       height: legacy.viewport?.height ?? 1080,
     },
-    timeoutSeconds: legacy.timeout ?? 30,
+    timeoutSeconds: legacy.timeout ?? DEFAULT_STEP_TIMEOUT_SECONDS,
     waitStrategy: (legacy.waitStrategy ?? 'networkidle') as WaitStrategy,
   };
 }

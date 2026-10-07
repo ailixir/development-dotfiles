@@ -1,0 +1,441 @@
+{
+  "storyId": "STUDIO-CODE-001-editable-versioned-source",
+  "researchedAt": "2026-10-05T02:40:35.950374Z",
+  "researchedBy": "@analyst (Atlas)",
+  "status": "COMPLETE",
+  "inputAlignment": {
+    "alignedAt": "2026-10-05T02:40:35.950374Z",
+    "requirements": {
+      "path": "docs/stories/STUDIO-CODE-001-editable-versioned-source/spec/requirements.json",
+      "sha256": "dcb209f3f939d359f12fc2be0b80f25e84bfc28c495b12ee0566c4db14b9c803",
+      "gatheredAt": "2026-10-05T02:35:13.235196Z",
+      "ids": [
+        "FR-1",
+        "FR-2",
+        "FR-3",
+        "FR-4",
+        "FR-5",
+        "FR-6",
+        "FR-7",
+        "FR-8",
+        "NFR-1",
+        "NFR-2",
+        "NFR-3",
+        "CON-1",
+        "CON-2",
+        "CON-3",
+        "CON-4",
+        "CON-5",
+        "ASM-1",
+        "ASM-2",
+        "ASM-3",
+        "OQ-1",
+        "OQ-2",
+        "OQ-3"
+      ]
+    },
+    "complexity": {
+      "path": "docs/stories/STUDIO-CODE-001-editable-versioned-source/spec/complexity.json",
+      "sha256": "5a63f3ad9655e4c4d2f0873560253678611f73da8fb354b44a0b239d4e96362d",
+      "assessedAt": "2026-10-05T02:37:55.131116+00:00",
+      "result": "COMPLEX",
+      "totalScore": 19
+    },
+    "dataReview": {
+      "path": "docs/stories/STUDIO-CODE-001-editable-versioned-source/spec/data-versioning-review.md",
+      "sha256": "e02933df772130055d8b37cda762bf351d86651592623b84b32b4ad40b696e93",
+      "reviewer": "@data-engineer (Dara)"
+    },
+    "note": "Formal Phase 3 research complete against the recorded input versions. Architecture/spec remain proposals under development; completion does not approve implementation or close assumptions."
+  },
+  "baseline": {
+    "commit": "13ec11d1c10762f6dd435bade54627fe88f906a2",
+    "branch": "brunobuger/ui-studio",
+    "worktree": "Existing dirty files read as-is; no production-code changes or tests performed"
+  },
+  "tools": {
+    "context7": "Unavailable in current tool metadata",
+    "exa": "Unavailable in current tool metadata",
+    "fallback": "Available web tool, primary official documentation only; repository search/read",
+    "technicalPreferences": ".aiox-core/development/data/technical-preferences.md missing; read .aiox-core/data/technical-preferences.md; generic Next.js preset superseded by supplied AGENTS.md and actual package files"
+  },
+  "dependencies": [
+    {
+      "name": "Existing Studio revision and confirmation API",
+      "type": "api",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "usageLocations": [
+          "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java:48",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:195",
+          "frontend/src/components/studio/CodeTab.tsx:73",
+          "docs/specs/studio/openapi.yaml"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "Immutable validated candidate followed by exact confirmation",
+          "description": "Preferred reuse point for bounded manual editing; requires declared new draft/authority semantics and public-contract amendment. Execution already pins confirmed revision ID."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [
+          "Git ingestion"
+        ],
+        "conflicts": [
+          "No current manual-code save/validate endpoint or lineage contract"
+        ]
+      }
+    },
+    {
+      "name": "TypeScript compiler API and Studio allowlist validator",
+      "type": "library",
+      "version": "5.9.3",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "5.9.3",
+        "usageLocations": [
+          "studio-runner/package.json",
+          "studio-runner/src/validator/ast.ts:96",
+          "studio-runner/src/validator/index.ts:43",
+          "studio-runner/src/versions.ts"
+        ]
+      },
+      "documentation": {
+        "url": "https://www.typescriptlang.org/docs/handbook/compiler-options.html",
+        "relevantSections": [
+          "noEmit"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "Whole artifact validation",
+          "description": "Parse bounded step code into trusted typed operations, retaining exact originalText and reference policy alignment. No eval/raw source execution."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": [
+          "Full TypeScript files/imports/control flow are outside accepted runtime language",
+          "Validation is not proof of English semantic equivalence"
+        ]
+      }
+    },
+    {
+      "name": "Playwright library and trusted operation adapter",
+      "type": "library",
+      "version": "1.63.0",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "1.63.0",
+        "usageLocations": [
+          "studio-runner/package.json",
+          "studio-runner/src/run/protocol.ts:4",
+          "studio-runner/src/run/playwrightAdapter.ts",
+          "studio-runner/src/validator/language.ts"
+        ]
+      },
+      "documentation": {
+        "url": "https://playwright.dev/docs/test-typescript",
+        "relevantSections": [
+          "Introduction",
+          "Run type checks separately"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "Reuse the operation execution boundary",
+          "description": "Manual bounded code can use existing execution after validation and confirmation. A portable Playwright Test file is a separate derived export with consumer setup."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [
+          "Separately scoped arbitrary-source execution"
+        ],
+        "conflicts": [
+          "@playwright/test is absent from runner dependencies",
+          "Live docs do not verify pinned installation or future export compatibility"
+        ]
+      }
+    },
+    {
+      "name": "PostgreSQL/Flyway immutable revision persistence",
+      "type": "infrastructure",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "usageLocations": [
+          "backend/src/main/resources/db/migration/V12__ui_test_revisions_and_compile_state.sql:16",
+          "backend/src/main/resources/db/migration/V24__studio_reference_policy.sql:23",
+          "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java:297"
+        ]
+      },
+      "documentation": {
+        "url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+        "relevantSections": [
+          "Read Committed Isolation Level"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "Compare-and-set publication and immutable lineage",
+          "description": "Capture draft authority/version before validation and compare again under lock before publish/confirm. Extend all relevant immutability/unique identity predicates for introduced fields."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": [
+          "Existing compiler predicates lack manual authority/version",
+          "Actual new multitable race safety needs tests"
+        ]
+      }
+    },
+    {
+      "name": "Existing React/MUI editor controls",
+      "type": "library",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "React ^18.2.0; MUI ^5.15.0 declared in frontend/package.json",
+        "usageLocations": [
+          "frontend/package.json",
+          "frontend/src/components/studio/inference/InferenceStudio.tsx:155"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "Bounded step editor",
+          "description": "Existing accessible multiline MUI controls can support first release without a new editor dependency. Rich syntax editor is an optional later decision."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [
+          "Monaco",
+          "CodeMirror"
+        ],
+        "conflicts": [
+          "Neither rich editor package currently declared",
+          "Supplied overview says MUI v7, actual package declares v5; preserve actual installed stack"
+        ]
+      }
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "NATIVE_REVISION",
+      "assessment": "prefer",
+      "rationale": "Fits existing validation, CSI authorization, immutable history, confirmation, dispatch and evidence; adds code draft/authority/lineage contracts",
+      "effort": "Relative moderate; unmeasured"
+    },
+    {
+      "id": "GIT_EXECUTION_SOURCE",
+      "assessment": "consider_later",
+      "rationale": "Developer collaboration benefits but adds ingestion, credentials, repo authorization and authority reconciliation; pin resolved object identity and complete runtime inputs",
+      "effort": "Relative high; unmeasured"
+    },
+    {
+      "id": "MUTABLE_OVERRIDE",
+      "assessment": "avoid",
+      "rationale": "Breaks exact confirmation and run provenance unless first snapshotted into validated immutable revision",
+      "effort": "Deceptively small UI surface; race/history costs"
+    },
+    {
+      "id": "FULL_PLAYWRIGHT_SOURCE",
+      "assessment": "separate_product_scope",
+      "rationale": "Current AST and child protocol deny arbitrary files. New isolation/dependency/reporting design needed. node:vm is not a security mechanism",
+      "effort": "Relative highest; unmeasured"
+    }
+  ],
+  "draftIdentityOptions": [
+    {
+      "id": "SEPARATE_CODE_DRAFT_REVISION",
+      "status": "recommended_after_data_review",
+      "tradeoff": "Recommended separate monotonic codeDraftRevision advances on accepted code saves and explicit GENERATED/MANUAL mode transitions; retains existing source/config/context meanings. Requires exhaustive capture/publish/confirm/readiness/execute predicate audit."
+    },
+    {
+      "id": "EXPAND_SOURCE_REVISION",
+      "status": "evaluated_not_recommended",
+      "tradeoff": "Viable only with broad sourceRevision contract changes; less clear alongside existing checklist/context identity and incremental baseline semantics."
+    }
+  ],
+  "unverifiedClaims": [
+    {
+      "claim": "Current PRD explicitly requires editable code and source download",
+      "reason": "Resolved by requirements provenance/prdGap: these are the current user-requested extension. Existing PRD mandates review/confirmation, not source editing/download.",
+      "action": "acceptable_risk"
+    },
+    {
+      "claim": "A downloaded portable .spec.ts reproduces Studio execution exactly",
+      "reason": "No export adapter exists or was tested; bindings, policy, secret resolution and evidence require separate mapping",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "Manual code can safely serve as current compiler incremental baseline",
+      "reason": "No mixed-origin reconciliation/intent policy verified",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "Separate codeDraftRevision implementation is concurrency safe",
+      "reason": "Data review resolves design recommendation to separate counter/mode; exhaustive predicate audit and database race tests remain required during implementation.",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "Source download permissions/retention are identical to video permissions/retention",
+      "reason": "No such policy established in requested scope; define source authorization/history separately",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "Proposed export is compatible with installed Playwright 1.63.0",
+      "reason": "Package declaration inspected; no export implementation or compatibility execution",
+      "action": "needs_validation"
+    }
+  ],
+  "recommendations": [
+    {
+      "type": "prefer",
+      "subject": "Native immutable manual revisions with existing supported step language",
+      "rationale": "Reuse trusted runtime and exact run provenance; edit draft, validate entire artifact, review, confirm, execute pinned revision"
+    },
+    {
+      "type": "prefer",
+      "subject": "Server-generated immutable revision package download",
+      "rationale": "Exact artifact/source plus safe metadata; exclude resolved secrets and label bounded steps clearly"
+    },
+    {
+      "type": "consider",
+      "subject": "Optional portable Playwright export",
+      "rationale": "Derived export with separate adapter version/hash and documented setup; do not claim byte-identical Studio execution"
+    },
+    {
+      "type": "avoid",
+      "subject": "Silent model repair/regeneration of manual source",
+      "rationale": "Would replace intentional user edits and invalidate confirmation; validation must return diagnostics without altering source"
+    },
+    {
+      "type": "prefer",
+      "subject": "Authority generation guard across compile/save/confirm/run",
+      "rationale": "Late generated results must not replace newer manual changes; select counter model in architect phase"
+    },
+    {
+      "type": "avoid",
+      "subject": "Generated English summaries as claims about manually edited semantics",
+      "rationale": "Syntax/reference validation does not prove semantic agreement; summarize actual validated operations"
+    },
+    {
+      "type": "prefer",
+      "subject": "Separate codeDraftRevision and immutable preparation-event identity",
+      "rationale": "Dara review favors preserving checklist/context meaning, retained manual checkpoints and request-based idempotency over artifact-content lineage deduplication. Coordinated migration must honor staged V19 captured-publisher cutover."
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://nodejs.org/docs/latest-v22.x/api/vm.html",
+      "verified": true,
+      "claim": "node:vm is not a security mechanism for untrusted code",
+      "retrievedAt": "2026-10-04"
+    },
+    {
+      "url": "https://playwright.dev/docs/test-typescript",
+      "verified": true,
+      "claim": "Playwright runs transformed TypeScript without doing type checking; separate tsc recommended",
+      "retrievedAt": "2026-10-04"
+    },
+    {
+      "url": "https://git-scm.com/docs/gitrevisions",
+      "verified": true,
+      "claim": "Object identity differs from symbolic ref identity; refs have historical values",
+      "retrievedAt": "2026-10-04"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+      "verified": true,
+      "claim": "Read Committed concurrent target-row updates re-evaluate WHERE after waiting",
+      "retrievedAt": "2026-10-04"
+    },
+    {
+      "url": "https://www.typescriptlang.org/docs/handbook/compiler-options.html",
+      "verified": true,
+      "claim": "noEmit compiler option is documented; this is not a security proof",
+      "retrievedAt": "2026-10-04"
+    }
+  ],
+  "researchNotes": "Formal Phase 3 complete against hashed requirements, COMPLEX19 assessment and Dara data review. No new dependencies assumed. No application changes or runtime tests; design recommendations remain proposals. See research-notes.md.",
+  "requirementCoverage": {
+    "FR-1": "Editable working code draft separate from immutable base; new explicit authority/draft generation contract; saved invalid/never-validated manual checkpoints remain retained; page-level dirty buffer survives tab/background reads",
+    "FR-2": "Exact selected immutable Studio artifact download; portable export outside first slice; resolved secrets excluded",
+    "FR-3": "Existing schema/AST/reference validator; no manual-source AI repair; both generated and manual preparation must await explicit confirmation, superseding current auto-confirm publication",
+    "FR-4": "Retain byte-aligned originalText and step order; actual operations summarize edited behavior without claiming English equivalence",
+    "FR-5": "Immutable revision ID, server artifact hash, truthful manual parent/actor lineage and accepted execution pin",
+    "FR-6": "CAS across save/validation/publication/confirmation/readiness; draft counter model left to architect; execute request names exact intended confirmed revision/hash/freshness tuple and never silently retargets to a newer confirmation",
+    "FR-7": "Working, validated candidate and confirmed labels; download pins selected persisted revision, not unsaved text; last-run source is resolved through its accepted execution revision even after new confirmations",
+    "FR-8": "CSI-scoped read/write/download; reference/secret restrictions; current runtime compatibility gate",
+    "NFR-1": "Preserve existing allowlist and operation-only child runtime; no full TypeScript execution",
+    "NFR-2": "Concurrency tests required for new authority-generation predicates; no runtime correctness claim here",
+    "NFR-3": "Existing MUI multiline control is dependency-free option; keyboard/focus/diagnostics acceptance must be verified during implementation",
+    "CON-1": "Bounded language retained; proposed editor explicitly supersedes ADR-002 section 30 only for working/candidate views",
+    "CON-2": "Checklist first; explicit source mode transition and confirmation; no runtime AI",
+    "CON-3": "Existing React/MUI/API client/MSW and backend/runner; no new dependency preselected",
+    "CON-4": "Documents-only proposal; no production changes",
+    "CON-5": "No Python; standalone export/import/Git/rollback/history UI outside first slice"
+  },
+  "complexity": "COMPLEX",
+  "complexityScore": 19,
+  "dataReviewAlignment": {
+    "recommendedCounter": "Separate codeDraftRevision with explicit authoring mode",
+    "manualWorkRetention": "Append-only bounded unvalidated manual checkpoints, including invalid source; preserve latest saved checkpoint across mode transitions; no silent regeneration",
+    "candidateIdentity": "One immutable revision per distinct captured preparation request; replay same request idempotently, do not coalesce independent authorship on equal artifactHash",
+    "migration": "Extend captured-attempt infrastructure for GENERATED_COMPILE/MANUAL_VALIDATION; reconcile V18/V24 content uniqueness and staged V19 require-request cutover with drained publishers; do not bypass captured request invariant",
+    "immutability": "Restore whole-row protection excluding only write-once first confirmation, or equivalent complete negative-test coverage; new fields must be protected",
+    "lineage": "Manual parent distinct from incremental baseline; same test/CSI ownership enforced by composite foreign keys",
+    "download": "Preserve exact artifact content and code strings, hash canonical artifact only, separate metadata envelope; avoid promising original HTTP serialization bytes"
+  },
+  "supplementalAlignment": {
+    "reviewedAt": "2026-10-05T02:51:03.482298Z",
+    "reviewReason": "Final QA provenance housekeeping after requirements/architecture/spec iteration 2 amendments. Original Phase 3 inputAlignment hashes and timestamp preserve the earlier research input provenance; this entry records later review rather than retroactively claiming the amendments were studied initially.",
+    "requirements": {
+      "path": "docs/stories/STUDIO-CODE-001-editable-versioned-source/spec/requirements.json",
+      "sha256": "f175971d830d3754cf67dffea988b6bc42be79dd4afd3fca1d1267dadf2b132c",
+      "gatheredAt": "2026-10-05T02:35:13.235196Z",
+      "reviewedIds": [
+        "FR-1",
+        "FR-5",
+        "FR-6",
+        "FR-7",
+        "NFR-2",
+        "DEC-1",
+        "DEC-2",
+        "DEC-3",
+        "DEC-4",
+        "DEC-5",
+        "QA-CRIT1"
+      ]
+    },
+    "spec": {
+      "path": "docs/stories/STUDIO-CODE-001-editable-versioned-source/spec/spec.md",
+      "sha256": "bf320dd1b4f8b4ca24fa509b73511f4cdd5e37e84d5f9108325ba17b24c72446",
+      "iteration": 2
+    },
+    "reviewedAmendments": [
+      "Existing authoring/Steps/context/config writers compare complete caller expected freshness F with persisted state, extending safeguards to existing entry points.",
+      "Generated/manual worker success/failure/deadline/cancellation/abandonment settlement uses immutable captured request identity/F rather than unauthenticated client-body freshness; stale sweeper work cannot clear newer manual candidate/request.",
+      "Optional preparation failure does not revoke unchanged compatible confirmed readiness; compileStatus alone is not readiness authority.",
+      "Ordered two-request page Save reports partial failure, preserves local source and blocks Validate/Run until resolved.",
+      "AT-6 expands existing writer and stale settlement race coverage without adding a cancellation product feature."
+    ],
+    "conclusionsChanged": false,
+    "outcome": "Later amendments are consistent with the existing native immutable revision, separate codeDraftRevision, complete concurrency audit, captured-event identity and exact confirmation/execution recommendations. No new dependency or runtime capability required. Implementation race evidence remains outstanding."
+  }
+}

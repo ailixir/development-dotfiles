@@ -56,8 +56,7 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
     this.audit = audit;
     capacity = new Semaphore(properties.maxConcurrency());
     OkHttpClient http =
-        new OkHttpClient.Builder()
-            .retryOnConnectionFailure(false)
+        transportBuilder(properties)
             .addInterceptor(
                 chain -> {
                   CallContext context = active.get();
@@ -109,6 +108,28 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
             .build();
   }
 
+  /**
+   * The transport defaults for the custom OkHttp client.
+   *
+   * <p>With a {@code customHttpClient} the SDK (1.71.0) reuses this client's connect, read and
+   * write timeouts as-is and only overrides {@code callTimeout} per request from {@link
+   * HttpOptions#timeout()}. Left unset, OkHttp's 10s read default cut every slower model response
+   * short (VAL-004), so every socket deadline is the configured request timeout. The compile budget
+   * still caps each call through the per-request call timeout and cancels it on expiry.
+   *
+   * @param properties the gateway properties
+   * @return a builder with timeouts and no connection-failure retry
+   */
+  static OkHttpClient.Builder transportBuilder(StudioGatewayProperties properties) {
+    Duration timeout = properties.requestTimeout();
+    return new OkHttpClient.Builder()
+        .retryOnConnectionFailure(false)
+        .connectTimeout(timeout)
+        .readTimeout(timeout)
+        .writeTimeout(timeout)
+        .callTimeout(timeout);
+  }
+
   private static BoundedCredentialProvider credentialProvider(StudioGatewayProperties properties)
       throws IOException {
     properties.validateForVertex();
@@ -132,12 +153,18 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
     // the identical static bytes, and the spec's fingerprint inputs do not include it.
     settings.put("thinkingLevel", properties.effectiveThinkingLevel());
     settings.put("envelopeVersion", 1);
-    settings.put("providerSchemaVersion", 1);
+    settings.put("providerSchemaVersion", PROVIDER_SCHEMA_VERSION);
     try {
       return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(settings);
     } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
       throw new IllegalStateException("Cannot encode gateway settings", error);
     }
+  }
+
+  /** {@link GatewayResponseParser#parseProposal} returns the envelope, not an artifact. */
+  @Override
+  public boolean returnsProposalEnvelope() {
+    return true;
   }
 
   @Override
@@ -352,7 +379,14 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
             properties.effectiveThinkingLevel());
     if (!"STOP".equals(finish)) {
       return CompileResponse.parseFailure(
-          "unusable model finish reason", provenance, retries, elapsed(start), inputBytes, 0);
+          "unusable model finish reason",
+          GatewayResponseParser.ProposalRejection.FINISH_REASON,
+          null,
+          provenance,
+          retries,
+          elapsed(start),
+          inputBytes,
+          0);
     }
     String text = raw.text();
     int bytes = GatewayPayloadSerializer.utf8Size(text);
@@ -371,32 +405,76 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
         parser.parseProposal(text, request.proposalKind(), request.writableStepIds());
     if (!parsed.isValid()) {
       return CompileResponse.parseFailure(
-          parsed.failureReason(), provenance, retries, elapsed(start), inputBytes, bytes);
+          parsed.failureReason(),
+          parsed.rejection(),
+          parsed.rejectStepIndex(),
+          provenance,
+          retries,
+          elapsed(start),
+          inputBytes,
+          bytes);
     }
     return CompileResponse.ok(
         parsed.artifactJson(), provenance, retries, elapsed(start), inputBytes, bytes);
   }
 
   /**
+   * Version of the provider response schema built by {@link #providerSchema}, recorded in the
+   * compilation settings so a schema change re-fingerprints every compile.
+   *
+   * <p>{@code 2} (VAL-030, 2026-10-04): the step item became a per-status {@code anyOf}. Version
+   * {@code 1} required only {@code stepId} and {@code status}, so models omitted {@code message} on
+   * refusals, the parser rejected them and both repairs repeated the omission (52/60 correct
+   * refusals lost as {@code GATEWAY_PARSE_FAILURE}; benchmark report {@code
+   * docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/report.md}, finding 1).
+   */
+  static final int PROVIDER_SCHEMA_VERSION = 2;
+
+  /**
    * Provider-supported subset only; the strict local envelope validator is authoritative.
    *
    * <p>Every map is insertion-ordered (Story 10.45 AC 5). {@code Map.of} iterates in an order that
    * depends on a per-JVM random salt, so the serialized schema bytes used to differ between JVMs
-   * and replicas. The schema content is unchanged; only its key order is now fixed.
+   * and replicas. That change fixed key order only; it left the schema content as it was.
+   *
+   * <p>Each step is a per-status {@code anyOf} (VAL-030, {@link #PROVIDER_SCHEMA_VERSION} 2) that
+   * mirrors the key sets {@link GatewayResponseParser#parseProposal} accepts exactly: a {@code
+   * GENERATED} branch requiring {@code stepId}, {@code status}, {@code code}, and one refusal
+   * branch requiring {@code stepId}, {@code status}, {@code reason}, {@code message}. It is the
+   * candidate shape the benchmark validated on direct Vertex (8/8 refusals in one attempt,
+   * positives unaffected), byte for byte. The refusal branch does not pair {@code UNSUPPORTED} with
+   * {@code UNSUPPORTED_CAPABILITY} or {@code CLARIFICATION} with {@code AMBIGUOUS_INTENT}; the
+   * parser still enforces that pairing ({@code REJECTION_REASON_MISMATCH}).
+   *
+   * <p><b>Unverified:</b> whether the R2D2 proxy accepts {@code anyOf} in {@code
+   * responseJsonSchema} was not tested (benchmark ran direct Vertex only). {@link
+   * StudioGatewayProperties.ProviderFeatures} has no EC-17 switch for the schema shape, so a proxy
+   * that rejects {@code anyOf} has no configuration fallback today.
    */
   static Map<String, Object> providerSchema(CompileRequest request) {
-    Map<String, Object> stepProperties = new LinkedHashMap<>();
-    stepProperties.put(
-        "stepId",
-        typed("string", "enum", request.writableStepIds().stream().map(Object::toString).toList()));
-    stepProperties.put(
-        "status", typed("string", "enum", List.of("GENERATED", "UNSUPPORTED", "CLARIFICATION")));
-    stepProperties.put("code", typed("string"));
-    stepProperties.put(
+    List<String> stepIds = request.writableStepIds().stream().map(Object::toString).toList();
+
+    Map<String, Object> generatedProperties = new LinkedHashMap<>();
+    generatedProperties.put("stepId", typed("string", "enum", stepIds));
+    generatedProperties.put("status", typed("string", "enum", List.of("GENERATED")));
+    generatedProperties.put("code", typed("string"));
+    Map<String, Object> generated =
+        typed("object", "required", List.of("stepId", "status", "code"));
+    generated.put("properties", generatedProperties);
+
+    Map<String, Object> refusalProperties = new LinkedHashMap<>();
+    refusalProperties.put("stepId", typed("string", "enum", stepIds));
+    refusalProperties.put(
+        "status", typed("string", "enum", List.of("UNSUPPORTED", "CLARIFICATION")));
+    refusalProperties.put(
         "reason", typed("string", "enum", List.of("UNSUPPORTED_CAPABILITY", "AMBIGUOUS_INTENT")));
-    stepProperties.put("message", typed("string"));
-    Map<String, Object> step = typed("object", "required", List.of("stepId", "status"));
-    step.put("properties", stepProperties);
+    refusalProperties.put("message", typed("string"));
+    Map<String, Object> refusal =
+        typed("object", "required", List.of("stepId", "status", "reason", "message"));
+    refusal.put("properties", refusalProperties);
+
+    Map<String, Object> step = new LinkedHashMap<>();
+    step.put("anyOf", List.of(generated, refusal));
 
     Map<String, Object> version = typed("integer", "minimum", 1);
     version.put("maximum", 1);

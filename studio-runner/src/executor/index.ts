@@ -15,6 +15,7 @@ export type { Redactor } from './redaction.js';
 export type {
   BrowserAdapter,
   LocatorHandle,
+  PageLocation,
   ResolvedMatcher,
   ValueResolver,
 } from './adapters/BrowserAdapter.js';

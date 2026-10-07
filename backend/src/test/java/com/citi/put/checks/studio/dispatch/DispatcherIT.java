@@ -8,6 +8,7 @@ import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.secrets.FakeStudioVaultProvider;
 import com.citi.put.checks.studio.secrets.StudioSecretFixtures;
 import com.citi.put.checks.studio.secrets.StudioVaultProvider;
+import com.citi.put.checks.studio.secrets.VaultScope;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
@@ -549,15 +550,16 @@ class DispatcherIT {
     entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, "vanishing-reference");
     vault.rotate(
         StudioVaultProvider.ReferenceKind.SECRET,
-        CSI_ID,
-        ENVIRONMENT,
+        VaultScope.of(CSI_ID, ENVIRONMENT, withReference),
         "vanishing-reference",
         "a-value-that-is-about-to-vanish");
     UUID execution = studioService.executeTest(withReference, owner, null).executionId();
 
     // Preflight passed at acceptance; the reference disappears from the vault before the send.
     vault.delete(
-        StudioVaultProvider.ReferenceKind.SECRET, CSI_ID, ENVIRONMENT, "vanishing-reference");
+        StudioVaultProvider.ReferenceKind.SECRET,
+        VaultScope.of(CSI_ID, ENVIRONMENT, withReference),
+        "vanishing-reference");
 
     dispatcher.dispatch(execution);
 
@@ -580,8 +582,7 @@ class DispatcherIT {
     entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, "LOGIN_PW");
     vault.rotate(
         StudioVaultProvider.ReferenceKind.SECRET,
-        CSI_ID,
-        ENVIRONMENT,
+        VaultScope.of(CSI_ID, ENVIRONMENT, withReference),
         "LOGIN_PW",
         "value-never-logged");
     UUID execution = studioService.executeTest(withReference, owner, null).executionId();
@@ -635,8 +636,7 @@ class DispatcherIT {
     String canaryValue = "studio-canary-value-do-not-persist";
     vault.rotate(
         StudioVaultProvider.ReferenceKind.SECRET,
-        CSI_ID,
-        ENVIRONMENT,
+        VaultScope.of(CSI_ID, ENVIRONMENT, withReference),
         "canary-reference",
         canaryValue);
     UUID execution = studioService.executeTest(withReference, owner, null).executionId();

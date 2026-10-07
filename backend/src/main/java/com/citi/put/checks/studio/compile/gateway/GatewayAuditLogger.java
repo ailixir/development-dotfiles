@@ -58,6 +58,10 @@ public class GatewayAuditLogger {
       fields.put("cachedContentTokens", provenance.cachedContentTokens());
       fields.put("totalTokens", provenance.totalTokens());
     }
+    // VAL-019a: the closed rejection reason and the 0-based step position only. Never the reason
+    // string, which can quote the model's output.
+    fields.put("rejectReason", response.rejection());
+    fields.put("rejectStepIndex", response.rejectStepIndex());
 
     StringJoiner line = new StringJoiner(" ", "studio.gateway.call ", "");
     fields.forEach((key, value) -> line.add(key + "=" + value));

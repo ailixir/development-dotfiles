@@ -113,6 +113,7 @@ export function createRunReporter(options: RunReporterOptions): RunReporter {
         atMs: event.startedAtMs,
         level: 'info',
         message: `step ${String(event.stepIndex)} started`,
+        stepIndex: event.stepIndex,
       });
       dispatch(snapshot.build('PROGRESS'));
     },
@@ -139,6 +140,7 @@ export function createRunReporter(options: RunReporterOptions): RunReporter {
           event.failure === null
             ? `step ${String(event.stepIndex)} ${event.status}`
             : `step ${String(event.stepIndex)} ${event.status}: ${event.failure}`,
+        stepIndex: event.stepIndex,
       });
       dispatch(snapshot.build('PROGRESS'));
     },

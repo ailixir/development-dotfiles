@@ -85,8 +85,8 @@ class SchemaSmokeTest {
                 + "WHERE table_schema = 'public' "
                 + "AND table_name IN ('users','csi_systems','checks','schedules','execution_results',"
                 + "'ui_tests','ui_test_executions','reports','report_executions','tags',"
-                + "'check_tags','csi_tags','secrets','shedlock')",
+                + "'check_tags','csi_tags','shedlock')",
             Integer.class);
-    assertThat(count).isEqualTo(14);
+    assertThat(count).isEqualTo(13);
   }
 }

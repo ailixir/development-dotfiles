@@ -54,6 +54,38 @@ class CompileBoundsTest {
 
   // ── AC-6: steps per draft ─────────────────────────────────────────────────
 
+  // ── VAL-021 / VAL-022: nothing to compile is refused before a compile begins ──
+
+  @Test
+  void anEmptySourceIsRefusedWithAnActionableCodeNotAnInternalError() {
+    assertThatThrownBy(() -> limits.requireWithinLimits(List.of()))
+        .isInstanceOf(StudioValidationException.class)
+        .hasMessage("This test has no steps. Add at least one step before compiling.")
+        .extracting(e -> ((StudioValidationException) e).getCode())
+        .isEqualTo(AuthoringLimits.INVALID_STEPS);
+    assertThatThrownBy(() -> limits.requireWithinLimits(null))
+        .isInstanceOf(StudioValidationException.class)
+        .extracting(e -> ((StudioValidationException) e).getCode())
+        .isEqualTo(AuthoringLimits.INVALID_STEPS);
+  }
+
+  @Test
+  void aBlankOrWhitespaceOnlyStepIsRefusedNamingItsNumber() {
+    for (String blank : new String[] {"", "   ", " \t\n "}) {
+      assertThatThrownBy(() -> limits.requireWithinLimits(List.of("Go home", blank)))
+          .isInstanceOf(StudioValidationException.class)
+          .hasMessage("Step 2 is blank. Write what the step should do, or remove it.")
+          .extracting(e -> ((StudioValidationException) e).getCode())
+          .isEqualTo(AuthoringLimits.INVALID_STEPS);
+    }
+    // A blank step longer than the line cap is still reported as blank: that is the actionable fix.
+    assertThatThrownBy(() -> limits.requireWithinLimits(List.of(" ".repeat(1025))))
+        .extracting(e -> ((StudioValidationException) e).getCode())
+        .isEqualTo(AuthoringLimits.INVALID_STEPS);
+    assertThatCode(() -> limits.requireWithinLimits(List.of("  Go home  ")))
+        .doesNotThrowAnyException();
+  }
+
   @Test
   void exactlyTheStepCapIsAcceptedAndOneMoreIsRejected() {
     assertThatCode(() -> limits.requireWithinLimits(lines(100, "Go home")))

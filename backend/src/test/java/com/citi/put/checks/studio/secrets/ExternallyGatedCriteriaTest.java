@@ -28,10 +28,10 @@ class ExternallyGatedCriteriaTest {
   @Disabled(
       "AC-5b — BLOCKED on ED-02 (status: open). Integration owner 10.18, integrated proof 10.19. "
           + "The same three properties evaluated by the REAL vault's own policy, including the "
-          + "principal dimension, which has no decidable source on this branch: the secrets table "
-          + "has no CSI column, there is no principal entitlement model and no environment "
-          + "scoping. This story ships the seam and a fake vault whose policy is development "
-          + "configuration, and adds no column and no migration to that table. SKIPPED, NOT PASSED.")
+          + "principal dimension, which has no decidable source on this branch: it belongs to the "
+          + "platform Vault token policy and the PUT Core secret-use policy (ED-02), neither of "
+          + "which is connected. This story ships the seam and a fake vault whose policy is "
+          + "development configuration. SKIPPED, NOT PASSED.")
   @DisplayName("AC-5b — resolution confined by the real vault's own policy (ED-02 / 10.18 / 10.19)")
   void ac5bRealVaultPolicy() {
     throw new AssertionError("blocked on ED-02");

@@ -8,6 +8,7 @@ import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.secrets.FakeStudioVaultProvider;
 import com.citi.put.checks.studio.secrets.StudioSecretFixtures;
 import com.citi.put.checks.studio.secrets.StudioVaultProvider;
+import com.citi.put.checks.studio.secrets.VaultScope;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -100,7 +101,10 @@ class RevocationRotationIT {
         StudioExecutionFixtures.references(List.of(), List.of(SECRET_ID)));
     entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, SECRET_ID);
     vault.rotate(
-        StudioVaultProvider.ReferenceKind.SECRET, CSI_ID, ENVIRONMENT, SECRET_ID, OLD_VALUE);
+        StudioVaultProvider.ReferenceKind.SECRET,
+        VaultScope.of(CSI_ID, ENVIRONMENT, testId),
+        SECRET_ID,
+        OLD_VALUE);
   }
 
   private UUID accept() {
@@ -139,7 +143,10 @@ class RevocationRotationIT {
   void aReferenceDeletedFromTheVaultBetweenAcceptanceAndDispatchIsTerminalAndNothingIsSent() {
     UUID execution = accept();
 
-    vault.delete(StudioVaultProvider.ReferenceKind.SECRET, CSI_ID, ENVIRONMENT, SECRET_ID);
+    vault.delete(
+        StudioVaultProvider.ReferenceKind.SECRET,
+        VaultScope.of(CSI_ID, ENVIRONMENT, testId),
+        SECRET_ID);
     dispatcher.dispatch(execution);
 
     // A fact about the draft and its environment (ADR-002 §15.3).
@@ -220,7 +227,10 @@ class RevocationRotationIT {
     Map<String, Object> before = revisionBinding();
 
     vault.rotate(
-        StudioVaultProvider.ReferenceKind.SECRET, CSI_ID, ENVIRONMENT, SECRET_ID, NEW_VALUE);
+        StudioVaultProvider.ReferenceKind.SECRET,
+        VaultScope.of(CSI_ID, ENVIRONMENT, testId),
+        SECRET_ID,
+        NEW_VALUE);
     dispatcher.dispatch(execution);
 
     assertThat(runner.sendCount()).isEqualTo(1);
@@ -261,7 +271,10 @@ class RevocationRotationIT {
     String beforeVersions = versionsOf(first);
 
     vault.rotate(
-        StudioVaultProvider.ReferenceKind.SECRET, CSI_ID, ENVIRONMENT, SECRET_ID, OLD_VALUE);
+        StudioVaultProvider.ReferenceKind.SECRET,
+        VaultScope.of(CSI_ID, ENVIRONMENT, testId),
+        SECRET_ID,
+        OLD_VALUE);
     runner.reset();
     UUID second = accept();
     dispatcher.dispatch(second);

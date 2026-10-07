@@ -39,9 +39,16 @@ public record StudioSecretsProperties(Vault vault, Map<String, String> entitleme
         return mount == null || mount.isBlank() ? "secret" : mount;
       }
 
+      /**
+       * The default renders, for a secret, {@code studio/60406/Production/<testId>/secrets/NAME}.
+       * The test id scopes a secret to the test it was saved for.
+       */
+      public static final String DEFAULT_PATH_TEMPLATE =
+          "studio/{csiId}/{environment}/{testId}/{kind}/{referenceName}";
+
       public String pathTemplateOrDefault() {
         return pathTemplate == null || pathTemplate.isBlank()
-            ? "studio/{csiId}/{environment}/{kind}/{referenceName}"
+            ? DEFAULT_PATH_TEMPLATE
             : pathTemplate;
       }
 

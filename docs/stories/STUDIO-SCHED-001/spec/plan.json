@@ -1,0 +1,365 @@
+{
+  "storyId": "STUDIO-SCHED-001",
+  "createdAt": "2026-10-06 00:37:42 UTC",
+  "status": "pending",
+  "createdBy": "@architect",
+  "complexity": "COMPLEX",
+  "dependencies": [],
+  "approvedSpec": "docs/stories/STUDIO-SCHED-001/spec/spec.md",
+  "critique": "docs/stories/STUDIO-SCHED-001/spec/critique-2.json",
+  "authorization": "User explicitly requested spec pipeline and implementation; root confirms Ready story and plan execution authorization; no redundant approval requested.",
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Storage and recurrence",
+      "subtasks": [
+        {
+          "id": "1.1",
+          "description": "Add owned schedules/activations/occurrences/ack and ledger/source constraints",
+          "service": "database",
+          "files": [
+            "backend/src/main/resources/db/migration/V26__studio_scheduling.sql",
+            "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingSchemaIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew test --tests '*StudioSchedulingSchemaIT'",
+            "instructions": "Real PostgreSQL; clean owned FK fixture rows"
+          },
+          "status": "pending",
+          "notes": "Dara helper owns these files."
+        },
+        {
+          "id": "1.2",
+          "description": "Implement shared minute cron, timezone and earlier-offset recurrence with injected clock",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioCronResolver.java",
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulingProperties.java",
+            "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioCronResolverTest.java"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew test --tests '*StudioCronResolverTest'"
+          },
+          "status": "pending",
+          "dependencies": [
+            "1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "API and live authorization",
+      "subtasks": [
+        {
+          "id": "2.1",
+          "description": "Implement default-deny and explicit local/test CSI environment grant policies",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioBackgroundAuthorization.java",
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/ConfiguredBackgroundAuthorization.java",
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledDispatchAuthorization.java"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew compileJava"
+          },
+          "status": "pending",
+          "dependencies": [
+            "1.1"
+          ]
+        },
+        {
+          "id": "2.2",
+          "description": "Implement schedule/occurrence/activation DTOs and JDBC repository",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleDtos.java",
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleRepository.java",
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleException.java"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew compileJava"
+          },
+          "status": "pending",
+          "dependencies": [
+            "1.1",
+            "1.2"
+          ]
+        },
+        {
+          "id": "2.3",
+          "description": "Implement CSI-authorized optimistic CRUD and exact activation/uncertainty acknowledgment",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleController.java",
+            "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew test --tests '*StudioScheduleApiIT'"
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.1",
+            "2.2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Admission, provenance and bounded worker",
+      "subtasks": [
+        {
+          "id": "3.1",
+          "description": "Extract shared expected-outcome admission and scheduled identity while preserving manual replay",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/entity/StudioDispatchLedger.java",
+            "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduledAcceptanceIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew test --tests '*AcceptanceIT' --tests '*StudioScheduledAcceptanceIT'"
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.3"
+          ]
+        },
+        {
+          "id": "3.2",
+          "description": "Preserve durable uncertainty summary and immutable scheduled execution attribution",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+            "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java",
+            "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionSnapshotDto.java"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew compileJava"
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.1"
+          ]
+        },
+        {
+          "id": "3.3",
+          "description": "Project activation/source through GET list SSE and metadata labels",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProvenance.java",
+            "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleProvenanceIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew test --tests '*StudioScheduleProvenanceIT' --tests '*StudioContractTest'"
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.2"
+          ]
+        },
+        {
+          "id": "3.4",
+          "description": "Wire atomic input/confirmation/delete invalidation and deferred lifecycle settlement",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleInvalidation.java"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew test --tests '*StudioScheduledAcceptanceIT'"
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.1"
+          ]
+        },
+        {
+          "id": "3.5",
+          "description": "Implement one-test atomic due decisions and bounded CSI worker poller",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java",
+            "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulePoller.java",
+            "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessorIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew test --tests '*StudioScheduleProcessorIT'"
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.2",
+            "3.4"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Mock-first frontend integration",
+      "subtasks": [
+        {
+          "id": "4.1",
+          "description": "Add matching typed Studio scheduling clients and MSW scenarios",
+          "service": "frontend",
+          "files": [
+            "frontend/src/services/api/studioApi.ts",
+            "frontend/src/types/studio/studioTypes.ts",
+            "frontend/src/services/mocks/studio/schedulingHandlers.ts"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frontend && npm run type-check"
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.3"
+          ],
+          "notes": "Frontend owner implements; preserve established centralized client."
+        },
+        {
+          "id": "4.2",
+          "description": "Integrate saved-test management and truthful deferred/refused occurrence controls",
+          "service": "frontend",
+          "files": [
+            "frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx",
+            "frontend/src/pages/StudioTestsPage/StudioTestsPage.tsx",
+            "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frontend && npm run test -- --run"
+          },
+          "status": "pending",
+          "dependencies": [
+            "4.1"
+          ]
+        },
+        {
+          "id": "4.3",
+          "description": "Render immutable schedule and activation source in existing run evidence",
+          "service": "frontend",
+          "files": [
+            "frontend/src/components/studio/runs/RunDetailsDrawer.tsx",
+            "frontend/src/components/studio/runs/RunRow.tsx",
+            "frontend/src/pages/StudioRunsPage/StudioRunsPage.tsx"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frontend && npm run type-check"
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.3",
+            "4.1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase-5",
+      "name": "Resilience and regression evidence",
+      "subtasks": [
+        {
+          "id": "5.1",
+          "description": "Verify real PostgreSQL worker races rollback locks and lifecycle/uncertainty behavior",
+          "service": "backend",
+          "files": [
+            "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessorIT.java",
+            "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduledAcceptanceIT.java",
+            "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleProvenanceIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew test --tests '*studio.scheduling.*' --tests '*studio.dispatch.AcceptanceIT' --tests '*studio.dispatch.DispatcherIT'"
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.3",
+            "3.4",
+            "3.5"
+          ]
+        },
+        {
+          "id": "5.2",
+          "description": "Verify mock-first accessible scheduling journey and browser critical path",
+          "service": "frontend",
+          "files": [
+            "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+            "frontend/e2e/studio-scheduling.spec.ts",
+            "frontend/src/services/mocks/studio/schedulingHandlers.test.ts"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frontend && npm run type-check && npm run test -- --run"
+          },
+          "status": "pending",
+          "dependencies": [
+            "4.2",
+            "4.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase-6",
+      "name": "Contracts operations and independent quality",
+      "subtasks": [
+        {
+          "id": "6.1",
+          "description": "Publish exact additive OpenAPI and terminal operations/restore default-off runbook",
+          "service": "infra",
+          "files": [
+            "docs/specs/studio/openapi.yaml",
+            "docs/runbooks/studio-scheduling.md"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew test --tests '*StudioContractTest' --tests '*StudioScheduleApiIT'"
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.3",
+            "3.3",
+            "3.5"
+          ],
+          "notes": "Root owns docs; API producer default-off separate from dispatcher/recovery."
+        },
+        {
+          "id": "6.2",
+          "description": "Run required gates and independent implementation QA with production gates retained",
+          "service": "backend",
+          "files": [
+            "docs/stories/STUDIO-SCHED-001/STUDIO-SCHED-001.story.md",
+            "docs/qa/gates/STUDIO-SCHED-001.yml"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd backend && ./gradlew test check"
+          },
+          "status": "pending",
+          "dependencies": [
+            "5.1",
+            "5.2",
+            "6.1"
+          ],
+          "notes": "No broad formatting of dirty baseline; QA owns verdict."
+        }
+      ]
+    }
+  ]
+}

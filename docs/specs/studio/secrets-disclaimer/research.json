@@ -1,0 +1,228 @@
+{
+  "storyId": "studio-secrets-disclaimer",
+  "researchedAt": "2026-10-05T00:00:00Z",
+  "researchedBy": "@analyst",
+  "complexity": "STANDARD",
+  "scope": "NARROW, time-boxed. Four topics named by @architect (complexity.json researchPhase.suggestedTopics plus the lead's brief): (1) acknowledgment evidence, (2) disclaimer UX/a11y, (3) comparable synthetic-monitoring products, (4) OQ-7 functional-ID link. No re-survey of the codebase beyond what these topics needed.",
+  "method": "WebSearch + WebFetch (Context7/EXA not used). Codebase checks by grep/sed on the working tree, read-only. Verified = fetched the primary page or read the file. Inferred = labelled as such.",
+
+  "dependencies": [
+    {
+      "name": "@mui/material Alert / AlertTitle / Checkbox / FormControlLabel",
+      "type": "library",
+      "version": "5.18.0 (installed; package.json declares ^5.15.0)",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "5.18.0",
+        "usageLocations": [
+          "frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx:43,109,179-180 (acknowledgment Checkbox gating the Resume action: closest precedent)",
+          "frontend/src/components/studio/inference/InferenceStudio.tsx:161 (Checkbox with inputProps aria-describedby)",
+          "frontend/src/components/studio/CodeTab.tsx:153,159,165 (Alert severity=warning/info with role=status), :203 (role=note + aria-label)",
+          "frontend/src/components/studio/SecretInput.tsx:151 (Alert severity=error inside the create dialog), :89 (canCreate gating)"
+        ]
+      },
+      "documentation": {
+        "url": "https://mui.com/material-ui/react-alert/",
+        "relevantSections": ["Accessibility"]
+      },
+      "patterns": [
+        {
+          "name": "Static advisory Alert with non-assertive role",
+          "description": "MUI docs: Alert renders role=\"alert\" by default (= aria-live assertive). Dynamically rendered alerts are announced; alerts present at page load are not. Less urgent messages should override with role=\"status\". A disclaimer that appears when the dialog opens is advisory, not urgent. Use role=\"note\" or role=\"status\" (the CodeTab precedent) and make it reachable via the Dialog's aria-describedby and the checkbox's aria-describedby, so screen readers read it in context instead of interrupting.",
+          "codeExample": "<Alert severity=\"warning\" role=\"note\" id=\"credential-disclaimer\">{CREDENTIAL_DISCLAIMER.short}</Alert>\n<FormControlLabel control={<Checkbox checked={ack} onChange={e => setAck(e.target.checked)} inputProps={{ 'aria-describedby': 'credential-disclaimer' }} />} label={CREDENTIAL_DISCLAIMER.ackLabel} />"
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": ["CLAUDE.md says MUI v7, but the installed version is 5.18.0. Alert/Checkbox APIs used here are the same in v5 and v7, so this does not affect the spec. The spec should cite v5 and not use v7-only props."]
+      }
+    },
+    {
+      "name": "Dedicated SLF4J audit logger (GatewayAuditLogger pattern)",
+      "type": "library",
+      "version": "existing",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "usageLocations": [
+          "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayAuditLogger.java:19-21 (AUDIT_LOGGER = \"studio.compile.gateway.audit\", INFO, field map incl. principal, testId, csiId, promptVersion)",
+          "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsService.java:137-138 (current create log: test, name, version; no principal)"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "studio.secrets.audit logger line",
+          "description": "Emit one structured INFO line on a dedicated logger name after vault.create succeeds. It carries the acknowledgment evidence fields (see recommendations R1). Never the value.",
+          "codeExample": "fields: principal, csiId, environment, testId, secretName, vaultVersion, disclaimerId, disclaimerVersion, disclaimerSha256, acknowledged=true, outcome=CREATED, serverTimestamp"
+        }
+      ],
+      "compatibility": { "preferred": true, "alternatives": ["DB table (see next)"], "conflicts": [] }
+    },
+    {
+      "name": "Persisted acknowledgment table (studio_schedule_uncertainty_ack precedent)",
+      "type": "infrastructure",
+      "version": "Flyway V26 precedent",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "usageLocations": [
+          "backend/src/main/resources/db/migration/V26__studio_scheduling.sql:154-165 (acknowledged_by NOT NULL with non-blank CHECK, acknowledged_at TIMESTAMPTZ)",
+          "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleService.java:250-262 (INSERT on acknowledgment)"
+        ]
+      },
+      "patterns": [
+        {
+          "name": "Acknowledgment row",
+          "description": "The repo already persists one human acknowledgment (scheduling uncertainty) as a DB row, not a log line. If InfoSec wants queryable or retained evidence, this is the in-house shape to copy. It is not needed for the default (log line).",
+          "codeExample": "studio_secret_ack(test_id, secret_name, vault_version, acknowledged_by, acknowledged_at, disclaimer_version, disclaimer_sha256)"
+        }
+      ],
+      "compatibility": { "preferred": false, "alternatives": ["audit log line"], "conflicts": ["Adds a migration: complexity infrastructure 1 -> 4, total 14, still STANDARD (complexity.json)."] }
+    },
+    {
+      "name": "HashiCorp Vault KV v2 (StudioSecretsService / HashicorpStudioVaultProvider)",
+      "type": "service",
+      "verified": true,
+      "source": "codebase",
+      "existing": { "installed": true, "usageLocations": ["backend/src/main/java/com/citi/put/checks/studio/secrets/"] },
+      "patterns": [],
+      "compatibility": { "preferred": true, "alternatives": [], "conflicts": ["Unchanged by this feature. The acknowledgment must NOT be written to Vault metadata, which would mix evidence with the secret store."] }
+    }
+  ],
+
+  "findings": [
+    {
+      "topic": "T1 Acknowledgment evidence",
+      "items": [
+        "VERIFIED (Ironclad, '6 components of clickwrap enforceability'): affirmative action with a box that is NOT pre-checked; prominent notice; digestible language; a distinct consent that is not buried; and backend records of 'time of acceptance, version of agreement, and other data that ties a specific user to an acceptance event'. Without proof of which version was accepted and when, a clickwrap is 'not likely to be enforceable'.",
+        "VERIFIED (clickterm, rsign search summaries; secondary sources): records usually also hold IP/user agent and a hash of the exact text shown. Tamper-evidence matters: a record the business could edit afterwards weakens it.",
+        "INFERRED: this is an internal employee acknowledgment, not a consumer contract, so contract enforceability is the wrong bar. What it needs is to answer an InfoSec/audit question later: 'who accepted which wording, for which secret on which test, when?' The clickwrap evidence fields map 1:1 onto that question. IP/user agent add little here because identity comes from the BFF-propagated principal. Do not add them unless InfoSec asks.",
+        "VERIFIED (codebase): the current create log has no principal (StudioSecretsService.java:138). The repo persists the one existing human acknowledgment (scheduling) as a DB row (V26:154), not a log line.",
+        "TRADE-OFF: a log line costs least and adds no infra. Its retention, immutability and queryability depend on the log pipeline (Splunk forwarding/retention for this service is UNKNOWN; not found in repo). A DB row is queryable and joins to the test, but it is mutable by the app and needs a migration. Neither one is tamper-evident on its own."
+      ]
+    },
+    {
+      "topic": "T2 Placement / UX / accessibility",
+      "items": [
+        "VERIFIED (NN/g, Confirmation Dialogs): overuse causes habituation ('if you cry wolf too many times, people will stop paying attention'). Wording must say what the risk is, not 'Are you sure?'. Reserve heavier confirmation for rare, high-consequence actions.",
+        "VERIFIED (W3C WCAG 2.1 Technique G155): a separate confirmation checkbox in addition to the submit button is a sufficient technique for SC 3.3.4 Error Prevention (Legal, Financial, Data). The checkbox is unchecked by default and placed near submit. Its test procedure expects that submitting without the box 'is rejected and the user is prompted', which means an explanatory message, not only a silent disabled button.",
+        "VERIFIED (w3c/wcag discussion #3845, search summary): a disabled submit as the ONLY signal is weak for 3.3.1. Pair it with visible text that explains what is missing.",
+        "VERIFIED (MUI Alert docs): the default role=alert is assertive. Alerts present at load are not announced. Use role=status for less urgent messages.",
+        "VERIFIED (codebase): StudioScheduleDialog already uses an inline Checkbox acknowledgment that gates an action (canResume), with no modal. Studio uses Alert severity=warning with role=status/note for advisory text. No modal-confirmation pattern is used for acknowledgments in studio.",
+        "INFERRED: secret creation is rare (once per credential per test), so a per-creation checkbox carries little fatigue risk. Plain-variable editing is frequent, so FR-3/FR-4 must stay inline and non-blocking (no checkbox, no modal). Otherwise the warning trains users to ignore the one that matters."
+      ]
+    },
+    {
+      "topic": "T3 Comparable products",
+      "items": [
+        "VERIFIED New Relic (Security for synthetic monitoring): 'be sure to create a non-personal login specifically for this purpose' because it 'will reduce the risk of unintended personal data exposure'. Collected data should be 'test data created for the purpose of monitoring'.",
+        "VERIFIED Datadog (App that requires login guide): 'use an account dedicated to testing with dummy credentials as a general testing best practice'. Store credentials as global variables with 'Hide and obfuscate'. Restrict access with RBAC. Even though storage is encrypted, the dedicated account remains the recommendation.",
+        "VERIFIED Checkly (Storing Secrets): 'Use dedicated test users... minimal privileges... Do not use your admin or root user.' 'Make sure you can easily disable or block these users.' Secrets are never shown after save.",
+        "VERIFIED Grafana Cloud SM (Manage secrets): values redacted as ***SECRET_REDACTED***. Only Admin/Editor/Checks-writer can use secrets. The page gives NO personal-vs-dedicated guidance.",
+        "SYNTHESIS: 3 of 4 vendors explicitly steer to dedicated/non-personal, least-privilege, disable-able accounts. None of the four documents an 'own risk' acknowledgment checkbox; they rely on docs plus RBAC plus masking. That makes an in-product acknowledgment stricter than industry norm. It is defensible for a bank, but not a copied pattern (confidence: medium. I checked docs pages, not product UIs)."
+      ]
+    },
+    {
+      "topic": "T4 OQ-7 functional-ID request link",
+      "items": [
+        "VERIFIED (repo grep for functional id / functional account / service account / FID / citi URLs across docs, PRD, ARCH, frontend/src): no Citi functional-ID request process or URL exists. The hits are unrelated: k8s service accounts, BFF 'service accounts' OU note, runner service identity, and example https://www.citi.com targets.",
+        "VERIFIED: the frontend has no existing configurable help-link mechanism. Env vars found: VITE_API_BASE_URL, VITE_API_URL, VITE_ENABLE_*, VITE_LOG_LEVEL, VITE_HOST_PORT, VITE_MF_PORT. STUDIO_CAPABILITIES is a frozen constant (studioCapabilities.ts).",
+        "Related but distinct: StudioScheduleDialog's 'approved unattended execution identity' (availableExecutionPrincipals) is the runner's identity, not a target-app login. The spec must not conflate them."
+      ]
+    }
+  ],
+
+  "unverifiedClaims": [
+    {
+      "claim": "A structured log line is durable/retained enough to serve as acknowledgment evidence.",
+      "reason": "Log forwarding, retention period and immutability for the checks backend are not documented in the repo.",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "Functional/service IDs can be requested by CSI owners for target apps (ASM-4).",
+      "reason": "No internal process found; only Citi IAM/InfoSec can confirm.",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "NFR-2 metric 'Alert has role=alert or aria-live'.",
+      "reason": "MUI docs show role=alert is assertive and not announced when static at load. Codebase convention for advisory text is role=status/note.",
+      "action": "needs_validation"
+    },
+    {
+      "claim": "Clickwrap enforceability statistics (e.g. '>90% enforcement rate') seen in search snippets.",
+      "reason": "Vendor marketing, not primary legal sources; not used in recommendations.",
+      "action": "acceptable_risk"
+    }
+  ],
+
+  "recommendations": [
+    {
+      "id": "R1",
+      "type": "prefer",
+      "subject": "Acknowledgment evidence fields (OQ-2)",
+      "rationale": "Record per successful create: principal (server-derived, never client-supplied), csiId, environment, testId, secretName, vaultVersion, disclaimerId + disclaimerVersion, disclaimerSha256 (hash of the exact short text + checkbox label as rendered), and a server timestamp. The client sends only {acknowledgedDisclaimerVersion}. The server rejects unknown/old versions with a stable 400 after the 403 check (NFR-4) and never trusts a client timestamp or identity. This answers who/when/which-wording/which-secret: the evidence set from clickwrap practice, without IP/UA."
+    },
+    {
+      "id": "R2",
+      "type": "prefer",
+      "subject": "Storage: dedicated audit logger line now; DB row only on InfoSec request",
+      "rationale": "Matches the @pm/@architect default and the GatewayAuditLogger pattern (logger name e.g. studio.secrets.audit), and adds no infra. Emit after vault.create succeeds, so no ack record exists for a secret that was never created. Raise the retention/immutability question with InfoSec. If they need queryable or retained evidence, copy the studio_schedule_uncertainty_ack row shape (acknowledged_by NOT NULL + non-blank CHECK). Either way, keep the value out by construction."
+    },
+    {
+      "id": "R3",
+      "type": "prefer",
+      "subject": "Create Secret dialog: inline warning Alert + unchecked checkbox, no modal",
+      "rationale": "G155 plus clickwrap 'affirmative, not pre-checked' plus the codebase StudioScheduleDialog precedent. Place the Alert (severity=warning, role=note or status, with an id) above Value. Put the checkbox next to the Create button, linked via aria-describedby to the Alert. Wire Dialog aria-describedby to the Alert. Keep the codebase's disabled-Create gating, but add visible helper text such as 'Confirm the credential notice to create', so the disabled state is not the only signal (3.3.1). Reset on every open (FR-2). Wording must name the concrete consequences: anyone who can run the test uses it; it appears in run video; it is your identity. Avoid 'Are you sure?' (NN/g)."
+    },
+    {
+      "id": "R4",
+      "type": "avoid",
+      "subject": "Checkbox or modal on plain variables / per-run warnings",
+      "rationale": "These actions are frequent. Gating them causes habituation that weakens the one acknowledgment that matters (NN/g). Keep FR-3/FR-4 as inline advisory text (Alert/helper text, role=status or static), with no blocking."
+    },
+    {
+      "id": "R5",
+      "type": "prefer",
+      "subject": "Disclaimer copy content (placeholder until Legal/InfoSec)",
+      "rationale": "Align with vendor consensus: use a dedicated, non-personal, least-privilege test/functional account that the CSI can disable or rotate (New Relic, Datadog, Checkly). Say why: personal identity, shared execution, video evidence. Then state the own-risk allowance. At most 3 sentences inline (NFR-2); the rest goes in 'Learn more'."
+    },
+    {
+      "id": "R6",
+      "type": "prefer",
+      "subject": "OQ-7 link: optional config value, hidden when unset",
+      "rationale": "No Citi URL found, and none should be invented. Put an optional functionalIdRequestUrl field on the versioned disclaimer constant (FR-9), or a VITE_ build-time var following the existing VITE_* convention. Render 'How to request a functional ID' only when it is set and is an https URL. Owner: @pm with Citi IAM. Note the constant approach needs a code change to set it; the env-var approach needs a deploy config change. Recommend the env var so ops/IAM can supply it without a code release (@architect to confirm)."
+    },
+    {
+      "id": "R7",
+      "type": "consider",
+      "subject": "Fix NFR-2 metric",
+      "rationale": "Change 'role=alert or aria-live' to 'disclaimer exposed via aria-describedby on the dialog and checkbox; advisory Alerts use role=status/note per Studio convention; checkbox has an accessible name'. role=alert on a static-at-open dialog Alert would either be assertive noise or not be announced at all."
+    }
+  ],
+
+  "autoDecisions": [
+    "[AUTO-DECISION] Include IP/user-agent in evidence? -> No (reason: internal tool with BFF-propagated identity; the clickwrap practice that adds IP/UA targets anonymous consumers; it adds personal data to logs for little evidential gain).",
+    "[AUTO-DECISION] Recommend DB table over log line? -> No, log line by default (reason: matches the architect-scored default; retention is unknown, so it is escalated as a needs_validation item instead of assumed).",
+    "[AUTO-DECISION] Skip SYNAPSE diagnostics/tech-search skill side-outputs -> skipped (reason: the lead's mission restricts writes to this artifact; tech-search would write under docs/research/)."
+  ],
+
+  "sources": [
+    "https://docs.newrelic.com/docs/synthetics/synthetic-monitoring/getting-started/security-synthetic-monitoring/",
+    "https://docs.datadoghq.com/synthetics/guide/app-that-requires-login/",
+    "https://www.checklyhq.com/docs/platform/secrets/",
+    "https://grafana.com/docs/grafana-cloud/testing/synthetic-monitoring/create-checks/manage-secrets/",
+    "https://ironcladapp.com/journal/contract-management/6-components-of-clickwrap-enforceability",
+    "https://clickterm.com/blog/clickwrap-enforceability/",
+    "https://www.w3.org/WAI/WCAG21/Techniques/general/G155",
+    "https://github.com/w3c/wcag/discussions/3845",
+    "https://mui.com/material-ui/react-alert/",
+    "https://www.nngroup.com/articles/confirmation-dialog/"
+  ],
+
+  "researchNotes": "Narrow research per architect. The real remaining unknowns are organisational: Legal/InfoSec wording and own-risk policy (CON-5), log retention/immutability for evidence (R2), and the functional-ID request process (OQ-7/ASM-4). None of these can be settled from code or the web. Confidence: high on T2/T3 (primary docs fetched), medium on T1 (legal practice from vendor/legal-tech sources, applied by inference to an internal acknowledgment), high on T4 negative result (repo grep). Side finding for the spec author: the installed MUI is 5.18.0, not v7 as CLAUDE.md states."
+}

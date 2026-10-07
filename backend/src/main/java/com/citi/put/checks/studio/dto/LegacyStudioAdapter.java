@@ -1,6 +1,7 @@
 package com.citi.put.checks.studio.dto;
 
 import com.citi.put.checks.studio.StudioValidationException;
+import com.citi.put.checks.studio.compile.AuthoringLimits;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -207,8 +208,36 @@ public final class LegacyStudioAdapter {
    *
    * <p>Only the canonical engine survives: other engines are rejected before execution rather than
    * silently reinterpreted (Architecture §8.3).
+   *
+   * <p>A blank step is rejected with {@code INVALID_STEPS} naming its number, and a per-step
+   * timeout outside the contract's {@code 1..120} with {@code INVALID_CONFIGURATION}; neither is
+   * coerced. An empty step list is accepted, because a draft is created empty and steps are added
+   * in the editor; an empty draft is refused at compile instead ({@link AuthoringLimits}).
    */
   public static void validateForWrite(UITestRequest request) {
+    List<String> steps = request.steps() == null ? List.of() : request.steps();
+    for (int index = 0; index < steps.size(); index++) {
+      String step = steps.get(index);
+      if (step == null || step.isBlank()) {
+        throw new StudioValidationException(
+            AuthoringLimits.INVALID_STEPS, AuthoringLimits.blankStepMessage(index));
+      }
+    }
+    Integer timeoutSeconds =
+        request.configuration() == null ? null : request.configuration().timeoutSeconds();
+    if (timeoutSeconds != null
+        && (timeoutSeconds < TestConfiguration.MIN_TIMEOUT_SECONDS
+            || timeoutSeconds > TestConfiguration.MAX_TIMEOUT_SECONDS)) {
+      throw new StudioValidationException(
+          "INVALID_CONFIGURATION",
+          "timeoutSeconds is "
+              + timeoutSeconds
+              + "; it must be between "
+              + TestConfiguration.MIN_TIMEOUT_SECONDS
+              + " and "
+              + TestConfiguration.MAX_TIMEOUT_SECONDS
+              + " seconds.");
+    }
     String browser = request.configuration() == null ? null : request.configuration().browser();
     if (!Objects.equals(TestConfiguration.CANONICAL_BROWSER, browser)) {
       throw new StudioValidationException(

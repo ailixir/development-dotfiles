@@ -117,7 +117,7 @@ export const QUOTA_EXHAUSTED_NARRATIVE: ExecuteRefusalNarrative = {
 export const EXECUTION_DISABLED_NARRATIVE: ExecuteRefusalNarrative = {
   title: 'Running tests is switched off right now',
   explanation:
-    'Execution is disabled across the platform, so no run can start from any draft — this is not about your test. Nothing was started.',
+    'Execution is disabled across the platform, so no run can start from any draft. This is not about your test. Nothing was started.',
   whoClearsIt:
     'An operator clears this by re-enabling execution. Everyone is affected until they do, and there is nothing about this draft to fix.',
   callerCanRetry: false,

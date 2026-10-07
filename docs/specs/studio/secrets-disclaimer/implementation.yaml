@@ -1,0 +1,848 @@
+# Implementation plan — studio-secrets-disclaimer (name-triggered identity disclaimer)
+# Spec Pipeline phase 6 (Plan), RE-RUN. Author: @architect (Aria), YOLO mode, 2026-10-06.
+# Inputs: spec.md iteration 4 (APPROVED 4.38, critique.json iteration 4), requirements.json
+#         (PO-0..PO-9), complexity.json, research.json, critique.json (incl.
+#         iterations[2].implementationYamlMustChange).
+# Supersedes: plan v1 (2026-10-05, generic-disclaimer design, Slices A/B, D3-D6). Nothing from v1's
+#         D3-D6 work items (plainVariableGuidance, credentialNameWarning, inlineCredentialGuidance,
+#         policySentence, saveErrorMessage/conflictNarratives INLINE_CREDENTIAL edits) is built.
+# Contents: rulings (OQ-18 a-e, re-rulings of v1, CRIT-25b), ADR-002 §35 outline, plan findings,
+#         pre-steps for @pm, slices A / S (shared) / B1 / B2 with ordered steps, blockers,
+#         separately-routed items, story breakdown.
+# Verification note: every "verified" item below was read in this worktree on 2026-10-06. Items
+#         marked "inference" were not run.
+
+meta:
+  storyId: studio-secrets-disclaimer
+  specVersion: 4
+  planVersion: 2
+  createdAt: "2026-10-06"
+  createdBy: "@architect"
+  executor: "@dev"
+  status: READY_FOR_STORY      # @sm drafts STUDIO-DISC-001..003; @po validates each; @dev implements
+  singlePr: false              # three stories, three PRs; Slice A never waits on B1/B2
+  slices:
+    A:  { story: STUDIO-DISC-001, contractChange: false, gate: "normal SDC; PF-1 (frontend files) landed" }
+    S:  { story: "STUDIO-DISC-002 (lands with whichever B-slice goes first; default B1)", contractChange: false, gate: "with its B-slice" }
+    B1: { story: STUDIO-DISC-002, contractChange: "Class C (ADR-002 §12, §34.1) — RULED here, §35", gate: "§35 landed (step B1-0) + PF-1 backend + STUDIO-DISC-001 merged" }
+    B2: { story: STUDIO-DISC-003, contractChange: "Class C — RULED here, §35", gate: "§35 landed + PF-1 secrets WIP committed + S merged; before or with the vaultSecrets flip" }
+  branchRule: >
+    Each story works from its own fresh feature branch cut from a base that already contains the
+    committed WIP named in PF-1. Stage only the files listed for that slice. Never `git add -A`:
+    this worktree carries a large uncommitted change set that belongs to neither story.
+
+toolchain:
+  backend:
+    cwd: backend/
+    compileMain: "./gradlew compileJava -q"
+    compileTests: "./gradlew compileTestJava -q"
+    note: >
+      `StudioContractTest` and every `*IT` are Testcontainers-backed: without Docker they report
+      SKIPPED, not passed. Confirm Docker before trusting T-CT-1, T-BE-9..12. Name every SKIPPED
+      result in the same line as the result.
+  frontend:
+    cwd: frontend/
+    lockfile: package-lock.json   # re-verified 2026-10-06: no pnpm-lock.yaml in frontend/
+    runTests: "pnpm exec vitest run <files>"
+    typeCheck: "pnpm exec tsc --noEmit"
+    lint: "pnpm exec eslint <files>"
+    note: "`pnpm exec` only; never `pnpm install` / `npm install` (would write a second lockfile)."
+  studioRunner:
+    cwd: studio-runner/
+    runTests: "pnpm exec vitest run <files>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RULINGS. Step B1-0 copies this block into ADR-002 §35.1 (outline in `adr002Section35`).
+# ─────────────────────────────────────────────────────────────────────────────
+rulings:
+
+  OQ-18a-class:
+    question: "Class of the TestRequest change: optional `identityNameAcknowledgements`, new 400s `IDENTITY_NAME_ACK_REQUIRED` and `INVALID_IDENTITY_NAME_ACK` on POST/PUT /studio/tests."
+    status: "RULED — Class C, AUTHORIZED prospectively (before any code)"
+    ruling: >
+      Class C under §12 and §34.1: it changes which requests receive 400 on two public routes (a
+      request that introduces a matching plain-variable name without an entry moved from 200/201 to
+      400). This is the first Class C amendment to follow §34.1's "ruling first" rule end to end:
+      §35 lands as the first commit of STUDIO-DISC-002 with a §13 row `AUTHORIZED, NOT YET LANDED`,
+      and the story replaces it with measured digests and counts.
+    conditions:
+      - "Grandfathering is part of the authorization: a stored non-secret name never requires an entry (FR-13, PO-6). An implementation that enforces on every save is NOT authorized."
+      - "§35 behaviour table carries the B1 rows (see adr002Section35.35_2)."
+      - "Consumer re-check: Checks frontend Studio page (`saveDraft`, `saveErrorMessage`), MSW Studio save handler (must mirror the rule; unlike §34.3 this is not left as a fidelity gap, because the drift-recovery UI is exercised in demo mode), wizard (not a consumer: Checks API, C21)."
+      - "Release note line, owner @devops."
+      - "Deploy order: frontend that sends the field first or in the same release. No server feature flag: a stale bundle fails only for a newly introduced identity name and recovers on reload (spec §7)."
+    tradeOff:
+      for: "Recorded server evidence on the live surface (PO-4) with zero change for existing tests."
+      against: "A new 400 on the most-used Studio write route; mitigated by grandfathering and FE-first deploy."
+
+  OQ-18b-vault-order:
+    question: "Re-rule OQ-12's order (v1: 403 → parse → ack → name/value/origins → Vault)."
+    status: "RE-RULED — D7 adopted: 403 → strict parse → name/value/origins → ack → Vault"
+    supersedes: "plan v1 rulings.OQ-12 (order only). The 503 → 400 part of OQ-12 stands."
+    ruling: >
+      The ack check moves after the name/value/origins checks. v1 placed it first because the ack
+      was unconditional and independent of the body content. It is now a function of the name
+      (D7, PO-0/PO-1), so it must run on a name the server has already accepted
+      (`^[A-Za-z0-9_.-]{1,64}$`). The v1 rationale still holds in substance: there is still one
+      precedence rule ("403, then body 400s, then Vault"), and the ack is the last body 400.
+    rationale:
+      - "The matcher runs only on valid names: smaller input domain, no 'tick, resubmit, then get the name 400' double round trip."
+      - "No SPI change (no `isConfigured()` probe); the v1 rejected alternative stays rejected."
+      - "Authorization still decides first: a non-member learns nothing (T-BE-2)."
+    conditions:
+      - "With provider `none`: matching name without an accepted version → 400 SECRET_ACK_REQUIRED (was 503); non-matching name → 503 unchanged (T-BE-1, AC-11)."
+      - "The ack check sits inside the existing try/finally so the value is still zero-filled on the new 400."
+
+  OQ-18c-required-field:
+    question: "Re-rule `new-required-field` (v1: `acknowledgedDisclaimerVersion` in `required` for every body)."
+    status: "RE-RULED — optional in the schema, conditionally required by the server (D7 adopted, with one refinement)"
+    supersedes: "plan v1 rulings.new-required-field"
+    ruling: >
+      v1's reason ("an optional acknowledgment is one any client may omit, which records nothing")
+      was about a universal acknowledgment. Under PO-0/PO-1 the acknowledgment exists only for
+      matching names, and the server — not the schema — decides when it is required, by running
+      the same matcher. Requiredness is therefore enforced, just not expressible in JSON Schema
+      `required`. Putting it in `required` would force the client to assert an acknowledgment the
+      author never gave for non-matching names, which corrupts the evidence.
+    refinement: >
+      Schema `acknowledgedDisclaimerVersion: {type: string, maxLength: 64, nullable: true}`, NOT
+      in `required`, and WITHOUT D7's `minLength: 1`. Reason: the server never refuses a blank
+      version as a shape error — for a matching name it is `SECRET_ACK_REQUIRED`, for a
+      non-matching name it is ignored — so `minLength: 1` would declare a bound the server does not
+      enforce. Shape (strict parse, any name): non-string or > 64 chars → 400 INVALID_SECRET_REQUEST.
+      This mirrors B1, where blank is allowed at shape and > 64 is a shape error. @pm folds this
+      into D7 (pre-step P0).
+    releaseConstraint: >
+      new FE + old BE: the strict parser refuses the unknown field (400 INVALID_SECRET_REQUEST),
+      but only for matching names (the FE omits the field otherwise). old FE + new BE: matching
+      names get 400 SECRET_ACK_REQUIRED. Both are reachable only with `vaultSecrets=true` (CON-2):
+      FE and BE ship before the flip; ordering between them is free while the flag is off.
+
+  OQ-18d-structured-error:
+    question: "Accept the `variableNames` extension of the error body for the two new codes, or the fallback (names in message only)."
+    status: "RULED — ACCEPTED, with constraints"
+    ruling: >
+      Both B1 codes return `{error, message, variableNames}`. It is an additive extension:
+      `ErrorResponse` (openapi.yaml:2487-2492) declares no `additionalProperties: false`, so the
+      body still validates as `ErrorResponse` for every existing consumer. Without the list, a
+      server-only match (matcher drift, stale MFE bundle) is unrecoverable except by renaming the
+      variable, which is a correctness hole in a gate the author cannot see the reason for.
+    shape:
+      openapiSchema: >
+        New flat schema `IdentityNameAckErrorResponse` {required: [error, message, variableNames];
+        error: {type: string, enum: [IDENTITY_NAME_ACK_REQUIRED, INVALID_IDENTITY_NAME_ACK]};
+        message: string; variableNames: {type: array, maxItems: 100, items: string}}. Flat (not
+        `allOf`), because `StudioContractTest.schemaProperties` reads `properties` directly
+        (StudioContractTest.java:628-635). POST/PUT /tests 400 responses keep `ErrorResponse` as
+        their schema (superset-compatible) and gain a description sentence plus two examples
+        naming `IdentityNameAckErrorResponse`.
+      java: >
+        Record `studio.credentials.IdentityNameAckErrorResponse(String error, String message,
+        List<String> variableNames)`, pinned by a new `assertSchemaMatchesRecord`. Exception
+        `StudioIdentityNameAckException extends StudioValidationException` (so existing catch sites
+        still see a validation failure) carrying the names; its own `@ExceptionHandler` in
+        `ChecksExceptionHandler` next to `handleStudioValidation` (Spring resolves the most
+        specific type).
+    constraints:
+      - "Names only, never values; distinct, sorted (String natural order), at most 100. If more than 100 names qualify, the first 100 are returned and the message says 'and N more'."
+      - "IDENTITY_NAME_ACK_REQUIRED: the required names lacking an accepted entry. INVALID_IDENTITY_NAME_ACK from step (2) reference errors: the offending entry names (already ≤ 64 after shape). INVALID_IDENTITY_NAME_ACK from step (1) shape errors: `variableNames: []` — the property is always present."
+      - "Reflection: the list echoes only names the caller itself sent in the same request, serialized by Jackson as JSON (no HTML context). Body size is bounded by the request. Accepted; recorded under security."
+      - "The FE never interpolates `variableNames` into HTML; it renders through React text nodes only."
+    fallbackRejected: "Names in `message` only: makes drift unrecoverable and forces the FE to parse prose (saveErrorMessage branches on codes, never prose — §34.3)."
+
+  OQ-18e-internal-path:
+    question: "Confirm that the internal `updateTest(…, null)` path skips the policy."
+    status: "RULED — CONFIRMED, with a guard"
+    verified: >
+      Main-code callers (grep, 2026-10-06): `StudioController.java:74` createAuthoringDraft, `:78`
+      createTest(…, auth), `:105` updateAuthoringDraft, `:107` updateTest(…, auth). The only
+      main-code call with `auth == null` is `StudioService.java:353` inside `updateAuthoringDraft`,
+      which runs the policy itself before delegating. `saveAuthoring`, `updateAuthoring` and
+      `adaptLegacyAuthoring` have no main-code caller and take no variables (AuthoringV2Request =
+      authoringSchemaVersion, globalContext, steps), so they are not a bypass.
+    ruling: >
+      The policy runs exactly once per HTTP save, at the entry point holding the caller's
+      `Authentication`: private `createTest` (after requireRegisteredCsi/requireWrite), `updateTest`
+      when `auth != null` (after lock, refresh, STALE_REVISION, CSI_IMMUTABLE,
+      AUTHORING_V2_REQUIRED; before `changeClassifier.classify`), `updateAuthoringDraft` (after
+      lockForAuthoringWrite and CSI_IMMUTABLE; before `updateTest(id, metadataOnly, null)`).
+    guard:
+      - "Javadoc on `updateTest(UUID, UITestRequest)` and on the `auth == null` branch: 'never reached from HTTP except via updateAuthoringDraft, which evaluates the identity-name policy first; a new HTTP caller must run the policy'."
+      - "T-BE-12 asserts exactly one evaluation per request on both v2 paths (spy on the policy)."
+      - "Any future internal caller of `createTest` with an `Authentication` (template import, duplicate) gets the policy with `acks = null`: identity names in its payload need entries or must be stored first. Documented in the createTest javadoc."
+
+  CRIT-25b-environment:
+    question: "AckSubject.environment on update: request's or stored row's?"
+    status: "RULED — the environment the row holds after the write (= `request.environment()` on every path)"
+    ruling: >
+      The audit line attests 'this identity name was introduced into test T, CSI C, environment E
+      as saved'. `updateTest` writes `request.environment()` unconditionally (StudioService.java:561)
+      and `metadataOnly` carries `metadata.environment()` on v2, so the post-write environment is the
+      request's on create, v1 update and v2 update alike. Recording the pre-write value would
+      describe a configuration the variable never ran under.
+    divergence: "CRIT-25 suggested the stored row's environment 'for consistency with csiId'. csiId is immutable (CSI_IMMUTABLE), so stored == requested for it; consistency holds either way. Trade-off: a save that both changes environment and introduces a name logs only the new environment; the old one is in the row's history, not the audit line. Accepted."
+
+  carriedFromV1:
+    OQ-13: "Stands unchanged (three-way test pin; no production import of docs/). Re-checked against matcherVersion: the matcher version is pinned separately by identity-name-cases.json#matcherVersion (T-FE-14, T-BE-6); it is NOT added to credential-disclaimer-version.json, because copy and matcher version independently (D1 vs D13)."
+    OQ-10: "Stands: one accepted version; first post-flip copy bump decides overlap (O-22). Now applies to both B1 and B2: the map is shared."
+    OQ-2: "Not ruled here (InfoSec). Log line built; D12 only on an InfoSec 'DB' answer → STUDIO-DISC-004."
+    ADR-002-§35-class-v1: "Superseded by OQ-18a/18c (the v1 class ruling was for a required field on the secrets route only)."
+
+  autoDecisions:
+    - "[AUTO-DECISION] UITestRequest gains a 10th component vs passing the raw node beside the record → 10th component `JsonNode identityNameAcknowledgements` plus a 9-arg compatibility constructor that passes null (reason: StudioContractTest:443 pins openapi TestRequest properties to the record's components, so the property must be a component; the compat constructor keeps all 29 existing 9-arg call sites — StudioService.java:342 and 28 in 16 test files — compiling unchanged, CRIT-25a. Trade-off: the compat constructor silently drops acks; acceptable because the only main-code caller is metadataOnly, which runs after the policy)."
+    - "[AUTO-DECISION] Where the wizard ack state lives → lifted into CreateCheckPage (it owns step1Valid, Next and Create/Update) and passed down to UiTestConfig as props (reason: UiTestConfig is presentational for uiVariables today)."
+    - "[AUTO-DECISION] Wizard gating mechanism → fold `pendingAckNames.length === 0` into `step1Valid` (CreateCheckPage.tsx:446,458,463,480) (reason: one predicate disables Next, Create/Update and also Test Connection, which runs the check with the variable; disabling it is consistent with PO-3. Flag to @po at validation: Test Connection is not named in FR-12)."
+    - "[AUTO-DECISION] Ack lifecycle logic placement → a pure module `identityNameAcks.ts` shared by page and wizard (reason: ChecksStudioPage.tsx carries heavy WIP; pure functions keep page edits to wiring and are unit-testable without rendering)."
+    - "[AUTO-DECISION] Story order for B-slices → B1 (live surface) first, carrying the shared package S; B2 second, before the vaultSecrets flip (reason: B1 produces evidence for authors today; B2's UI is dark)."
+    - "[AUTO-DECISION] FU-1 recorded in ADR-002 as open item O-23 (reason: it is a contract requirement on a future UI_TEST check-configuration API, which is ADR-002's domain, not only a backlog line)."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ADR-002 §35 — proposed text outline. Landed by @architect as step B1-0 (first commit of
+# STUDIO-DISC-002). This plan does not edit the ADR.
+# ─────────────────────────────────────────────────────────────────────────────
+adr002Section35:
+  title: "## 35. Identity-name acknowledgment on Studio saves and secret create — STUDIO-DISC-002 / STUDIO-DISC-003 (2026-10-xx)"
+  "35_1_ruling": >
+    Copy `rulings` OQ-18a..e, CRIT-25b, and the carried OQ-13/OQ-10 lines verbatim. State
+    explicitly that §35 supersedes the plan-v1 OQ-12 order and the required-field ruling, which
+    never landed in this ADR (they lived only in the v1 plan), so no earlier § is amended.
+  "35_2_behaviour":
+    B1_rows:
+      - "POST/PUT /tests, new or renamed non-secret variable whose name matches identity-names-1, no accepted entry: before 200/201 → now 400 IDENTITY_NAME_ACK_REQUIRED {variableNames}."
+      - "Malformed identityNameAcknowledgements (non-array, > 100, bad item, > 64, entry naming an absent/secret variable, duplicate name): before ignored (v1) / 400 UNSUPPORTED_FIELD (v2) → now 400 INVALID_IDENTITY_NAME_ACK, always after 403/409."
+      - "v2 body carrying the key: before 400 UNSUPPORTED_FIELD → now accepted."
+      - "Stored names, non-matching names, value-only edits: unchanged."
+    B2_rows:
+      - "POST /tests/{id}/secrets, matching name, field missing/blank/unknown: before 503 (provider none) / 201 → now 400 SECRET_ACK_REQUIRED."
+      - "Non-matching name, field absent: unchanged (503/201). Field present on a non-matching name: ignored."
+      - "Field non-string or > 64: 400 INVALID_SECRET_REQUEST (message names four fields)."
+      - "Non-member, any body: 403 unchanged."
+  "35_3_consumers_and_release": >
+    Checks frontend Studio page + saveErrorMessage; SecretInput + describeFailure; MSW Studio save
+    handler (mirrors the rule); no MSW secrets handler exists (re-verify at landing); wizard is not
+    a consumer (C21). Release-note lines (owner @devops) for both rows sets. Deploy order B1: FE
+    first or same release. B2: both before the vaultSecrets flip.
+  "35_4_contract_tests": >
+    StudioContractTest: TestRequest↔UITestRequest parity (now 10 components), new parity pins for
+    IdentityNameAcknowledgement and IdentityNameAckErrorResponse, CreateStudioSecretRequest parity
+    (4 components), operation count stays 31 (no route added). BASE_SHA256 re-anchored once per
+    landing story from `shasum -a 256` of the committed file; never transcribed from ADR text.
+  "35_5_open_items": >
+    O-22 (OQ-10 version overlap at first post-flip copy bump; owner: that story). O-23 (FU-1: the
+    future UI_TEST check-configuration contract carries identityNameAcknowledgements with the D17
+    shape and rules, surface CHECK_WIZARD_VARIABLE, plus checkId; owner: that story, @pm tracks).
+  "35_6_evidence_semantics": >
+    The audit line attests that an authenticated caller asserted acknowledgment of version V for
+    name N; a human tick is not provable server-side (CRIT-6). Sufficiency is InfoSec's (OQ-2).
+  "13_rows": "Two rows, one per landing story (STUDIO-DISC-002, STUDIO-DISC-003), each `AUTHORIZED, NOT YET LANDED` until measured."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Plan findings (checked in this worktree 2026-10-06)
+# ─────────────────────────────────────────────────────────────────────────────
+planFindings:
+  - id: PF-1
+    severity: HIGH
+    finding: >
+      Touched files still carry uncommitted WIP. Frontend modified: ChecksStudioPage.tsx,
+      RunControl.tsx, useRunGate.ts, UiTestConfig.tsx, SecretInput.tsx(+test), secretsApi.ts,
+      studioTypes.ts, apiClient.ts, studioApi.ts, mocks/studio/handlers.ts(+tests). Frontend
+      untracked: UiTestConfig.test.tsx, pageAuthoringUx.test.tsx. Backend modified: StudioService.java,
+      StudioController.java, UITestRequest.java, StudioAuthoringMapper.java, LegacyStudioAdapterTest,
+      StudioContractTest, ChecksExceptionHandler.java. Backend untracked: StudioSecretsService.java,
+      CreateStudioSecretRequest.java. Docs modified: openapi.yaml (HEAD c6b89138…1088, working tree
+      5e5477fc…070ac = the current BASE_SHA256 pin), ADR-002 (HEAD lacks §32-§34). Clean today:
+      CreateCheckPage.tsx, saveErrorMessage.ts(+test).
+    handledIn: "blockers.B-1; baseline steps A0, B1-1, B2-0"
+  - id: PF-2
+    severity: MEDIUM
+    finding: >
+      `UITestRequest` is a 9-component record (UITestRequest.java:31-40). `new UITestRequest(` occurs
+      30 times: the deserializer (:132), StudioService.java:342 (metadataOnly) and 28 in 16 test
+      files (ConfigurationRevisionTest 5, LegacyStudioAdapterTest 3, TargetPolicyGapTest 3,
+      StudioScheduleApiIT 3, StudioServiceWriteAuthorizationTest 2, CompilePipelineIT 2,
+      ExactConfirmationIT 2, and 1 each in 9 more). The 13-arg legacy constructor delegates via
+      `this(...)` (:72).
+    handledIn: "autoDecisions[0]; step B1-2"
+  - id: PF-3
+    severity: MEDIUM
+    finding: >
+      RunControl renders `data-testid="run-blocked-reason"` in two independent branches (no steps,
+      :268-277; waiting, :279-288). A third independent branch would let two elements share the test
+      id. Also, programmatic activation (`runRequest`, :169) is gated by `runnable`; if
+      `blockedReason` is not folded into `runnable`, `?autorun=1` / "Run again" would bypass the
+      disabled button and fall through to the saveDraft guard. No co-located RunControl test exists
+      (run/ has runGate.test.tsx and others).
+    handledIn: "step A3"
+  - id: PF-4
+    severity: LOW
+    finding: >
+      `StudioAuthoringMapper.legacy()` runs `requireSaveable` and `validateForWrite` in the controller,
+      before authorization, so existing body 400s already precede 403 on these routes. The ack
+      shape check is deliberately after authorization (NFR-4). Two precedences coexist; T-BE-9 pins
+      the ack one. Not changed by this work.
+    handledIn: "step B1-6 (T-BE-9)"
+  - id: PF-5
+    severity: LOW
+    finding: >
+      v2 metadata reaches `UITestRequest` through `legacy(metadata)` on a deep copy of the body
+      (StudioAuthoringMapper.java:91-94), so the raw ack node arrives in `write.metadata()` on v2
+      once FIELDS admits the key. No separate v2 plumbing is needed.
+    handledIn: "step B1-2"
+  - id: PF-6
+    severity: LOW
+    finding: >
+      Spec matcher walkthrough re-run by script (inference-free: a Python model of §3.5 steps 1-7 in
+      the session scratchpad) for the CRIT-24 rows: USERETRY/useRef/focusError/TROUSERS/mouseRight/
+      reuseResult → user; LOGINTERVAL/logInfo/BLOGINDEX/catalogInfo/dialogInput → login;
+      VOICEMAIL/serviceMail → email; LOG_INTERVAL/INVOICE_MAIL/USE_RETRY/SOE_IDENTITY/E_MAILBOX → no.
+      Matches critique.json autoFixes CRIT-24. The model is not the implementation; T-FE-14/T-BE-6
+      are the proof.
+    handledIn: "pre-step P0, step A1"
+  - id: PF-7
+    severity: LOW
+    finding: "ADR-002's highest open item is O-21 (§33.4); O-22 (reserved by plan v1) never landed. §35 adds O-22 and O-23."
+    handledIn: "step B1-0"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PRE-STEPS (not @dev). Spec and requirements edits are @pm's.
+# ─────────────────────────────────────────────────────────────────────────────
+preSteps:
+  - id: P0
+    owner: "@pm"
+    blocks: "nothing for drafting; STUDIO-DISC-001 Done waits on the PO confirmation in item 1"
+    items:
+      - "CRIT-23: add PO-9a to requirements.json#poDecisions: 'Matching is case-blind substring search inside ASCII letter runs; camelCase and run-together names are not split, so cross-word joins trigger (LOGINTERVAL, useRetry, voicemail).' Mark it as a @pm auto-decision under CRIT-14 pending explicit product-owner confirmation; @po confirms during STUDIO-DISC-001 validation (Article IV)."
+      - "CRIT-24: add to spec §3.5 table: match/user USERETRY, useRef, focusError, TROUSERS; match/login LOGINTERVAL, logInfo, BLOGINDEX, catalogInfo; match/email VOICEMAIL, serviceMail; no-match LOG_INTERVAL, INVOICE_MAIL, USE_RETRY, SOE_IDENTITY (separator splits; merges are exact-segment). @dev puts the same rows in identity-name-cases.json in step A1 regardless of P0 timing."
+      - "CRIT-25 text: §5.2 names the UITestRequest compat-constructor approach (PF-2); D17 records the CRIT-25b environment ruling; D16/§5.2 name `frontend/src/components/studio/run/RunControl.test.tsx` and the caption precedence (step A3); T-BE-6 uses `Locale.of(\"tr\", \"TR\")`, restored in `finally`."
+      - "D7: drop `minLength: 1` from the field schema; shape = string ≤ 64 (OQ-18c refinement)."
+      - "OQ-12 / OQ-18 / `new-required-field` rows: mark RULED with a pointer to implementation.yaml#rulings (plan v2)."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SLICE A — STUDIO-DISC-001: matcher (TS), shared case table, row warning + checkbox, gating on
+# Studio page and wizard. No backend, openapi, digest or ADR change. 8 steps (A0-A7).
+# ─────────────────────────────────────────────────────────────────────────────
+sliceA:
+  story: STUDIO-DISC-001
+  dependsOn: ["B-1 (frontend part): ChecksStudioPage.tsx, RunControl.tsx, useRunGate.ts, UiTestConfig.tsx(+untracked test), pageAuthoringUx.test.tsx committed"]
+  mustNotTouch:
+    - backend/
+    - docs/specs/studio/openapi.yaml
+    - studio-runner/
+    - docs/architecture/ADR-002-internal-contract-surface.md
+    - frontend/src/utils/config/studioCapabilities.ts      # CON-2
+    - frontend/src/components/studio/SecretInput.tsx        # B2
+    - frontend/src/services/api/                            # nothing new is sent in Slice A
+    - "CreateCheckPage.tsx localStorage draft code (:134-145, :185, :256)"   # OQ-6, STUDIO-SEC-001
+  steps:
+    - id: A0
+      name: Baseline on arrival (no edits)
+      verify:
+        - cmd: "cd frontend && pnpm exec vitest run src/pages/ChecksStudioPage/pageAuthoringUx.test.tsx src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx src/pages/ChecksStudioPage/pageRunGate.test.tsx src/components/studio/run/runGate.test.tsx src/components/checks/wizard/configs/UiTestConfig.test.tsx"
+          expect: "green; a missing file means PF-1 has not landed: stop"
+
+    - id: A1
+      name: Copy constant, TS matcher, shared case table (D1, D13; FR-9, FR-10)
+      files:
+        new:
+          - frontend/src/components/studio/credentialDisclaimer.ts
+          - frontend/src/components/studio/credentialDisclaimer.test.ts
+          - docs/specs/studio/identity-name-cases.json
+      change:
+        - "Frozen `CREDENTIAL_DISCLAIMER` (`as const` + Object.freeze): id 'studio-credential-disclaimer', version 'draft-2', status 'DRAFT', identityNameWarning, ackLabel, ackMissingReason.{save,wizard,create} (spec §3.3 verbatim). NO ackTextSha256 yet (added in S1). Header comment per D1."
+        - "Interpolation helpers `formatIdentityWarning(name)`, `formatAckMissing(kind, names)`: plain string replace of `{name}`/`{names}`; output rendered as React text only."
+        - "`IDENTITY_MATCHER_VERSION = 'identity-names-1'`; `isIdentityName(name: string | null | undefined): {token: IdentityToken} | null` implementing §3.5 steps 1-7 exactly: explicit ASCII lowercase (`/[A-Z]/g` map, never toLowerCase), segments `/[a-z]+/g` (no `u` flag), joinable gap = only `_ - .` or space, closed merge list, substring scan, `account` narrow rule. Signature takes a name only (NFR-1)."
+        - "identity-name-cases.json `{matcherVersion: 'identity-names-1', cases: [{name, matches, token}]}`: every §3.5 row, one case per name (null as JSON null), plus the CRIT-24 rows (P0 / PF-6), plus `SOEIDENTITY` → soeid (run-together, contrast to SOE_IDENTITY)."
+      tests:
+        - "T-FE-1 (DRAFT status/prefix, warning ≤ 2 sentences)"
+        - "T-FE-3 (honesty regex over every string)"
+        - "T-FE-14 (every case; each also ASCII-upper and ASCII-lower cased gives the same result; matcherVersion === IDENTITY_MATCHER_VERSION). Table read via `fs` with path.resolve to docs/specs/studio (precedent studioContract.test.ts)."
+      verify:
+        - cmd: "cd frontend && pnpm exec vitest run src/components/studio/credentialDisclaimer.test.ts"
+          expect: green
+
+    - id: A2
+      name: Ack lifecycle as pure functions (D15, D16 inputs)
+      dependsOn: [A1]
+      files:
+        new:
+          - frontend/src/components/studio/identityNameAcks.ts
+          - frontend/src/components/studio/identityNameAcks.test.ts
+      change:
+        - "`storedNonSecretNames(variables)` → Set of trimmed non-secret names (null/blank excluded)."
+        - "`requiresAck(row, stored, serverRequired)` = non-secret && trimmed name non-blank && (isIdentityName(name) || serverRequired.has(trim(name))) && !stored.has(trim(name)). Exact, case-sensitive after String.prototype.trim (D15)."
+        - "Tick model `{rowId, name}`; `isTicked(row, ticks)` only while `row.name === tick.name` (rename resets, AC-17)."
+        - "`pendingAckNames(rows, stored, ticks, serverRequired)` → distinct sorted trimmed names where some required row with that name is unticked (CRIT-17d)."
+        - "`ackEntries(rows, stored, ticks, serverRequired, version)` → one `{variableName, disclaimerVersion}` per distinct acknowledged required name (used by B1; exported now, unused in A)."
+        - "Wizard kinds plain/number/boolean count as non-secret; Studio `plain` only; kind change secret→plain makes the row non-secret."
+      tests: ["unit: rename resets; value-only edit of stored name → not required; same name on two rows needs both ticks; whitespace-padded names compare equal; null/blank never required; secret rows never required; serverRequired forces a non-matching name"]
+      verify:
+        - cmd: "cd frontend && pnpm exec vitest run src/components/studio/identityNameAcks.test.ts"
+          expect: green
+
+    - id: A3
+      name: RunControl `blockedReason` (D16, CRIT-15, CRIT-25c)
+      files:
+        modified:
+          - frontend/src/components/studio/run/RunControl.tsx
+        new:
+          - frontend/src/components/studio/run/RunControl.test.tsx
+      change:
+        - "Optional prop `blockedReason?: string | null`."
+        - "`runnable = gate.canRun && hasSteps && !blockedReason` so the button AND the programmatic `runRequest` path (:169) are both blocked (PF-3)."
+        - "Collapse the two `run-blocked-reason` branches into ONE caption element with precedence: !hasSteps → 'Add a step to run this test.'; else blockedReason → blockedReason; else waiting → 'Getting your saved test ready…'. Shown only when !isRunning. The caption gets an id and the Run button `aria-describedby` it while shown."
+        - "No change to useRunGate, SaveOutcome or RunSaveOutcome."
+      tests: ["T-FE-20: blockedReason set → Run disabled, caption text; runRequest increment does not start a run; blockedReason + no steps → no-steps caption, exactly one run-blocked-reason element; blockedReason + waiting → blockedReason; null → unchanged behaviour (existing runGate/pageRunGate suites green)"]
+      verify:
+        - cmd: "cd frontend && pnpm exec vitest run src/components/studio/run/RunControl.test.tsx src/components/studio/run/runGate.test.tsx src/components/studio/run/runActivation.test.tsx src/pages/ChecksStudioPage/pageRunGate.test.tsx"
+          expect: green
+
+    - id: A4
+      name: Row warning + checkbox component (D14, NFR-2)
+      dependsOn: [A1]
+      files:
+        new:
+          - frontend/src/components/studio/IdentityNameAck.tsx
+          - frontend/src/components/studio/IdentityNameAck.test.tsx
+      change:
+        - "Props: `rowId`, `name`, `token`, `required`, `checked`, `onChange`. Renders nothing when `token` is null. Else `<Alert severity=\"warning\" role=\"note\" id={`identity-warning-${rowId}`}>` with the interpolated warning; when `required`, a `Checkbox` in `FormControlLabel` labelled ackLabel with `inputProps={{'aria-describedby': `identity-warning-${rowId}`}}`. MUI + sx only; no role=alert, no modal."
+      tests: ["T-FE-19 (component level): strings come from CREDENTIAL_DISCLAIMER; grandfathered (required=false) shows warning only; accessible name and aria-describedby resolve"]
+      verify:
+        - cmd: "cd frontend && pnpm exec vitest run src/components/studio/IdentityNameAck.test.tsx"
+          expect: green
+
+    - id: A5
+      name: Studio page wiring (D14-D16; FR-11..FR-13)
+      dependsOn: [A2, A3, A4]
+      files:
+        modified:
+          - frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx
+        new:
+          - frontend/src/pages/ChecksStudioPage/pageIdentityNameAck.test.tsx
+      change:
+        - "State: `storedNames` recomputed from TestDto.variables on load and after each 'saved' outcome; `ticks`; `serverRequiredNames` (empty in A, filled by B1; cleared on reload and on save)."
+        - "Variables dialog rows (~:1268 name field): render `<IdentityNameAck>` under the Name field for non-secret rows. Name input keeps its toUpperCase (C22); the matcher is case-blind."
+        - "`pendingAckNames` non-empty → disable header Save (:758), Variables Save (:1333), leave-dialog Save (:1427); pass `blockedReason={formatAckMissing('save', names)}` to RunControl (:763). Visible reason (FormHelperText/caption, aria-describedby) under header Save, in the Variables dialog actions and in the leave dialog."
+        - "`saveDraft` (:581) early guard: if pending, show the reason in the save snackbar, send nothing, return 'error' (useRunGate stops, C23)."
+        - "Do NOT send anything new in the body (B1 adds it)."
+      tests:
+        - "T-FE-15 (AC-14, AC-15, AC-17; LOGIN_URL triggers; PASSWORD does not; typing svcUser → SVCUSER warns; saveDraft guard sends no request — assert via MSW request spy)"
+        - "T-FE-16 (AC-16 stored USERNAME: warning, no checkbox, Save enabled)"
+        - "T-FE-19 (page part: strings rendered from the constant)"
+      verify:
+        - cmd: "cd frontend && pnpm exec vitest run src/pages/ChecksStudioPage/pageIdentityNameAck.test.tsx src/pages/ChecksStudioPage/pageAuthoringUx.test.tsx src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx src/pages/ChecksStudioPage/pageRunGate.test.tsx"
+          expect: "green (existing page suites guard collateral changes)"
+
+    - id: A6
+      name: Wizard wiring (D14-D16, D18; FR-15)
+      dependsOn: [A2, A4]
+      files:
+        modified:
+          - frontend/src/components/checks/wizard/configs/UiTestConfig.tsx
+          - frontend/src/components/checks/wizard/configs/UiTestConfig.test.tsx
+          - frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx
+        new:
+          - frontend/src/pages/CreateCheckPage/createCheckIdentityAck.test.tsx
+      change:
+        - "CreateCheckPage owns `ticks` and `storedNames` (create: empty set, so prefilled rows require ack; edit: names from the loaded check configuration, :162). Passes them to UiTestConfig."
+        - "UiTestConfig renders `<IdentityNameAck>` per plain/number/boolean row (rowId = index or a stable key; tick bound to name)."
+        - "`step1Valid &&= pendingAckNames.length === 0` (autoDecisions: also disables Test Connection, :463). Reason `formatAckMissing('wizard', names)` in the step-1 message area (:446) and above Create/Update Check (:480)."
+        - "Payload (:211) unchanged; localStorage code untouched (OQ-6)."
+      tests: ["T-FE-17 (AC-21: prefilled USER_ID blocks Next and Create with the reason; tick enables both; buildConfiguration payload byte-identical)", "T-FE-19 (wizard part)"]
+      verify:
+        - cmd: "cd frontend && pnpm exec vitest run src/components/checks/wizard/configs/UiTestConfig.test.tsx src/pages/CreateCheckPage/createCheckIdentityAck.test.tsx"
+          expect: green
+
+    - id: A7
+      name: Slice A gate
+      dependsOn: [A1, A2, A3, A4, A5, A6]
+      verify:
+        - cmd: "git diff --name-only <base>...HEAD"
+          expect: "only the files in A1-A6 (14); nothing under backend/, openapi.yaml, studio-runner/, ADR-002, studioCapabilities.ts, services/api/"
+        - cmd: "cd frontend && pnpm exec tsc --noEmit"
+          expect: green
+        - cmd: "cd frontend && pnpm exec eslint <the 13 frontend files from A1-A6>"
+          expect: "no new errors"
+        - cmd: "cd frontend && pnpm exec vitest run src/components/studio src/pages/ChecksStudioPage src/pages/CreateCheckPage src/components/checks/wizard"
+          expect: green
+      acceptanceGate: "@po records the product owner's confirmation of PO-9a (P0 item 1) before @qa marks the story Done."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SHARED PACKAGE S — `com.citi.put.checks.studio.credentials` + FE hash/pin. Lands inside the first
+# B-story (default STUDIO-DISC-002). 4 steps (S1-S4).
+# ─────────────────────────────────────────────────────────────────────────────
+sharedS:
+  story: "STUDIO-DISC-002 (or STUDIO-DISC-003 if B2 is pulled forward)"
+  dependsOn: ["STUDIO-DISC-001 merged (A1 constant and case table)"]
+  steps:
+    - id: S1
+      name: Copy hash literal and version pin file (D8; OQ-13)
+      files:
+        new: [docs/specs/studio/credential-disclaimer-version.json]
+        modified: [frontend/src/components/studio/credentialDisclaimer.ts, frontend/src/components/studio/credentialDisclaimer.test.ts]
+      change:
+        - "`ackTextSha256` literal = SHA-256 hex of UTF-8 `identityNameWarning + \"\\n\" + ackLabel` over the TEMPLATE text (literal `{name}`). Computed by running the test, never transcribed. Version stays draft-2 (never shipped with a hash; spec §3.3)."
+        - "JSON `{id, version, ackTextSha256}`."
+      tests: ["T-FE-2", "OQ-13 pin (2): JSON via fs equals the constant"]
+      verify: [{ cmd: "cd frontend && pnpm exec vitest run src/components/studio/credentialDisclaimer.test.ts", expect: green }]
+
+    - id: S2
+      name: Java matcher (D13)
+      files:
+        new:
+          - backend/src/main/java/com/citi/put/checks/studio/credentials/IdentityNameMatcher.java
+          - backend/src/test/java/com/citi/put/checks/studio/credentials/IdentityNameMatcherTest.java
+      change:
+        - "Final class, static `Optional<IdentityToken> match(String name)` (null → empty), `MATCHER_VERSION = \"identity-names-1\"`. Explicit ASCII mapping (`c >= 'A' && c <= 'Z'`), segments by explicit `[a-z]` loop or `Pattern.compile(\"[a-z]+\")` — never `\\p{Alpha}`, `Character.isLetter`, or a default-locale case API. If `toLowerCase` is used at all, `Locale.ROOT`."
+        - "`IdentityToken` enum: USER, USERNAME, USERID, LOGIN, SOEID, EMAIL, ACCOUNT with lowercase `wireName()`."
+      tests: ["T-BE-6: plain JUnit (no Spring, no Docker); reads ../docs/specs/studio/identity-name-cases.json (StudioContractTest precedent); every case + ASCII upper/lower parity; one run under `Locale.setDefault(Locale.of(\"tr\", \"TR\"))` restored in `finally` (CRIT-25d)"]
+      verify: [{ cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.credentials.IdentityNameMatcherTest'", expect: green }]
+
+    - id: S3
+      name: Accepted versions (D8 server side)
+      dependsOn: [S1]
+      files:
+        new:
+          - backend/src/main/java/com/citi/put/checks/studio/credentials/CredentialDisclaimerVersions.java
+          - backend/src/test/java/com/citi/put/checks/studio/credentials/CredentialDisclaimerParityTest.java
+      change: ["Final class: DISCLAIMER_ID; `Map.of(\"draft-2\", \"<hex>\")`; `isAccepted(String)` (null/blank/unknown → false); `sha256Of(String)`."]
+      tests: ["T-BE-5: JSON pin equals the single map entry"]
+      verify: [{ cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.credentials.CredentialDisclaimerParityTest'", expect: green }]
+
+    - id: S4
+      name: Audit subject and logger (D9)
+      dependsOn: [S2, S3]
+      files:
+        new:
+          - backend/src/main/java/com/citi/put/checks/studio/credentials/AckSubject.java
+          - backend/src/main/java/com/citi/put/checks/studio/credentials/CredentialAckAuditLogger.java
+          - backend/src/test/java/com/citi/put/checks/studio/credentials/CredentialAckAuditLoggerTest.java
+      change:
+        - "`AckSubject(String principal, String csiId, String environment, UUID testId)` record; `withTestId(UUID)` for create."
+        - "Enums `Surface {VAULT_SECRET, STUDIO_VARIABLE}`, `Operation {CREATE_SECRET, CREATE_TEST, UPDATE_TEST}` (nested or own files)."
+        - "@Component @Profile(\"!worker\"), logger name `studio.credentials.audit`, INFO, LinkedHashMap allow-list exactly the D9 fields; `disclaimerSha256` from S3, never the client; `matcherVersion` from S2. `acknowledged(AckSubject, Surface, Operation, String name, IdentityToken token, String version)` — no value-capable parameter. Body in try/catch(RuntimeException): drop the line, one field-less WARN, never rethrow (modelled on GatewayAuditLogger.java:9-40)."
+      tests: ["T-BE-4: field set equals the allow-list; sha from the map; a throwing appender does not propagate"]
+      verify: [{ cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.credentials.*'", expect: green }]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SLICE B1 — STUDIO-DISC-002: plain-variable evidence on POST/PUT /studio/tests (Class C).
+# 10 steps (B1-0..B1-9) + S1-S4.
+# ─────────────────────────────────────────────────────────────────────────────
+sliceB1:
+  story: STUDIO-DISC-002
+  dependsOn:
+    - "B-1 backend part committed (StudioService, StudioController, UITestRequest, StudioAuthoringMapper, ChecksExceptionHandler, openapi.yaml, ADR-002 §32-§34, StudioContractTest)"
+    - "STUDIO-DISC-001 merged"
+    - "rulings OQ-18a/d/e (given here); §35 lands as B1-0"
+  steps:
+    - id: B1-0
+      owner: "@architect"
+      name: ADR-002 §35, two §13 rows, O-22, O-23 (first commit of the story)
+      files: { modified: [docs/architecture/ADR-002-internal-contract-surface.md] }
+      change: ["Land `adr002Section35` as prose. No openapi byte changes in this commit."]
+      verify: [{ cmd: "grep -n '^## 35\\.\\|AUTHORIZED, NOT YET LANDED\\|O-22\\|O-23' docs/architecture/ADR-002-internal-contract-surface.md", expect: "heading, two §13 rows, both open items" }]
+
+    - id: B1-1
+      name: Baseline on arrival (no code edits)
+      verify:
+        - { cmd: "shasum -a 256 docs/specs/studio/openapi.yaml && grep -n 'BASE_SHA256 =' studio-runner/test/run/confinement.test.ts", expect: "equal; record for the §13 row (never take a digest from ADR text)" }
+        - { cmd: "cd studio-runner && pnpm exec vitest run test/run/confinement.test.ts", expect: green }
+        - { cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.StudioContractTest' --tests 'com.citi.put.checks.studio.compile.PromptAssemblyTest' --tests 'com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest' --tests 'com.citi.put.checks.studio.LegacyStudioAdapterTest'", expect: "green with counts; StudioContractTest SKIPPED without Docker is not a baseline" }
+
+    - id: B1-2
+      name: Request plumbing — raw node component, deserializer, v2 FIELDS (D17 parsing; CRIT-25a)
+      files:
+        modified:
+          - backend/src/main/java/com/citi/put/checks/studio/dto/UITestRequest.java
+          - backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringMapper.java
+          - backend/src/test/java/com/citi/put/checks/studio/LegacyStudioAdapterTest.java
+          - backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java
+      change:
+        - "10th component `JsonNode identityNameAcknowledgements` (raw, nullable). Add a public 9-arg compatibility constructor passing null; the 13-arg legacy constructor's `this(...)` targets it. The 28 test call sites and StudioService.java:342 compile unchanged (PF-2)."
+        - "LegacyDeserializer: `node.get(\"identityNameAcknowledgements\")` copied as-is (JSON null → null); no validation here (CRIT-17b)."
+        - "FIELDS gains \"identityNameAcknowledgements\" (PF-5)."
+      tests: ["deserializer copies the node verbatim incl. a malformed one; absent → null", "v2 body with the key is not UNSUPPORTED_FIELD (T-BE-12 part)"]
+      verify:
+        - { cmd: "cd backend && ./gradlew compileJava compileTestJava -q", expect: "green with zero test call-site edits" }
+        - { cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.LegacyStudioAdapterTest' --tests 'com.citi.put.checks.studio.StudioWriteValidationControllerTest'", expect: green }
+
+    - id: B1-3
+      name: Structured 400 — exception, error record, handler (OQ-18d)
+      files:
+        new:
+          - backend/src/main/java/com/citi/put/checks/studio/StudioIdentityNameAckException.java
+          - backend/src/main/java/com/citi/put/checks/studio/credentials/IdentityNameAckErrorResponse.java
+        modified:
+          - backend/src/main/java/com/citi/put/checks/config/ChecksExceptionHandler.java
+      change:
+        - "Exception extends StudioValidationException; carries code + `List<String> variableNames` (sorted, distinct, ≤ 100, defensive copy)."
+        - "Handler returns `IdentityNameAckErrorResponse(error, message, variableNames)` with 400, placed beside handleStudioValidation (:233)."
+      tests: ["handler unit/WebMvc test: both codes produce the three-field body; a plain StudioValidationException is unchanged"]
+      verify: [{ cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.config.*ExceptionHandler*'", expect: "green (create the test class if none exists)" }]
+
+    - id: B1-4
+      name: IdentityNameAckPolicy (D17 steps 1-4)
+      dependsOn: [S2, S3, B1-3]
+      files:
+        new:
+          - backend/src/main/java/com/citi/put/checks/studio/credentials/IdentityNameAckPolicy.java
+          - backend/src/main/java/com/citi/put/checks/studio/dto/IdentityNameAcknowledgement.java
+          - backend/src/test/java/com/citi/put/checks/studio/credentials/IdentityNameAckPolicyTest.java
+      change:
+        - "Pure @Component (no transaction, no logging): `AckDecision evaluate(List<StudioVariable> stored, List<StudioVariable> requested, JsonNode acks)` → required names with tokens and accepted versions; throws StudioIdentityNameAckException. Steps exactly as D17: shape → reference → required (set semantics, String.trim(), case-sensitive, null/blank never required) → extras ignored."
+        - "Messages fixed per §3.3; never echo a version or a value."
+      tests: ["T-BE-7 (full list in spec §6.1) as plain JUnit — no Spring, no Docker"]
+      verify: [{ cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.credentials.IdentityNameAckPolicyTest'", expect: green }]
+
+    - id: B1-5
+      name: StudioService wiring at three entry points + after-commit audit (D17; CRIT-16; CRIT-25b; OQ-18e)
+      dependsOn: [S4, B1-2, B1-4]
+      files:
+        modified:
+          - backend/src/main/java/com/citi/put/checks/studio/StudioService.java
+        new:
+          - backend/src/test/java/com/citi/put/checks/studio/StudioIdentityNameAckTest.java
+          - backend/src/test/java/com/citi/put/checks/studio/StudioIdentityNameAckIT.java
+      change:
+        - "Inject IdentityNameAckPolicy and CredentialAckAuditLogger (constructor; update the test constructions that build StudioService directly — enumerate with grep at implementation time)."
+        - "Private createTest (:233): after requireWrite (:244), `evaluate(List.of(), request.variables(), request.identityNameAcknowledgements())`; subject = (identity.email(), request.csiId(), request.environment(), null); after `studioRepository.save` register audit with the new id, operation CREATE_TEST."
+        - "updateTest 5-arg (:482), `auth != null` branch only: after AUTHORING_V2_REQUIRED (:543), before classify (:548): stored = LegacyStudioAdapter.parseVariables(test.getVariables()) read before setVariables (:555); subject = (principalOf(auth), test.getCsiId(), request.environment(), id); operation UPDATE_TEST."
+        - "updateAuthoringDraft (:329): after CSI_IMMUTABLE (:336-338), before metadataOnly/delegation (:342-353): evaluate on the locked row's variables vs metadata.variables() with metadata.identityNameAcknowledgements(); subject from auth; operation UPDATE_TEST. The delegated `updateTest(…, null)` does not evaluate (OQ-18e)."
+        - "Audit registration helper: `TransactionSynchronizationManager.registerSynchronization(afterCommit → one logger call per required name)`. All entry points are @Transactional (C20); if synchronization is unexpectedly inactive, log nothing and emit one field-less WARN (fail closed on evidence, open on the save — never write a line for an uncommitted save)."
+        - "OQ-18e javadoc guards."
+      tests:
+        - "StudioIdentityNameAckTest (Mockito, no Docker): T-BE-8 (grandfathering, rename, secret→plain), T-BE-9 order (403 before shape error; 409 STALE_REVISION before any ack 400; nothing written on 400), T-BE-12 (policy invoked exactly once on v1 create/update and v2 create/update; principal = caller, csiId = row, environment = request, operation correct)."
+        - "StudioIdentityNameAckIT (Testcontainers): T-BE-10 (revisions, persisted variables JSON and authoring hash identical with/without an entry), T-BE-11 (after-commit line with every D9 field; forced rollback → no line; canary value absent from all captured logs), StudioSaveInCallerTransactionIT pattern for the caller-transaction case."
+      verify:
+        - { cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.StudioIdentityNameAckTest' --tests 'com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest' --tests 'com.citi.put.checks.studio.ConfigurationRevisionTest'", expect: green }
+        - { cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.StudioIdentityNameAckIT' --tests 'com.citi.put.checks.studio.StudioSaveInCallerTransactionIT'", expect: "green with Docker; name SKIPPED otherwise" }
+
+    - id: B1-6
+      name: openapi + contract tests (T-CT-1)
+      dependsOn: [B1-2, B1-3]
+      files:
+        modified:
+          - docs/specs/studio/openapi.yaml
+          - backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java
+      change:
+        - "TestRequest (:2906): `identityNameAcknowledgements` {type: array, maxItems: 100, items: $ref IdentityNameAcknowledgement}; description states the rule (introduction only, grandfathering, both codes, transient/not echoed in TestDto)."
+        - "New schemas IdentityNameAcknowledgement {additionalProperties: false, required: [variableName, disclaimerVersion], variableName string 1..64, disclaimerVersion string ≤ 64} and IdentityNameAckErrorResponse (OQ-18d)."
+        - "POST /tests and PUT /tests/{id}: 400 description lists IDENTITY_NAME_ACK_REQUIRED and INVALID_IDENTITY_NAME_ACK with their order (after 403/409); two examples with variableNames."
+        - "StudioContractTest: :443 parity now includes the component; add assertSchemaMatchesRecord for IdentityNameAcknowledgement and IdentityNameAckErrorResponse; assert both codes appear in both 400 descriptions; hasSize(31) ×2 unchanged."
+      tests: [T-CT-1]
+      verify:
+        - { cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.StudioContractTest'", expect: "green with Docker; SKIPPED is not evidence" }
+        - { cmd: "cd studio-runner && pnpm exec vitest run test/contract-integrity.test.ts test/contract.test.ts", expect: green }
+        - { cmd: "cd frontend && pnpm exec vitest run src/services/mocks/studio/studioContract.test.ts", expect: green }
+
+    - id: B1-7
+      name: Frontend sends the field; error mapping; drift recovery; MSW mirror (T-FE-18)
+      dependsOn: [S1, B1-6]
+      files:
+        modified:
+          - frontend/src/types/studio/studioTypes.ts
+          - frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx
+          - frontend/src/pages/ChecksStudioPage/saveErrorMessage.ts
+          - frontend/src/pages/ChecksStudioPage/saveErrorMessage.test.ts
+          - frontend/src/pages/ChecksStudioPage/pageIdentityNameAck.test.tsx
+          - frontend/src/services/mocks/studio/handlers.ts
+          - frontend/src/services/mocks/studio/studioHandlers.test.ts
+      change:
+        - "TestRequest type: optional `identityNameAcknowledgements?: {variableName: string; disclaimerVersion: string}[]`."
+        - "saveDraft body (:596): `identityNameAcknowledgements: ackEntries(...)` with CREDENTIAL_DISCLAIMER.version; omit the key when empty."
+        - "saveErrorMessage: add both codes to AUTHOR_FACING_SAVE_ERRORS; export `identityAckNamesFrom(error): string[] | null` (status 400, one of the two codes, array of strings; else null)."
+        - "Page: on IDENTITY_NAME_ACK_REQUIRED, union the names into serverRequiredNames (rows then require a tick); cleared on reload and on 'saved'."
+        - "MSW PUT/POST /tests handlers (:332, :370): run isIdentityName + the same grandfathering against the fixture's stored variables; return the structured 400 when missing."
+      tests: ["T-FE-18", "saveErrorMessage unit for both codes and the helper", "studioHandlers test for the mirror"]
+      verify: [{ cmd: "cd frontend && pnpm exec vitest run src/pages/ChecksStudioPage/saveErrorMessage.test.ts src/pages/ChecksStudioPage/pageIdentityNameAck.test.tsx src/services/mocks/studio/studioHandlers.test.ts", expect: green }]
+
+    - id: B1-8
+      name: Digest re-anchor and §13 measurements (T-CT-2)
+      after: "openapi.yaml final on the committed file, including QA-loop edits"
+      files: { modified: [studio-runner/test/run/confinement.test.ts, docs/architecture/ADR-002-internal-contract-surface.md] }
+      change: ["BASE_SHA256 = value printed by `shasum -a 256 docs/specs/studio/openapi.yaml`; comment cites §35 and STUDIO-DISC-002.", "§13 row (DISC-002): before (B1-1) / after digests and measured test counts; drop NOT YET LANDED."]
+      verify: [{ cmd: "cd studio-runner && pnpm exec vitest run test/run/confinement.test.ts", expect: green }]
+
+    - id: B1-9
+      name: Slice B1 gate
+      dependsOn: [B1-0, B1-5, B1-6, B1-7, B1-8]
+      verify:
+        - { cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.compile.PromptAssemblyTest'", expect: "green (T-CT-3, NFR-3)" }
+        - { cmd: "cd backend && ./gradlew check", expect: "green: spotless, checkstyle (ParameterNumber on the 10-arg record is suppressed like the legacy ctor), spotbugs, jacoco" }
+        - { cmd: "cd frontend && pnpm exec tsc --noEmit && pnpm exec vitest run src/components/studio src/pages/ChecksStudioPage src/services", expect: green }
+      handoff:
+        - "@devops: release note — POST/PUT /studio/tests: a newly added or renamed plain variable named like a sign-in identity needs identityNameAcknowledgements; otherwise 400 IDENTITY_NAME_ACK_REQUIRED. Existing variables unaffected. Deploy the frontend first or in the same release."
+        - "@qa: gate checks §35 and the landed §13 row exist before merge."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SLICE B2 — STUDIO-DISC-003: Vault create-secret acknowledgment (Class C; UI dark). 7 steps.
+# ─────────────────────────────────────────────────────────────────────────────
+sliceB2:
+  story: STUDIO-DISC-003
+  dependsOn:
+    - "B-1 secrets part: StudioSecretsService.java and CreateStudioSecretRequest.java committed (both untracked today)"
+    - "STUDIO-DISC-002 merged (S package, §35)"
+    - "Lands before or with the vaultSecrets flip, never after"
+  steps:
+    - id: B2-0
+      name: Baseline on arrival
+      verify:
+        - { cmd: "shasum -a 256 docs/specs/studio/openapi.yaml && grep -n 'BASE_SHA256 =' studio-runner/test/run/confinement.test.ts", expect: equal }
+        - { cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.secrets.*' --tests 'com.citi.put.checks.studio.StudioContractTest'", expect: "green; name SKIPPED" }
+        - { cmd: "grep -rn 'secrets' frontend/src/services/mocks --include=*.ts -l", expect: "no MSW secrets handler (re-verify §35.3 claim)" }
+
+    - id: B2-1
+      name: Request field and strict parse (D7; OQ-18c refinement)
+      files:
+        modified:
+          - backend/src/main/java/com/citi/put/checks/studio/secrets/CreateStudioSecretRequest.java
+          - backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsService.java
+      change:
+        - "Record gains `String acknowledgedDisclaimerVersion` (last); toString/equals/hashCode still exclude the value."
+        - "Strict parser admits the 4th key: absent/null → null; non-string or > 64 chars → 400 INVALID_SECRET_REQUEST."
+        - "`invalidRequest()` text (:213) = 'The body must be a JSON object with name, value, allowedOrigins and, for a sign-in identity name, acknowledgedDisclaimerVersion' (constant, reused by the contract test)."
+
+    - id: B2-2
+      name: Ack check in the ruled order + audit (D7, D9; OQ-18b)
+      dependsOn: [B2-1, S4]
+      files:
+        modified:
+          - backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsService.java
+          - backend/src/test/java/com/citi/put/checks/studio/secrets/StudioSecretsServiceTest.java
+      change:
+        - "Order: 403 → strict parse → name/value/origins → `if (IdentityNameMatcher.match(name).isPresent() && !CredentialDisclaimerVersions.isAccepted(v)) throw StudioValidationException(\"SECRET_ACK_REQUIRED\", fixed message)` → vault.create → audit (VAULT_SECRET, CREATE_SECRET) only when matched → 201. Non-matching: field ignored, no audit line."
+        - "Subject resolved after authorization and before vault.create: principal (local private BffAuthenticationToken→email helper, PF-6 v1), csiId/environment/testId from the loaded test row. Logger never throws, so a stored secret never becomes an error."
+        - "All inside the existing try/finally (value zero-filled on the new 400)."
+      tests: ["T-BE-1 (incl. non-matching without field → 503; matching + accepted → 503 with provider none; zero-fill)", "T-BE-2", "T-BE-3 (canary; one line; failed create → none; throwing logger → still 201)"]
+      verify: [{ cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.secrets.*'", expect: "green; name SKIPPED ITs" }]
+
+    - id: B2-3
+      name: openapi secrets texts + contract test
+      dependsOn: [B2-1]
+      files: { modified: [docs/specs/studio/openapi.yaml, backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java] }
+      change:
+        - "CreateStudioSecretRequest (:3506): property {type: string, maxLength: 64, nullable: true}, NOT in required; additionalProperties: false stays."
+        - "createTestSecret description (:812-814), 400 description and `invalidRequest` example (:851) name four fields, SECRET_ACK_REQUIRED and its position (after field codes, before Vault)."
+        - "StudioContractTest: :456 parity (4 components); assert field NOT in required; 400 description contains SECRET_ACK_REQUIRED; example message equals the service constant."
+      verify: [{ cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.StudioContractTest'", expect: "green with Docker" }]
+
+    - id: B2-4
+      name: Create Secret dialog (D2) and request body (D7 FE)
+      files:
+        modified:
+          - frontend/src/services/api/secretsApi.ts
+          - frontend/src/components/studio/SecretInput.tsx
+          - frontend/src/components/studio/SecretInput.test.tsx
+      change:
+        - "secretsApi: optional `acknowledgedDisclaimerVersion?: string`; redactBody kept."
+        - "SecretInput: when isIdentityName(newName) → Alert role=note id=identity-name-warning, Checkbox(ackLabel) aria-describedby 'identity-name-warning identity-ack-reason', FormHelperText id=identity-ack-reason while unticked; canCreate &&= (!matched || acknowledged); reset on open, closeCreate, failure branch and every Name change; body includes the version only when matched && ticked; describeFailure maps SECRET_ACK_REQUIRED (exact match before the INVALID_SECRET_ prefix branch). Never reads newValue for ack logic."
+      tests: ["T-FE-5..T-FE-8", "T-FE-19 (SecretInput part)"]
+      verify: [{ cmd: "cd frontend && pnpm exec vitest run src/components/studio/SecretInput.test.tsx", expect: green }]
+
+    - id: B2-5
+      name: Digest re-anchor and §13 row (DISC-003)
+      after: "openapi.yaml final on the committed file"
+      files: { modified: [studio-runner/test/run/confinement.test.ts, docs/architecture/ADR-002-internal-contract-surface.md] }
+      verify: [{ cmd: "cd studio-runner && pnpm exec vitest run test/run/confinement.test.ts", expect: green }]
+
+    - id: B2-6
+      name: Slice B2 gate
+      verify:
+        - { cmd: "cd backend && ./gradlew check", expect: green }
+        - { cmd: "cd frontend && pnpm exec tsc --noEmit && pnpm exec vitest run src/components/studio src/services", expect: green }
+        - { cmd: "grep -n 'vaultSecrets' frontend/src/utils/config/studioCapabilities.ts", expect: "still false (CON-2)" }
+      handoff: ["@devops release note: POST /tests/{id}/secrets — a secret named like a sign-in identity needs acknowledgedDisclaimerVersion; otherwise 400 SECRET_ACK_REQUIRED (previously 503 when Vault is not configured). Other names unchanged."]
+
+# ─────────────────────────────────────────────────────────────────────────────
+acceptanceTrace:
+  AC-13: [A1, S2]
+  AC-14: [A4, A5]
+  AC-15: [A3, A5]
+  AC-16: [A2, A5]
+  AC-17: [A2, A5]
+  AC-21: [A6]
+  AC-10: [A4, A5, A6, B2-4]
+  AC-18: [B1-4, B1-5]
+  AC-19: [B1-5]
+  AC-20: [B1-5]
+  AC-9:  [S4, B1-5, B2-2]
+  AC-1:  [B2-4]
+  AC-2:  [B2-4]
+  AC-3:  [B2-4]
+  AC-11: [B2-2]
+  AC-12: [B2-1, B2-3]
+  NFR-4: [B1-5, B2-2]
+  NFR-5: [B1-5]
+  retired: "AC-4..AC-8 (superseded requirements)"
+
+security:
+  - "NFR-1: no new code path reads a value for ack purposes. Matcher, policy and logger signatures take names only; canary tests T-BE-3, T-BE-11, T-FE-8 are the proof, not review."
+  - "Ack shape validation runs after authorization (403 first) on both B1 paths; B2 keeps 403 first."
+  - "variableNames reflects only names the caller sent in the same request, as JSON; bounded at 100; rendered as React text (OQ-18d)."
+  - "Audit written after commit only; principal always from the authenticated caller, never the body; disclaimerSha256 from the server map, never the client."
+  - "The acknowledgment is an API assertion, not a provable human tick (§35.6, OQ-2)."
+  - "Unchanged existing findings, keep visible in both B PRs: cookie-authenticated mutations have no CSRF control (runbook §10); wizard localStorage persists plain values (STUDIO-SEC-001)."
+  - "Wizard acknowledgments are UI-only until FU-1 (PO-7): no server evidence for that surface."
+
+tradeOffs:
+  - { decision: "Three stories (A, B1+S, B2)", for: "Live UI gate ships without a contract change; B2 waits for its WIP without holding B1", against: "Shared package lands in B1; B2 rebases on it" }
+  - { decision: "Optional, conditionally required Vault field", for: "Evidence only for names that triggered; no false assertions", against: "Requiredness lives in server logic, not in JSON Schema" }
+  - { decision: "Ack after name/value/origins", for: "Matcher sees only valid names", against: "Diverges from the v1 ruling; documented in §35" }
+  - { decision: "Structured variableNames", for: "Recoverable drift; FE branches on data, not prose", against: "One new schema + record + handler" }
+  - { decision: "10th record component + compat constructor", for: "Parity test stays strict; zero churn in 29 call sites", against: "Compat constructor drops acks silently (only metadataOnly uses it in main)" }
+  - { decision: "Environment = post-write value", for: "Line describes the saved configuration", against: "Pre-change environment not on the line" }
+
+blockers:
+  - id: B-1
+    blocks: "Start of each story (per-slice file subsets in each slice's dependsOn)"
+    item: "PF-1: uncommitted WIP in every touched file must be committed first (Studio page/run/wizard WIP; StudioService/Controller/UITestRequest/Mapper/handler; untracked StudioSecretsService + CreateStudioSecretRequest; openapi.yaml and ADR-002 §32-§34)."
+    owner: "lead / @dev / @devops"
+  - id: B-2
+    blocks: "GA copy only — not DRAFT implementation of any slice"
+    item: "OQ-1 Legal/InfoSec sign-off. On approval: drop DRAFT prefixes, bump version, update FE literal + JSON + CredentialDisclaimerVersions; re-run T-FE-2, pin (2), T-BE-5. If the flag has flipped, decide O-22 first."
+    owner: "@pm → Security & Compliance"
+  - id: B-3
+    blocks: "STUDIO-DISC-001 Done (not drafting or implementation)"
+    item: "P0 item 1: product owner confirms PO-9a (substring cross-word false positives)."
+    owner: "@pm → product owner; @po records"
+  - id: B-4
+    blocks: "D12 only"
+    item: "OQ-2: InfoSec decides whether a log line is enough."
+    owner: "@architect + InfoSec"
+
+separatelyRouted:
+  - id: STUDIO-SEC-001
+    item: "OQ-6 defect: CreateCheckPage persists uiVariables plain values to localStorage `checks:create:draft` (:134-145, also :185), removed only on successful create (:256). Direction to spec (not decided here): exclude variable values from the persisted draft or clear on unmount/discard. Must not be bundled into STUDIO-DISC-001."
+    owner: "@architect triage → @sm/@dev"
+  - id: STUDIO-DISC-DOC
+    item: "PRD.md:119 and docs/brd/checks-ui-studio.brd.md:104 still say pasted credentials are prohibited (re-verified 2026-10-06 for PRD.md:119). After OQ-1: 'discouraged; a sign-in identity named as such needs an explicit, recorded own-risk acknowledgment; functional IDs recommended'. Review PRD.md:77,205 in the same edit."
+    owner: "@pm"
+  - id: FU-1
+    item: "Wizard server audit line (surface CHECK_WIZARD_VARIABLE, D17 shape and rules, plus checkId). Blocked on a backend UI_TEST check configuration (C21). Recorded as ADR-002 O-23 in §35."
+    owner: "@pm tracks; the future UI_TEST check-config story implements; @architect assigns"
+  - id: STUDIO-DISC-004
+    item: "D12 DB acknowledgment row, only if OQ-2 answers 'DB' (Flyway via @data-engineer)."
+    owner: "@architect → @data-engineer"
+  - id: O-22
+    item: "OQ-10 version overlap at the first post-flip copy bump."
+    owner: "the story that bumps the copy"
+
+stories:
+  - id: STUDIO-DISC-001
+    title: "Identity-name warning and own-risk gate on Studio variables and the Create Check wizard (Slice A)"
+    steps: [A0, A1, A2, A3, A4, A5, A6, A7]
+    ready: "after B-1 (frontend part); Done after B-3"
+  - id: STUDIO-DISC-002
+    title: "Server-validated, audited identity-name acknowledgment on Studio saves (Slice B1 + shared package)"
+    steps: [B1-0, B1-1, S1, S2, S3, S4, B1-2, B1-3, B1-4, B1-5, B1-6, B1-7, B1-8, B1-9]
+    ready: "after B-1 (backend part) and STUDIO-DISC-001 merged; rulings given here"
+  - id: STUDIO-DISC-003
+    title: "Identity-name acknowledgment on Vault secret create (Slice B2)"
+    steps: [B2-0, B2-1, B2-2, B2-3, B2-4, B2-5, B2-6]
+    ready: "after B-1 (secrets part) and STUDIO-DISC-002 merged; before the vaultSecrets flip"
+
+outOfScope:
+  - "Turning STUDIO_CAPABILITIES.vaultSecrets on (CON-2)."
+  - "Any value inspection; CredentialPatternScreen and INLINE_CREDENTIAL copy (PO-0)."
+  - "Enforcing Variable.name ≤ 64 server-side (spec D17 auto-decision)."
+  - "Functional-ID request link (OQ-7, OQ-8)."
+  - "Persisting acknowledgments or making them revision inputs (NFR-5)."

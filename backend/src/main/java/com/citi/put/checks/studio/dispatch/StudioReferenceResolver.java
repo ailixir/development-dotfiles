@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * The one seam through which a declared variable or secret reference becomes a value (§5.1.1,
@@ -39,20 +40,34 @@ public interface StudioReferenceResolver {
   /**
    * Names only, at acceptance. Retains nothing.
    *
-   * @throws UnknownReferenceException when a name is unknown to this CSI/environment
+   * @param csiId the test's CSI
+   * @param environment the test's environment, which the execution snapshots
+   * @param testId the test the references were declared by; references are scoped to it
+   * @throws UnknownReferenceException when a name is unknown to this CSI/environment/test
    * @throws SecretUseNotAuthorizedException when the principal may not use a declared secret
    */
   void preflight(
-      String csiId, String environment, String principal, ReferenceDeclarations declarations);
+      String csiId,
+      String environment,
+      UUID testId,
+      String principal,
+      ReferenceDeclarations declarations);
 
   /**
    * Values, at dispatch only.
    *
+   * @param csiId the execution's own CSI
+   * @param environment the environment snapshotted at acceptance
+   * @param testId the execution row's {@code test_id}
    * @throws ReferenceUnavailableException for a reference that has vanished since acceptance
    * @throws SecretUseRevokedException when entitlement was withdrawn since acceptance
    */
   Resolved resolve(
-      String csiId, String environment, String principal, ReferenceDeclarations declarations);
+      String csiId,
+      String environment,
+      UUID testId,
+      String principal,
+      ReferenceDeclarations declarations);
 
   /** A declared reference this CSI may not use, or that does not exist. Never carries a value. */
   class UnknownReferenceException extends RuntimeException {

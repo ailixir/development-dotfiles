@@ -1,0 +1,652 @@
+{
+  "storyId": "studio-secrets-disclaimer",
+  "critiquedAt": "2026-10-06T18:00:00Z",
+  "critiquedBy": "@qa (Quinn)",
+  "specVersion": 4,
+  "currentIteration": 4,
+  "verdict": "APPROVED",
+  "verdictReason": "All nine iteration-3 items (CRIT-14..CRIT-22) are resolved, and the code claims behind them were verified on 2026-10-06. PO-9 closes CRIT-18. The case-blind matcher closes CRIT-14 by construction: ASCII lowercase runs before segmentation, so the result cannot depend on case. Every row in the §3.5 table was walked through steps 1-7 and gives the stated result and token. No regressions were found in the save paths, the v2 principal flow, the error contract or requirements.json. Remaining: three LOW items, all auto-fixable. CRIT-23: the substring clause is not written into PO-9. CRIT-24: the case table omits the false-positive classes the substring rule creates. CRIT-25: implementation details. The open B1/B2 items (OQ-18 a-e, including the structured variableNames body and the D7 re-rulings) are explicitly gated on @architect and block only B1/B2. Weighted average 4.38.",
+  "scores": {
+    "accuracy": 4.5,
+    "completeness": 4,
+    "consistency": 4.5,
+    "feasibility": 4.5,
+    "alignment": 4.5,
+    "average": 4.38
+  },
+  "issues": [
+    {
+      "id": "CRIT-23",
+      "severity": "LOW",
+      "category": "accuracy",
+      "check": "acc-2 / Article IV",
+      "description": "The substring rule goes further than the recorded PO-9 text. requirements.json#poDecisions PO-9 says 'a name triggers if any of its TOKENS is an identity token'. The case-blind, inside-letter-run substring search (spec §3.5 step 5) is listed in spec Metadata as a @pm auto-decision made for CRIT-14. Without camelCase boundaries it matches across word joins that PO-2/PO-9 tokenization would split. Examples: logInterval [log, interval], useRetry [use, retry], serviceMail [service, mail]. The lead's brief describes PO-9 as including the substring rule, so this is not a design objection. Only the written record is missing.",
+      "location": "requirements.json#poDecisions PO-9; spec.md#3.5 step 5, Metadata Article IV note",
+      "suggestion": "Add one clause to PO-9 (or a PO-9a): 'matching is case-blind substring search inside ASCII letter runs; cross-word joins in camelCase/compact names (e.g. LOGINTERVAL, useRetry, voicemail) trigger'. Cite the false-positive classes listed in this entry.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-24",
+      "severity": "LOW",
+      "category": "completeness",
+      "check": "comp-2",
+      "description": "The shared case table (§3.5, identity-name-cases.json) covers in-word false positives (SUPERUSER, MAX_USERS) and token-level ones (LOGIN_URL, USER_AGENT, EMAIL_SUBJECT). It omits two classes the substring rule creates. (1) Cross-word joins with no separator, where the matcher sees one letter run: '...use'+'r...' gives useRef, useRetry, focusError, mouseRight, pauseResume, reuseResult (user). '...log'+'in...' gives logInfo, logIndex, logInterval, logInput, blogIndex/BLOGINDEX, catalogInfo, dialogInput (login). '...e'+'mail...' gives voicemail, serviceMail, invoiceMail, storeMail (email). (2) Separator asymmetry: LOG_INTERVAL, INVOICE_MAIL and USE_RETRY do not match, while LOGINTERVAL, invoiceMail and USERETRY do. Other English words containing 'user' are missing too: TROUSERS, ACCUSER, ABUSER, CAUSER, DIFFUSER. The table also does not pin the exact-segment reading of the merges: a prefix reading would merge SOE_IDENTITY into soeid. E_MAILBOX covers this for e+mail only. No natural false-positive class was found for 'soeid' (SHOE_ID and shoeId do not contain it).",
+      "location": "spec.md#3.5 example table",
+      "suggestion": "Add these rows with their expected results: match/user for USERETRY, useRef, focusError; match/login for LOGINTERVAL, logInfo, BLOGINDEX, catalogInfo; match/email for VOICEMAIL, serviceMail; match/user for TROUSERS; no match for LOG_INTERVAL, INVOICE_MAIL, USE_RETRY, SOE_IDENTITY. The PO then sees the cost in the artifact that pins the behaviour, and any later narrowing is a deliberate matcherVersion bump.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-25",
+      "severity": "LOW",
+      "category": "feasibility",
+      "check": "feas-3 / comp-4",
+      "description": "Implementation details left out of the B1/Slice A file lists. (a) UITestRequest is a 9-component record (UITestRequest.java:31-40). Adding a JsonNode component breaks every 'new UITestRequest(' call: StudioService.java:341 (metadataOnly) plus about 28 in 15 test files (ConfigurationRevisionTest 5, LegacyStudioAdapterTest 3, TargetPolicyGapTest 3, StudioScheduleApiIT 3, ...). (b) AckSubject.environment on update is not specified: the request's environment or the stored row's? On create it can only be the request's. (c) RunControl already renders run-blocked-reason for !hasSteps and for 'waiting' (RunControl.tsx:268-290). The precedence of blockedReason against those captions is not stated, so two elements with the same test id can render. RunControl has no co-located test file today (only run/runGate.test.tsx), and C23/§5.2 omit the run/ directory. (d) T-BE-6's 'new Locale(\"tr\",\"TR\")' is deprecated on Java 21. Use Locale.of(\"tr\",\"TR\") and restore the default in finally.",
+      "location": "spec.md#3.2 D17, D16; #5.2; #6.1 T-BE-6",
+      "suggestion": "(a) Add the call sites to §5.2, or keep a 9-arg compatibility constructor that passes null. (b) Use the stored row's environment, read before setEnvironment, for consistency with csiId, or state the choice. (c) blockedReason wins over the waiting caption; with no steps, show the no-steps caption. Write the test in a new frontend/src/components/studio/run/RunControl.test.tsx or in runGate.test.tsx. (d) Use Locale.of and restore the default in finally.",
+      "autoFixable": true
+    }
+  ],
+  "summary": {
+    "highIssues": 0,
+    "mediumIssues": 0,
+    "lowIssues": 3,
+    "autoFixable": 3,
+    "priorIssuesResolved": 9,
+    "priorIssuesOpen": 0,
+    "priorNote": "CRIT-14..CRIT-22 resolved (CRIT-18 closed by PO-9). Open items deferred to @architect: OQ-18 (a) Class C for TestRequest, (b) OQ-12 order re-ruling, (c) new-required-field re-ruling, (d) the structured variableNames error body or its fallback, (e) the internal auth=null skip. These are acceptable as open because they gate only Slices B1/B2."
+  },
+  "nextAction": "APPROVED. Slice A can go to @sm/@dev now. @pm can apply CRIT-23..25 in place without a new critique round. @architect rules OQ-18 (a)-(e) before B1/B2, then regenerates implementation.yaml using iterations[2].implementationYamlMustChange plus the iteration-4 deltas: RunControl.blockedReason, AckSubject at three entry points, raw-node parsing with policy-side shape validation, IdentityNameAckErrorResponse or its fallback, and the UITestRequest call-site update.",
+  "iterations": [
+    {
+      "iteration": 1,
+      "storyId": "studio-secrets-disclaimer",
+      "critiquedAt": "2026-10-05T00:00:00Z",
+      "critiquedBy": "@qa (Quinn)",
+      "specVersion": 1,
+      "verdict": "NEEDS_REVISION",
+      "verdictReason": "The code claims hold: all 14 C* findings were spot-checked against the working tree and none is wrong. The 403 -> parse -> ack -> fields -> Vault order is sound. No HIGH issues. Four MEDIUM issues need fixing before planning. (1) The overview promises a 'recorded acknowledgment', but on the only live alpha path (plain variables) there is none. (2) The server-side ack check is labelled 'dark', but the POST route is live in every non-worker profile. (3) A stale 'exactly name, value and allowedOrigins' message/contract text is not in the change list. (4) Scope is heavier than the user's ask: a Class C contract change, a cross-module version pin, an env-var link with no URL and an unverified build path, and a notice that cannot be reached, all for dark surfaces. The weighted average is 3.83.",
+      "scores": {
+        "accuracy": 4,
+        "completeness": 4,
+        "consistency": 3.5,
+        "feasibility": 4,
+        "alignment": 3.5,
+        "average": 3.83
+      },
+      "scoreNotes": "Weighted average per task weights (25/25/20/15/15): 4*.25 + 4*.25 + 3.5*.20 + 4*.15 + 3.5*.15 = 3.825. Verdict rule: MEDIUM issues present and average in 3.0-3.9, so NEEDS_REVISION.",
+      "verifiedCodeClaims": [
+        "C1 VERIFIED: SecretInput.tsx:89 canCreate, :91-97 closeCreate resets name/value/origins/error, :107-109 catch clears only the value, :147 Dialog onClose=closeCreate (covers backdrop/Escape), :171 helper 'Stored in Vault only. It is never shown again.', :188 Create disabled={!canCreate}. describeFailure (:31-38) maps only INVALID_SECRET_* by prefix, so SECRET_ACK_REQUIRED needs a new branch, which §5.2 lists.",
+        "C2 VERIFIED: secretsApi.ts:35-40 posts {name, value, allowedOrigins} with {redactBody: true} through apiClient.",
+        "C3 VERIFIED: StudioSecretsService.java:124-148. findById/canWrite -> 403 (:127-130), parse (:132), name/value/origins (:133-135), vault.create (:137), log line with no principal (:138), body and value zero-filled in finally (:140-147). Strict mapper FAIL_ON_UNKNOWN_PROPERTIES at :97.",
+        "C4 VERIFIED: openapi.yaml:3506-3510 CreateStudioSecretRequest additionalProperties:false, required [name, value, allowedOrigins]. StudioContractTest.java:456 assertSchemaMatchesRecord. The helper (:615-625) compares property names only, not `required` and not 400 descriptions.",
+        "C5 VERIFIED: confinement.test.ts:257 BASE_SHA256 = 5e5477fc...070ac, which equals `shasum -a 256` of the WORKING-TREE openapi.yaml. Both files carry uncommitted WIP (openapi.yaml +1019 lines vs HEAD).",
+        "C6 VERIFIED: ADR-002 §34.1 (line 2913): changing which requests get 400 on a public route is Class C, the ruling comes first, and landing first 'is not' a precedent. The current last section is §34.",
+        "C7 VERIFIED: GatewayAuditLogger.java:19 AUDIT_LOGGER='studio.compile.gateway.audit', allow-list LinkedHashMap, no method takes content.",
+        "C8 VERIFIED: StudioService.java:1161 principalOf -> extractIdentity (:1165) -> BffAuthenticationToken.getPrincipal().email(). It is private, so D9 needs a shared helper or a local copy.",
+        "C9 VERIFIED: ChecksStudioPage.tsx caption :866-868, Variables intro :1247-1249, plain value TextField :1286-1292, Secret option gated :1272-1274. UiTestConfig.tsx Secret option gated :132-134, plain Value TextField :151-158. The wizard also has number/boolean kinds that render the same Value field.",
+        "C10 VERIFIED: saveErrorMessage.ts:13-38 (INLINE_CREDENTIAL in AUTHOR_FACING_SAVE_ERRORS, message shown trimmed). conflictNarratives.ts:57-58.",
+        "C11 VERIFIED: applyTemplate at ChecksStudioPage.tsx:309. The page imports only PRODUCTION_ALPHA_TEMPLATES (:93, :1352). quickStartTemplates.ts:98-102 filters out secret-declaring templates.",
+        "C12 VERIFIED: StudioScheduleDialog.tsx:179 inline Checkbox in FormControlLabel.",
+        "C13 VERIFIED: appConfig.ts:15-37 getStringEnv uses import.meta.env with a process.env[key] fallback, plus the DefinePlugin comment.",
+        "C14 VERIFIED: node_modules/@mui/material version 5.18.0.",
+        "CredentialPatternScreen VERIFIED: javadoc :10-26 names the non-existent CredentialScreenHonestyTest. LIMITATION :38-40. The real guard is PromptAssemblyTest:195. The spec's NFR-3 correction is right.",
+        "NFR-2 precedent: CodeTab.tsx:153,159 use role=\"status\" (not \"note\"). D2's role=\"note\" is still acceptable per R7."
+      ],
+      "orderingAndRequiredFieldAssessment": "SOUND, with one labelling error. Putting the ack check after the 403 and after the strict parse keeps NFR-4: authorization still decides first, and an absent test still gives 403 (C3 :127). A required field cannot break a live client, because the only caller is the flag-gated SecretInput (CON-2). Records do not fail on a missing component, so null -> SECRET_ACK_REQUIRED works as D7 says. The labelling error is that 'behind a disabled flag' is true only for the FRONTEND. StudioSecretsController is @Profile(\"!worker\") and always mapped. With studio.secrets.vault.provider=none (default), a create today answers 503 VAULT_NOT_CONFIGURED. After this change, an unacknowledged body answers 400 SECRET_ACK_REQUIRED first. That is a live status-semantic change on a public route in every deployment, which is exactly why ADR-002 §34.1 makes it Class C. The spec handles the governance correctly, but its 'dark' wording (§2.1, CON-2 impact, §7 skew risk 'Low now (dark)') understates the change.",
+      "issues": [
+        {
+          "id": "CRIT-1",
+          "severity": "MEDIUM",
+          "category": "consistency",
+          "check": "con-4",
+          "description": "§1 Overview says: 'An author who stores a personal credential anyway does so through an explicit, recorded acknowledgment.' On the only path live in the alpha (plain variables, FR-3/FR-4, D3/D4/R4) there is no acknowledgment and nothing is recorded, by design. The acknowledgment and the audit exist only on the dark Vault dialog. The user's 'they can add on their own risk' is therefore advisory-only in the alpha, and the spec never says so plainly. On top of that, plainVariableGuidance.alpha tells authors to 'avoid tests that need a password for now', which pulls against the own-risk allowance the product owner granted.",
+          "location": "spec.md#1-overview, #1.1-goals, #3.3 plainVariableGuidance.alpha",
+          "suggestion": "Reword the overview: 'On the Vault path (dark until vaultSecrets is on), personal credentials need an explicit, recorded acknowledgment. On plain variables (live), the guidance is advisory only; own risk is implicit and unrecorded.' Add a non-goal or open question: 'No acknowledgment on plain variables (R4).' Flag for @pm whether 'avoid tests that need a password' matches the own-risk decision, or should read 'if you must, use a functional ID; personal credentials are at your own risk.'",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-2",
+          "severity": "MEDIUM",
+          "category": "accuracy",
+          "check": "acc-1",
+          "description": "FR-8/D7 server enforcement is labelled 'No (flag)' (§2.1) and 'ship dark' (CON-2 impact), but the POST /tests/{id}/secrets route is live in every non-worker profile. After the change, a body with no ack answers 400 SECRET_ACK_REQUIRED where it now answers 503 VAULT_NOT_CONFIGURED (provider default 'none'). Only the frontend surfaces are dark.",
+          "location": "spec.md#2.1 (FR-8 row), #2.3 CON-2, #7 FE/BE skew risk",
+          "suggestion": "Change FR-8's 'Live in alpha?' to 'Server check: live on the route; UI: dark'. In D7/§9, require the ADR-002 §35 behaviour table (modelled on §34.2) to include the row 'body without acknowledgedDisclaimerVersion: 503 VAULT_NOT_CONFIGURED (provider none) / 201 -> 400 SECRET_ACK_REQUIRED'.",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-3",
+          "severity": "MEDIUM",
+          "category": "completeness",
+          "check": "comp-4",
+          "description": "Adding a fourth field leaves three texts saying 'exactly name, value and allowedOrigins' wrong, and none is in §5.2: StudioSecretsService.invalidRequest() message (StudioSecretsService.java:210-214), the createTestSecret operation description (openapi.yaml ~811-814: 'The body is closed...'), and the INVALID_SECRET_REQUEST 400 example message (openapi.yaml ~848). The INVALID_REQUEST constant's message is user- and contract-visible.",
+          "location": "spec.md#5.2, #3.2 D7",
+          "suggestion": "Add these edits to D7 and §5.2. Have T-BE-1 assert the updated invalidRequest message, and T-CT-1 check that the example message matches the server constant.",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-4",
+          "severity": "MEDIUM",
+          "category": "alignment",
+          "check": "feas-3 / align-4 (scope vs. the user's ask)",
+          "description": "The user asked for a disclaimer, with own risk allowed. Every item traces to an FR/OQ default, so this is not an Article IV violation. But the bulk of the work serves surfaces no user can reach: a Class C public-contract change gated on an @architect ruling, an openapi edit, a BASE_SHA256 re-anchor, a new server version map, a backend test that parses a frontend TS file (new cross-module coupling), and a new audit logger (FR-8/D7-D9, all for the dark Vault dialog). D10 is a notice that stays unreachable even after the flag flips (C11/OQ-9). D11 is a new VITE_ env var for a URL that does not exist (OQ-7), whose Webpack/federated delivery is unverified (C13/OQ-8). D11 also contradicts complexity.json infrastructure=1 ('no env var'). Bundling the live and dark work makes the live disclaimer wait on the Class C ruling.",
+          "location": "spec.md#3.2 D7-D11, #5, #9",
+          "suggestion": "Split into two stories. Story A (live, no contract change): D1, D3, D4, D5, D6, plus T-FE-1..4, 9, 10, 12, 13. Story B (Vault path, to land before or with the vaultSecrets flip): D2, D7, D8, D9, plus contract pins and the ADR-002 §35 ruling. Drop D11 from both and keep OQ-7/OQ-8 open until IAM supplies a URL. Make D10 conditional on OQ-9 instead of building and testing a notice nobody can reach.",
+          "autoFixable": false
+        },
+        {
+          "id": "CRIT-5",
+          "severity": "LOW",
+          "category": "completeness",
+          "check": "comp-2",
+          "description": "T-CT-1 says the contract test checks that the 400 description lists SECRET_ACK_REQUIRED. assertSchemaMatchesRecord (StudioContractTest.java:615-625) compares property names only, so no existing assertion covers the description, `required`, or the new code. §5.2 also says StudioContractTest 'should pass unchanged', which contradicts T-CT-1.",
+          "location": "spec.md#6.2 T-CT-1, #5.2 StudioContractTest row",
+          "suggestion": "State that T-CT-1 needs a new assertion (required contains acknowledgedDisclaimerVersion; the 400 description names SECRET_ACK_REQUIRED). Otherwise narrow T-CT-1 to property-name parity.",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-6",
+          "severity": "LOW",
+          "category": "accuracy",
+          "check": "acc-4",
+          "description": "The evidence semantics are overstated in spirit. The audit line proves that an authenticated client sent the current version string, not that a human ticked a box. Any API caller with write access can send it. That is fine for an internal control, but InfoSec should hear it stated, since OQ-2 asks them to judge the evidence.",
+          "location": "spec.md#3.2 D9, #8 OQ-2",
+          "suggestion": "Add one sentence to D9/OQ-2: 'The record attests the authenticated caller asserted acknowledgment of version V; UI-level ticking is not provable server-side.'",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-7",
+          "severity": "LOW",
+          "category": "feasibility",
+          "check": "feas-2",
+          "description": "D9 derives the principal 'from the same identity as StudioService.principalOf'. That method is private and throws AccessDeniedException for non-BFF auth. canWrite passing implies a BFF identity (CsiOwnershipEvaluator.extractIdentity), so this is low risk. Still, any exception thrown in the audit call AFTER vault.create would turn a stored secret into an error response.",
+          "location": "spec.md#3.2 D9",
+          "suggestion": "Resolve principal/csiId/environment before vault.create (right after authorization), and require StudioSecretAuditLogger.created to never throw.",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-8",
+          "severity": "LOW",
+          "category": "alignment",
+          "check": "align-2",
+          "description": "The ADR-002 process is incomplete. The §32/§34 precedent pairs a numbered section with a §13 row ('AUTHORIZED, NOT YET LANDED'), and §34.3 requires a consumer re-check plus a release-note line for public-route 400 changes. The spec names only §35. The BASE_SHA256 pin in the working tree (5e5477fc...) already reflects about 1019 uncommitted openapi lines, so the re-anchor has to be computed at landing time on the committed base, not now.",
+          "location": "spec.md#3.2 D7, #9",
+          "suggestion": "Add the §13 row and the §34.3-style consumer/release-note step to §9. Note that the re-anchor is taken from the landed openapi.yaml, with a verify-green-on-arrival step as in the §13 10.15 row.",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-9",
+          "severity": "LOW",
+          "category": "completeness",
+          "check": "comp-2",
+          "description": "T-FE-9 covers only plainVariableGuidance.alpha, so the vaultOn variant (D3) has no test. T-FE-11's 'injected through the test' is vague: applyTemplate is an internal useCallback, and the page imports PRODUCTION_ALPHA_TEMPLATES directly.",
+          "location": "spec.md#6.2 T-FE-9, T-FE-11",
+          "suggestion": "Add a vaultOn case (vi.mock of studioCapabilities). For T-FE-11, name the mechanism: vi.mock('@/components/studio/templates') so PRODUCTION_ALPHA_TEMPLATES returns a secret-declaring template, then click it in the template picker (:1352).",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-10",
+          "severity": "LOW",
+          "category": "alignment",
+          "check": "align-2",
+          "description": "D8 cites confinement.test.ts as the cross-module pin precedent. The closer backend precedent is StudioContractTest.java:80, which reads ../docs/specs/studio/openapi.yaml. A backend test reading ../frontend/src would be new coupling: it parses TypeScript with a regex and breaks if backend is ever tested outside the monorepo root.",
+          "location": "spec.md#3.2 D8",
+          "suggestion": "Cite StudioContractTest:80 as the precedent. Consider pinning a small JSON (version + sha) that both FE and BE read, instead of regex-parsing a .ts file. Moot for Story A if CRIT-4's split is taken.",
+          "autoFixable": false
+        }
+      ],
+      "summary": {
+        "highIssues": 0,
+        "mediumIssues": 4,
+        "lowIssues": 6,
+        "autoFixable": 8
+      },
+      "articleIVTraceability": "PASS. Every D* cites an FR/NFR/OQ default or R* recommendation, and every C* claim checked out against the code. No invented feature was found. The scope concern (CRIT-4) is about proportion and phasing, not invention.",
+      "autoDecisions": [
+        "[AUTO-DECISION] Treat the overstated scope as HIGH (blocking)? -> MEDIUM (reason: every item traces to requirements.json, and the split is a phasing choice for @pm, not a defect that blocks a correct implementation).",
+        "[AUTO-DECISION] Use fractional dimension scores? -> yes, 3.5 for consistency/alignment (reason: the schema allows numbers, and the issues are fixable wording/phasing items, not structural failures).",
+        "[AUTO-DECISION] Run the SYNAPSE diagnostics, CodeRabbit and checklist-runner skill payloads attached to the spawn prompt? -> skipped (reason: the mission restricts writes to critique.json and requires no source/git changes; CodeRabbit reviews code diffs, not a spec)."
+      ],
+      "nextAction": "Return to @pm (*write-spec iteration 2) with this critique. Fix CRIT-1..3 (auto-fixable wording/change-list edits). Have the product owner rule on CRIT-4 (split into a live Story A and a Vault-path Story B; drop D11; make D10 conditional on OQ-9). Fold in the LOW items, then re-submit to @qa.",
+      "autoFixes": [
+        {
+          "issueId": "CRIT-1",
+          "location": "spec.md:13",
+          "original": "An author who stores a personal credential anyway does so through an explicit, recorded acknowledgment.",
+          "suggested": "On the Vault secret path (dark until vaultSecrets is on), an author who stores a personal credential anyway does so through an explicit, recorded acknowledgment. On plain variables (the live alpha path) the guidance is advisory only: own risk is implicit and not recorded (R4)."
+        },
+        {
+          "issueId": "CRIT-2",
+          "location": "spec.md:53",
+          "original": "| FR-8 | ... | P1 | No (flag) |",
+          "suggested": "| FR-8 | ... | P1 | Server check live on the route (400 precedes 503 VAULT_NOT_CONFIGURED); UI dark |"
+        },
+        {
+          "issueId": "CRIT-3",
+          "location": "spec.md §5.2",
+          "original": "(no row)",
+          "suggested": "StudioSecretsService.invalidRequest() message, openapi createTestSecret description ('The body is closed...') and the INVALID_SECRET_REQUEST example message: name all four fields."
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "critiquedAt": "2026-10-05T12:00:00Z",
+      "critiquedBy": "@qa (Quinn)",
+      "specVersion": 2,
+      "verdict": "APPROVED",
+      "verdictReason": "All 10 iteration-1 findings are resolved. The fixes that depend on code were checked against the working tree, and every line reference is exact: StudioSecretsService.java:213, openapi.yaml:812-814 and :851, and the 503 coming from vault.create after every body 400. The Slice A/B split is clean. Slice A touches no contract surface. Slice B is gated on the ADR-002 §35 ruling, and its open questions (OQ-10, OQ-12, OQ-13) are routed to @architect. No regression reaches HIGH or MEDIUM. There are three new LOW items: alpha copy drifted from FR-3/OQ-5, a stale 'MSW secrets handlers' consumer plus an imprecise mock path, and spec-derived AC ids. The weighted average is 4.5.",
+      "scores": {
+        "accuracy": 4.5,
+        "completeness": 4.5,
+        "consistency": 4.5,
+        "feasibility": 4.5,
+        "alignment": 4.5,
+        "average": 4.5
+      },
+      "scoreNotes": "Weighted 4.5*.25 + 4.5*.25 + 4.5*.20 + 4.5*.15 + 4.5*.15 = 4.5. No HIGH and no MEDIUM issues; every dimension is at least 3; the average is at least 4.0, so APPROVED.",
+      "priorFindingResolution": {
+        "CRIT-1": "RESOLVED. §1 per-path table (spec.md:17-22), non-goal (:49), OQ-11 (:410) and risk row (:381). Alpha copy no longer says 'avoid tests that need a password'. Side effect tracked as CRIT-11.",
+        "CRIT-2": "RESOLVED and VERIFIED. FR-8 row (:77) and CON-2 (:96) state the server check is live. C3a checks out: DisabledStudioVaultProvider.java:28,33 throws VaultNotConfiguredException from vault.create; ChecksExceptionHandler.java:200-208 maps it to 503; StudioSecretsController.java:26 is @Profile(\"!worker\"); application.yml:200-203 defaults to none. In StudioSecretsService.create (:124-148), parse/validName/validateValue/validOrigins all run before vault.create (:137), so every body 400 already precedes 503 today. D7's 'keep and document' auto-decision keeps one precedence rule, and OQ-12 hands the alternative to @architect. T-BE-1 and AC-11 pin both directions.",
+        "CRIT-3": "RESOLVED and VERIFIED. C3b line refs are exact: StudioSecretsService.java:213 holds the 'exactly name, value and allowedOrigins' message; openapi.yaml:812-814 holds 'The body is closed: a field it does not name ... 400 INVALID_SECRET_REQUEST'; openapi.yaml:851 holds the invalidRequest example with the same string. All three are in D7, §5.2 and §9, and are asserted by T-BE-1, T-CT-1 and AC-12.",
+        "CRIT-4": "RESOLVED. §1.0 splits Slice A (D1, D3-D6; no backend/openapi/BASE_SHA256/ADR) from Slice B (D2, D7-D9, D12 optional; gated on the ADR-002 §35 ruling). D11 is retired to backlog §8.3, which restores agreement with complexity.json infrastructure=1. D10 is deferred to OQ-9, and templateNotice is kept out of the constant. The test lists in §1.0, §6 and §9 match by slice.",
+        "CRIT-5": "RESOLVED. §5.2 marks StudioContractTest as changed with new assertions; T-CT-1 lists required, the 400 description and example parity.",
+        "CRIT-6": "RESOLVED. D9 and OQ-2 state that the record is an API assertion, not proof of a UI tick.",
+        "CRIT-7": "RESOLVED. D9 resolves identity after authorization and before vault.create, and created() never throws. T-BE-3 and T-BE-4 cover a throwing logger still giving 201.",
+        "CRIT-8": "RESOLVED. §9 adds the §13 AUTHORIZED, NOT YET LANDED row, the consumer re-check and the release note (one stale consumer name, see CRIT-12). Re-anchor from the committed openapi after a green-on-arrival check (T-CT-2).",
+        "CRIT-9": "RESOLVED. T-FE-9b covers the vaultOn variant (mock path imprecise, see CRIT-12). T-FE-11's mechanism checks out: '@/components/studio/templates' exists (index.ts) and is imported at ChecksStudioPage.tsx:93, with the picker at :1352.",
+        "CRIT-10": "RESOLVED. C15 is verified: StudioContractTest.java:80 reads Path.of(\"..\",\"docs\",\"specs\",\"studio\",\"openapi.yaml\"), and frontend/tsconfig.json:12 has resolveJsonModule: true. Shared-JSON option (b) is recommended, and the choice goes to @architect (OQ-13)."
+      },
+      "regressionCheck": [
+        "D7 check order and D9 identity sequencing agree with the §3.4 data flow (403 -> resolve identity -> parse -> ack -> name/value/origins -> vault.create -> audit). The ack check sits inside the existing try/finally, so erasure still covers the body.",
+        "Slice A is genuinely contract-free. D1/D3-D6 touch only FE files, and the cited files exist: pageAuthoringUx.test.tsx, UiTestConfig.test.tsx, saveErrorMessage.test.ts, conflictNarratives.ts. T-FE-1's DRAFT-prefix rule matches the §3.3 table. The Slice A Alert texts are at most 3 sentences each.",
+        "Slice B depends only on D1. It must land before or with the vaultSecrets flip, which is stated in §1.0 and §9. OQ-11 (product owner on advisory-only alpha) is correctly marked blocking for Slice A sign-off, not for implementation.",
+        "Regression found: the alpha copy now under-delivers FR-3's 'no passwords in plain variables' clause (CRIT-11, LOW)."
+      ],
+      "issues": [
+        {
+          "id": "CRIT-11",
+          "severity": "LOW",
+          "category": "accuracy",
+          "check": "acc-1 / con-4",
+          "description": "Applying CRIT-1 caused copy drift. The revised plainVariableGuidance.alpha no longer tells authors not to put passwords in plain variables, which is FR-3's core clause ('guidance not to put passwords or personal credentials in plain variables'). It also drops OQ-5's proposed default ('recommend not storing any password and say secure secrets are coming'). The copy now implicitly accepts an unencrypted functional-ID password in a plain value. D3 still says 'OQ-5 default adopted', which is no longer accurate. This is not MEDIUM: the copy is DRAFT under OQ-1, OQ-5 belongs to @pm, the OQ-5 row says the default was revised, and OQ-11 sends the trade-off to the product owner.",
+          "location": "spec.md#3.2 D3, #3.3 plainVariableGuidance.alpha",
+          "suggestion": "Change D3 to 'OQ-5 default revised (iteration 2)'. Consider restoring a discouraging clause within the 3-sentence limit, for example: 'DRAFT: Plain values are saved unencrypted and unmasked, so avoid putting any password here. If the test must sign in, use a service or functional account owned by this CSI, not your own login. A personal credential entered here is at your own risk, and nothing records that choice.'",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-12",
+          "severity": "LOW",
+          "category": "consistency",
+          "check": "con-4 / comp-4",
+          "description": "§9 Slice B's §34.3-style consumer re-check lists 'MSW secrets handlers'. None exist: in frontend/src/services/mocks, 'secrets' appears only in a comment in studio/compileFixtures.ts:88. Separately, T-FE-9b says 'vi.mock of studioCapabilities' and §4.2 cites 'studioCapabilities.ts', but the module is '@/utils/config/studioCapabilities' (ChecksStudioPage.tsx:85, UiTestConfig.tsx:2).",
+          "location": "spec.md#9 Slice B first item, #6.2 T-FE-9b, #4.2",
+          "suggestion": "Replace 'MSW secrets handlers' with 'none (no MSW secrets handler exists; verified at landing)'. Name the mock target as vi.mock('@/utils/config/studioCapabilities').",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-13",
+          "severity": "LOW",
+          "category": "consistency",
+          "check": "con-1",
+          "description": "§6.3 adds AC-4b, AC-11 and AC-12, which are not in requirements.json (it defines AC-1..AC-10). They trace to CRIT-1/2/3 and to documented behaviour (D7, C3b), so this is not invention. But §2.1 still says 'AC-1..AC-10 are carried into §6.3', which undercounts.",
+          "location": "spec.md#2.1, #6.3",
+          "suggestion": "Change §2.1 to 'AC-1..AC-10 carried; AC-4b, AC-11 and AC-12 are spec-derived from CRIT-1..3'. Or have @pm back-port them to requirements.json.",
+          "autoFixable": true
+        }
+      ],
+      "summary": {
+        "highIssues": 0,
+        "mediumIssues": 0,
+        "lowIssues": 3,
+        "autoFixable": 3,
+        "priorIssuesResolved": 10,
+        "priorIssuesOpen": 0
+      },
+      "articleIVTraceability": "PASS. New items (C3a, C3b, C15, OQ-11..13, T-FE-9b, AC-4b/11/12) all trace to critique items or verified code. The backlog moves reduce scope; they add nothing.",
+      "autoDecisions": [
+        "[AUTO-DECISION] Grade the FR-3/OQ-5 copy drift (CRIT-11) as MEDIUM? -> LOW (reason: the copy is DRAFT under OQ-1, OQ-5 is @pm-owned and openly marked revised, and OQ-11 escalates the trade-off to the product owner; only D3's 'default adopted' label is wrong).",
+        "[AUTO-DECISION] Restructure critique.json to keep iteration 1? -> top-level fields carry the latest verdict for the pipeline gate; both iterations are kept verbatim under 'iterations' (reason: verification.verdict_field reads top-level 'verdict').",
+        "[AUTO-DECISION] Run the SYNAPSE diagnostics, CodeRabbit and checklist-runner payloads attached to the spawn prompt? -> skipped, same as iteration 1 (reason: a spec critique with no source or git changes allowed)."
+      ],
+      "nextAction": "Proceed to @architect *plan. Slice A can go to SDC now (@sm draft), with OQ-11 answered before Slice A is accepted. Slice B waits for the ADR-002 §35 ruling (OQ-10/12/13). @pm can fold in CRIT-11..13 when drafting stories; they do not block.",
+      "autoFixes": [
+        {
+          "issueId": "CRIT-11",
+          "location": "spec.md:138 (D3)",
+          "original": "(OQ-5 default adopted)",
+          "suggested": "(OQ-5 default revised in iteration 2, see §3.3 and OQ-11)"
+        },
+        {
+          "issueId": "CRIT-12",
+          "location": "spec.md:445",
+          "original": "MSW secrets handlers",
+          "suggested": "no MSW secrets handler exists (re-verify at landing)"
+        },
+        {
+          "issueId": "CRIT-12",
+          "location": "spec.md:285 (T-FE-9b)",
+          "original": "`vi.mock` of `studioCapabilities`",
+          "suggested": "`vi.mock('@/utils/config/studioCapabilities')`"
+        },
+        {
+          "issueId": "CRIT-13",
+          "location": "spec.md:80",
+          "original": "Acceptance criteria AC-1..AC-10 are carried into §6.3, tagged by slice.",
+          "suggested": "Acceptance criteria AC-1..AC-10 are carried into §6.3, tagged by slice; AC-4b, AC-11 and AC-12 are spec-derived (CRIT-1..3)."
+        }
+      ]
+    },
+    {
+      "iteration": 3,
+      "critiquedAt": "2026-10-06T12:00:00Z",
+      "critiquedBy": "@qa (Quinn)",
+      "specVersion": 3,
+      "verdict": "NEEDS_REVISION",
+      "verdictReason": "The iteration-3 redesign (name-triggered, A/B1/B2 slices, transient top-level list) is sound, and its central claim holds. 'Exempt until added/renamed' can be determined on the server from the save request: both update paths CAS both revisions under a row lock, and any variables difference bumps configurationRevision, so the FE's loaded variables equal the server's stored variables for every save that passes STALE_REVISION. No HIGH issues. Seven MEDIUM: surface-dependent matcher results caused by upper-casing (CRIT-14); a missed fourth save path, Run (CRIT-15); no principal on the v2 update path (CRIT-16); error-contract gaps (CRIT-17); the head-word narrowing of PO-2 unconfirmed by the PO (CRIT-18); stale superseded references in requirements.json and AC-10 (CRIT-19); and existing @architect rulings silently reversed (CRIT-20). Two LOW. Weighted average 3.98.",
+      "scores": {
+        "accuracy": 4,
+        "completeness": 4,
+        "consistency": 3.5,
+        "feasibility": 4,
+        "alignment": 4.5,
+        "average": 3.98
+      },
+      "scoreNotes": "4*.25 + 4*.25 + 3.5*.20 + 4*.15 + 4.5*.15 = 3.975. Verdict rule: no HIGH, but MEDIUM issues present and average below 4.0 -> NEEDS_REVISION.",
+      "verifiedCodeClaims": [
+        "Exemption is determinable server-side, VERIFIED. v1: StudioController.java:98-107 -> updateTest (StudioService.java:476-527) requires both revisions and rejects a mismatch with 409 STALE_REVISION under findByIdForUpdate. v2: lockForAuthoringWrite (:719-737) does the same. ConfigurationChangeClassifier.java:52 counts any variables-list difference as configurationChanged, which bumps configurationRevision (:574-576). So the FE's last-loaded TestDto.variables equals the stored list for every accepted save. Create: CreateTestDialog.tsx:79-87 sends variables: [], so the 'create: nothing stored' rule never fires from the shipped FE.",
+        "C16 VERIFIED, but incomplete: saveDraft :581-628, header Save :758, Variables Save :1333, leave Save :1427, plus a fourth path, onSaveBeforeRun={saveDraft} at :769 (CRIT-15).",
+        "C17 VERIFIED: legacy() uses mapper.treeToValue with LegacyDeserializer (named paths only, so unknown top-level fields are ignored). read() rejects any field outside FIELDS (StudioAuthoringMapper.java:17-29, :61-68) and then reuses legacy() on the metadata copy, so adding the field to FIELDS plus the deserializer covers v2.",
+        "C19 VERIFIED, with a further finding: metadataOnly (:341-350) drops unknown components, and updateTest is called with auth=null (:352) (CRIT-16).",
+        "C20 PARTIAL: the save paths are @Transactional (:198-221, :306, :328, :475-481), but four public methods are NOT_SUPPORTED (CRIT-16).",
+        "C22 VERIFIED: name.toUpperCase() at ChecksStudioPage.tsx:1268 with placeholder USERNAME :1270; wizard newVarName.trim().toUpperCase() at UiTestConfig.tsx:73; prefill v.name.toUpperCase() at CreateCheckPage.tsx:116. The FE sends trimmed names and drops empty rows (toContractVariables :118-126).",
+        "Shared case file is FEASIBLE: FE precedent studioContextContract.test.ts:12 (path.resolve(__dirname, '../../../../docs/specs/studio/examples') + fs.readFileSync); BE precedent StudioContractTest.java:80 and ErrorCodeVocabularyTest.java:51 (Path.of(\"..\",\"docs\",...)).",
+        "Error status consistency VERIFIED: StudioValidationException maps to 400 {error, message} (ChecksExceptionHandler.java:233-236). All three new codes are 400 through it. ErrorResponse has no details field (openapi.yaml:2487-2492).",
+        "openapi TestRequest (openapi.yaml:2906-2931) has no additionalProperties:false, and Variable.name maxLength 64 / kind enum [plain, secretRef] (Variable schema) is not enforced server-side. variableFromNode maps any other kind to plain.",
+        "studioAuthoringTransport.ts: AuthoringTestRequest = Omit<TestRequest,'steps'> & AuthoringV2Request, so adding the field to TestRequest also types it for v2 bodies with no extra change.",
+        "Matcher table walked row by row against steps 1-5: every listed row produces its stated result and token. The divergences are in unlisted compact or variant forms (CRIT-14)."
+      ],
+      "supersededReferenceScan": "spec.md: FR-3..FR-7 appear only in the superseded rows, §0 and the revision history. OK. requirements.json: stale references in CON-2, NFR-3, ASM-1, domainModel and an edgeCase, plus AC-10 status (CRIT-19). Test IDs: T-FE-4 and T-FE-9..13 are retired and nothing references them. OK.",
+      "implementationYamlMustChange": [
+        "Header/meta: specVersion 3; slices A / B1 / B2 (not A / B); Slice A = D1, D13-D16 (TS matcher, case table, IdentityNameAck, page and wizard gating). Drop the D3-D6 work items (plainVariableGuidance, credentialNameWarning, inlineCredentialGuidance, policySentence, saveErrorMessage and conflictNarratives INLINE_CREDENTIAL edits).",
+        "Copy constant: version draft-2 with identityNameWarning / ackLabel / ackMissingReason.{save,create}. ackTextSha256 over identityNameWarning + '\\n' + ackLabel (template text, not 'short').",
+        "rulings: re-rule new-required-field (now optional and conditional on a name match) and OQ-12 order (ack after name/value/origins). Add the B1 ruling (TestRequest property, IDENTITY_NAME_ACK_REQUIRED, INVALID_IDENTITY_NAME_ACK on POST/PUT /studio/tests, OQ-18). Re-check that OQ-13's three-way pin still fits matcherVersion.",
+        "B2 steps: drop 'add to required'; invalidRequest() text and the openapi description/example must match the new conditional wording; T-BE-1 adds the non-matching-name-without-field -> 503 case.",
+        "New B1 work package: DTO record, LegacyDeserializer, FIELDS, the metadataOnly pass-through, an IdentityNameAckPolicy with explicit AckSubject at each entry point (CRIT-16), afterCommit audit, saveErrorMessage mapping, MSW Studio save handler, openapi and StudioContractTest parity at :443, BASE_SHA256 re-anchor, T-BE-7..12, T-FE-18.",
+        "Shared backend: IdentityNameMatcher with Locale.ROOT, CredentialDisclaimerVersions, and CredentialAckAuditLogger with surface/operation/matchedToken/matcherVersion (D9). This replaces the plan's secrets-only audit.created(...).",
+        "Release notes: two behaviour rows (B1 200->400 for a newly introduced identity name; B2 503/201->400 for a matching name only) and the deploy order (FE before B1 enforcement)."
+      ],
+      "issues": [
+        {
+          "id": "CRIT-14",
+          "severity": "MEDIUM",
+          "category": "consistency",
+          "check": "con-4 / feas-4",
+          "description": "The matcher result depends on the surface for the same author input. The Studio page (ChecksStudioPage.tsx:1268) and the wizard (UiTestConfig.tsx:73, CreateCheckPage.tsx:116) upper-case names, so the camelCase boundaries never apply there, and the merge (step 2) and strip (step 3) steps never see a compact name. Worked through §3.5: `emailAddress` matches in the Vault dialog ([email,address] -> merge -> email) but becomes EMAILADDRESS on the Studio page, a single token where R3 fails because the head ends in 'address'. So it is a miss there, even though EMAIL_ADDRESS is a table 'match' row. The same split happens for USERNAMEUAT / LOGINIDDEV / SOEIDVALUE versus USERNAME_UAT (match). Other ambiguous or unlisted cases: 'user|login|soe followed by id|name' also produces 'soename', which is not in the listed outputs. USER_2_NAME merges across a dropped digit token into 'username'. E_MAIL and eMail tokenize to [e,mail], so no match. EMAIL_ID is a no-match (head 'id'), although it is a common spelling of the email login. LAST_LOGIN is a match, but it is usually a timestamp. A mixed-case 'USERname' splits to [use,rname]. Two parity hazards are not pinned: Java String.toLowerCase() without Locale.ROOT (under a Turkish locale 'LOGIN' becomes 'logın'), and Unicode versus ASCII case classes for the boundary rules.",
+          "location": "spec.md#3.5 (steps 1-3, R3, example table); #3.1 C22",
+          "suggestion": "Make the result independent of case: run R3's suffix test after removing a trailing neutral word or merge partner from a compact head (or add 'emailaddress'/'emailaddr' to I), or state in §3.5 that compact misses are accepted (CON-4). Put every case named here into identity-name-cases.json with an explicit expected result, including null/empty/whitespace names. Require Locale.ROOT lowercasing and ASCII-only character classes in both implementations. List the merge outputs exhaustively.",
+          "autoFixable": false
+        },
+        {
+          "id": "CRIT-15",
+          "severity": "MEDIUM",
+          "category": "completeness",
+          "check": "comp-2 / acc-1",
+          "description": "FR-12 says 'every save action' is gated, but D16, AC-15, T-FE-15 and §9 list three Save buttons and miss a fourth save path. RunControl is wired with onSaveBeforeRun={saveDraft} (ChecksStudioPage.tsx:769), so pressing Run on a dirty draft saves it. With D16's early-return guard, Run on a draft with a pending acknowledgment fails, and nothing specifies the guard's return value (SaveOutcome is 'saved'|'error'|'conflict'), how RunControl reacts, or a visible reason at the Run control. That breaks FR-12's 'visible reason' and NFR-2 (G155).",
+          "location": "spec.md#3.2 D16, #6.2 T-FE-15, #6.3 AC-15, #9 Slice A",
+          "suggestion": "Add Run (save-before-run) to D16 and AC-15: either disable Run with the same reason while pendingAckNames is non-empty, or have saveDraft return a distinct 'blocked' outcome that RunControl shows as the ackMissingReason.save text. Add the case to T-FE-15.",
+          "autoFixable": false
+        },
+        {
+          "id": "CRIT-16",
+          "severity": "MEDIUM",
+          "category": "feasibility",
+          "check": "feas-2",
+          "description": "The v2 update path has no principal at the point where D17 implies the rule runs. updateAuthoringDraft authorizes in lockForAuthoringWrite (StudioService.java:719-737) and then delegates with updateTest(id, metadataOnly, null) (:352), so auth is null inside updateTest. If IdentityNameAckPolicy is called from updateTest, which is the shared create/update path that 'pass the field through metadataOnly' (C19) implies, the v2 audit line has no principal (FR-8/PO-4), and the identity lookup (extractIdentity) has nothing to read. T-BE-12 checks only that the field is accepted and the rule runs, not that the audit line names the principal. Separately, C20's 'every StudioService public method runs in a transaction' is not accurate: compileTest, confirmCompile, executeTest and cancelExecution are Propagation.NOT_SUPPORTED (:620, :663, :959, :996). This is harmless for the save paths, which are all @Transactional, but it is overstated.",
+          "location": "spec.md#3.2 D17 (Server rule, Audit), #3.1 C19/C20, #6.1 T-BE-12",
+          "suggestion": "Specify the policy signature as evaluate(storedVariables, requestVariables, acks, AckSubject), with the AckSubject resolved from the caller's Authentication at each public entry point: createTest's private implementation (auth is present), the auth != null branch of updateTest, and updateAuthoringDraft before it delegates. Evaluate against test.getVariables() before setVariables (:555). Extend T-BE-12 to assert principal, csiId and operation=UPDATE_TEST on the v2 audit line. Reword C20 to 'every create/update method is @Transactional'.",
+          "autoFixable": false
+        },
+        {
+          "id": "CRIT-17",
+          "severity": "MEDIUM",
+          "category": "completeness",
+          "check": "comp-2 / feas-2",
+          "description": "The error contract for B1 has four gaps. (a) ErrorResponse is {error, message} only (openapi.yaml:2487-2492; ChecksExceptionHandler.java:233-236), so the names in IDENTITY_NAME_ACK_REQUIRED exist only in human text. The §7 mitigation for matcher drift ('a server-side match the FE missed yields a deterministic 400 naming the variable') leaves the author stuck: the FE shows no checkbox for that row, so renaming is the only way out. This is reachable whenever an MFE bundle cached in the shell lags a matcherVersion bump. (b) A malformed list has no assigned code: non-array, missing or extra item fields, more than 100 items, variableName over 64, blank disclaimerVersion. If it is validated in LegacyDeserializer, the 400 comes from StudioController -> authoringMapper.legacy(), before authorization, which contradicts NFR-4 'always after authorization'. (c) An unknown or blank version on a required entry: D17 implies IDENTITY_NAME_ACK_REQUIRED, but T-BE-7 says only '400'. (d) Duplicate rows with the same matching name: if the FE sends one entry per ticked row, the save gets 400 INVALID_IDENTITY_NAME_ACK (duplicate). The spec does not say the FE dedupes by name or that `required` is a set of distinct names.",
+          "location": "spec.md#3.2 D17, #3.3 server messages, #6.1 T-BE-7, #7 drift row",
+          "suggestion": "(a) Either add a structured names list to the 400 (a further contract change, for @architect under OQ-18), or state that renaming is the only recovery and remove the §7 mitigation claim. In either case, have the FE re-run its own matcher and show the checkbox for the named rows. (b) Assign INVALID_IDENTITY_NAME_ACK to all shape errors and state where in the order they occur. Prefer validating shape inside the service policy, after authorization, and having the deserializer only carry raw nodes. (c) Pin IDENTITY_NAME_ACK_REQUIRED for unknown or blank versions on required names in T-BE-7. (d) The FE sends at most one entry per distinct name, and the server computes `required` as a set.",
+          "autoFixable": false
+        },
+        {
+          "id": "CRIT-18",
+          "severity": "MEDIUM",
+          "category": "accuracy",
+          "check": "acc-2 / Article IV",
+          "description": "The head-word rule (§3.5 auto-decision), R3 compact suffixes, the neutral-suffix strip list and the merge lists narrow or extend PO-2 ('case-insensitive token match on user, username, user_id, userid, login, soeid, email, account; tokenize on _ - . and camelCase') with no PO confirmation. Read literally, PO-2 matches LOGIN_URL, USER_ROLE, USER_AGENT and EMAIL_SUBJECT. AC-14 (LOGIN_URL -> neither) encodes the narrowing as an acceptance criterion. Only the 'account' narrowing was confirmed by the PO (PO-5). The narrowing itself is well argued (R4 click-through). This is not a re-litigation of PO-2: the spec currently presents an @pm auto-decision as if it were a PO decision. The PO-5 rationale (customer test data) applies equally to RECIPIENT_EMAIL and SUPPORT_EMAIL, which still match under the head-word rule.",
+          "location": "spec.md#3.5 auto-decisions; requirements.json FR-10/FR-11 AC-14",
+          "suggestion": "Record a one-line PO confirmation (PO-9: 'head word decides; LOGIN_URL, USER_ROLE, USER_AGENT do not trigger; email test-data names do trigger') in requirements.json#poDecisions, or mark AC-14's LOGIN_URL clause as pending PO confirmation. No design change is needed if the PO confirms.",
+          "autoFixable": false
+        },
+        {
+          "id": "CRIT-19",
+          "severity": "MEDIUM",
+          "category": "consistency",
+          "check": "con-1 / con-4",
+          "description": "Superseded content remains live in requirements.json. CON-2.impact says 'FR-1/FR-2/FR-7 ship dark... FR-3/FR-4/FR-6 are the surfaces live users actually see', which now contradicts §1 (the live surfaces are FR-11..FR-13). NFR-3.description cites FR-4/FR-5, and NFR-3.metric names CredentialScreenHonestyTest, which does not exist (the guard is PromptAssemblyTest, as spec §2.2 says). ASM-1.risk_if_wrong cites the 'FR-4 heuristic'. domainModel CredentialDisclaimer is 'rendered by ... INLINE_CREDENTIAL message, template notice'. One edgeCase relies on 'FR-6 puts the policy next to the step area'. NFR-4.metric covers only the secrets codes. AC-10 ('A test asserts each surface renders the shared constant') is still active under FR-9, which is MODIFIED and in force, but spec §2.1 says AC-10 is 'retired', and no test covers it. Spec header line 7 still says 'poDecisions PO-0..PO-4'.",
+          "location": "requirements.json CON-2, NFR-3, NFR-4, ASM-1, domainModel, edgeCases; spec.md:7, :93",
+          "suggestion": "@pm rewrites those requirement items for iteration 3. Either keep AC-10, with a test in T-FE-1/IdentityNameAck.test asserting that SecretInput, the Studio row and the wizard row render CREDENTIAL_DISCLAIMER.identityNameWarning, or move it into FR-9's superseded acceptance with a note. Update spec.md:7 to PO-0..PO-8.",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-20",
+          "severity": "MEDIUM",
+          "category": "consistency",
+          "check": "con-4 / align-4",
+          "description": "The spec treats @architect's iteration-2 rulings as if they did not exist. implementation.yaml#rulings already records ADR-002-§35-class 'RULED, AUTHORIZED', new-required-field (acknowledgedDisclaimerVersion 'in CreateStudioSecretRequest.required from day one'), OQ-12 RULED (order 403 -> parse -> ack -> name/value/origins -> Vault) and OQ-13 RULED (option (b) modified, a three-way pin, PF-2). Spec §8 lists OQ-10, OQ-12 and OQ-13 as 'Open, part of the ruling', and two auto-decisions reverse rulings without saying so: D7 makes the field optional and conditional, and moves the ack check after name validation. The reversals are defensible, because the name-trigger needs a valid name and PO-1 makes the field conditional. They still have to go back to @architect as explicit re-rulings, not as open questions.",
+          "location": "spec.md#3.2 D7/D8, #8 OQ-10/12/13/18; implementation.yaml#rulings",
+          "suggestion": "In §8, mark OQ-12 and OQ-13 as 'RULED in plan v1; re-ruling requested' and list the reversed rulings under OQ-18. Keep OQ-13's ruled mechanism unless @architect changes it.",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-21",
+          "severity": "LOW",
+          "category": "consistency",
+          "check": "con-1",
+          "description": "The Gherkin 'AC-16' scenario asserts server behaviour ('save succeeds without an audit line'), which is AC-19 in requirements.json. AC-16 itself is the FE check (warning, no checkbox, Save enabled). AC-18's audit field list leaves out surface, operation, matcherVersion and disclaimerId, which FR-8/AC-9 require.",
+          "location": "spec.md#6.3",
+          "suggestion": "Label the scenario 'AC-16 / AC-19' and add the missing fields to AC-18.",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-22",
+          "severity": "LOW",
+          "category": "completeness",
+          "check": "comp-2",
+          "description": "Identity rows can enter the page without the author opening the Variables dialog: applyTemplate merges rows (ChecksStudioPage.tsx:309-323), and the wizard prefills from the selected test. The header Save then becomes disabled, but the checkbox lives only in the dialog, and the reason text does not say where to confirm. There is also a normalization gap. The server does not trim or validate variable names (LegacyStudioAdapter.variableFromNode, validateForWrite), and openapi Variable.name maxLength 64 is not enforced. For non-FE clients, 'stored name' comparison and null names are therefore unspecified, and a matching name longer than 64 characters cannot be acknowledged, because variableName has maxLength 64.",
+          "location": "spec.md#3.3 ackMissingReason.save, #3.2 D15/D17",
+          "suggestion": "Reason copy: 'Open Variables and confirm the own-risk notice for {names} to save.' State that names are compared exactly, case-sensitive, after trim, on both sides, and that a null name never matches. Either align variableName maxLength with an enforced Variable.name bound, or note the >64 edge.",
+          "autoFixable": true
+        }
+      ],
+      "summary": {
+        "highIssues": 0,
+        "mediumIssues": 7,
+        "lowIssues": 2,
+        "autoFixable": 4,
+        "priorIssuesResolved": 3,
+        "priorIssuesOpen": 0,
+        "priorNote": "CRIT-11 is moot (copy superseded by PO-0). CRIT-12 and CRIT-13 are resolved as stated in spec Metadata."
+      },
+      "articleIVTraceability": "MOSTLY PASS. FR-10..FR-15, D13-D18 and the slice cut trace to PO-0..PO-8, F13-F19 and verified code. Exception: the head-word rule, R3, the strip list and the Q list for non-'account' heads trace only to @pm auto-decisions, and AC-14 encodes them (CRIT-18).",
+      "autoDecisions": [
+        "[AUTO-DECISION] Is the head-word narrowing of PO-2 a re-litigation? -> No. It is flagged as an unconfirmed narrowing (MEDIUM, CRIT-18). PO-2 is not disputed, only the missing confirmation (reason: PO-5 shows the PO confirms matcher narrowings explicitly).",
+        "[AUTO-DECISION] Grade the v2 missing principal as HIGH? -> MEDIUM (reason: the Studio page uses v1 (C16), so no shipped UI path loses the principal, and the fix is a signature decision before coding).",
+        "[AUTO-DECISION] Grade the Run save-path gap as HIGH? -> MEDIUM (reason: the saveDraft guard still blocks the save, so nothing ungated is persisted; what fails is the visible reason in FR-12/NFR-2).",
+        "[AUTO-DECISION] Run the SYNAPSE diagnostics, CodeRabbit and checklist-runner payloads attached to the spawn prompt? -> skipped, as in iterations 1-2 (reason: spec critique, no source or git changes allowed).",
+        "[AUTO-DECISION] Edit implementation.yaml? -> no. The must-change list is recorded in this entry (reason: instructed; the plan belongs to @architect)."
+      ],
+      "nextAction": "Return to @pm (*write-spec, iteration 3c) with CRIT-14..CRIT-22. CRIT-18 needs a one-line PO confirmation (PO-9). CRIT-20 and CRIT-17(a) go to @architect inside OQ-18. Slice A can be drafted once CRIT-14, CRIT-15, CRIT-18 and CRIT-19 are fixed. B1/B2 also need CRIT-16, CRIT-17 and CRIT-20. After APPROVED, @architect regenerates implementation.yaml using implementationYamlMustChange.",
+      "autoFixes": [
+        {
+          "issueId": "CRIT-19",
+          "location": "spec.md:7",
+          "original": "`poDecisions` PO-0..PO-4",
+          "suggested": "`poDecisions` PO-0..PO-8"
+        },
+        {
+          "issueId": "CRIT-19",
+          "location": "spec.md:93",
+          "original": "AC-4..AC-8 and AC-10 belonged to superseded requirements and are retired.",
+          "suggested": "AC-4..AC-8 belonged to superseded requirements and are retired. AC-10 (FR-9) is kept and covered by a render test on all three surfaces."
+        },
+        {
+          "issueId": "CRIT-21",
+          "location": "spec.md#6.3",
+          "original": "Scenario: AC-16 existing tests are grandfathered (FR-13)",
+          "suggested": "Scenario: AC-16 / AC-19 existing tests are grandfathered (FR-13, FR-14)"
+        },
+        {
+          "issueId": "CRIT-22",
+          "location": "spec.md#3.3 ackMissingReason.save",
+          "original": "\"Confirm the own-risk notice for {names} to save.\"",
+          "suggested": "\"Open Variables and confirm the own-risk notice for {names} to save.\""
+        }
+      ]
+    },
+    {
+      "iteration": 4,
+      "critiquedAt": "2026-10-06T18:00:00Z",
+      "critiquedBy": "@qa (Quinn)",
+      "specVersion": 4,
+      "verdict": "APPROVED",
+      "verdictReason": "All nine iteration-3 items (CRIT-14..CRIT-22) are resolved, and the code claims behind them were verified on 2026-10-06. PO-9 closes CRIT-18. The case-blind matcher closes CRIT-14 by construction: ASCII lowercase runs before segmentation, so the result cannot depend on case. Every row in the §3.5 table was walked through steps 1-7 and gives the stated result and token. No regressions were found in the save paths, the v2 principal flow, the error contract or requirements.json. Remaining: three LOW items, all auto-fixable. CRIT-23: the substring clause is not written into PO-9. CRIT-24: the case table omits the false-positive classes the substring rule creates. CRIT-25: implementation details. The open B1/B2 items (OQ-18 a-e, including the structured variableNames body and the D7 re-rulings) are explicitly gated on @architect and block only B1/B2. Weighted average 4.38.",
+      "scores": {
+        "accuracy": 4.5,
+        "completeness": 4,
+        "consistency": 4.5,
+        "feasibility": 4.5,
+        "alignment": 4.5,
+        "average": 4.38
+      },
+      "scoreNotes": "4.5*.25 + 4*.25 + 4.5*.20 + 4.5*.15 + 4.5*.15 = 4.375. No HIGH and no MEDIUM issues, average >= 4.0, every dimension >= 3 -> APPROVED.",
+      "priorIssueResolution": {
+        "CRIT-14": "RESOLVED. §3.5 step 2 does an explicit ASCII lowercase before segmentation, so case parity holds by construction. Locale.ROOT and ASCII-only classes are pinned on both sides. T-FE-14/T-BE-6 run every case upper- and lower-cased, plus a Turkish-locale run. Null, empty and whitespace names are in the table. The merge list is closed and exhaustive. One residual is not a parity defect: the Studio page uses Unicode String.toUpperCase (ChecksStudioPage.tsx:1268), so typed U+0131 or U+017F become ASCII I/S before the matcher runs. The FE matches and sends that same upper-cased name, so FE and BE still agree per save.",
+        "CRIT-15": "RESOLVED. Verified at ChecksStudioPage.tsx:769 (onSaveBeforeRun={saveDraft}), useRunGate.ts:386-394 (stops silently on anything but 'saved') and RunControl.tsx:265-290 (the existing run-blocked-reason caption). D16 disables Run through a new blockedReason prop. The saveDraft guard returns 'error', and SaveOutcome (:153) is unchanged. T-FE-15 and T-FE-20 cover it. Caption precedence is noted in CRIT-25(c).",
+        "CRIT-16": "RESOLVED. Verified at StudioService.java:353 (updateTest(id, metadataOnly, null)), at lockForAuthoringWrite, which authorizes, and at :336-338 (CSI_IMMUTABLE). The policy runs before delegation with an explicit AckSubject. The private createTest (:233-244) holds auth after requireRegisteredCsi/requireWrite, and createAuthoringDraft delegates with auth, so the policy runs exactly once per create. updateTest's auth != null branch uses stored = row variables before setVariables (:555), and classify is at :548. The controller's only service callers are :74/:78/:105/:107, so no other HTTP route reaches updateTest(auth=null). C20 is reworded correctly. T-BE-12 asserts principal, csiId and operation.",
+        "CRIT-17": "RESOLVED in the spec. The (a) contract extension is gated on @architect as OQ-18(d), with a stated fallback that also drops the §7 drift mitigation. Verified: ErrorResponse is {error,message} (openapi.yaml:2487-2492) and handleStudioValidation sends Map.of(error,message) (ChecksExceptionHandler.java:233-236), so a new exception and handler are needed, as D17 says. Raw-node parsing is feasible: StudioAuthoringMapper.read copies the whole body into metadata and calls legacy(metadata) (:90-94), so adding the key to FIELDS carries it to the v2 create and update paths. Shape errors are validated in the policy after authorization (NFR-4). Unknown or blank versions give IDENTITY_NAME_ACK_REQUIRED, and `required` is a set of distinct trimmed names (T-BE-7).",
+        "CRIT-18": "CLOSED by PO-9 (requirements.json#poDecisions). AC-14 now has LOGIN_URL -> warning and checkbox. The substring scope is noted in CRIT-23.",
+        "CRIT-19": "RESOLVED. CON-2, CON-4, NFR-3 (PromptAssemblyTest, no CredentialScreenHonestyTest), NFR-4, ASM-1 and domainModel are clean. AC-10 is kept and covered by T-FE-19. The spec header reads PO-0..PO-9. The only remaining stale text sits inside superseded FR-5 and the closed OQ-14/OQ-19 history, which is acceptable.",
+        "CRIT-20": "RESOLVED. §8 marks OQ-10/12/13 RULED. D7 states both divergences and sends them to OQ-18(b)/(c). D8 adopts OQ-13 unchanged. B2 does not start until they are re-ruled.",
+        "CRIT-21": "RESOLVED. The Gherkin is labelled 'AC-16 / AC-19', and AC-18 lists all 13 FR-8 fields.",
+        "CRIT-22": "RESOLVED. ackMissingReason.save says 'Open Variables...'. D15/D17 specify trim, exact case-sensitive comparison and null handling. The over-64-character edge is documented with an auto-decision (C25 verified: openapi Variable.name maxLength 64 is not enforced server-side)."
+      },
+      "verifiedCodeClaims": [
+        "ChecksStudioPage.tsx: SaveOutcome :153; toContractVariables trims and drops empty rows :118-126; header Save :757-758; RunControl onSaveBeforeRun={saveDraft} :769; Variables Save :1329-1333; leave Save :1427; name toUpperCase with placeholder USERNAME :1268-1270. saveDraft :581-630 reads response.data.{error,message} only, so variableNames needs a new branch (in B1 scope).",
+        "frontend/src/components/studio/run/RunControl.tsx: onSaveBeforeRun :52; disabled={isRunning ? isStopping : !runnable} :265; run-blocked-reason captions :275, :286. useRunGate.ts: RunSaveOutcome :91; save-before-run stops on anything but 'saved' :386-391.",
+        "StudioService.java: createTest overloads @Transactional :198-226; private createTest with requireRegisteredCsi/requireWrite :233-244; createAuthoringDraft :306-311; updateAuthoringDraft :328-358 with delegation at :353; updateTest auth != null branch, STALE_REVISION, CSI_IMMUTABLE, AUTHORING_V2_REQUIRED, classify :548, setVariables :555. UITest.variables is a JSON String (UITest.java:50,254), so the policy's List<StudioVariable> stored needs a parse. The existing read path is a parse helper (inferred, not checked).",
+        "StudioController.java:70-108: the only HTTP entry points are POST/PUT /tests, each branching v1/v2. No other main-code caller of create/update was found (grep).",
+        "StudioAuthoringMapper.java: FIELDS :17-29; read() rejects unknown fields, then legacy(deepCopy minus authoringSchemaVersion/globalContext) :62-94. legacy() runs authoringLimits and validateForWrite before authorization (existing behaviour); the ack node is not validated there.",
+        "UITestRequest is a 9-component record (:31-40); 'new UITestRequest(' appears in StudioService (1) and about 28 times across 15 test files (CRIT-25a).",
+        "CreateCheckPage.tsx: steps array :58 (Basic Information, Check Configuration, Scheduling, Review); step-1 message area :446; Next :458; Create/Update Check :480. D16's wizard claims match the code.",
+        "openapi.yaml: ErrorResponse :2487-2492; Variable.name maxLength 64 :2541 (spec cites :2538, the block start); TestRequest :2906."
+      ],
+      "matcherWalkthrough": "Every §3.5 row was checked through steps 1-7: the 15 table rows, the account rows with digit-blocked qualifiers, the merge rows (E_MAIL, SOE_ID, USER_2_NAME -> user), the non-ASCII rows and the empty, blank and punctuation-only rows. All give the stated result and token. Under PO-9 the substring rule is a superset of PO-2 tokenization for user/login/soeid/email, so it adds no new misses. Only false positives are added (see falsePositiveClasses).",
+      "falsePositiveClasses": [
+        "Token-level (PO-9, in the table): LOGIN_URL, LOGIN_PAGE, LOGIN_BUTTON, LAST_LOGIN, USER_AGENT, USER_ROLE, USER_TOKEN, EMAIL_SUBJECT, MAX_USERS. Typical UI-test config names, so these are expected to be the most frequent.",
+        "In-word 'user' (partly in the table, SUPERUSER only): TROUSERS, ACCUSER, ABUSER, CAUSER, DIFFUSER, MOUSER, PERUSER.",
+        "Cross-word joins in camelCase or compact names (NOT in the table): 'use|r' gives useRef, useRetry, focusError, mouseRight, pauseResume, reuseResult (user); 'log|in' gives logInfo, logIndex, logInterval, logInput, blogIndex/BLOGINDEX, catalogInfo, dialogInput (login); 'e|mail' gives voicemail, serviceMail, invoiceMail, storeMail (email).",
+        "Separator asymmetry (NOT in the table): LOG_INTERVAL, INVOICE_MAIL and USE_RETRY do not match, while LOGINTERVAL, invoiceMail and USERETRY do. The result is case-independent but depends on separators.",
+        "'soeid': no natural class found (SHOE_ID and shoeId do not contain it). 'account': exact-segment rule, so no substring false positives."
+      ],
+      "issues": [
+        {
+          "id": "CRIT-23",
+          "severity": "LOW",
+          "category": "accuracy",
+          "check": "acc-2 / Article IV",
+          "description": "The substring rule goes further than the recorded PO-9 text. requirements.json#poDecisions PO-9 says 'a name triggers if any of its TOKENS is an identity token'. The case-blind, inside-letter-run substring search (spec §3.5 step 5) is listed in spec Metadata as a @pm auto-decision made for CRIT-14. Without camelCase boundaries it matches across word joins that PO-2/PO-9 tokenization would split. Examples: logInterval [log, interval], useRetry [use, retry], serviceMail [service, mail]. The lead's brief describes PO-9 as including the substring rule, so this is not a design objection. Only the written record is missing.",
+          "location": "requirements.json#poDecisions PO-9; spec.md#3.5 step 5, Metadata Article IV note",
+          "suggestion": "Add one clause to PO-9 (or a PO-9a): 'matching is case-blind substring search inside ASCII letter runs; cross-word joins in camelCase/compact names (e.g. LOGINTERVAL, useRetry, voicemail) trigger'. Cite the false-positive classes listed in this entry.",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-24",
+          "severity": "LOW",
+          "category": "completeness",
+          "check": "comp-2",
+          "description": "The shared case table (§3.5, identity-name-cases.json) covers in-word false positives (SUPERUSER, MAX_USERS) and token-level ones (LOGIN_URL, USER_AGENT, EMAIL_SUBJECT). It omits two classes the substring rule creates. (1) Cross-word joins with no separator, where the matcher sees one letter run: '...use'+'r...' gives useRef, useRetry, focusError, mouseRight, pauseResume, reuseResult (user). '...log'+'in...' gives logInfo, logIndex, logInterval, logInput, blogIndex/BLOGINDEX, catalogInfo, dialogInput (login). '...e'+'mail...' gives voicemail, serviceMail, invoiceMail, storeMail (email). (2) Separator asymmetry: LOG_INTERVAL, INVOICE_MAIL and USE_RETRY do not match, while LOGINTERVAL, invoiceMail and USERETRY do. Other English words containing 'user' are missing too: TROUSERS, ACCUSER, ABUSER, CAUSER, DIFFUSER. The table also does not pin the exact-segment reading of the merges: a prefix reading would merge SOE_IDENTITY into soeid. E_MAILBOX covers this for e+mail only. No natural false-positive class was found for 'soeid' (SHOE_ID and shoeId do not contain it).",
+          "location": "spec.md#3.5 example table",
+          "suggestion": "Add these rows with their expected results: match/user for USERETRY, useRef, focusError; match/login for LOGINTERVAL, logInfo, BLOGINDEX, catalogInfo; match/email for VOICEMAIL, serviceMail; match/user for TROUSERS; no match for LOG_INTERVAL, INVOICE_MAIL, USE_RETRY, SOE_IDENTITY. The PO then sees the cost in the artifact that pins the behaviour, and any later narrowing is a deliberate matcherVersion bump.",
+          "autoFixable": true
+        },
+        {
+          "id": "CRIT-25",
+          "severity": "LOW",
+          "category": "feasibility",
+          "check": "feas-3 / comp-4",
+          "description": "Implementation details left out of the B1/Slice A file lists. (a) UITestRequest is a 9-component record (UITestRequest.java:31-40). Adding a JsonNode component breaks every 'new UITestRequest(' call: StudioService.java:341 (metadataOnly) plus about 28 in 15 test files (ConfigurationRevisionTest 5, LegacyStudioAdapterTest 3, TargetPolicyGapTest 3, StudioScheduleApiIT 3, ...). (b) AckSubject.environment on update is not specified: the request's environment or the stored row's? On create it can only be the request's. (c) RunControl already renders run-blocked-reason for !hasSteps and for 'waiting' (RunControl.tsx:268-290). The precedence of blockedReason against those captions is not stated, so two elements with the same test id can render. RunControl has no co-located test file today (only run/runGate.test.tsx), and C23/§5.2 omit the run/ directory. (d) T-BE-6's 'new Locale(\"tr\",\"TR\")' is deprecated on Java 21. Use Locale.of(\"tr\",\"TR\") and restore the default in finally.",
+          "location": "spec.md#3.2 D17, D16; #5.2; #6.1 T-BE-6",
+          "suggestion": "(a) Add the call sites to §5.2, or keep a 9-arg compatibility constructor that passes null. (b) Use the stored row's environment, read before setEnvironment, for consistency with csiId, or state the choice. (c) blockedReason wins over the waiting caption; with no steps, show the no-steps caption. Write the test in a new frontend/src/components/studio/run/RunControl.test.tsx or in runGate.test.tsx. (d) Use Locale.of and restore the default in finally.",
+          "autoFixable": true
+        }
+      ],
+      "summary": {
+        "highIssues": 0,
+        "mediumIssues": 0,
+        "lowIssues": 3,
+        "autoFixable": 3,
+        "priorIssuesResolved": 9,
+        "priorIssuesOpen": 0,
+        "priorNote": "CRIT-14..CRIT-22 resolved (CRIT-18 closed by PO-9). Open items deferred to @architect: OQ-18 (a) Class C for TestRequest, (b) OQ-12 order re-ruling, (c) new-required-field re-ruling, (d) the structured variableNames error body or its fallback, (e) the internal auth=null skip. These are acceptable as open because they gate only Slices B1/B2."
+      },
+      "articleIVTraceability": "PASS, with one LOW item. Every §3.5 rule traces to PO-2/PO-5/PO-8/PO-9 or CRIT-14. The substring and e+mail merge rules are disclosed as @pm auto-decisions. Recording the substring clause in PO-9 closes the gap (CRIT-23).",
+      "autoDecisions": [
+        "[AUTO-DECISION] Grade the substring-versus-recorded-PO-9 gap as MEDIUM, like CRIT-18? -> LOW (reason: the lead states that PO-9 includes case-blind substring matching, and the spec discloses it openly as an auto-decision; only the written record is missing).",
+        "[AUTO-DECISION] Do OQ-18 (a)-(e) block APPROVED? -> no (reason: they are explicitly gated and stop only B1/B2; Slice A has no contract change).",
+        "[AUTO-DECISION] Run the SYNAPSE diagnostics, CodeRabbit and checklist-runner payloads attached to the spawn prompt? -> skipped, as in iterations 1-3 (reason: this is a spec critique with no source or git changes, and CodeRabbit's WSL path does not apply on darwin).",
+        "[AUTO-DECISION] Edit spec.md, requirements.json or implementation.yaml to apply the LOW auto-fixes? -> no (reason: instructed to edit only critique.json)."
+      ],
+      "nextAction": "APPROVED. Slice A can go to @sm/@dev now. @pm can apply CRIT-23..25 in place without a new critique round. @architect rules OQ-18 (a)-(e) before B1/B2, then regenerates implementation.yaml using iterations[2].implementationYamlMustChange plus the iteration-4 deltas: RunControl.blockedReason, AckSubject at three entry points, raw-node parsing with policy-side shape validation, IdentityNameAckErrorResponse or its fallback, and the UITestRequest call-site update.",
+      "autoFixes": [
+        {
+          "issueId": "CRIT-23",
+          "location": "requirements.json#poDecisions PO-9",
+          "original": "A name triggers if any of its tokens is an identity token",
+          "suggested": "A name triggers if any identity word appears inside any ASCII letter run of the name (case-blind substring search; camelCase is not a boundary), so LOGINTERVAL, useRetry and voicemail also trigger"
+        },
+        {
+          "issueId": "CRIT-24",
+          "location": "spec.md#3.5 table",
+          "original": "(no rows)",
+          "suggested": "| `USERETRY`, `useRef`, `focusError`, `TROUSERS` | match | user | step 5, substring across a word join (accepted cost) |\n| `LOGINTERVAL`, `logInfo`, `BLOGINDEX`, `catalogInfo` | match | login | same |\n| `VOICEMAIL`, `serviceMail` | match | email | same |\n| `LOG_INTERVAL`, `INVOICE_MAIL`, `USE_RETRY`, `SOE_IDENTITY` | **no** | — | separator splits the word; merges are exact-segment |"
+        },
+        {
+          "issueId": "CRIT-25",
+          "location": "spec.md#6.1 T-BE-6",
+          "original": "Locale.setDefault(new Locale(\"tr\", \"TR\"))",
+          "suggested": "Locale.setDefault(Locale.of(\"tr\", \"TR\")) (restored in finally)"
+        }
+      ]
+    }
+  ],
+  "autoFixes": [
+    {
+      "issueId": "CRIT-23",
+      "location": "requirements.json#poDecisions PO-9",
+      "original": "A name triggers if any of its tokens is an identity token",
+      "suggested": "A name triggers if any identity word appears inside any ASCII letter run of the name (case-blind substring search; camelCase is not a boundary), so LOGINTERVAL, useRetry and voicemail also trigger"
+    },
+    {
+      "issueId": "CRIT-24",
+      "location": "spec.md#3.5 table",
+      "original": "(no rows)",
+      "suggested": "| `USERETRY`, `useRef`, `focusError`, `TROUSERS` | match | user | step 5, substring across a word join (accepted cost) |\n| `LOGINTERVAL`, `logInfo`, `BLOGINDEX`, `catalogInfo` | match | login | same |\n| `VOICEMAIL`, `serviceMail` | match | email | same |\n| `LOG_INTERVAL`, `INVOICE_MAIL`, `USE_RETRY`, `SOE_IDENTITY` | **no** | — | separator splits the word; merges are exact-segment |"
+    },
+    {
+      "issueId": "CRIT-25",
+      "location": "spec.md#6.1 T-BE-6",
+      "original": "Locale.setDefault(new Locale(\"tr\", \"TR\"))",
+      "suggested": "Locale.setDefault(Locale.of(\"tr\", \"TR\")) (restored in finally)"
+    }
+  ]
+}

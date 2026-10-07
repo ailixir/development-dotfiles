@@ -24,6 +24,7 @@ import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
 import { setExecuting } from '@/store/slices/studioSlice';
 import ChecksStudioPage, { RELOAD_TEST_LABEL, SAVE_CONFLICT_TITLE } from './ChecksStudioPage';
+import { GENERIC_SAVE_ERROR } from './saveErrorMessage';
 
 /**
  * Studio v1, WP5: the page's Save and Stop do what they say.
@@ -54,19 +55,6 @@ const requests = (method: string, pathPattern: RegExp) =>
 const bootstrapHandlers = [
   http.get(`${API_BASE}/checks/sources`, () => HttpResponse.json({ sources: [] })),
   http.get(`${API_BASE}/features`, () => HttpResponse.json({ sources: [], features: [] })),
-  http.get(`${API_BASE}/secrets`, () =>
-    HttpResponse.json({
-      data: [
-        {
-          id: 'vault://studio/pilot-pw',
-          label: 'Pilot password',
-          scope: 'project',
-          last4: 'abcd',
-          createdAt: '2026-09-01T09:00:00Z',
-        },
-      ],
-    }),
-  ),
 ];
 
 /** Serves one draft. `current` is what the list and the single read return right now. */
@@ -225,6 +213,32 @@ describe('Save', () => {
     await waitFor(() => expect(screen.getAllByDisplayValue(THEIR_STEP)).toHaveLength(1), WAIT);
     await waitFor(() => expect(screen.queryByTestId('save-conflict')).toBeNull(), WAIT);
     expect(requests('POST', /\/studio\/tests$/)).toHaveLength(0);
+  }, TEST_TIMEOUT_MS);
+
+  it('VAL-027: a 400 INVALID_STEPS shows the server message; a 500 keeps the generic text', async () => {
+    serveDraft(readyDraft);
+    const BLANK_STEP = 'Step 2 is blank. Write what the step should do, or remove it.';
+    let status = 400;
+    studioMockServer.use(
+      http.put(`${STUDIO_BASE}/tests/:id`, () =>
+        status === 400
+          ? HttpResponse.json({ error: 'INVALID_STEPS', message: BLANK_STEP }, { status: 400 })
+          : HttpResponse.json({ error: 'INTERNAL_ERROR', message: 'NullPointerException at Foo.java:12' }, { status: 500 }),
+      ),
+    );
+    renderPage();
+    await screen.findByRole('button', { name: 'Run Test' }, WAIT);
+    const user = userEvent.setup({ delay: null });
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(await screen.findByText(BLANK_STEP, {}, WAIT)).toBeInTheDocument();
+    expect(screen.queryByText('INVALID_STEPS')).toBeNull();
+
+    status = 500;
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).not.toBeDisabled(), WAIT);
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(await screen.findByText(GENERIC_SAVE_ERROR, {}, WAIT)).toBeInTheDocument();
+    expect(screen.queryByText(/NullPointerException/)).toBeNull();
   }, TEST_TIMEOUT_MS);
 });
 

@@ -3,8 +3,12 @@ package com.citi.put.checks.studio.dispatch;
 import com.citi.put.checks.csi.CsiRepository;
 import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.entity.UITest;
+import com.citi.put.checks.studio.scheduling.StudioBackgroundAuthorization;
+import com.citi.put.checks.studio.scheduling.StudioScheduledDispatchAuthorization;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,6 +27,13 @@ public class ProvisionalDispatchAuthorization implements DispatchAuthorization {
 
   private final StudioRepository tests;
   private final CsiRepository csis;
+  private StudioScheduledDispatchAuthorization scheduled;
+
+  @Autowired
+  public void initializeScheduledChecks(
+      StudioBackgroundAuthorization background, JdbcTemplate jdbc) {
+    scheduled = new StudioScheduledDispatchAuthorization(background, jdbc);
+  }
 
   public ProvisionalDispatchAuthorization(StudioRepository tests, CsiRepository csis) {
     this.tests = tests;
@@ -52,6 +63,9 @@ public class ProvisionalDispatchAuthorization implements DispatchAuthorization {
       throw new AuthorizationRevokedException(
           "The execution carries no principal whose authorization could be rechecked");
     }
-    return "csi:" + csiId + "/provisional-dispatch-policy";
+    String policy = "csi:" + csiId + "/provisional-dispatch-policy";
+    return scheduled == null
+        ? policy
+        : scheduled.recheck(executionId, testId, csiId, principal, policy);
   }
 }

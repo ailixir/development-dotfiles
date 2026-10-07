@@ -6,8 +6,11 @@ import type {
   ExecuteAccepted,
   ExecutionPage,
   ExecutionSnapshot,
+  ExecutionListQuery,
   TestDto,
+  TestListQuery,
   TestPage,
+  Page,
 } from '@/types/studio/studioTypes';
 
 /**
@@ -17,22 +20,84 @@ import type {
  * `@/types/studio/legacyTestIr`, before they reach this module.
  */
 
-export interface ListTestsParams {
-  csiId?: string;
-  page?: number;
-  size?: number;
+/** Kept for existing callers; the full query shape is {@link TestListQuery}. */
+export type ListTestsParams = TestListQuery;
+
+/** Kept for existing callers; the full query shape is {@link ExecutionListQuery}. */
+export type ListExecutionsParams = ExecutionListQuery;
+
+/** Per-request options for the list reads. */
+export interface ListRequestOptions {
+  /**
+   * Aborts the request. `apiClient` normalizes errors, so an aborted call rejects with a plain
+   * `Error`: callers should check `signal.aborted` rather than the error's type.
+   */
+  signal?: AbortSignal;
 }
 
-export interface ListExecutionsParams {
-  /** Optional since 10.1: an unfiltered history request is scoped by the caller's CSIs. */
-  testId?: string;
-  page?: number;
-  size?: number;
+/** Drops `undefined`, `null` and blank-string params so the URL only carries real filters. */
+function compactParams(params: object | undefined): Record<string, string | number> | undefined {
+  if (!params) return undefined;
+  const result: Record<string, string | number> = {};
+  for (const [key, value] of Object.entries(params) as [string, unknown][]) {
+    if (value === undefined || value === null) continue;
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed !== '') result[key] = trimmed;
+    } else if (typeof value === 'number' && Number.isFinite(value)) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+/**
+ * Keeps the first occurrence of each id. The server pages with a stable `id` tie-breaker, so a
+ * duplicate within one page should not happen; this is the client half of AC-2 in case it does.
+ */
+export function dedupeById<T>(items: readonly T[], idOf: (item: T) => string): T[] {
+  const seen = new Set<string>();
+  const result: T[] = [];
+  for (const item of items) {
+    const id = idOf(item);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    result.push(item);
+  }
+  return result;
+}
+
+/** Local list search and filters must include records beyond the server's first page. */
+async function readAllPages<T>(readPage: (page: number) => Promise<Page<T>>): Promise<T[]> {
+  const first = await readPage(0);
+  const items = [...first.data];
+  for (let page = 1; page < first.totalPages; page += 1) {
+    const next = await readPage(page);
+    items.push(...next.data);
+  }
+  return items;
 }
 
 export const studioApi = {
-  listTests: async (params?: ListTestsParams): Promise<TestPage> =>
-    apiClient.get('/studio/tests', { params }),
+  /**
+   * One server page of tests (`GET /studio/tests`), filtered, searched and sorted server-side.
+   * Returns the backend envelope as-is (`data`, 0-based `page`, `size`, `totalElements`,
+   * `totalPages`) with `data` de-duplicated by id.
+   */
+  listTests: async (params?: TestListQuery, options?: ListRequestOptions): Promise<TestPage> => {
+    const page = await apiClient.get<TestPage>('/studio/tests', {
+      params: compactParams(params),
+      signal: options?.signal,
+    });
+    return { ...page, data: dedupeById(page.data ?? [], (test) => test.id) };
+  },
+
+  /** Every page, concatenated. Prefer {@link studioApi.listTests} for list screens. */
+  listAllTests: async (csiId?: string): Promise<TestDto[]> =>
+    dedupeById(
+      await readAllPages<TestDto>((page) => studioApi.listTests({ csiId, page, size: 100 })),
+      (test) => test.id,
+    ),
 
   getTest,
   createTest,
@@ -65,8 +130,30 @@ export const studioApi = {
   cancelExecution: async (id: string): Promise<ExecutionSnapshot> =>
     apiClient.post(`/studio/executions/${id}/cancel`, undefined),
 
-  listExecutions: async (params?: ListExecutionsParams): Promise<ExecutionPage> =>
-    apiClient.get('/studio/executions', { params }),
+  /**
+   * One server page of runs (`GET /studio/executions`), filtered, searched and sorted server-side.
+   * Each item carries `testName` (null for a deleted test). `data` is de-duplicated by
+   * `executionId`.
+   */
+  listExecutions: async (
+    params?: ExecutionListQuery,
+    options?: ListRequestOptions,
+  ): Promise<ExecutionPage> => {
+    const page = await apiClient.get<ExecutionPage>('/studio/executions', {
+      params: compactParams(params),
+      signal: options?.signal,
+    });
+    return { ...page, data: dedupeById(page.data ?? [], (execution) => execution.executionId) };
+  },
+
+  /** Every page, concatenated. Prefer {@link studioApi.listExecutions} for list screens. */
+  listAllExecutions: async (): Promise<ExecutionSnapshot[]> =>
+    dedupeById(
+      await readAllPages<ExecutionSnapshot>((page) =>
+        studioApi.listExecutions({ page, size: 100 }),
+      ),
+      (execution) => execution.executionId,
+    ),
 
   /**
    * Enqueues a compile of the draft's current source. The `202` means the attempt was *started*,

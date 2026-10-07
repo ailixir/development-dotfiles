@@ -11,6 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.bind.BindException;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
+import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.ClassPathResource;
 
 /** Story 10.5 AC-2: an enabled gateway with incomplete configuration must not start. */
 class StudioGatewayPropertiesTest {
@@ -75,17 +80,17 @@ class StudioGatewayPropertiesTest {
     assertThat(defaults.temperature()).isZero();
     assertThat(defaults.structuredOutput()).isTrue();
     assertThat(defaults.retry().maxRetries()).isEqualTo(2);
-    assertThat(defaults.thinkingLevel()).isEqualTo(StudioGatewayProperties.ThinkingLevel.MEDIUM);
+    assertThat(defaults.thinkingLevel()).isEqualTo(StudioGatewayProperties.ThinkingLevel.LOW);
     assertThat(defaults.providerFeatures().systemInstruction()).isTrue();
     assertThat(defaults.providerFeatures().thinkingConfig()).isTrue();
-    assertThat(defaults.effectiveThinkingLevel()).isEqualTo("MEDIUM");
+    assertThat(defaults.effectiveThinkingLevel()).isEqualTo("LOW");
   }
 
   @Test
-  void bindingDefaultsPinMediumAndSendEveryProviderFeature() {
+  void bindingDefaultsToLowAndSendsEveryProviderFeature() {
     StudioGatewayProperties bound = bind(Map.of());
 
-    assertThat(bound.thinkingLevel()).isEqualTo(StudioGatewayProperties.ThinkingLevel.MEDIUM);
+    assertThat(bound.thinkingLevel()).isEqualTo(StudioGatewayProperties.ThinkingLevel.LOW);
     assertThat(bound.providerFeatures()).isEqualTo(StudioGatewayProperties.ProviderFeatures.ALL);
   }
 
@@ -118,6 +123,32 @@ class StudioGatewayPropertiesTest {
     assertThat(bound.providerFeatures().thinkingConfig()).isFalse();
     assertThat(bound.effectiveThinkingLevel())
         .isEqualTo(StudioGatewayProperties.PROVIDER_DEFAULT_THINKING_LEVEL);
+  }
+
+  @Test
+  void applicationYamlDefaultsToLowAndTheEnvironmentOverridesIt() throws Exception {
+    assertThat(bindApplicationYaml(Map.of()).thinkingLevel())
+        .isEqualTo(StudioGatewayProperties.ThinkingLevel.LOW);
+    assertThat(
+            bindApplicationYaml(Map.of("STUDIO_GATEWAY_THINKING_LEVEL", "MEDIUM")).thinkingLevel())
+        .isEqualTo(StudioGatewayProperties.ThinkingLevel.MEDIUM);
+  }
+
+  /** Binds the real {@code application.yml}, resolving its placeholders against {@code env}. */
+  private static StudioGatewayProperties bindApplicationYaml(Map<String, Object> env)
+      throws Exception {
+    StandardEnvironment environment = new StandardEnvironment();
+    environment
+        .getPropertySources()
+        .remove(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME);
+    environment.getPropertySources().addFirst(new MapPropertySource("test-env", env));
+    for (PropertySource<?> source :
+        new YamlPropertySourceLoader()
+            .load("application.yml", new ClassPathResource("application.yml"))) {
+      environment.getPropertySources().addLast(source);
+    }
+    return Binder.get(environment)
+        .bindOrCreate("studio.compile.gateway", StudioGatewayProperties.class);
   }
 
   private static StudioGatewayProperties bind(Map<String, String> values) {

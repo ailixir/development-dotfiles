@@ -1,0 +1,251 @@
+{
+  "storyId": "STUDIO-SCHED-001",
+  "recordedAt": "2026-10-06T01:17:01.892900+00:00",
+  "status": "local_implementation_done_QA_CONCERNS",
+  "scope": "Local default-off recurring scheduling of individual saved Studio tests",
+  "checks": {
+    "workflow": "valid; nine existing workflow-convention warnings",
+    "baselineFrontendTypeCheck": "pass",
+    "baselineBackendCompilation": "pass",
+    "baselineFrontendLint": "pass;303 preexisting warnings",
+    "docker": "available",
+    "baselineFrontendTests": "897 passed; 4 failed in existing InferenceStudio and studioWcagAudit",
+    "baselineFrontendBuildStandalone": "pass",
+    "specCritique": "APPROVED4.85; localdefaultoffscope",
+    "newFrontendTransportMocks": "3/3 pass; frontend type-check pass",
+    "baselineFrontendRecheck": "Same four failures reproduced in single-thread targeted inference/a11y recheck;17 passed",
+    "newBackendSchema": "20/20 private PostgreSQL15 passed,0skipped",
+    "newBackendAPIMilestone": "9/9 privatePG API/processor passed",
+    "newBackendResolver": "4/4 passed incl NY,LordHowe,Casey",
+    "newFrontendFocused": "104 Studio regression tests + scheduling15 passed",
+    "newFrontendQuality": "type-check pass;lint0errors303baselinewarnings;Webpack/Vite builds pass",
+    "browserSmoke": "ChromiumfixtureflowPASS;no real scheduling mutation or runner send",
+    "finalFrontendFullSuite": "913 passed; same 4 preexisting failures;75 files,917 tests; no new failures",
+    "finalFrontendFocused": "119/119 after finalQAUI/mock corrections;22 new focused tests pass",
+    "finalFrontendBuilds": "Webpack pass with existing size warning; Vite pass sequentially after Webpack, consistent dist",
+    "backendStatic": "spotlessJavaCheck/checkstyleMain/checkstyleTest/spotbugsMain PASS;spotbugsTest SKIPPED byexistingbuildconfiguration",
+    "backendCore": "LatestAPI19+Contract14 PASS;schema20+resolver4+isolation2+manual11+dispatcher26+recovery25 PASS across batches",
+    "genericDispatch": "Cron1+ShedLock2+Retry3+ReportDelivery2 PASS",
+    "runnerContract": "35/35 scopedpass;whole-documentreviewedhashguardretained;coveragefilteredoff,no wholecoverageclaim",
+    "backendFullCheck": "Unfiltered gradlecheck/Jacoco gate not run;no fullbackendgreenclaim"
+  },
+  "commands": {
+    "frontendFull": "npx vitest run --poolOptions.threads.maxThreads=4 --poolOptions.threads.minThreads=1",
+    "frontendFocused": "npx vitest run src/components/studio/scheduling src/services/api/studioSchedulesApi.test.ts src/services/mocks/studio/studioContract.test.ts src/services/mocks/studio/studioHandlers.test.ts",
+    "frontendQuality": [
+      "npm run type-check",
+      "npm run lint",
+      "npm run build",
+      "npm run build:standalone"
+    ],
+    "backendStatic": "./gradlew spotlessJavaCheck checkstyleMain checkstyleTest spotbugsMain spotbugsTest",
+    "backendTests": "Executor-selected private PostgreSQL scheduling/API/schema tests and existing acceptance/dispatch/recovery/contract/generic-dispatch batches; final executor report supplies exact selectors",
+    "browser": "Chromium against localhost:5197 with canonical Studio MSW fixtures and isolated schedule routes; no real schedule mutation or browser send"
+  },
+  "knownPreexistingFailures": [
+    {
+      "file": "frontend/src/components/studio/inference/InferenceStudio.test.tsx",
+      "test": "retains step IDs, reaffirms each edit, confirms all six fields and executes only on explicit Run"
+    },
+    {
+      "file": "frontend/src/components/studio/inference/InferenceStudio.test.tsx",
+      "test": "regenerates the middle suffix and preserves only the earlier step"
+    },
+    {
+      "file": "frontend/src/components/studio/inference/InferenceStudio.test.tsx",
+      "test": "identical regenerated code is labeled regenerated and never a reused step"
+    },
+    {
+      "file": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+      "test": "surface 7 \u2014 ChecksStudioPage, video-playback state"
+    }
+  ],
+  "fullSuiteTimingNote": "Full frontend 913/917 was before isolated later QA corrections; latest focused 119/119 verifies those corrections. Full unfiltered backend check/Jacoco not run. No whole-repository green claim.",
+  "limits": [
+    "Production live principal/grant/secret revocation and actual policy version evidence remain release gated",
+    "On-demand Studio production trust, capacity/pilot and retention/restore evidence remain release gated",
+    "CodeRabbit CLI unavailable; independent manual QA fallback used",
+    "Scoped runner tests disable whole-repository coverage verification; no full coverage claim"
+  ],
+  "artifacts": [
+    "browser-smoke.json",
+    "qa-runner-contract.json",
+    "backend-verification.json",
+    "qa-review.md",
+    "qa-review-inputs.json"
+  ],
+  "baselineCodeChangesPreserved": true,
+  "backendFinalFocused": {
+    "command": "./gradlew test --tests '*studio.scheduling.*' --tests '*StudioContractTest' --tests '*scheduling.ScheduleCrudIT' --tests '*scheduling.ScheduleEnableDisableIT' --tests '*scheduling.BackpressureIntegrationIT'",
+    "status": "PASS",
+    "tests": 63,
+    "failures": 0,
+    "skipped": 0,
+    "suites": [
+      {
+        "name": "com.citi.put.checks.scheduling.BackpressureIntegrationIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:00"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ScheduleCrudIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:11"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ScheduleEnableDisableIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:20"
+      },
+      {
+        "name": "com.citi.put.checks.studio.StudioContractTest",
+        "tests": "14",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:33"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioCronResolverTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:40"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+        "tests": "19",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:50"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioSchedulingIsolationTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:52"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioSchedulingSchemaIT",
+        "tests": "20",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T01:16:54"
+      }
+    ]
+  },
+  "backendAdditionalRegression": {
+    "AcceptanceIT": {
+      "tests": 11,
+      "status": "PASS",
+      "evidence": "Actual two independent application-context manual idempotency and quotas"
+    },
+    "DispatcherIT": {
+      "tests": 26,
+      "status": "PASS"
+    },
+    "RecoveryIT": {
+      "tests": 25,
+      "status": "PASS"
+    },
+    "genericScheduling": {
+      "CronDispatcherIT": 1,
+      "ShedLockCronDispatcherIT": 2,
+      "RetryDispatcherIT": 3,
+      "ReportDeliveryDispatcherIT": 2,
+      "status": "PASS"
+    }
+  },
+  "backendStatic": {
+    "command": "./gradlew spotlessJavaCheck checkstyleMain checkstyleTest spotbugsMain spotbugsTest",
+    "spotlessJavaCheck": "PASS",
+    "checkstyleMain": "PASS",
+    "checkstyleTest": "PASS",
+    "spotbugsMain": "PASS",
+    "spotbugsTest": "SKIPPED: existing build.gradle.kts explicitly enabled=false"
+  },
+  "featureFileList": [
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/ConfiguredBackgroundAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioBackgroundAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioCronResolver.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleController.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleDtos.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleException.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleInvalidation.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulePoller.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleRepository.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledDispatchAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulingHealthIndicator.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulingProperties.java",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioCronResolverTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingIsolationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingSchemaIT.java",
+    "backend/src/main/resources/db/migration/V26__studio_scheduling.sql",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionSnapshotDto.java",
+    "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java",
+    "backend/src/main/java/com/citi/put/checks/studio/entity/StudioDispatchLedger.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+    "frontend/src/types/studio/studioScheduling.ts",
+    "frontend/src/services/api/studioSchedulesApi.ts",
+    "frontend/src/services/api/studioSchedulesApi.test.ts",
+    "frontend/src/services/mocks/studio/schedulePreview.ts",
+    "frontend/src/services/mocks/studio/schedulingHandlers.ts",
+    "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+    "frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx",
+    "frontend/src/components/studio/scheduling/StudioScheduleSummary.tsx",
+    "frontend/src/components/studio/scheduling/schedulePresentation.ts",
+    "frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx",
+    "frontend/src/services/mocks/studio/handlers.ts",
+    "frontend/src/components/studio/tests/TestRow.tsx",
+    "frontend/src/components/studio/tests/TestRowMenu.tsx",
+    "frontend/src/components/studio/tests/DeleteTestDialog.tsx",
+    "frontend/src/pages/StudioTestsPage/StudioTestsPage.tsx",
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+    "frontend/src/types/studio/studioTypes.ts",
+    "frontend/src/components/studio/runs/RunRow.tsx",
+    "frontend/src/components/studio/runs/RunDetailsDrawer.tsx",
+    "docs/specs/studio/openapi.yaml",
+    "docs/specs/studio/scheduling/README.md",
+    "docs/specs/studio/scheduling/operations.md",
+    "docs/architecture/ADR-003-studio-test-scheduling.md",
+    "docs/architecture/ADR-002-internal-contract-surface.md",
+    "docs/architecture/studio-execution.md",
+    "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java",
+    "studio-runner/test/run/confinement.test.ts",
+    ".aiox/studio-scheduling-spec-state.json"
+  ],
+  "implementationQA": {
+    "verdict": "CONCERNS",
+    "report": "docs/stories/STUDIO-SCHED-001/implementation/qa-review.md",
+    "gate": "docs/qa/gates/STUDIO-SCHED-001-studio-test-scheduling.yml",
+    "reviewedSourceDigest": "2d38f01546eb1551cf8d33ee198b8f71089b46d8ea521bea3e446e8bb3207756"
+  },
+  "administrativeClosure": {
+    "status": "read_only_no_op",
+    "skill": "/Users/brunobuger/.agents/skills/close-story/SKILL.md",
+    "reason": "Quality gates are not globally green and no waiver exists; no story/epic/backlog closure metadata written",
+    "lifecyclePreserved": "Done"
+  }
+}

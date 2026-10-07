@@ -2,6 +2,7 @@ import { studioInferenceHandlers, resetInferenceMocks, inferenceMockTests } from
 import { http, HttpResponse } from 'msw';
 import { createAuthoringHandlers } from './authoringHandlers';
 import { resetAuthoringMocks } from './authoringState';
+import { createSchedulingHandlers, resetSchedulingMocks } from './schedulingHandlers';
 import {
   CANCELLED_ERROR_CODE,
   defaultConfiguration,
@@ -13,6 +14,13 @@ import {
   type TestRequest,
 } from '@/types/studio/studioTypes';
 import { MOCK_READABLE_CSIS, MOCK_VIDEO_BYTES, mockExecutions, mockTests } from './fixtures';
+import { demoExecutions, demoTests } from './demoFixtures';
+import {
+  EXECUTION_STATUS_FILTERS,
+  TEST_LAST_RUN_FILTERS,
+  isExecutionSort,
+  isTestSort,
+} from '@/types/studio/studioTypes';
 import { compileReviewDrafts, conflictResponse } from './compileFixtures';
 import { executeConflictResponse } from './executionFixtures';
 
@@ -33,8 +41,11 @@ const readable = <T extends { csiId: string | null }>(items: T[]): T[] =>
   items.filter((item) => item.csiId !== null && MOCK_READABLE_CSIS.includes(item.csiId));
 
 function paginate<T>(items: T[], url: URL): Page<T> {
-  const page = Number(url.searchParams.get('page') ?? '0');
-  const size = Math.min(Number(url.searchParams.get('size') ?? '20'), 100);
+  const rawPage = Number(url.searchParams.get('page') ?? '0');
+  const rawSize = Number(url.searchParams.get('size') ?? '20');
+  const page = Number.isInteger(rawPage) && rawPage >= 0 ? rawPage : 0;
+  // The server clamps rather than refuses: `Math.min(size, 100)`.
+  const size = Number.isInteger(rawSize) && rawSize >= 1 ? Math.min(rawSize, 100) : 20;
   const start = page * size;
   return {
     data: items.slice(start, start + size),
@@ -49,22 +60,68 @@ function badRequest(error: string, message: string) {
   return HttpResponse.json({ error, message }, { status: 400 });
 }
 
+/**
+ * Story 10.46 list query emulation. The FE must branch on the `400` status only: the backend's
+ * `error` code for these refusals is not part of the contract, so `INVALID_QUERY` is the mock's.
+ */
+const INVALID_QUERY = 'INVALID_QUERY';
+
+type SortKey<T> = (item: T) => string | number | null;
+
+/**
+ * `field,direction` order with a stable `id` tie-breaker in the same direction (AC-2). Nulls sort
+ * last in both directions, so "never run" and "still running" rows never lead a sorted list.
+ */
+function sortBy<T>(
+  items: T[], key: SortKey<T>, idOf: (item: T) => string, direction: string,
+  /** Order among rows whose key is null, before the id (backend: unfinished runs newest first). */
+  bothNull?: (left: T, right: T) => number,
+): T[] {
+  const sign = direction === 'asc' ? 1 : -1;
+  const compare = (a: string | number, b: string | number) =>
+    typeof a === 'number' && typeof b === 'number'
+      ? a - b
+      : String(a).localeCompare(String(b), 'en', { sensitivity: 'base' });
+  return [...items].sort((left, right) => {
+    const a = key(left);
+    const b = key(right);
+    if (a === null && b !== null) return 1;
+    if (b === null && a !== null) return -1;
+    const primary = a === null || b === null ? 0 : compare(a, b);
+    if (primary !== 0) return sign * primary;
+    const nullOrder = a === null && b === null && bothNull ? bothNull(left, right) : 0;
+    if (nullOrder !== 0) return nullOrder;
+    return sign * (idOf(left) < idOf(right) ? -1 : idOf(left) > idOf(right) ? 1 : 0);
+  });
+}
+
+const instant = (value: string | null): number | null =>
+  value === null ? null : new Date(value).getTime();
+
+const searchTerm = (url: URL): string => (url.searchParams.get('q') ?? '').trim().toLowerCase();
+
 let created: TestDto[] = [];
+/** Soft-deleted test ids: hidden from every read; their runs resolve `testName: null`. */
+const deletedTestIds = new Set<string>();
 let acceptedExecutions: ExecutionSnapshot[] = [];
 /** Principal-scoped idempotency, mirrored from the ledger the server keeps. */
 const idempotency = new Map<string, string>();
 
 export function resetStudioMocks(): void {
+  resetSchedulingMocks();
   resetAuthoringMocks();
   resetInferenceMocks();
   created = [];
+  deletedTestIds.clear();
   acceptedExecutions = [];
   idempotency.clear();
 }
 
 const allTests = (): TestDto[] => {
   const inference = inferenceMockTests();
-  return [...inference, ...created, ...mockTests].filter((test,index,all) => all.findIndex(item => item.id === test.id) === index);
+  return [...inference, ...created, ...mockTests, ...demoTests]
+    .filter((test,index,all) => all.findIndex(item => item.id === test.id) === index)
+    .filter((test) => !deletedTestIds.has(test.id));
 };
 
 /** Mirrors the backend's bounded `GET /tests` projection. */
@@ -89,7 +146,17 @@ const reviewDraft = (id: unknown): TestDto | undefined =>
 function conflict(code: string) {
   return HttpResponse.json(conflictResponse(code), { status: 409 });
 }
-const allExecutions = (): ExecutionSnapshot[] => [...acceptedExecutions, ...mockExecutions];
+const allExecutions = (): ExecutionSnapshot[] => [
+  ...acceptedExecutions,
+  ...mockExecutions,
+  ...demoExecutions,
+];
+
+/** The server's batch name lookup: the live test's name, or `null` once it is deleted. */
+function withTestNames(executions: ExecutionSnapshot[]): ExecutionSnapshot[] {
+  const names = new Map(allTests().map((test) => [test.id, test.name]));
+  return executions.map((execution) => ({ ...execution, testName: names.get(execution.testId) ?? null }));
+}
 
 /**
  * `GET /executions/{id}/video` (story 10.16a, AC-13).
@@ -208,6 +275,7 @@ function serveExecutionVideo(execution: ExecutionSnapshot | undefined, request: 
 }
 
 export const studioHandlers = [
+  ...createSchedulingHandlers({ getTest: id => allTests().find(test => test.id === id) ?? reviewDraft(id), getExecutions: () => allExecutions() }),
   ...createAuthoringHandlers({
     get: id => allTests().find(test => test.id === id) ?? reviewDraft(id),
     put: test => { created = [test, ...created.filter(candidate => candidate.id !== test.id)]; },
@@ -215,12 +283,40 @@ export const studioHandlers = [
   ...studioInferenceHandlers,
   http.get(`${BASE}/tests`, ({ request }) => {
     const url = new URL(request.url);
-    const csiId = url.searchParams.get('csiId');
+    const params = url.searchParams;
+    const csiId = params.get('csiId');
+    const environment = params.get('environment');
+    // Filter values are case-insensitive, as on the backend.
+    const lastRun = params.get('lastRun')?.toUpperCase() ?? null;
+    const sort = params.get('sort') ?? 'updatedAt,desc';
+    if (lastRun && !(TEST_LAST_RUN_FILTERS as readonly string[]).includes(lastRun)) {
+      return badRequest(INVALID_QUERY, `Unsupported lastRun filter: ${lastRun}`);
+    }
+    const normalizedSort = sort.includes(',') ? sort : `${sort},asc`;
+    if (!isTestSort(normalizedSort)) {
+      return badRequest(INVALID_QUERY, `Unsupported sort: ${sort}`);
+    }
+    const term = searchTerm(url);
     let items = readable(allTests());
     if (csiId) {
       // An explicit filter can only narrow the scope, never widen it.
       items = items.filter((test) => test.csiId === csiId);
     }
+    if (environment) items = items.filter((test) => test.environment === environment);
+    if (term) {
+      items = items.filter((test) =>
+        test.name.toLowerCase().includes(term) || (test.description ?? '').toLowerCase().includes(term));
+    }
+    if (lastRun) {
+      items = items.filter((test) =>
+        lastRun === 'NEVER' ? test.lastRunStatus === null : test.lastRunStatus === lastRun);
+    }
+    const [field, direction] = normalizedSort.split(',');
+    const key: SortKey<TestDto> =
+      field === 'name' ? (test) => test.name
+        : field === 'lastRunAt' ? (test) => instant(test.lastRunAt)
+          : (test) => instant(test.updatedAt);
+    items = sortBy(items, key, (test) => test.id, direction);
     return HttpResponse.json(paginate(items.map(forList), url));
   }),
 
@@ -328,6 +424,7 @@ export const studioHandlers = [
 
   http.delete(`${BASE}/tests/:id`, ({ params }) => {
     created = created.filter((candidate) => candidate.id !== params.id);
+    deletedTestIds.add(String(params.id));
     return new HttpResponse(null, { status: 204 });
   }),
 
@@ -418,6 +515,7 @@ export const studioHandlers = [
     }
     const pendingExecution: ExecutionSnapshot = {
         executionId,
+        triggerSource: 'MANUAL',
         testId: test.id,
         csiId: test.csiId,
         revisionId: test.confirmedRevisionId,
@@ -504,9 +602,13 @@ export const studioHandlers = [
       (candidate) => candidate.executionId === params.id,
     );
     if (!execution) {
-      return badRequest('BAD_REQUEST', `Execution not found: ${params.id}`);
+      // An unknown run answers 404 so the standalone drawer says "Run not found" (story 10.46).
+      return HttpResponse.json(
+        { error: 'NOT_FOUND', message: `Execution not found: ${params.id}` },
+        { status: 404 },
+      );
     }
-    return HttpResponse.json(execution);
+    return HttpResponse.json(withTestNames([execution])[0]);
   }),
 
   http.get(`${BASE}/executions/:id/video`, ({ params, request }) =>
@@ -518,11 +620,43 @@ export const studioHandlers = [
 
   http.get(`${BASE}/executions`, ({ request }) => {
     const url = new URL(request.url);
-    const testId = url.searchParams.get('testId');
-    let items = readable(allExecutions());
+    const params = url.searchParams;
+    const testId = params.get('testId');
+    const csiId = params.get('csiId');
+    // Filter values are case-insensitive, as on the backend.
+    const status = params.get('status')?.toUpperCase() ?? null;
+    const sort = params.get('sort') ?? 'acceptedAt,desc';
+    if (status && !(EXECUTION_STATUS_FILTERS as readonly string[]).includes(status)) {
+      return badRequest(INVALID_QUERY, `Unsupported status filter: ${status}`);
+    }
+    const normalizedSort = sort.includes(',') ? sort : `${sort},asc`;
+    if (!isExecutionSort(normalizedSort)) {
+      return badRequest(INVALID_QUERY, `Unsupported sort: ${sort}`);
+    }
+    const term = searchTerm(url);
+    let items = withTestNames(readable(allExecutions()));
     if (testId) {
       items = items.filter((execution) => execution.testId === testId);
     }
+    if (csiId) items = items.filter((execution) => execution.csiId === csiId);
+    if (status) {
+      // CANCELLED is ERROR + errorCode CANCELLED, exactly as `isCancelledOutcome` reads it, and
+      // ERROR then excludes it.
+      const cancelled = (execution: ExecutionSnapshot) =>
+        execution.status === 'ERROR' && execution.errorCode === CANCELLED_ERROR_CODE;
+      items = items.filter((execution) =>
+        status === 'CANCELLED' ? cancelled(execution)
+          : status === 'ERROR' ? execution.status === 'ERROR' && !cancelled(execution)
+            : execution.status === status);
+    }
+    if (term) {
+      items = items.filter((execution) => (execution.testName ?? '').toLowerCase().includes(term));
+    }
+    const [field, direction] = normalizedSort.split(',');
+    const key: SortKey<ExecutionSnapshot> =
+      field === 'durationMs' ? (execution) => execution.durationMs : (execution) => instant(execution.acceptedAt);
+    items = sortBy(items, key, (execution) => execution.executionId, direction,
+      (left, right) => (instant(right.acceptedAt) ?? 0) - (instant(left.acceptedAt) ?? 0));
     return HttpResponse.json(paginate(items, url));
   }),
 ];

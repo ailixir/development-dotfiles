@@ -34,8 +34,12 @@ public final class CompilePins {
    * context once per request, reference names and writable IDs after the static blocks, and repair
    * carrying the rejected proposal. Advanced exactly once for that layout, before any
    * v2/incremental baseline exists (spec &sect;9, OQ-10).
+   *
+   * <p>{@code 2.3.0} (VAL-019b, 2026-10-04): a repair after a parser-rejected envelope carries a
+   * fixed correction instruction and the closed rejection code. Prompt text only; it changes the
+   * compilation fingerprint and nothing else.
    */
-  public static final String PROMPT_VERSION = "2.2.0";
+  public static final String PROMPT_VERSION = "2.3.0";
 
   /**
    * The only artifact schema version this backend can hand to the runner.

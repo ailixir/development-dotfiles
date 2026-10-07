@@ -306,6 +306,22 @@ describe('AC-1 — internal contract', () => {
   );
 
   it.skipIf(!CONTRACT_PRESENT)(
+    'a progress body carrying a step log line with stepIndex conforms to the amended schema (ADR-002 §33)',
+    () => {
+      const document: YamlValue = parseYaml(readFileSync(CONTRACT_PATH, 'utf8'));
+      const progressSchema = requestSchema(document, { path: API_ROUTES[1], method: 'post' });
+      const withStepLine = wire.progressRequests
+        .map((body) => JSON.parse(body) as { logs?: { stepIndex?: unknown }[] })
+        .find((body) => (body.logs ?? []).some((entry) => typeof entry.stepIndex === 'number'));
+      // Not vacuous: the runner really does emit an indexed step line on the wire.
+      expect(withStepLine).toBeDefined();
+      expect(
+        validateAgainstSchema(withStepLine, progressSchema, document, 'progressRequest'),
+      ).toEqual([]);
+    },
+  );
+
+  it.skipIf(!CONTRACT_PRESENT)(
     'the response bodies the runner serves conform to the internal-tagged response schemas',
     () => {
       const document: YamlValue = parseYaml(readFileSync(CONTRACT_PATH, 'utf8'));

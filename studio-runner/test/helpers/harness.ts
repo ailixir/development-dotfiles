@@ -43,7 +43,7 @@ export const RUNTIME_VERSIONS: Readonly<Record<string, unknown>> = {
   playwright: '1.63.0',
   node: 'v22.11.0',
   validatorSchema: '2.0.0',
-  executor: '2.0.0',
+  executor: '2.1.0',
   syntaxReference: SYNTAX_REFERENCE_VERSION,
 };
 

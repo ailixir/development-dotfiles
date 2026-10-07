@@ -1,0 +1,168 @@
+{
+  "storyId": "studio-vault-secrets",
+  "gatheredAt": "2026-09-22T00:00:00Z",
+  "source": "user",
+  "gatheredBy": "@pm",
+  "elicitationVersion": "2.0",
+  "mode": "YOLO — user decisions supplied in the spawn prompt; code findings verified by reading the files cited",
+
+  "functional": [
+    {
+      "id": "FR-1",
+      "description": "Saving a Studio secret writes its value to Vault KV v2 and nowhere else. No secret value is persisted in the application database.",
+      "priority": "P0",
+      "rationale": "V1: SecretsService.create stores the value as plaintext bytes in `secrets.encrypted_value` (SecretsService.java:42, TODO AES-GCM). V2: nothing writes to Vault.",
+      "acceptance": ["AC-V1-1", "AC-V1-2", "AC-V2-1"]
+    },
+    {
+      "id": "FR-2",
+      "description": "The Vault path of a Studio secret is scoped by CSI, environment and test id, plus the secret name. Both the save path and the run-time lookup (acceptance preflight and dispatch resolve) use the same path.",
+      "priority": "P0",
+      "rationale": "V3/V4/V5: pathTemplateOrDefault() = studio/{csiId}/{environment}/{kind}/{referenceName} has no test id; save goes to DB while run reads Vault; DB table has no CSI column.",
+      "acceptance": ["AC-V3-1", "AC-V3-2", "AC-V3-3", "AC-V4-1", "AC-V5-1"]
+    },
+    {
+      "id": "FR-3",
+      "description": "Creating a secret is a test-scoped operation: the caller names the test; the server takes CSI and environment from the persisted test row, never from the request.",
+      "priority": "P0",
+      "rationale": "User decision 4. UITest has id, csiId and environment (environment NOT NULL, UITest.java:67-68).",
+      "acceptance": ["AC-V2-2", "AC-V5-1"]
+    },
+    {
+      "id": "FR-4",
+      "description": "The Studio secret list for a test comes from a Vault KV v2 metadata LIST under that test's path prefix. It returns names only.",
+      "priority": "P0",
+      "rationale": "User decision 1.",
+      "acceptance": ["AC-V4-2"]
+    },
+    {
+      "id": "FR-5",
+      "description": "Drop the `secrets` table with forward Flyway migration V25 (purges plaintext rows) and remove the `com.citi.put.checks.secrets` package (entity, repository, service, controller, DTOs).",
+      "priority": "P0",
+      "rationale": "User decision 1. Table created in V1__init.sql:243, column added by V4__secrets_encrypted_value.sql. Latest migration is V24__studio_reference_policy.sql.",
+      "acceptance": ["AC-V1-1", "AC-V1-3"]
+    },
+    {
+      "id": "FR-6",
+      "description": "Remove the stub endpoint POST /api/v1/internal/resolve-secret.",
+      "priority": "P0",
+      "rationale": "User decision 3. SecretsController.java:41 / SecretsService.java:66 return value \"REDACTED\"; VaultStudioReferenceResolver is the real resolver.",
+      "acceptance": ["AC-V8-1"]
+    },
+    {
+      "id": "FR-7",
+      "description": "With vault provider `none`, list and create answer 503 with a stable error code and never fall back to any other store.",
+      "priority": "P0",
+      "rationale": "User decision 4.",
+      "acceptance": ["AC-V7-2"]
+    },
+    {
+      "id": "FR-8",
+      "description": "Connecting Vault requires only environment variables: provider, address, token file, and optionally namespace, mount, path template. Startup validation covers the new path template and fails closed.",
+      "priority": "P0",
+      "rationale": "User decision 2. application-dev.yml:30 and application-local.yml:79 hard-code `provider: none`, which overrides STUDIO_VAULT_PROVIDER from application.yml:203.",
+      "acceptance": ["AC-V7-1", "AC-V7-3", "AC-V3-2"]
+    },
+    {
+      "id": "FR-9",
+      "description": "The frontend secret picker lists and creates secrets for a specific test and stores the secret name as the variable's secretId.",
+      "priority": "P0",
+      "rationale": "CompileInputs.from (CompileInputs.java:67) declares `secretId` (falling back to the variable name) as the vars.secret reference; VaultStudioReferenceResolver uses that string as the Vault referenceName. Today SecretInput stores the DB UUID returned by POST /secrets, which can never be a Vault key the resolver finds.",
+      "acceptance": ["AC-V4-3", "AC-FE-1", "AC-FE-2", "AC-FE-3"]
+    },
+    {
+      "id": "FR-10",
+      "description": "Update misleading comments/docs that describe the DB store or the REDACTED stub (application.yml:129, application.yml:201-203, ConfiguredSecretUseAuthorization javadoc, ExternallyGatedCriteriaTest skip text, ARCH.md secrets table section).",
+      "priority": "P1",
+      "rationale": "User decision 2.",
+      "acceptance": ["AC-V6-2", "AC-DOC-1"]
+    }
+  ],
+
+  "nonFunctional": [
+    {
+      "id": "NFR-1",
+      "category": "security",
+      "description": "A secret value is never logged, never returned in any response, never persisted outside Vault, and never placed in a URI.",
+      "metric": "Canary value asserted absent from: every response body, captured log output, DB (no table exists), request URI seen by the stub Vault server."
+    },
+    {
+      "id": "NFR-2",
+      "category": "security",
+      "description": "Values are handled as char[] from request deserialization to the Vault write and erased (zero-filled) on every exit path, including errors. The serialized HTTP body buffer is zeroed after send; platform-created transient strings are the named residual, as already stated for Resolved (StudioReferenceResolver.java AC-15 note).",
+      "metric": "Unit test asserts the request's char[] is all '\\0' after both success and Vault-failure paths."
+    },
+    {
+      "id": "NFR-3",
+      "category": "security",
+      "description": "Write requires CSI write permission on the test's CSI; list requires read permission. Absent, soft-deleted and unauthorized tests are indistinguishable (403 STUDIO_ACCESS_DENIED).",
+      "metric": "Controller tests for owner, reader, non-member, absent test id."
+    },
+    {
+      "id": "NFR-4",
+      "category": "reliability",
+      "description": "Vault calls reuse the existing bounded transport: connect timeout, request deadline, max-response-bytes, no redirects, token from mounted file.",
+      "metric": "Stalled-body and oversized-response tests pass for list as they do for read."
+    },
+    {
+      "id": "NFR-5",
+      "category": "reliability",
+      "description": "Vault outage is distinguishable from not-configured and from not-found.",
+      "metric": "503 VAULT_UNAVAILABLE (outage) vs 503 VAULT_NOT_CONFIGURED (provider none) vs empty list / UNKNOWN_REFERENCE (absent)."
+    }
+  ],
+
+  "constraints": [
+    { "id": "CON-1", "type": "business", "description": "Vault provider default stays `none`; dev entitlement config (studio.secrets.entitlements / ConfiguredSecretUseAuthorization) stays.", "impact": "Feature is ready but off. Frontend flag STUDIO_CAPABILITIES.vaultSecrets stays false." },
+    { "id": "CON-2", "type": "business", "description": "Production secret-use policy (V6) is PUT Core's work; platform Vault connection (V7) is the platform's. Neither is designed here.", "impact": "Recorded as externally blocked; no new policy model (Constitution Art. IV)." },
+    { "id": "CON-3", "type": "technical", "description": "Flyway is forward-only; next version is V25.", "impact": "Table drop is irreversible; plaintext rows are purged by design." },
+    { "id": "CON-4", "type": "technical", "description": "Secret names must be valid `<secret ID>` step tokens: [A-Za-z0-9_.-]{1,64} (VariableReferenceValidator.java:38), and path-safe for HashicorpStudioVaultProvider.segment (rejects '/', '\\\\', '.', '..').", "impact": "Name regex enforced on create in backend and frontend." },
+    { "id": "CON-5", "type": "technical", "description": "A secret whose Vault entry carries no valid allowedOrigins cannot be filled on any origin (SecretOrigins, HashicorpStudioVaultProvider.read warning path).", "impact": "Create must require at least one valid origin, stored in the exact comma-separated form the reader parses." },
+    { "id": "CON-6", "type": "technical", "description": "Studio API lives under /api/v1/studio (StudioController @RequestMapping). Test ids are UUIDs.", "impact": "New endpoints are nested under /api/v1/studio/tests/{testId}/secrets." },
+    { "id": "CON-7", "type": "technical", "description": "No code or git changes during spec phases; ~230 unrelated uncommitted changes exist in the working tree.", "impact": "Implementation story must not sweep unrelated files." }
+  ],
+
+  "assumptions": [
+    { "id": "ASM-1", "description": "Vault KV v2 semantics: POST /v1/{mount}/data/{path} with {\"options\":{\"cas\":0},\"data\":{...}} writes only if the key does not exist; LIST (or GET ?list=true) on /v1/{mount}/metadata/{prefix} returns data.keys, folders suffixed '/', and 404 when the prefix is empty. Taken from HashiCorp public API docs, not verified against the platform's Vault version (research phase skipped).", "risk": "medium" },
+    { "id": "ASM-2", "description": "The platform will issue a Vault token whose policy grants create on {mount}/data/studio/* and list on {mount}/metadata/studio/*. Not in this repo's control.", "risk": "high" },
+    { "id": "ASM-3", "description": "No production data in `secrets` needs migration to Vault: the provider is `none` everywhere and the only writer stored plaintext under an M3 TODO. User decision 1 accepts the purge.", "risk": "low" },
+    { "id": "ASM-4", "description": "Check-level UI_TEST variable overrides (wizard uiVariables.secretId) are not consumed by the backend: no Java outside the studio package references UI_TEST or uiTest (grep). The wizard picker therefore only selects among the chosen test's own secrets.", "risk": "medium" }
+  ],
+
+  "domainModel": [
+    { "entity": "UITest", "description": "Studio draft: id (UUID), csiId, environment (NOT NULL).", "relationships": ["owns 0..n StudioSecret via Vault path"] },
+    { "entity": "StudioSecret", "description": "Vault KV v2 entry at {mount}/data/studio/{csiId}/{environment}/{testId}/secrets/{name}; keys: <valueKey> (default `value`), `allowedOrigins` (comma-separated normalized origins). Version = KV v2 metadata.version.", "relationships": ["belongs to UITest (csi, env, test)", "referenced by StudioVariable.secretId == name"] },
+    { "entity": "StudioVariable (secretRef)", "description": "{name, kind: secretRef, secretId}. secretId is the Vault secret name; it becomes the vars.secret reference in the revision's references document.", "relationships": ["declared in ui_test_revisions.references.secrets"] }
+  ],
+
+  "interactions": [
+    { "flow": "Studio page — pick/create secret", "description": "Variables dialog, row type Secret (visible only when vaultSecrets flag is on). Saved test: picker lists names from GET .../secrets; '+ Create' opens dialog (Name, Value, Allowed origins); on 201 the name is selected and the value field cleared. Unsaved test: picker disabled with hint to save first.", "states": ["loading", "empty (no secrets for this test)", "error: VAULT_NOT_CONFIGURED", "error: VAULT_UNAVAILABLE", "error: SECRET_ALREADY_EXISTS", "error: validation"] },
+    { "flow": "Create Check wizard — UI_TEST variables", "description": "Secret option and picker gated by the same vaultSecrets flag; picker scoped to formData.uiTestId; disabled until a test is selected.", "states": ["disabled (no test)", "loading", "error"] }
+  ],
+
+  "edgeCases": [
+    { "scenario": "Provider `none`", "handling": "503 VAULT_NOT_CONFIGURED on list/create; read path unchanged (empty -> UNKNOWN_REFERENCE at acceptance)." },
+    { "scenario": "Vault unreachable / 5xx / 403 / oversize / timeout", "handling": "503 VAULT_UNAVAILABLE; value erased." },
+    { "scenario": "Name already exists under the test", "handling": "409 SECRET_ALREADY_EXISTS; nothing overwritten (cas=0)." },
+    { "scenario": "Test environment changed after secrets were created", "handling": "Secrets under the old environment are not listed or resolved for the new one (path-scoped by design). Author re-creates them." },
+    { "scenario": "Legacy secretId values (DB UUIDs, `vault://studio/pilot-pw` fixtures) on existing drafts", "handling": "Not migrated. At acceptance they resolve to UNKNOWN_REFERENCE (or fail path-safety). Author re-selects." },
+    { "scenario": "Test deleted", "handling": "Vault entries remain (no delete endpoint in scope). See OQ-2." }
+  ],
+
+  "terminology": [
+    { "term": "secret name", "definition": "The Vault key's last path segment; equals the variable's secretId and the `<secret ID>` token.", "synonyms": ["referenceName", "secretId"], "avoid": ["label", "reference_id (DB)"] },
+    { "term": "test-scoped path", "definition": "studio/{csiId}/{environment}/{testId}/{kind}/{referenceName} under the KV v2 mount." }
+  ],
+
+  "externallyBlocked": [
+    { "id": "V6", "description": "Production secret-use permission model", "owner": "PUT Core", "stateInThisSpec": "Dev config entitlements retained unchanged." },
+    { "id": "V7", "description": "Platform Vault connection (address, namespace, token/policy)", "owner": "Platform / ED-02", "stateInThisSpec": "Default `none` retained; env-var-only activation made possible." }
+  ],
+
+  "openQuestions": [
+    { "id": "OQ-1", "question": "Is replacing (rotating) or deleting a test's secret from Studio required? This spec ships create + list only; a mistyped value must be fixed in Vault directly or by creating a new name.", "blocking": false, "assignedTo": "@pm" },
+    { "id": "OQ-2", "question": "Should deleting a test delete its Vault subtree? Not specified by the user.", "blocking": false, "assignedTo": "@architect" },
+    { "id": "OQ-3", "question": "The frozen Studio OpenAPI example (docs/specs/studio/openapi.yaml:202) and MSW fixtures use secretId `vault://studio/pilot-pw`, which is not a path-safe Vault segment. Change the example to a plain name?", "blocking": false, "assignedTo": "@architect" },
+    { "id": "OQ-4", "question": "Should the wizard's check-level secret overrides exist at all, given ASM-4?", "blocking": false, "assignedTo": "@po" }
+  ]
+}

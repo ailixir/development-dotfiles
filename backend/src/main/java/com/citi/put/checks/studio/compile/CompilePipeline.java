@@ -4,7 +4,11 @@ import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.compile.gateway.CompileResponse;
 import com.citi.put.checks.studio.compile.gateway.GatewayErrorCode;
 import com.citi.put.checks.studio.compile.gateway.GatewayProvenance;
+import com.citi.put.checks.studio.compile.gateway.GatewayResponseParser.ProposalRejection;
 import com.citi.put.checks.studio.compile.gateway.LlmGatewayClient;
+import com.citi.put.checks.studio.compile.incremental.CompilationPlanner;
+import com.citi.put.checks.studio.compile.incremental.IncrementalAssembler;
+import com.citi.put.checks.studio.compile.validator.RunnerDiagnostic;
 import com.citi.put.checks.studio.compile.validator.RunnerValidationClient;
 import com.citi.put.checks.studio.compile.validator.ValidationOutcome;
 import com.citi.put.checks.studio.entity.UITest;
@@ -13,14 +17,23 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Asynchronous compile orchestration: begin, prompt, gateway, parse, validate, publish (Story 10.8,
- * AC-2 to AC-20).
+ * Asynchronous compile orchestration: begin, prompt, gateway, parse, assemble, validate, publish
+ * (Story 10.8, AC-2 to AC-20).
+ *
+ * <p>When the gateway client {@linkplain LlmGatewayClient#returnsProposalEnvelope() declares} a
+ * proposal envelope, the executable artifact is assembled here from the ordered source and the
+ * model's per-step {@code code} before the version gate and {@code /v1/validate} (VAL-006). An
+ * {@code UNSUPPORTED} or {@code CLARIFICATION} entry ends the request as {@code NEEDS_REVISION}
+ * with the model's reasons, without a validator call or a repair.
  *
  * <h2>The draft is committed before any compile work begins</h2>
  *
@@ -63,7 +76,8 @@ import org.springframework.stereotype.Service;
  *
  * <p>A gateway or validator failure on a repair call ends the loop with that code and does not
  * silently consume a further attempt. Only an {@code ok: false} verdict — a 200 with a verdict, not
- * a transport failure — spends one.
+ * a transport failure — or an envelope the strict parser rejected (VAL-019b) spends one. A parser
+ * rejection that exhausts the bound ends {@code STALE GATEWAY_PARSE_FAILURE}.
  *
  * <h2>No cache</h2>
  *
@@ -185,6 +199,10 @@ public class CompilePipeline {
       int stepCount = inputs.orderedSource().size();
       String lastDiagnostics = null;
       String lastRejectedProposal = null;
+      // Set when the previous attempt's envelope was rejected by the strict parser (VAL-019b): the
+      // next repair carries only the fixed instruction and this closed code, never model text.
+      ProposalRejection lastEnvelopeRejection = null;
+      Integer lastEnvelopeRejectStep = null;
       com.citi.put.checks.studio.compile.gateway.CompileRequest firstPrompt = null;
 
       for (int attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -198,11 +216,18 @@ public class CompilePipeline {
         // A repair is built from the first attempt's request, so its kind and writable step IDs
         // are frozen: it carries the rejected proposal and the diagnostics, never a wider write
         // set (Story 10.45, FR-10, spec §3.2.6 "Repair").
-        com.citi.put.checks.studio.compile.gateway.CompileRequest prompt =
-            attempt == 1
-                ? assemblePrompt(inputs, contextInputs, request.requestId())
-                : repairPromptAssembler.assemble(
-                    firstPrompt, attempt, lastDiagnostics, lastRejectedProposal);
+        com.citi.put.checks.studio.compile.gateway.CompileRequest prompt;
+        if (attempt == 1) {
+          prompt = assemblePrompt(inputs, contextInputs, request.requestId());
+        } else if (lastEnvelopeRejection != null) {
+          prompt =
+              repairPromptAssembler.assembleAfterRejectedEnvelope(
+                  firstPrompt, attempt, lastEnvelopeRejection, lastEnvelopeRejectStep);
+        } else {
+          prompt =
+              repairPromptAssembler.assemble(
+                  firstPrompt, attempt, lastDiagnostics, lastRejectedProposal);
+        }
         if (attempt == 1) {
           firstPrompt = prompt;
         }
@@ -216,7 +241,17 @@ public class CompilePipeline {
           return;
         }
 
-        CompileResponse response = gatewayClient.propose(prompt);
+        // The request-owned budget, not a fresh per-call one (VAL-007 / C0 §5): each call is capped
+        // at min(request-timeout, remaining), and the executor's deadline timer cancels the live
+        // transport through this same object, so an expired call releases its gateway permit.
+        CompileResponse response;
+        try {
+          response = gatewayClient.propose(prompt, settlement.budget());
+        } catch (CancellationException expired) {
+          // The budget expired before the call started. The deadline timer settles the request.
+          dropLateResult(inputs.testId(), request, "gateway");
+          return;
+        }
         if (!aggregate.charge(response)) {
           settleError(
               settlement,
@@ -226,20 +261,77 @@ public class CompilePipeline {
           return;
         }
         if (!response.isOk()) {
-          // A gateway refusal ends the whole request — on a repair exactly as on the first
+          if (response.rejection() != null) {
+            logRejectedAttempt(request, attempt, response.rejection(), response.rejectStepIndex());
+          }
+          if (response.isRepairableRejection() && attempt < maxAttempts) {
+            // VAL-019b (C0 §4): an envelope the strict parser rejected is model variance, so it
+            // consumes one repair from the same shared bound. Exhaustion falls through below to
+            // STALE GATEWAY_PARSE_FAILURE (user decision D1, 2026-10-04), not NEEDS_REVISION.
+            lastEnvelopeRejection = response.rejection();
+            lastEnvelopeRejectStep = response.rejectStepIndex();
+            lastDiagnostics = null;
+            lastRejectedProposal = null;
+            continue;
+          }
+          // Every other refusal ends the whole request — on a repair exactly as on the first
           // attempt. It does not silently consume a further attempt and then try again: the
-          // condition is a bound firing (GATEWAY_BUSY, a timeout, a transport failure), and
-          // spending the remaining repair budget on it would turn one refusal into three.
+          // condition is a bound firing (GATEWAY_BUSY, a timeout, a transport failure) or a
+          // terminal model answer (an unusable finish reason), and spending the remaining repair
+          // budget on it would turn one refusal into three.
           settleError(settlement, inputs.testId(), request, response.errorCode().name());
           return;
         }
+        lastEnvelopeRejection = null;
+        lastEnvelopeRejectStep = null;
 
-        String artifactJson = response.artifactJson();
+        // A client that declares a proposal envelope returns {stepId,status,code} per writable
+        // step, never an artifact. The server assembles the artifact from the ordered source
+        // (VAL-006): the model supplies only `code`, so `stepIndex` and `originalText` cannot
+        // drift. Always against the first attempt's IDs — a repair's write set is frozen.
+        String proposalJson = response.artifactJson();
+        String artifactJson = proposalJson;
+        if (gatewayClient.returnsProposalEnvelope()) {
+          IncrementalAssembler.Result assembled;
+          List<CompilationPlanner.Step> steps =
+              proposalSteps(firstPrompt.writableStepIds(), inputs.orderedSource());
+          CompilationPlanner.Plan plan =
+              CompilationPlanner.plan(steps, true, false, false, false, null, null);
+          try {
+            assembled = IncrementalAssembler.assemble(steps, plan, null, proposalJson);
+          } catch (IllegalArgumentException malformed) {
+            // Terminal, unlike a parser rejection: ends the request, spends no repair.
+            logRejectedAttempt(request, attempt, ProposalRejection.ASSEMBLY_FAILED, null);
+            settleError(
+                settlement,
+                inputs.testId(),
+                request,
+                GatewayErrorCode.GATEWAY_PARSE_FAILURE.name());
+            return;
+          }
+          if (!assembled.executable()) {
+            // Output contract rule 5: one UNSUPPORTED or CLARIFICATION entry blocks publication.
+            // The model has said it cannot express the step, so neither the validator nor a
+            // repair can change the answer — terminal NEEDS_REVISION with its own reasons.
+            if (!settlement.claim()) {
+              dropLateResult(inputs.testId(), request, "invalid");
+              return;
+            }
+            compileStateService.publishInvalid(
+                inputs.testId(),
+                request,
+                diagnosticsBounder.bound(
+                    rejectionOutcome(steps, assembled.rejections()), stepCount, attempt, false));
+            return;
+          }
+          artifactJson = assembled.artifactJson();
+        }
         if (!isSupportedArtifactVersion(artifactJson)) {
           // Schema validity is not executability, and a repair goes back through this gate rather
           // than around it: a schema-valid `version: 2` document returned by attempt 3 is rejected
           // exactly as it is on attempt 1, is never written as a candidate revision, and is never
           // sent to /v1/validate.
+          logRejectedAttempt(request, attempt, ProposalRejection.ARTIFACT_VERSION, null);
           settleError(
               settlement, inputs.testId(), request, GatewayErrorCode.GATEWAY_PARSE_FAILURE.name());
           return;
@@ -283,7 +375,9 @@ public class CompilePipeline {
         // this turns out to be the last attempt — one bounding path, so the byte cap stays true.
         lastDiagnostics =
             diagnosticsBounder.bound(validation, stepCount, attempt, attempt >= maxAttempts);
-        lastRejectedProposal = artifactJson;
+        // The repair asks for a corrected proposal of the same kind, so it carries what the
+        // model returned (the envelope, when the client declares one), not the assembled artifact.
+        lastRejectedProposal = proposalJson;
       }
 
       // Exhausted repair yields NEEDS_REVISION (§4.7), carrying the FINAL attempt's diagnostics
@@ -529,6 +623,36 @@ public class CompilePipeline {
     usage.put("usageAvailable", gateway != null && gateway.usageAvailable());
   }
 
+  /** Pairs each writable step ID with its source line, in order (FULL mode: one per line). */
+  private static List<CompilationPlanner.Step> proposalSteps(
+      List<UUID> writableStepIds, List<String> orderedSource) {
+    List<CompilationPlanner.Step> steps = new ArrayList<>(writableStepIds.size());
+    for (int index = 0; index < writableStepIds.size(); index++) {
+      String text = index < orderedSource.size() ? orderedSource.get(index) : null;
+      steps.add(new CompilationPlanner.Step(writableStepIds.get(index), text == null ? "" : text));
+    }
+    return steps;
+  }
+
+  /** The model's per-step UNSUPPORTED/CLARIFICATION reasons, as a rejected verdict. */
+  private ValidationOutcome rejectionOutcome(
+      List<CompilationPlanner.Step> steps, List<IncrementalAssembler.Rejection> rejections) {
+    List<UUID> ids = steps.stream().map(CompilationPlanner.Step::id).toList();
+    List<ValidationOutcome.StepVerdict> verdicts = new ArrayList<>(rejections.size());
+    for (IncrementalAssembler.Rejection rejection : rejections) {
+      int stepIndex = ids.indexOf(rejection.stepId());
+      verdicts.add(
+          new ValidationOutcome.StepVerdict(
+              stepIndex,
+              false,
+              List.of(
+                  new RunnerDiagnostic(
+                      rejection.reason(), stepIndex, rejection.message(), null, null))));
+    }
+    return ValidationOutcome.verdict(
+        false, runtimePin.validatorSchemaVersion(), List.of(), verdicts);
+  }
+
   private static boolean isSupportedArtifactVersion(String artifactJson) {
     try {
       JsonNode node = MAPPER.readTree(artifactJson);
@@ -557,6 +681,20 @@ public class CompilePipeline {
     // The bounded, scrubbed code and nothing else: no prompt, no response body, no source text.
     error.put("code", code);
     compileStateService.publishError(testId, request, error.toString());
+  }
+
+  /**
+   * One WARN line per rejected attempt (VAL-019a): the closed reason and 0-based step position
+   * only. The response's reason string can quote the model's output, so it is never logged.
+   */
+  private static void logRejectedAttempt(
+      CompileRequest request, int attempt, ProposalRejection reason, Integer stepIndex) {
+    LOGGER.warn(
+        "studio.compile.attempt_rejected compileRequestId={} attempt={} reason={} stepIndex={}",
+        request.requestId(),
+        attempt,
+        reason,
+        stepIndex);
   }
 
   /**

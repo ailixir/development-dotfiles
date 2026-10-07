@@ -1,0 +1,540 @@
+# Implementation plan — studio-vault-secrets
+# Spec Pipeline phase 6 (Plan). Author: @architect (Aria), YOLO mode, 2026-09-22.
+# Inputs: spec.md rev 2 (APPROVED 4.25), requirements.json, critique.json.
+# Scope: V1–V8 plus the critique fixes (CRIT-1..CRIT-10). Nothing else. Rulings are in spec.md §9.
+
+meta:
+  storyId: studio-vault-secrets
+  specVersion: 2
+  planVersion: 1
+  createdAt: "2026-09-22"
+  createdBy: "@architect"
+  executor: "@dev"
+  status: READY_FOR_STORY   # @sm drafts the story from this plan; @po validates; @dev implements
+  singlePr: true            # spec §8: one PR. The signature change and the contract re-anchor must not be split.
+  branchRule: >
+    Work from a fresh feature branch. CON-7: stage only the files listed in this plan.
+    At planning time `git status --short` showed 2 untracked entries (`.aiox/`, `docs/specs/studio/vault-secrets/`);
+    re-check before staging, and never use `git add -A`.
+
+toolchain:
+  backend:
+    cwd: backend/
+    compileMain: "./gradlew compileJava -q"
+    compileTests: "./gradlew compileTestJava -q"
+    note: >
+      Gradle compiles the whole test source set before any test runs, so no test can run until
+      every caller of the changed signatures compiles (steps P1-P2). Until then each step verifies
+      with a compile only. `*IT` classes use Testcontainers with `disabledWithoutDocker = true`:
+      a run without Docker reports them as SKIPPED, not passed. Docker 27.4.0 was reachable when
+      this plan was written; confirm it before trusting an IT result.
+  frontend:
+    cwd: frontend/
+    lockfile: package-lock.json   # verified: the frontend has no pnpm lockfile
+    runTests: "pnpm exec vitest run <files>"
+    typeCheck: "pnpm exec tsc --noEmit"
+    lint: "pnpm exec eslint <files>"
+    note: >
+      The user's rule is pnpm, and the lockfile is npm's. `pnpm exec` runs the binaries already in
+      node_modules/.bin and neither installs nor writes a lockfile, so it satisfies both. Do NOT run
+      `pnpm install` here: it would create a pnpm lockfile beside package-lock.json.
+  studioRunner:
+    cwd: studio-runner/
+    lockfile: package-lock.json
+    runTests: "pnpm exec vitest run <files>"
+    runDeployment: "pnpm exec vitest run --config vitest.deployment.config.ts <files>"
+    note: "The deployment tier needs `helm` on PATH (present at /opt/homebrew/bin/helm when planned)."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Findings made during planning that the spec did not have. Each was verified in the code.
+# ─────────────────────────────────────────────────────────────────────────────
+planFindings:
+  - id: PF-1
+    severity: HIGH
+    finding: >
+      `studio-runner/test/run/confinement.test.ts:249` pins the SHA-256 of docs/specs/studio/openapi.yaml
+      (`BASE_SHA256 = c6b89138…1088`, which matches the file today, measured with `shasum -a 256`).
+      Any openapi.yaml edit turns it red. ADR-002 §19 says the story that edits the contract re-anchors
+      the pin in the same PR. The spec's file list did not include it.
+    handledIn: C4
+  - id: PF-2
+    severity: MEDIUM
+    finding: >
+      Every Studio route with a `UUID` path variable answers 400 for a malformed id before any handler
+      code runs (`GET /tests/{id}` declares 200,400,401,403 for that reason). Spec §3.3 left 400 out of
+      the GET status set. The contract would then be false for `GET /tests/not-a-uuid/secrets`.
+    handledIn: "OQ-5 ruling R-5.2; C2"
+  - id: PF-3
+    severity: MEDIUM
+    finding: >
+      A Spring `@RequestBody byte[]` defaults to `required = true`, so an empty body is a 400 from
+      argument resolution, before authorization. That breaks spec §3.3's "403 before 400" order. Adding
+      `consumes = application/json` would also add a 415 before authorization, and 415 is not in the
+      declared status set.
+    handledIn: "R-6; B3"
+  - id: PF-4
+    severity: MEDIUM
+    finding: >
+      Spec §3.3 uses two response shapes: list items are `{name}` and the 201 body is
+      `{name, version, allowedOrigins}`. One `StudioSecretDto` cannot serialize both without emitting
+      `"version": null` in the list, and it cannot satisfy one `StudioSecret` schema-parity check.
+    handledIn: "R-5.4; B1, C2, C3"
+  - id: PF-5
+    severity: LOW
+    finding: >
+      (Inference from HashiCorp's docs, not checked against a live Vault.) KV v2 runs an existence
+      check on the data path. With a policy that grants `create` but not `update`, a `cas=0` write to an
+      existing key can come back as 403 permission denied instead of 400. D4 checks metadata only on a
+      400, so that case would read as an outage.
+    handledIn: "R-7; A4"
+  - id: PF-6
+    severity: LOW
+    finding: >
+      `JobBodyLeakTest` and `StudioKillSwitchWiringTest` build `Resolved` directly or use a bare
+      `mock(StudioReferenceResolver.class)` with no stubbing of preflight/resolve (grep). `StudioSecretFixtures`
+      touches only `mayUse`. None of the three needs an edit. The spec listed them as "signature change".
+    handledIn: P3 (verify-only)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Ordered steps. Order matters: P-steps keep main compiling; D1 is atomic; C4 runs after the last
+# openapi.yaml byte is final.
+# ─────────────────────────────────────────────────────────────────────────────
+phases:
+
+  - phase: P0
+    name: Baseline (no edits)
+    steps:
+      - id: P0.1
+        action: >
+          Record the pre-change state so the §13 amendment row can report before and after
+          measurements (ADR-002 §12 "Every amendment is recorded").
+        verify:
+          - cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.StudioContractTest'"
+            expect: "green; 21 declared operations"
+          - cmd: "shasum -a 256 docs/specs/studio/openapi.yaml"
+            expect: "c6b891387d939131f38b68971e51cecccebfa6fd4b3af09ac34a121477171088 (value on 2026-09-22)"
+          - cmd: "cd studio-runner && pnpm exec vitest run test/run/confinement.test.ts"
+            expect: green
+
+  - phase: P1
+    name: Provider seam (main only; verify by compile)
+    steps:
+      - id: A1
+        files:
+          new:
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/VaultScope.java
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/VaultNotConfiguredException.java
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAlreadyExistsException.java
+          modified:
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/StudioVaultProvider.java
+        change:
+          - "`public record VaultScope(String csiId, String environment, String testId)`, plus the factory `static VaultScope of(String csiId, String environment, UUID testId)` that uses `testId.toString()` (canonical lowercase). Acceptance, dispatch and the endpoint all build it from a UUID, so every path renders the same bytes."
+          - "StudioVaultProvider: `read(ReferenceKind, VaultScope, String referenceName)` replaces the 4-arg form (D8). Add `String create(VaultScope scope, String name, char[] value, List<String> origins)` (it returns the KV v2 version) and `List<String> listSecretNames(VaultScope scope)`. Update the javadoc: the scope is (execution CSI, snapshotted environment, test id)."
+          - "Put the D3 name rule on the interface, so one definition serves the endpoint, the resolver and the provider: `Pattern SECRET_NAME = ^[A-Za-z0-9_.-]{1,64}$` and `static boolean isValidSecretName(String n)`, which is also false for `.` and `..`. The grammar deliberately equals VariableReferenceValidator.SECRET_TOKEN's capture group. Leave that validator untouched."
+          - "VaultNotConfiguredException extends RuntimeException. It must NOT extend VaultProviderUnavailableException, because the handlers must stay distinct (NFR-5). SecretAlreadyExistsException extends RuntimeException and carries only the name."
+        verify:
+          - cmd: "cd backend && ./gradlew compileJava -q"
+            expect: "fails only at the implementors and callers that A2-A5/B-P2 fix. Do not run tests yet."
+      - id: A2
+        files:
+          modified:
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/DisabledStudioVaultProvider.java
+        change:
+          - "read(kind, scope, name) → Optional.empty(). The behaviour is unchanged (edge case: none → UNKNOWN_REFERENCE at acceptance)."
+          - "create and listSecretNames → throw new VaultNotConfiguredException(). Nothing else is touched (FR-7, AC-V7-2)."
+      - id: A3
+        files:
+          modified:
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsProperties.java
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/StudioVaultConfiguration.java
+        change:
+          - "pathTemplateOrDefault() → `studio/{csiId}/{environment}/{testId}/{kind}/{referenceName}` (D1, AC-V3-1)."
+          - "validateHashicorp: the required placeholders become {csiId},{environment},{testId},{kind},{referenceName}. The template must end with `/{referenceName}`, and that placeholder must occur exactly once (D2, AC-V3-2). Keep the existing relative-path, https/loopback, userinfo/query and token-file checks as they are."
+          - "Expose `static String listPrefixTemplate(String template)` (the template minus `/{referenceName}`) for A4. A4 uses that one function, so save, list and read cannot drift."
+      - id: A4
+        files:
+          modified:
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/HashicorpStudioVaultProvider.java
+        change:
+          - "Class javadoc: it is no longer 'read-only'. It does bounded KV v2 read, create-only write, and metadata list (FR-10)."
+          - "uri(): take VaultScope and replace {testId} via segment(scope.testId()). Add metadataUri(scope, name) and listUri(scope) (`…/v1/{mount}/metadata/{prefix}?list=true`, D7)."
+          - "read(): the body is unchanged apart from the scope."
+          - "create() (D4, D12): (1) serialize `{\"options\":{\"cas\":0},\"data\":{<valueKey>: value, \"allowedOrigins\": String.join(\",\", origins)}}` with objectMapper.getFactory().createGenerator(buffer, UTF8), writing the value with `writeString(char[],0,len)`. (2) `buffer` is a private ErasableBuffer extends ByteArrayOutputStream that exposes `erase()` (Arrays.fill(buf,(byte)0)) and publishes `ofByteArray(buf, 0, count)` with no toByteArray() copy. Pre-size it to `6*value.length + 16*513 + 256` so growth never leaves an orphaned copy. (3) POST with the same headers and timeout as read. 2xx → parse data.version (bounded read) and return it as a String. 400 or 403 → GET metadataUri (bounded): 200 → SecretAlreadyExistsException, anything else → VaultProviderUnavailableException (PF-5, R-7). Other statuses, IO errors and timeouts → VaultProviderUnavailableException. (4) `finally`: buffer.erase(). The caller-owned value[] is NOT erased here; the service owns it (B2)."
+          - "listSecretNames() (D7): GET listUri with the same headers. 404 → List.of(). 2xx → bounded read, then data.keys. Skip keys ending in '/' and keys failing isValidSecretName. Return them sorted and immutable. Anything else → unavailable. The existing readBounded/deadline covers stalls and oversize (NFR-4)."
+          - "Do not log a value, a URI containing a value, or a Vault response body. The name may be logged."
+      - id: A5
+        name: "Compile gate for P1"
+        verify:
+          - cmd: "cd backend && ./gradlew compileJava -q"
+            expect: "remaining errors are only in VaultStudioReferenceResolver / StudioReferenceResolver callers (fixed in B-P2)"
+
+  - phase: P2
+    name: Resolver seam and its two callers (main)
+    steps:
+      - id: B1r
+        files:
+          modified:
+            - backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioReferenceResolver.java
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java
+        change:
+          - "Signatures (R-3): `preflight(String csiId, String environment, UUID testId, String principal, ReferenceDeclarations)` and the same for `resolve`. Use the UUID type, not String. The dispatch package must not import studio.secrets (secrets already depends on dispatch), so VaultScope is built inside the implementation."
+          - "VaultStudioReferenceResolver: build `VaultScope.of(csiId, environment, testId)` once per call and pass it to every read."
+          - "D9: for each declared secret, before mayUse and before any provider call, a name that fails StudioVaultProvider.isValidSecretName throws UnknownReferenceException(name) in preflight and ReferenceUnavailableException(name) in resolve. Leave variables unchanged: both callers pass secretsOnly(...)."
+          - "Class javadoc: drop 'the global platform secrets table' as current-state wording (FR-10). Keep it as history only."
+      - id: B2r
+        files:
+          modified:
+            - backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java
+            - backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java
+        change:
+          - "StudioAcceptanceService.java:230 → references.preflight(test.getCsiId(), test.getEnvironment(), test.getId(), principal, secretsOnly(declarations)). Use test.getId() (the locked row), not the method argument."
+          - "StudioDispatcher.java:311 → references.resolve(csiId, environment, testId, principal, …). `testId` is already the execution row's `test_id` (line 264)."
+        verify:
+          - cmd: "cd backend && ./gradlew compileJava -q"
+            expect: green
+
+  - phase: P3
+    name: Test doubles and every test caller (the wide, mechanical part)
+    steps:
+      - id: T1
+        files:
+          modified:
+            - backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java
+            - backend/src/test/java/com/citi/put/checks/studio/secrets/SecretUseAuthorizationTest.java
+            - backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatcherIT.java
+            - backend/src/test/java/com/citi/put/checks/studio/dispatch/RevocationRotationIT.java
+            - backend/src/test/java/com/citi/put/checks/studio/compile/CompilePipelineIT.java
+            - backend/src/test/java/com/citi/put/checks/studio/secrets/HashicorpStudioVaultProviderTest.java
+            - backend/src/test/java/com/citi/put/checks/studio/secrets/VaultProviderSelectionTest.java
+          verifyOnly:
+            - backend/src/test/java/com/citi/put/checks/studio/dispatch/JobBodyLeakTest.java
+            - backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java
+            - backend/src/test/java/com/citi/put/checks/studio/secrets/StudioSecretFixtures.java
+        change:
+          - "FakeStudioVaultProvider: key = kind|csi|env|testId|name. rotate/bindOrigins/delete/key take (kind, VaultScope, name). Implement create (a present key → SecretAlreadyExistsException, cas=0 semantics; version \"1\"; origins through SecretOrigins.parse(String.join(\",\", …))), and listSecretNames (SECRET kind under the scope, sorted, D3-filtered). makeUnavailable → both throw VaultProviderUnavailableException. Record every create call's scope/name (never the value) so B5 can assert 'exactly one write'."
+          - "Each IT seeds under `VaultScope.of(CSI_ID, ENVIRONMENT, <the seeded test id>)`. In DispatcherIT and RevocationRotationIT the id is already a local (`withReference`, `testId`). CompilePipelineIT.RecordingVault delegates the new signatures; its canary proof read at :1038 uses the seeded test's scope."
+          - "SecretUseAuthorizationTest: pass a fixed TEST_ID UUID to every preflight/resolve. Add the D9 case: declared `vault://studio/pilot-pw` → UNKNOWN_REFERENCE at preflight and REFERENCE_UNAVAILABLE at resolve, with zero provider reads (spy or counter). Add the cross-test case: a secret under test A, same CSI/env, is UNKNOWN for test B (AC-V4-2 resolver side, AC-V3-3)."
+          - "HashicorpStudioVaultProviderTest (stub HttpServer): existing reads now assert `/v1/secret/data/studio/60406/Production/<uuid>/secrets/LOGIN%20PW`. New cases: create POST path + body `options.cas=0` + value key + allowedOrigins + token header + canary absent from the URI; 400 then metadata 200 → SecretAlreadyExists; 400 then metadata 404 → unavailable; 403 then metadata 200 → SecretAlreadyExists (PF-5); 403 then metadata 403 → unavailable; 5xx and timeout → unavailable; the ErasableBuffer is zero after success and after failure (package-private hook or a captured buffer reference); list `?list=true` on the prefix, 404 → [], folder and invalid keys skipped, sorted, oversize and stalled body bounded (NFR-4)."
+          - "VaultProviderSelectionTest (D2, AC-V3-2, AC-V7-3): reject a template without {testId}; reject one not ending in /{referenceName}; reject one with {referenceName} twice; reject the OLD default string. Accept the new default with only address + token file set. Also read `../helm-chart/put-checks/values.yaml` with SnakeYAML (StudioContractTest already loads YAML the same way) and assert `studioVault.pathTemplate` passes validateHashicorp. That makes the Helm/Java coupling (F17) a Java failure as well as a chart-test failure."
+        verify:
+          - cmd: "cd backend && ./gradlew compileTestJava -q"
+            expect: green
+          - cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.secrets.*'"
+            expect: green
+          - cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.dispatch.DispatcherIT' --tests 'com.citi.put.checks.studio.dispatch.RevocationRotationIT' --tests 'com.citi.put.checks.studio.compile.CompilePipelineIT' --tests 'com.citi.put.checks.studio.dispatch.JobBodyLeakTest' --tests 'com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest'"
+            expect: "green; report any SKIPPED IT as skipped, not passed"
+
+  - phase: D
+    name: Drop the plaintext store (one atomic step; F14, F15)
+    steps:
+      - id: D1
+        atomic: true
+        why: >
+          Once V25 exists, the seed INSERT and SecretSmokeEntity break every fresh dev DB and every
+          @SpringBootTest context (ddl-auto: validate). They must disappear in the same change.
+        files:
+          new:
+            - backend/src/main/resources/db/migration/V25__drop_plaintext_secrets.sql
+            - backend/src/test/java/com/citi/put/checks/studio/secrets/PlaintextSecretsDropMigrationIT.java
+          modified:
+            - backend/src/main/resources/db/seed/R__sample_data.sql
+            - backend/src/test/java/com/citi/put/checks/smoke/SchemaSmokeTest.java
+            - backend/src/test/java/com/citi/put/checks/smoke/IndexCatalogTest.java
+          deleted:
+            - backend/src/main/java/com/citi/put/checks/secrets/SecretsController.java
+            - backend/src/main/java/com/citi/put/checks/secrets/SecretsService.java
+            - backend/src/main/java/com/citi/put/checks/secrets/SecretsRepository.java
+            - backend/src/main/java/com/citi/put/checks/secrets/entity/Secret.java
+            - backend/src/main/java/com/citi/put/checks/secrets/dto/CreateSecretRequest.java
+            - backend/src/main/java/com/citi/put/checks/secrets/dto/SecretDto.java
+            - backend/src/test/java/com/citi/put/checks/smoke/entity/SecretSmokeEntity.java
+        change:
+          - "V25: a header comment (forward-only; purges plaintext rows by user decision 1 / ASM-3; indexes go with the table; no FK references it: V1/V4 are the only migrations that name it, grep-verified) + `DROP TABLE IF EXISTS secrets;`"
+          - "R__sample_data.sql: delete section '10. Secrets' (lines ~315-328), header and INSERT. Do not renumber the other sections. The checksum change re-applies the seed once on existing dev DBs, which is harmless."
+          - "SchemaSmokeTest: remove 'secrets' from the IN list; 14 → 13. IndexCatalogTest: remove idx_secrets_owner and idx_secrets_scope."
+          - "PlaintextSecretsDropMigrationIT (pattern: compile/ReferencePolicyMigrationIT): migrate to target 24, insert one secrets row, migrate to 25, then assert to_regclass('public.secrets') IS NULL and that neither index exists."
+        verify:
+          - cmd: "cd backend && ./gradlew compileJava compileTestJava -q"
+            expect: "green (grep first: `grep -rn 'checks\\.secrets\\.' backend/src` returns nothing)"
+          - cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.secrets.PlaintextSecretsDropMigrationIT' --tests 'com.citi.put.checks.studio.StudioSeedIT' --tests 'com.citi.put.checks.smoke.SchemaSmokeTest' --tests 'com.citi.put.checks.smoke.IndexCatalogTest'"
+            expect: "green (AC-V1-1, F14, F15)"
+
+  - phase: B
+    name: Test-scoped endpoint
+    steps:
+      - id: B1
+        files:
+          new:
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/CreateStudioSecretRequest.java
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretDto.java
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretNameDto.java
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretListDto.java
+        change:
+          - "record CreateStudioSecretRequest(String name, char[] value, List<String> allowedOrigins). Override toString() to omit the value, and override equals/hashCode to exclude it as well (D12)."
+          - "record StudioSecretDto(String name, String version, List<String> allowedOrigins) is the 201 body. record StudioSecretNameDto(String name) is a list item. record StudioSecretListDto(List<StudioSecretNameDto> data) is the 200 body (R-5.4, PF-4)."
+      - id: B2
+        files:
+          new:
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsService.java
+        change:
+          - "@Service @Profile(\"!worker\"). Collaborators: StudioRepository, CsiOwnershipEvaluator, StudioVaultProvider, the platform ObjectMapper. Build `strict = platformMapper.copy().enable(FAIL_ON_UNKNOWN_PROPERTIES)` once (F18). Also disable ALLOW_COERCION_OF_SCALARS for this mapper so a numeric `value` is refused, not coerced."
+          - "Do not annotate with @Transactional: no DB connection is held across the Vault HTTP call. The only DB touch is studioRepository.findById, the same visibility-restricted lookup as StudioService.findTestById:279."
+          - "list(UUID id, Authentication auth): load → absent → StudioAccessDeniedException; canRead(auth, csi) or 403 → provider.listSecretNames(VaultScope.of(test.getCsiId(), test.getEnvironment(), test.getId())) → StudioSecretListDto."
+          - "create(UUID id, byte[] body, Authentication auth), in order (spec §3.3): (1) load + canWrite (403). (2) body null/empty or > 65536 bytes → StudioValidationException(INVALID_SECRET_REQUEST, fixed message) (R-6). (3) strict.readValue(body, CreateStudioSecretRequest.class) straight from bytes, never new String(body). Any JsonProcessingException/IOException → INVALID_SECRET_REQUEST with a fixed message, never e.getMessage(). (4) validate: name → INVALID_SECRET_NAME (D3); value null/empty/>8192 → INVALID_SECRET_VALUE (D6); origins null/empty/>16/any >512 chars, or SecretOrigins.parse(String.join(\",\", list)) empty or a different size (a dropped entry means malformed) → INVALID_SECRET_ORIGINS (D5). (5) provider.create(scope, name, value, normalized). (6) return StudioSecretDto(name, version, normalized)."
+          - "`finally` on every path: Arrays.fill(body,(byte)0); if a request was parsed, Arrays.fill(request.value(),'\\0') (NFR-2). Javadoc names the residual: Jackson's recycled parse buffers and servlet/HttpClient transients (same stance as Resolved, AC-15)."
+          - "Logging: at most INFO `Studio secret created: test={id} name={name} version={v}`. Never the body, the value, or the request object."
+      - id: B3
+        files:
+          new:
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsController.java
+        change:
+          - "@RestController @Profile(\"!worker\") @RequestMapping(\"/api/v1/studio\"). `@GetMapping(\"/tests/{id}/secrets\")` → 200. `@PostMapping(\"/tests/{id}/secrets\")` takes `@PathVariable UUID id, @RequestBody(required = false) byte[] body, Authentication auth` → ResponseEntity.status(201).body(dto), with no Location header."
+          - "Set no `consumes`. That would add a pre-authorization 415 outside the declared status set (PF-3). ByteArrayHttpMessageConverter accepts every media type."
+      - id: B4
+        files:
+          modified:
+            - backend/src/main/java/com/citi/put/checks/config/ChecksExceptionHandler.java
+        change:
+          - "@ExceptionHandler(VaultNotConfiguredException) → 503 {error: VAULT_NOT_CONFIGURED, message: 'Vault is not connected for this environment'}."
+          - "@ExceptionHandler(SecretAlreadyExistsException) → 409 {error: SECRET_ALREADY_EXISTS, message: 'A secret with this name already exists for this test'}."
+          - "The existing VAULT_UNAVAILABLE, StudioValidationException (400 {error,message}) and StudioAccessDenied handlers already cover the rest (F10)."
+      - id: B5
+        files:
+          new:
+            - backend/src/test/java/com/citi/put/checks/studio/secrets/StudioSecretsServiceTest.java
+            - backend/src/test/java/com/citi/put/checks/studio/secrets/StudioSecretsControllerIT.java
+        change:
+          - "[AUTO-DECISION] The spec calls it StudioSecretsControllerTest; the repo convention names Testcontainers/@SpringBootTest classes *IT (StudioAuthorizationIT, StudioSeedIT). Name it StudioSecretsControllerIT. build.gradle.kts includes both patterns in `test`, so nothing is lost."
+          - "ServiceTest (Mockito, real platform-configured ObjectMapper): validation codes for each rule; the body byte[] and value char[] are all-zero after success, validation failure and provider failure; a non-member with a malformed body → 403 and the parser never invoked; DisabledStudioVaultProvider → VaultNotConfiguredException on list and create; an unknown field `label` sent as raw bytes → INVALID_SECRET_REQUEST; the exception message contains neither the canary nor a parser fragment."
+          - "ControllerIT (@SpringBootTest RANDOM_PORT, profile test, header identities as in StudioAuthorizationIT, the context's own ObjectMapper and filters). The provider bean is a @Primary delegating double whose delegate switches between FakeStudioVaultProvider and DisabledStudioVaultProvider (the CompilePipelineIT.RecordingVault pattern), so one context covers both. Cases: owner POST 201 {name,version,allowedOrigins}, no value; exactly one fake create for (csi, env, testId) taken from the row; a body with csiId/environment/label → 400 INVALID_SECRET_REQUEST and zero creates (AC-V5-1); reader GET 200, reader POST 403; stranger and absent UUID → 403 with byte-identical bodies; GET /tests/not-a-uuid/secrets → 400 (PF-2); duplicate → 409; delegate=disabled → 503 VAULT_NOT_CONFIGURED on both; makeUnavailable → 503 VAULT_UNAVAILABLE; list for test B excludes test A's names with the same CSI/env (AC-V4-2); created name → execute test T → acceptance preflight passes → dispatch resolves the same scope (AC-V4-1; reuse StudioExecutionFixtures); canary absent from captured logs (ListAppender as in VaultProviderSelectionTest), from every response body, and from every text/json/bytea column in schema public (scan information_schema.columns) (AC-V1-2); removed routes GET/POST /api/v1/secrets and POST /api/v1/internal/resolve-secret → 404 for an authenticated caller (AC-V1-3, AC-V8-1); an Idempotency-Key replay returns the cached 201 bytes, which contain no value (D13)."
+        verify:
+          - cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.secrets.StudioSecretsServiceTest' --tests 'com.citi.put.checks.studio.secrets.StudioSecretsControllerIT'"
+            expect: green
+
+  - phase: C
+    name: Frozen contract (OQ-5 ruling; Class C; ADR-002 §12, §19)
+    steps:
+      - id: C1
+        files:
+          modified:
+            - docs/architecture/ADR-002-internal-contract-surface.md
+        change:
+          - "Add §32 'Test-scoped Studio secrets (studio-vault-secrets)'. Copy the OQ-5 ruling from spec.md §9 verbatim. Add a §13 row marked `AUTHORIZED, NOT YET LANDED`, owner = this story. When C4 is done, replace the row's prediction with the measured before/after: StudioContractTest counts, the old and new digest, and the frontend/runner contract tests."
+      - id: C2
+        files:
+          modified:
+            - docs/specs/studio/openapi.yaml
+        change:
+          - "New path `/tests/{id}/secrets`, placed after `/tests/{id}/execute`. Parameters `$ref TestId`. Tag `tests`, no new tag. Document-level security."
+          - "get: operationId listTestSecrets. Responses 200 (StudioSecretList), 400 (BadRequest: malformed id), 401 (SessionUnauthorized), 403 (Forbidden), 503 (ErrorResponse; examples vaultNotConfigured / vaultUnavailable)."
+          - "post: operationId createTestSecret. requestBody required, CreateStudioSecretRequest. Responses 201 (StudioSecret, no Location header), 400 (description lists INVALID_SECRET_REQUEST, INVALID_SECRET_NAME, INVALID_SECRET_VALUE, INVALID_SECRET_ORIGINS; states that 403 is decided before any 400 of this list and that INVALID_IDEMPOTENCY_KEY is the platform filter's), 401 SessionUnauthorized, 403 Forbidden, 409 with `x-conflict-codes: [SECRET_ALREADY_EXISTS]` (the document's own rule), 503 as for get. The description says the value is write-only, is never returned, and cannot be rotated or deleted here (OQ-1)."
+          - "components.schemas: StudioSecretName {name} (required, additionalProperties false); StudioSecretList {data: StudioSecretName[]}; StudioSecret {name, version, allowedOrigins} (all required); CreateStudioSecretRequest {name pattern ^[A-Za-z0-9_.-]{1,64}$; value string writeOnly format password minLength 1 maxLength 8192; allowedOrigins string[] minItems 1 maxItems 16 items maxLength 512}, required all three, additionalProperties false (the strict parse really does close it)."
+          - "OQ-3 ruling: line 202, `secretId: vault://studio/pilot-pw` → `secretId: LOGIN_PW`. D9 now refuses that id, and the contract must not show an id the server rejects. The file is re-anchored anyway (C4), so this costs nothing extra."
+        verify:
+          - cmd: "cd studio-runner && pnpm exec vitest run test/contract-integrity.test.ts test/contract.test.ts"
+            expect: "green (every new $ref resolves)"
+      - id: C3
+        files:
+          modified:
+            - backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java
+        change:
+          - "expected.put(\"GET /tests/{id}/secrets\", \"200,400,401,403,503\"); expected.put(\"POST /tests/{id}/secrets\", \"201,400,401,403,409,503\"). Update both hasSize(21) to hasSize(23), and update the drift message to name this ruling (ADR-002 §32) next to story 10.31's."
+          - "theFrozenSchemasAndTheJavaTypesShareTheSameFieldNames: add assertSchemaMatchesRecord for StudioSecret/StudioSecretDto, StudioSecretName/StudioSecretNameDto, StudioSecretList/StudioSecretListDto and CreateStudioSecretRequest/CreateStudioSecretRequest."
+        verify:
+          - cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.StudioContractTest'"
+            expect: "green; 23 operations; springdoc exposes both routes under {id}"
+      - id: C4
+        after: "the last byte of openapi.yaml is final (including any QA-loop edits)"
+        files:
+          modified:
+            - studio-runner/test/run/confinement.test.ts
+        change:
+          - "Re-anchor BASE_SHA256 to the value `shasum -a 256 docs/specs/studio/openapi.yaml` prints, read from the file and not transcribed (the file's own rule). Add one comment line: 'Re-anchored by studio-vault-secrets (ADR-002 §32): two test-scoped secret operations, four schemas, and the pilot-pw example.'"
+        verify:
+          - cmd: "cd studio-runner && pnpm exec vitest run test/run/confinement.test.ts"
+            expect: green
+          - cmd: "cd frontend && pnpm exec vitest run src/services/mocks/studio/studioContract.test.ts"
+            expect: "green (unchanged, and it must stay green)"
+
+  - phase: E
+    name: Configuration and Helm (V7, FR-8, F7, F17)
+    steps:
+      - id: E1
+        files:
+          modified:
+            - backend/src/main/resources/application.yml
+            - backend/src/main/resources/application-dev.yml
+            - backend/src/main/resources/application-local.yml
+        change:
+          - "application-dev.yml:30 and application-local.yml:79: `provider: ${STUDIO_VAULT_PROVIDER:none}`. Update their comments to say activation takes env vars only. Leave application-test.yml untouched (`none`)."
+          - "application.yml:129: drop '`SecretsService` returns REDACTED'. State that the Studio vault adapter is implemented and default-off, and that the ED-02 pilot gate is unchanged. Lines 199-203: the comment names the required env vars (STUDIO_VAULT_PROVIDER=hashicorp, _ADDRESS, _TOKEN_FILE) and the optional ones, and says the default path template includes {testId}. The value stays `${STUDIO_VAULT_PROVIDER:none}` (AC-V7-1, AC-DOC-1)."
+        verify:
+          - cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.secrets.VaultProviderSelectionTest' --tests 'com.citi.put.checks.config.MountedSpringConfigurationTest'"
+            expect: green
+      - id: E2
+        files:
+          modified:
+            - helm-chart/put-checks/values.yaml
+            - studio-runner/test/deployment/integrations.test.ts
+        change:
+          - "values.yaml:643 → pathTemplate: \"studio/{csiId}/{environment}/{testId}/{kind}/{referenceName}\". Keep `provider: none` in every values file (CON-1). Leave values-dev/uat/prod untouched."
+          - "integrations.test.ts: a default-render case asserting that the -api and -worker containers' STUDIO_VAULT_PATH_TEMPLATE contains `{testId}` and ends with `/{referenceName}`, and that STUDIO_VAULT_PROVIDER is `none`."
+        verify:
+          - cmd: "cd studio-runner && pnpm exec vitest run --config vitest.deployment.config.ts test/deployment/integrations.test.ts"
+            expect: "green (needs helm on PATH; a run without helm is not evidence)"
+
+  - phase: F
+    name: Frontend (FR-9, D15, D16, F19)
+    steps:
+      - id: F1
+        files:
+          modified:
+            - frontend/src/services/api/apiClient.ts
+        change:
+          - "Module augmentation `declare module 'axios' { interface AxiosRequestConfig { redactBody?: boolean; __doNotRetry?: boolean } }`. This types the existing retry flag too, with no behaviour change."
+          - "Request debug log: when config.redactBody, log `data: '[redacted]'`."
+          - "Error path: when error.config?.redactBody, attach to the normalized error a copy of the response with config.data removed (`{...error.response, config: {...error.response.config, data: undefined}}`), or no response when there was none. The existing console.error payload (url/method/status/message/response data) has no request body. Keep it."
+      - id: F2
+        files:
+          modified:
+            - frontend/src/services/api/secretsApi.ts
+        change:
+          - "Types: `StudioSecretName {name}`, `StudioSecret {name; version; allowedOrigins: string[]}`. Remove SecretMetadata (label/scope/last4)."
+          - "listSecrets(testId) → apiClient.get(`/studio/tests/${encodeURIComponent(testId)}/secrets`, { __doNotRetry: true })."
+          - "createSecret(testId, {name, value, allowedOrigins}) → apiClient.post(same path, body, { redactBody: true }). No Idempotency-Key (D13)."
+      - id: F3
+        files:
+          modified:
+            - frontend/src/components/studio/SecretInput.tsx
+        change:
+          - "Required prop `testId: string | null`. Making it required lets the compiler enforce D16 at both call sites. Optional prop `disabledHint?: string`, defaulting to 'Save the test before adding secrets'."
+          - "testId null → the select is disabled, the helper text shows the hint, and no request is sent. The list effect depends on [testId] and ignores stale responses (the `active` flag already exists)."
+          - "Dialog fields: Name (validated with /^[A-Za-z0-9_.-]{1,64}$/, not '.'/'..', inline error), Value (password, 1-8192), and Allowed origins (multiline; split on newline or comma, trim, drop empties, 1-16 entries). Create stays disabled until all three are valid. Remove Label, Scope and last4."
+          - "On 201: onChange({id: created.name}), clear the value state, close the dialog, and add the name to the list if missing. Error text is keyed on `(failure as Error).message`, which apiClient sets to `response.data.error`: VAULT_NOT_CONFIGURED → 'Vault is not connected for this environment.'; SECRET_ALREADY_EXISTS → 'A secret with this name already exists for this test.'; VAULT_UNAVAILABLE → 'Vault is temporarily unavailable. Try again.'; INVALID_SECRET_* → 'The secret was rejected: check the name, value and origins.'; anything else → 'Could not create the secret'. Clear the value on error too."
+          - "Update the component doc comment: the stored reference is the Vault secret NAME, which equals `<secret NAME>` in steps."
+      - id: F4
+        files:
+          modified:
+            - frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx
+            - frontend/src/components/checks/wizard/configs/UiTestConfig.tsx
+        change:
+          - "Page (~1251): <SecretInput testId={selectedScenario} …/>. selectedScenario is only ever set from a persisted list entry or null (verified at :196, :356), so an unsaved draft passes null."
+          - "Wizard: gate the 'Secret' MenuItem on STUDIO_CAPABILITIES.vaultSecrets (same import as the page). For an existing kind:'secret' row with the flag off, render `<Alert severity=\"info\">Vault secrets are unavailable in this alpha.</Alert>` instead of the picker. With the flag on, pass testId={formData.uiTestId || null} and disabledHint='Select a Studio test first'."
+      - id: F5
+        files:
+          modified:
+            - frontend/src/components/studio/SecretInput.test.tsx
+            - frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx
+          new:
+            - frontend/src/components/checks/wizard/configs/UiTestConfig.test.tsx
+        change:
+          - "SecretInput.test: local MSW handlers on `*/api/v1/studio/tests/:id/secrets`. Cases: testId null → disabled and zero requests (onUnhandledRequest: 'error'); the list GET hits the test's path; create POSTs exactly {name, value, allowedOrigins[]} with no label/scope; onChange({id: 'LOGIN_PW'}); value input empty after 201; nothing written to localStorage; invalid name keeps Create disabled; 409/503 bodies map to the D15 texts; a 503 list is requested exactly once (no retry)."
+          - "Same file, the canary suite (AC-FE-2, F19): set APP_CONFIG.debugMode = true (the object is mutable; restore in afterEach), spy console.log/console.error/console.warn, create with value 'Canary-7f3a…' on a 201, a 409 and a 503, and assert that no spy argument (JSON.stringify with a circular-safe replacer) contains the canary. The rejected error's response.config.data is undefined."
+          - "pageSaveAndStop.test: remove the dead `GET ${API_BASE}/secrets` handler (the flag is off, so it is never called). The existing 'unavailable in this alpha' assertions stay. Leave the `vault://studio/pilot-pw` fixture row at :251 alone (OQ-3 ruling: fixtures are a follow-up)."
+          - "UiTestConfig.test: mock '@/utils/config/studioCapabilities' with a vi.hoisted mutable object. Flag off: no 'Secret' option, and an existing secret row shows the unavailable Alert and sends no request. Flag on with uiTestId '' → picker disabled with 'Select a Studio test first'. Flag on with uiTestId set → the GET hits /studio/tests/<id>/secrets (AC-FE-3, D16)."
+        verify:
+          - cmd: "cd frontend && pnpm exec vitest run src/components/studio/SecretInput.test.tsx src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx src/components/checks/wizard/configs/UiTestConfig.test.tsx"
+            expect: green
+          - cmd: "cd frontend && pnpm exec tsc --noEmit"
+            expect: green
+          - cmd: "cd frontend && pnpm exec eslint src/services/api/apiClient.ts src/services/api/secretsApi.ts src/components/studio/SecretInput.tsx src/components/studio/SecretInput.test.tsx src/pages/ChecksStudioPage/ChecksStudioPage.tsx src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx src/components/checks/wizard/configs/UiTestConfig.tsx src/components/checks/wizard/configs/UiTestConfig.test.tsx"
+            expect: "no new errors"
+
+  - phase: G
+    name: Docs and comments (FR-10; V6 wording; runbook)
+    steps:
+      - id: G1
+        files:
+          modified:
+            - backend/src/main/java/com/citi/put/checks/studio/secrets/ConfiguredSecretUseAuthorization.java
+            - backend/src/test/java/com/citi/put/checks/studio/secrets/ExternallyGatedCriteriaTest.java
+        change:
+          - "ConfiguredSecretUseAuthorization javadoc (:12-14): stop justifying the class by the dropped table's missing CSI column. Say it is development configuration keyed principal|csi|environment, and that PUT Core owns the production secret-use policy (V6, CON-2). Behaviour does not change (AC-V6-1)."
+          - "ExternallyGatedCriteriaTest @Disabled texts (:28-34 …): replace 'the secrets table' wording with 'the platform Vault token policy / PUT Core policy (ED-02)'. They stay @Disabled (AC-V6-2)."
+        verify:
+          - cmd: "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest' --tests 'com.citi.put.checks.studio.secrets.SecretUseAuthorizationTest'"
+            expect: "green; ExternallyGatedCriteriaTest cases SKIPPED as before"
+      - id: G2
+        files:
+          modified:
+            - docs/runbooks/studio-runner.md
+            - ARCH.md
+        change:
+          - "Runbook :37-40 and :457-463: remove 'the legacy SecretsService … REDACTED/plaintext'. Add a 'Studio secrets in Vault' block: the path `{mount}/data/studio/{csiId}/{environment}/{testId}/secrets/{name}`; the entry keys `<valueKey>` and `allowedOrigins`; create-only (no rotate/delete in Studio; fix in Vault or create a new name); the env vars that activate it; the token policy. The api needs `create`+`read` on `{mount}/data/studio/*` (preflight reads) and `list`+`read` on `{mount}/metadata/studio/*`. The worker needs `read` on `{mount}/data/studio/*` only. If `update` is not granted, a duplicate write is still reported as 409 through the metadata check (PF-5). Also: the max-response-bytes caveat (lowering STUDIO_VAULT_MAX_RESPONSE_BYTES below ~57 KiB can make stored 8192-char secrets unreadable, D6); an environment change hides earlier secrets (D18); a deleted test leaves its subtree behind (OQ-2)."
+          - "ARCH.md §secrets (~470-488): replace the DDL with a short 'Studio secrets live only in Vault KV v2' paragraph (the path template and the two keys) and a note that V25 dropped the table. Tree line :172: `secrets/` → note that it moved under `studio/secrets/` (Vault provider and reference resolution)."
+        verify:
+          - cmd: "grep -n 'SecretsService\\|REDACTED' docs/runbooks/studio-runner.md backend/src/main/resources/application.yml ARCH.md"
+            expect: "no match that describes current behaviour (AC-DOC-1)"
+
+  - phase: Z
+    name: Final gates (once, at the end)
+    steps:
+      - id: Z1
+        verify:
+          - cmd: "grep -rn 'checks\\.secrets\\.\\|/api/v1/secrets\\|resolve-secret\\|SecretSmokeEntity' backend/src frontend/src"
+            expect: "no matches (FR-5, FR-6)"
+          - cmd: "cd backend && ./gradlew check"
+            expect: "green: spotless, checkstyle, spotbugs, jacoco (the 0.70 bundle floor; studio.secrets has no package rule, so B5 carries its coverage)"
+          - cmd: "cd frontend && pnpm exec tsc --noEmit && pnpm exec vitest run src/components/studio src/pages/ChecksStudioPage src/services"
+            expect: green
+          - cmd: "cd studio-runner && pnpm exec vitest run test/run/confinement.test.ts test/contract.test.ts test/contract-integrity.test.ts && pnpm exec vitest run --config vitest.deployment.config.ts test/deployment/integrations.test.ts"
+            expect: green
+        note: >
+          Report each gate's actual result. Any IT reported SKIPPED (no Docker) or any deployment test
+          that did not run (no helm) must be named in the same line as the result.
+
+# ─────────────────────────────────────────────────────────────────────────────
+acceptanceTrace:
+  AC-V1-1: [D1]
+  AC-V1-2: [B5]
+  AC-V1-3: [D1, B5, Z1]
+  AC-V2-1: [A4, B5]
+  AC-V2-2: [A4, T1, B5]
+  AC-V3-1: [A3, T1]
+  AC-V3-2: [A3, T1]
+  AC-V3-3: [B1r, B2r, T1]
+  AC-V4-1: [B5]
+  AC-V4-2: [T1, B5]
+  AC-V4-3: [F3, F5]
+  AC-V5-1: [B2, B5]
+  AC-V6-1: [G1]
+  AC-V6-2: [G1]
+  AC-V7-1: [E1]
+  AC-V7-2: [A2, B5]
+  AC-V7-3: [T1, E2]
+  AC-V8-1: [D1, B5]
+  AC-FE-1: [F3, F5]
+  AC-FE-2: [F1, F3, F5]
+  AC-FE-3: [F4, F5]
+  AC-DOC-1: [E1, G2]
+  OQ-5: [C1, C2, C3, C4]
+
+security:
+  - "NFR-1: the value is refused at four boundaries: the response DTOs (no value field), toString, fixed error messages, and the frontend redactBody. B5 and F5 test each with a canary; review alone is not accepted as proof."
+  - "NFR-2: the stated residual is Jackson's recycled parser and generator buffers plus servlet/HttpClient transients. What is claimed: no retained reference after return. Zeroing of transient platform buffers is not claimed."
+  - "NFR-3: 403 comes before any 400/409/503 because the body is parsed after authorization. The one earlier-than-authz 400 is a malformed UUID path variable, which answers identically for every caller and discloses nothing (the same stance as confirmCompile's @Valid note)."
+  - "Existing finding, not fixed here: cookie-authenticated mutations have no CSRF control (runbook §10). This story adds one more such mutation, and this one writes to Vault. Keep it visible in the PR description."
+  - "Inbound body size: the post-authz 64 KiB cap limits parsing, but Spring has already buffered the body. That matches every other public Studio JSON route; there is no global request-size limit in this service (grep)."
+
+tradeOffs:
+  - decision: "One PR"
+    for: "The resolver signature, the V25 drop, the contract count and the digest pin are mutually dependent. Splitting them leaves main red or the contract lying."
+    against: "Large review surface (~45 files)."
+    mitigation: "Phase order above; each phase has its own narrow gate."
+  - decision: "Name rule on the StudioVaultProvider interface, not a new utility class"
+    for: "One definition shared by the endpoint, the resolver and the provider; no new file."
+    against: "A static on an SPI is slightly unusual."
+  - decision: "Separate list-item and create DTOs (R-5.4)"
+    for: "Wire shapes stay exactly as §3.3 says, and schema parity holds."
+    against: "Three small records instead of one."
+  - decision: "Treat 403 on create as 'check metadata' (R-7)"
+    for: "Works with a create-only token policy. A bad token still reads as unavailable, because the metadata read also returns 403."
+    against: "One extra round trip on a genuine permission failure."
+
+outOfScope:   # recorded as follow-ups, not built (spawn instruction; spec §1.2)
+  - "OQ-1 rotate/replace/delete a secret from Studio → @pm."
+  - "OQ-2 delete the Vault subtree when a test is deleted → follow-up; see the ruling in spec §9."
+  - "OQ-3 MSW fixtures (fixtures.ts:62, compileFixtures.ts:90, pageSaveAndStop.test.tsx:251) and compileStates.test.tsx:301: unchanged."
+  - "OQ-4 wizard check-level secret overrides → @po. D16's gate is applied and nothing else."
+  - "Turning STUDIO_CAPABILITIES.vaultSecrets on (CON-1); production secret-use policy (V6); platform Vault connection (V7)."
+  - "docs/stories/10.43-…/integration-design.md:59 quotes the old template. It is a historical story record; leave it."

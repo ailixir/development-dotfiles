@@ -1,0 +1,141 @@
+{
+  "workflowId": "spec-pipeline",
+  "instanceId": "STUDIO-CODE-001-editable-versioned-source",
+  "startedAt": "2026-10-05T02:34:01.304678+00:00",
+  "status": "discarded",
+  "scope": "Analysis and reviewable proposal only; no application code changes",
+  "executionMode": "AIOX tasks executed through real Codex expert subagents; workflow YAML remains unchanged",
+  "preflight": {
+    "outputWritable": true,
+    "existingSpec": false,
+    "agentConfigurations": [
+      "pm",
+      "architect",
+      "analyst",
+      "qa"
+    ],
+    "allAgentsHaveSpecPipeline": true
+  },
+  "source": {
+    "prd": "PRD.md",
+    "userExtension": "Editable Code tab and source download; evaluate execution versioning"
+  },
+  "elicitation": {
+    "optionalScopeQuestionAsked": true,
+    "response": null,
+    "defaultRecommendation": "Bounded Studio source editing; arbitrary Playwright execution evaluated as separate option",
+    "defaultUsedForProposal": true
+  },
+  "phases": {
+    "gather": "completed",
+    "assess": "completed",
+    "research": "completed",
+    "spec": "completed",
+    "critique_1": "completed",
+    "revise": "completed",
+    "critique_2": "completed",
+    "plan": "completed"
+  },
+  "experts": {
+    "pm": "/root/product_spec",
+    "ux": "/root/ux_analysis",
+    "analyst": "/root/dependency_research",
+    "architect": "/root/architecture",
+    "data-engineer": "/root/data_versioning",
+    "qa": "/root/qa_critique"
+  },
+  "validation": {
+    "taskJsonSchemas": "PASS (AJV + date formats)",
+    "implementationYamlSchema": "PASS",
+    "requirementTraceability": "16/16",
+    "finalReviewedSpecHash": "PASS",
+    "planDependencyIds": "PASS",
+    "documentationWhitespace": "PASS",
+    "runtimeTests": "Not run; analysis/proposal only"
+  },
+  "findings": [
+    "Current PRD specifies review and exact confirmation; user request extends scope to edit and source download",
+    "Current working tree auto-accepts compiled revisions, contrary to current PRD explicit confirmation",
+    "Runner executes validated bounded typed operations rather than arbitrary TypeScript"
+  ],
+  "supplementalReviews": {
+    "ux": "completed",
+    "dataVersioning": "completed"
+  },
+  "complexity": {
+    "result": "COMPLEX",
+    "totalScore": 19
+  },
+  "firstCritique": {
+    "verdict": "NEEDS_REVISION",
+    "score": 4.6,
+    "highIssues": 0,
+    "mediumIssues": 1
+  },
+  "specVersion": 2,
+  "finalCritique": {
+    "verdict": "APPROVED",
+    "score": 4.85,
+    "specVersion": 2,
+    "openIssues": 0,
+    "approvalScope": "specification quality only"
+  },
+  "completedAt": "2026-10-05T02:56:17.917599+00:00",
+  "plan": {
+    "phases": 6,
+    "subtasks": 41,
+    "status": "pending/not executed",
+    "reviewGate": "Proposed plan; implementation and feature adoption not authorized by this pipeline request"
+  },
+  "outputs": [
+    "plan/implementation.yaml",
+    "spec/architecture-proposal.md",
+    "spec/complexity.json",
+    "spec/critique-1.json",
+    "spec/critique-2.json",
+    "spec/critique.json",
+    "spec/data-versioning-review.md",
+    "spec/pipeline-state.json",
+    "spec/plan.json",
+    "spec/qa-review.md",
+    "spec/requirements.json",
+    "spec/research-notes.md",
+    "spec/research.json",
+    "spec/spec.md",
+    "spec/ux-analysis.md",
+    "spec/validation-report.json"
+  ],
+  "artifactHashes": {
+    "plan/implementation.yaml": "e5e294410a42c69d58238d9ee0cc77c4ab6e54bed340e01b35fa85f303d36132",
+    "spec/architecture-proposal.md": "a26e6e97c746d7a69f9af5f81258ccc2fee82aef207d30cbae234576cb35afa6",
+    "spec/complexity.json": "5a63f3ad9655e4c4d2f0873560253678611f73da8fb354b44a0b239d4e96362d",
+    "spec/critique-1.json": "17475da34f221039a223c63c687b0118f7179a95fab6fcd0aa57929a38529795",
+    "spec/critique-2.json": "fb9787225d0c44d2970555dfcc53dbbe4af32a5b44c99fc95b6161efee4ff3d0",
+    "spec/critique.json": "fb9787225d0c44d2970555dfcc53dbbe4af32a5b44c99fc95b6161efee4ff3d0",
+    "spec/data-versioning-review.md": "e02933df772130055d8b37cda762bf351d86651592623b84b32b4ad40b696e93",
+    "spec/plan.json": "c33a653251f5b31a3328ae02f84e9bc646a955744592d0fd4147e6424b326efe",
+    "spec/qa-review.md": "7fe41c225712d8af906400664f637e217088d486f256972b6f21e8f9eba7876e",
+    "spec/requirements.json": "f175971d830d3754cf67dffea988b6bc42be79dd4afd3fca1d1267dadf2b132c",
+    "spec/research-notes.md": "88c3886523440ba0618db6c6c2531cf75587671db033fbb24bbe353d7c0e5e20",
+    "spec/research.json": "8d2ca794f41ae4fe1167e07e6654b8d9d6178afab12ba02591eea004e1901513",
+    "spec/spec.md": "bf320dd1b4f8b4ca24fa509b73511f4cdd5e37e84d5f9108325ba17b24c72446",
+    "spec/ux-analysis.md": "aa3879cc9a57f57aefe5c559b02d3a44ce4ba6619782d9c6e3b7dff2a605c8a7",
+    "spec/validation-report.json": "ec13b6ec2ccc295f313ce9f280ed0a99dc758a518eea951202e6115266f2b337"
+  },
+  "scopeRefinement": {
+    "artifact": "scope-refinement.json",
+    "activeSourceDownload": false,
+    "activeEditing": "Specific existing code step",
+    "previousPipelineResult": "Completed historical broader proposal; original QA review preserved",
+    "currentAssessment": "step-edit-effort-assessment.md",
+    "status": "discarded",
+    "estimateEngineerDays": "5\u20139 provisional"
+  },
+  "discardedAt": "2026-10-05T03:05:01.190127+00:00",
+  "disposition": {
+    "reason": "User explicitly discarded the idea",
+    "activeScope": "None",
+    "implementationAuthorized": false,
+    "historicalAnalysisRetained": true
+  }
+}

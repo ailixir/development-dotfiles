@@ -1,0 +1,869 @@
+{
+  "storyId": "studio-secrets-disclaimer",
+  "gatheredAt": "2026-10-05T00:00:00Z",
+  "source": "user",
+  "gatheredBy": "@pm",
+  "elicitationVersion": "2.0",
+  "mode": "autonomous (YOLO). No interactive elicitation was possible; questions that would normally go to the user are recorded as openQuestions with a proposed default.",
+  "userRequest": "analyze the current ui studio implementation and think how can we add a disclaimer for secrets, to prevent users to add their own credentials (they can add on their own risk)",
+  "interpretation": "Checks Studio authors can supply a credential so a UI test can log in. Show a disclaimer that discourages personal credentials (the author's own SSO/SOE login) and points authors to service or functional accounts. An author who goes ahead anyway gives an explicit acknowledgment that they do so at their own risk.",
+  "findings": [
+    {
+      "id": "F1",
+      "summary": "The Vault secret create dialog is the only purpose-built credential entry surface. It has Name, a password-type Value with helper text 'Stored in Vault only. It is never shown again.', and Allowed origins. It shows no ownership or personal-credential guidance.",
+      "evidence": [
+        "frontend/src/components/studio/SecretInput.tsx:147-190",
+        "frontend/src/components/studio/SecretInput.tsx:164-173"
+      ]
+    },
+    {
+      "id": "F2",
+      "summary": "The Vault secrets UI is switched off in this alpha (STUDIO_CAPABILITIES.vaultSecrets = false). The 'Secret' type option and SecretInput are gated on page and wizard. With the flag off, an info Alert says 'Vault secrets are unavailable in this alpha.'",
+      "evidence": [
+        "frontend/src/utils/config/studioCapabilities.ts:2-4",
+        "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:1280-1302",
+        "frontend/src/components/checks/wizard/configs/UiTestConfig.tsx:132-150"
+      ]
+    },
+    {
+      "id": "F3",
+      "summary": "With the flag off, a 'Plain' variable is the only reachable way to give a test a password. Its value field is an unmasked TextField with no warning. Plain values are saved with the test in the DB (variables JSON) and feed the authoring revision identity.",
+      "evidence": [
+        "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:1286-1292",
+        "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:1247-1249",
+        "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:866",
+        "backend/src/main/java/com/citi/put/checks/studio/StudioService.java:555,868-874"
+      ]
+    },
+    {
+      "id": "F4",
+      "summary": "The Create Check wizard's UI_TEST variables table also has an unmasked plain 'Value' field. The wizard autosaves the whole formData, uiVariables included, to localStorage key 'checks:create:draft'. A typed password therefore persists in browser storage until the check is created.",
+      "evidence": [
+        "frontend/src/components/checks/wizard/configs/UiTestConfig.tsx:152-158",
+        "frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx:134-145,256"
+      ]
+    },
+    {
+      "id": "F5",
+      "summary": "An author can type a credential straight into a plain-English step through the 'Add new test step...' input. The server-side CredentialPatternScreen rejects only known token shapes: private key, AWS, Google, GitHub, Slack, JWT, basic-auth-in-URL and 'password=' assignments. It runs only at compile time and only on steps (orderedSource), not on plain variable values. Its own javadoc says an ordinary-word password passes.",
+      "evidence": [
+        "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:1045",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CredentialPatternScreen.java:15-27,56-76,87-105",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java:169",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java:149"
+      ]
+    },
+    {
+      "id": "F6",
+      "summary": "The frontend already maps INLINE_CREDENTIAL to user-facing text (save errors and conflict narratives). This is an existing reactive surface that a disclaimer can reuse.",
+      "evidence": [
+        "frontend/src/pages/ChecksStudioPage/saveErrorMessage.ts:16",
+        "frontend/src/components/studio/review/conflictNarratives.ts:57"
+      ]
+    },
+    {
+      "id": "F7",
+      "summary": "The Quick Start 'Daily sign-on check' template is built around logging in as a 'real user', with USERNAME (plain) and PASSWORD (secret). The alpha hides templates that need secrets (PRODUCTION_ALPHA_TEMPLATES). Once the flag is on, this template becomes the most likely way an author ends up entering a personal login.",
+      "evidence": [
+        "frontend/src/components/studio/templates/quickStartTemplates.ts:50-66",
+        "frontend/src/components/studio/templates/quickStartTemplates.ts:98-102"
+      ]
+    },
+    {
+      "id": "F8",
+      "summary": "The backend StudioSecretsService (Vault KV v2, test-scoped, create-only) logs 'Studio secret created: test, name, version'. It does not log the principal and records no acknowledgment. The create body is parsed strictly with FAIL_ON_UNKNOWN_PROPERTIES, so adding an acknowledgment field to the request is a contract change and needs a backend change too.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsService.java:128,138,157",
+        "docs/specs/studio/vault-secrets/spec.md §3.2 D11, D12"
+      ]
+    },
+    {
+      "id": "F9",
+      "summary": "The legacy DB-plaintext `checks/secrets/` package is deleted in the working tree. Vault-only `studio/secrets/*` (StudioSecretsController/Service, HashicorpStudioVaultProvider, VaultScope) replaced it, per the studio-vault-secrets spec. The provider defaults to `none`.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/secrets/",
+        "docs/specs/studio/vault-secrets/spec.md §1, §5.3"
+      ]
+    },
+    {
+      "id": "F10",
+      "summary": "Existing policy text is stricter than the user's request. PRD.md:119 says 'User-pasted credentials are prohibited; use vault references.' BRD:104 says 'inline credentials are prohibited.' Neither distinguishes personal credentials from functional ones, and neither mentions 'own risk'.",
+      "evidence": [
+        "PRD.md:77,119,205",
+        "docs/brd/checks-ui-studio.brd.md:104"
+      ]
+    },
+    {
+      "id": "F11",
+      "summary": "Run video records the target application. PRD.md:119 notes that video can contain sensitive target-page content. A personal login used in a test therefore exposes the author's identity and session-visible data in evidence that other CSI members can watch.",
+      "evidence": [
+        "PRD.md:119"
+      ]
+    },
+    {
+      "id": "F12",
+      "summary": "The onboarding coach describes Save as keeping 'secure secret references' but gives no credential guidance. The STUDIO-CODE-001 manual code editor is spec-only: no editor component exists in frontend/src. Its spec says manual code goes through the same credential checks as generated code.",
+      "evidence": [
+        "frontend/src/components/studio/OnboardingCoach.tsx:16-17",
+        "docs/stories/STUDIO-CODE-001-editable-versioned-source/spec/architecture-proposal.md:53,71"
+      ]
+    },
+    {
+      "id": "F13",
+      "summary": "The Studio page saves through the v1 body (TestRequest, no authoringSchemaVersion) with PUT /studio/tests/{id}. Variables are sent as {name, kind, value|secretId}.",
+      "evidence": [
+        "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:581-608",
+        "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:118-127",
+        "backend/src/main/java/com/citi/put/checks/studio/StudioController.java:98-107"
+      ]
+    },
+    {
+      "id": "F14",
+      "summary": "The v1 body is read by UITestRequest.LegacyDeserializer, which reads named paths only, so an unknown top-level field is silently ignored today. The v2 path (StudioAuthoringMapper.read) rejects any field outside its FIELDS allow-list with 400 UNSUPPORTED_FIELD. Per-variable unknown fields are dropped by LegacyStudioAdapter.variableFromNode.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/dto/UITestRequest.java:105-146",
+        "backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringMapper.java:17-29,61-68",
+        "backend/src/main/java/com/citi/put/checks/studio/dto/LegacyStudioAdapter.java:124-144"
+      ]
+    },
+    {
+      "id": "F15",
+      "summary": "Persisted variables are the serialized StudioVariable list. ConfigurationChangeClassifier compares StudioVariable list equality, so any new field inside a variable would count as a configuration change (configurationRevision bump, authoring snapshot and scope review cleared). Plain values also feed AuthoringRevisionIdentity.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/compile/ConfigurationChangeClassifier.java:44-58",
+        "backend/src/main/java/com/citi/put/checks/studio/StudioService.java:555,568-581,867-874"
+      ]
+    },
+    {
+      "id": "F16",
+      "summary": "updateAuthoringDraft rebuilds a UITestRequest field by field (metadataOnly). A new request component is dropped on the v2 update path unless it is passed through there.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/StudioService.java:336-352"
+      ]
+    },
+    {
+      "id": "F17",
+      "summary": "openapi TestRequest is pinned to UITestRequest by StudioContractTest (property-name parity). ADR-002 §34 already ruled that new save-time 400 codes on public routes are Class C.",
+      "evidence": [
+        "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java:443",
+        "docs/specs/studio/openapi.yaml:2906-2930",
+        "docs/architecture/ADR-002-internal-contract-surface.md §34 (:2906)"
+      ]
+    },
+    {
+      "id": "F18",
+      "summary": "The wizard sends UI_TEST variables as configuration.uiTest.variables (a name-keyed map) on the Checks API. The backend CheckConfiguration sealed type has only HTTP, TCP and SPLUNK subtypes, so no server contract for UI_TEST check configuration exists today; the wizard path is MSW-backed only.",
+      "evidence": [
+        "frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx:211",
+        "backend/src/main/java/com/citi/put/checks/checks/model/CheckConfiguration.java:6-14"
+      ]
+    },
+    {
+      "id": "F19",
+      "summary": "Studio page variable names are upper-cased as typed (so camelCase is lost: svcUser becomes SVCUSER) and the name placeholder is 'USERNAME'. Wizard names are fixed once added and prefilled from the selected Studio test's variables.",
+      "evidence": [
+        "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:1266-1270",
+        "frontend/src/components/checks/wizard/configs/UiTestConfig.tsx:118-122",
+        "frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx:103-125"
+      ]
+    }
+  ],
+  "functional": [
+    {
+      "id": "FR-1",
+      "description": "The Create Secret dialog shows the identity-name warning (FR-11 copy) only while the secret Name matches the shared matcher (FR-10). It steers to a CSI-owned service/functional ID. No disclaimer is shown for a non-matching name.",
+      "priority": "P0",
+      "rationale": "F1, F11. This is the one surface built for credential entry, and it currently gives no ownership guidance.",
+      "acceptance": [
+        "AC-1: Given the Create Secret dialog, When Name is APP_LOGIN, Then the warning is visible and not dismissible; When Name is DB_PASSWORD, Then no warning is shown."
+      ],
+      "status": "MODIFIED (iteration 3)",
+      "trace": [
+        "PO-0",
+        "PO-1",
+        "PO-3"
+      ]
+    },
+    {
+      "id": "FR-2",
+      "description": "While the Name matches, Create requires the unchecked-by-default checkbox 'I understand this is at my own risk'. Create is disabled until ticked, with a visible reason. The tick resets when the dialog opens, after a failed create, and whenever Name changes.",
+      "priority": "P0",
+      "rationale": "This is the 'they can add on their own risk' half of the request. The author makes a deliberate choice instead of passively seeing text. Pattern: SecretInput canCreate gating, SecretInput.tsx:89,188.",
+      "acceptance": [
+        "AC-2: matching name and unchecked box -> Create disabled and reason visible. AC-3: tick then change Name -> box unchecked again."
+      ],
+      "status": "MODIFIED (iteration 3)",
+      "trace": [
+        "PO-1",
+        "PO-3"
+      ]
+    },
+    {
+      "id": "FR-3",
+      "description": "A plain variable value field on the Studio page and in the wizard shows inline guidance not to put passwords or personal credentials in plain variables. It explains that plain values are saved unencrypted with the test, and, once vaultSecrets is enabled, it points to the Secret type.",
+      "priority": "P0",
+      "rationale": "F3, F4. While the alpha flag is off, plain variables are the real path by which credentials get stored. A disclaimer only on SecretInput would cover a surface nobody can reach today.",
+      "acceptance": [
+        "AC-4: Given the Variables dialog or wizard variables table, Then the guidance is visible and is the same text in both places (single source)."
+      ],
+      "status": "SUPERSEDED (iteration 3)",
+      "supersededBy": "FR-11",
+      "supersededReason": "PO-0: no always-on generic disclaimer; disclaimer is name-triggered. PO-2: password names do not trigger."
+    },
+    {
+      "id": "FR-4",
+      "description": "When a plain variable's name or the step that references it suggests a credential (name matches PASSWORD|PASSWD|PWD|PIN|TOKEN|SECRET|API_KEY|CREDENTIAL, case-insensitive, or the referencing step targets a field labelled password), the row shows a warning. Saving still works; it is not blocked.",
+      "priority": "P1",
+      "rationale": "F3, F5. CredentialPatternScreen never inspects plain values, and an ordinary-word password passes it. A name-based hint costs little and has no false-blocking risk. Detection is advisory only (see CON-4).",
+      "acceptance": [
+        "AC-5: Given a plain variable named PASSWORD, Then a warning is shown on that row and Save remains enabled."
+      ],
+      "status": "SUPERSEDED (iteration 3)",
+      "supersededBy": "FR-10",
+      "supersededReason": "PO-0: no always-on generic disclaimer; disclaimer is name-triggered. PO-2: password names do not trigger."
+    },
+    {
+      "id": "FR-5",
+      "description": "The INLINE_CREDENTIAL error message shown on save/compile adds the same personal-credential guidance and the service-account recommendation, next to the existing 'use a vault reference' text.",
+      "priority": "P1",
+      "rationale": "F5, F6. Reuses the existing reactive surface. The backend LIMITATION text must stay verbatim (CredentialScreenHonestyTest).",
+      "acceptance": [
+        "AC-6: Given a compile is refused INLINE_CREDENTIAL, Then the shown message includes the guidance and does not claim the text is otherwise secret-free."
+      ],
+      "status": "SUPERSEDED (iteration 3)",
+      "supersededBy": null,
+      "supersededReason": "PO-0: the disclaimer is not for inline credentials. INLINE_CREDENTIAL messages stay as they are."
+    },
+    {
+      "id": "FR-6",
+      "description": "The Variables dialog intro text and the alpha caption under the environment selector state the credential policy in one sentence, and link or point to the full disclaimer.",
+      "priority": "P2",
+      "rationale": "F3. ChecksStudioPage.tsx:866 and :1247-1249 already explain where variables are stored; this adds the policy at first contact.",
+      "acceptance": [
+        "AC-7: The caption and dialog intro contain the policy sentence."
+      ],
+      "status": "SUPERSEDED (iteration 3)",
+      "supersededBy": "FR-11",
+      "supersededReason": "PO-0: no always-on generic policy sentence."
+    },
+    {
+      "id": "FR-7",
+      "description": "When the 'Daily sign-on check' template (or any template declaring a secret-type variable) is applied, a one-time notice says the sign-on must use a service/functional account, not the author's own login.",
+      "priority": "P2",
+      "rationale": "F7. The template is currently filtered out in the alpha, so this matters only once vaultSecrets is enabled.",
+      "acceptance": [
+        "AC-8: Given vaultSecrets is on and the sign-on template is applied, Then the notice is shown."
+      ],
+      "status": "SUPERSEDED (iteration 3)",
+      "supersededBy": "FR-11",
+      "supersededReason": "PO-0: no template-level notice. A template that declares an identity-named plain variable (e.g. USERNAME in the sign-on template) triggers FR-11 on that row."
+    },
+    {
+      "id": "FR-8",
+      "description": "Every acknowledged identity name is recorded server-side as one audit line: principal, csiId, environment, testId, surface, name, matchedToken, disclaimerId, disclaimerVersion, disclaimerSha256 (server-looked-up copy hash), matcherVersion, operation, serverTimestamp. Never the value. Vault path: on successful create-secret. Plain variables: after the save transaction commits (FR-14).",
+      "priority": "P1",
+      "rationale": "F8. 'Own risk' carries little weight if nothing records who accepted it. Today the create log line has no principal.",
+      "acceptance": [
+        "AC-9: successful create/save with a canary value -> one audit line per acknowledged name with every field above and no canary anywhere in logs.",
+        "AC-11 (Vault): provider none, matching name, no acknowledgedDisclaimerVersion -> 400 SECRET_ACK_REQUIRED (was 503); non-matching name without the field -> unchanged 503.",
+        "AC-12 (Vault): an unknown body field -> 400 INVALID_SECRET_REQUEST whose message and openapi example name all four fields."
+      ],
+      "status": "MODIFIED (iteration 3)",
+      "trace": [
+        "PO-4"
+      ]
+    },
+    {
+      "id": "FR-9",
+      "description": "The warning text and checkbox label are one versioned DRAFT frontend constant (pending Legal/InfoSec, OQ-1) reused by all three surfaces. The matcher has its own version id. The server holds the accepted disclaimer version -> copy hash map, pinned per the OQ-13 ruling (shared JSON, three-way test pin, no production import).",
+      "priority": "P0",
+      "rationale": "OQ-1: the wording owner is external. Avoids drift between surfaces. The CredentialPatternScreen LIMITATION constant uses the same single-source pattern.",
+      "acceptance": [
+        "AC-10: A render test asserts that every surface renders the shared constant: the Studio row and the wizard row via IdentityNameAck (Slice A, T-FE-19) and SecretInput (Slice B2)."
+      ],
+      "status": "MODIFIED (iteration 3)",
+      "trace": [
+        "PO-1",
+        "PO-4",
+        "CON-5"
+      ]
+    },
+    {
+      "id": "FR-10",
+      "status": "NEW (iteration 3); rule replaced in iteration 4 (PO-9)",
+      "description": "One identity-name matcher, isIdentityName(name) -> {token} | null, version 'identity-names-1', defined in spec.md §3.5 with a shared case table (docs/specs/studio/identity-name-cases.json) that the frontend and backend implementations both test against. Rule (PO-9): ANY identity word in the name triggers (user, username, userid, login, soeid, email), found case-blind inside ASCII letter runs so the same name gives the same result on every surface (CRIT-14); 'account' only alone or after a service qualifier (PO-5). Password-only names (PASSWORD, PWD) contain no identity word and never trigger (PO-2, PO-8). Java must not use locale-sensitive case conversion (Locale.ROOT).",
+      "priority": "P0",
+      "trace": [
+        "PO-1",
+        "PO-2",
+        "PO-5",
+        "PO-8",
+        "PO-9"
+      ],
+      "rationale": "PO-1 asks for a single shared matcher; the server must re-run it to enforce FR-14 and to log matchedToken (PO-4), so it exists in TS and Java, pinned to one case table.",
+      "acceptance": [
+        "AC-13: every case in identity-name-cases.json passes in both the FE and BE test suites, also with each name ASCII-upper- and lower-cased; the BE suite also passes under a Turkish default locale."
+      ]
+    },
+    {
+      "id": "FR-11",
+      "status": "NEW (iteration 3)",
+      "description": "On the Studio Variables dialog and the wizard variables table, a non-secret variable row whose name matches FR-10 shows an inline warning (role='note') steering to a CSI-owned service/functional ID, plus the unchecked own-risk checkbox, whose aria-describedby points at the warning. Non-matching rows show nothing new.",
+      "priority": "P0",
+      "trace": [
+        "PO-0",
+        "PO-1",
+        "PO-3",
+        "PO-9"
+      ],
+      "acceptance": [
+        "AC-14: row named APP_LOGIN -> warning and checkbox; row named LOGIN_URL -> warning and checkbox (PO-9); row named PASSWORD -> neither."
+      ]
+    },
+    {
+      "id": "FR-12",
+      "status": "NEW (iteration 3)",
+      "description": "While any row requiring acknowledgment (FR-13) is unticked, every save action is disabled with a visible reason that names the rows and says where to tick: Studio header Save, Variables dialog Save, leave-dialog Save and Run (which saves a dirty draft first, ChecksStudioPage.tsx:769); wizard Next on Check Configuration and Create/Update Check. No modal.",
+      "priority": "P0",
+      "trace": [
+        "PO-3"
+      ],
+      "acceptance": [
+        "AC-15: unticked required row -> header Save, Variables Save, leave-dialog Save and Run disabled, and 'Open Variables and confirm the own-risk notice for {names} to save.' visible under Save and under Run; tick -> enabled."
+      ]
+    },
+    {
+      "id": "FR-13",
+      "status": "NEW (iteration 3)",
+      "description": "Acknowledgment lifecycle. A row requires acknowledgment iff it is non-secret, its name matches, and that exact trimmed name (case-sensitive) is not among the trimmed non-secret variable names stored on the saved record (create: none stored). A null, empty or whitespace-only name never requires acknowledgment. Requirements are per distinct name. Unchanged existing variables, and value-only edits to them, require no acknowledgment (they still show the warning, without a checkbox). A tick is bound to (row, exact name): any name change, including to another matching name, clears it. After a 400 IDENTITY_NAME_ACK_REQUIRED, rows named in the response's variableNames require acknowledgment even if the FE matcher missed them.",
+      "priority": "P0",
+      "trace": [
+        "PO-3",
+        "PO-4",
+        "PO-6"
+      ],
+      "acceptance": [
+        "AC-16: loaded test with stored USERNAME -> warning, no checkbox, Save enabled. AC-17: tick SVC_USER, rename to SVC_LOGIN -> unticked."
+      ]
+    },
+    {
+      "id": "FR-14",
+      "status": "NEW (iteration 3)",
+      "description": "Plain-variable server contract. POST/PUT /studio/tests (v1 and v2 bodies) accept an optional top-level identityNameAcknowledgements: [{variableName, disclaimerVersion}] (maxItems 100, variableName 1-64 chars, disclaimerVersion <= 64 chars). It is transient: not persisted, not part of Variable, not echoed in TestDto, not a revision input. The server evaluates it once per request at the public entry point that holds the caller's Authentication (create; v1 update with auth; v2 update before it delegates with auth=null), with an explicit AckSubject, after authorization and the existing 409 checks and before any write. Order: shape errors -> 400 INVALID_IDENTITY_NAME_ACK; an entry naming no non-secret variable in the body, or a duplicate trimmed name -> 400 INVALID_IDENTITY_NAME_ACK; any required name (FR-10/FR-13, a set of distinct trimmed names) without an entry carrying an accepted version (missing, blank or unknown all count as missing) -> 400 IDENTITY_NAME_ACK_REQUIRED. Both 400s list the names in a structured variableNames array (proposed; @architect, OQ-18) and never values. On commit, one FR-8 audit line per distinct required name, with the caller's principal on every path.",
+      "priority": "P0",
+      "trace": [
+        "PO-3",
+        "PO-4",
+        "PO-6",
+        "F13",
+        "F14",
+        "F15",
+        "F16",
+        "F17"
+      ],
+      "acceptance": [
+        "AC-18: new APP_LOGIN without entry -> 400 IDENTITY_NAME_ACK_REQUIRED with variableNames [APP_LOGIN]; with entry -> 200 and one audit line with every FR-8 field (principal, csiId, environment, testId, surface, operation, name, matchedToken, matcherVersion, disclaimerId, disclaimerVersion, disclaimerSha256, serverTimestamp). AC-19: unchanged stored USERNAME without entry -> 200, no audit line. AC-20: an ack-only difference does not change configurationRevision."
+      ]
+    },
+    {
+      "id": "FR-15",
+      "status": "NEW (iteration 3)",
+      "description": "Wizard: FR-11/FR-12/FR-13 apply now (on create, every matching non-secret row requires acknowledgment, prefilled rows included; on edit, rows from the stored check configuration are exempt). The wizard acknowledgment is UI-ONLY: nothing is sent to the server and no audit line is written until the backend supports a UI_TEST check configuration (F18). Follow-up FU-1 adds the server audit line using the identityNameAcknowledgements shape.",
+      "priority": "P1",
+      "trace": [
+        "PO-1",
+        "PO-4",
+        "PO-7",
+        "F18"
+      ],
+      "acceptance": [
+        "AC-21: wizard create with USER_ID row unticked -> Next on Check Configuration and Create Check disabled, with 'Confirm the own-risk notice for USER_ID in Check Configuration to continue.' visible."
+      ]
+    }
+  ],
+  "nonFunctional": [
+    {
+      "id": "NFR-1",
+      "category": "security",
+      "description": "The disclaimer and acknowledgment never handle, log, echo or persist a credential value. No client-side inspection of the Value field content (no entropy/regex scan of the secret value in the browser).",
+      "metric": "No new code path reads SecretInput newValue except the existing createSecret call; audit record schema has no value field."
+    },
+    {
+      "id": "NFR-2",
+      "category": "usability",
+      "description": "Warning is inline MUI Alert severity 'warning' with role='note' (not role='alert'), at most 2 sentences, no modal. The checkbox has an accessible name and aria-describedby the warning. A disabled save action is never the only signal: a visible reason names the rows (WCAG 3.3.1/G155).",
+      "metric": "RTL/axe: checkbox accessible name; aria-describedby resolves to the warning; no role=alert; reason text visible while disabled.",
+      "trace": [
+        "PO-3"
+      ]
+    },
+    {
+      "id": "NFR-3",
+      "category": "usability",
+      "description": "The disclaimer copy never claims detection is complete.",
+      "metric": "Frontend honesty-guard test over every CREDENTIAL_DISCLAIMER string (spec T-FE-3); PromptAssemblyTest#noMessageInTheModuleClaimsCredentialDetectionIsComplete stays green.",
+      "note": "Iteration 4: references to superseded FR-4/FR-5 and to the non-existent CredentialScreenHonestyTest removed (CRIT-19)."
+    },
+    {
+      "id": "NFR-4",
+      "category": "reliability",
+      "description": "The acknowledgment adds only deterministic 400s with stable codes (SECRET_ACK_REQUIRED, IDENTITY_NAME_ACK_REQUIRED, INVALID_IDENTITY_NAME_ACK), always after authorization, including shape errors in the acknowledgment list. Existing saved tests with identity-named variables keep saving unchanged.",
+      "metric": "Tests: Vault path 403 precedes 400 INVALID_SECRET_REQUEST / SECRET_ACK_REQUIRED; Studio path 403 precedes any INVALID_IDENTITY_NAME_ACK (even for a malformed list) and 409 STALE_REVISION precedes IDENTITY_NAME_ACK_REQUIRED; stored identity names save with no entry (spec T-BE-1, T-BE-2, T-BE-7..T-BE-9).",
+      "trace": [
+        "PO-3",
+        "PO-4"
+      ]
+    },
+    {
+      "id": "NFR-5",
+      "category": "reliability",
+      "description": "The acknowledgment never changes revision identity: it is not persisted with variables, not compared by ConfigurationChangeClassifier and not an AuthoringRevisionIdentity input.",
+      "metric": "Test: same body with and without an ack entry -> identical configurationRevision/sourceRevision and authoring hash.",
+      "trace": [
+        "PO-4",
+        "F15"
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "CON-1",
+      "type": "business",
+      "description": "Existing policy says user-pasted/inline credentials are prohibited (PRD.md:119, BRD:104). An 'at your own risk' allowance for personal credentials loosens that stance and must be reconciled before wording ships.",
+      "impact": "Blocking for final copy (OQ-1, OQ-5). Requirements are written so the default copy works under either policy: discourage plus acknowledge."
+    },
+    {
+      "id": "CON-2",
+      "type": "technical",
+      "description": "STUDIO_CAPABILITIES.vaultSecrets stays false in the alpha. This work must not enable it.",
+      "impact": "The Vault path (FR-1/FR-2, Slice B2) ships dark behind the flag. The live surfaces are the Studio Variables dialog and the Create Check wizard (FR-11..FR-13, FR-15)."
+    },
+    {
+      "id": "CON-3",
+      "type": "technical",
+      "description": "The POST /api/v1/studio/tests/{id}/secrets body is parsed strictly (unknown fields cause 400), and the operation is pinned by StudioContractTest and docs/specs/studio/openapi.yaml.",
+      "impact": "Sending an acknowledgment field to the server requires an openapi.yaml change, a contract test update and a backend DTO change. A frontend-only acknowledgment needs none of these. Iteration 3: TestRequest (POST/PUT /studio/tests) also changes: optional property + new save-time 400 codes, pinned by StudioContractTest:443 and BASE_SHA256; ADR-002 §34 precedent makes it Class C."
+    },
+    {
+      "id": "CON-4",
+      "type": "technical",
+      "description": "No reliable way exists to tell a personal credential from a functional one. Pattern checks cannot prove text is secret-free (CredentialPatternScreen.LIMITATION).",
+      "impact": "The trigger is the NAME, never the value. A personal login stored under a non-identity name (e.g. CODE) is not detected (accepted by PO-0/PO-2). Non-identity names containing an identity word (LOGIN_URL, USER_AGENT) do trigger (accepted by PO-9)."
+    },
+    {
+      "id": "CON-5",
+      "type": "regulatory",
+      "description": "Final disclaimer wording and whether 'own risk' acceptance is permitted at all belong to Citi Legal / InfoSec (Security & Compliance sign-off, BRD §11), not to the product team.",
+      "impact": "Engineering ships placeholder copy under a versioned constant (FR-9). The GA copy waits for sign-off."
+    },
+    {
+      "id": "CON-6",
+      "type": "technical",
+      "description": "Frontend uses MUI components and the sx prop. All HTTP goes through apiClient. No source or git changes during spec phases (the working tree has heavy unrelated uncommitted work).",
+      "impact": "The spec phase produces documents only."
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1",
+      "description": "By 'their own credentials' the user means personal identity credentials (SSO/SOE/network ID and password, personal MFA/TOTP seeds), as opposed to service/functional IDs provisioned for the CSI.",
+      "risk": "medium",
+      "risk_if_wrong": "If 'own' means any credential the author typed (versus provisioned by platform), the copy and the identity-name trigger (FR-10) need to change.",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-2",
+      "description": "Iteration 3: acknowledgment is per introduction of an identity name (new variable or rename), per secret creation on the Vault path. Not per value edit, not per user.",
+      "risk": "low",
+      "risk_if_wrong": "Per-user acknowledgment would need persisted user preference storage, which does not exist today.",
+      "validation_needed": true,
+      "trace": [
+        "PO-3"
+      ]
+    },
+    {
+      "id": "ASM-3",
+      "description": "Plain variables remain allowed for non-sensitive values. The request is to warn, not to remove or encrypt plain variables. Iteration 3: still true; identity-named plain variables are allowed after acknowledgment.",
+      "risk": "medium",
+      "risk_if_wrong": "If InfoSec wants passwords in plain variables blocked, a server-side heuristic or a policy change is needed (escalate to @architect).",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-4",
+      "description": "Service/functional accounts for target applications exist or can be requested by CSI owners. Otherwise the recommendation is not actionable.",
+      "risk": "medium",
+      "risk_if_wrong": "If they cannot be requested, the disclaimer pushes users to either abandon login tests or accept risk every time, which needs a 'how to request a functional ID' link owner.",
+      "validation_needed": true
+    }
+  ],
+  "domainModel": [
+    {
+      "entity": "CredentialDisclaimer",
+      "description": "Versioned DRAFT disclaimer copy (id, version, identityNameWarning, ackLabel, ackMissingReason.*). A frontend constant; the server holds version -> ackTextSha256 (FR-9).",
+      "relationships": [
+        "rendered by SecretInput (Vault dialog), the Studio Variables dialog rows and the wizard variables rows (IdentityNameAck)"
+      ]
+    },
+    {
+      "entity": "IdentityNameAcknowledgment",
+      "description": "Fact that an authenticated principal asserted acknowledgment of disclaimer version V for an identity name (a Vault secret at creation, or a plain Studio variable when introduced) on test T at time t. Recorded as one audit log line (FR-8); never holds the value; not persisted with the test.",
+      "relationships": [
+        "belongs to UITest (testId) and CSI (csiId)",
+        "surface VAULT_SECRET references the Studio secret by name (Vault, studio/{csi}/{env}/{testId}/secrets/{name})",
+        "surface STUDIO_VARIABLE references the plain variable by name"
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "flow": "Plain variable named like an identity (Studio page, live)",
+      "description": "Author adds or renames a row to APP_LOGIN -> inline warning + unchecked own-risk checkbox on that row -> header Save, Variables Save, leave-dialog Save and Run disabled with 'Open Variables and confirm the own-risk notice for APP_LOGIN to save.' -> tick -> Save (or Run's save-before-run) -> PUT body carries identityNameAcknowledgements [{variableName:'APP_LOGIN', disclaimerVersion}] -> server validates and logs after commit.",
+      "states": [
+        "warning+checkbox: new/renamed matching row",
+        "warning only: stored matching row",
+        "blocked: required row unticked (Save and Run)",
+        "400 IDENTITY_NAME_ACK_REQUIRED: mapped message; rows in variableNames re-flagged with a checkbox"
+      ]
+    },
+    {
+      "flow": "Wizard (MSW-backed)",
+      "description": "Same row UI; Next on Check Configuration and Create/Update Check gated. The acknowledgment is UI-only (PO-7) until a backend UI_TEST check configuration exists (FU-1).",
+      "states": [
+        "blocked",
+        "enabled"
+      ]
+    },
+    {
+      "flow": "Create secret with identity name (flag on)",
+      "description": "Name APP_LOGIN -> warning + checkbox -> Create disabled until ticked -> POST carries acknowledgedDisclaimerVersion -> server re-runs matcher, requires the field for matching names only, logs after vault.create.",
+      "states": [
+        "no warning for non-matching name",
+        "blocked",
+        "error: checkbox reset"
+      ]
+    }
+  ],
+  "edgeCases": [
+    {
+      "scenario": "Author ticks the acknowledgment, create fails (409 SECRET_ALREADY_EXISTS / 503), then retries.",
+      "handling": "Checkbox reset with value (FR-2); the author must re-acknowledge.",
+      "severity": "low"
+    },
+    {
+      "scenario": "Wizard plain value holding a password is autosaved to localStorage 'checks:create:draft' (F4).",
+      "handling": "Out of scope for the disclaimer itself. Flagged as OQ-6 because it makes 'own risk' riskier than the author is told.",
+      "severity": "high"
+    },
+    {
+      "scenario": "A personal password that is an ordinary word is typed inline in a step.",
+      "handling": "Not detectable (CON-4), and out of this disclaimer's scope: the disclaimer is name-triggered and not for inline credentials (PO-0). The existing INLINE_CREDENTIAL screen is unchanged.",
+      "severity": "medium"
+    },
+    {
+      "scenario": "Existing secrets created before the disclaimer existed.",
+      "handling": "No retroactive acknowledgment. The audit record is absent for them; documented as known gap.",
+      "severity": "low"
+    },
+    {
+      "scenario": "Another CSI member runs a test whose secret is someone's personal credential.",
+      "handling": "For identity-named secrets, the warning says anyone who can run the test signs in with it (FR-1). Password-named secrets show nothing (PO-8). No per-run warning (OQ-4 closed).",
+      "severity": "medium"
+    },
+    {
+      "scenario": "Existing saved tests already hold identity-named plain variables (e.g. the sign-on template's USERNAME).",
+      "handling": "Grandfathered (FR-13): warning shown, no checkbox, saves unchanged, no audit line. Renaming or re-adding under a new matching name requires acknowledgment.",
+      "severity": "medium",
+      "trace": [
+        "PO-3"
+      ]
+    },
+    {
+      "scenario": "Author swaps the value of a stored USERNAME from a functional ID to a personal login.",
+      "handling": "No acknowledgment required (name-triggered, PO-0); the warning stays visible on the row. Confirmed by the product owner (PO-6, OQ-15 closed).",
+      "severity": "medium"
+    },
+    {
+      "scenario": "Stale frontend bundle saves a new identity-named variable after backend enforcement lands.",
+      "handling": "400 IDENTITY_NAME_ACK_REQUIRED. Mitigated by shipping the FE (which sends the field) before BE enforcement: the v1 LegacyDeserializer ignores unknown top-level fields today (F14).",
+      "severity": "low"
+    },
+    {
+      "scenario": "Personal login stored under a non-identity name (CODE, ID1).",
+      "handling": "Not detected (CON-4). Accepted by PO-2.",
+      "severity": "medium"
+    },
+    {
+      "scenario": "The same name typed on different surfaces (svcUser in the Vault dialog, SVCUSER on the Studio page, run-together EMAILADDRESS).",
+      "handling": "The matcher is case-blind and finds identity words inside letter runs (spec §3.5), so every surface and the server give the same result (CRIT-14).",
+      "severity": "medium",
+      "trace": [
+        "PO-9"
+      ]
+    },
+    {
+      "scenario": "Run pressed on a dirty draft with an unticked required row.",
+      "handling": "Run is disabled with the same visible reason as Save; the saveDraft guard sends nothing (FR-12, CRIT-15).",
+      "severity": "medium"
+    },
+    {
+      "scenario": "Server matches a name the FE matcher missed (drift or stale cached bundle).",
+      "handling": "400 IDENTITY_NAME_ACK_REQUIRED with variableNames; the page shows the checkbox on those rows so the author can tick and resave (FR-13). Fallback if @architect rejects variableNames: rename (OQ-18).",
+      "severity": "low"
+    },
+    {
+      "scenario": "A matching variable name longer than 64 characters.",
+      "handling": "Cannot be acknowledged (variableName maxLength 64, like the unenforced Variable.name); the save gets a 400 and the recovery is to shorten the name. Accepted edge (CRIT-22).",
+      "severity": "low"
+    }
+  ],
+  "terminology": [
+    {
+      "term": "Personal credential",
+      "definition": "A secret tied to an individual's identity: SSO/SOE/network login, personal MFA seed, personal API token.",
+      "synonyms": [
+        "own credentials",
+        "user credentials"
+      ],
+      "avoid": [
+        "user account (ambiguous with app user)"
+      ]
+    },
+    {
+      "term": "Service / functional account",
+      "definition": "A non-personal ID provisioned for an application/CSI to run automated checks.",
+      "synonyms": [
+        "functional ID",
+        "FID",
+        "test account"
+      ],
+      "avoid": [
+        "shared account"
+      ]
+    },
+    {
+      "term": "Secret (Studio)",
+      "definition": "A test-scoped Vault KV v2 entry referenced in steps as <secret NAME>; the value is never returned to the browser.",
+      "synonyms": [
+        "vault reference",
+        "secretRef"
+      ],
+      "avoid": [
+        "password variable"
+      ]
+    },
+    {
+      "term": "Plain variable",
+      "definition": "A test variable whose value is stored in the test record and referenced as <var NAME>. Not encrypted and not for credentials.",
+      "synonyms": [
+        "nonsecret variable"
+      ],
+      "avoid": []
+    }
+  ],
+  "openQuestions": [
+    {
+      "id": "OQ-1",
+      "question": "Who owns and approves the disclaimer wording, and may the product allow personal credentials 'at own risk' at all, given PRD.md:119 / BRD:104 prohibit pasted/inline credentials?",
+      "proposedDefault": "Ship versioned placeholder copy that discourages and asks for acknowledgment. Route wording plus policy reconciliation to Security & Compliance (BRD §11) before GA. Update PRD.md:119 to match the outcome.",
+      "blocking": true,
+      "assignedTo": "@pm",
+      "note": "Iteration 3: unchanged. Copy is a single versioned DRAFT constant. PRD.md:119 / BRD:104 flag stays."
+    },
+    {
+      "id": "OQ-2",
+      "question": "Must the acknowledgment be persisted/audited server-side (FR-8), or is a frontend-only gate enough?",
+      "proposedDefault": "Server-side structured audit log line (principal, testId, name, disclaimerVersion, timestamp) via an optional request field. This needs an openapi/contract change (CON-3). Use a DB table only if InfoSec requires queryable evidence.",
+      "blocking": false,
+      "assignedTo": "@architect",
+      "status": "PARTIALLY CLOSED (PO-4)",
+      "resolution": "Server audit log line on both paths (decided). Whether a log line is sufficient evidence vs a DB table stays with @architect + InfoSec."
+    },
+    {
+      "id": "OQ-3",
+      "question": "Should acknowledgment be per secret creation, per test, or once per user?",
+      "proposedDefault": "Per secret creation (ASM-2). No new user-preference storage.",
+      "blocking": false,
+      "assignedTo": "@pm",
+      "status": "CLOSED (PO-3)",
+      "resolution": "Per introduction of an identity name (new or renamed variable) and per secret creation; not per value edit or per user."
+    },
+    {
+      "id": "OQ-4",
+      "question": "Should inline/plain credential detection go beyond advisory hints, for example name-based warnings on plain variables (FR-4), or extending CredentialPatternScreen to scan plain variable values server-side?",
+      "proposedDefault": "Frontend advisory warning only (FR-4). Do not extend the server screen in this story. Raise extending it to plain values as a separate @architect item, because it changes compile refusals.",
+      "blocking": false,
+      "assignedTo": "@architect",
+      "status": "CLOSED (PO-0, PO-2)",
+      "resolution": "Name-triggered only. No value scanning and no CredentialPatternScreen extension."
+    },
+    {
+      "id": "OQ-5",
+      "question": "Since vaultSecrets is off in the alpha, should the plain-variable warning (FR-3) also say 'Do not use this test for authenticated flows until Vault secrets are available'?",
+      "proposedDefault": "Yes. While the flag is off, recommend not storing any password and say secure secrets are coming.",
+      "blocking": false,
+      "assignedTo": "@pm",
+      "status": "CLOSED / SUPERSEDED (PO-0)",
+      "resolution": "No always-on plain-variable guidance."
+    },
+    {
+      "id": "OQ-6",
+      "question": "The wizard autosaves plain variable values (possible passwords) to localStorage (CreateCheckPage.tsx:139). Fix it in this story (exclude uiVariables values from the draft) or route it separately?",
+      "proposedDefault": "Route separately as a security defect to @architect/@dev. It is not a disclaimer, and Article IV (No Invention) keeps it out of this spec's scope.",
+      "blocking": false,
+      "assignedTo": "@architect",
+      "note": "Iteration 3: unchanged; still routed separately as a security defect."
+    },
+    {
+      "id": "OQ-7",
+      "question": "Is there a canonical Citi link/process for requesting a functional ID to include in 'Learn more'?",
+      "proposedDefault": "Leave a configurable link slot, empty by default and hidden when unset.",
+      "blocking": false,
+      "assignedTo": "@pm"
+    },
+    {
+      "id": "OQ-11",
+      "question": "(From spec iteration 2) Is advisory-only acceptable on plain variables?",
+      "status": "CLOSED (PO-3, PO-4)",
+      "resolution": "No: plain variables get a required checkbox and server evidence."
+    },
+    {
+      "id": "OQ-10",
+      "question": "Accept the previous disclaimer version for one release after a copy bump?",
+      "status": "RULED (@architect, implementation.yaml plan v1)",
+      "resolution": "No overlap now; one accepted version. The first copy bump after vaultSecrets flips decides (ADR-002 O-22). Spec D8 adopts it unchanged.",
+      "assignedTo": "@architect"
+    },
+    {
+      "id": "OQ-12",
+      "question": "Vault path: may a matching-name body without the field turn 503 into 400, and where does the ack check sit?",
+      "status": "RULED (@architect, implementation.yaml plan v1); re-ruling requested on the order (OQ-18 b)",
+      "resolution": "Ruled: 400 may replace 503 VAULT_NOT_CONFIGURED; order 403 -> parse -> ack -> name/value/origins -> Vault. Spec D7 keeps the first part and diverges on the order (ack after name/value/origins), flagged in OQ-18 (b).",
+      "assignedTo": "@architect"
+    },
+    {
+      "id": "OQ-13",
+      "question": "Version pin mechanism.",
+      "status": "RULED (@architect, implementation.yaml plan v1)",
+      "resolution": "Option (b) modified: docs/specs/studio/credential-disclaimer-version.json as reviewable source, no production import (PF-2), three-way test pin. Spec D8 adopts it unchanged (hash input renamed short -> identityNameWarning with the iteration-3 copy).",
+      "assignedTo": "@architect"
+    },
+    {
+      "id": "OQ-14",
+      "question": "'account' is narrowed: it matches only as the head word and only alone or after a service/identity qualifier (SVC_ACCOUNT, SERVICE_ACCOUNT, TEST_ACCOUNT, ACCOUNT), not ACCOUNT_ID, ACCOUNT_NUMBER, FROM_ACCOUNT, BANK_ACCOUNT. Confirm, given banking test data uses account numbers heavily.",
+      "proposedDefault": "Adopt the narrowing (spec §3.5).",
+      "blocking": false,
+      "assignedTo": "@pm -> product owner",
+      "status": "CLOSED (PO-5, 2026-10-06)",
+      "resolution": "Adopted the narrow rule (spec §3.5 step 6)."
+    },
+    {
+      "id": "OQ-15",
+      "question": "Grandfathering: stored identity-named variables never require acknowledgment, and value-only edits never re-require it. Confirm, or require re-acknowledgment when the value of an identity-named variable changes.",
+      "proposedDefault": "Grandfather; name-triggered per PO-0. Re-ack on value change would need the FE to diff values and the server to compare stored values, and trains users to click through.",
+      "blocking": false,
+      "assignedTo": "@pm -> product owner",
+      "status": "CLOSED (PO-6, 2026-10-06)",
+      "resolution": "Stored identity-named variables are exempt until added or renamed; value-only edits never re-require acknowledgment."
+    },
+    {
+      "id": "OQ-16",
+      "question": "The backend has no UI_TEST CheckConfiguration subtype (F18). Who owns the UI_TEST check contract, so wizard acknowledgments can reach the server?",
+      "proposedDefault": "Wizard gets the FE gate now; server evidence lands with the UI_TEST check-configuration story, using the same identityNameAcknowledgements shape.",
+      "blocking": false,
+      "assignedTo": "@architect",
+      "status": "CLOSED (PO-7, 2026-10-06)",
+      "resolution": "Wizard warning + required checkbox ship now; the acknowledgment is UI-only (nothing sent, nothing recorded) until a backend UI_TEST check configuration exists. Server audit line is follow-up FU-1."
+    },
+    {
+      "id": "OQ-17",
+      "question": "Password-named secrets (the common Vault case) no longer show any disclaimer (PO-2). Confirm that the Vault dialog shows nothing for DB_PASSWORD-style names.",
+      "proposedDefault": "Confirmed by PO-2 as written; recorded so the gap is visible.",
+      "blocking": false,
+      "assignedTo": "@pm -> product owner",
+      "status": "CLOSED (PO-8, 2026-10-06)",
+      "resolution": "Identity names only; password-named secrets show no disclaimer."
+    },
+    {
+      "id": "OQ-19",
+      "question": "(CRIT-18) Does the head word decide, or does any identity token trigger?",
+      "status": "CLOSED (PO-9, 2026-10-06)",
+      "resolution": "Any token matches. LOGIN_URL, USER_AGENT, LAST_LOGIN, EMAIL_SUBJECT, USER_PASSWORD trigger.",
+      "assignedTo": "@pm -> product owner"
+    },
+    {
+      "id": "OQ-18",
+      "question": "ADR-002 ruling for both contract changes: (a) Class C for the TestRequest change (optional identityNameAcknowledgements, IDENTITY_NAME_ACK_REQUIRED, INVALID_IDENTITY_NAME_ACK on POST/PUT /studio/tests); (b) re-rule OQ-12's order on the Vault path (spec D7 proposes the ack check after name/value/origins; plan v1 ruled it before); (c) re-rule new-required-field (spec D7 proposes acknowledgedDisclaimerVersion optional and required only for matching names; plan v1 ruled it required for every body); (d) accept the structured variableNames extension of the 400 body, or the fallback (names in message only, rename to recover); (e) confirm the internal updateTest(auth=null) path skips the policy.",
+      "proposedDefault": "Class C under the §34 precedent; one @architect section covering both paths before any backend code lands.",
+      "blocking": true,
+      "assignedTo": "@architect",
+      "note": "Iteration 4 (CRIT-20): (b) and (c) are divergences from existing @architect rulings, submitted for re-ruling rather than reversed by the spec. B2 does not start until they are ruled."
+    }
+  ],
+  "iteration": 4,
+  "revisedAt": "2026-10-06T14:00:00Z",
+  "revisionNote": "Iteration 3, PO clarification 2026-10-05. The disclaimer is NAME-TRIGGERED (identity names), not inline and not always-on. FR-3/FR-4/FR-5/FR-6/FR-7 superseded; FR-1/FR-2/FR-8/FR-9 modified; FR-10..FR-15 added. Every new or modified requirement traces to PO-0..PO-4. Iteration 3b (2026-10-06): PO answered OQ-14..OQ-17 (PO-5..PO-8). Iteration 4 (2026-10-06): PO-9 (any token matches) and critique iteration 3 (CRIT-14..CRIT-22): FR-10 rule replaced (case-blind, any token); FR-12 adds Run and wizard Next; FR-13 trimming, distinct names, server-required names; FR-14 entry points, AckSubject, error order and structured variableNames; AC-10 kept; AC-14/15/18/21 revised; stale references in CON-2, CON-4, NFR-3, NFR-4, ASM-1, domainModel, interactions and edgeCases cleaned; OQ-10/12/13 recorded as RULED with divergences in OQ-18; OQ-19 closed by PO-9.",
+  "poDecisions": [
+    {
+      "id": "PO-0",
+      "date": "2026-10-05",
+      "verbatim": "the disclaimer is not for inline, its for when the user tries to add a secret name user/login/username.",
+      "effect": "Disclaimer appears only when a secret or variable NAME matches an identity name. INLINE_CREDENTIAL guidance (FR-5) and every always-on generic disclaimer (FR-3, FR-6, FR-7) are dropped."
+    },
+    {
+      "id": "PO-1",
+      "date": "2026-10-05",
+      "decision": "Surface: BOTH the Vault secret dialog (SecretInput.tsx) and plain variables (Studio Variables dialog in ChecksStudioPage.tsx, Create Check wizard UiTestConfig.tsx). One shared matcher."
+    },
+    {
+      "id": "PO-2",
+      "date": "2026-10-05",
+      "decision": "Trigger: identity names, case-insensitive token match on user, username, user_id, userid, login, soeid, email, account; tokenize on _ - . and camelCase. Password names do NOT trigger."
+    },
+    {
+      "id": "PO-3",
+      "date": "2026-10-05",
+      "decision": "Interaction: inline warning steering to a functional/service ID plus an unchecked 'I understand this is at my own risk' checkbox. Save/Create disabled until checked, with a visible reason. No modal. Re-evaluate on name change. Accessible (role note/status, aria-describedby)."
+    },
+    {
+      "id": "PO-4",
+      "date": "2026-10-05",
+      "decision": "Evidence: server audit line (who, csiId/env, testId, name, matched token, disclaimerVersion, copy hash, server timestamp; never the value). Vault path: acknowledgedDisclaimerVersion on create-secret. Plain variables: minimal save-contract change, server validation and logging."
+    },
+    {
+      "id": "PO-5",
+      "date": "2026-10-06",
+      "decision": "OQ-14: 'account' narrow rule as proposed (alone or after a service qualifier such as svc/service/test; ACCOUNT_ID, ACCOUNT_NUMBER etc. do not match)."
+    },
+    {
+      "id": "PO-6",
+      "date": "2026-10-06",
+      "decision": "OQ-15: existing variables are exempt until added or renamed, as proposed (no re-ack on value-only edits)."
+    },
+    {
+      "id": "PO-7",
+      "date": "2026-10-06",
+      "decision": "OQ-16: the Create Check wizard shows the same warning and required checkbox now; its acknowledgment is UI-only until the backend supports a UI_TEST check configuration; server audit line tracked as a follow-up."
+    },
+    {
+      "id": "PO-8",
+      "date": "2026-10-06",
+      "decision": "OQ-17: confirmed, identity names only; password-named secrets do not trigger."
+    },
+    {
+      "id": "PO-9",
+      "date": "2026-10-06",
+      "decision": "CRIT-18: ANY token matches; the head-word/last-token rule is dropped. A name triggers if any of its tokens is an identity token, so LOGIN_URL, USER_AGENT, LAST_LOGIN, EMAIL_SUBJECT, USER_PASSWORD trigger. PO-2 token set, PO-5 'account' narrow rule, password-only names not triggering (PO-8), grandfathering (PO-6) and the UI-only wizard acknowledgment (PO-7) stand."
+    }
+  ],
+  "followUps": [
+    {
+      "id": "FU-1",
+      "item": "Server audit line for wizard acknowledgments (surface CHECK_WIZARD_VARIABLE), using the identityNameAcknowledgements shape and FR-14 rules.",
+      "blockedBy": "Backend UI_TEST CheckConfiguration subtype (does not exist today, F18).",
+      "owner": "@architect to assign the UI_TEST check-configuration story; @pm tracks",
+      "trace": [
+        "PO-7"
+      ]
+    }
+  ]
+}

@@ -9,7 +9,7 @@ import path from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { readyDraft, draftsByCompileStatus } from '@/services/mocks/studio/compileFixtures';
+import { readyDraft, staleDraft, draftsByCompileStatus } from '@/services/mocks/studio/compileFixtures';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
@@ -225,7 +225,7 @@ describe('the simple Save and Run workflow', () => {
     expect(run).not.toBeDisabled();
     expect(screen.queryByText('Save your changes before running.')).toBeNull();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Studio Tests' }));
+    await userEvent.click(screen.getByRole('button', { name: 'UI Tests' }));
     const dialog = await screen.findByRole('dialog', { name: 'Save changes before continuing?' });
     expect(dialog).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save and continue' })).toBeInTheDocument();
@@ -304,5 +304,91 @@ describe('the draft the page sends carries a timeout the contract would accept',
     expect(typeof configuration.timeoutSeconds).toBe('number');
     expect(configuration.timeoutSeconds).toBeGreaterThanOrEqual(TIMEOUT_BOUND.minimum);
     expect(configuration.timeoutSeconds).toBeLessThanOrEqual(TIMEOUT_BOUND.maximum);
+  }, PAGE_TEST_TIMEOUT_MS);
+
+  it('VAL-009: a refused step in the Run outcome links to that step in the editor', async () => {
+    const base = draftsByCompileStatus.NEEDS_REVISION;
+    const refused = {
+      ...base,
+      compileDiagnostics: {
+        validatorSchemaVersion: '1.0.0',
+        artifact: [],
+        steps: base.steps.map((_, stepIndex) => ({
+          stepIndex,
+          ok: stepIndex !== 1,
+          truncated: false,
+          diagnostics:
+            stepIndex === 1
+              ? [{ code: 'UNSUPPORTED_CAPABILITY', stepIndex, message: 'Server CPU is not visible to a browser.', node: null, excerpt: null }]
+              : [],
+        })),
+        truncated: false,
+        attempts: 1,
+        exhausted: false,
+      },
+    };
+    serveList(refused);
+    studioMockServer.use(
+      http.post(`${STUDIO_BASE}/tests/:id/compile`, () =>
+        HttpResponse.json({ compileRequestId: 'r', compileStatus: 'COMPILING' }, { status: 202 }),
+      ),
+    );
+    renderPage();
+    const user = userEvent.setup({ delay: null });
+
+    const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
+    await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
+    await user.click(control);
+
+    expect(await screen.findByTestId('run-compile-refusal-1', {}, pageWait)).toHaveTextContent(
+      "Step 2 can't be done in a browser test: Server CPU is not visible to a browser. Rewrite or remove it.",
+    );
+    await user.click(screen.getByRole('button', { name: 'Go to step 2' }));
+    expect(screen.getByRole('textbox', { name: 'Step 2' })).toHaveFocus();
+    expect(executeRequests()).toHaveLength(0);
+  }, PAGE_TEST_TIMEOUT_MS);
+});
+
+describe('VAL-042: the first Run press on a freshly opened saved test acts', () => {
+  const requestsTo = (method: string, suffix: RegExp) =>
+    observed.filter((entry) => entry.method === method && suffix.test(new URL(entry.url).pathname));
+
+  it('READY: one press, with nothing touched first, starts exactly one execute and no save', async () => {
+    serveList(readyDraft);
+    const user = userEvent.setup({ delay: null });
+    renderPage();
+
+    const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
+    await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
+    await user.click(control);
+
+    await screen.findByRole('button', { name: 'Stop' }, pageWait);
+    expect(executeRequests()).toHaveLength(1);
+    expect(requestsTo('PUT', /\/studio\/tests\/[^/]+$/u)).toHaveLength(0);
+  }, PAGE_TEST_TIMEOUT_MS);
+
+  it('STALE: one press, with nothing touched first, compiles once and then executes once', async () => {
+    let compiled = false;
+    serveList(staleDraft);
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id`, () =>
+        HttpResponse.json(compiled ? { ...staleDraft, compileStatus: 'READY' } : staleDraft),
+      ),
+      http.post(`${STUDIO_BASE}/tests/:id/compile`, () => {
+        compiled = true;
+        return HttpResponse.json({ compileRequestId: 'c1', compileStatus: 'COMPILING' }, { status: 202 });
+      }),
+    );
+    const user = userEvent.setup({ delay: null });
+    renderPage();
+
+    const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
+    await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
+    await user.click(control);
+
+    await screen.findByRole('button', { name: 'Stop' }, pageWait);
+    expect(requestsTo('POST', /\/compile$/u)).toHaveLength(1);
+    expect(executeRequests()).toHaveLength(1);
+    expect(requestsTo('PUT', /\/studio\/tests\/[^/]+$/u)).toHaveLength(0);
   }, PAGE_TEST_TIMEOUT_MS);
 });

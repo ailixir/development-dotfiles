@@ -35,5 +35,5 @@ public record RuntimePinProperties(
     @DefaultValue("1") int artifactSchemaVersion,
     @DefaultValue("2.0.0") String validatorSchemaVersion,
     @DefaultValue("2.1.0") String syntaxReferenceVersion,
-    @DefaultValue("2.0.0") String executorVersion,
+    @DefaultValue("2.1.0") String executorVersion,
     @DefaultValue("1.63.0") String playwrightVersion) {}

@@ -7,13 +7,12 @@ import java.util.Set;
 /**
  * The development entitlement policy behind {@link StudioSecretUseAuthorization} (AC-4, AC-5a).
  *
- * <p>Entitlements are configuration, keyed {@code principal|csi|environment} and holding the secret
- * ids that principal may use there. There is no principal entitlement model on this branch to read
- * instead — the platform {@code secrets} table has {@code reference_id}, {@code label}, {@code
- * scope}, {@code owner}, {@code last_four}, {@code encrypted_value}, {@code rotated_at} and {@code
- * expires_at}, and <b>no CSI column</b> — and inventing one on a table `ED-02` replaces would be an
- * Article IV violation and a migration this story deliberately does not need. AC-5b is where the
- * real vault's own policy, including the principal dimension, is evaluated.
+ * <p>This is <b>development configuration</b>, keyed {@code principal|csi|environment} and holding
+ * the secret ids that principal may use there. It is not the production policy: PUT Core owns the
+ * production secret-use policy (V6, CON-2), and the platform Vault's own token policy is `ED-02`'s.
+ * Neither is connected on this branch, and inventing a principal entitlement model in their place
+ * would be an Article IV violation. AC-5b is where the real policy, including the principal
+ * dimension, is evaluated.
  *
  * <p>What this <em>does</em> give AC-4 is a decision that is genuinely separate from open execution
  * admission: the entitlement is per secret, so a principal who may start the test can still be

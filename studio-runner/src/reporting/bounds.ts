@@ -43,6 +43,13 @@ export interface LogEntry {
   readonly atMs: number | null;
   readonly level: 'info' | 'warn' | 'error';
   readonly message: string;
+  /**
+   * The 0-based position of the step this line is **about**, in the same index space as
+   * `SnapshotStep.stepIndex` (ADR-002 §33). Set only by the `step N started` and
+   * `step N PASS|FAIL|SKIPPED` producers; run-level lines omit it and are retained as `null`.
+   * Never inferred from message text.
+   */
+  readonly stepIndex?: number | null;
 }
 
 /**
@@ -160,7 +167,12 @@ export function createLogBuffer(maxEntries: number, maxEntryLength: number): Log
       // The brand is dropped on retention rather than carried: it states how the entry arrived,
       // it is not a field, and rebuilding the entry field by field keeps `entries()` a plain
       // `LogEntry[]` so nothing downstream can launder a brand back out of the buffer.
-      entries.push({ atMs: entry.atMs, level: entry.level, message });
+      entries.push({
+        atMs: entry.atMs,
+        level: entry.level,
+        message,
+        stepIndex: entry.stepIndex ?? null,
+      });
       while (entries.length > maxEntries) {
         entries.shift();
         dropped += 1;

@@ -6,6 +6,7 @@ import { compileErrorNarrative, isDeclaredCompileErrorCode } from './compileErro
 import { compileConflictNarrative, compileRejectionNarrative, confirmConflictNarrative } from './conflictNarratives';
 import { UNSUPPORTED_WORKFLOW_HEADING, UNSUPPORTED_WORKFLOW_LIMITS } from './unsupportedWorkflows';
 import { WATCH_GAVE_UP_MESSAGE } from './compilePollBounds';
+import { CompileElapsed } from './CompileElapsed';
 import { DiagnosticsSummary, UNCLAMPED_TEXT_SX } from './DiagnosticsView';
 import { StepReviewList } from './StepReviewList';
 import { useCompileReview } from './useCompileReview';
@@ -144,6 +145,12 @@ export function CompileReviewPanel({
             >
               {narrative.whatIsBlocked}
             </Typography>
+            {/* VAL-007 G1: how long this page has been waiting, and that a long wait is normal. */}
+            {test.compileStatus === 'COMPILING' && !review.watchGaveUp && (
+              <Box data-testid="compile-wait" sx={{ mt: 1 }}>
+                <CompileElapsed prefix="Waiting for the result: " />
+              </Box>
+            )}
           </Box>
 
           {test.compileStatus === 'READY' && test.confirmedRevisionId && (

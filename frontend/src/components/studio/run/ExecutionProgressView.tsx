@@ -46,6 +46,8 @@ export const LOGS_TRUNCATED_STATEMENT =
   'Earlier log lines were dropped before this report reached you: the run produced more than the server retains.';
 export const RERUN_LABEL = 'Run again';
 export const SEEK_LABEL = 'Show in recording';
+/** VAL-025: the failed step's pointer to the evidence of where the browser was. */
+export const WATCH_FAILURE_LABEL = 'Watch the recording at this step';
 export const UNNAMED_ERROR_STATEMENT =
   'The run ended in an error the server could not name, so there is nothing here to explain it. Nothing about the browser can be concluded from this.';
 
@@ -118,6 +120,40 @@ const StepSeekControl: React.FC<{ step: StepResult; onSeekStep: (offsetMs: numbe
         }}
       >
         {SEEK_LABEL}
+      </Button>
+    </Box>
+  );
+};
+
+/**
+ * VAL-025. A failed step points the author to the recording only when there is one to watch
+ * (`video.status` is `AVAILABLE`) and the step has a reading to seek to; the caller's `onSeekStep`
+ * switches to the Proof tab and seeks, the same path as the per-step seek control.
+ */
+function failureSeekOffset(snapshot: ExecutionSnapshot, step: StepResult): number | null {
+  if (step.status !== 'FAIL' || snapshot.video.status !== 'AVAILABLE') return null;
+  const eligibility = seekEligibility(step);
+  return eligibility.seekable ? eligibility.offsetMs : null;
+}
+
+const WatchFailureControl: React.FC<{
+  snapshot: ExecutionSnapshot;
+  step: StepResult;
+  onSeekStep: (offsetMs: number) => void;
+}> = ({ snapshot, step, onSeekStep }) => {
+  const offsetMs = failureSeekOffset(snapshot, step);
+  if (offsetMs === null) return null;
+  return (
+    <Box>
+      <Button
+        size="small"
+        variant="outlined"
+        color="error"
+        aria-label={`${WATCH_FAILURE_LABEL} (step ${step.stepIndex + 1})`}
+        data-testid={`step-watch-failure-${step.stepIndex}`}
+        onClick={() => onSeekStep(offsetMs)}
+      >
+        {WATCH_FAILURE_LABEL}
       </Button>
     </Box>
   );
@@ -201,7 +237,7 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
             <Typography variant="body2" data-testid="execution-error-remedy">
               {narrative.remedyOwner}
             </Typography>
-            {narrative.offersRerun && (
+            {narrative.offersRerun && onRerun && (
               <Box>
                 <Button size="small" variant="outlined" onClick={onRerun}>
                   {RERUN_LABEL}
@@ -226,11 +262,16 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
                 {step.status}
               </Typography>
               <StepTimings step={step} />
-              {onSeekStep && <StepSeekControl step={step} onSeekStep={onSeekStep} />}
+              {onSeekStep && failureSeekOffset(snapshot, step) === null && (
+                <StepSeekControl step={step} onSeekStep={onSeekStep} />
+              )}
               {step.message && (
                 <Typography variant="caption" data-testid={`step-message-${step.stepIndex}`}>
                   {step.message}
                 </Typography>
+              )}
+              {onSeekStep && (
+                <WatchFailureControl snapshot={snapshot} step={step} onSeekStep={onSeekStep} />
               )}
             </Stack>
           </ListItem>

@@ -1,0 +1,1 @@
+- [studio-runner test invocation](project_studio_runner_test_invocation.md) — pnpm exec refused there; use ./node_modules/.bin/vitest, coverage off, deployment config

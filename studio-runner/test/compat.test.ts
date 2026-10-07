@@ -111,6 +111,21 @@ describe('isCompatible', () => {
     expect(isCompatible({ ...MATCHING, executor: '1.5.0' }, runtime).ok).toBe(false);
   });
 
+  it('runs a revision recorded under executor 2.0.0 on 2.1.0, and refuses the downgrade (VAL-031)', () => {
+    // Text-entry role equivalence is a backward-compatible minor: confirmed revisions keep running.
+    expect(EXECUTOR_VERSION).toBe('2.1.0');
+    expect(isCompatible({ ...MATCHING, executor: '2.0.0' }, RUNTIME).ok).toBe(true);
+    expect(isCompatible({ ...MATCHING, executor: '2.1.0' }, RUNTIME).ok).toBe(true);
+    // A backend pinned to 2.1.0 meeting a 2.0.0 runner is a downgrade: deploy the runner first.
+    const downgrade = isCompatible(
+      { ...MATCHING, executor: '2.1.0' },
+      { ...RUNTIME, executor: '2.0.0' },
+    );
+    expect(downgrade.ok).toBe(false);
+    expect(downgrade.code).toBe(RUNTIME_INCOMPATIBLE);
+    expect(downgrade.mismatches.map((mismatch) => mismatch.field)).toEqual(['executor']);
+  });
+
   it('reports every differing field at once', () => {
     const result = isCompatible(
       { validatorSchema: '0.9.0', syntaxReference: '0.9.0', playwright: '1.60.0', executor: '0.9.0' },
@@ -194,7 +209,7 @@ describe('loadRuntimeVersions', () => {
         playwright: '1.63.0',
         validatorSchema: '2.0.0',
         syntaxReference: SYNTAX_REFERENCE_VERSION,
-        executor: '2.0.0',
+        executor: '2.1.0',
         chromiumBuild: null,
         image: null,
       })}\n`,

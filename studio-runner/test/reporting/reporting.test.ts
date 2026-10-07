@@ -595,6 +595,60 @@ describe('ADR-002 §INT-1 — log lines carry timeline positions, not placeholde
   });
 });
 
+describe('ADR-002 §33 — log lines name the step they are about', () => {
+  it('carries stepIndex on step lines and null on run-level lines', async () => {
+    const runner = await start();
+    await runOnce(runner);
+
+    const final = reports(runner).at(-1);
+    const entries = final?.logs ?? [];
+    expect(final?.steps.length).toBeGreaterThan(0);
+    for (const step of final?.steps ?? []) {
+      const index = String(step.stepIndex);
+      const started = entries.find((entry) => entry.message === `step ${index} started`);
+      const finished = entries.find((entry) => entry.message.startsWith(`step ${index} ${step.status}`));
+      expect(started?.stepIndex).toBe(step.stepIndex);
+      expect(finished?.stepIndex).toBe(step.stepIndex);
+    }
+    const browserStarted = entries.find((entry) => entry.message === 'browser started');
+    const run = entries.find((entry) => entry.message.startsWith('run '));
+    expect(browserStarted).toBeDefined();
+    expect(run).toBeDefined();
+    // Present and null on the wire, not merely absent.
+    expect(browserStarted).toHaveProperty('stepIndex', null);
+    expect(run).toHaveProperty('stepIndex', null);
+  });
+
+  it('carries stepIndex on a failing step line and on the skipped line after it', async () => {
+    const runner = await start();
+    const original = runner.launcher.launch.bind(runner.launcher);
+    Object.assign(runner.launcher, {
+      async launch(options: Parameters<typeof original>[0]) {
+        const session = await original(options);
+        runner.launcher.adapters.at(-1)?.failOn('goto', new Error('NavigationError: refused'));
+        return session;
+      },
+    });
+    await runOnce(runner);
+
+    const entries = reports(runner).at(-1)?.logs ?? [];
+    expect(entries.find((entry) => entry.message.startsWith('step 0 FAIL'))?.stepIndex).toBe(0);
+    expect(entries.find((entry) => entry.message.startsWith('step 1 SKIPPED'))?.stepIndex).toBe(1);
+  });
+
+  it('preserves stepIndex through bounded retention, and retains an omitted one as null', () => {
+    const buffer = createLogBuffer(2, 8);
+    buffer.append(redactLogEntry({ atMs: 1, level: 'info', message: 'dropped', stepIndex: 9 }, NULL_REDACTOR));
+    buffer.append(redactLogEntry({ atMs: 2, level: 'info', message: 'step 3 started and long', stepIndex: 3 }, NULL_REDACTOR));
+    buffer.append(redactLogEntry({ atMs: null, level: 'info', message: 'run PASSED' }, NULL_REDACTOR));
+
+    expect(buffer.entries()).toEqual([
+      { atMs: 2, level: 'info', message: 'step 3 …', stepIndex: 3 },
+      { atMs: null, level: 'info', message: 'run PAS…', stepIndex: null },
+    ]);
+  });
+});
+
 describe('AC-20 — the secret canary appears in no form on any outbound byte', () => {
   const CANARY = 'canary-secret-value';
 

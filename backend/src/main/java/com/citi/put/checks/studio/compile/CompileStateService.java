@@ -38,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class CompileStateService {
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private com.citi.put.checks.studio.scheduling.StudioScheduleInvalidation scheduleInvalidation;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CompileStateService.class);
 
@@ -48,13 +50,16 @@ public class CompileStateService {
   private static final String INSERT_REVISION =
       """
       INSERT INTO ui_test_revisions (
-          test_id, csi_id, source_revision, configuration_revision,
-          source, source_hash, artifact, artifact_hash, artifact_schema_version,
-          configuration, "references", provenance, created_by, reference_policy,
-          intent_derivation_version)
-      VALUES (?, ?, ?, ?,
-          CAST(? AS jsonb), ?, CAST(? AS jsonb), ?, ?,
-          CAST(? AS jsonb), CAST(? AS jsonb), CAST(? AS jsonb), ?, CAST(? AS jsonb), ?)
+      test_id,  csi_id,  source_revision,  configuration_revision,
+      source,  source_hash,  artifact,  artifact_hash,
+      artifact_schema_version,
+      configuration,  "references",  provenance,  created_by,
+      reference_policy,
+      intent_derivation_version)
+      VALUES (?,  ?,  ?,  ?,
+      CAST(? AS jsonb),  ?,  CAST(? AS jsonb),  ?,  ?,
+      CAST(? AS jsonb),  CAST(? AS jsonb),  CAST(? AS jsonb),  ?,  CAST(?
+      AS jsonb),  ?)
       ON CONFLICT DO NOTHING
       RETURNING id
       """;
@@ -62,11 +67,12 @@ public class CompileStateService {
   private static final String SELECT_REVISION_BY_IDENTITY =
       """
       SELECT id FROM ui_test_revisions
-       WHERE test_id = ? AND source_revision = ? AND configuration_revision = ?
-         AND artifact_hash = ?
-         AND expected_intent IS NULL
-         AND reference_policy IS NOT DISTINCT FROM CAST(? AS jsonb)
-         AND intent_derivation_version IS NOT DISTINCT FROM ?
+      WHERE test_id = ? AND source_revision = ? AND configuration_revision
+      = ?
+      AND artifact_hash = ?
+      AND expected_intent IS NULL
+      AND reference_policy IS NOT DISTINCT FROM CAST(? AS jsonb)
+      AND intent_derivation_version IS NOT DISTINCT FROM ?
       """;
 
   private final JdbcTemplate jdbc;
@@ -174,13 +180,13 @@ public class CompileStateService {
         jdbc.queryForList(
             """
             UPDATE ui_tests
-               SET compile_request_id  = ?,
-                   compile_status      = 'COMPILING',
-                   compile_started_at  = NOW(),
-                   compile_error       = NULL,
-                   compile_diagnostics = NULL
-             WHERE id = ? AND deleted_at IS NULL AND quarantined_at IS NULL
-            RETURNING source_revision, configuration_revision
+            SET compile_request_id  = ?,
+            compile_status      = 'COMPILING',
+            compile_started_at  = NOW(),
+            compile_error       = NULL,
+            compile_diagnostics = NULL
+            WHERE id = ? AND deleted_at IS NULL AND quarantined_at IS NULL
+            RETURNING source_revision,  configuration_revision
             """,
             requestId,
             testId);
@@ -224,17 +230,17 @@ public class CompileStateService {
         jdbc.update(
             """
             UPDATE ui_tests
-               SET current_candidate_revision_id = ?,
-                   compile_status                = 'AWAITING_CONFIRMATION',
-                   compile_started_at            = NULL,
-                   compile_error                 = NULL,
-                   compile_diagnostics           = NULL
-             WHERE id = ? AND compile_request_id = ? AND source_revision = ?
-               AND configuration_revision = ?
-               AND deleted_at IS NULL AND quarantined_at IS NULL
-               AND NOT EXISTS (SELECT 1 FROM ui_test_compile_requests r
-                 WHERE r.request_id = ui_tests.compile_request_id
-                   AND r.deadline_at <= clock_timestamp())
+            SET current_candidate_revision_id = ?,
+            compile_status                = 'AWAITING_CONFIRMATION',
+            compile_started_at            = NULL,
+            compile_error                 = NULL,
+            compile_diagnostics           = NULL
+            WHERE id = ? AND compile_request_id = ? AND source_revision = ?
+            AND configuration_revision = ?
+            AND deleted_at IS NULL AND quarantined_at IS NULL
+            AND NOT EXISTS (SELECT 1 FROM ui_test_compile_requests r
+            WHERE r.request_id = ui_tests.compile_request_id
+            AND r.deadline_at <= clock_timestamp())
             """,
             revisionId,
             testId,
@@ -281,9 +287,9 @@ public class CompileStateService {
     jdbc.update(
         """
         UPDATE ui_test_revisions
-           SET confirmed_by = ?, confirmed_at = NOW()
-         WHERE id = ? AND test_id = ?
-           AND confirmed_by IS NULL AND confirmed_at IS NULL
+        SET confirmed_by = ?,  confirmed_at = NOW()
+        WHERE id = ? AND test_id = ?
+        AND confirmed_by IS NULL AND confirmed_at IS NULL
         """,
         candidate.createdBy(),
         revisionId,
@@ -293,15 +299,15 @@ public class CompileStateService {
         jdbc.update(
             """
             UPDATE ui_tests
-               SET current_candidate_revision_id = ?,
-                   confirmed_revision_id         = ?,
-                   compile_status                = 'READY',
-                   compile_started_at            = NULL,
-                   compile_error                 = NULL,
-                   compile_diagnostics           = NULL
-             WHERE id = ? AND compile_request_id = ? AND source_revision = ?
-               AND configuration_revision = ?
-               AND deleted_at IS NULL AND quarantined_at IS NULL
+            SET current_candidate_revision_id = ?,
+            confirmed_revision_id         = ?,
+            compile_status                = 'READY',
+            compile_started_at            = NULL,
+            compile_error                 = NULL,
+            compile_diagnostics           = NULL
+            WHERE id = ? AND compile_request_id = ? AND source_revision = ?
+            AND configuration_revision = ?
+            AND deleted_at IS NULL AND quarantined_at IS NULL
             """,
             revisionId,
             revisionId,
@@ -332,14 +338,14 @@ public class CompileStateService {
         jdbc.update(
             """
             UPDATE ui_tests
-               SET compile_status                = 'NEEDS_REVISION',
-                   compile_started_at            = NULL,
-                   compile_diagnostics           = CAST(? AS jsonb),
-                   compile_error                 = NULL,
-                   current_candidate_revision_id = NULL
-             WHERE id = ? AND compile_request_id = ? AND source_revision = ?
-               AND configuration_revision = ?
-               AND deleted_at IS NULL AND quarantined_at IS NULL
+            SET compile_status                = 'NEEDS_REVISION',
+            compile_started_at            = NULL,
+            compile_diagnostics           = CAST(? AS jsonb),
+            compile_error                 = NULL,
+            current_candidate_revision_id = NULL
+            WHERE id = ? AND compile_request_id = ? AND source_revision = ?
+            AND configuration_revision = ?
+            AND deleted_at IS NULL AND quarantined_at IS NULL
             """,
             diagnosticsJson,
             testId,
@@ -371,14 +377,14 @@ public class CompileStateService {
         jdbc.update(
             """
             UPDATE ui_tests
-               SET compile_status                = 'STALE',
-                   compile_started_at            = NULL,
-                   compile_error                 = CAST(? AS jsonb),
-                   compile_diagnostics           = NULL,
-                   current_candidate_revision_id = NULL
-             WHERE id = ? AND compile_request_id = ? AND source_revision = ?
-               AND configuration_revision = ?
-               AND deleted_at IS NULL AND quarantined_at IS NULL
+            SET compile_status                = 'STALE',
+            compile_started_at            = NULL,
+            compile_error                 = CAST(? AS jsonb),
+            compile_diagnostics           = NULL,
+            current_candidate_revision_id = NULL
+            WHERE id = ? AND compile_request_id = ? AND source_revision = ?
+            AND configuration_revision = ?
+            AND deleted_at IS NULL AND quarantined_at IS NULL
             """,
             errorJson,
             testId,
@@ -423,15 +429,15 @@ public class CompileStateService {
     List<Map<String, Object>> candidates =
         jdbc.queryForList(
             """
-            SELECT source::text AS source, authoring::text AS authoring,
-                   authoring_revision_inputs::text AS authoring_inputs,
-                   reference_policy::text AS reference_policy,
-                   intent_derivation_version, provenance::text AS provenance
-              FROM ui_test_revisions
-             WHERE id = ? AND test_id = ? AND artifact_hash = ?
-               AND source_revision = ? AND configuration_revision = ?
-               AND confirmed_by IS NULL AND confirmed_at IS NULL
-             FOR UPDATE
+            SELECT source::text AS source,  authoring::text AS authoring,
+            authoring_revision_inputs::text AS authoring_inputs,
+            reference_policy::text AS reference_policy,
+            intent_derivation_version,  provenance::text AS provenance
+            FROM ui_test_revisions
+            WHERE id = ? AND test_id = ? AND artifact_hash = ?
+            AND source_revision = ? AND configuration_revision = ?
+            AND confirmed_by IS NULL AND confirmed_at IS NULL
+            FOR UPDATE
             """,
             revisionId,
             testId,
@@ -448,10 +454,10 @@ public class CompileStateService {
         jdbc.update(
             """
             UPDATE ui_test_revisions
-               SET confirmed_by = ?, confirmed_at = NOW()
-             WHERE id = ? AND test_id = ? AND artifact_hash = ?
-               AND source_revision = ? AND configuration_revision = ?
-               AND confirmed_by IS NULL AND confirmed_at IS NULL
+            SET confirmed_by = ?,  confirmed_at = NOW()
+            WHERE id = ? AND test_id = ? AND artifact_hash = ?
+            AND source_revision = ? AND configuration_revision = ?
+            AND confirmed_by IS NULL AND confirmed_at IS NULL
             """,
             principal,
             revisionId,
@@ -472,14 +478,14 @@ public class CompileStateService {
         jdbc.update(
             """
             UPDATE ui_tests
-               SET confirmed_revision_id = ?,
-                   compile_status        = 'READY',
-                   compile_error         = NULL,
-                   compile_diagnostics   = NULL
-             WHERE id = ? AND current_candidate_revision_id = ?
-               AND compile_status = 'AWAITING_CONFIRMATION'
-               AND source_revision = ? AND configuration_revision = ?
-               AND deleted_at IS NULL AND quarantined_at IS NULL
+            SET confirmed_revision_id = ?,
+            compile_status        = 'READY',
+            compile_error         = NULL,
+            compile_diagnostics   = NULL
+            WHERE id = ? AND current_candidate_revision_id = ?
+            AND compile_status = 'AWAITING_CONFIRMATION'
+            AND source_revision = ? AND configuration_revision = ?
+            AND deleted_at IS NULL AND quarantined_at IS NULL
             """,
             revisionId,
             testId,
@@ -494,6 +500,9 @@ public class CompileStateService {
               + " is not the current candidate of a test "
               + testId
               + " that is awaiting confirmation");
+    }
+    if (scheduleInvalidation != null) {
+      scheduleInvalidation.invalidate(testId, "ACTIVATION_REVISION_MISMATCH");
     }
     return revisionId;
   }
@@ -512,13 +521,13 @@ public class CompileStateService {
     List<Map<String, Object>> rows =
         jdbc.queryForList(
             """
-            SELECT source::text AS source, authoring::text AS authoring,
-                   authoring_revision_inputs::text AS authoring_inputs,
-                   reference_policy::text AS reference_policy,
-                   intent_derivation_version, provenance::text AS provenance
-              FROM ui_test_revisions
-             WHERE id = ? AND test_id = ?
-             FOR UPDATE
+            SELECT source::text AS source,  authoring::text AS authoring,
+            authoring_revision_inputs::text AS authoring_inputs,
+            reference_policy::text AS reference_policy,
+            intent_derivation_version,  provenance::text AS provenance
+            FROM ui_test_revisions
+            WHERE id = ? AND test_id = ?
+            FOR UPDATE
             """,
             revisionId,
             testId);
@@ -546,14 +555,15 @@ public class CompileStateService {
     List<Map<String, Object>> current =
         jdbc.queryForList(
             """
-        SELECT t.id FROM ui_tests t JOIN ui_test_revisions r
-          ON r.id = t.current_candidate_revision_id AND r.test_id = t.id
-         WHERE t.id = ? AND t.compile_request_id = ? AND r.compile_request_id = ?
-           AND t.authoring_hash = ? AND r.authoring_hash = ? AND r.id = ?
-           AND t.source_revision = ? AND t.configuration_revision = ?
-           AND t.deleted_at IS NULL AND t.quarantined_at IS NULL
-         FOR UPDATE OF t
-        """,
+            SELECT t.id FROM ui_tests t JOIN ui_test_revisions r
+            ON r.id = t.current_candidate_revision_id AND r.test_id = t.id
+            WHERE t.id = ? AND t.compile_request_id = ? AND r.compile_request_id
+            = ?
+            AND t.authoring_hash = ? AND r.authoring_hash = ? AND r.id = ?
+            AND t.source_revision = ? AND t.configuration_revision = ?
+            AND t.deleted_at IS NULL AND t.quarantined_at IS NULL
+            FOR UPDATE OF t
+            """,
             testId,
             requestId,
             requestId,
@@ -643,25 +653,25 @@ public class CompileStateService {
     return jdbc.update(
         """
         WITH abandoned AS (
-            SELECT id
-              FROM ui_tests
-             WHERE compile_status = 'COMPILING'
-               AND compile_started_at < NOW() - make_interval(secs => ?)
-             ORDER BY compile_started_at
-             LIMIT ?
-               FOR UPDATE SKIP LOCKED
+        SELECT id
+        FROM ui_tests
+        WHERE compile_status = 'COMPILING'
+        AND compile_started_at < NOW() - make_interval(secs => ?)
+        ORDER BY compile_started_at
+        LIMIT ?
+        FOR UPDATE SKIP LOCKED
         )
         UPDATE ui_tests t
-           SET compile_status                = 'STALE',
-               compile_started_at            = NULL,
-               compile_request_id            = NULL,
-               compile_error                 = CAST(? AS jsonb),
-               compile_diagnostics           = NULL,
-               current_candidate_revision_id = NULL
-          FROM abandoned a
-         WHERE t.id = a.id
-           AND t.compile_status = 'COMPILING'
-           AND t.compile_started_at < NOW() - make_interval(secs => ?)
+        SET compile_status                = 'STALE',
+        compile_started_at            = NULL,
+        compile_request_id            = NULL,
+        compile_error                 = CAST(? AS jsonb),
+        compile_diagnostics           = NULL,
+        current_candidate_revision_id = NULL
+        FROM abandoned a
+        WHERE t.id = a.id
+        AND t.compile_status = 'COMPILING'
+        AND t.compile_started_at < NOW() - make_interval(secs => ?)
         """,
         thresholdSeconds,
         batchSize,
@@ -704,14 +714,14 @@ public class CompileStateService {
   private List<Map<String, Object>> lockCurrentRequest(UUID testId, CompileRequest request) {
     return jdbc.queryForList(
         """
-        SELECT csi_id, configuration_revision
-          FROM ui_tests
-         WHERE id = ? AND compile_request_id = ? AND source_revision = ?
-           AND configuration_revision = ?
-           AND deleted_at IS NULL AND quarantined_at IS NULL
-           AND NOT EXISTS (SELECT 1 FROM ui_test_compile_requests r
-               WHERE r.request_id = ? AND r.deadline_at <= clock_timestamp())
-           FOR UPDATE
+        SELECT csi_id,  configuration_revision
+        FROM ui_tests
+        WHERE id = ? AND compile_request_id = ? AND source_revision = ?
+        AND configuration_revision = ?
+        AND deleted_at IS NULL AND quarantined_at IS NULL
+        AND NOT EXISTS (SELECT 1 FROM ui_test_compile_requests r
+        WHERE r.request_id = ? AND r.deadline_at <= clock_timestamp())
+        FOR UPDATE
         """,
         testId,
         request.requestId(),
@@ -796,12 +806,16 @@ public class CompileStateService {
     boundSettlementStatements();
     jdbc.update(
         """
-        INSERT INTO ui_test_compile_outcomes(request_id,outcome)
-        SELECT request_id, jsonb_build_object('state',?, 'stage','COMPLETE',
-          'errorCode',CAST(? AS text),'diagnostics',CAST(? AS jsonb),'usage',CAST(? AS jsonb),
-          'revisionId',(SELECT id FROM ui_test_revisions WHERE compile_request_id = r.request_id),
-          'artifactHash',(SELECT artifact_hash FROM ui_test_revisions WHERE compile_request_id = r.request_id))
-          FROM ui_test_compile_requests r WHERE request_id = ?
+        INSERT INTO ui_test_compile_outcomes(request_id, outcome)
+        SELECT request_id,  jsonb_build_object('state', ?,  'stage',
+        'COMPLETE',
+        'errorCode', CAST(? AS text), 'diagnostics', CAST(? AS jsonb),
+        'usage', CAST(? AS jsonb),
+        'revisionId', (SELECT id FROM ui_test_revisions WHERE
+        compile_request_id = r.request_id),
+        'artifactHash', (SELECT artifact_hash FROM ui_test_revisions WHERE
+        compile_request_id = r.request_id))
+        FROM ui_test_compile_requests r WHERE request_id = ?
         ON CONFLICT(request_id) DO NOTHING
         """,
         state,
@@ -821,9 +835,10 @@ public class CompileStateService {
     List<Long> remaining =
         jdbc.queryForList(
             """
-        SELECT greatest(0,floor(extract(epoch FROM deadline_at-clock_timestamp())*1000))::bigint
-        FROM ui_test_compile_requests WHERE request_id = ?
-        """,
+            SELECT greatest(0, floor(extract(epoch FROM
+            deadline_at-clock_timestamp())*1000))::bigint
+            FROM ui_test_compile_requests WHERE request_id = ?
+            """,
             Long.class,
             request.requestId());
     if (remaining.isEmpty()) {
@@ -860,18 +875,24 @@ public class CompileStateService {
     List<UUID> inserted =
         jdbc.queryForList(
             """
-        INSERT INTO ui_test_revisions
-          (id,test_id,csi_id,source_revision,configuration_revision,source,source_hash,
-           artifact,artifact_hash,artifact_schema_version,configuration,"references",provenance,
-           created_by,compile_request_id,authoring_snapshot,authoring_hash,scope_reviewed_by,
-           scope_reviewed_at,compilation_fingerprint,baseline_revision_id)
-        SELECT ?,test_id,csi_id,source_revision,configuration_revision,source,source_hash,
-           CAST(? AS jsonb),?,?,configuration,"references",CAST(? AS jsonb),created_by,
-           request_id,authoring_snapshot,authoring_hash,scope_reviewed_by,scope_reviewed_at,
-           compilation_fingerprint,baseline_revision_id
-          FROM ui_test_compile_requests WHERE request_id = ? AND test_id = ?
-        ON CONFLICT (compile_request_id) DO NOTHING RETURNING id
-        """,
+            INSERT INTO ui_test_revisions
+            (id, test_id, csi_id, source_revision, configuration_revision,
+            source, source_hash,
+            artifact, artifact_hash, artifact_schema_version, configuration,
+            "references", provenance,
+            created_by, compile_request_id, authoring_snapshot, authoring_hash,
+            scope_reviewed_by,
+            scope_reviewed_at, compilation_fingerprint, baseline_revision_id)
+            SELECT ?, test_id, csi_id, source_revision, configuration_revision,
+            source, source_hash,
+            CAST(? AS jsonb), ?, ?, configuration, "references", CAST(? AS
+            jsonb), created_by,
+            request_id, authoring_snapshot, authoring_hash, scope_reviewed_by,
+            scope_reviewed_at,
+            compilation_fingerprint, baseline_revision_id
+            FROM ui_test_compile_requests WHERE request_id = ? AND test_id = ?
+            ON CONFLICT (compile_request_id) DO NOTHING RETURNING id
+            """,
             UUID.class,
             allocatedRevision,
             candidate.artifact(),

@@ -1,0 +1,35 @@
+schema: 1
+story: 'STUDIO-SCHED-001'
+gate: CONCERNS
+status_reason: 'The local default-off scheduling implementation has no unresolved high-severity feature finding and passed scoped PostgreSQL, UI, contract and static checks. Four pre-existing frontend failures, unexecuted whole-repository gates and external production evidence remain explicit concerns.'
+reviewer: 'Quinn'
+reviewed_revision: 'working-tree-source-sha256:2d38f01546eb1551cf8d33ee198b8f71089b46d8ea521bea3e446e8bb3207756'
+updated: '2026-10-06T01:22:07Z'
+top_issues:
+  - id: TEST-001
+    severity: medium
+    finding: 'Four pre-existing frontend tests still fail; latest whole suite is not green.'
+    suggested_action: 'Track baseline InferenceStudio and video-playback accessibility fixes and close the global frontend gate before merge/release.'
+  - id: TEST-002
+    severity: medium
+    finding: 'Unfiltered backend test/check/Jacoco and full runner coverage were not executed; final frontend corrections were verified by the focused suite.'
+    suggested_action: 'Complete required whole-repository validation before merge/release; do not infer it from scoped passes.'
+  - id: SEC-001
+    severity: medium
+    finding: 'Live production background/secret grants and real policy identity remain unwired; local fixtures deny outside approved local/test profiles.'
+    suggested_action: 'Security/platform owners supply approved real grants/revocation/policy identity and evidence before production enablement.'
+  - id: OPS-001
+    severity: medium
+    finding: 'Real scheduled-browser pilot, representative capacity, retention/restore and compatible rollout evidence remain release-gated.'
+    suggested_action: 'Keep scheduling default off until operations and DevOps accept the explicit release gates.'
+waiver: { active: false }
+scope: 'Local default-off implementation; no merge or production approval'
+evidence:
+  backend_final: '63 passed, zero failures/errors/skips; private PostgreSQL feature/schema and contracts'
+  backend_additional: 'Manual acceptance 11, dispatcher 26, recovery 25, generic dispatch 8 passed in separate batches'
+  frontend_final_focused: '119 passed, including 22 new focused tests'
+  frontend_whole: '913 passed, four pre-existing failures; before last focused corrections'
+  runner_qa_scoped: '35 passed with global coverage disabled; no full coverage claim'
+  static: 'Spotless Java, Checkstyle main/test, SpotBugs main, frontend type check/lint/builds passed'
+  automated_review: 'CodeRabbit unavailable; configured graceful degradation and independent manual review'
+  report: 'docs/stories/STUDIO-SCHED-001/implementation/qa-review.md'

@@ -1,0 +1,162 @@
+{
+  "storyId": "STUDIO-SCHED-001",
+  "critiquedAt": "2026-10-06T00:32:26Z",
+  "critiquedBy": "@qa",
+  "specVersion": 1,
+  "iteration": 1,
+  "verdict": "BLOCKED",
+  "verdictReason": "One HIGH requirement completeness gap: immutable human activation attribution is not defined in persisted schedule/occurrence contract. Two MEDIUM internal contract gaps require deferred-occurrence interruption semantics and fixed-versus-configurable cadence alignment. These are local specification fixes, not unmet production release evidence.",
+  "scores": {
+    "accuracy": 3,
+    "completeness": 4,
+    "consistency": 3,
+    "feasibility": 4,
+    "alignment": 5,
+    "average": 3.7
+  },
+  "issues": [
+    {
+      "id": "CRIT-1",
+      "severity": "HIGH",
+      "category": "accuracy",
+      "check": "acc-1",
+      "requirements": [
+        "FR-10",
+        "FR-11"
+      ],
+      "description": "FR-11 requires the human activator recorded separately from background principal, and FR-10 requires immutable activation provenance. Frozen storage specifies principal/revision/version and mutable schedule update audit, but no durable human actor/time for a normal clean Resume. Uncertainty acknowledgment actor/time only records activations with uncertainty; it cannot supply attribution for all activations or historical accepted occurrences.",
+      "location": "spec.md#34-storage-atomicity-and-lock-rules",
+      "suggestion": "Aria must freeze an immutable activation event record or equivalent explicit persisted activation actor/time snapshots covering every successful activation, including an empty uncertainty set. Define principal, environment, confirmed revision and version linkage from accepted occurrences; preserve previous attribution after edits, clean Resume and removal/recreation. Add migration/API or linked audit projection and PostgreSQL provenance tests. Align contract, spec and associated story before critique2.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-2",
+      "severity": "MEDIUM",
+      "category": "consistency",
+      "check": "con-4",
+      "requirements": [
+        "FR-07",
+        "FR-08",
+        "FR-09"
+      ],
+      "description": "DEFERRED occurrences retain nominal identity and must eventually settle at grace expiry, but pause/removal/configuration edit and Resume reset schedule eligibility/cursor with no frozen transition for an outstanding deferred occurrence. The ordinary due poller will no longer revisit that old nominal slot, leaving truthful history indefinitely marked delayed.",
+      "location": "spec.md#35-recurrence-backlog-capacity-and-lifecycle",
+      "suggestion": "Freeze one bounded interruption rule under test→schedule→occurrence locking: settle an outstanding deferred identity without execution when pause/remove/configuration mutation supersedes it, with explicit stable decision code and immutable grace/provenance. Specify behavior during capability disable and later reenable. Add pause/remove/edit/resume-versus-deferral race and post-grace history tests; align API codes, contract and story.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-3",
+      "severity": "MEDIUM",
+      "category": "consistency",
+      "check": "con-4",
+      "requirements": [
+        "FR-03",
+        "NFR-03",
+        "ASM-01",
+        "OQ-04"
+      ],
+      "description": "ASM-01 and OQ-04 describe a configurable 60-second minimum, whereas the frozen resolver contract and capabilities expose a fixed 60-second floor established by zero-second minute grammar. Higher configurable floors require additional correct bounded validation and are not established by that grammar proof.",
+      "location": "spec.md#24-assumptions-and-adoption",
+      "suggestion": "Align requirements/spec/research/contract on fixed 60-second floor for this implementation and retain different production cadence as a future adopted contract, or explicitly specify and test bounded higher-floor validation. Keep configurable grace distinct from cadence floor; do not imply an unsupported configurability guarantee.",
+      "autoFixable": false
+    }
+  ],
+  "summary": {
+    "highIssues": 1,
+    "mediumIssues": 2,
+    "lowIssues": 0,
+    "autoFixable": 0,
+    "checksEvaluated": 21,
+    "dimensionChecks": {
+      "accuracy": {
+        "passed": [
+          "acc-2",
+          "acc-3",
+          "acc-4"
+        ],
+        "failed": [
+          "acc-1"
+        ]
+      },
+      "completeness": {
+        "passed": [
+          "comp-1",
+          "comp-2",
+          "comp-3",
+          "comp-4",
+          "comp-5"
+        ],
+        "failed": []
+      },
+      "consistency": {
+        "passed": [
+          "con-1",
+          "con-2",
+          "con-3"
+        ],
+        "failed": [
+          "con-4"
+        ]
+      },
+      "feasibility": {
+        "passed": [
+          "feas-1",
+          "feas-2",
+          "feas-3",
+          "feas-4"
+        ],
+        "failed": []
+      },
+      "alignment": {
+        "passed": [
+          "align-1",
+          "align-2",
+          "align-3",
+          "align-4"
+        ],
+        "failed": []
+      }
+    }
+  },
+  "nextAction": "Halt implementation; return to architect/PM for revised local contract/spec and associated story, then independent mandatory COMPLEX critique2. External production grant/pilot/load evidence stays release-gated, not a local revision blocker.",
+  "autoFixes": [],
+  "evidence": {
+    "inputs": [
+      "docs/stories/STUDIO-SCHED-001/spec/spec.md",
+      "docs/stories/STUDIO-SCHED-001/spec/requirements.json",
+      "docs/stories/STUDIO-SCHED-001/spec/complexity.json",
+      "docs/stories/STUDIO-SCHED-001/spec/research.json",
+      "docs/stories/STUDIO-SCHED-001/spec/implementation-contract.md",
+      "docs/stories/STUDIO-SCHED-001/STUDIO-SCHED-001.story.md"
+    ],
+    "sourceInspected": [
+      "StudioAcceptanceService.java",
+      "StudioService.java",
+      "CompileStateService.java",
+      "ProgressReportService.java",
+      "StudioDispatchLedgerStatements.java",
+      "ProvisionalDispatchAuthorization.java",
+      "ConfiguredSecretUseAuthorization.java",
+      "ExecutionReadinessService.java",
+      "UITestExecutionId.java",
+      "V7/V13/V14 migrations",
+      "studio-runner/src/reporting/reportingStepReporter.ts"
+    ],
+    "notes": [
+      "No application tests, migration, browser execution or live production authorization experiment was run by this critique.",
+      "Aria's previous installed-dependency DST probe was reviewed, not rerun by Quinn.",
+      "The source confirms STARTED reporting is detached; START_TIMEOUT inclusion is research-derived and traced consistently.",
+      "Real PostgreSQL integrity/races, local fail-closed behavior and operator flows remain future implementation gates.",
+      "Referenced spec-quality-checklist.md absent after repository search; self-critique performed against all 21 explicit dimension checks and verdict rules in declared spec-critique.md.",
+      "No runtime framework dependency or product scope expansion required; complex delivery has associated ordered tracks and a Draft story.",
+      "Ledger-joined execution linkage, version-independent local uniqueness, nonlocking overlap and durable uncertainty are sound design directions; revised human activation attribution remains necessary."
+    ]
+  },
+  "selfCritique": {
+    "performed": true,
+    "framework": ".aiox-core/development/tasks/spec-critique.md",
+    "referencedChecklistAvailable": false,
+    "verdictRulesApplied": "Any HIGH issue means BLOCKED; weighted average 3.70; minimum dimension 3.",
+    "scopeDistinction": "Specification verdict only; no story lifecycle transition, implementation QA pass or production approval."
+  }
+}

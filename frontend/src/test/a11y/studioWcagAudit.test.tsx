@@ -88,10 +88,12 @@ const FAILING_IMPACTS = new Set(['critical', 'serious']);
  *
  * Re-measured 2026-09-20 with axe-core 4.13.0 after the two-panel Studio redesign. The Studio
  * editor surfaces (`ChecksStudioPage/*`) and Runs page now have zero critical/serious violations.
- * One unnamed Tests-page action remains ticketed by A11Y-1/A11Y-2.
+ * Re-measured 2026-10-04 after the compact Studio lists: the Tests-page Delete action now has
+ * its own accessible name, and tooltip wrappers use describeChild. Tests and Runs both have
+ * zero critical/serious violations; A11Y-1/A11Y-2 are resolved in the automated scan.
  */
 const PINNED_CRITICAL_SERIOUS: Readonly<Record<string, Readonly<Record<string, number>>>> = {
-  StudioTestsPage: { 'aria-prohibited-attr': 1, 'button-name': 1 },
+  StudioTestsPage: {},
   StudioRunsPage: {},
   'ChecksStudioPage/author': {},
   'ChecksStudioPage/compile-review': {},
@@ -103,6 +105,7 @@ const PINNED_CRITICAL_SERIOUS: Readonly<Record<string, Readonly<Record<string, n
 const bootstrapHandlers = [
   http.get(`${API_BASE}/checks/sources`, () => HttpResponse.json({ sources: [] })),
   http.get(`${API_BASE}/features`, () => HttpResponse.json({ sources: [], features: [] })),
+  http.get(`${API_BASE}/csi`, () => HttpResponse.json({ data: [], page: 0, size: 20, totalElements: 0, totalPages: 0 })),
 ];
 
 /** Every finding this run produced, at every impact, written out for the audit record. */

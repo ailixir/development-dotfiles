@@ -16,9 +16,13 @@ import {
   type SourceArtifact,
   type TestDto,
 } from '@/types/studio/studioTypes';
+import { DEMO_CSIS } from './demoFixtures';
 
-/** The CSIs the mock principal may read. Anything else must stay invisible. */
-export const MOCK_READABLE_CSIS = ['60406'];
+/**
+ * The CSIs the mock principal may read. Anything else must stay invisible. `60406` holds the
+ * contract corpus below; the others hold the demo-scale list data in `demoFixtures.ts`.
+ */
+export const MOCK_READABLE_CSIS: string[] = [...DEMO_CSIS];
 
 export const OTHER_CSI = '60499';
 

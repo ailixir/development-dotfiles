@@ -44,6 +44,7 @@ class ExecutionReadinessTest {
   @Autowired private StudioRepository studioRepository;
   @Autowired private java.util.Map<String, ExecutionReadiness> implementations;
   @Autowired private JdbcTemplate jdbc;
+  @Autowired private RuntimePinProperties pins;
 
   private UUID testId;
 
@@ -347,6 +348,22 @@ class ExecutionReadinessTest {
 
     assertThat(verdict.code()).isEqualTo(ReadinessVerdict.RUNTIME_INCOMPATIBLE);
     assertThat(verdict.message()).contains("artifact schema version 2");
+  }
+
+  /**
+   * VAL-031: executor 2.1.0 (text-entry role equivalence) is a backward-compatible minor, so a
+   * revision confirmed under 2.0.0 stays executable once the pin moves to 2.1.0. The runner's
+   * {@code isCompatible} accepts it; the backend must not refuse it either.
+   */
+  @Test
+  void aRevisionConfirmedUnderExecutor200StaysReadyOnThe210Pin() {
+    assertThat(pins.executorVersion()).isEqualTo("2.1.0");
+    String provenance = ReadinessFixtures.provenance(CompilePins.SYNTAX_REFERENCE_VERSION, "2.0.0");
+    assertThat(provenance).contains("\"executorVersion\":\"2.0.0\"");
+    ReadinessFixtures.confirm(
+        states, jdbc, testId, STEPS, provenance, CompilePins.SUPPORTED_ARTIFACT_VERSION);
+
+    assertThat(readiness.evaluate(testId).ready()).isTrue();
   }
 
   /**

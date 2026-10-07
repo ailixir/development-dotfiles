@@ -1,0 +1,490 @@
+{
+  "storyId": "STUDIO-CODE-001-editable-versioned-source",
+  "gatheredAt": "2026-10-05T02:35:13.235196Z",
+  "source": "prd",
+  "gatheredBy": "@pm (Morgan)",
+  "elicitationVersion": "2.0",
+  "status": "Proposal; not an approved implementation story",
+  "scope": "Analyze and propose editable/downloadable Studio source with explicit execution versioning. No product implementation is authorized by this spec run.",
+  "provenance": {
+    "USER-1": "User request: Code tab should be editable when users need to change or download source; evaluate and propose the best execution versioning option using expert agents.",
+    "PRD-1": "PRD.md \u00a75.2, lines 82-119: checklist authoring, readable action/target/assertion summaries, expandable Playwright source, exact immutable revision confirmation, and relevant edits requiring reconfirmation.",
+    "PRD-2": "PRD.md \u00a75.3 line 128: confirmed Playwright TypeScript source; Python export retired.",
+    "PRD-3": "PRD.md \u00a75.2 lines 104/113: existing download commitment concerns video evidence, not source code.",
+    "ARCH-1": "docs/architecture/studio-execution.md \u00a7\u00a74.2-4.5 and \u00a78.1: generated immutable candidate, conditional confirmation, bounded schema/AST validation, canonical artifact hash and preserved execution provenance.",
+    "ARCH-2": "docs/architecture/studio-execution.md \u00a7\u00a79.1-9.3 and AGENTS.md: CSI authorization, declared secret references, no hardcoded credentials, centralized API client and MSW-first development.",
+    "CODE-1": "frontend/src/components/studio/CodeTab.tsx: confirmed-source-only per-step read-only renderer; no code save/edit/download action; explicitly states the artifact is Studio step language rather than a standalone file.",
+    "CONTRACT-1": "docs/specs/studio/openapi.yaml, docs/specs/studio/artifact.schema.json, frontend/src/types/studio/studioTypes.ts: ordered originalText/code artifact steps; source/configuration counters; revision/hash confirmation; no client-submitted code authoring path.",
+    "ADR-30": "docs/architecture/ADR-002-internal-contract-surface.md \u00a730: Code view renders only independently read confirmed artifact/hash. Editable mode is a proposed explicit supersession, not a permitted reinterpretation of this existing surface.",
+    "CODE-2": "Current dirty working tree: backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java:361-370 invokes publishAcceptedCandidate; compile/CompileStateService.java:281-303 auto-stamps confirmedBy/confirmedAt and READY. Static observed behavior conflicts with PRD exact explicit confirmation; runtime not independently exercised in this spec analysis.",
+    "HISTORY-1": "PRD historical commits db748a3a3 and 9ece64272 reviewed: earlier PRD discusses Python generation and evidence download; current PRD explicitly retires Python export. No explicit editable-code mandate found in those versions.",
+    "UX-1": "ux-analysis.md: proposed explicit bounded per-step editor, page-level dirty/navigation protection, operation-derived summaries, confirmed/candidate/last-run source identity and exact persisted-revision export.",
+    "RESEARCH-1": "research.json and research-notes.md: verified existing bounded validator/trusted operations, immutable persistence/CAS patterns; native revision recommendation, no new editor dependency, full TypeScript/Git/portable export separately scoped.",
+    "ARCH-P1": "architecture-proposal.md: Aria evaluated proposal: additive codeDraftRevision, explicit authoringMode, freshness tuple F, captured manual validation, explicit confirmation and exact expected execution identity; native ZIP source export.",
+    "DATA-P1": "data-versioning-review.md: Dara proposal: append-only manual checkpoints, preparation-event identity, complete immutability/ownership constraints and staged V19 drained-publisher cutover.",
+    "QA-PRE1": "Quinn pre-review findings: page Save spans existing authoring and proposed code endpoints; specify ordered requests/returned F and partial failure, preserving buffers and blocking validation/execution instead of claiming a cross-request transaction.",
+    "QA-CRIT1": "critique-1.json CRIT-1 (MEDIUM completeness): explicitly include existing authoring/Steps/context/config saves and background cancellation/abandonment settlement in complete freshness guard audit, distinguishing caller expectations from immutable request captures; extend races without a new cancel feature."
+  },
+  "prdGap": "The checked-out PRD mandates source review and immutable confirmation but does not explicitly mandate editable source or code downloads. Those are a user-requested product extension, not an already implemented PRD obligation.",
+  "functional": [
+    {
+      "id": "FR-1",
+      "description": "Allow an authorized author to edit Studio source from the Code tab without mutating any existing confirmed revision.",
+      "priority": "P0",
+      "status": "user-requested",
+      "rationale": "Support expert corrections while retaining the checklist-first workflow and immutable trust boundary.",
+      "sources": [
+        "USER-1",
+        "PRD-1",
+        "ARCH-1",
+        "UX-1",
+        "QA-PRE1"
+      ],
+      "acceptance": [
+        "Given readable source and edit permission, entering Edit creates a distinct working draft while the base immutable revision remains unchanged.",
+        "Code changes remain identifiable as unconfirmed until validated and explicitly confirmed.",
+        "Code draft changes participate in page Save, dirty-state and navigation protection; tab switching and background reads preserve the working buffer.",
+        "Combined page Save commits authoring first, then compatible code using returned freshness; a failed or incompatible second save preserves local code, reports partial state and blocks validation/execution until resolved."
+      ]
+    },
+    {
+      "id": "FR-2",
+      "description": "Offer an authorized source download from the Code tab with explicit revision identity, content and portability meaning.",
+      "priority": "P0",
+      "status": "user-requested",
+      "rationale": "Users need to obtain the code they are reviewing; a Studio artifact must not be mislabeled as a runnable standalone Playwright file.",
+      "sources": [
+        "USER-1",
+        "CODE-1",
+        "ARCH-1"
+      ],
+      "acceptance": [
+        "Given a retained source revision, downloading produces that selected revision's exact source artifact with server-provided identity and hash.",
+        "Downloaded artifacts contain reference identifiers rather than resolved secrets.",
+        "The interface distinguishes Studio source download from a standalone Playwright export; unsupported portability is not promised."
+      ]
+    },
+    {
+      "id": "FR-3",
+      "description": "Submit manually edited code through authoritative server validation and review before it can become a runnable confirmed revision.",
+      "priority": "P0",
+      "status": "derived-safeguard",
+      "rationale": "The existing validator and confirmation contract protect generated and manual source equally.",
+      "sources": [
+        "FR-1",
+        "PRD-1",
+        "ARCH-1",
+        "CONTRACT-1",
+        "CODE-2"
+      ],
+      "acceptance": [
+        "Manual preparation validates schema, bounded step AST, declared references and current policy without invoking AI to replace the user's source.",
+        "Rejected source shows bounded per-step diagnostics and creates no runnable confirmed revision.",
+        "Successful preparation creates a new immutable candidate requiring the exact revision/hash and freshness inputs to be confirmed.",
+        "Generated and manual preparations both reach awaiting-confirmation; preparation must not stamp confirmation identity/time or make the candidate READY before the author confirms it."
+      ]
+    },
+    {
+      "id": "FR-4",
+      "description": "Keep every editable code step associated with its checklist identity and original text, and make any divergence visible.",
+      "priority": "P0",
+      "status": "proposed-derivation",
+      "rationale": "Step-level progress and evidence depend on ordered source-step mapping; code edits cannot assert that English and behavior are automatically equivalent.",
+      "sources": [
+        "PRD-1",
+        "CODE-1",
+        "CONTRACT-1"
+      ],
+      "acceptance": [
+        "Manual edits preserve the current artifact's valid ordered step mapping.",
+        "Review renders actual validated code/actions and identifies user-edited provenance instead of claiming unchanged AI translation.",
+        "Checklist edits cannot silently regenerate or overwrite manual source; the user must select an explicit preparation path."
+      ]
+    },
+    {
+      "id": "FR-5",
+      "description": "Preserve immutable source version history and provenance so each run identifies the exact confirmed version accepted for execution.",
+      "priority": "P0",
+      "status": "existing-and-user-requested",
+      "rationale": "Execution needs one authoritative version, independent of later draft/code edits.",
+      "sources": [
+        "USER-1",
+        "PRD-1",
+        "ARCH-1",
+        "CONTRACT-1",
+        "DATA-P1"
+      ],
+      "acceptance": [
+        "New generated or manually edited source creates a new immutable revision rather than editing an old revision in place.",
+        "Manual revision provenance identifies its base revision and author, without fabricating AI provenance for edited source.",
+        "An accepted execution continues using its snapshotted revision after a later authoring change.",
+        "Equal artifact hashes from distinct successful preparation/authorship events retain distinct revision identities; a retry of the same captured attempt returns the same outcome."
+      ]
+    },
+    {
+      "id": "FR-6",
+      "description": "Reject stale code saves, validations, confirmations and executions instead of silently accepting outdated source.",
+      "priority": "P0",
+      "status": "derived-safeguard",
+      "rationale": "Code introduces an additional execution-affecting input into the existing optimistic concurrency contract.",
+      "sources": [
+        "PRD-1",
+        "ARCH-1",
+        "FR-1",
+        "RESEARCH-1",
+        "ARCH-P1",
+        "QA-CRIT1"
+      ],
+      "acceptance": [
+        "An edit to source or configuration invalidates runnable readiness for the current draft.",
+        "Concurrent authoring returns a conflict and preserves the losing client's local edits for recovery.",
+        "A delayed generated/manual preparation result cannot publish against inputs that have moved.",
+        "The API refuses execution when confirmation does not match all current execution-affecting inputs.",
+        "Execute identifies the revision/hash and current freshness values the client intends to run; the API accepts only that exact current confirmed revision, never a newer different confirmation selected in a race.",
+        "An unchanged compatible confirmed revision remains runnable after an optional preparation failure; compileStatus alone is neither a readiness grant nor a readiness revocation.",
+        "Existing authoring/Steps/context/config writers compare complete caller expected freshness with saved state; all preparation success/failure/deadline/cancellation/abandonment settlements recheck captured request identity and freshness, so older work cannot clear a newer manual candidate/request or revoke unchanged confirmed readiness."
+      ]
+    },
+    {
+      "id": "FR-7",
+      "description": "Show distinct working, validated candidate and confirmed source states so the user can tell what would run and what was downloaded.",
+      "priority": "P0",
+      "status": "proposed-derivation",
+      "rationale": "Editable source would otherwise make the Code tab's current saved-source guarantee misleading.",
+      "sources": [
+        "USER-1",
+        "CODE-1",
+        "PRD-1",
+        "UX-1"
+      ],
+      "acceptance": [
+        "The visible source carries a human-readable state and immutable revision identity when one exists.",
+        "Unsaved local edits never appear as confirmed source.",
+        "Save, preparation, review/confirmation, download and Run states remain understandable during loading, empty and error states.",
+        "The selected last-run source remains inspectable under that execution snapshot identity after later draft or confirmation changes."
+      ]
+    },
+    {
+      "id": "FR-8",
+      "description": "Preserve CSI ownership, current secret-reference policy and runtime compatibility checks across code editing, downloading and execution.",
+      "priority": "P0",
+      "status": "existing-extension",
+      "rationale": "Code editing and downloads expose existing protected resources; they do not bypass ordinary authorization or broaden execution capability.",
+      "sources": [
+        "ARCH-1",
+        "ARCH-2",
+        "PRD-1"
+      ],
+      "acceptance": [
+        "Unauthorized callers cannot read/download source or create/confirm manual revisions.",
+        "Manual code cannot access an undeclared or unauthorized variable/secret reference.",
+        "Historical source remains preserved when runtime policy revocation blocks running it."
+      ]
+    }
+  ],
+  "nonFunctional": [
+    {
+      "id": "NFR-1",
+      "category": "security",
+      "description": "Manual source remains subject to the same bounded allowlist validator and operation-only execution boundary as generated source.",
+      "metric": "All existing forbidden-node/method fixtures remain rejected; no browser-evaluate, filesystem, process, arbitrary import or unrestricted JavaScript path is introduced.",
+      "sources": [
+        "ARCH-1",
+        "ARCH-2"
+      ]
+    },
+    {
+      "id": "NFR-2",
+      "category": "reliability",
+      "description": "Revision and accepted-execution identity remains durable and consistent under concurrent edits and retries.",
+      "metric": "Race tests produce one conditional winner; losing saves/confirmations/preparations cannot replace current source; accepted executions retain their immutable revision.",
+      "sources": [
+        "ARCH-1",
+        "FR-5",
+        "FR-6"
+      ]
+    },
+    {
+      "id": "NFR-3",
+      "category": "usability",
+      "description": "Source editing and download actions support keyboard use and explicit understandable saved/candidate/confirmed/error states.",
+      "metric": "Keyboard-only author can enter edit, change source, save, inspect diagnostics, confirm and download; focused errors associate with the relevant step.",
+      "sources": [
+        "PRD-1",
+        "AGENTS.md",
+        "FR-7"
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "CON-1",
+      "type": "technical",
+      "description": "Keep the existing bounded Playwright step language and trusted typed-operation executor unless a separately approved architecture changes that boundary.",
+      "impact": "Editing exposes supported per-step source, not arbitrary TypeScript projects. The proposed editor must explicitly supersede ADR-002 \u00a730 for working/candidate views while preserving the confirmed-view identity guarantee.",
+      "sources": [
+        "ARCH-1",
+        "CODE-1",
+        "CONTRACT-1",
+        "ADR-30"
+      ]
+    },
+    {
+      "id": "CON-2",
+      "type": "business",
+      "description": "Maintain checklist-first no-code authoring and exact revision review/confirmation before execution; no runtime AI or silent regeneration.",
+      "impact": "Manual source is an optional expert path requiring clear mode transitions and reconfirmation.",
+      "sources": [
+        "PRD-1"
+      ]
+    },
+    {
+      "id": "CON-3",
+      "type": "technical",
+      "description": "Use existing React/TypeScript/MUI, centralized API client, MSW contracts and backend/runner bounded contexts.",
+      "impact": "No editor library, Git service or new runtime dependency is preselected without verified need.",
+      "sources": [
+        "AGENTS.md",
+        "ARCH-2"
+      ]
+    },
+    {
+      "id": "CON-4",
+      "type": "business",
+      "description": "This pipeline delivers analysis and a reviewable proposal only, without production implementation or rewriting the existing PRD/architecture.",
+      "impact": "Decisions and future file changes are proposals; no acceptance status implies feature delivery.",
+      "sources": [
+        "USER-1"
+      ]
+    },
+    {
+      "id": "CON-5",
+      "type": "business",
+      "description": "Python export is retired; standalone Playwright export, code import, Git synchronization and revision rollback are not established requirements in the checked-out PRD.",
+      "impact": "Do not bundle these capabilities into the recommended first slice without explicit scope decisions.",
+      "sources": [
+        "PRD-1",
+        "PRD-2",
+        "USER-1"
+      ]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1",
+      "description": "The requested edit capability means changing bounded code that Studio executes, rather than executing arbitrary uploaded Playwright projects.",
+      "risk": "high",
+      "risk_if_wrong": "An unrestricted-code product needs a separate isolation, policy and runtime architecture.",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-2",
+      "description": "A faithful revision-identified Studio source download satisfies the immediate download need; standalone local execution is a distinct optional follow-up.",
+      "risk": "medium",
+      "risk_if_wrong": "A portable package requires a verified adapter/runtime contract rather than merely wrapping snippets.",
+      "validation_needed": true
+    },
+    {
+      "id": "ASM-3",
+      "description": "Existing CSI-scoped author permissions can govern code editing without introducing a new product role in this first slice.",
+      "risk": "medium",
+      "risk_if_wrong": "Authorization policy must distinguish code authors from ordinary checklist authors.",
+      "validation_needed": true
+    }
+  ],
+  "proposedDecisions": [
+    {
+      "id": "DEC-1",
+      "status": "proposed",
+      "description": "Native immutable Studio revisions remain execution authority; edit a separate bounded manual draft. Git integration and full TypeScript execution remain separate scope.",
+      "sources": [
+        "ARCH-P1",
+        "RESEARCH-1",
+        "FR-1",
+        "FR-5",
+        "CON-1"
+      ]
+    },
+    {
+      "id": "DEC-2",
+      "status": "proposed",
+      "description": "Keep existing checklist/context counters and add codeDraftRevision, GENERATED/MANUAL authoringMode and server codeDraftHash; enforce full freshness tuple at every writer and acceptance boundary. This includes existing authoring writers and all background outcomes, using immutable captured identity for workers rather than client-body expectations.",
+      "sources": [
+        "ARCH-P1",
+        "DATA-P1",
+        "FR-6",
+        "QA-CRIT1"
+      ]
+    },
+    {
+      "id": "DEC-3",
+      "status": "proposed",
+      "description": "Generated and manual preparation create unconfirmed immutable candidates; only explicit exact-revision approval makes new source runnable. Reconcile current auto-accept publication and legacy current eligibility during rollout.",
+      "sources": [
+        "ARCH-P1",
+        "PRD-1",
+        "CODE-2",
+        "FR-3"
+      ]
+    },
+    {
+      "id": "DEC-4",
+      "status": "proposed",
+      "description": "Save append-only manual authoring checkpoints, including invalid bounded syntax, and retain them across deliberate regeneration. Reuse captured preparation attempts for manual validation; deduplicate retries by event identity.",
+      "sources": [
+        "DATA-P1",
+        "ARCH-P1",
+        "FR-1",
+        "FR-4",
+        "FR-5"
+      ]
+    },
+    {
+      "id": "DEC-5",
+      "status": "proposed",
+      "description": "Download a selected persisted validated revision as a ZIP with exact canonical source.artifact.json plus allowlisted manifest.json. No unsaved-draft or standalone executable export in first slice.",
+      "sources": [
+        "ARCH-P1",
+        "RESEARCH-1",
+        "FR-2",
+        "CON-5"
+      ]
+    }
+  ],
+  "domainModel": [
+    {
+      "entity": "Studio test draft",
+      "description": "Mutable authoring inputs, configuration and freshness counters belonging to one immutable registered CSI.",
+      "relationships": [
+        "has many immutable source revisions"
+      ]
+    },
+    {
+      "entity": "Source revision",
+      "description": "Server-validated immutable artifact with canonical hash, source/configuration context, provenance and write-once confirmation metadata.",
+      "relationships": [
+        "belongs to Studio test",
+        "may reference parent revision for manual edits",
+        "has many execution references"
+      ]
+    },
+    {
+      "entity": "Execution",
+      "description": "Durable accepted attempt that snapshots a confirmed revision, CSI, environment and current runtime provenance.",
+      "relationships": [
+        "belongs to immutable source revision"
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "flow": "Edit source",
+      "description": "Author enters Code, creates a working draft from an identified source, changes supported step code, saves, validates, reviews and confirms the new revision.",
+      "states": [
+        "unavailable",
+        "loading",
+        "confirmed",
+        "editing/unsaved",
+        "saved/unconfirmed",
+        "validating",
+        "validation rejected",
+        "awaiting confirmation",
+        "conflict",
+        "ready"
+      ]
+    },
+    {
+      "flow": "Download source",
+      "description": "Author selects a readable source revision and downloads its exact Studio artifact with revision identity and explicit portability semantics.",
+      "states": [
+        "unavailable",
+        "loading",
+        "authorized",
+        "download complete",
+        "failed",
+        "permission denied"
+      ]
+    }
+  ],
+  "edgeCases": [
+    {
+      "scenario": "Two authors edit the same source version",
+      "handling": "Conditional persistence rejects the stale save and keeps its local text available to reconcile.",
+      "severity": "high"
+    },
+    {
+      "scenario": "Checklist or referenced nonsecret values change while manual source exists",
+      "handling": "Invalidate readiness and explain that manual source needs explicit revalidation or intentional replacement; do not silently regenerate.",
+      "severity": "high"
+    },
+    {
+      "scenario": "Manual source uses unsupported TypeScript or an unauthorized reference",
+      "handling": "Reject before any runnable candidate/confirmation, using bounded diagnostics.",
+      "severity": "critical"
+    },
+    {
+      "scenario": "User downloads while local source differs from selected saved revision",
+      "handling": "Clearly identify the saved revision being downloaded; do not imply local edits were confirmed or exported.",
+      "severity": "medium"
+    },
+    {
+      "scenario": "User has no confirmed or validated source yet",
+      "handling": "Show a preparation path and an honest source-unavailable state.",
+      "severity": "low"
+    },
+    {
+      "scenario": "Policy or runtime upgrade makes an old confirmed revision incompatible",
+      "handling": "Preserve historical source, reject incompatible execution and require explicit validation/confirmation against current policy.",
+      "severity": "high"
+    }
+  ],
+  "terminology": [
+    {
+      "term": "Studio source artifact",
+      "definition": "An ordered JSON artifact of supported per-step Playwright expressions; not a standalone Playwright test file."
+    },
+    {
+      "term": "working code draft",
+      "definition": "Mutable manually edited source that has not yet been validated and confirmed."
+    },
+    {
+      "term": "immutable source revision",
+      "definition": "One persisted validated artifact/context identity; later edits create a new revision."
+    },
+    {
+      "term": "confirmed source",
+      "definition": "The exact revision and artifact hash the author accepted, runnable only while all freshness and current policy checks still match."
+    },
+    {
+      "term": "artifact schema version",
+      "definition": "The artifact format version; distinct from source revision identity, mutable draft counters and execution snapshot revisions."
+    },
+    {
+      "term": "source download",
+      "definition": "Faithful retrieval of an identified Studio artifact; portable Playwright export would be a separately labeled derived format."
+    }
+  ],
+  "openQuestions": [
+    {
+      "id": "OQ-1",
+      "question": "Does the desired download need a Studio artifact for inspection/archival, or a standalone locally runnable Playwright package? Recommended first slice is exact Studio source download.",
+      "blocking": false,
+      "assignedTo": "@pm",
+      "blocks": "Portable-export scope, not this proposal"
+    },
+    {
+      "id": "OQ-2",
+      "question": "Should the existing CSI author permission govern manual source edits, or must code editing require a dedicated elevated permission?",
+      "blocking": false,
+      "assignedTo": "@pm",
+      "blocks": "Implementation authorization contract"
+    },
+    {
+      "id": "OQ-3",
+      "question": "What revision/code retention and maximum editable-source limits are required beyond existing artifact caps?",
+      "blocking": false,
+      "assignedTo": "@architect",
+      "blocks": "Operational rollout, not architecture evaluation"
+    }
+  ]
+}

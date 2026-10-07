@@ -1,0 +1,97 @@
+{
+  "storyId": "studio-secrets-disclaimer",
+  "assessedAt": "2026-10-05T00:00:00Z",
+  "assessedBy": "@architect",
+
+  "result": "STANDARD",
+  "overridden": false,
+
+  "assumptionsForScoring": [
+    "[AUTO-DECISION] OQ-2 -> scored with the @pm proposed default: a server-side structured audit log line (FR-8) carried by a new field on POST /tests/{id}/secrets, with no DB table. (reason: this is the default in requirements.json, and it is the version of FR-8 that changes the score. Frontend-only acknowledgment would lower scope to 3 and integration to 1, total 9, still STANDARD at the boundary.)",
+    "Policy direction of OQ-1 is settled by the product owner: users MAY store their own credentials at their own risk. CON-1 is no longer a policy blocker. It becomes a required doc update (PRD.md:119, docs/brd/checks-ui-studio.brd.md:104). Final copy still needs Legal/InfoSec sign-off (CON-5). That is an open item, and it does not block the spec.",
+    "OQ-6 (wizard localStorage draft holds plain values) is out of scope, per the @pm default. Not counted."
+  ],
+
+  "dimensions": {
+    "scope": {
+      "score": 4,
+      "notes": "About 15-20 files across FE, BE, contract and docs. FE: a new versioned copy constant (FR-9), SecretInput.tsx (FR-1/2), ChecksStudioPage.tsx (Variables dialog FR-3/4/6, caption :866, template apply FR-7), UiTestConfig.tsx (FR-3/4), saveErrorMessage.ts and conflictNarratives.ts (FR-5), plus co-located tests. BE (FR-8): CreateStudioSecretRequest.java, StudioSecretsService.java, StudioSecretsServiceTest/StudioSecretsControllerIT. Contract: docs/specs/studio/openapi.yaml schema CreateStudioSecretRequest (additionalProperties:false, line 3506), StudioContractTest, the studio-runner/test/run/confinement.test.ts BASE_SHA256 digest pin (line 257), and an ADR-002 row. Docs: PRD.md:119 and BRD:104. Cross-cutting but shallow: most edits are copy and gating."
+    },
+    "integration": {
+      "score": 2,
+      "notes": "No external system. FR-8 extends one existing internal API, POST /api/v1/studio/tests/{id}/secrets. The new field is a closed-schema contract change and does not add a route, so the 31-operation pin is unchanged. Vault (HashicorpStudioVaultProvider) is untouched, and the acknowledgment never goes to Vault. The audit line can follow the existing GatewayAuditLogger pattern (a dedicated SLF4J audit logger name)."
+    },
+    "infrastructure": {
+      "score": 1,
+      "notes": "No schema, migration, env var, dependency or service. The STUDIO_CAPABILITIES.vaultSecrets flag stays false (CON-2), so FR-1/2/7 ship dark. A DB acknowledgment table would apply only if InfoSec requires queryable evidence (OQ-2). That would make this score 4 and the total 14, still STANDARD."
+    },
+    "knowledge": {
+      "score": 1,
+      "notes": "Each mechanism already exists in the codebase. canCreate gating in SecretInput.tsx:89/188, MUI Alert, the INLINE_CREDENTIAL message maps, the strict byte[] body parse with FAIL_ON_UNKNOWN_PROPERTIES (StudioSecretsService.java:97), the CSI write check before parse (D10/D11 order), the GatewayAuditLogger audit-logger pattern, and the CredentialPatternScreen.LIMITATION single-source constant pattern. The real unknown is policy and legal wording, which an external owner decides. Codebase research cannot settle it."
+    },
+    "risk": {
+      "score": 3,
+      "notes": "Security- and compliance-adjacent, and visible on the live alpha path (plain variables, FR-3/4/6). It loosens a written policy ('prohibited' becomes 'discouraged, own risk'). It touches a deliberately hardened endpoint whose body is erased after use (byte[]/char[] zeroing, no value echo). The new field must not weaken that, and NFR-4's required-ack 400 has to keep 403 before 400. Reversible: mostly copy behind a constant, and the secret UI is dark. No run, compile or evidence semantics change. Advisory only, with no new blocking (CON-4)."
+    }
+  },
+
+  "totalScore": 11,
+
+  "pipelinePhases": ["gather", "assess", "research", "spec", "critique", "plan"],
+
+  "researchPhase": {
+    "skippable": false,
+    "reason": "STANDARD class keeps Research by the task's thresholds. Recommended: keep it time-boxed and narrow. All implementation patterns exist in the codebase, so Research should NOT re-survey the code.",
+    "suggestedTopics": [
+      "Acknowledgment / clickwrap evidence practice: what an 'at your own risk' record needs (who, what version, when) to count as evidence. This informs the OQ-2 log-line vs DB-table choice.",
+      "Disclaimer UX for credential entry in enterprise test-automation tools: placement, length (NFR-2 at most 3 sentences), re-acknowledge per entry vs once.",
+      "Whether a Citi functional-ID request process/link exists (OQ-7). This is likely internal-only. If it cannot be found, record it as an open item and do not invent it."
+    ]
+  },
+
+  "requirementClaimCorrections": [
+    {
+      "where": "FR-5 rationale, NFR-3 metric, and F5 via the CredentialPatternScreen javadoc",
+      "claim": "'CredentialScreenHonestyTest stays green'",
+      "finding": "No class with that name exists in the repo or in git history. Only the javadoc of CredentialPatternScreen.java names it. The real guard is PromptAssemblyTest#noMessageInTheModuleClaimsCredentialDetectionIsComplete (backend/src/test/java/com/citi/put/checks/studio/compile/PromptAssemblyTest.java:195). It scans backend messages only, so frontend disclaimer copy (NFR-3) has no automated honesty guard. The spec must name the right test and add a frontend copy assertion if NFR-3 is meant to be enforced.",
+      "severity": "medium"
+    },
+    {
+      "where": "F8 evidence StudioSecretsService.java:128,138,157",
+      "claim": "line cites for the create log line",
+      "finding": "Line 138 (the log line) is correct and has no principal, as F8 says. Lines 128 and 157 are the create() body and parse() rather than log lines. This is minor and does not affect scoring.",
+      "severity": "low"
+    },
+    {
+      "where": "CON-3",
+      "claim": "the change needs openapi.yaml, a contract test and a DTO change",
+      "finding": "Correct but incomplete. Any edit to openapi.yaml also breaks the studio-runner digest pin (studio-runner/test/run/confinement.test.ts:257 BASE_SHA256, which must be re-anchored from shasum) and needs an ADR-002 row. The operation count pin (StudioContractTest:363, 31) is unaffected because no route is added.",
+      "severity": "medium"
+    }
+  ],
+
+  "verifiedClaims": [
+    "F1 SecretInput dialog Name/Value(password)/Allowed origins and helper text 'Stored in Vault only. It is never shown again.' (SecretInput.tsx:147-190)",
+    "F2 STUDIO_CAPABILITIES.vaultSecrets=false; Secret option and SecretInput gated on page (ChecksStudioPage.tsx ~1280-1302) and wizard (UiTestConfig.tsx:132-150)",
+    "F3 plain value is an unmasked TextField; variables are persisted (StudioService.java:555) and plain values feed AuthoringRevisionIdentity (StudioService.java:868-874)",
+    "F4 wizard autosaves the whole formData to localStorage 'checks:create:draft' (CreateCheckPage.tsx:139) and removes it only on create (:256)",
+    "F5 the screen runs only on orderedSource (CompilePipeline.java:169, CompileStateService.java:149)",
+    "F6 INLINE_CREDENTIAL mapped in saveErrorMessage.ts:16 and conflictNarratives.ts:57",
+    "F7 daily-sign-on template is 'real user' with PASSWORD secret; filtered out by PRODUCTION_ALPHA_TEMPLATES",
+    "F8 the create body is parsed strictly (StudioSecretsService.java:97) and openapi CreateStudioSecretRequest has additionalProperties:false",
+    "F9 legacy backend/.../checks/secrets/ is absent; studio/secrets/* exists",
+    "F10 PRD.md:119 'User-pasted credentials are prohibited' and BRD:104 'inline credentials are prohibited'"
+  ],
+
+  "flags": [
+    "DOC UPDATE REQUIRED: PRD.md:119 and docs/brd/checks-ui-studio.brd.md:104 say 'prohibited'. That conflicts with the product-owner decision (allowed at own risk). Change both to 'discouraged; personal credentials allowed only with recorded acknowledgment' once Legal/InfoSec approve the wording.",
+    "OPEN (non-blocking for spec): final disclaimer copy and the 'own risk' allowance need Legal/InfoSec (Security & Compliance, BRD §11) sign-off before GA. Ship a versioned placeholder constant (FR-9).",
+    "SECURITY: the acknowledgment field must not reorder the 403 -> 400 -> 409/503 check order (vault-secrets D10/D11). The body-erasure finally block must keep covering the new field. The audit line must carry principal, testId, name and disclaimerVersion and never the value.",
+    "BACKWARD COMPATIBILITY: if the acknowledgment is REQUIRED server-side (NFR-4 SECRET_ACK_REQUIRED), any client that does not send it gets 400. Today the only client is the dark SecretInput, so the risk is low. Ship FE and BE together, or make the field optional first and required in a later step.",
+    "CONTRACT PINS: plan must list openapi.yaml schema edit + StudioContractTest schema/record parity + studio-runner BASE_SHA256 re-anchor + ADR-002 row. Frontend/studio-runner verification via `pnpm exec vitest run ...` (no install, no lockfile write).",
+    "ADJACENT DEFECT (out of scope, route separately): the wizard localStorage draft (OQ-6) keeps plain values, possibly passwords, in browser storage. That makes 'own risk' riskier than the disclaimer tells the author.",
+    "Live-path priority: while vaultSecrets is off, FR-3/FR-4/FR-6 are the only surfaces users see. FR-1/FR-2/FR-7/FR-8 are dark until the flag flips."
+  ],
+
+  "estimatedEffort": "1-3 days (about 1 day FE copy/gating/tests, about 0.5-1 day BE ack field + audit line + contract pins; Legal/InfoSec wording turnaround is external and not included)"
+}

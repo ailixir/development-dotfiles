@@ -42,7 +42,7 @@ export const CODE_VIEW_WHAT_IS_TRUE =
  * Asserted by AC-3(a): the tab must not claim to be a runnable script.
  */
 export const CODE_VIEW_LANGUAGE_NOTE =
-  'Each line below is one instruction in Studio\u2019s step language \u2014 this is exactly what ' +
+  'Each line below is one instruction in Studio\u2019s step language. This is exactly what ' +
   'runs, not a file you can run elsewhere. The browser, the checks and your saved values are ' +
   'supplied by Studio when the test runs.';
 

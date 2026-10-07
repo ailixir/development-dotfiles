@@ -312,20 +312,6 @@ INSERT INTO report_executions (id, report_id, status, executed_at, recipient_cou
   ('f6a7b8c9-0001-4000-8000-000000000009', 'e5f6a7b8-0001-4000-8000-000000000003', 'SUCCESS', NOW() - INTERVAL '60 days', 2, 15, 1, 3900)
 ON CONFLICT DO NOTHING;
 
--- ═══════════════════════════════════════════════════════════════
--- 10. Secrets (2 rows)
--- ═══════════════════════════════════════════════════════════════
-
-INSERT INTO secrets (id, reference_id, label, scope, owner, last_four, created_at, expires_at) VALUES
-  ('a7b8c9d0-0001-4000-8000-000000000001',
-   'vault/checks/project/put-api-key', 'PUT Platform API Key', 'project',
-   'bruno.buger@citi.com', 'k3y1', NOW() - INTERVAL '60 days', NOW() + INTERVAL '180 days'),
-
-  ('a7b8c9d0-0001-4000-8000-000000000002',
-   'vault/checks/org/tse-broker-cert', 'TSE Broker Certificate', 'org',
-   'daniel.estevez@citi.com', 'rt01', NOW() - INTERVAL '45 days', NOW() + INTERVAL '90 days')
-ON CONFLICT (id) DO NOTHING;
-
 -- UI Studio intentionally has no sample tests or execution history. Production-like results must
 -- come from a real accepted run. Remove rows created by older revisions of this repeatable seed.
 DELETE FROM studio_dispatch_ledger

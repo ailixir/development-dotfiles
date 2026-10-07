@@ -178,7 +178,7 @@ export function InferenceStudio() {
           const reused=id && attempt?.plan.reusedStepIds.includes(id);
           const prior=previous.current;
           const before=prior && prior.revision===attempt?.plan.baselineRevisionId ? prior.artifact.steps[prior.stepIds.indexOf(id ?? null)]?.code ?? null : null;
-          return <Box key={index}><Typography>Step {index+1} — {reused?'Reused':'Recompiled'}</Typography><Typography>{step.originalText}</Typography>
+          return <Box key={index}><Typography>Step {index+1}: {reused?'Reused':'Recompiled'}</Typography><Typography>{step.originalText}</Typography>
             {!reused && before !== null && <details><summary>Code changes</summary><Typography variant="body2">Removed lines start with −; added lines start with +.</Typography><Box component="pre" sx={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{before === step.code ? 'Code is identical; this step was regenerated. Review the updated wording.' : `${before.split('\n').map(line => `− ${line}`).join('\n')}\n${step.code.split('\n').map(line => `+ ${line}`).join('\n')}`}</Box></details>}
             <details><summary>{reused?'Reused code':'Current code'}</summary><Box component="pre" sx={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{step.code}</Box></details></Box>;
         })}

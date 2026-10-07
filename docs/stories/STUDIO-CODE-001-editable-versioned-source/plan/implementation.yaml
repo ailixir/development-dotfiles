@@ -1,0 +1,1231 @@
+{
+  "storyId": "STUDIO-001",
+  "createdAt": "2026-10-05T02:55:06.126Z",
+  "createdBy": "@architect (Aria)",
+  "status": "cancelled",
+  "complexity": "COMPLEX",
+  "specVersion": 2,
+  "scope": "Implementation proposal only; no application code, migration, deployment, product adoption or execution authorized by this plan.",
+  "qualityGate": {
+    "verdict": "APPROVED",
+    "specVersion": 2,
+    "artifact": "spec/critique.json",
+    "specSha256": "bf320dd1b4f8b4ca24fa509b73511f4cdd5e37e84d5f9108325ba17b24c72446",
+    "meaning": "Specification quality only"
+  },
+  "estimatedEffort": "COMPLEX advisory band 3+ days; not a measured commitment; implementation should use coherent separate stories.",
+  "dependencies": [],
+  "assumptions": [
+    "Bounded existing Studio step editing, not unrestricted TypeScript projects",
+    "Native Studio ZIP download, not standalone Playwright project",
+    "CSI-author permission is a proposed default requiring product/security decision before enabling writes"
+  ],
+  "executionAuthorized": false,
+  "approvalRequiredBeforeExecution": true,
+  "prerequisites": [
+    "Product acceptance of explicit PRD/ADR \u00a7\u00a721/30 and API amendments",
+    "Code-author permission and retention/bounds policy",
+    "Actual applied/pending migration and staged V19 inventory",
+    "Renewed review policy for current historically autoaccepted source; preserve historic facts",
+    "Compatible publisher deployment and old publisher drain before manual-author endpoints"
+  ],
+  "isolation": {
+    "maxFilesPerSubtask": 3,
+    "singleService": true,
+    "sequence": "Subtasks are deliberately sequential across phases and within phases; repeated file ownership cannot race. Split newly discovered file scope into additional atomic tasks rather than exceeding three files."
+  },
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Contract and approval foundation",
+      "description": "Future product/permission acceptance, explicit contract supersessions and generated approval correction. Additive database preparation preserves existing records; editing remains disabled.",
+      "subtasks": [
+        {
+          "id": "1.1",
+          "description": "Adopt bounded editing/native download scope and explicit PRD and ADR supersessions before implementing source authoring",
+          "service": "infra",
+          "files": [
+            "PRD.md",
+            "ARCH.md",
+            "docs/architecture/ADR-002-internal-contract-surface.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Product/architect review must record acceptance of spec v2, ADR \u00a7\u00a721/30 amendment, existing vs elevated CSI author permission, source retention/limits and historical autoaccepted-source eligibility. No approval is assumed by this proposal."
+          },
+          "status": "pending",
+          "dependencies": [],
+          "coverage": [
+            "FR-1",
+            "FR-2",
+            "FR-3",
+            "FR-8",
+            "CON-1",
+            "CON-4"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "1.2",
+          "description": "Declare full freshness, revision detail, ZIP export, preparation and exact approval/execute contracts",
+          "service": "infra",
+          "files": [
+            "docs/specs/studio/openapi.yaml",
+            "docs/specs/studio/inference.openapi.yaml",
+            "docs/specs/studio/artifact.schema.json"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Review closed request/response schemas, status/refusal order, /api/v1/studio routes, capability compatibility window and generated/manual awaiting-confirmation parity. Keep artifact bounded grammar unchanged except truthful source-origin descriptions."
+          },
+          "status": "pending",
+          "dependencies": [
+            "1.1"
+          ],
+          "coverage": [
+            "FR-1",
+            "FR-2",
+            "FR-3",
+            "FR-6",
+            "FR-7"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "1.3",
+          "description": "Retire generated auto-accept and publish exact unconfirmed candidates through the captured state machine",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java",
+            "backend/src/test/java/com/citi/put/checks/studio/compile/CompilePipelineTest.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.compile.CompilePipelineTest'",
+            "instructions": "New/updated cases assert successful generated preparation does not stamp confirmation and uses captured publication."
+          },
+          "status": "pending",
+          "dependencies": [
+            "1.2"
+          ],
+          "coverage": [
+            "FR-3",
+            "AT-3"
+          ],
+          "notes": "Preserve historic rows and actors; source remains disabled for manual writes. Same request retry stable; full capture cutover follows phase 2."
+        },
+        {
+          "id": "1.4",
+          "description": "Reconnect generated candidate review so Run waits for explicit approval of displayed immutable bytes",
+          "service": "frontend",
+          "files": [
+            "frontend/src/components/studio/run/useRunGate.ts",
+            "frontend/src/components/studio/review/CompileReviewPanel.tsx",
+            "frontend/src/components/studio/run/runGate.test.tsx"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "frontend",
+            "command": "npm run test -- --run src/components/studio/run/runGate.test.tsx",
+            "instructions": "Run prepares then stops at exact review; direct Run remains available for unchanged confirmed source."
+          },
+          "status": "pending",
+          "dependencies": [
+            "1.3"
+          ],
+          "coverage": [
+            "FR-3",
+            "AT-3",
+            "AT-11"
+          ],
+          "notes": "Page wiring is completed in phase 3; do not deploy an incomplete cross-component slice."
+        },
+        {
+          "id": "1.5",
+          "description": "Add forward-only code-mode identities and append-only manual checkpoints with composite ownership",
+          "service": "database",
+          "files": [
+            "backend/src/main/resources/db/migration/VNEXT__studio_code_authoring.sql",
+            "backend/src/test/java/com/citi/put/checks/studio/authoring/StudioCodeCheckpointMigrationIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.authoring.StudioCodeCheckpointMigrationIT'",
+            "instructions": "Migration tests prove historical rows remain readable, valid/invalid checkpoints persist and cross-test/CSI parent linkage fails."
+          },
+          "status": "pending",
+          "dependencies": [
+            "1.4"
+          ],
+          "coverage": [
+            "FR-1",
+            "FR-4",
+            "FR-5",
+            "FR-8",
+            "AT-9"
+          ],
+          "notes": "PROPOSED NEW migration filename token VNEXT must be assigned only after inspecting actual applied/pending ledger. Dara owns detailed schema review."
+        },
+        {
+          "id": "1.6",
+          "description": "Add immutable preparation kind and F/code snapshot while protecting every added revision/request field",
+          "service": "database",
+          "files": [
+            "backend/src/main/resources/db/migration/VNEXT__studio_manual_preparation_capture.sql",
+            "backend/src/test/java/com/citi/put/checks/studio/compile/StudioPreparationMigrationIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.compile.StudioPreparationMigrationIT'",
+            "instructions": "Test immutable captures, row-wide revision protection, first confirmation only, composite checkpoint ownership and history retention."
+          },
+          "status": "pending",
+          "dependencies": [
+            "1.5"
+          ],
+          "coverage": [
+            "FR-5",
+            "FR-6",
+            "AT-9"
+          ],
+          "notes": "Additive migration only. VNEXT is a proposed number placeholder; content uniqueness/require-request cutover has separate drained-publisher gate."
+        },
+        {
+          "id": "1.7",
+          "description": "Document actual-ledger inventory and nonconcurrent old/new publisher deployment prerequisites",
+          "service": "infra",
+          "files": [
+            "backend/db/cutover/V19__studio_inference_candidate_identity.sql",
+            "docs/operations/studio-code-source-cutover.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Release/database owners inspect the actual ledger, staged V19 execution status, publisher binaries and durable in-flight requests. Define drain verification, preservation of current/historic approval facts, renewed current review, disable-only recovery and manual feature OFF defaults."
+          },
+          "status": "pending",
+          "dependencies": [
+            "1.6"
+          ],
+          "coverage": [
+            "FR-3",
+            "FR-5",
+            "FR-6",
+            "OQ-4"
+          ],
+          "notes": "No SQL/runbook is executed by this plan. No arbitrary retention deadline or irreversible history rewrite."
+        }
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Captured identity and every-writer guards",
+      "description": "Extend existing backend identities and conditional state paths before allowing a manual authoring writer. Verify compatible publisher deployment and staged cutover before phase 3.",
+      "subtasks": [
+        {
+          "id": "2.1",
+          "description": "Map code-mode/checkpoint/captured revision metadata without changing checklist counter semantics",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/entity/UITest.java",
+            "backend/src/main/java/com/citi/put/checks/studio/entity/UITestRevision.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/CandidateRevision.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew compileJava",
+            "instructions": "Strict compilation verifies additive entity/candidate mappings; schema-backed evidence follows migration and integration tests."
+          },
+          "status": "pending",
+          "dependencies": [
+            "1.7"
+          ],
+          "coverage": [
+            "FR-5",
+            "FR-6"
+          ],
+          "notes": "New fields truthful; parentRevisionId is separate from incremental baselineRevisionId."
+        },
+        {
+          "id": "2.2",
+          "description": "Define reusable complete F and immutable captured request inputs for generated/manual preparation",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/dto/SourceFreshnessDto.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/CompileRequest.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/CompileInputs.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew compileJava",
+            "instructions": "Typed identities contain source/config/code/mode/context/hash; client expectations and immutable worker capture remain distinct."
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.1"
+          ],
+          "coverage": [
+            "FR-6",
+            "AT-6"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "2.3",
+          "description": "Extend captured request persistence with manual snapshot kind and event-based retry identity",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/compile/InferenceCaptureStore.java",
+            "backend/src/test/java/com/citi/put/checks/studio/compile/InferenceCaptureIntegrationTest.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.compile.InferenceCaptureIntegrationTest'",
+            "instructions": "Same-request retry stable, independent equal-content requests remain distinct, snapshots preserve authenticated actor/F and compatible ownership."
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.2"
+          ],
+          "coverage": [
+            "FR-5",
+            "FR-6",
+            "AT-9"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "2.4",
+          "description": "Guard success, failure, deadline, cancellation and abandoned-sweep settlement by captured request and complete F",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/CompileAbandonmentSweeper.java",
+            "backend/src/test/java/com/citi/put/checks/studio/compile/AbandonedCompileSweepIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.compile.AbandonedCompileSweepIT' --tests 'com.citi.put.checks.studio.CompileStateServiceTest'",
+            "instructions": "Old settlement/sweeper cannot clear newer mode/manual request/candidate; losing publication rolls back insert; all outcomes enforce applicable lifecycle/deadline capture."
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.3",
+            "1.3"
+          ],
+          "coverage": [
+            "FR-3",
+            "FR-6",
+            "AT-6"
+          ],
+          "notes": "Do not invent a user cancellation feature; audit existing cancel/abandon/error call sites. Remaining meaningful races added in phase 4."
+        },
+        {
+          "id": "2.5",
+          "description": "Require full F on existing Steps, context, configuration and metadata writes with true no-op semantics",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/dto/UITestRequest.java",
+            "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringV2Request.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.OptimisticSaveIT' --tests 'com.citi.put.checks.studio.StudioAuthoringApiIT'",
+            "instructions": "Extend these cases to concurrent manual code/mode expectations; metadata/no-op preserves F/readiness; code changes cannot be overwritten by pair-only authoring saves."
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.4"
+          ],
+          "coverage": [
+            "FR-6",
+            "AT-6",
+            "AT-11"
+          ],
+          "notes": "Code hash remains separate from the unchanged existing AuthoringRevisionIdentity digest meaning. Coordinate DTO capability transition."
+        },
+        {
+          "id": "2.6",
+          "description": "Extend public confirmation and authoring projections with current full F and request identity",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/dto/ConfirmCompileRequestDto.java",
+            "backend/src/main/java/com/citi/put/checks/studio/dto/UITestDto.java",
+            "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringV2Response.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew compileJava",
+            "instructions": "Strict DTO compile plus later contract suite proves full expectations/read projections; heavy artifact/draft content omitted from list projection."
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.5"
+          ],
+          "coverage": [
+            "FR-3",
+            "FR-6",
+            "FR-7"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "2.7",
+          "description": "Make generated inference, repair and incremental baseline selection honor active source mode and full capture",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/incremental/CompilationPlanner.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/incremental/IncrementalAssembler.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.compile.CompilePipelineSourceAdmissionTest' --tests 'com.citi.put.checks.studio.compile.CompilePipelineTest'",
+            "instructions": "Manual authority rejects ordinary generated preparation; generated-only baseline fallback; repairs and delayed callbacks stay within current captured F."
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.6",
+            "1.3"
+          ],
+          "coverage": [
+            "FR-4",
+            "FR-6",
+            "AT-5"
+          ],
+          "notes": "Inventory actual inference/scope-review/save-trigger entry points, split further subtasks if audit finds files beyond these three; no manual incremental merge."
+        },
+        {
+          "id": "2.8",
+          "description": "Extend independent readiness with persisted code/mode/hash/context integrity and truthful validation pins",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+            "backend/src/test/java/com/citi/put/checks/studio/readiness/ExecutionReadinessTest.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.readiness.ExecutionReadinessTest'",
+            "instructions": "Changed saved code refuses even with forced READY; optional failure on unchanged confirmed source stays runnable; manual provenance uses current shared pins without fake model fields."
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.7"
+          ],
+          "coverage": [
+            "FR-6",
+            "FR-8",
+            "AT-11",
+            "AT-12"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "2.9",
+          "description": "Accept only explicitly requested confirmed revision/hash/F and preserve submitted-request idempotency",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/dto/ExecuteSourceRequestDto.java",
+            "backend/src/test/java/com/citi/put/checks/studio/dispatch/AcceptanceIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.dispatch.AcceptanceIT'",
+            "instructions": "A-confirm/B-confirm race refuses A instead of executing B; accepted A remains pinned; same-key/request replay returns A after later edits; changed submitted identity conflicts."
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.8"
+          ],
+          "coverage": [
+            "FR-5",
+            "FR-6",
+            "AT-7"
+          ],
+          "notes": "Digest contains stable submitted fields, never later server state. Check existing accepted idempotent outcome before stale-current-F rejection."
+        },
+        {
+          "id": "2.10",
+          "description": "Cut over drained compatible captured publishers and event uniqueness before any manual-author writer is enabled",
+          "service": "database",
+          "files": [
+            "backend/db/cutover/V19__studio_inference_candidate_identity.sql",
+            "backend/db/cutover/studio_code_preparation_identity.sql",
+            "backend/src/test/java/com/citi/put/checks/studio/compile/StudioCodeCutoverIT.java"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "First run StudioCodeCutoverIT against required pre/post states, then release/database owner verifies drained obsolete writers, deploys compatible phase-2 backend and applies reviewed cutover. Preserve records; every new revision requires capture; equal hashes cannot collapse events. Mark gate complete only with real database/deployment evidence."
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.9",
+            "1.7"
+          ],
+          "coverage": [
+            "FR-5",
+            "FR-6",
+            "AT-9"
+          ],
+          "notes": "PROPOSED new SQL path; exact migration/cutover mechanism chosen after applied-ledger inventory. Manual author endpoints stay disabled until this prerequisite succeeds."
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Manual backend, source surfaces and editor",
+      "description": "Single-source-authority paths, exact inspection/export, coordinated clients/MSW and page buffer behavior. Backend author writers depend on phase-2 drained/captured gate; feature remains disabled until integration evidence.",
+      "subtasks": [
+        {
+          "id": "3.1",
+          "description": "Persist conditional bounded manual saves as recoverable append-only checkpoints",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/authoring/ManualCodeService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/authoring/ManualCodeCheckpointStore.java",
+            "backend/src/main/java/com/citi/put/checks/studio/dto/ManualCodeDraftDto.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew compileJava",
+            "instructions": "Typed service compiles; phase-4 real-DB tests prove counters, bounded invalid source, mapping/ownership, idempotent retry and archived manual preservation."
+          },
+          "status": "pending",
+          "dependencies": [
+            "2.10"
+          ],
+          "coverage": [
+            "FR-1",
+            "FR-4",
+            "FR-5",
+            "FR-6"
+          ],
+          "notes": "No external writer deploy before 2.10. Save bytes may be invalid AST, but payload/reference/credential bounds apply before accepting durable work."
+        },
+        {
+          "id": "3.2",
+          "description": "Validate captured exact manual artifacts without AI and produce truthful operation summaries/provenance",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/compile/ManualValidationPipeline.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/validator/RunnerValidationClient.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/validator/ValidationOutcome.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew compileJava",
+            "instructions": "Capture/validator path compiles; later tests assert no gateway/repair calls, current authoring-derived required/allowed references, and truthful manual validation fingerprints."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.1"
+          ],
+          "coverage": [
+            "FR-3",
+            "FR-4",
+            "FR-8",
+            "AT-2",
+            "AT-4"
+          ],
+          "notes": "Reuse VersionedIntentDeriver/IntentRevisionVerifier; do not restore retired expectedIntent equality. Exact runtime/default-deny behavior unchanged."
+        },
+        {
+          "id": "3.3",
+          "description": "Expose safe CSI-owned retained revision detail through one authorized immutable reader",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/source/StudioSourceRevisionReader.java",
+            "backend/src/main/java/com/citi/put/checks/studio/dto/SourceRevisionDetailDto.java",
+            "backend/src/test/java/com/citi/put/checks/studio/source/StudioSourceRevisionReadIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.source.StudioSourceRevisionReadIT'",
+            "instructions": "Distinct candidate/confirmed/last-run content and soft-deleted authorized history remain exact; cross-test/CSI source withheld; safe provenance projection."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.2"
+          ],
+          "coverage": [
+            "FR-2",
+            "FR-5",
+            "FR-7",
+            "FR-8",
+            "AT-8"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "3.4",
+          "description": "Build exact canonical source ZIP and allowlisted manifest with fail-closed integrity/source safety",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/source/StudioSourceExportService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/source/StudioSourceExportManifest.java",
+            "backend/src/test/java/com/citi/put/checks/studio/source/StudioSourceExportIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.source.StudioSourceExportIT'",
+            "instructions": "Canonical artifact entry SHA-256 equals stored hash; ZIP/manifest excluded from artifact hash; identity/state exact; no configuration/resolved values/internal credentials; corruption/credential canaries emit no source."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.3"
+          ],
+          "coverage": [
+            "FR-2",
+            "FR-7",
+            "FR-8",
+            "AT-8"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "3.5",
+          "description": "Wire protected manual draft/validate/revision read/download and exact approval/execute routes",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/StudioController.java",
+            "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/source/StudioSourceController.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.StudioContractTest' --tests 'com.citi.put.checks.studio.ConfirmCompileRouteTest'",
+            "instructions": "Extend contract assertions for status/refusal order, complete request expectations and no-store safe attachment; shared protected reader governs read/export."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.4",
+            "2.5"
+          ],
+          "coverage": [
+            "FR-1",
+            "FR-2",
+            "FR-3",
+            "FR-6",
+            "FR-8"
+          ],
+          "notes": "No caller CSI/actor/hash becomes authority; capability/version gate refuses old missing-F writers on code-capable drafts."
+        },
+        {
+          "id": "3.6",
+          "description": "Add typed source/F APIs through the centralized client and declared transport contracts",
+          "service": "frontend",
+          "files": [
+            "frontend/src/types/studio/studioTypes.ts",
+            "frontend/src/services/api/studioApi.ts",
+            "frontend/src/services/api/studioAuthoringTransport.ts"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "frontend",
+            "command": "npm run type-check",
+            "instructions": "Strict client types cover code draft, immutable detail, ZIP response, full authoring/confirmation/execute expectations and capability state."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.5"
+          ],
+          "coverage": [
+            "FR-1",
+            "FR-2",
+            "FR-3",
+            "FR-6",
+            "FR-7"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "3.7",
+          "description": "Align execution and inference transports with explicit source authority and exact run expectations",
+          "service": "frontend",
+          "files": [
+            "frontend/src/services/api/studioExecutionTransport.ts",
+            "frontend/src/services/api/studioInferenceApi.ts",
+            "frontend/src/services/api/studioTransportWiring.ts"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "frontend",
+            "command": "npm run test -- --run src/services/api/studioAuthoringTransport.test.ts src/services/api/studioTransport.node.test.ts",
+            "instructions": "Extend transport tests for submitted F/revision/hash, conflicts and no ordinary AI compile on manual source."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.6"
+          ],
+          "coverage": [
+            "FR-4",
+            "FR-5",
+            "FR-6"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "3.8",
+          "description": "Mirror native manual draft/revision/approval/export lifecycle in MSW before connecting editor",
+          "service": "frontend",
+          "files": [
+            "frontend/src/services/mocks/studio/handlers.ts",
+            "frontend/src/services/mocks/studio/authoringHandlers.ts",
+            "frontend/src/services/mocks/studio/inferenceHandlers.ts"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "frontend",
+            "command": "npm run test -- --run src/services/mocks/studio/studioContract.test.ts src/services/mocks/studio/authoringHandlers.test.ts",
+            "instructions": "MSW respects exact identity, separate generated/manual capture, no auto-approval, full-F conflicts and faithful safe export fixtures."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.7"
+          ],
+          "coverage": [
+            "FR-1",
+            "FR-2",
+            "FR-3",
+            "FR-6",
+            "CON-3"
+          ],
+          "notes": "MSW-first; raw fetch prohibited outside existing approved transport architecture."
+        },
+        {
+          "id": "3.9",
+          "description": "Add shared source buffer and ordered partial-save recovery to Studio page lifecycle",
+          "service": "frontend",
+          "files": [
+            "frontend/src/components/studio/source/useSourceDraft.ts",
+            "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+            "frontend/src/pages/ChecksStudioPage/pageSourceSave.test.tsx"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "frontend",
+            "command": "npm run test -- --run src/pages/ChecksStudioPage/pageSourceSave.test.tsx",
+            "instructions": "Save-start snapshot, newer typing survives, first authoring save returns F for second code save; partial failure preserves unresolved code, blocks validate/run and reports actual partial state."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.8"
+          ],
+          "coverage": [
+            "FR-1",
+            "FR-4",
+            "FR-6",
+            "FR-7",
+            "AT-10"
+          ],
+          "notes": "Tab/background refresh must not erase buffer; include route/unload guards; mapping/text change never silently remaps code."
+        },
+        {
+          "id": "3.10",
+          "description": "Replace read-only Code surface with accessible draft/confirmed/last-run editing and protected download",
+          "service": "frontend",
+          "files": [
+            "frontend/src/components/studio/CodeTab.tsx",
+            "frontend/src/components/studio/source/CodeSourceEditor.tsx",
+            "frontend/src/components/studio/source/CodeSourceEditor.test.tsx"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "frontend",
+            "command": "npm run test -- --run src/components/studio/source/CodeSourceEditor.test.tsx src/components/studio/confirmedSource.test.tsx",
+            "instructions": "Keyboard edits supported sequences, exits editor, follows diagnostics; identity/state honest; local Edit does not mutate server mode; selected immutable download never exports local text."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.9"
+          ],
+          "coverage": [
+            "FR-1",
+            "FR-2",
+            "FR-7",
+            "NFR-3",
+            "AT-1",
+            "AT-8",
+            "AT-10"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "3.11",
+          "description": "Review actual validated manual operations and explicitly confirm/run the displayed candidate",
+          "service": "frontend",
+          "files": [
+            "frontend/src/components/studio/review/useCompileReview.ts",
+            "frontend/src/components/studio/review/CompileReviewPanel.tsx",
+            "frontend/src/components/studio/review/artifactSummary.ts"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "frontend",
+            "command": "npm run test -- --run src/components/studio/review/confirmFlow.test.tsx src/components/studio/review/artifactSummary.test.ts",
+            "instructions": "Manual source summaries reflect new operations, original English labeled context; exact F/request/revision/hash preserved; conflicting approval never auto-retries replacement source."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.10",
+            "1.4"
+          ],
+          "coverage": [
+            "FR-3",
+            "FR-4",
+            "FR-6",
+            "AT-3",
+            "AT-4"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "3.12",
+          "description": "Route all Run entry points by manual/generated authority and unresolved local changes",
+          "service": "frontend",
+          "files": [
+            "frontend/src/components/studio/run/useRunGate.ts",
+            "frontend/src/components/studio/run/runEnablement.ts",
+            "frontend/src/components/studio/run/runGate.test.tsx"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "frontend",
+            "command": "npm run test -- --run src/components/studio/run/runGate.test.tsx src/components/studio/run/compileWait.test.tsx",
+            "instructions": "Manual Run saves/validates then waits for exact approval without LLM; generated Run prepares/reviews; ready direct Run stays ready after optional unchanged preparation failure; dirty source never dispatches."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.11",
+            "1.4"
+          ],
+          "coverage": [
+            "FR-3",
+            "FR-4",
+            "FR-5",
+            "FR-6",
+            "AT-3",
+            "AT-5",
+            "AT-11"
+          ],
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Meaningful concurrency, security and contract evidence",
+      "description": "Exercise actual immutable database constraints and interleavings, current runner refusals, protected export and frontend accessibility/partial-save behavior. These are future checks, not results.",
+      "subtasks": [
+        {
+          "id": "4.1",
+          "description": "Prove concurrent manual checkpoints, full-F saves and complete late-outcome settlement races",
+          "service": "backend",
+          "files": [
+            "backend/src/test/java/com/citi/put/checks/studio/authoring/StudioManualCodeIT.java",
+            "backend/src/test/java/com/citi/put/checks/studio/compile/StudioManualPreparationRaceIT.java",
+            "backend/src/test/java/com/citi/put/checks/studio/compile/AbandonedCompileSweepIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.authoring.StudioManualCodeIT' --tests 'com.citi.put.checks.studio.compile.StudioManualPreparationRaceIT' --tests 'com.citi.put.checks.studio.compile.AbandonedCompileSweepIT'",
+            "instructions": "AT-1/5/6 cover actual DB save/generation/validation/success/failure/deadline/cancellation/sweeper interleavings and saved invalid-work retention."
+          },
+          "status": "pending",
+          "dependencies": [
+            "3.12",
+            "2.4"
+          ],
+          "coverage": [
+            "AT-1",
+            "AT-5",
+            "AT-6",
+            "NFR-2"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "4.2",
+          "description": "Prove provenance event identity, mutation denial and cross-CSI parent/checkpoint invariants",
+          "service": "database",
+          "files": [
+            "backend/src/test/java/com/citi/put/checks/studio/compile/StudioSourceEventIdentityIT.java",
+            "backend/src/test/java/com/citi/put/checks/studio/authoring/StudioCodeImmutabilityIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.compile.StudioSourceEventIdentityIT' --tests 'com.citi.put.checks.studio.authoring.StudioCodeImmutabilityIT'",
+            "instructions": "AT-9 varies equal code across authors/modes/config/policies; retries same attempt; tampering all new/old capture fields and foreign ownership must fail."
+          },
+          "status": "pending",
+          "dependencies": [
+            "4.1"
+          ],
+          "coverage": [
+            "AT-9",
+            "FR-5",
+            "FR-8"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "4.3",
+          "description": "Prove manual validator references/provenance and protected detail/export safety end to end",
+          "service": "backend",
+          "files": [
+            "backend/src/test/java/com/citi/put/checks/studio/compile/StudioManualValidationIT.java",
+            "backend/src/test/java/com/citi/put/checks/studio/source/StudioSourceExportAuthorizationIT.java",
+            "backend/src/test/java/com/citi/put/checks/studio/source/StudioSourceContractIT.java"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "backend",
+            "command": "./gradlew test --tests 'com.citi.put.checks.studio.compile.StudioManualValidationIT' --tests 'com.citi.put.checks.studio.source.StudioSourceExportAuthorizationIT' --tests 'com.citi.put.checks.studio.source.StudioSourceContractIT'",
+            "instructions": "AT-2/3/4/8/12 assert zero AI calls, bounded full-artifact validation, approval parity, policy/runtime revocation, safe selected canonical download, authorized soft-deleted history and refusal-before-bytes."
+          },
+          "status": "pending",
+          "dependencies": [
+            "4.2"
+          ],
+          "coverage": [
+            "AT-2",
+            "AT-3",
+            "AT-4",
+            "AT-8",
+            "AT-12"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "4.4",
+          "description": "Keep existing runner grammar, forbidden-source child and reference-policy fixtures intact",
+          "service": "backend",
+          "files": [
+            "studio-runner/test/reference-policy.test.ts",
+            "studio-runner/test/run/protocol.test.ts",
+            "studio-runner/test/no-dynamic-evaluation.test.ts"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "studio-runner",
+            "command": "npm run test -- --run test/reference-policy.test.ts test/run/protocol.test.ts test/no-dynamic-evaluation.test.ts",
+            "instructions": "Manual examples stay within existing validator/typed-operation path; unchanged source-bearing child rejection, forbidden eval/import/process paths and required/allowed reference policy remain proven."
+          },
+          "status": "pending",
+          "dependencies": [
+            "4.3"
+          ],
+          "coverage": [
+            "AT-2",
+            "AT-12",
+            "NFR-1"
+          ],
+          "notes": "service backend denotes existing runner backend; verification-only by default, change fixtures only for required contract cases; no raw-source runtime implementation."
+        },
+        {
+          "id": "4.5",
+          "description": "Assert MSW and public schemas agree on source lifecycle and exact-identity requests",
+          "service": "frontend",
+          "files": [
+            "frontend/src/services/mocks/studio/studioContract.test.ts",
+            "frontend/src/services/mocks/studio/manualSourceHandlers.test.ts",
+            "frontend/src/services/mocks/studio/compileFixtureMatrix.test.ts"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "frontend",
+            "command": "npm run test -- --run src/services/mocks/studio/studioContract.test.ts src/services/mocks/studio/manualSourceHandlers.test.ts src/services/mocks/studio/compileFixtureMatrix.test.ts",
+            "instructions": "AT-1/3/6/8 fixtures distinguish candidate/confirmed/run identities and F; reject bypass/missing expectations; deterministic safe ZIP fixture."
+          },
+          "status": "pending",
+          "dependencies": [
+            "4.4"
+          ],
+          "coverage": [
+            "AT-1",
+            "AT-3",
+            "AT-6",
+            "AT-8"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "4.6",
+          "description": "Exercise keyboard editing, source view identity and partial-save conflict recovery",
+          "service": "frontend",
+          "files": [
+            "frontend/src/components/studio/source/sourceAccessibility.test.tsx",
+            "frontend/src/pages/ChecksStudioPage/pageSourceSave.test.tsx",
+            "frontend/src/components/studio/review/confirmInFlight.test.tsx"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "frontend",
+            "command": "npm run test -- --run src/components/studio/source/sourceAccessibility.test.tsx src/pages/ChecksStudioPage/pageSourceSave.test.tsx src/components/studio/review/confirmInFlight.test.tsx",
+            "instructions": "AT-10 keyboard focus/escape/diagnostics, read refresh/tab preservation, after-save-start typing, first-success/second-conflict and exact-approval race are covered."
+          },
+          "status": "pending",
+          "dependencies": [
+            "4.5",
+            "3.9"
+          ],
+          "coverage": [
+            "AT-7",
+            "AT-10",
+            "NFR-3"
+          ],
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "phase-5",
+      "name": "Integrated deployment gates",
+      "description": "Connect real API and MSW critical flows, run required service gates once and confirm migration/authorization/policy evidence before feature enablement. No execution of this plan is authorized here.",
+      "subtasks": [
+        {
+          "id": "5.1",
+          "description": "Verify critical edit/save/validate/review/confirm/run/download flow against MSW and real API",
+          "service": "frontend",
+          "files": [
+            "frontend/tests/e2e/studio-source-editing.spec.ts"
+          ],
+          "verification": {
+            "type": "e2e",
+            "workdir": "frontend",
+            "testFile": "frontend/tests/e2e/studio-source-editing.spec.ts",
+            "command": "npm run test:e2e -- tests/e2e/studio-source-editing.spec.ts",
+            "instructions": "Inspect existing Playwright config/testDir before finalizing this proposed path; run same flow with MSW-first and authenticated real API profiles. Include typed-operation evidence, selected ZIP hash, manual regeneration protection, partial Save, A/B confirmation race and accepted-run pinning."
+          },
+          "status": "pending",
+          "dependencies": [
+            "4.6"
+          ],
+          "coverage": [
+            "AT-1",
+            "AT-3",
+            "AT-5",
+            "AT-7",
+            "AT-8",
+            "AT-10"
+          ],
+          "notes": "PROPOSED test directory because no configured E2E file was discovered. Resolve runner/browser/account fixtures before implementation; don't claim unconfigured profile passed."
+        },
+        {
+          "id": "5.2",
+          "description": "Run required frontend gates and preserve evidence for the final code-enabled client",
+          "service": "frontend",
+          "files": [
+            "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": "frontend",
+            "command": "npm run type-check && npm run lint && npm run test -- --run && npm run build",
+            "instructions": "Run once after completed source changes; record actual output and baseline blockers, never treat unrun gates as passed."
+          },
+          "status": "pending",
+          "dependencies": [
+            "5.1",
+            "3.9"
+          ],
+          "coverage": [
+            "CON-3",
+            "AT-10"
+          ],
+          "notes": "Verification-only task; no extra modifications implied. Fix material issues in appropriately scoped <=3-file subtasks."
+        },
+        {
+          "id": "5.3",
+          "description": "Run backend and runner quality/compatibility gates with migrated database and source capability disabled",
+          "service": "backend",
+          "files": [
+            "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+            "studio-runner/src/run/protocol.ts"
+          ],
+          "verification": {
+            "type": "command",
+            "workdir": ".",
+            "command": "(cd backend && ./gradlew check) && (cd studio-runner && npm run type-check && npm run lint && npm run test -- --run && npm run build)",
+            "instructions": "Complete required service checks including actual migration/races; record environment dependencies or pre-existing failures and resolve before rollout."
+          },
+          "status": "pending",
+          "dependencies": [
+            "5.2",
+            "3.5"
+          ],
+          "coverage": [
+            "NFR-1",
+            "NFR-2",
+            "AT-2",
+            "AT-6",
+            "AT-9",
+            "AT-11",
+            "AT-12"
+          ],
+          "notes": "Verification-only. Recheck actual runner package scripts at implementation; no dependency upgrades assumed."
+        },
+        {
+          "id": "5.4",
+          "description": "Review release evidence and enable guarded source capability only after all cutover and approval prerequisites",
+          "service": "infra",
+          "files": [
+            "docs/operations/studio-code-source-cutover.md",
+            "docs/operations/studio-code-source-release-evidence.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Product/security/database/release owners verify scope/permission/retention decisions, drained publishers and ledger, current autoaccepted-source renewed review, full writer matrix, real API/MSW/runner/ZIP/accessibility evidence, compatible clients and disabled obsolete contract bypass. Then explicitly enable source writes; a disable preserves checkpoints/history and never restores auto-confirm."
+          },
+          "status": "pending",
+          "dependencies": [
+            "5.3",
+            "1.7"
+          ],
+          "coverage": [
+            "FR-3",
+            "FR-5",
+            "FR-6",
+            "FR-8",
+            "CON-4"
+          ],
+          "notes": "Future implementation/release approval required. Spec-quality APPROVED is not product adoption, deployment approval or permission to execute this plan."
+        }
+      ]
+    },
+    {
+      "id": "phase-6",
+      "name": "Documentation and final ownership handoff",
+      "description": "Describe implemented behavior and measured limits after execution, finalize story/file inventory and route review/release to appropriate owners.",
+      "subtasks": [
+        {
+          "id": "6.1",
+          "description": "Update Studio architecture and MFE integration documentation with source lifecycle and exact export meaning",
+          "service": "infra",
+          "files": [
+            "docs/architecture/studio-execution.md",
+            "MFE_GUIDE.md",
+            "docs/operations/studio-code-source-release-evidence.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Documentation matches actual implemented/manual mode behavior, F/captured provenance, native ZIP limits and observed checks; no unmeasured portable execution promise."
+          },
+          "status": "pending",
+          "dependencies": [
+            "5.4"
+          ],
+          "coverage": [
+            "FR-2",
+            "FR-3",
+            "FR-7",
+            "CON-4"
+          ],
+          "notes": ""
+        },
+        {
+          "id": "6.2",
+          "description": "Record final file coverage, acceptance evidence and remaining operational limitations for independent review",
+          "service": "infra",
+          "files": [
+            "docs/stories/STUDIO-CODE-001-editable-versioned-source/implementation-handoff.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Future owner records final story/AC mapping, AT-1\u2013AT-12 outcomes, immutable migration history, actual changed files and limitations. QA owns quality verdict, DevOps owns remote/PR/release work. No lifecycle completion or remote action occurs merely from creating this proposal."
+          },
+          "status": "pending",
+          "dependencies": [
+            "6.1"
+          ],
+          "coverage": [
+            "AT-1",
+            "AT-2",
+            "AT-3",
+            "AT-4",
+            "AT-5",
+            "AT-6",
+            "AT-7",
+            "AT-8",
+            "AT-9",
+            "AT-10",
+            "AT-11",
+            "AT-12",
+            "CON-4"
+          ],
+          "notes": ""
+        }
+      ]
+    }
+  ],
+  "proposedNewFiles": [
+    "backend/db/cutover/studio_code_preparation_identity.sql",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/ManualCodeCheckpointStore.java",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/ManualCodeService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/ManualValidationPipeline.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/ExecuteSourceRequestDto.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/ManualCodeDraftDto.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/SourceFreshnessDto.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/SourceRevisionDetailDto.java",
+    "backend/src/main/java/com/citi/put/checks/studio/source/StudioSourceController.java",
+    "backend/src/main/java/com/citi/put/checks/studio/source/StudioSourceExportManifest.java",
+    "backend/src/main/java/com/citi/put/checks/studio/source/StudioSourceExportService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/source/StudioSourceRevisionReader.java",
+    "backend/src/main/resources/db/migration/VNEXT__studio_code_authoring.sql",
+    "backend/src/main/resources/db/migration/VNEXT__studio_manual_preparation_capture.sql",
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/StudioCodeCheckpointMigrationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/StudioCodeImmutabilityIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/StudioManualCodeIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/compile/StudioCodeCutoverIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/compile/StudioManualPreparationRaceIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/compile/StudioManualValidationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/compile/StudioPreparationMigrationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/compile/StudioSourceEventIdentityIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/source/StudioSourceContractIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/source/StudioSourceExportAuthorizationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/source/StudioSourceExportIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/source/StudioSourceRevisionReadIT.java",
+    "docs/operations/studio-code-source-cutover.md",
+    "docs/operations/studio-code-source-release-evidence.md",
+    "docs/stories/STUDIO-CODE-001-editable-versioned-source/implementation-handoff.md",
+    "frontend/src/components/studio/source/CodeSourceEditor.test.tsx",
+    "frontend/src/components/studio/source/CodeSourceEditor.tsx",
+    "frontend/src/components/studio/source/sourceAccessibility.test.tsx",
+    "frontend/src/components/studio/source/useSourceDraft.ts",
+    "frontend/src/pages/ChecksStudioPage/pageSourceSave.test.tsx",
+    "frontend/src/services/mocks/studio/manualSourceHandlers.test.ts",
+    "frontend/tests/e2e/studio-source-editing.spec.ts"
+  ],
+  "fileNamingNotes": "All proposedNewFiles are prospective, not existing or created by this spec. VNEXT migration tokens must be assigned using real applied/pending ledger; proposed E2E testDir must be reconciled with installed Playwright configuration.",
+  "taskOutput": {
+    "path": "../plan/implementation.yaml",
+    "storyIdAlias": "STUDIO-001",
+    "canonicalStoryId": "STUDIO-CODE-001-editable-versioned-source",
+    "aliasReason": "plan-create-implementation task regex only accepts letters-digits or story-numeric IDs; canonical workflow ID is retained separately. Serialized as JSON-compatible YAML to avoid adding a YAML dependency."
+  },
+  "verificationStatus": "Plan structure and existing/proposed path checks only. Product tests listed here are proposed and were not run.",
+  "canonicalStoryId": "STUDIO-CODE-001-editable-versioned-source",
+  "discardedAt": "2026-10-05T03:05:01.190127+00:00",
+  "disposition": "User discarded the idea; historical proposal only, no implementation planned"
+}

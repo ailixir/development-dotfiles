@@ -2,7 +2,9 @@ package com.citi.put.checks.studio.compile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.citi.put.checks.studio.compile.gateway.CompileResponse;
 import com.citi.put.checks.studio.compile.gateway.GatewayErrorCode;
+import com.citi.put.checks.studio.compile.gateway.GatewayResponseParser.ProposalRejection;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -215,6 +217,129 @@ class RepairLoopTest extends AbstractRepairPipelineTest {
         .isEqualTo(1);
     assertThat(revisionCount()).isZero();
     assertThat(currentCandidate()).isNull();
+  }
+
+  // ── VAL-019b: a parser-rejected envelope consumes one repair ─────────────
+
+  /** A model-text marker that may sit in a failure reason but must never reach a repair prompt. */
+  private static final String MODEL_TEXT_CANARY = "MODEL-TEXT-CANARY-AKIAIOSFODNN7EXAMPLE";
+
+  private static CompileResponse envelopeRejected(ProposalRejection rejection, Integer stepIndex) {
+    return CompileResponse.parseFailure(
+        "the model wrote " + MODEL_TEXT_CANARY, rejection, stepIndex, null, 0, 12L, 100, 200);
+  }
+
+  /**
+   * VAL-019b — a strict-parser rejection on attempt 1 is repaired, and the repair publishes.
+   *
+   * <p>The repair prompt carries the fixed envelope instruction and the closed code with its step
+   * position, and nothing the model wrote (user decision D2): the canary planted in the failure
+   * reason never reaches it.
+   */
+  @Test
+  void aParserRejectedEnvelopeConsumesOneRepairAndTheRepairPublishes() {
+    stubValidatorSequence(true);
+    String artifact = artifactFor(SOURCE, "await page.goto('https://example.com/login');");
+    gateway.answer(
+        request ->
+            request.attempt() == 1
+                ? envelopeRejected(ProposalRejection.GENERATED_KEYS, 1)
+                : ScriptedRepairGateway.ok(artifact));
+
+    ch.qos.logback.classic.Logger log =
+        (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(CompilePipeline.class);
+    ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent> warnings =
+        new ch.qos.logback.core.read.ListAppender<>();
+    warnings.start();
+    log.addAppender(warnings);
+    try {
+      pipeline.compile(testId, OWNER);
+      awaitCompileStatus("READY");
+    } finally {
+      log.detachAppender(warnings);
+    }
+
+    assertThat(gateway.attempts()).containsExactly(1, 2);
+    assertThat(validateCalls()).as("only the repaired proposal is validated").isEqualTo(1);
+    String warned =
+        warnings.list.stream()
+            .filter(event -> event.getLevel() == ch.qos.logback.classic.Level.WARN)
+            .map(ch.qos.logback.classic.spi.ILoggingEvent::getFormattedMessage)
+            .collect(java.util.stream.Collectors.joining("\n"));
+    assertThat(warned)
+        .contains("studio.compile.attempt_rejected")
+        .contains("attempt=1 reason=GENERATED_KEYS stepIndex=1")
+        .doesNotContain(MODEL_TEXT_CANARY);
+    assertThat(currentCandidate()).isNotNull();
+    var repair = gateway.seen().get(1);
+    assertThat(repair.repairDiagnostics())
+        .startsWith(RepairPromptAssembler.ENVELOPE_INSTRUCTIONS)
+        .contains("GENERATED_KEYS at steps[1]")
+        .doesNotContain(MODEL_TEXT_CANARY)
+        .doesNotContain("the model wrote");
+    assertThat(repair.writableStepIds()).isEqualTo(gateway.seen().get(0).writableStepIds());
+    assertThat(repair.proposalKind()).isEqualTo(gateway.seen().get(0).proposalKind());
+  }
+
+  /**
+   * VAL-019b, user decision D1 — parser rejections on every attempt exhaust the shared bound and
+   * end {@code STALE GATEWAY_PARSE_FAILURE}, not {@code NEEDS_REVISION}.
+   */
+  @Test
+  void parserRejectionsOnEveryAttemptEndStaleGatewayParseFailureAtTheBound() {
+    stubValidatorSequence(true);
+    gateway.answer(request -> envelopeRejected(ProposalRejection.MALFORMED_JSON, null));
+
+    pipeline.compile(testId, OWNER);
+
+    awaitCompileStatus("STALE");
+    assertThat(storedErrorCode()).isEqualTo(GatewayErrorCode.GATEWAY_PARSE_FAILURE.name());
+    assertThat(gateway.calls()).isEqualTo(1 + properties.repair().maxAttempts());
+    assertThat(gateway.attempts()).containsExactly(1, 2, 3);
+    assertThat(validateCalls()).isZero();
+    assertThat(revisionCount()).isZero();
+    assertThat(storedDiagnosticsText()).as("no NEEDS_REVISION document").isNull();
+  }
+
+  /**
+   * A validator rejection followed by a parser rejection: the next repair switches to the envelope
+   * instruction, and a validator rejection after that carries diagnostics again.
+   */
+  @Test
+  void aParserRejectionOnARepairIsRepairedWithTheEnvelopeInstruction() {
+    stubValidatorSequence(false, true);
+    String artifact = artifactFor(SOURCE, "await page.goto('https://example.com/login');");
+    gateway.answer(
+        request ->
+            request.attempt() == 2
+                ? envelopeRejected(ProposalRejection.TRAILING_CONTENT, null)
+                : ScriptedRepairGateway.ok(artifact));
+
+    pipeline.compile(testId, OWNER);
+
+    awaitCompileStatus("READY");
+    assertThat(gateway.attempts()).containsExactly(1, 2, 3);
+    assertThat(validateCalls()).isEqualTo(2);
+    assertThat(gateway.seen().get(1).repairDiagnostics())
+        .startsWith("Repair request: the validator rejected");
+    assertThat(gateway.seen().get(2).repairDiagnostics())
+        .startsWith(RepairPromptAssembler.ENVELOPE_INSTRUCTIONS)
+        .endsWith("Rejection code: TRAILING_CONTENT")
+        .doesNotContain(MODEL_TEXT_CANARY);
+  }
+
+  /** An unusable finish reason is a parse failure that stays terminal: no repair (C0 §4). */
+  @Test
+  void anUnusableFinishReasonStaysTerminalWithNoRepair() {
+    stubValidatorSequence(true);
+    gateway.answer(request -> envelopeRejected(ProposalRejection.FINISH_REASON, null));
+
+    pipeline.compile(testId, OWNER);
+
+    awaitCompileStatus("STALE");
+    assertThat(storedErrorCode()).isEqualTo(GatewayErrorCode.GATEWAY_PARSE_FAILURE.name());
+    assertThat(gateway.calls()).isEqualTo(1);
+    assertThat(validateCalls()).isZero();
   }
 
   /**

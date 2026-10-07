@@ -1,6 +1,7 @@
 import CommandPalette from '@/components/home/CommandPalette';
 import GlobalSearch from '@/components/home/GlobalSearch';
-import { Box, Stack, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, Drawer, IconButton, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Close, Menu } from '@mui/icons-material';
 import { PlatformSidebar } from '@put/core-components';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -20,6 +21,7 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
   const location = useLocation();
   const [currentPage, setCurrentPage] = useState('home');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   
@@ -38,6 +40,7 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
 
   const handlePageChange = (pageId: string, path: string) => {
     setCurrentPage(pageId);
+    setMobileNavigationOpen(false);
     navigate(path);
   };
 
@@ -111,15 +114,33 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
       >
         Skip to main content
       </Box>
-      {shouldShowSidebar && (
+      {shouldShowSidebar && !isMobile && (
         <PlatformSidebar
           key={`checks-sidebar-${currentPage}`}
           currentModule="checks"
           currentPage={currentPage}
           onPageChange={handlePageChange}
-          isCollapsed={isMobile ? false : sidebarCollapsed}
+          isCollapsed={sidebarCollapsed}
           onToggleCollapse={handleToggleCollapse}
         />
+      )}
+      {shouldShowSidebar && isMobile && (
+        <Drawer open={mobileNavigationOpen} onClose={() => setMobileNavigationOpen(false)} PaperProps={{ sx: { width: 300, maxWidth: '85vw' } }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 2, py: 1 }}>
+            <Typography variant="subtitle1" fontWeight={600}>Navigation</Typography>
+            <IconButton aria-label="Close navigation" onClick={() => setMobileNavigationOpen(false)}><Close /></IconButton>
+          </Stack>
+          <Box sx={{ flex: 1, minHeight: 0 }}>
+            <PlatformSidebar
+              currentModule="checks"
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              isCollapsed={false}
+              showCollapseToggle={false}
+              style={{ position: 'relative', top: 0, left: 0, width: '100%', height: '100%', margin: 0, marginTop: 0, borderRadius: 0, boxShadow: 'none' }}
+            />
+          </Box>
+        </Drawer>
       )}
       
         <Box
@@ -146,6 +167,7 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
           },
         }}
       >
+          {shouldShowSidebar && isMobile && <Button startIcon={<Menu />} aria-expanded={mobileNavigationOpen} onClick={() => setMobileNavigationOpen(true)} sx={{ mb: 2 }}>Navigation</Button>}
           {showGlobalSearch && (
             <Stack spacing={2} sx={{ mb: 2 }}>
               <GlobalSearch />

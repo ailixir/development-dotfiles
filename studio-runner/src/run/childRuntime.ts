@@ -83,6 +83,41 @@ export interface ChildRuntimeDependencies {
    * unit tier can observe the hold without spending it; the child itself uses a real timer.
    */
   readonly sleep?: ((ms: number) => Promise<void>) | undefined;
+  /**
+   * Writes one operator log line. The child's stderr is captured, redacted and bounded by the
+   * parent's `outputRelay` (AC-8..AC-10), so that is where the default sends it. Injected so the
+   * unit tier can read the text-entry equivalence (VAL-031 rule 8) and visible-only resolution
+   * (VAL-040) disclosures.
+   */
+  readonly log?: ((line: string) => void) | undefined;
+}
+
+/** The disclosure line for one use of the text-entry equivalence (VAL-031 rule 8). */
+export function textEntryEquivalenceLine(
+  authored: string,
+  resolved: string,
+  stepIndex: number | null,
+): string {
+  return (
+    `text-entry-equivalence: authored=${authored} resolved=${resolved} ` +
+    `step=${stepIndex === null ? '?' : String(stepIndex)}`
+  );
+}
+
+/**
+ * The disclosure line for one action that visible-only resolution decided (VAL-040): the locator
+ * matched `total` elements, exactly one of them visible. Counts and the step only — never the
+ * locator text, which can carry a resolved variable's value.
+ */
+export function visibleOnlyResolutionLine(total: number, stepIndex: number | null): string {
+  return (
+    `visible-only-resolution: step=${stepIndex === null ? '?' : String(stepIndex)} ` +
+    `total=${String(total)}`
+  );
+}
+
+function defaultLog(line: string): void {
+  process.stderr.write(`${line}\n`);
 }
 
 // ── The tail settle: the recorder runs on past the last operation, briefly and boundedly ──────
@@ -365,6 +400,19 @@ export async function executeInChild(
   }
 
   const resolver = createChildResolver(message);
+  const log = dependencies.log ?? defaultLog;
+  // The adapter does not know which step it is serving; the reporter does.
+  let currentStep: number | null = null;
+  const forwarding = createForwardingReporter(channel);
+  const reporter: StepReporter = {
+    stepStarted(event: StepStartedEvent): void {
+      currentStep = event.stepIndex;
+      forwarding.stepStarted(event);
+    },
+    stepFinished(event: StepFinishedEvent): void {
+      forwarding.stepFinished(event);
+    },
+  };
   const adapter = createPlaywrightAdapter({
     page: handle.page,
     defaultTimeoutMs: message.stepTimeoutMs,
@@ -375,6 +423,20 @@ export async function executeInChild(
       // The ordered stop is in progress: nothing further runs in the browser (AC-5a).
       if (state.stopping) return STOPPING_MESSAGE;
       return null;
+    },
+    onTextEntryEquivalence: (authored, resolved) => {
+      try {
+        log(textEntryEquivalenceLine(authored, resolved, currentStep));
+      } catch {
+        // A disclosure line must never fail the step it describes.
+      }
+    },
+    onVisibleOnlyResolution: (total) => {
+      try {
+        log(visibleOnlyResolutionLine(total, currentStep));
+      } catch {
+        // As above: disclosure never fails the step.
+      }
     },
   });
 
@@ -391,7 +453,7 @@ export async function executeInChild(
     const result = await executeSteps({
       steps,
       adapter,
-      reporter: createForwardingReporter(channel),
+      reporter,
       resolver,
       // AC-11.1: explicitly supplied. There is no process-origin default to fall back to.
       clock,

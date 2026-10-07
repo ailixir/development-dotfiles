@@ -34,7 +34,7 @@ export const COMPILE_STATE_NARRATIVES: Readonly<Record<CompileStatus, CompileSta
     title: 'Translating your steps',
     whatIsTrue:
       'Your draft is saved. A translation of your steps is running right now on the server.',
-    whatYouCanDo: 'Wait here — this page checks for the result and stops on its own.',
+    whatYouCanDo: 'Wait here. This page checks for the result and stops on its own.',
     whatIsBlocked: 'There is nothing to confirm yet, so this draft cannot be made runnable yet.',
   },
   AWAITING_CONFIRMATION: {
@@ -49,7 +49,7 @@ export const COMPILE_STATE_NARRATIVES: Readonly<Record<CompileStatus, CompileSta
   READY: {
     title: 'Confirmed and runnable',
     whatIsTrue: 'You confirmed a revision of this draft, and that revision is the one that runs.',
-    whatYouCanDo: 'Run it, or edit the steps — editing starts a new translation you would review again.',
+    whatYouCanDo: 'Run it, or edit the steps. Editing starts a new translation you would review again.',
     whatIsBlocked: 'Nothing is blocked. This card identifies the revision that runs.',
   },
   NEEDS_REVISION: {
@@ -66,7 +66,7 @@ export const COMPILE_STATE_NARRATIVES: Readonly<Record<CompileStatus, CompileSta
   // true of every STALE cause — the translation stopped before it finished — and it names the
   // recompile control, which is the only remedy and is rendered in this state alone.
   STALE: {
-    title: 'Translation was interrupted — not something you did',
+    title: 'Translation was interrupted: not something you did',
     whatIsTrue:
       'Your draft is saved and unchanged. Any revision you confirmed earlier still runs. The translation was interrupted on our side before it finished; the cause is not in your steps.',
     whatYouCanDo:

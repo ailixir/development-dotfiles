@@ -3,11 +3,9 @@ package com.citi.put.checks.studio;
 import com.citi.put.checks.studio.entity.UITestExecution;
 import com.citi.put.checks.studio.entity.UITestExecutionId;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,23 +20,14 @@ import org.springframework.data.repository.query.Param;
  * UITestExecutionRepositoryCustom#findByExecutionId(UUID)}. No query issues {@code WHERE id = ?}
  * alone.
  *
- * <p>Every list method filters on the execution's own {@code csi_id}, never the parent test's, and
- * never returns a row whose CSI is null — that is the quarantine predicate for history the V14
- * backfill could not resolve (AC-9, AC-14).
+ * <p>The list ({@link UITestExecutionRepositoryCustom#findPage}) filters on the execution's own
+ * {@code csi_id}, never the parent test's, and never returns a row whose CSI is null — that is the
+ * quarantine predicate for history the V14 backfill could not resolve (AC-9, AC-14).
  */
 public interface UITestExecutionRepository
     extends JpaRepository<UITestExecution, UITestExecutionId>, UITestExecutionRepositoryCustom {
 
   Optional<UITestExecution> findByIdAndStartedAt(UUID id, Instant startedAt);
-
-  Page<UITestExecution> findByTestIdAndCsiIdIn(
-      UUID testId, Collection<String> csiIds, Pageable pageable);
-
-  Page<UITestExecution> findByCsiIdIn(Collection<String> csiIds, Pageable pageable);
-
-  Page<UITestExecution> findByTestIdAndCsiIdIsNotNull(UUID testId, Pageable pageable);
-
-  Page<UITestExecution> findByCsiIdIsNotNull(Pageable pageable);
 
   /**
    * Finished executions of one test, newest first by {@code (acceptedAt, executionId)}.

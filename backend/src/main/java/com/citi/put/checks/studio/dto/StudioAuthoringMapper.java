@@ -2,6 +2,7 @@ package com.citi.put.checks.studio.dto;
 
 import com.citi.put.checks.studio.StudioService.AuthoringDraft;
 import com.citi.put.checks.studio.StudioValidationException;
+import com.citi.put.checks.studio.compile.AuthoringLimits;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,10 +29,13 @@ public class StudioAuthoringMapper {
           "configurationRevision");
   private final ObjectMapper mapper;
   private final Validator validator;
+  private final AuthoringLimits authoringLimits;
 
-  public StudioAuthoringMapper(ObjectMapper mapper, Validator validator) {
+  public StudioAuthoringMapper(
+      ObjectMapper mapper, Validator validator, AuthoringLimits authoringLimits) {
     this.mapper = mapper;
     this.validator = validator;
+    this.authoringLimits = authoringLimits;
   }
 
   public UITestRequest legacy(JsonNode body) {
@@ -40,6 +44,9 @@ public class StudioAuthoringMapper {
       if (request == null) {
         throw new StudioValidationException("INVALID_AUTHORING", "Request must be an object");
       }
+      // VAL-024: the compile step-count and line-length bounds apply at save too, first, so an
+      // over-limit draft is refused with the code and message compile would give, not only on Run.
+      authoringLimits.requireSaveable(request.steps());
       LegacyStudioAdapter.validateForWrite(request);
       return request;
     } catch (JsonProcessingException exception) {

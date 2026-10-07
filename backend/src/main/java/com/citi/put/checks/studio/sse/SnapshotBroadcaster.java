@@ -1,13 +1,16 @@
 package com.citi.put.checks.studio.sse;
 
 import com.citi.put.checks.studio.ExecutionSnapshotMapper;
+import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.UITestExecutionRepository;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.entity.UITestExecution;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -43,20 +46,30 @@ public class SnapshotBroadcaster {
   private final WatchedExecutionRegistry registry;
   private final UITestExecutionRepository executions;
   private final ExecutionSnapshotMapper snapshotMapper;
+  private final StudioRepository tests;
   private final BoundedSenders senders;
   private final StreamAuthorization authorization;
   private final com.citi.put.checks.studio.StudioExecutionProperties properties;
+
+  /**
+   * The parent draft's name per watched execution, resolved once when the execution is first read
+   * and kept while anyone on this replica watches it (Story 10.46, PERF-001). An empty value is a
+   * deleted or absent draft. Entries are dropped as soon as the execution is no longer watched.
+   */
+  private final Map<UUID, Optional<String>> testNames = new ConcurrentHashMap<>();
 
   public SnapshotBroadcaster(
       WatchedExecutionRegistry registry,
       UITestExecutionRepository executions,
       ExecutionSnapshotMapper snapshotMapper,
+      StudioRepository tests,
       BoundedSenders senders,
       StreamAuthorization authorization,
       com.citi.put.checks.studio.StudioExecutionProperties properties) {
     this.registry = registry;
     this.executions = executions;
     this.snapshotMapper = snapshotMapper;
+    this.tests = tests;
     this.senders = senders;
     this.authorization = authorization;
     this.properties = properties;
@@ -78,6 +91,7 @@ public class SnapshotBroadcaster {
    */
   public int broadcast() {
     Set<UUID> watchedIds = registry.watchedExecutionIds();
+    testNames.keySet().retainAll(watchedIds);
     if (watchedIds.isEmpty()) {
       return 0;
     }
@@ -96,7 +110,18 @@ public class SnapshotBroadcaster {
   @Transactional(readOnly = true)
   protected Optional<ExecutionSnapshotDto> read(UUID executionId) {
     Optional<UITestExecution> execution = executions.findByExecutionId(executionId);
-    return execution.map(snapshotMapper::toSnapshot);
+    // Labelled like GET /executions/{id}, so every frame is that same payload (Story 10.46, §5.5).
+    // The name is looked up once per watched execution, not once per frame (PERF-001).
+    return execution.map(
+        row ->
+            snapshotMapper
+                .toSnapshot(row)
+                .withTestName(
+                    testNames
+                        .computeIfAbsent(
+                            executionId,
+                            id -> Optional.ofNullable(tests.findVisibleName(row.getTestId())))
+                        .orElse(null)));
   }
 
   private int deliver(UUID executionId, ExecutionSnapshotDto snapshot) {

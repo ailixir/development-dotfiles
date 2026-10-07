@@ -1,0 +1,454 @@
+{
+  "storyId": "STUDIO-SCHED-002",
+  "recordedAt": "2026-10-06T02:36:45.416740+00:00",
+  "recordedBy": "@dev backend execution; independent QA verdict separate",
+  "architecture": "docs/stories/STUDIO-SCHED-002/architecture.md",
+  "scope": "Actual shared production recurrence and due orchestration; preserved target admission/execution and public contracts",
+  "behavioralRun": {
+    "command": "./gradlew test --tests '*scheduling.*' --tests '*ReportScheduleResolverTest' --tests '*studio.dispatch.AcceptanceIT' --tests '*studio.dispatch.DispatcherIT' --tests '*studio.recovery.RecoveryIT' --tests '*StudioContractTest' spotlessJavaCheck checkstyleMain checkstyleTest spotbugsMain",
+    "testStatus": "PASS",
+    "tests": 214,
+    "failures": 0,
+    "skipped": 0,
+    "combinedCommandExit": "1 only because new test formatting issues; behavior and main static gates passed. Narrow test formatting then separate static command passed.",
+    "suites": [
+      {
+        "name": "com.citi.put.checks.reports.schedule.ReportScheduleResolverTest",
+        "tests": "12",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:12"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.BackpressureIntegrationIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:21"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.CapacityGatedDispatchTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:23"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.CronDispatcherBatchIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:33"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.CronDispatcherDisabledIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:36"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.CronDispatcherDriftIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:40"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.CronDispatcherIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:42"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.CronRecurrenceTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:43"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.CsiMetricsRefreshIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:45"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.DispatcherHealthIT",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:47"
+      },
+      {
+        "name": "Fall-back (Nov 1 2026, 02:00 \u2192 01:00 ET)",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:47"
+      },
+      {
+        "name": "Spring-forward (Mar 8 2026, 02:00 \u2192 03:00 ET)",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:47"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.FailedDispatchTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:47"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ParallelDispatchIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:49"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.RetryDispatcherIT",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:51"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ScheduleAuthzIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:30:53"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ScheduleCrudIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:03"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ScheduleEmbedIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:07"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ScheduleEnableDisableIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:09"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ScheduleValidationIT",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:11"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.SchedulingCoordinatorTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:11"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.SharedSchedulingIT",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:16"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ShedLockCronDispatcherIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:22"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.ShedLockIT",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:24"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.DefaultPartitionHealthIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:26"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.DefaultPartitionIT",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:28"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.PartitionBootstrapIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:30"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.PartitionConversionIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:33"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.PartitionDefaultRowsIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:42"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.PartitionHealthIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:45"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.PartitionIdempotencyIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:47"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.PartitionLifecycleIT",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:49"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.PartitionSchedulerIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:51"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.RetentionPrunerConfigIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:53"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.RetentionPrunerIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:55"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.RetentionPrunerSkipCurrentIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:57"
+      },
+      {
+        "name": "com.citi.put.checks.scheduling.partitioning.SeededStartPartitionHealthIT",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:31:59"
+      },
+      {
+        "name": "com.citi.put.checks.studio.StudioContractTest",
+        "tests": "14",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:32:11"
+      },
+      {
+        "name": "com.citi.put.checks.studio.dispatch.AcceptanceIT",
+        "tests": "11",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:32:25"
+      },
+      {
+        "name": "com.citi.put.checks.studio.dispatch.DispatcherIT",
+        "tests": "26",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:32:34"
+      },
+      {
+        "name": "com.citi.put.checks.studio.recovery.RecoveryIT",
+        "tests": "25",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:32:52"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioCronResolverTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:32:57"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+        "tests": "19",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:33:03"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioSchedulingIsolationTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:33:05"
+      },
+      {
+        "name": "com.citi.put.checks.studio.scheduling.StudioSchedulingSchemaIT",
+        "tests": "20",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "timestamp": "2026-10-06T02:33:06"
+      }
+    ]
+  },
+  "finalStaticRun": {
+    "command": "./gradlew spotlessJavaCheck checkstyleMain checkstyleTest spotbugsMain",
+    "status": "PASS",
+    "spotlessJavaCheck": "PASS",
+    "checkstyleMain": "PASS",
+    "checkstyleTest": "PASS",
+    "spotbugsMain": "PASS"
+  },
+  "criticalEvidence": [
+    "Shared actual Spring coordinator runs registered HTTP/TCP/Splunk executors and Studio atomic ledger; existing StudioDispatcher sends runner envelope once; ambiguity is not replayed or sent to generic retry",
+    "Actual second worker context with catalog dispatcher flag off still creates one Studio execution across shared coordinators",
+    "Actual Boot scheduled task interval250ms, ordinary ISO/SpEL delay and Studio SpEL interval, no circular refs and one due timer",
+    "Ordinary held ShedLock does not suppress Studio, Studio flag off does not suppress checks",
+    "Monotonic full-pass completion + initial delay, disabled-target subsecond clamp, failure/guard/slow-target isolation, role matrix, stop/start and old-generation no-overlap",
+    "Generic grammar/macros/whitespace/seconds/ZoneId/null exhaustion/UTC gap/stored due and report macro/alias semantics preserved while Studio earlier-offset policies retained"
+  ],
+  "sourceFiles": {
+    "created": [
+      "backend/src/main/java/com/citi/put/checks/scheduling/CronRecurrence.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/ScheduledTarget.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingTicker.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingCoordinatorProperties.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingTargetWorker.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingCoordinator.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingHeartbeat.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingDelays.java",
+      "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledTarget.java",
+      "backend/src/test/java/com/citi/put/checks/scheduling/CronRecurrenceTest.java",
+      "backend/src/test/java/com/citi/put/checks/scheduling/SchedulingCoordinatorTest.java",
+      "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java"
+    ],
+    "modified": [
+      "backend/src/main/java/com/citi/put/checks/scheduling/CronDispatcher.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/ScheduleService.java",
+      "backend/src/main/java/com/citi/put/checks/reports/schedule/ReportScheduleResolver.java",
+      "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioCronResolver.java",
+      "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulingProperties.java",
+      "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingIsolationTest.java"
+    ],
+    "deleted": [
+      "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulePoller.java"
+    ]
+  },
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/scheduling/CronRecurrence.java": "ce1edad0e3db239e22e10439a6eccbfed8295d1899db6810e9bb3fd2d64edde9",
+    "backend/src/main/java/com/citi/put/checks/scheduling/ScheduledTarget.java": "7d30b5ff4cea6024312c8cce4cf68bfa9adb21dfb66e01e1abfb5adeb59d0540",
+    "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingTicker.java": "281ff08fddfb46aa45901cd035805444c7d4005767c10b8de6d5be3b7375e091",
+    "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingConfiguration.java": "544dc2794fa680416d125655598cd34d50e842be1bbb68ff0f1c2d8726b8e28d",
+    "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingCoordinatorProperties.java": "e058ff0a6be3b1b1de058a40429630277d23899b06ec242849f73e90a77c9c48",
+    "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingTargetWorker.java": "f51c95036c586d64ecd929463ed740d28a40bc347a343ca300a202782f47e077",
+    "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingCoordinator.java": "1dcfb4b076ab1dae897b3b2fd092a67601a2874825009bf9b8087c08d7e49d51",
+    "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingHeartbeat.java": "857615c80f1b15ed80584f78115967e4999e3a7130c79f4d95ef8ad1cbad66e0",
+    "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingDelays.java": "71bb5ff18998b2025f5e9f555a0527253cb23fb75b411433c890fccd71d7af7c",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledTarget.java": "bfc41be264f5abdd54571277d1da5791f7076031f29cd78d0a927b226253d3ef",
+    "backend/src/main/java/com/citi/put/checks/scheduling/CronDispatcher.java": "580ba79e5eb07eee90bc3a5e0faf2823b88456f396a3d618dc8cb35ee97d4073",
+    "backend/src/main/java/com/citi/put/checks/scheduling/ScheduleService.java": "93d8c1881acee4985524869ebcea2e38a1216cceb0d31894dd80ecdecb7f9224",
+    "backend/src/main/java/com/citi/put/checks/reports/schedule/ReportScheduleResolver.java": "d4799aa8d466efda962a1699f9432467fe76f47fcc0b607f7e816f2ccb1dff01",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioCronResolver.java": "a11f655f79961637015161fbfeabe99583c74af71a2dcbabf6cd5b29c2362fde",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulingProperties.java": "b8fd37d224a076b1b277d6b180aa7e72aaf03bfdbbea1d9c31a74c9fe7d06d42",
+    "backend/src/test/java/com/citi/put/checks/scheduling/CronRecurrenceTest.java": "9ab00bf21e874da0e47c2d9a01814223399f20a5fbd7b8462cb2583db137909b",
+    "backend/src/test/java/com/citi/put/checks/scheduling/SchedulingCoordinatorTest.java": "f7e2f099c15eaa70b97e54221b3bf52447682b3507cea4087b72370214e08935",
+    "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java": "18b69066063a8ae4f76ebcc7dce21e72d7d72176e2e5374f0fa6ad6f7361a2d3",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingIsolationTest.java": "a42688a10138747a22ca4dc25a3c3d74c39bdda710ebdd301b636eaf9cca49b0"
+  },
+  "notClaimed": [
+    "Unfiltered full ./gradlew test or ./gradlew check/Jacoco coverage verification",
+    "Live production grants/vault/pilot/load/restore gates",
+    "New schema/public DTO/frontend/runner wire changes"
+  ],
+  "preservation": "All prior dirty work retained; formatting targeted this refactor files. Prior STUDIO-SCHED-001 approval/history not rewritten.",
+  "automatedReview": {
+    "coderabbitExecutablePresent": false,
+    "wslAvailable": false,
+    "configuredFallback": ".aiox-core/core-config.yaml graceful_degradation.skip_if_not_installed:true",
+    "status": "Unavailable; focused manual executor review and independent QA fallback; no automated pass"
+  }
+}

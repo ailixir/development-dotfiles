@@ -43,7 +43,26 @@ export interface FakePage extends PageLike {
    * the run can reach.
    */
   onCall: ((call: RecordedPageCall) => void) | null;
+  /**
+   * What `count()` answers for a locator, by its recorded path (e.g.
+   * `page.getByRole(searchbox,{})`). `null` — the default — answers 1 for every locator, so a
+   * text-entry target resolves on the authored role exactly as before executor 2.1.0.
+   */
+  countOf: ((path: string) => number) | null;
+  /**
+   * How many of a locator's matches are hidden, by its unfiltered path (VAL-040). `null` — the
+   * default — means none: a `filter({ visible: true })` locator then counts what its base counts.
+   */
+  hiddenOf: ((path: string) => number) | null;
+  /** Every `count()` call, by locator path, in order. Kept apart from `calls` on purpose. */
+  readonly counts: string[];
 }
+
+/** The path suffix of a `filter({ visible: true })` locator (VAL-040). */
+export const VISIBLE_SUFFIX = '.filter(visible)';
+
+/** Each fake locator's recorded path, so `or()` can name both of its sides. */
+const locatorPaths = new WeakMap<LocatorLike, string>();
 
 export function createFakePage(): FakePage {
   const calls: RecordedPageCall[] = [];
@@ -62,6 +81,9 @@ export function createFakePage(): FakePage {
     currentTitle: 'Checks — Home',
     neverVisible: false,
     onCall: null,
+    countOf: null,
+    hiddenOf: null,
+    counts: [] as string[],
     failOn(method: string, error: Error): void {
       failures.set(method, error);
     },
@@ -113,10 +135,12 @@ function locatorFactories(
   page: FakePage,
   calls: RecordedPageCall[],
   path: string,
-): Pick<
-  QueryRoot,
-  'getByRole' | 'getByText' | 'getByLabel' | 'getByPlaceholder' | 'getByTestId' | 'locator'
-> {
+): Pick<QueryRoot, 'getByRole' | 'getByText' | 'getByLabel' | 'getByPlaceholder' | 'getByTestId'> & {
+  locator(
+    selector: string | LocatorLike,
+    options?: { readonly hasNot?: LocatorLike },
+  ): LocatorLike;
+} {
   const child = (method: string, ...args: unknown[]): LocatorLike => {
     const next = `${path}.${method}(${args.map((arg) => describeArg(arg)).join(',')})`;
     calls.push({ method, args });
@@ -128,8 +152,18 @@ function locatorFactories(
     getByLabel: (text, options) => child('getByLabel', describe(text), options),
     getByPlaceholder: (text, options) => child('getByPlaceholder', describe(text), options),
     getByTestId: (testId) => child('getByTestId', testId),
-    locator: (selector) => child('locator', selector),
+    // VAL-041: a locator argument and a `hasNot` option are recorded by the other locator's path.
+    locator: (selector, options) => {
+      const target = typeof selector === 'string' ? selector : pathOf(selector);
+      return options?.hasNot === undefined
+        ? child('locator', target)
+        : child('locator', target, `{hasNot:${pathOf(options.hasNot)}}`);
+    },
   };
+}
+
+function pathOf(locator: LocatorLike): string {
+  return locatorPaths.get(locator) ?? '?';
 }
 
 function describeArg(arg: unknown): string {
@@ -192,7 +226,24 @@ export function createFakeLocator(
     inputValue(): Promise<string> {
       return Promise.resolve(page.value);
     },
+    count(): Promise<number> {
+      page.counts.push(path);
+      if (path.endsWith(VISIBLE_SUFFIX)) {
+        const base = path.slice(0, -VISIBLE_SUFFIX.length);
+        const total = page.countOf?.(base) ?? 1;
+        return Promise.resolve(Math.max(0, total - (page.hiddenOf?.(base) ?? 0)));
+      }
+      return Promise.resolve(page.countOf?.(path) ?? 1);
+    },
+    // Not recorded as a call: it narrows a locator, it is not a segment of the authored chain.
+    filter(): LocatorLike {
+      return createFakeLocator(page, calls, `${path}${VISIBLE_SUFFIX}`);
+    },
+    or(other: LocatorLike): LocatorLike {
+      return createFakeLocator(page, calls, `${path}.or(${locatorPaths.get(other) ?? '?'})`);
+    },
   };
+  locatorPaths.set(locator, path);
   return locator;
 }
 

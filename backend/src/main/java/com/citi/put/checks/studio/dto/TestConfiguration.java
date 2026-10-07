@@ -13,6 +13,11 @@ public record TestConfiguration(
   public static final String CANONICAL_BROWSER = "chromium";
   public static final String LEGACY_CHROME = "chrome";
   public static final int DEFAULT_TIMEOUT_SECONDS = 30;
+
+  /** Contract bounds for the per-step {@code timeoutSeconds} ({@code minimum: 1, maximum: 120}). */
+  public static final int MIN_TIMEOUT_SECONDS = 1;
+
+  public static final int MAX_TIMEOUT_SECONDS = 120;
   public static final String DEFAULT_WAIT_STRATEGY = "networkidle";
 
   public static TestConfiguration defaults() {

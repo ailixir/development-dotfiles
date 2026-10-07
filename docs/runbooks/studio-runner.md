@@ -36,8 +36,9 @@ That guide supersedes the earlier Sonic/fake-store setup notes below; cloud prov
 >    still `open`.** An owner is not a delivery: item 3 below is unchanged.
 > 2. **The Studio Vault adapter is implemented but not connected.** The `hashicorp` KV v2 client
 >    is selected only with `STUDIO_VAULT_PROVIDER=hashicorp`; the shipped deployed default is
->    `none`; tests alone use the fake. The legacy non-Studio `SecretsService` path still
->    returns `REDACTED`/plaintext. Real endpoint/policy evidence remains `ED-02`.
+>    `none`; tests alone use the fake. Vault is the only secret store: the plaintext `secrets`
+>    table and its `REDACTED` stub were removed (V25, §9.2). Real endpoint/policy evidence remains
+>    `ED-02`.
 > 3. **No credentialed pilot may run until `ED-02` has linked completed tickets.** That is `ED-02`'s
 >    own `gate_note`, not this document's opinion. **Unchanged, and this is the item that matters.**
 >    *(The second half of this line — @po's ruling that story 10.19 may not be **drafted** while
@@ -457,12 +458,13 @@ default somebody may change.
    comment records why that is unavailable — *"while the target platform does not provide Core
    services."*
 2. **The Studio real-vault flow exists but is default-off.** `hashicorp` performs bounded KV v2
-   reads using a mounted token file, returns the nonsecret Vault version, distinguishes `404` from
-   outages, and never sends values through the compile path. Local secret-use authorization still
-   uses the fake; the legacy `SecretsService` remains unchanged. Real policy/endpoint proof is
-   still `ED-02`.
+   reads, create-only writes and metadata lists using a mounted token file, returns the nonsecret
+   Vault version, distinguishes `404` from outages, and never sends values through the compile
+   path. Secret-use authorization is still development configuration. The plaintext `secrets`
+   table is gone (V25); Vault is the only store (§9.2). Real policy/endpoint proof is still
+   `ED-02`.
    **Every Studio secret needs an `allowedOrigins` key** (story 10.44, ADR-SC-003) beside its value
-   in the KV v2 entry: comma-separated `scheme://host[:port]` origins, http(s) only, at most 16.
+   in the KV v2 entry (a secret saved through Studio is written with one; §9.2): comma-separated `scheme://host[:port]` origins, http(s) only, at most 16.
    The runner fills a secret only while the page origin is listed and otherwise fails the step with
    `SECRET_ORIGIN_NOT_ALLOWED`. A missing, empty or malformed list binds the secret to no origin
    (fail closed), and the API logs a WARN naming the reference.
@@ -527,6 +529,78 @@ real, non-header-injected identity is story 10.19 AC-7, **blocked**.
 governed by `checks.local-dev-auth.enabled`. It cannot load in any deployed profile — the chart
 renders `api,dev` / `api,staging` / `api,prod` — and it is named here so that a reader counting
 bypasses finds four accounted for rather than three and a surprise.
+
+### 9.2 Studio secrets in Vault
+
+*Added by studio-vault-secrets, 2026-09-22 (ADR-002 §32).*
+
+**Where a secret lives.** Only in Vault KV v2, at
+
+```
+{mount}/data/studio/{csiId}/{environment}/{testId}/secrets/{name}
+```
+
+with two keys in the entry: the value under `STUDIO_VAULT_VALUE_KEY` (default `value`) and
+`allowedOrigins` (comma-separated, normalized). The CSI, environment and test id come from the
+persisted draft, never from a request. The plaintext `secrets` table was dropped by V25, rows and
+all; nothing migrated them.
+
+**Saving and listing.** `POST /api/v1/studio/tests/{id}/secrets` (needs write access to the
+draft's CSI) is a **create-only** write (`cas=0`). `GET` on the same path (read access) lists
+names, never values. Studio cannot rotate, replace or delete a secret: fix it in Vault directly,
+or create a new name and point the step at it. In Vault, replace a value with `vault kv put` (a new
+version) or remove a name with `vault kv metadata delete`. Do **not** use `vault kv delete`: that
+soft-deletes the latest version only, so the name still lists, a run answers `UNKNOWN_REFERENCE`,
+and re-creating it answers `409`.
+
+**Connecting Vault is not enough to run with a secret.** Secret use is still decided by the
+development entitlement map `studio.secrets.entitlements` (`principal|csi|environment -> ids`);
+the production secret-use policy is PUT Core's and not built (V6). A run whose principal is not
+entitled to a secret there is refused even when Vault holds it. A `503 VAULT_UNAVAILABLE` is
+logged at WARN as `Studio Vault call failed: …` with Vault's HTTP status, which is how a token
+missing `create` or `list` shows.
+
+**What each answer means:**
+
+| Answer | Meaning |
+|---|---|
+| `503 VAULT_NOT_CONFIGURED` | The provider is `none`. Expected until Vault is connected. Not an outage. |
+| `503 VAULT_UNAVAILABLE` | Vault did not answer, answered an error, or the token was refused. |
+| `409 SECRET_ALREADY_EXISTS` | The name is already stored for this test. The stored entry was not touched. |
+| `403 STUDIO_FORBIDDEN` | Unknown draft, or no access to its CSI. Decided before the body is read. |
+
+**Turning it on** takes environment variables only:
+
+- required: `STUDIO_VAULT_PROVIDER=hashicorp`, `STUDIO_VAULT_ADDRESS` (https; plain http only on
+  loopback), `STUDIO_VAULT_TOKEN_FILE` (a readable mounted token file);
+- optional: `STUDIO_VAULT_NAMESPACE`, `STUDIO_VAULT_MOUNT`, `STUDIO_VAULT_PATH_TEMPLATE`,
+  `STUDIO_VAULT_VALUE_KEY`.
+
+A path template must contain `{csiId}`, `{environment}`, `{testId}`, `{kind}` and end with
+`/{referenceName}`, or the api and worker refuse to start. The chart's `studioVault.pathTemplate`
+default is `studio/{csiId}/{environment}/{testId}/{kind}/{referenceName}`.
+
+**The token policy each pod needs:**
+
+- **api:** `create` and `read` on `{mount}/data/studio/*` (acceptance preflight reads), and
+  `list` and `read` on `{mount}/metadata/studio/*`.
+- **worker:** `read` on `{mount}/data/studio/*` only.
+
+`update` is not needed. Without it, a duplicate write may come back from Vault as `403` rather than
+`400`; the API then reads the entry's metadata and still answers `409`. That Vault behaviour is
+inferred from HashiCorp's documentation and has not been checked against the platform Vault.
+
+**Caveats an operator will meet:**
+
+- **Response size.** A value may be up to 8192 characters. Lowering
+  `STUDIO_VAULT_MAX_RESPONSE_BYTES` below about 57 KiB can make a stored long value unreadable
+  (the read is refused as oversized and surfaces as `VAULT_UNAVAILABLE`).
+- **Changing a test's environment hides its earlier secrets.** They stay in Vault under the old
+  environment, are not listed, and do not resolve. This is the intended scoping.
+- **Deleting a test leaves its Vault subtree behind.** Purge it in Vault by prefix if needed; Studio
+  does not.
+- **CSRF.** The save route is one more cookie-authenticated mutation without a CSRF control (§10),
+  and this one writes to Vault.
 
 ## 10. CSRF — an open prerequisite, not a solved problem
 
@@ -724,6 +798,67 @@ rollback expires on its original schedule.
   bytes are removed has not been measured.*
 
 <!-- ROLLBACK-END -->
+
+### (e) Executor and contract release order — three steps in one window
+
+*Added 2026-10-04 (VAL-031). Reconciled 2026-10-05 with VAL-012 (ADR-002 §33.3), following the
+re-gate `regate_2026-10-04b.release_sequence` in
+[`docs/qa/gates/ui-studio-validation-20261004.yml`](../qa/gates/ui-studio-validation-20261004.yml).*
+The earlier text said only "runner first, backend pin second". On its own, that order is unsafe.
+
+**The conflict.** This release has two ordering constraints, and they point in opposite directions:
+
+- **VAL-012 (ADR-002 §33.3) needs the backend first.** The 2.1.0 runner sends
+  `RunnerLogEntry.stepIndex`. An old backend rejects the unknown property
+  (`ignoreUnknown = false`), every progress and final report fails, and the run is reaped.
+- **VAL-031 needs the runner first.** The backend pin is recorded on revision provenance, and a
+  `2.0.0` runner refuses revisions with `2.1.0` provenance (`RUNTIME_INCOMPATIBLE`).
+
+One backend artifact carries both the `stepIndex` acceptance and the `2.1.0` default pin, so neither
+order is safe by itself. The override env var
+`STUDIO_RUNTIME_EXECUTOR_VERSION` (`studio.runtime.pin.executor-version` in the backend
+`application.yml`, default `2.1.0`) splits the two changes apart.
+
+**Safe sequence:**
+
+1. **Deploy the backend with `STUDIO_RUNTIME_EXECUTOR_VERSION=2.0.0`** as an explicit override. The
+   new code accepts `stepIndex`, and new revisions carry `2.0.0` provenance, which both runner
+   versions accept.
+2. **Deploy `studio-runner` with executor `2.1.0`.** Its `stepIndex` is now accepted. Revisions with
+   `2.0.0` provenance keep running, because the executor is compared as a backward-compatible minor.
+3. **Remove the override**, so the pin becomes `2.1.0`, and restart the backend.
+
+**Rollback runs in reverse:**
+
+1. Set the pin back to `2.0.0` (re-add the override).
+2. Roll the runner back to `2.0.0`. Revisions compiled with `2.1.0` provenance are refused until
+   they are recompiled.
+3. Roll back the backend code. §12(a) through §12(d) still apply: kill switch first, and the
+   database does not roll back.
+
+**Run steps 1 through 3 in a single window.** The executor pin is a compile-fingerprint input, so
+step 3 changes every fingerprint again. Step 1 also ships prompt `2.3.0`, `providerSchemaVersion`
+`2` and `thinking-level: LOW`, and those already force one recompile of every test.
+
+**Expected recompiles:**
+
+- **Most tests recompile once.** That covers any test that is not recompiled between step 1 and
+  step 3: the step 1 change and the step 3 change are absorbed into its next compile.
+- **Tests recompiled inside the window recompile twice,** once for step 1 and again after step 3.
+  Keeping the window short keeps this set small.
+- **A rollback past step 1 forces another recompile,** because the fingerprint inputs revert.
+
+**Release checklist** (all are release gates, not code defects):
+
+- **R2D2 proxy probe (VAL-030, gate QA-2).** Before any R2D2 rollout, send one probe call through
+  the proxy with the v2 provider schema (a per-status `anyOf`) and `thinking-level: LOW`. Until it
+  passes, ship on Vertex only. If the proxy rejects either one, every compile on that path fails,
+  and the only remedy is a code revert.
+- **Deployment tier against the release image (gate QA-R5).** Run
+  `vitest.deployment.config.ts` with `STUDIO_RUNNER_IMAGE` set to the image built from the release
+  tree (executor `2.1.0`), not the default `10.18a-local` image.
+- **ED-02 for credentialed pilots.** Do not run a credentialed pilot until `ED-02` closes. See §9 and
+  `docs/epics/EPIC-10-EXECUTION.yaml`.
 
 ### After the rollback
 

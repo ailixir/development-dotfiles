@@ -98,4 +98,162 @@ class GatewayResponseParserTest {
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("Unable to load the artifact schema");
   }
+
+  // ── VAL-019a: one closed rejection reason per envelope check ──────────────
+
+  private static final java.util.UUID A =
+      java.util.UUID.fromString("00000000-0000-0000-0000-00000000000a");
+  private static final java.util.UUID B =
+      java.util.UUID.fromString("00000000-0000-0000-0000-00000000000b");
+  private static final java.util.List<java.util.UUID> IDS = java.util.List.of(A, B);
+
+  private static String generated(java.util.UUID id) {
+    return "{\"stepId\":\"" + id + "\",\"status\":\"GENERATED\",\"code\":\"await x();\"}";
+  }
+
+  private static String envelope(String first, String second) {
+    return "{\"version\":1,\"kind\":\"FULL\",\"steps\":[" + first + "," + second + "]}";
+  }
+
+  private ParseResult proposal(String text) {
+    return parser.parseProposal(text, "FULL", IDS);
+  }
+
+  private void assertRejected(
+      String text, GatewayResponseParser.ProposalRejection expected, Integer stepIndex) {
+    ParseResult result = proposal(text);
+    assertThat(result.isValid()).as("%s must be rejected", expected).isFalse();
+    assertThat(result.rejection()).isEqualTo(expected);
+    assertThat(result.rejectStepIndex()).isEqualTo(stepIndex);
+  }
+
+  @Test
+  void aValidEnvelopeCarriesNoRejection() {
+    ParseResult result = proposal(envelope(generated(A), generated(B)));
+    assertThat(result.isValid()).isTrue();
+    assertThat(result.rejection()).isNull();
+    assertThat(result.rejectStepIndex()).isNull();
+  }
+
+  @Test
+  void eachSyntaxDefectHasItsOwnReasonDecidedByParseStageNotMessage() {
+    String valid = envelope(generated(A), generated(B));
+    assertRejected("   ", GatewayResponseParser.ProposalRejection.EMPTY, null);
+    assertRejected(null, GatewayResponseParser.ProposalRejection.EMPTY, null);
+    assertRejected("{\"version\":1,", GatewayResponseParser.ProposalRejection.MALFORMED_JSON, null);
+    assertRejected("not json", GatewayResponseParser.ProposalRejection.MALFORMED_JSON, null);
+    assertRejected(
+        "{\"version\":1,\"version\":1,\"kind\":\"FULL\",\"steps\":["
+            + generated(A)
+            + ","
+            + generated(B)
+            + "]}",
+        GatewayResponseParser.ProposalRejection.DUPLICATE_KEY,
+        null);
+    assertRejected(valid + " {}", GatewayResponseParser.ProposalRejection.TRAILING_CONTENT, null);
+    assertRejected(
+        "```json\n" + valid + "\n```",
+        GatewayResponseParser.ProposalRejection.MALFORMED_JSON,
+        null);
+  }
+
+  @Test
+  void eachEnvelopeDefectHasItsOwnReason() {
+    String steps = "[" + generated(A) + "," + generated(B) + "]";
+    assertRejected(
+        "{\"version\":1,\"kind\":\"FULL\",\"steps\":" + steps + ",\"extra\":1}",
+        GatewayResponseParser.ProposalRejection.ENVELOPE_KEYS,
+        null);
+    assertRejected(
+        "{\"version\":2,\"kind\":\"FULL\",\"steps\":" + steps + "}",
+        GatewayResponseParser.ProposalRejection.VERSION,
+        null);
+    assertRejected(
+        "{\"version\":\"1\",\"kind\":\"FULL\",\"steps\":" + steps + "}",
+        GatewayResponseParser.ProposalRejection.VERSION,
+        null);
+    assertRejected(
+        "{\"version\":1,\"kind\":\"PATCH\",\"steps\":" + steps + "}",
+        GatewayResponseParser.ProposalRejection.KIND_MISMATCH,
+        null);
+    assertRejected(
+        "{\"version\":1,\"kind\":\"FULL\",\"steps\":{}}",
+        GatewayResponseParser.ProposalRejection.STEPS_NOT_ARRAY,
+        null);
+    assertRejected(
+        "{\"version\":1,\"kind\":\"FULL\",\"steps\":[" + generated(A) + "]}",
+        GatewayResponseParser.ProposalRejection.STEP_COUNT,
+        null);
+  }
+
+  @Test
+  void eachStepDefectHasItsOwnReasonAndTheZeroBasedPosition() {
+    assertRejected(
+        envelope(generated(A), generated(A)),
+        GatewayResponseParser.ProposalRejection.STEP_ID_MISMATCH,
+        1);
+    assertRejected(
+        envelope(generated(A), "{\"stepId\":\"" + B + "\",\"status\":\"DONE\"}"),
+        GatewayResponseParser.ProposalRejection.STATUS_UNKNOWN,
+        1);
+    assertRejected(
+        envelope(
+            "{\"stepId\":\"" + A + "\",\"status\":\"GENERATED\",\"code\":\"x\",\"message\":\"m\"}",
+            generated(B)),
+        GatewayResponseParser.ProposalRejection.GENERATED_KEYS,
+        0);
+    assertRejected(
+        envelope(generated(A), "{\"stepId\":\"" + B + "\",\"status\":\"GENERATED\",\"code\":\"\"}"),
+        GatewayResponseParser.ProposalRejection.CODE_EMPTY_OR_TOO_LONG,
+        1);
+    assertRejected(
+        envelope(
+            generated(A),
+            "{\"stepId\":\""
+                + B
+                + "\",\"status\":\"GENERATED\",\"code\":\""
+                + "x".repeat(2001)
+                + "\"}"),
+        GatewayResponseParser.ProposalRejection.CODE_EMPTY_OR_TOO_LONG,
+        1);
+    assertRejected(
+        envelope(
+            generated(A),
+            "{\"stepId\":\""
+                + B
+                + "\",\"status\":\"UNSUPPORTED\",\"reason\":\"UNSUPPORTED_CAPABILITY\"}"),
+        GatewayResponseParser.ProposalRejection.REJECTION_KEYS,
+        1);
+    assertRejected(
+        envelope(
+            generated(A),
+            "{\"stepId\":\""
+                + B
+                + "\",\"status\":\"UNSUPPORTED\",\"reason\":\"AMBIGUOUS_INTENT\",\"message\":\"m\"}"),
+        GatewayResponseParser.ProposalRejection.REJECTION_REASON_MISMATCH,
+        1);
+    assertRejected(
+        envelope(
+            generated(A),
+            "{\"stepId\":\""
+                + B
+                + "\",\"status\":\"CLARIFICATION\",\"reason\":\"AMBIGUOUS_INTENT\",\"message\":\"\"}"),
+        GatewayResponseParser.ProposalRejection.MESSAGE_EMPTY_OR_TOO_LONG,
+        1);
+  }
+
+  /** Every parser value is repairable; the adapter- and pipeline-side values are terminal. */
+  @Test
+  void onlyParserDetectedReasonsAreRepairable() {
+    for (GatewayResponseParser.ProposalRejection value :
+        GatewayResponseParser.ProposalRejection.values()) {
+      boolean terminal =
+          java.util.Set.of(
+                  GatewayResponseParser.ProposalRejection.FINISH_REASON,
+                  GatewayResponseParser.ProposalRejection.ASSEMBLY_FAILED,
+                  GatewayResponseParser.ProposalRejection.ARTIFACT_VERSION)
+              .contains(value);
+      assertThat(value.repairable()).as("%s", value).isEqualTo(!terminal);
+    }
+  }
 }

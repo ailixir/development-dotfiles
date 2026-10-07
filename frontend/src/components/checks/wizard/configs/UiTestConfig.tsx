@@ -1,6 +1,8 @@
 import SecretInput from '@/components/studio/SecretInput';
+import { STUDIO_CAPABILITIES } from '@/utils/config/studioCapabilities';
 import { Delete } from '@mui/icons-material';
 import {
+  Alert,
   Button,
   FormControl,
   Grid,
@@ -127,17 +129,25 @@ const UiTestConfig: React.FC<UiTestConfigProps> = ({
                         <MenuItem value="plain">Plain</MenuItem>
                         <MenuItem value="number">Number</MenuItem>
                         <MenuItem value="boolean">Boolean</MenuItem>
-                        <MenuItem value="secret">Secret</MenuItem>
+                        {STUDIO_CAPABILITIES.vaultSecrets && (
+                          <MenuItem value="secret">Secret</MenuItem>
+                        )}
                       </Select>
                     </FormControl>
                   </TableCell>
                   <TableCell>
                     {v?.kind === 'secret' ? (
-                      <SecretInput
-                        label="Select secret"
-                        value={v?.secretId ? { id: v.secretId } : null}
-                        onChange={(ref) => handleSecretChange(name, ref)}
-                      />
+                      STUDIO_CAPABILITIES.vaultSecrets ? (
+                        <SecretInput
+                          label="Select secret"
+                          testId={formData.uiTestId || null}
+                          disabledHint="Select a Studio test first"
+                          value={v?.secretId ? { id: v.secretId } : null}
+                          onChange={(ref) => handleSecretChange(name, ref)}
+                        />
+                      ) : (
+                        <Alert severity="info">Vault secrets are unavailable in this alpha.</Alert>
+                      )
                     ) : (
                       <TextField
                         size="small"

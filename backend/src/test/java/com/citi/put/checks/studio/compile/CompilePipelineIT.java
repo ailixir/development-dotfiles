@@ -26,6 +26,7 @@ import com.citi.put.checks.studio.readiness.ExecutionReadinessService;
 import com.citi.put.checks.studio.readiness.ReadinessVerdict;
 import com.citi.put.checks.studio.secrets.FakeStudioVaultProvider;
 import com.citi.put.checks.studio.secrets.StudioVaultProvider;
+import com.citi.put.checks.studio.secrets.VaultScope;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -179,16 +180,34 @@ class CompilePipelineIT {
 
     @Override
     public java.util.Optional<VaultEntry> read(
-        ReferenceKind kind, String csiId, String environment, String referenceName) {
-      calls.add(kind + ":" + csiId + ":" + environment + ":" + referenceName);
+        ReferenceKind kind, VaultScope scope, String referenceName) {
+      calls.add(kind + ":" + scope + ":" + referenceName);
       if (throwing) {
         throw new IllegalStateException("the compile path reached the vault");
       }
-      return delegate.read(kind, csiId, environment, referenceName);
+      return delegate.read(kind, scope, referenceName);
     }
 
-    void seed(String csiId, String environment, String referenceName, String value) {
-      delegate.rotate(ReferenceKind.SECRET, csiId, environment, referenceName, value);
+    @Override
+    public String create(VaultScope scope, String name, char[] value, List<String> origins) {
+      calls.add("create:" + scope + ":" + name);
+      if (throwing) {
+        throw new IllegalStateException("the compile path reached the vault");
+      }
+      return delegate.create(scope, name, value, origins);
+    }
+
+    @Override
+    public List<String> listSecretNames(VaultScope scope) {
+      calls.add("list:" + scope);
+      if (throwing) {
+        throw new IllegalStateException("the compile path reached the vault");
+      }
+      return delegate.listSecretNames(scope);
+    }
+
+    void seed(VaultScope scope, String referenceName, String value) {
+      delegate.rotate(ReferenceKind.SECRET, scope, referenceName, value);
     }
 
     void reset() {
@@ -1030,19 +1049,20 @@ class CompilePipelineIT {
   @Test
   void aValueInTheVaultReachesNoGatewayPayloadNoAuditLineAndNoPrompt() {
     String canary = "Compile-Path-Vault-Canary-6e02b9";
-    vault.seed(CSI_ID, "Production", "LOGIN_PW", canary);
+    UUID id = seedTest(STEPS);
+    VaultScope scope = VaultScope.of(CSI_ID, "Production", id);
+    vault.seed(scope, "LOGIN_PW", canary);
 
-    // Proven present, in the source this story introduced.
+    // Proven present, in the source this story introduced, under the compiled test's own scope.
     assertThat(
             vault
-                .read(StudioVaultProvider.ReferenceKind.SECRET, CSI_ID, "Production", "LOGIN_PW")
+                .read(StudioVaultProvider.ReferenceKind.SECRET, scope, "LOGIN_PW")
                 .map(entry -> new String(entry.value()))
                 .orElse(""))
         .isEqualTo(canary);
     // …and the proof read itself is not counted against the compile below.
     vault.calls.clear();
 
-    UUID id = seedTest(STEPS);
     pipeline.compile(id, OWNER);
     awaitCompileStatus(id, "READY");
 

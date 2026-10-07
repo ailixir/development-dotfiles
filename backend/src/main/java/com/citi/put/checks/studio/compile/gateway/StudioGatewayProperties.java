@@ -37,9 +37,11 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * @param retry bounded transport-retry policy
  * @param artifactSchema Spring resource location of the artifact JSON schema used for validation
  * @param thinkingLevel the thinking level sent explicitly on every request and recorded in the
- *     compilation settings (Story 10.45 AC 6). Pinned {@code MEDIUM}, inferred to equal the
- *     gemini-3.8-flash default; SPK-01 verifies it for Vertex/R2D2. {@code MINIMAL} is not
- *     representable, so binding it fails
+ *     compilation settings (Story 10.45 AC 6). Defaults to {@code LOW} (VAL-007): the benchmark
+ *     measured LOW at least as accurate as MEDIUM and HIGH and 3-6x faster ({@code
+ *     docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/report.md}, finding 2). Overridable per
+ *     environment via {@code STUDIO_GATEWAY_THINKING_LEVEL}. {@code MINIMAL} is not representable,
+ *     so binding it fails
  * @param providerFeatures request fields the R2D2 proxy is trusted to accept (EC-17 degradation)
  */
 @ConfigurationProperties(prefix = "studio.compile.gateway")
@@ -49,7 +51,7 @@ public record StudioGatewayProperties(
     String location,
     String model,
     @DefaultValue Credentials credentials,
-    @DefaultValue("60s") Duration requestTimeout,
+    @DefaultValue("150s") Duration requestTimeout,
     @DefaultValue("4") int maxConcurrency,
     @DefaultValue("262144") int maxInputBytes,
     @DefaultValue("65536") int maxOutputBytes,
@@ -58,7 +60,7 @@ public record StudioGatewayProperties(
     @DefaultValue("0") double temperature,
     @DefaultValue TransportRetry retry,
     @DefaultValue("classpath:studio/artifact.schema.json") String artifactSchema,
-    @DefaultValue("MEDIUM") ThinkingLevel thinkingLevel,
+    @DefaultValue("LOW") ThinkingLevel thinkingLevel,
     @DefaultValue ProviderFeatures providerFeatures) {
 
   /**
@@ -126,8 +128,12 @@ public record StudioGatewayProperties(
         ProviderFeatures.ALL);
   }
 
-  /** The pinned thinking level (spec &sect;3.2.6); a harness A/B may later pin {@code LOW}. */
-  public static final ThinkingLevel DEFAULT_THINKING_LEVEL = ThinkingLevel.MEDIUM;
+  /**
+   * The default thinking level (spec &sect;3.2.6). {@code LOW} since VAL-007 (2026-10-04), from the
+   * benchmark A/B in {@code docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/report.md}; it was
+   * {@code MEDIUM}. The level is a fingerprint input, so the change recompiles every test once.
+   */
+  public static final ThinkingLevel DEFAULT_THINKING_LEVEL = ThinkingLevel.LOW;
 
   /**
    * Thinking levels gemini-3.8-flash accepts (research Q1: low, medium and high).

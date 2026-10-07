@@ -65,6 +65,10 @@ public class ExecutionSnapshotMapper {
     this.servesRecordings = servesRecordings;
   }
 
+  /**
+   * The snapshot without {@code testName}: the mapper reads one history row and nothing else. The
+   * list and single-read routes label it with {@link ExecutionSnapshotDto#withTestName}.
+   */
   public ExecutionSnapshotDto toSnapshot(UITestExecution execution) {
     String status = LegacyStudioAdapter.normalizeStatus(execution.getStatus());
     String errorCode =
@@ -74,6 +78,7 @@ public class ExecutionSnapshotMapper {
     return new ExecutionSnapshotDto(
         execution.getId(),
         execution.getTestId(),
+        null,
         execution.getCsiId(),
         execution.getRevisionId(),
         status,
@@ -89,7 +94,15 @@ public class ExecutionSnapshotMapper {
         videoPath(execution, video),
         readRuntime(execution.getRuntimeVersions()),
         execution.getSnapshotRevision(),
-        streamComplete(status, video));
+        streamComplete(status, video),
+        execution.getTriggerSource(),
+        execution.getScheduleId(),
+        execution.getScheduleVersion(),
+        execution.getOccurrenceId(),
+        execution.getScheduledAt(),
+        execution.getActivationId(),
+        execution.getActivatedBy(),
+        execution.getActivatedAt());
   }
 
   /**

@@ -84,7 +84,7 @@ export const studioInferenceHandlers = [
     if (!validWrite(body)) return problem('INVALID_AUTHORING', 400);
     if (body.steps.some(step => step.id != null)) return problem('INVALID_STEP_ID', 400);
     const template=mockTests[0]; if(!template) return problem('NO_FIXTURE',500);
-    const id=crypto.randomUUID(); const view=fromTest({...template,...body,id,steps:body.steps.map(s=>s.text),sourceRevision:1,configurationRevision:1,
+    const id=crypto.randomUUID(); const now=new Date().toISOString(); const view=fromTest({...template,...body,id,createdAt:now,updatedAt:now,steps:body.steps.map(s=>s.text),sourceRevision:1,configurationRevision:1,
       compileStatus:'STALE',confirmedRevisionId:null,confirmedRevisionArtifact:null,confirmedRevisionArtifactHash:null,currentCandidateRevisionId:null,currentCandidateArtifact:null,currentCandidateArtifactHash:null,lastRunStatus:null,lastRunAt:null});
     view.authoring={version:2,steps:body.steps.map(s=>({...s,id:crypto.randomUUID()})),scope:body.scope};view.authoringHash=hash(1);
     views.set(id,view);return HttpResponse.json(view,{status:201});

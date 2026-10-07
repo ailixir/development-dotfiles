@@ -475,8 +475,23 @@ export interface RuntimeVersions {
  * without touching rendering.
  */
 export interface ExecutionSnapshot {
+  /** Absent/null on historical servers or legacy runs; never infer Manual from missing provenance. */
+  triggerSource?: 'MANUAL' | 'SCHEDULED' | null;
+  scheduleId?: string | null;
+  scheduleVersion?: number | null;
+  occurrenceId?: string | null;
+  scheduledAt?: string | null;
+  activationId?: string | null;
+  activatedBy?: string | null;
+  activatedAt?: string | null;
   executionId: string;
   testId: string;
+  /**
+   * The parent test's current name, resolved server-side for `GET /executions` items (story
+   * 10.46). `null` when the test was soft-deleted. Optional because snapshots from the SSE stream,
+   * older servers and older fixtures may not carry it; read it as `snapshot.testName ?? null`.
+   */
+  testName?: string | null;
   csiId: string | null;
   /** Null for legacy history: those runs never had a confirmed revision. */
   revisionId: string | null;
@@ -512,6 +527,85 @@ export interface Page<T> {
 
 export type TestPage = Page<TestDto>;
 export type ExecutionPage = Page<ExecutionSnapshot>;
+
+/*
+ * List query parameters (story 10.46). All optional and additive: an omitted parameter means
+ * "no filter" and the server's default sort. Unknown `sort`, `status` or `lastRun` values answer
+ * `400`. `page` is 0-based; `size` is capped at 100 server-side.
+ */
+
+export type SortDirection = 'asc' | 'desc';
+
+export const TEST_SORT_FIELDS = ['name', 'updatedAt', 'lastRunAt'] as const;
+export type TestSortField = (typeof TEST_SORT_FIELDS)[number];
+/** Wire form `field,direction`, e.g. `name,asc`. */
+export type TestSort = `${TestSortField},${SortDirection}`;
+export const DEFAULT_TEST_SORT: TestSort = 'updatedAt,desc';
+
+export const EXECUTION_SORT_FIELDS = ['acceptedAt', 'durationMs'] as const;
+export type ExecutionSortField = (typeof EXECUTION_SORT_FIELDS)[number];
+/** Wire form `field,direction`, e.g. `durationMs,desc`. */
+export type ExecutionSort = `${ExecutionSortField},${SortDirection}`;
+export const DEFAULT_EXECUTION_SORT: ExecutionSort = 'acceptedAt,desc';
+
+/** `NEVER` selects drafts with no run; the rest match `TestDto.lastRunStatus`. */
+export const TEST_LAST_RUN_FILTERS = ['PASSED', 'FAILED', 'ERROR', 'NEVER'] as const;
+export type TestLastRunFilter = (typeof TEST_LAST_RUN_FILTERS)[number];
+
+/**
+ * `CANCELLED` selects `ERROR` with `errorCode: CANCELLED` (see `isCancelledOutcome`), and `ERROR`
+ * then excludes cancelled runs.
+ */
+export const EXECUTION_STATUS_FILTERS = [
+  'PENDING',
+  'RUNNING',
+  'PASSED',
+  'FAILED',
+  'ERROR',
+  'CANCELLED',
+] as const;
+export type ExecutionStatusFilter = (typeof EXECUTION_STATUS_FILTERS)[number];
+
+/** `GET /studio/tests` query. */
+export interface TestListQuery {
+  csiId?: string;
+  environment?: string;
+  /** Case-insensitive match on name or description. */
+  q?: string;
+  lastRun?: TestLastRunFilter;
+  sort?: TestSort;
+  /** 0-based. */
+  page?: number;
+  size?: number;
+}
+
+/** `GET /studio/executions` query. */
+export interface ExecutionListQuery {
+  testId?: string;
+  csiId?: string;
+  status?: ExecutionStatusFilter;
+  /** Case-insensitive match on the test name. */
+  q?: string;
+  sort?: ExecutionSort;
+  /** 0-based. */
+  page?: number;
+  size?: number;
+}
+
+/** Narrowing helpers for values read from the URL or a select. */
+export function isTestSort(value: string): value is TestSort {
+  const [field, direction, ...rest] = value.split(',');
+  return rest.length === 0
+    && (TEST_SORT_FIELDS as readonly string[]).includes(field)
+    && (direction === 'asc' || direction === 'desc');
+}
+
+export function isExecutionSort(value: string): value is ExecutionSort {
+  const [field, direction, ...rest] = value.split(',');
+  return rest.length === 0
+    && (EXECUTION_SORT_FIELDS as readonly string[]).includes(field)
+    && (direction === 'asc' || direction === 'desc');
+}
 
 export interface ExecuteAccepted {
   executionId: string;
@@ -549,11 +643,18 @@ export function isTerminalExecutionStatus(status: string): boolean {
   return (TERMINAL_EXECUTION_STATUSES as readonly string[]).includes(status);
 }
 
+/**
+ * The per-step budget (`configuration.timeoutSeconds`, openapi `TestConfiguration`): how long each
+ * action or assertion may wait for the page before the step fails. Authors do not set it; every
+ * save and create sends this value.
+ */
+export const DEFAULT_STEP_TIMEOUT_SECONDS = 30;
+
 export function defaultConfiguration(): TestConfiguration {
   return {
     browser: CANONICAL_BROWSER,
     viewport: { width: 1920, height: 1080 },
-    timeoutSeconds: 30,
+    timeoutSeconds: DEFAULT_STEP_TIMEOUT_SECONDS,
     waitStrategy: 'networkidle',
   };
 }

@@ -1,158 +1,261 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, Grid, Chip, Stack, Skeleton, IconButton, Tooltip, LinearProgress, Alert } from '@mui/material';
-import { Refresh, Movie } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import studioApi from '@/services/api/studioApi';
-import { useAppSelector } from '@/store';
-import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
-import { executionStatusLabel, executionStatusTone } from '@/components/studio/run';
-import { VideoEvidencePanel } from '@/components/studio/evidence';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Grid,
+  MenuItem,
+  Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+} from '@mui/material';
+import { Add, Movie } from '@mui/icons-material';
+import CreateTestDialog from '@/components/studio/tests/CreateTestDialog';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { fetchCSIs } from '@/store/slices/csiSlice';
+import { useUrlListState } from '@/hooks/useUrlListState';
+import { SortableHeaderCell, StudioListLayout } from '@/components/studio/list/StudioListLayout';
+import { hideBelowMd } from '@/components/studio/list/studioListSx';
+import { executionStatusLabel } from '@/components/studio/run/executionStatus';
+import {
+  DEFAULT_EXECUTION_SORT,
+  EXECUTION_STATUS_FILTERS,
+  isExecutionSort,
+  type ExecutionSort,
+  type ExecutionStatusFilter,
+} from '@/types/studio/studioTypes';
+import { useStudioRuns } from '@/components/studio/runs/useStudioRuns';
+import { useLiveRunsRefresh } from '@/components/studio/runs/useLiveRunsRefresh';
+import { RunRow } from '@/components/studio/runs/RunRow';
+import { RunDetailsDrawer } from '@/components/studio/runs/RunDetailsDrawer';
+import { copyText, runDetailsPath, runsListPath, studioTestPath, studioTestsPath } from '@/components/studio/runs/runLinks';
+import { isActiveRunStatus } from '@/components/studio/runs/runSnapshots';
 
-/** One history row: the execution as the server reports it, plus the test's name for display. */
-interface RunItem {
-  readonly execution: ExecutionSnapshot;
-  readonly testName: string | null;
+export const RUNS_PAGE_SIZE = 25;
+
+type StatusFilterValue = ExecutionStatusFilter | '';
+const STATUS_VALUES: readonly StatusFilterValue[] = ['', ...EXECUTION_STATUS_FILTERS];
+/** Columns: Test · Status · System · Requested · Duration · actions. */
+const COLUMN_SX = [undefined, undefined, hideBelowMd, undefined, hideBelowMd, undefined] as const;
+
+function statusFilterLabel(status: ExecutionStatusFilter): string {
+  return status === 'CANCELLED' ? 'Cancelled' : executionStatusLabel(status);
 }
 
 /**
- * Browser time only, as the server measured it. Null while the run has not finished, and never
- * computed here from timestamps.
+ * Run history (story 10.46): server-paged, URL-driven list with a deep-linked, live run details
+ * drawer at `studio/runs/:executionId`.
  */
-function durationText(execution: ExecutionSnapshot): string {
-  if (execution.durationMs !== null) {
-    return `${Math.round(execution.durationMs / 1000)}s`;
-  }
-  return execution.status === 'PENDING' || execution.status === 'RUNNING' ? 'in progress' : '—';
-}
-
 const StudioRunsPage: React.FC = () => {
-  const [allRuns, setAllRuns] = useState<RunItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const { executionId } = useParams<{ executionId?: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
-  const searchContext = useAppSelector(state => state.dashboard.searchContext);
+  const dispatch = useAppDispatch();
+  const csiId = useAppSelector((state) => state.dashboard.searchContext.csiId);
+  const registeredCsis = useAppSelector((state) => state.csi.data);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [notice, setNotice] = useState<{ message: string; severity: 'success' | 'error' } | null>(null);
 
-  const load = async () => {
-    setLoading(true);
-    setLoadError(null);
-    try {
-      const [executions, tests] = await Promise.all([
-        studioApi.listExecutions(),
-        studioApi.listTests({}),
-      ]);
-      const names = new Map((tests.data ?? []).map((test) => [test.id, test.name]));
-      setAllRuns(
-        (executions.data ?? []).map((execution) => ({
-          execution,
-          testName: names.get(execution.testId) ?? null,
-        })),
-      );
-    } catch (error: unknown) {
-      setLoadError((error as { message?: string })?.message || 'Failed to load runs');
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => { void dispatch(fetchCSIs()); }, [dispatch]);
+  const csiNames = useMemo(
+    () => new Map(registeredCsis.map((csi) => [csi.id, csi.name])),
+    [registeredCsis],
+  );
+
+  const list = useUrlListState<{ status: StatusFilterValue }, ExecutionSort>({
+    filters: { status: { defaultValue: '', values: STATUS_VALUES } },
+    defaultSort: DEFAULT_EXECUTION_SORT,
+    isSort: isExecutionSort,
+    defaultPageSize: RUNS_PAGE_SIZE,
+  });
+  const { page, setPage, pageSize } = list;
+
+  const { runs, totalElements, loading, error, runningCount, reload, applySnapshot } = useStudioRuns({
+    q: list.debouncedQuery,
+    status: list.filters.status,
+    csiId,
+    sort: list.sort,
+    page,
+    pageSize,
+  });
+
+  const hasActiveRun = runs.some((run) => isActiveRunStatus(run.status));
+  const backgroundRefresh = useCallback(() => reload({ silent: true }), [reload]);
+  useLiveRunsRefresh({ active: hasActiveRun && error === null, refresh: backgroundRefresh });
+
+  // A different global system starts the list from its first page.
+  const previousCsi = useRef(csiId);
+  useEffect(() => {
+    if (previousCsi.current === csiId) return;
+    previousCsi.current = csiId;
+    if (page !== 1) setPage(1, { replace: true });
+  }, [csiId, page, setPage]);
+
+  // A page past the end (stale link, rows gone) falls back to the last page that exists.
+  useEffect(() => {
+    if (loading || error || runs.length > 0 || totalElements === 0 || page === 1) return;
+    // Replace, not push: Back must not return to the empty page, which would redirect again.
+    setPage(Math.max(1, Math.ceil(totalElements / pageSize)), { replace: true });
+  }, [loading, error, runs.length, totalElements, page, pageSize, setPage]);
+
+  const listPath = runsListPath(location.pathname);
+  const runHref = (id: string) => runDetailsPath(listPath, id, location.search);
+  const testHref = useCallback((testId: string) => studioTestPath(listPath, testId), [listPath]);
+
+  const openRun = (id: string) => navigate(runHref(id));
+  const closeRun = () => navigate({ pathname: listPath, search: location.search });
+  const switchRun = (id: string) => navigate(runHref(id), { replace: true });
+  const copyRunLink = (id: string) => {
+    void copyText(`${window.location.origin}${runHref(id)}`).then((copied) =>
+      setNotice(copied
+        ? { message: 'Link copied', severity: 'success' }
+        : { message: 'The link could not be copied', severity: 'error' }),
+    );
   };
 
-  useEffect(() => { load(); }, []);
-
-  // The execution carries its own CSI, so the global CSI filter needs no second lookup.
-  const runs = searchContext.csiId
-    ? allRuns.filter((run) => run.execution.csiId === searchContext.csiId)
-    : allRuns;
+  const filterActive = list.hasActiveFilters || csiId !== null;
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Movie sx={{ fontSize: 32, color: 'primary.main' }} />
-          Studio Runs
-        </Typography>
-        <Tooltip title="Refresh">
-          <span>
-            <IconButton onClick={load} disabled={loading} aria-label="Refresh runs">
-              <Refresh />
-            </IconButton>
-          </span>
-        </Tooltip>
-      </Stack>
+      <StudioListLayout
+        title="Runs"
+        description="Browser test results, live progress and recordings."
+        icon={<Movie aria-hidden="true" />}
+        action={
+          <>
+            {runningCount !== null && runningCount > 0 && (
+              <Chip
+                color="info"
+                variant={list.filters.status === 'RUNNING' ? 'filled' : 'outlined'}
+                data-testid="runs-running-count"
+                aria-pressed={list.filters.status === 'RUNNING'}
+                icon={<CircularProgress size={12} thickness={6} color="inherit" sx={{ ml: '8px !important' }} />}
+                label={`${runningCount} running`}
+                onClick={() => list.setFilter('status', list.filters.status === 'RUNNING' ? '' : 'RUNNING')}
+              />
+            )}
+            <Button variant="contained" startIcon={<Add />} onClick={() => setCreateOpen(true)} size="large">Create Test</Button>
+          </>
+        }
+        query={list.query}
+        onQueryChange={list.setQuery}
+        filter={
+          <Grid item xs={12} md={2}>
+            <TextField
+              fullWidth
+              select
+              label="Status"
+              value={list.filters.status}
+              onChange={(event) => list.setFilter('status', event.target.value as StatusFilterValue)}
+            >
+              <MenuItem value="">All Status</MenuItem>
+              {EXECUTION_STATUS_FILTERS.map((status) => (
+                <MenuItem key={status} value={status}>{statusFilterLabel(status)}</MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+        }
+        csiId={csiId}
+        loading={loading}
+        error={error}
+        onRefresh={() => { void reload(); }}
+        emptyTitle={filterActive ? 'No matching runs' : 'No runs yet'}
+        emptyMessage={filterActive ? 'No runs match your filters.' : 'Run a test from the Studio editor and its result appears here.'}
+        emptyAction={filterActive ? undefined : { label: 'Go to tests', onClick: () => navigate(studioTestsPath(listPath)) }}
+        hasActiveFilters={list.hasActiveFilters}
+        onClearFilters={list.clearAll}
+        count={totalElements}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        pageSizeOptions={list.pageSizeOptions}
+        onPageSizeChange={list.setPageSize}
+        showRefresh
+        skeletonColumns={COLUMN_SX.length}
+        skeletonColumnSx={COLUMN_SX}
+      >
+        <TableContainer>
+          <Table size="small" aria-label="UI test runs">
+            <TableHead>
+              <TableRow>
+                <TableCell>Test</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell sx={hideBelowMd}>System</TableCell>
+                <SortableHeaderCell
+                  field="acceptedAt"
+                  label="Requested"
+                  activeField={list.sortField}
+                  direction={list.sortDirection}
+                  onSort={(field) => list.toggleSort(field, 'desc')}
+                />
+                <SortableHeaderCell
+                  field="durationMs"
+                  label="Duration"
+                  activeField={list.sortField}
+                  direction={list.sortDirection}
+                  onSort={(field) => list.toggleSort(field, 'desc')}
+                  sx={hideBelowMd}
+                />
+                <TableCell align="right">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {runs.map((run) => (
+                <RunRow
+                  key={run.executionId}
+                  run={run}
+                  csiName={run.csiId ? csiNames.get(run.csiId) ?? null : null}
+                  href={runHref(run.executionId)}
+                  selected={run.executionId === executionId}
+                  onOpenRun={() => openRun(run.executionId)}
+                  onOpenTest={run.testName === null ? undefined : () => navigate(testHref(run.testId))}
+                  onCopyLink={() => copyRunLink(run.executionId)}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </StudioListLayout>
 
-      {/* Global search context indicator */}
-      {searchContext.csiId && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="body2">Global filter active:</Typography>
-            <Chip label={`CSI: ${searchContext.csiId}`} size="small" />
-            <Typography variant="body2" sx={{ ml: 2 }}>
-              Showing {runs.length} of {allRuns.length} runs
-            </Typography>
-          </Stack>
-        </Alert>
-      )}
-      {loadError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {loadError}
-        </Alert>
-      )}
-      <Grid container spacing={2}>
-        {loading
-          ? [...Array(6)].map((_, i) => (
-              <Grid key={`s${i}`} item xs={12} md={6} lg={4}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Skeleton variant="text" width={180} />
-                    <Skeleton variant="text" width={220} />
-                    <Skeleton variant="rounded" height={120} />
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))
-          : runs.map(({ execution, testName }) => (
-              <Grid key={execution.executionId} item xs={12} md={6} lg={4}>
-                <Card variant="outlined" sx={{ display: 'flex' }} data-testid={`run-${execution.executionId}`}>
-                  <CardContent sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-                    <Stack spacing={1} sx={{ flexGrow: 1 }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography
-                          variant="subtitle1"
-                          fontWeight={600}
-                          onClick={() => navigate(`/checks/studio/${execution.testId}`)}
-                          sx={{
-                            cursor: 'pointer',
-                            color: 'primary.main',
-                            '&:hover': { textDecoration: 'underline' }
-                          }}
-                        >
-                          {testName ?? execution.testId}
-                        </Typography>
-                        <Chip
-                          label={executionStatusLabel(execution.status, execution.errorCode)}
-                          color={executionStatusTone(execution.status, execution.errorCode)}
-                          size="small"
-                          data-testid="run-status"
-                        />
-                      </Stack>
-                      <Typography variant="caption" color="text.secondary">
-                        Accepted: {new Date(execution.acceptedAt).toLocaleString()} • Duration: {durationText(execution)}
-                      </Typography>
-                      {execution.status === 'RUNNING' || execution.status === 'PENDING' ? (
-                        <LinearProgress variant="indeterminate" sx={{ height: 6, borderRadius: 2 }} />
-                      ) : (
-                        // The evidence state from `video.status`, and a player only for an
-                        // AVAILABLE recording served by the protected `/video` route.
-                        <VideoEvidencePanel snapshot={execution} />
-                      )}
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-      </Grid>
-      {!loading && !loadError && runs.length === 0 && (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-          No runs yet.
-        </Typography>
-      )}
+      <RunDetailsDrawer
+        executionId={executionId ?? null}
+        pageRuns={runs}
+        onClose={closeRun}
+        onNavigateRun={switchRun}
+        onCopyLink={copyRunLink}
+        testHref={testHref}
+        onSnapshot={applySnapshot}
+      />
+
+      <CreateTestDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={(created) => {
+          setCreateOpen(false);
+          navigate(testHref(created.id));
+        }}
+      />
+
+      <Snackbar
+        open={notice !== null}
+        autoHideDuration={3000}
+        onClose={() => setNotice(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        {notice ? (
+          <Alert onClose={() => setNotice(null)} severity={notice.severity} sx={{ width: '100%' }}>
+            {notice.message}
+          </Alert>
+        ) : undefined}
+      </Snackbar>
     </Box>
   );
 };

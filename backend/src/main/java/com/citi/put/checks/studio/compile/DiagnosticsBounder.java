@@ -15,6 +15,11 @@ import org.springframework.stereotype.Component;
  * Bounds and redacts validator output <em>before</em> it is handed to {@code publishInvalid} (Story
  * 10.8, AC-15; closes the 10.4 LOW finding "{@code compile_diagnostics} unbounded until 10.8").
  *
+ * <p>Redaction (VAL-033): every free-text field — {@code message}, {@code node}, {@code excerpt},
+ * including a model refusal's {@code message} — goes through {@link
+ * RepairPromptAssembler#redactCredentials} before it is clamped. Like the inline-credential screen,
+ * this recognises known credential shapes only; it is not a proof that the text is secret-free.
+ *
  * <p>Bounding happens here rather than at the database because a hostile or merely broken validator
  * response is untrusted input the moment it is parsed, and the column is {@code jsonb}: a document
  * that is too large to store is also too large to have been built in memory and logged on the way.
@@ -101,9 +106,9 @@ public class DiagnosticsBounder {
       ObjectNode node = array.addObject();
       node.put("code", clamp(diagnostic.code(), limits.maxMessageChars()));
       node.put("stepIndex", diagnostic.stepIndex());
-      node.put("message", clamp(diagnostic.message(), limits.maxMessageChars()));
-      node.put("node", clamp(diagnostic.node(), limits.maxMessageChars()));
-      node.put("excerpt", clamp(diagnostic.excerpt(), limits.maxExcerptChars()));
+      node.put("message", redactThenClamp(diagnostic.message(), limits.maxMessageChars()));
+      node.put("node", redactThenClamp(diagnostic.node(), limits.maxMessageChars()));
+      node.put("excerpt", redactThenClamp(diagnostic.excerpt(), limits.maxExcerptChars()));
     }
     return array;
   }
@@ -154,6 +159,18 @@ public class DiagnosticsBounder {
     minimal.put("attempts", root.path("attempts").asInt(1));
     minimal.put("exhausted", root.path("exhausted").asBoolean(false));
     return minimal.toString();
+  }
+
+  /**
+   * Redacts, then clamps, one free-text field (VAL-033). Every free-text field here is
+   * model-originated: a refusal's {@code message} is the model's own sentence, and a validator
+   * {@code message}, {@code node} or {@code excerpt} describes the artifact the model wrote. The
+   * redaction is the one the repair prompt applies to a rejected proposal, so the document the
+   * author reads and the context the model is re-sent are cleaned the same way. Redaction runs
+   * first so a cap cannot split a credential into a fragment the patterns no longer recognise.
+   */
+  private static String redactThenClamp(String value, int max) {
+    return clamp(RepairPromptAssembler.redactCredentials(value), max);
   }
 
   private static int utf8(String value) {

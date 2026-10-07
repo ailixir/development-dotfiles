@@ -429,6 +429,38 @@ class ProgressCallbackIT {
     assertThat(steps.get(1).originalText()).isEqualTo("Check the URL");
   }
 
+  // ── ADR-002 §33: logs[].stepIndex reaches the public snapshot ────────────
+
+  @Test
+  void aLogLinesStepIndexReachesThePublicSnapshot() {
+    progressService.apply(executionId, started(1, Instant.parse("2026-09-10T10:00:02Z")));
+
+    progressService.apply(
+        executionId,
+        new RunnerReport(
+            executionId,
+            attemptId,
+            admissionId,
+            RUNNER,
+            RunnerReport.PROGRESS,
+            2L,
+            Instant.now(),
+            Instant.parse("2026-09-10T10:00:02Z"),
+            List.of(new RunnerStepState(1, StepResult.RUNNING, 4300.0, null, null, null)),
+            List.of(
+                new RunnerLogEntry(0.0, "info", "browser started", null),
+                new RunnerLogEntry(4300.0, "info", "step 1 started", 1)),
+            false,
+            Map.of(),
+            null,
+            null,
+            null));
+
+    assertThat(snapshot().logs())
+        .extracting(com.citi.put.checks.studio.dto.ExecutionLogEntry::stepIndex)
+        .containsExactly(null, 1);
+  }
+
   // ── helpers ──────────────────────────────────────────────────────────────
 
   private void finish(UUID execution, String result) {

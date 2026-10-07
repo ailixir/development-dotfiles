@@ -67,6 +67,7 @@ import { formatLogTime, toStudioLogLines } from '@/utils/studio/logTime';
 import {
   CANONICAL_BROWSER,
   defaultConfiguration,
+  DEFAULT_STEP_TIMEOUT_SECONDS,
   isTerminalExecutionStatus,
   type ExecutionSnapshot,
   type StudioVariable,
@@ -90,6 +91,9 @@ import {
 } from '@/components/studio/run';
 import { VideoEvidencePanel, useVideoSeek } from '@/components/studio/evidence';
 import { PRODUCTION_ALPHA_TEMPLATES, type QuickStartTemplate } from '@/components/studio/templates';
+import { saveErrorMessage } from './saveErrorMessage';
+import { StudioScheduleDialog } from '@/components/studio/scheduling/StudioScheduleDialog';
+import { StudioScheduleSummary } from '@/components/studio/scheduling/StudioScheduleSummary';
 
 /** One row of the Variables dialog. `secret` rows hold a reference id, never a secret value. */
 type EditableVariable = {
@@ -188,6 +192,9 @@ const ExecutionTime: React.FC<{ snapshot: ExecutionSnapshot; running: boolean }>
   );
 };
 
+/** The DOM id of a step's text field, so a refusal can link to the line it is about. */
+const stepInputId = (index: number) => `studio-step-input-${index}`;
+
 const ChecksStudioPageInner: React.FC = () => {
   const theme = useTheme();
   const [scenarios, setScenarios] = useState<TestDto[] | null>(null);
@@ -235,7 +242,7 @@ const ChecksStudioPageInner: React.FC = () => {
   // Removed legacy interval-based simulator in favor of API polling
   const [variablesList, setVariablesList] = useState<EditableVariable[]>([]);
   const [environment, setEnvironment] = useState('');
-  const [rightTab, setRightTab] = useState(0);
+  const [rightTab, setRightTab] = useState<'proof' | 'logs' | 'code'>('proof');
   const [coachStep, setCoachStep] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('studio:coachStep');
@@ -278,6 +285,15 @@ const ChecksStudioPageInner: React.FC = () => {
       environment !== selectedScenarioData.environment
     );
   }, [environment, selectedScenarioData, testSteps, variablesList]);
+
+  /**
+   * VAL-036: text typed in "Add a test step" but not yet added. Save and Run add it as a step
+   * first, so the author never runs (or saves) a checklist without the step they just wrote.
+   */
+  const hasPendingStep = newStep.trim() !== '';
+  /** VAL-038: the run outcome alerts render here, full width below the header. */
+  const [runAlertsSlot, setRunAlertsSlot] = useState<HTMLDivElement | null>(null);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const pendingNavigationRef = useRef<(() => void) | null>(null);
@@ -532,6 +548,13 @@ const ChecksStudioPageInner: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, scenarios, selectedScenario]);
 
+  /** VAL-009: a refusal in the Run outcome links to its step by moving focus to that step's text. */
+  const showStep = useCallback((stepIndex: number) => {
+    const input = document.getElementById(stepInputId(stepIndex));
+    input?.scrollIntoView?.({ block: 'center' });
+    input?.focus();
+  }, []);
+
   /** The recording can be sought only when the panel has mounted one (AC-4's gate, AC-8). */
   const hasPlayableRecording =
     snapshot !== null && snapshot.video.status === 'AVAILABLE' && snapshot.videoPath !== null;
@@ -539,7 +562,7 @@ const ChecksStudioPageInner: React.FC = () => {
     (offsetMs: number) => {
       seekToOffset(offsetMs);
       // The player lives on the Proof tab; show it when a reader asks to seek.
-      setRightTab(1);
+      setRightTab('proof');
     },
     [seekToOffset],
   );
@@ -552,19 +575,31 @@ const ChecksStudioPageInner: React.FC = () => {
    * page last read, so the server refuses a save made over a newer version with `409
    * STALE_REVISION` instead of overwriting it. The CSI is the draft's own and is never defaulted:
    * the server keeps a draft's CSI fixed after creation. The browser is always the canonical
-   * engine, whatever an older draft recorded.
+   * engine, and the per-step timeout is always the default, whatever an older draft recorded:
+   * authors do not set it, so a save normalises a stored value to the default.
    */
   const saveDraft = useCallback(async (): Promise<SaveOutcome> => {
     const test = selectedScenarioData;
     if (!test) return 'error';
+    // VAL-036: a step still sitting in the add field is added before the draft is saved.
+    const steps = newStep.trim() ? [...testSteps, newStep] : testSteps;
+    if (steps !== testSteps) {
+      setTestSteps(steps);
+      setNewStep('');
+    }
     const body: TestRequest = {
       name: test.name,
       description: test.description ?? null,
       csiId: test.csiId,
       environment,
-      steps: testSteps,
+      steps,
       variables: toContractVariables(variablesList),
-      configuration: { ...defaultConfiguration(), ...test.configuration, browser: CANONICAL_BROWSER },
+      configuration: {
+        ...defaultConfiguration(),
+        ...test.configuration,
+        browser: CANONICAL_BROWSER,
+        timeoutSeconds: DEFAULT_STEP_TIMEOUT_SECONDS,
+      },
       sourceRevision: test.sourceRevision,
       configurationRevision: test.configurationRevision,
     };
@@ -587,12 +622,13 @@ const ChecksStudioPageInner: React.FC = () => {
         });
         return 'conflict';
       }
-      setSaveSnack({ open: true, message: failure.message || 'Failed to save', severity: 'error' });
+      // VAL-027: an author-facing 400 shows the server's own message; anything else stays generic.
+      setSaveSnack({ open: true, message: saveErrorMessage(error), severity: 'error' });
       return 'error';
     } finally {
       setIsSaving(false);
     }
-  }, [environment, replaceScenario, selectedScenarioData, testSteps, variablesList]);
+  }, [environment, newStep, replaceScenario, selectedScenarioData, testSteps, variablesList]);
 
   /** The conflict's way out: read the draft again and put the server's version in the editor. */
   const reloadSelectedTest = useCallback(async () => {
@@ -672,7 +708,7 @@ const ChecksStudioPageInner: React.FC = () => {
               onClick={() => requestNavigation(() => navigate('/checks/studio/tests'))}
               sx={{ px: 0, minWidth: 0 }}
             >
-              Studio Tests
+              UI Tests
             </Button>
             <Typography variant="h5" component="h1" fontWeight={700} noWrap>
               {selectedScenarioData?.name ?? 'Checks Studio'}
@@ -691,6 +727,7 @@ const ChecksStudioPageInner: React.FC = () => {
         </Stack>
 
         <Stack direction="row" spacing={1} alignItems="flex-start" justifyContent="flex-end" flexWrap="wrap" useFlexGap>
+          <Button disabled={!selectedScenarioData} onClick={() => setScheduleOpen(true)} sx={{ minHeight: 42 }}>Manage schedule</Button>
           <Button
             variant="text"
             size="small"
@@ -728,19 +765,31 @@ const ChecksStudioPageInner: React.FC = () => {
             refreshToken={`${selectedScenarioData?.sourceRevision ?? 0}:${selectedScenarioData?.configurationRevision ?? 0}:${selectedScenarioData?.compileStatus ?? ''}:${selectedScenarioData?.confirmedRevisionId ?? ''}`}
             isRunning={isRunning}
             onPreparingChange={setIsPreparing}
-            isDirty={isDirty}
+            isDirty={isDirty || hasPendingStep}
             onSaveBeforeRun={saveDraft}
-            hasSteps={testSteps.length > 0}
+            hasSteps={testSteps.length > 0 || hasPendingStep}
             runRequest={runRequest}
             onAccepted={(executionId) => {
-              setRightTab(0);
+              setRightTab('proof');
               beginRun(executionId);
             }}
             onStop={handleStop}
+            onShowStep={showStep}
             isStopping={isStopping}
+            alertsContainer={runAlertsSlot}
           />
         </Stack>
       </Paper>
+      {selectedScenarioData && <Box sx={{ mb: 2 }}><StudioScheduleSummary testId={selectedScenarioData.id}
+        refreshToken={`${selectedScenarioData.sourceRevision}:${selectedScenarioData.configurationRevision}:${selectedScenarioData.confirmedRevisionId ?? ''}`} /></Box>}
+      <StudioScheduleDialog test={scheduleOpen ? selectedScenarioData : null} dirty={isDirty || hasPendingStep} onClose={() => setScheduleOpen(false)} />
+
+      {/* VAL-038: Run's outcome alerts, full width so the header keeps its title and actions. */}
+      <Box
+        ref={setRunAlertsSlot}
+        data-testid="run-alerts-slot"
+        sx={{ mt: -2, mb: 3, '&:empty': { display: 'none' } }}
+      />
 
       {/* Two-panel Studio: checklist/configuration on the left, run evidence on the right. */}
       <Grid container spacing={3} sx={{ minHeight: '600px' }}>
@@ -910,7 +959,7 @@ const ChecksStudioPageInner: React.FC = () => {
                             multiline
                             minRows={2}
                             maxRows={8}
-                            inputProps={{ 'aria-label': `Step ${index + 1}` }}
+                            inputProps={{ 'aria-label': `Step ${index + 1}`, id: stepInputId(index) }}
                             value={step}
                             disabled={editorLocked}
                             onChange={(e) => {
@@ -997,12 +1046,12 @@ const ChecksStudioPageInner: React.FC = () => {
                     value={newStep}
                     disabled={editorLocked}
                     onChange={(e) => setNewStep(e.target.value)}
-                    helperText="Press Ctrl+Enter (or Cmd+Enter) to add the step."
+                    helperText="Press Enter to add the step. Shift+Enter starts a new line."
                     onKeyDown={(event) => {
-                      if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
-                        event.preventDefault();
-                        addTestStep();
-                      }
+                      // VAL-036: Enter adds the step; Shift+Enter keeps the multiline newline.
+                      if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return;
+                      event.preventDefault();
+                      addTestStep();
                     }}
                     InputProps={{
                       endAdornment: (
@@ -1018,7 +1067,7 @@ const ChecksStudioPageInner: React.FC = () => {
           </Card>
         </Grid>
 
-        {/* Right panel - Logs, Proof, and Source */}
+        {/* Right panel - Proof, Logs, and Source */}
         <Grid item xs={12} lg={6}>
           <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <CardHeader
@@ -1044,9 +1093,9 @@ const ChecksStudioPageInner: React.FC = () => {
                 aria-label="Execution details"
                 sx={{ px: 2, borderBottom: '1px solid', borderColor: 'divider' }}
               >
-                <Tab label="Logs" id="studio-tab-logs" aria-controls="studio-panel-logs" />
-                <Tab label="Proof" id="studio-tab-proof" aria-controls="studio-panel-proof" />
-                <Tab label="Code" id="studio-tab-code" aria-controls="studio-panel-code" />
+                <Tab value="proof" label="Proof" id="studio-tab-proof" aria-controls="studio-panel-proof" />
+                <Tab value="logs" label="Logs" id="studio-tab-logs" aria-controls="studio-panel-logs" />
+                <Tab value="code" label="Code" id="studio-tab-code" aria-controls="studio-panel-code" />
               </Tabs>
 
               <Box sx={{ p: 2, flex: 1 }}>
@@ -1078,16 +1127,11 @@ const ChecksStudioPageInner: React.FC = () => {
                     </Alert>
                   )}
 
-                <Box
-                  role="tabpanel"
-                  id="studio-panel-logs"
-                  aria-labelledby="studio-tab-logs"
-                  hidden={rightTab !== 0}
-                >
-                  {isDirty ? (
-                    <Alert severity="warning" sx={{ mb: 2 }}>
-                      <AlertTitle>Save before running</AlertTitle>
-                      Run always uses the saved checklist. Save these changes to make Run available.
+                <Box role="tabpanel" id="studio-panel-proof" aria-labelledby="studio-tab-proof" hidden={rightTab !== 'proof'}>
+                  {isDirty || hasPendingStep ? (
+                    <Alert severity="info" sx={{ mb: 2 }} data-testid="run-unsaved-notice">
+                      <AlertTitle>Unsaved changes</AlertTitle>
+                      Run will save them first, then run the saved checklist.
                     </Alert>
                   ) : !snapshot && !isRunning ? (
                     <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', mb: 2 }}>
@@ -1145,6 +1189,12 @@ const ChecksStudioPageInner: React.FC = () => {
                       />
                     </Box>
                   )}
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <VideoEvidencePanel ref={videoRef} snapshot={snapshot} />
+                  </Paper>
+                </Box>
+
+                <Box role="tabpanel" id="studio-panel-logs" aria-labelledby="studio-tab-logs" hidden={rightTab !== 'logs'}>
                   <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Code sx={{ fontSize: 18 }} /> Live execution logs
                   </Typography>
@@ -1159,16 +1209,10 @@ const ChecksStudioPageInner: React.FC = () => {
                   </Paper>
                 </Box>
 
-                <Box role="tabpanel" id="studio-panel-proof" aria-labelledby="studio-tab-proof" hidden={rightTab !== 1}>
-                  <Paper variant="outlined" sx={{ p: 2 }}>
-                    <VideoEvidencePanel ref={videoRef} snapshot={snapshot} />
-                  </Paper>
-                </Box>
-
-                <Box role="tabpanel" id="studio-panel-code" aria-labelledby="studio-tab-code" hidden={rightTab !== 2}>
+                <Box role="tabpanel" id="studio-panel-code" aria-labelledby="studio-tab-code" hidden={rightTab !== 'code'}>
                   <CodeTab
                     testId={selectedScenarioData?.id ?? null}
-                    active={rightTab === 2}
+                    active={rightTab === 'code'}
                     refreshToken={`${selectedScenarioData?.sourceRevision ?? 0}:${selectedScenarioData?.configurationRevision ?? 0}:${selectedScenarioData?.compileStatus ?? ''}`}
                   />
                 </Box>
@@ -1248,7 +1292,7 @@ const ChecksStudioPageInner: React.FC = () => {
                         }} placeholder="value" fullWidth />
                       ) : (
                         STUDIO_CAPABILITIES.vaultSecrets ? (
-                          <SecretInput label="Select secret" value={v.secretId ? { id: v.secretId } : null} onChange={(ref) => {
+                          <SecretInput label="Select secret" testId={selectedScenario} value={v.secretId ? { id: v.secretId } : null} onChange={(ref) => {
                             const next = [...variablesList];
                             next[i] = { ...v, secretId: ref?.id };
                             setVariablesList(next);

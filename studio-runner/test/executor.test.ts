@@ -310,3 +310,191 @@ describe('a secret fill carries its id to the adapter', () => {
     expect(result.steps[0]?.failure).toMatch(/^SECRET_ORIGIN_NOT_ALLOWED: Secret "LOGIN_PW"/u);
   });
 });
+
+describe('VAL-013 — a failed step names the page the browser was on', () => {
+  const SECRET = 'tok-3f9a-secret-canary';
+
+  async function failWithLocation(
+    pageLocation: () => Promise<{ url: string; title: string | null } | null>,
+    overrides: { maxFailureMessageLength?: number; pageLocationTimeoutMs?: number } = {},
+  ): Promise<string | null> {
+    const adapter = Object.assign(createFakeBrowserAdapter(), { pageLocation });
+    adapter.failOn('goto', new Error('navigation refused'));
+    const result = await executeSteps({
+      steps: [gotoStep(0, 'https://a.example/')],
+      adapter,
+      reporter: createRecordingStepReporter(),
+      resolver: createValueResolver({ secrets: { pw: SECRET } }),
+      clock: createFakeClock(),
+      ...overrides,
+    });
+    return result.steps[0]?.failure ?? null;
+  }
+
+  it('appends origin + pathname and the title', async () => {
+    const failure = await failWithLocation(() =>
+      Promise.resolve({ url: 'https://www.google.com/sorry/index', title: 'Unusual traffic' }),
+    );
+    expect(failure).toBe(
+      'Error: navigation refused (page: https://www.google.com/sorry/index — "Unusual traffic")',
+    );
+  });
+
+  it('never emits the query, the fragment or the userinfo', async () => {
+    const failure = await failWithLocation(() =>
+      Promise.resolve({
+        url: 'https://user:hunter2@app.example:8443/cb/login?code=abc123&state=s1#access_token=zz',
+        title: null,
+      }),
+    );
+    expect(failure).toBe('Error: navigation refused (page: https://app.example:8443/cb/login)');
+    for (const leaked of ['hunter2', 'user', 'abc123', 'state', 'access_token', '?', '#']) {
+      expect(failure).not.toContain(leaked);
+    }
+  });
+
+  it('reduces a non-http scheme to the scheme, so a data: URL cannot carry the document', async () => {
+    const failure = await failWithLocation(() =>
+      Promise.resolve({ url: `data:text/html,<p>${SECRET}</p>`, title: null }),
+    );
+    expect(failure).toBe('Error: navigation refused (page: data:)');
+  });
+
+  it('redacts a known value in the path and in the title, and truncates the title', async () => {
+    const failure = await failWithLocation(() =>
+      Promise.resolve({
+        url: `https://app.example/users/${SECRET}/edit`,
+        title: `Welcome ${SECRET} ${'x'.repeat(300)}`,
+      }),
+    );
+    expect(failure).not.toContain(SECRET);
+    expect(failure).toContain('(page: https://app.example/users/[REDACTED]/edit — "Welcome [REDACTED] ');
+    const title = /— "(.*)"\)$/u.exec(failure ?? '')?.[1] ?? '';
+    expect(title.length).toBeLessThanOrEqual(120);
+  });
+
+  describe('VAL-020 — a URL inside the title is reduced like the location', () => {
+    const at = (title: string): Promise<string | null> =>
+      failWithLocation(() => Promise.resolve({ url: 'https://www.google.com/sorry/index', title }));
+
+    it('reduces a title that is itself a URL (Google /sorry) to origin + path', async () => {
+      const failure = await at(
+        'https://www.google.com/search?q=hosting&sca_esv=ec734b9ba2f66c6f&sxsrf=APpeQnvXBQcXfUBg1nYM6YUtdTxB7B5lEw%3A1791159561700',
+      );
+      expect(failure).toBe(
+        'Error: navigation refused (page: https://www.google.com/sorry/index — "https://www.google.com/search")',
+      );
+      for (const leaked of ['hosting', 'sca_esv', 'sxsrf', 'APpeQ', '?', '&']) {
+        expect(failure).not.toContain(leaked);
+      }
+    });
+
+    it('strips userinfo and fragment from a URL in the title', async () => {
+      const failure = await at('https://user:hunter2@app.example/cb#access_token=zz');
+      expect(failure).toBe(
+        'Error: navigation refused (page: https://www.google.com/sorry/index — "https://app.example/cb")',
+      );
+    });
+
+    it('sanitizes a URL embedded in prose in place, keeping the prose', async () => {
+      const failure = await at(
+        'Redirecting to https://app.example/next?token=abc123, see (//cdn.example/a?x=1) or www.help.example/faq#q',
+      );
+      expect(failure).toContain(
+        '"Redirecting to https://app.example/next, see (//cdn.example/a) or www.help.example/faq"',
+      );
+      expect(failure).not.toContain('abc123');
+      expect(failure).not.toContain('x=1');
+    });
+
+    it('leaves a plain-text title unchanged', async () => {
+      const failure = await at('Sorry? Unusual traffic from your network #42');
+      expect(failure).toBe(
+        'Error: navigation refused (page: https://www.google.com/sorry/index — "Sorry? Unusual traffic from your network #42")',
+      );
+    });
+
+    it('omits a title that, once sanitized, only repeats the location', async () => {
+      const failure = await at('https://www.google.com/sorry/index?continue=https://x.example/');
+      expect(failure).toBe('Error: navigation refused (page: https://www.google.com/sorry/index)');
+    });
+  });
+
+  it('stays within the failure-message bound and keeps the location', async () => {
+    const adapter = Object.assign(createFakeBrowserAdapter(), {
+      pageLocation: () => Promise.resolve({ url: 'https://app.example/here', title: 'T' }),
+    });
+    adapter.failOn('goto', new Error('y'.repeat(5_000)));
+    const result = await executeSteps({
+      steps: [gotoStep(0, 'https://a.example/')],
+      adapter,
+      reporter: createRecordingStepReporter(),
+      resolver: createValueResolver({}),
+      clock: createFakeClock(),
+      maxFailureMessageLength: 120,
+    });
+    const failure = result.steps[0]?.failure ?? '';
+    expect(failure.length).toBeLessThanOrEqual(120);
+    expect(failure.endsWith(' (page: https://app.example/here — "T")')).toBe(true);
+  });
+
+  it('does not throw or wait when the page cannot be read', async () => {
+    expect(await failWithLocation(() => Promise.reject(new Error('Target closed')))).toBe(
+      'Error: navigation refused',
+    );
+    expect(
+      await failWithLocation(() => {
+        throw new Error('crashed');
+      }),
+    ).toBe('Error: navigation refused');
+    expect(await failWithLocation(() => Promise.resolve(null))).toBe('Error: navigation refused');
+
+    const started = Date.now();
+    const hung = await failWithLocation(() => new Promise(() => undefined), {
+      pageLocationTimeoutMs: 20,
+    });
+    expect(hung).toBe('Error: navigation refused');
+    expect(Date.now() - started).toBeLessThan(1_000);
+  });
+
+  it('reads the step end before the location, so the read never lengthens the step', async () => {
+    const reporter = createRecordingStepReporter();
+    let reads = 0;
+    const clock = { now: (): number => (reads += 1) * 10 };
+    const adapter = Object.assign(createFakeBrowserAdapter(), {
+      pageLocation: () => {
+        // Any clock read after this point would be a third reading.
+        return Promise.resolve({ url: 'https://app.example/', title: null });
+      },
+    });
+    adapter.failOn('goto', new Error('navigation refused'));
+    await executeSteps({
+      steps: [gotoStep(0, 'https://a.example/')],
+      adapter,
+      reporter,
+      resolver: createValueResolver({}),
+      clock,
+    });
+    expect(reads).toBe(2);
+    expect(reporter.finished[0]?.durationMs).toBe(10);
+  });
+
+  it('leaves a passing step untouched and does not read the page', async () => {
+    let read = false;
+    const adapter = Object.assign(createFakeBrowserAdapter(), {
+      pageLocation: () => {
+        read = true;
+        return Promise.resolve({ url: 'https://app.example/', title: null });
+      },
+    });
+    const result = await executeSteps({
+      steps: [gotoStep(0, 'https://a.example/')],
+      adapter,
+      reporter: createRecordingStepReporter(),
+      resolver: createValueResolver({}),
+      clock: createFakeClock(),
+    });
+    expect(result.steps[0]?.failure).toBeNull();
+    expect(read).toBe(false);
+  });
+});

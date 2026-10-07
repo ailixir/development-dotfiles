@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting Started with Checks (Alpha)</title>
+<style>
+  :root {
+    --bg: #f7f8fa; --surface: #ffffff; --text: #1d2330; --muted: #5b6475;
+    --border: #e1e5ec; --accent: #0b5cad; --accent-soft: #e8f1fb;
+    --green: #1e7f4f; --amber: #a86400; --red: #b42318; --grey: #6b7280;
+    --code-bg: #f1f3f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151b; --surface: #1a1f27; --text: #e6e9ef; --muted: #9aa3b2;
+      --border: #2c333f; --accent: #6aa8ec; --accent-soft: #1d2a3a;
+      --green: #4cc38a; --amber: #f0b44c; --red: #f07167; --grey: #9aa3b2;
+      --code-bg: #232a35;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151b; --surface: #1a1f27; --text: #e6e9ef; --muted: #9aa3b2;
+    --border: #2c333f; --accent: #6aa8ec; --accent-soft: #1d2a3a;
+    --green: #4cc38a; --amber: #f0b44c; --red: #f07167; --grey: #9aa3b2;
+    --code-bg: #232a35;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 780px; margin: 0 auto; padding: 40px 16px 64px; }
+  header { margin-bottom: 28px; }
+  .badge {
+    display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--accent); background: var(--accent-soft);
+    padding: 3px 10px; border-radius: 999px; margin-bottom: 12px;
+  }
+  h1 { font-size: 30px; line-height: 1.25; margin: 0 0 6px; }
+  .meta { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+  .lead { font-size: 18px; margin: 0; }
+  nav.toc {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 18px; margin: 28px 0 8px; font-size: 15px;
+  }
+  nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  section {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 22px 24px; margin-top: 20px;
+  }
+  h2 { font-size: 21px; margin: 0 0 10px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  h2 .time { font-size: 13px; font-weight: 500; color: var(--muted); }
+  p { margin: 0 0 12px; }
+  ol, ul { margin: 0 0 12px; padding-left: 24px; }
+  li { margin: 4px 0; }
+  li > ul { margin: 4px 0 4px; }
+  code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; font-size: .9em; word-break: break-all; }
+  .ui { font-weight: 600; }
+  .msg { font-style: italic; }
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li { padding-left: 30px; position: relative; }
+  .checklist li::before {
+    content: ""; position: absolute; left: 2px; top: 5px; width: 16px; height: 16px;
+    border: 2px solid var(--accent); border-radius: 4px;
+  }
+  .table-wrap { overflow-x: auto; margin: 0 0 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  th { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+  .s { font-weight: 700; }
+  .s.green { color: var(--green); } .s.amber { color: var(--amber); }
+  .s.red { color: var(--red); } .s.grey { color: var(--grey); }
+  .note {
+    border-left: 3px solid var(--accent); background: var(--accent-soft);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 12px 0 0;
+  }
+  .note p:last-child { margin: 0; }
+  section.feedback { border-color: var(--accent); }
+  footer { color: var(--muted); font-size: 13px; text-align: center; margin-top: 32px; }
+  @media (max-width: 560px) {
+    main { padding-top: 24px; }
+    h1 { font-size: 25px; }
+    section { padding: 18px 16px; }
+    td:first-child { white-space: normal; }
+  }
+  @media print {
+    body { background: #fff; }
+    nav.toc { display: none; }
+    section { break-inside: avoid; border-color: #ccc; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="badge">Alpha</span>
+    <h1>Getting Started with Checks</h1>
+    <p class="meta">October 2026 · About 15 minutes</p>
+    <p class="lead">In about 15 minutes you will create two health checks for your CSI, put them in an emailed Report, and see their status on Home. Checks is one place to define, run, and track standard health checks, organized by CSI. It works alongside ITRS and Splunk.</p>
+  </header>
+
+  <nav class="toc" aria-label="Contents">
+    <strong>Contents</strong>
+    <ol>
+      <li><a href="#before">Before you start</a></li>
+      <li><a href="#step1">Step 1: Create an HTTP check</a></li>
+      <li><a href="#step2">Step 2: Add a TCP port check</a></li>
+      <li><a href="#step3">Step 3: Run both checks now</a></li>
+      <li><a href="#step4">Step 4: Create a Report</a></li>
+      <li><a href="#step5">Step 5: See your status on Home</a></li>
+      <li><a href="#rough-edges">Known rough edges</a></li>
+      <li><a href="#feedback">Tell us what you think</a></li>
+    </ol>
+  </nav>
+
+  <section id="before">
+    <h2>Before you start</h2>
+    <p>You need three things in place. Without them you will get stuck on the first screen.</p>
+    <ul class="checklist">
+      <li>You can sign in to Checks with SSO.</li>
+      <li>You own, or have write access to, at least one CSI. The CSI picker only lists CSIs you own, so if it is empty, ask your alpha contact.</li>
+      <li>You have a health endpoint (for example <code>https://myapp.example.citi.com/health</code>) and a host:port that Checks can reach. Your own service's health URL is ideal.</li>
+    </ul>
+    <p>Four terms you will see:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Term</th><th>What it means here</th></tr></thead>
+        <tbody>
+          <tr><td>CSI</td><td>Citi System Inventory ID. Every check belongs to one, and Home and Reports are organized by it.</td></tr>
+          <tr><td>Check</td><td>A test that runs on a schedule or on demand. This guide uses the two basic types: HTTP/HTTPS and TCP Port.</td></tr>
+          <tr><td>Check status</td><td><span class="s green">Passing</span> (green), <span class="s amber">Warning</span> (amber), <span class="s red">Failing</span> (red), or <span class="s grey">Pending</span> (grey, meaning it has not run yet).</td></tr>
+          <tr><td>Report</td><td>A scheduled email that summarizes the status of checks you choose, sent to the recipients you list.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="step1">
+    <h2>Step 1: Create an HTTP check <span class="time">5 min</span></h2>
+    <p>This step creates a check that calls your health URL every hour and expects HTTP 200.</p>
+    <ol>
+      <li>In the sidebar, click <span class="ui">Checks</span>. Then click <span class="ui">Create Check</span> at the top right.
+        <ul><li>Ignore the Splunk prototype banner at the top of the page. It is not part of this tutorial.</li></ul>
+      </li>
+      <li><span class="ui">What are you monitoring?</span> Under <em>Basic</em>, pick <span class="ui">HTTP/HTTPS Check</span>.</li>
+      <li>Fill in <span class="ui">Basic Information</span>:
+        <ul>
+          <li><span class="ui">Check Name</span>, for example <code>MyApp – Health endpoint</code></li>
+          <li><span class="ui">CSI Entity</span>: start typing your CSI ID or name and pick it from the list.</li>
+          <li><span class="ui">Environment</span>: this defaults to Production. Change it if your endpoint is UAT or Staging.</li>
+          <li><span class="ui">Description</span> and <span class="ui">Add Tags</span> are optional. Press Enter after each tag.</li>
+          <li>Click <span class="ui">Next</span>.</li>
+        </ul>
+      </li>
+      <li><span class="ui">Check Configuration</span>:
+        <ul>
+          <li><span class="ui">Endpoint URL</span>: the full URL, including <code>https://</code>. Without it, <span class="ui">Next</span> stays greyed out.</li>
+          <li>Leave <span class="ui">HTTP Method</span> as GET, <span class="ui">Expected Status Code</span> as 200 and <span class="ui">Timeout</span> as 30 s, unless your endpoint needs something else.</li>
+          <li>Click <span class="ui">Test Connection</span>. You should see <span class="msg">Connected</span> followed by the response time in ms. If it fails, fix the URL before you go on.</li>
+          <li>Click <span class="ui">Next</span>.</li>
+        </ul>
+      </li>
+      <li><span class="ui">Scheduling Configuration</span>: keep <span class="ui">Schedule</span> enabled and <span class="ui">Frequency</span> on <span class="ui">Hourly</span>. Click <span class="ui">Next</span>.</li>
+      <li><span class="ui">Review</span>: check the summary, then click <span class="ui">Create Check</span>.</li>
+    </ol>
+    <p>You'll see <span class="msg">Check created successfully</span>, and you land on the check's details page. Its status is <span class="s grey">Pending</span> until it runs for the first time.</p>
+  </section>
+
+  <section id="step2">
+    <h2>Step 2: Add a TCP port check <span class="time">3 min</span></h2>
+    <p>This step checks that a port, such as a database or message broker, accepts connections.</p>
+    <ol>
+      <li>Go back to <span class="ui">Checks</span> and click <span class="ui">Create Check</span>.</li>
+      <li>Pick <span class="ui">TCP Port Check</span>. Fill in <span class="ui">Basic Information</span> with the <strong>same CSI</strong> as in Step 1, then click <span class="ui">Next</span>.</li>
+      <li>Fill in <span class="ui">Host/IP Address</span> and <span class="ui">Port</span>, for example <code>mydb.example.citi.com</code> and <code>5432</code>. Leave <span class="ui">Connection Timeout</span> at its default.</li>
+      <li>Click <span class="ui">Test Connection</span>, then <span class="ui">Next</span> → keep <span class="ui">Hourly</span> → <span class="ui">Next</span> → <span class="ui">Create Check</span>.</li>
+    </ol>
+  </section>
+
+  <section id="step3">
+    <h2>Step 3: Run both checks now <span class="time">1 min</span></h2>
+    <p>Run each check by hand once, so you don't have to wait up to an hour for its first status.</p>
+    <ol>
+      <li>Open each check's details page from the <span class="ui">Checks</span> list.</li>
+      <li>Click <span class="ui">Execute</span>. After a moment you'll see <span class="msg">Executed: PASSING in N ms</span>, or a failure with the reason.</li>
+      <li>The run appears in the check's history, and the status chip turns green, amber or red.</li>
+    </ol>
+    <div class="note"><p>New checks start as Pending, and Home doesn't count Pending checks. Running them now is what makes them show up on Home in Step 5.</p></div>
+  </section>
+
+  <section id="step4">
+    <h2>Step 4: Create a Report <span class="time">5 min</span></h2>
+    <p>This step creates a daily email that summarizes both checks. You'll send one test to yourself first.</p>
+    <ol>
+      <li>In the sidebar, click <span class="ui">Reports</span>, then <span class="ui">Create Report</span>.</li>
+      <li>Under <span class="ui">Details</span>, enter a <span class="ui">Report Name</span>, for example <code>MyApp – Daily health</code>. Keep <span class="ui">Template</span> set to Standard.</li>
+      <li>Under <span class="ui">Sections</span>, click <span class="ui">+ Manual</span>:
+        <ul>
+          <li>Give the section a <span class="ui">Section Title</span>, for example <code>Endpoints</code>.</li>
+          <li>In <span class="msg">Search checks to add…</span>, type your check name and click <span class="ui">Add</span>. Do the same for the second check. Both appear as chips.</li>
+        </ul>
+      </li>
+      <li>Under <span class="ui">Schedule</span>, keep the default of <span class="ui">Daily at 18:00 (America/New_York)</span>, or pick your own time.</li>
+      <li>On the right, under <span class="ui">Delivery</span>, add yourself in <span class="ui">Recipients</span> (press Enter after the address). The <span class="ui">Subject</span> defaults to the report name.</li>
+      <li>Click <span class="ui">Save Report</span> (Cmd/Ctrl+S). Once it shows <span class="msg">All changes saved</span>, the <span class="ui">Live Preview</span> fills in with your two checks.</li>
+      <li>Click <span class="ui">Test</span> → <span class="ui">Send Test</span> and check your inbox.</li>
+    </ol>
+    <p>Saving keeps you on the builder. Go back to <span class="ui">Reports</span> to see your report in the list. Open it to find <span class="ui">Send now</span>, <span class="ui">Pause</span> and a <span class="ui">Recent Sends</span> history.</p>
+  </section>
+
+  <section id="step5">
+    <h2>Step 5: See your status on Home <span class="time">1 min</span></h2>
+    <p>Home shows one CSI at a time, so pick yours first.</p>
+    <ol>
+      <li>Click <span class="ui">Home</span> in the sidebar. Until you choose a CSI, it says <span class="msg">Select a CSI to view data</span>.</li>
+      <li>In the search box in the header (<span class="msg">Select a CSI to search…</span>), pick your CSI. Click <span class="ui">Pin</span> so it stays under <span class="ui">My CSIs</span> next time.</li>
+      <li>Read the five panels:</li>
+    </ol>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Panel</th><th>What to look for</th></tr></thead>
+        <tbody>
+          <tr><td>Overall Status</td><td><span class="s green">HEALTHY</span> (green), <span class="s amber">WARNING</span> (amber) or <span class="s red">CRITICAL</span> (red), with counts of Passing, Degraded, Failing and Muted checks</td></tr>
+          <tr><td>Needs Attention</td><td>Failing or degrading checks. If everything passed, it says <span class="msg">All clear</span>.</td></tr>
+          <tr><td>Upcoming</td><td>When your checks and report run next</td></tr>
+          <tr><td>Activity (24h)</td><td>The runs you just did. Click <span class="ui">Refresh Now</span> if they are missing.</td></tr>
+          <tr><td>Reports</td><td>The report you created in Step 4</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Overall Status and Needs Attention refresh every 60 seconds. The other panels update when you reload the page or change the CSI.</p>
+  </section>
+
+  <section id="rough-edges">
+    <h2>Known rough edges in this alpha build</h2>
+    <p>You may run into these. We already know about them, so you don't need to report them. Do tell us if one blocks you.</p>
+    <ul>
+      <li><strong>Next stays greyed out without saying why.</strong> The usual cause is a missing required field, or a URL that doesn't start with <code>https://</code>.</li>
+      <li><strong>Overall Status can say HEALTHY before any check has run.</strong> Pending checks aren't counted. Click <span class="ui">Execute</span> (Step 3) to get a real status.</li>
+      <li><strong>Create Report may reopen with your last report filled in.</strong> If it does, clear the fields first, or you'll save a duplicate.</li>
+      <li><strong>Save Report with no name saves an "Untitled Report".</strong> Enter the name first.</li>
+      <li><strong>The Splunk prototype banner</strong> on Create Check isn't part of this tutorial.</li>
+    </ul>
+  </section>
+
+  <section id="feedback" class="feedback">
+    <h2>Tell us what you think</h2>
+    <p>Please answer these five questions while the steps are fresh. Short answers are fine.</p>
+    <ol>
+      <li>How long did your first check take, and where did you get stuck or need help?</li>
+      <li>From Home alone, could you tell which checks are healthy and which need attention?</li>
+      <li>Would you send this Report to your manager as it is? If not, what would you change?</li>
+      <li>Which manual check, wiki step or script could Checks replace for you today, and what's missing?</li>
+      <li>On a scale of 0–10, how likely are you to recommend Checks to another team? Why?</li>
+    </ol>
+    <p>We'll log feature requests for a later release rather than add them during the alpha, but every answer gets read.</p>
+  </section>
+
+  <footer>Checks · Production Unified Toolkit · Alpha</footer>
+</main>
+</body>
+</html>

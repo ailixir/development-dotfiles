@@ -11,6 +11,9 @@ import java.util.UUID;
  * execution.snapshot} event all carry exactly this shape, so the MFE renders one type regardless of
  * transport.
  *
+ * @param testName the parent draft's current name on {@code GET /executions/{id}}, the items of
+ *     {@code GET /executions} and SSE frames alike (Story 10.46); null when the draft is deleted or
+ *     quarantined
  * @param acceptedAt immutable acceptance instant; also the history partition key ({@code
  *     ui_test_executions.started_at})
  * @param startedAt browser start ({@code browser_started_at}); null until a runner start report is
@@ -23,6 +26,7 @@ import java.util.UUID;
 public record ExecutionSnapshotDto(
     UUID executionId,
     UUID testId,
+    String testName,
     String csiId,
     UUID revisionId,
     String status,
@@ -38,4 +42,97 @@ public record ExecutionSnapshotDto(
     String videoPath,
     RuntimeVersions runtime,
     long revision,
-    boolean streamComplete) {}
+    boolean streamComplete,
+    String triggerSource,
+    UUID scheduleId,
+    Long scheduleVersion,
+    UUID occurrenceId,
+    Instant scheduledAt,
+    UUID activationId,
+    String activatedBy,
+    Instant activatedAt) {
+
+  /** Existing call sites retain unknown provenance unless the persisted history supplies it. */
+  @SuppressWarnings("checkstyle:ParameterNumber")
+  public ExecutionSnapshotDto(
+      UUID executionId,
+      UUID testId,
+      String testName,
+      String csiId,
+      UUID revisionId,
+      String status,
+      String errorCode,
+      Instant acceptedAt,
+      Instant startedAt,
+      Instant endedAt,
+      Long durationMs,
+      List<StepResult> stepResults,
+      List<ExecutionLogEntry> logs,
+      boolean logsTruncated,
+      VideoEvidence video,
+      String videoPath,
+      RuntimeVersions runtime,
+      long revision,
+      boolean streamComplete) {
+    this(
+        executionId,
+        testId,
+        testName,
+        csiId,
+        revisionId,
+        status,
+        errorCode,
+        acceptedAt,
+        startedAt,
+        endedAt,
+        durationMs,
+        stepResults,
+        logs,
+        logsTruncated,
+        video,
+        videoPath,
+        runtime,
+        revision,
+        streamComplete,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
+  }
+
+  /** The same snapshot labelled with its draft's name. */
+  public ExecutionSnapshotDto withTestName(String name) {
+    return new ExecutionSnapshotDto(
+        executionId,
+        testId,
+        name,
+        csiId,
+        revisionId,
+        status,
+        errorCode,
+        acceptedAt,
+        startedAt,
+        endedAt,
+        durationMs,
+        stepResults,
+        logs,
+        logsTruncated,
+        video,
+        videoPath,
+        runtime,
+        revision,
+        streamComplete,
+        triggerSource,
+        scheduleId,
+        scheduleVersion,
+        occurrenceId,
+        scheduledAt,
+        activationId,
+        activatedBy,
+        activatedAt);
+  }
+}

@@ -26,7 +26,8 @@ const otherCsiExecution = mockExecutions.find((execution) => execution.csiId ===
 
 describe('list scoping', () => {
   it('an unfiltered test list never contains another CSI', async () => {
-    const page = await studioApi.listTests();
+    // One page of 100 holds every readable fixture, so the scope check sees the whole list.
+    const page = await studioApi.listTests({ size: 100 });
 
     expect(page.data.length).toBeGreaterThan(0);
     expect(page.data.every((test) => MOCK_READABLE_CSIS.includes(test.csiId!))).toBe(true);

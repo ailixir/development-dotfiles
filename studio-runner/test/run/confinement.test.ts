@@ -247,7 +247,14 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   // Story 10.20 C0 adds an architect-owned inference amendment link; runner body remains closed.
   // Story 10.27 / ADR-002 §30 adds the confirmed artifact pair on public reads only.
   // Re-pinned after merging origin/main (Epic 10 / Studio v1) into the story 10.44 branch.
-  const BASE_SHA256 = 'c6b891387d939131f38b68971e51cecccebfa6fd4b3af09ac34a121477171088';
+  // Re-anchored by studio-vault-secrets (ADR-002 §32): two test-scoped secret operations, four
+  // schemas, and the pilot-pw example.
+  // Re-anchored by VAL-012 (ADR-002 §33): optional `RunnerLogEntry.stepIndex` and the rewritten
+  // `ExecutionLogEntry` description; VAL-018 documents the `chromiumBuild → runtime.chromium` key.
+  // STUDIO-SCHED-001 re-anchors the reviewed public scheduling operations and optional public
+  // execution provenance. Runner request/report/job schemas are unchanged by this amendment;
+  // test/contract.test.ts independently checks the current runtime producers against them.
+  const BASE_SHA256 = '5e5477fce65bdac45029056f2636ebebd18c9daae6c174c6bbffcd2777f070ac';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the

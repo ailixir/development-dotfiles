@@ -49,7 +49,6 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -86,6 +85,15 @@ public class StudioService {
    * REFRESH-FLUSH-1).
    */
   @PersistenceContext private EntityManager entityManager;
+
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private com.citi.put.checks.studio.scheduling.StudioScheduleInvalidation scheduleInvalidation;
+
+  private void invalidateSchedule(UUID id, String code) {
+    if (scheduleInvalidation != null) {
+      scheduleInvalidation.invalidate(id, code);
+    }
+  }
 
   @SuppressWarnings("checkstyle:ParameterNumber")
   public StudioService(
@@ -162,19 +170,21 @@ public class StudioService {
    * draft, so a page of drafts in {@code NEEDS_REVISION} would be a multi-megabyte response
    * carrying per-step reasons no list renders. {@code compileStatus} and the bounded {@code
    * compileError} stay, so nothing a caller needs in order to know that reasons exist is hidden.
+   *
+   * <p>Search, filters and sort (Story 10.46) are validated by {@link StudioListQuery} and applied
+   * in the same statement as the scope; the draft id always breaks ties, so equal keys page
+   * deterministically.
    */
-  public Page<UITestDto> listTests(String csiId, int page, int size, Authentication auth) {
-    Pageable pageable =
-        PageRequest.of(page, Math.min(size, 100), Sort.by("createdAt").descending());
+  public Page<UITestDto> listTests(
+      StudioListQuery.Tests query, int page, int size, Authentication auth) {
+    Pageable pageable = PageRequest.of(page, Math.min(size, 100));
     Optional<Set<String>> readable = csiOwnershipEvaluator.readableCsiIds(auth);
-    if (readable.isEmpty()) {
-      return studioRepository.findAllFiltered(csiId, pageable).map(UITestDto::forList);
-    }
-    Set<String> csiIds = readable.get();
-    if (csiIds.isEmpty()) {
+    if (readable.isPresent() && readable.get().isEmpty()) {
       return Page.empty(pageable);
     }
-    return studioRepository.findAllFilteredScoped(csiId, csiIds, pageable).map(UITestDto::forList);
+    return studioRepository
+        .findPage(query, readable.orElse(null), pageable)
+        .map(UITestDto::forList);
   }
 
   /**
@@ -569,6 +579,7 @@ public class StudioService {
       test.setConfigurationRevision(test.getConfigurationRevision() + 1);
     }
     if (change.anyChanged()) {
+      invalidateSchedule(id, "COMPILE_REQUIRED");
       // Confirmed revision is kept for history; the draft is simply not runnable until a new
       // candidate is confirmed (readiness enforcement belongs to 10.8).
       test.setCompileStatus(CompileState.STALE);
@@ -746,6 +757,7 @@ public class StudioService {
       test.setConfigurationRevision(test.getConfigurationRevision() + 1);
     }
     if (sourceChanged || configurationChanged) {
+      invalidateSchedule(test.getId(), "COMPILE_REQUIRED");
       test.setCompileStatus(CompileState.STALE);
       test.setCurrentCandidateRevisionId(null);
       test.setCompileDiagnostics(null);
@@ -899,8 +911,9 @@ public class StudioService {
   public void softDeleteTest(UUID id) {
     UITest test =
         studioRepository
-            .findById(id)
+            .findByIdForUpdate(id)
             .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + id));
+    invalidateSchedule(id, "TEST_DELETED");
     test.setDeletedAt(Instant.now());
   }
 
@@ -920,6 +933,10 @@ public class StudioService {
   public void softDeleteTest(UUID id, Authentication auth) {
     UITest test = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
     requireWrite(auth, test.getCsiId());
+    test = studioRepository.findByIdForUpdate(id).orElseThrow(StudioAccessDeniedException::new);
+    entityManager.flush();
+    entityManager.refresh(test);
+    invalidateSchedule(id, "TEST_DELETED");
     test.setDeletedAt(Instant.now());
   }
 
@@ -1055,30 +1072,51 @@ public class StudioService {
    *
    * <p>Rows whose CSI could not be resolved by the V14 backfill stay quarantined: they match no
    * scope and are excluded even for administrators (AC-9).
+   *
+   * <p>Story 10.46 adds {@code csiId}, {@code status}, {@code q} and {@code sort}. {@code csiId} is
+   * one more equality on the execution's own CSI, so it intersects with the scope and can never
+   * widen it. Each item is labelled with its draft's name, resolved for the whole page at once.
    */
   public Page<ExecutionSnapshotDto> listExecutions(
-      UUID testId, int page, int size, Authentication auth) {
-    Pageable pageable =
-        PageRequest.of(page, Math.min(size, 100), Sort.by("createdAt").descending());
+      StudioListQuery.Executions query, int page, int size, Authentication auth) {
+    Pageable pageable = PageRequest.of(page, Math.min(size, 100));
     Optional<Set<String>> readable = csiOwnershipEvaluator.readableCsiIds(auth);
-
-    if (readable.isEmpty()) {
-      Page<UITestExecution> all =
-          testId == null
-              ? executionRepository.findByCsiIdIsNotNull(pageable)
-              : executionRepository.findByTestIdAndCsiIdIsNotNull(testId, pageable);
-      return all.map(snapshotMapper::toSnapshot);
-    }
-
-    Set<String> csiIds = readable.get();
-    if (csiIds.isEmpty()) {
+    if (readable.isPresent() && readable.get().isEmpty()) {
       return Page.empty(pageable);
     }
-    Page<UITestExecution> scoped =
-        testId == null
-            ? executionRepository.findByCsiIdIn(csiIds, pageable)
-            : executionRepository.findByTestIdAndCsiIdIn(testId, csiIds, pageable);
-    return scoped.map(snapshotMapper::toSnapshot);
+    Page<UITestExecution> executions =
+        executionRepository.findPage(query, readable.orElse(null), pageable);
+    Map<UUID, String> names =
+        testNames(executions.getContent().stream().map(UITestExecution::getTestId).toList());
+    return executions.map(
+        execution ->
+            snapshotMapper.toSnapshot(execution).withTestName(names.get(execution.getTestId())));
+  }
+
+  /**
+   * {@link #findExecutionById(UUID, Authentication)}, labelled with the draft's current name for
+   * {@code GET /executions/{id}} and the SSE frames, which must carry the same payload (Story
+   * 10.46, §5.5). Kept apart from the authorization read so the video route and the stream's
+   * authorization refresh, which call that read, do not pay for a name they never render.
+   */
+  public ExecutionSnapshotDto readExecution(UUID executionId, Authentication auth) {
+    ExecutionSnapshotDto snapshot = findExecutionById(executionId, auth);
+    return snapshot.withTestName(studioRepository.findVisibleName(snapshot.testId()));
+  }
+
+  /**
+   * Names of the visible drafts among {@code testIds}, in one statement. A deleted or quarantined
+   * draft has no entry, so its runs carry {@code testName: null}.
+   */
+  private Map<UUID, String> testNames(List<UUID> testIds) {
+    if (testIds.isEmpty()) {
+      return Map.of();
+    }
+    Map<UUID, String> names = new HashMap<>();
+    studioRepository
+        .findNamesByIdIn(new HashSet<>(testIds))
+        .forEach(name -> names.put(name.getId(), name.getName()));
+    return names;
   }
 
   /**

@@ -17,6 +17,8 @@ import {
   TAIL_SETTLE_LOAD_TIMEOUT_MS,
   attachChildRuntime,
   failureKindOf,
+  textEntryEquivalenceLine,
+  visibleOnlyResolutionLine,
 } from '../../src/run/childRuntime.js';
 import type { ChildChannel } from '../../src/run/childRuntime.js';
 import { PROTOCOL_VERSION } from '../../src/run/protocol.js';
@@ -39,7 +41,12 @@ interface Driver {
   ready(): Extract<ChildMessage, { kind: 'ready' }> | undefined;
 }
 
-function createDriver(overrides: { originSource?: Parameters<typeof attachChildRuntime>[0]['originSource'] } = {}): Driver {
+function createDriver(
+  overrides: {
+    originSource?: Parameters<typeof attachChildRuntime>[0]['originSource'];
+    log?: (line: string) => void;
+  } = {},
+): Driver {
   const sent: ChildMessage[] = [];
   const exits: number[] = [];
   const sleeps: number[] = [];
@@ -75,6 +82,7 @@ function createDriver(overrides: { originSource?: Parameters<typeof attachChildR
     channel,
     browsers,
     originSource: overrides.originSource,
+    log: overrides.log,
     // The file itself is 10.14's business; what this tier exercises is the *vocabulary* the
     // observation maps onto. The fixtures tier reads a real webm off disk (AC-7).
     inspectRecording: (path, orderlyClose) =>
@@ -616,5 +624,79 @@ describe('failureKindOf', () => {
     );
     expect(failureKindOf({ ...base, refusal: null })).toBe('step');
     expect(failureKindOf(base)).toBe('step');
+  });
+});
+
+describe('VAL-031 rule 8 — the text-entry equivalence is disclosed to the operator', () => {
+  it('formats one bounded line naming roles and the step only', () => {
+    expect(textEntryEquivalenceLine('searchbox', 'combobox', 3)).toBe(
+      'text-entry-equivalence: authored=searchbox resolved=combobox step=3',
+    );
+    expect(textEntryEquivalenceLine('textbox', 'searchbox', null)).toBe(
+      'text-entry-equivalence: authored=textbox resolved=searchbox step=?',
+    );
+  });
+
+  it('logs one line, with the step index, when a fill used the equivalence', async () => {
+    const lines: string[] = [];
+    const driver = createDriver({ log: (line) => lines.push(line) });
+    const searchbox = 'page.getByRole(searchbox,{})';
+    const union = 'page.getByRole(textbox,{}).or(page.getByRole(combobox,{}))';
+    driver.browsers.page.countOf = (path) => (path === union || path.endsWith('(combobox,{})') ? 1 : 0);
+    const result = await runOnce(driver, [
+      ...defaultSteps().slice(0, 1),
+      {
+        stepIndex: 1,
+        operations: [
+          {
+            op: 'fill',
+            locator: { segments: [{ kind: 'getByRole', role: 'searchbox' }] },
+            value: { kind: 'literal', value: 'hosting' },
+            // A short timeout keeps the real settle window (timeout/4) at 10 ms.
+            options: { timeout: 40 },
+          },
+        ],
+      },
+    ]);
+
+    expect(result.ok).toBe(true);
+    expect(driver.browsers.page.counts[0]).toBe(`${searchbox}.filter(visible)`);
+    expect(lines).toEqual(['text-entry-equivalence: authored=searchbox resolved=combobox step=1']);
+  });
+});
+
+describe('VAL-040 — visible-only resolution is disclosed to the operator', () => {
+  it('formats one bounded line naming the step and the total only', () => {
+    expect(visibleOnlyResolutionLine(2, 4)).toBe('visible-only-resolution: step=4 total=2');
+    expect(visibleOnlyResolutionLine(6, null)).toBe('visible-only-resolution: step=? total=6');
+  });
+
+  it('logs one line, with the step index, when a hidden twin was skipped', async () => {
+    const lines: string[] = [];
+    const driver = createDriver({ log: (line) => lines.push(line) });
+    const placeholder = 'page.getByPlaceholder(Search Wikipedia,{})';
+    driver.browsers.page.countOf = (path) => (path === placeholder ? 2 : 1);
+    driver.browsers.page.hiddenOf = (path) => (path === placeholder ? 1 : 0);
+    const result = await runOnce(driver, [
+      ...defaultSteps().slice(0, 1),
+      {
+        stepIndex: 1,
+        operations: [
+          {
+            op: 'fill',
+            locator: {
+              segments: [
+                { kind: 'getByPlaceholder', text: { kind: 'literal', value: 'Search Wikipedia' } },
+              ],
+            },
+            value: { kind: 'literal', value: 'Alan Turing' },
+          },
+        ],
+      },
+    ]);
+
+    expect(result.ok).toBe(true);
+    expect(lines).toEqual(['visible-only-resolution: step=1 total=2']);
+    expect(lines.join('\n')).not.toContain('Search Wikipedia');
   });
 });

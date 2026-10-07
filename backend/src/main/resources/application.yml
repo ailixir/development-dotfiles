@@ -126,8 +126,9 @@ checks:
     # nothing for a caller that can reach the pod and send a header. Architecture §9.1 assigns
     # stripping those headers to a trusted gateway; this repository contains no such gateway.
     #
-    # ⚠ **The vault is also still a stub** — `SecretsService` returns REDACTED — and **no
-    # credentialed pilot may run until ED-02 has linked completed tickets**. ED-02's owner reads
+    # ⚠ **The Studio vault adapter is implemented but default-off** (`studio.secrets.vault.provider:
+    # none`), and **no credentialed pilot may run until ED-02 has linked completed tickets**. The
+    # ED-02 pilot gate is unchanged by the adapter existing. ED-02's owner reads
     # "TBD — not assigned in sources"; the escalation path is @pm → Checks-squad engineering
     # management (BRD §8), with Security & Compliance accepting.
     bypass:
@@ -198,8 +199,16 @@ studio:
     v2-enabled: ${STUDIO_AUTHORING_V2_ENABLED:false}
   secrets:
     vault:
-      # Vault-backed secrets are unavailable throughout the production alpha. Tests override this
-      # with the fake; `hashicorp` activates the future KV v2 client when connected.
+      # Vault KV v2 is the only Studio secret store, and it is off by default (`none`: saving or
+      # listing a secret answers 503 VAULT_NOT_CONFIGURED; nothing falls back to another store).
+      # Connecting needs environment variables only:
+      #   required  STUDIO_VAULT_PROVIDER=hashicorp, STUDIO_VAULT_ADDRESS (https, or loopback
+      #             http), STUDIO_VAULT_TOKEN_FILE (a readable mounted token file)
+      #   optional  STUDIO_VAULT_NAMESPACE, STUDIO_VAULT_MOUNT, STUDIO_VAULT_PATH_TEMPLATE,
+      #             STUDIO_VAULT_VALUE_KEY
+      # The default path template is studio/{csiId}/{environment}/{testId}/{kind}/{referenceName}.
+      # Any template must contain those five placeholders and end with /{referenceName}, or the
+      # context refuses to start. Tests override the provider with the fake.
       provider: ${STUDIO_VAULT_PROVIDER:none}
       hashicorp:
         address: ${STUDIO_VAULT_ADDRESS:}
@@ -309,12 +318,19 @@ studio:
       credentials:
         mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
         service-account-key-file: ${STUDIO_GATEWAY_CREDENTIALS_KEY_FILE:}
-      request-timeout: ${STUDIO_GATEWAY_REQUEST_TIMEOUT:60s}
+      # VAL-007 interim default (user decision D3, 2026-10-04), pending the latency benchmark. Each
+      # call is still capped by the remaining 240s compile budget; one full attempt fits, repairs
+      # after a long first call are truncated by that shared deadline.
+      request-timeout: ${STUDIO_GATEWAY_REQUEST_TIMEOUT:150s}
       max-concurrency: ${STUDIO_GATEWAY_MAX_CONCURRENCY:4}
       max-input-bytes: ${STUDIO_GATEWAY_MAX_INPUT_BYTES:262144}
       max-output-bytes: ${STUDIO_GATEWAY_MAX_OUTPUT_BYTES:262144}
       max-output-tokens: ${STUDIO_GATEWAY_MAX_OUTPUT_TOKENS:32768}
       structured-output: ${STUDIO_GATEWAY_STRUCTURED_OUTPUT:true}
+      # VAL-007 (2026-10-04): LOW measured >= MEDIUM >= HIGH on quality and 3-6x faster
+      # (docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/report.md). A fingerprint input: changing
+      # it recompiles every test once. LOW | MEDIUM | HIGH; MINIMAL fails binding.
+      thinking-level: ${STUDIO_GATEWAY_THINKING_LEVEL:LOW}
       retry:
         max-retries: 2
         initial-backoff: 250ms
@@ -396,7 +412,7 @@ studio:
       artifact-schema-version: 1
       validator-schema-version: ${STUDIO_RUNTIME_VALIDATOR_SCHEMA_VERSION:2.0.0}
       syntax-reference-version: ${STUDIO_RUNTIME_SYNTAX_REFERENCE_VERSION:2.1.0}
-      executor-version: ${STUDIO_RUNTIME_EXECUTOR_VERSION:2.0.0}
+      executor-version: ${STUDIO_RUNTIME_EXECUTOR_VERSION:2.1.0}
       playwright-version: ${STUDIO_RUNTIME_PLAYWRIGHT_VERSION:1.63.0}
 
 springdoc:

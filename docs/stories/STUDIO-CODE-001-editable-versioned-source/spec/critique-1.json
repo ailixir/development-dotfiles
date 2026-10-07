@@ -1,0 +1,74 @@
+{
+  "storyId": "STUDIO-CODE-001-editable-versioned-source",
+  "critiquedAt": "2026-10-05T02:47:36.231165+00:00",
+  "critiquedBy": "@qa (Quinn)",
+  "specVersion": 1,
+  "verdict": "NEEDS_REVISION",
+  "verdictReason": "All 8 functional requirements, 3 non-functional requirements and 5 constraints are accurately covered. One MEDIUM completeness issue requests explicit coverage of existing authoring writes and cancellation/abandonment settlement in the all-guard audit and race tests. No HIGH issue; proposal scope and core native immutable revision approach are sound.",
+  "scores": {
+    "accuracy": 5,
+    "completeness": 4,
+    "consistency": 5,
+    "feasibility": 4,
+    "alignment": 5,
+    "average": 4.6
+  },
+  "issues": [
+    {
+      "id": "CRIT-1",
+      "severity": "MEDIUM",
+      "category": "completeness",
+      "check": "comp-2",
+      "description": "The complete freshness guarantee is concrete for manual save, compile, confirm and execute, but the existing Steps/context/configuration save contract and background cancellation/abandonment settlement remain implicit. The ordered page Save starts through the existing authoring endpoint without explicitly requiring the code/mode/hash expectations there; AT-6 names failure/timeout but not cancellation or the abandonment sweeper. Current StudioService authoring writes compare only source/configuration and CompileStateService.sweepAbandoned selects by status/time, so these existing writers need explicit inclusion in the proposed audit. This is specification precision, not evidence that the proposed architecture permits a bypass.",
+      "location": "spec.md#4-proposed-contracts-and-code-tab-behavior;spec.md#6-persistence-migration-and-rollout;spec.md#8-proposed-verification-gates",
+      "suggestion": "Add a concise writer/outcome guard matrix covering existing authoring/Steps/context/config writes with expected/current F, manual save/mode switch, preparation capture, success/failure/deadline/cancellation/abandonment, confirmation, readiness and acceptance. Distinguish request-supplied expected F from the current immutable capture checked by background workers. Extend AT-6 to show an older cancellation/sweeper cannot clear a newer manual candidate/request or revoke unchanged confirmed readiness. This does not require a new user cancellation feature.",
+      "autoFixable": false
+    }
+  ],
+  "summary": {
+    "highIssues": 0,
+    "mediumIssues": 1,
+    "lowIssues": 0,
+    "autoFixable": 0
+  },
+  "nextAction": "Return to @pm spec-write for CRIT-1 precision revision, preserve critique-1.json, then run independent critique_2 required by COMPLEX19. This verdict concerns specification quality only, not implementation completion, product adoption or release authorization.",
+  "autoFixes": [],
+  "reviewEvidence": {
+    "specSha256": "1a30ec81e2c7d9ef573ca11c64742bfeb27999829967ea46e8a733ce822c7729",
+    "requirementsCovered": [
+      "FR-1",
+      "FR-2",
+      "FR-3",
+      "FR-4",
+      "FR-5",
+      "FR-6",
+      "FR-7",
+      "FR-8",
+      "NFR-1",
+      "NFR-2",
+      "NFR-3",
+      "CON-1",
+      "CON-2",
+      "CON-3",
+      "CON-4",
+      "CON-5"
+    ],
+    "currentSourceRead": [
+      "PRD.md:82-131",
+      "frontend/src/components/studio/CodeTab.tsx",
+      "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:559-585",
+      "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java:147-149,361-370",
+      "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java:281-303,631-674",
+      "backend/src/main/java/com/citi/put/checks/studio/StudioService.java:478-511",
+      "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:161-245,340-359",
+      "backend/db/cutover/V19__studio_inference_candidate_identity.sql",
+      "backend/src/main/resources/db/migration/V24__studio_reference_policy.sql",
+      "studio-runner/src/validator/ast.ts:128-139",
+      "frontend/package.json",
+      "studio-runner/package.json",
+      "backend/build.gradle.kts"
+    ],
+    "selfCritique": "Named spec-quality-checklist.md was not found in .aiox-core or docs. Applied all declared spec-critique task dimension checks and verified verdict against actual weighted scores/severity. No implementation/runtime tests run."
+  }
+}

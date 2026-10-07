@@ -112,6 +112,73 @@ class LegacyStudioAdapterTest {
   }
 
   @Test
+  void aBlankStepIsRejectedAtWriteNamingItsNumberButAnEmptyDraftIsAccepted() {
+    for (String blank : new String[] {"", "   ", "\t\n"}) {
+      UITestRequest request = request(List.of("Go home", "Click Sign On", blank), 30);
+      assertThatThrownBy(() -> LegacyStudioAdapter.validateForWrite(request))
+          .isInstanceOf(StudioValidationException.class)
+          .hasMessage("Step 3 is blank. Write what the step should do, or remove it.")
+          .extracting(e -> ((StudioValidationException) e).getCode())
+          .isEqualTo("INVALID_STEPS");
+    }
+    // The Tests page creates a draft with `steps: []` and the editor saves it before steps exist.
+    LegacyStudioAdapter.validateForWrite(request(List.of(), 30));
+  }
+
+  @Test
+  void aTimeoutOutsideTheContractIsRejectedNotCoerced() throws Exception {
+    for (int timeout : new int[] {0, -5, 121}) {
+      UITestRequest request = request(List.of("Go home"), timeout);
+      assertThatThrownBy(() -> LegacyStudioAdapter.validateForWrite(request))
+          .isInstanceOf(StudioValidationException.class)
+          .hasMessage("timeoutSeconds is " + timeout + "; it must be between 1 and 120 seconds.")
+          .extracting(e -> ((StudioValidationException) e).getCode())
+          .isEqualTo("INVALID_CONFIGURATION");
+    }
+    LegacyStudioAdapter.validateForWrite(request(List.of("Go home"), 1));
+    LegacyStudioAdapter.validateForWrite(request(List.of("Go home"), 120));
+
+    // The deserializer keeps the submitted value so the boundary can judge it; absent → default.
+    UITestRequest zero =
+        objectMapper.readValue(
+            "{\"configuration\":{\"browser\":\"chromium\",\"timeoutSeconds\":0}}",
+            UITestRequest.class);
+    assertThat(zero.configuration().timeoutSeconds()).isZero();
+    UITestRequest absent =
+        objectMapper.readValue(
+            "{\"configuration\":{\"browser\":\"chromium\"}}", UITestRequest.class);
+    assertThat(absent.configuration().timeoutSeconds())
+        .isEqualTo(TestConfiguration.DEFAULT_TIMEOUT_SECONDS);
+    for (String unrepresentable : new String[] {"1.5", "4294967297"}) {
+      assertThatThrownBy(
+              () ->
+                  objectMapper.readValue(
+                      "{\"configuration\":{\"timeoutSeconds\":" + unrepresentable + "}}",
+                      UITestRequest.class))
+          .isInstanceOf(StudioValidationException.class)
+          .extracting(e -> ((StudioValidationException) e).getCode())
+          .isEqualTo("INVALID_CONFIGURATION");
+    }
+  }
+
+  private static UITestRequest request(List<String> steps, int timeoutSeconds) {
+    return new UITestRequest(
+        "n",
+        "d",
+        "60400",
+        "Production",
+        steps,
+        List.of(),
+        new TestConfiguration(
+            TestConfiguration.CANONICAL_BROWSER,
+            Viewport.defaults(),
+            timeoutSeconds,
+            TestConfiguration.DEFAULT_WAIT_STRATEGY),
+        1L,
+        1L);
+  }
+
+  @Test
   void legacyOutcomesMapOntoTheCanonicalVocabulary() {
     assertThat(LegacyStudioAdapter.normalizeStatus("COMPLETED")).isEqualTo(ExecutionStatus.PASSED);
     assertThat(LegacyStudioAdapter.normalizeStatus("TIMEOUT")).isEqualTo(ExecutionStatus.ERROR);

@@ -264,7 +264,7 @@ class CompilePipelineTest {
     assertThat(provenance.path("validatorSchemaVersion").asText())
         .as("the version the validator reported it actually ran, not the one we hoped for")
         .isEqualTo("2.0.0");
-    assertThat(provenance.path("executorVersion").asText()).isEqualTo("2.0.0");
+    assertThat(provenance.path("executorVersion").asText()).isEqualTo("2.1.0");
     assertThat(provenance.path("playwrightVersion").asText()).isEqualTo("1.63.0");
     assertThat(provenance.path("artifactSchemaVersion").asInt())
         .isEqualTo(CompilePins.SUPPORTED_ARTIFACT_VERSION);

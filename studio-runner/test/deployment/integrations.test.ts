@@ -57,6 +57,22 @@ describe('production integration provider wiring', () => {
     expect(worker.STUDIO_EVIDENCE_DIRECTORY).toBe(api.STUDIO_EVIDENCE_DIRECTORY);
   });
 
+  it('passes a test-scoped Vault path template the backend accepts, with the provider off', () => {
+    // studio-vault-secrets (F17): the chart always passes its template to both pods, and the
+    // backend refuses to start `hashicorp` with a template lacking {testId} or not ending in
+    // /{referenceName}. The chart default must therefore be the backend's own.
+    const outcome = render();
+    for (const suffix of ['-api', '-worker']) {
+      const env = envValues(soleContainer(deploymentNamed(outcome, suffix)));
+      expect(env.STUDIO_VAULT_PATH_TEMPLATE, suffix).toContain('{testId}');
+      expect(env.STUDIO_VAULT_PATH_TEMPLATE, suffix).toMatch(/\/\{referenceName\}$/u);
+      expect(env.STUDIO_VAULT_PATH_TEMPLATE, suffix).toBe(
+        'studio/{csiId}/{environment}/{testId}/{kind}/{referenceName}',
+      );
+      expect(env.STUDIO_VAULT_PROVIDER, suffix).toBe('none');
+    }
+  });
+
   it('renders one Sonic endpoint/bucket into writer and readers with file credentials', () => {
     const outcome = render({
       set: {

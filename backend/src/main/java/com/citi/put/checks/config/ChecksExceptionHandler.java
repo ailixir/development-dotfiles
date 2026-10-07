@@ -11,9 +11,13 @@ import com.citi.put.checks.studio.dispatch.StudioReferenceResolver;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.evidence.ExecutionVideoException;
 import com.citi.put.checks.studio.internal.InternalCallbackException;
+import com.citi.put.checks.studio.secrets.SecretAlreadyExistsException;
+import com.citi.put.checks.studio.secrets.VaultNotConfiguredException;
 import com.citi.put.checks.studio.secrets.VaultProviderUnavailableException;
 import com.citi.put.checks.studio.sse.WatchedExecutionRegistry;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +29,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @Profile("!worker")
 public class ChecksExceptionHandler {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ChecksExceptionHandler.class);
 
   @ExceptionHandler(com.citi.put.checks.checks.CheckSourceDisabledException.class)
   public ResponseEntity<Map<String, Object>> handleCreationSourceDisabled(
@@ -177,11 +183,40 @@ public class ChecksExceptionHandler {
   @ExceptionHandler(VaultProviderUnavailableException.class)
   public ResponseEntity<Map<String, String>> handleVaultUnavailable(
       VaultProviderUnavailableException ex) {
+    // The message is fixed text plus, at most, Vault's HTTP status, so an operator can tell a token
+    // missing `create` or `list` from an outage. Never the cause chain, which could name a URL.
+    LOGGER.warn("Studio Vault call failed: {}", ex.getMessage());
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
         .body(
             Map.of(
                 "error", "VAULT_UNAVAILABLE",
                 "message", "Studio secret resolution is temporarily unavailable"));
+  }
+
+  /**
+   * No Vault is connected in this deployment (provider {@code none}). A different answer from an
+   * outage and from an absent secret, and nothing falls back to another store (studio-vault-secrets
+   * FR-7, NFR-5).
+   */
+  @ExceptionHandler(VaultNotConfiguredException.class)
+  public ResponseEntity<Map<String, String>> handleVaultNotConfigured(
+      VaultNotConfiguredException ex) {
+    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+        .body(
+            Map.of(
+                "error", "VAULT_NOT_CONFIGURED",
+                "message", "Vault is not connected for this environment"));
+  }
+
+  /** A create-only secret write found the name taken for this test. Never carries a value. */
+  @ExceptionHandler(SecretAlreadyExistsException.class)
+  public ResponseEntity<Map<String, String>> handleSecretAlreadyExists(
+      SecretAlreadyExistsException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(
+            Map.of(
+                "error", "SECRET_ALREADY_EXISTS",
+                "message", "A secret with this name already exists for this test"));
   }
 
   /**

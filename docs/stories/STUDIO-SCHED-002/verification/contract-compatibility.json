@@ -1,0 +1,41 @@
+{
+  "storyId": "STUDIO-SCHED-002",
+  "recordedAt": "2026-10-06T02:37:19.516539+00:00",
+  "runner": {
+    "command": "npm run test -- test/run/confinement.test.ts test/contract.test.ts --coverage.enabled=false",
+    "directory": "studio-runner",
+    "status": "PASS",
+    "testsPassed": 35,
+    "filesPassed": 2,
+    "exitCode": 0,
+    "coverage": "Scoped assertions only; no whole-repository coverage claim",
+    "log": "/tmp/studio-scheduling-reuse-runner-tests.log"
+  },
+  "unchangedReviewedInputs": {
+    "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionSnapshotDto.java": true,
+    "backend/src/main/resources/db/migration/V26__studio_scheduling.sql": true,
+    "docs/specs/studio/openapi.yaml": true,
+    "frontend/src/components/studio/runs/RunDetailsDrawer.tsx": true,
+    "frontend/src/components/studio/runs/RunRow.tsx": true,
+    "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx": true,
+    "frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx": true,
+    "frontend/src/components/studio/scheduling/StudioScheduleSummary.tsx": true,
+    "frontend/src/components/studio/scheduling/schedulePresentation.ts": true,
+    "frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx": true,
+    "frontend/src/components/studio/tests/DeleteTestDialog.tsx": true,
+    "frontend/src/components/studio/tests/TestRow.tsx": true,
+    "frontend/src/components/studio/tests/TestRowMenu.tsx": true,
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": true,
+    "frontend/src/pages/StudioTestsPage/StudioTestsPage.tsx": true,
+    "frontend/src/services/api/studioSchedulesApi.test.ts": true,
+    "frontend/src/services/api/studioSchedulesApi.ts": true,
+    "frontend/src/services/mocks/studio/handlers.ts": true,
+    "frontend/src/services/mocks/studio/schedulePreview.ts": true,
+    "frontend/src/services/mocks/studio/schedulingHandlers.ts": true,
+    "frontend/src/types/studio/studioScheduling.ts": true,
+    "frontend/src/types/studio/studioTypes.ts": true,
+    "studio-runner/test/run/confinement.test.ts": true
+  },
+  "frontendVerification": "19 previously reviewed frontend sources unchanged; no UI rerun claim",
+  "boundary": "Mixed backend integration uses actual registered HTTP/TCP/Splunk fixtures and existing Studio runner client seam; no production browser pilot claim"
+}

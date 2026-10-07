@@ -1,0 +1,2906 @@
+{
+ "generatedAt": "2026-10-05T01:30:13.408Z",
+ "budget": {
+  "limit": 500,
+  "transportCallsUsed": 473,
+  "probes": 3
+ },
+ "fidelity": {
+  "javaVsNodeByteEqual": "91/91",
+  "variants": [
+   "LOW",
+   "MEDIUM",
+   "HIGH",
+   "SIOFF",
+   "TCOFF",
+   "MOT4096",
+   "REPAIR.LOW"
+  ],
+  "contractHeader": "# Output contract — prompt version 2.3.0",
+  "path": "/v1/projects/epicagentai/locations/global/publishers/google/models/gemini-3.8-flash:generateContent"
+ },
+ "pricing": {
+  "estimatedCostPerCompileUsd": null,
+  "reason": "no sourced Vertex price list available in-repo or offline; token counts reported instead"
+ },
+ "phase1": {
+  "T2": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "LOW",
+   "prompt": "2.2.0",
+   "calls": 36,
+   "transportOk": 36,
+   "finishStop": 36,
+   "envelopeParsed": 24,
+   "validatorPassed": 24,
+   "validatorChecked": 24,
+   "positives": 24,
+   "positivesExecPassed": 18,
+   "positivesExpectingPass": 21,
+   "positivesSemanticCorrect": 21,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 12,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 0,
+   "negativesIntentCorrectButMissingMessage": 12,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 12,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 21,
+   "stability": {
+    "casesAllIdentical": 9,
+    "casesAllEquivalent": 12,
+    "cases": 12,
+    "casesMixedCorrectness": []
+   },
+   "latencyMs": {
+    "p50": 2832,
+    "p95": 15704,
+    "max": 39748
+   },
+   "thoughtsTokens": {
+    "p50": null,
+    "p95": null,
+    "max": null
+   },
+   "outputTokens": {
+    "p50": 145,
+    "p95": 389,
+    "sum": 6718
+   },
+   "inputTokens": {
+    "p50": 3204,
+    "sum": 118653
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C04-account-save": "3/3",
+    "C07-ambiguous-search-locator": "0/3",
+    "C12-clarify-click-button": "0/3",
+    "C10-unsupported-cpu": "0/3",
+    "C11-unsupported-second-tab": "0/3",
+    "C02-rf-wiki-url": "3/3",
+    "C01-rf-example-url": "3/3",
+    "C08-intended-assertion-fail": "3/3",
+    "C06-forms-fill-save": "3/3",
+    "C09-negation-trap": "0/3",
+    "C05-login-var-secret": "3/3",
+    "C03-rf-wiki-search-var": "3/3"
+   },
+   "failures": [
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 3,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 2,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    }
+   ]
+  },
+  "T1": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "MEDIUM",
+   "prompt": "2.2.0",
+   "calls": 36,
+   "transportOk": 35,
+   "finishStop": 35,
+   "envelopeParsed": 26,
+   "validatorPassed": 26,
+   "validatorChecked": 26,
+   "positives": 24,
+   "positivesExecPassed": 17,
+   "positivesExpectingPass": 21,
+   "positivesSemanticCorrect": 20,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 12,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 3,
+   "negativesIntentCorrectButMissingMessage": 9,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 9,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 20,
+   "stability": {
+    "casesAllIdentical": 10,
+    "casesAllEquivalent": 11,
+    "cases": 12,
+    "casesMixedCorrectness": [
+     "C04-account-save(2/3)"
+    ]
+   },
+   "latencyMs": {
+    "p50": 9653,
+    "p95": 57658,
+    "max": 60002
+   },
+   "thoughtsTokens": {
+    "p50": 1061,
+    "p95": 5055,
+    "max": 7125
+   },
+   "outputTokens": {
+    "p50": 145,
+    "p95": 389,
+    "sum": 6473
+   },
+   "inputTokens": {
+    "p50": 3204,
+    "sum": 115146
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C03-rf-wiki-search-var": "3/3",
+    "C08-intended-assertion-fail": "3/3",
+    "C07-ambiguous-search-locator": "0/3",
+    "C09-negation-trap": "0/3",
+    "C10-unsupported-cpu": "0/3",
+    "C05-login-var-secret": "3/3",
+    "C01-rf-example-url": "3/3",
+    "C04-account-save": "2/3",
+    "C06-forms-fill-save": "3/3",
+    "C11-unsupported-second-tab": "0/3",
+    "C02-rf-wiki-url": "3/3",
+    "C12-clarify-click-button": "0/3"
+   },
+   "failures": [
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 3,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C04-account-save",
+     "rep": 1,
+     "stage": "transport",
+     "outcome": "TRANSPORT_FAILURE",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 2,
+     "stage": "executed",
+     "outcome": "GENERATED_FOR_NEGATIVE(exec FAILED)",
+     "note": "generated runnable code where a refusal was expected",
+     "validator": null,
+     "execFailure": "Error: locator.click: Error: strict mode violation: getByRole('button') resolved to 4 elements: 1) <button type=\"button\">Submit</button> aka getByRole('button',",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "await page.getByRole('button').click();"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 3,
+     "stage": "executed",
+     "outcome": "GENERATED_FOR_NEGATIVE(exec FAILED)",
+     "note": "generated runnable code where a refusal was expected",
+     "validator": null,
+     "execFailure": "Error: locator.click: Error: strict mode violation: getByRole('button') resolved to 4 elements: 1) <button type=\"button\">Submit</button> aka getByRole('button',",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "await page.getByRole('button').click();"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "GENERATED_FOR_NEGATIVE(exec FAILED)",
+     "note": "generated runnable code where a refusal was expected",
+     "validator": null,
+     "execFailure": "Error: locator.click: Error: strict mode violation: getByRole('button') resolved to 4 elements: 1) <button type=\"button\">Submit</button> aka getByRole('button',",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "await page.getByRole('button').click();"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 2,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    }
+   ]
+  },
+  "T5": {
+   "model": "gemini-3.1-pro-preview",
+   "thinkingLevel": "MEDIUM",
+   "prompt": "2.2.0",
+   "calls": 36,
+   "transportOk": 36,
+   "finishStop": 36,
+   "envelopeParsed": 23,
+   "validatorPassed": 23,
+   "validatorChecked": 23,
+   "positives": 24,
+   "positivesExecPassed": 17,
+   "positivesExpectingPass": 21,
+   "positivesSemanticCorrect": 20,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 12,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 0,
+   "negativesIntentCorrectButMissingMessage": 12,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 13,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 20,
+   "stability": {
+    "casesAllIdentical": 9,
+    "casesAllEquivalent": 11,
+    "cases": 12,
+    "casesMixedCorrectness": [
+     "C05-login-var-secret(2/3)"
+    ]
+   },
+   "latencyMs": {
+    "p50": 7507,
+    "p95": 20485,
+    "max": 24215
+   },
+   "thoughtsTokens": {
+    "p50": 602,
+    "p95": 1821,
+    "max": 2981
+   },
+   "outputTokens": {
+    "p50": 197,
+    "p95": 506,
+    "sum": 8408
+   },
+   "inputTokens": {
+    "p50": 3204,
+    "sum": 118653
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C01-rf-example-url": "3/3",
+    "C12-clarify-click-button": "0/3",
+    "C07-ambiguous-search-locator": "0/3",
+    "C03-rf-wiki-search-var": "3/3",
+    "C02-rf-wiki-url": "3/3",
+    "C06-forms-fill-save": "3/3",
+    "C05-login-var-secret": "2/3",
+    "C11-unsupported-second-tab": "0/3",
+    "C10-unsupported-cpu": "0/3",
+    "C08-intended-assertion-fail": "3/3",
+    "C04-account-save": "3/3",
+    "C09-negation-trap": "0/3"
+   },
+   "failures": [
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 2,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C05-login-var-secret",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent wrong)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c05/login');",
+      "await page.getByLabel('Username').fill(vars.get('USERNAME'));",
+      "await page.getByLabel('Password').fill(vars.secret('LOGIN_PW'));",
+      "await page.getByRole('button', { name: 'Sign in' }).click();",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 3,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    }
+   ]
+  },
+  "T3": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "HIGH",
+   "prompt": "2.2.0",
+   "calls": 36,
+   "transportOk": 29,
+   "finishStop": 29,
+   "envelopeParsed": 20,
+   "validatorPassed": 20,
+   "validatorChecked": 20,
+   "positives": 24,
+   "positivesExecPassed": 12,
+   "positivesExpectingPass": 21,
+   "positivesSemanticCorrect": 15,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 12,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 2,
+   "negativesIntentCorrectButMissingMessage": 9,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 9,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 15,
+   "stability": {
+    "casesAllIdentical": 11,
+    "casesAllEquivalent": 11,
+    "cases": 12,
+    "casesMixedCorrectness": []
+   },
+   "latencyMs": {
+    "p50": 12399,
+    "p95": 60002,
+    "max": 60005
+   },
+   "thoughtsTokens": {
+    "p50": 1728,
+    "p95": 8550,
+    "max": 8589
+   },
+   "outputTokens": {
+    "p50": 145,
+    "p95": 351,
+    "sum": 4559
+   },
+   "inputTokens": {
+    "p50": 3204,
+    "sum": 93653
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C08-intended-assertion-fail": "3/3",
+    "C12-clarify-click-button": "0/3",
+    "C06-forms-fill-save": "0/3",
+    "C07-ambiguous-search-locator": "0/3",
+    "C11-unsupported-second-tab": "0/3",
+    "C01-rf-example-url": "3/3",
+    "C09-negation-trap": "0/3",
+    "C04-account-save": "0/3",
+    "C02-rf-wiki-url": "3/3",
+    "C03-rf-wiki-search-var": "3/3",
+    "C10-unsupported-cpu": "0/3",
+    "C05-login-var-secret": "3/3"
+   },
+   "failures": [
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 3,
+     "stage": "executed",
+     "outcome": "GENERATED_FOR_NEGATIVE(exec FAILED)",
+     "note": "generated runnable code where a refusal was expected",
+     "validator": null,
+     "execFailure": "Error: locator.click: Error: strict mode violation: getByRole('button') resolved to 4 elements: 1) <button type=\"button\">Submit</button> aka getByRole('button',",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "await page.getByRole('button').click();"
+     ]
+    },
+    {
+     "case": "C06-forms-fill-save",
+     "rep": 1,
+     "stage": "transport",
+     "outcome": "TRANSPORT_FAILURE",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 2,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "GENERATED_FOR_NEGATIVE(exec FAILED)",
+     "note": "generated runnable code where a refusal was expected",
+     "validator": null,
+     "execFailure": "Error: locator.click: Error: strict mode violation: getByRole('button') resolved to 4 elements: 1) <button type=\"button\">Submit</button> aka getByRole('button',",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "await page.getByRole('button').click();"
+     ]
+    },
+    {
+     "case": "C04-account-save",
+     "rep": 3,
+     "stage": "transport",
+     "outcome": "TRANSPORT_FAILURE",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C04-account-save",
+     "rep": 2,
+     "stage": "transport",
+     "outcome": "TRANSPORT_FAILURE",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    },
+    {
+     "case": "C06-forms-fill-save",
+     "rep": 2,
+     "stage": "transport",
+     "outcome": "TRANSPORT_FAILURE",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C04-account-save",
+     "rep": 1,
+     "stage": "transport",
+     "outcome": "TRANSPORT_FAILURE",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 2,
+     "stage": "transport",
+     "outcome": "TRANSPORT_FAILURE",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 3,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C06-forms-fill-save",
+     "rep": 3,
+     "stage": "transport",
+     "outcome": "TRANSPORT_FAILURE",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    }
+   ]
+  }
+ },
+ "stagesABX": {
+  "S4": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "PROVIDER_DEFAULT",
+   "prompt": "2.3.0",
+   "calls": 13,
+   "transportOk": 13,
+   "finishStop": 13,
+   "envelopeParsed": 10,
+   "validatorPassed": 10,
+   "validatorChecked": 10,
+   "positives": 9,
+   "positivesExecPassed": 6,
+   "positivesExpectingPass": 8,
+   "positivesSemanticCorrect": 7,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 4,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 1,
+   "negativesIntentCorrectButMissingMessage": 3,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 3,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 7,
+   "stability": {
+    "casesAllIdentical": 13,
+    "casesAllEquivalent": 13,
+    "cases": 13,
+    "casesMixedCorrectness": []
+   },
+   "latencyMs": {
+    "p50": 23484,
+    "p95": 95901,
+    "max": 95901
+   },
+   "thoughtsTokens": {
+    "p50": 2126,
+    "p95": 14925,
+    "max": 14925
+   },
+   "outputTokens": {
+    "p50": 206,
+    "p95": 425,
+    "sum": 3102
+   },
+   "inputTokens": {
+    "p50": 3507,
+    "sum": 65111
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C02-rf-wiki-url": "1/1",
+    "C01-rf-example-url": "1/1",
+    "C08-intended-assertion-fail": "1/1",
+    "C12-clarify-click-button": "0/1",
+    "C11-unsupported-second-tab": "0/1",
+    "C13-ambiguous-wiki-placeholder": "0/1",
+    "C03-rf-wiki-search-var": "1/1",
+    "C05-login-var-secret": "1/1",
+    "C10-unsupported-cpu": "0/1",
+    "C07-ambiguous-search-locator": "0/1",
+    "C04-account-save": "1/1",
+    "C06-forms-fill-save": "1/1",
+    "C09-negation-trap": "0/1"
+   },
+   "failures": [
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "GENERATED_FOR_NEGATIVE(exec FAILED)",
+     "note": "generated runnable code where a refusal was expected",
+     "validator": null,
+     "execFailure": "Error: locator.click: Error: strict mode violation: getByRole('button') resolved to 4 elements: 1) <button type=\"button\">Submit</button> aka getByRole('button',",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "await page.getByRole('button').click();"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C13-ambiguous-wiki-placeholder",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "Error: locator.fill: Error: strict mode violation: getByPlaceholder('Search Wikipedia') resolved to 2 elements: 1) <input type=\"search\" name=\"search\" aria-label",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c13/wikimain');",
+      "await page.getByPlaceholder('Search Wikipedia').fill('Alan Turing'); await page.getByPlaceholder('Search Wikipedia').press('Enter');"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    }
+   ]
+  },
+  "S1": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "LOW",
+   "prompt": "2.3.0",
+   "calls": 39,
+   "transportOk": 39,
+   "finishStop": 39,
+   "envelopeParsed": 27,
+   "validatorPassed": 27,
+   "validatorChecked": 27,
+   "positives": 27,
+   "positivesExecPassed": 19,
+   "positivesExpectingPass": 24,
+   "positivesSemanticCorrect": 22,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 12,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 0,
+   "negativesIntentCorrectButMissingMessage": 12,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 12,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 22,
+   "stability": {
+    "casesAllIdentical": 9,
+    "casesAllEquivalent": 11,
+    "cases": 13,
+    "casesMixedCorrectness": [
+     "C03-rf-wiki-search-var(2/3)",
+     "C13-ambiguous-wiki-placeholder(2/3)"
+    ]
+   },
+   "latencyMs": {
+    "p50": 3147,
+    "p95": 59283,
+    "max": 144024
+   },
+   "thoughtsTokens": {
+    "p50": 302,
+    "p95": 874,
+    "max": 874
+   },
+   "outputTokens": {
+    "p50": 201,
+    "p95": 426,
+    "sum": 9807
+   },
+   "inputTokens": {
+    "p50": 3507,
+    "sum": 208453
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C04-account-save": "3/3",
+    "C03-rf-wiki-search-var": "2/3",
+    "C08-intended-assertion-fail": "3/3",
+    "C11-unsupported-second-tab": "0/3",
+    "C06-forms-fill-save": "3/3",
+    "C02-rf-wiki-url": "3/3",
+    "C12-clarify-click-button": "0/3",
+    "C09-negation-trap": "0/3",
+    "C13-ambiguous-wiki-placeholder": "2/3",
+    "C01-rf-example-url": "3/3",
+    "C10-unsupported-cpu": "0/3",
+    "C05-login-var-secret": "3/3",
+    "C07-ambiguous-search-locator": "0/3"
+   },
+   "failures": [
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 2,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C13-ambiguous-wiki-placeholder",
+     "rep": 2,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "Error: locator.fill: Error: strict mode violation: getByPlaceholder('Search') resolved to 2 elements: 1) <input type=\"search\" name=\"search\" aria-label=\"Search W",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c13/wikimain');",
+      "await page.getByPlaceholder('Search').fill('Alan Turing');\nawait page.getByPlaceholder('Search').press('Enter');"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 3,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C03-rf-wiki-search-var",
+     "rep": 3,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('textbox', { name: 'Search Wikipedia' })\u001b[22m (page: http://127.0.0",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c03/wiki');",
+      "await page.getByRole('textbox', { name: 'Search Wikipedia' }).fill(vars.get('SEARCH_TERM'));",
+      "await expect(page).toHaveURL(/\\/wiki/);"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    }
+   ]
+  },
+  "S7": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "MEDIUM",
+   "prompt": "2.3.0",
+   "calls": 13,
+   "transportOk": 13,
+   "finishStop": 12,
+   "envelopeParsed": 9,
+   "validatorPassed": 9,
+   "validatorChecked": 9,
+   "positives": 9,
+   "positivesExecPassed": 6,
+   "positivesExpectingPass": 8,
+   "positivesSemanticCorrect": 7,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 4,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 1,
+   "negativesIntentCorrectButMissingMessage": 3,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 3,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 7,
+   "stability": {
+    "casesAllIdentical": 13,
+    "casesAllEquivalent": 13,
+    "cases": 13,
+    "casesMixedCorrectness": []
+   },
+   "latencyMs": {
+    "p50": 17108,
+    "p95": 192341,
+    "max": 192341
+   },
+   "thoughtsTokens": {
+    "p50": 2314,
+    "p95": 5166,
+    "max": 5166
+   },
+   "outputTokens": {
+    "p50": 199,
+    "p95": 428,
+    "sum": 2957
+   },
+   "inputTokens": {
+    "p50": 3350,
+    "sum": 61837
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C06-forms-fill-save": "1/1",
+    "C05-login-var-secret": "1/1",
+    "C11-unsupported-second-tab": "0/1",
+    "C02-rf-wiki-url": "1/1",
+    "C09-negation-trap": "0/1",
+    "C04-account-save": "1/1",
+    "C08-intended-assertion-fail": "1/1",
+    "C03-rf-wiki-search-var": "1/1",
+    "C10-unsupported-cpu": "0/1",
+    "C01-rf-example-url": "1/1",
+    "C07-ambiguous-search-locator": "0/1",
+    "C12-clarify-click-button": "0/1",
+    "C13-ambiguous-wiki-placeholder": "0/1"
+   },
+   "failures": [
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "GENERATED_FOR_NEGATIVE(exec FAILED)",
+     "note": "generated runnable code where a refusal was expected",
+     "validator": null,
+     "execFailure": "Error: locator.click: Error: strict mode violation: getByRole('button') resolved to 4 elements: 1) <button type=\"button\">Submit</button> aka getByRole('button',",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "await page.getByRole('button').click();"
+     ]
+    },
+    {
+     "case": "C13-ambiguous-wiki-placeholder",
+     "rep": 1,
+     "stage": "finish",
+     "outcome": "PARSE_FAILURE(finish)",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    }
+   ]
+  },
+  "S3": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "HIGH",
+   "prompt": "2.3.0",
+   "calls": 13,
+   "transportOk": 12,
+   "finishStop": 12,
+   "envelopeParsed": 9,
+   "validatorPassed": 9,
+   "validatorChecked": 9,
+   "positives": 9,
+   "positivesExecPassed": 6,
+   "positivesExpectingPass": 8,
+   "positivesSemanticCorrect": 7,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 4,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 1,
+   "negativesIntentCorrectButMissingMessage": 3,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 3,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 7,
+   "stability": {
+    "casesAllIdentical": 13,
+    "casesAllEquivalent": 13,
+    "cases": 13,
+    "casesMixedCorrectness": []
+   },
+   "latencyMs": {
+    "p50": 27329,
+    "p95": 150001,
+    "max": 150001
+   },
+   "thoughtsTokens": {
+    "p50": 3087,
+    "p95": 18010,
+    "max": 18010
+   },
+   "outputTokens": {
+    "p50": 194,
+    "p95": 430,
+    "sum": 2806
+   },
+   "inputTokens": {
+    "p50": 3350,
+    "sum": 58645
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C01-rf-example-url": "1/1",
+    "C08-intended-assertion-fail": "1/1",
+    "C07-ambiguous-search-locator": "0/1",
+    "C09-negation-trap": "0/1",
+    "C02-rf-wiki-url": "1/1",
+    "C03-rf-wiki-search-var": "1/1",
+    "C04-account-save": "1/1",
+    "C13-ambiguous-wiki-placeholder": "0/1",
+    "C10-unsupported-cpu": "0/1",
+    "C11-unsupported-second-tab": "0/1",
+    "C12-clarify-click-button": "0/1",
+    "C05-login-var-secret": "1/1",
+    "C06-forms-fill-save": "1/1"
+   },
+   "failures": [
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C13-ambiguous-wiki-placeholder",
+     "rep": 1,
+     "stage": "transport",
+     "outcome": "GATEWAY_TIMEOUT",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "GENERATED_FOR_NEGATIVE(exec FAILED)",
+     "note": "generated runnable code where a refusal was expected",
+     "validator": null,
+     "execFailure": "Error: locator.click: Error: strict mode violation: getByRole('button') resolved to 4 elements: 1) <button type=\"button\">Submit</button> aka getByRole('button',",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "await page.getByRole('button').click();"
+     ]
+    }
+   ]
+  },
+  "S9": {
+   "model": "gemini-3.1-pro-preview",
+   "thinkingLevel": "MEDIUM",
+   "prompt": "2.3.0",
+   "calls": 13,
+   "transportOk": 13,
+   "finishStop": 13,
+   "envelopeParsed": 9,
+   "validatorPassed": 9,
+   "validatorChecked": 9,
+   "positives": 9,
+   "positivesExecPassed": 6,
+   "positivesExpectingPass": 8,
+   "positivesSemanticCorrect": 7,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 4,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 1,
+   "negativesIntentCorrectButMissingMessage": 3,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 4,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 7,
+   "stability": {
+    "casesAllIdentical": 13,
+    "casesAllEquivalent": 13,
+    "cases": 13,
+    "casesMixedCorrectness": []
+   },
+   "latencyMs": {
+    "p50": 12669,
+    "p95": 41350,
+    "max": 41350
+   },
+   "thoughtsTokens": {
+    "p50": 1067,
+    "p95": 3755,
+    "max": 3755
+   },
+   "outputTokens": {
+    "p50": 233,
+    "p95": 1293,
+    "sum": 4846
+   },
+   "inputTokens": {
+    "p50": 3507,
+    "sum": 72531
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C13-ambiguous-wiki-placeholder": "1/1",
+    "C06-forms-fill-save": "1/1",
+    "C07-ambiguous-search-locator": "0/1",
+    "C04-account-save": "1/1",
+    "C02-rf-wiki-url": "1/1",
+    "C01-rf-example-url": "1/1",
+    "C08-intended-assertion-fail": "1/1",
+    "C11-unsupported-second-tab": "0/1",
+    "C12-clarify-click-button": "0/1",
+    "C09-negation-trap": "0/1",
+    "C03-rf-wiki-search-var": "1/1",
+    "C10-unsupported-cpu": "0/1",
+    "C05-login-var-secret": "0/1"
+   },
+   "failures": [
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "GENERATED_FOR_NEGATIVE(exec FAILED)",
+     "note": "generated runnable code where a refusal was expected",
+     "validator": null,
+     "execFailure": "Error: locator.click: Error: strict mode violation: getByRole('button') resolved to 4 elements: 1) <button type=\"button\">Submit</button> aka getByRole('button',",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "await page.getByRole('button').click();"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C05-login-var-secret",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent wrong)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c05/login');",
+      "await page.getByLabel('Username').fill(vars.get('USERNAME'));",
+      "await page.getByLabel('Password').fill(vars.secret('LOGIN_PW'));",
+      "await page.getByRole('button', { name: 'Sign in' }).click();",
+      "CLARIFICATION: [missing]"
+     ]
+    }
+   ]
+  },
+  "S8": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "LOW",
+   "prompt": "2.3.0",
+   "calls": 39,
+   "transportOk": 39,
+   "finishStop": 39,
+   "envelopeParsed": 28,
+   "validatorPassed": 27,
+   "validatorChecked": 27,
+   "positives": 27,
+   "positivesExecPassed": 19,
+   "positivesExpectingPass": 24,
+   "positivesSemanticCorrect": 22,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 12,
+   "negativesCorrectRefusal": 1,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 0,
+   "negativesIntentCorrectButMissingMessage": 11,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 11,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 23,
+   "stability": {
+    "casesAllIdentical": 8,
+    "casesAllEquivalent": 11,
+    "cases": 13,
+    "casesMixedCorrectness": [
+     "C13-ambiguous-wiki-placeholder(1/3)",
+     "C10-unsupported-cpu(1/3)"
+    ]
+   },
+   "latencyMs": {
+    "p50": 5380,
+    "p95": 52124,
+    "max": 57092
+   },
+   "thoughtsTokens": {
+    "p50": 946,
+    "p95": 2289,
+    "max": 2289
+   },
+   "outputTokens": {
+    "p50": 208,
+    "p95": 434,
+    "sum": 10529
+   },
+   "inputTokens": {
+    "p50": 3628,
+    "sum": 218861
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C07-ambiguous-search-locator": "0/3",
+    "C02-rf-wiki-url": "3/3",
+    "C12-clarify-click-button": "0/3",
+    "C01-rf-example-url": "3/3",
+    "C09-negation-trap": "0/3",
+    "C06-forms-fill-save": "3/3",
+    "C13-ambiguous-wiki-placeholder": "1/3",
+    "C08-intended-assertion-fail": "3/3",
+    "C10-unsupported-cpu": "1/3",
+    "C11-unsupported-second-tab": "0/3",
+    "C05-login-var-secret": "3/3",
+    "C04-account-save": "3/3",
+    "C03-rf-wiki-search-var": "3/3"
+   },
+   "failures": [
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C13-ambiguous-wiki-placeholder",
+     "rep": 2,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "Error: locator.fill: Error: strict mode violation: getByPlaceholder('Search Wikipedia') resolved to 2 elements: 1) <input type=\"search\" name=\"search\" aria-label",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c13/wikimain');",
+      "await page.getByPlaceholder('Search Wikipedia').fill('Alan Turing');\nawait page.getByPlaceholder('Search Wikipedia').press('Enter');"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 2,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 3,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C13-ambiguous-wiki-placeholder",
+     "rep": 3,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "Error: locator.fill: Error: strict mode violation: getByPlaceholder('Search Wikipedia') resolved to 2 elements: 1) <input type=\"search\" name=\"search\" aria-label",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c13/wikimain');",
+      "await page.getByPlaceholder('Search Wikipedia').fill('Alan Turing'); await page.getByPlaceholder('Search Wikipedia').press('Enter');"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    }
+   ]
+  },
+  "S6": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "MEDIUM",
+   "prompt": "2.4.0-rule7",
+   "calls": 13,
+   "transportOk": 13,
+   "finishStop": 13,
+   "envelopeParsed": 10,
+   "validatorPassed": 10,
+   "validatorChecked": 10,
+   "positives": 9,
+   "positivesExecPassed": 7,
+   "positivesExpectingPass": 8,
+   "positivesSemanticCorrect": 8,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 4,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 1,
+   "negativesIntentCorrectButMissingMessage": 3,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 3,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 8,
+   "stability": {
+    "casesAllIdentical": 13,
+    "casesAllEquivalent": 13,
+    "cases": 13,
+    "casesMixedCorrectness": []
+   },
+   "latencyMs": {
+    "p50": 17076,
+    "p95": 37891,
+    "max": 37891
+   },
+   "thoughtsTokens": {
+    "p50": 2318,
+    "p95": 6447,
+    "max": 6447
+   },
+   "outputTokens": {
+    "p50": 198,
+    "p95": 476,
+    "sum": 3072
+   },
+   "inputTokens": {
+    "p50": 3469,
+    "sum": 64098
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C11-unsupported-second-tab": "0/1",
+    "C10-unsupported-cpu": "0/1",
+    "C03-rf-wiki-search-var": "1/1",
+    "C09-negation-trap": "0/1",
+    "C13-ambiguous-wiki-placeholder": "1/1",
+    "C08-intended-assertion-fail": "1/1",
+    "C06-forms-fill-save": "1/1",
+    "C04-account-save": "1/1",
+    "C02-rf-wiki-url": "1/1",
+    "C05-login-var-secret": "1/1",
+    "C01-rf-example-url": "1/1",
+    "C07-ambiguous-search-locator": "0/1",
+    "C12-clarify-click-button": "0/1"
+   },
+   "failures": [
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "GENERATED_FOR_NEGATIVE(exec FAILED)",
+     "note": "generated runnable code where a refusal was expected",
+     "validator": null,
+     "execFailure": "Error: locator.click: Error: strict mode violation: getByRole('button') resolved to 4 elements: 1) <button type=\"button\">Submit</button> aka getByRole('button',",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "await page.getByRole('button').click();"
+     ]
+    }
+   ]
+  },
+  "S2": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "MEDIUM",
+   "prompt": "2.3.0",
+   "calls": 13,
+   "transportOk": 12,
+   "finishStop": 12,
+   "envelopeParsed": 9,
+   "validatorPassed": 9,
+   "validatorChecked": 9,
+   "positives": 9,
+   "positivesExecPassed": 5,
+   "positivesExpectingPass": 8,
+   "positivesSemanticCorrect": 6,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 4,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 1,
+   "negativesIntentCorrectButMissingMessage": 3,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 3,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 6,
+   "stability": {
+    "casesAllIdentical": 13,
+    "casesAllEquivalent": 13,
+    "cases": 13,
+    "casesMixedCorrectness": []
+   },
+   "latencyMs": {
+    "p50": 19659,
+    "p95": 150004,
+    "max": 150004
+   },
+   "thoughtsTokens": {
+    "p50": 2310,
+    "p95": 6533,
+    "max": 6533
+   },
+   "outputTokens": {
+    "p50": 198,
+    "p95": 457,
+    "sum": 3051
+   },
+   "inputTokens": {
+    "p50": 3507,
+    "sum": 61907
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C01-rf-example-url": "1/1",
+    "C11-unsupported-second-tab": "0/1",
+    "C09-negation-trap": "0/1",
+    "C04-account-save": "1/1",
+    "C06-forms-fill-save": "1/1",
+    "C12-clarify-click-button": "0/1",
+    "C03-rf-wiki-search-var": "1/1",
+    "C02-rf-wiki-url": "0/1",
+    "C07-ambiguous-search-locator": "0/1",
+    "C10-unsupported-cpu": "0/1",
+    "C08-intended-assertion-fail": "1/1",
+    "C13-ambiguous-wiki-placeholder": "0/1",
+    "C05-login-var-secret": "1/1"
+   },
+   "failures": [
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "GENERATED_FOR_NEGATIVE(exec FAILED)",
+     "note": "generated runnable code where a refusal was expected",
+     "validator": null,
+     "execFailure": "Error: locator.click: Error: strict mode violation: getByRole('button') resolved to 4 elements: 1) <button type=\"button\">Submit</button> aka getByRole('button',",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "await page.getByRole('button').click();"
+     ]
+    },
+    {
+     "case": "C02-rf-wiki-url",
+     "rep": 1,
+     "stage": "transport",
+     "outcome": "GATEWAY_TIMEOUT",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C13-ambiguous-wiki-placeholder",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "Error: locator.fill: Error: strict mode violation: getByPlaceholder('Search Wikipedia') resolved to 2 elements: 1) <input type=\"search\" name=\"search\" aria-label",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c13/wikimain');",
+      "await page.getByPlaceholder('Search Wikipedia').fill('Alan Turing'); await page.getByPlaceholder('Search Wikipedia').press('Enter');"
+     ]
+    }
+   ]
+  },
+  "S5": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "LOW",
+   "prompt": "2.4.0-rule7",
+   "calls": 39,
+   "transportOk": 38,
+   "finishStop": 38,
+   "envelopeParsed": 27,
+   "validatorPassed": 27,
+   "validatorChecked": 27,
+   "positives": 27,
+   "positivesExecPassed": 20,
+   "positivesExpectingPass": 24,
+   "positivesSemanticCorrect": 23,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 12,
+   "negativesCorrectRefusal": 0,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 0,
+   "negativesIntentCorrectButMissingMessage": 11,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 11,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 23,
+   "stability": {
+    "casesAllIdentical": 9,
+    "casesAllEquivalent": 11,
+    "cases": 13,
+    "casesMixedCorrectness": [
+     "C03-rf-wiki-search-var(2/3)"
+    ]
+   },
+   "latencyMs": {
+    "p50": 3380,
+    "p95": 31403,
+    "max": 152470
+   },
+   "thoughtsTokens": {
+    "p50": 129,
+    "p95": 411,
+    "max": 411
+   },
+   "outputTokens": {
+    "p50": 198,
+    "p95": 423,
+    "sum": 9622
+   },
+   "inputTokens": {
+    "p50": 3626,
+    "sum": 206174
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C12-clarify-click-button": "0/3",
+    "C04-account-save": "3/3",
+    "C09-negation-trap": "0/3",
+    "C10-unsupported-cpu": "0/3",
+    "C13-ambiguous-wiki-placeholder": "3/3",
+    "C11-unsupported-second-tab": "0/3",
+    "C06-forms-fill-save": "3/3",
+    "C02-rf-wiki-url": "3/3",
+    "C03-rf-wiki-search-var": "2/3",
+    "C08-intended-assertion-fail": "3/3",
+    "C01-rf-example-url": "3/3",
+    "C05-login-var-secret": "3/3",
+    "C07-ambiguous-search-locator": "0/3"
+   },
+   "failures": [
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 1,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 1,
+     "stage": "transport",
+     "outcome": "GATEWAY_TIMEOUT",
+     "note": null,
+     "validator": null,
+     "execFailure": null,
+     "codes": null
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 1,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 2,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C11-unsupported-second-tab",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C03-rf-wiki-search-var",
+     "rep": 2,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('textbox', { name: 'Search Wikipedia' })\u001b[22m (page: http://127.0.0",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c03/wiki');",
+      "await page.getByRole('textbox', { name: 'Search Wikipedia' }).fill(vars.get('SEARCH_TERM'));",
+      "await expect(page).toHaveURL(/\\/wiki/);"
+     ]
+    },
+    {
+     "case": "C12-clarify-click-button",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+      "CLARIFICATION: [missing]"
+     ]
+    },
+    {
+     "case": "C07-ambiguous-search-locator",
+     "rep": 3,
+     "stage": "executed",
+     "outcome": "FAILED",
+     "note": "domain-events,application-state,execution-outcome",
+     "validator": null,
+     "execFailure": "TimeoutError: locator.fill: Timeout 10000ms exceeded. Call log: \u001b[2m - waiting for getByRole('searchbox')\u001b[22m (page: http://127.0.0.1:4102/ns/c07/search — \"Sea",
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+      "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 3,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C09-negation-trap",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+      "UNSUPPORTED: [missing]"
+     ]
+    },
+    {
+     "case": "C10-unsupported-cpu",
+     "rep": 2,
+     "stage": "envelope",
+     "outcome": "PARSE_FAILURE(invalid unsupported or clarification step)",
+     "note": "refusal without message -> GATEWAY_PARSE_FAILURE (intent correct)",
+     "validator": null,
+     "execFailure": null,
+     "codes": [
+      "UNSUPPORTED: [missing]"
+     ]
+    }
+   ]
+  },
+  "X1": {
+   "model": "gemini-3.8-flash",
+   "thinkingLevel": "LOW",
+   "prompt": "2.3.0",
+   "calls": 11,
+   "transportOk": 11,
+   "finishStop": 11,
+   "envelopeParsed": 11,
+   "validatorPassed": 3,
+   "validatorChecked": 3,
+   "positives": 3,
+   "positivesExecPassed": 3,
+   "positivesExpectingPass": 3,
+   "positivesSemanticCorrect": 3,
+   "falseSuccesses": 0,
+   "falseRefusals": 0,
+   "negatives": 8,
+   "negativesCorrectRefusal": 8,
+   "negativesRefusedWrongClassOrStep": 0,
+   "negativesGeneratedCode": 0,
+   "negativesIntentCorrectButMissingMessage": 0,
+   "negativesIntentWrongClass": 0,
+   "refusalsMissingMessage": 0,
+   "envelopeFailuresOther": 0,
+   "overallCorrect": 11,
+   "stability": {
+    "casesAllIdentical": 3,
+    "casesAllEquivalent": 7,
+    "cases": 7,
+    "casesMixedCorrectness": []
+   },
+   "latencyMs": {
+    "p50": 3043,
+    "p95": 5562,
+    "max": 5562
+   },
+   "thoughtsTokens": {
+    "p50": 158,
+    "p95": 589,
+    "max": 589
+   },
+   "outputTokens": {
+    "p50": 160,
+    "p95": 382,
+    "sum": 1803
+   },
+   "inputTokens": {
+    "p50": 3387,
+    "sum": 37637
+   },
+   "estimatedCostPerCompileUsd": null,
+   "perCase": {
+    "C10-unsupported-cpu": "2/2",
+    "C12-clarify-click-button": "2/2",
+    "C11-unsupported-second-tab": "2/2",
+    "C09-negation-trap": "2/2",
+    "C13-ambiguous-wiki-placeholder": "1/1",
+    "C04-account-save": "1/1",
+    "C06-forms-fill-save": "1/1"
+   },
+   "failures": []
+  }
+ }
+}

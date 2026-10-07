@@ -1,0 +1,33 @@
+schema: 1
+story: 'STUDIO-SCHED-002'
+gate: CONCERNS
+status_reason: 'The local default-off shared scheduling refactor meets all acceptance criteria with no unresolved high-severity feature finding and verified scoped evidence. Inherited frontend failures, unfiltered global validation and external production-release evidence remain open.'
+reviewer: 'Quinn (independent scheduling_reuse_final_qa)'
+reviewed_revision: 'working-tree-source-sha256:25bbb70a6a30ab38962b15c7665f75386fac259b788dd4e2253df9f9d487f415'
+updated: '2026-10-06T02:54:30.793142+00:00'
+top_issues:
+  - id: TEST-001
+    severity: medium
+    finding: 'Four pre-existing frontend failures remain; the whole-suite gate is not green.'
+    suggested_action: 'Close the existing frontend baseline gate before merge/release.'
+  - id: TEST-002
+    severity: medium
+    finding: 'Unfiltered backend test/check/Jacoco and whole-runner coverage are unverified.'
+    suggested_action: 'Complete required repository-wide validation before merge/release.'
+  - id: SEC-001
+    severity: medium
+    finding: 'Live production background/secret grants and policy identity remain external obligations.'
+    suggested_action: 'Obtain approved security/platform identity and revocation evidence before production enablement.'
+  - id: OPS-001
+    severity: medium
+    finding: 'Real browser pilot, representative capacity, retention/restore and rollout evidence remain release-gated.'
+    suggested_action: 'Keep scheduling default off until operational release gates are closed.'
+waiver: { active: false }
+scope: 'Local default-off implementation; no merge or production approval'
+evidence:
+  backend: '214 tests; 45 current XML suites; zero failures/errors/skips; 19/19 source hashes match'
+  static: 'Spotless Java, Checkstyle Main/Test and SpotBugs Main passed in final separate executor command'
+  compatibility: '23 unchanged inputs independently hash-verified; coordinator scoped runner 35 passed, coverage disabled'
+  automated_review: 'CodeRabbit/configured WSL unavailable; permitted independent manual fallback; no automated pass'
+  report: 'docs/stories/STUDIO-SCHED-002/implementation/qa-review.md'
+  fingerprint: 'docs/stories/STUDIO-SCHED-002/implementation/qa-review-inputs.json'

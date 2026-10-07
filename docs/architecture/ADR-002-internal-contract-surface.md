@@ -321,6 +321,7 @@ An architect amending the contract still never edits a story's Title, Acceptance
 
 | Date | Change | Class | By | Contract test |
 |---|---|---|---|---|
+| 2026-10-05 | STUDIO-SCHED-001: eight public schedule/capability/preview/occurrence operations and optional immutable run/activation provenance; runner-produced bodies unchanged. See [ADR-003](ADR-003-studio-test-scheduling.md) and approved feature contract. | C | @architect, spec pipeline; independent critique APPROVED | Existing 23 operation status pins retained; eight reviewed operations added, total 31. Runner whole-document hash re-anchored with its assertion retained; measured final results in feature implementation evidence. |
 | 2026-09-17 | Land video 401/403/503 declarations from §§24/25, truthful nested session envelope, and both shipped 503 producer shapes (§30). No application behavior changed | C | @architect, story 10.27 | ESC-1/ESC-2 assertions unchanged; owner reruns contract/status fixtures and re-anchors digest |
 | 2026-09-11 | All six §8.4 routes declared, per-path `servers`, `runner`/`api-callback` tags, `x-served-by`, `serviceIdentity` (§3) | C | @architect, ADR-002 | 576/2/2 → 577/2/1 |
 | 2026-09-11 | `logs[].at` (`date-time`) → `atMs` run-timeline offset (§4) | B | @architect, ADR-002 | as above |
@@ -344,6 +345,9 @@ An architect amending the contract still never edits a story's Title, Acceptance
 | 2026-09-18 | **Studio v1 WP4 — cancel (§29).** Public `cancelExecution` (`POST /executions/{id}/cancel`: `202` `ExecutionSnapshot`, `400`, `401` `SessionUnauthorized`, `403`, `409` with `x-conflict-codes [EXECUTION_TERMINAL, CANCEL_ALREADY_REQUESTED]`); runner `runnerCancelRun` (`DELETE /v1/runs/{id}`: `202` closed `RunCancelAccepted`, `401`, `403`, `404`, `409`); `ExecutionErrorCode` gains `CANCELLED` (table row, `x-assigned-by`); `x-runner-error-codes` gains `CANCELLED`; the intersection prose, `RunOutcome.errorCode` and the `RunnerReport` mapping row name `TIMEOUT` **and** `CANCELLED`. No runner-produced body gained or lost a field; no existing status moved. Producers in the same change: backend route, ledger CAS, relay, reaper; runner `DELETE`; frontend carrier and narrative | C — public surface and two routes. Authorized by the Studio v1 plan, WP4 and decision D4, **not** by an architect ruling recorded here first; @architect to ratify or amend | @dev, Studio v1 WP4 | Pins moved deliberately in the same change: `StudioContractTest` 14/14, `ExecutionVideoContractTest` 17/17 (operation count 18 → 20, public `401`s 12 → 13, runner `401`s 4 → 5); runner `confinement`/`errors`/`contract` 49/49 with `BASE_SHA256` re-anchored; frontend `studioContract.test.ts` 54/54 after `CANCELLED` moved into the carrier (3 red before) |
 | 2026-09-18 | **Studio v1 WP4, amended — pull-based cancel (§29.4).** New `readExecutionControl` (`GET /internal/studio/executions/{id}/control`: `200` closed `ExecutionControl`, `400`, `401`, `403`, `404`); `ProgressAck` gains required `cancelRequested`; `runnerCancelRun`'s `404` row says it is not an acknowledgement; `cancelExecution`'s table says the owner learns the cancel itself. Producers in the same change: backend control route and ack flag, `ADMITTED` `FINAL` for a cancelled run; runner control poll and ack handling | C — a new internal route and a field on a closed callback body. Same authority as the row above (plan WP4, coordinator follow-up closing §29.3's multi-pod limit); @architect to ratify | @dev, Studio v1 WP4 | Pins moved deliberately: operation count 20 → 21, internal routes 7 → 8, callback `401`s 2 → 3; runner `BASE_SHA256` re-anchored |
 | 2026-09-18 | **Studio v1 WP11 — the interrupted step (§29.5) and the measured grace (§29.3).** Description text only: `RunnerStepState.failure` may be non-null on `SKIPPED` — the step a cancel interrupted carries the fixed text `The run was stopped before this step finished.`; `RunnerStepState.startedAtMs` and `StepResult` say that step keeps its start; `runnerCancelRun` names the chart's 15 s grace and the `SKIPPED` step. Producer in the same change: the runner's `stopAwareReporter`. The chart's `STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS` moved 5000 → 15000 on measurement | B — the meaning of a field on a closed runner body. Authorized by Studio v1 decision D1 (user-approved), **not** by an architect ruling recorded here first; @architect to ratify | @dev, Studio v1 WP11 | Runner `confinement.test.ts` 1 red with only the document edited (the pin) → green after `BASE_SHA256` re-anchor; `contract.test.ts` + `contract-integrity.test.ts` + `confinement.test.ts` 36/36 after. After only (not re-run against the old document): `StudioContractTest` 14/14, `ExecutionVideoContractTest` 17/17, `ArtifactSchemaDriftTest` 3/3; frontend unit suite 568 passed / 3 failed, the 3 failing identically on an untouched checkout of the base commit |
+| 2026-09-22 | **studio-vault-secrets — test-scoped Studio secrets (§32).** New `listTestSecrets` (`GET /tests/{id}/secrets`: `200` `StudioSecretList`, `400`, `401` `SessionUnauthorized`, `403` `Forbidden`, `503` `ErrorResponse` with `VAULT_NOT_CONFIGURED`/`VAULT_UNAVAILABLE` examples) and `createTestSecret` (`POST /tests/{id}/secrets`: `201` `StudioSecret`, `400` naming the four `INVALID_SECRET_*` codes and that `403` is decided first, `401`, `403`, `409` with `x-conflict-codes [SECRET_ALREADY_EXISTS]`, `503` as for GET). New closed schemas `StudioSecretName`, `StudioSecretList`, `StudioSecret`, `CreateStudioSecretRequest` (`value` `writeOnly`). The canonical create example's `secretId: vault://studio/pilot-pw` becomes `LOGIN_PW` (OQ-3 ruling). No runner-produced body, no existing operation's status set, and no tag or security scheme moved. Producers in the same change: `StudioSecretsController`/`StudioSecretsService`, the Vault create/list provider seam | C — two routes on the public surface | Ruled by @architect in `docs/specs/studio/vault-secrets/spec.md` §9.1 (OQ-5, R-5.1…R-5.5); **landed by @dev, story studio-vault-secrets** | **MEASURED by @dev on this branch.** `StudioContractTest` **14/14 before** (21 operations, P0 baseline) → **14/14 after**, with both `hasSize` pins moved 21 → 23, the two rows added to the expected map, the drift message naming this ruling, and four schema/record parity assertions added; springdoc exposes both routes under `{id}`. Runner `confinement.test.ts` **19/19 on arrival** at `c6b891387d939131f38b68971e51cecccebfa6fd4b3af09ac34a121477171088`; **18/19 with only the document edited** (the pin alone); **19/19 after the re-anchor** to `96d54caecd5479ca2d38c7649378c5163611dbc604f3e1c53510203ec3d9687b`, re-read with `shasum -a 256`. Runner `contract.test.ts` + `contract-integrity.test.ts` **18/18 after** (not run before the edit). Frontend `studioContract.test.ts` **56/56 after**, file unchanged (not run before the edit). `ExecutionVideoContractTest` **16/17 with the document edited** (the public-`401` count pin, 13 → 15, which this plan did not list) → **17/17** after `listTestSecrets` and `createTestSecret` were added to its pinned public-operation list and the count moved to 15 |
+| 2026-10-04 | **VAL-012 — `RunnerLogEntry.stepIndex` (§33).** `RunnerLogEntry` gains an **optional**, nullable `stepIndex` (`integer`, `minimum: 0`), not added to `required`; the `ExecutionLogEntry` description is rewritten from *"no runner-side source today"* to the step the line is about. The public `ExecutionLogEntry` shape does not move. Same edit, VAL-018: `ReportedRuntimeVersions` names the keys the API projects, including `chromiumBuild → chromium` (description text only), and the `RunnerReport` mapping table gains a `logs[].stepIndex` row. Promotion to `required` is **O-21** (§33.4). **Release constraint: backend before runner** (§33.3) | B | Ruled by @architect (`docs/stories/UI-STUDIO-VALIDATION-20261004/VAL-012-014-017-rulings.md`); **landed by @dev, VAL-012/VAL-018, uncommitted on `brunobuger/ui-studio`** | `BASE_SHA256` re-anchored `96d54cae…9687b` → `5571bee0…f629` from `shasum -a 256`. Runner suite and backend `RunnerReportProjectionTest` measured green by @dev; `StudioContractTest` (schema-to-record parity) and `ProgressCallbackIT` **skipped, not passed** — Docker was down; parity checked by reading the parsed schema against the record instead |
+| 2026-10-04 | **VAL-027 / VAL-024 / gate QA-5 — save and compile `400` codes documented.** Description text only, on `createTest` (operation description and `400` description), `updateTest` (operation description; its `400` stays the shared `BadRequest` `$ref`) and `compileTest` (`400` description). They now list the codes the server returns: `INVALID_STEPS` (blank step on save; no steps or a blank step at compile), `INVALID_CONFIGURATION` for `timeoutSeconds` outside 1..120, and `SOURCE_TOO_MANY_STEPS` / `SOURCE_LINE_TOO_LONG` at save as well as at compile (VAL-024 moved those two checks forward with the same codes and messages). Behaviour change stated in the document: an out-of-range `timeoutSeconds` (e.g. `0`) used to be coerced to `30` and is now `400`, which is what the declared `minimum: 1, maximum: 120` already said. No status, schema, enum, `required` list, example or route moved | **C** — **RULED 2026-10-05 by @architect (§34)**, correcting the `A` @dev recorded. Public routes, and the edit records a status-code behaviour change for clients (`201` → `400` for `timeoutSeconds: 0`, blank steps and over-bound drafts at save); §12 assigns authority by class of change, not by edit type. Content ratified unchanged; not a loosening | @dev, UI-STUDIO-VALIDATION-20261004 (edit); @architect (class ruling, §34) | `confinement.test.ts` 19/19 after re-anchoring `BASE_SHA256` to `43fe0bb46cb40011ae3f19e05071e16fbe6ffd437e6fb785c0b36586a7c47898` (was `5571bee0…0f629`). `StudioContractTest` 14/14 after (before not measured; no assertion reads these descriptions) |
 
 The two `@dev, story 10.7` rows above are one story's amendment, recorded against §12's four
 requirements (this amendment's own record is in §15.10):
@@ -2827,3 +2831,143 @@ after all amendments are settled, as already authorized in §24.7. Neither escal
 weakened. This author ran YAML/reference/example validation only; Gradle, frontend behavior tests,
 and the final pinned digest belong to the coordinating story execution. Their eventual results
 must be reported separately from this architectural decision.
+
+## 32. Test-scoped Studio secrets — studio-vault-secrets (2026-09-22)
+
+Class C (routes, public surface) under §12. Under §19 the architect authorizes it and the
+implementing story lands it; the ruling was made in
+`docs/specs/studio/vault-secrets/spec.md` §9.1 and is copied here verbatim. The §13 row above
+records the landing and its measurements.
+
+**OQ-5: RULED, authorized.** This is a Class C amendment (routes, public surface) under ADR-002 §12. Under §19 the architect authorizes it here and the implementing story makes the edit. That story also records it as ADR-002 §32 plus a §13 row (`AUTHORIZED, NOT YET LANDED` until the edit lands).
+- R-5.1 Path `/tests/{id}/secrets`. The path variable is named `{id}` through `$ref: '#/components/parameters/TestId'`, as on every other draft route. Tag `tests`; no new tag; document-level security. operationIds: `listTestSecrets`, `createTestSecret`.
+- R-5.2 Status sets: `GET` = `200,400,401,403,503`; `POST` = `201,400,401,403,409,503`. **This amends §3.3.** GET gains `400` because a malformed UUID path variable is a `400` before any handler runs, the same reason `GET /tests/{id}` declares it. `401` → `SessionUnauthorized`; `403` → `Forbidden`; `503` → `ErrorResponse` with `VAULT_NOT_CONFIGURED` / `VAULT_UNAVAILABLE` examples (the `executeTest` precedent; §25's backend-wide envelope question stays separate). The `409` carries `x-conflict-codes: [SECRET_ALREADY_EXISTS]`, as the document requires of every `409`. The `400` description lists the four `INVALID_SECRET_*` codes and states that `403` is decided first.
+- R-5.3 Operation count 21 → 23. `StudioContractTest` changes both `hasSize` pins, the expected map and the drift message, in the same PR.
+- R-5.4 Schemas: `StudioSecretName {name}` (list item), `StudioSecretList {data}`, `StudioSecret {name, version, allowedOrigins}` (201), and `CreateStudioSecretRequest {name, value, allowedOrigins}` (closed, `value` is `writeOnly`). **This amends §3.3/§5.1:** the list item and the 201 body are different records (`StudioSecretNameDto`, `StudioSecretDto`, plus `StudioSecretListDto`). One record would either emit `"version": null` in the list or fail schema parity. Every schema is added to `theFrozenSchemasAndTheJavaTypesShareTheSameFieldNames`.
+- R-5.5 **Digest re-anchor (a finding the spec lacked).** `studio-runner/test/run/confinement.test.ts` pins the SHA-256 of `openapi.yaml`, currently `c6b89138…1088`. The same PR re-anchors it to the value `shasum -a 256` prints once the document is final (ADR-002 §19).
+
+**OQ-3: RULED, split.** In `openapi.yaml:202`, change the example `secretId: vault://studio/pilot-pw` to `LOGIN_PW` in this PR: D9 now refuses that id, and the file is re-anchored anyway. The MSW fixtures (`fixtures.ts:62`, `compileFixtures.ts:90`, `pageSaveAndStop.test.tsx:251`) and `compileStates.test.tsx:301` stay as they are. They never reach the resolver, the flag is off, and changing them is a follow-up.
+
+In the section references above, "§3.3", "§5.1" and "§9" are the spec's own sections, not this
+ADR's.
+
+## 33. `RunnerLogEntry.stepIndex` — VAL-012 (2026-10-04)
+
+Class B under §12: a field on a closed runner-produced body. Under §19 the architect authorized it
+(`docs/stories/UI-STUDIO-VALIDATION-20261004/VAL-012-014-017-rulings.md`, VAL-012) and VAL-012
+lands it. The §13 row above records the landing.
+
+### 33.1 Shape and meaning
+
+- `RunnerLogEntry.stepIndex: { type: integer, minimum: 0, nullable: true }`. **Not** in `required`,
+  on the `RunnerEvidence.partial` precedent (§17, §20): optional first, promoted once every producer
+  emits it.
+- The 0-based position of the step the line is **about**, in the index space of
+  `RunnerStepState.stepIndex`. The runner sets it on `step N started` and
+  `step N PASS|FAIL|SKIPPED[: …]`, and nowhere else. Run-level lines (browser start, run outcome,
+  deadline, upload, evidence) carry `null`. It is never inferred from message text.
+- The public `ExecutionLogEntry` keeps its shape (`stepIndex: integer, nullable`). Only its
+  description changes: from "always null for runner lines" to "the step the line is about".
+  API-produced lines (reaper, evidence updates) stay `null`. No migration: persisted log JSON
+  already carries the key.
+
+### 33.2 Validation
+
+A non-null `stepIndex` outside `[0, steps of the confirmed revision)` is `400 INVALID_REPORT`, which
+mirrors the existing rule for `RunnerStepState.stepIndex` ("a step index the revision does not have
+is a divergence"). It is refused, never silently nulled, because a silent null would hide a runner
+bug and loosening is never the safe default under §12. `null` and absence are always valid.
+
+### 33.3 Release constraint — backend before runner
+
+`RunnerLogEntry` is closed on both sides (`additionalProperties: false`;
+`@JsonIgnoreProperties(ignoreUnknown = false)`). An old runner against a new backend omits the field,
+which reads as `null`: behaviour is unchanged. A **new runner against an old backend is refused**:
+the old record rejects the unknown property, every progress and final report fails, and the run is
+reaped. This was inferred from `ignoreUnknown = false` and has not been exercised. **The backend must
+be deployed before `studio-runner`, or both ship in one release with the backend rolled out first.**
+No feature flag: ordering is enough, and a flag would be a second contract.
+
+### 33.4 O-21 — promote `RunnerLogEntry.stepIndex` to `required` (nullable)
+
+Once every producer emits it, `stepIndex` becomes `required` (still nullable), as O-14 did for
+`RunnerEvidence.partial`. Owner: the first story that touches `RunnerLogEntry` after this one lands.
+The ruling names this item O-17. That number is already taken in this ADR (§23.4, the 10.10
+AC-routing item), so it is recorded as **O-21**, the next free number.
+
+### 33.5 Same change set — VAL-018
+
+`RunnerReportProjection.projectRuntime` read the key `chromium`, but the runner records ADR-001's
+`chromiumBuild`, so `ExecutionSnapshot.runtime.chromium` was always null. The projection now reads
+`chromiumBuild`. The public field name `runtime.chromium` is unchanged. `ReportedRuntimeVersions`
+names the projected keys in its description, which is text only and rides on this section's
+re-anchor.
+
+## 34. Save-time `400` codes on public routes — class ruling, VAL-027 / VAL-024 / VAL-023 (2026-10-05)
+
+Ruling on gate finding QA-R2 (`docs/qa/gates/ui-studio-validation-20261004.yml`,
+`regate_2026-10-04b`). The 2026-10-04 §13 row for VAL-027 / VAL-024 / gate QA-5 recorded a
+description-only amendment to `createTest`, `updateTest` and `compileTest` as Class A and asked
+@architect to confirm the class.
+
+### 34.1 Ruling — Class C, content ratified
+
+**The class is C, not A.** The §13 row is corrected in place.
+
+- §12 Class A covers defects *no producer or consumer could ever have satisfied*. The old `400`
+  descriptions could be satisfied. They became incomplete because the server's behaviour changed,
+  and that is not a malformed document.
+- §12 Class C covers *status-code semantics, and anything on the public surface*. `POST /tests`,
+  `PUT /tests/{id}` and `POST /tests/{id}/compile` are public routes. The amendment records a status
+  outcome change for clients. A request that used to get `201` now gets `400`.
+- §12 assigns authority by **class of change**, not by edit type. "Description text only" is how
+  the edit was made. It does not decide the class. The `400` status itself was already declared, but
+  which requests receive it changed, and that is a status-code semantic.
+
+**The content is ratified unchanged.** The edit is not a loosening. It narrows what the server
+accepts toward bounds the document already declared (`timeoutSeconds` `minimum: 1, maximum: 120`,
+and the compile bounds of 100 steps and 1024 characters per step). It invents no code: every code it
+lists was already in the compile vocabulary. No status, schema, enum, `required` list, example or
+route moved. The ruling adds no text to `openapi.yaml`, so `BASE_SHA256`
+(`studio-runner/test/run/confinement.test.ts`, `43fe0bb46cb4…7898`) stays as it is and needs no
+re-anchor.
+
+**Process.** Under §19 a Class C edit is authorized by @architect first and then landed by a named
+story. Here the edit landed first, by @dev under UI-STUDIO-VALIDATION-20261004, and this section
+authorizes it retroactively. That is accepted once, because the content was sound and the row itself
+flagged the question. The precedent is not: the next public-route amendment waits for the ruling.
+
+### 34.2 Behaviour change for API clients
+
+| Request at save (`POST /tests`, `PUT /tests/{id}`) | Before | Now |
+|---|---|---|
+| `timeoutSeconds` outside 1..120 (VAL-023) | `201`/`200`. `0` was silently coerced to `30`, and `121` was stored as `121` | `400 INVALID_CONFIGURATION` |
+| A blank or whitespace-only step | saved; refused only at compile | `400 INVALID_STEPS` |
+| More than 100 steps | saved; refused only at compile | `400 SOURCE_TOO_MANY_STEPS` |
+| A step longer than 1024 characters | saved; refused only at compile | `400 SOURCE_LINE_TOO_LONG` |
+
+Codes and messages are the same as the compile-time ones (VAL-024). The 65 536-byte total-source
+bound is still checked at compile only, as the openapi text states. `compileTest`'s `400` is
+unchanged in meaning. Only its code list is now complete.
+
+**A client that relied on the coercion now gets a refusal.** In particular, a client that sent
+`timeoutSeconds: 0` to mean "default" will start failing.
+
+### 34.3 Consumers re-checked, and notification
+
+- **The Checks frontend** is the only known consumer. `saveErrorMessage.ts` branches on status and
+  code, never on prose, and `saveErrorMessage.test.ts` is green in the re-gate's 770/770.
+- **The MSW handlers** do not emit the save-time codes. That is a fidelity gap, not a contract
+  divergence, and it goes to a follow-up.
+- **Notification.** ADR-002 sets no consumer-notification mechanism beyond this record (§12: "every
+  amendment is recorded"). This ruling additionally requires one line in the release notes of the
+  release that ships VAL-024/VAL-027, naming the four codes and the end of `timeoutSeconds`
+  coercion. Owner: @devops, as part of the release. No deprecation window applies. The routes are
+  Studio's own, and no external client is known. If one is found, the release note is the notice.
+
+### 34.4 Contract test
+
+Unchanged by this ruling: `confinement.test.ts` 19/19 and `StudioContractTest` 14/14, as measured in
+the §13 row. No test reads this ADR's bytes. A repository search found no hash or content anchor on
+`docs/architecture/ADR-002-internal-contract-surface.md`. The only tooling reference is
+`tools/epic10-fold/guards.sh`, which checks for merge-conflict markers.

@@ -169,7 +169,7 @@ backend/
     │   │   ├── studio/          # UI Test / Checks Studio
     │   │   ├── reports/         # Report definitions, rendering, delivery
     │   │   ├── users/           # User provisioning from JWT claims
-    │   │   ├── secrets/         # Vault client + secret reference resolution
+    │   │   ├── studio/secrets/  # Vault provider + secret reference resolution (moved from secrets/)
     │   │   └── common/          # Shared DTOs, error handling, pagination
     │   └── resources/
     │       ├── application.yml
@@ -467,25 +467,12 @@ CREATE INDEX idx_check_tags_tag ON check_tags(tag_id);
 CREATE INDEX idx_csi_tags_csi ON csi_tags(csi_id);
 ```
 
-#### **secrets**
-Secret references for vault integration.
-
-```sql
-CREATE TABLE secrets (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    reference_id VARCHAR(255) NOT NULL UNIQUE,     -- Vault reference ID
-    label VARCHAR(255) NOT NULL,
-    scope VARCHAR(20) NOT NULL CHECK (scope IN ('project', 'org', 'user')),
-    owner VARCHAR(255) NOT NULL,
-    last_four VARCHAR(4),                          -- Masked preview
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    rotated_at TIMESTAMPTZ,
-    expires_at TIMESTAMPTZ
-);
-
-CREATE INDEX idx_secrets_owner ON secrets(owner);
-CREATE INDEX idx_secrets_scope ON secrets(scope);
-```
+#### **Studio secrets (no table)**
+Studio secrets live only in Vault KV v2, never in this database. A secret is stored at
+`{mount}/data/studio/{csiId}/{environment}/{testId}/secrets/{name}` (path template
+`studio/{csiId}/{environment}/{testId}/{kind}/{referenceName}`), with two keys in the entry: the
+value and `allowedOrigins`. The CSI, environment and test id come from the persisted `ui_tests`
+row. The former `secrets` table, which held plaintext, was dropped by migration V25.
 
 ### **7.3. Aggregate/Materialized Views**
 

@@ -154,6 +154,8 @@ class SseStreamingIT {
           objectMapper.readValue(first.data(), ExecutionSnapshotDto.class);
       assertThat(first.id()).isEqualTo(Long.toString(streamed.revision()));
       assertThat(streamed.executionId()).isEqualTo(executionId);
+      // Labelled like GET /executions/{id} (Story 10.46, TEST-001).
+      assertThat(streamed.testName()).isEqualTo("SSE draft");
     }
   }
 

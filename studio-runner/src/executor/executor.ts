@@ -2,7 +2,8 @@ import type { BrowserAdapter, LocatorHandle, ResolvedMatcher, ValueResolver } fr
 import type { Clock, StepReporter, StepStatus } from './adapters/StepReporter.js';
 import type { FillValue, Operation, TextMatcher } from './operations.js';
 import type { Redactor } from './redaction.js';
-import { createRedactor, safeMessage } from './redaction.js';
+import { createRedactor } from './redaction.js';
+import { DEFAULT_PAGE_LOCATION_TIMEOUT_MS, failureWithLocation } from './pageLocation.js';
 import type { StepRefusalCode } from './refusals.js';
 import { StepRefusal, isHttpUrl } from './refusals.js';
 import { EXECUTOR_VERSION } from '../versions.js';
@@ -64,6 +65,8 @@ export interface ExecuteOptions {
   readonly clock: Clock;
   /** Maximum length of a redacted failure message (AC-15). */
   readonly maxFailureMessageLength?: number | undefined;
+  /** Bound on reading the page location a failure message names (VAL-013). Default 500 ms. */
+  readonly pageLocationTimeoutMs?: number | undefined;
 }
 
 const DEFAULT_MAX_FAILURE_MESSAGE_LENGTH = 400;
@@ -111,18 +114,30 @@ export async function executeSteps(options: ExecuteOptions): Promise<ExecutionRe
     const startedAtMs = clock.now();
     options.reporter.stepStarted({ stepIndex: step.stepIndex, startedAtMs });
 
-    let failure: string | null = null;
+    let caught: { readonly error: unknown } | null = null;
     try {
       for (const operation of step.operations) {
         await runOperation(operation, options.adapter, options.resolver);
       }
     } catch (error) {
-      failure = safeMessage(error, redactor, maxMessage);
+      caught = { error };
       failed = true;
       if (error instanceof StepRefusal) refusal = error.code;
     }
 
+    // Read before the page location is: the bounded location read is reporting, not the step,
+    // and must not lengthen the step's recorded duration or move its end on the timeline.
     const finishedAtMs = clock.now();
+    const failure =
+      caught === null
+        ? null
+        : await failureWithLocation(
+            caught.error,
+            options.adapter,
+            redactor,
+            maxMessage,
+            options.pageLocationTimeoutMs ?? DEFAULT_PAGE_LOCATION_TIMEOUT_MS,
+          );
     const outcome: StepOutcome = {
       stepIndex: step.stepIndex,
       status: failure === null ? 'PASS' : 'FAIL',

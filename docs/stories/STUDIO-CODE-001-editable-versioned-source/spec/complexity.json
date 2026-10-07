@@ -1,0 +1,48 @@
+{
+  "storyId": "STUDIO-CODE-001-editable-versioned-source",
+  "assessedAt": "2026-10-05T02:37:55.131116+00:00",
+  "assessedBy": "@architect (Aria)",
+  "result": "COMPLEX",
+  "overridden": false,
+  "dimensions": {
+    "scope": {
+      "score": 5,
+      "notes": "More than 20 existing contract, authoring, compile capture/publication, revision, readiness, acceptance, frontend, mock and meaningful test files are affected across frontend/backend/runner; no runner execution expansion is proposed."
+    },
+    "integration": {
+      "score": 3,
+      "notes": "New internal manual-draft/validation/export API contracts plus amendments to compile/confirm/execute requests; reuse existing validator, CSI authorization and runner, no new external integration."
+    },
+    "infrastructure": {
+      "score": 4,
+      "notes": "Forward-only database migration and coordinated publication cutover needed for code draft/attempt snapshot/lineage/immutability and dedup identities; no new service."
+    },
+    "knowledge": {
+      "score": 2,
+      "notes": "Existing immutable revision, conditional publication, bounded AST and trusted operation patterns are reusable; manual authority is a new pattern requiring explicit compiler/incremental policy."
+    },
+    "risk": {
+      "score": 5,
+      "notes": "Critical execution-source trust boundary, explicit approval, concurrent-edit safety, protected source export and immutable provenance; current dirty compile auto-accept conflicts with PRD."
+    }
+  },
+  "totalScore": 19,
+  "pipelinePhases": [
+    "gather",
+    "assess",
+    "research",
+    "spec",
+    "critique_1",
+    "revise",
+    "critique_2",
+    "plan"
+  ],
+  "flags": [
+    "Architectural review required; proposal only, no product implementation authorized",
+    "Split implementation into confirmation alignment, persistence/contracts, manual validation, editable UX/export, integrated races",
+    "Assumption: bounded Studio source editing; unrestricted TypeScript requires separate runtime architecture",
+    "Coordinated drained-publisher cutover must honor existing staged V19 publication contract",
+    "QA must verify both generated and manual paths require explicit exact-revision confirmation"
+  ],
+  "estimatedEffort": "3+ days; advisory complexity band, not a delivery commitment"
+}

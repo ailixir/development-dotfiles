@@ -1,0 +1,208 @@
+{
+  "storyId": "studio-vault-secrets",
+  "critiquedAt": "2026-09-22T00:00:00Z",
+  "critiquedBy": "@qa",
+  "specVersion": 2,
+
+  "verdict": "APPROVED",
+  "verdictReason": "Spec rev 1 would have been BLOCKED: 5 HIGH omissions/conflicts found against the code (seed INSERT into the dropped table, test-scope JPA entity on the dropped table, StudioContractTest route/status gate, Helm-pinned old path template, frontend debug logging of the request body), plus a wrong unknown-field mechanism (MEDIUM). All were small and were applied to spec.md as rev 2 (auto-fixes below). Rev 2 has no HIGH or MEDIUM issue left, every dimension is >= 4 and the weighted average is 4.25. Every code finding F1-F13 was re-verified at the cited file:line. The binding user decisions were not re-litigated.",
+
+  "scores": {
+    "accuracy": 5,
+    "completeness": 4,
+    "consistency": 4,
+    "feasibility": 4,
+    "alignment": 4,
+    "average": 4.25
+  },
+
+  "preFixAssessment": {
+    "specVersion": 1,
+    "verdict": "BLOCKED",
+    "scores": {
+      "accuracy": 4,
+      "completeness": 3,
+      "consistency": 4,
+      "feasibility": 3,
+      "alignment": 3,
+      "average": 3.45
+    },
+    "note": "Weights: accuracy 25, completeness 25, consistency 20, feasibility 15, alignment 15. Rev 1 was BLOCKED by rule, because it had HIGH issues. All of those issues were specific and fixable in the spec itself, so they were fixed here and not escalated."
+  },
+
+  "verification": {
+    "method": "Read each cited file and grepped for every reference to the secrets table/package/routes across backend main+test, resources (migration, seed, profiles), frontend, helm-chart, studio-runner deployment tests and docs. No code was executed; no tests were run.",
+    "findingsVerified": {
+      "F1": "CompileInputs.java:67 `secretId == null ? name : secretId`; VaultStudioReferenceResolver.java:68-75,99-105 pass it as referenceName. OK",
+      "F2": "VariableReferenceValidator.java:38 SECRET_TOKEN [A-Za-z0-9_.-]{1,64}; :91 secretId fallback. OK",
+      "F3": "SecretInput.tsx:52-58 onChange({id: created.id}) with DB id. OK",
+      "F4": "HashicorpStudioVaultProvider.segment:196-204 rejects '/', '\\\\', '.', '..'. OK",
+      "F5": "SecretOrigins.parse returns [] on any malformed entry or >16; read() warns on empty. OK",
+      "F6": "StudioAcceptanceService.java:230 preflight(test.getCsiId(), test.getEnvironment(), ...); StudioDispatcher.java:264 testId from row, :311 resolve(csiId, environment, ...). OK",
+      "F7": "application-dev.yml:30 and application-local.yml:79 `provider: none`; application.yml:203 `${STUDIO_VAULT_PROVIDER:none}`. OK",
+      "F8": "CsiOwnershipEvaluator.java:24,36; StudioService.java:127-153; findById is @SQLRestriction-filtered, so deleted/quarantined rows are 403 too. OK",
+      "F9": "IdempotencyFilter caches response bodies only (and caches 5xx as well as 2xx, noted in D13); RateLimitFilter.java:102 buffers the request body only for the BULK class (checks/_bulk). OK",
+      "F10": "ChecksExceptionHandler.java:177-185 VAULT_UNAVAILABLE 503; :198 StudioValidationException 400 {error, message}. OK",
+      "F11": "No global MSW secrets handler; test-local handlers in SecretInput.test.tsx:18 and pageSaveAndStop.test.tsx:57; studioCapabilities.ts comment matches. OK",
+      "F12": "UiTestConfig.tsx:130-140 renders the Secret option/SecretInput ungated; ChecksStudioPage.tsx:1236,1250 gate on vaultSecrets. OK",
+      "F13": "UITest.java:67-68 @Column(nullable=false, length=50) environment. OK"
+    },
+    "securityReview": {
+      "valueNeverReturned": "Rev 2 OK. The 201 body is {name, version, allowedOrigins}. IdempotencyFilter replays response bytes only, with no request hash, so no value-derived data is cached.",
+      "valueNeverLoggedBackend": "Rev 2 OK. The DTO toString is overridden, which covers Spring's DEBUG body logging. Parser messages are not echoed (fixed INVALID_SECRET_REQUEST). Jackson 2.17 (Boot 3.3.5) excludes source from locations by default.",
+      "valueNeverLoggedFrontend": "Rev 1 missed this (CRIT-5). apiClient debug logs config.data, and .env.development sets VITE_DEBUG_MODE=true. Fixed in D15 plus a test.",
+      "valueNeverInUri": "OK. The value goes only in the POST body. The name is URL-encoded and path-safe by D3.",
+      "pathSafety": "OK. D3 regex plus the existing segment() guard. D9 now also refuses non-D3 declared ids before any provider call. A free-text environment containing '/' gives a generic 503, which is recorded as an accepted low risk.",
+      "authz": "OK. Load through the visibility-restricted findById, then canRead (list) or canWrite (create). Absent, deleted, quarantined and denied all give the same 403. Rev 2 parses the body after authorization, so a non-member cannot tell 400 from 403.",
+      "vaultKvV2Semantics": "Consistent with HashiCorp's public API: data POST with options.cas=0 gives 400 on an existing key; metadata GET distinguishes 409 from other 400s; LIST == GET ?list=true, data.keys, folders suffixed '/', 404 when empty; the write response carries data.version. Not verified against the platform Vault version (ASM-1, externally blocked V7)."
+    }
+  },
+
+  "issues": [
+    {
+      "id": "CRIT-1",
+      "severity": "HIGH",
+      "category": "completeness",
+      "check": "comp-4",
+      "description": "V25 drops `secrets`, but the repeatable seed backend/src/main/resources/db/seed/R__sample_data.sql:315-328 INSERTs 2 rows into it. The dev profile (application-dev.yml:9-12) and StudioSeedIT.java:50 apply db/seed after versioned migrations, so every fresh dev database and StudioSeedIT would fail. Not listed in spec rev 1.",
+      "location": "spec.md#5-files",
+      "suggestion": "Delete seed section '10. Secrets'; add a StudioSeedIT assertion.",
+      "autoFixable": true,
+      "status": "FIXED in rev 2 (F14, §5.2, §6, AC-V1-1)"
+    },
+    {
+      "id": "CRIT-2",
+      "severity": "HIGH",
+      "category": "completeness",
+      "check": "comp-4",
+      "description": "Test-scope JPA entity backend/src/test/java/com/citi/put/checks/smoke/entity/SecretSmokeEntity.java:11 maps @Table(name=\"secrets\"). No @EntityScan exists and application.yml:11 sets ddl-auto: validate, so (inferred, not run) Hibernate schema validation would fail every @SpringBootTest context after V25. SchemaSmokeTest.java:88-91 also counts 14 tables including secrets, and IndexCatalogTest.java:50-51 expects idx_secrets_owner/scope. The spec's 'checked with grep across migrations' only covered migrations.",
+      "location": "spec.md#5-files",
+      "suggestion": "Delete SecretSmokeEntity; update SchemaSmokeTest (14 -> 13) and IndexCatalogTest.",
+      "autoFixable": true,
+      "status": "FIXED in rev 2 (F15, §5.2, §5.3, §6, AC-V1-1)"
+    },
+    {
+      "id": "CRIT-3",
+      "severity": "HIGH",
+      "category": "alignment",
+      "check": "align-4",
+      "description": "StudioContractTest.java:90-101 fails if any springdoc /api/v1/studio/** operation is missing from docs/specs/studio/openapi.yaml. :330-362 pins the operation count (21) and every status set, and treats unruled movement as drift. Rev 1 added two Studio routes with no OpenAPI or contract-test change. It also named the path variable {testId}, while every Studio route and the contract use {id}, so the paths would not match.",
+      "location": "spec.md#3.3-endpoint-shapes",
+      "suggestion": "Declare both operations and a StudioSecret schema in openapi.yaml, update the expected map (21 -> 23), rename the path variable to {id}, and get an @architect ruling on the frozen-contract change.",
+      "autoFixable": true,
+      "status": "FIXED in rev 2 (F16, D10, §3.3, §5.2, §6, OQ-5). The ruling is still open and must happen before merge."
+    },
+    {
+      "id": "CRIT-4",
+      "severity": "HIGH",
+      "category": "feasibility",
+      "check": "feas-2",
+      "description": "helm-chart/put-checks/values.yaml:643 pins studioVault.pathTemplate to the OLD template (no {testId}), and templates/deployment.yaml:140-141,524-525 always export it as STUDIO_VAULT_PATH_TEMPLATE to the api and worker pods. With D2's new validation, every deployed pod would refuse to start as soon as provider=hashicorp is set. That contradicts FR-8 'env-var-only activation' and AC-V7-3 for real deployments.",
+      "location": "spec.md#3.2-decisions (D14)",
+      "suggestion": "Change the values.yaml default to the D1 template; add a render assertion in studio-runner/test/deployment/integrations.test.ts.",
+      "autoFixable": true,
+      "status": "FIXED in rev 2 (F17, D14, §5.2, §6, AC-V7-3)"
+    },
+    {
+      "id": "CRIT-5",
+      "severity": "HIGH",
+      "category": "accuracy",
+      "check": "acc-4",
+      "description": "NFR-1 (value never logged) was not addressed on the frontend. frontend/src/services/api/apiClient.ts:30-35 console.logs every request's config.data when APP_CONFIG.debugMode is on. .env.development:4 sets VITE_DEBUG_MODE=true, and window.__CHECKS_CONFIG__.debugMode can enable it at runtime. The normalized error (:99-105) also keeps error.response, whose config.data is the request body. The create POST would print the secret value to the browser console.",
+      "location": "spec.md#3.2-decisions (D15)",
+      "suggestion": "Add a per-request redactBody flag honored by apiClient (debug log and normalized error), and a console-spy canary test.",
+      "autoFixable": true,
+      "status": "FIXED in rev 2 (F19, D15, §5.2, §6, AC-FE-2)"
+    },
+    {
+      "id": "CRIT-6",
+      "severity": "MEDIUM",
+      "category": "feasibility",
+      "check": "feas-2",
+      "description": "D11 relied on @JsonIgnoreProperties(ignoreUnknown = false) to reject old-client bodies. The platform ObjectMapper has FAIL_ON_UNKNOWN_PROPERTIES disabled, and the annotation's false value does not override that. The codebase documents this itself (StrictInternalBodyReader.java:13-29), and strict boundaries use a mapper copy instead (StudioAuthoringValidation.java:29-30). The AC-V5-1 unknown-field test would fail. Also, with Spring binding a typed @RequestBody, a malformed body is a 400 before authorization, so §3.3's 'authorization first' claim was false.",
+      "location": "spec.md#3.2-decisions (D11, D12), #3.3",
+      "suggestion": "Take the body as byte[], authorize first, then parse with a strict mapper copy straight from the bytes, return a fixed-message 400 INVALID_SECRET_REQUEST, and zero the byte[] in finally.",
+      "autoFixable": true,
+      "status": "FIXED in rev 2 (F18, D11, D12, §3.3, §6, AC-V5-1)"
+    },
+    {
+      "id": "CRIT-7",
+      "severity": "LOW",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "Risk row said legacy `vault://…` secretIds give UNKNOWN_REFERENCE at acceptance. With hashicorp selected, HashicorpStudioVaultProvider.segment throws VaultProviderUnavailableException (503 VAULT_UNAVAILABLE) for '/'-containing ids, which reads as an outage and violates the spirit of NFR-5.",
+      "location": "spec.md#8-risks, D9",
+      "suggestion": "Resolver refuses non-D3 declared ids before calling the provider.",
+      "autoFixable": true,
+      "status": "FIXED in rev 2 (D9, risk row, §6)"
+    },
+    {
+      "id": "CRIT-8",
+      "severity": "LOW",
+      "category": "feasibility",
+      "check": "feas-2",
+      "description": "D12 zeroed only the byte[] handed to the publisher. A ByteArrayOutputStream-backed generator keeps a second, unerased copy in its internal buffer.",
+      "location": "spec.md#3.2-decisions (D12)",
+      "suggestion": "Serialize into a buffer the provider owns and zeroes.",
+      "autoFixable": true,
+      "status": "FIXED in rev 2 (D12)"
+    },
+    {
+      "id": "CRIT-9",
+      "severity": "LOW",
+      "category": "accuracy",
+      "check": "acc-4",
+      "description": "D6's size argument ignored JSON escaping by Vault (Go escapes <, >, & as 6-byte \\u00XX). The bound still fits (~57 KiB < 64 KiB), but only just, and an operator lowering STUDIO_VAULT_MAX_RESPONSE_BYTES would make stored secrets unreadable.",
+      "location": "spec.md#3.2-decisions (D6)",
+      "suggestion": "State the worst case; document the caveat in the runbook.",
+      "autoFixable": true,
+      "status": "FIXED in rev 2 (D6, §5.2 runbook row)"
+    },
+    {
+      "id": "CRIT-10",
+      "severity": "LOW",
+      "category": "completeness",
+      "check": "comp-4",
+      "description": "Minor file-list gaps. The runbook, which the risk mitigation relies on, was not listed. Nor were HashicorpStudioVaultProvider's 'read-only' javadoc, StudioKillSwitchWiringTest and CompilePipelineIT (StudioReferenceResolver users), or the new UiTestConfig test. `corun/*` was listed, although no corun file calls the changed signatures. The 201 Location header pointed at a route that does not exist. The wizard gate did not cover existing kind:'secret' rows. apiClient retries GET 5xx, so a NOT_CONFIGURED list would be retried twice.",
+      "location": "spec.md#5-files, #3.3, D15, D16",
+      "suggestion": "Add the rows; drop Location; gate existing rows; set __doNotRetry on list.",
+      "autoFixable": true,
+      "status": "FIXED in rev 2"
+    },
+    {
+      "id": "CRIT-11",
+      "severity": "LOW",
+      "category": "feasibility",
+      "check": "feas-1",
+      "description": "Open, not fixable here. KV v2 semantics (CAS 400, LIST 404, metadata read) and the token policy are unverified against the platform Vault (ASM-1, ASM-2; V7 is externally blocked). The stub-server tests pin today's assumption only.",
+      "location": "spec.md#4-dependencies, #8-risks",
+      "suggestion": "Re-verify when V7 connects; the api/worker policy split is now documented in the runbook row.",
+      "autoFixable": false,
+      "status": "OPEN (accepted, externally blocked)"
+    }
+  ],
+
+  "summary": {
+    "highIssues": 5,
+    "mediumIssues": 1,
+    "lowIssues": 5,
+    "autoFixable": 10,
+    "fixedInRev2": 10,
+    "open": 1
+  },
+
+  "nextAction": "Proceed to Phase 6 (@architect *plan). Before implementation merges: @architect rules OQ-5 (frozen OpenAPI contract gains 2 operations, count 21 -> 23). @pm may review the rev 2 diff to spec.md, since @qa applied the fixes itself. The implementation story must touch only the listed files (CON-7: unrelated uncommitted changes in the tree).",
+
+  "autoFixes": [
+    { "issueId": "CRIT-1", "location": "spec.md §3.1 F14, §5.2, §6, AC-V1-1", "original": "(no seed row)", "suggested": "Remove R__sample_data.sql section 10; StudioSeedIT stays green" },
+    { "issueId": "CRIT-2", "location": "spec.md §3.1 F15, §5.2, §5.3, §6, AC-V1-1", "original": "no FK references it (checked with grep across migrations)", "suggested": "Delete SecretSmokeEntity; update SchemaSmokeTest and IndexCatalogTest" },
+    { "issueId": "CRIT-3", "location": "spec.md §3.1 F16, D10, §3.3, §5.2, §6, §9 OQ-5", "original": "/api/v1/studio/tests/{testId}/secrets", "suggested": "/api/v1/studio/tests/{id}/secrets + openapi.yaml + StudioContractTest (21 -> 23) + @architect ruling" },
+    { "issueId": "CRIT-4", "location": "spec.md §3.1 F17, D14, §5.2, §6, AC-V7-3", "original": "(helm not mentioned)", "suggested": "values.yaml studioVault.pathTemplate -> D1 template; render assertion" },
+    { "issueId": "CRIT-5", "location": "spec.md §3.1 F19, D15, §5.2, §6, AC-FE-2", "original": "(frontend logging not mentioned)", "suggested": "apiClient honors redactBody; console-spy canary test" },
+    { "issueId": "CRIT-6", "location": "spec.md §3.1 F18, D11, D12, §3.3, §6, AC-V5-1", "original": "The request DTO uses @JsonIgnoreProperties(ignoreUnknown = false)", "suggested": "byte[] body, authorize, strict mapper copy parse, fixed-message 400 INVALID_SECRET_REQUEST, zero bytes" },
+    { "issueId": "CRIT-7", "location": "spec.md D9, §8", "original": "Acceptance gives UNKNOWN_REFERENCE naming the id", "suggested": "Resolver refuses non-D3 ids before the provider call" },
+    { "issueId": "CRIT-8", "location": "spec.md D12", "original": "serializes the body into a byte[] ... zero-fills that array", "suggested": "serialize into a provider-owned buffer (no BAOS second copy) and zero it" },
+    { "issueId": "CRIT-9", "location": "spec.md D6", "original": "8192 UTF-16 units <= 24 KiB of UTF-8", "suggested": "worst case with 6-byte escapes ~57 KiB; runbook caveat" },
+    { "issueId": "CRIT-10", "location": "spec.md §3.3, §5.1, §5.2, D15, D16", "original": "201 Location: ...; corun/*", "suggested": "no Location; listed missing files; gate existing secret rows; __doNotRetry" }
+  ]
+}

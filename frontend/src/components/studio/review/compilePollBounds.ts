@@ -32,23 +32,51 @@ export const COMPILE_SWEEP_INTERVAL_MS = 15_000;
 /** The whole watch window: the threshold plus the one pass that acts on it. No other margin. */
 export const COMPILE_WATCH_WINDOW_MS = COMPILE_SWEEP_THRESHOLD_MS + COMPILE_SWEEP_INTERVAL_MS;
 
-const FIRST_DELAY_MS = 2_000;
-const BACKOFF_FACTOR = 1.6;
-const MAX_DELAY_MS = 30_000;
+/** The shape of a backoff: the first delay, the growth factor, and the ceiling. */
+export interface CompilePollShape {
+  readonly firstDelayMs: number;
+  readonly backoffFactor: number;
+  readonly maxDelayMs: number;
+}
+
+/**
+ * The Code tab's watch. It observes a compile the author may not be waiting on, so it can afford
+ * to back off far.
+ */
+export const CODE_TAB_POLL_SHAPE: CompilePollShape = {
+  firstDelayMs: 2_000,
+  backoffFactor: 1.6,
+  maxDelayMs: 30_000,
+};
+
+/**
+ * Run's wait (VAL-007 G3). The author pressed Run and is watching a spinner, so the first reads
+ * stay close together — a three-second compile is noticed within about a second of settling — and
+ * the ceiling is low enough that a slow compile is noticed at most five seconds late. Over the
+ * whole window that is under seventy reads, against the 525 a flat 600ms poll could make.
+ */
+export const RUN_POLL_SHAPE: CompilePollShape = {
+  firstDelayMs: 600,
+  backoffFactor: 1.6,
+  maxDelayMs: 5_000,
+};
 
 /**
  * The delays between reads, derived from the window rather than counted out by hand. Backoff
  * keeps the early transitions responsive without holding a request slot open for ten minutes at
  * two-second intervals.
  */
-export function compilePollSchedule(windowMs: number = COMPILE_WATCH_WINDOW_MS): number[] {
+export function compilePollSchedule(
+  windowMs: number = COMPILE_WATCH_WINDOW_MS,
+  shape: CompilePollShape = CODE_TAB_POLL_SHAPE,
+): number[] {
   const delays: number[] = [];
   let elapsed = 0;
-  let delay = FIRST_DELAY_MS;
+  let delay = shape.firstDelayMs;
   while (elapsed + delay <= windowMs) {
     delays.push(delay);
     elapsed += delay;
-    delay = Math.min(Math.round(delay * BACKOFF_FACTOR), MAX_DELAY_MS);
+    delay = Math.min(Math.round(delay * shape.backoffFactor), shape.maxDelayMs);
   }
   return delays;
 }
@@ -76,4 +104,4 @@ export function isTerminalCompileStatus(status: string): boolean {
  * server-side outcome is the same class of untruth AC-7 exists to prevent.
  */
 export const WATCH_GAVE_UP_MESSAGE =
-  'We stopped watching for the result. This does not mean anything went wrong — reload the page to see where the translation got to.';
+  'We stopped watching for the result. This does not mean anything went wrong. Reload the page to see where the translation got to.';

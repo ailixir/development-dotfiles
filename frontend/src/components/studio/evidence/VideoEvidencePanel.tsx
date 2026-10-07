@@ -9,6 +9,7 @@ import {
   videoEvidenceNarrative,
 } from './videoEvidenceNarratives';
 import { studioVideoUrl } from './studioVideoUrl';
+import { formatEvidenceInstant } from './formatEvidenceInstant';
 
 /**
  * The run's evidence, and the only playback surface on the Studio page (story 10.16a, AC-2 – AC-4,
@@ -73,8 +74,10 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
     const isPartial = isAvailable && video.partial;
     // Keyed on the run outcome, not on `partial`: an orderly stop leaves `partial: false`.
     const stoppedRunStatement = isAvailable ? stoppedRunRecordingStatement(snapshot.errorCode) : null;
-    const showsExpiry =
-      (video.status === 'AVAILABLE' || video.status === 'EXPIRED') && video.expiresAt !== null;
+    const expiry =
+      (video.status === 'AVAILABLE' || video.status === 'EXPIRED') && video.expiresAt !== null
+        ? formatEvidenceInstant(video.expiresAt)
+        : null;
 
     return (
       <Box
@@ -101,11 +104,11 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
               {PARTIAL_RECORDING_QUALIFIER}
             </Typography>
           )}
-          {showsExpiry && (
+          {expiry !== null && (
             <Typography variant="caption" color="text.secondary" data-testid="video-evidence-expiry">
               {video.status === 'EXPIRED'
-                ? `Expired on ${video.expiresAt}`
-                : `Available until ${video.expiresAt}`}
+                ? `Expired on ${expiry}`
+                : `Available until ${expiry}`}
             </Typography>
           )}
           {playbackUrl !== null && (

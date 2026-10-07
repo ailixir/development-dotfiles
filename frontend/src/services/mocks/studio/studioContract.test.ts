@@ -40,6 +40,10 @@ import {
 } from '@/components/studio/evidence';
 import { studioMockServer } from './server';
 import { resetStudioMocks } from './handlers';
+import { DEMO_DELETED_TEST_ID, demoExecutions, demoTests } from './demoFixtures';
+import studioApi from '@/services/api/studioApi';
+import { isCancelledOutcome } from '@/components/studio/run/executionStatus';
+import type { ExecutionSnapshot, TestDto } from '@/types/studio/studioTypes';
 
 /**
  * Story 10.1 AC-21 — the mocks are checked against the frozen contract, not against themselves.
@@ -921,5 +925,210 @@ describe('story 10.16a: the mock video route answers only as the document declar
     // Exact equality, so the two statuses the mock cannot observe — an absent session (401) and an
     // unreachable evidence store (503) — are excluded by this line rather than by a comment.
     expect([...produced].sort()).toEqual(['200', '206', '403', '404', '410', '416']);
+  });
+});
+
+describe('story 10.46: the demo-scale list fixtures match the contract', () => {
+  it('every demo test validates against TestDto', () => {
+    const validate = componentValidator('TestDto');
+    for (const test of demoTests) {
+      expect(validate(test), `${test.id}: ${JSON.stringify(validate.errors)}`).toBe(true);
+    }
+  });
+
+  it('every demo run validates against ExecutionSnapshot and carries only declared fields', () => {
+    const validate = componentValidator('ExecutionSnapshot');
+    const required = requiredPropertiesOf('ExecutionSnapshot');
+    const declared = declaredPropertiesOf('ExecutionSnapshot');
+    for (const execution of demoExecutions) {
+      expect(validate(execution), `${execution.executionId}: ${JSON.stringify(validate.errors)}`).toBe(true);
+      for (const field of required) expect(Object.keys(execution)).toContain(field);
+      for (const field of Object.keys(execution)) expect(declared).toContain(field);
+    }
+  });
+
+  it('is rich enough to demo the lists', () => {
+    expect(demoTests.length).toBeGreaterThanOrEqual(25);
+    expect(new Set(demoTests.map((test) => test.csiId)).size).toBeGreaterThanOrEqual(3);
+    expect(new Set(demoTests.map((test) => test.environment)).size).toBeGreaterThanOrEqual(3);
+    expect(new Set(demoTests.map((test) => test.compileStatus)).size).toBeGreaterThanOrEqual(4);
+    expect(demoTests.some((test) => test.lastRunStatus === null)).toBe(true);
+
+    expect(demoExecutions.length).toBeGreaterThanOrEqual(40);
+    const statuses = new Set(demoExecutions.map((execution) => execution.status));
+    for (const status of ['PENDING', 'RUNNING', 'PASSED', 'FAILED', 'ERROR']) expect(statuses).toContain(status);
+    expect(demoExecutions.some((e) => isCancelledOutcome(e.status, e.errorCode))).toBe(true);
+    expect(demoExecutions.some((e) => e.status === 'ERROR' && e.errorCode !== null && !isCancelledOutcome(e.status, e.errorCode))).toBe(true);
+    expect(demoExecutions.some((e) => e.durationMs !== null && e.durationMs < 1_000)).toBe(true);
+    expect(demoExecutions.some((e) => e.durationMs !== null && e.durationMs > 3_600_000)).toBe(true);
+    expect(demoExecutions.some((e) => e.testId === DEMO_DELETED_TEST_ID)).toBe(true);
+  });
+});
+
+describe('story 10.46: the list query parameters are emulated as the contract declares', () => {
+  const ORIGIN = 'http://localhost/api/v1/studio';
+  beforeAll(() => studioMockServer.listen({ onUnhandledRequest: 'error' }));
+  afterEach(() => {
+    studioMockServer.resetHandlers();
+    resetStudioMocks();
+  });
+  afterAll(() => studioMockServer.close());
+
+  const ids = <T,>(items: T[], idOf: (item: T) => string) => items.map(idOf);
+
+  it('tests: default sort is updatedAt,desc with an id tie-breaker, and pages do not overlap', async () => {
+    const all = await studioApi.listTests({ size: 100 });
+    const keys = all.data.map((test) => [test.updatedAt ?? '', test.id] as const);
+    for (let index = 1; index < keys.length; index += 1) {
+      const [previousAt, previousId] = keys[index - 1];
+      const [at, id] = keys[index];
+      const previous = new Date(previousAt).getTime();
+      const current = new Date(at).getTime();
+      expect(previous > current || (previous === current && previousId > id)).toBe(true);
+    }
+    const first = await studioApi.listTests({ page: 0, size: 10 });
+    const second = await studioApi.listTests({ page: 1, size: 10 });
+    expect(first.totalElements).toBe(all.totalElements);
+    expect(first.totalPages).toBe(Math.ceil(all.totalElements / 10));
+    const overlap = ids(first.data, (t) => t.id).filter((id) => ids(second.data, (t) => t.id).includes(id));
+    expect(overlap).toEqual([]);
+  });
+
+  it('tests: q, environment, csiId and lastRun narrow the list', async () => {
+    const byName = await studioApi.listTests({ q: 'LOGIN', size: 100 });
+    expect(byName.data.length).toBeGreaterThan(0);
+    expect(byName.data.every((t) => `${t.name} ${t.description ?? ''}`.toLowerCase().includes('login'))).toBe(true);
+
+    const uat = await studioApi.listTests({ environment: 'UAT', size: 100 });
+    expect(uat.data.length).toBeGreaterThan(0);
+    expect(uat.data.every((t) => t.environment === 'UAT')).toBe(true);
+
+    const csi = await studioApi.listTests({ csiId: '178672', size: 100 });
+    expect(csi.data.length).toBeGreaterThan(0);
+    expect(csi.data.every((t) => t.csiId === '178672')).toBe(true);
+
+    const never = await studioApi.listTests({ lastRun: 'NEVER', size: 100 });
+    expect(never.data.length).toBeGreaterThan(0);
+    expect(never.data.every((t) => t.lastRunStatus === null)).toBe(true);
+
+    const failed = await studioApi.listTests({ lastRun: 'FAILED', size: 100 });
+    expect(failed.data.every((t) => t.lastRunStatus === 'FAILED')).toBe(true);
+  });
+
+  it('tests: name sort is case-insensitive and lastRunAt keeps never-run drafts last', async () => {
+    const byName = (await studioApi.listTests({ sort: 'name,asc', size: 100 })).data.map((t) => t.name.toLowerCase());
+    expect(byName).toEqual([...byName].sort((a, b) => a.localeCompare(b, 'en')));
+
+    for (const sort of ['lastRunAt,asc', 'lastRunAt,desc'] as const) {
+      const rows: TestDto[] = (await studioApi.listTests({ sort, size: 100 })).data;
+      const firstNever = rows.findIndex((t) => t.lastRunAt === null);
+      expect(firstNever).toBeGreaterThan(0);
+      expect(rows.slice(firstNever).every((t) => t.lastRunAt === null)).toBe(true);
+    }
+  });
+
+  it('caps size at 100', async () => {
+    const page = await studioApi.listExecutions({ size: 500 });
+    expect(page.size).toBe(100);
+    expect(page.data.length).toBeLessThanOrEqual(100);
+  });
+
+  it('executions: default sort is acceptedAt,desc with an id tie-breaker', async () => {
+    const rows = (await studioApi.listExecutions({ size: 100 })).data;
+    for (let index = 1; index < rows.length; index += 1) {
+      const previous = new Date(rows[index - 1].acceptedAt).getTime();
+      const current = new Date(rows[index].acceptedAt).getTime();
+      expect(
+        previous > current || (previous === current && rows[index - 1].executionId > rows[index].executionId),
+      ).toBe(true);
+    }
+  });
+
+  it('executions: every item carries testName, null for a deleted test', async () => {
+    const rows = (await studioApi.listExecutions({ size: 100 })).data;
+    expect(rows.every((e) => e.testName !== undefined)).toBe(true);
+    const orphan = rows.find((e) => e.testId === DEMO_DELETED_TEST_ID);
+    expect(orphan?.testName).toBeNull();
+    const named = rows.find((e) => e.testId === demoTests[0].id);
+    expect(named?.testName).toBe(demoTests[0].name);
+    expect((await studioApi.getExecution(named!.executionId)).testName).toBe(demoTests[0].name);
+  });
+
+  it('executions: deleting a test turns its runs into testName null and hides the test', async () => {
+    const target = demoTests[1];
+    await studioApi.deleteTest(target.id);
+    const runs = (await studioApi.listExecutions({ size: 100 })).data.filter((e) => e.testId === target.id);
+    expect(runs.length).toBeGreaterThan(0);
+    expect(runs.every((e) => e.testName === null)).toBe(true);
+    expect((await studioApi.listTests({ size: 100 })).data.map((t) => t.id)).not.toContain(target.id);
+  });
+
+  it('executions: status filter maps CANCELLED like isCancelledOutcome, and ERROR excludes it', async () => {
+    const cancelled = (await studioApi.listExecutions({ status: 'CANCELLED', size: 100 })).data;
+    expect(cancelled.length).toBeGreaterThan(0);
+    expect(cancelled.every((e) => isCancelledOutcome(e.status, e.errorCode))).toBe(true);
+
+    const errored = (await studioApi.listExecutions({ status: 'ERROR', size: 100 })).data;
+    expect(errored.length).toBeGreaterThan(0);
+    expect(errored.every((e) => e.status === 'ERROR' && !isCancelledOutcome(e.status, e.errorCode))).toBe(true);
+
+    const running = (await studioApi.listExecutions({ status: 'RUNNING', size: 100 })).data;
+    expect(running.length).toBeGreaterThan(0);
+    expect(running.every((e) => e.status === 'RUNNING')).toBe(true);
+  });
+
+  it('executions: q matches the test name, csiId narrows, durationMs sorts with nulls last', async () => {
+    const zelle = (await studioApi.listExecutions({ q: 'zelle', size: 100 })).data;
+    expect(zelle.length).toBeGreaterThan(0);
+    expect(zelle.every((e) => (e.testName ?? '').toLowerCase().includes('zelle'))).toBe(true);
+
+    const csi = (await studioApi.listExecutions({ csiId: '169001', size: 100 })).data;
+    expect(csi.length).toBeGreaterThan(0);
+    expect(csi.every((e) => e.csiId === '169001')).toBe(true);
+
+    const longest: ExecutionSnapshot[] = (await studioApi.listExecutions({ sort: 'durationMs,desc', size: 100 })).data;
+    const firstNull = longest.findIndex((e) => e.durationMs === null);
+    const timed = longest.slice(0, firstNull).map((e) => e.durationMs as number);
+    expect(timed).toEqual([...timed].sort((a, b) => b - a));
+    expect(longest.slice(firstNull).every((e) => e.durationMs === null)).toBe(true);
+  });
+
+  it('executions: unfinished runs order newest accepted first in both duration directions (QA 10.46)', async () => {
+    for (const sort of ['durationMs,asc', 'durationMs,desc'] as const) {
+      const all: ExecutionSnapshot[] = (await studioApi.listExecutions({ sort, size: 100 })).data;
+      const untimed = all.filter((e) => e.durationMs === null).map((e) => Date.parse(e.acceptedAt));
+      expect(untimed.length).toBeGreaterThan(1);
+      expect(untimed).toEqual([...untimed].sort((a, b) => b - a));
+    }
+  });
+
+  it.each([
+    ['/tests?sort=createdAt,desc'],
+    ['/tests?sort=name,sideways'],
+    ['/tests?lastRun=SKIPPED'],
+    ['/executions?sort=name,asc'],
+    ['/executions?status=TIMEOUT'],
+  ])('answers 400 for %s', async (path) => {
+    const response = await fetch(`${ORIGIN}${path}`);
+    expect(response.status).toBe(400);
+    expect(componentValidator('ErrorResponse')(await response.json())).toBe(true);
+  });
+
+  it('lastRun and status filter values are case-insensitive, as on the backend (MNT-001)', async () => {
+    const lower = await (await fetch(`${ORIGIN}/tests?lastRun=never&size=100`)).json();
+    const upper = await studioApi.listTests({ lastRun: 'NEVER', size: 100 });
+    expect(lower.totalElements).toBeGreaterThan(0);
+    expect(lower.totalElements).toBe(upper.totalElements);
+
+    const runningLower = await (await fetch(`${ORIGIN}/executions?status=running&size=100`)).json();
+    const runningUpper = await studioApi.listExecutions({ status: 'RUNNING', size: 100 });
+    expect(runningLower.totalElements).toBeGreaterThan(0);
+    expect(runningLower.totalElements).toBe(runningUpper.totalElements);
+  });
+
+  it('an unknown execution answers 404 (MNT-001)', async () => {
+    const response = await fetch(`${ORIGIN}/executions/no-such-run`);
+    expect(response.status).toBe(404);
+    expect(componentValidator('ErrorResponse')(await response.json())).toBe(true);
   });
 });

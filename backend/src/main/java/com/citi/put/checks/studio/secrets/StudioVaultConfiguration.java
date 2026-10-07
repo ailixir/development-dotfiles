@@ -35,6 +35,13 @@ public class StudioVaultConfiguration {
   public static final Set<String> KNOWN_PROVIDERS =
       Set.of(DisabledStudioVaultProvider.NAME, HashicorpStudioVaultProvider.NAME);
 
+  private static final String REFERENCE_NAME = "{referenceName}";
+  private static final String REFERENCE_NAME_SEGMENT = "/" + REFERENCE_NAME;
+
+  /** Every coordinate a path template must render; the test id scopes a secret to its test. */
+  private static final List<String> REQUIRED_PLACEHOLDERS =
+      List.of("{csiId}", "{environment}", "{testId}", "{kind}", REFERENCE_NAME);
+
   /** The startup line AC-9 asserts on captured output, not on source text. */
   public static final String STARTUP_MESSAGE_PREFIX = "Studio vault provider selected: ";
 
@@ -88,20 +95,7 @@ public class StudioVaultConfiguration {
       throw new IllegalStateException(
           "studio.secrets.vault.hashicorp.max-response-bytes must be greater than zero");
     }
-    String template = properties.pathTemplateOrDefault();
-    for (String placeholder : List.of("{csiId}", "{environment}", "{kind}", "{referenceName}")) {
-      if (!template.contains(placeholder)) {
-        throw new IllegalStateException(
-            "studio.secrets.vault.hashicorp.path-template must contain " + placeholder);
-      }
-    }
-    if (template.startsWith("/")
-        || template.contains("..")
-        || template.contains("?")
-        || template.contains("#")) {
-      throw new IllegalStateException(
-          "studio.secrets.vault.hashicorp.path-template must be a relative Vault path");
-    }
+    validatePathTemplate(properties.pathTemplateOrDefault());
     URI address = URI.create(properties.address());
     boolean loopback =
         "localhost".equals(address.getHost())
@@ -120,6 +114,50 @@ public class StudioVaultConfiguration {
     if (!Files.isReadable(tokenFile)) {
       throw new IllegalStateException("The configured Vault token file is not readable");
     }
+  }
+
+  /**
+   * The path template must name all five coordinates, be a relative Vault path, and end with {@code
+   * /{referenceName}}, which occurs once. The list prefix is the template minus that last segment
+   * ({@link #listPrefixTemplate}), so save, list and read render from one template and cannot
+   * drift.
+   */
+  static void validatePathTemplate(String template) {
+    for (String placeholder : REQUIRED_PLACEHOLDERS) {
+      if (!template.contains(placeholder)) {
+        throw new IllegalStateException(
+            "studio.secrets.vault.hashicorp.path-template must contain " + placeholder);
+      }
+    }
+    if (!template.endsWith(REFERENCE_NAME_SEGMENT)
+        || template.indexOf(REFERENCE_NAME) != template.lastIndexOf(REFERENCE_NAME)) {
+      throw new IllegalStateException(
+          "studio.secrets.vault.hashicorp.path-template must end with "
+              + REFERENCE_NAME_SEGMENT
+              + ", and name "
+              + REFERENCE_NAME
+              + " only there");
+    }
+    if (template.startsWith("/")
+        || template.contains("..")
+        || template.contains("?")
+        || template.contains("#")) {
+      throw new IllegalStateException(
+          "studio.secrets.vault.hashicorp.path-template must be a relative Vault path");
+    }
+  }
+
+  /**
+   * The template of the folder one scope's references of one kind live in: the path template minus
+   * its trailing {@code /{referenceName}}. Only meaningful for a template {@link
+   * #validatePathTemplate} accepted.
+   */
+  public static String listPrefixTemplate(String template) {
+    if (!template.endsWith(REFERENCE_NAME_SEGMENT)) {
+      throw new IllegalStateException(
+          "studio.secrets.vault.hashicorp.path-template must end with " + REFERENCE_NAME_SEGMENT);
+    }
+    return template.substring(0, template.length() - REFERENCE_NAME_SEGMENT.length());
   }
 
   private static void requireText(String value, String field) {
