@@ -2470,3 +2470,49 @@ work is a recipe rather than an investigation.
 **Not verified, stated plainly:** their `write503` behaviour (the basis of their `oneOf` schema claim);
 whether a merged `StudioService.java` passes spotless; anything in the other 246 dirty paths. No backend
 or vitest suite was run for this analysis — every "would fail" claim about a test is read from source.
+
+## Reconciliation — the fold landed; Phase 2's precondition is met (2026-10-06, @po)
+
+*Append-only. Nothing above is edited. Tree read: `brunobuger/ui-studio` at `e2179f50b`. No suite was run
+for this entry; every claim is a `git` query, a grep or a file read, and is labelled where it is inferred.*
+
+**What the 2026-09-17 sections say and is no longer true:** *"Nothing can be folded today … their work is
+uncommitted and therefore unmergeable."* The other program's work was committed and folded. Verified with
+`git show --stat` and `git merge-base --is-ancestor … HEAD` (all ancestors of HEAD):
+
+- `51ade0f1f` (2026-09-19): `rescue(epic)`. Archives the `wt/epic` uncommitted work (`epic/EPIC-10 @ ff0513385`) as a commit.
+- `ec94e9585` (2026-09-19) and `b22055dda` (2026-09-20, PR #3): fold that work into the ui-studio line, as two-parent merges.
+- `cd2ab3001` (2026-09-20, PR #2): lands Epic 10, Studio v1 and the fold on `main`. Ancestor of `origin/main`.
+- `1f3c56a59` (2026-09-22): folds `origin/main` back into the ui-studio line [10.44].
+
+**What this unblocks, by item:**
+
+- **PROD-1 / 10.33.** Their slices guard is in tree from `51ade0f1f`: `sourcesSlice.ts:20-23`, `featuresSlice.ts:42-46`, plus the new `featuresSlice.test.ts`. That makes closure step 2.7 dispatchable. 10.33 moved **Draft → Ready** (@po validation GO 9/10), meaning dispatchable to **@qa** for the gate, not to @dev.
+- **DEF-05 / 10.35.** The fix is in tree at `a19112afb` (2026-09-18, this line's Studio v1 WP1, not `wt/epic`):
+  - `HttpRunnerDispatchClient.java:108,149` send `Authorization: Bearer`.
+  - `:55,180` hold `SERVICE_IDENTITY_NOT_CONFIGURED`.
+  - `tools/corun.sh` and `StudioCoRunIT.java` are tracked.
+
+  10.35 stays **Ready** and is now dispatchable to @qa. DEF-05 stays **open**, as "fix present in tree at `a19112afb`, pending gate by 10.35".
+- **F-3.** `httpClient.test.ts` was last touched by `51ade0f1f`, so their fix landed. Squeeze verification can now run (step 2.7).
+
+**What the fold did not do, stated plainly:** Phase 2 had steps 2.3, 2.6 and 2.8 as *stops before* the
+merge. The merge happened first. I found no `docs/` record of `StudioServiceWriteAuthorizationTest` /
+`StudioAuthorizationIT` running on the merged tree. By reading, the 10.30 shape survived:
+
+- 0 `requireCompile` in `backend/src/main`.
+- `softDeleteTest(UUID, Authentication)` → `requireWrite`.
+- `StudioController.deleteTest` takes `Authentication`.
+
+That reading is **not** the run the plan made mandatory. Those steps are now post-hoc verifications, and
+a red result opens a fix story. The full step table is in `EPIC-10-CLOSURE-PLAN.md` §8a.
+
+**Other record corrections made today:**
+
+- **10.25: Ready → InReview.** All five tasks were `[x]` with the hand-off to Quinn ticked. Quinn's focused re-review (`docs/qa/studio-inference-implementation-review.md`, 14/14 `InferenceStudio.test.tsx`) explicitly gave no formal story approval.
+- **Register §4.2:** added a DEF-05 row.
+- **Manifest DEF-05:** added a dated note. `status: open` is unchanged.
+
+**Still unknown:** whether the merged tree passes the four authorization suites, the co-run legs 0–3, or
+any full-suite baseline. `studio-execution.md:80` still names the Vertex AI SDK (flag to @architect, 2.6).
+Whether 10.20–10.27 join this manifest is still the user's call (2.1).

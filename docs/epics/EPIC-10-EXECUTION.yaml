@@ -2168,6 +2168,19 @@ integration_defects:
     # had to true up. The fix is not in this repository's history at all. It exists only as an
     # uncommitted edit in the separate studio-inference program's wt/epic working tree. This field
     # moves when a commit with a SHA exists, never before.
+    # @po 2026-10-06: a commit with a SHA now exists, so the comment above is overtaken. `status`
+    # stays `open` on purpose. "Fixed" is the 10.35 gate's to declare, by running, and this note
+    # does not declare it.
+    fix_in_tree: >-
+      Fix present in tree at a19112afb (2026-09-18, "fix(studio): present the runner service identity
+      on dispatch (DEF-05) [Studio v1 WP1]"). That is an ancestor of brunobuger/ui-studio HEAD
+      e2179f50b and of origin/main. It is this line's own Studio v1 commit, not the studio-inference
+      program's. The wt/epic version of the same file arrived later via 51ade0f1f -> ec94e9585/b22055dda.
+      Read-verified, not run: HttpRunnerDispatchClient.java:108 and :149 send "Authorization: Bearer"
+      on POST /v1/runs and DELETE /v1/runs/{id}. :55 and :180 define and return
+      SERVICE_IDENTITY_NOT_CONFIGURED. tools/corun.sh and StudioCoRunIT.java are tracked.
+      Pending gate by story 10.35 (now dispatchable to @qa). Do NOT mark this item fixed until
+      10.35 AC-1 to AC-4 are green on tools/corun.sh and the AC-5 unit test passes.
     fix_owner_external: >-
       The studio-inference program (separate, user-authorised), by user decision recorded at
       EPIC-10-RUN-LOG.md:2264-2277. Its uncommitted wt/epic tree already carries the fix in

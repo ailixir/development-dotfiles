@@ -378,6 +378,67 @@ test.
 
 ---
 
+## 8a. Reconciliation — Phase 2's precondition is met (2026-10-06, @po)
+
+*Appended, not rewritten. Everything in §0–§8 above is left exactly as the 2026-09-17 review wrote it;
+this section records what changed after it and what that does to Phase 2. Reviewed tree:
+`brunobuger/ui-studio` at `e2179f50b` (2026-10-06 WIP checkpoint). Every SHA below was checked with
+`git show --stat` and `git merge-base --is-ancestor <sha> HEAD` (all ancestors of HEAD). **Nothing was
+built or tested for this entry** — every "verified" below is a read, a grep or a `git` query.*
+
+### The precondition — "the other program commits" — is met
+
+| SHA | Date | What it is (verified with `git show --stat`) |
+|---|---|---|
+| `51ade0f1f` | 2026-09-19 | `rescue(epic): archive the uncommitted work in the wt/epic worktree (epic/EPIC-10 @ ff0513385)` — the `wt/epic` working tree, committed. From here on it is on a branch with a SHA. |
+| `ec94e9585` | 2026-09-19 | `merge(epic-10): fold the wt/epic uncommitted work into the ui-studio line` — a two-parent merge (`a36b06c9c` + `51ade0f1f`), not a rebase. |
+| `b22055dda` | 2026-09-20 | Same fold, as PR #3 (parents `a36b06c9c` + `ec94e9585`). Ancestor of `origin/main`. |
+| `cd2ab3001` | 2026-09-20 | `feat(studio): land Epic 10, Studio v1 and the wt/epic fold; remove the G shortcut (#2)` — merge onto `main` (parents `9fbd3970c` + `b22055dda`). Ancestor of `origin/main`. |
+| `1f3c56a59` | 2026-09-22 | `merge(main): fold origin/main (Epic 10 / Studio v1) into the ui-studio line [Story 10.44]`. |
+
+Two facts bearing on specific stories, both verified by reading at `e2179f50b`:
+
+- **PROD-1 / 10.33.** The slices guard landed at `51ade0f1f` (`sourcesSlice.ts:20-23`, `featuresSlice.ts:42-46`,
+  new `featuresSlice.test.ts`; `git log` on those three files shows `51ade0f1f` as last touch). `setup.ts`
+  was **not** changed by `51ade0f1f`/`ec94e9585` — FOC-08 is still to be checked by running (10.33 AC-5).
+  `pageBootstrapShape.test.tsx` does not exist; it is @qa's red-first test at the gate.
+- **DEF-05 / 10.35.** The fix is in tree at **`a19112afb`** (2026-09-18, `fix(studio): present the runner
+  service identity on dispatch (DEF-05) [Studio v1 WP1]`) — **this line's own Studio v1 commit, not
+  `wt/epic`'s** (whose `51ade0f1f` also touches `HttpRunnerDispatchClient.java`, +17). `HttpRunnerDispatchClient.java:108,149`
+  send `Authorization: Bearer`; `:55,180` define and return `SERVICE_IDENTITY_NOT_CONFIGURED`.
+  `a19112afb` also removed one wiring line from `StudioCoRunIT.java` (`studio.execution.runner-base-url`) —
+  a harness change 10.35's Scope requires to be noted.
+
+### Phase 2, step by step, as of 2026-10-06
+
+**The ordering assumption broke, and that is the main finding.** Phase 2 put 2.3, 2.6 and 2.8 as
+*stops before* the merge. The fold has already merged and reached `origin/main`. I found **no record**
+in `docs/` that `StudioServiceWriteAuthorizationTest` / `StudioAuthorizationIT` were run on the merged tree
+(grep hits are all pre-fold gate and story files). `c81911b30` ("regression fixes after the fold (#4)")
+suggests post-fold verification happened, but I did not verify that. So these steps are now
+**post-hoc verifications of a landed tree**, not gates on a merge. A red result means a fix story, not a
+refused merge.
+
+| # | State on 2026-10-06 | Basis |
+|---|---|---|
+| 2.1 | **Half executed by action; half still the user's.** The base is in practice the ui-studio/`main` line, because of the user's own merges above. That reading is *inferred* from the commits, and no ruling records it. Whether 10.20–10.27 join this manifest is still open: the register guard still lists 10.20–10.26 as excluded (run 2026-10-06). | Article IV: no agent assigns this |
+| 2.2 | **Executed** (`ec94e9585`/`b22055dda`, merges, no rebase). Not re-executable as written. | `git rev-list --parents` |
+| 2.3 | **Executable now, as a verification.** Read: 0 `requireCompile` in `backend/src/main`; `StudioService.softDeleteTest(UUID, Authentication)` calls `requireWrite` (`:933-935`); `StudioController.deleteTest(@PathVariable UUID id, Authentication auth)` (`:165`). The auth-less `softDeleteTest(UUID)` overload is still present (`:911`). That is §4's latent hazard and item 1.6. **The four authorization suites were not run.** → @dev runs, @qa reads | grep/read |
+| 2.4 | **Pin half appears done; ADR half not checked.** `shasum -a 256 docs/specs/studio/openapi.yaml` = `5e5477fc…070ac`, and that digest is present in `studio-runner/test/run/confinement.test.ts` (path moved from §1's citation). I did not check the ADR-002 §13 amendment rows. → @dev/@architect | measured/grep |
+| 2.5 | **Executable.** `helm-chart/put-checks/templates/_helpers.tpl:157` lists **36** keys. That matches the fold-prep ruling's "union at 36", but not §8's 27+4+1=32 formula. I am not ruling which count is right; recount from `KEY_SPECS` per FOC-07. → @dev | `wc -w` |
+| 2.6 | **Executable; the second grep's premise changed.** `grep -rl com.google.cloud.vertexai backend/src/main/java` is empty (verified). `build.gradle.kts` no longer declares `google-cloud-vertexai` at all. The demoted test classes now import `com.google.genai` (`implementation`, `:56`), so "is `testImplementation`" no longer applies. Compilation not verified by me. `docs/architecture/studio-execution.md:80` (was `:78`) **still names the Google Vertex AI SDK**. → flag to @architect | grep/read |
+| 2.7 | **Executable — dispatch to @qa.** Story 10.33 moved Draft → Ready today for exactly this. F-3: `studio-runner/test/reporting/httpClient.test.ts` was last touched by `51ade0f1f` (their fix landed), so the squeeze verification is now runnable. | `git log` |
+| 2.8 | **Executable**, under the same load and sequential-run rules. The baselines in the table are stale (pre-fold; their suites and 10.44/10.45 added tests). Re-baseline; never compare against 709/548/984. → @dev runs, @qa reads | — |
+| 2.9 | **Partly done.** `node docs/qa/scripts/verify-staging-registration.mjs` → `PASS` (run by @po 2026-10-06, before and after this entry's register edit). The 1.2 `$ref` walk exists as `studio-runner/test/contract-integrity.test.ts`; I did not run it. → @qa | measured |
+| 2.10 | **Superseded as written.** No `epic/EPIC-10` branch exists in this clone (`git branch -a` lists only `wip/epic-worktree-rescue` among epic-named refs). The line reached `origin/main` through PRs #2/#3. `HEAD` is 12 commits ahead of `origin/main`. Any further push or PR is **@devops only**. | `git branch -a`, `merge-base` |
+
+**Story status changes made with this entry:** 10.33 Draft → Ready (gate dispatchable to @qa, step 2.7);
+10.35 stays Ready, now dispatchable to @qa (fix in tree at `a19112afb`); 10.25 Ready → InReview (record
+correction; see its change log). DEF-05 stays **open** in the manifest and register — fix present, gate
+pending.
+
+---
+
 ## 9. What to drop rather than do
 
 | Drop | Why |
