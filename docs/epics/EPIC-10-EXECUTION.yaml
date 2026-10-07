@@ -1606,6 +1606,63 @@ stories:
         GO, 9/10, @po 2026-10-07, Draft → Ready. UI signal ruled: reuse the existing public
         schedule/capabilities.canManage (= canWrite = canExecute today; no Class C change). Resume split out
         of scope. See the story's PO Readiness section.
+  - id: "10.49"
+    title: "Run-confirmed compiles: ADR-002 §35 fix, V1 compile-request capture and V19-safety proof"
+    # ADDED BY @po 2026-10-07 at validation. Same pattern as 10.45, 10.47, 10.48. Source: ADR-002 §35.5 and
+    # the 2026-10-07 V1+ scope decision (STUDIO-INC-001 decisions.md §3 items 1a + 5a, §4 row S2).
+    #
+    # size M is the decision's own §4 row S2.
+    size: M
+    # wave: null as for 10.34/10.35/10.45/10.47/10.48: post-closure conformance fix.
+    wave: null
+    # depends_on 10.48 is MERGE ORDER ONLY (decision §4: S2 depends on "S1 merged (openapi digest)"): both
+    # edit docs/specs/studio/openapi.yaml, so the BASE_SHA256 re-anchor and the ADR-002 §13 row are serial.
+    # Development may run in parallel. Not criterion-backed: no 10.49 criterion needs 10.48's behaviour.
+    depends_on: ["10.48"]
+    # blocks is EMPTY: no story id exists for applying V19 to shared environments (INC-001 phase 3, deferred
+    # to T-INC). Recorded instead: until 10.49 is merged, V19 must not be applied to any shared environment
+    # (decision §2); 10.49 AC-21 carries that to the runbook.
+    blocks: []
+    story_context:
+      shape: >-
+        CONFORMANCE FIX + MIGRATION V29. beginCompile writes a ui_test_compile_requests row per V1 compile
+        (FULL, trigger = RUN, same transaction); publishAcceptedCandidate auto-accepts only for trigger = RUN
+        and confirmer = created_by, gains the deadline recheck and the insertCapturedRevision branch, and
+        writes confirmation_source (RUN | MANUAL, write-once, no backfill). NoAutoConfirmTest rewritten
+        (supersedes 10.9 AC-21). IT proves a V1 compile reaches READY with V19 applied in a test schema.
+        compileTest/confirmCompile text only; executeTest belongs to 10.48. No prompt-byte change.
+      po_validation: >-
+        GO, 9/10, @po 2026-10-07, Draft → Ready. trigger value set resolved from C0-A3 approved wording
+        {RUN, COMPILE_CHANGES, REBUILD_ALL}; no SCHEDULED (scheduled runs execute a pinned revision and never
+        compile). V18 NOT NULL set listed; write-once amendment bound to V27's contract. 10.9 AC-21
+        supersession recorded on 10.9. See the story's PO Readiness section.
+  - id: "10.50"
+    title: "R2D2 proxy accepts the per-status anyOf provider schema (probe)"
+    # ADDED BY @po 2026-10-07 at validation. Source: 2026-10-07 V1+ scope decision §3 item 8, §4 row S3;
+    # validation-plan VAL-030, QA-2, release condition 3. A release gate for R2D2, not a merge gate.
+    #
+    # size S is the decision's own §4 row S3.
+    size: S
+    wave: null
+    # depends_on is EMPTY: no story must land first (decision §4: parallel with S1/S2).
+    depends_on: []
+    # Recorded as external_blocker, not as a story id, per the 10.34 convention. ED-01's own gates list
+    # (external_dependencies below) is @pm's and is NOT edited here; adding "10.50" to it is flagged to @pm.
+    external_blocker: >-
+      ED-01 (R2D2 gateway access): status open, owner "TBD — not assigned in sources". SPK-01 (R2D2
+      capability): OPEN, accountable Architecture with the R2D2 gateway owners, no individual named; its
+      pilot-use gate forbids studio.compile.gateway.enabled=true in any shared environment until its
+      Findings are signed. Owner question routed to the user / @pm at validation (story Open question 1).
+    blocks: []
+    story_context:
+      shape: >-
+        EVIDENCE PROBE, READY BUT NOT STARTABLE (10.34 precedent). Sends the client's own
+        providerSchemaVersion = 2 anyOf schema to R2D2 in an approved environment, runs one real compile and
+        the VAL-030 refusal case, records ACCEPTED / REJECTED / INCONCLUSIVE. Stop rule: no fallback switch
+        is built here; a rejection goes to @architect and @po for a separate story.
+      po_validation: >-
+        GO, 8/10, @po 2026-10-07, Draft → Ready (externally blocked). AC-1 reconciled with the SPK-01
+        pilot-use gate. See the story's PO Readiness section.
 
 # ─────────────────────────────────────────────────────────────
 # File-ownership conflicts (wave planning must serialize or single-own)
