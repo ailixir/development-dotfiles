@@ -886,3 +886,31 @@ rereview_2026_10_07b:
   yaml_fix: >-
     Line 441 plain scalar containing ": " converted to a folded scalar, same text; parses under Ruby
     YAML.safe_load (python3 yaml module not installed).
+
+rereview_2026_10_07c:
+  reviewer: Quinn (@qa)
+  head_sha: 788133f6d
+  scope: AC-19 only; AC-1..AC-7 untouched and still skipped — blocked
+  top_level_gate: unchanged (CONCERNS)
+  decision: APPROVED (AC-19)
+  story_status: Ready for Review (unchanged; blocked criteria and open AC-12(b)/AC-13 forbid Done)
+  ticked: [AC-19]
+  ac_19:
+    verdict: MET
+    frontend: "npx vitest run at 788133f6d -> 77/77 files, 946 passed / 0 failed, 95.8 s, load 8.3-11.0"
+    type_check: exit 0, 0 errors
+    lint: 0 errors / 303 warnings (fact, not reported as passed)
+    staging_registration_script: PASS, exit 0
+    backend_runner: >-
+      Not re-run. git diff 530c3ea2a..788133f6d is empty for backend/, studio-runner/ and docs/specs/.
+      No backend/runner test reads the changed docs files. The post-merge --rerun-tasks results at
+      530c3ea2a stand: studio.* 1199/0/7, runner 1214/0/29, fixtures 154/10, deployment 313/0, F-3
+      closed.
+    test_change_review: >-
+      788133f6d is a test-only change. openDelete still locates the menu by role and clicks Delete by
+      text inside it. The fallback test keeps page=0, ?page-dropped and the "Test first" link
+      assertions (link scoped to test-row-first) and adds a dialog-closed check. The 15 s budget was
+      not raised. Nothing is weaker; the only loss is an implicit role match on the Delete item, which
+      was used to interact, not to assert.
+  resolves: FE-10.19-RR-3
+  note: The story Status-line parenthetical still names AC-19(a) as outstanding; outside QA Results, left for @po/@dev.
