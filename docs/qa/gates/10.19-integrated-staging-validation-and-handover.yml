@@ -438,7 +438,8 @@ qa_own_mutation_table:
         nothing keeps it working.
       restore: all 7 files OK
     - id: Q4
-      mutation: delete the `AC-5: [ED-02]` line from `blocked_criteria` entirely.
+      mutation: >-
+        delete the `AC-5: [ED-02]` line from `blocked_criteria` entirely.
       expected_if_guard_complete: RED
       result: GREEN — SURVIVED
       why_it_matters: >-
@@ -848,3 +849,40 @@ rereview_2026_10_07:
     missing: >-
       There is no committed keyboard-order (first-Tab) test, which AC-14 requires. ENV-1(a) no longer
       blocks writing one, so BL-10.19-8 is actionable now. Route to @dev.
+
+rereview_2026_10_07b:
+  reviewer: Quinn (@qa)
+  head_sha: c637fa62d
+  scope: AC-14, AC-12(a) surface 7, AC-19; AC-1..AC-7 untouched and still skipped — blocked
+  top_level_gate: unchanged (CONCERNS)
+  decision: NEEDS_WORK
+  story_status: Ready for Review (unchanged; blocked criteria forbid Done)
+  ticked: [AC-14]
+  ac_14:
+    verdict: MET
+    test: frontend/src/components/layout/ChecksLayout/ChecksLayout.keyboard.test.tsx
+    run: "npx vitest run src/components/layout/ChecksLayout -> 2 files, 3/3 passed"
+    mutations:
+      - "M1 skip-link element deleted -> RED (no link 'Skip to main content'); restored, sha256 OK"
+      - "M1b tabIndex={-1} on the link -> RED (toHaveFocus); restored, sha256 OK"
+    limit: visible-on-focus read from sx '&:focus' only; jsdom cannot verify layout
+  ac_12:
+    verdict: PARTIAL — not ticked
+    surface_7: >-
+      Re-anchor only (step-seek-1 -> step-watch-failure-1); Proof tab, single <video> and pinned scan
+      unchanged. src/test/a11y 7/7. axe-results.json byte-identical after run.
+    part_a: >-
+      Satisfied: all seven surfaces show moderate findings only (region, heading-order); threshold is
+      zero critical/serious.
+    part_b: NOT DONE — screen-reader pass outstanding (A11Y-5)
+  ac_19:
+    verdict: NOT MET
+    reason: >-
+      Post-merge frontend suite 945 passed / 1 failed (StudioTestsPage delete-fallback, 15 s timeout
+      under full parallel load). Passes alone (27/27, 39.5 s, load ~5). The criterion's "a green branch
+      run does not stand in for the post-merge run" requires a green post-merge run; a documented flake
+      is inference, not a green suite.
+    to_close: deterministic test or adjusted budget, then a green full frontend run on the merged tree
+  yaml_fix: >-
+    Line 441 plain scalar containing ": " converted to a folded scalar, same text; parses under Ruby
+    YAML.safe_load (python3 yaml module not installed).
