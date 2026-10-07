@@ -117,6 +117,58 @@ class CompilationPlannerTest {
   }
 
   @Test
+  void flagOffReportsIncrementalDisabledAheadOfEveryIncompatibilityReason() {
+    var reordered = List.of(SOURCE.get(1), SOURCE.get(0), SOURCE.get(2));
+    // Contract §3: EXPLICIT_FULL, then INCREMENTAL_DISABLED, ahead of rank-4 incompatibilities.
+    assertThat(
+            CompilationPlanner.plan(
+                    edit(2), false, false, false, true, "pins", baseline(true, true))
+                .reason())
+        .isEqualTo("INCREMENTAL_DISABLED");
+    assertThat(
+            CompilationPlanner.plan(
+                    reordered, false, false, true, true, "pins", baseline(true, true))
+                .reason())
+        .isEqualTo("INCREMENTAL_DISABLED");
+    assertThat(
+            CompilationPlanner.plan(SOURCE, false, false, true, true, "new", baseline(true, true))
+                .reason())
+        .isEqualTo("INCREMENTAL_DISABLED");
+    assertThat(
+            CompilationPlanner.plan(SOURCE, false, false, true, false, "pins", baseline(true, true))
+                .reason())
+        .isEqualTo("INCREMENTAL_DISABLED");
+    assertThat(
+            CompilationPlanner.plan(edit(2), false, false, true, true, "pins", baseline(true, true))
+                .reason())
+        .isEqualTo("INCREMENTAL_DISABLED");
+    assertThat(CompilationPlanner.plan(edit(2), false, false, true, true, "pins", null).reason())
+        .isEqualTo("INCREMENTAL_DISABLED");
+    assertThat(
+            CompilationPlanner.plan(SOURCE, true, false, true, true, "pins", baseline(true, true))
+                .reason())
+        .isEqualTo("EXPLICIT_FULL");
+    var unchanged =
+        CompilationPlanner.plan(SOURCE, false, false, true, true, "pins", baseline(true, false));
+    assertThat(unchanged.mode()).isEqualTo(CompilationPlanner.Mode.REUSE);
+    assertThat(unchanged.reason()).isEqualTo("UNCHANGED_SOURCE");
+  }
+
+  @Test
+  void flagOnKeepsTheIncompatibilityReasons() {
+    assertThat(
+            CompilationPlanner.plan(edit(2), false, true, false, true, "pins", baseline(true, true))
+                .reason())
+        .isEqualTo("LEGACY_MAPPING");
+    assertThat(
+            CompilationPlanner.plan(SOURCE, false, true, true, true, "new", baseline(true, true))
+                .reason())
+        .isEqualTo("FINGERPRINT_CHANGE");
+    assertThat(CompilationPlanner.plan(edit(2), false, true, true, true, "pins", null).reason())
+        .isEqualTo("NO_ELIGIBLE_BASELINE");
+  }
+
+  @Test
   void patchCannotWriteProtectedOmitDuplicateOrSupplySource() {
     var steps = edit(2);
     var plan = plan(steps);

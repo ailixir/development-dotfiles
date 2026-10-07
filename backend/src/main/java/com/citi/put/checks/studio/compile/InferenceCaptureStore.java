@@ -140,7 +140,11 @@ final class InferenceCaptureStore {
             reviewed,
             fingerprint,
             baseline);
+    // A higher-ranked contract §3 FULL reason (EXPLICIT_FULL, INCREMENTAL_DISABLED,
+    // NO_ELIGIBLE_BASELINE) is never relabelled as the rank-4 SCOPE_UNKNOWN.
     if (baseline != null
+        && !List.of("EXPLICIT_FULL", "INCREMENTAL_DISABLED", "NO_ELIGIBLE_BASELINE")
+            .contains(plan.reason())
         && !parse(authoring)
             .path("scope")
             .equals(parse((String) evidence.get("authoring_snapshot")).path("scope"))) {

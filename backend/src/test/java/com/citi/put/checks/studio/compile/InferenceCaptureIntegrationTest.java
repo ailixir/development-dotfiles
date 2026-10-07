@@ -28,6 +28,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 class InferenceCaptureIntegrationTest {
   private static final String OWNER = "inference-capture@citi.com";
   private static final String CSI = "71024";
+  private static final String OTHER_CSI = "71025";
   private static final String FINGERPRINT = "a".repeat(64);
   private static final ObjectMapper JSON = new ObjectMapper();
   @Autowired private CompileStateService states;
@@ -282,6 +283,224 @@ class InferenceCaptureIntegrationTest {
   }
 
   @Test
+  void flagOffReportsIncrementalDisabledBeforeScopeOrLegacyReasons() {
+    // 10.20 gate ISSUE-1 / contract §3: INCREMENTAL_DISABLED ranks second, after EXPLICIT_FULL.
+    var legacy = capture("AUTO", false);
+    assertThat(legacy.plan().mode().name()).isEqualTo("FULL");
+    assertThat(legacy.plan().reason()).isEqualTo("INCREMENTAL_DISABLED");
+    withCutover(
+        () -> {
+          UUID firstId = UUID.randomUUID();
+          UUID lastId = UUID.randomUUID();
+          authoring(firstId, lastId, "Check saved", "STEP_SCOPED");
+          var first = capture("FULL", false);
+          states.publishCandidate(testId, first.request(), candidate(first));
+          UUID baseline = revision();
+          states.confirm(
+              testId,
+              baseline,
+              candidate(first).artifactHash(),
+              first.request().sourceRevision(),
+              first.request().configurationRevision(),
+              OWNER);
+          fullPass(baseline);
+          authoring(firstId, lastId, "Check saved", "UNKNOWN");
+          var changed = capture("AUTO", false);
+          assertThat(changed.plan().mode().name()).isEqualTo("FULL");
+          assertThat(changed.plan().reason()).isEqualTo("INCREMENTAL_DISABLED");
+          assertThat(
+                  jdbc.queryForObject(
+                      "SELECT compilation_plan->>'reason' FROM ui_test_compile_requests"
+                          + " WHERE request_id=?",
+                      String.class,
+                      changed.request().requestId()))
+              .isEqualTo("INCREMENTAL_DISABLED");
+        });
+  }
+
+  @Test
+  void passingEvidenceRecordedUnderAnotherCsiIsNeverABaseline() {
+    withCutover(
+        () -> {
+          seedCsi(OTHER_CSI);
+          UUID firstId = UUID.randomUUID();
+          UUID lastId = UUID.randomUUID();
+          authoring(firstId, lastId, "Check saved", "STEP_SCOPED");
+          var first = capture("FULL", true);
+          states.publishCandidate(testId, first.request(), candidate(first));
+          UUID baseline = revision();
+          states.confirm(
+              testId,
+              baseline,
+              candidate(first).artifactHash(),
+              first.request().sourceRevision(),
+              first.request().configurationRevision(),
+              OWNER);
+          fullPass(baseline);
+          jdbc.update(
+              "UPDATE ui_test_executions SET csi_id=? WHERE revision_id=?", OTHER_CSI, baseline);
+          authoring(firstId, lastId, "Check updated", "STEP_SCOPED");
+          var foreign = capture("AUTO", true);
+          assertThat(foreign.plan().mode().name()).isEqualTo("FULL");
+          assertThat(foreign.plan().reason()).isEqualTo("NO_ELIGIBLE_BASELINE");
+          assertThat(foreign.baseline()).isNull();
+          assertThat(
+                  jdbc.queryForObject(
+                      "SELECT baseline_revision_id FROM ui_test_compile_requests"
+                          + " WHERE request_id=?",
+                      UUID.class,
+                      foreign.request().requestId()))
+              .isNull();
+          // Control: the same revision with same-CSI passing evidence is eligible.
+          fullPass(baseline);
+          assertThat(capture("AUTO", true).plan().mode().name()).isEqualTo("INCREMENTAL");
+        });
+  }
+
+  @Test
+  void anIdenticalConfirmedPassingRevisionOfAnotherCsisTestIsNeverABaseline() {
+    withCutover(
+        () -> {
+          seedCsi(OTHER_CSI);
+          UUID firstId = UUID.randomUUID();
+          UUID lastId = UUID.randomUUID();
+          UUID ownTest = testId;
+          UUID foreignTest = UUID.randomUUID();
+          jdbc.update(
+              """
+              INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,created_by)
+              VALUES(?,'Foreign',?,'Production','chromium','["Open home","Check saved"]'::jsonb,
+                '[]'::jsonb,?)
+              """,
+              foreignTest,
+              OTHER_CSI,
+              OWNER);
+          testId = foreignTest;
+          authoring(firstId, lastId, "Check saved", "STEP_SCOPED");
+          var foreign = capture("FULL", true);
+          states.publishCandidate(testId, foreign.request(), candidate(foreign));
+          UUID foreignRevision = revision();
+          states.confirm(
+              testId,
+              foreignRevision,
+              candidate(foreign).artifactHash(),
+              foreign.request().sourceRevision(),
+              foreign.request().configurationRevision(),
+              OWNER);
+          fullPass(foreignRevision);
+          testId = ownTest;
+          authoring(firstId, lastId, "Check updated", "STEP_SCOPED");
+          var own = capture("AUTO", true);
+          assertThat(own.plan().mode().name()).isEqualTo("FULL");
+          assertThat(own.plan().reason()).isEqualTo("NO_ELIGIBLE_BASELINE");
+          assertThat(own.baseline()).isNull();
+        });
+  }
+
+  @Test
+  void confirmationBindsTheCapturedScopeOnBothConfirmationPaths() {
+    withCutover(
+        () -> {
+          UUID firstId = UUID.randomUUID();
+          UUID lastId = UUID.randomUUID();
+          authoring(firstId, lastId, "Check saved", "STEP_SCOPED");
+          var first = capture("FULL", true);
+          states.publishCandidate(testId, first.request(), candidate(first));
+          UUID candidate = revision();
+          String reviewed =
+              jdbc.queryForObject(
+                  "SELECT authoring_hash FROM ui_tests WHERE id=?", String.class, testId);
+          // The database refuses a scope change that does not move source_revision ...
+          var unknown = JSON.createObjectNode().put("version", 2);
+          var steps = unknown.putArray("steps");
+          steps.addObject().put("id", firstId.toString()).put("text", "Open home");
+          steps.addObject().put("id", lastId.toString()).put("text", "Check saved");
+          unknown.putObject("scope").put("policyVersion", "1.0.0").put("declaration", "UNKNOWN");
+          jdbc.execute("SAVEPOINT scope_without_revision");
+          assertThatThrownBy(
+                  () ->
+                      jdbc.update(
+                          "UPDATE ui_tests SET authoring_snapshot=CAST(? AS jsonb),"
+                              + "authoring_hash=? WHERE id=?",
+                          unknown.toString(),
+                          ArtifactCanonicalizer.hash(unknown.toString()),
+                          testId))
+              .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class)
+              .hasMessageContaining("requires a new source_revision");
+          jdbc.execute("ROLLBACK TO SAVEPOINT scope_without_revision");
+          // ... so a scope change under review stales the candidate on both confirmation paths.
+          authoring(firstId, lastId, "Check saved", "UNKNOWN");
+          assertThatThrownBy(
+                  () ->
+                      states.confirmVersioned(
+                          testId,
+                          first.request().requestId(),
+                          candidate,
+                          candidate(first).artifactHash(),
+                          first.request().sourceRevision(),
+                          first.request().configurationRevision(),
+                          reviewed,
+                          OWNER))
+              .isInstanceOf(StudioConflictException.class);
+          assertThatThrownBy(
+                  () ->
+                      states.confirm(
+                          testId,
+                          candidate,
+                          candidate(first).artifactHash(),
+                          first.request().sourceRevision(),
+                          first.request().configurationRevision(),
+                          OWNER))
+              .isInstanceOf(StudioConflictException.class);
+          // The surrounding test transaction is shared, so the draft row is the observable: in
+          // production each refused confirm also rolls back its own revision bookkeeping.
+          assertThat(
+                  jdbc.queryForObject(
+                      "SELECT confirmed_revision_id IS NULL FROM ui_tests WHERE id=?",
+                      Boolean.class,
+                      testId))
+              .isTrue();
+        });
+  }
+
+  @Test
+  void versionedConfirmationAcceptsOnlyTheExactCapturedAuthoringHash() {
+    withCutover(
+        () -> {
+          authoring(UUID.randomUUID(), UUID.randomUUID(), "Check saved", "STEP_SCOPED");
+          var first = capture("FULL", true);
+          states.publishCandidate(testId, first.request(), candidate(first));
+          UUID candidate = revision();
+          String reviewed =
+              jdbc.queryForObject(
+                  "SELECT authoring_hash FROM ui_tests WHERE id=?", String.class, testId);
+          assertThatThrownBy(
+                  () ->
+                      states.confirmVersioned(
+                          testId,
+                          first.request().requestId(),
+                          candidate,
+                          candidate(first).artifactHash(),
+                          first.request().sourceRevision(),
+                          first.request().configurationRevision(),
+                          "b".repeat(64),
+                          OWNER))
+              .isInstanceOf(StudioConflictException.class);
+          assertThat(
+                  states.confirmVersioned(
+                      testId,
+                      first.request().requestId(),
+                      candidate,
+                      candidate(first).artifactHash(),
+                      first.request().sourceRevision(),
+                      first.request().configurationRevision(),
+                      reviewed,
+                      OWNER))
+              .isEqualTo(candidate);
+        });
+  }
+
+  @Test
   void configurationOnlyReuseNeedsNoHistoricalPassButTextReversionDoes() {
     withCutover(
         () -> {
@@ -458,6 +677,17 @@ class InferenceCaptureIntegrationTest {
         capture.inputs().configurationJson(),
         capture.inputs().referencesJson(),
         "{\"validatorSchemaVersion\":\"2.0.0\",\"executorVersion\":\"2.0.0\",\"playwrightVersion\":\"1.63.0\"}",
+        OWNER);
+  }
+
+  private void seedCsi(String csi) {
+    jdbc.update(
+        """
+        INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment,status)
+        VALUES(?,'Inference other','Ops','HIGH',?,'Production','OPERATIONAL')
+        ON CONFLICT(id) DO NOTHING
+        """,
+        csi,
         OWNER);
   }
 

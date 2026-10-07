@@ -59,11 +59,19 @@ public final class CompilationPlanner {
     if (explicitFull) {
       return full(current, "EXPLICIT_FULL");
     }
+    // Contract §3 ranks INCREMENTAL_DISABLED second: while the gate is off it is the reported
+    // reason ahead of every baseline/incompatibility reason, and only the source-independent
+    // configuration reuse below remains reachable.
+    if (!enabled) {
+      return unchangedReuse(current, reliableMapping, reviewedScope, fingerprint, baseline)
+          ? reuse(current)
+          : full(current, "INCREMENTAL_DISABLED");
+    }
     if (!reliableMapping) {
       return full(current, "LEGACY_MAPPING");
     }
     if (baseline == null) {
-      return full(current, enabled ? "NO_ELIGIBLE_BASELINE" : "INCREMENTAL_DISABLED");
+      return full(current, "NO_ELIGIBLE_BASELINE");
     }
     requireUnique(baseline.steps());
     if (!baseline.configurationCompatible()) {
@@ -84,13 +92,10 @@ public final class CompilationPlanner {
     }
     // Existing compatible configuration-only candidate reuse does not need a historical pass.
     if (first == current.size() && reviewedScope == baseline.reviewedScope()) {
-      return new Plan(Mode.REUSE, "UNCHANGED_SOURCE", List.of(), first);
+      return reuse(current);
     }
     if (first == current.size()) {
       return full(current, "SCOPE_UNKNOWN");
-    }
-    if (!enabled) {
-      return full(current, "INCREMENTAL_DISABLED");
     }
     if (!baseline.successfulFullExecution()) {
       return full(current, "NO_ELIGIBLE_BASELINE");
@@ -106,6 +111,27 @@ public final class CompilationPlanner {
         "SCOPED_SUFFIX",
         current.subList(first, current.size()).stream().map(Step::id).toList(),
         first);
+  }
+
+  /** The flag-independent REUSE predicate: same mapping, configuration, structure, text, scope. */
+  private static boolean unchangedReuse(
+      List<Step> current,
+      boolean reliableMapping,
+      boolean reviewedScope,
+      String fingerprint,
+      Baseline baseline) {
+    if (!reliableMapping || baseline == null) {
+      return false;
+    }
+    requireUnique(baseline.steps());
+    return baseline.configurationCompatible()
+        && Objects.equals(fingerprint, baseline.fingerprint())
+        && current.equals(baseline.steps())
+        && reviewedScope == baseline.reviewedScope();
+  }
+
+  private static Plan reuse(List<Step> current) {
+    return new Plan(Mode.REUSE, "UNCHANGED_SOURCE", List.of(), current.size());
   }
 
   private static Plan full(List<Step> steps, String reason) {
