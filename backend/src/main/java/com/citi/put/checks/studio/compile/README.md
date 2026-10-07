@@ -1,15 +1,25 @@
 # Studio compile pipeline
 
-Stories 10.8 and 10.9. Turns an author's ordered English steps into a validated, confirmable
-Playwright artifact — once, at authoring time, inside hard bounds — and then makes a principal
-approve one exact revision before anything can run.
+Stories 10.8, 10.9 and 10.49. Turns an author's ordered English steps into a validated, immutable
+Playwright artifact — once, at authoring time, inside hard bounds — and records which explicit
+author action authorized that one exact revision to run (ADR-002 §35).
+
+An explicit v1 compile **is the Run action's preparation**: save never compiles, and the only UI
+caller of `POST /tests/{id}/compile` is the Run gate, which executes the result in the same user
+activation. So the server stamps `trigger = RUN` on the compile request (the route is the trigger;
+no client field sets it), and a validated candidate is accepted for the principal who pressed Run,
+without prior review, recorded as `confirmation_source = RUN`. Any compile whose request does not
+carry `trigger = RUN` for that same principal publishes `AWAITING_CONFIRMATION` and waits for a
+manual confirm, which records `MANUAL`.
 
 ```
-POST /tests/{id}/compile          (or an after-commit enqueue on save)
+POST /tests/{id}/compile          (the Run action; save never compiles)
   │  requireCompilable            10.4's lifecycle guard
   │  authoring limits             400, no compile begun
   │  credential screen            400, no compile begun
-  ├─ beginCompile                 request identity + compile_started_at → COMPILING
+  ├─ beginCompile                 request identity + compile_started_at → COMPILING, and the
+  │                               ui_test_compile_requests row (trigger = RUN, FULL plan,
+  │                               fingerprint, deadline_at) in the same transaction
   └─ bounded pool, no queue       one budget for the WHOLE request, repairs included
        ┌─ attempt 1..3            at most 1 + 2 repairs (§4.3)
        │    prompt assembly       fenced source + pinned syntax reference + output contract
@@ -17,17 +27,23 @@ POST /tests/{id}/compile          (or an after-commit enqueue on save)
        │    LlmGatewayClient      one propose per attempt; a refusal ENDS the loop
        │    artifact version pin  schema-valid is not executable — on every attempt
        │    POST /v1/validate     one call per attempt, no retry, bounded timeout
-       │    ok:true  → publishCandidate  AWAITING_CONFIRMATION — never READY
+       │    ok:true  → publishAcceptedCandidate
+       │                trigger = RUN and confirmer = request created_by
+       │                          → READY, confirmation_source = RUN (one transaction)
+       │                otherwise → AWAITING_CONFIRMATION (exactly as publishCandidate)
+       │                deadline_at rechecked at the lock, the insert, the confirmation
+       │                and the final CAS; past it nothing is published
        └─  ok:false → next attempt, or exhaustion
             publishInvalid        NEEDS_REVISION, the FINAL attempt's diagnostics,
                                   plus `attempts` and `exhausted`
             publishError          STALE, retryable, code only
 
-POST /tests/{id}/confirm-compile
+POST /tests/{id}/confirm-compile  (manual confirmation; the v1 UI has no caller today)
   │  authorization                401/403 before any lifecycle read (ADR-002 §14.4)
   │  requireCompilable            409 TEST_DELETED / TEST_QUARANTINED
   └─ confirm                      two conditional statements, all four fields intrinsic
-                                  → READY, confirmed_by = the authenticated principal, once
+                                  → READY, confirmed_by = the authenticated principal, once,
+                                    confirmation_source = MANUAL
 
 CompileAbandonmentSweeper (every 60s, every replica)
   └─ sweepAbandoned               COMPILING older than the threshold → exactly what
@@ -102,8 +118,9 @@ with that code and does not silently consume a further one.
 
 Every attempt — including a repair — goes back through the same gate rather than around it: the
 `SUPPORTED_ARTIFACT_VERSION` pin and `/v1/validate` run before any publication, a successful repair
-is published through `publishCandidate` to `AWAITING_CONFIRMATION`, and there is **no call path
-from the loop to `CompileStateService.confirm`** (`RepairLoopTest` fails on the reference).
+is published through the same `publishAcceptedCandidate` as a first-attempt candidate (so it is
+accepted only under the Run conditions above), and there is **no call path from the loop to
+`CompileStateService.confirm`** (`RepairLoopTest` fails on the reference).
 
 Exhaustion publishes the **final attempt's** diagnostics only, plus `attempts` and `exhausted`
 (spellings fixed by ADR-002 §16.2). Earlier attempts describe artifacts the author never saw, and
@@ -119,6 +136,16 @@ NULL` is an **application** guard that matches zero rows on a second confirmatio
 never reaches V12's write-once trigger — the difference is a `409` the caller can act on instead of
 a `500`. Each of those five terms has a recorded falsification: delete it and a named test goes
 red.
+
+### Exactly two confirmation writers (ADR-002 §35)
+
+`confirmed_by` is written in exactly two statements, both in `CompileStateService`: the manual
+`confirm` (`confirmation_source = 'MANUAL'`) and the Run auto-accept inside the publication
+transaction (`confirmation_source = 'RUN'`), reached only when the request row's server-captured
+`trigger` is `RUN` and the confirmer is that request's `created_by`. `NoAutoConfirmTest` scans every
+production file, this class included, and fails on a third writer. V29 makes
+`confirmation_source` write-once with the first confirmation. Revisions confirmed before V29 read
+`NULL` ("unknown") and are never backfilled.
 
 ### Credential patterns are not a proof
 

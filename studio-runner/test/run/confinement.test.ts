@@ -256,7 +256,8 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   // test/contract.test.ts independently checks the current runtime producers against them.
   // Re-anchored for 10.27's gate finding: description cross-ref "section 29" → "§30" only.
   // Re-anchored by 10.48 (ADR-002 §13, O-22 execute check): `executeTest` description text only.
-  const BASE_SHA256 = 'bc1869b563dc13cecbf101c34303ec46ff11be85bf28e613efed4130864741e1';
+  // Re-anchored by 10.49 (ADR-002 §35/§13): `compileTest`/`confirmCompile` text, `deprecated` removed.
+  const BASE_SHA256 = 'ca98f80c590553dc2b453deb110bdec0309ce773eb010ae4eea85e99a6b5fa57';
 
   it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the

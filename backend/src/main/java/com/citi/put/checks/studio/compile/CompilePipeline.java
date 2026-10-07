@@ -64,9 +64,12 @@ import org.springframework.stereotype.Service;
  * at most three {@code propose} calls and at most three {@code /v1/validate} calls, numbered 1, 2,
  * 3 and never repeated. Every attempt — including a repair — passes the {@code
  * SUPPORTED_ARTIFACT_VERSION} pin and {@code /v1/validate} before any publication, and a successful
- * repair is published through the same state-machine gate as a first-attempt candidate. Explicit
- * compile requests publish to {@code AWAITING_CONFIRMATION}; save-triggered compiles atomically
- * accept the validated revision and publish {@code READY}. Invalid or failed attempts never take
+ * repair is published through the same state-machine gate as a first-attempt candidate. An explicit
+ * v1 compile is the Run action's preparation (ADR-002 §35): {@code beginCompile} stores its compile
+ * request with the server-stamped {@code trigger = RUN}, and {@code publishAcceptedCandidate}
+ * accepts the validated revision for the requesting principal and publishes {@code READY} with
+ * {@code confirmation_source = RUN}, in one transaction. A compile whose request is not {@code RUN}
+ * for that principal publishes {@code AWAITING_CONFIRMATION}. Invalid or failed attempts never take
  * either path.
  *
  * <p>The settlement is re-checked between <em>every</em> pair of calls in the loop, not only once
@@ -144,9 +147,12 @@ public class CompilePipeline {
    * to {@code COMPILING} and then failed. Only then is the request identity persisted and the
    * attempt submitted.
    *
-   * <p>A candidate that passes validation is accepted for the requesting principal and published
-   * {@code READY} in one transaction. The author asked for this revision to be prepared by pressing
-   * Run, so a second confirmation step would ask the same question twice.
+   * <p>The route is the trigger (ADR-002 §35.3): the compile request is stored with {@code trigger
+   * = RUN}, the FULL plan, the compilation fingerprint and a {@code deadline_at} from the
+   * request-owned budget. A candidate that passes validation is then accepted for the requesting
+   * principal and published {@code READY} in one transaction, recorded as a Run confirmation
+   * without prior review ({@code confirmation_source = RUN}). The author asked for this revision to
+   * be prepared by pressing Run, so a second confirmation step would ask the same question twice.
    *
    * @param testId the draft to compile
    * @param principal the authenticated user
@@ -168,7 +174,14 @@ public class CompilePipeline {
     authoringLimits.requireWithinLimits(inputs.orderedSource());
     credentialScreen.requireNoInlineCredentials(inputs.orderedSource());
 
-    CompileRequest request = compileStateService.beginCompile(testId);
+    // Story 10.49: the request row (trigger = RUN, FULL plan, fingerprint, deadline_at from the
+    // request-owned budget) is written in beginCompile's transaction. No prompt byte depends on it.
+    CompileRequest request =
+        compileStateService.beginCompile(
+            testId,
+            inputs,
+            compilationFingerprint(gatewayClient.compilationSettings(), runtimePin),
+            properties.pipeline().attemptBudget());
     if (contextInputs != null && !contextInputs.matches(request)) {
       publishError(testId, request, CompileErrorCode.COMPILE_INTERNAL_ERROR);
       return request;

@@ -107,6 +107,8 @@ class CompilePipelineSourceAdmissionTest {
   private void assertNothingStarted() {
     verify(state).requireCompilable(TEST_ID);
     verify(state, never()).beginCompile(any());
+    // Story 10.49: the Run entry that also writes the compile request row.
+    verify(state, never()).beginCompile(any(), any(), any(), any());
     verifyNoInteractions(executor, gateway, runner);
   }
 }

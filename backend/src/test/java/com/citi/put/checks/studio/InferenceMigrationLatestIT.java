@@ -23,7 +23,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Story 10.23 AC-5 on the <em>current</em> Flyway head rather than V18: V18 is followed by V20–V27
+ * Story 10.23 AC-5 on the <em>current</em> Flyway head rather than V18: V18 is followed by V20–V29
  * in the ordinary startup path while V19 remains manually staged, so the additive guarantees, the
  * baseline query and the writer cutover are re-proven against the schema a real deployment actually
  * reaches. Every case runs in a transaction that is rolled back.
@@ -95,7 +95,18 @@ class InferenceMigrationLatestIT {
        ORDER BY r.created_at DESC, r.id DESC LIMIT 1
       """;
 
-  /** The HEAD legacy publisher statement ({@code CompileStateService.INSERT_REVISION}). */
+  /**
+   * The content-identity publisher statement ({@code CompileStateService.INSERT_REVISION}).
+   *
+   * <p>Story 10.49 (AC-20), reconciled rather than deleted: this is still the statement production
+   * uses <em>before</em> V19, for both publishers, because {@code
+   * InferenceCaptureStore.requestIdentityAvailable()} is false there. After V19 the capability is
+   * true and both publishers (including the V1 Run path's {@code publishAcceptedCandidate}) select
+   * the captured writer instead, so no production path issues this statement after the cutover. Its
+   * rejection below is therefore still the correct assertion: it is the retired pre-cutover shape
+   * failing loudly, not the live writer. {@code RunCompileAfterV19Test} proves the live chain
+   * reaches {@code READY} after V19.
+   */
   private static final String LEGACY_WRITER =
       "INSERT INTO ui_test_revisions(test_id,csi_id,source_revision,configuration_revision,"
           + "source,source_hash,artifact,artifact_hash,artifact_schema_version,configuration,"
@@ -288,7 +299,10 @@ class InferenceMigrationLatestIT {
    */
   @Test
   void everyRevisionColumnExceptFirstConfirmationIsImmutableOnTheHeadSchema() throws SQLException {
-    List<String> mutableByDesign = List.of("confirmed_by", "confirmed_at");
+    // Story 10.49 / V29: confirmation_source is first-confirmation bookkeeping (V27 contract: the
+    // exclusion array and this allow-list change together). Its write-once rule is proven in
+    // confirmationSourceIsWriteOnceAndOnlyWithTheFirstConfirmation.
+    List<String> mutableByDesign = List.of("confirmed_by", "confirmed_at", "confirmation_source");
     try (Connection c = transaction();
         Statement s = c.createStatement()) {
       UUID request = insertRequest(c, TEST_ID, CSI, 2, LEGACY_REVISION, FINGERPRINT);
@@ -756,6 +770,133 @@ class InferenceMigrationLatestIT {
     }
   }
 
+  /** Story 10.49 AC-1: the server-captured trigger is closed to C0-A3's set and immutable. */
+  @Test
+  void compileRequestTriggerIsClosedToTheC0SetAndImmutable() throws SQLException {
+    try (Connection c = transaction()) {
+      for (String trigger : List.of("RUN", "COMPILE_CHANGES", "REBUILD_ALL")) {
+        UUID request = insertRequest(c, TEST_ID, CSI, 2, null, FINGERPRINT);
+        reject(
+            c,
+            "UPDATE ui_test_compile_requests SET \"trigger\"='"
+                + trigger
+                + "'"
+                + " WHERE request_id='"
+                + request
+                + "'",
+            "immutable");
+        UUID stamped = insertRequest(c, TEST_ID, CSI, 2, null, FINGERPRINT, trigger);
+        assertThat(
+                scalar(
+                    c,
+                    "SELECT \"trigger\" FROM ui_test_compile_requests WHERE request_id='"
+                        + stamped
+                        + "'"))
+            .isEqualTo(trigger);
+        for (String other : List.of("RUN", "COMPILE_CHANGES", "REBUILD_ALL")) {
+          reject(
+              c,
+              "UPDATE ui_test_compile_requests SET \"trigger\"='"
+                  + other
+                  + "'"
+                  + " WHERE request_id='"
+                  + stamped
+                  + "'",
+              "immutable");
+        }
+        reject(
+            c,
+            "UPDATE ui_test_compile_requests SET \"trigger\"=NULL WHERE request_id='"
+                + stamped
+                + "'",
+            "immutable");
+      }
+      for (String outside : List.of("SCHEDULED", "MANUAL", "run")) {
+        var savepoint = c.setSavepoint();
+        assertThatThrownBy(() -> insertRequest(c, TEST_ID, CSI, 2, null, FINGERPRINT, outside))
+            .isInstanceOf(SQLException.class)
+            .hasMessageContaining("ck_ui_test_compile_requests_trigger");
+        c.rollback(savepoint);
+      }
+      c.rollback();
+    }
+  }
+
+  /**
+   * Story 10.49 AC-2: {@code confirmation_source} is set only by the first confirmation, together
+   * with {@code confirmed_by}, and can never be written again.
+   */
+  @Test
+  void confirmationSourceIsWriteOnceAndOnlyWithTheFirstConfirmation() throws SQLException {
+    try (Connection c = transaction();
+        Statement s = c.createStatement()) {
+      UUID request = insertRequest(c, TEST_ID, CSI, 2, null, FINGERPRINT);
+      UUID revision = UUID.randomUUID();
+      s.executeUpdate(candidate(revision, request, "9".repeat(64), PROVENANCE, null));
+      String where = " WHERE id='" + revision + "'";
+      // Not without a confirmation, and only RUN or MANUAL.
+      reject(
+          c,
+          "UPDATE ui_test_revisions SET confirmation_source='RUN'" + where,
+          "ck_ui_test_revisions_confirmation_source");
+      reject(
+          c,
+          "UPDATE ui_test_revisions SET confirmed_by='first',confirmed_at=NOW(),"
+              + "confirmation_source='SYSTEM'"
+              + where,
+          "ck_ui_test_revisions_confirmation_source");
+      // The first confirmation may set it.
+      assertThat(
+              s.executeUpdate(
+                  "UPDATE ui_test_revisions SET confirmed_by='first',confirmed_at=NOW(),"
+                      + "confirmation_source='RUN'"
+                      + where))
+          .isEqualTo(1);
+      // A second write, a change or a clear is rejected 23514.
+      for (String rewrite :
+          List.of(
+              "confirmation_source='MANUAL'",
+              "confirmation_source=NULL",
+              "confirmation_source='RUN',confirmed_by='second'")) {
+        reject(c, "UPDATE ui_test_revisions SET " + rewrite + where, "write-once");
+        assertThat(sqlState(c, "UPDATE ui_test_revisions SET " + rewrite + where))
+            .isEqualTo("23514");
+      }
+      // A row confirmed before V29 keeps NULL and cannot be backfilled afterwards.
+      reject(
+          c,
+          "UPDATE ui_test_revisions SET confirmation_source='MANUAL' WHERE id='"
+              + LEGACY_REVISION
+              + "'",
+          "write-once");
+      c.rollback();
+    }
+  }
+
+  /** Story 10.49 AC-3: V29 backfills nothing; pre-V29 confirmations read NULL ("unknown"). */
+  @Test
+  void v29BackfillsNoConfirmationSourceOrTrigger() throws SQLException {
+    try (Connection c = connect()) {
+      assertThat(
+              scalar(
+                  c,
+                  "SELECT confirmed_by||':'||coalesce(confirmation_source,'NULL')"
+                      + " FROM ui_test_revisions WHERE id='"
+                      + LEGACY_REVISION
+                      + "'"))
+          .isEqualTo("inference@citi.com:NULL");
+      assertThat(
+              scalar(
+                  c,
+                  "SELECT count(*) FROM ui_test_revisions WHERE confirmation_source IS NOT NULL"))
+          .isEqualTo("0");
+      assertThat(
+              scalar(
+                  c, "SELECT count(*) FROM ui_test_compile_requests WHERE \"trigger\" IS NOT NULL"))
+          .isEqualTo("0");
+    }
+  }
+
   // ---------------------------------------------------------------------------------------------
 
   private static void seedOwners(Statement s) throws SQLException {
@@ -928,6 +1069,19 @@ class InferenceMigrationLatestIT {
     }
   }
 
+  /** The SQLSTATE a statement fails with (then undone), or null when it succeeds. */
+  private static String sqlState(Connection c, String sql) throws SQLException {
+    var savepoint = c.setSavepoint();
+    try (Statement s = c.createStatement()) {
+      s.execute(sql);
+      return null;
+    } catch (SQLException e) {
+      return e.getSQLState();
+    } finally {
+      c.rollback(savepoint);
+    }
+  }
+
   private static String scalar(Connection c, String sql) throws SQLException {
     try (Statement s = c.createStatement();
         ResultSet r = s.executeQuery(sql)) {
@@ -960,6 +1114,18 @@ class InferenceMigrationLatestIT {
   private static UUID insertRequest(
       Connection c, UUID test, String csi, int sourceRevision, UUID baseline, String fingerprint)
       throws SQLException {
+    return insertRequest(c, test, csi, sourceRevision, baseline, fingerprint, null);
+  }
+
+  private static UUID insertRequest(
+      Connection c,
+      UUID test,
+      String csi,
+      int sourceRevision,
+      UUID baseline,
+      String fingerprint,
+      String trigger)
+      throws SQLException {
     UUID id = UUID.randomUUID();
     try (Statement s = c.createStatement()) {
       s.executeUpdate(
@@ -967,7 +1133,7 @@ class InferenceMigrationLatestIT {
               + "configuration_revision,source,source_hash,authoring_snapshot,authoring_hash,"
               + "scope_reviewed_by,scope_reviewed_at,configuration,\"references\","
               + "compilation_fingerprint,compilation_plan,baseline_revision_id,created_by,"
-              + "deadline_at) VALUES('"
+              + "deadline_at,\"trigger\") VALUES('"
               + id
               + "','"
               + test
@@ -989,7 +1155,9 @@ class InferenceMigrationLatestIT {
               + fingerprint
               + "','{\"selectedMode\":\"FULL\"}',"
               + (baseline == null ? "NULL" : "'" + baseline + "'")
-              + ",'inference@citi.com',NOW()+INTERVAL '4 minutes')");
+              + ",'inference@citi.com',NOW()+INTERVAL '4 minutes',"
+              + (trigger == null ? "NULL" : "'" + trigger + "'")
+              + ")");
     }
     return id;
   }

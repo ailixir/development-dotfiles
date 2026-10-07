@@ -34,13 +34,21 @@ final class InferenceCaptureStore {
             Boolean.class));
   }
 
+  /**
+   * Writes the immutable compile request row for {@code request} inside the caller's transaction.
+   *
+   * @param trigger the server-captured trigger (V29, C0-A3): {@code RUN} for every V1 compile
+   *     (story 10.49, ADR-002 §35.3: the route is the trigger), or {@code null} when the caller has
+   *     no trigger to state. Never taken from a request body; {@code null} is never auto-accepted.
+   */
   CompileStateService.Capture persist(
       CompileRequest request,
       CompileInputs inputs,
       String fingerprint,
       Duration duration,
       String requestedMode,
-      boolean incrementalEnabled) {
+      boolean incrementalEnabled,
+      String trigger) {
     Map<String, Object> metadata =
         jdbc.queryForMap(
             """
@@ -201,10 +209,10 @@ final class InferenceCaptureStore {
           (request_id,test_id,csi_id,source_revision,configuration_revision,source,source_hash,
            authoring_snapshot,authoring_hash,scope_reviewed_by,scope_reviewed_at,
            configuration,"references",compilation_fingerprint,compilation_plan,
-           baseline_revision_id,created_by,deadline_at)
+           baseline_revision_id,created_by,deadline_at,"trigger")
         VALUES (?,?,?,?,?,CAST(? AS jsonb),?,CAST(? AS jsonb),?,?,?,
                 CAST(? AS jsonb),CAST(? AS jsonb),?,CAST(? AS jsonb),?,?,
-                NOW() + make_interval(secs => ?))
+                NOW() + make_interval(secs => ?),?)
         """,
         request.requestId(),
         inputs.testId(),
@@ -223,7 +231,8 @@ final class InferenceCaptureStore {
         planJson.toString(),
         baseline == null ? null : baseline.revisionId(),
         inputs.principal(),
-        duration.toMillis() / 1000.0d);
+        duration.toMillis() / 1000.0d,
+        trigger);
     return new CompileStateService.Capture(
         request,
         inputs,

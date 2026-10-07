@@ -14,17 +14,23 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 /**
- * Story 10.9 AC-21 — <b>no production auto-confirmation and no temporary gate bypass exists.</b>
+ * Confirmation writers — <b>exactly two exist: the manual {@code confirm} and the Run
+ * auto-accept</b> (ADR-002 §35.5 item 3, story 10.49 AC-15).
  *
- * <p>Epic 10's release ordering is explicit: "No temporary gate bypass or production
- * auto-confirmation is allowed", and §10.8's third acceptance bullet says "no production
- * auto-confirm fallback exists". Story 10.8 AC-26 closed the readiness half; this closes the
- * confirmation half.
+ * <p>This class was written for story 10.9 AC-21 ("no production auto-confirmation exists"). That
+ * criterion is <b>superseded</b> by ADR-002 §35: Run is the confirming act (DEC-OQ3, C0-A3), and a
+ * V1 Run compile is accepted inside its own publication transaction when, and only when, its
+ * request's server-captured {@code trigger} is {@code RUN} and the confirmer is the request's
+ * {@code created_by}. The earlier version skipped {@code CompileStateService} — where that
+ * auto-accept lives as inline SQL — and its statement check was satisfied by either writer, so it
+ * was green while the property it named was false (§35.1 item 6). The scan below includes {@code
+ * CompileStateService} and tells the two statements apart by the {@code confirmation_source} each
+ * writes.
  *
- * <p>Two properties, and both are scans rather than behavioural tests, deliberately. A behavioural
- * test can show that no auto-confirmation happened on the paths it exercised; the criterion is that
- * no such path <em>exists</em>, and the failure mode is a <em>new</em> one that no behavioural test
- * can anticipate.
+ * <p>The properties stay scans rather than behavioural tests, deliberately: a behavioural test
+ * shows what happened on the paths it exercised, and the failure mode here is a <em>new</em> writer
+ * no behavioural test anticipates. The conditions under which the Run writer fires are proven
+ * behaviourally in {@code RunConfirmationTest}.
  */
 class NoAutoConfirmTest {
 
@@ -35,6 +41,21 @@ class NoAutoConfirmTest {
    * A call to {@code confirm(...)} on any receiver — never the declaration, never a longer name.
    */
   private static final Pattern CONFIRM_CALL = Pattern.compile("\\.\\s*confirm\\s*\\(");
+
+  /**
+   * A write of the confirmation identity: SQL {@code SET confirmed_by =}, {@code , confirmed_by =}
+   * in a multi-column {@code SET}, an {@code INSERT INTO ui_test_revisions} column list naming
+   * {@code confirmed_by}, or a JPA {@code setConfirmedBy(}. Case-insensitive.
+   */
+  private static final Pattern CONFIRMATION_WRITE =
+      Pattern.compile(
+          "(?i)(\\bset\\s+confirmed_by\\s*=|,\\s*confirmed_by\\s*=|setconfirmedby\\s*\\("
+              + "|insert\\s+into\\s+ui_test_revisions\\s*\\([^)]*\\bconfirmed_by\\b)");
+
+  private static final String MANUAL_WRITER =
+      "SET confirmed_by = ?, confirmed_at = NOW(), confirmation_source = 'MANUAL'";
+  private static final String RUN_WRITER =
+      "SET confirmed_by = ?, confirmed_at = NOW(), confirmation_source = 'RUN'";
 
   private static final Path APPLICATION_YML =
       Path.of("src", "main", "resources", "application.yml");
@@ -78,6 +99,63 @@ class NoAutoConfirmTest {
     assertThat(callsConfirm("test.setConfirmedRevisionId(id);"))
         .as("nor on an unrelated identifier that merely contains the word")
         .isFalse();
+  }
+
+  /** The writer detector, exercised before it is trusted: an absence below is an absence. */
+  @Test
+  void theConfirmationWriterDetectorMatchesEveryWriteShape() {
+    for (String write :
+        List.of(
+            "UPDATE ui_test_revisions SET confirmed_by = ?, confirmed_at = NOW()",
+            "update ui_test_revisions set confirmed_by='system'",
+            "UPDATE ui_test_revisions SET confirmed_at = NOW(), confirmed_by = ?",
+            "revision.setConfirmedBy(principal);",
+            "INSERT INTO ui_test_revisions (id, test_id, confirmed_by, confirmed_at) VALUES")) {
+      assertThat(confirmationWrites(write)).as("must detect %s", write).isEqualTo(1);
+    }
+    assertThat(confirmationWrites("WHERE confirmed_by IS NULL AND confirmed_at IS NULL"))
+        .as("a predicate on the column is not a write")
+        .isZero();
+    assertThat(confirmationWrites("SELECT confirmed_by FROM ui_test_revisions")).isZero();
+  }
+
+  /**
+   * ADR-002 §35.5 item 3: exactly two confirmation writers exist in production code — the manual
+   * {@code confirm} ({@code MANUAL}) and the Run auto-accept ({@code RUN}) — and both are in {@code
+   * CompileStateService}, which this scan does <b>not</b> skip.
+   */
+  @Test
+  void exactlyTwoConfirmationWritersExistTheManualConfirmAndTheRunAutoAccept() throws IOException {
+    List<String> writers = new ArrayList<>();
+    for (Path file : javaFiles(MAIN)) {
+      String source = stripComments(Files.readString(file, StandardCharsets.UTF_8));
+      int count = confirmationWrites(source);
+      for (int i = 0; i < count; i++) {
+        writers.add(file.getFileName().toString());
+      }
+    }
+    assertThat(writers)
+        .as(
+            "confirmed_by is written only by the manual confirm and the Run auto-accept; a third"
+                + " writer is an unreviewed confirmation path (ADR-002 §35)")
+        .containsExactly("CompileStateService.java", "CompileStateService.java");
+
+    String service = stripComments(Files.readString(STATE_SERVICE, StandardCharsets.UTF_8));
+    assertThat(occurrences(service, MANUAL_WRITER)).as("one MANUAL writer").isEqualTo(1);
+    assertThat(occurrences(service, RUN_WRITER)).as("one RUN writer").isEqualTo(1);
+    assertThat(methodBody(service, "public UUID confirm("))
+        .as("the MANUAL writer is the manual confirm transition")
+        .contains(MANUAL_WRITER)
+        .doesNotContain(RUN_WRITER);
+    String publish = methodBody(service, "private PublishResult publish(");
+    assertThat(publish)
+        .as("the RUN writer is the Run auto-accept inside the publication transaction")
+        .contains(RUN_WRITER)
+        .doesNotContain(MANUAL_WRITER);
+    assertThat(publish.substring(0, publish.indexOf(RUN_WRITER)))
+        .as("and it is reached only through the C0-A3 condition")
+        .contains("boolean runAccepts = runRequested && runConfirms(")
+        .contains("if (runAccepts)");
   }
 
   /**
@@ -177,8 +255,8 @@ class NoAutoConfirmTest {
     }
 
     assertThat(stripComments(Files.readString(STATE_SERVICE, StandardCharsets.UTF_8)))
-        .as("and the statement binds it rather than writing a literal")
-        .contains("SET confirmed_by = ?, confirmed_at = NOW()");
+        .as("and the manual statement binds it rather than writing a literal")
+        .contains(MANUAL_WRITER);
   }
 
   /**
@@ -308,6 +386,35 @@ class NoAutoConfirmTest {
    */
   private static boolean callsConfirm(String source) {
     return CONFIRM_CALL.matcher(source).find();
+  }
+
+  private static int confirmationWrites(String source) {
+    return (int) CONFIRMATION_WRITE.matcher(source).results().count();
+  }
+
+  private static int occurrences(String source, String needle) {
+    int count = 0;
+    for (int at = source.indexOf(needle); at >= 0; at = source.indexOf(needle, at + 1)) {
+      count++;
+    }
+    return count;
+  }
+
+  /** The text of the method whose declaration starts with {@code signature}, braces balanced. */
+  private static String methodBody(String source, String signature) {
+    int start = source.indexOf(signature);
+    assertThat(start).as("method %s exists", signature).isGreaterThan(-1);
+    int open = source.indexOf('{', start);
+    int depth = 0;
+    for (int i = open; i < source.length(); i++) {
+      char c = source.charAt(i);
+      if (c == '{') {
+        depth++;
+      } else if (c == '}' && --depth == 0) {
+        return source.substring(start, i + 1);
+      }
+    }
+    throw new AssertionError("unbalanced braces after " + signature);
   }
 
   private static String stripComments(String source) {

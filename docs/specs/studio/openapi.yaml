@@ -559,10 +559,12 @@ paths:
         last on the request thread (`400`), before any compile request identity is persisted: a
         draft that cannot be compiled must not first be moved to `COMPILING` and then failed.
 
-        A candidate that passes validation is **accepted for the requesting principal and published
-        `READY`** in one transaction: the author asked for this revision to be prepared by pressing
-        Run, and a separate confirmation step would ask the same question twice. `POST
-        /tests/{id}/confirm-compile` is retained for compatibility and is no longer used by the UI.
+        This route is the Run action's preparation, so the server records the compile request with
+        `trigger = RUN`; no request field sets it (ADR-002 §35.3). A candidate that passes validation
+        is **accepted for the requesting principal and published `READY`** in one transaction, and
+        that acceptance is recorded as a Run confirmation without prior review (ADR-002 §35). A
+        compile whose request is not a Run by that same principal is published
+        `AWAITING_CONFIRMATION` instead, for `POST /tests/{id}/confirm-compile`.
 
         `202` therefore means the attempt was *started*, not that it will succeed. Pool saturation
         and gateway failure surface asynchronously as `compileStatus: STALE` carrying
@@ -626,12 +628,10 @@ paths:
     post:
       tags: [tests]
       operationId: confirmCompile
-      summary: Confirm the current compiled candidate (deprecated)
-      deprecated: true
+      summary: Confirm the current compiled candidate
       description: |
-        Retained for compatibility. `POST /tests/{id}/compile` now accepts a valid candidate for the
-        requesting principal, so no draft is left in `AWAITING_CONFIRMATION` by the current flow and
-        this route has no caller in the UI.
+        Manual confirmation of the exact candidate the author reviewed. The v1 UI has no caller
+        today.
       x-implemented-by: '10.9'
       parameters:
         - { $ref: '#/components/parameters/TestId' }

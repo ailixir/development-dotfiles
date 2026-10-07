@@ -1554,19 +1554,22 @@ class StudioCoRunIT {
 
   /**
    * Waits for a compile to settle and fails with an attribution unless it published {@code READY}
-   * with the revision already accepted.
+   * with the revision already accepted <em>as a Run confirmation</em>.
    *
-   * <p>Since story 10.44 a validated compile stores and accepts its candidate in one transaction
-   * ({@code CompileStateService.publishAcceptedCandidate}); there is no {@code
-   * AWAITING_CONFIRMATION} step left for the harness to drive. What the harness's old explicit
-   * confirm used to prove is asserted directly instead: an accepted revision exists, it is the
-   * test's {@code confirmed_revision_id}, and it was confirmed by the test owner. {@code
-   * NEEDS_REVISION} and {@code STALE} are still waited for so a bad compile fails fast with its own
-   * attribution rather than as a timeout.
+   * <p>ADR-002 §35 (story 10.49): {@code POST /tests/{id}/compile} is the Run action's preparation,
+   * so the server stamps {@code trigger = RUN} on its compile request, and {@code
+   * CompileStateService.publishAcceptedCandidate} accepts the validated candidate in its
+   * publication transaction only for that trigger and that request's own principal, recording
+   * {@code confirmation_source = RUN}. Any other compile publishes {@code AWAITING_CONFIRMATION}.
+   * The harness never drives a confirm, so {@code AWAITING_CONFIRMATION} here means the Run
+   * auto-accept did not happen: it is a terminal status that fails fast with its own attribution,
+   * as {@code NEEDS_REVISION} and {@code STALE} do, rather than as a timeout. What the old explicit
+   * confirm proved is asserted directly: an accepted revision exists, it is the test's {@code
+   * confirmed_revision_id}, it was confirmed by the test owner, and its source is {@code RUN}.
    */
   private void awaitCompiledToReadyAndAccepted(
       UUID id, String component, String subject, Supplier<String> detail) {
-    awaitCompileStatusIn(id, Set.of("READY", "NEEDS_REVISION", "STALE"));
+    awaitCompileStatusIn(id, Set.of("READY", "AWAITING_CONFIRMATION", "NEEDS_REVISION", "STALE"));
     String status = compileStatus(id);
     if (!"READY".equals(status)) {
       throw new CoRunFailure(
@@ -1581,6 +1584,9 @@ class StudioCoRunIT {
     assertThat(confirmedBy(candidate))
         .as("the accepted revision must be confirmed by the test owner")
         .isEqualTo(OWNER);
+    assertThat(confirmationSource(candidate))
+        .as("the acceptance must be recorded as a Run confirmation (ADR-002 §35)")
+        .isEqualTo("RUN");
   }
 
   private void awaitCompileStatusIn(UUID id, Set<String> accepted) {
@@ -1632,6 +1638,11 @@ class StudioCoRunIT {
   private String confirmedBy(UUID revisionId) {
     return jdbc.queryForObject(
         "SELECT confirmed_by FROM ui_test_revisions WHERE id = ?", String.class, revisionId);
+  }
+
+  private String confirmationSource(UUID revisionId) {
+    return jdbc.queryForObject(
+        "SELECT confirmation_source FROM ui_test_revisions WHERE id = ?", String.class, revisionId);
   }
 
   private UUID admissionId(UUID executionId) {

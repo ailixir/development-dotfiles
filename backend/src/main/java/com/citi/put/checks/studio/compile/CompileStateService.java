@@ -45,6 +45,9 @@ public class CompileStateService {
 
   private static final String STALE_CANDIDATE = "STALE_CANDIDATE";
 
+  /** The only trigger V1 captures, and the only one that auto-accepts (ADR-002 §35.3). */
+  private static final String RUN_TRIGGER = "RUN";
+
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private static final String INSERT_REVISION =
@@ -163,14 +166,27 @@ public class CompileStateService {
           "INFERENCE_CUTOVER_REQUIRED",
           "Versioned compilation requires the compatible publisher cutover");
     }
+    // No trigger is stated here: this versioned entry has no src/main caller, and the v2 flows
+    // that will call it must capture their own (ADR-002 §35.3). NULL is never auto-accepted.
     return store.persist(
-        beginCompile(testId), inputs, fingerprint, duration, requestedMode, incrementalEnabled);
+        beginCompile(testId),
+        inputs,
+        fingerprint,
+        duration,
+        requestedMode,
+        incrementalEnabled,
+        null);
   }
 
   /**
-   * Persists a new compile request identity and moves the draft to {@code COMPILING}, returning the
-   * source and configuration revisions the compile is started for. Single statement, one
-   * transaction (AC-10).
+   * Persists a new compile request identity on the draft and moves it to {@code COMPILING},
+   * returning the source and configuration revisions the compile is started for. Single statement,
+   * one transaction (AC-10).
+   *
+   * <p>This writes no {@code ui_test_compile_requests} row. It is the primitive the V1 Run entry
+   * {@link #beginCompile(UUID, CompileInputs, String, Duration)} and the versioned {@link #capture}
+   * build on; a compile begun through it alone has no captured trigger and is therefore never
+   * auto-accepted by {@link #publishAcceptedCandidate} (story 10.49).
    */
   @Transactional
   public CompileRequest beginCompile(UUID testId) {
@@ -199,6 +215,34 @@ public class CompileStateService {
   }
 
   /**
+   * Begins a V1 Run compile: the draft transition of {@link #beginCompile(UUID)} plus the immutable
+   * compile request row, in one transaction (story 10.49 AC-5; decision 2026-10-07 item 1a).
+   *
+   * <p>The row carries the existing V18 columns for a FULL plan — the captured source,
+   * configuration and references the prompt is built from, {@code compilation_fingerprint}, and
+   * {@code deadline_at = NOW() + budget} — and the server-stamped {@code trigger = RUN}. The route
+   * is the trigger (ADR-002 §35.3): nothing a client sends can set it. The row is what makes the
+   * publication deadline recheck real (it was vacuous with no row) and what the post-V19 captured
+   * writer links the revision to. It changes no prompt byte: the synthetic FULL step ids recorded
+   * in the plan are the ones the prompt already uses.
+   *
+   * @param testId the draft
+   * @param inputs the compile inputs the attempt's prompt is built from (and the requesting
+   *     principal, recorded as {@code created_by})
+   * @param fingerprint {@link CompilePipeline#compilationFingerprint}, 64 lowercase hex
+   * @param budget the request-owned compile budget ({@code studio.compile.pipeline.attempt-budget})
+   * @return the persisted request identity and the revisions it was started for
+   */
+  @Transactional
+  public CompileRequest beginCompile(
+      UUID testId, CompileInputs inputs, String fingerprint, Duration budget) {
+    CompileRequest request = beginCompile(testId);
+    new InferenceCaptureStore(jdbc)
+        .persist(request, inputs, fingerprint, budget, "FULL", false, RUN_TRIGGER);
+    return request;
+  }
+
+  /**
    * Stores a validated candidate as an immutable revision and makes it the current candidate, but
    * only while the supplied compile request identity and <em>both</em> revisions it was started for
    * are still current (AC-8, AC-11). Otherwise nothing is written and {@link
@@ -207,6 +251,40 @@ public class CompileStateService {
   @Transactional
   public PublishResult publishCandidate(
       UUID testId, CompileRequest request, CandidateRevision candidate) {
+    return publish(testId, request, candidate, false);
+  }
+
+  /**
+   * Publishes the validated candidate of a V1 Run compile and, when the Run itself is the
+   * confirming act, accepts it in the same transaction (ADR-002 §35; C0-A3 as clarified by §35.3).
+   *
+   * <p>Pressing Run is an explicit, authenticated author action that prepares and then executes the
+   * draft. Its compile is accepted <b>without prior review</b> only when both C0-A3 conditions
+   * hold, read under the publication lock from the request row {@link #beginCompile(UUID,
+   * CompileInputs, String, Duration)} wrote: the request's server-captured {@code trigger} is
+   * {@code RUN}, and the confirmer ({@link CandidateRevision#createdBy()}) is the request's own
+   * {@code created_by}. The revision then records {@code confirmation_source = RUN}, so the audit
+   * can tell it from a reviewed ({@code MANUAL}) confirmation, and the draft becomes {@code READY}.
+   * In every other case — another trigger, no captured trigger, another principal — the candidate
+   * is published exactly as {@link #publishCandidate} publishes it, to {@code
+   * AWAITING_CONFIRMATION}.
+   *
+   * <p>Both outcomes share {@link #publishCandidate}'s path: the request/revision guard is locked
+   * before a revision is inserted (an edit or newer compile discards the result without leaving an
+   * orphan revision), the request's {@code deadline_at} is rechecked before the lock, before the
+   * insert, before each confirmation statement and in the final CAS, and the revision is linked to
+   * its request through the captured writer when the V19 capability is present. On the accepting
+   * path the reference policy is re-verified from the persisted immutable row before readiness is
+   * granted, so only a validated, current and verifiable revision can reach {@code READY}.
+   */
+  @Transactional
+  public PublishResult publishAcceptedCandidate(
+      UUID testId, CompileRequest request, CandidateRevision candidate) {
+    return publish(testId, request, candidate, true);
+  }
+
+  private PublishResult publish(
+      UUID testId, CompileRequest request, CandidateRevision candidate, boolean runRequested) {
     requireCompilable(testId);
     requireCandidateMatchesRequest(request, candidate);
     if (!boundPublicationStatements(request)) {
@@ -219,11 +297,33 @@ public class CompileStateService {
       return PublishResult.DISCARDED_OUT_OF_ORDER;
     }
     String csiId = (String) guarded.get(0).get("csi_id");
+    boolean runAccepts = runRequested && runConfirms(testId, request, candidate);
     requirePublicationBudget(request);
     UUID revisionId =
         new InferenceCaptureStore(jdbc).requestIdentityAvailable()
             ? insertCapturedRevision(testId, request, candidate)
             : insertOrReuseRevision(testId, csiId, request.sourceRevision(), candidate);
+
+    if (runAccepts) {
+      if (!persistedReferencePolicyIsVerified(revisionId, testId)) {
+        throw new IllegalStateException(
+            "Validated revision "
+                + revisionId
+                + " does not carry a verifiable immutable reference policy");
+      }
+      requirePublicationBudget(request);
+      // A reused revision that is already confirmed keeps its first confirmation (write-once).
+      jdbc.update(
+          """
+          UPDATE ui_test_revisions
+          SET confirmed_by = ?, confirmed_at = NOW(), confirmation_source = 'RUN'
+          WHERE id = ? AND test_id = ?
+          AND confirmed_by IS NULL AND confirmed_at IS NULL
+          """,
+          candidate.createdBy(),
+          revisionId,
+          testId);
+    }
 
     requirePublicationBudget(request);
     int updated =
@@ -231,7 +331,9 @@ public class CompileStateService {
             """
             UPDATE ui_tests
             SET current_candidate_revision_id = ?,
-            compile_status                = 'AWAITING_CONFIRMATION',
+            confirmed_revision_id         = CASE WHEN ? THEN ? ELSE confirmed_revision_id END,
+            compile_status                = CASE WHEN ? THEN 'READY'
+            ELSE 'AWAITING_CONFIRMATION' END,
             compile_started_at            = NULL,
             compile_error                 = NULL,
             compile_diagnostics           = NULL
@@ -243,87 +345,39 @@ public class CompileStateService {
             AND r.deadline_at <= clock_timestamp())
             """,
             revisionId,
+            runAccepts,
+            revisionId,
+            runAccepts,
             testId,
             request.requestId(),
             request.sourceRevision(),
             request.configurationRevision());
     if (updated != 1) {
-      // Throwing rolls back any inserted revision together with the failed final CAS.
+      // Throwing rolls back any inserted revision and confirmation together with the failed CAS.
       throw new java.util.concurrent.CancellationException("Publication deadline or guard expired");
     }
     return PublishResult.PUBLISHED;
   }
 
   /**
-   * Stores and accepts a validated candidate produced by a save-triggered compile in one
-   * transaction.
-   *
-   * <p>The same request/revision guard used by {@link #publishCandidate} is locked before a
-   * revision is inserted, so an edit or newer compile discards the result without leaving even an
-   * orphan revision. The reference policy is re-verified from the persisted immutable row before
-   * readiness is granted. This keeps save convenient without weakening the fail-closed execution
-   * gate: only a validated, current and verifiable revision can reach {@code READY}.
+   * C0-A3's auto-accept condition, read under the publication lock: the request's server-captured
+   * trigger is {@code RUN} and the confirmer is the principal that created the request. A request
+   * with no row, or a row with no trigger, does not qualify.
    */
-  @Transactional
-  public PublishResult publishAcceptedCandidate(
-      UUID testId, CompileRequest request, CandidateRevision candidate) {
-    requireCompilable(testId);
-    requireCandidateMatchesRequest(request, candidate);
-    List<Map<String, Object>> guarded = lockCurrentRequest(testId, request);
-    if (guarded.isEmpty()) {
-      logDiscard(testId, request);
-      return PublishResult.DISCARDED_OUT_OF_ORDER;
-    }
-
-    String csiId = (String) guarded.get(0).get("csi_id");
-    UUID revisionId = insertOrReuseRevision(testId, csiId, request.sourceRevision(), candidate);
-    if (!persistedReferencePolicyIsVerified(revisionId, testId)) {
-      throw new IllegalStateException(
-          "Validated revision "
-              + revisionId
-              + " does not carry a verifiable immutable reference policy");
-    }
-
-    jdbc.update(
-        """
-        UPDATE ui_test_revisions
-        SET confirmed_by = ?, confirmed_at = NOW()
-        WHERE id = ? AND test_id = ?
-        AND confirmed_by IS NULL AND confirmed_at IS NULL
-        """,
-        candidate.createdBy(),
-        revisionId,
-        testId);
-
-    int updated =
-        jdbc.update(
+  private boolean runConfirms(UUID testId, CompileRequest request, CandidateRevision candidate) {
+    List<Map<String, Object>> rows =
+        jdbc.queryForList(
             """
-            UPDATE ui_tests
-            SET current_candidate_revision_id = ?,
-            confirmed_revision_id         = ?,
-            compile_status                = 'READY',
-            compile_started_at            = NULL,
-            compile_error                 = NULL,
-            compile_diagnostics           = NULL
-            WHERE id = ? AND compile_request_id = ? AND source_revision = ?
-            AND configuration_revision = ?
-            AND deleted_at IS NULL AND quarantined_at IS NULL
+            SELECT "trigger",  created_by
+            FROM ui_test_compile_requests
+            WHERE request_id = ? AND test_id = ?
             """,
-            revisionId,
-            revisionId,
-            testId,
             request.requestId(),
-            request.sourceRevision(),
-            request.configurationRevision());
-    if (updated != 1) {
-      throw new IllegalStateException(
-          "Accepted candidate publication lost its guard for test "
-              + testId
-              + " (request "
-              + request.requestId()
-              + ")");
-    }
-    return PublishResult.PUBLISHED;
+            testId);
+    return rows.size() == 1
+        && RUN_TRIGGER.equals(rows.get(0).get("trigger"))
+        && candidate.createdBy() != null
+        && candidate.createdBy().equals(rows.get(0).get("created_by"));
   }
 
   /**
@@ -454,7 +508,7 @@ public class CompileStateService {
         jdbc.update(
             """
             UPDATE ui_test_revisions
-            SET confirmed_by = ?, confirmed_at = NOW()
+            SET confirmed_by = ?, confirmed_at = NOW(), confirmation_source = 'MANUAL'
             WHERE id = ? AND test_id = ? AND artifact_hash = ?
             AND source_revision = ? AND configuration_revision = ?
             AND confirmed_by IS NULL AND confirmed_at IS NULL
