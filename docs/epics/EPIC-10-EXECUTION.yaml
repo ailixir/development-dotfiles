@@ -1178,6 +1178,9 @@ stories:
   # ── Wave 8 (added by @po 2026-09-17) ── PROD-1, from @qa's carry-forward gate ──
   - id: "10.33"
     title: "Refuse malformed store-bootstrap payloads (PROD-1)"
+    # @po 2026-10-07 close-story: story Done (gate PASS, Quinn, reviewed_revision 829a56f02,
+    # docs/qa/gates/10.33-refuse-malformed-store-bootstrap-payloads.yml). PROD-1 closed in the staging
+    # register. Administrative only; this manifest tracks no story status. [closure-key: 10.33:commit:829a56f02]
     size: S
     wave: 8
     # No unmerged prerequisite. The two reducers and their thunks are pre-Epic-10 frontend code that
@@ -1549,6 +1552,8 @@ stories:
 
   - id: "10.47"
     title: "Realign the co-run harness to the compile-to-READY flow (OBS-H1)"
+    # @po 2026-10-07 close-story: story Done (gate PASS, Quinn, reviewed_revision 27775249b,
+    # docs/qa/gates/10.47-corun-harness-compile-to-ready.yml). Administrative only. [closure-key: 10.47:commit:27775249b]
     # ADDED BY @po 2026-10-07 at validation. Same pattern as 10.35 and 10.45: the story's own Epic row
     # flagged the missing entry for @po. Source: 10.35 gate OBS-H1
     # (docs/qa/gates/10.35-dispatch-service-identity-def-05.yml). 10.44 and 10.46 still have no entries;
@@ -1583,6 +1588,8 @@ stories:
         git log -S claim given its path filter. See the story's PO Readiness section.
   - id: "10.48"
     title: "Restore the CSI execute check on Studio POST /tests/{id}/execute (O-22)"
+    # @po 2026-10-07 close-story: story Done (gate PASS, Quinn, reviewed_revision bc44dc45a,
+    # docs/qa/gates/10.48-restore-execute-authorization-o22.yml). O-22 closed. Administrative only. [closure-key: 10.48:commit:bc44dc45a]
     # ADDED BY @po 2026-10-07 at validation. Same pattern as 10.35, 10.45, 10.47: the story's own Epic row
     # flagged the missing entry for @po. Source: ADR-002 §35.4 and the §13 row of 2026-10-07 (O-22, ruled by
     # @architect "not ratified"); user decision 2026-10-07 "restore the execute check now". Security priority.
@@ -1608,6 +1615,9 @@ stories:
         of scope. See the story's PO Readiness section.
   - id: "10.49"
     title: "Run-confirmed compiles: ADR-002 §35 fix, V1 compile-request capture and V19-safety proof"
+    # @po 2026-10-07 close-story: story Done (gate PASS, Quinn, reviewed_revision 4fdfc4d42,
+    # docs/qa/gates/10.49-run-confirmed-compiles-v29.yml). Applying V19 to shared environments stays
+    # deferred to T-INC (STUDIO-INC-001 decisions.md 2026-10-07, §3 row 5b). Administrative only. [closure-key: 10.49:commit:4fdfc4d42]
     # ADDED BY @po 2026-10-07 at validation. Same pattern as 10.45, 10.47, 10.48. Source: ADR-002 §35.5 and
     # the 2026-10-07 V1+ scope decision (STUDIO-INC-001 decisions.md §3 items 1a + 5a, §4 row S2).
     #
@@ -2280,7 +2290,24 @@ integration_defects:
     # @po" and no manifest entry existed until now: `grep -n "DEF-05" docs/epics/EPIC-10-EXECUTION.yaml`
     # returned nothing. Story 10.19's AC-10 register reads this block by name, so a defect absent here
     # is a defect absent from the epic's final open-items record.
-    status: open
+    # @po 2026-10-07: CLOSED. @qa ruled DEF-05 closable at the 10.35 re-gate (QA loop iteration 2,
+    # PASS at 0d93a9bf1, re_reviews[0].def_05_closure: "CLOSABLE ... Closing is @po's action"). All of
+    # 10.35 AC-1..AC-7 executed and passed on a committed tree, subject to OBS-H5 (an uncommitted V28 in
+    # build/resources during the co-run; low, inferred unable to turn a red green). OBS-1 stays routed to
+    # @pm and is NOT closed by this. The comments below are kept as history.
+    status: fixed
+    fixed_by: >-
+      a19112afb (2026-09-18, Studio v1 WP1: Authorization "Bearer" on POST /v1/runs and DELETE
+      /v1/runs/{id}, SERVICE_IDENTITY_NOT_CONFIGURED pre-flight refusal) plus e79178666 (studio-runner
+      handleRuns writes one redacted `runs.refused` line per refused /v1/runs body, which makes 10.35
+      AC-3 / DEF-01's defect class observable). Both are ancestors of HEAD (git merge-base
+      --is-ancestor, @po 2026-10-07). Gate: docs/qa/gates/10.35-dispatch-service-identity-def-05.yml,
+      gate PASS, reviewer Quinn (@qa), reviewed_revision 0d93a9bf1. Measured by running (tools/corun.sh
+      legs 0, 2, 3 green; admission_id written; malformed body produces a third, distinguishable
+      refusal shape), not by reading.
+    # Not changed by this closure: 10.35's `blocks: ["10.34"]` edge. The gate asks @po to re-rule it
+    # ("the dispatch half is now reachable"); that re-ruling is still owed and is listed as an open item
+    # in EPIC-10-RUN-LOG.md (2026-10-07 session entry).
     # `open` is literal and is NOT a stale field of the DEF-01/DEF-02 kind that closure-plan step 0.2
     # had to true up. The fix is not in this repository's history at all. It exists only as an
     # uncommitted edit in the separate studio-inference program's wt/epic working tree. This field

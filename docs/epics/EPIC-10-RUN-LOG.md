@@ -2516,3 +2516,103 @@ a red result opens a fix story. The full step table is in `EPIC-10-CLOSURE-PLAN.
 **Still unknown:** whether the merged tree passes the four authorization suites, the co-run legs 0–3, or
 any full-suite baseline. `studio-execution.md:80` still names the Vertex AI SDK (flag to @architect, 2.6).
 Whether 10.20–10.27 join this manifest is still the user's call (2.1).
+
+## Session close-out — gates, fixes, deferrals and open items (2026-10-07, @po)
+
+*Append-only. Nothing above is edited. Tree read: `brunobuger/ui-studio` at `7ede4d5e9`. Commit range:
+`git log --oneline 13ec11d1c..HEAD`, which is 40 commits. @po ran no suite for this entry. Every verdict
+below is quoted from its gate file, and every SHA was checked with `git merge-base --is-ancestor … HEAD`
+or comes from `git log`. Handoff consolidation (`.claude/rules/handoff-consolidation.md`) does not apply,
+because `.aiox/handoffs/` is empty.*
+
+### Stories moved to Done this session, and closed administratively (`po-close-story`)
+
+| Story | Gate (reviewer) | Gated revision | Key commits | Closure |
+|---|---|---|---|---|
+| 10.20 | CONCERNS (Morgan, @pm quality_gate) | `829a56f02` | `0aca96d99` gate | closed `[closure-key: 10.20:commit:829a56f02]` |
+| 10.21 | PASS (Aria, @architect) | `829a56f02` (head_sha) | `eae0bca82` gate | closed `[closure-key: 10.21:commit:829a56f02]` |
+| 10.22 | PASS (Aria) | `b40be10d0` (head_sha) | `49c3ef94f` gate | closed `[closure-key: 10.22:commit:b40be10d0]` |
+| 10.27 | CONCERNS (Aria) | `b40be10d0` (head_sha) | `49c3ef94f` gate; `4fcb5a2cb` ADR-002 §13 row | closed `[closure-key: 10.27:commit:b40be10d0]` |
+| 10.33 | PASS (Quinn) | `829a56f02` | `b40be10d0` tests; guard `51ade0f1f` (folded) | closed `[closure-key: 10.33:commit:829a56f02]`; PROD-1 closed |
+| 10.35 | FAIL `b40be10d0` → re-gate PASS (Quinn) | `0d93a9bf1` | `5c8052357` FAIL; `e79178666` fix; `bfc73b967` PASS | **close-story HALTED**, see below. DEF-05 closed |
+| 10.44 | CONCERNS → re-review PASS (Aria) | `0d93a9bf1` (head_sha) | `0d93a9bf1` fix; `8c74743ce` re-review | closed `[closure-key: 10.44:commit:0d93a9bf1]` |
+| 10.47 | PASS (Quinn), co-run 11/11 | `27775249b` | `27775249b`; `530c3ea2a` gate | closed `[closure-key: 10.47:commit:27775249b]` |
+| 10.48 | PASS (Quinn) | `bc44dc45a` | `bc44dc45a`; `cbcd1a9dc` gate | closed `[closure-key: 10.48:commit:bc44dc45a]` |
+| 10.49 | PASS (Quinn) | `4fdfc4d42` | `4fdfc4d42` (V29); `7ede4d5e9` gate | closed `[closure-key: 10.49:commit:4fdfc4d42]` |
+
+- **The 10.35 halt.** The story is `Done` with gate PASS, but none of its AC-1…AC-7 checkboxes is ticked,
+  and they still carry the `(Blocked)` prefix. Under the close-story preconditions, ACs and tasks must be
+  complete, so no closure key was written. Ticking criteria from a run belongs to @qa (the story's own
+  rule, `10.35.story.md:194`). That ticking is owed, and the closure can be re-run once it is done.
+  DEF-05 is closed anyway, because @qa's ruling on it is independent of the checkboxes.
+- **Provenance.** The 10.21, 10.22, 10.27 and 10.44 gates have no `reviewed_revision` field. Their
+  `head_sha` was accepted as the commit binding.
+- **10.33 record drift.** Its Tasks 1–9 checkboxes stay unticked because the story was never dispatched
+  to @dev. AC-1…AC-5 are ticked.
+
+**Not moved and not Done:**
+
+- 10.19 is Ready for Review (CONCERNS).
+- 10.23 is InReview (CONCERNS, held on the external AC-5 items).
+- 10.24 is InProgress and 10.25 is InReview, both with deferral records (below).
+- 10.26 is InReview (CONCERNS held on SPK-01).
+- 10.34 and 10.50 are Ready but not startable.
+
+### Defects found and fixed this session
+
+- **10.23 D1–D3, found by the head-schema migration IT (`701f98f30`).**
+  - D1: V21–V24 had lost V18's deny-by-default revision immutability. V27 restores it (`aef95e314`).
+  - D2: a historical `execution_scope` could be relabelled. V28 makes it immutable after insert (`91ac82b00`), as ruled in `4fcb5a2cb`.
+  - D3: the post-V19 captured writer dropped `reference_policy` and `intent_derivation_version`. Fixed in `571e779e1`.
+  - The rollback floor moved to V28 (`f02e31835`). 10.23 stays InReview on its external AC-5 items (`b71b7334a`).
+- **10.44, secret-origin TOCTOU (S-1).** The secret's origin is now re-checked on the resolved element at fill time (`0d93a9bf1`). S-2 was closed by `4fcb5a2cb`.
+- **10.35, silent runner refusal (AC-3).** The runner now logs one redacted `runs.refused` line per refused `/v1/runs` body (`e79178666`). That makes DEF-01's defect class observable.
+- **O-22, missing execute authorization.** 10.48 restored `canExecute` on `POST /tests/{id}/execute` (`bc44dc45a`).
+- **ADR-002 §35, unconditional compile auto-accept.** Ruled in `ccf3b9743`. 10.49 implements it (`4fdfc4d42`, V29): a compile is Run-confirmed only with a recorded trigger and confirmation source.
+- **V19 hazard.** Applying V19 at the old HEAD broke every V1 Run compile (decision record `450b15e36`). 10.49 makes HEAD V19-safe and corrects the runbook floor. Applying V19 to shared environments stays deferred to T-INC.
+
+**WIP regressions fixed:** `036b31e4e` repaired backend regressions from the scheduling WIP checkpoint
+(STUDIO-SCHED-001), across CompileStateService, StudioServiceWriteAuthorizationTest and ExecutionVideoContractTest.
+
+**DEF-05 and PROD-1 closed.** The manifest's `integration_defects.DEF-05` now reads `status: fixed`, with
+`fixed_by` `a19112afb` + `e79178666` and the gate cited. Both rows of the staging register are closed, and
+the register guard passed before and after the edit. OBS-1 remains with @pm.
+
+**New stories:**
+
+| Story | Purpose | Commit(s) | State |
+|---|---|---|---|
+| 10.47 | co-run harness realigned to compile-to-READY | `5f9023268` | Done |
+| 10.48 | O-22 | `16d48bc9e` | Done |
+| 10.49 | §35 + V1 request capture + V19 safety | `ba9b95550` | Done |
+| 10.50 | R2D2 `anyOf` probe | `ba9b95550` | Ready, blocked on ED-01 and SPK-01 |
+
+**Deferral (user-delegated V1+ decision, `STUDIO-INC-001…/spec/decisions.md`, 2026-10-07).** Both items
+wait for trigger T-INC: measured pilot evidence, plus SPK-01 done, which 10.50 probes.
+- 10.24's AC-8 route half is DEFERRED.
+- 10.25's integrated real-backend QA is DEFERRED.
+
+Neither story is Done and no AC was ticked. Each Status line and Change Log records the deferral. The
+decision record defers "C (v2 stack, `InferenceStudio` mount)" in §3 row 7. It does not name 10.24 or
+10.25. Mapping those two items onto row 7 is the lead's direction, which @po recorded.
+
+### Open items carried
+
+- **External gates.**
+  - ED-01's owner is still `TBD — not assigned in sources`. It blocks 10.50, the live half of 10.26, and 10.5.
+  - ED-02…ED-06 are open, and so are SPK-01…SPK-06. The guard confirms all twelve read open.
+- **Owed by @po.** Re-rule 10.35's `blocks: ["10.34"]` edge, because the dispatch half is now reachable (10.35 gate, `unblocks`).
+- **Owed by @qa.** Tick 10.35 AC-1…AC-7 from the re-gate run. Then close-story can be re-run.
+- **Phase 4.** 10.19 AC-12(b) (A11Y-5) and AC-13 (the nontechnical-user trial) are not done.
+- **Low findings backlog. None is scheduled.**
+
+  | Origin | Finding | Note |
+  |---|---|---|
+  | 10.48 | Idempotency replay. `IdempotencyFilter` replays a cached 2xx without re-authorizing | Either exclude execute from the filter or re-authorize on replay |
+  | 10.48 | TEST-001, MNT-001 | — |
+  | 10.49 | Nullable `trigger` | V30 `CHECK ("trigger" IS NOT NULL) NOT VALID`, and `capture()` takes a required trigger before any v2 caller exists (@data-engineer) |
+  | 10.49 | REL-001 | Sweeper delay after a deadline-refused publication |
+  | 10.44 | S-4, post-fill origin check | Accepted residual. The user did not schedule it |
+  | 10.26 | REL-002 | Denominator dilution |
+  | 10.21 | SR-001…SR-003 | — |
+  | 10.20 | ISSUE-2…ISSUE-4 | Low |
