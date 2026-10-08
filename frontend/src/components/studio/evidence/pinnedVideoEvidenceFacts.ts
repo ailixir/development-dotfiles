@@ -1,4 +1,4 @@
-import type { ExecutionErrorCode, VideoStatus } from '@/types/studio/studioTypes';
+import type { VideoStatus } from '@/types/studio/studioTypes';
 
 /**
  * What each `VideoStatus` must tell the reader, and what it must not, written **independently** of
@@ -79,18 +79,3 @@ export interface PinnedStoppedRunRecordingFacts {
   /** Must not appear in the rendered line. */
   readonly deniedClaims: readonly string[];
 }
-
-export const PINNED_STOPPED_RUN_RECORDING_FACTS: Readonly<
-  Record<Extract<ExecutionErrorCode, 'TIMEOUT' | 'CANCELLED'>, PinnedStoppedRunRecordingFacts>
-> = {
-  TIMEOUT: {
-    endsPhrase: 'ends where the run was stopped',
-    causePhrase: 'total time cap',
-    deniedClaims: ['partial', 'recorder', 'orderly', 'failed', 'no recording', 'expired', 'on request'],
-  },
-  CANCELLED: {
-    endsPhrase: 'ends where the run was stopped',
-    causePhrase: 'on request',
-    deniedClaims: ['partial', 'recorder', 'orderly', 'failed', 'no recording', 'expired', 'time cap'],
-  },
-};

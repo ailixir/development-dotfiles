@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { TestIR } from '@/types/studio/legacyTestIr';
 
 interface StudioState {
   testSteps: string[];
@@ -17,9 +16,6 @@ interface StudioState {
     timestamp: string;
   }>;
   currentStep: number;
-  testIR: TestIR | null;
-  generatedCode: string;
-  autoSyncCode: boolean;
 }
 
 const initialState: StudioState = {
@@ -28,22 +24,12 @@ const initialState: StudioState = {
   executionLogs: [],
   stepResults: [],
   currentStep: -1,
-  testIR: null,
-  generatedCode: '',
-  autoSyncCode: true,
 };
 
 const studioSlice = createSlice({
   name: 'studio',
   initialState,
   reducers: {
-    updateTestSteps: (state, action: PayloadAction<string[]>) => {
-      state.testSteps = action.payload;
-      // Reset results when steps change
-      state.stepResults = [];
-      state.currentStep = -1;
-    },
-
     setExecuting: (state, action: PayloadAction<boolean>) => {
       state.isExecuting = action.payload;
       if (action.payload) {
@@ -58,24 +44,8 @@ const studioSlice = createSlice({
       }
     },
 
-    addExecutionLog: (state, action: PayloadAction<StudioState['executionLogs'][0]>) => {
-      state.executionLogs.push(action.payload);
-    },
-
     setExecutionLogs: (state, action: PayloadAction<StudioState['executionLogs']>) => {
       state.executionLogs = action.payload;
-    },
-
-    updateStepResult: (
-      state,
-      action: PayloadAction<{ stepIndex: number; status: 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL'; message?: string }>
-    ) => {
-      const stepResult = state.stepResults.find((r) => r.stepIndex === action.payload.stepIndex);
-      if (stepResult) {
-        stepResult.status = action.payload.status;
-        stepResult.message = action.payload.message;
-        stepResult.timestamp = new Date().toISOString();
-      }
     },
 
     setAllStepResults: (
@@ -106,29 +76,6 @@ const studioSlice = createSlice({
       state.currentStep = action.payload;
     },
 
-    setTestIR: (state, action: PayloadAction<TestIR | null>) => {
-      state.testIR = action.payload;
-    },
-
-    setGeneratedCode: (state, action: PayloadAction<string>) => {
-      state.generatedCode = action.payload;
-    },
-
-    setAutoSyncCode: (state, action: PayloadAction<boolean>) => {
-      state.autoSyncCode = action.payload;
-    },
-
-    resetStudio: (state) => {
-      state.testSteps = [];
-      state.isExecuting = false;
-      state.executionLogs = [];
-      state.stepResults = [];
-      state.currentStep = -1;
-      state.testIR = null;
-      state.generatedCode = '';
-      state.autoSyncCode = true;
-    },
-
     clearLogs: (state) => {
       state.executionLogs = [];
     },
@@ -136,17 +83,10 @@ const studioSlice = createSlice({
 });
 
 export const {
-  updateTestSteps,
   setExecuting,
-  addExecutionLog,
   setExecutionLogs,
-  updateStepResult,
   setAllStepResults,
   setCurrentStep,
-  setTestIR,
-  setGeneratedCode,
-  setAutoSyncCode,
-  resetStudio,
   clearLogs,
 } = studioSlice.actions;
 

@@ -251,6 +251,8 @@ describe('AC-16a: with no artifact, both slots are unavailable and neither is fi
     const modules = STORY_SOURCE_MODULES.map((file) => [file, fs.readFileSync(file, 'utf8')] as const);
     expect(modules.length).toBeGreaterThanOrEqual(13);
 
+    // Both modules were deleted by story 10.51. The paths stay as string literals (never imports) so
+    // that re-introducing either module, and importing it from a story module, still fails here.
     const RETIRED = ['@/utils/studio/ir/parseSteps', '@/utils/studio/codegen/pythonGenerator'];
 
     for (const [file, source] of modules) {

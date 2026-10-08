@@ -275,8 +275,6 @@ const OVER_CAP_DIAGNOSTICS: CompileDiagnostic[] = Array.from(
     }),
 );
 
-export const SHED_DIAGNOSTIC_COUNT = OVER_CAP_DIAGNOSTICS.length - DIAGNOSTICS_CAPS.maxPerStep;
-
 export const stepTruncatedDraft = draft('a0000000-0000-0000-0000-000000000009', {
   compileStatus: 'NEEDS_REVISION',
   compileDiagnostics: diagnosticsDoc({

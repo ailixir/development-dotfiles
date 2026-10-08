@@ -1,4 +1,4 @@
-import type { CompileStatus, TestDto, TestLastRunFilter } from '@/types/studio/studioTypes';
+import type { CompileStatus, TestLastRunFilter } from '@/types/studio/studioTypes';
 
 /**
  * Display vocabulary for the Studio tests list (story 10.46, Track C).
@@ -65,8 +65,6 @@ export const LAST_RUN_FILTER_LABELS: Readonly<Record<TestLastRunFilter, string>>
   ERROR: 'Error',
   NEVER: 'Never run',
 };
-
-export type LastRunOutcome = NonNullable<TestDto['lastRunStatus']>;
 
 /** Maximum test name length, matching the backend column. */
 export const TEST_NAME_MAX_LENGTH = 255;

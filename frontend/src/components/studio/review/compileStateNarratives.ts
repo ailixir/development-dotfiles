@@ -93,7 +93,3 @@ export function narrativeFor(status: string): CompileStateNarrative {
   }
   return narrative;
 }
-
-export const COMPILE_STATE_KEYS: readonly CompileStatus[] = Object.keys(
-  COMPILE_STATE_NARRATIVES,
-) as CompileStatus[];

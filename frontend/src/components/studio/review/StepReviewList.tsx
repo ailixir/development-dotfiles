@@ -24,8 +24,8 @@ import {
  * artifact the server canonicalized, not from the English. Deriving it from `steps` would present
  * *the client's* reading of the sentence as *the validator's* reading of the artifact, so the
  * human control point would become the place where two different interpretations are quietly
- * reconciled. `@/utils/studio/ir/parseSteps` and `@/utils/studio/codegen/pythonGenerator` are not
- * imported by this story's modules, and a test asserts it.
+ * reconciled. The client-side grammar parser and Python generator were deleted (story 10.51); a
+ * test asserts that no module of this story imports either path.
  *
  * **When there is no artifact the slots stay unavailable and say so.** A draft with no candidate
  * has nothing validated to show, and a list entry never carries one — the list projection nulls it

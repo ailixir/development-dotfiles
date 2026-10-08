@@ -5,7 +5,6 @@ import type {
   GlobalAuthoringContext,
   LegacyAuthoringRequest,
   StepAuthoringContext,
-  StudioAuthoring,
 } from './studioTypes';
 
 export type AuthoringValidationCategory =
@@ -363,9 +362,4 @@ export function parseStudioAuthoring(
     return { ok: true, value: adaptLegacyStudioAuthoring(value, createStepId) };
   }
   return { ok: true, value: value as AuthoringV2Request };
-}
-
-/** Narrows either accepted wire shape without performing legacy adaptation. */
-export function isStudioAuthoring(value: unknown): value is StudioAuthoring {
-  return validateStudioAuthoring(value).length === 0;
 }

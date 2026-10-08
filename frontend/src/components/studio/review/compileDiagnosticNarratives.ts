@@ -23,10 +23,6 @@ export const REFUSAL_NARRATIVES: Readonly<Record<string, RefusalWording>> = {
     `Step ${step} is ambiguous${detail} Say exactly which element or value you mean.`,
 };
 
-export function isRefusalCode(code: string): boolean {
-  return Object.prototype.hasOwnProperty.call(REFUSAL_NARRATIVES, code);
-}
-
 /**
  * The refusal sentence for a diagnostic, or null when it is not a model refusal or belongs to no
  * single step. The model's message keeps its own `?`/`!`; otherwise it gets exactly one full stop,

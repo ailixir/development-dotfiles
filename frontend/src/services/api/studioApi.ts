@@ -10,7 +10,6 @@ import type {
   TestDto,
   TestListQuery,
   TestPage,
-  Page,
 } from '@/types/studio/studioTypes';
 
 /**
@@ -19,12 +18,6 @@ import type {
  * Every call here speaks the frozen contract. Legacy drafts are converted once, in
  * `@/types/studio/legacyTestIr`, before they reach this module.
  */
-
-/** Kept for existing callers; the full query shape is {@link TestListQuery}. */
-export type ListTestsParams = TestListQuery;
-
-/** Kept for existing callers; the full query shape is {@link ExecutionListQuery}. */
-export type ListExecutionsParams = ExecutionListQuery;
 
 /** Per-request options for the list reads. */
 export interface ListRequestOptions {
@@ -67,17 +60,6 @@ export function dedupeById<T>(items: readonly T[], idOf: (item: T) => string): T
   return result;
 }
 
-/** Local list search and filters must include records beyond the server's first page. */
-async function readAllPages<T>(readPage: (page: number) => Promise<Page<T>>): Promise<T[]> {
-  const first = await readPage(0);
-  const items = [...first.data];
-  for (let page = 1; page < first.totalPages; page += 1) {
-    const next = await readPage(page);
-    items.push(...next.data);
-  }
-  return items;
-}
-
 export const studioApi = {
   /**
    * One server page of tests (`GET /studio/tests`), filtered, searched and sorted server-side.
@@ -91,13 +73,6 @@ export const studioApi = {
     });
     return { ...page, data: dedupeById(page.data ?? [], (test) => test.id) };
   },
-
-  /** Every page, concatenated. Prefer {@link studioApi.listTests} for list screens. */
-  listAllTests: async (csiId?: string): Promise<TestDto[]> =>
-    dedupeById(
-      await readAllPages<TestDto>((page) => studioApi.listTests({ csiId, page, size: 100 })),
-      (test) => test.id,
-    ),
 
   getTest,
   createTest,
@@ -145,15 +120,6 @@ export const studioApi = {
     });
     return { ...page, data: dedupeById(page.data ?? [], (execution) => execution.executionId) };
   },
-
-  /** Every page, concatenated. Prefer {@link studioApi.listExecutions} for list screens. */
-  listAllExecutions: async (): Promise<ExecutionSnapshot[]> =>
-    dedupeById(
-      await readAllPages<ExecutionSnapshot>((page) =>
-        studioApi.listExecutions({ page, size: 100 }),
-      ),
-      (execution) => execution.executionId,
-    ),
 
   /**
    * Enqueues a compile of the draft's current source. The `202` means the attempt was *started*,

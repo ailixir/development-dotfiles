@@ -141,5 +141,3 @@ export function useStudioTests(defaultPageSize: number = TESTS_PAGE_SIZE) {
     isNarrowed: list.hasActiveFilters || Boolean(globalCsiId) || Boolean(globalEnvironment),
   };
 }
-
-export type StudioTestsState = ReturnType<typeof useStudioTests>;
