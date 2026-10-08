@@ -1,0 +1,1 @@
+- [Push hook text match](feedback_push_hook_text_match.md) — push-authority hook blocks any Bash text containing "git push", even inside heredocs; run record scripts from a file

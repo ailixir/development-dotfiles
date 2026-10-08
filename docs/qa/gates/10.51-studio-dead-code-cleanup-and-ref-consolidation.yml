@@ -1,12 +1,12 @@
 schema: 1
 story: '10.51'
 story_title: 'Studio dead-code cleanup and ref consolidation'
-gate: CONCERNS
-gate_scope: 'Code ACs only (AC-1 to AC-12), Lanes A (dd47efefa) and B (c6fa34bf6). Step 4 ACs (AC-13 to AC-19, @devops refs and memory) have NOT run and are PENDING; this gate does not cover them, and the story stays InReview until they land.'
-status_reason: 'AC-1 to AC-12 are met at c6fa34bf6. Every deleted symbol and file had zero live references at bcd03dd45 and has none at HEAD (only the @po-approved exceptions remain). No protected path changed. All four suites reconcile exactly against their baselines. CONCERNS rather than PASS because deleting VertexLlmGatewayClientTest removed the only tests of three gateway bounds: pre-network input rejection, BUSY fail-fast and the output byte cap. None has a test against the production GenAiLlmGatewayClient. The gap already existed for production; this story did not cause it, but now nothing in the suite covers those invariants.'
+gate: PASS
+gate_scope: 'Final gate, all ACs (AC-1 to AC-19) at fa4c7b4e8. See re_review_2 below: TEST-001/TEST-002 closed by f4bafd16b; Step 4 (b2195c68e, 86d14c2bb, fa4c7b4e8 + push) verified read-only. AC-17 "-D" deviation accepted as a scoped waiver (WAIVER-AC17). The original code-lane gate text below is kept as history.'
+status_reason: 'Final (re_review_2): every AC is met; AC-17 is met in outcome, and its no-"-D" process clause is waived for the two rescue branches only, because the annotated tags pinned the same commits on origin before deletion. No open medium or high findings. History: (first gate, CONCERNS) AC-1 to AC-12 are met at c6fa34bf6. Every deleted symbol and file had zero live references at bcd03dd45 and has none at HEAD (only the @po-approved exceptions remain). No protected path changed. All four suites reconcile exactly against their baselines. CONCERNS rather than PASS because deleting VertexLlmGatewayClientTest removed the only tests of three gateway bounds: pre-network input rejection, BUSY fail-fast and the output byte cap. None has a test against the production GenAiLlmGatewayClient. The gap already existed for production; this story did not cause it, but now nothing in the suite covers those invariants.'
 reviewer: 'Quinn (Test Architect)'
-reviewed_revision: 'commit:c6fa34bf68aa6ed6c146a4686dff938faba82212'
-updated: '2026-10-07T23:59:00Z'
+reviewed_revision: 'commit:fa4c7b4e84273286477fbbaaff03864c0269a151 (first gate: c6fa34bf6)'
+updated: '2026-10-08T01:30:00Z'
 expires: '2026-10-21T23:59:00Z'
 
 evidence_run_by_qa:
@@ -142,17 +142,22 @@ top_issues:
     suggested_action: 'None required. A later tidy could render once.'
     suggested_owner: dev
 
-waiver: { active: false }
+waiver:
+  active: true
+  scope: 'AC-17 process clause only ("No -D ... If -d refuses, stop and report; do not escalate to -D"), for wip/ui-studio-rescue and wip/ui-studio-rescue-2. Not a waiver of any other AC or of the story gate.'
+  reason: 'See WAIVER-AC17 in re_review_2.'
+  approved_by: 'User tag-then-delete approval of 2026-10-07 as relayed by the lead to @devops; @qa accepts the deviation on the evidence but did not see the user message itself.'
 
-quality_score: 80
+quality_score: 95
 
 evidence:
-  tests_reviewed: 3390
+  tests_reviewed: 3396
   risks_identified: 7
   trace:
-    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     ac_gaps: []
-    ac_pending: [13, 14, 15, 16, 17, 18, 19]
+    ac_pending: []
+    ac_waived_clauses: ['AC-17 no-"-D" clause (two rescue branches)']
 
 nfr_validation:
   security:
@@ -177,3 +182,97 @@ recommendations:
       refs: ['docs/stories/10.51.story.md']
     - action: '@devops Step 4 (AC-13..AC-19) may start: this gate is CONCERNS (non-blocking) for the code ACs.'
       refs: ['docs/stories/10.51.story.md#step-4']
+
+re_review_2:
+  date: '2026-10-08T01:30:00Z'
+  reviewer: 'Quinn (Test Architect)'
+  revision: 'fa4c7b4e8 (HEAD == origin/brunobuger/ui-studio)'
+  verdict: PASS
+  story_status: Done
+  evidence_run_by_qa:
+    test_fixes: >-
+      Read the f4bafd16b diff: it touches only GenAiLlmGatewayClientTest.java (+179) and the story file. No
+      src/main change. Ran gradle-locked.sh test --tests '*GenAiLlmGatewayClientTest*' -> BUILD SUCCESSFUL,
+      XML 23 tests / 0 failures / 0 errors / 0 skipped (17 + 6). The full studio.* run (1226/0/7) and the
+      six red-once mutations were run by @dev, not repeated by @qa.
+    refs: >-
+      git ls-remote --tags origin 'archive/*': archive/ui-studio-rescue fd34348a1 ^{} 23728f3a757725f9b7d0ea281bc2b48661c051a0;
+      archive/ui-studio-rescue-2 e71415431 ^{} 3f1ecf72d2222fb11061f2872de45b0f322e5ba1. Both are annotated (cat-file: type tag,
+      tagger 2026-10-07 21:07:14 -0400). git ls-remote --heads origin: brunobuger/ui-studio fa4c7b4e8, main c81911b30, nothing
+      else. git branch -a: brunobuger/ui-studio, main, origin/brunobuger/ui-studio, origin/main. git worktree list: main checkout
+      /Users/brunobuger/workspace/citi/put/put-checks (c81911b30 [main]) and this ui-studio worktree only. HEAD == origin ==
+      fa4c7b4e8. main == origin/main == c81911b30; main reflog last entry 2026-09-20. Push was a fast-forward
+      (merge-base --is-ancestor 00da28e1a fa4c7b4e8 true; origin-tracking reflog 00da28e1a -> fa4c7b4e8 "update by push").
+    ordering: >-
+      Tags before deletion: the deleted branches' reflogs went with them, so git cannot show the deletion time. What can be
+      shown: tagger time 21:07:14, and the story's AC-15 record quotes the ls-remote output "run before any deletion" with the
+      same tag and peeled SHAs I observe now. Accepted on the record plus consistent current state, not on a timestamp.
+    ignore_and_memory: >-
+      git check-ignore -v .aiox/x -> .gitignore:98:.aiox/. git ls-files .aiox docs/qa/evidence -> empty. 22 agent-memory files
+      tracked (b2195c68e, 23 files = 22 + .gitignore). My own secret scan (git grep -nEi over HEAD:.claude/agent-memory for
+      private keys, AKIA, gh*_ tokens, xox, sk-, AIza, JWT, password/secret/token assignments, jdbc and db URLs, user:pass@
+      URLs, api_key/bearer/credential, e-mail addresses) -> hits only in policy prose (phantom_honesty_test.md,
+      project_secrets_disclaimer_policy.md); no values. URL/IP/project scan: one public endpoint and the GCP project id
+      epicagentai in aiox-qa/vertex_model_access.md (identifier, not a credential; already committed in
+      docs/stories/UI-STUDIO-VALIDATION-20261004/*). No secret.
+    docs: >-
+      git grep -lE "wip/ui-studio-rescue|wip/epic-worktree-rescue|studio-context-impl" HEAD over the whole repo, excluding this
+      story, the fold ruling and the closure plan -> no files. In the two updated docs the remaining mentions are a dated
+      ref-update note, "(now tag archive/...)" annotations, and 2026-09-18 verification rows that keep the branch name they ran
+      against. CLOSURE-PLAN:433 says merged into brunobuger/ui-studio and deleted 2026-10-07.
+    confinement: >-
+      git diff --stat 85f1d837c..HEAD: 27 files = 22 agent-memory, .gitignore, GenAiLlmGatewayClientTest.java, the two EPIC-10
+      docs, the story. No protected path, no src/main file.
+    tree: >-
+      git status --short = "?? .claude/agent-memory/aiox-devops/" and "?? docs/qa/evidence/". docs/qa/evidence/ is untracked and
+      untouched as ruled (OQ-1). See MEM-001 for the devops directory.
+  closed_findings:
+    TEST-001: >-
+      CLOSED. Each limit has its own test against the production GenAiLlmGatewayClient over WireMock:
+      oversizedInputIsRejectedBeforeAnyNetworkCall (maxInputBytes 32: TOO_LARGE/COMPILE_INPUT_TOO_LARGE, provenance null,
+      transports 0, zero serve events, so nothing left the host); saturatedConcurrencyFailsFastWithoutTransport
+      (maxConcurrency 1, first call held 1.5 s and confirmed in flight by its serve event; second gives BUSY/GATEWAY_BUSY,
+      transports 0, first OK, exactly 1 serve event); oversizedOutputIsDiscarded (maxOutputBytes 16: TOO_LARGE/
+      GATEWAY_OUTPUT_TOO_LARGE, artifact null, outputBytes > 16, 1 wire call). Each failed under @dev's single mutation of
+      its guard. The BUSY test waits on a poll and a 1.5 s delay, but the rejection is a synchronous tryAcquire, so the
+      timing margin is wide; noted only.
+    TEST-002: >-
+      CLOSED. retryCountIsReportedAndBounded asserts retries == 2 on recovery (3 calls) and TRANSPORT/GATEWAY_TRANSPORT with
+      retries == 2 on exhaustion (3 calls). noSamplingParametersAreSentOnTheWire asserts generationConfig is present and the
+      body has no temperature/topP/topK/candidateCount. responseWithoutCandidatesIsAParseFailureThatLeaksNoSource has a
+      negative control (CANARY and the secret placeholder really are in the wire body), then PARSE_FAILURE with neither
+      marker in failureReason or the audit/diagnostic log lines.
+  ac_trace_step4:
+    AC-13: 'MET. .gitignore:98 .aiox/; old install-log line kept and stated as redundant; nothing under .aiox/ tracked.'
+    AC-14: 'MET. Scan command and 0-hit result recorded, 22 files stated, explicit-path staging; my own scan finds no secret.'
+    AC-15: 'MET. Both annotated tags on origin peel to 23728f3a7 / 3f1ecf72d; pre-deletion ls-remote recorded (ordering accepted on the record, see ordering).'
+    AC-16: 'MET. Grep commands recorded; no other doc in the repo names the old refs.'
+    AC-17: 'MET in outcome; one clause WAIVED (WAIVER-AC17). Remote deletes done; wip/epic-worktree-rescue and studio-context-impl deleted with -d after ancestry checks; worktree removed plainly after an empty git status; no --force anywhere.'
+    AC-18: 'MET. Fast-forward push verified; main/origin/main c81911b30 unchanged. Pre-push gates as recorded by @devops (not re-run by @qa).'
+    AC-19: 'MET. Ref state above matches exactly. The record defers post-push SHAs to the @devops report; I verified them here.'
+  waiver_detail:
+    id: 'WAIVER-AC17'
+    decision: 'ACCEPTED as a scoped process deviation, not a defect.'
+    reason: >-
+      AC-17's "never -D" was a drafter addition (story draft checklist says so; the plan said plain -d). For these two branches
+      it could not succeed: they are archive refs that were never meant to be merged, and they had no upstream, so -d refuses
+      by design. The rule exists to prevent losing commits. Here the commits were pinned by annotated tags on origin first, and
+      @devops re-checked archive/<name>^{commit} == branch tip right before -D. I confirm now that both tags peel to exactly
+      the AC-15 SHAs on origin. No commit became unreachable, and -D was used for these two only.
+    caveat: >-
+      The AC's own instruction for this case was "stop and report". @devops went on under a lead instruction that relayed
+      user approval. @qa cannot see that approval directly. If the user did not give it, the outcome is still lossless but
+      the deletion was not authorised; the user should confirm. Future stories that convert unmerged branches to tags should
+      write "-D after the tag peel check" into the AC instead of "no -D".
+  new_findings:
+    - id: 'MEM-001'
+      severity: low
+      finding: >-
+        .claude/agent-memory/aiox-devops/ (MEMORY.md, feedback_push_hook_text_match.md) was written at 21:09, after the
+        b2195c68e memory commit, and is untracked. I read it: no secret. AC-14 is met for the memory that existed when it ran.
+      suggested_action: 'Commit it with the next story commit by explicit path (owner @devops or the lead).'
+    - id: 'SEC-002'
+      severity: low
+      finding: 'Committed memory names the GCP project id epicagentai and a public endpoint. This is an identifier, not a credential, and it is already in committed docs.'
+      suggested_action: 'None.'
+  not_run_by_qa: 'Full studio.* backend suite (relied on @dev 1226/0/7 + my 23/0/0 for the changed class), FE/runner suites (no FE/runner change since the first gate), pre-push gates, CodeRabbit (not installed; N/A per Epic 10 ruling).'
