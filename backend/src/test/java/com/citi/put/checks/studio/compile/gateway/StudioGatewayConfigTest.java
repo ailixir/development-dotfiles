@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.compile.gateway;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.nio.file.NoSuchFileException;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -128,9 +129,12 @@ class StudioGatewayConfigTest {
             new StudioGatewayProperties.TransportRetry(0, Duration.ofMillis(1), 2d, 0d),
             "classpath:studio/artifact.schema.json");
 
-    assertThatThrownBy(() -> VertexAiClientFactory.create(properties))
-        .isInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("service-account-key-file is not readable")
+    // The production adapter opens the key file when it is built; the path is the report.
+    assertThatThrownBy(
+            () ->
+                new GenAiLlmGatewayClient(
+                    properties, GatewayTestSupport.parser(), new GatewayAuditLogger()))
+        .isInstanceOf(NoSuchFileException.class)
         .hasMessageContaining("/nonexistent/key.json");
   }
 }

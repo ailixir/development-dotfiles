@@ -35,8 +35,4 @@ public final class ExecutionStatus {
   public static boolean isTerminal(String status) {
     return status != null && TERMINAL.contains(status);
   }
-
-  public static Set<String> canonicalValues() {
-    return CANONICAL;
-  }
 }

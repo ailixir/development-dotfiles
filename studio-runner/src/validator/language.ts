@@ -32,7 +32,6 @@ export type ArgumentKind =
 
 export type OptionValueSchema =
   | { readonly type: 'boolean' }
-  | { readonly type: 'false' }
   | { readonly type: 'integer'; readonly min: number; readonly max: number }
   | { readonly type: 'enum'; readonly values: readonly string[] }
   | { readonly type: 'textMatcher' };

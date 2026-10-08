@@ -9,6 +9,20 @@
 > deliberately **not** written into `studio-execution.md`; §6 gives both reasons, the second of
 > which is mechanical.
 
+> **Update 2026-10-07 — Story 10.51 AC-7 (gate 10.22 G-1): the demoted Vertex client is deleted.**
+> This is the "recorded deletion" §3.2 and §5 step 3 anticipated. `VertexLlmGatewayClient.java`,
+> `VertexAiClientFactory.java` and `VertexLlmGatewayClientTest.java` (12 tests) are removed from
+> `backend/src/test`. Their three remaining users now build `GenAiLlmGatewayClient`:
+> `GatewayAuditTest` (all ten tests, canary and audit-line assertions unchanged; OK stubs now return
+> a FULL proposal envelope, and the transport-failure reason is pinned to the adapter's fixed
+> `"gateway transport failed"` instead of a scrubbed vendor exception prefix), `GatewayTestSupport`
+> (`vertexAi()` removed) and `StudioGatewayConfigTest.aMissingServiceAccountKeyFileIsReportedByPath`
+> (now `NoSuchFileException` naming the path, from the production credential provider; the old
+> `"service-account-key-file is not readable"` text was produced only by the deleted test factory).
+> The production client is the only implementation left, so §3.1's parameterised Tier 1 suite has
+> one implementation. §2 and §4 below are the 2026-09-17 record and still name the deleted files;
+> §4's evidence column is mapped to current tests in the note under that table.
+
 ---
 
 ## 1. Why this was escalated, and what the escalation got wrong
@@ -226,6 +240,17 @@ tier.
 
 Row 6 is the one a careless rewrite would silently weaken, and row 3 is the one whose loss would be
 invisible until production.
+
+**After Story 10.51 (2026-10-07), for `GenAiLlmGatewayClient`:** row 1 →
+`GenAiLlmGatewayClientTest.retriesAreBoundedWithoutSdkAmplification` (three wire calls for
+`maxRetries=2`); row 3 → `GatewayAuditTest` (WireMock on `127.0.0.1` with a dynamic port over
+`http`, one served request and the stub's `ROUTE_MARKER` on every success); row 4 →
+`StudioGatewayConfigTest.aMissingServiceAccountKeyFileIsReportedByPath`; row 5 → not applicable
+(`SDK_VERSION` is a constant, there is no manifest fallback); row 6 → `GatewayAuditTest`, canary
+half unchanged, reason half now the fixed `"gateway transport failed"`. **Row 2 has no
+`GenAiLlmGatewayClient` test**, nor do the deleted file's `BUSY` and output-`TOO_LARGE` cases; the
+deleted tests proved them for the Vertex class only, so nothing covering production was lost. They
+are recorded as a later-story candidate, not added by 10.51.
 
 ---
 

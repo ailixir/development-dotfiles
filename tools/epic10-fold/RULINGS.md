@@ -1,5 +1,9 @@
 # Epic 10 fold — per-file rulings and the fold sequence
 
+> **Historical (2026-10-07, Story 10.51 AC-8).** The fold is complete. `precheck.sh`, `fold.sh`,
+> `preview.sh` and `common.sh` were deleted as one-off tooling; the steps below that name them
+> record what was run. `pin-contract.sh` and `guards.sh` are kept.
+
 Evidence read 2026-09-18T03:39:09Z–03:46:45Z (UTC) from `wt/epic` (branch `epic/EPIC-10`, HEAD
 `ff0513385`, 263 dirty paths, read-only) against the integration tip `epic/EPIC-10-w7` at
 `c025422bb` (47 ahead, 0 behind: a pure fast-forward in git's terms). Their side is uncommitted,

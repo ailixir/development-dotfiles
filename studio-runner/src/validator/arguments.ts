@@ -657,16 +657,6 @@ function readOptionValue(
 ): OptionValue | null {
   const excerpt = ctx.excerpt(node);
   switch (schema.type) {
-    case 'false': {
-      if (node.kind === ts.SyntaxKind.FalseKeyword) return false;
-      ctx.collector.add({
-        code: 'OPTION_VALUE_TYPE',
-        message: `Option "${key}" must be false; trial mode checks actionability without performing the action.`,
-        node: nodeName(node),
-        excerpt,
-      });
-      return null;
-    }
     case 'boolean': {
       if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
       if (node.kind === ts.SyntaxKind.FalseKeyword) return false;

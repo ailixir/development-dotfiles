@@ -1,6 +1,5 @@
 package com.citi.put.checks.studio.dispatch;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,14 +34,6 @@ public record ReferenceDeclarations(List<String> variables, List<String> secrets
 
   public boolean isEmpty() {
     return variables.isEmpty() && secrets.isEmpty();
-  }
-
-  /** Every declared name, variables first. Names only — there is no value in this type. */
-  public List<String> allNames() {
-    List<String> all = new ArrayList<>(variables.size() + secrets.size());
-    all.addAll(variables);
-    all.addAll(secrets);
-    return List.copyOf(all);
   }
 
   /** A name declared as both a variable and a secret, which is a refusal wherever it is found. */

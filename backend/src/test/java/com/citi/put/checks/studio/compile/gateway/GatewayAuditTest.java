@@ -10,9 +10,10 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.google.genai.Client;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
@@ -40,7 +41,7 @@ class GatewayAuditTest {
 
   private ListAppender<ILoggingEvent> auditAppender;
   private ListAppender<ILoggingEvent> diagnosticAppender;
-  private Client vertexAi;
+  private GenAiLlmGatewayClient gateway;
 
   @BeforeAll
   static void startWireMock() {
@@ -65,17 +66,18 @@ class GatewayAuditTest {
   void tearDown() {
     detach(GatewayAuditLogger.AUDIT_LOGGER, auditAppender);
     detach(GatewayAuditLogger.class.getName(), diagnosticAppender);
-    if (vertexAi != null) {
-      vertexAi.close();
-      vertexAi = null;
+    if (gateway != null) {
+      gateway.close();
+      gateway = null;
     }
   }
 
   @Test
   void auditLineCarriesExactlyTheAgreedFields() throws Exception {
-    stubOk(GatewayTestSupport.VALID_ARTIFACT);
+    CompileRequest request = GatewayTestSupport.request();
+    stubOk(validEnvelope(request));
 
-    assertLocalSuccess(client().propose(GatewayTestSupport.request()));
+    assertLocalSuccess(client().propose(request));
 
     String line = onlyAuditLine();
     assertThat(line)
@@ -96,9 +98,9 @@ class GatewayAuditTest {
 
   @Test
   void auditLineNeverCarriesPromptOrResponseContent() throws Exception {
-    stubOk(GatewayTestSupport.VALID_ARTIFACT);
     CompileRequest request = GatewayTestSupport.requestWithCanaryInSource();
     assertCanaryIsReallyInTheRequest(request);
+    stubOk(validEnvelope(request));
 
     assertLocalSuccess(client().propose(request));
 
@@ -113,9 +115,9 @@ class GatewayAuditTest {
 
   @Test
   void sourceTextReachesTheWireButNeverTheAuditOrDiagnosticStream() throws Exception {
-    stubOk(GatewayTestSupport.VALID_ARTIFACT);
     CompileRequest request = GatewayTestSupport.requestWithCanaryInSource();
     assertCanaryIsReallyInTheRequest(request);
+    stubOk(validEnvelope(request));
 
     assertLocalSuccess(client().propose(request));
 
@@ -216,8 +218,9 @@ class GatewayAuditTest {
 
     wireMock.verify(1, postRequestedFor(urlPathMatching(GENERATE_CONTENT_PATH)));
     assertThat(response.outcome()).isEqualTo(GatewayOutcome.TRANSPORT);
+    // The production adapter reports a fixed reason and never quotes the provider's error body.
     assertThat(response.failureReason())
-        .startsWith("ClientException (status=400)")
+        .isEqualTo("gateway transport failed")
         .doesNotContain(GatewayTestSupport.SECRET_PLACEHOLDER);
     assertThat(logged(diagnosticAppender)).doesNotContain(GatewayTestSupport.SECRET_PLACEHOLDER);
     assertThat(logged(auditAppender)).contains("outcome=TRANSPORT");
@@ -272,11 +275,27 @@ class GatewayAuditTest {
   }
 
   private LlmGatewayClient client() throws Exception {
-    StudioGatewayProperties properties =
-        GatewayTestSupport.properties("http://127.0.0.1:" + wireMock.port());
-    vertexAi = GatewayTestSupport.vertexAi(properties);
-    return new VertexLlmGatewayClient(
-        properties, vertexAi, GatewayTestSupport.parser(), new GatewayAuditLogger());
+    gateway =
+        new GenAiLlmGatewayClient(
+            GatewayTestSupport.properties("http://127.0.0.1:" + wireMock.port()),
+            GatewayTestSupport.parser(),
+            new GatewayAuditLogger());
+    return gateway;
+  }
+
+  /** A valid FULL proposal envelope generating every writable step of the request. */
+  private static String validEnvelope(CompileRequest request) {
+    ObjectNode envelope =
+        new ObjectMapper().createObjectNode().put("version", 1).put("kind", "FULL");
+    var steps = envelope.putArray("steps");
+    for (var id : request.writableStepIds()) {
+      steps
+          .addObject()
+          .put("stepId", id.toString())
+          .put("status", "GENERATED")
+          .put("code", "await page.goto('https://example.invalid');");
+    }
+    return envelope.toString();
   }
 
   private void stubOk(String modelText) {
