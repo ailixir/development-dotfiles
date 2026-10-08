@@ -1685,6 +1685,35 @@ stories:
         GO, 8/10, @po 2026-10-07, Draft → Ready (externally blocked). AC-1 reconciled with the SPK-01
         pilot-use gate. See the story's PO Readiness section.
 
+  - id: "10.51"
+    title: "Studio dead-code cleanup and ref consolidation"
+    # ADDED BY @po 2026-10-07 at validation. Same pattern as 10.47-10.50: the story's own Epic row flagged
+    # the missing entry for @po. Source: user-approved plan streamed-tickling-nova.md (user decisions
+    # 2026-10-07: tag then delete rescue branches; commit agent-memory, gitignore .aiox/; low-risk dead code
+    # only), the 2026-10-07 V1+ scope decision (KEEP/DEFER/churn rows), gates 10.21 SR-001 and 10.22 G-1,
+    # fold ruling §3.3 ("None promoted").
+    #
+    # size M is the story's own row (stated in the delegation).
+    size: M
+    # wave: null as for 10.47-10.50: post-closure chore, not schedulable in the wave sequence.
+    wave: null
+    # depends_on is EMPTY: no story must land first.
+    depends_on: []
+    # blocks is EMPTY: no story criterion depends on this one.
+    blocks: []
+    story_context:
+      shape: >-
+        CHORE, low-risk deletions only. Lane A (frontend Python-IR code, unused studioSlice actions,
+        studioApi pagers, unused exports) and Lane B (runner 'false' option, two zero-reference backend
+        methods, legacy Vertex test client after migrating its users, one-off fold tooling), each item
+        re-grepped before deletion; protected KEEP/DEFER items, openapi.yaml, migrations, application.yml
+        keys and the runner pin byte-unchanged. Then @devops after the @qa gate: .aiox/ gitignored,
+        agent-memory secret-scanned and committed, archive/* tags pushed before any branch delete, no force.
+      po_validation: >-
+        GO, 9/10, @po 2026-10-07, Draft → Ready. AC-1/9/11/12/14 clarified (toConfiguration kept,
+        comment-only edits, gate count reconciliation, grep exceptions, explicit-path staging);
+        docs/qa/evidence/ ruled out of scope. See the story's PO Readiness section.
+
 # ─────────────────────────────────────────────────────────────
 # File-ownership conflicts (wave planning must serialize or single-own)
 # ─────────────────────────────────────────────────────────────
