@@ -1,0 +1,8 @@
+- [Contract change checklist](contract_change_checklist.md) — openapi.yaml edits need digest re-anchor, op-count pin, ADR-002 §13 row; pnpm exec vs npm lockfiles
+- [Fixture masks live compile shape](project_fixture_masks_live_compile.md) — recorded-fixture/stubs are artifact-shaped, live GenAi is envelope; VAL-006 origin
+- [Prompt vs syntax version cost](prompt_vs_syntax_version_cost.md) — syntax-ref bump invalidates all confirmed revisions; prompt bump = fingerprint only; runner-body fields backend-first; backend executor pin = fingerprint
+- [Phantom honesty test](phantom_honesty_test.md) — CredentialScreenHonestyTest doesn't exist; real guard PromptAssemblyTest (backend-only)
+- [ADR-002 section renumbering](adr002_section_renumbering.md) — §29 Cancel, §30 confirmed source, §31 video, §35 auto-accept; digest re-anchor owed
+- [Run auto-accept ruling](run_auto_accept_ruling.md) — §35: Run=confirm is contract; 554277fcb interim non-conformant; NoAutoConfirmTest vacuous; O-22 execute authz
+- [V19 hazard on V1 writer](v19_hazard_v1_writer.md) — V19 at HEAD breaks V1 compiles; runbook floor row wrong; V1 writes no request row
+- [V1+ scope decision](v1_plus_scope_decision.md) — 2026-10-07: incremental deferred behind T-INC; S1 O-22, S2 §35+request row, S3 R2D2 probe

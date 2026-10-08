@@ -1,0 +1,4 @@
+- [pnpm blocked in node packages](tooling_node_packages_pnpm_blocked.md) — studio-runner: use ./node_modules/.bin/vitest; ui-studio frontend: pnpm exec works; FE suite load flakes
+- [gradle check takes ~10.5 min](tooling_gradle_check_duration.md) — run in background, serialize Gradle, count results from test XML
+- [FE suite side effects](tooling_fe_suite_side_effects.md) — full vitest rewrites axe-results.json; flakes under Gradle load; GET retries leak across tests
+- [Deletions and baselines](tooling_deletions_and_baselines.md) — rm not git rm (no staging); check which --tests filter a story baseline used

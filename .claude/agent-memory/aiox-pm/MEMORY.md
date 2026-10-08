@@ -1,0 +1,1 @@
+- [Secrets disclaimer policy](project_secrets_disclaimer_policy.md) — PO: name-triggered (any identity token, PO-9) disclaimer, own-risk ack + audit; PRD/BRD conflict open

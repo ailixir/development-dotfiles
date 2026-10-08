@@ -1,0 +1,1 @@
+- [Studio migrations: test at head](project_studio_migration_head_testing.md) — later CREATE OR REPLACE of write_once dropped V18 guards; verify at Flyway head

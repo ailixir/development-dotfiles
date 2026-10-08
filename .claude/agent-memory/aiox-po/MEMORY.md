@@ -1,0 +1,1 @@
+- [Epic 10 manifest convention](project_epic10_manifest_convention.md) — @po adds manifest entries at validation; `blocks` criterion-backed vs sequencing

@@ -1,0 +1,1 @@
+- [Vertex model access (epicagentai)](vertex_model_access.md) — 3.8-flash and 3.1-pro-preview callable; 3.5-pro/3.8-pro 404; points to 2026-10-04 UI Studio benchmark data
