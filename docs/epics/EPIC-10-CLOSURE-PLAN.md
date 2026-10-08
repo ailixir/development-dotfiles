@@ -430,7 +430,7 @@ refused merge.
 | 2.7 | **Executable — dispatch to @qa.** Story 10.33 moved Draft → Ready today for exactly this. F-3: `studio-runner/test/reporting/httpClient.test.ts` was last touched by `51ade0f1f` (their fix landed), so the squeeze verification is now runnable. | `git log` |
 | 2.8 | **Executable**, under the same load and sequential-run rules. The baselines in the table are stale (pre-fold; their suites and 10.44/10.45 added tests). Re-baseline; never compare against 709/548/984. → @dev runs, @qa reads | — |
 | 2.9 | **Partly done.** `node docs/qa/scripts/verify-staging-registration.mjs` → `PASS` (run by @po 2026-10-06, before and after this entry's register edit). The 1.2 `$ref` walk exists as `studio-runner/test/contract-integrity.test.ts`; I did not run it. → @qa | measured |
-| 2.10 | **Superseded as written.** No `epic/EPIC-10` branch exists in this clone (`git branch -a` lists only `wip/epic-worktree-rescue` among epic-named refs). The line reached `origin/main` through PRs #2/#3. `HEAD` is 12 commits ahead of `origin/main`. Any further push or PR is **@devops only**. | `git branch -a`, `merge-base` |
+| 2.10 | **Superseded as written.** No `epic/EPIC-10` branch exists in this clone (`git branch -a` lists only `wip/epic-worktree-rescue` among epic-named refs; that branch was fully merged into `brunobuger/ui-studio` and deleted 2026-10-07, Story 10.51). The line reached `origin/main` through PRs #2/#3. `HEAD` is 12 commits ahead of `origin/main`. Any further push or PR is **@devops only**. | `git branch -a`, `merge-base` |
 
 **Story status changes made with this entry:** 10.33 Draft → Ready (gate dispatchable to @qa, step 2.7);
 10.35 stays Ready, now dispatchable to @qa (fix in tree at `a19112afb`); 10.25 Ready → InReview (record

@@ -2,6 +2,8 @@
 
 **Author:** @architect (Aria) · **Date:** 2026-09-18 · **Status:** DECIDED, partially executed
 
+> **Ref update 2026-10-07 (Story 10.51):** the rescue branches `wip/ui-studio-rescue` (`23728f3a7`) and `wip/ui-studio-rescue-2` (`3f1ecf72d`) were converted to annotated tags `archive/ui-studio-rescue` and `archive/ui-studio-rescue-2` (pushed to origin), then deleted locally and on origin. Commands below now name the tag; verification records of 2026-09-18 keep the branch name they were run against.
+
 Every claim below cites the command that produced it. Claims I could not verify are
 listed in §7 and are labelled as such.
 
@@ -11,7 +13,7 @@ listed in §7 and are labelled as such.
 
 | # | Decision | Executed? |
 |---|---|---|
-| 1 | Preserve the 162 unclaimed working-tree paths as a git ref, built with plumbing so the live tree is never touched | **YES** — `wip/ui-studio-rescue` @ `23728f3a7` |
+| 1 | Preserve the 162 unclaimed working-tree paths as a git ref, built with plumbing so the live tree is never touched | **YES** — `wip/ui-studio-rescue` @ `23728f3a7` (since 2026-10-07 the annotated tag `archive/ui-studio-rescue`) |
 | 2 | Fast-forward `brunobuger/ui-studio` → `epic/EPIC-10-w7` | **NO** — sound, but not mine to fire. See §4 |
 | 3 | Merge any of the 13 overwritten files forward | **NO** — refused, with cause. See §3 |
 | 4 | Relocate the duplicate Flyway V12 before the fast-forward | **MANDATORY** — see §5 |
@@ -140,7 +142,7 @@ Preservation, by contrast, was **urgent and reversible**, so I did it. Urgent be
 only other copy of this work lived in a `/tmp` scratchpad, which macOS purges and which is
 scoped to a single session. That is not insurance. A ref is.
 
-Waiting costs nothing: `wip/ui-studio-rescue` is permanent, and the fast-forward is now a
+Waiting costs nothing: `archive/ui-studio-rescue` (originally branch `wip/ui-studio-rescue`) is permanent, and the fast-forward is now a
 ten-second operation (§6) that anyone can run once the tree is free.
 
 ---
@@ -162,7 +164,7 @@ refuses to start on a duplicate version.
 
 **A fast-forward that "succeeds" here produces a backend that cannot boot.** The file must
 be removed from the working tree as part of the operation. It is preserved at
-`wip/ui-studio-rescue:backend/src/main/resources/db/migration/V12__ui_test_execution_lifecycle_statuses.sql`.
+`archive/ui-studio-rescue:backend/src/main/resources/db/migration/V12__ui_test_execution_lifecycle_statuses.sql`.
 
 ---
 
@@ -174,13 +176,13 @@ Written for someone who has never seen this session. Run from
 ### 6a. Recover any preserved file
 
 ```bash
-git show wip/ui-studio-rescue:<path>              # inspect
-git checkout wip/ui-studio-rescue -- <path>       # restore into the tree
-git diff 910de104d wip/ui-studio-rescue           # the complete rescued delta
-git diff 910de104d wip/ui-studio-rescue --stat    # 139 added, 23 modified
+git show archive/ui-studio-rescue:<path>              # inspect
+git checkout archive/ui-studio-rescue -- <path>       # restore into the tree
+git diff 910de104d archive/ui-studio-rescue           # the complete rescued delta
+git diff 910de104d archive/ui-studio-rescue --stat    # 139 added, 23 modified
 ```
 
-The ref is `wip/ui-studio-rescue` = `23728f3a757725f9b7d0ea281bc2b48661c051a0`,
+The ref is the annotated tag `archive/ui-studio-rescue` (originally branch `wip/ui-studio-rescue`) → `23728f3a757725f9b7d0ea281bc2b48661c051a0`,
 parented on `910de104d` so the snapshot sits where the work was actually done.
 It is independent of the working tree and survives the fast-forward.
 
@@ -192,7 +194,7 @@ cd /Users/brunobuger/orca/workspaces/put-checks/ui-studio
 # 1. Confirm everything on disk is already in the rescue ref.
 { git diff --name-only; git ls-files --others --exclude-standard; } | while read -r f; do
   a=$(git hash-object "$f" </dev/null)
-  b=$(git rev-parse --verify --quiet "wip/ui-studio-rescue:$f" </dev/null)
+  b=$(git rev-parse --verify --quiet "archive/ui-studio-rescue:$f" </dev/null)
   [ "$a" = "$b" ] || echo "NOT PRESERVED: $f"
 done
 #    EXPECTED OUTPUT, exactly one line and nothing else:
@@ -231,7 +233,7 @@ memory and regenerable.
 
 `/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/fd79b627-2435-477c-99ac-a4247c325da9/scratchpad/ui-studio-rescue/`
 holds `tracked-modifications.patch` and `untracked-files.tgz`. Both verified (§8).
-It lives in `/tmp`. Treat `wip/ui-studio-rescue` as the real record.
+It lives in `/tmp`. Treat `archive/ui-studio-rescue` as the real record.
 
 ### 6d. Capturing a dirty tree without disturbing a live session
 
@@ -297,5 +299,5 @@ unreferenced; the branch was force-updated to the corrected `23728f3a7` (3261 fi
 
 | SHA | Branch | What |
 |---|---|---|
-| `23728f3a757725f9b7d0ea281bc2b48661c051a0` | `wip/ui-studio-rescue` | The 162 preserved paths, parented on `910de104d` |
+| `23728f3a757725f9b7d0ea281bc2b48661c051a0` | `wip/ui-studio-rescue` (now tag `archive/ui-studio-rescue`) | The 162 preserved paths, parented on `910de104d` |
 | `3984ee13c9e33248a805bbb348254b81422c1858` | *(tree, unreferenced)* | Defective first attempt — see §8 |
