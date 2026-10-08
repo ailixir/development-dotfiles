@@ -9,18 +9,24 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.citi.put.checks.studio.compile.CompileBudget;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 class GenAiLlmGatewayClientTest {
   private final WireMockServer server =
@@ -428,5 +434,178 @@ class GenAiLlmGatewayClientTest {
         .isEqualTo("[\"stepId\",\"status\",\"code\"]");
     assertThat(items.path("anyOf").get(1).path("required").toString())
         .isEqualTo("[\"stepId\",\"status\",\"reason\",\"message\"]");
+  }
+
+  /** Loopback properties with the given bounds; everything else is the shared default. */
+  private StudioGatewayProperties limits(
+      int maxConcurrency, int maxInputBytes, int maxOutputBytes, int maxRetries) {
+    return GatewayTestSupport.properties(
+        server.baseUrl(),
+        Duration.ofSeconds(10),
+        maxConcurrency,
+        maxInputBytes,
+        maxOutputBytes,
+        maxRetries);
+  }
+
+  private void stubUnavailable(String state, String next) {
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .inScenario("unavailable")
+            .whenScenarioStateIs(state)
+            .willReturn(
+                aResponse()
+                    .withStatus(503)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"error\":{\"code\":503,\"message\":\"unavailable\",\"status\":\"UNAVAILABLE\"}}"))
+            .willSetStateTo(next));
+  }
+
+  /** Story 10.51 TEST-001 (seam doc §4 row 2): the input bound is checked before any socket. */
+  @Test
+  void oversizedInputIsRejectedBeforeAnyNetworkCall() throws Exception {
+    CompileRequest request = request();
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .willReturn(okJson(GatewayTestSupport.generateContentBody(proposal(request)))));
+    try (GenAiLlmGatewayClient client = client(limits(1, 32, 262144, 2))) {
+      CompileBudget budget = new CompileBudget(Duration.ofSeconds(5));
+      CompileResponse response = client.propose(request, budget);
+
+      assertThat(response.outcome()).isEqualTo(GatewayOutcome.TOO_LARGE);
+      assertThat(response.errorCode()).isEqualTo(GatewayErrorCode.COMPILE_INPUT_TOO_LARGE);
+      assertThat(response.provenance()).isNull();
+      assertThat(response.inputBytes()).isGreaterThan(32);
+      assertThat(budget.transports()).isZero();
+      assertThat(server.getAllServeEvents()).isEmpty();
+    }
+  }
+
+  /** Story 10.51 TEST-001: a full gateway answers BUSY at once and sends nothing. */
+  @Test
+  void saturatedConcurrencyFailsFastWithoutTransport() throws Exception {
+    CompileRequest request = request();
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .willReturn(
+                okJson(GatewayTestSupport.generateContentBody(proposal(request)))
+                    .withFixedDelay(1500)));
+    try (GenAiLlmGatewayClient client = client(limits(1, 262144, 262144, 0))) {
+      CompletableFuture<CompileResponse> first =
+          CompletableFuture.supplyAsync(
+              () -> client.propose(request, new CompileBudget(Duration.ofSeconds(10))));
+      long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+      while (server.getAllServeEvents().isEmpty() && System.nanoTime() < until) {
+        Thread.sleep(10);
+      }
+      assertThat(server.getAllServeEvents()).as("first call in flight").hasSize(1);
+
+      CompileBudget budget = new CompileBudget(Duration.ofSeconds(10));
+      CompileResponse rejected = client.propose(request, budget);
+
+      assertThat(rejected.outcome()).isEqualTo(GatewayOutcome.BUSY);
+      assertThat(rejected.errorCode()).isEqualTo(GatewayErrorCode.GATEWAY_BUSY);
+      assertThat(rejected.provenance()).isNull();
+      assertThat(budget.transports()).isZero();
+      assertThat(first.get(10, TimeUnit.SECONDS).outcome()).isEqualTo(GatewayOutcome.OK);
+      assertThat(server.getAllServeEvents()).hasSize(1);
+    }
+  }
+
+  /** Story 10.51 TEST-001: model output over the byte cap is discarded, never parsed. */
+  @Test
+  void oversizedOutputIsDiscarded() throws Exception {
+    CompileRequest request = request();
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .willReturn(okJson(GatewayTestSupport.generateContentBody(proposal(request)))));
+    try (GenAiLlmGatewayClient client = client(limits(1, 262144, 16, 2))) {
+      CompileResponse response = client.propose(request, new CompileBudget(Duration.ofSeconds(5)));
+
+      assertThat(response.outcome()).isEqualTo(GatewayOutcome.TOO_LARGE);
+      assertThat(response.errorCode()).isEqualTo(GatewayErrorCode.GATEWAY_OUTPUT_TOO_LARGE);
+      assertThat(response.artifactJson()).isNull();
+      assertThat(response.outputBytes()).isGreaterThan(16);
+      server.verify(1, postRequestedFor(urlPathMatching(".*generateContent")));
+    }
+  }
+
+  /** Story 10.51 TEST-002: retries are counted and stop at the configured bound. */
+  @Test
+  void retryCountIsReportedAndBounded() throws Exception {
+    CompileRequest request = request();
+    stubUnavailable(Scenario.STARTED, "second");
+    stubUnavailable("second", "third");
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .inScenario("unavailable")
+            .whenScenarioStateIs("third")
+            .willReturn(okJson(GatewayTestSupport.generateContentBody(proposal(request)))));
+    try (GenAiLlmGatewayClient client = client(limits(1, 262144, 262144, 2))) {
+      CompileResponse recovered = client.propose(request, new CompileBudget(Duration.ofSeconds(5)));
+      assertThat(recovered.outcome()).isEqualTo(GatewayOutcome.OK);
+      assertThat(recovered.retries()).isEqualTo(2);
+      server.verify(3, postRequestedFor(urlPathMatching(".*generateContent")));
+
+      server.resetAll();
+      stubUnavailable(Scenario.STARTED, Scenario.STARTED);
+      CompileResponse exhausted = client.propose(request, new CompileBudget(Duration.ofSeconds(5)));
+      assertThat(exhausted.outcome()).isEqualTo(GatewayOutcome.TRANSPORT);
+      assertThat(exhausted.errorCode()).isEqualTo(GatewayErrorCode.GATEWAY_TRANSPORT);
+      assertThat(exhausted.retries()).isEqualTo(2);
+      server.verify(3, postRequestedFor(urlPathMatching(".*generateContent")));
+    }
+  }
+
+  /**
+   * Story 10.51 TEST-002: no sampling parameter leaves the process (javadoc of generationConfig).
+   */
+  @Test
+  void noSamplingParametersAreSentOnTheWire() throws Exception {
+    JsonNode body =
+        wireBody(properties(StudioGatewayProperties.ThinkingLevel.MEDIUM, true, true), request());
+
+    assertThat(body.at("/generationConfig").isObject()).isTrue();
+    assertThat(body.toString()).doesNotContain("temperature", "topP", "topK", "candidateCount");
+  }
+
+  /**
+   * Story 10.51 TEST-002: a response with no candidates is a parse failure that leaks no source.
+   */
+  @Test
+  void responseWithoutCandidatesIsAParseFailureThatLeaksNoSource() throws Exception {
+    CompileRequest request = GatewayTestSupport.requestWithCanaryInSource();
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .willReturn(okJson("{\"candidates\":[],\"modelVersion\":\"stub-model-001\"}")));
+    List<Logger> loggers =
+        List.of(
+            (Logger) LoggerFactory.getLogger(GatewayAuditLogger.AUDIT_LOGGER),
+            (Logger) LoggerFactory.getLogger(GatewayAuditLogger.class));
+    ListAppender<ILoggingEvent> appender = new ListAppender<>();
+    appender.start();
+    loggers.forEach(logger -> logger.addAppender(appender));
+    try (GenAiLlmGatewayClient client = client()) {
+      CompileResponse response = client.propose(request, new CompileBudget(Duration.ofSeconds(5)));
+
+      assertThat(server.getAllServeEvents().getFirst().getRequest().getBodyAsString())
+          .as("negative control: the source really left with the request")
+          .contains(GatewayTestSupport.CANARY, GatewayTestSupport.SECRET_PLACEHOLDER);
+      assertThat(response.outcome()).isEqualTo(GatewayOutcome.PARSE_FAILURE);
+      assertThat(response.failureReason())
+          .isNotBlank()
+          .doesNotContain(GatewayTestSupport.CANARY, GatewayTestSupport.SECRET_PLACEHOLDER);
+      String logged =
+          appender.list.stream()
+              .map(ILoggingEvent::getFormattedMessage)
+              .collect(Collectors.joining("\n"));
+      assertThat(logged)
+          .contains("outcome=PARSE_FAILURE")
+          .doesNotContain(GatewayTestSupport.CANARY, GatewayTestSupport.SECRET_PLACEHOLDER);
+    } finally {
+      loggers.forEach(logger -> logger.detachAppender(appender));
+      appender.stop();
+    }
   }
 }
