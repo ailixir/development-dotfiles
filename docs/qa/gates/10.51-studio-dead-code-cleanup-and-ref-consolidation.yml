@@ -1,0 +1,179 @@
+schema: 1
+story: '10.51'
+story_title: 'Studio dead-code cleanup and ref consolidation'
+gate: CONCERNS
+gate_scope: 'Code ACs only (AC-1 to AC-12), Lanes A (dd47efefa) and B (c6fa34bf6). Step 4 ACs (AC-13 to AC-19, @devops refs and memory) have NOT run and are PENDING; this gate does not cover them, and the story stays InReview until they land.'
+status_reason: 'AC-1 to AC-12 are met at c6fa34bf6. Every deleted symbol and file had zero live references at bcd03dd45 and has none at HEAD (only the @po-approved exceptions remain). No protected path changed. All four suites reconcile exactly against their baselines. CONCERNS rather than PASS because deleting VertexLlmGatewayClientTest removed the only tests of three gateway bounds: pre-network input rejection, BUSY fail-fast and the output byte cap. None has a test against the production GenAiLlmGatewayClient. The gap already existed for production; this story did not cause it, but now nothing in the suite covers those invariants.'
+reviewer: 'Quinn (Test Architect)'
+reviewed_revision: 'commit:c6fa34bf68aa6ed6c146a4686dff938faba82212'
+updated: '2026-10-07T23:59:00Z'
+expires: '2026-10-21T23:59:00Z'
+
+evidence_run_by_qa:
+  tree: 'HEAD c6fa34bf6; git status --short = ?? .aiox/, ?? .claude/agent-memory/, ?? docs/qa/evidence/ (before and after all runs; the vitest axe-results.json side effect was restored with git checkout)'
+  frontend: 'npx vitest run -> Test Files 77 passed (77), Tests 956 passed (956). Reconciliation 956 - 0 + 0 = 956. npm run type-check exit 0. npm run lint exit 0, 0 errors / 303 warnings (pre-existing count).'
+  runner: 'npm test -> Test Files 60 passed | 1 skipped (61); Tests 1214 passed | 29 skipped (1243). Reconciliation 1214 - 0 + 0. typecheck exit 0, lint exit 0. confinement.test.ts 19/19. BASE_SHA256 ca98f80c590553dc2b453deb110bdec0309ce773eb010ae4eea85e99a6b5fa57 = shasum -a 256 openapi.yaml; confinement.test.ts not in the diff.'
+  backend: "gradle-locked.sh test --tests 'com.citi.put.checks.studio.*' -> BUILD SUCCESSFUL 9m39s; JUnit XML 150 classes, 1220 tests / 0 failures / 0 errors / 7 skipped. A per-class diff against @dev's bcd03dd45 baseline XML (151 classes, 1232/0/7) shows one difference only: VertexLlmGatewayClientTest 12 -> absent. GatewayAuditTest 10 = 10, StudioGatewayConfigTest 8 = 8. The story's 1233 baseline included --tests '*Migration*' (+1, see gate 10.49 evidence), so 1233 - 1 - 12 = 1220."
+  spotless: 'spotlessJavaCheck BUILD SUCCESSFUL'
+  corun: 'tools/corun.sh under the gradle lock, after the backend run -> legs executed 11, failures 0, errors 0, skipped 0 (GREEN)'
+  diff_confinement: 'git diff bcd03dd45..HEAD --stat: 32 files, +290/-1235. Every path maps to AC-1..AC-8, the AC-7 seam doc, the AC-8 RULINGS note, the AC-9 comment-only edit (StepReviewList.tsx:27-28) or the story file. The protected-path stat (openapi.yaml, backend/src/main/resources/** incl. db/migration and application*.yml, components/studio/inference, features/studio/authoring, studioInferenceApi.ts, inferenceTypes.ts, inferenceHandlers.ts, studioAuthoringTransport.ts, studioTypes.ts, confinement.test.ts, EPIC-10-EXECUTION.yaml) is empty. Only two backend src/main files changed (ExecutionStatus.java, ReferenceDeclarations.java); no CompileStateService, Legacy* adapter, EvidenceReference DTO, temperature or V18 file is touched. Nothing under .aiox/ or docs/qa/evidence/ was committed.'
+  regrep_parent: 'git grep -w per symbol at bcd03dd45 over frontend/src, studio-runner, backend/src, tools: every AC-1..AC-8 symbol was referenced only in its own file, its own deleted module or test, or (for the Vertex trio) the three users AC-7 migrated. generatePythonFromIR/buildDefaultTestIR: live imports only at runGate.test.tsx:12-13 (reworked); diagnostics.test.tsx hits are string fixtures. type/case false only at language.ts:35 and arguments.ts:660. The fold scripts were referenced only by each other and by docs (RULINGS.md, ADR-002:528, EPIC-10-RUN-LOG.md:2455-2459).'
+  final_grep_head: 'Single git grep -E over all deleted names at HEAD in frontend/src, studio-runner/src, backend/src, tools: remaining hits are (a) backend LegacyStudioAdapter.parseSteps (a different, live, protected symbol excluded by AC-12), (b) diagnostics.test.tsx:256,300-304,309-310 string literals (approved guard exception, no imports), (c) tools/epic10-fold/RULINGS.md:3-4,11,39,44-45,49 (see DOC-001). git grep -w resetStudio returns nothing.'
+  not_run_by_qa: 'Red-once mutation of runGate.test.tsx was not reproduced; its soundness was checked by reading (seven static strings > 12 chars, asserted not.toContain on every render). CodeRabbit skipped: the CLI is not installed on this Darwin host (and it is N/A under the Epic 10 standing ruling). Full ./gradlew check not run.'
+
+ac_trace:
+  AC-1: 'MET. parseSteps.ts and pythonGenerator.ts are deleted, along with toTestRequest/toSteps/toVariables/StepActionType and the step IR. toConfiguration, TestIR (minus steps) and the variable types are kept. runGate reworked to static strings; RETIRED annotated. Lane A reading accepted (see LANEA-001).'
+  AC-2: 'MET. 7 actions and 3 fields are removed; the 5 kept actions are unchanged.'
+  AC-3: 'MET. listAllTests, listAllExecutions and readAllPages are removed; dedupeById is kept (runSnapshots.ts).'
+  AC-4: 'MET. All 9 exports removed; each was declaration-only at bcd03dd45. The 3 orphaned type imports were removed.'
+  AC-5: 'MET. The false option is removed in both places. The drift test does not depend on it (PROSE_WORDS only). Pin unchanged.'
+  AC-6: 'MET. canonicalValues() and allNames() removed; ArrayList import removed.'
+  AC-7: 'MET with concern. 3 users migrated to GenAiLlmGatewayClient; GatewayAuditTest 10/10 and StudioGatewayConfigTest 8/8 kept; Vertex trio deleted; seam doc updated; 12-test drop counted. See TEST-001.'
+  AC-8: 'MET. fold.sh/precheck.sh/preview.sh deleted; common.sh deleted (sourced only by those three); pin-contract.sh, guards.sh, RULINGS.md kept.'
+  AC-9: 'MET. Protected-path stat empty; the only non-AC code edit is comment-only (StepReviewList.tsx:27-28).'
+  AC-10: 'MET. openapi.yaml, migrations and application.yml are byte-unchanged; confinement 19/19; pin ca98f80c...fa57 before and after.'
+  AC-11: 'MET. FE 956/956, runner 1214/29, backend 1220/0/7 (= 1232 - 12 named), spotless green, co-run 11/11 skipped 0. Every count reconciles exactly.'
+  AC-12: 'MET with documented exceptions: approved guard literals, LegacyStudioAdapter.parseSteps, and RULINGS.md historical text (DOC-001).'
+  AC-13_to_AC-19: 'PENDING @devops (Step 4 not run). Not gated here.'
+
+top_issues:
+  - id: 'TEST-001'
+    severity: medium
+    category: tests
+    finding: >-
+      VertexLlmGatewayClientTest held the suite's only tests of three bounds that the production
+      GenAiLlmGatewayClient also enforces: (1) oversizedInputIsRejectedBeforeAnyNetworkCall
+      (COMPILE_INPUT_TOO_LARGE with zero WireMock serve events; prod GenAiLlmGatewayClient.java:190-198),
+      which bounds what can leave the host; (2) saturatedConcurrencyFailsFast (GATEWAY_BUSY on
+      tryAcquire failure; prod :199-207); (3) oversizedResponseIsDiscarded (GATEWAY_OUTPUT_TOO_LARGE;
+      prod :393-401). GenAiLlmGatewayClientTest (17 tests) and GenAiGatewayAuditTest (3) exercise none
+      of them. The BUSY and TOO_LARGE references in CompilePipelineTest and RepairBoundsTest use fake
+      clients, so they test how the pipeline handles those outcomes, not how the client enforces them.
+      The deleted tests ran against a src/test-only class, so no assertion on production code was
+      lost; the production gap already existed. Even so, these are security and bounds invariants
+      (seam doc §4 row 2; current-state.md CS-12) and the suite no longer covers them anywhere.
+      @dev recorded the gap honestly (seam doc §4 note, later-story candidates). AC-7 authorised the
+      deletion, so the AC is met.
+    suggested_action: >-
+      Follow-up story (owner @sm to draft, @dev to implement): add three GenAiLlmGatewayClientTest
+      cases against WireMock: maxInputBytes below the payload gives TOO_LARGE/COMPILE_INPUT_TOO_LARGE
+      with server.getAllServeEvents() empty and provenance null; maxConcurrency=1 with a delayed
+      in-flight call gives the second propose BUSY/GATEWAY_BUSY and the first OK; maxOutputBytes below
+      the stub output gives TOO_LARGE/GATEWAY_OUTPUT_TOO_LARGE with outputBytes greater than the cap.
+    suggested_owner: dev
+  - id: 'TEST-002'
+    severity: low
+    category: tests
+    finding: >-
+      These lesser assertions from the deleted suite now have no direct GenAiLlmGatewayClient test:
+      response.retries() == 2 after two 503s followed by success, and errorCode GATEWAY_TRANSPORT plus
+      retries == 2 on exhaustion (retriesAreBoundedWithoutSdkAmplification asserts only 3 wire calls
+      and TRANSPORT); the wire body omitting temperature/topP/topK/candidateCount (the prod javadoc at
+      :293 says no temperature is sent, but nothing asserts it); an empty candidates array giving
+      PARSE_FAILURE with no secret in the reason (redaction is still covered for malformed, transport
+      and finish-reason paths in GenAiGatewayAuditTest and GatewayAuditTest). Covered elsewhere:
+      parse paths (GatewayResponseParserTest), timeout not retried
+      (activeCallUsesRemainingDeadlineAndDoesNotRetryTimeout), OK path and provenance fields.
+    suggested_action: 'Fold into the TEST-001 follow-up as optional cases.'
+    suggested_owner: dev
+  - id: 'TEST-003'
+    severity: low
+    category: tests
+    finding: >-
+      Neither migrated assertion is weakened. GatewayAuditTest's 400 case changed from
+      startsWith("ClientException (status=400)") to isEqualTo("gateway transport failed"). Exact
+      equality is stricter, and it pins the fact that the provider body is never quoted. The
+      doesNotContain(SECRET_PLACEHOLDER) checks on reason, diagnostic stream and audit stream,
+      outcome=TRANSPORT and verify(1) are all unchanged. One thing is lost: the HTTP status is no
+      longer visible in the reason, but that is production behaviour, not test slack.
+      StudioGatewayConfigTest's IllegalStateException changed to NoSuchFileException containing
+      "/nonexistent/key.json", now thrown by the production credential path. The dropped "not
+      readable" text came from the deleted test-only factory, and grep finds no src/main emitter. The
+      test's subject (a missing key reported by its path) is kept.
+    suggested_action: 'None. Recorded for traceability.'
+    suggested_owner: dev
+  - id: 'LANEA-001'
+    severity: low
+    category: requirements
+    finding: >-
+      @dev read "Python IR types" as the step IR only. ACCEPTED. StepIRBase, the five *StepIR types,
+      StepIR and StepActionType were used only by the two deleted modules and TestIR.steps (re-grepped
+      at bcd03dd45). TestIR must stay for toConfiguration (@po clarification). Once its element type
+      is gone it cannot keep steps. SecretRef/VariableValue/VariableDefinition describe legacy-draft
+      variables, which is not Python IR. Side effect: TestIR no longer describes the full legacy
+      persisted shape. It is a compile-time type with one consumer (toConfiguration's Pick of
+      configuration) and no runtime parse, so there is no behaviour impact.
+    suggested_action: 'None. Include TestIR/variable types in the toConfiguration later-story candidate (already recorded).'
+    suggested_owner: po
+  - id: 'DOC-001'
+    severity: low
+    category: docs
+    finding: >-
+      tools/epic10-fold/RULINGS.md still names the deleted scripts at :11, :39, :44-45, :49, under a
+      dated 2026-10-07 "Historical" note at :3-5. Ruling: ACCEPTABLE as history. AC-8 keeps RULINGS.md
+      and the Dev Notes forbid rewriting dated records. The note makes it plain that the procedure is
+      a past record, and no script or CI path calls the deleted files. This is the "historical,
+      listed" case of AC-12, which happens to sit in tools/ instead of docs/. @po may confirm.
+      Unlisted by @dev: docs/architecture/ADR-002-fold-ruling-video-503-envelope.md:528 and
+      docs/epics/EPIC-10-RUN-LOG.md:2455-2459 also name the scripts. Both are dated historical records.
+    suggested_action: 'None for code. @po to confirm the AC-12 reading for tools/epic10-fold/RULINGS.md.'
+    suggested_owner: po
+  - id: 'DOC-002'
+    severity: low
+    category: docs
+    finding: >-
+      docs/specs/studio-context/current-state.md:26 (CS-12) cites
+      backend/src/main/.../VertexLlmGatewayClient.java:74-115, a path that was already wrong before
+      this story and now names a deleted class. CS-08 (:22) cites the deleted parseSteps.ts and
+      pythonGenerator.ts the same way. The document is headed "Assessed 2026-09-18" as a static
+      snapshot, so this is stale history, not a live contract. CS-12's subject (byte caps, bounded
+      concurrency, output caps) is exactly what TEST-001 shows is untested on the production client.
+    suggested_action: 'Optional: add a dated "superseded paths" note to current-state.md in the TEST-001 follow-up; do not rewrite the assessment.'
+    suggested_owner: sm
+  - id: 'MNT-001'
+    severity: low
+    category: code
+    finding: >-
+      In runGate.test.tsx "renders no generator-derived text for any fixture", the loop now runs
+      drafts.length times without using the draft: CodeTab is rendered with no props, so every
+      iteration is the same. This was already true before the change, because the draft fed only the
+      generator. The guard is still sound: 7 static lines, each > 12 chars, and @dev's red-once
+      mutation is recorded.
+    suggested_action: 'None required. A later tidy could render once.'
+    suggested_owner: dev
+
+waiver: { active: false }
+
+quality_score: 80
+
+evidence:
+  tests_reviewed: 3390
+  risks_identified: 7
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    ac_gaps: []
+    ac_pending: [13, 14, 15, 16, 17, 18, 19]
+
+nfr_validation:
+  security:
+    status: CONCERNS
+    notes: 'Redaction and canary assertions are kept and run against the production client (GatewayAuditTest 10/10, GenAiGatewayAuditTest). The pre-network input-size bound has no test on the production client (TEST-001).'
+  performance:
+    status: PASS
+    notes: 'Deletions only; no runtime path changed apart from removing an unreachable runner branch.'
+  reliability:
+    status: CONCERNS
+    notes: 'BUSY fail-fast and the output byte cap are untested on the production client (TEST-001). All suites and the co-run are green.'
+  maintainability:
+    status: PASS
+    notes: '1235 lines removed, no dead references left, docs annotated as historical rather than rewritten.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Add GenAiLlmGatewayClient tests for pre-network COMPILE_INPUT_TOO_LARGE (zero serve events), GATEWAY_BUSY and GATEWAY_OUTPUT_TOO_LARGE (TEST-001), optionally the TEST-002 cases.'
+      refs: ['backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClientTest.java', 'backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java:190-207,393-401']
+    - action: 'Later-story dead-code candidates recorded by @dev: toConfiguration plus TestIR/variable types, PinnedStoppedRunRecordingFacts, studioSlice.testSteps, studioApi.ts header comment.'
+      refs: ['docs/stories/10.51.story.md']
+    - action: '@devops Step 4 (AC-13..AC-19) may start: this gate is CONCERNS (non-blocking) for the code ACs.'
+      refs: ['docs/stories/10.51.story.md#step-4']
