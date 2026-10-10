@@ -1,3 +1,5 @@
 - [Epic 10 manifest convention](project_epic10_manifest_convention.md) — @po adds manifest entries at validation; `blocks` criterion-backed vs sequencing
-- [STUDIO-OBSERVED wave PO conventions](project_studio_observed_wave_po_conventions.md) — PO section placement, r2 report naming, Q2/Q4 conditional GO, C-1/C-5/C-7 ownership tension
+- [STUDIO-OBSERVED wave PO conventions](project_studio_observed_wave_po_conventions.md) — PO section placement, r2/sp report rounds, 2026-10-10 scores, V19/014-015 ownership/UX-panel coordination items
 - [OBS-007 secret-login decisions](project_obs007_secret_login_decisions.md) — binding 2026-10-09 rescope (no provider/handoff/UI); Q1/Q3 at defaults; GO 9/10 Ready
+- [Single-path re-cut validation](project_single_path_recut_validation.md) — 2026-10-10 verdicts 007/012A/012B; 012A one story + Lane M gate; recurring misses (rdsParityLint, observed-contracts build path, 13 review tests)
+- [Epic 10 closure conventions](project_epic10_closure_conventions.md) — no Superseded/Deferred status; notes + status unchanged; Done is @qa's; ADR-SC-005 disposition record

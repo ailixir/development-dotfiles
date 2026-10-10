@@ -1,0 +1,131 @@
+{
+  "story": "STUDIO-OBS-013",
+  "task": "validate-next-story",
+  "round": "sp (first validation; story created 2026-10-09 by the ADR-SC-005 single-path re-cut)",
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T00:00:00Z",
+  "validationDate": "2026-10-10",
+  "verdict": "GO",
+  "conditional": true,
+  "readinessScore": 9,
+  "scoreScale": 10,
+  "confidence": "High — every anchor spot-checked is accurate; the one open item (migration number vs parallel OBS-014) is a coordination decision, not a content gap",
+  "scoreRationale": "Six ACs each name an oracle; the story closes the UX panel gap (no video on the learning run) by reusing the replay recording pipeline, stamps step/action offsets against the ADR-002 §11.6 clock origin for seek, reuses ExecutionVideoController's Range/206/expiry/CSI semantics, splits learned-vs-replayed evidence per OBS-006 AC-4, and proves it with a joined IT incl. the recording-failure path. Deduction: risks are implicit (AC-5 residual, Dev Notes) rather than listed; the offsets DDL number is deferred to T0 while OBS-014 (parallel) already reserves V19.",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "changeLogEntry": "| 2026-10-10 | 0.1.1 | Validated GO (9/10) — Status: Draft → Ready. Report `.ai/STUDIO-OBS-013-po-validation-sp.json` | @po |",
+  "storySha256Before": "b0d7799399c4fdc080e765217c2d552545fa09e4bb87ac15c4156a9ef50e1503",
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "status": "PASS"},
+    {"n": 2, "item": "Complete description", "status": "PASS", "note": "Fact at HEAD stated with the grep that proves it"},
+    {"n": 3, "item": "Testable acceptance criteria", "status": "PASS", "note": "AC-6 joined IT names video AVAILABLE, 206 read, one offset per step/action, zero canary hits, UNAVAILABLE on mid-session failure"},
+    {"n": 4, "item": "Scope IN/OUT", "status": "PASS", "note": "Out: UI playback (008), masking gate/Sonic (009), prefix-offset population (015), governance (014)"},
+    {"n": 5, "item": "Dependencies mapped", "status": "PASS", "note": "012A; parallel with 012B/014 with disjoint File Lists except the contract-owner set; 015 depends on this story's recorded BrowserHandle"},
+    {"n": 6, "item": "Complexity estimate", "status": "PASS", "note": "Size M"},
+    {"n": 7, "item": "Business value", "status": "PASS", "note": "'From Checklist to Reality' true from the first Run"},
+    {"n": 8, "item": "Risks documented", "status": "PARTIAL", "note": "Residuals in AC-5/Dev Notes; no named risk list"},
+    {"n": 9, "item": "Criteria of Done", "status": "PASS", "note": "AC-6 proof; only @qa sets Done; never mark an unavailable store as passed"},
+    {"n": 10, "item": "Alignment with PRD/epic", "status": "PASS", "note": "ADR-SC-005 placement map row OBS-013; design R3 §4 Video/§10 F-3; UX panel finding"}
+  ],
+  "templateComplianceIssues": {
+    "missingTopLevelSections": [],
+    "unfilledPlaceholders": [],
+    "futureDeveloperOwnedSubsections": ["Agent Model Used", "Debug Log References", "Completion Notes List"],
+    "structure": "Wave convention (OBS-006 shape) retained."
+  },
+  "executorAssignment": {
+    "executor": "dev",
+    "quality_gate": "architect",
+    "sdc_reviewer": "qa",
+    "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests"],
+    "status": "PASS",
+    "note": "Code/Features row; executor != gate; tools non-empty"
+  },
+  "decisionsPending": {
+    "offsets-ddl": {"question": "Where offsets persist after the D-B re-baseline (dedicated table/columns; forward-only migration if needed)", "default": "decided with @data-engineer at T0", "blocksReady": false, "reason": "Coordination item: OBS-014 reserves V19 in parallel — this story must take V20 or fold into V14 via 012A; recorded as should-fix DDL-001"}
+  },
+  "criticalIssues": [],
+  "shouldFixIssues": [
+    {"id": "DDL-001", "acs": ["AC-2", "AC-3"], "action": "Assign the migration number before T2 (V20, or fold offsets columns into V14__guided_sessions through OBS-012A before it closes). Two parallel stories must not both mint V19."},
+    {"id": "OFF-001", "acs": ["AC-2"], "action": "Name the reserved offset kinds (step / action / clarification-wait / prefix-replay) in the Dev Agent Record at T1 so OBS-015 fills rather than invents them."},
+    {"id": "RISK-001", "acs": [], "action": "Add a one-line Risks entry: recording must work in the standalone guided worker and in the folded runner (OBS-009); failure path never fakes video."}
+  ],
+  "niceToHaveImprovements": [
+    "State in AC-3 which object-store key prefix the guided session uses so OBS-009's Sonic lifecycle (F-1) can budget retention per prefix."
+  ],
+  "goConditions": [
+    "T0 agrees the result3/session-view3 edit order with the OBS-014/015 contract owner before any schema edit.",
+    "DDL-001 resolved before T2.",
+    "Only independent @qa sets Done; an unavailable object store (Sonic) is recorded as unavailable, never passed."
+  ],
+  "antiHallucinationFindings": {
+    "verifiedAnchors": [
+      "grep -rln \"video\\|recording\" studio-runner/src/guided → 0",
+      "studio-runner/src/run/{recording,evidenceUpload,manifest,timeline,objectStore,s3ObjectStore,observedReplayAdapter,guidedBrowser,browser,browserFactory}.ts exist",
+      "launchGuidedBrowser: studio-runner/src/run/browser.ts:464 (imported guidedMain.ts:5)",
+      "studio-runner/test/fixtures-tier/recording-coverage.test.ts and test/run/confinement.test.ts exist",
+      "backend .../studio/ExecutionVideoController.java (Range/206 path) and test .../studio/evidence/ExecutionVideoContractTest.java exist",
+      "backend/src/main/resources/application.yml:261 studio.execution.evidence-retention (single source, :266)",
+      "docs/architecture/ADR-002-internal-contract-surface.md §11.6 clock origin (lines 176, 195, 213)",
+      "docs/runbooks/studio-guided-authoring.md:3 defers 'first guided recording'",
+      "OBS-006 AC-4: finalization creates zero additional execution actions; learned-vs-replay evidence split",
+      "backend .../studio/internal/ProgressReportService.java and guided/publication/GuidedPublicationResultProjector.java exist"
+    ],
+    "corrections": []
+  },
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "status": "PLANNING_PARTIAL",
+    "storyType": "Feature/integration; secondary API contract; complexity medium — correct",
+    "agents": "@dev executor / @architect gate / independent @qa / @ux consulted on offsets shape",
+    "qualityGates": "Pre-commit, independent SDC QA, @devops handoff",
+    "selfHealing": {"type": "full", "maxIterations": 3, "timeoutMinutes": 30},
+    "focusAreas": "no second recording implementation, masked-dots invariant, authorization reuse, honest unavailable states, contract sequencing — match type",
+    "fallback": "graceful_degradation documented; no PASS invented"
+  },
+  "codeIntelligenceCheck": {"available": false, "result": "skipped (isCodeIntelAvailable() → false)"},
+  "epicContextEnrichment": {"attempted": true, "result": "no epic file for STUDIO-OBSERVED under docs/prd; ADR-SC-005 + wave README used as epic context"},
+  "taskChecks": [
+    {"taskStep": "1", "check": "Template completeness", "status": "PASS_WITH_MINOR_GAPS"},
+    {"taskStep": "1.1", "check": "Executor assignment", "status": "PASS"},
+    {"taskStep": "2", "check": "File/source structure", "status": "PASS", "details": "All existing paths verified; new files named (GuidedSessionEvidenceService, GuidedSessionVideoController, guided/evidence.ts, tests)"},
+    {"taskStep": "3", "check": "UI/frontend completeness", "status": "N/A", "details": "UI playback is OBS-008"},
+    {"taskStep": "4", "check": "AC coverage/testability", "status": "PASS"},
+    {"taskStep": "5", "check": "Testing instructions", "status": "PASS", "details": "fixtures tier real Chromium, adapter-parity test, ExecutionVideoContractTest extension, joined IT, pins re-anchored"},
+    {"taskStep": "6", "check": "Security considerations", "status": "PASS", "details": "masked dots only, canary scan with recording on, CSI authorization reuse, no new unguarded route, no tracing/recordHar/screenshot"},
+    {"taskStep": "7", "check": "Task sequence", "status": "PASS", "details": "T0 reconcile → T1 runner → T2 backend → T3 proof → T4 submit"},
+    {"taskStep": "8", "check": "CodeRabbit planning", "status": "PARTIAL"},
+    {"taskStep": "8.1", "check": "Code intelligence duplicates", "status": "N/A"},
+    {"taskStep": "9", "check": "Anti-hallucination", "status": "PASS"},
+    {"taskStep": "10", "check": "Implementation readiness", "status": "GO", "details": "9/10; startable after OBS-012A Done"}
+  ],
+  "acceptanceCriteriaAssessment": [
+    {"ac": "AC-1", "testable": true, "source": "ADR-SC-005 row OBS-013; design R3 §4 Video, §10 F-3; OBS-006 AC-4", "readiness": "READY"},
+    {"ac": "AC-2", "testable": true, "source": "UX panel; ADR-002 §11.6", "readiness": "READY", "findingIds": ["OFF-001"]},
+    {"ac": "AC-3", "testable": true, "source": "ADR-SC-005 defaults Public API; ADR-002 video envelope; OBS-006 runbook", "readiness": "READY", "findingIds": ["DDL-001"]},
+    {"ac": "AC-4", "testable": true, "source": "ADR-SC-005 Consequences Evidence; OBS-006 AC-4; Order and parallelism", "readiness": "READY_CONTRACT_OWNER_SEQUENCED"},
+    {"ac": "AC-5", "testable": true, "source": "design R3 §4 Video residual; §7 C-17", "readiness": "READY"},
+    {"ac": "AC-6", "testable": true, "source": "OBS-006 AC-7 precedent; design R3 §7 SEC-3; ADR Tests", "readiness": "READY"}
+  ],
+  "dependencyVerification": {
+    "OBS-012A": "Draft at validation time (validated by a parallel @po); must be Done before T0",
+    "OBS-012B": "parallel, frontend only — disjoint",
+    "OBS-014": "parallel — disjoint except the contract-owner set; runtime.ts is 013's, transport.ts is 014's (both stories state it)",
+    "OBS-015": "depends on this story's recorded BrowserHandle; also edits GuidedPublicationResultProjector.java after 013 (sequential)"
+  },
+  "crossStoryIssues": [
+    "Migration numbering: 013 may need a forward-only migration while parallel 014 reserves V19__guided_governance — coordinator/@data-engineer assign numbers (DDL-001).",
+    "Contract owner for result3/session-view3 edits across 013/014/015 must be named before any of the three starts T2."
+  ],
+  "sourceInventory": [
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md", "sha256": "b0d7799399c4fdc080e765217c2d552545fa09e4bb87ac15c4156a9ef50e1503", "note": "before PO edits"},
+    {"path": "docs/architecture/ADR-SC-005-single-path-observed-authoring.md", "sha256": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-design.md", "sha256": "8c1cd118beed176b1e622a25ebe07f5c1d4ea406cf156535526ded6ca8b24d57"},
+    {"path": "docs/stories/STUDIO-OBSERVED/README.md", "sha256": "e49f77e1218b8043c0d65b2dec19933b14252510fe17902c0130ab87c5fe9ac9"},
+    {"path": "docs/stories/STUDIO-OBSERVED/wave-plan-single-path.json", "sha256": "5155948abe4df61caa4674cd6d25917ec578003bd49bd0a51c3b648808b6bc0d"},
+    {"path": ".aiox-core/development/tasks/validate-next-story.md", "sha256": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea"},
+    {"path": ".claude/rules/story-lifecycle.md", "sha256": "f5262020e0a3b614104881019550cb0b793907c6694d41e027fc9c1bbe2a2278"}
+  ]
+}

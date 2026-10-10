@@ -1,0 +1,144 @@
+{
+  "story": "STUDIO-OBS-014",
+  "task": "validate-next-story",
+  "round": "sp (first validation; story created 2026-10-09 by the ADR-SC-005 single-path re-cut)",
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T00:00:00Z",
+  "validationDate": "2026-10-10",
+  "verdict": "GO",
+  "conditional": true,
+  "readinessScore": 9,
+  "scoreScale": 10,
+  "confidence": "High — all P0/P1 items from ADR-SC-005 'Security work becomes stories' are present with oracles; the external approval is named external and gated in OBS-010, never marked obtained",
+  "scoreRationale": "Eleven ACs cover: governed per-application read/discovery policy with frozen hash validated by the runner and mounted-file refusal (P0); data-flow description for the external compliance approval (P0, OBS-010 gate); retention/pruning; semantic grounding of click/press/check targetIntent; destructive-verb guard; first-Run side-effect stance; labelSource on clarification choices; EXECUTE classification + persisted per-CSI budgets; mandatory Idempotency-Key on replay execute (D-2b named open, not resolved); per-action audit to SIEM with canary; P2 HMAC design note only. Every security-panel anchor cited is accurate at HEAD. Deduction: the 014/015 shared-file set is wider than the two services the ADR's one-owner rule names.",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "changeLogEntry": "| 2026-10-10 | 0.1.1 | Validated GO (9/10) — Status: Draft → Ready. Report `.ai/STUDIO-OBS-014-po-validation-sp.json` | @po |",
+  "storySha256Before": "afd5431c96a42716f8922738094f87f61d1bb2e4645ef96688bbffd1a77ec618",
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "status": "PASS"},
+    {"n": 2, "item": "Complete description", "status": "PASS", "note": "Residuals quoted with verified anchors"},
+    {"n": 3, "item": "Testable acceptance criteria", "status": "PASS", "note": "Each AC names its oracle (planted 'Delete account' proposal; Save/Delete fixture; two sessions limit 1; classifier unit test; canary over audit stream)"},
+    {"n": 4, "item": "Scope IN/OUT", "status": "PASS", "note": "GA-plan path-independent items and the approval itself are out; UI rendering is 008; SIEM sink is 009"},
+    {"n": 5, "item": "Dependencies mapped", "status": "PASS", "note": "012A; parallel with 012B/013; 015 only under one owner"},
+    {"n": 6, "item": "Complexity estimate", "status": "PASS", "note": "Size L"},
+    {"n": 7, "item": "Business value", "status": "PASS", "note": "CSI owner: nothing clicked/submitted/exported that nobody asked for"},
+    {"n": 8, "item": "Risks documented", "status": "PASS", "note": "Decisions-pending table (DDL placement, pruning strategy, side-effect default); real-model behaviour deferred to 009 D-C"},
+    {"n": 9, "item": "Criteria of Done", "status": "PASS", "note": "T5 full suites + fixture end-to-end under guards; independent @qa security remit; approval never marked passed"},
+    {"n": 10, "item": "Alignment with PRD/epic", "status": "PASS", "note": "ADR-SC-005 P0/P1/P2 one-to-one; ADR-SC-004 trust model preserved"}
+  ],
+  "templateComplianceIssues": {
+    "missingTopLevelSections": [],
+    "unfilledPlaceholders": [],
+    "futureDeveloperOwnedSubsections": ["Agent Model Used", "Debug Log References", "Completion Notes List"],
+    "structure": "Wave convention retained."
+  },
+  "executorAssignment": {
+    "executor": "dev",
+    "quality_gate": "architect",
+    "sdc_reviewer": "qa",
+    "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests", "security-scan"],
+    "status": "PASS",
+    "note": "Security story → @architect gate matches; @data-engineer co-authors DDL as stated"
+  },
+  "decisionsPending": {
+    "ddl-placement": {"question": "Fold governance tables into V14 or forward-only V19", "default": "V19__guided_governance", "blocksReady": false, "reason": "Keeps 012A's 'exactly V1–V18' stable; coordinate the number with OBS-013's possible offsets migration"},
+    "pruning-strategy": {"question": "Null columns vs delete rows", "default": "null columns; rows/receipts stay", "blocksReady": false, "reason": "Publication integrity"},
+    "side-effect-default": {"question": "Default stance for a new application", "default": "CLARIFY_FIRST", "blocksReady": false, "reason": "AC-6 oracle set changes only"}
+  },
+  "criticalIssues": [],
+  "shouldFixIssues": [
+    {"id": "OWN-001", "acs": ["AC-1", "AC-4", "AC-8", "AC-9", "AC-10"], "action": "Shared-file set with OBS-015 also includes GuidedDispatchService.java, GuidedContracts.java, GuidedSessionController.java, StudioController.java. One owner for the whole set if 014 ∥ 015; otherwise 014 → 015 (ADR fallback). Record at T0."},
+    {"id": "PRUNE-001", "acs": ["AC-3"], "action": "Name the pruner: new GuidedObservationPruner vs extending core scheduling/partitioning/RetentionPruner.java (partition-oriented; may not fit column nulling)."},
+    {"id": "CODE-001", "acs": ["AC-8"], "action": "Fix the problem+json code and Retry-After semantics for BUDGET_EXCEEDED-at-start at T0 with the other closed codes."},
+    {"id": "DDL-002", "acs": ["AC-1", "AC-3", "AC-8"], "action": "Confirm V19 with @data-engineer against OBS-013's possible offsets migration (parallel story)."}
+  ],
+  "niceToHaveImprovements": [
+    "AC-2: list the exact fields exported per observation node (from observationTypes.ts) in the data-flow document outline so Compliance sees the schema, not a description."
+  ],
+  "goConditions": [
+    "OWN-001 decision recorded at T0 before T1.",
+    "Closed code names (AC-1, 4, 5, 6, 8) fixed by @architect at T0 and recorded in the Dev Agent Record.",
+    "The compliance approval, the SIEM sink and real-model guard behaviour are never marked passed here (OBS-010 / OBS-009).",
+    "Only independent @qa (security-scan remit) sets Done."
+  ],
+  "antiHallucinationFindings": {
+    "verifiedAnchors": [
+      "studio-runner/src/run/guidedMain.ts:18 STUDIO_GUIDED_CONFIG_FILE; :20 accepted keys incl. applicationPolicy; file is 33 lines",
+      "backend .../config/RateLimitClassifier.java:31-36 matches only .*/studio/tests/[^/]+/execute$; BucketClass {READ, WRITE, EXECUTE, SEND} :7-11",
+      "backend/src/main/resources/db/migration/V30__studio_guided_sessions.sql:10 progress jsonb NOT NULL",
+      "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql:58 safe_result jsonb CHECK(...)",
+      "studio-runner/src/run/observationTypes.ts:26 ObservationRule, :39 ObservationApplicationPolicy",
+      "backend .../guided/translation/GuidedTranslationService.java:1278 label = \"Saved input choice \" + (++index)",
+      "backend .../config/IdempotencyFilter.java:79 reads Idempotency-Key (optional today; :88 INVALID_IDEMPOTENCY_KEY)",
+      "GuidedProposalValidator, GuidedTranslationStore, GuidedTranslationProperties, GuidedSessionProperties, GuidedContracts, StudioApiIT exist",
+      "BUDGET_EXCEEDED exists (PublicationContracts, ObservedValidationClient, GuidedPublicationEvidenceRepository)",
+      "docs/epics/UI-STUDIO-GA-PLAN.md:105 D-2b (IdempotencyFilter replays cached 2xx without re-authorizing)",
+      "docs/specs/studio-observed-authoring/translation-design.md exists",
+      "Only existing pruner: backend .../scheduling/partitioning/RetentionPruner.java (core)"
+    ],
+    "corrections": []
+  },
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "status": "PLANNING_PARTIAL",
+    "storyType": "Security; secondary API/contract, Database; complexity high — correct",
+    "agents": "@dev executor / @data-engineer DDL / @architect gate / independent @qa security",
+    "qualityGates": "Pre-commit, independent SDC QA with D-2b named open, @devops handoff",
+    "selfHealing": {"type": "full", "maxIterations": 3, "timeoutMinutes": 30},
+    "focusAreas": "OWASP authorization/metering, no new page content to the model, fail-closed defaults, persisted counters, audit without values, pins — match type",
+    "fallback": "graceful_degradation documented; no PASS invented"
+  },
+  "codeIntelligenceCheck": {"available": false, "result": "skipped (isCodeIntelAvailable() → false)"},
+  "epicContextEnrichment": {"attempted": true, "result": "no epic file for STUDIO-OBSERVED under docs/prd; ADR-SC-005 + wave README used as epic context"},
+  "taskChecks": [
+    {"taskStep": "1", "check": "Template completeness", "status": "PASS_WITH_MINOR_GAPS"},
+    {"taskStep": "1.1", "check": "Executor assignment", "status": "PASS"},
+    {"taskStep": "2", "check": "File/source structure", "status": "PASS", "details": "Existing paths verified; new policy package, pruner, V19, tests, two documents named", "findingIds": ["OWN-001", "DDL-002"]},
+    {"taskStep": "3", "check": "UI/frontend completeness", "status": "N/A", "details": "Untrusted-label rendering is OBS-008"},
+    {"taskStep": "4", "check": "AC coverage/testability", "status": "PASS"},
+    {"taskStep": "5", "check": "Testing instructions", "status": "PASS", "details": "unit on OBS-005 fixtures; Testcontainers ITs (governance, pruning, two-replica budgets, Idempotency-Key); classifier test; audit canary; runner policy-hash tests; contract tool; OBS-005/006/007 regressions"},
+    {"taskStep": "6", "check": "Security considerations", "status": "PASS", "details": "This is the security story; approval external; D-2b named open; CSRF/headers tracked in GA plan"},
+    {"taskStep": "7", "check": "Task sequence", "status": "PASS", "details": "T0 rulings/ownership → T1 policy+retention → T2 validator → T3 metering/audit → T4 docs → T5 verify"},
+    {"taskStep": "8", "check": "CodeRabbit planning", "status": "PARTIAL"},
+    {"taskStep": "8.1", "check": "Code intelligence duplicates", "status": "N/A"},
+    {"taskStep": "9", "check": "Anti-hallucination", "status": "PASS"},
+    {"taskStep": "10", "check": "Implementation readiness", "status": "GO", "details": "9/10; startable after OBS-012A Done"}
+  ],
+  "acceptanceCriteriaAssessment": [
+    {"ac": "AC-1", "testable": true, "source": "ADR P0; panel Security; guidedMain.ts:18-20", "readiness": "READY", "findingIds": ["DDL-002", "OWN-001"]},
+    {"ac": "AC-2", "testable": true, "source": "ADR P0 external approval; GA F-2/J-1", "readiness": "READY_DOCUMENT_ONLY_APPROVAL_EXTERNAL"},
+    {"ac": "AC-3", "testable": true, "source": "ADR row OBS-014 retention; V30:10, V32:58", "readiness": "READY", "findingIds": ["PRUNE-001"]},
+    {"ac": "AC-4", "testable": true, "source": "ADR P1 semantic grounding; panel HIGH", "readiness": "READY"},
+    {"ac": "AC-5", "testable": true, "source": "ADR P1 destructive-verb guard", "readiness": "READY"},
+    {"ac": "AC-6", "testable": true, "source": "ADR P1 first-Run side-effect policy", "readiness": "READY"},
+    {"ac": "AC-7", "testable": true, "source": "ADR P1 labelSource; UX panel; translation-design", "readiness": "READY_CONTRACT_OWNER_SEQUENCED"},
+    {"ac": "AC-8", "testable": true, "source": "ADR P1 EXECUTE + per-CSI budgets; RateLimitClassifier.java:31-35", "readiness": "READY", "findingIds": ["CODE-001"]},
+    {"ac": "AC-9", "testable": true, "source": "ADR P1 Idempotency-Key; GA D-2b", "readiness": "READY"},
+    {"ac": "AC-10", "testable": true, "source": "ADR P1 per-action audit; design R3 I-B4", "readiness": "READY_SINK_EXTERNAL"},
+    {"ac": "AC-11", "testable": true, "source": "ADR P2", "readiness": "READY_DESIGN_NOTE_ONLY"}
+  ],
+  "dependencyVerification": {
+    "OBS-012A": "Draft at validation time; must be Done before T0",
+    "OBS-013": "parallel — disjoint except contract-owner set; transport.ts is 014's, runtime.ts is 013's",
+    "OBS-015": "parallel only under one owner for the full shared set (OWN-001); else sequential 014 → 015",
+    "OBS-008": "consumes labelSource, Idempotency-Key, BUDGET_EXCEEDED/POLICY_DENIED codes",
+    "OBS-009": "SIEM sink routing; real-model guard behaviour in D-C",
+    "OBS-010": "records the compliance approval as an external release gate"
+  },
+  "crossStoryIssues": [
+    "014/015 shared-file set wider than GuidedSessionService/GuidedTranslationService (OWN-001) — coordinator decision needed before batch 3 dispatch.",
+    "V19 numbering vs OBS-013's possible offsets migration (DDL-002)."
+  ],
+  "sourceInventory": [
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md", "sha256": "afd5431c96a42716f8922738094f87f61d1bb2e4645ef96688bbffd1a77ec618", "note": "before PO edits"},
+    {"path": "docs/architecture/ADR-SC-005-single-path-observed-authoring.md", "sha256": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4"},
+    {"path": "docs/epics/UI-STUDIO-GA-PLAN.md", "sha256": "8a6ce9e85e53ed69c1cf453653fd58ccc5eb25ccf309a9cdbe8a8f8f43003c7a"},
+    {"path": "docs/stories/STUDIO-OBSERVED/README.md", "sha256": "e49f77e1218b8043c0d65b2dec19933b14252510fe17902c0130ab87c5fe9ac9"},
+    {"path": "docs/stories/STUDIO-OBSERVED/wave-plan-single-path.json", "sha256": "5155948abe4df61caa4674cd6d25917ec578003bd49bd0a51c3b648808b6bc0d"},
+    {"path": ".aiox-core/development/tasks/validate-next-story.md", "sha256": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea"},
+    {"path": ".claude/rules/story-lifecycle.md", "sha256": "f5262020e0a3b614104881019550cb0b793907c6694d41e027fc9c1bbe2a2278"}
+  ]
+}

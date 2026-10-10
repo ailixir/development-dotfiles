@@ -1,0 +1,149 @@
+{
+  "story": "STUDIO-OBS-015",
+  "task": "validate-next-story",
+  "round": "sp (first validation; story created 2026-10-09 by the ADR-SC-005 single-path re-cut, D-D in GA)",
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T00:00:00Z",
+  "validationDate": "2026-10-10",
+  "verdict": "GO",
+  "conditional": true,
+  "readinessScore": 9,
+  "scoreScale": 10,
+  "confidence": "High — the user's requirement is implemented precisely with falsifiable ACs; anchors verified; the only open items are coordination (014/015 ownership) and two wording nits",
+  "scoreRationale": "Binding requirement ('10-step test, change step 4 → only 4..10 re-learned; snapshot of previous'): AC-1 defines the first changed step k falsifiably (authored text + referenced var/secret declarations + step-level config; inserts/deletes/reorders at the first affected index; multiple edits → earliest; test-level config → k = 1; no edit → READY; first Run → UNLEARNED) over an immutable per-step snapshot revision; AC-3 requires zero model calls for 1…k-1 with fresh binding values under existing IDs and 'steps after k are always re-learned'; AC-5 requires byte-identical prefix hashes, reusedFrom provenance, merged admissionProvenanceHash, pure validation, no model call at finalize; AC-4 carries architect conditions 1–4 verbatim; AC-2 names the v3 contract change; AC-6 is ADR Verification D-D plus insert/delete/reorder, config → k = 1, drift at j, FAIL-in-prefix stop, lowered-k refusal, secretRef prefix, video, and the two D-C corpus artifacts. Dependency on OBS-013 (recorded BrowserHandle for the observed adapter) is justified. Deduction: shared-file set with 014 wider than named; two wording nits.",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "changeLogEntry": "| 2026-10-10 | 0.1.1 | Validated GO (9/10) — Status: Draft → Ready. Report `.ai/STUDIO-OBS-015-po-validation-sp.json` | @po |",
+  "storySha256Before": "390fe8cbdbf3c8753c74b0375b2b03d4615ba32c27091569e9737b0a9d3cf3d3",
+  "userRequirementTrace": {
+    "requirement": "In case we have a 10-step test and we change step 4, only step 4 and beyond (5..10) should be regenerated; snapshot of the previous (ADR-SC-005 D-D, 2026-10-09)",
+    "firstChangedStepDefinition": "AC-1",
+    "zeroModelCallsPrefix": "AC-3 (both gateways silent), AC-6 (gateway counters zero for 1…3)",
+    "freshDataflowValues": "AC-3 (recaptured under existing server-issued binding IDs)",
+    "perStepSnapshotHashes": "AC-1, AC-2 (learned-plan/revision), AC-5 (byte-identical prefix), AC-6",
+    "publicationMerge": "AC-5",
+    "driftConditions": "AC-4 (architect conditions 1–4), AC-6 (j = 2 case; FAIL-in-prefix stops)",
+    "contractChangeNamed": "AC-2 (commands#start {baseRevisionId, firstLearnStepId}; REPLAYING_PREFIX; per-step hashes + reusedFrom; result3 relearnedFrom)",
+    "dependencyOn013": "Dependency notes + AC-3: observed adapter needs the recorded BrowserHandle"
+  },
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "status": "PASS"},
+    {"n": 2, "item": "Complete description", "status": "PASS", "note": "Binding user correction quoted; UX statement quoted; INC-001 superseded-but-requirement-carried stated"},
+    {"n": 3, "item": "Testable acceptance criteria", "status": "PASS", "note": "AC-6 = ADR Verification D-D verbatim plus eleven additional named cases"},
+    {"n": 4, "item": "Scope IN/OUT", "status": "PASS", "note": "Out: UI (008), benchmark execution (009), claim() split (011), governance (014)"},
+    {"n": 5, "item": "Dependencies mapped", "status": "PASS", "note": "007 (v3/secretRef), 012A (one generation, V15 columns), 013 (recorded handle); 014 under one owner or sequential; 008 follows"},
+    {"n": 6, "item": "Complexity estimate", "status": "PASS", "note": "Size L"},
+    {"n": 7, "item": "Business value", "status": "PASS", "note": "Fixing one step costs seconds of replay plus the tail"},
+    {"n": 8, "item": "Risks documented", "status": "PASS", "note": "Decisions-pending table; hot-file ownership; do not refactor claim() here"},
+    {"n": 9, "item": "Criteria of Done", "status": "PASS", "note": "AC-6 joined oracles; regressions 006/007/013; only @qa sets Done"},
+    {"n": 10, "item": "Alignment with PRD/epic", "status": "PASS", "note": "ADR-SC-005 D-D, defaults, Consequences, placement row, Verification, Alternatives — one-to-one"}
+  ],
+  "templateComplianceIssues": {
+    "missingTopLevelSections": [],
+    "unfilledPlaceholders": [],
+    "futureDeveloperOwnedSubsections": ["Agent Model Used", "Debug Log References", "Completion Notes List"],
+    "structure": "Wave convention retained."
+  },
+  "executorAssignment": {
+    "executor": "dev",
+    "quality_gate": "architect",
+    "sdc_reviewer": "qa",
+    "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests"],
+    "status": "PASS"
+  },
+  "decisionsPending": {
+    "ddl": {"question": "Any DDL beyond V15 columns", "default": "none; forward-only if needed", "blocksReady": false, "reason": "Coordinate numbering with 013/014"},
+    "lowered-k-code": {"question": "Refusal code when client lowers firstLearnStepId", "default": "@architect names at T0", "blocksReady": false, "reason": "AC-2 wording only"}
+  },
+  "criticalIssues": [],
+  "shouldFixIssues": [
+    {"id": "OWN-001", "acs": ["AC-1", "AC-2", "AC-3"], "action": "Shared-file set with OBS-014 also includes GuidedDispatchService.java, GuidedContracts.java, GuidedSessionController.java, StudioController.java — one owner for the whole set if parallel; otherwise 014 → 015."},
+    {"id": "WORD-001", "acs": ["AC-1"], "action": "Stable step UUIDs originate in 10.35 AuthoringV2Request / V21 authoring (INC-001 research.json:172 adopted them) — say 'reused from 10.35/INC-001' rather than 'INC-001 introduced'. No behavioural change."},
+    {"id": "ORACLE-001", "acs": ["AC-6"], "action": "Name the counter source for 'gateway counters zero' (NoRuntimeLlmTest / DeReadyCarryForwardTest precedent) so @qa reproduces the oracle identically."}
+  ],
+  "niceToHaveImprovements": [
+    "AC-3: state explicitly that prefix replay under REPLAYING_PREFIX honours OBS-014's governance guards only for the learned suffix (the story's Out-of-scope says so; moving it next to AC-3 helps @dev)."
+  ],
+  "goConditions": [
+    "Starts only after OBS-013 Done (recorded handle) and the V15 per-step hash + reusedFrom columns are verified present at T0.",
+    "OWN-001 ownership decision vs OBS-014 recorded before T1.",
+    "@architect fixes the lowered-firstLearnStepId refusal code and the hash composition at T0 (Dev Agent Record).",
+    "Only independent @qa sets Done; the two corpus artifacts are written but their real-model execution is OBS-009's."
+  ],
+  "antiHallucinationFindings": {
+    "verifiedAnchors": [
+      "docs/stories/STUDIO-INC-001-incremental-compile/spec/requirements.json:378 stable UUID kept across text edits; research.json:172,325 UUIDs come from V21 authoring (10.35)",
+      "backend .../studio/dto/AuthoringStep.java and backend .../studio/authoring/ exist",
+      "backend .../guided/session/GuidedSessionService.java:565 public JsonNode claim(...); file is 2,130 lines (panel's '606 lines' not re-measured here)",
+      "checkCommand: backend .../guided/translation/GuidedTranslationService.java:87,459",
+      "docs/specs/studio-observed-authoring/publication-design.md:61 ordered ledger tuple admissionProvenanceHash",
+      "GuidedPlanBuilder, GuidedPlanPublisher, ObservedArtifactLowerer, ObservedRevisionVerifier, PublicationContracts, GuidedPublicationRepository, GuidedPublicationResultProjector, GuidedMaterializationService, GuidedTranslationCoordinator, UITestRevision, ExecutionReadinessService, StudioService, StudioController, GuidedSessionController exist",
+      "studio-runner/src/guided/ownership.ts, executor/observedReplay.ts, validator/observedReplay.ts exist",
+      "docs/specs/studio-observed-authoring/contracts/v3/ exists (OBS-007 in flight)",
+      "OBS-012A AC-6 (story :42) lands V15__publication per-step snapshot hash + reusedFrom{revisionId, stepId} columns; 012A :9 states OBS-015 needs them",
+      "secret-login-design.md R3 header (:3) and §10 :259 — secretRef fill in a reused prefix replays under the same rules",
+      "ExecutionReadinessService.java still emits COMPILE_REQUIRED (11 hits) — renamed to LEARN_REQUIRED by 012A, so the 012A dependency is real",
+      "studio-runner/evaluation/observed-authoring/ does not exist (new; consistent with OBS-009 File List)"
+    ],
+    "corrections": [
+      "AC-1 'stable AuthoringStep UUIDs INC-001 introduced' — the UUIDs predate INC-001 (10.35/V21); INC-001 adopted them (WORD-001)."
+    ]
+  },
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "status": "PLANNING_PARTIAL",
+    "storyType": "Feature/architecture (session state machine, publication merge); secondary API contract; complexity high — correct",
+    "agents": "@dev executor / @architect gate + T0 rulings / independent @qa",
+    "qualityGates": "Pre-commit, independent SDC QA mapped to ADR Verification D-D, @devops handoff",
+    "selfHealing": {"type": "full", "maxIterations": 3, "timeoutMinutes": 30},
+    "focusAreas": "zero model calls in prefix, at-most-once dispatch, hash equality, conditions 1–4, no hidden replay in finalize — match type",
+    "fallback": "graceful_degradation documented; no PASS invented"
+  },
+  "codeIntelligenceCheck": {"available": false, "result": "skipped (isCodeIntelAvailable() → false)"},
+  "epicContextEnrichment": {"attempted": true, "result": "no epic file for STUDIO-OBSERVED under docs/prd; ADR-SC-005 + wave README used as epic context"},
+  "taskChecks": [
+    {"taskStep": "1", "check": "Template completeness", "status": "PASS_WITH_MINOR_GAPS"},
+    {"taskStep": "1.1", "check": "Executor assignment", "status": "PASS"},
+    {"taskStep": "2", "check": "File/source structure", "status": "PASS", "details": "All existing paths verified; new ChangeDetectionTest, IncrementalRelearnIT, mixed-mode-prefix.test.ts, corpus artifacts named", "findingIds": ["OWN-001"]},
+    {"taskStep": "3", "check": "UI/frontend completeness", "status": "N/A", "details": "UI is OBS-008; copy that depends on this contract is listed in Dev Notes"},
+    {"taskStep": "4", "check": "AC coverage/testability", "status": "PASS", "findingIds": ["ORACLE-001"]},
+    {"taskStep": "5", "check": "Testing instructions", "status": "PASS", "details": "unit change detection + merge; joined ITs with gateway counters and hash equality; runner fixtures tier mixed mode; regressions 006/007/013"},
+    {"taskStep": "6", "check": "Security considerations", "status": "PASS", "details": "secretRef prefix rules unchanged (OBS-007); at-most-once; no model call at finalize; same session budget for j…k-1; OBS-014 guards apply to the suffix"},
+    {"taskStep": "7", "check": "Task sequence", "status": "PASS", "details": "T0 reconcile → T1 detection → T2 contracts → T3 session → T4 merge → T5 oracles → T6 submit"},
+    {"taskStep": "8", "check": "CodeRabbit planning", "status": "PARTIAL"},
+    {"taskStep": "8.1", "check": "Code intelligence duplicates", "status": "N/A"},
+    {"taskStep": "9", "check": "Anti-hallucination", "status": "PASS_WITH_ONE_WORDING_CORRECTION", "findingIds": ["WORD-001"]},
+    {"taskStep": "10", "check": "Implementation readiness", "status": "GO", "details": "9/10; startable after 007, 012A, 013 Done"}
+  ],
+  "acceptanceCriteriaAssessment": [
+    {"ac": "AC-1", "testable": true, "source": "ADR D-D; defaults Readiness vocabulary; row OBS-015", "readiness": "READY", "findingIds": ["WORD-001"]},
+    {"ac": "AC-2", "testable": true, "source": "ADR row OBS-015 contract change; Contracts and pins", "readiness": "READY_CONTRACT_OWNER_SEQUENCED"},
+    {"ac": "AC-3", "testable": true, "source": "ADR D-D defaults adopted; Consequences Incremental re-learn", "readiness": "READY_AFTER_013"},
+    {"ac": "AC-4", "testable": true, "source": "ADR D-D architect conditions 1–4", "readiness": "READY"},
+    {"ac": "AC-5", "testable": true, "source": "ADR row OBS-015 publication merge; Consequences drift; OBS-006 AC-1…5", "readiness": "READY"},
+    {"ac": "AC-6", "testable": true, "source": "ADR Verification D-D; D-C incremental cases", "readiness": "READY", "findingIds": ["ORACLE-001"]}
+  ],
+  "dependencyVerification": {
+    "OBS-007": "Draft at validation (parallel @po validates) — v3 and secretRef rules",
+    "OBS-012A": "Draft — V15 columns, one generation, LEARN_REQUIRED",
+    "OBS-013": "Validated GO today — recorded BrowserHandle",
+    "OBS-014": "parallel only under one owner for the full shared set (OWN-001)",
+    "OBS-008": "follows; renders 'Learning from step k' against this contract",
+    "OBS-009": "executes the two incremental corpus cases in D-C"
+  },
+  "crossStoryIssues": [
+    "014/015 shared-file set wider than the two named services (OWN-001).",
+    "Contract owner for commands/session/session-view/learned-plan/revision/result edits must be the same owner as 013/014's."
+  ],
+  "sourceInventory": [
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md", "sha256": "390fe8cbdbf3c8753c74b0375b2b03d4615ba32c27091569e9737b0a9d3cf3d3", "note": "before PO edits"},
+    {"path": "docs/architecture/ADR-SC-005-single-path-observed-authoring.md", "sha256": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-design.md", "sha256": "8c1cd118beed176b1e622a25ebe07f5c1d4ea406cf156535526ded6ca8b24d57"},
+    {"path": "docs/stories/STUDIO-OBSERVED/README.md", "sha256": "e49f77e1218b8043c0d65b2dec19933b14252510fe17902c0130ab87c5fe9ac9"},
+    {"path": "docs/stories/STUDIO-OBSERVED/wave-plan-single-path.json", "sha256": "5155948abe4df61caa4674cd6d25917ec578003bd49bd0a51c3b648808b6bc0d"},
+    {"path": ".aiox-core/development/tasks/validate-next-story.md", "sha256": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea"},
+    {"path": ".claude/rules/story-lifecycle.md", "sha256": "f5262020e0a3b614104881019550cb0b793907c6694d41e027fc9c1bbe2a2278"}
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "story": "STUDIO-OBS-010",
+  "task": "validate-next-story",
+  "round": "sp (validation of the 2026-10-09 single-path re-cut 0.3.0; r2 = dual-path 0.2.x GO, superseded)",
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T00:00:00Z",
+  "validationDate": "2026-10-10",
+  "verdict": "GO",
+  "conditional": true,
+  "readinessScore": 8,
+  "scoreScale": 10,
+  "confidence": "High for the document work; the pilot and every external gate depend on people and approvals outside the repo, which the story never fabricates",
+  "scoreRationale": "Thin and bounded: six ACs, six files, no code. Pilot gated on the D-C benchmark pass (not merely run) with an incremental re-learn task; release-readiness record with a fixed row shape and explicit external gates (G-1/G-2/G-3, C-2/C-3, OBS-014 compliance approvals, D-B deployment-history confirmation, ED-01 owner), none readable as 'obtained' without an evidence path; single-path runbook rewrite with the dated 'Live surface' list OBS-011 must not remove from; devops handoff that triggers nothing. Deductions: the ~15 runbook rows need a row → evidence table for @qa; ED-01 owner 'TBD' needs who-was-asked recorded.",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "changeLogEntry": "| 2026-10-10 | 0.3.1 | Validated GO (8/10) — Status: Draft → Ready (single-path draft). Report `.ai/STUDIO-OBS-010-po-validation-sp.json` | @po |",
+  "storySha256Before": "28171046cec463a28ee6787304a8a0f42c3ad18d6045bf26465677be53cb86d8",
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "status": "PASS"},
+    {"n": 2, "item": "Complete description", "status": "PASS"},
+    {"n": 3, "item": "Testable acceptance criteria", "status": "PASS", "note": "Denominators named (completed/needed help/abandoned; understood yes/no); record row shape fixed; Live surface contents enumerated"},
+    {"n": 4, "item": "Scope IN/OUT", "status": "PASS", "note": "Out: code/charts/contracts/migrations; GA plan file coordinator-owned; path-independent GA items listed as tracked"},
+    {"n": 5, "item": "Dependencies mapped", "status": "PASS", "note": "009 Done with D-C passed; 011 parallel after the Live surface list (T2 before 011 T0)"},
+    {"n": 6, "item": "Complexity estimate", "status": "PASS", "note": "Size M"},
+    {"n": 7, "item": "Business value", "status": "PASS"},
+    {"n": 8, "item": "Risks documented", "status": "PASS", "note": "Residuals that must appear honestly listed; externals never fabricated"},
+    {"n": 9, "item": "Criteria of Done", "status": "PASS", "note": "Any pending external item prevents release readiness; only @qa sets Done; release-checklist.md run by @devops"},
+    {"n": 10, "item": "Alignment with PRD/epic", "status": "PASS", "note": "ADR D-B residual, D-C, Security work, Operations, row OBS-010; design §10; security condition 10; GA §4.B/§4.C/§4.F/§4.J/§7"}
+  ],
+  "templateComplianceIssues": {
+    "missingTopLevelSections": [],
+    "unfilledPlaceholders": [],
+    "futureDeveloperOwnedSubsections": ["Agent Model Used", "Debug Log References", "Completion Notes List"],
+    "structure": "Wave convention retained; superseded 0.2.x PO section kept as history inside Dev Notes."
+  },
+  "executorAssignment": {
+    "executor": "analyst",
+    "quality_gate": "pm",
+    "sdc_reviewer": "qa",
+    "quality_gate_tools": ["requirements-traceability", "evidence-review", "release-checklist"],
+    "status": "PASS",
+    "note": "Research/Investigation row (analyst → pm); @devops receives the handoff and runs release-checklist.md"
+  },
+  "decisionsPending": {
+    "Q3": {"question": "Audit retention window", "default": "existing retention pruner window (design §4.1/§8 Q3)", "blocksReady": false, "reason": "Runbook row wording only"}
+  },
+  "criticalIssues": [],
+  "shouldFixIssues": [
+    {"id": "ROWS-001", "acs": ["AC-5"], "action": "At T2 add a runbook row → implementing-story evidence table to the Dev Agent Record so @qa's 'each row cites evidence' pass is mechanical."},
+    {"id": "OWNER-001", "acs": ["AC-4"], "action": "For ED-01 'owner TBD' record who was asked and when, not only the state."}
+  ],
+  "niceToHaveImprovements": [
+    "AC-1: name the fixture login application the pilot uses (OBS-007 fixture vs approved staging) so participant prerequisites are concrete."
+  ],
+  "goConditions": [
+    "The pilot never starts before OBS-009 AC-7 reports the D-C gate passed (≥ 90 %, zero false-pass, zero leak).",
+    "No participant is contacted or recruited without explicit user authorization recorded.",
+    "The dated 'Live surface' list is written at T2 before OBS-011 T0.",
+    "The release record cannot read 'ready' while any external gate is pending; each gate carries owner, state, evidence path, date.",
+    "Only independent @qa sets Done; @devops executes release-checklist.md on handoff; nothing is deployed by this story."
+  ],
+  "antiHallucinationFindings": {
+    "verifiedAnchors": [
+      "docs/runbooks/studio-guided-authoring.md:7 (V33 migration text) and :41 '## Staged V19 compatibility and rollback' — the sections AC-5 replaces after D-B",
+      "docs/stories/10.34.story.md exists; Groups A–N (:66 Group A); 33 inherited ACs from 12 stories (:7)",
+      "docs/epics/UI-STUDIO-GA-PLAN.md:202 'OBS-010 merges with the pilot/10.34 evidence'; :170 lane G",
+      "secret-login-design.md:16,:109 R1-2 form-action origin refusal and whole-origin trust statement; :107 §4.1 audit retention default (Q3); :263 §10 row OBS-010",
+      "secret-login-security-review.md:60 condition 10 (G-1/G-2/G-3 in release readiness and runbook)",
+      "ADR-SC-005 D-B: deployment-history confirmation 'owed, not obtained'",
+      ".aiox-core/product/checklists/release-checklist.md exists (L2 — executed, not edited)",
+      "docs/qa/evidence/studio-observed-authoring/ does not exist (new)"
+    ],
+    "corrections": []
+  },
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "status": "PLANNING_PARTIAL",
+    "storyType": "Research/pilot and release documentation; complexity medium — correct",
+    "agents": "@analyst executor / @pm gate / @devops handoff / independent @qa",
+    "qualityGates": "Evidence and runbook review; independent SDC QA traceability; release-checklist.md by @devops",
+    "selfHealing": {"type": "full", "maxIterations": 3, "timeoutMinutes": 30},
+    "focusAreas": "markdown quality and reference validity — match documentation type",
+    "fallback": "graceful_degradation documented; 'Never invent a CodeRabbit PASS'"
+  },
+  "codeIntelligenceCheck": {"available": false, "result": "skipped (isCodeIntelAvailable() → false)"},
+  "epicContextEnrichment": {"attempted": true, "result": "no epic file for STUDIO-OBSERVED under docs/prd; ADR-SC-005 + wave README used as epic context"},
+  "taskChecks": [
+    {"taskStep": "1", "check": "Template completeness", "status": "PASS_WITH_MINOR_GAPS"},
+    {"taskStep": "1.1", "check": "Executor assignment", "status": "PASS"},
+    {"taskStep": "2", "check": "File/source structure", "status": "PASS", "details": "Six files; runbook exists; 10.34 exists; evidence dir new"},
+    {"taskStep": "3", "check": "UI/frontend completeness", "status": "N/A", "details": "Pilot script uses OBS-008 copy verbatim"},
+    {"taskStep": "4", "check": "AC coverage/testability", "status": "PASS", "findingIds": ["ROWS-001", "OWNER-001"]},
+    {"taskStep": "5", "check": "Testing instructions", "status": "PASS", "details": "Human observations with denominators; @qa traceability review; runbook checklist pass; release-checklist.md by @devops"},
+    {"taskStep": "6", "check": "Security considerations", "status": "PASS", "details": "G-1/G-2/G-3, C-2/C-3, compliance approvals, D-B confirmation as external gates; residuals listed honestly"},
+    {"taskStep": "7", "check": "Task sequence", "status": "PASS", "details": "T0 prerequisites → T1 pilot → T2 runbook + Live surface (before 011 T0) → T3 release record → T4 handoff"},
+    {"taskStep": "8", "check": "CodeRabbit planning", "status": "PARTIAL"},
+    {"taskStep": "8.1", "check": "Code intelligence duplicates", "status": "N/A"},
+    {"taskStep": "9", "check": "Anti-hallucination", "status": "PASS"},
+    {"taskStep": "10", "check": "Implementation readiness", "status": "GO", "details": "8/10; T2/T3 document work startable after OBS-009 Done; T1 gated on D-C pass and user authorization"}
+  ],
+  "acceptanceCriteriaAssessment": [
+    {"ac": "AC-1", "testable": true, "source": "ADR D-C 'Before any human pilot'; row OBS-010; consensus §11", "readiness": "READY_GATED_DC_PASS_AND_USER_AUTH"},
+    {"ac": "AC-2", "testable": true, "source": "consensus §11 formative test; GA I-1; UX copy", "readiness": "READY_EXTERNAL_PARTICIPANTS"},
+    {"ac": "AC-3", "testable": true, "source": "consensus §11", "readiness": "READY"},
+    {"ac": "AC-4", "testable": true, "source": "ADR D-B residual, Security work, Operations; design I-C8; security condition 10; GA §4.B/C/J/§7", "readiness": "READY_EXTERNAL_GATES", "findingIds": ["OWNER-001"]},
+    {"ac": "AC-5", "testable": true, "source": "design §4.3, §4.6, §10; security R1-2, condition 10; ADR Operations, Secrets, D-D", "readiness": "READY", "findingIds": ["ROWS-001"]},
+    {"ac": "AC-6", "testable": true, "source": "Full SDC; consensus §10", "readiness": "READY"}
+  ],
+  "dependencyVerification": {
+    "OBS-009": "Validated GO today; Done with D-C passed is the pilot gate",
+    "OBS-011": "parallel after 009 Done; reads this story's Live surface list first",
+    "OBS-012A": "dev-DB recreation command recorded in its evidence; runbook row here",
+    "OBS-014": "compliance approvals recorded here as external gates"
+  },
+  "crossStoryIssues": [
+    "011 T0 is sequenced on 010 T2 (Live surface list) while 011's Depends-on cell names 010 whole — consistent with the user's 'at the end of the wave' decision; if the coordinator parallelizes per the ADR, T2 must land first."
+  ],
+  "sourceInventory": [
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md", "sha256": "28171046cec463a28ee6787304a8a0f42c3ad18d6045bf26465677be53cb86d8", "note": "before PO edits"},
+    {"path": "docs/architecture/ADR-SC-005-single-path-observed-authoring.md", "sha256": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-design.md", "sha256": "8c1cd118beed176b1e622a25ebe07f5c1d4ea406cf156535526ded6ca8b24d57"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-security-review.md", "sha256": "c5ce3be4543ae51618455b14909caabaf9cc46b9dd7fce0a2ff57516394cde49"},
+    {"path": "docs/epics/UI-STUDIO-GA-PLAN.md", "sha256": "8a6ce9e85e53ed69c1cf453653fd58ccc5eb25ccf309a9cdbe8a8f8f43003c7a"},
+    {"path": "docs/stories/STUDIO-OBSERVED/README.md", "sha256": "e49f77e1218b8043c0d65b2dec19933b14252510fe17902c0130ab87c5fe9ac9"},
+    {"path": ".aiox-core/development/tasks/validate-next-story.md", "sha256": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea"},
+    {"path": ".claude/rules/story-lifecycle.md", "sha256": "f5262020e0a3b614104881019550cb0b793907c6694d41e027fc9c1bbe2a2278"}
+  ]
+}

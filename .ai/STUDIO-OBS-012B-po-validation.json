@@ -1,0 +1,130 @@
+{
+  "story": "STUDIO-OBS-012B",
+  "storyPath": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012B.story.md",
+  "task": "validate-next-story (SDC Phase 2) — initial validation of the ADR-SC-005 re-cut story",
+  "round": 1,
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T04:10:00Z",
+  "validationDate": "2026-10-10",
+  "verdict": "GO",
+  "readinessScore": 8,
+  "scoreScale": 10,
+  "confidence": "High for scope; Medium for test reconciliation until SF-1/SF-2 land",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "storyVersionBefore": "0.1.0",
+  "storyVersionAfter": "0.1.1",
+  "changeLogEntry": "| 2026-10-10 | 0.1.1 | Validated GO (8/10) — Status: Draft → Ready. Conditions C1–C4 and should-fixes SF-1…SF-5 in Dev Notes \"PO validation — 2026-10-10\". Report `.ai/STUDIO-OBS-012B-po-validation.json` | @po |",
+  "storySha256Before": "2ccc700f6f7a60ccdc3b605627bc074b011e938d65c9eea6b18ba0e0441dfbb9",
+  "scoreRationale": "Deletion-only frontend lane scoped exactly to ADR-SC-005 placement row OBS-012B and the UX panel 'Remove (012B)' list, with 10.51's count-and-name method, the RETIRED-guard relocation (G7) and an honest interim Run state ('learning is not yet available in this build') that is correct after OBS-012A (server answers UNLEARNED / 409 LEARN_REQUIRED) and fenced by 'no release before OBS-008'. Every module named exists on the tree. Two points withheld: AC-4 names the behaviour and sentence but no test that asserts it; AC-6's named-drop list omits two review/*.test.ts files (13 cases) that AC-1 deletes, so reconciliation would miss them; risks are not consolidated. None changes an AC.",
+  "bindingDecisionsRespected": {
+    "adrSc005DA_compileUiRemovedNoCompat": true,
+    "readinessVocabularyUnlearnedLearningReadyNeedsRelearn_LearnRequired": true,
+    "interimRunOnlyReadyUntilObs008": true,
+    "tenFiftyOneProtectionsLiftedByAdrForCompileItems": true,
+    "notRelitigated": true
+  },
+  "canonicalSources": [
+    "docs/architecture/ADR-SC-005-single-path-observed-authoring.md (D-A, defaults 'Readiness vocabulary', placement map row OBS-012B, Removed/moved/kept, Order and parallelism)",
+    "UX panel 2026-10-09 as summarized in ADR-SC-005 panel evidence item 4 and the story's quoted state copy",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md (CLN-01, 02, 03, 04, 05, 06, 08, 09, 11, 14; G5, G7, G8)",
+    "docs/stories/10.51.story.md (RETIRED guard, count-and-name method, AC-9 protected list)",
+    "docs/stories/STUDIO-OBSERVED/README.md; wave-plan-single-path.json (batch 3 with 013/014; edge 012B→008)"
+  ],
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "result": "PASS", "evidence": "'Compile-path retirement (frontend) and learn vocabulary'"},
+    {"n": 2, "item": "Complete description", "result": "PASS", "evidence": "Story statement + binding paragraph + Dev Notes on panel lists, CLN-14, vaultSecrets, a11y sequencing, type derivation from 012A's OpenAPI"},
+    {"n": 3, "item": "Testable acceptance criteria", "result": "PARTIAL", "evidence": "AC-1/2/3/5/6 have grep/count/mutation oracles; AC-4 states the behaviour and the exact interim sentence but names no test (SF-2)"},
+    {"n": 4, "item": "Well-defined scope (IN/OUT)", "result": "PASS", "evidence": "'Out of scope here' (OBS-008 guided UI, OBS-012A backend, OBS-011 CLN-07/10, CLN-13 out of wave); 'Not owned here' list; 'Do not start guided components here'"},
+    {"n": 5, "item": "Dependencies mapped", "result": "PASS", "evidence": "OBS-012A Done precondition (one OpenAPI, vocabulary); parallel with 013/014 (no shared files); OBS-008 must follow with no intermediate release"},
+    {"n": 6, "item": "Complexity estimate", "result": "PASS", "evidence": "M; 12 wave-plan paths; deletion-only"},
+    {"n": 7, "item": "Business value", "result": "PASS", "evidence": "Author sees only learn/repeat vocabulary; no dead compile-review, inference or authoring-v2 code in the GA bundle"},
+    {"n": 8, "item": "Risks documented", "result": "PARTIAL", "evidence": "Hazards present but scattered (CLN-14 behaviour-neutral, axe-results.json regeneration, a11y comment-only, no release before 008); no consolidated list (SF-5)"},
+    {"n": 9, "item": "Criteria of Done", "result": "PASS", "evidence": "T4 gates + grep + reconciled counts + File List; independent @qa reconciles; only QA sets Done"},
+    {"n": 10, "item": "Alignment with PRD/Epic", "result": "PASS", "evidence": "Every AC cites ADR-SC-005 or the UX panel; vocabulary matches the ADR defaults table; NEEDS_RELEARN copy correctly reserved for OBS-008 (server emits it only after OBS-015)"}
+  ],
+  "executorAssignment": {
+    "executor": "dev", "quality_gate": "ux-design-expert", "sdc_reviewer": "qa",
+    "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests", "accessibility-audit"],
+    "executorNotEqualGate": true,
+    "typeConsistency": "Frontend removal + copy fidelity → @dev executor; gate @ux-design-expert",
+    "autoDecision": "[AUTO-DECISION] gate 'ux-design-expert' accepted → the framework's gate list names @architect/@dev/@pm only, but the wave README assigns copy-fidelity gates to UX for 012B, executor ≠ gate holds and accessibility-audit fits (reason: project convention over generic list; no process risk)",
+    "result": "PASS (with auto-decision)"
+  },
+  "templateComplianceIssues": [],
+  "codeRabbitIntegrationFindings": {"enabledInConfig": true, "sectionPresent": true, "subsections": ["Story Type Analysis", "Specialized Agents", "Quality Gates", "Self-Healing and Focus Areas"], "primaryAgentDev": true, "result": "PASS"},
+  "codeIntelligenceCheck": {"isCodeIntelAvailable": false, "note": "Step 8.1 skipped (graceful fallback)"},
+  "epicContextEnrichment": {"accumulatorInvoked": false, "substitute": "Manual cross-reference of README, wave plan batch 3, ADR placement map, OBS-008/013/014 File Lists"},
+  "antiHallucinationFindings": {
+    "untraceableStatements": 0,
+    "anchorsVerifiedOnTree": [
+      "frontend/src/components/studio/review/: CompileReviewPanel.tsx, useCompileReview.ts, StepReviewList.tsx, DiagnosticsView.tsx, compileStateNarratives.ts, conflictNarratives.ts, unsupportedWorkflows.ts, artifactHash.ts, index.ts (CLN-01); live siblings CompileElapsed.tsx, formatElapsed.ts, artifactSummary.ts, compileDiagnosticNarratives.ts, compileErrorCodes.ts, compilePollBounds.ts; helpers reviewTestHarness.tsx, pinnedNarratives.ts, forbiddenClaims.ts",
+      "review/*.test.tsx = 11 files (82 it() static); review/*.test.ts = 2 files not named in AC-6: artifactSummary.test.ts (9), compilePollBounds.test.ts (4)",
+      "review/diagnostics.test.tsx:256 RETIRED = ['@/utils/studio/ir/parseSteps', '@/utils/studio/codegen/pythonGenerator'] (10.51 guard); run/runGate.test.tsx exists (relocation host)",
+      "run/compileWait.test.tsx:14 imports CompileReviewPanel; :248 renders it (one case)",
+      "components/studio/CodeTab.tsx; mounted at pages/ChecksStudioPage/ChecksStudioPage.tsx:60 (import) and :1213",
+      "components/studio/inference/{InferenceStudio.tsx, InferenceStudio.test.tsx} — 14 cases",
+      "services/api/studioInferenceApi.ts, types/studio/inferenceTypes.ts, services/mocks/studio/inferenceHandlers.ts exist",
+      "utils/constants/appConfig.ts:56-57 STUDIO_AUTHORING_V2 reads window.__CHECKS_CONFIG__.studioAuthoringV2",
+      "features/studio/authoring/ = 7 files (authoringFixtures, authoringReducer(+test), authoringSelectors(+test), authoringState, index); 0 importers outside the folder",
+      "types/studio/legacyTestIr.ts; components/studio/runs/index.ts; services/mocks/studio/index.ts; compileFixtures.ts; compileFixtureMatrix.test.ts; REVIEW-SCRIPT.md all exist",
+      "store/slices/studioSlice.ts:4 testSteps: string[]; :22 testSteps: []; :38 state.testSteps.map in setExecuting",
+      "services/api/studioApi.ts:132 compileTest; :140 confirmCompile(id, ConfirmCompileRequest)",
+      "types/studio/studioTypes.ts:361,396 compileStatus; :371 ConfirmCompileRequest; :373 artifactHash",
+      "components/studio/run/useRunGate.ts:266,320,323,338,360 compileStatus-driven compile-then-execute",
+      "components/studio/runs/useLiveRunsRefresh.ts:2 imports CompilePollShape from review/compilePollBounds",
+      "test/a11y/studioWcagAudit.test.tsx:99-100 'ChecksStudioPage/compile-review', 'ChecksStudioPage/confirm' (CLN-11)",
+      "utils/config/studioCapabilities.ts:3 vaultSecrets: false (keep per Dev Notes)",
+      "services/api/studioAuthoringTransport.ts imported by studioApi.ts, mocks/studio/authoringHandlers.ts, authoringState.ts → live, keep",
+      "services/mocks/studio/studioContract.test.ts:56 SPEC_DIR = docs/specs/studio; :61 parses openapi.yaml (the one public document after OBS-012A)",
+      "'ready to run' in tests/testListPresentation.ts, run/executeRefusals.ts, pages/StudioTestsPage/StudioTestsPage.test.tsx",
+      "/compil/i appears in 46 non-test source files under frontend/src today; OnboardingCoach.tsx has 0 hits",
+      "run/{runEnablement,executeRefusals,executionErrorNarratives,executionStatus,index}.ts, runs/runPresentation.ts, mocks/studio/{handlers,fixtures,executionFixtures,authoringHandlers,authoringState}.ts, studioHandlers.test.ts, studioEscalation.test.ts, studioAuthoringTransport.test.ts, utils/retireLegacyStudioWorker.ts, evidence/pinnedVideoEvidenceFacts.ts, docs/qa/accessibility/axe-results.json all exist; pages/ChecksStudioPage has 6 *.test.tsx"
+    ],
+    "knownInaccuracies": [
+      {"id": "SF-1", "where": "AC-6 expected named drops", "issue": "review/artifactSummary.test.ts (9) and review/compilePollBounds.test.ts (4) are deleted by AC-1 ('review/** entirely') but not named; reconciliation would miss 13 cases", "acWeakened": false},
+      {"id": "SF-3", "where": "AC-5", "issue": "OnboardingCoach.tsx has 0 'compil' hits today; AC still applies (grep to zero); informational", "acWeakened": false},
+      {"id": "SF-4", "where": "File List", "issue": "StudioTestsPage.test.tsx, scheduling/StudioScheduleDialog.tsx(+test), run/refusals.test.tsx carry compile vocabulary/readiness types and are not listed; the AC-5 sweep reaches them", "acWeakened": false}
+    ]
+  },
+  "interimRunStateCheck": {
+    "statedInStory": "AC-4: READY runs ordinary replay; every other readiness state disables Run and states 'learning is not yet available in this build'; Dependency notes + Quality Gates: no release between 012B and 008",
+    "honestAfterObs012A": "Server answers UNLEARNED and 409 LEARN_REQUIRED (012A AC-2); no compile route exists; frontend cannot start learning until OBS-008's guided transport",
+    "testable": "Only after SF-2 (named RTL tests) — condition C2"
+  },
+  "fileListOwnership": {
+    "wavePlanBatch": 3,
+    "parallelStories": ["STUDIO-OBS-013", "STUDIO-OBS-014"],
+    "obs013_014": "Disjoint — both declare 'Not owned here: frontend/src/**'; 012B is frontend-only",
+    "obs008": "Sequential after (frontend lane, no intermediate release): ChecksStudioPage.tsx, RunControl.tsx, useRunGate.ts, runEnablement.ts, executionErrorNarratives.ts, testListPresentation.ts, schedulePresentation.ts, quickStartTemplates.ts, OnboardingCoach.tsx, studioSlice.ts, studioTypes.ts, studioContract.test.ts, studioWcagAudit.test.tsx, axe-results.json, pages/ChecksStudioPage/*.test.tsx",
+    "obs011": "retireLegacyStudioWorker.ts and pinnedVideoEvidenceFacts.ts correctly excluded",
+    "result": "PASS"
+  },
+  "dependencyVerification": {
+    "obs012A": {"status": "Ready (validated 2026-10-10); must be Done before T0 (one public OpenAPI, readiness vocabulary)", "verified": true},
+    "hiddenExternalBlockers": "none",
+    "result": "PASS"
+  },
+  "goConditions": [
+    {"id": "C1", "owner": "@dev (T0)", "text": "Apply SF-1 (name the two review/*.test.ts drops), SF-4 (File List additions) and SF-5 (consolidated risks) in Dev Notes/File List"},
+    {"id": "C2", "owner": "@dev", "text": "AC-4 oracle tests exist and are named before T4: (a) READY → execute called, zero compile calls; (b) each non-READY readiness value → Run disabled and the exact interim sentence; (c) 409 LEARN_REQUIRED rendered without a compile narrative"},
+    {"id": "C3", "owner": "@qa", "text": "Reproduce the /compil/i grep (exceptions listed) and after = baseline − named drops + named additions independently"},
+    {"id": "C4", "owner": "coordinator", "text": "No release between this story and OBS-008 (restated as a gate)"}
+  ],
+  "requiredFixesForSm": [],
+  "shouldFixIssues": ["SF-1 name review/artifactSummary.test.ts and review/compilePollBounds.test.ts as drops", "SF-2 name the AC-4 oracle tests", "SF-3 informational (OnboardingCoach)", "SF-4 File List additions (StudioTestsPage.test.tsx, StudioScheduleDialog*.tsx, run/refusals.test.tsx)", "SF-5 consolidated risks list"],
+  "niceToHaveImprovements": [],
+  "filesChanged": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012B.story.md (Status Draft → Ready; Dev Notes '### PO validation — 2026-10-10'; Change Log row 0.1.1)",
+    ".ai/STUDIO-OBS-012B-po-validation.json"
+  ],
+  "notChanged": ["ACs, scope, title, Tasks, File List, QA Results", "other story files", "any code, spec, ADR or design"],
+  "scope": {"codeChanged": false, "gitWrites": false, "buildsOrTestsRun": false, "subagents": false},
+  "limitations": [
+    "Read-only cross-check; no npm/vitest run; it() counts are static greps and differ from the inventory's 88 (fresh baseline at T0 is the rule)",
+    "Gotchas file .aiox/gotchas.json absent on this tree"
+  ],
+  "handoff": {"next_agent": "@dev", "next_command": "*develop STUDIO-OBS-012B", "gateBeforeDispatch": "OBS-012A Done; T0 vitest baseline, importer grep, SF-1/SF-4/SF-5 applied, AC-4 test file named"}
+}

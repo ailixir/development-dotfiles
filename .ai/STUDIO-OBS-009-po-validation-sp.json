@@ -1,0 +1,161 @@
+{
+  "story": "STUDIO-OBS-009",
+  "task": "validate-next-story",
+  "round": "sp (validation of the 2026-10-09 single-path re-cut 0.3.0; r2 = dual-path 0.2.x GO, superseded)",
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T00:00:00Z",
+  "validationDate": "2026-10-10",
+  "verdict": "GO",
+  "conditional": true,
+  "readinessScore": 8,
+  "scoreScale": 10,
+  "confidence": "Medium-High — local hardening is startable; the benchmark gate and live proof depend on named externals with owners outside the repo",
+  "scoreRationale": "AC-7 is ADR-SC-005 D-C verbatim (≥ 20 workflows × 3 real-model reps on the deployed stack with pinned versions; ≥ 90 % completion without clarification on unambiguous cases; zero false passes and zero secret/PII leaks as hard gates; p50/p95 latency, calls, tokens, cost with denominators; incremental cases prove k…n re-learned and zero model calls for 1…k-1). External prerequisites are named at T0 with the rule 'absent ⇒ unrun, owner X — never a pass'. Deployment ACs implement one runner process, G-1 mTLS chain, G-2 TLS hop with client certificate, dump/Vault controls, profile gates and G-3. Deductions: @devops work under a @dev executor (co-execution stated; dispatch must honor it); Done depends on ED-01 (owner TBD), ED-02, an approved staging application and a dev Vault.",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "changeLogEntry": "| 2026-10-10 | 0.3.1 | Validated GO (8/10, conditional) — Status: Draft → Ready (single-path draft). Report `.ai/STUDIO-OBS-009-po-validation-sp.json` | @po |",
+  "storySha256Before": "d7af696471b5adbdbdea53aedfc1e518ed63bdef1f6d588add2b6ed03105b56a",
+  "dcGateFidelity": {
+    "corpus": "≥ 20 workflows: 13 ported compile cases (C01–C13 verified in results.jsonl) + login (fixture and staging) + dataflow + two OBS-015 incremental cases + enterprise patterns fixed by @qa",
+    "repetitions": 3,
+    "completionThreshold": "≥ 90 % without clarification on unambiguous cases",
+    "hardGates": ["zero false passes", "zero secret/PII leaks"],
+    "published": "p50/p95 latency, model calls, tokens, configured-provider cost per run with denominators",
+    "incremental": "exactly k…n re-learned; zero model calls for 1…k-1",
+    "extra": "replay stability ≥ 98 % over 100 (consensus-plan.md:234); its 30-workflow corpus superseded by D-C ≥ 20",
+    "neverFakePass": "AC-7 preamble + Dev Notes 'Thresholds and honesty rules'"
+  },
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "status": "PASS"},
+    {"n": 2, "item": "Complete description", "status": "PASS", "note": "'What is true today' verified line by line"},
+    {"n": 3, "item": "Testable acceptance criteria", "status": "PASS", "note": "Thresholds with denominators; negative tests named (fail-closed chain, http:// refusal, Vault write denied)"},
+    {"n": 4, "item": "Scope IN/OUT", "status": "PASS", "note": "Out: pilot/runbook/release (010), C-2/C-3 sources, schedule activation, Sonic lifecycle, CSRF, operability, repo/CI, emitter removal (011)"},
+    {"n": 5, "item": "Dependencies mapped", "status": "PASS", "note": "008 Done (whole path); shared backend files after 007; playwright config from 008; 011 after this story"},
+    {"n": 6, "item": "Complexity estimate", "status": "PASS", "note": "Size L"},
+    {"n": 7, "item": "Business value", "status": "PASS"},
+    {"n": 8, "item": "Risks documented", "status": "PASS", "note": "Decisions pending (Q2, corpus); honesty rules; externals by owner"},
+    {"n": 9, "item": "Criteria of Done", "status": "PASS", "note": "A failed or unrun gate stays failed or unrun; @qa reproduces critical paths; only @qa sets Done"},
+    {"n": 10, "item": "Alignment with PRD/epic", "status": "PASS", "note": "ADR D-C, defaults Runner topology, Operations, rows OBS-009 ×2, 10.50 re-cut; design R3 §10; security conditions 10–11"}
+  ],
+  "templateComplianceIssues": {
+    "missingTopLevelSections": [],
+    "unfilledPlaceholders": [],
+    "futureDeveloperOwnedSubsections": ["Agent Model Used", "Debug Log References", "Completion Notes List"],
+    "structure": "Wave convention retained; superseded 0.2.x PO section kept as history inside Dev Notes."
+  },
+  "executorAssignment": {
+    "executor": "dev",
+    "quality_gate": "architect",
+    "sdc_reviewer": "qa",
+    "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests", "security-scan"],
+    "status": "PASS_WITH_NOTE",
+    "note": "AC-1…AC-6 are Infra/Deploy work (table executor @devops); the story states @devops co-executes T1/T2 and the wave README lists 'dev (+ devops)'. Coordinator must dispatch @devops for T1/T2."
+  },
+  "decisionsPending": {
+    "Q2": {"question": "Scheduled observed runs fill secrets with no live user (ARCH-9) via ConfiguredBackgroundAuthorization parity", "default": "adopt; G-3 holds regardless", "blocksReady": false, "reason": "AC-6 delta pre-written; OBS-011 AC-3 conditions emitter removal on this outcome; user may override before T3 → @sm delta + @po AC-6 revalidation"},
+    "corpus-composition": {"question": "Enterprise-pattern cases beyond the ADR's named ones", "default": "included, fixed by @qa at T0", "blocksReady": false, "reason": "AC-7 corpus list only; ≥ 20 × 3 / 90 % / hard gates are the ADR's"}
+  },
+  "criticalIssues": [],
+  "shouldFixIssues": [
+    {"id": "EXT-002", "acs": ["AC-2", "AC-4", "AC-5", "AC-7", "AC-8", "AC-10", "AC-11"], "action": "T0 records every external prerequisite by name and owner: ED-01 gateway owner (TBD per GA D-3); ED-02 Vault/secret-use/background authorization; approved staging application with real login and approved origins; provisioned test secret; dev Vault; SIEM sink (Platform/SRE). Absent ⇒ dependent AC 'unrun, owner X' — never a pass, never a silent skip."},
+    {"id": "EXEC-001", "acs": ["AC-1", "AC-2", "AC-3", "AC-4", "AC-5", "AC-6"], "action": "Dispatch @devops as co-executor for T1/T2 (image, chart, TLS, Vault policy, profiles) as the story states."},
+    {"id": "SINK-001", "acs": ["AC-5"], "action": "Name the SIEM sink owner (Platform/SRE) and the 'unrun' wording in the evidence when absent."}
+  ],
+  "niceToHaveImprovements": [
+    "Split docs/qa/evidence/studio-observed-authoring/*.json into 'local' and 'deployed-stack' sections so OBS-010 can cite each gate's provenance (carried from r2).",
+    "Name the fixture-server extension points reused from studio-runner/evaluation/fixture-server.mjs in T4 (carried from r2)."
+  ],
+  "goConditions": [
+    "EXT-002 recorded at T0 before any live-proof task.",
+    "Budget admission against the USD 500 wave ceiling recorded before the first real-provider call; all published numbers carry denominators.",
+    "Done is unreachable while AC-7's staging half, AC-8 or AC-4's Vault policy test is unrun; the pilot (OBS-010) cannot open on an unrun gate.",
+    "Q2 default stands unless the user overrides before T3; override goes through @sm delta + @po AC-6 revalidation.",
+    "@devops co-executes T1/T2 (EXEC-001).",
+    "Only independent @qa sets Done."
+  ],
+  "antiHallucinationFindings": {
+    "verifiedAnchors": [
+      "studio-runner/Dockerfile:59 CMD [\"node\", \"dist/main.js\"] (only CMD)",
+      "studio-runner/src/run/guidedMain.ts: 33 lines; createGuidedServer imported :4, called :23",
+      "helm-chart/put-checks/templates/: studio-runner-{deployment,networkpolicy,scaledobject,service}.yaml; no studio-guided-worker-* template",
+      "studio-runner/src/server/server.ts:17 import { createServer } from 'node:http'",
+      "backend .../studio/compile/validator/StudioRunnerProperties.java (still under compile/; 012A relocates)",
+      "GuidedSessionReaper.java and GuidedTranslationCoordinator.java: @Scheduled ×1, @Profile ×0",
+      "backend .../scheduling/ConfiguredBackgroundAuthorization.java:9,23,37 local-only grants",
+      "backend/src/test .../guided/translation/GuidedProviderEvaluationTest.java:79 UNAVAILABLE_NOT_RUN (assumeTrue :4)",
+      "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/results.jsonl: cases C01–C13 (13)",
+      "tools/corun.sh, tools/corun-report.mjs, studio-runner/evaluation/{cli,fixture-server,oracle}.mjs, test/deployment/{chart,backend-env,envfrom-keys}.test.ts, helm.ts, image.ts exist",
+      "studio-runner/src/server/config.ts:173 KEY_SPECS; server/{identity,application,routes}.ts, src/main.ts exist",
+      "GuidedInternalSecurity.java, HttpRunnerDispatchClient.java, StudioScheduledDispatchAuthorization.java, StudioScheduleService.java, StudioBackgroundAuthorization.java, StudioSecretUseAuthorization.java exist",
+      "application-{api,dev,local,prod,staging,test,worker}.yml + application.yml exist",
+      "No HeapDumpOnOutOfMemoryError / ulimit -c in Dockerfile, build.gradle.kts, resources, helm-chart",
+      "secret-login-security-review.md:60-61 conditions 10 (G-1/G-2/G-3) and 11 (dumps, Vault policy)",
+      "consensus-plan.md:234 ≥ 98 % over 100 stable-fixture replays; 30-workflow corpus superseded by D-C",
+      "studio-runner/evaluation/observed-authoring/ and docs/qa/evidence/studio-observed-authoring/ do not exist (new)"
+    ],
+    "corrections": []
+  },
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "status": "PLANNING_PARTIAL",
+    "storyType": "Deployment/Infrastructure; secondary Security, Integration; complexity high — correct",
+    "agents": "@dev executor / @devops co-executor AC-1…6 / @architect gate / independent @qa fixes corpus and reproduces",
+    "qualityGates": "Pre-commit, independent SDC QA, pre-deployment review by @devops with G-1/G-2/G-3 asserted",
+    "selfHealing": {"type": "full", "maxIterations": 3, "timeoutMinutes": 30},
+    "focusAreas": "TLS on every secret-bearing hop, fail-closed defaults, one process/one trust chain, honest evidence with denominators, hard gates at zero — match type",
+    "fallback": "graceful_degradation documented; no PASS invented"
+  },
+  "codeIntelligenceCheck": {"available": false, "result": "skipped (isCodeIntelAvailable() → false)"},
+  "epicContextEnrichment": {"attempted": true, "result": "no epic file for STUDIO-OBSERVED under docs/prd; ADR-SC-005 + wave README used as epic context"},
+  "taskChecks": [
+    {"taskStep": "1", "check": "Template completeness", "status": "PASS_WITH_MINOR_GAPS"},
+    {"taskStep": "1.1", "check": "Executor assignment", "status": "PASS_WITH_NOTE", "findingIds": ["EXEC-001"]},
+    {"taskStep": "2", "check": "File/source structure", "status": "PASS", "details": "Existing paths verified; new deployment tests, ITs, evidence files, corpus manifest named"},
+    {"taskStep": "3", "check": "UI/frontend completeness", "status": "N/A", "details": "Only the Playwright E2E extension (AC-12) touches the frontend"},
+    {"taskStep": "4", "check": "AC coverage/testability", "status": "PASS", "findingIds": ["EXT-002"]},
+    {"taskStep": "5", "check": "Testing instructions", "status": "PASS", "details": "Deployment tier, profile tests, self-signed-CA IT, Vault policy test with honest skip, harness runs, co-run, full suites, Playwright on deployed stack; @qa reproduction list"},
+    {"taskStep": "6", "check": "Security considerations", "status": "PASS", "details": "G-1/G-2/G-3, dumps, Vault least privilege, wire canaries, manual video gate (C-17), revocation under real polling, OBS-014 guards with the real model"},
+    {"taskStep": "7", "check": "Task sequence", "status": "PASS", "details": "T0 prerequisites → T1/T2 devops+dev → T3 schedules → T4 probe+benchmark → T5 oracles/faults/E2E → T6 record"},
+    {"taskStep": "8", "check": "CodeRabbit planning", "status": "PARTIAL"},
+    {"taskStep": "8.1", "check": "Code intelligence duplicates", "status": "N/A"},
+    {"taskStep": "9", "check": "Anti-hallucination", "status": "PASS"},
+    {"taskStep": "10", "check": "Implementation readiness", "status": "GO", "details": "8/10; local items startable after OBS-008 Done; live items gated by named externals"}
+  ],
+  "acceptanceCriteriaAssessment": [
+    {"ac": "AC-1", "testable": true, "source": "ADR defaults Runner topology; GA ARCH-8", "readiness": "READY", "executor": "@devops+@dev"},
+    {"ac": "AC-2", "testable": true, "source": "GA SEC-4; design I-C8 G-1", "readiness": "READY", "executor": "@devops+@dev"},
+    {"ac": "AC-3", "testable": true, "source": "design I-C8, C-9, Q4 decided; GA D-2", "readiness": "READY", "executor": "@devops+@dev"},
+    {"ac": "AC-4", "testable": true, "source": "design I-B7, I-C9, C-8, C-10; security condition 11", "readiness": "READY_EXTERNAL_DEV_VAULT", "findingIds": ["EXT-002"]},
+    {"ac": "AC-5", "testable": true, "source": "ADR Operations; OBS-014 AC-10", "readiness": "READY_SINK_EXTERNAL", "findingIds": ["SINK-001"]},
+    {"ac": "AC-6", "testable": true, "source": "design ARCH-9, Q2, G-3; security F-9/condition 10", "readiness": "READY_CONDITIONAL_Q2"},
+    {"ac": "AC-7", "testable": true, "source": "ADR D-C; Verification D-C; GA ED-01", "readiness": "READY_EXTERNAL_STAGING_AND_GATEWAY", "findingIds": ["EXT-002"]},
+    {"ac": "AC-8", "testable": true, "source": "ADR Supersedes 10.50 re-cut", "readiness": "READY_EXTERNAL_GATEWAY", "findingIds": ["EXT-002"]},
+    {"ac": "AC-9", "testable": true, "source": "design §7 isolation; consensus §11; OBS-014", "readiness": "READY"},
+    {"ac": "AC-10", "testable": true, "source": "design C-17, F-10; consensus §11", "readiness": "READY_EXTERNAL_STAGING"},
+    {"ac": "AC-11", "testable": true, "source": "consensus §11 Recovery; GA H-1; panel QA; design I-A3", "readiness": "READY"},
+    {"ac": "AC-12", "testable": true, "source": "consensus §11 UI evidence; GA H-2", "readiness": "READY_AFTER_008"}
+  ],
+  "dependencyVerification": {
+    "OBS-008": "Validated GO today; must be Done before T0",
+    "OBS-007": "Draft (parallel @po) — scheduling/authorization files edited first by 007",
+    "OBS-014": "SIEM events emitted there, routed here",
+    "OBS-015": "two incremental corpus artifacts written there, executed here",
+    "OBS-011": "starts after this story is Done; emitter removal conditional on AC-6"
+  },
+  "crossStoryIssues": [
+    "OBS-009 Done — and therefore OBS-010 start and OBS-011 start — is gated by externals with owners outside the repo (ED-01 TBD, ED-02, approved staging application, dev Vault, SIEM sink). Surface to the user: name owners now or accept that the wave idles after OBS-008.",
+    "OBS-011 AC-3 and OBS-009 AC-6 agree on OBSERVED_SCHEDULE_AUTH_REQUIRED (lift here under Q2; emitters removed in 011) — consistent."
+  ],
+  "sourceInventory": [
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md", "sha256": "d7af696471b5adbdbdea53aedfc1e518ed63bdef1f6d588add2b6ed03105b56a", "note": "before PO edits"},
+    {"path": "docs/architecture/ADR-SC-005-single-path-observed-authoring.md", "sha256": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-design.md", "sha256": "8c1cd118beed176b1e622a25ebe07f5c1d4ea406cf156535526ded6ca8b24d57"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-security-review.md", "sha256": "c5ce3be4543ae51618455b14909caabaf9cc46b9dd7fce0a2ff57516394cde49"},
+    {"path": "docs/epics/UI-STUDIO-GA-PLAN.md", "sha256": "8a6ce9e85e53ed69c1cf453653fd58ccc5eb25ccf309a9cdbe8a8f8f43003c7a"},
+    {"path": "docs/stories/STUDIO-OBSERVED/README.md", "sha256": "e49f77e1218b8043c0d65b2dec19933b14252510fe17902c0130ab87c5fe9ac9"},
+    {"path": ".aiox-core/development/tasks/validate-next-story.md", "sha256": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea"},
+    {"path": ".claude/rules/story-lifecycle.md", "sha256": "f5262020e0a3b614104881019550cb0b793907c6694d41e027fc9c1bbe2a2278"}
+  ]
+}

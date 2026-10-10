@@ -1,0 +1,140 @@
+{
+  "story": "STUDIO-OBS-011",
+  "task": "validate-next-story",
+  "round": "sp (validation of the 2026-10-09 single-path re-cut 0.2.0; the 0.1.1 GO on the pre-ADR scope is superseded)",
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T00:00:00Z",
+  "validationDate": "2026-10-10",
+  "verdict": "GO",
+  "conditional": true,
+  "readinessScore": 8,
+  "scoreScale": 10,
+  "confidence": "High — thin, bounded, method is 10.51's; three anchors have drifted at HEAD and the story's own AC-1 re-run absorbs them",
+  "scoreRationale": "Seven ACs: inventory re-run at HEAD marking rows 'resolved by {story}'; remaining class A/B/C rows with rulings or carry-forward; OBSERVED_SCHEDULE_AUTH_REQUIRED emitters conditional on OBS-009 AC-6; panel code-health folds (GuidedRunnerClient/ObservedValidationClient → dispatch client; GuidedPublicationAuthorization → DispatchAuthorization), claim()/checkCommand split, guided TS reformat, regeneration check; sleep-polled IT flake reduction with before/after wall time; pins/docs/.ai disposition; counted, bounded, Live-surface boundary respected. Deductions for three drifted anchors: CLN-20's updateAuthoring is no longer present (only updateAuthoringDraft), checkCommand lives in GuidedTranslationService not GuidedSessionService, and .ai/ is now 108 tracked files not 103 untracked.",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "changeLogEntry": "| 2026-10-10 | 0.2.1 | Validated GO (8/10) — Status: Draft → Ready (single-path draft). Report `.ai/STUDIO-OBS-011-po-validation-sp.json` | @po |",
+  "storySha256Before": "812dcd4d7cb8353075c456b4a99a7f9ebc5321c35df1fbbf788a6d63dbd1da46",
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "status": "PASS"},
+    {"n": 2, "item": "Complete description", "status": "PASS", "note": "Method stated (10.51); value is the re-run and the folds"},
+    {"n": 3, "item": "Testable acceptance criteria", "status": "PASS", "note": "Per-item grep recorded; after = baseline − named drops + named additions; SQL-statement count per command; wall-time before/after"},
+    {"n": 4, "item": "Scope IN/OUT", "status": "PASS", "note": "Out: CLN-30/31, CLN-13, CLN-25, CLN-42, Live surface, migrations"},
+    {"n": 5, "item": "Dependencies mapped", "status": "PASS", "note": "010 (user: end of wave); ADR allows after 009 with the Live surface list first"},
+    {"n": 6, "item": "Complexity estimate", "status": "PASS", "note": "Size M"},
+    {"n": 7, "item": "Business value", "status": "PASS", "note": "one dispatch client, one authorization seam, readable session code, ITs that do not sleep"},
+    {"n": 8, "item": "Risks documented", "status": "PASS", "note": "G1 no deletion on inventory alone; G12 Live surface; no parallel owner of GuidedSessionService"},
+    {"n": 9, "item": "Criteria of Done", "status": "PASS", "note": "Final symbol grep independently re-run by @qa; reconciled counts; only @qa sets Done"},
+    {"n": 10, "item": "Alignment with PRD/epic", "status": "PASS", "note": "ADR row OBS-011, Order and parallelism, Panel evidence 2/5; inventory G1–G12"}
+  ],
+  "templateComplianceIssues": {
+    "missingTopLevelSections": [],
+    "unfilledPlaceholders": [],
+    "futureDeveloperOwnedSubsections": ["Agent Model Used", "Debug Log References", "Completion Notes List"],
+    "structure": "Wave convention retained; superseded 0.1.x PO section kept as history inside Dev Notes."
+  },
+  "executorAssignment": {
+    "executor": "dev",
+    "quality_gate": "architect",
+    "sdc_reviewer": "qa",
+    "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests", "dependency-analysis"],
+    "status": "PASS",
+    "note": "Refactor/cleanup → @architect gate (fold rulings); @po rules CLN-10; @qa rules CLN-40"
+  },
+  "decisionsPending": {
+    "CLN-10": {"question": "retireLegacyStudioWorker.ts shim sunset", "default": "keep until first production deploy + N weeks; carry forward with @devops if none", "blocksReady": false, "reason": "@po advisory position recorded 2026-10-09 stands"},
+    "wait-library": {"question": "Awaitility or equivalent for AC-5", "default": "none on classpath today (verified build.gradle.kts); @architect rules", "blocksReady": false, "reason": "No new dependency without ruling — already in AC-5"}
+  },
+  "criticalIssues": [],
+  "shouldFixIssues": [
+    {"id": "DRIFT-001", "acs": ["AC-2"], "action": "CLN-20 target StudioService.updateAuthoring(...) (inventory :424-433) is not present at HEAD — only updateAuthoringDraft (:339). AC-1 re-run marks it already removed/renamed; do not re-delete."},
+    {"id": "DRIFT-002", "acs": ["AC-4"], "action": "checkCommand is GuidedTranslationService.java:87,459, not GuidedSessionService. Name GuidedTranslationService in AC-4(c) and the 'Folds and splits' File List (OBS-015 Dev Notes already say so)."},
+    {"id": "DRIFT-003", "acs": ["AC-6"], "action": ".ai/ is now 108 tracked files, 0 untracked (since b2195c68e). Reword the '103 untracked' premise; the decision becomes keep-tracked vs archive, still archive-first; docs/qa/evidence/** never staged stands."}
+  ],
+  "niceToHaveImprovements": [
+    "AC-4(d): the longest guided TypeScript line at HEAD is 1,611 chars (panel said 792) — state the measured figure in the before/after evidence."
+  ],
+  "goConditions": [
+    "T0 waits for OBS-010's dated Live surface list and starts only after OBS-009 is Done.",
+    "No item is deleted on the strength of the inventory alone (G1); CLN-10/CLN-40/CLN-47 rulings recorded before T1.",
+    "OBSERVED_SCHEDULE_AUTH_REQUIRED emitters removed only if OBS-009 AC-6 lifted observed schedules; the V16 CHECK value is immutable.",
+    "after = baseline − named drops + named additions reconciled by @qa for frontend, runner (incl. skipped count) and backend studio.*.",
+    "Only independent @qa sets Done."
+  ],
+  "antiHallucinationFindings": {
+    "verifiedAnchors": [
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md: 49 CLN- rows (CLN-01…CLN-49), guardrails G1–G12, tree c767efbe7 (:7)",
+      "frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts:74 PinnedStoppedRunRecordingFacts",
+      "backend .../studio/dto/ExecutionStatus.java:25 CANONICAL, :31 isCanonical",
+      "backend/src/main/resources/application.yml:321 read-interval",
+      "studio-runner/src/run/launcher.ts:631 TOTAL_TIMEOUT_MESSAGE; scripts/write-runtime-versions.mjs, src/versions.ts, test/deferred.test.ts exist",
+      "frontend/src/utils/retireLegacyStudioWorker.ts exists",
+      "GuidedRunnerClient.java, ObservedValidationClient.java, GuidedPublicationAuthorization.java, DispatchAuthorization.java, ProvisionalDispatchAuthorization.java, GuidedPublicationController.java, StudioAcceptanceService.java exist",
+      "OBSERVED_SCHEDULE_AUTH_REQUIRED emitters: StudioScheduleProcessor.java:273, StudioAcceptanceService.java:322",
+      "Thread.sleep in GuidedPublicationReplayIT, GuidedPublicationRaceTest, GuidedPlanningIntegrationTest, GuidedTranslationTest, GuidedGatewayPrivacyTest",
+      "Awaitility absent from backend/build.gradle.kts",
+      "docs/specs/studio-observed-authoring/account-provider-readiness-design.md and docs/specs/studio-context/current-state.md exist",
+      "tools/check-studio-observed-contracts.cjs and tools/build-studio-observed-schemas.cjs exist",
+      "Longest line in studio-runner/src/guided/*.ts + run/guidedBrowser.ts: 1,611 chars"
+    ],
+    "corrections": [
+      "CLN-20 StudioService.updateAuthoring not found at HEAD (DRIFT-001).",
+      "checkCommand is in GuidedTranslationService, not GuidedSessionService (DRIFT-002).",
+      ".ai/ is tracked (108 files), not 103 untracked (DRIFT-003)."
+    ]
+  },
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "status": "PLANNING_PARTIAL",
+    "storyType": "Refactor/cleanup; secondary Architecture (folds); complexity medium — correct",
+    "agents": "@dev executor / @architect gate + fold rulings / @po CLN-10 / independent @qa grep + counts + CLN-40",
+    "qualityGates": "Pre-commit, independent SDC QA with per-row mapping and independent grep, @devops handoff",
+    "selfHealing": {"type": "full", "maxIterations": 3, "timeoutMinutes": 30},
+    "focusAreas": "interface stability of folds, no behaviour change beyond removals, pin coherence, test-count reconciliation, Live-surface boundary — match refactor type",
+    "fallback": "graceful_degradation documented; no PASS invented"
+  },
+  "codeIntelligenceCheck": {"available": false, "result": "skipped (isCodeIntelAvailable() → false)"},
+  "epicContextEnrichment": {"attempted": true, "result": "no epic file for STUDIO-OBSERVED under docs/prd; ADR-SC-005 + wave README used as epic context"},
+  "taskChecks": [
+    {"taskStep": "1", "check": "Template completeness", "status": "PASS_WITH_MINOR_GAPS"},
+    {"taskStep": "1.1", "check": "Executor assignment", "status": "PASS"},
+    {"taskStep": "2", "check": "File/source structure", "status": "PASS_WITH_DRIFT", "details": "All listed existing files verified; three anchors drifted", "findingIds": ["DRIFT-001", "DRIFT-002", "DRIFT-003"]},
+    {"taskStep": "3", "check": "UI/frontend completeness", "status": "N/A"},
+    {"taskStep": "4", "check": "AC coverage/testability", "status": "PASS"},
+    {"taskStep": "5", "check": "Testing instructions", "status": "PASS", "details": "static grep/tsc scans; three suites with baseline filter; contract tool; OpenAPI hash tests; IT wall-time log; SQL-statement count; reconciliation formula"},
+    {"taskStep": "6", "check": "Security considerations", "status": "PASS", "details": "SecretValue single writer and canonical body digest preserved through the dispatch-client fold; CLN-30/31 explicitly out of scope (ED-02)"},
+    {"taskStep": "7", "check": "Task sequence", "status": "PASS", "details": "T0 baselines/rulings/Live surface → T1 leftovers → T2 folds/splits → T3 flake → T4 docs → T5 verify"},
+    {"taskStep": "8", "check": "CodeRabbit planning", "status": "PARTIAL"},
+    {"taskStep": "8.1", "check": "Code intelligence duplicates", "status": "N/A"},
+    {"taskStep": "9", "check": "Anti-hallucination", "status": "PASS_WITH_THREE_DRIFTED_ANCHORS", "findingIds": ["DRIFT-001", "DRIFT-002", "DRIFT-003"]},
+    {"taskStep": "10", "check": "Implementation readiness", "status": "GO", "details": "8/10; startable after OBS-009 Done and OBS-010 T2"}
+  ],
+  "acceptanceCriteriaAssessment": [
+    {"ac": "AC-1", "testable": true, "source": "inventory G1; ADR row OBS-011", "readiness": "READY"},
+    {"ac": "AC-2", "testable": true, "source": "inventory class A/B/C rows, G2, G7, G8", "readiness": "READY_RULINGS_AT_T0", "findingIds": ["DRIFT-001"]},
+    {"ac": "AC-3", "testable": true, "source": "ADR row OBS-011; design §6; OBS-009 Decisions pending", "readiness": "READY_CONDITIONAL_ON_009_AC6"},
+    {"ac": "AC-4", "testable": true, "source": "ADR Panel evidence 5; row OBS-011", "readiness": "READY", "findingIds": ["DRIFT-002"]},
+    {"ac": "AC-5", "testable": true, "source": "ADR Panel evidence 2; row OBS-011", "readiness": "READY_ARCHITECT_WAIT_LIBRARY_RULING"},
+    {"ac": "AC-6", "testable": true, "source": "inventory G3, G10, G11; 10.51 AC-13", "readiness": "READY", "findingIds": ["DRIFT-003"]},
+    {"ac": "AC-7", "testable": true, "source": "inventory G5, G8, G12; ADR Order and parallelism", "readiness": "READY"}
+  ],
+  "dependencyVerification": {
+    "OBS-010": "Validated GO today; T2 Live surface list gates this story's T0",
+    "OBS-009": "Validated GO today; Done is the ADR's start condition; AC-6 outcome drives AC-3",
+    "OBS-007/012A/014/015": "all edit GuidedSessionService before the split — split starts from the final shape"
+  },
+  "crossStoryIssues": [
+    "GuidedSessionService.java is edited by 007, 012A, 014, 015 and then split here — any parallelism among those stories must keep one owner at a time.",
+    "OBS-009 AC-6 ↔ OBS-011 AC-3 on OBSERVED_SCHEDULE_AUTH_REQUIRED emitters — consistent."
+  ],
+  "sourceInventory": [
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md", "sha256": "812dcd4d7cb8353075c456b4a99a7f9ebc5321c35df1fbbf788a6d63dbd1da46", "note": "before PO edits"},
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md", "sha256": "b2ee4bd6ba470228afaad54f3b268effd756394f17482ea23034095137467cd0"},
+    {"path": "docs/architecture/ADR-SC-005-single-path-observed-authoring.md", "sha256": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4"},
+    {"path": "docs/stories/STUDIO-OBSERVED/README.md", "sha256": "e49f77e1218b8043c0d65b2dec19933b14252510fe17902c0130ab87c5fe9ac9"},
+    {"path": ".aiox-core/development/tasks/validate-next-story.md", "sha256": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea"},
+    {"path": ".claude/rules/story-lifecycle.md", "sha256": "f5262020e0a3b614104881019550cb0b793907c6694d41e027fc9c1bbe2a2278"}
+  ]
+}

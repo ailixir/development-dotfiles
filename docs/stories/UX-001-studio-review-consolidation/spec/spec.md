@@ -3,7 +3,11 @@
 > **Story ID:** UX-001-studio-review-consolidation  
 > **Complexity:** STANDARD  
 > **Generated:** 2026-09-20  
-> **Status:** Approved for implementation
+> **Status:** ~~Approved for implementation~~ **SUPERSEDED by ADR-SC-005 (2026-10-09) — never implemented**
+
+> ### Disposition — ADR-SC-005 (2026-10-09)
+>
+> **Recorded 2026-10-10 by @po (Pax).** On 2026-10-09 the user decided that observed/guided is the only UI Studio authoring path and that the compile-to-READY path is removed entirely (`docs/architecture/ADR-SC-005-single-path-observed-authoring.md`). The ADR's "Supersedes" section names this spec directly: *"UX-001 (`CompileReviewPanel`): dropped; the component is deleted."* The surface this spec consolidates — the compile-review list in the Control Tower, `CompileReviewPanel`, `useCompileReview`, the Code tab's artifact summary and the translation/readiness decision — is deleted by **STUDIO-OBS-012B** (`components/studio/review/**`, `CodeTab`, `inference/**`), and the single-path UI (states, copy, plan explanation replacing the Code tab, learned-vs-replayed evidence) is **STUDIO-OBS-008**. This spec was approved (critique verdict APPROVED) and **never implemented**; no story was cut from it; nothing is removed from the product by closing it. Its one surviving idea — the Steps panel is the canonical checklist and the operational surface is outcome-first — is already the premise of the OBS-008 UX split (states/copy, reference picker, plan explanation). **Disposition: SUPERSEDED.** `requirements.json`, `research.json`, `complexity.json` and `critique.json` are left as history. Summary: `docs/epics/EPIC-10-SINGLE-PATH-DISPOSITION.md`.
 
 ---
 

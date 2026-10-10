@@ -1,0 +1,152 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "storyPath": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md",
+  "task": "validate-next-story (SDC Phase 2) — initial validation of the ADR-SC-005 re-cut story",
+  "round": 1,
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T04:10:00Z",
+  "validationDate": "2026-10-10",
+  "verdict": "GO",
+  "readinessScore": 8,
+  "scoreScale": 10,
+  "confidence": "High for scope/sequencing; Medium for execution risk (XL removal + one irreversible re-baseline; D-B confirmation owed)",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "storyVersionBefore": "0.1.0",
+  "storyVersionAfter": "0.1.1",
+  "changeLogEntry": "| 2026-10-10 | 0.1.1 | Validated GO (8/10) — Status: Draft → Ready. One story accepted with a Lane M phase gate; conditions G1–G5 and should-fixes SF-1…SF-8 in Dev Notes \"PO validation — 2026-10-10\". Report `.ai/STUDIO-OBS-012A-po-validation.json` | @po |",
+  "storySha256Before": "193609850929192479004283ce8c8ea35cc4015743fae5553dd46d38878a5fb2",
+  "scoreRationale": "Scope is exactly ADR-SC-005 D-A/D-B placement row OBS-012A with every inventory 'ruling needed' row decided by the ADR and executed by name; method is 10.51's (grep at HEAD, count-and-name, pins quoted). Counts verified exact today (54 compile Java files, 60/383 compile tests, 30+6+1 v1 ITs, 17 Flyway-pinned test files, V1–V11 byte-identical to d954a21c5). Two points withheld: eight Dev Notes/File List inaccuracies (wrong StudioAcceptanceService path, 54-vs-77 wording, two unlisted gateway DTOs, missing GuidedTranslationConfiguration import, observed-contracts build path, rdsParityLint unnamed, ExecutionVideoContractTest path, ~30k fixture figure) and the D-B external confirmation still owed. None changes an AC.",
+  "bindingDecisionsRespected": {
+    "adrSc005DA_noLegacyNoCompatNoFallback": true,
+    "adrSc005DB_coreV1V11ByteIdentical_studioReauthoredV12V18": true,
+    "defaultsApiV1OneContractVersionReadinessVocabulary": true,
+    "inventoryRulingsDecidedByAdrNotReopened": ["CLN-12 document/keep", "CLN-15", "CLN-16/17", "CLN-23", "CLN-24", "CLN-27/28", "CLN-46", "CLN-48"],
+    "notRelitigated": true
+  },
+  "canonicalSources": [
+    "docs/architecture/ADR-SC-005-single-path-observed-authoring.md (D-A, D-B, defaults, Removed/moved/kept, Contracts and pins, Tests, Docs, placement map row OBS-012A, Verification D-A/D-B)",
+    "docs/specs/studio-observed-authoring/secret-login-design.md R3 §3 (v3 only), §6 'Removed by OBS-012A', 'Migration'",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md (CLN-12, 15, 16, 17, 23, 24, 27, 28, 46, 48; G1, G3, G5, G9)",
+    "docs/stories/STUDIO-OBSERVED/README.md; wave-plan-single-path.json (batch 2; edges 007→012A→{012B,013,014}, 012A→015)",
+    "ARCH.md:123 forward-only Flyway policy (one pre-release exception per D-B)",
+    "backend/build.gradle.kts (rdsParityLint :277-280; processResources observed-contracts :339-344)"
+  ],
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "result": "PASS", "evidence": "'Compile-path retirement (backend, runner, contracts) and migration re-baseline'"},
+    {"n": 2, "item": "Complete description", "result": "PASS", "evidence": "Story statement + binding paragraph + 'What exists today (verified 2026-10-09)' + grep hygiene + why-one-story"},
+    {"n": 3, "item": "Testable acceptance criteria", "result": "PASS", "evidence": "7 ACs; each has a grep/count/shasum/pin oracle; AC-7 is the ADR Verification D-A sweep; AC-6 is Verification D-B"},
+    {"n": 4, "item": "Well-defined scope (IN/OUT)", "result": "PASS", "evidence": "'Out of scope here' names 012B/013/014/015/009/011 and the GA-plan path-independent items; 'Not owned here' in File List"},
+    {"n": 5, "item": "Dependencies mapped", "result": "PASS", "evidence": "OBS-007 Done precondition (T0); same lane; downstream 012B ∥ 013 ∥ 014 and 015's V15 columns named; D-B external confirmation recorded as owed with owner"},
+    {"n": 6, "item": "Complexity estimate", "result": "PASS", "evidence": "XL, three lanes K/C/M with shared-file order and a documented 012A-1/012A-2 fallback"},
+    {"n": 7, "item": "Business value", "result": "PASS", "evidence": "Branch contains exactly one generation of every contract, pin, route and table; nothing the observed path does not use"},
+    {"n": 8, "item": "Risks documented", "result": "PASS", "evidence": "D-B residual (unconfirmed deployments), G9 grep hazard (observed-1 live literal), setter-injection seams, recordEvidence seam, check-task hang unverified, V16 OBSERVED_SCHEDULE_AUTH_REQUIRED decision"},
+    {"n": 9, "item": "Criteria of Done", "result": "PASS", "evidence": "T4 greps per item + full gates + reconciled counts; T5 independent @qa grep and reconciliation; only QA sets Done"},
+    {"n": 10, "item": "Alignment with PRD/Epic", "result": "PASS", "evidence": "Every AC cites ADR-SC-005 sections; order/parallelism matches ADR and regenerated wave plan (no DAG errors)"}
+  ],
+  "executorAssignment": {"executor": "dev", "quality_gate": "architect", "sdc_reviewer": "qa", "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests", "dependency-analysis"], "executorNotEqualGate": true, "typeConsistency": "Architecture/refactor + DB (@data-engineer co-executes V12–V18) → @dev / @architect", "result": "PASS"},
+  "templateComplianceIssues": [],
+  "codeRabbitIntegrationFindings": {"enabledInConfig": true, "sectionPresent": true, "subsections": ["Story Type Analysis", "Specialized Agents", "Quality Gates", "Self-Healing and Focus Areas"], "primaryAgentDev": true, "result": "PASS"},
+  "codeIntelligenceCheck": {"isCodeIntelAvailable": false, "note": "Step 8.1 skipped (graceful fallback)"},
+  "epicContextEnrichment": {"accumulatorInvoked": false, "substitute": "Manual cross-reference of README, wave plan batch 2, ADR placement map, OBS-007/013/014/015 File Lists"},
+  "antiHallucinationFindings": {
+    "untraceableStatements": 0,
+    "anchorsVerifiedOnTree": [
+      "backend studio/compile = 54 Java files total: 31 top-level + 21 gateway/ + 2 incremental/; compile/validator = {StudioRunnerProperties, RunnerValidationClient, RunnerDiagnostic, ValidationOutcome}",
+      "compile test suites = 60 files / 383 @Test (exact match to story)",
+      "GuidedSessionIT 30 @Test (8 'schemaVersion', 1 uses); GuidedHttpSecurityIT 6 @Test (:44 /internal/v1/ URL); GuidedBridgeIntegrationTest 1 sv1 case (37 @Test total)",
+      "GuidedInternalController.java:17-19 dual mount /internal/v1|v2; :159 v2 prefix check",
+      "studio-runner/src/server/routes.ts:6-8 /v1/validate, /v1/runs, DELETE /v1/runs/{id}",
+      "StudioController.java:122 POST /tests/{id}/compile; :151 confirm-compile; :236 validate-variables",
+      "docs/specs/studio/openapi.yaml:669 /tests/{id}/compile; :747 /tests/{id}/confirm-compile",
+      "application.yml:221 studio.authoring.v2-enabled; :331 studio.compile:; :333 compile.incremental.enabled; :432-433 studio.runtime.pin",
+      "studio-runner/src/versions.ts:46 OBSERVED_VALIDATOR_VERSION='observed-1'; GuidedSessionService.java:344 v1 observed-1 fallback tuple; observedOperations.ts:2 and V33:300 'observed-replay-1' catalog (G9 live literals)",
+      "ExecutionReadinessService.java:167,171,180 COMPILE_REQUIRED; dispatch/ExecutionReadiness.java:18 constant",
+      "db/migration = V1–V18, V20–V33 (32 files); backend/db/cutover/V19__studio_inference_candidate_identity.sql present; V25 drops core secrets table",
+      "shasum -a 256 V1–V11 == git show d954a21c5 (all 11 identical, verified 2026-10-10)",
+      "17 test files pin a Flyway target (.target( / MigrationVersion): ErrorCodeConstraintMigrationIT, InferenceMigrationIT, InferenceMigrationLatestIT, LegacyDataMigrationIT, RevisionMigrationIT, authoring/StudioAuthoringMigrationIT, compile/CompileStartedAtMigrationIT, compile/IntentDerivationMigrationIT, compile/ReferencePolicyMigrationIT, dispatch/LedgerStateMachineMigrationIT, guided/bridge/GuidedBridgeIntegrationTest, guided/publication/GuidedPublicationMigrationTest, guided/session/GuidedSessionIT, guided/translation/GuidedPlanningIntegrationTest, guided/translation/GuidedTranslationMigrationTest, scheduling/StudioSchedulingSchemaIT, secrets/PlaintextSecretsDropMigrationIT",
+      "StudioRunnerProperties referenced outside compile/ by GuidedPublicationConfiguration.java and HttpRunnerDispatchClient.java",
+      "GenAiGuidedLlmGatewayClient.java imports studio.compile.gateway.GenAiGatewayTransport; GuidedSourceClassifier.java and GuidedTranslationConfiguration.java import studio.compile.CredentialPatternScreen",
+      "application.yml:11 spring.jpa.hibernate.ddl-auto: validate",
+      "build.gradle.kts:277-280 rdsParityLint task (migrationDir db/migration, allowlist config/rds-parity/allowlist.yml); :319 check dependsOn rdsParityLint",
+      "build.gradle.kts:339-344 processResources copies ../docs/specs/studio-observed-authoring/contracts {*.schema.json, v2/*, v3/*} into studio/observed-contracts (build output)",
+      "docs targets exist: studio-execution.md, studio-inference-{contract-v1,execution-log,implementation-plan,review-2026-09-16,ux}.md, specs/studio-context/current-state.md, STUDIO-INC-001-incremental-compile/spec/decisions.md, runbooks/studio-inference-rollout.md, compile/README.md, UI-STUDIO-VALIDATION-20261004/benchmark/report.md",
+      "runner targets exist: validator/{bounds,diagnostics,index}.ts, executor/adapters/, executor/pageLocation.ts, compat/{compatibility,runtime-versions}.ts, scripts/{write-runtime-versions,check-pins}.mjs, test/{compat,contract,contract-integrity}.test.ts, test/helpers/openapi.ts; attachLegacyChildRuntime at childRuntime.ts:576,786",
+      "entities exist: entity/{UITest,UITestRevision,UITestExecution,StudioDispatchLedger}.java; dto/{EvidenceReference,ConfirmCompileRequestDto,ExecutionStatus}.java; dispatch/StudioAcceptanceService.java; readiness tests ExecutionReadinessTest, DeReadyCarryForwardTest; compile/NoRuntimeLlmTest",
+      "studio-runner JSON (all non-package, non-tsconfig, excl node_modules/dist) = 19,783 lines today"
+    ],
+    "knownInaccuracies": [
+      {"id": "SF-1", "where": "Dev Notes 'What exists today'", "issue": "'54 Java files plus gateway/ (21) and incremental/ (2)' reads as 77; actual total is 54 (31 + 21 + 2)", "acWeakened": false},
+      {"id": "SF-2", "where": "File List Lane K", "issue": "scheduling/StudioAcceptanceService.java does not exist; the class is dispatch/StudioAcceptanceService.java (already listed)", "acWeakened": false},
+      {"id": "SF-3", "where": "AC-1 relocation list", "issue": "compile/gateway/ also holds CompileRequest.java and CompileResponse.java, not in the 19-class list; disposition needed at T0", "acWeakened": false},
+      {"id": "SF-4", "where": "File List Lane K", "issue": "GuidedTranslationConfiguration.java also imports compile.CredentialPatternScreen; only GuidedSourceClassifier is listed for the import fix", "acWeakened": false},
+      {"id": "SF-5", "where": "File List Lane C", "issue": "backend/src/main/resources/studio/observed-contracts/** is a processResources build output, not a source path; the edit is the include(...) list in build.gradle.kts (listed)", "acWeakened": false},
+      {"id": "SF-6", "where": "AC-6 / Testing", "issue": "rdsParityLint (part of check) is not named; the seven re-authored migrations are new SQL and must pass it; check completion is itself flagged unverified so the task should be run standalone", "acWeakened": false},
+      {"id": "SF-7", "where": "File List Lane K tests", "issue": "ExecutionVideoContractTest lives under studio/evidence/, not studio/", "acWeakened": false},
+      {"id": "SF-8", "where": "AC-3 / CodeRabbit section", "issue": "'~30k lines of JSON fixtures' is the panel estimate; runner JSON totals 19,783 lines today; story already says baseline at T0", "acWeakened": false},
+      {"id": "INFO", "where": "AC-1 '≈1,580 LOC'", "issue": "gateway is 2,229 non-blank/non-comment LOC (3,113 raw); panel figure attributed, not asserted", "acWeakened": false}
+    ]
+  },
+  "reBaselineAssessment": {
+    "flywayMechanics": "Fresh-install at V18 on Testcontainers; V1–V11 shasum against d954a21c5; 17 pinned ITs named above for T0; db/cutover removed; forward-only policy resumes after — ADEQUATE",
+    "hibernateLockstep": "Entities change in the same change; application.yml:11 ddl-auto: validate enforces entity ↔ schema agreement at context load — ADEQUATE",
+    "rdsParityLint": "Exists (build.gradle.kts:277-280; backend/config/rds-parity/allowlist.yml; rules no-alter-system, extension-allowlist, no-superuser, …); runs under check; NOT NAMED in story — condition G3",
+    "dbResidual": "Treated as explicit risk with a T0 record (asked whom, answer or 'unconfirmed'); acceptable because nothing is released before OBS-010 which carries it as an external gate; condition G4 makes the ask real",
+    "exactlyV1toV18VsLaterDdl": "Point-in-time gate for 012A; OBS-014 V19__guided_governance.sql and any OBS-013 forward-only DDL land afterwards and re-pin the fresh-install count; nice-to-have N-1 (assert latest == highest file instead of literal V18)"
+  },
+  "sizing": {
+    "declared": "XL, one story, three lanes K/C/M; documented fallback 012A-1 (K+C) → 012A-2 (M)",
+    "smFlag": "at risk: ~55–60k lines removed, re-baseline V12–V18, 36 ITs ported, ~1.6k LOC gateway moved first",
+    "verdict": "ACCEPT one story; fallback split NOT applied now; hard phase gate added",
+    "reasons": [
+      "Lane M depends on K (compile columns it drops are read only by code K deletes) and C (V15 carries the v3 tuple and scope without accountRef); a split forces a second entity pass",
+      "Splitting leaves OBS-014 (V19 numbering) and OBS-015 (V15 columns) blocked on 012A-2 anyway; the only parallelism gain is 012B/013, and 013's possible forward-only DDL would collide with an in-flight M",
+      "Deletion volume is by-name, mechanical and count-reconciled; the 36 ITs are URL/body version ports (GuidedSessionIT 30, GuidedHttpSecurityIT 6)",
+      "ADR-SC-005 places removal + re-baseline in one lane"
+    ],
+    "phaseGate": "T3 (Lane M) may start only after K and C are compile-green and a fresh backend baseline is re-taken on that tree",
+    "applyFallbackIf": ["T0 D-B answer is 'something was deployed from an internal remote' (M then needs a different migration strategy)", "@architect T0 rulings materially enlarge Lane C"]
+  },
+  "fileListOwnership": {
+    "wavePlanBatch": 2,
+    "parallelStories": "none (alone in batch 2)",
+    "obs007": "Sequential before (same lane): GuidedSessionService, GuidedContracts, GuidedSessionController, contracts/v3, openapi.yaml, build.gradle.kts, tools, bundles, versions.ts, pins, V34→V17",
+    "obs012B_013_014": "Downstream parallel; 012B frontend-only; 013/014 touch GuidedSessionService/transport/v3 schemas after 012A; 014 adds V19 after V18",
+    "obs015": "Needs V15 per-step snapshot columns landed here (AC-6)",
+    "result": "PASS"
+  },
+  "dependencyVerification": {
+    "obs007": {"status": "Ready (validated 2026-10-10, r5); must be Done before T0", "verified": true},
+    "externalResidual": {"item": "D-B confirmation that nothing was ever deployed from an internal remote", "owner": "user / Platform-SRE", "status": "owed, not obtained (ADR-SC-005 D-B)", "handling": "explicit risk + T0 record; OBS-010 release gate"},
+    "result": "PASS"
+  },
+  "decisionsPendingAutoApplied": [
+    "[AUTO-DECISION] V16 mints OBSERVED_SCHEDULE_AUTH_REQUIRED → mint (design §6 item 5; OBS-011 removes emitters if OBS-009 lifts schedules) (reason: keeps OBS-009's refusal code valid at no cost)",
+    "[AUTO-DECISION] D-B confirmation unavailable at T0 → proceed with 'unconfirmed, owner: user / Platform-SRE' recorded (reason: ADR-SC-005 records it as owed; nothing is released before OBS-010)",
+    "[AUTO-DECISION] compile/validator survivors → StudioRunnerProperties to studio/dispatch; others only if /v2/validate-observed uses them, @architect at T0 (reason: story default; verified today that GuidedPublicationConfiguration and HttpRunnerDispatchClient use StudioRunnerProperties)"
+  ],
+  "goConditions": [
+    {"id": "G1", "owner": "@dev (T0)", "text": "Fix SF-1…SF-7 in Dev Notes/File List; no AC changes"},
+    {"id": "G2", "owner": "coordinator/@dev", "text": "Lane M (T3) starts only after Lanes K and C are compile-green and a fresh backend baseline is re-taken on that tree"},
+    {"id": "G3", "owner": "@dev/@data-engineer", "text": "Name rdsParityLint in AC-6 evidence; run it standalone (./gradlew rdsParityLint) on the seven new migrations and quote the result"},
+    {"id": "G4", "owner": "coordinator → user", "text": "Put the D-B question (nothing ever deployed from an internal remote?) to the user/Platform-SRE at T0 and record the answer or 'unconfirmed'; proceeding on 'unconfirmed' is per ADR-SC-005"},
+    {"id": "G5", "owner": "@qa", "text": "Reproduce the grep sweep and after = baseline − named drops − named deletions + named ports independently (10.51 AC-12 method)"}
+  ],
+  "requiredFixesForSm": [],
+  "shouldFixIssues": ["SF-1", "SF-2", "SF-3", "SF-4", "SF-5", "SF-6", "SF-7", "SF-8"],
+  "niceToHaveImprovements": ["N-1: fresh-install/migration-count test asserts 'latest applied == highest migration file' rather than literal V18 so OBS-013/014 need not re-pin it"],
+  "filesChanged": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md (Status Draft → Ready; Dev Notes '### PO validation — 2026-10-10'; Change Log row 0.1.1)",
+    ".ai/STUDIO-OBS-012A-po-validation.json"
+  ],
+  "notChanged": ["ACs, scope, title, Tasks, File List, QA Results", "other story files", "any code, spec, ADR, design or migration"],
+  "scope": {"codeChanged": false, "gitWrites": false, "buildsOrTestsRun": false, "subagents": false},
+  "limitations": [
+    "Read-only cross-check; no Gradle/Vitest run; counts are static greps on the 2026-10-10 working tree and will drift (G1 of the inventory applies)",
+    "The '17 Flyway-pinned ITs' match is by regex (.target( / MigrationVersion); T0 confirms by name",
+    "Gotchas file .aiox/gotchas.json absent on this tree"
+  ],
+  "handoff": {"next_agent": "@dev", "next_command": "*develop STUDIO-OBS-012A", "gateBeforeDispatch": "OBS-007 Done; T0 baselines, @architect rulings (gateway package, CompileRequest/Response, compile/validator survivors), @data-engineer V12–V18 draft, D-B question asked (G4)"}
+}

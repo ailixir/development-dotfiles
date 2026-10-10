@@ -1,3 +1,5 @@
+> **Superseded in part by [ADR-SC-005](ADR-SC-005-single-path-observed-authoring.md) — 2026-10-09.** The user decided that observed/guided authoring is the **only** UI Studio path. This ADR's "Preserves" row (authoring v2 / manual confirmation / artifact v1 / ordinary saved replay), its "Versioning and rollout" sentence "Legacy artifact v1/reference policy 2 are unchanged", and the `/api/v3/studio/guided-sessions` scope are superseded: the compile path, artifact 1, reference policy 2 and the observed v1/v2 contract generations are removed (STUDIO-OBS-012A), guided routes move under `/api/v1/studio`, and re-learning is incremental from the first changed step (ADR-SC-005 D-D). The Decision, Trust and data boundaries, and INPUT-POLICY-01 amendment below stand. Body untouched.
+
 # ADR-SC-004 — First guided Run and immutable observed plans
 
 | Field | Value |

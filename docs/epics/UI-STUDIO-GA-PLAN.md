@@ -4,6 +4,13 @@
 **Inputs:** working tree of `brunobuger/ui-studio` at `c767efbe7` plus 56 modified / 593 untracked files.
 **Binding decision applied:** 2026-10-09: guided runs log in through author-written steps that use `<secret ID>` references. There is no external account provider, and EXT-001 is dropped.
 
+> **Update 2026-10-09: single path.** The user decided that UI Studio ships **one** authoring path, observed/guided, and that the compile-to-READY path is removed. There is no legacy path and no backward compatibility, because nothing is released. Other decisions:
+> - Studio migrations V12+ are re-baselined; core V1–V11 are unchanged.
+> - The pilot is gated on a real-model benchmark: ≥90% on 20 workflows × 3 runs, with zero false passes and zero leaks.
+> - Re-learn from step N ships after GA.
+>
+> These are recorded in [ADR-SC-005](../architecture/ADR-SC-005-single-path-observed-authoring.md). Below, anything framed as "legacy path for GA, guided for GA+1" is superseded. Path-independent items still apply: §4.A repo/CI/images, §4.B external gates, §4.D CSRF and transport, §4.E schedule authorization, §4.F evidence storage, §4.G operability and §4.J sign-off. Story scope is re-cut in the STUDIO-OBSERVED wave.
+
 Severity: **P0** blocks the GA release · **P1** must land before pilot users depend on it · **P2** hardening/polish.
 Effort: S / M / L as the reviewers estimated it. Owner is the AIOX agent unless a team outside the repo is named.
 
@@ -31,10 +38,10 @@ The **observed/guided path** is reachable from no screen, cannot start, cannot r
 
 | # | Decision | Recommendation | Why |
 |---|---|---|---|
-| D-1 | Does GA ship guided authoring, or legacy only? | **Legacy only; guided is GA+1.** | Legacy already supports `<secret ID>` login steps (10.17/10.44), schedules and video. Guided has zero frontend, an unwired replay verifier, a broken worker profile split and needs an mTLS chain no environment has. Shipping both doubles the surface to test and secure (@architect, @ux, @po concur). |
+| D-1 | Does GA ship guided authoring, or legacy only? | **Decided 2026-10-09: observed/guided is the only path, and compile is removed (ADR-SC-005).** Original recommendation, superseded: legacy only, guided GA+1. | Legacy already supports `<secret ID>` login steps (10.17/10.44), schedules and video. Guided has zero frontend, an unwired replay verifier, a broken worker profile split and needs an mTLS chain no environment has. Shipping both doubles the surface to test and secure (@architect, @ux, @po concur). |
 | D-2 | Where is the Citi repository/registry/pipeline? | Name it, then mirror this line there. | The only remote is `github.com:ailixir/development-dotfiles` (verified). Nothing connects this code to `registry.citi.com`. |
 | D-3 | Who owns ED-01 (R2D2 gateway access)? | Assign a named owner this week. | It's on the critical path for 10.50, 10.5, 10.8, 10.26 and 10.34. The manifest says `owner: "TBD"`. |
-| D-4 | Commit the uncommitted STUDIO-OBSERVED work to git now? | **Yes**: a local commit on this branch with flags staying default-off. | 593 untracked files include `studio/guided/**`, runner `guided/**`, Flyway V30–V33, six QA gates and tools. One bad reset loses OBS-001…006. |
+| D-4 | Commit the uncommitted STUDIO-OBSERVED work to git now? **Done 2026-10-09: `d954a21c5`** (local only; evidence binaries ignored). | **Yes**: a local commit on this branch with flags staying default-off. | 593 untracked files include `studio/guided/**`, runner `guided/**`, Flyway V30–V33, six QA gates and tools. One bad reset loses OBS-001…006. |
 
 ## 3. Do now (no external dependency)
 
@@ -50,6 +57,7 @@ The **observed/guided path** is reachable from no screen, cannot start, cannot r
    - Remove the stale "fold" blocker from 10.34. The fold is merged (verified by @devops).
    - Drop **STUDIO-CODE-001** (pipeline state `discarded`). Defer **STUDIO-INC-001** (T-INC).
    - Close **UX-001** as superseded: `CompileReviewPanel` is no longer mounted. Remove or quarantine `CompileReviewPanel` / `useCompileReview` / `InferenceStudio` (UX-10).
+   - **Dispositioned 2026-10-10 (@po) under ADR-SC-005 — this list is superseded in part.** Per-item outcome (leave / superseded / re-cut), carriers and recommended @qa/@pm actions are in `docs/epics/EPIC-10-SINGLE-PATH-DISPOSITION.md`. In short: 10.5, 10.6, 10.7, 10.12, 10.15, 10.16, 10.18 and 10.19 are left `InReview`/not Done with their criteria carried by 10.34, which STUDIO-OBS-010 re-registers against the single path; 10.8, 10.23, 10.24, 10.25 and 10.26 are superseded (compile-only remaining criteria); 10.50 is re-cut into STUDIO-OBS-009; 10.11 is mixed (AC-3(b) superseded, transport halves carried); "Group M", "10.26 AC-3 into Group C" and "post-GA carrier for 10.24/10.25" are withdrawn (OBS-015 carries the requirement in GA); UX-001 superseded, STUDIO-INC-001 superseded as a compile spec, STUDIO-CODE-001 discarded. No status field was changed: `Done` is @qa's transition.
 3. **Rewrite STUDIO-OBS-007** to the 2026-10-09 decision (§7) so the guided track is ready when D-1 allows it. The story file still describes approved accounts (`grep '<secret'` = 0 hits).
 
 ## 4. GA workstreams (legacy path)

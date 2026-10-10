@@ -2,7 +2,13 @@
 
 **Story:** STUDIO-CODE-001-editable-versioned-source · **Spec version:** 2 · **Complexity:** COMPLEX, 19/25 · **Date:** 2026-10-04 (local) / 2026-10-05 (UTC)
 
-**Status: proposed for review.** This document evaluates a product extension. It is not an approved implementation story, accepted ADR, deployed feature or release approval. Repository findings include existing uncommitted changes; no product code, migration or runtime test was changed or executed by this pipeline. [CON-4]
+**Status: ~~proposed for review~~ DISCARDED (pipeline state `discarded`, 2026-10-05) — and SUPERSEDED by ADR-SC-005 (2026-10-09).**
+
+> ### Disposition — ADR-SC-005 (2026-10-09)
+>
+> **Recorded 2026-10-10 by @po (Pax).** This spec was already discarded by the user on 2026-10-05 (`spec/pipeline-state.json`: `"status": "discarded"`, `discardedAt` 2026-10-05T03:05:01Z); nothing was cut from it and no code was changed by its pipeline. ADR-SC-005 (`docs/architecture/ADR-SC-005-single-path-observed-authoring.md`) closes the door it proposed to open: the Code tab (`CodeTab`) and the confirmed-artifact read surface are deleted by **STUDIO-OBS-012B**, and on the single path there is no author-editable Playwright/TypeScript source — the author's artefact is the published learned plan, explained in **STUDIO-OBS-008**. **Disposition: DISCARDED, confirmed; SUPERSEDED.** Left as history. Summary: `docs/epics/EPIC-10-SINGLE-PATH-DISPOSITION.md`.
+
+*Original status text:* **proposed for review.** This document evaluates a product extension. It is not an approved implementation story, accepted ADR, deployed feature or release approval. Repository findings include existing uncommitted changes; no product code, migration or runtime test was changed or executed by this pipeline. [CON-4]
 
 ## 1. Recommendation
 

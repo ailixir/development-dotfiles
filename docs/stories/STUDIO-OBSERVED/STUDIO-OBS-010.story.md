@@ -1,4 +1,4 @@
-# Story STUDIO-OBS-010 — Nontechnical pilot, secret-login runbook and release readiness
+# Story STUDIO-OBS-010 — Nontechnical pilot, single-path runbook and release readiness
 
 | Field | Value |
 |---|---|
@@ -6,7 +6,8 @@
 | Status | **Ready** |
 | Epic | Studio observed authoring |
 | Depends on | STUDIO-OBS-009 |
-| Source | docs/specs/studio-observed-authoring/consensus-plan.md §§10–12 · secret-login-design.md §4.3 (R1-2 statement), §4.6 (I-B7, I-C8 gates, I-C9), §8 Q3, §10 · secret-login-security-review.md condition 10, R1-2 · UI-STUDIO-GA-PLAN.md §4.C C-2/C-3, §4.J, §7 knock-on ("OBS-010 merges with the pilot/10.34 evidence") |
+| Dependency notes | The pilot opens only after OBS-009 AC-7 (the ADR-SC-005 D-C benchmark gate) is **passed**, not merely run. OBS-011 may run in parallel to this story once OBS-009 is Done, but must not remove anything on this story's dated "Live surface" list — write that list first (T2). Human participants, the compliance approval, ED-02 and the D-B confirmation are external prerequisites, never fabricated. |
+| Source | docs/architecture/ADR-SC-005-single-path-observed-authoring.md (D-B residual, D-C, "Security work becomes stories" (approval gated here), "Operations", placement map row OBS-010, Supersedes GA plan D-1/§6) · docs/specs/studio-observed-authoring/secret-login-design.md R3 §4.3 (R1-2 statement), §4.6 I-B7/I-C8/I-C9, §8 Q3, §10 row OBS-010 · docs/specs/studio-observed-authoring/secret-login-security-review.md condition 10, R1-2 · docs/epics/UI-STUDIO-GA-PLAN.md §4.B, §4.C C-2/C-3, §4.F F-2, §4.J, §7 ("OBS-010 merges with the pilot/10.34 evidence") · docs/stories/10.34.story.md (staging acceptance register) · UX panel 2026-10-09 (state copy the pilot script uses) |
 | Size | M |
 
 executor: "analyst"
@@ -16,42 +17,45 @@ quality_gate_tools: [requirements-traceability, evidence-review, release-checkli
 
 ## Story
 
-As a Studio product owner, I want to validate with real nontechnical users that they can author, log in with their secrets and clarify a test without learning technical syntax, and to consolidate every gate into one honest release-readiness record with an operable runbook, so that the guided experience is released only when the evidence — including the external compliance gates — actually supports it.
+As a Studio product owner, I want to validate with real nontechnical users that they can author, log in with their secrets, resolve a clarification and re-learn a changed step without learning technical syntax, and to consolidate every gate — including the external compliance, Vault, authorization and deployment-history confirmations — into one honest release-readiness record with an operable runbook, so that the single observed path is released only when the evidence actually supports it.
 
 ## Acceptance Criteria
 
-1. **AC-1 — Pilot preparation.** A consented formative pilot with at least five nontechnical users is prepared on the supported workflow, which is now the **login workflow**: a checklist that reaches a login-protected page using `<var USER>`/`<secret PASS>` login steps inserted through the OBS-008 reference picker, then a grounded ambiguity to resolve. No external person is contacted or recruited without explicit user authorization; needed participant access, test secrets and approved origins are identified as prerequisites, not assumed. [consensus §11; design §10 OBS-010 row]
+1. **AC-1 — Pilot preparation (gated on D-C).** A consented formative pilot with at least five nontechnical users is prepared on the **login workflow**: a checklist that reaches a login-protected page using `<var USER>`/`<secret PASS>` steps inserted through the OBS-008 reference picker, a grounded ambiguity to resolve, and one edit of a middle step followed by a Run that re-learns only from that step (OBS-015). The pilot script uses the OBS-008 state copy verbatim. The pilot does not start until OBS-009 AC-7 reports the D-C gate passed (≥ 90 %, zero false-pass, zero leak). No external person is contacted or recruited without explicit user authorization; participant access, test secrets and approved origins are identified as prerequisites, not assumed. [ADR-SC-005 D-C "Before any human pilot"; placement map row OBS-010; consensus plan §11]
 
-2. **AC-2 — Pilot execution and observations.** Each participant authors and runs the workflow and resolves the grounded ambiguity without capture syntax, selectors or developer instructions; anonymized observations and outcome denominators are recorded (completed / needed help / abandoned, time to first Run, clarification understood yes/no). Where a participant encounters the blocked-by-login guidance, whether they recover from it unaided is recorded as an observation. Simulated users cannot replace this gate. [consensus §11 "formative test"; GA plan §4.I I-1]
+2. **AC-2 — Pilot execution and observations.** Each participant authors and runs the workflow, resolves the ambiguity and performs the incremental re-learn without capture syntax, selectors or developer instructions; anonymized observations and outcome denominators are recorded (completed / needed help / abandoned, time to first Run, clarification understood yes/no, "Steps changed — next Run learns from step k" understood yes/no). Whether a participant recovers unaided from the blocked-by-login guidance is recorded. Simulated users cannot replace this gate. [consensus plan §11 "formative test"; GA plan §4.I I-1; UX panel copy]
 
-3. **AC-3 — Remediation loop.** Usability failures are routed into scoped remediation stories and the affected task is rerun with evidence of the failed attempts preserved; the promised plain-language experience is not reduced to make results pass. [consensus §11]
+3. **AC-3 — Remediation loop.** Usability failures are routed into scoped remediation stories and the affected task is rerun with evidence of the failed attempts preserved; the promised plain-language experience is not reduced to make results pass. [consensus plan §11]
 
-4. **AC-4 — Release readiness record.** One record consolidates: implementation (OBS-007/008), live proof and deployment hardening (OBS-009), secret-login proof (replacing the former "account integration" line), usability (this story), compatibility/drain/rollback (OBS-006 runbook), evidence retention, and the 10.34 staging-acceptance evidence it merges with (GA plan §7). Gates **G-1** (guided mTLS chain in shared environments), **G-2** (no real credential in Vault until every secret-bearing hop is TLS-authenticated) and **G-3** (no scheduled secret-referencing run before production background and secret-use authorization sources exist) are listed as release gates with their current state; GA items **C-2** (production `StudioSecretUseAuthorization` source) and **C-3** (Vault provider enablement) are explicit external gates. Any external pending evidence stays explicit and prevents release readiness. [consensus §§10–12; design §4.6 I-C8; security review condition 10 / F-9; GA plan §4.C, §4.J]
+4. **AC-4 — Release readiness record.** One record (`docs/qa/evidence/studio-observed-authoring/release-readiness.md`, fixed row shape: gate · owner · state · evidence path · date) consolidates: implementation (OBS-007/012A/012B/013/014/015/008), deployment and live proof incl. the D-C benchmark report (OBS-009), secret-login proof, usability (this story), compatibility/drain/rollback (OBS-006 runbook as amended), evidence retention, and the **10.34 staging acceptance re-registered against the single path** (the legacy-path groups no longer apply as written; each group is re-cut, carried or closed with a reason). Explicit **external gates**, each with current state and owner, none of which may read "obtained" without the evidence path: **G-1** (guided mTLS chain in shared environments), **G-2** (no real credential in Vault until every secret-bearing hop is TLS-authenticated), **G-3** (no scheduled secret-referencing run before production background and secret-use authorization sources exist), GA **C-2** (production `StudioSecretUseAuthorization` source) and **C-3** (Vault provider enablement) — owner ED-02; the **OBS-014 compliance approvals** (page-metadata/origin export to the gateway; retention of sanitized observations and model output; gateway-side retention answer from ED-01's owner); the **D-B confirmation** that nothing was ever deployed from an internal remote (owner: user / Platform-SRE); ED-01 gateway owner named (today TBD). Any pending external item prevents release readiness. [ADR-SC-005 D-B residual, "Security work becomes stories", "Operations"; design §4.6 I-C8; security review condition 10 / F-9; GA plan §4.B, §4.C, §4.J, §7]
 
-5. **AC-5 — Operations runbook.** `docs/runbooks/studio-guided-authoring.md` (or a linked secrets runbook) is updated to the decided flow, removing account-provider text, and gains rows for: secret provisioning per CSI/environment/test with `allowedOrigins` — including the statement that an `allowedOrigins` entry asserts the **whole origin's content is trusted** (no user-generated content) because origin binding is the trust boundary (R1-2); rotation (artifact hash unchanged, audit versions differ); revocation including the mid-run bound (one control poll plus one in-flight step); audit retention window (design §8 Q3 default: existing pruner window); the single 4096-character value bound (F-5); the multi-password-page limit (guided unsupported, legacy author-named targets); heap/core-dump operational controls (I-B7); Vault least-privilege policy and KV v2 version-history residual (I-C9); guided-bridge key/issuer/token-rotation inputs from OBS-009 (SEC-4); gates G-1/G-2/G-3. It also contains a dated **"Live surface"** list naming the routes, contracts (v3), configuration keys and migrations that are live after this wave — the list OBS-011 must not remove from. [design §4.3, §4.6, §10; security review R1-2, condition 10]
+5. **AC-5 — Operations runbook (single path).** `docs/runbooks/studio-guided-authoring.md` (or a linked secrets runbook) is rewritten to the single path: account-provider and compile/legacy text removed; rows for: secret provisioning per CSI/environment/test with `allowedOrigins` — including the statement that an `allowedOrigins` entry asserts the **whole origin's content is trusted** (R1-2); rotation (artifact hash unchanged, audit versions differ); revocation incl. the mid-run bound (one control poll plus one in-flight step); audit retention window (design §8 Q3 default); the single 4096-character bound; the **multi-password and non-password limit** (unsupported at GA, no fallback — ADR default); heap/core-dump controls (I-B7); Vault least-privilege policy and KV v2 history residual (I-C9); mTLS/TLS chain and client-certificate **rotation inputs** from OBS-009 (SEC-4, G-2); **dev-database recreation after the D-B re-baseline** (command from OBS-012A evidence); governed read/discovery policy administration (OBS-014); incremental re-learn semantics for operators ("Learn again" from the first changed step, D-D); gates G-1/G-2/G-3. It also contains a dated **"Live surface"** list naming the public routes (`/api/v1/studio/**` incl. guided-sessions and video), `contracts/v3` documents, configuration keys (incl. the on-by-default flags and the `studio.execution.enabled` kill switch), migrations `V1`–`V18` (+ forward-only additions), chart values and runner config keys that are live after this wave — the list OBS-011 must not remove from. [design §4.3, §4.6, §10 row OBS-010; security review R1-2, condition 10; ADR-SC-005 "Operations", defaults "Secrets", D-D]
 
-6. **AC-6 — Devops handoff.** An exact-path handoff for any requested PR/push/release lists gate results, open external gates and risks; deployment, schedule activation and production actions are not triggered by this story. [Full SDC; consensus §10]
+6. **AC-6 — Devops handoff.** An exact-path handoff for any requested PR/push/release lists gate results, open external gates and risks; deployment, schedule activation and production actions are not triggered by this story. [Full SDC; consensus plan §10]
 
 ## Tasks / Subtasks
 
-- [ ] **T0 — Prerequisites (AC-1).** Confirm OBS-009 Done; obtain user authorization for participant contact; identify participant access, test secrets (provisioned per the runbook draft) and approved origins; freeze the pilot script against the OBS-008 UI.
+- [ ] **T0 — Prerequisites (AC-1).** Confirm OBS-009 Done and the D-C gate passed; obtain user authorization for participant contact; identify participant access, test secrets (provisioned per the runbook draft) and approved origins; freeze the pilot script against the OBS-008 UI copy.
 - [ ] **T1 — Pilot (AC-2, AC-3).** Run sessions; record anonymized observations and denominators; route failures into remediation stories; rerun affected tasks; preserve failed-attempt evidence.
-- [ ] **T2 — Runbook (AC-5).** Write the rows listed in AC-5 and the dated "Live surface" list; cross-check every row against OBS-007/009 evidence (no row describes an unimplemented control as live).
-- [ ] **T3 — Release readiness (AC-4).** Consolidate gates with current state; merge with 10.34 staging acceptance; name every external pending item and its owner.
+- [ ] **T2 — Runbook and Live surface (AC-5).** Write the rows and the dated "Live surface" list **before OBS-011 T0**; cross-check every row against OBS-007/009/012A/014 evidence (no row describes an unimplemented control as live).
+- [ ] **T3 — Release readiness (AC-4).** Consolidate gates with current state; re-register 10.34 against the single path; name every external pending item and owner.
 - [ ] **T4 — Handoff (AC-6).** Prepare the @devops handoff; submit to independent @qa for traceability review; only QA can set Done.
 
 ## Dev Notes
 
-- Human participation and any staging application/secret provisioning are genuine external prerequisites; they are not silently excluded from completion and are not fabricated (wave README).
-- The runbook today (`docs/runbooks/studio-guided-authoring.md`, 51 lines) describes OBS-006's publication/replay operations and still says "It does not provide account connectivity (OBS-007)… An unconfigured account provider refuses" — that sentence is corrected minimally by OBS-007 and rewritten here. Keep the V19/V33 compatibility, rollback and evidence sections; they remain true.
-- Gate definitions come from design §4.6 I-C8 (G-1, G-2, G-3); the production authorization sources (C-2) and Vault provider (C-3) are outside this repository (GA plan §4.B ED-02). Record them as external with owner "ED-02 (PUT Core / BFF)" as the GA plan names it.
-- 10.34 staging acceptance (Groups A–N) is the production-ready gate for the legacy path (GA plan §4.B); this story merges guided evidence into that record rather than creating a parallel one (GA plan §7 "OBS-010 merges with the pilot/10.34 evidence").
-- Residuals that must appear in the record honestly (design): JVM/JS string copies, child-memory residency for the run, operator-triggered dumps, KV v2 history, same-origin script exfiltration (R1-2), page-echoed secrets visible in video, one-poll revocation window.
-- Preserve 10.51's precedent for documentation: dated notes on dated records, rewrites only on live docs.
+- Human participation, staging application, secret provisioning, compliance approval and the D-B confirmation are genuine external prerequisites; they are not silently excluded from completion and are not fabricated (wave README; ADR-SC-005 D-B "recorded as owed, not obtained").
+- The runbook today (`docs/runbooks/studio-guided-authoring.md`) describes OBS-006's publication/replay operations; OBS-007 and OBS-013 each correct one sentence; this story rewrites it for the single path. The V19/V33 compatibility and rollback sections are **no longer true** after OBS-012A's re-baseline — replace them with the V1–V18 baseline and the dev-DB recreation row (the 10.51 "rewrite live docs" precedent applies; the old text is history in git).
+- 10.34 (Groups A–N) was the production-ready gate for the **legacy** path (GA plan §4.B). ADR-SC-005 places "10.34 re-registered against the single path" here: each group is re-cut (still applies to the single path), carried (external) or closed (legacy-only) with a reason; no group is marked passed without evidence.
+- Residuals that must appear honestly: JVM/JS string copies, child-memory residency for the run, operator-triggered dumps, KV v2 history, same-origin script exfiltration (R1-2), page-echoed secrets visible in video, one-poll revocation window, gateway-side retention unknown until ED-01 answers.
+- GA plan path-independent items (CSRF D-1, schedule activation E-1/E-2, evidence store F-1, operability G-*, repo/CI A-*) are listed in the record as **tracked in the GA plan** with their state, not closed here.
+
+### PO validation — 2026-10-09 (0.2.x dual-path draft) — SUPERSEDED by the ADR-SC-005 re-cut; historical
+
+> Verdict then: **GO 8/10 — Draft → Ready**, report `.ai/STUDIO-OBS-010-po-validation-r2.json`. Carried forward as recommendations: (1) explicit user authorization recorded before any participant contact, prerequisites listed with owners (ED-02 "PUT Core / BFF"); (2) each gate carries a current-state line pointing at an evidence file or "unrun, owner X" — the record cannot say "ready" while any external item is pending; (3) the dated "Live surface" list is written before OBS-011 T0; (4) fixed row shape for the record. Its condition "runbook rewrite touches only the account sentence; V19/V33 sections remain true" is **void** — D-B re-baselines the migrations.
 
 ## Testing
 
-Human task observations with anonymized records and denominators; independent @qa traceability review of the release-readiness record against OBS-007/008/009 gate files and QA reports; a checklist pass over the runbook asserting each row cites the implementing story's evidence. Participant availability is an external prerequisite, not evidence the analyst can fabricate.
+Human task observations with anonymized records and denominators; independent @qa traceability review of the release-readiness record against OBS-007…015 gate files, QA reports and the OBS-009 benchmark report; a checklist pass over the runbook asserting each row cites the implementing story's evidence; `release-checklist.md` executed by @devops on handoff. Participant availability and external approvals are prerequisites, not evidence the analyst can fabricate.
 
 ## CodeRabbit Integration
 
@@ -61,7 +65,7 @@ Primary: Research/pilot and release documentation. Complexity: medium.
 
 ### Specialized Agents
 
-@analyst owns execution; @pm provides the assigned product gate; @devops receives the handoff; independent @qa owns the SDC verdict and Done transition.
+@analyst owns execution; @pm provides the product gate; @devops receives the handoff; independent @qa owns the SDC verdict and Done transition.
 
 ### Quality Gates
 
@@ -71,33 +75,32 @@ Primary: Research/pilot and release documentation. Complexity: medium.
 
 ### Self-Healing and Focus Areas
 
-Documentation story: CodeRabbit focus is markdown quality and reference validity; QA full review limits apply (three iterations, 30 minutes). Record an unavailable tool and use the configured independent review fallback. Never invent a CodeRabbit PASS.
+Documentation story: CodeRabbit focus is markdown quality and reference validity; QA full review limits apply. Record an unavailable tool and use the configured independent review fallback. Never invent a CodeRabbit PASS.
 
 ## File List
 
 - `docs/qa/evidence/studio-observed-authoring/usability-pilot.md` (new)
 - `docs/qa/evidence/studio-observed-authoring/release-readiness.md` (new)
-- `docs/runbooks/studio-guided-authoring.md` (rewrite of the account sentence; new rows; "Live surface" list)
+- `docs/runbooks/studio-guided-authoring.md` (single-path rewrite; new rows; "Live surface" list)
 - `docs/runbooks/studio-secrets-provisioning.md` (new, optional — only if the guided runbook becomes unreadable; otherwise a section)
+- `docs/stories/10.34.story.md` (dated re-registration note only; the register itself per its own process)
 - `docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md`
 
-Not owned here: code, charts, contracts, migrations (OBS-007/009); `docs/epics/UI-STUDIO-GA-PLAN.md` (coordinator-owned; this story links to it).
+Not owned here: code, charts, contracts, migrations (OBS-007…015, 009); `docs/epics/UI-STUDIO-GA-PLAN.md` (coordinator-owned; linked).
 
-## PO Validation (2026-10-09)
+## PO Validation (2026-10-10) — single path (0.3.x)
 
-**Verdict:** GO — readiness 8/10 (confidence High for scope; execution depends on human participants and OBS-009 Done). Status Draft → Ready. Report: `.ai/STUDIO-OBS-010-po-validation-r2.json`. Validator: Pax (@po).
+**Verdict: GO (8/10) — Status: Draft → Ready.** Report `.ai/STUDIO-OBS-010-po-validation-sp.json`. Validated by Pax (@po) against ADR-SC-005 (D-B residual, D-C, "Security work becomes stories", "Operations", placement map row OBS-010, Supersedes GA plan D-1/§6). The 0.2.1 verdict stays superseded history. Thin and bounded: six ACs, six files, no code.
 
-**Verified (2026-10-09):** `docs/runbooks/studio-guided-authoring.md` is 51 lines; line 3 carries the account sentence; lines 31/37/39/47 hold the finalize, receipt, replay-authority and rollback text to keep; `docs/stories/10.34.story.md` exists (staging acceptance to merge with); `docs/stories/10.51.story.md` exists (documentation precedent); `.aiox-core/product/checklists/release-checklist.md` exists; `StudioSecretUseAuthorization`/`ConfiguredSecretUseAuthorization` are the only sources (GA C-2 external); `DisabledStudioVaultProvider` is the default (GA C-3 external). Every AC-5 runbook row traces to design §4.3/§4.6 (I-B7, I-C8, I-C9), §8 Q3, F-5, R1-2 or security conditions 10–11; no row invents a control.
+**10-point checklist:** 1–10 PASS. Executor `analyst` / gate `pm` matches the Research row.
 
-**10-point checklist:** title ✓ · description ✓ · testable ACs ✓ (denominators, checklist pass over runbook rows, traceability review) · scope ✓ · dependencies ✓ (OBS-009) · complexity ✓ (M) · value ✓ · risks ✓ (external prerequisites, residuals list) · Done criteria ✓ · alignment ✓ (design §10 OBS-010 rows, consensus §11 formative test, GA §4.J, §7 "merges with 10.34"). Executor `analyst` / gate `pm` valid and distinct.
+**Anchors spot-checked at HEAD (working tree 2026-10-10):** runbook `studio-guided-authoring.md:7` (V33) and `:41` "Staged V19 compatibility and rollback" exist and are the sections AC-5 replaces; `docs/stories/10.34.story.md` Groups A–N (`:66` Group A) exist; GA plan `:202` "OBS-010 merges with the pilot/10.34 evidence"; design R3 `:16,:109` R1-2 whole-origin statement, `:107` §4.1 Q3 retention default, `:263` §10 row OBS-010; security review condition 10 `:60`; ADR D-B records the deployment-history confirmation as "owed, not obtained"; `.aiox-core/product/checklists/release-checklist.md` exists (L2 — executed by @devops, never edited).
 
-**GO conditions:**
-1. T0: explicit user authorization is obtained and recorded before any participant is contacted; participant access, test secret and approved origins are listed with owners (ED-02 "PUT Core / BFF" where applicable).
-2. AC-4: G-1/G-2/G-3 and C-2/C-3 each carry a current-state line pointing at the OBS-009 evidence file (or "unrun, owner X"); the record cannot say "ready" while any external item is pending — no fabricated pass of 10.34 groups or external gates.
-3. AC-5: the dated "Live surface" list is written before OBS-011 T0 and names routes, v3 contracts, configuration keys and migrations individually (OBS-011 AC-10 reads it as a boundary).
-4. The runbook rewrite touches only the account sentence and the new rows per the 10.51 precedent; the V19/V33 compatibility, rollback and evidence sections remain true and unchanged.
+**Should-fix (non-blocking):**
+1. AC-5 lists roughly fifteen runbook rows — at T2 add a row → implementing-story evidence table to the Dev Agent Record so @qa's "each row cites evidence" pass is mechanical.
+2. AC-4: for ED-01 "owner TBD", record who was asked and when, not only the state.
 
-**Nice-to-have:** give `release-readiness.md` a fixed row shape (gate · owner · state · evidence path · date) so @qa's traceability review is mechanical.
+**GO conditions:** the pilot never starts before OBS-009 AC-7 reports the D-C gate **passed**; no participant is contacted without explicit user authorization; the dated "Live surface" list is written at T2 before OBS-011 T0; the release record cannot read "ready" while any external gate (G-1/G-2/G-3, C-2/C-3, OBS-014 approvals, D-B confirmation, ED-01 owner) is pending; only independent @qa sets Done.
 
 ## Dev Agent Record
 
@@ -112,5 +115,7 @@ Not reviewed. No quality verdict assigned.
 | Date | Version | Change | Author |
 |---|---|---|---|
 | 2026-10-08 | 0.1.0 | Draft derived from approved observed-authoring consensus plan for SDC intake | SM preparation |
-| 2026-10-09 | 0.2.0 | **Rescoped** after the 2026-10-09 decision: pilot uses the login workflow with `<secret>` references; "account integration" replaced by secret-login proof; runbook rows for provisioning (incl. R1-2 whole-origin trust), rotation, revocation, retention, 4096 bound, dumps, Vault policy, SEC-4 inputs; gates G-1/G-2/G-3 and C-2/C-3 as release gates; merges with 10.34 evidence; dated "Live surface" list for OBS-011; 6 ACs; Status Draft | @sm (River) |
-| 2026-10-09 | 0.2.1 | Validated GO (8/10) — Status: Draft → Ready | @po |
+| 2026-10-09 | 0.2.0 | **Rescoped** after the 2026-10-09 decision: login-workflow pilot; secret-login proof; runbook rows; gates G-1/G-2/G-3 and C-2/C-3; merges with 10.34; "Live surface" list; 6 ACs; Status Draft | @sm (River) |
+| 2026-10-09 | 0.2.1 | Validated GO (8/10) — Status: Draft → Ready (dual-path draft). Report `.ai/STUDIO-OBS-010-po-validation-r2.json` | @po |
+| 2026-10-09 | 0.3.0 | **Re-cut to the single path (ADR-SC-005).** Pilot gated on the D-C benchmark pass and extended with an incremental re-learn task (D-D); release record adds the OBS-014 compliance approvals, the D-B deployment-history confirmation and the ED-01 owner as external gates and re-registers 10.34 against the single path; runbook rewritten for one path (legacy/compile text removed, dev-DB recreation after D-B, mTLS/TLS rotation inputs, policy administration, no-fallback multi-password limit); "Live surface" list names `/api/v1/studio/**`, `contracts/v3`, V1–V18, flags and kill switch. Prior PO GO (0.2.1) marked superseded and kept as history. Status **Ready → Draft**, pending @po re-validation | @sm (River) |
+| 2026-10-10 | 0.3.1 | Validated GO (8/10) — Status: Draft → Ready (single-path draft). Report `.ai/STUDIO-OBS-010-po-validation-sp.json` | @po |

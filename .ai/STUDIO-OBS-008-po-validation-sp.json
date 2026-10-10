@@ -1,0 +1,140 @@
+{
+  "story": "STUDIO-OBS-008",
+  "task": "validate-next-story",
+  "round": "sp (validation of the 2026-10-09 single-path re-cut 0.3.0; r2 = dual-path 0.2.x GO, superseded)",
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T00:00:00Z",
+  "validationDate": "2026-10-10",
+  "verdict": "GO",
+  "conditional": true,
+  "readinessScore": 8,
+  "scoreScale": 10,
+  "confidence": "Medium-High — contracts the UI binds are real only after 012B/013/014/015; the UX panel state model is not a repo artifact",
+  "scoreRationale": "Nine ACs implement the UX state model with no compile state or vocabulary; three Run modes read readiness (UNLEARNED/READY/NEEDS_RELEARN) never compileStatus; REPLAYING_PREFIX → 'Repeating saved steps 1–(k-1)…' then 'Learning from step k'; blocked-by-login both variants with Go to step N / Open Variables; server-provided vaultSecrets capability replacing studioCapabilities.ts:3; never-echo canaries; plan explanation replacing the Code tab; first-Run and replay video with per-action seek; WCAG 2.1 AA with named rules; Vitest+MSW flows and first Playwright config. Deductions: the UX panel 2026-10-09 state model exists only as transcribed in this story (not a repository document), and the capability-route ruling is still a T0 decision.",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "changeLogEntry": "| 2026-10-10 | 0.3.1 | Validated GO (8/10) — Status: Draft → Ready (single-path draft). Report `.ai/STUDIO-OBS-008-po-validation-sp.json` | @po |",
+  "storySha256Before": "33261fb20c64805e54913afeeb88c670d6e9e4ac451e8c7ed9624b8b5c3b314e",
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "status": "PASS"},
+    {"n": 2, "item": "Complete description", "status": "PASS", "note": "No guided frontend exists (grep 0); compile UI gone via 012B"},
+    {"n": 3, "item": "Testable acceptance criteria", "status": "PASS", "note": "Copy verbatim; AC-9 enumerates the Vitest flows and the E2E path"},
+    {"n": 4, "item": "Scope IN/OUT", "status": "PASS", "note": "Out: live integration (009), schedule dialog (E-4), list landing (I-2/I-3), autocomplete (post-GA)"},
+    {"n": 5, "item": "Dependencies mapped", "status": "PASS", "note": "012B/013/014/015; no intermediate release after 012B; backend capability route co-executed by @dev"},
+    {"n": 6, "item": "Complexity estimate", "status": "PASS", "note": "Size L with the UX split encoded as two lanes"},
+    {"n": 7, "item": "Business value", "status": "PASS"},
+    {"n": 8, "item": "Risks documented", "status": "PASS", "note": "MSW proof not live; never-echo; no hidden second execution; honest readiness/evidence"},
+    {"n": 9, "item": "Criteria of Done", "status": "PASS", "note": "type-check/lint/build/test/test:e2e; only @qa sets Done"},
+    {"n": 10, "item": "Alignment with PRD/epic", "status": "PASS", "note": "ADR-SC-005 row OBS-008, D-D UX statement, defaults; design R3 §5; GA C-1/C-5/C-7/H-2/I-1"}
+  ],
+  "templateComplianceIssues": {
+    "missingTopLevelSections": [],
+    "unfilledPlaceholders": [],
+    "futureDeveloperOwnedSubsections": ["Agent Model Used", "Debug Log References", "Completion Notes List"],
+    "structure": "Wave convention retained; superseded 0.2.x PO section kept as history inside Dev Notes."
+  },
+  "executorAssignment": {
+    "executor": "ux-design-expert",
+    "quality_gate": "dev",
+    "sdc_reviewer": "qa",
+    "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests", "accessibility-audit"],
+    "status": "PASS",
+    "note": "Design/UI row (ux-design-expert → dev); @dev co-executes the one backend route (AC-5a)"
+  },
+  "decisionsPending": {
+    "capability-route": {"question": "vaultSecrets capability route path/shape (per-test vs global)", "default": "@architect rules at T0 following GET /tests/{id}/schedule/capabilities", "blocksReady": false, "reason": "AC-5a wording only; pins re-anchored with old/new quoted"}
+  },
+  "criticalIssues": [],
+  "shouldFixIssues": [
+    {"id": "SRC-001", "acs": ["AC-3", "AC-4"], "action": "Persist the UX panel 2026-10-09 state model and copy as a dated document under docs/specs/studio-observed-authoring/ (or declare AC-3/AC-4 the canonical list in the Dev Agent Record at T0) so guidedNarratives.ts cites a file, not a meeting."},
+    {"id": "ROUTE-001", "acs": ["AC-5"], "action": "Record the capability-route ruling at T0 with both pins quoted old/new (carried from r2)."},
+    {"id": "SLICE-001", "acs": ["AC-1"], "action": "Name the Redux slice keys in T1 (carried from r2)."}
+  ],
+  "niceToHaveImprovements": [
+    "AC-7: state the seek tolerance (ms) the per-action buttons accept so OBS-013's offsets contract and the UI agree."
+  ],
+  "goConditions": [
+    "Implementation starts only after OBS-012B/013/014/015 are Done — every contract the UI binds exists.",
+    "No state beyond the AC-3/AC-4 list; no compile state or vocabulary; every string in guidedNarratives.ts cites its source.",
+    "Never-echo canaries assert value absent / ID present; MSW proof is not claimed as live integration.",
+    "Only independent @qa sets Done."
+  ],
+  "antiHallucinationFindings": {
+    "verifiedAnchors": [
+      "grep -rn guided-sessions frontend/src → 0",
+      "frontend/src/utils/config/studioCapabilities.ts:3 vaultSecrets: false; readers: pages/ChecksStudioPage/ChecksStudioPage.tsx, components/checks/wizard/configs/UiTestConfig.tsx (exactly two)",
+      "backend .../studio/scheduling/StudioScheduleController.java:32 @GetMapping(\"/tests/{id}/schedule/capabilities\"); docs/specs/studio/openapi.yaml:1857",
+      "docs/specs/studio/openapi.yaml:883 /tests/{id}/secrets",
+      "backend .../studio/secrets/DisabledStudioVaultProvider.java exists",
+      "frontend/src/components/studio/{SecretInput.tsx, OnboardingCoach.tsx}, evidence/{VideoEvidencePanel.tsx,useVideoSeek.ts,seekEligibility.ts,videoEvidenceNarratives.ts}, run/{RunControl.tsx,useRunGate.ts,runEnablement.ts,executionErrorNarratives.ts}, templates/quickStartTemplates.ts, runs/RunDetailsDrawer.tsx exist",
+      "frontend/src/services/api/studioTransportWiring.ts and services/mocks/studio/studioContract.test.ts exist",
+      "frontend/src/test/a11y/studioWcagAudit.test.tsx exists; inventory CLN-11 :59 surfaces 4/5",
+      "frontend/playwright.config.ts absent; frontend/package.json:18 \"test:e2e\": \"playwright test\" (GA H-2 holds)",
+      "frontend/src/components/studio/references/ absent (new)",
+      "docs/epics/UI-STUDIO-GA-PLAN.md:91 C-1, :95 C-5, :97 C-7"
+    ],
+    "corrections": [
+      "The 'UX panel 2026-10-09 single-path state model' is not a repository artifact: REPLAYING_PREFIX and the copy appear only in ADR-SC-005, secret-login-design.md R3, the wave README and the stories; ADR says the full model was 'handed to @sm' (SRC-001)."
+    ]
+  },
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "status": "PLANNING_PARTIAL",
+    "storyType": "Frontend/UX; secondary API client contract; complexity high — correct",
+    "agents": "@ux-design-expert executor / @dev gate + co-executor / independent @qa",
+    "qualityGates": "Pre-commit, independent SDC QA, @devops handoff",
+    "selfHealing": {"type": "full", "maxIterations": 3, "timeoutMinutes": 30},
+    "focusAreas": "WCAG 2.1 AA, centralized transport, no secret value rendered/mocked, no hidden second execution, honest readiness/evidence, copy fidelity — match type",
+    "fallback": "graceful_degradation documented; no PASS invented"
+  },
+  "codeIntelligenceCheck": {"available": false, "result": "skipped (isCodeIntelAvailable() → false)"},
+  "epicContextEnrichment": {"attempted": true, "result": "no epic file for STUDIO-OBSERVED under docs/prd; ADR-SC-005 + wave README used as epic context"},
+  "taskChecks": [
+    {"taskStep": "1", "check": "Template completeness", "status": "PASS_WITH_MINOR_GAPS"},
+    {"taskStep": "1.1", "check": "Executor assignment", "status": "PASS"},
+    {"taskStep": "2", "check": "File/source structure", "status": "PASS", "details": "Existing paths verified; new guided/ and references/ components, MSW handlers/fixtures, types, Playwright config/E2E named"},
+    {"taskStep": "3", "check": "UI/frontend completeness", "status": "PASS", "details": "States and copy verbatim; interaction flows (clarification radiogroup, login actions, seek); a11y rules named; integration points listed", "findingIds": ["SRC-001"]},
+    {"taskStep": "4", "check": "AC coverage/testability", "status": "PASS"},
+    {"taskStep": "5", "check": "Testing instructions", "status": "PASS", "details": "Vitest+RTL+MSW flows enumerated; contract test; axe with contrast/target-size enabled; Playwright against Vite+MSW; gates listed"},
+    {"taskStep": "6", "check": "Security considerations", "status": "PASS", "details": "never-echo canaries, Idempotency-Key, untrusted PAGE labels, no selectors/DOM upload, capability never simulated"},
+    {"taskStep": "7", "check": "Task sequence", "status": "PASS", "details": "T0 ruling → T1 transport/Run → T2 states/login/explanation/video → T3 references/capability → T4 a11y/tests → T5 record"},
+    {"taskStep": "8", "check": "CodeRabbit planning", "status": "PARTIAL"},
+    {"taskStep": "8.1", "check": "Code intelligence duplicates", "status": "N/A"},
+    {"taskStep": "9", "check": "Anti-hallucination", "status": "PASS_WITH_ONE_SOURCE_GAP", "findingIds": ["SRC-001"]},
+    {"taskStep": "10", "check": "Implementation readiness", "status": "GO", "details": "8/10; startable after 012B/013/014/015 Done"}
+  ],
+  "acceptanceCriteriaAssessment": [
+    {"ac": "AC-1", "testable": true, "source": "ADR defaults Public API; UX panel New(008); CLAUDE.md transport rule", "readiness": "READY_AFTER_UPSTREAM", "findingIds": ["SLICE-001"]},
+    {"ac": "AC-2", "testable": true, "source": "ADR Consequences one path; UX Adapt list; OBS-006 runbook", "readiness": "READY_AFTER_UPSTREAM"},
+    {"ac": "AC-3", "testable": true, "source": "UX panel state model; ADR D-D UX statement; design R3 §4.2", "readiness": "READY", "findingIds": ["SRC-001"]},
+    {"ac": "AC-4", "testable": true, "source": "design R3 §5; GA C-5", "readiness": "READY"},
+    {"ac": "AC-5", "testable": true, "source": "GA C-1, C-7; design I-B6/I-C11; VAL-001", "readiness": "READY_T0_RULING", "findingIds": ["ROUTE-001"]},
+    {"ac": "AC-6", "testable": true, "source": "UX panel plan explanation; OBS-006 runbook; OBS-015 AC-2", "readiness": "READY_AFTER_015"},
+    {"ac": "AC-7", "testable": true, "source": "UX panel video/seek; OBS-013 AC-2/AC-3", "readiness": "READY_AFTER_013"},
+    {"ac": "AC-8", "testable": true, "source": "UX WCAG list; GA I-1; CLN-11", "readiness": "READY"},
+    {"ac": "AC-9", "testable": true, "source": "UX Playwright config; GA H-2", "readiness": "READY"}
+  ],
+  "dependencyVerification": {
+    "OBS-012B": "Draft (parallel @po) — leaves Run replay-only; no intermediate release",
+    "OBS-013": "Validated GO today — video route/offsets",
+    "OBS-014": "Validated GO today — labelSource, Idempotency-Key, budget codes",
+    "OBS-015": "Validated GO today — NEEDS_RELEARN/REPLAYING_PREFIX/relearnedFrom",
+    "OBS-009": "extends playwright.config.ts and e2e/ created here"
+  },
+  "crossStoryIssues": [
+    "UX panel state model should be persisted once; 015 Dev Notes and 008 AC-3 both transcribe copy — a single file avoids drift (SRC-001).",
+    "GA plan C-1/C-5/C-7 (legacy P0/P1 items) are now carried only by this story — still the open ownership tension flagged on 2026-10-09; with the single path there is no other carrier, so it is resolved by construction but @pm should mark the GA plan rows accordingly."
+  ],
+  "sourceInventory": [
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md", "sha256": "33261fb20c64805e54913afeeb88c670d6e9e4ac451e8c7ed9624b8b5c3b314e", "note": "before PO edits"},
+    {"path": "docs/architecture/ADR-SC-005-single-path-observed-authoring.md", "sha256": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-design.md", "sha256": "8c1cd118beed176b1e622a25ebe07f5c1d4ea406cf156535526ded6ca8b24d57"},
+    {"path": "docs/epics/UI-STUDIO-GA-PLAN.md", "sha256": "8a6ce9e85e53ed69c1cf453653fd58ccc5eb25ccf309a9cdbe8a8f8f43003c7a"},
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md", "sha256": "b2ee4bd6ba470228afaad54f3b268effd756394f17482ea23034095137467cd0"},
+    {"path": "docs/stories/STUDIO-OBSERVED/README.md", "sha256": "e49f77e1218b8043c0d65b2dec19933b14252510fe17902c0130ab87c5fe9ac9"},
+    {"path": ".aiox-core/development/tasks/validate-next-story.md", "sha256": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea"},
+    {"path": ".claude/rules/story-lifecycle.md", "sha256": "f5262020e0a3b614104881019550cb0b793907c6694d41e027fc9c1bbe2a2278"}
+  ]
+}
